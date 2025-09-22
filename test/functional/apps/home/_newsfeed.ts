@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -43,39 +43,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('has red icon which is a sign of not checked news', async () => {
       const hasCheckedNews = await PageObjects.newsfeed.getRedButtonSign();
-      expect(hasCheckedNews).to.be(true);
+      expect(hasCheckedNews).toBe(true);
     });
 
     it('clicking on newsfeed icon should open you newsfeed', async () => {
       await globalNav.clickNewsfeed();
       const isOpen = await PageObjects.newsfeed.openNewsfeedPanel();
-      expect(isOpen).to.be(true);
+      expect(isOpen).toBe(true);
     });
 
     it('no red icon, because all news is checked', async () => {
       const hasCheckedNews = await PageObjects.newsfeed.getRedButtonSign();
-      expect(hasCheckedNews).to.be(false);
+      expect(hasCheckedNews).toBe(false);
     });
 
     it('shows all news from newsfeed', async () => {
       const objects = await PageObjects.newsfeed.getNewsfeedList();
 
       if (await deployment.isOss()) {
-        expect(objects).to.eql([
+        expect(objects).toEqual([
           '21 June 2019\nYou are functionally testing the newsfeed widget with fixtures!\nSee test/common/fixtures/plugins/newsfeed/newsfeed_simulation\nGeneric feed-viewer could go here',
           '21 June 2019\nStaging too!\nHello world\nGeneric feed-viewer could go here',
         ]);
       } else {
         // can't shim the API in cloud so going to check that at least something is rendered
         // to test that the API was called and returned something that could be rendered
-        expect(objects.length).to.be.above(0);
+        expect(objects.length).toBeGreaterThan(0);
       }
     });
 
     it('clicking on newsfeed icon should close opened newsfeed', async () => {
       await globalNav.clickNewsfeed();
       const isOpen = await PageObjects.newsfeed.openNewsfeedPanel();
-      expect(isOpen).to.be(false);
+      expect(isOpen).toBe(false);
     });
   });
 }

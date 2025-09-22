@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 const dashboardName = 'Dashboard Test Time';
 
@@ -61,8 +61,8 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.equal(PageObjects.timePicker.defaultStartTime);
-        expect(time.end).to.equal(PageObjects.timePicker.defaultEndTime);
+        expect(time.start).toEqual(PageObjects.timePicker.defaultStartTime);
+        expect(time.end).toEqual(PageObjects.timePicker.defaultEndTime);
       });
     });
 
@@ -82,8 +82,8 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
 
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.equal(PageObjects.timePicker.defaultStartTime);
-        expect(time.end).to.equal(PageObjects.timePicker.defaultEndTime);
+        expect(time.start).toEqual(PageObjects.timePicker.defaultStartTime);
+        expect(time.end).toEqual(PageObjects.timePicker.defaultEndTime);
       });
 
       // If time is stored with a dashboard, it's supposed to override the current time settings when opened.
@@ -99,8 +99,8 @@ export default function ({ getPageObjects, getService }) {
         const urlWithGlobalTime = `${opensearchDashboardsBaseUrl}#/view/${id}?_g=(time:(from:now-1h,to:now))`;
         await browser.get(urlWithGlobalTime, false);
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.equal('~ an hour ago');
-        expect(time.end).to.equal('now');
+        expect(time.start).toEqual('~ an hour ago');
+        expect(time.end).toEqual('now');
       });
 
       it('should use saved time, if time is missing in global state, but _g is present in the url', async function () {
@@ -113,8 +113,8 @@ export default function ({ getPageObjects, getService }) {
         const urlWithGlobalTime = `${opensearchDashboardsBaseUrl}#/view/${id}?_g=(filters:!())`;
         await browser.get(urlWithGlobalTime, false);
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.equal(PageObjects.timePicker.defaultStartTime);
-        expect(time.end).to.equal(PageObjects.timePicker.defaultEndTime);
+        expect(time.start).toEqual(PageObjects.timePicker.defaultStartTime);
+        expect(time.end).toEqual(PageObjects.timePicker.defaultEndTime);
       });
     });
 
@@ -134,8 +134,8 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.header.clickDashboard();
 
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.equal('Jan 1, 2019 @ 00:00:00.000');
-        expect(time.end).to.equal('Jan 2, 2019 @ 00:00:00.000');
+        expect(time.start).toEqual('Jan 1, 2019 @ 00:00:00.000');
+        expect(time.end).toEqual('Jan 2, 2019 @ 00:00:00.000');
       });
     });
   });

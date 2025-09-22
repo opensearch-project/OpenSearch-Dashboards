@@ -31,7 +31,6 @@
 import fn from './title';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('title.js', () => {
@@ -42,7 +41,7 @@ describe('title.js', () => {
 
   it('sets the title property', () => {
     return invoke(fn, [seriesList, 'beer']).then((r) => {
-      _.each(r.output.list, (series) => expect(series._title).to.equal('beer'));
+      _.each(r.output.list, (series) => expect(series._title).toEqual('beer'));
     });
   });
 });

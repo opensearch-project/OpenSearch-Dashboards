@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -44,9 +44,9 @@ export default function ({ getService }) {
           .set('osd-xsrf', 'opensearch-dashboards')
           .expect(200);
 
-        expect(resp.body).to.be.an('array');
-        expect(resp.body.length).to.be.above(0);
-        expect(resp.body[0].status).to.be('not_installed');
+        expect(Array.isArray(resp.body)).toBe(true);
+        expect(resp.body.length).toBeGreaterThan(0);
+        expect(resp.body[0].status).toBe('not_installed');
       });
     });
 
@@ -64,7 +64,7 @@ export default function ({ getService }) {
           .set('osd-xsrf', 'opensearch-dashboards')
           .expect(200);
 
-        expect(resp.body).to.eql({
+        expect(resp.body).toEqual({
           opensearchIndicesCreated: { opensearch_dashboards_sample_data_flights: 13059 },
           opensearchDashboardsSavedObjectsLoaded: 20,
         });
@@ -79,7 +79,7 @@ export default function ({ getService }) {
         const docMilliseconds = Date.parse(doc._source.timestamp);
         const nowMilliseconds = Date.now();
         const delta = Math.abs(nowMilliseconds - docMilliseconds);
-        expect(delta).to.be.lessThan(MILLISECOND_IN_WEEK * 4);
+        expect(delta).toBeLessThan(MILLISECOND_IN_WEEK * 4);
       });
 
       describe('parameters', () => {
@@ -97,7 +97,7 @@ export default function ({ getService }) {
           const docMilliseconds = Date.parse(doc._source.timestamp);
           const nowMilliseconds = Date.parse(nowString);
           const delta = Math.abs(nowMilliseconds - docMilliseconds);
-          expect(delta).to.be.lessThan(MILLISECOND_IN_WEEK * 4);
+          expect(delta).toBeLessThan(MILLISECOND_IN_WEEK * 4);
         });
       });
     });
@@ -114,7 +114,7 @@ export default function ({ getService }) {
         const resp = await opensearch.indices.exists({
           index: 'opensearch_dashboards_sample_data_flights',
         });
-        expect(resp).to.be(false);
+        expect(resp).toBe(false);
       });
     });
   });

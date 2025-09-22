@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -67,17 +67,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Navigating back to discover
       await browser.goBack();
       currUrl = await browser.getCurrentUrl();
-      expect(currUrl).to.be(modifiedTimeDiscoverUrl);
+      expect(currUrl).toBe(modifiedTimeDiscoverUrl);
 
       // Navigating back from time settings
       await browser.goBack(); // undo time settings
       currUrl = await browser.getCurrentUrl();
-      expect(currUrl.startsWith(discoverUrl)).to.be(true);
+      expect(currUrl.startsWith(discoverUrl)).toBe(true);
 
       // Navigate back home
       await browser.goBack();
       currUrl = await browser.getCurrentUrl();
-      expect(currUrl).to.be(homeUrl);
+      expect(currUrl).toBe(homeUrl);
     });
   });
 }

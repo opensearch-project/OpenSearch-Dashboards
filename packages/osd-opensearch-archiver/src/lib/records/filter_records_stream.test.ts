@@ -29,7 +29,6 @@
  */
 
 import Chance from 'chance';
-import expect from '@osd/expect';
 
 import { createListStream, createPromiseFromStreams, createConcatStream } from '../streams';
 
@@ -53,7 +52,7 @@ describe('opensearchArchiver: createFilterRecordsStream()', () => {
       createConcatStream([]),
     ]);
 
-    expect(output).to.eql([]);
+    expect(output).toEqual([]);
   });
 
   it('produces record values that have a matching type', async () => {
@@ -72,7 +71,7 @@ describe('opensearchArchiver: createFilterRecordsStream()', () => {
       createConcatStream([]),
     ]);
 
-    expect(output).to.have.length(3);
-    expect(output.map((o) => o.type)).to.eql([type1, type1, type1]);
+    expect(output).toHaveLength(3);
+    expect(output.map((o) => o.type)).toEqual([type1, type1, type1]);
   });
 });

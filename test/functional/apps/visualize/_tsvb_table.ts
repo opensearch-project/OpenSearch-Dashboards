@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
@@ -54,7 +54,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         const EXPECTED = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
 
         const tableData = await visualBuilder.getViewTable();
-        expect(tableData).to.be(EXPECTED);
+        expect(tableData).toBe(EXPECTED);
       });
 
       it('should display correct values on changing metrics aggregation', async () => {
@@ -65,8 +65,8 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await visualBuilder.setFieldForAggregation('machine.ram');
         const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
         const tableData = await visualBuilder.getViewTable();
-        expect(isFieldForAggregationValid).to.be(true);
-        expect(tableData).to.be(EXPECTED);
+        expect(isFieldForAggregationValid).toBe(true);
+        expect(tableData).toBe(EXPECTED);
       });
 
       it('should render correctly after saving', async () => {
@@ -75,7 +75,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         await visualize.saveVisualizationExpectSuccessAndBreadcrumb('TSVB table saving test');
 
         const tableData = await visualBuilder.getViewTable();
-        expect(tableData).to.be(EXPECTED);
+        expect(tableData).toBe(EXPECTED);
       });
     });
   });

@@ -32,7 +32,6 @@ import { spawnSync } from 'child_process';
 import { resolve } from 'path';
 
 import stripAnsi from 'strip-ansi';
-import expect from '@osd/expect';
 import { REPO_ROOT } from '@osd/utils';
 
 const SCRIPT = resolve(REPO_ROOT, 'scripts/functional_test_runner.js');
@@ -46,8 +45,8 @@ describe('failure hooks', function () {
       {
         flag: '$FAILING_BEFORE_HOOK$',
         assert(lines) {
-          expect(lines.shift()).to.match(/info\s+testHookFailure\s+\$FAILING_BEFORE_ERROR\$/);
-          expect(lines.shift()).to.match(
+          expect(lines.shift()).toMatch(/info\s+testHookFailure\s+\$FAILING_BEFORE_ERROR\$/);
+          expect(lines.shift()).toMatch(
             /info\s+testHookFailureAfterDelay\s+\$FAILING_BEFORE_ERROR\$/
           );
         },
@@ -55,17 +54,17 @@ describe('failure hooks', function () {
       {
         flag: '$FAILING_TEST$',
         assert(lines) {
-          expect(lines.shift()).to.match(/\$FAILING_TEST\$/);
-          expect(lines.shift()).to.match(/global before each/);
-          expect(lines.shift()).to.match(/info\s+testFailure\s+\$FAILING_TEST_ERROR\$/);
-          expect(lines.shift()).to.match(/info\s+testFailureAfterDelay\s+\$FAILING_TEST_ERROR\$/);
+          expect(lines.shift()).toMatch(/\$FAILING_TEST\$/);
+          expect(lines.shift()).toMatch(/global before each/);
+          expect(lines.shift()).toMatch(/info\s+testFailure\s+\$FAILING_TEST_ERROR\$/);
+          expect(lines.shift()).toMatch(/info\s+testFailureAfterDelay\s+\$FAILING_TEST_ERROR\$/);
         },
       },
       {
         flag: '$FAILING_AFTER_HOOK$',
         assert(lines) {
-          expect(lines.shift()).to.match(/info\s+testHookFailure\s+\$FAILING_AFTER_ERROR\$/);
-          expect(lines.shift()).to.match(
+          expect(lines.shift()).toMatch(/info\s+testHookFailure\s+\$FAILING_AFTER_ERROR\$/);
+          expect(lines.shift()).toMatch(
             /info\s+testHookFailureAfterDelay\s+\$FAILING_AFTER_ERROR\$/
           );
         },
@@ -80,6 +79,6 @@ describe('failure hooks', function () {
       }
     }
 
-    expect(tests).to.have.length(0);
+    expect(tests).toHaveLength(0);
   });
 });

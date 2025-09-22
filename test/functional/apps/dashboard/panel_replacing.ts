@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import {
   PIE_CHART_VIS_NAME,
   AREA_CHART_VIS_NAME,
@@ -72,10 +72,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardReplacePanel.replaceEmbeddable(AREA_CHART_VIS_NAME);
       await PageObjects.header.waitUntilLoadingHasFinished();
       const panelTitles = await PageObjects.dashboard.getPanelTitles();
-      expect(panelTitles.length).to.be(2);
-      expect(panelTitles[0]).to.be(AREA_CHART_VIS_NAME);
+      expect(panelTitles.length).toBe(2);
+      expect(panelTitles[0]).toBe(AREA_CHART_VIS_NAME);
       const newDimensions = await PageObjects.dashboard.getPanelDimensions();
-      expect(intialDimensions![0]).to.eql(newDimensions[0]);
+      expect(intialDimensions![0]).toEqual(newDimensions[0]);
     });
 
     it('replaced panel persisted correctly when dashboard is hard refreshed', async () => {
@@ -84,8 +84,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       const panelTitles = await PageObjects.dashboard.getPanelTitles();
-      expect(panelTitles.length).to.be(2);
-      expect(panelTitles[0]).to.be(AREA_CHART_VIS_NAME);
+      expect(panelTitles.length).toBe(2);
+      expect(panelTitles[0]).toBe(AREA_CHART_VIS_NAME);
     });
 
     it('replaced panel with saved search', async () => {
@@ -104,8 +104,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
       const panelTitles = await PageObjects.dashboard.getPanelTitles();
-      expect(panelTitles.length).to.be(2);
-      expect(panelTitles[0]).to.be(replacedSearch);
+      expect(panelTitles.length).toBe(2);
+      expect(panelTitles[0]).toBe(replacedSearch);
     });
   });
 }

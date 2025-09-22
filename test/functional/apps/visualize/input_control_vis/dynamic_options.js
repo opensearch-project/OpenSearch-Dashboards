@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'visEditor', 'header', 'timePicker']);
@@ -45,13 +45,13 @@ export default function ({ getService, getPageObjects }) {
 
       it('should fetch new options when string field is filtered', async () => {
         const initialOptions = await comboBox.getOptionsList('listControlSelect0');
-        expect(initialOptions.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,NG,PK,RU');
+        expect(initialOptions.trim().split('\n').join()).toEqual('BD,BR,CN,ID,IN,JP,NG,PK,RU');
 
         await comboBox.filterOptionsList('listControlSelect0', 'R');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const updatedOptions = await comboBox.getOptionsList('listControlSelect0');
-        expect(updatedOptions.trim().split('\n').join()).to.equal('AR,BR,FR,GR,IR,KR,RO,RU,RW');
+        expect(updatedOptions.trim().split('\n').join()).toEqual('AR,BR,FR,GR,IR,KR,RO,RU,RW');
       });
 
       it('should not fetch new options when non-string is filtered', async () => {
@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickGo();
 
         const initialOptions = await comboBox.getOptionsList('listControlSelect0');
-        expect(initialOptions.trim().split('\n').join()).to.equal(
+        expect(initialOptions.trim().split('\n').join()).toEqual(
           '135.206.117.161,177.194.175.66,18.55.141.62,243.158.217.196,32.146.206.24'
         );
 
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const updatedOptions = await comboBox.getOptionsList('listControlSelect0');
-        expect(updatedOptions.trim().split('\n').join()).to.equal(
+        expect(updatedOptions.trim().split('\n').join()).toEqual(
           '135.206.117.161,177.194.175.66,243.158.217.196'
         );
       });
@@ -85,13 +85,13 @@ export default function ({ getService, getPageObjects }) {
 
       it('should fetch new options when string field is filtered', async () => {
         const initialOptions = await comboBox.getOptionsList('listControlSelect1');
-        expect(initialOptions.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,MX,NG,PK');
+        expect(initialOptions.trim().split('\n').join()).toEqual('BD,BR,CN,ID,IN,JP,MX,NG,PK');
 
         await comboBox.filterOptionsList('listControlSelect1', 'R');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const updatedOptions = await comboBox.getOptionsList('listControlSelect1');
-        expect(updatedOptions.trim().split('\n').join()).to.equal('AR,BR,FR,GR,IR,KR,RO,RS,RU');
+        expect(updatedOptions.trim().split('\n').join()).toEqual('AR,BR,FR,GR,IR,KR,RO,RS,RU');
       });
     });
   });

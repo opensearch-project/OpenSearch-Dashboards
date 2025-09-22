@@ -29,7 +29,7 @@
  */
 
 import { SuperTest, Test } from 'supertest';
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const apiUrl = '/api/opensearch-dashboards/management/saved_objects/scroll/counts';
@@ -55,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(res.body).to.eql({
+      expect(res.body).toEqual({
         dashboard: 2,
         'index-pattern': 1,
         search: 1,
@@ -71,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(res.body).to.eql({
+      expect(res.body).toEqual({
         dashboard: 2,
         search: 1,
       });
@@ -86,7 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(res.body).to.eql({
+      expect(res.body).toEqual({
         dashboard: 1,
         visualization: 1,
         'index-pattern': 0,
@@ -103,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(res.body).to.eql({
+      expect(res.body).toEqual({
         dashboard: 0,
         visualization: 0,
         search: 0,

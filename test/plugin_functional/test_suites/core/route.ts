@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { Test } from 'supertest';
 import { PluginFunctionalProviderContext } from '../../services';
 
@@ -71,10 +71,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
           await result.then(
             (res) => {
-              expect(res).to.be(undefined);
+              expect(res).toBe(undefined);
             },
             (err) => {
-              expect(err.message).to.be('Request Timeout');
+              expect(err.message).toBe('Request Timeout');
             }
           );
         });
@@ -91,10 +91,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
           await result.then(
             (res) => {
-              expect(res).to.have.property('statusCode', 200);
+              expect(res).toHaveProperty('statusCode', 200);
             },
             (err) => {
-              expect(err).to.be(undefined);
+              expect(err).toBe(undefined);
             }
           );
         });
@@ -113,10 +113,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
           await result.then(
             (res) => {
-              expect(res).to.be(undefined);
+              expect(res).toBe(undefined);
             },
             (err) => {
-              expect(err.message).to.be('socket hang up');
+              expect(err.message).toBe('socket hang up');
             }
           );
         });
@@ -133,10 +133,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
           await result.then(
             (res) => {
-              expect(res).to.have.property('statusCode', 200);
+              expect(res).toHaveProperty('statusCode', 200);
             },
             (err) => {
-              expect(err).to.be(undefined);
+              expect(err).toBe(undefined);
             }
           );
         });
@@ -153,10 +153,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
           await result.then(
             (res) => {
-              expect(res).to.be(undefined);
+              expect(res).toBe(undefined);
             },
             (err) => {
-              expect(err.message).to.be('socket hang up');
+              expect(err.message).toBe('socket hang up');
             }
           );
         });
@@ -173,10 +173,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
           await result.then(
             (res) => {
-              expect(res).to.have.property('statusCode', 200);
+              expect(res).toHaveProperty('statusCode', 200);
             },
             (err) => {
-              expect(err).to.be(undefined);
+              expect(err).toBe(undefined);
             }
           );
         });
