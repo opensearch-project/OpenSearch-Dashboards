@@ -4,7 +4,7 @@
  */
 
 import * as c3 from 'antlr4-c3';
-import { ParseTree, Token, TokenStream } from 'antlr4ng';
+import { ParserRuleContext, Token, TokenStream } from 'antlr4ng';
 import {
   SimplifiedOpenSearchPPLLexer as OpenSearchPPLLexer,
   SimplifiedOpenSearchPPLParser as OpenSearchPPLParser,
@@ -27,8 +27,6 @@ const operatorsToInclude = [
   OpenSearchPPLParser.PIPE,
   OpenSearchPPLParser.EQUAL,
   OpenSearchPPLParser.COMMA,
-  OpenSearchPPLParser.PLUS,
-  OpenSearchPPLParser.MINUS,
   OpenSearchPPLParser.EQUAL,
   OpenSearchPPLParser.NOT_EQUAL,
   OpenSearchPPLParser.LESS,
@@ -37,8 +35,6 @@ const operatorsToInclude = [
   OpenSearchPPLParser.NOT_GREATER,
   OpenSearchPPLParser.OR,
   OpenSearchPPLParser.AND,
-  OpenSearchPPLParser.XOR,
-  OpenSearchPPLParser.NOT,
   OpenSearchPPLParser.LT_PRTHS,
   OpenSearchPPLParser.RT_PRTHS,
   OpenSearchPPLParser.IN,
@@ -57,8 +53,7 @@ const fieldRuleList = [
 ];
 
 export function getIgnoredTokens(): number[] {
-  // const tokens = [OpenSearchPPLParser.SPACE, OpenSearchPPLParser.EOF];
-  const tokens = [];
+  const tokens = [OpenSearchPPLParser.AS, OpenSearchPPLParser.IN]; // Add explicitly ignored tokens here
 
   const firstOperatorIndex = OpenSearchPPLParser.MATCH;
   const lastOperatorIndex = OpenSearchPPLParser.ERROR_RECOGNITION;
@@ -99,20 +94,33 @@ const tokenDictionary: any = {
 
 const rulesToVisit = new Set([
   OpenSearchPPLParser.RULE_statsFunctionName,
-  OpenSearchPPLParser.RULE_percentileAggFunction,
   OpenSearchPPLParser.RULE_takeAggFunction,
-  OpenSearchPPLParser.RULE_getFormatFunction,
-  OpenSearchPPLParser.RULE_tableIdent,
-  OpenSearchPPLParser.RULE_positionFunctionName,
-  OpenSearchPPLParser.RULE_evalFunctionName,
-  OpenSearchPPLParser.RULE_literalValue,
   OpenSearchPPLParser.RULE_integerLiteral,
   OpenSearchPPLParser.RULE_decimalLiteral,
   OpenSearchPPLParser.RULE_keywordsCanBeId,
   OpenSearchPPLParser.RULE_renameClasue,
   OpenSearchPPLParser.RULE_qualifiedName,
   OpenSearchPPLParser.RULE_tableQualifiedName,
+  OpenSearchPPLParser.RULE_wcQualifiedName,
+  OpenSearchPPLParser.RULE_keywordsCanBeId,
+  OpenSearchPPLParser.RULE_positionFunctionName,
+  OpenSearchPPLParser.RULE_searchableKeyWord,
+  OpenSearchPPLParser.RULE_stringLiteral,
+  OpenSearchPPLParser.RULE_searchCommand,
+  OpenSearchPPLParser.RULE_searchComparisonOperator,
+  OpenSearchPPLParser.RULE_comparisonOperator,
+  OpenSearchPPLParser.RULE_positionFunctionName,
+  OpenSearchPPLParser.RULE_sqlLikeJoinType,
 ]);
+
+const isAValidExpressionEndToken = (token: Token | undefined) => {
+  if (!token) {
+    return false;
+  }
+  const validExpressionEndTokens = new Set([tokenDictionary.ID, tokenDictionary.BACKTICK_QUOTE]);
+
+  return validExpressionEndTokens.has(token.type);
+};
 
 export function processVisitedRules(
   rules: c3.CandidatesCollection['rules'],
@@ -125,13 +133,19 @@ export function processVisitedRules(
   let suggestFieldsInAggregateFunction = false;
   let suggestValuesForColumn: string | undefined;
   let suggestRenameAs: boolean = false;
+  let suggestSingleQuotes: boolean = false;
   const rerunWithoutRules: number[] = [];
+
+  const lastNonOperatorToken = findLastNonSpaceOperatorToken(tokenStream, cursorTokenIndex);
 
   for (const [ruleId, rule] of rules) {
     const parentRuleList = rule.ruleList;
     switch (ruleId) {
+      case OpenSearchPPLParser.RULE_sqlLikeJoinType:
+      case OpenSearchPPLParser.RULE_positionFunctionName:
       case OpenSearchPPLParser.RULE_integerLiteral:
       case OpenSearchPPLParser.RULE_decimalLiteral:
+      case OpenSearchPPLParser.RULE_searchableKeyWord:
       case OpenSearchPPLParser.RULE_keywordsCanBeId: {
         break;
       }
@@ -140,6 +154,29 @@ export function processVisitedRules(
         suggestAggregateFunctions = true;
         break;
       }
+      case OpenSearchPPLParser.RULE_comparisonOperator:
+      case OpenSearchPPLParser.RULE_searchComparisonOperator: {
+        const lastToken = findLastNonSpaceToken(tokenStream, cursorTokenIndex);
+        if (lastToken?.token && isAValidExpressionEndToken(lastToken?.token)) {
+          rerunWithoutRules.push(OpenSearchPPLParser.RULE_searchComparisonOperator);
+          rerunWithoutRules.push(OpenSearchPPLParser.RULE_comparisonOperator);
+          rerunWithoutRules.push(OpenSearchPPLParser.RULE_searchCommand); // Since this is the parent of Search Comparison
+        }
+        break;
+      }
+      case OpenSearchPPLParser.RULE_searchCommand: {
+        const firstTokenAfterPipe = findFirstNonSpaceTokenAfterPipe(tokenStream, cursorTokenIndex);
+        if (
+          !firstTokenAfterPipe ||
+          ![OpenSearchPPLParser.DESCRIBE, OpenSearchPPLParser.SHOW].includes(
+            firstTokenAfterPipe.token.type
+          )
+        ) {
+          rerunWithoutRules.push(ruleId);
+        }
+        break;
+      }
+      case OpenSearchPPLParser.RULE_wcQualifiedName:
       case OpenSearchPPLParser.RULE_qualifiedName: {
         // Check if we're in a stats function context
         const isInStatsFunction = (parentRuleList ?? []).includes(
@@ -168,10 +205,10 @@ export function processVisitedRules(
         }
 
         // handling the scenario if the last Token is ID, we Don't suggest Column except in the case the second last token is Source to handle the scenario source = tablename fieldname suggestions
-        if (lastTokenResult && lastTokenResult?.token.type === tokenDictionary.ID) {
+        if (lastNonOperatorToken && lastNonOperatorToken?.token.type === tokenDictionary.ID) {
           const secondLastTokenResult = findLastNonSpaceOperatorToken(
             tokenStream,
-            lastTokenResult.index
+            lastNonOperatorToken.index
           );
           if (secondLastTokenResult?.token.type !== tokenDictionary.SOURCE) {
             break;
@@ -181,7 +218,10 @@ export function processVisitedRules(
         break;
       }
       case OpenSearchPPLParser.RULE_tableQualifiedName: {
-        suggestSourcesOrTables = SourceOrTableSuggestion.TABLES;
+        const lastToken = findLastNonSpaceToken(tokenStream, cursorTokenIndex);
+        if (![tokenDictionary.ID, tokenDictionary.BQUOTA_STRING].includes(lastToken?.token.type)) {
+          suggestSourcesOrTables = SourceOrTableSuggestion.TABLES;
+        }
         break;
       }
       case OpenSearchPPLParser.RULE_renameClasue: {
@@ -203,21 +243,21 @@ export function processVisitedRules(
 
         break;
       }
-      case OpenSearchPPLParser.RULE_literalValue: {
+      case OpenSearchPPLParser.RULE_stringLiteral: {
         // on its own, this rule would be triggered for relevance expressions and span. span
         // has its own rule, and relevance ....
         // todo: create span rule
         // todo: check if relevance expressions have incorrect behavior here
         if (cursorTokenIndex < 2) break; // should not happen due to grammar
 
-        let currentIndex = cursorTokenIndex - 1;
+        suggestSingleQuotes = true;
 
+        let currentIndex = cursorTokenIndex - 1;
         // get the last token that appears other than whitespace
         const lastToken =
           tokenStream.get(currentIndex).type === tokenDictionary.SPACE
             ? tokenStream.get(currentIndex - 1)
             : tokenStream.get(currentIndex);
-
         // we only want to get the value if the very last token before WS is =, or
         // if its paren/comma and we pass by IN later. we don't need to check that we pass IN
         // because there is no valid syntax that will encounter the literal value rule with the
@@ -236,7 +276,11 @@ export function processVisitedRules(
 
         while (currentIndex > -1) {
           const token = tokenStream.get(currentIndex);
-          if (!token || token.type === tokenDictionary.PIPE) {
+          if (
+            !token ||
+            token.type === tokenDictionary.PIPE ||
+            token.type === tokenDictionary.SOURCE
+          ) {
             break;
           }
 
@@ -276,6 +320,7 @@ export function processVisitedRules(
     suggestValuesForColumn,
     suggestRenameAs,
     rerunWithoutRules,
+    suggestSingleQuotes,
   };
 }
 
@@ -287,6 +332,7 @@ function findLastNonSpaceOperatorToken(
   for (let i = currentIndex - 1; i >= 0; i--) {
     const token = tokenStream.get(i);
     if (
+      token &&
       token.type !== OpenSearchPPLParser.SPACE &&
       token.type !== OpenSearchPPLParser.EOF &&
       !operatorsToInclude.includes(token.type)
@@ -311,10 +357,65 @@ function findLastNonSpaceToken(
   return null;
 }
 
+export function lastNonSpaceTokensContainSource(
+  tokenStream: TokenStream,
+  cursorIndex: number,
+  count: number = 2
+): boolean {
+  const tokens: Token[] = [];
+  let checked = 0;
+
+  for (let i = cursorIndex - 1; i >= 0 && checked < count; i--) {
+    const token = tokenStream.get(i);
+    if (!token) continue;
+
+    if (token.type !== OpenSearchPPLParser.SPACE && token.type !== OpenSearchPPLParser.EOF) {
+      tokens.push(token);
+      checked++;
+    }
+  }
+
+  return tokens.some((t) => t.type === OpenSearchPPLParser.SOURCE);
+}
+
+function findFirstNonSpaceTokenAfterPipe(
+  tokenStream: TokenStream,
+  cursorIndex: number
+): { token: Token; index: number } | null {
+  let firstNonSpaceToken: { token: Token; index: number } | null = null;
+
+  for (let i = cursorIndex - 1; i >= 0; i--) {
+    const token = tokenStream.get(i);
+    if (!token) continue;
+
+    if (token.type !== OpenSearchPPLParser.SPACE && token.type !== OpenSearchPPLParser.EOF) {
+      firstNonSpaceToken = { token, index: i };
+
+      if (token.type === OpenSearchPPLParser.PIPE) {
+        // Found pipe, now find the first non-space token after it (moving forward)
+        for (let j = i + 1; j < tokenStream.size; j++) {
+          const nextToken = tokenStream.get(j);
+          if (!nextToken) break;
+
+          if (
+            nextToken.type !== OpenSearchPPLParser.SPACE &&
+            nextToken.type !== OpenSearchPPLParser.EOF
+          ) {
+            return { token: nextToken, index: j };
+          }
+        }
+        break;
+      }
+    }
+  }
+
+  return firstNonSpaceToken;
+}
+
 export function getParseTree(
   parser: OpenSearchPPLParser,
   type?: 'from' | 'alter' | 'insert' | 'update' | 'select'
-): ParseTree {
+): ParserRuleContext {
   parser.buildParseTrees = true;
   if (!type) {
     return parser.root();
