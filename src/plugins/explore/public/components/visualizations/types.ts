@@ -300,3 +300,20 @@ export interface Unit {
   name: string;
   units: UnitItem[];
 }
+export interface ValueMapping {
+  type: 'range' | 'value';
+  value?: string;
+  range?: RangeValue;
+  displayText?: string;
+  color?: string;
+}
+
+export interface ValueMappingOptions {
+  valueMappings?: ValueMapping[];
+}
+
+export interface ThresholdOptions {
+  thresholds?: Threshold[];
+  baseColor?: string;
+  thresholdStyle?: ThresholdLineStyle;
+}
