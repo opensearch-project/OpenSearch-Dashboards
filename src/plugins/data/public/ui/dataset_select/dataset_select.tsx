@@ -51,7 +51,12 @@ export interface DatasetSelectProps {
 /**
  * @experimental This component is experimental and may change in future versions
  */
-const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes, onFilter }) => {
+const DatasetSelect: React.FC<DatasetSelectProps> = ({
+  onSelect,
+  appName,
+  supportedTypes,
+  onFilter,
+}) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const isMounted = useRef(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -168,9 +173,9 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
         const iconType = typeConfig?.meta?.icon?.type || 'database';
         const label = displayName || title;
         // Prepending the label to the searchable label to allow for better search, render will strip it out
-        const searchableLabel = `${label}${typeConfig?.title || DEFAULT_DATA.STRUCTURES.ROOT.title}${
-          description && description.trim() !== '' ? ` - ${description}` : ''
-        }`.trim();
+        const searchableLabel = `${label}${
+          typeConfig?.title || DEFAULT_DATA.STRUCTURES.ROOT.title
+        }${description && description.trim() !== '' ? ` - ${description}` : ''}`.trim();
 
         return {
           label,
