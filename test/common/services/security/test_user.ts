@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import supertestAsPromised from 'supertest-as-promised';
+import supertest from 'supertest';
 
 import { Role } from './role';
 import { User } from './user';
@@ -119,5 +119,5 @@ export function TestUserSupertestProvider({ getService }: FtrProviderContext) {
   opensearchDashboardsServerConfig.username = TEST_USER_NAME;
   opensearchDashboardsServerConfig.password = TEST_USER_PASSWORD;
 
-  return supertestAsPromised(opensearchDashboardsServerConfig.toString().slice(0, -1));
+  return supertest(opensearchDashboardsServerConfig.toString().slice(0, -1));
 }
