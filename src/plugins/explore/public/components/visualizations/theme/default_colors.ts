@@ -71,3 +71,55 @@ export const getColors = () => {
 };
 
 export const DEFAULT_GREY = '#d3d3d3';
+export const getColorGroups = () => {
+  return {
+    red: {
+      red1: '#c4152a',
+      red2: '#e02f44',
+      red3: '#ff4b5e',
+      red4: '#ff7f87',
+      red5: '#ffb3b8',
+    },
+    orange: {
+      orange1: '#fa6501',
+      orange2: '#ff780b',
+      orange3: '#ff9830',
+      orange4: '#ffb357',
+      orange5: '#ffcb7e',
+    },
+    yellow: {
+      yellow1: '#e0b400',
+      yellow2: '#ffca00',
+      yellow3: '#ffdb4a',
+      yellow4: '#ffe680',
+      yellow5: '#fff2b3',
+    },
+    green: {
+      green1: '#37872d',
+      green2: '#57a64b',
+      green3: '#73bf69',
+      green4: '#96d98d',
+      green5: '#c9f2c2',
+    },
+    blue: {
+      blue1: '#2061c4',
+      blue2: '#3275d9',
+      blue3: '#5794f2',
+      blue4: '#8ab8ff',
+      blue5: '#c0d8ff',
+    },
+    purple: {
+      purple1: '#8f3bb8',
+      purple2: '#a352cd',
+      purple3: '#b977d9',
+      purple4: '#ca96e5',
+      purple5: '#deb7f2',
+    },
+  };
+};
+
+export const greyDefault = '#cdccdc';
+
+export const getCategoryNextColor = (index: number) => {
+  return getColors().categories[index % getColors().categories.length];
+};

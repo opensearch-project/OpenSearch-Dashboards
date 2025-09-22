@@ -24,6 +24,7 @@ import { createTableConfig } from './table/table_vis_config';
 import { ChartType } from './utils/use_visualization_types';
 import { getColumnsByAxesMapping } from './visualization_builder_utils';
 import { createGaugeConfig } from './gauge/gauge_vis_config';
+import { createStateTimelineConfig } from './state_timeline/state_timeline_config';
 
 /**
  * Registry for visualization rules and configurations.
@@ -166,6 +167,8 @@ export class VisualizationRegistry {
         return createTableConfig();
       case 'gauge':
         return createGaugeConfig();
+      case 'state_timeline':
+        return createStateTimelineConfig();
       default:
         return;
     }
