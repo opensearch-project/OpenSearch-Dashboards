@@ -62,6 +62,7 @@ interface SavedObjectBody {
   title?: string;
   displayName?: string;
   description?: string;
+  signalType?: string;
   timeFieldName?: string;
   intervalName?: string;
   fields?: string;
@@ -84,6 +85,7 @@ export class IndexPattern implements IIndexPattern {
   public title: string = '';
   public displayName?: string;
   public description?: string;
+  public signalType?: string;
   public fieldFormatMap: Record<string, any>;
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
@@ -137,6 +139,7 @@ export class IndexPattern implements IIndexPattern {
     this.title = spec.title || '';
     this.displayName = spec.displayName;
     this.description = spec.description;
+    this.signalType = spec.signalType;
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
     this.signalType = spec.signalType;
@@ -240,6 +243,7 @@ export class IndexPattern implements IIndexPattern {
       title: this.title,
       displayName: this.displayName,
       description: this.description,
+      signalType: this.signalType,
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters,
       fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
@@ -380,6 +384,7 @@ export class IndexPattern implements IIndexPattern {
       title: this.title,
       displayName: this.displayName,
       description: this.description,
+      signalType: this.signalType,
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,

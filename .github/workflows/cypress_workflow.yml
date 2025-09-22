@@ -198,16 +198,16 @@ jobs:
 
       - name: Setup Yarn
         run: |
-            npm uninstall -g yarn
-            npm i -g yarn@^1.22.10
-            yarn config set network-timeout 1000000 -g
+          npm uninstall -g yarn
+          npm i -g yarn@^1.22.10
+          yarn config set network-timeout 1000000 -g
 
       - name: Run bootstrap
         run: yarn osd bootstrap
 
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
-    
+
       - name: Checkout FT repo
         uses: actions/checkout@v4
         with:
@@ -235,8 +235,8 @@ jobs:
           echo "SPEC=${FORMATTED_SPEC}" >> $GITHUB_ENV
           echo "SPEC=${FORMATTED_SPEC}"
 
-      # Setup spec files for Dashboards in-house cypress tests
-      - name: Setup spec files for Dashboards tests
+      # Setup spec files for OSD in-house cypress tests
+      - name: Setup spec files for OSD tests
         if: ${{ inputs.specs == '' && matrix.test_location == 'source' }}
         shell: bash
         run: |
@@ -296,13 +296,13 @@ jobs:
           sleep 30
         shell: bash
 
-      # Clear Cypress Cache before running Dashboards tests
+      # Clear Cypress Cache before running OSD tests
       - name: Clear Cypress Cache
         if: matrix.test_location == 'source'
         run: npx cypress cache clear
 
-      # Run Dashboards Cypress tests within the source repo
-      - name: Run Dashboards Cypress tests with query enhancements
+      # Run OSD Cypress tests within the source repo
+      - name: Run OSD Cypress tests with query enhancements
         if: matrix.test_location == 'source' && (matrix.config == 'query_enhanced' || matrix.config == 'explore')
         uses: cypress-io/github-action@v6
         with:
@@ -311,7 +311,7 @@ jobs:
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
 
-      - name: Run Dashboards Cypress tests without query enhancements
+      - name: Run OSD Cypress tests without query enhancements
         if: matrix.test_location == 'source' && matrix.config == 'dashboard'
         uses: cypress-io/github-action@v6
         with:
@@ -340,24 +340,24 @@ jobs:
           path: ftr-cypress-artifacts-${{ matrix.group }}.tar.gz
           retention-days: 1
 
-      - name: Compress Dashboards repo artifacts
+      - name: Compress OSD repo artifacts
         if: always() && matrix.test_location == 'source'
         run: |
-          mkdir -p dashboard-artifacts
+          mkdir -p osd-artifacts
             for dir in screenshots videos results; do
               if [ -d "cypress/$dir" ]; then
-                cp -r "cypress/$dir" dashboard-artifacts/
+                cp -r "cypress/$dir" osd-artifacts/
               fi
           done
-          tar -czf dashboards-cypress-artifacts-${{ matrix.group }}.tar.gz -C dashboard-artifacts .
+          tar -czf osd-cypress-artifacts-${{ matrix.group }}.tar.gz -C osd-artifacts .
         shell: bash
 
-      - name: Upload Dashboards repo artifacts
+      - name: Upload OSD repo artifacts
         if: always() && matrix.test_location == 'source'
         uses: actions/upload-artifact@v4
         with:
-          name: dashboards-cypress-artifacts-${{ matrix.group }}
-          path: dashboards-cypress-artifacts-${{ matrix.group }}.tar.gz
+          name: osd-cypress-artifacts-${{ matrix.group }}
+          path: osd-cypress-artifacts-${{ matrix.group }}.tar.gz
           retention-days: 1
           overwrite: true
 

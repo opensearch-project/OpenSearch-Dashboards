@@ -379,6 +379,7 @@ export class DataViewsService {
         title,
         displayName,
         description,
+        signalType,
         timeFieldName,
         intervalName,
         fields,
@@ -386,7 +387,6 @@ export class DataViewsService {
         fieldFormatMap,
         typeMeta,
         type,
-        signalType,
       },
       references,
     } = savedObject;
@@ -404,6 +404,7 @@ export class DataViewsService {
       title,
       displayName,
       description,
+      signalType,
       intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,

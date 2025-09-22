@@ -66,12 +66,12 @@ export interface IndexPatternAttributes {
   title: string;
   displayName?: string;
   description?: string;
+  signalType?: string;
   typeMeta: string;
   timeFieldName?: string;
   intervalName?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
-  signalType?: string;
 }
 
 export type OnNotification = (toastInputFields: ToastInputFields) => void;
@@ -217,6 +217,7 @@ export interface IndexPatternSpec {
   title?: string;
   displayName?: string;
   description?: string;
+  signalType?: string;
   intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
@@ -225,7 +226,6 @@ export interface IndexPatternSpec {
   type?: string;
   dataSourceRef?: SavedObjectReference;
   fieldsLoading?: boolean;
-  signalType?: SignalType;
 }
 
 export interface SourceFilter {
