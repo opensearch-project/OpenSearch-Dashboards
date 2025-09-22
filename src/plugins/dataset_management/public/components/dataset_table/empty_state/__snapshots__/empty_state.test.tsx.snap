@@ -4,7 +4,7 @@ exports[`EmptyState should render normally 1`] = `
 <Fragment>
   <EuiPageContent
     className="inpEmptyState"
-    data-test-subj="indexPatternEmptyState"
+    data-test-subj="datasetEmptyState"
     grow={false}
     horizontalPosition="center"
   >

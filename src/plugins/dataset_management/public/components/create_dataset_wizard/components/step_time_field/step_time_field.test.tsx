@@ -323,6 +323,6 @@ describe('StepTimeField', () => {
 
     await (component.instance() as StepTimeField).createDataset();
 
-    expect(createDataset).toHaveBeenCalledWith(undefined, '');
+    expect(createDataset).toHaveBeenCalledWith(undefined, '', undefined);
   });
 });

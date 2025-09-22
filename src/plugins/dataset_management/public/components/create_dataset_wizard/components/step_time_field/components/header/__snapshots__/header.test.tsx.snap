@@ -23,14 +23,14 @@ exports[`Header should render normally 1`] = `
   />
   <EuiText>
     <FormattedMessage
-      defaultMessage="Specify settings for your {dataset} {indexPatternName}."
+      defaultMessage="Specify settings for your {dataset} {datasetName}."
       id="datasetManagement.createDataset.stepTimeLabel"
       values={
         Object {
           "dataset": <strong>
             ki*
           </strong>,
-          "indexPatternName": "ki*",
+          "datasetName": "ki*",
         }
       }
     />

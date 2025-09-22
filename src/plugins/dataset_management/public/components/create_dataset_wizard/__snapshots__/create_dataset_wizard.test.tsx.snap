@@ -16,6 +16,7 @@ exports[`CreateDatasetWizard renders index pattern step when there are indices 1
 <Fragment>
   <EuiPageContent>
     <Header
+      datasetName="name"
       docLinks={
         Object {
           "links": Object {
@@ -26,7 +27,6 @@ exports[`CreateDatasetWizard renders index pattern step when there are indices 1
           },
         }
       }
-      indexPatternName="name"
       isBeta={false}
       prompt={null}
     />
@@ -40,9 +40,7 @@ exports[`CreateDatasetWizard renders index pattern step when there are indices 1
         ]
       }
       catchAndWarn={[Function]}
-      goToNextStep={[Function]}
-      goToPreviousStep={[Function]}
-      indexPatternCreationType={
+      datasetCreationType={
         DatasetCreationConfig {
           "httpClient": null,
           "isBeta": false,
@@ -52,6 +50,8 @@ exports[`CreateDatasetWizard renders index pattern step when there are indices 1
           "type": "default",
         }
       }
+      goToNextStep={[Function]}
+      goToPreviousStep={[Function]}
       showSystemIndices={true}
       stepInfo={
         Object {
@@ -74,6 +74,7 @@ exports[`CreateDatasetWizard renders the empty state when there are no indices 1
 <Fragment>
   <EuiPageContent>
     <Header
+      datasetName="name"
       docLinks={
         Object {
           "links": Object {
@@ -84,7 +85,6 @@ exports[`CreateDatasetWizard renders the empty state when there are no indices 1
           },
         }
       }
-      indexPatternName="name"
       isBeta={false}
       prompt={null}
     />
@@ -92,9 +92,7 @@ exports[`CreateDatasetWizard renders the empty state when there are no indices 1
     <StepDataset
       allIndices={Array []}
       catchAndWarn={[Function]}
-      goToNextStep={[Function]}
-      goToPreviousStep={[Function]}
-      indexPatternCreationType={
+      datasetCreationType={
         DatasetCreationConfig {
           "httpClient": null,
           "isBeta": false,
@@ -104,6 +102,8 @@ exports[`CreateDatasetWizard renders the empty state when there are no indices 1
           "type": "default",
         }
       }
+      goToNextStep={[Function]}
+      goToPreviousStep={[Function]}
       showSystemIndices={true}
       stepInfo={
         Object {
@@ -126,6 +126,7 @@ exports[`CreateDatasetWizard renders time field step when step is set to TIME_FI
 <Fragment>
   <EuiPageContent>
     <Header
+      datasetName="name"
       docLinks={
         Object {
           "links": Object {
@@ -136,16 +137,14 @@ exports[`CreateDatasetWizard renders time field step when step is set to TIME_FI
           },
         }
       }
-      indexPatternName="name"
       isBeta={false}
       prompt={null}
     />
     <EuiHorizontalRule />
     <StepTimeField
       createDataset={[Function]}
-      goToPreviousStep={[Function]}
       dataset=""
-      indexPatternCreationType={
+      datasetCreationType={
         DatasetCreationConfig {
           "httpClient": null,
           "isBeta": false,
@@ -155,6 +154,7 @@ exports[`CreateDatasetWizard renders time field step when step is set to TIME_FI
           "type": "default",
         }
       }
+      goToPreviousStep={[Function]}
       stepInfo={
         Object {
           "currentStepNumber": 2,
@@ -176,6 +176,7 @@ exports[`CreateDatasetWizard renders when there are no indices but there are rem
 <Fragment>
   <EuiPageContent>
     <Header
+      datasetName="name"
       docLinks={
         Object {
           "links": Object {
@@ -186,7 +187,6 @@ exports[`CreateDatasetWizard renders when there are no indices but there are rem
           },
         }
       }
-      indexPatternName="name"
       isBeta={false}
       prompt={null}
     />
@@ -194,9 +194,7 @@ exports[`CreateDatasetWizard renders when there are no indices but there are rem
     <StepDataset
       allIndices={Array []}
       catchAndWarn={[Function]}
-      goToNextStep={[Function]}
-      goToPreviousStep={[Function]}
-      indexPatternCreationType={
+      datasetCreationType={
         DatasetCreationConfig {
           "httpClient": null,
           "isBeta": false,
@@ -206,6 +204,8 @@ exports[`CreateDatasetWizard renders when there are no indices but there are rem
           "type": "default",
         }
       }
+      goToNextStep={[Function]}
+      goToPreviousStep={[Function]}
       showSystemIndices={true}
       stepInfo={
         Object {
@@ -240,6 +240,7 @@ exports[`CreateDatasetWizard shows system indices even if there are no other ind
 <Fragment>
   <EuiPageContent>
     <Header
+      datasetName="name"
       docLinks={
         Object {
           "links": Object {
@@ -250,7 +251,6 @@ exports[`CreateDatasetWizard shows system indices even if there are no other ind
           },
         }
       }
-      indexPatternName="name"
       isBeta={false}
       prompt={null}
     />
@@ -264,9 +264,7 @@ exports[`CreateDatasetWizard shows system indices even if there are no other ind
         ]
       }
       catchAndWarn={[Function]}
-      goToNextStep={[Function]}
-      goToPreviousStep={[Function]}
-      indexPatternCreationType={
+      datasetCreationType={
         DatasetCreationConfig {
           "httpClient": null,
           "isBeta": false,
@@ -276,6 +274,8 @@ exports[`CreateDatasetWizard shows system indices even if there are no other ind
           "type": "default",
         }
       }
+      goToNextStep={[Function]}
+      goToPreviousStep={[Function]}
       showSystemIndices={true}
       stepInfo={
         Object {

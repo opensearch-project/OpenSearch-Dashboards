@@ -3,7 +3,7 @@
 exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
 <Fragment>
   <header
-    indexPatternId=""
+    datasetId=""
     useUpdatedUX={true}
   />
   <call-outs
@@ -18,13 +18,13 @@ exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
     size="l"
   />
   <Table
-    deleteField={[Function]}
-    editField={[Function]}
     dataset={
       Object {
         "getScriptedFields": [Function],
       }
     }
+    deleteField={[Function]}
+    editField={[Function]}
     items={
       Array [
         Object {
@@ -46,7 +46,7 @@ exports[`ScriptedFieldsTable should filter based on the lang filter 1`] = `
 exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
 <Fragment>
   <header
-    indexPatternId=""
+    datasetId=""
     useUpdatedUX={true}
   />
   <call-outs
@@ -57,13 +57,13 @@ exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
     size="l"
   />
   <Table
-    deleteField={[Function]}
-    editField={[Function]}
     dataset={
       Object {
         "getScriptedFields": [Function],
       }
     }
+    deleteField={[Function]}
+    editField={[Function]}
     items={
       Array [
         Object {
@@ -80,7 +80,7 @@ exports[`ScriptedFieldsTable should filter based on the query bar 1`] = `
 exports[`ScriptedFieldsTable should hide the table if there are no scripted fields 1`] = `
 <Fragment>
   <header
-    indexPatternId=""
+    datasetId=""
     useUpdatedUX={true}
   />
   <call-outs
@@ -91,13 +91,13 @@ exports[`ScriptedFieldsTable should hide the table if there are no scripted fiel
     size="l"
   />
   <Table
-    deleteField={[Function]}
-    editField={[Function]}
     dataset={
       Object {
         "getScriptedFields": [Function],
       }
     }
+    deleteField={[Function]}
+    editField={[Function]}
     items={Array []}
   />
 </Fragment>
@@ -106,7 +106,7 @@ exports[`ScriptedFieldsTable should hide the table if there are no scripted fiel
 exports[`ScriptedFieldsTable should render normally 1`] = `
 <Fragment>
   <header
-    indexPatternId=""
+    datasetId=""
     useUpdatedUX={true}
   />
   <call-outs
@@ -117,13 +117,13 @@ exports[`ScriptedFieldsTable should render normally 1`] = `
     size="l"
   />
   <Table
-    deleteField={[Function]}
-    editField={[Function]}
     dataset={
       Object {
         "getScriptedFields": [Function],
       }
     }
+    deleteField={[Function]}
+    editField={[Function]}
     items={
       Array [
         Object {
@@ -145,7 +145,7 @@ exports[`ScriptedFieldsTable should render normally 1`] = `
 exports[`ScriptedFieldsTable should show a delete modal 1`] = `
 <Fragment>
   <header
-    indexPatternId=""
+    datasetId=""
     useUpdatedUX={true}
   />
   <call-outs
@@ -156,13 +156,13 @@ exports[`ScriptedFieldsTable should show a delete modal 1`] = `
     size="l"
   />
   <Table
-    deleteField={[Function]}
-    editField={[Function]}
     dataset={
       Object {
         "getScriptedFields": [Function],
       }
     }
+    deleteField={[Function]}
+    editField={[Function]}
     items={
       Array [
         Object {

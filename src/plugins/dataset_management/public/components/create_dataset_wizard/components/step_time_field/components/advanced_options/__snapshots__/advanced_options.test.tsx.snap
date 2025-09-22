@@ -58,7 +58,7 @@ exports[`AdvancedOptions should render normally 1`] = `
     >
       <EuiCompressedFieldText
         data-test-subj="createDatasetIdInput"
-        name="indexPatternId"
+        name="datasetId"
         onChange={[Function]}
         placeholder="custom-index-pattern-id"
         value="foobar"

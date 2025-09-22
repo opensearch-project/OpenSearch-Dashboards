@@ -22,7 +22,6 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       isVisible={true}
     />
     <ScriptingHelpFlyout
-      executeScript={[Function]}
       dataset={
         Object {
           "fields": Object {
@@ -32,6 +31,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
           "getFormatterForField": [Function],
         }
       }
+      executeScript={[Function]}
       isVisible={false}
       lang="painless"
       onClose={[Function]}
@@ -263,7 +263,6 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       isVisible={true}
     />
     <ScriptingHelpFlyout
-      executeScript={[Function]}
       dataset={
         Object {
           "fields": Object {
@@ -273,6 +272,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
           "getFormatterForField": [Function],
         }
       }
+      executeScript={[Function]}
       isVisible={false}
       lang="painless"
       name="test"
@@ -503,7 +503,6 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       isVisible={true}
     />
     <ScriptingHelpFlyout
-      executeScript={[Function]}
       dataset={
         Object {
           "fields": Object {
@@ -513,6 +512,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
           "getFormatterForField": [Function],
         }
       }
+      executeScript={[Function]}
       isVisible={false}
       lang="painless"
       name="foobar"
@@ -772,7 +772,6 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       isVisible={true}
     />
     <ScriptingHelpFlyout
-      executeScript={[Function]}
       dataset={
         Object {
           "fields": Object {
@@ -782,6 +781,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
           "getFormatterForField": [Function],
         }
       }
+      executeScript={[Function]}
       isVisible={false}
       lang="testlang"
       name="test"
@@ -1093,7 +1093,6 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       isVisible={true}
     />
     <ScriptingHelpFlyout
-      executeScript={[Function]}
       dataset={
         Object {
           "fields": Object {
@@ -1103,6 +1102,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
           "getFormatterForField": [Function],
         }
       }
+      executeScript={[Function]}
       isVisible={false}
       lang="painless"
       name="foobar"
