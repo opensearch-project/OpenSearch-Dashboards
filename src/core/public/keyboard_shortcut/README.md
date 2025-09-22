@@ -24,7 +24,7 @@ The modal shows shortcuts grouped by categories like "Navigation", "Search", "Da
 | `?`       | Show this help              | Opens the help modal with all available shortcuts | (Global)            |
 | `Shift+L` | Switch to logs tab          | Navigate to logs tab in Explore                   | (Explore)           |
 | `Shift+P` | Switch to patterns tab      | Navigate to patterns tab in Explore               | (Explore)           |
-| `Shift+V` | Switch to visualization tab | Navigate to visualization tab in Explore          | (Visualization)     |
+| `Shift+V` | Switch to visualization tab | Navigate to visualization tab in Explore          | (Explore)           |
 
 #### Panel / Layout
 
