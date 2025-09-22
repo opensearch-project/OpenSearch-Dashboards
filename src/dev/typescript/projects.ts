@@ -39,7 +39,7 @@ export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'src/test_utils/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'src/core/tsconfig.json')),
 
-  // NOTE: using glob.sync rather than glob-all or globby
+  // NOTE: using glob.sync rather than globby
   // because it takes less than 10 ms, while the other modules
   // both took closer to 1000ms.
   ...glob
