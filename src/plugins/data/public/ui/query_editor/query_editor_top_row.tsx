@@ -414,8 +414,8 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
         createPortal(datasetSelector, props.datasetSelectorRef.current)}
       {props?.datePickerRef?.current && uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)
         ? createPortal(datePicker, props.datePickerRef.current)
-        : null}
-      {shouldRenderQueryEditor() && (
+        : datePicker}
+      {props.showQueryEditor && (
         <EuiFlexGroup
           className={classes}
           responsive={!!props.showDatePicker}
