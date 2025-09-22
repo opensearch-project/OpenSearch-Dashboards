@@ -3,13 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@osd/i18n';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonIcon,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -18,6 +20,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiPopover,
   EuiSmallButton,
   EuiSmallButtonEmpty,
   EuiSwitch,
@@ -43,7 +46,7 @@ interface DataLinkModalProps {
   availableFields: Array<{ label: string; value: string }>;
 }
 
-const DataLinkModal: React.FC<DataLinkModalProps> = ({
+export const DataLinkModal: React.FC<DataLinkModalProps> = ({
   link,
   onSave,
   onCancel,
@@ -51,7 +54,7 @@ const DataLinkModal: React.FC<DataLinkModalProps> = ({
 }) => {
   const [title, setTitle] = useState(link?.title || '');
   const [url, setUrl] = useState(link?.url || '');
-  const [openInNewTab, setOpenInNewTab] = useState(link?.openInNewTab || false);
+  const [openInNewTab, setOpenInNewTab] = useState(link?.openInNewTab ?? true);
   const [selectedFields, setSelectedFields] = useState<Array<{ label: string; value: string }>>(
     link?.fields
       .map((field) => {
@@ -60,12 +63,13 @@ const DataLinkModal: React.FC<DataLinkModalProps> = ({
       })
       .filter((option): option is { label: string; value: string } => option !== null) || []
   );
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const isSaveDisabled = !title.trim() || !url.trim() || selectedFields.length === 0;
 
   const handleSave = () => {
     onSave({
-      id: link?.id || Math.random().toString(36).substr(2, 9),
+      id: link?.id || uuidv4(),
       title,
       url,
       openInNewTab,
@@ -73,12 +77,29 @@ const DataLinkModal: React.FC<DataLinkModalProps> = ({
     });
   };
 
-  const handleFieldsChange = (selected: Array<EuiComboBoxOptionOption<string>>) => {
-    const validSelected = selected
-      .filter((option): option is { label: string; value: string } => option.value !== undefined)
-      .map((option) => ({ label: option.label, value: option.value! }));
-    setSelectedFields(validSelected);
+  const handleAddField = useCallback((field: { label: string; value: string }) => {
+    setSelectedFields((prev) => [...prev, field]);
+  }, []);
+
+  const handleRemoveField = (value: string) => {
+    setSelectedFields((prev) => prev.filter((field) => field.value !== value));
   };
+
+  const fieldOptions: EuiContextMenuPanelDescriptor[] = useMemo(
+    () => [
+      {
+        id: 0,
+        items: availableFields
+          .filter((field) => !selectedFields.some((f) => f.value === field.value))
+          .map((field) => ({
+            name: field.label,
+            onClick: () => handleAddField(field),
+            'data-test-subj': `dataLinkFieldOption-${field.value}`,
+          })),
+      },
+    ],
+    [availableFields, selectedFields, handleAddField]
+  );
 
   return (
     <EuiModal onClose={onCancel}>
@@ -111,14 +132,45 @@ const DataLinkModal: React.FC<DataLinkModalProps> = ({
             defaultMessage: 'Fields',
           })}
         >
-          <EuiComboBox
-            placeholder="Select fields"
-            options={availableFields}
-            selectedOptions={selectedFields}
-            onChange={handleFieldsChange}
-            isClearable={true}
-            data-test-subj="dataLinkFieldsComboBox"
-          />
+          <EuiFlexGroup wrap gutterSize="s" alignItems="center">
+            {selectedFields.map((field) => (
+              <EuiFlexItem grow={false} key={field.value}>
+                <EuiBadge
+                  color="hollow"
+                  iconType="cross"
+                  iconSide="right"
+                  onClick={() => handleRemoveField(field.value)}
+                  onClickAriaLabel={`Remove ${field}`}
+                  data-test-subj={`dataLinkFieldBadge-${field.value}`}
+                >
+                  {field.label}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                button={
+                  <EuiButtonIcon
+                    iconType="plusInCircle"
+                    onClick={() => setIsPopoverOpen(true)}
+                    aria-label="Add Field"
+                    data-test-subj="dataLinkAddFieldButton"
+                  />
+                }
+                isOpen={isPopoverOpen}
+                closePopover={() => setIsPopoverOpen(false)}
+                panelPaddingSize="s"
+                anchorPosition="downLeft"
+              >
+                <EuiContextMenu
+                  size="s"
+                  initialPanelId={0}
+                  panels={fieldOptions}
+                  data-test-subj="dataLinkFieldContextMenu"
+                />
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate('explore.stylePanel.table.dataLinks.urlLabel', {
