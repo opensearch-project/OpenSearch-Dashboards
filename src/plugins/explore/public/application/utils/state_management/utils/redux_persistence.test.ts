@@ -9,7 +9,7 @@ import { RootState } from '../store';
 import { EXPLORE_DEFAULT_LANGUAGE, DEFAULT_TRACE_COLUMNS_SETTING } from '../../../../../common';
 import { ColorSchemas } from '../../../../components/visualizations/types';
 import { EditorMode, QueryExecutionStatus } from '../types';
-import { SignalType } from '../../../../../../data/common';
+import { CORE_SIGNAL_TYPES } from '../../../../../../data/common';
 import { of } from 'rxjs';
 
 jest.mock('../../../../components/visualizations/metric/metric_vis_config', () => ({
@@ -66,7 +66,7 @@ describe('redux_persistence', () => {
             Promise.resolve({
               id: 'test-dataset',
               title: 'test-dataset',
-              signalType: SignalType.LOGS,
+              signalType: CORE_SIGNAL_TYPES.LOGS,
             })
           ),
         },
@@ -497,7 +497,7 @@ describe('redux_persistence', () => {
         data: {
           ...mockServices.data,
           dataViews: {
-            get: jest.fn(() => Promise.resolve({ signalType: SignalType.TRACES })),
+            get: jest.fn(() => Promise.resolve({ signalType: CORE_SIGNAL_TYPES.TRACES })),
           },
         },
       } as any;
@@ -520,7 +520,7 @@ describe('redux_persistence', () => {
         data: {
           ...mockServices.data,
           dataViews: {
-            get: jest.fn(() => Promise.resolve({ signalType: SignalType.LOGS })),
+            get: jest.fn(() => Promise.resolve({ signalType: CORE_SIGNAL_TYPES.LOGS })),
           },
         },
       } as any;
@@ -543,7 +543,7 @@ describe('redux_persistence', () => {
         data: {
           ...mockServices.data,
           dataViews: {
-            get: jest.fn(() => Promise.resolve({ signalType: SignalType.LOGS })),
+            get: jest.fn(() => Promise.resolve({ signalType: CORE_SIGNAL_TYPES.LOGS })),
           },
         },
       } as any;
@@ -566,7 +566,7 @@ describe('redux_persistence', () => {
         data: {
           ...mockServices.data,
           dataViews: {
-            get: jest.fn(() => Promise.resolve({ signalType: SignalType.TRACES })),
+            get: jest.fn(() => Promise.resolve({ signalType: CORE_SIGNAL_TYPES.TRACES })),
           },
         },
       } as any;

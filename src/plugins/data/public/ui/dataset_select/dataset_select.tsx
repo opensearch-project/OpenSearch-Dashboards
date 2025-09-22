@@ -29,7 +29,7 @@ import {
   useOpenSearchDashboards,
   toMountPoint,
 } from '../../../../opensearch_dashboards_react/public';
-import { Dataset, DEFAULT_DATA, Query, SignalType } from '../../../common';
+import { Dataset, DEFAULT_DATA, Query } from '../../../common';
 import { IDataPluginServices } from '../../types';
 import { DatasetDetails, DatasetDetailsBody, DatasetDetailsHeader } from './dataset_details';
 import { AdvancedSelector } from '../dataset_selector/advanced_selector';
@@ -38,7 +38,7 @@ import './_index.scss';
 export interface DetailedDataset extends Dataset {
   description?: string;
   displayName?: string;
-  signalType?: SignalType;
+  signalType?: string;
 }
 
 export interface DatasetSelectProps {
