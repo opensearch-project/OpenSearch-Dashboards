@@ -54,6 +54,8 @@ export interface BarChartStyleControls {
   bucket?: BucketOptions;
 
   thresholdOptions?: ThresholdOptions;
+
+  useThresholdColor?: boolean;
 }
 
 export const defaultBarChartStyles: BarChartStyleControls = {
@@ -78,9 +80,8 @@ export const defaultBarChartStyles: BarChartStyleControls = {
     baseColor: getColors().statusGreen,
     thresholds: [],
     thresholdStyle: ThresholdMode.Off,
-    useThresholdColor: false,
   },
-
+  useThresholdColor: false,
   standardAxes: [
     {
       id: 'Axis-1',

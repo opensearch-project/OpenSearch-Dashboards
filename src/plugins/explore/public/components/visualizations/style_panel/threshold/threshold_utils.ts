@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getColors } from '../../theme/default_colors';
 import {
   Threshold,
   ThresholdLine,
@@ -23,9 +24,9 @@ import {
 export function mergeThresholdsWithBase(
   minBase: number,
   maxBase: number,
-  baseColor: string,
+  baseColor?: string,
   thresholds?: Threshold[]
-) {
+): Threshold[] {
   // only display threshold ranges under the max base and above min base
   const validThresholds =
     thresholds?.filter((range) => range.value >= minBase && range.value <= maxBase) || [];
@@ -36,7 +37,7 @@ export function mergeThresholdsWithBase(
   }
 
   const aboveMin = validThresholds.filter((range) => range.value > minBase);
-  return [{ value: minBase, color: baseColor }, ...aboveMin];
+  return [{ value: minBase, color: baseColor ?? getColors().statusGreen }, ...aboveMin];
 }
 
 /**

@@ -45,6 +45,7 @@ export interface MetricChartStyleControls {
   thresholdOptions?: ThresholdOptions;
   min?: number;
   max?: number;
+  useThresholdColor?: boolean;
 }
 
 // TODO: refactor other type of chart to ensure the default style control object is properly typed
@@ -66,8 +67,8 @@ export const defaultMetricChartStyles: DefaultMetricChartStyleControls = {
   thresholdOptions: {
     baseColor: getColors().statusGreen,
     thresholds: [],
-    useThresholdColor: false,
   },
+  useThresholdColor: false,
 };
 
 export const createMetricConfig = (): VisualizationType<'metric'> => ({

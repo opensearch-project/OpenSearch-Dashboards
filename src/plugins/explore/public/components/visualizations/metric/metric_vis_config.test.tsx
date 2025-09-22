@@ -34,7 +34,6 @@ describe('createMetrictmapeConfig', () => {
     expect(defaults.thresholdOptions).toMatchObject({
       baseColor: '#00BD6B',
       thresholds: [],
-      useThresholdColor: false,
     });
   });
 

@@ -66,7 +66,6 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
               thresholdsOptions={styleOptions.thresholdOptions}
               onChange={(options) => updateStyleOption('thresholdOptions', options)}
               showThresholdStyle={true}
-              canUseThresholdColor={false}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

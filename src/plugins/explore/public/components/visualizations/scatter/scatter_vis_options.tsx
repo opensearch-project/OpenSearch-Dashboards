@@ -41,7 +41,6 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
   // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
   const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
-
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -63,7 +62,6 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
               thresholdsOptions={styleOptions.thresholdOptions}
               onChange={(options) => updateStyleOption('thresholdOptions', options)}
               showThresholdStyle={true}
-              canUseThresholdColor={!hasColorMapping}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -79,7 +77,12 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
           <EuiFlexItem grow={false}>
             <ScatterExclusiveVisOptions
               styles={styleOptions.exclusive}
+              useThresholdColor={styleOptions?.useThresholdColor}
               onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
+              onUseThresholdColorChange={(useThresholdColor) =>
+                updateStyleOption('useThresholdColor', useThresholdColor)
+              }
+              shouldDisableUseThresholdColor={hasColorMapping}
             />
           </EuiFlexItem>
 

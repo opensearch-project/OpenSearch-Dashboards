@@ -268,7 +268,6 @@ export interface ThresholdOptions {
   thresholds?: Threshold[];
   baseColor?: string;
   thresholdStyle?: ThresholdMode;
-  useThresholdColor?: boolean;
 }
 
 export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';

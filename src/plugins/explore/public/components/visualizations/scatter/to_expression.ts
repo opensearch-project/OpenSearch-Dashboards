@@ -40,7 +40,7 @@ export const createTwoMetricScatter = (
         type: getSchemaByAxis(yAxis),
         axis: applyAxisStyling(yAxis, yAxisStyle),
       },
-      color: styles?.thresholdOptions?.useThresholdColor ? colorEncodingLayer : [],
+      color: styles?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {

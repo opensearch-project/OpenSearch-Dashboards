@@ -114,36 +114,42 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
               })}
               initialIsOpen={true}
             >
-              <EuiSplitPanel.Inner paddingSize="s" color="subdued">
-                <EuiText size="s" style={{ fontWeight: 600 }}>
-                  {i18n.translate('explore.stylePanel.gauge.threshold.title.splitPanel', {
-                    defaultMessage: 'Title',
+              <EuiFormRow>
+                <EuiSwitch
+                  compressed
+                  label={i18n.translate('explore.vis.gauge.useThresholdColor', {
+                    defaultMessage: 'Use threshold colors',
                   })}
-                </EuiText>
-                <EuiSpacer size="s" />
+                  data-test-subj="useThresholdColorButton"
+                  checked={styleOptions?.useThresholdColor ?? false}
+                  onChange={(e) => updateStyleOption('useThresholdColor', e.target.checked)}
+                />
+              </EuiFormRow>
+
+              <EuiSpacer size="s" />
+
+              <EuiFormRow>
+                <EuiSwitch
+                  compressed
+                  label={i18n.translate('explore.stylePanel.gauge.title', {
+                    defaultMessage: 'Show title',
+                  })}
+                  checked={styleOptions.showTitle}
+                  onChange={(e) => updateStyleOption('showTitle', e.target.checked)}
+                  data-test-subj="showTitleSwitch"
+                />
+              </EuiFormRow>
+              {styleOptions.showTitle && (
                 <EuiFormRow>
-                  <EuiSwitch
-                    compressed
-                    label={i18n.translate('explore.stylePanel.gauge.title', {
-                      defaultMessage: 'Show title',
+                  <DebouncedFieldText
+                    value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
+                    placeholder={i18n.translate('explore.vis.gauge.title', {
+                      defaultMessage: 'Title',
                     })}
-                    checked={styleOptions.showTitle}
-                    onChange={(e) => updateStyleOption('showTitle', e.target.checked)}
-                    data-test-subj="showTitleSwitch"
+                    onChange={(text) => updateStyleOption('title', text)}
                   />
                 </EuiFormRow>
-                {styleOptions.showTitle && (
-                  <EuiFormRow>
-                    <DebouncedFieldText
-                      value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
-                      placeholder={i18n.translate('explore.vis.gauge.title', {
-                        defaultMessage: 'Title',
-                      })}
-                      onChange={(text) => updateStyleOption('title', text)}
-                    />
-                  </EuiFormRow>
-                )}
-              </EuiSplitPanel.Inner>
+              )}
             </StyleAccordion>
           </EuiFlexItem>
         </>

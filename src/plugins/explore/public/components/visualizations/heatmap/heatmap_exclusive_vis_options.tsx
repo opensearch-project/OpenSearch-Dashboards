@@ -15,8 +15,9 @@ import { DebouncedFieldNumber } from '../style_panel/utils';
 
 interface HeatmapVisOptionsProps {
   styles: HeatmapChartStyleControls['exclusive'];
+  useThresholdColor?: boolean;
   onChange: (styles: HeatmapChartStyleControls['exclusive']) => void;
-  useThresholdColor: boolean;
+  onUseThresholdColorChange: (useThresholdColor: boolean) => void;
 }
 
 interface HeatmapLabelVisOptionsProps {
@@ -26,8 +27,9 @@ interface HeatmapLabelVisOptionsProps {
 
 export const HeatmapExclusiveVisOptions = ({
   styles,
-  onChange,
   useThresholdColor,
+  onChange,
+  onUseThresholdColorChange,
 }: HeatmapVisOptionsProps) => {
   const updateExclusiveOption = <K extends keyof HeatmapChartStyleControls['exclusive']>(
     key: K,
@@ -49,6 +51,17 @@ export const HeatmapExclusiveVisOptions = ({
       initialIsOpen={true}
       data-test-subj="heatmapExclusivePanel"
     >
+      <EuiFormRow>
+        <EuiSwitch
+          compressed
+          label={i18n.translate('explore.vis.heatmap.useThresholdColor', {
+            defaultMessage: 'Use threshold colors',
+          })}
+          data-test-subj="useThresholdColorButton"
+          checked={useThresholdColor ?? false}
+          onChange={(e) => onUseThresholdColorChange(e.target.checked)}
+        />
+      </EuiFormRow>
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.heatmap.exclusive.colorSchema', {
           defaultMessage: 'Color schema',

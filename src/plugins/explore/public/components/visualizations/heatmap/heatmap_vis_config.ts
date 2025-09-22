@@ -60,6 +60,7 @@ export interface HeatmapChartStyleControls {
   switchAxes: boolean;
 
   titleOptions: TitleOptions;
+  useThresholdColor?: boolean;
   thresholdOptions?: ThresholdOptions;
 }
 
@@ -89,11 +90,10 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
       color: 'black',
     },
   },
-
+  useThresholdColor: false,
   thresholdOptions: {
     baseColor: getColors().statusGreen,
     thresholds: [],
-    useThresholdColor: false,
   },
 
   // Standard axes

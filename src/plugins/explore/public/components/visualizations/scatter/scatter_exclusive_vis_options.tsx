@@ -15,9 +15,18 @@ import { useDebouncedNumber } from '../utils/use_debounced_value';
 interface ScatterVisOptionsProps {
   styles: ScatterChartStyleControls['exclusive'];
   onChange: (styles: ScatterChartStyleControls['exclusive']) => void;
+  useThresholdColor?: boolean;
+  onUseThresholdColorChange: (useThresholdColor: boolean) => void;
+  shouldDisableUseThresholdColor?: boolean;
 }
 
-export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptionsProps) => {
+export const ScatterExclusiveVisOptions = ({
+  styles,
+  onChange,
+  useThresholdColor,
+  onUseThresholdColorChange,
+  shouldDisableUseThresholdColor = false,
+}: ScatterVisOptionsProps) => {
   const updateStyle = <K extends keyof ScatterChartStyleControls['exclusive']>(
     key: K,
     value: ScatterChartStyleControls['exclusive'][K]
@@ -47,6 +56,19 @@ export const ScatterExclusiveVisOptions = ({ styles, onChange }: ScatterVisOptio
       })}
       initialIsOpen={true}
     >
+      {!shouldDisableUseThresholdColor && (
+        <EuiFormRow>
+          <EuiSwitch
+            compressed
+            label={i18n.translate('explore.vis.scatter.useThresholdColor', {
+              defaultMessage: 'Use threshold colors',
+            })}
+            data-test-subj="useThresholdColorButton"
+            checked={useThresholdColor ?? false}
+            onChange={(e) => onUseThresholdColorChange(e.target.checked)}
+          />
+        </EuiFormRow>
+      )}
       <EuiFormRow
         label={i18n.translate('explore.vis.scatter.shape', {
           defaultMessage: 'Shape',

@@ -44,7 +44,7 @@ export const createHeatmapWithBin = (
         field: colorField,
         type: getSchemaByAxis(colorFieldColumn),
         // TODO: a dedicate method to handle scale type is log especially in percentage mode
-        bin: !styles.thresholdOptions?.useThresholdColor
+        bin: !styles?.useThresholdColor
           ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
           : false,
         scale: {
@@ -126,7 +126,7 @@ export const createRegularHeatmap = (
         field: colorField,
         type: getSchemaByAxis(colorFieldColumn),
         // TODO: a dedicate method to handle scale type is log especially in percentage mode
-        bin: !styles.thresholdOptions?.useThresholdColor
+        bin: !styles?.useThresholdColor
           ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
           : false,
         scale: {

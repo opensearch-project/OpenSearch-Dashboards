@@ -27,9 +27,10 @@ describe('HeatmapExclusiveVisOptions', () => {
         color: 'black',
       },
     },
+    useThresholdColor: false,
     shouldShowType: true,
     onChange: jest.fn(),
-    useThresholdColor: false,
+    onUseThresholdColorChange: jest.fn(),
   };
 
   beforeEach(() => {
@@ -47,7 +48,7 @@ describe('HeatmapExclusiveVisOptions', () => {
   });
   it('calls onChange when change is made(reverse schema)', () => {
     render(<HeatmapExclusiveVisOptions {...defaultProps} />);
-    const reverse = screen.getAllByRole('switch')[0];
+    const reverse = screen.getAllByRole('switch')[1];
     fireEvent.click(reverse);
     expect(defaultProps.onChange).toHaveBeenCalledWith({
       ...defaultProps.styles,

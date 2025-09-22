@@ -65,7 +65,6 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
               thresholdsOptions={styleOptions.thresholdOptions}
               onChange={(options) => updateStyleOption('thresholdOptions', options)}
               showThresholdStyle={true}
-              canUseThresholdColor={false}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

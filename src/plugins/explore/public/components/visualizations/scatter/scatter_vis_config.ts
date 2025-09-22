@@ -38,6 +38,8 @@ export interface ScatterChartStyleControls {
   switchAxes: boolean;
 
   titleOptions: TitleOptions;
+
+  useThresholdColor?: boolean;
   thresholdOptions?: ThresholdOptions;
 }
 
@@ -55,12 +57,13 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
     angle: 0,
     filled: true,
   },
+
+  useThresholdColor: false,
   // Threshold options
   thresholdOptions: {
     baseColor: getColors().statusGreen,
     thresholds: [],
-    thresholdStyle: ThresholdMode.Solid,
-    useThresholdColor: false,
+    thresholdStyle: ThresholdMode.Off,
   },
   // Standard axes
   standardAxes: [

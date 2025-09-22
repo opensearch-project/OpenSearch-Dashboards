@@ -87,7 +87,7 @@ export const createSingleMetric = (
   }
 
   const fillColor = targetFillColor(
-    styles?.thresholdOptions?.useThresholdColor ?? false,
+    styles?.useThresholdColor ?? false,
     styles?.thresholdOptions?.thresholds,
     styles?.thresholdOptions?.baseColor
   );

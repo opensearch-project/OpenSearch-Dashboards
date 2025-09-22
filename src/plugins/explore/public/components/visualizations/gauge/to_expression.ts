@@ -56,8 +56,8 @@ export const createGauge = (
     minBase,
     maxBase,
     // TODO: update to use the color from color palette
-    styleOptions.thresholdOptions.baseColor || colors.statusBlue,
-    styleOptions.thresholdOptions.thresholds
+    styleOptions?.thresholdOptions?.baseColor || colors.statusBlue,
+    styleOptions?.thresholdOptions?.thresholds
   );
 
   // Locate which threshold the target value falls into
@@ -157,9 +157,7 @@ export const createGauge = (
         dy: { expr: `-fontFactor*30 * ${selectedUnit?.fontScale ?? 1}` },
         fontSize: { expr: `fontFactor * 25 * ${selectedUnit?.fontScale ?? 1}` },
         fill: {
-          expr: `${
-            styleOptions?.thresholdOptions?.useThresholdColor ?? false
-          } ? fontColor : fillColor`,
+          expr: `${styleOptions?.useThresholdColor ?? false} ? fillColor : fontColor`,
         },
       },
       encoding: {

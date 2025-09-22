@@ -99,7 +99,7 @@ export const enhanceStyle = (
     markLayer.encoding.color.scale.domain = getDataBound(transformedData, colorField);
   }
 
-  if (styles?.thresholdOptions?.useThresholdColor && styles.thresholdOptions?.thresholds) {
+  if (styles?.useThresholdColor && styles.thresholdOptions?.thresholds) {
     const newThreshold = styles?.thresholdOptions?.thresholds ?? [];
 
     const thresholdWithBase = [

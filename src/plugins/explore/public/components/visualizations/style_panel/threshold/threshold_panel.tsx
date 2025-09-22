@@ -5,7 +5,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { ThresholdCustomValues } from './threshold_custom_values';
 import { Threshold, ThresholdMode, ThresholdOptions } from '../../types';
 import { StyleAccordion } from '../style_accordion';
@@ -16,14 +16,12 @@ export interface ThresholdPanelProps {
   thresholdsOptions?: ThresholdOptions;
   onChange: (thresholds: ThresholdOptions) => void;
   showThresholdStyle?: boolean;
-  canUseThresholdColor?: boolean;
 }
 
 export const ThresholdPanel = ({
   thresholdsOptions,
   onChange,
   showThresholdStyle = false,
-  canUseThresholdColor = true,
 }: ThresholdPanelProps) => {
   const updateThresholdOption = <K extends keyof ThresholdOptions>(
     key: K,
@@ -69,23 +67,6 @@ export const ThresholdPanel = ({
               onChange={(e) =>
                 updateThresholdOption('thresholdStyle', e.target.value as ThresholdMode)
               }
-            />
-          </EuiFormRow>
-        </>
-      )}
-
-      {canUseThresholdColor && (
-        <>
-          <EuiSpacer />
-          <EuiFormRow>
-            <EuiSwitch
-              compressed
-              label={i18n.translate('explore.vis.metric.useThresholdColor', {
-                defaultMessage: 'Use threshold colors',
-              })}
-              data-test-subj="useThresholdColorButton"
-              checked={thresholdsOptions?.useThresholdColor ?? false}
-              onChange={(e) => updateThresholdOption('useThresholdColor', e.target.checked)}
             />
           </EuiFormRow>
         </>

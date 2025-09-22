@@ -153,6 +153,17 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               })}
               initialIsOpen={true}
             >
+              <EuiFormRow>
+                <EuiSwitch
+                  compressed
+                  label={i18n.translate('explore.vis.metric.useThresholdColor', {
+                    defaultMessage: 'Use threshold colors',
+                  })}
+                  data-test-subj="useThresholdColorButton"
+                  checked={styleOptions?.useThresholdColor ?? false}
+                  onChange={(e) => updateStyleOption('useThresholdColor', e.target.checked)}
+                />
+              </EuiFormRow>
               <PercentageSelector
                 percentageColor={
                   styleOptions.percentageColor ?? defaultMetricChartStyles.percentageColor

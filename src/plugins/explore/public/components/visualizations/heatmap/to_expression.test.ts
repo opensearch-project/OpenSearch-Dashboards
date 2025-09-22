@@ -156,9 +156,8 @@ describe('createHeatmapWithBin', () => {
       exclusive: {
         ...baseStyles.exclusive,
       },
-      thresholdOptions: {
-        useThresholdColor: true,
-      },
+      useThresholdColor: true,
+      thresholdOptions: {},
     };
 
     const spec = createHeatmapWithBin(mockData, mockNumericColumns, styles, mockAxisMappings);
@@ -275,9 +274,8 @@ describe('createRegularHeatmap', () => {
       exclusive: {
         ...baseStyles.exclusive,
       },
-      thresholdOptions: {
-        useThresholdColor: true,
-      },
+      useThresholdColor: true,
+      thresholdOptions: {},
     };
 
     const spec = createRegularHeatmap(mockData, mockNumericColumns, styles, regularAxisMappings);

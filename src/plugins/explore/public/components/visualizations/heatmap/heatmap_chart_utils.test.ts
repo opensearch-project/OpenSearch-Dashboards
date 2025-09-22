@@ -208,7 +208,6 @@ describe('enhanceStyle', () => {
     const styles = {
       exclusive: {
         customRanges: [],
-        useThresholdColor: false,
         colorSchema: ColorSchemas.GREENS,
         percentageMode: true,
         reverseSchema: false,
@@ -217,6 +216,7 @@ describe('enhanceStyle', () => {
         maxNumberOfColors: 4,
         label: {} as HeatmapLabels,
       },
+      useThresholdColor: false,
       addLegend: true,
     };
 
@@ -231,7 +231,6 @@ describe('enhanceStyle', () => {
     const styles = {
       exclusive: {
         customRanges: [],
-        useThresholdColor: false,
         colorSchema: ColorSchemas.GREENS,
         percentageMode: true,
         reverseSchema: false,
@@ -240,6 +239,7 @@ describe('enhanceStyle', () => {
         maxNumberOfColors: 4,
         label: {} as HeatmapLabels,
       },
+      useThresholdColor: false,
     };
 
     const markLayer = JSON.parse(JSON.stringify(baseMarkLayer));
@@ -259,13 +259,13 @@ describe('enhanceStyle', () => {
         maxNumberOfColors: 4,
         label: {} as HeatmapLabels,
       },
+      useThresholdColor: true,
       thresholdOptions: {
         baseColor: '#00BD6B',
         thresholds: [
           { value: 2, color: '#00FF00' },
           { value: 8, color: '#0000FF' },
         ],
-        useThresholdColor: true,
       },
     };
 
@@ -293,13 +293,13 @@ describe('enhanceStyle', () => {
         scaleToDataBounds: true,
         label: {} as HeatmapLabels,
       },
+      useThresholdColor: true,
       thresholdOptions: {
         baseColor: '#00BD6B',
         thresholds: [
           { value: 2, color: '#00FF00' },
           { value: 8, color: '#0000FF' },
         ],
-        useThresholdColor: true,
       },
     };
 

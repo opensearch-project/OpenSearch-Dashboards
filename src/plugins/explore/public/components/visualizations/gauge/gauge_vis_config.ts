@@ -26,7 +26,8 @@ export interface GaugeChartStyleControls {
   thresholds?: Threshold[];
   valueCalculation: CalculationMethod;
   unitId?: string;
-  thresholdOptions: ThresholdOptions;
+  thresholdOptions?: ThresholdOptions;
+  useThresholdColor?: boolean;
 }
 
 export const defaultGaugeChartStyles: GaugeChartStyleControls = {
@@ -35,8 +36,8 @@ export const defaultGaugeChartStyles: GaugeChartStyleControls = {
   thresholdOptions: {
     thresholds: [],
     baseColor: getColors().statusGreen,
-    useThresholdColor: false,
   },
+  useThresholdColor: false,
   valueCalculation: 'last',
 };
 

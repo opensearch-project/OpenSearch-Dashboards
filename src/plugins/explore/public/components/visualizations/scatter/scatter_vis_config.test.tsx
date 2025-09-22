@@ -54,7 +54,7 @@ describe('createScatterConfig', () => {
     expect(defaults.thresholdOptions).toMatchObject({
       baseColor: '#00BD6B',
       thresholds: [],
-      thresholdStyle: ThresholdMode.Solid,
+      thresholdStyle: ThresholdMode.Off,
     });
   });
   it('should render the ScatterVisStyleControls component with the provided props', () => {

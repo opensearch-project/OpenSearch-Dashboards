@@ -85,7 +85,7 @@ export const createBarSpec = (
       [valueAxis]: {
         ...buildEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType),
       },
-      color: styleOptions?.thresholdOptions?.useThresholdColor ? colorEncodingLayer : [],
+      color: styleOptions?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -169,7 +169,6 @@ export const createTimeBarChart = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    opacity: 0.8,
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
   };
   configureBarSizeAndSpacing(barMark, styles);
@@ -190,7 +189,7 @@ export const createTimeBarChart = (
       y: {
         ...buildEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
       },
-      color: styleOptions?.thresholdOptions?.useThresholdColor ? colorEncodingLayer : [],
+      color: styleOptions?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -266,7 +265,6 @@ export const createGroupedTimeBarChart = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    opacity: 0.8,
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
   };
   configureBarSizeAndSpacing(barMark, styles);
@@ -395,7 +393,6 @@ export const createFacetedTimeBarChart = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    opacity: 0.8,
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
   };
   configureBarSizeAndSpacing(barMark, styles);
@@ -510,7 +507,6 @@ export const createStackedBarSpec = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    opacity: 0.8,
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
   };
   configureBarSizeAndSpacing(barMark, styles);
@@ -605,7 +601,6 @@ export const createNumericalHistogramBarChart = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    opacity: 0.8,
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
   };
 
@@ -634,7 +629,7 @@ export const createNumericalHistogramBarChart = (
         type: getSchemaByAxis(yAxis),
         axis: applyAxisStyling(yAxis, yAxisStyle),
       },
-      color: styleOptions?.thresholdOptions?.useThresholdColor ? colorEncodingLayer : [],
+      color: styleOptions?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -692,7 +687,6 @@ export const createSingleBarChart = (
   // Configure bar mark
   const barMark: any = {
     type: 'bar',
-    opacity: 0.8,
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
   };
 
@@ -720,7 +714,7 @@ export const createSingleBarChart = (
         type: 'quantitative',
         axis: applyAxisStyling(yAxis, yAxisStyle),
       },
-      color: styleOptions?.thresholdOptions?.useThresholdColor ? colorEncodingLayer : [],
+      color: styleOptions?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
