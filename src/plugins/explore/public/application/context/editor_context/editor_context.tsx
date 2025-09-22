@@ -35,6 +35,7 @@ export const EditorContextProvider: FC = ({ children }) => {
       (window as any).exploreServices = {};
     }
     (window as any).exploreServices.editorRef = editorRef;
+    // eslint-disable-next-line no-console
     console.log('🎯 Editor reference made globally available for MCP integration');
 
     return () => {

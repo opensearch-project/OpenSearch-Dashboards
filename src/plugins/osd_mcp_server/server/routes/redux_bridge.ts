@@ -5,7 +5,7 @@
 
 /* eslint-disable no-console */
 
-import { IRouter } from '../../../../core/server';
+import { IRouter, Logger } from '../../../../core/server';
 
 // In-memory store for pending MCP commands
 const pendingCommands: any[] = [];
@@ -16,7 +16,7 @@ const pendingCommands: any[] = [];
  * These routes execute Redux actions by accessing the global services exposed by the Explore plugin.
  * The global services are made available at `global.exploreServices` when the Explore page is active.
  */
-export function registerReduxBridgeRoutes(router: IRouter) {
+export function registerReduxBridgeRoutes(router: IRouter, logger: Logger) {
   // New endpoint: Get pending MCP commands for browser polling
   router.get(
     {
@@ -29,7 +29,7 @@ export function registerReduxBridgeRoutes(router: IRouter) {
         const commands = [...pendingCommands];
         pendingCommands.length = 0; // Clear the array
 
-        console.log(`📨 Pending Commands: Returning ${commands.length} commands to browser`);
+        logger.debug(`📨 Pending Commands: Returning ${commands.length} commands to browser`);
 
         return response.ok({
           body: commands,

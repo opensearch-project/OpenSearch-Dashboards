@@ -6,12 +6,14 @@
 import { AgUiAgent } from './ag_ui_agent';
 import { ChatContextManager } from './chat_context_manager';
 import { RunAgentInput } from '../../common/types';
+import type { ToolDefinition } from '../../../context_provider/public';
 
 export interface ChatMessage {
   id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'tool';
   content: string;
   timestamp: number;
+  toolCallId?: string;
 }
 
 export interface ChatState {
@@ -24,6 +26,8 @@ export class ChatService {
   private agent: AgUiAgent;
   private threadId: string;
   private contextManager?: ChatContextManager;
+  public availableTools: ToolDefinition[] = [];
+  public events$: any;
 
   constructor(serverUrl?: string) {
     this.agent = new AgUiAgent(serverUrl);
@@ -86,7 +90,7 @@ export class ChatService {
           content: userMessage.content,
         },
       ],
-      tools: [], // Add tools here if your AG-UI server supports them
+      tools: this.availableTools || [], // Pass available tools to AG-UI server
       context: assistantContexts, // Include assistant contexts
       state: {
         staticContext: this.contextManager?.getRawStaticContext() || null,
@@ -118,7 +122,56 @@ export class ChatService {
       },
     });
 
+    // Store the observable as events$ for tool call handling
+    this.events$ = observable;
+
     return { observable, userMessage };
+  }
+
+  public async sendToolResult(toolCallId: string, result: any): Promise<void> {
+    // Create a tool result message
+    const toolMessage: ChatMessage = {
+      id: this.generateMessageId(),
+      role: 'tool',
+      content: typeof result === 'string' ? result : JSON.stringify(result),
+      timestamp: Date.now(),
+      toolCallId,
+    };
+
+    // Get current messages from somewhere (you might need to track this in the service)
+    const messages: ChatMessage[] = []; // This should come from your state management
+
+    // Send the tool result back to the agent
+    const runInput: RunAgentInput = {
+      threadId: this.threadId,
+      runId: this.generateRunId(),
+      messages: [
+        ...messages,
+        {
+          id: toolMessage.id,
+          role: toolMessage.role,
+          content: toolMessage.content,
+          toolCallId: toolMessage.toolCallId,
+        },
+      ],
+      tools: this.availableTools || [],
+      context: [],
+      state: {
+        staticContext: this.contextManager?.getRawStaticContext() || null,
+        dynamicContext: this.contextManager?.getRawDynamicContext() || null,
+      },
+      forwardedProps: {},
+    };
+
+    // Continue the conversation with the tool result
+    const observable = this.agent.runAgent(runInput, {});
+    this.events$ = observable;
+
+    return new Promise((resolve) => {
+      observable.subscribe({
+        complete: () => resolve(),
+      });
+    });
   }
 
   public abort(): void {
