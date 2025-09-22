@@ -56,7 +56,7 @@ interface StepTimeFieldProps {
   createDataset: (
     selectedTimeField: string | undefined,
     datasetId: string,
-    datasetType: string
+    signalType: string | undefined
   ) => void;
   datasetCreationType: DatasetCreationConfig;
   selectedTimeField?: string;
@@ -73,8 +73,8 @@ interface StepTimeFieldState {
   isFetchingTimeFields: boolean;
   isCreating: boolean;
   datasetId: string;
-  datasetType: string;
   datasetName: string;
+  signalType?: string;
 }
 
 interface TimeFieldConfig {
@@ -98,13 +98,12 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     isFetchingTimeFields: false,
     isCreating: false,
     datasetId: '',
-    datasetType: '',
     datasetName: '',
+    signalType: undefined,
   };
 
   constructor(props: StepTimeFieldProps) {
     super(props);
-    this.state.datasetType = props.datasetCreationType.getDatasetType() || '';
     this.state.datasetName = props.datasetCreationType.getDatasetName();
     this.state.selectedTimeField = props.selectedTimeField;
     if (props.selectedTimeField) {
@@ -161,8 +160,8 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
     this.setState({ datasetId: e.target.value });
   };
 
-  onChangeDatasetType = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    this.setState({ datasetType: e.target.value });
+  onChangeSignalType = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    this.setState({ signalType: e.target.value || undefined });
   };
 
   toggleAdvancedOptions = () => {
@@ -173,10 +172,10 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
 
   createDataset = async () => {
     const { createDataset } = this.props;
-    const { selectedTimeField, datasetId, datasetType } = this.state;
+    const { selectedTimeField, datasetId, signalType } = this.state;
     this.setState({ isCreating: true });
     try {
-      await createDataset(selectedTimeField, datasetId, datasetType);
+      await createDataset(selectedTimeField, datasetId, signalType);
     } catch (error) {
       if (!this.mounted) return;
       this.setState({
@@ -205,10 +204,10 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
       timeFieldSet,
       isAdvancedOptionsVisible,
       datasetId,
+      signalType,
       isCreating,
       isFetchingTimeFields,
       datasetName,
-      datasetType,
     } = this.state;
 
     if (isCreating) {
@@ -282,10 +281,10 @@ export class StepTimeField extends Component<StepTimeFieldProps, StepTimeFieldSt
         <AdvancedOptions
           isVisible={isAdvancedOptionsVisible}
           datasetId={datasetId}
-          datasetType={datasetType}
+          signalType={signalType}
           toggleAdvancedOptions={this.toggleAdvancedOptions}
           onChangeDatasetId={this.onChangeDatasetId}
-          onChangeDatasetType={this.onChangeDatasetType}
+          onChangeSignalType={this.onChangeSignalType}
         />
         <EuiSpacer size="m" />
         {error}

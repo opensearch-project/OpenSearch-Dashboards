@@ -89,6 +89,7 @@ export const DatasetDetailsBody: FC<DatasetDetailsProps> = ({ dataset, className
     i18n.translate('data.datasetDetails.noTimeFilter', {
       defaultMessage: "I don't want to use a time filter",
     });
+  const signalType = dataset.signalType || '';
 
   return (
     <EuiDescriptionList
@@ -149,7 +150,7 @@ export const DatasetDetailsBody: FC<DatasetDetailsProps> = ({ dataset, className
                 className="datasetDetails__dataDefinition__icon"
               />
               <EuiText size="xs">
-                <small>{dataSourceName}</small>
+                <small>{`${dataSourceName}${signalType ? ` /${signalType}` : ''}`}</small>
               </EuiText>
             </EuiButtonEmpty>
           ),

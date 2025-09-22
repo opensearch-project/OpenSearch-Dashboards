@@ -66,6 +66,7 @@ export interface IndexPatternAttributes {
   title: string;
   displayName?: string;
   description?: string;
+  signalType?: string;
   typeMeta: string;
   timeFieldName?: string;
   intervalName?: string;
@@ -217,6 +218,7 @@ export interface IndexPatternSpec {
   title?: string;
   displayName?: string;
   description?: string;
+  signalType?: string;
   intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];

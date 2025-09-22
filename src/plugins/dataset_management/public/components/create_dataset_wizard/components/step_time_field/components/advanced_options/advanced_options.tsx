@@ -45,43 +45,43 @@ import { FormattedMessage } from '@osd/i18n/react';
 interface AdvancedOptionsProps {
   isVisible: boolean;
   datasetId: string;
-  datasetType: string;
+  signalType?: string;
   toggleAdvancedOptions: (e: React.FormEvent<HTMLButtonElement>) => void;
   onChangeDatasetId: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onChangeDatasetType?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChangeSignalType?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
 export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   isVisible,
   datasetId,
-  datasetType,
+  signalType,
   toggleAdvancedOptions,
   onChangeDatasetId,
-  onChangeDatasetType,
+  onChangeSignalType,
 }) => {
-  const datasetTypeOptions = [
+  const signalTypeOptions = [
     {
-      value: 'LOGS',
-      text: i18n.translate('datasetManagement.indexPatternType.logs', {
-        defaultMessage: 'Logs',
+      value: undefined,
+      text: i18n.translate('datasetManagement.signalType.none', {
+        defaultMessage: 'I do not want to set a type',
       }),
     },
     {
-      value: 'TRACES',
-      text: i18n.translate('datasetManagement.indexPatternType.traces', {
-        defaultMessage: 'Traces',
+      value: 'logs',
+      text: i18n.translate('datasetManagement.signalType.logs', {
+        defaultMessage: 'logs',
       }),
     },
     {
-      value: 'METRICS',
-      text: i18n.translate('datasetManagement.indexPatternType.metrics', {
-        defaultMessage: 'Metrics',
+      value: 'traces',
+      text: i18n.translate('datasetManagement.signalType.traces', {
+        defaultMessage: 'traces',
       }),
     },
     {
-      value: '',
-      text: i18n.translate('datasetManagement.indexPatternType.none', {
-        defaultMessage: 'NONE',
+      value: 'metrics',
+      text: i18n.translate('datasetManagement.signalType.metrics', {
+        defaultMessage: 'metrics',
       }),
     },
   ];
@@ -134,29 +134,29 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
               )}
             />
           </EuiCompressedFormRow>
-          {onChangeDatasetType && (
+          {onChangeSignalType && (
             <>
               <EuiSpacer size="m" />
               <EuiCompressedFormRow
                 label={
                   <FormattedMessage
-                    id="datasetManagement.createDataset.stepTime.options.datasetTypeHeader"
-                    defaultMessage="Dataset Type"
+                    id="datasetManagement.createDataset.stepTime.options.signalTypeHeader"
+                    defaultMessage="Type"
                   />
                 }
                 helpText={
                   <FormattedMessage
-                    id="datasetManagement.createDataset.stepTime.options.datasetTypeLabel"
+                    id="datasetManagement.createDataset.stepTime.options.signalTypeLabel"
                     defaultMessage="Optionally specify a signal type for this dataset."
                   />
                 }
               >
                 <EuiCompressedSelect
-                  name="indexPatternType"
-                  data-test-subj="createIndexPatternTypeSelect"
-                  value={datasetType || ''}
-                  onChange={onChangeDatasetType}
-                  options={datasetTypeOptions}
+                  name="signalType"
+                  data-test-subj="createDatasetSignalTypeSelect"
+                  value={signalType}
+                  onChange={onChangeSignalType}
+                  options={signalTypeOptions}
                 />
               </EuiCompressedFormRow>
             </>
