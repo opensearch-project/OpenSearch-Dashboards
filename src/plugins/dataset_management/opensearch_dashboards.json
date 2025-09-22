@@ -1,0 +1,10 @@
+{
+  "id": "datasetManagement",
+  "version": "opensearchDashboards",
+  "server": false,
+  "ui": true,
+  "optionalPlugins": ["dataSource"],
+  "requiredPlugins": ["management", "navigation", "data", "urlForwarding"],
+  "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils"],
+  "supportedOSDataSourceVersions": ">=1.0.0"
+}
