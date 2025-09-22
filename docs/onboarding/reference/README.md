@@ -4,52 +4,52 @@ This comprehensive reference guide provides quick access to essential informatio
 
 ## Quick Navigation
 
-### 1. [API Reference](./api-reference.md)
+### 1. [API Reference](onboarding/reference/api-reference.md)
 Complete API documentation for core services, plugin development, REST endpoints, and client-side APIs.
 
-### 2. [Configuration Schema Reference](./configuration-reference.md)
+### 2. [Configuration Schema Reference](onboarding/reference/configuration-reference.md)
 Detailed configuration options for server settings, plugin configurations, environment variables, and advanced patterns.
 
-### 3. [Plugin Development Templates](./plugin-templates.md)
+### 3. [Plugin Development Templates](onboarding/reference/plugin-templates.md)
 Ready-to-use templates, patterns, and examples for building OpenSearch Dashboards plugins.
 
-### 4. [Troubleshooting Guide](./troubleshooting-guide.md)
+### 4. [Troubleshooting Guide](onboarding/reference/troubleshooting-guide.md)
 Solutions for common issues, debugging techniques, performance optimization, and error interpretation.
 
-### 5. [Migration and Breaking Changes](./migration-guide.md)
+### 5. [Migration and Breaking Changes](onboarding/reference/migration-guide.md)
 Version upgrade guides, breaking changes documentation, and migration strategies.
 
-### 6. [Glossary and Key Concepts](./glossary.md)
+### 6. [Glossary and Key Concepts](onboarding/reference/glossary.md)
 Essential terminology, architecture concepts, and common abbreviations.
 
 ## Quick Start Guides
 
 ### For Plugin Developers
-1. Start with [Plugin Development Templates](./plugin-templates.md) for scaffolding
-2. Reference the [API Reference](./api-reference.md) for available services
-3. Check [Configuration Schema](./configuration-reference.md) for setup options
-4. Use [Troubleshooting Guide](./troubleshooting-guide.md) when issues arise
+1. Start with [Plugin Development Templates](onboarding/reference/plugin-templates.md) for scaffolding
+2. Reference the [API Reference](onboarding/reference/api-reference.md) for available services
+3. Check [Configuration Schema](onboarding/reference/configuration-reference.md) for setup options
+4. Use [Troubleshooting Guide](onboarding/reference/troubleshooting-guide.md) when issues arise
 
 ### For Core Contributors
-1. Review [API Reference](./api-reference.md) for core service interfaces
-2. Understand [Migration Guide](./migration-guide.md) for compatibility
-3. Reference [Glossary](./glossary.md) for terminology consistency
-4. Follow patterns in [Plugin Templates](./plugin-templates.md) for examples
+1. Review [API Reference](onboarding/reference/api-reference.md) for core service interfaces
+2. Understand [Migration Guide](onboarding/reference/migration-guide.md) for compatibility
+3. Reference [Glossary](onboarding/reference/glossary.md) for terminology consistency
+4. Follow patterns in [Plugin Templates](onboarding/reference/plugin-templates.md) for examples
 
 ### For DevOps Engineers
-1. Focus on [Configuration Schema Reference](./configuration-reference.md)
-2. Use [Troubleshooting Guide](./troubleshooting-guide.md) for deployment issues
-3. Check [Migration Guide](./migration-guide.md) for upgrade planning
-4. Reference environment variables in [Configuration Schema](./configuration-reference.md)
+1. Focus on [Configuration Schema Reference](onboarding/reference/configuration-reference.md)
+2. Use [Troubleshooting Guide](onboarding/reference/troubleshooting-guide.md) for deployment issues
+3. Check [Migration Guide](onboarding/reference/migration-guide.md) for upgrade planning
+4. Reference environment variables in [Configuration Schema](onboarding/reference/configuration-reference.md)
 
 ## Search Tips
 
 ### Finding Specific Information
-- **API Methods**: Search in [API Reference](./api-reference.md) using method names
-- **Config Options**: Use Ctrl+F in [Configuration Reference](./configuration-reference.md)
-- **Error Messages**: Check [Troubleshooting Guide](./troubleshooting-guide.md) error section
-- **Terms/Concepts**: Look up in [Glossary](./glossary.md)
-- **Version Changes**: Search version numbers in [Migration Guide](./migration-guide.md)
+- **API Methods**: Search in [API Reference](onboarding/reference/api-reference.md) using method names
+- **Config Options**: Use Ctrl+F in [Configuration Reference](onboarding/reference/configuration-reference.md)
+- **Error Messages**: Check [Troubleshooting Guide](onboarding/reference/troubleshooting-guide.md) error section
+- **Terms/Concepts**: Look up in [Glossary](onboarding/reference/glossary.md)
+- **Version Changes**: Search version numbers in [Migration Guide](onboarding/reference/migration-guide.md)
 
 ### Common Search Patterns
 ```
@@ -85,10 +85,10 @@ Search: "ERROR:" or "FATAL:"
 ## Related Documentation
 
 ### Core Documentation
-- [Core Framework Architecture](../core_framework_architecture.md)
-- [Plugin System](../plugin_system.md)
-- [UI Framework and Components](../ui_framework_and_components.md)
-- [Data Services and API Patterns](../data_services_api_patterns.md)
+- [Core Framework Architecture](onboarding/core_framework_architecture.md)
+- [Plugin System](onboarding/plugin_system.md)
+- [UI Framework and Components](onboarding/ui_framework_and_components.md)
+- [Data Services and API Patterns](onboarding/data_services_api_patterns.md)
 
 ### External Resources
 - [OpenSearch Documentation](https://opensearch.org/docs/latest/)

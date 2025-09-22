@@ -1062,7 +1062,7 @@ class HighPerformanceVisualization {
 
 ## Additional Resources
 
-- [OpenSearch Dashboards Developer Guide](../README.md)
-- [Plugin Development Guide](./plugin_development.md)
-- [Testing Guide](./testing.md)
+- [OpenSearch Dashboards Developer Guide](../DEVELOPER_GUIDE.md)
+- [Plugin Development Guide](onboarding/plugin_system.md)
+- [Testing Guide](onboarding/building_and_testing.md)
 - [OpenSearch Documentation](https://opensearch.org/docs/latest/)

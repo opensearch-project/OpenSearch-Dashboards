@@ -1195,9 +1195,9 @@ spec:
 
 ## Related Documentation
 
-- [API Reference](./api-reference.md)
-- [Plugin Development Templates](./plugin-templates.md)
-- [Troubleshooting Guide](./troubleshooting-guide.md)
-- [Migration Guide](./migration-guide.md)
-- [Glossary](./glossary.md)
+- [API Reference](onboarding/reference/api-reference.md)
+- [Plugin Development Templates](onboarding/reference/plugin-templates.md)
+- [Troubleshooting Guide](onboarding/reference/troubleshooting-guide.md)
+- [Migration Guide](onboarding/reference/migration-guide.md)
+- [Glossary](onboarding/reference/glossary.md)
 - [OpenSearch Dashboards Documentation](https://opensearch.org/docs/latest/dashboards/)

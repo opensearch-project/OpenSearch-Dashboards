@@ -720,9 +720,9 @@ Congratulations! You've successfully set up your OpenSearch Dashboards developme
 ### Learn the Architecture
 
 1. **Read the Core Documentation:**
-   - [Plugin System](./plugin_system.md) - Understand how plugins work
-   - [Core Framework Architecture](./core_framework_architecture.md) - Learn about core services
-   - [UI Framework](./ui_framework_and_components.md) - Master the UI components
+   - [Plugin System](onboarding/plugin_system.md) - Understand how plugins work
+   - [Core Framework Architecture](onboarding/core_framework_architecture.md) - Learn about core services
+   - [UI Framework](onboarding/ui_framework_and_components.md) - Master the UI components
 
 2. **Explore Example Plugins:**
    ```bash
@@ -816,4 +816,4 @@ Remember, the OpenSearch community is here to help. Don't hesitate to ask questi
 
 ---
 
-*This guide is part of the OpenSearch Dashboards onboarding documentation. For more detailed information, see the [Developer Guide](../../DEVELOPER_GUIDE.md) and other [onboarding docs](./README.md).*
+*This guide is part of the OpenSearch Dashboards onboarding documentation. For more detailed information, see the [Developer Guide](../DEVELOPER_GUIDE.md) and other [onboarding docs](onboarding/README.md).*

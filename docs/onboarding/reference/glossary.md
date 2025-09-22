@@ -454,8 +454,8 @@ class MyService {
 ```
 
 ## Related Documentation
-- [Core Framework Architecture](../core_framework_architecture.md)
-- [Plugin System](../plugin_system.md)
-- [API Reference](./api-reference.md)
+- [Core Framework Architecture](onboarding/core_framework_architecture.md)
+- [Plugin System](onboarding/plugin_system.md)
+- [API Reference](onboarding/reference/api-reference.md)
 - [OpenSearch Glossary](https://opensearch.org/docs/latest/opensearch/glossary/)
-- [Development Guide](../getting_started.md)
+- [Development Guide](onboarding/getting_started.md)

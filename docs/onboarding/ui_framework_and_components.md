@@ -864,13 +864,13 @@ const App: React.FC = () => {
 
 - [OUI Component Documentation](https://oui.opensearch.org/)
 - [React Documentation](https://reactjs.org/docs)
-- [OpenSearch Dashboards Plugin Development](../plugins/README.md)
-- [Chrome Service Documentation](../../src/core/public/chrome/README.md)
-- [State Management Patterns](../../src/plugins/opensearch_dashboards_react/public/state_management/README.md)
+- [OpenSearch Dashboards Plugin Development](plugins/README.md)
+- [Chrome Service Documentation](../src/core/public/chrome/README.md)
+- [State Management Patterns](../src/plugins/opensearch_dashboards_react/public/state_management/README.md)
 
 ## Next Steps
 
-- Explore the [Plugin Development Guide](../plugins/README.md) for creating full plugins
-- Review [Data Services](./data_services.md) for data fetching and manipulation
-- Learn about [Saved Objects](../saved_objects/README.md) for persistent storage
-- Understand [Security and Authentication](./security.md) patterns
+- Explore the [Plugin Development Guide](plugins/README.md) for creating full plugins
+- Review [Data Services](onboarding/data_services_api_patterns.md) for data fetching and manipulation
+- Learn about [Saved Objects](saved_objects/README.md) for persistent storage
+- Understand Security and Authentication patterns (covered in [Advanced Topics](onboarding/advanced_topics.md))

@@ -1644,9 +1644,9 @@ if (!hasPermission) {
 
 ## Related Documentation
 
-- [Core Framework Architecture](../core_framework_architecture.md)
-- [Plugin System](../plugin_system.md)
-- [Configuration Schema Reference](./configuration-reference.md)
-- [Troubleshooting Guide](./troubleshooting-guide.md)
-- [Plugin Development Templates](./plugin-templates.md)
-- [Migration Guide](./migration-guide.md)
+- [Core Framework Architecture](onboarding/core_framework_architecture.md)
+- [Plugin System](onboarding/plugin_system.md)
+- [Configuration Schema Reference](onboarding/reference/configuration-reference.md)
+- [Troubleshooting Guide](onboarding/reference/troubleshooting-guide.md)
+- [Plugin Development Templates](onboarding/reference/plugin-templates.md)
+- [Migration Guide](onboarding/reference/migration-guide.md)

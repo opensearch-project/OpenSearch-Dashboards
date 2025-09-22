@@ -1603,7 +1603,7 @@ The OpenSearch Dashboards data services provide a robust and flexible framework 
 7. **Enable real-time updates** through auto-refresh and observables
 
 For more detailed information, refer to:
-- [Data Plugin API Documentation](../plugins/data/public/public.api.md)
-- [Search Source Examples](../plugins/data/common/search/search_source/)
-- [Aggregation Types](../plugins/data/common/search/aggs/)
-- [Data Source Plugin Documentation](../plugins/data_source/README.md)
+- [Data Plugin API Documentation](plugins/data/README.md)
+- [Search Source Examples](../src/plugins/data/common/search/search_source/)
+- [Aggregation Types](../src/plugins/data/common/search/aggs/)
+- [Data Source Plugin Documentation](../src/plugins/data_source/README.md)

@@ -739,9 +739,9 @@ fs.writeFileSync('opensearch_dashboards.new.yml', yaml.dump(newConfig));
 ```
 
 ## Related Resources
-- [Configuration Reference](./configuration-reference.md)
-- [API Reference](./api-reference.md)
-- [Plugin Development](./plugin-templates.md)
-- [Troubleshooting Guide](./troubleshooting-guide.md)
+- [Configuration Reference](onboarding/reference/configuration-reference.md)
+- [API Reference](onboarding/reference/api-reference.md)
+- [Plugin Development](onboarding/reference/plugin-templates.md)
+- [Troubleshooting Guide](onboarding/reference/troubleshooting-guide.md)
 - [OpenSearch Dashboards Releases](https://github.com/opensearch-project/OpenSearch-Dashboards/releases)
 - [Upgrade Assistant](https://opensearch.org/docs/latest/upgrade-assistant/)

@@ -910,8 +910,8 @@ When seeking help, include:
 8. Relevant log excerpts
 
 ## Related Documentation
-- [Building and Testing](../building_and_testing.md)
-- [Plugin Development](./plugin-templates.md)
-- [Configuration Reference](./configuration-reference.md)
-- [API Reference](./api-reference.md)
-- [Deployment Guide](../deployment_and_production.md)
+- [Building and Testing](onboarding/building_and_testing.md)
+- [Plugin Development](onboarding/reference/plugin-templates.md)
+- [Configuration Reference](onboarding/reference/configuration-reference.md)
+- [API Reference](onboarding/reference/api-reference.md)
+- [Deployment Guide](onboarding/deployment_and_production.md)

@@ -919,8 +919,8 @@ management.sections.section.opensearchDashboards.registerApp({
 - Profile and optimize critical paths
 
 ## Related Resources
-- [Plugin System Documentation](../plugin_system.md)
-- [API Reference](./api-reference.md)
-- [Configuration Reference](./configuration-reference.md)
-- [Testing Guide](../building_and_testing.md)
-- [UI Framework](../ui_framework_and_components.md)
+- [Plugin System Documentation](onboarding/plugin_system.md)
+- [API Reference](onboarding/reference/api-reference.md)
+- [Configuration Reference](onboarding/reference/configuration-reference.md)
+- [Testing Guide](onboarding/building_and_testing.md)
+- [UI Framework](onboarding/ui_framework_and_components.md)

@@ -5,50 +5,50 @@ Welcome to the comprehensive onboarding guide for the OpenSearch Dashboards fram
 ## 📚 Table of Contents
 
 ### Core Documentation
-- [**Getting Started**](./getting_started.md) ✅ - Prerequisites, setup, and your first contribution
-- [**Core Framework Architecture**](./core_framework_architecture.md) ✅ - Deep dive into the core system
-- [**Plugin System**](./plugin_system.md) ✅ - Understanding and building plugins
-- [**UI Framework and Components**](./ui_framework_and_components.md) ✅ - React, OUI, and component patterns
-- [**Data Services and API Patterns**](./data_services_api_patterns.md) ✅ - Data fetching, OpenSearch integration, and APIs
+- [**Getting Started**](onboarding/getting_started.md) ✅ - Prerequisites, setup, and your first contribution
+- [**Core Framework Architecture**](onboarding/core_framework_architecture.md) ✅ - Deep dive into the core system
+- [**Plugin System**](onboarding/plugin_system.md) ✅ - Understanding and building plugins
+- [**UI Framework and Components**](onboarding/ui_framework_and_components.md) ✅ - React, OUI, and component patterns
+- [**Data Services and API Patterns**](onboarding/data_services_api_patterns.md) ✅ - Data fetching, OpenSearch integration, and APIs
 
 ### Development Guides
-- [**Building and Testing**](./building_and_testing.md) ✅ - Development workflow, testing strategies, code quality
-- [**Advanced Topics**](./advanced_topics.md) - Multi-tenancy, security, performance, i18n
-- [**Deployment and Production**](./deployment_and_production.md) ✅ - Building artifacts, Docker, monitoring
+- [**Building and Testing**](onboarding/building_and_testing.md) ✅ - Development workflow, testing strategies, code quality
+- [**Advanced Topics**](onboarding/advanced_topics.md) ✅ - Multi-tenancy, security, performance, i18n
+- [**Deployment and Production**](onboarding/deployment_and_production.md) ✅ - Building artifacts, Docker, monitoring
 
 ### Community Resources
-- [**Contributing and Community**](./contributing_and_community.md) - How to contribute effectively
-- [**Reference Materials**](./reference_materials.md) - API docs, configuration, migration guides
+- [**Contributing and Community**](onboarding/contributing_and_community.md) ✅ - How to contribute effectively
+- [**Reference Materials**](onboarding/reference/README.md) ✅ - API docs, configuration, migration guides
 
 ## 🚀 Quick Start
 
-1. **New to OpenSearch Dashboards?** Start with [Getting Started](./getting_started.md)
-2. **Building a plugin?** Jump to [Plugin System](./plugin_system.md)
-3. **Working with data?** Check out [Data Services and API Patterns](./data_services_api_patterns.md)
-4. **Contributing code?** Read [Contributing and Community](./contributing_and_community.md)
+1. **New to OpenSearch Dashboards?** Start with [Getting Started](onboarding/getting_started.md)
+2. **Building a plugin?** Jump to [Plugin System](onboarding/plugin_system.md)
+3. **Working with data?** Check out [Data Services and API Patterns](onboarding/data_services_api_patterns.md)
+4. **Contributing code?** Read [Contributing and Community](onboarding/contributing_and_community.md)
 
 ## 📖 How to Use This Guide
 
 ### For Away Teams
 If you're an external team building on top of OpenSearch Dashboards:
-1. Start with [Getting Started](./getting_started.md) to set up your environment
-2. Study the [Plugin System](./plugin_system.md) to understand extensibility
-3. Review [UI Framework and Components](./ui_framework_and_components.md) for UI development
-4. Explore [Data Services](./data_services_api_patterns.md) for data integration
+1. Start with [Getting Started](onboarding/getting_started.md) to set up your environment
+2. Study the [Plugin System](onboarding/plugin_system.md) to understand extensibility
+3. Review [UI Framework and Components](onboarding/ui_framework_and_components.md) for UI development
+4. Explore [Data Services](onboarding/data_services_api_patterns.md) for data integration
 
 ### For Contributors
 If you're contributing to the core framework:
-1. Begin with [Core Framework Architecture](./core_framework_architecture.md)
-2. Understand [Building and Testing](./building_and_testing.md) practices
-3. Review [Contributing and Community](./contributing_and_community.md) guidelines
-4. Study [Advanced Topics](./advanced_topics.md) for complex features
+1. Begin with [Core Framework Architecture](onboarding/core_framework_architecture.md)
+2. Understand [Building and Testing](onboarding/building_and_testing.md) practices
+3. Review [Contributing and Community](onboarding/contributing_and_community.md) guidelines
+4. Study [Advanced Topics](onboarding/advanced_topics.md) for complex features
 
 ### For Plugin Developers
 If you're developing plugins:
-1. Master the [Plugin System](./plugin_system.md)
-2. Learn [UI Framework and Components](./ui_framework_and_components.md)
-3. Understand [Data Services](./data_services_api_patterns.md)
-4. Follow [Building and Testing](./building_and_testing.md) best practices
+1. Master the [Plugin System](onboarding/plugin_system.md)
+2. Learn [UI Framework and Components](onboarding/ui_framework_and_components.md)
+3. Understand [Data Services](onboarding/data_services_api_patterns.md)
+4. Follow [Building and Testing](onboarding/building_and_testing.md) best practices
 
 ## 🎯 Learning Paths
 
@@ -74,25 +74,6 @@ Getting Started → Core Architecture → Plugin System → UI Framework → Dat
 - **Build**: Webpack, Babel
 - **Testing**: Jest, Cypress
 - **Data**: OpenSearch client, SavedObjects
-
-## 📝 Document Status
-
-- ✅ Complete and reviewed
-- 📝 In progress
-- 📋 Planned
-
-| Section | Status | Last Updated |
-|---------|--------|--------------|
-| Getting Started | ✅ | Available |
-| Core Framework Architecture | ✅ | Available |
-| Plugin System | ✅ | Available |
-| UI Framework and Components | ✅ | Available |
-| Data Services and API Patterns | ✅ | Available |
-| Building and Testing | ✅ | Available |
-| Advanced Topics | 📝 | In Progress |
-| Deployment and Production | ✅ | Available |
-| Contributing and Community | ✅ | Available |
-| Reference Materials | 📋 | Planned |
 
 ## 🤝 Contributing to This Guide
 
