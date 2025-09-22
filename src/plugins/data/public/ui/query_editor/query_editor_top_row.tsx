@@ -408,6 +408,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   );
 
   const datasetSelector = <>{renderDatasetSelector()}</>;
+
   return (
     <>
       {props?.datasetSelectorRef?.current &&

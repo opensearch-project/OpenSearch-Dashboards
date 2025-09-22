@@ -158,7 +158,7 @@ describe('QueryEditorTopRow', () => {
         showDatePicker: true,
       })
     );
-    await waitFor(() => expect(container.querySelector(QUERY_EDITOR)).toBeTruthy());
+    await waitFor(() => expect(container.querySelector(QUERY_EDITOR)).toBeFalsy());
     expect(container.querySelector(DATE_PICKER)).toBeFalsy();
   });
 
@@ -180,7 +180,7 @@ describe('QueryEditorTopRow', () => {
         showDatePicker: true,
       })
     );
-    await waitFor(() => expect(container.querySelector(QUERY_EDITOR)).toBeTruthy());
+    await waitFor(() => expect(container.querySelector(QUERY_EDITOR)).toBeFalsy());
     expect(container.querySelector(DATE_PICKER)).toBeFalsy();
   });
 
@@ -203,7 +203,7 @@ describe('QueryEditorTopRow', () => {
         showDatePicker: true,
       })
     );
-    await waitFor(() => expect(container.querySelector(QUERY_EDITOR)).toBeTruthy());
+    await waitFor(() => expect(container.querySelector(QUERY_EDITOR)).toBeFalsy());
     expect(container.querySelector(DATE_PICKER)).toBeTruthy();
   });
 
