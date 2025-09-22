@@ -17,7 +17,7 @@ import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards
 import { ExploreServices } from '../../../../types';
 import {
   executeQueries,
-  prepareDataTableCacheKey,
+  defaultPrepareQueryString,
 } from '../../../../application/utils/state_management/actions/query_actions';
 import { DiscoverChartContainer } from '../../../../components/chart/discover_chart_container';
 import { useDatasetContext } from '../../../../application/context';
@@ -42,7 +42,7 @@ export const BottomRightContainer = () => {
     return state.queryEditor.overallQueryStatus.status || QueryExecutionStatus.UNINITIALIZED;
   });
   const dataTableStatus = useSelector((state: RootState) => {
-    return selectQueryStatusMapByKey(state, prepareDataTableCacheKey(query))?.status;
+    return selectQueryStatusMapByKey(state, defaultPrepareQueryString(query))?.status;
   });
 
   if (dataset == null) {
