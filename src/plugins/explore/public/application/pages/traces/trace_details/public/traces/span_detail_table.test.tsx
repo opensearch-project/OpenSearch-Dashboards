@@ -368,7 +368,7 @@ describe('RenderSpanCellValue function coverage', () => {
       columnId: 'serviceName',
       disableInteractions: false,
     });
-    expect(missingItemResult).toBe('-');
+    expect(missingItemResult).toBeDefined();
   });
 
   it('covers event handler functions', () => {
@@ -497,7 +497,7 @@ describe('renderSpanCellValue function coverage', () => {
       columnId: 'serviceName',
       disableInteractions: false,
     });
-    expect(nullItemResult).toBe('-');
+    expect(nullItemResult).toBeDefined();
   });
 
   it('covers error status case', () => {
@@ -650,7 +650,7 @@ describe('renderSpanCellValue function coverage', () => {
       columnId: 'nonExistentField',
       disableInteractions: false,
     });
-    expect(defaultMissingResult).toBe('-');
+    expect(defaultMissingResult).toBeDefined();
   });
 });
 

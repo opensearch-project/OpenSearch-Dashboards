@@ -4,7 +4,7 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiButtonEmpty, EuiDataGridColumn, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiDataGridColumn, EuiIcon, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -48,6 +48,7 @@ interface SpanDetailTableProps {
     field: string;
     value: any;
   }>;
+  selectedSpanId?: string;
 }
 
 interface Span {
@@ -130,13 +131,85 @@ const getColumns = (): EuiDataGridColumn[] => [
   },
 ];
 
-const renderSpanCellValue = ({
+const HierarchyServiceSpanCell = ({
+  rowIndex,
+  columnId,
+  items,
+  disableInteractions,
+  props,
+  setCellProps,
+  expandedRows,
+  setExpandedRows,
+}: {
+  rowIndex: number;
+  columnId: string;
+  items: ParsedHit[];
+  disableInteractions: boolean;
+  props: SpanDetailTableProps;
+  setCellProps?: (props: any) => void;
+  expandedRows: Set<string>;
+  setExpandedRows: React.Dispatch<React.SetStateAction<Set<string>>>;
+}) => {
+  const item = items[rowIndex];
+  const value = item[columnId];
+
+  const isRowSelected =
+    props.selectedSpanId && props.selectedSpanId === item.spanId && !disableInteractions;
+
+  useEffect(() => {
+    if (isRowSelected) {
+      setCellProps?.({
+        className: ['treeCell--firstColumn', 'exploreSpanDetailTable__selectedRow'],
+      });
+    } else {
+      setCellProps?.({ className: ['treeCell--firstColumn'] });
+    }
+  }, [props.selectedSpanId, item.spanId, disableInteractions, isRowSelected, setCellProps]);
+
+  const indentation = `${(item.level || 0) * 20}px`;
+  const isExpanded = expandedRows.has(item.spanId);
+
+  const cellContent = (
+    <div className="exploreSpanDetailTable__hierarchyCell" style={{ paddingLeft: indentation }}>
+      {item.children && item.children.length > 0 ? (
+        <EuiIcon
+          type={isExpanded ? 'arrowDown' : 'arrowRight'}
+          onClick={() => {
+            setExpandedRows((prev) => {
+              const newSet = new Set(prev);
+              if (newSet.has(item.spanId)) {
+                newSet.delete(item.spanId);
+              } else {
+                newSet.add(item.spanId);
+              }
+              return newSet;
+            });
+          }}
+          className="exploreSpanDetailTable__expandIcon"
+          data-test-subj="treeViewExpandArrow"
+        />
+      ) : (
+        <EuiIcon type="empty" className="exploreSpanDetailTable__hiddenIcon" />
+      )}
+      <span>{resolveServiceNameFromSpan(item) || value || '-'}</span>
+    </div>
+  );
+
+  return disableInteractions ? (
+    cellContent
+  ) : (
+    <button onClick={() => props.openFlyout(item.spanId)}>{cellContent}</button>
+  );
+};
+
+const SpanCell = ({
   rowIndex,
   columnId,
   items,
   tableParams,
   disableInteractions,
   props,
+  setCellProps,
 }: {
   rowIndex: number;
   columnId: string;
@@ -144,9 +217,34 @@ const renderSpanCellValue = ({
   tableParams: { page: number; size: number };
   disableInteractions: boolean;
   props: SpanDetailTableProps;
+  setCellProps?: (props: any) => void;
 }) => {
   const adjustedRowIndex = rowIndex - tableParams.page * tableParams.size;
   const item = items[adjustedRowIndex];
+
+  useEffect(() => {
+    if (props.selectedSpanId && props.selectedSpanId === item.spanId && !disableInteractions) {
+      setCellProps?.({ className: 'exploreSpanDetailTable__selectedRow' });
+    } else {
+      setCellProps?.({});
+    }
+  }, [props.selectedSpanId, item.spanId, disableInteractions]);
+
+  const cellContent = renderSpanCellValue({ item, columnId });
+
+  return disableInteractions ? (
+    cellContent
+  ) : (
+    <button
+      className="exploreSpanDetailTable__flyoutButton"
+      onClick={() => props.openFlyout(item.spanId)}
+    >
+      {cellContent}
+    </button>
+  );
+};
+
+const renderSpanCellValue = ({ columnId, item }: { item: Span; columnId: string }) => {
   if (!item) return '-';
 
   const value = item[columnId];
@@ -164,13 +262,7 @@ const renderSpanCellValue = ({
         })
       );
     case 'spanId':
-      return disableInteractions ? (
-        <span>{value}</span>
-      ) : (
-        <EuiLink data-test-subj="spanId-link" onClick={() => props.openFlyout(value)}>
-          {value}
-        </EuiLink>
-      );
+      return <span>{value}</span>;
     case 'durationInNanos':
       return `${round(nanoToMilliSec(Math.max(0, extractSpanDuration(item))), 2)} ms`;
     case 'startTime':
@@ -265,16 +357,18 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
 
   const columns = useMemo(() => getColumns(), []);
   const renderCellValue = useCallback(
-    ({ rowIndex, columnId, disableInteractions }) =>
-      renderSpanCellValue({
-        rowIndex,
-        columnId,
-        items,
-        tableParams,
-        disableInteractions,
-        props,
-      }),
-    [items]
+    ({ rowIndex, columnId, disableInteractions, setCellProps }) => (
+      <SpanCell
+        rowIndex={rowIndex}
+        columnId={columnId}
+        items={items}
+        tableParams={tableParams}
+        disableInteractions={disableInteractions}
+        props={props}
+        setCellProps={setCellProps}
+      />
+    ),
+    [items, props.selectedSpanId]
   );
 
   const visibleColumns = useMemo(
@@ -411,63 +505,29 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
   };
 
   const renderCellValue = useCallback(
-    ({ rowIndex, columnId, disableInteractions }) => {
-      const item = flattenedItems[rowIndex];
-      const value = item[columnId];
-
-      if (columnId === 'serviceName') {
-        const indentation = `${(item.level || 0) * 20}px`;
-        const isExpanded = expandedRows.has(item.spanId);
-        return (
-          <div
-            className="exploreSpanDetailTable__hierarchyCell"
-            style={{ paddingLeft: indentation }}
-          >
-            {item.children && item.children.length > 0 ? (
-              <EuiIcon
-                type={isExpanded ? 'arrowDown' : 'arrowRight'}
-                onClick={() => {
-                  setExpandedRows((prev) => {
-                    const newSet = new Set(prev);
-                    if (newSet.has(item.spanId)) {
-                      newSet.delete(item.spanId);
-                    } else {
-                      newSet.add(item.spanId);
-                    }
-                    return newSet;
-                  });
-                }}
-                className="exploreSpanDetailTable__expandIcon"
-                data-test-subj="treeViewExpandArrow"
-              />
-            ) : (
-              <EuiIcon type="empty" className="exploreSpanDetailTable__hiddenIcon" />
-            )}
-            <span>{resolveServiceNameFromSpan(item) || value || '-'}</span>
-          </div>
-        );
-      } else if (columnId === 'spanId') {
-        return disableInteractions ? (
-          <span>{value}</span>
-        ) : (
-          <EuiLink
-            onClick={() => openFlyout(item.spanId)}
-            color="primary"
-            data-test-subj="spanId-flyout-button"
-          >
-            {value}
-          </EuiLink>
-        );
-      }
-
-      return renderSpanCellValue({
-        rowIndex,
-        columnId,
-        items: flattenedItems,
-        tableParams: { page: 0, size: flattenedItems.length },
-        disableInteractions,
-        props,
-      });
+    ({ rowIndex, columnId, disableInteractions, setCellProps }) => {
+      return columnId === 'serviceName' ? (
+        <HierarchyServiceSpanCell
+          rowIndex={rowIndex}
+          columnId={columnId}
+          items={flattenedItems}
+          disableInteractions={disableInteractions}
+          props={props}
+          setCellProps={setCellProps}
+          setExpandedRows={setExpandedRows}
+          expandedRows={expandedRows}
+        />
+      ) : (
+        <SpanCell
+          rowIndex={rowIndex}
+          columnId={columnId}
+          items={flattenedItems}
+          tableParams={{ page: 0, size: flattenedItems.length }}
+          disableInteractions={disableInteractions}
+          props={props}
+          setCellProps={setCellProps}
+        />
+      );
     },
     [flattenedItems, expandedRows, openFlyout]
   );
