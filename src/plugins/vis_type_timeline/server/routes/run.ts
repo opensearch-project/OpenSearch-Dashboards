@@ -43,6 +43,15 @@ import { ConfigManager } from '../lib/config_manager';
 
 const timelineDefaults = getNamespacesSettings();
 
+const filterDefinition = schema.object({
+  bool: schema.object({
+    filter: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+    must: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+    should: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+    must_not: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+  }),
+});
+
 export function runRoute(
   router: IRouter,
   {
@@ -66,16 +75,9 @@ export function runRoute(
           extended: schema.maybe(
             schema.object({
               es: schema.object({
-                filter: schema.object({
-                  bool: schema.object({
-                    filter: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-                    must: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-                    should: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
-                    must_not: schema.maybe(
-                      schema.arrayOf(schema.object({}, { unknowns: 'allow' }))
-                    ),
-                  }),
-                }),
+                filter: filterDefinition,
+                ignoreFilterIfFieldNotInIndex: schema.maybe(schema.boolean()),
+                filterByIndex: schema.maybe(schema.recordOf(schema.string(), filterDefinition)),
               }),
             })
           ),
