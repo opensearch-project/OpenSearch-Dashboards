@@ -55,7 +55,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
   onSelect,
   appName,
   supportedTypes,
-  onFilter,
+  onFilter = () => true,
 }) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const isMounted = useRef(true);
@@ -132,17 +132,21 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
           });
         }
 
+        const filteredDatasets = fetchedDatasets.filter(onFilter);
+
         const defaultDataView = await dataViews.getDefault();
         if (defaultDataView) {
           setDefaultDatasetId(defaultDataView.id);
         }
-
-        setDatasets(fetchedDatasets);
-
-        if (!currentDataset && defaultDataView) {
-          const defaultDataset = await dataViews.convertToDataset(defaultDataView);
+        const defaultDataset =
+          filteredDatasets.find((d) => d.id === defaultDataView?.id) ?? filteredDatasets[0];
+        if (
+          defaultDataset &&
+          !(currentDataset && filteredDatasets.find((d) => d.id === currentDataset.id))
+        ) {
           onSelect(defaultDataset);
         }
+        setDatasets(filteredDatasets);
       } finally {
         if (isMounted.current) {
           setIsLoading(false);
@@ -154,7 +158,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
     return () => {
       isMounted.current = false;
     };
-  }, [datasetService, dataViews, currentDataset, onSelect]);
+  }, [datasetService, dataViews, currentDataset, onSelect, onFilter]);
 
   const togglePopover = useCallback(() => setIsOpen(!isOpen), [isOpen]);
 
@@ -163,37 +167,35 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
   }, []);
 
   const options = useMemo(() => {
-    return datasets
-      .filter((dataset) => (onFilter ? onFilter(dataset) : true))
-      .map((dataset) => {
-        const { id, title, type, description, displayName } = dataset;
-        const isSelected = id === selectedDataset?.id;
-        const isDefault = id === defaultDatasetId;
-        const typeConfig = datasetService.getType(type);
-        const iconType = typeConfig?.meta?.icon?.type || 'database';
-        const label = displayName || title;
-        // Prepending the label to the searchable label to allow for better search, render will strip it out
-        const searchableLabel = `${label}${
-          typeConfig?.title || DEFAULT_DATA.STRUCTURES.ROOT.title
-        }${description && description.trim() !== '' ? ` - ${description}` : ''}`.trim();
+    return datasets.map((dataset) => {
+      const { id, title, type, description, displayName } = dataset;
+      const isSelected = id === selectedDataset?.id;
+      const isDefault = id === defaultDatasetId;
+      const typeConfig = datasetService.getType(type);
+      const iconType = typeConfig?.meta?.icon?.type || 'database';
+      const label = displayName || title;
+      // Prepending the label to the searchable label to allow for better search, render will strip it out
+      const searchableLabel = `${label}${typeConfig?.title || DEFAULT_DATA.STRUCTURES.ROOT.title}${
+        description && description.trim() !== '' ? ` - ${description}` : ''
+      }`.trim();
 
-        return {
-          label,
-          searchableLabel: searchableLabel || title,
-          key: id,
-          checked: isSelected ? ('on' as const) : undefined,
-          prepend: <EuiIcon size="s" type={iconType} />,
-          'data-test-subj': `datasetSelectOption-${title}`,
-          append: isDefault ? (
-            <EuiBadge>
-              {i18n.translate('data.datasetSelect.defaultLabel', {
-                defaultMessage: 'Default',
-              })}
-            </EuiBadge>
-          ) : undefined,
-        };
-      });
-  }, [datasets, onFilter, selectedDataset?.id, defaultDatasetId, datasetService]);
+      return {
+        label,
+        searchableLabel: searchableLabel || title,
+        key: id,
+        checked: isSelected ? ('on' as const) : undefined,
+        prepend: <EuiIcon size="s" type={iconType} />,
+        'data-test-subj': `datasetSelectOption-${title}`,
+        append: isDefault ? (
+          <EuiBadge>
+            {i18n.translate('data.datasetSelect.defaultLabel', {
+              defaultMessage: 'Default',
+            })}
+          </EuiBadge>
+        ) : undefined,
+      };
+    });
+  }, [datasets, selectedDataset?.id, defaultDatasetId, datasetService]);
 
   const handleOptionChange = useCallback(
     async (newOptions: EuiSelectableOption[]) => {

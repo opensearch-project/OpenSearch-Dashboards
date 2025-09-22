@@ -8,6 +8,7 @@ import {
   INDEX_WITHOUT_TIME_1,
   START_TIME,
   END_TIME,
+  RESOURCES,
 } from '../../../../../../utils/apps/explore/constants';
 import { verifyMonacoEditorContent } from '../../../../../../utils/apps/explore/shared';
 import { DEFAULT_OPTIONS } from '../../../../../../utils/commands.core';
@@ -50,6 +51,7 @@ describe('Dataset Select', () => {
 
   after(() => {
     cy.core.deleteDataset(testResources.noTimeDatasetId);
+    cy.core.deleteDataset(testResources.traceDatasetId);
     cy.core.cleanupTestResources(testResources);
   });
 
@@ -96,5 +98,33 @@ describe('Dataset Select', () => {
       .should('be.visible')
       .getElementByTestId(`datasetSelectOption-${INDEX_PATTERN_WITH_TIME}`)
       .should('be.visible');
+  });
+
+  it('should refresh the options if new datasets of any signal type are added', () => {
+    const dataset = {
+      ...DEFAULT_OPTIONS.dataset,
+      ...RESOURCES.DATASETS.OTEL_V1_APM_SPAN,
+    };
+
+    cy.core
+      .createDataset(testResources.workspaceId, testResources.dataSourceId, {
+        dataset,
+      })
+      .then((datasetId) => {
+        testResources.traceDatasetId = datasetId;
+        cy.reload();
+        cy.osd.waitForLoader(true);
+        cy.core.waitForDatasetsToLoad();
+        cy.wait(5000);
+
+        cy.getElementByTestId('datasetSelectSelectable')
+          .get('[placeholder="Search"]')
+          .clear()
+          .type(dataset.title);
+        cy.getElementByTestId('datasetSelectSelectable')
+          .should('be.visible')
+          .getElementByTestId(`datasetSelectOption-${dataset.title}`)
+          .should('be.visible');
+      });
   });
 });
