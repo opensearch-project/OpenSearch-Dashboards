@@ -140,7 +140,7 @@ export const DataLinkModal: React.FC<DataLinkModalProps> = ({
                   iconType="cross"
                   iconSide="right"
                   onClick={() => handleRemoveField(field.value)}
-                  onClickAriaLabel={`Remove ${field}`}
+                  onClickAriaLabel={`Remove ${field.label}`}
                   data-test-subj={`dataLinkFieldBadge-${field.value}`}
                 >
                   {field.label}
@@ -233,17 +233,23 @@ export const DataLinkOptions: React.FC<TableVisStyleControlsProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingLink, setEditingLink] = useState<DataLink | undefined>(undefined);
 
-  const availableFields = [
-    ...numericalColumns.map((col: VisColumn) => ({
-      label: col.name || col.column,
-      value: col.column,
-    })),
-    ...categoricalColumns.map((col: VisColumn) => ({
-      label: col.name || col.column,
-      value: col.column,
-    })),
-    ...dateColumns.map((col: VisColumn) => ({ label: col.name || col.column, value: col.column })),
-  ];
+  const availableFields = useMemo(
+    () => [
+      ...numericalColumns.map((col: VisColumn) => ({
+        label: col.name || col.column,
+        value: col.column,
+      })),
+      ...categoricalColumns.map((col: VisColumn) => ({
+        label: col.name || col.column,
+        value: col.column,
+      })),
+      ...dateColumns.map((col: VisColumn) => ({
+        label: col.name || col.column,
+        value: col.column,
+      })),
+    ],
+    [numericalColumns, categoricalColumns, dateColumns]
+  );
 
   const addOrUpdateLink = useCallback(
     (link: DataLink) => {
