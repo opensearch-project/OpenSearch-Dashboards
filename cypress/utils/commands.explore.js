@@ -444,7 +444,7 @@ cy.explore.add('setIndexPatternAsDataset', (indexPattern) => {
   }).as('agentConfigRequest');
 
   cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
-  cy.get(`[title="${indexPattern}"]`).should('be.visible').click();
+  cy.getElementByTestId(`datasetSelectOption-${indexPattern}`).should('be.visible').click();
 
   // verify that it has been selected
   cy.getElementByTestId('datasetSelectButton').should('contain.text', `${indexPattern}`);

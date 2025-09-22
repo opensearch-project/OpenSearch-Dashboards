@@ -31,20 +31,48 @@
     align-self: center;
   }
 
-  &__selectable {
+  &__contextMenu {
     width: 400px;
-    padding: $euiSizeXS;
-    overflow-y: auto;
+    overflow-y: hidden;
 
-    span:is([class*="euiSelectableListItem__text"]) {
-      :first-child {
-        font-size: $euiFontSizeS;
+    button:is([class*="euiContextMenuItem"]) {
+      padding: $euiSizeXS;
+
+      &:nth-of-type(1) {
+        padding: $euiSizeS $euiSizeS 0 $euiSizeS;
       }
+
+      &:focus {
+        background-color: transparent !important;
+        box-shadow: none !important;
+      }
+    }
+
+    button:is([class*="euiContextMenuPanelTitle"]) {
+      padding: $euiSizeXS;
+
+      &:nth-of-type(1) {
+        padding: $euiSizeS;
+      }
+
+      &:focus {
+        background-color: transparent !important;
+        box-shadow: none !important;
+      }
+    }
+
+    span:is([class*="datasetDetails__defaultBadge"]) {
+      transform: translateX(-100%) translateX($euiSizeXS * 2);
     }
   }
 
+  &__selectable {
+    width: 100%;
+    overflow-y: auto;
+    max-height: 300px;
+  }
+
   &__searchContainer {
-    padding: $euiSizeXS;
     border-bottom: $euiBorderThin;
     font-size: $euiFontSizeS;
   }
