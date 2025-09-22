@@ -168,7 +168,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
     this.useHover = !this.isVegaLite;
 
     this._config = this._parseConfig();
-    this.hideWarnings = !!this._config.hideWarnings;
+    this.hideWarnings = this._config.hideWarnings !== false;
     this.visibleVisLayers = this._config.visibleVisLayers;
     this.visAugmenterConfig = this._config.visAugmenterConfig;
     this.useMap = this._config.type === 'map';
