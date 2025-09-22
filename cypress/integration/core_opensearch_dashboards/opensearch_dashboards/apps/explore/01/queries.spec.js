@@ -4,24 +4,161 @@
  */
 
 import {
-  END_TIME,
-  INDEX_PATTERN_WITH_TIME,
-  INVALID_INDEX,
+  DATASOURCE_NAME,
+  INDEX_WITH_TIME_1,
   START_TIME,
-} from '../../../../../../utils/apps/explore/constants';
-import { verifyMonacoEditorContent } from '../../../../../../utils/apps/explore/shared';
+  END_TIME,
+  INVALID_INDEX,
+} from '../../../../../../utils/apps/constants';
+import {
+  getRandomizedWorkspaceName,
+  generateAllTestConfigurations,
+  generateBaseConfiguration,
+} from '../../../../../../utils/apps/explore/shared';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { verifyDiscoverPageState } from '../../../../../../utils/apps/explore/saved';
 
-describe('Queries', { scrollBehavior: false }, () => {
-  let testResources = {};
-  const pattern = INDEX_PATTERN_WITH_TIME;
+const workspace = getRandomizedWorkspaceName();
 
-  before(() => {
-    cy.core.setupTestResources().then((resources) => {
-      testResources = resources;
-      cy.window().then((win) => {
-        win.localStorage.setItem('hasSeenInfoBox_PPL', true);
-        cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
+const queriesTestSuite = () => {
+  describe('query enhancement queries', { scrollBehavior: false }, () => {
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
+      // Create and select index pattern for ${INDEX_WITH_TIME_1}*
+      cy.createWorkspaceIndexPatterns({
+        workspaceName: workspace,
+        indexPattern: INDEX_WITH_TIME_1,
+        timefieldName: 'timestamp',
+        indexPatternHasTimefield: true,
+        dataSource: DATASOURCE_NAME,
+        isEnhancement: true,
+      });
+    });
+
+    beforeEach(() => {
+      // Go to discover page
+      cy.osd.navigateToWorkSpaceSpecificPage({
+        workspaceName: workspace,
+        page: 'explore/logs',
+        isEnhancement: true,
+      });
+    });
+
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
+    });
+
+    generateAllTestConfigurations(generateBaseConfiguration, {
+      indexPattern: `${INDEX_WITH_TIME_1}*`,
+      index: INDEX_WITH_TIME_1,
+    }).forEach((config) => {
+      it(`with empty PPL query for ${config.testName}`, () => {
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setTopNavDate(START_TIME, END_TIME);
+
+        // Default PPL query should be set
         cy.osd.waitForLoader(true);
+
+        // Use the more robust verifyDiscoverPageState function to check editor content
+        // This handles Monaco editor's special whitespace characters better
+        verifyDiscoverPageState({
+          dataset: config.dataset,
+          queryString: '',
+          language: 'PPL',
+          hitCount: '10,000',
+        });
+        cy.getElementByTestId(`discoverQueryElapsedMs`).should('be.visible');
+        cy.osd.verifyResultsCount(10000);
+
+        // Query should persist across refresh
+        cy.reload();
+        cy.getElementByTestId(`discoverQueryElapsedMs`).should('be.visible');
+
+        // Verify the state again after reload
+        verifyDiscoverPageState({
+          dataset: config.dataset,
+          queryString: '',
+          language: 'PPL',
+          hitCount: '10,000',
+        });
+
+        // TODO: Update test to test for stripping of stats
+        // Test none search PPL query
+        // const statsQuery = `describe ${INDEX_WITH_TIME_1} | stats count()`;
+        // cy.explore.setQueryEditor(statsQuery);
+        // cy.osd.verifyResultsCount(1);
+
+        // TODO: Fix error messaging
+        // Test error message
+        const invalidQuery = `source = ${INVALID_INDEX}`;
+        // const error = `no such index`;
+        cy.explore.setQueryEditor(invalidQuery);
+        // cy.osd.verifyResultsError(error);
+      });
+
+      it(`with PPL query not starting with source for ${config.testName}`, () => {
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setTopNavDate(START_TIME, END_TIME);
+
+        // Default PPL query should be set
+        cy.osd.waitForLoader(true);
+
+        // Use the more robust verifyDiscoverPageState function to check editor content
+        // This handles Monaco editor's special whitespace characters better
+        verifyDiscoverPageState({
+          dataset: config.dataset,
+          queryString: '',
+          language: 'PPL',
+          hitCount: '10,000',
+        });
+        cy.getElementByTestId(`discoverQueryElapsedMs`).should('be.visible');
+        cy.osd.verifyResultsCount(10000);
+
+        // Executing a query without source = part
+        const queryWithoutSource =
+          'category = "Network" and bytes_transferred > 5000 | sort bytes_transferred';
+        cy.explore.setQueryEditor(queryWithoutSource);
+
+        cy.osd.waitForLoader(true);
+
+        verifyDiscoverPageState({
+          dataset: config.dataset,
+          queryString: queryWithoutSource,
+          language: 'PPL',
+          hitCount: '1,263',
+        });
+      });
+
+      it(`with PPL query starting with search command for ${config.testName}`, () => {
+        cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.setTopNavDate(START_TIME, END_TIME);
+
+        // Default PPL query should be set
+        cy.osd.waitForLoader(true);
+
+        // Use the more robust verifyDiscoverPageState function to check editor content
+        // This handles Monaco editor's special whitespace characters better
+        verifyDiscoverPageState({
+          dataset: config.dataset,
+          queryString: '',
+          language: 'PPL',
+          hitCount: '10,000',
+        });
+        cy.getElementByTestId(`discoverQueryElapsedMs`).should('be.visible');
+        cy.osd.verifyResultsCount(10000);
+
+        // Executing a query without source = part
+        const queryWithSearch = `search source = ${config.dataset} category = "Network" and bytes_transferred > 5000 | sort bytes_transferred`;
+        cy.explore.setQueryEditor(queryWithSearch);
+
+        cy.osd.waitForLoader(true);
+
+        verifyDiscoverPageState({
+          dataset: config.dataset,
+          queryString: queryWithSearch,
+          language: 'PPL',
+          hitCount: '1,263',
+        });
       });
       it('returns to Visualization tab after switching to Logs', () => {
         cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
@@ -53,43 +190,6 @@ describe('Queries', { scrollBehavior: false }, () => {
       });
     });
   });
+};
 
-  after(() => {
-    cy.core.cleanupTestResources(testResources);
-  });
-
-  it('should execute empty PPL query', () => {
-    cy.explore.setTopNavDate(START_TIME, END_TIME);
-    cy.getElementByTestId('exploreTabs').should('exist');
-    cy.verifyHitCount('10,000');
-    verifyMonacoEditorContent('');
-
-    // Query should persist across refresh
-    cy.reload();
-    cy.getElementByTestId('exploreTabs').should('exist');
-    cy.verifyHitCount('10,000');
-    verifyMonacoEditorContent('');
-
-    // Test error message with invalid index
-    const invalidQuery = `source = ${INVALID_INDEX}`;
-    cy.explore.setQueryEditor(invalidQuery);
-  });
-
-  it('should execute PPL query not starting with source', () => {
-    cy.explore.setTopNavDate(START_TIME, END_TIME);
-    // Executing a query without source = part
-    const queryWithoutSource =
-      'category = "Network" and bytes_transferred > 5000 | sort bytes_transferred';
-    cy.explore.setQueryEditor(queryWithoutSource);
-    cy.verifyHitCount('1,263');
-    verifyMonacoEditorContent(queryWithoutSource);
-  });
-
-  it('should execute PPL query starting with search command', () => {
-    cy.explore.setTopNavDate(START_TIME, END_TIME);
-    const queryWithSearch = `search source = ${pattern} category = "Network" and bytes_transferred > 5000 | sort bytes_transferred`;
-    cy.explore.setQueryEditor(queryWithSearch);
-    cy.verifyHitCount('1,263');
-    verifyMonacoEditorContent(queryWithSearch);
-  });
-});
+prepareTestSuite('Queries', queriesTestSuite);

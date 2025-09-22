@@ -13,7 +13,8 @@ import {
   START_TIME,
   END_TIME,
 } from './constants';
-import { setDatePickerDatesAndSearchIfRelevant, verifyMonacoEditorContent } from './shared';
+import { setDatePickerDatesAndSearchIfRelevant } from './shared';
+import { verifyMonacoEditorContent } from './autocomplete';
 import { openShareMenuWithRetry } from './shared_links';
 
 /**

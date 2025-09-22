@@ -4,99 +4,160 @@
  */
 
 import {
-  END_TIME,
   INDEX_PATTERN_WITH_TIME,
+  INDEX_WITH_TIME_1,
+  INDEX_WITH_TIME_2,
+  DATASOURCE_NAME,
+  END_TIME,
   START_TIME,
 } from '../../../../../../utils/apps/explore/constants';
-import { verifyMonacoEditorContent } from '../../../../../../utils/apps/explore/shared';
+import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
+import { prepareTestSuite } from '../../../../../../utils/helpers';
+import { verifyMonacoEditorContent } from '../../../../../../utils/apps/explore/autocomplete';
 
-describe('Saved Explore', () => {
-  let testResources = {};
-  let savedSearchName;
-  let updatedSavedSearchName;
-  let newSavedSearchName;
+const workspaceName = getRandomizedWorkspaceName();
 
-  before(() => {
-    cy.core.setupTestResources().then((resources) => {
-      testResources = resources;
-      cy.visit(`/w/${testResources.workspaceId}/app/explore/logs#`);
+const runSavedExploreTests = () => {
+  describe('saved explore', () => {
+    before(() => {
+      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
+        INDEX_WITH_TIME_1,
+        INDEX_WITH_TIME_2,
+      ]);
+      cy.createWorkspaceIndexPatterns({
+        workspaceName: workspaceName,
+        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
+        timefieldName: 'timestamp',
+        dataSource: DATASOURCE_NAME,
+        isEnhancement: true,
+      });
+      cy.osd.navigateToWorkSpaceSpecificPage({
+        workspaceName: workspaceName,
+        page: 'explore/logs',
+        isEnhancement: true,
+      });
+      // ensure dataset is loaded
+      cy.wait(10000);
+    });
+
+    after(() => {
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
+        INDEX_WITH_TIME_1,
+        INDEX_WITH_TIME_2,
+      ]);
+    });
+
+    beforeEach(() => {
+      cy.getElementByTestId('discoverNewButton').click();
       cy.osd.waitForLoader(true);
     });
+
+    it('should create and load a saved search', () => {
+      // Set dataset and time range
+      cy.explore.setDataset(INDEX_PATTERN_WITH_TIME, DATASOURCE_NAME, 'INDEX_PATTERN');
+      cy.explore.setTopNavDate(START_TIME, END_TIME, false);
+
+      // Set query input
+      cy.explore.clearQueryEditor();
+      const query = `source=${INDEX_PATTERN_WITH_TIME} | stats count() by category`;
+      cy.explore.setQueryEditor(query, { submit: false });
+
+      // Run the query
+      cy.getElementByTestId('exploreQueryExecutionButton').click();
+      cy.osd.waitForLoader(true);
+      cy.wait(1000);
+
+      // Navigate to logs tab
+      cy.getElementByTestId('exploreTabs').should('be.visible');
+      cy.get('#logs').click();
+      cy.getElementByTestId('docTable').should('be.visible');
+
+      // Create a saved search
+      cy.getElementByTestId('discoverSaveButton').click();
+      const savedSearchName = `SAVED_SEARCH_${Date.now()}`;
+      cy.getElementByTestId('savedObjectTitle').type(savedSearchName);
+      cy.getElementByTestId('confirmSaveSavedObjectButton').click();
+      cy.getElementByTestId('savedExploreSuccess').should('be.visible');
+
+      // Open left nav
+      cy.get('body').then(($body) => {
+        const shrinkButton = $body.find('[data-test-subj="collapsibleNavShrinkButton"]');
+        if (shrinkButton.length === 0) {
+          cy.get('[data-test-subj="toggleNavButton"]').filter(':visible').first().click();
+        }
+      });
+
+      // Navigate to assets page
+      cy.getElementByTestId('collapsibleNavAppLink-objects')
+        .should('exist')
+        .scrollIntoView()
+        .click();
+      cy.osd.waitForLoader(true);
+
+      // Check the saved search can be found
+      cy.getElementByTestId('savedObjectsTable').should('contain.text', savedSearchName);
+
+      // Open the saved search should have the query loaded
+      cy.contains(savedSearchName).click();
+      cy.osd.waitForLoader(true);
+      cy.wait(10000);
+      cy.contains('h1', savedSearchName).should('be.visible');
+      verifyMonacoEditorContent(query);
+
+      // Update the saved search with a new query
+      cy.explore.clearQueryEditor();
+      const newQuery = `source=${INDEX_PATTERN_WITH_TIME} | stats count()`;
+      cy.explore.setQueryEditor(newQuery, { submit: false });
+
+      // Run the query
+      cy.getElementByTestId('exploreQueryExecutionButton').click();
+      cy.osd.waitForLoader(true);
+      cy.wait(1000);
+
+      // Navigate to logs tab
+      cy.getElementByTestId('exploreTabs').should('be.visible');
+      cy.get('#logs').click();
+      cy.getElementByTestId('docTable').should('be.visible');
+
+      // Save the updated saved search
+      cy.getElementByTestId('discoverSaveButton').click();
+      const updatedSavedSearchName = `UPDATED_SAVED_SEARCH_${Date.now()}`;
+      cy.getElementByTestId('savedObjectTitle').clear().type(updatedSavedSearchName);
+      cy.getElementByTestId('confirmSaveSavedObjectButton').click();
+      cy.getElementByTestId('savedExploreSuccess').should('be.visible');
+      cy.wait(3000);
+
+      // Save as a new saved search
+      cy.getElementByTestId('discoverSaveButton').click();
+      const newSavedSearchName = `NEW_SAVED_SEARCH_${Date.now()}`;
+      cy.getElementByTestId('saveAsNewCheckbox').click();
+      cy.getElementByTestId('savedObjectTitle').clear().type(newSavedSearchName);
+      cy.getElementByTestId('confirmSaveSavedObjectButton').click();
+      cy.getElementByTestId('savedExploreSuccess').should('be.visible');
+
+      // Open left nav
+      cy.get('body').then(($body) => {
+        const shrinkButton = $body.find('[data-test-subj="collapsibleNavShrinkButton"]');
+        if (shrinkButton.length === 0) {
+          cy.get('[data-test-subj="toggleNavButton"]').filter(':visible').first().click();
+        }
+      });
+
+      // Navigate to assets page
+      cy.getElementByTestId('collapsibleNavAppLink-objects')
+        .should('exist')
+        .scrollIntoView()
+        .click();
+      cy.osd.waitForLoader(true);
+
+      // Check the old saved search cannot be found because name update
+      cy.getElementByTestId('savedObjectsTable').should('not.contain.text', savedSearchName);
+      // Check the updated saved search can be found
+      cy.getElementByTestId('savedObjectsTable').should('contain.text', updatedSavedSearchName);
+      // Check the new saved search can be found
+      cy.getElementByTestId('savedObjectsTable').should('contain.text', newSavedSearchName);
+    });
   });
+};
 
-  beforeEach(() => {
-    cy.getElementByTestId('discoverNewButton').click();
-    cy.osd.waitForLoader(true);
-    verifyMonacoEditorContent('');
-  });
-
-  after(() => {
-    cy.core.cleanupTestResources(testResources);
-  });
-
-  it('should create a saved search', () => {
-    cy.explore.setTopNavDate(START_TIME, END_TIME);
-    cy.osd.waitForLoader(true);
-
-    const query = `source=${INDEX_PATTERN_WITH_TIME} | stats count() by category`;
-    cy.explore.setQueryEditor(query);
-    cy.getElementByTestId('exploreQueryExecutionButton').click();
-    cy.osd.waitForLoader(true);
-
-    cy.getElementByTestId('exploreTabs').should('be.visible');
-    cy.get('#logs').click();
-    cy.getElementByTestId('docTable').should('be.visible');
-
-    cy.getElementByTestId('discoverSaveButton').click();
-    savedSearchName = `SAVED_SEARCH_${Date.now()}`;
-    cy.getElementByTestId('savedObjectTitle').type(savedSearchName);
-    cy.getElementByTestId('confirmSaveSavedObjectButton').click();
-    cy.getElementByTestId('savedExploreSuccess').should('be.visible');
-    cy.osd.waitForLoader(true);
-  });
-
-  it('should load a saved search', () => {
-    cy.getElementByTestId('discoverOpenButton').click();
-    cy.getElementByTestId('savedObjectFinderItemList')
-      .should('be.visible')
-      .contains(savedSearchName)
-      .click();
-    cy.osd.waitForLoader(true);
-
-    cy.contains('h1', savedSearchName).should('be.visible');
-    const query = `source=${INDEX_PATTERN_WITH_TIME} | stats count() by category`;
-    verifyMonacoEditorContent(query);
-  });
-
-  it('should modify a saved search', () => {
-    const newQuery = `source=${INDEX_PATTERN_WITH_TIME} | stats count()`;
-    cy.explore.setQueryEditor(newQuery);
-    cy.getElementByTestId('exploreQueryExecutionButton').click();
-    cy.osd.waitForLoader(true);
-
-    cy.getElementByTestId('exploreTabs').should('be.visible');
-    cy.get('#logs').click();
-    cy.getElementByTestId('docTable').should('be.visible');
-
-    cy.getElementByTestId('discoverSaveButton').click();
-    updatedSavedSearchName = `UPDATED_SAVED_SEARCH_${Date.now()}`;
-    cy.getElementByTestId('savedObjectTitle').clear().type(updatedSavedSearchName);
-    cy.getElementByTestId('confirmSaveSavedObjectButton').click();
-    cy.getElementByTestId('savedExploreSuccess').should('be.visible');
-    cy.osd.waitForLoader(true);
-    cy.contains('h1', updatedSavedSearchName).should('be.visible');
-    verifyMonacoEditorContent(newQuery);
-
-    cy.getElementByTestId('discoverSaveButton').click();
-    newSavedSearchName = `NEW_SAVED_SEARCH_${Date.now()}`;
-    cy.getElementByTestId('saveAsNewCheckbox').click();
-    cy.getElementByTestId('savedObjectTitle').clear().type(newSavedSearchName);
-    cy.getElementByTestId('confirmSaveSavedObjectButton').click();
-    cy.getElementByTestId('savedExploreSuccess').should('be.visible');
-
-    cy.getElementByTestId('discoverOpenButton').click();
-    cy.getElementByTestId('savedObjectFinderItemList').should('be.visible');
-    cy.contains(updatedSavedSearchName).should('be.visible');
-    cy.contains(newSavedSearchName).should('be.visible');
-  });
-});
+prepareTestSuite('Saved Explore', runSavedExploreTests);
