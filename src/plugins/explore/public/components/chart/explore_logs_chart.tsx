@@ -30,7 +30,7 @@ import { RootState } from '../../application/utils/state_management/store';
 import {
   executeQueries,
   executeHistogramQuery,
-  defaultPrepareQueryString,
+  prepareHistogramCacheKey,
 } from '../../application/utils/state_management/actions/query_actions';
 import { ResultsSummary } from '../results_summary/results_summary';
 import { selectSummaryAgentIsAvailable } from '../../application/utils/state_management/selectors';
@@ -67,7 +67,7 @@ export const ExploreLogsChart = ({
   const { interval } = useSelector((state: RootState) => state.legacy);
   const query = useSelector((state: RootState) => state.query);
   const dispatch = useDispatch();
-  const cacheKey = defaultPrepareQueryString(query);
+  const cacheKey = prepareHistogramCacheKey(query);
   const onChangeInterval = (newInterval: string) => {
     dispatch(setInterval(newInterval));
     dispatch(clearResultsByKey(cacheKey));

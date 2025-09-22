@@ -11,7 +11,8 @@ import {
   Query,
   DataView,
   IndexPatternField,
-} from 'src/plugins/data/common';
+  formatTimePickerDate,
+} from '../../../../../../../../src/plugins/data/common';
 import { QueryExecutionStatus } from '../types';
 import { setResults, ISearchResult } from '../slices';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
@@ -63,11 +64,38 @@ export const defaultPrepareQueryString = (query: Query): string => {
   }
 };
 
+export const buildQuery = (
+  query: string,
+  timeFieldName: string | undefined,
+  interval: string | undefined,
+  services: ExploreServices
+): string => {
+  if (!timeFieldName || !interval) {
+    return query;
+  }
+  const { fromDate, toDate } = formatTimePickerDate(
+    services.data.query.timefilter.timefilter.getTime(),
+    'YYYY-MM-DD HH:mm:ss.SSS'
+  );
+
+  let effectiveInterval = interval;
+  if (interval === 'auto') {
+    effectiveInterval =
+      services.data.search.aggs.calculateAutoTimeExpression({
+        from: fromDate,
+        to: toDate,
+        mode: 'absolute',
+      }) || '1h';
+  }
+
+  return `${query} | stats count() by span(${timeFieldName}, ${effectiveInterval})`;
+};
+
 /**
  * Prepare cache key for data table queries (no aggregations)
  */
-export const prepareDataTableCacheKey = (query: Query): string => {
-  return `datatable:${defaultPrepareQueryString(query)}`;
+export const prepareHistogramCacheKey = (query: Query): string => {
+  return `histogram:${defaultPrepareQueryString(query)}`;
 };
 
 /**
@@ -207,8 +235,8 @@ export const executeQueries = createAsyncThunk<
 
   const defaultCacheKey = defaultPrepareQueryString(query);
   // Use separate cache keys for data table and histogram
-  const dataTableCacheKey = prepareDataTableCacheKey(query);
-  const histogramCacheKey = defaultCacheKey;
+  const dataTableCacheKey = defaultCacheKey;
+  const histogramCacheKey = prepareHistogramCacheKey(query);
 
   // Check what needs execution for core queries
   const needsDataTableQuery = !results[dataTableCacheKey];
@@ -573,10 +601,18 @@ export const executeHistogramQuery = createAsyncThunk<
   },
   { state: RootState }
 >('query/executeHistogramQuery', async (params, thunkAPI) => {
+  const { services, queryString, interval } = params;
+  const { getState } = thunkAPI;
   return executeQueryBase(
     {
       ...params,
-      includeHistogram: true,
+      includeHistogram: false,
+      queryString: buildQuery(
+        queryString,
+        getState().query?.dataset?.timeFieldName,
+        interval,
+        services
+      ),
     },
     thunkAPI
   );

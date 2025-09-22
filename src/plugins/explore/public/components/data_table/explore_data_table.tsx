@@ -28,8 +28,8 @@ import {
 } from '../../application/utils/state_management/selectors';
 import { RootState } from '../../application/utils/state_management/store';
 import {
-  prepareDataTableCacheKey,
   defaultResultsProcessor,
+  defaultPrepareQueryString,
 } from '../../application/utils/state_management/actions/query_actions';
 import { useChangeQueryEditor } from '../../application/hooks';
 import { useDatasetContext } from '../../application/context';
@@ -45,7 +45,7 @@ const ExploreDataTableComponent = () => {
   const { dataset } = useDatasetContext();
 
   const query = useSelector((state: RootState) => state.query);
-  const cacheKey = useMemo(() => prepareDataTableCacheKey(query), [query]);
+  const cacheKey = useMemo(() => defaultPrepareQueryString(query), [query]);
   const results = useSelector((state: RootState) => state.results);
   const rawResults = results[cacheKey];
   const rows = rawResults?.hits?.hits || [];
