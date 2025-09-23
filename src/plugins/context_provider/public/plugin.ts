@@ -81,30 +81,30 @@ export class ContextProviderPlugin
 
     this.contextCaptureService.getDynamicContext$().subscribe((context) => {
       console.log('⚡ Dynamic Context Captured:', context);
-      console.log('🔥 DEBUG: Dynamic context appId:', context?.appId);
-      console.log('🔥 DEBUG: Dynamic context trigger:', context?.trigger);
+      console.debug('🔥 DEBUG: Dynamic context appId:', context?.appId);
+      console.debug('🔥 DEBUG: Dynamic context trigger:', context?.trigger);
 
       // 🔧 FIX: Refresh static context after dynamic events to ensure AI assistant sees updates
       if (context && context.appId) {
         console.log('🔄 Refreshing static context after dynamic event');
-        console.log('🔥 DEBUG: Current URL pathname:', window.location.pathname);
+        console.debug('🔥 DEBUG: Current URL pathname:', window.location.pathname);
 
         setTimeout(() => {
           // Force a fresh static context capture to include the dynamic changes
           const currentAppId = window.location.pathname.split('/app/')[1]?.split('/')[0];
-          console.log('🔥 DEBUG: Extracted currentAppId:', currentAppId);
-          console.log('🔥 DEBUG: contextCaptureService exists:', !!this.contextCaptureService);
+          console.debug('🔥 DEBUG: Extracted currentAppId:', currentAppId);
+          console.debug('🔥 DEBUG: contextCaptureService exists:', !!this.contextCaptureService);
 
           if (currentAppId && this.contextCaptureService) {
-            console.log('🔥 DEBUG: Calling captureStaticContext for:', currentAppId);
+            console.debug('🔥 DEBUG: Calling captureStaticContext for:', currentAppId);
             (this.contextCaptureService as any).captureStaticContext(currentAppId);
-            console.log('🔥 DEBUG: captureStaticContext called');
+            console.debug('🔥 DEBUG: captureStaticContext called');
           } else {
             console.error('🔥 DEBUG: Cannot refresh static context - missing appId or service');
           }
         }, 100); // Small delay to ensure dynamic context is processed
       } else {
-        console.log('🔥 DEBUG: Not refreshing static context - no appId in dynamic context');
+        console.debug('🔥 DEBUG: Not refreshing static context - no appId in dynamic context');
       }
     });
 
@@ -200,9 +200,9 @@ export class ContextProviderPlugin
     );
 
     if (this.uiActionsIntegrationService) {
-      console.log('🔥 DEBUG: Calling uiActionsIntegrationService.triggerContextCapture');
+      console.debug('🔥 DEBUG: Calling uiActionsIntegrationService.triggerContextCapture');
       this.uiActionsIntegrationService.triggerContextCapture(triggerType, data);
-      console.log('🔥 DEBUG: uiActionsIntegrationService.triggerContextCapture called');
+      console.debug('🔥 DEBUG: uiActionsIntegrationService.triggerContextCapture called');
     } else {
       console.error('🔥 DEBUG: uiActionsIntegrationService is not available!');
     }

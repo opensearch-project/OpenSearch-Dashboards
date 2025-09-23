@@ -6,7 +6,7 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { CoreStart, MountPoint, SIDECAR_DOCKED_MODE } from '../../../../core/public';
-import { ChatWindowWithActions } from './chat_window_with_actions';
+import { ChatWindow } from './chat_window';
 import { ChatProvider } from '../contexts/chat_context';
 import { ChatService } from '../services/chat_service';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
@@ -146,7 +146,7 @@ export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
         <div style={{ height: '100%', boxSizing: 'border-box' }}>
           <OpenSearchDashboardsContextProvider services={{ core, contextProvider }}>
             <ChatProvider chatService={chatService}>
-              <ChatWindowWithActions layoutMode={layoutMode} onToggleLayout={toggleLayoutMode} />
+              <ChatWindow layoutMode={layoutMode} onToggleLayout={toggleLayoutMode} />
             </ChatProvider>
           </OpenSearchDashboardsContextProvider>
         </div>

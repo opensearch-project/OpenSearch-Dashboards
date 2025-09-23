@@ -3,13 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/*
- * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- */
+/* eslint-disable no-console */
 
 import { UiActionsSetup, UiActionsStart } from '../../../../plugins/ui_actions/public';
 
@@ -263,12 +257,12 @@ export class UIActionsIntegrationService {
   // Method to manually trigger context capture (for testing)
   public triggerContextCapture(triggerType: string, data: any): void {
     console.log(`🧪 Manually triggering context capture: ${triggerType}`, data);
-    console.log('🔥 DEBUG: contextCaptureCallback exists:', !!this.contextCaptureCallback);
+    console.debug('🔥 DEBUG: contextCaptureCallback exists:', !!this.contextCaptureCallback);
 
     if (this.contextCaptureCallback) {
-      console.log('🔥 DEBUG: Calling contextCaptureCallback');
+      console.debug('🔥 DEBUG: Calling contextCaptureCallback');
       this.contextCaptureCallback(triggerType, data);
-      console.log('🔥 DEBUG: contextCaptureCallback called successfully');
+      console.debug('🔥 DEBUG: contextCaptureCallback called successfully');
     } else {
       console.error('🔥 DEBUG: contextCaptureCallback is not set!');
     }

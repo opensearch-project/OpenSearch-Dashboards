@@ -4,12 +4,16 @@
  */
 /* eslint-disable no-console */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { CoreStart } from '../../../../core/public';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatContextManager } from '../services/chat_context_manager';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
-import { ContextProviderStart } from '../../../context_provider/public';
+import {
+  ContextProviderStart,
+  AssistantActionService,
+} from '../../../context_provider/public';
+import type { ToolDefinition } from '../../../context_provider/public';
 import {
   EventType,
   // eslint-disable-next-line prettier/prettier
@@ -20,6 +24,8 @@ import { ChatContainer } from './chat_container';
 import { ChatHeader } from './chat_header';
 import { ChatMessages } from './chat_messages';
 import { ChatInput } from './chat_input';
+import { usePPLQueryAction } from '../actions/ppl_query_action';
+import { useUserConfirmationAction } from '../actions/user_confirmation_action';
 
 interface TimelineMessage {
   type: 'message';
@@ -53,10 +59,25 @@ interface ChatWindowProps {
   onToggleLayout?: () => void;
 }
 
-export const ChatWindow: React.FC<ChatWindowProps> = ({
+interface PendingToolCall {
+  id: string;
+  name: string;
+  args: string;
+}
+
+/**
+ * ChatWindow with AssistantAction support
+ */
+export const ChatWindow: React.FC<ChatWindowProps> = (props) => {
+  return <ChatWindowContent {...props} />;
+};
+
+function ChatWindowContent({
   layoutMode = ChatLayoutMode.SIDECAR,
   onToggleLayout,
-}) => {
+}: ChatWindowProps) {
+  const service = AssistantActionService.getInstance();
+  const [availableTools, setAvailableTools] = useState<ToolDefinition[]>([]);
   const { chatService } = useChatContext();
   const { services } = useOpenSearchDashboards<{
     core: CoreStart;
@@ -68,6 +89,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const [currentStreamingMessage, setCurrentStreamingMessage] = useState('');
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const [processedEventIds, setProcessedEventIds] = useState<Set<string>>(new Set());
+  const [pendingToolCalls] = useState<Map<string, PendingToolCall>>(new Map());
+
+  // Register actions
+  usePPLQueryAction();
+  useUserConfirmationAction();
 
   // Initialize context manager
   const contextManager = useMemo(() => {
@@ -78,6 +104,91 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     return manager;
   }, [chatService, services.contextProvider]);
 
+  // Subscribe to tool updates from the service
+  useEffect(() => {
+    const subscription = service.getState$().subscribe((state) => {
+      setAvailableTools(state.toolDefinitions);
+      if (chatService && state.toolDefinitions.length > 0) {
+        // Store tools for when we send messages
+        (chatService as any).availableTools = state.toolDefinitions;
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [service, chatService]);
+
+  // Extract common tool call handler to avoid duplication
+  const handleToolCallEvent = useCallback(async (event: ChatEvent) => {
+    switch (event.type) {
+      case EventType.TOOL_CALL_START:
+        if ('toolCallId' in event && 'toolCallName' in event) {
+          service.updateToolCallState(event.toolCallId, {
+            id: event.toolCallId,
+            name: event.toolCallName,
+            status: 'pending',
+            timestamp: Date.now(),
+          });
+
+          pendingToolCalls.set(event.toolCallId, {
+            id: event.toolCallId,
+            name: event.toolCallName,
+            args: '',
+          });
+        }
+        break;
+
+      case EventType.TOOL_CALL_ARGS:
+        if ('toolCallId' in event && 'delta' in event) {
+          const toolCall = pendingToolCalls.get(event.toolCallId);
+          if (toolCall) {
+            toolCall.args += event.delta;
+          }
+        }
+        break;
+
+      case EventType.TOOL_CALL_END:
+        if ('toolCallId' in event) {
+          const toolCall = pendingToolCalls.get(event.toolCallId);
+          if (toolCall) {
+            try {
+              const args = JSON.parse(toolCall.args);
+
+              service.updateToolCallState(toolCall.id, {
+                status: 'executing',
+                args,
+              });
+
+              const result = await service.executeAction(toolCall.name, args);
+
+              service.updateToolCallState(toolCall.id, {
+                status: 'complete',
+                result,
+              });
+
+              // Send tool result back to assistant
+              if ((chatService as any).sendToolResult) {
+                await (chatService as any).sendToolResult(toolCall.id, result);
+              }
+            } catch (error: any) {
+              service.updateToolCallState(toolCall.id, {
+                status: 'failed',
+                error,
+              });
+
+              // Send error back to assistant
+              if ((chatService as any).sendToolResult) {
+                await (chatService as any).sendToolResult(toolCall.id, {
+                  error: error.message,
+                });
+              }
+            }
+
+            pendingToolCalls.delete(event.toolCallId);
+          }
+        }
+        break;
+    }
+  }, [service, pendingToolCalls, chatService]);
 
   const handleSend = async () => {
     if (!input.trim() || isStreaming) return;
@@ -121,17 +232,22 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           console.log(`🔄 [${eventTime}] ${event.type}:`, event);
 
           // Event deduplication - create a unique event identifier
-          const eventId = `${event.type}-${event.timestamp || Date.now()}-${JSON.stringify(event).substring(0, 100)}`;
+          const eventId = `${event.type}-${event.timestamp || Date.now()}-${JSON.stringify(
+            event
+          ).substring(0, 100)}`;
           if (processedEventIds.has(eventId)) {
             console.log(`🔄 [${eventTime}] Skipping duplicate event:`, event.type);
             return; // Skip duplicate event
           }
-          setProcessedEventIds(prev => new Set(prev).add(eventId));
+          setProcessedEventIds((prev) => new Set(prev).add(eventId));
 
           // Update runId if we get it from the event
           if ('runId' in event && event.runId && event.runId !== currentRunId) {
             setCurrentRunId(event.runId);
           }
+
+          // Handle tool call events
+          handleToolCallEvent(event);
 
           switch (event.type) {
             case EventType.TEXT_MESSAGE_CONTENT:
@@ -143,7 +259,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               setCurrentStreamingMessage((currentContent) => {
                 const assistantMessage: TimelineMessage = {
                   type: 'message',
-                  id: 'messageId' in event && event.messageId ? event.messageId : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                  id:
+                    'messageId' in event && event.messageId
+                      ? event.messageId
+                      : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                   role: 'assistant',
                   content: currentContent,
                   timestamp: event.timestamp || Date.now(),
@@ -153,10 +272,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 setTimeline((prev) => {
                   // Check if message with same content already exists recently (within 1 second)
                   const isDuplicate = prev.some(
-                    item => item.type === 'message' &&
-                    item.role === 'assistant' &&
-                    item.content === currentContent &&
-                    Math.abs(item.timestamp - (event.timestamp || Date.now())) < 1000
+                    (item) =>
+                      item.type === 'message' &&
+                      item.role === 'assistant' &&
+                      item.content === currentContent &&
+                      Math.abs(item.timestamp - (event.timestamp || Date.now())) < 1000
                   );
                   return isDuplicate ? prev : [...prev, assistantMessage];
                 });
@@ -175,7 +295,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 };
                 setTimeline((prev) => {
                   // Check if tool call with this ID already exists
-                  const existingIndex = prev.findIndex(item => item.id === newToolCall.id);
+                  const existingIndex = prev.findIndex((item) => item.id === newToolCall.id);
                   if (existingIndex !== -1) {
                     // Update existing tool call instead of adding duplicate
                     const updated = [...prev];
@@ -285,8 +405,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     if (isStreaming) return;
 
     // Find the index of this message in the timeline
-    const messageIndex = timeline.findIndex(item =>
-      item.type === 'message' && item.id === message.id
+    const messageIndex = timeline.findIndex(
+      (item) => item.type === 'message' && item.id === message.id
     );
 
     if (messageIndex === -1) return;
@@ -334,17 +454,22 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           console.log(`🔄 [${eventTime}] ${event.type}:`, event);
 
           // Event deduplication - create a unique event identifier
-          const eventId = `${event.type}-${event.timestamp || Date.now()}-${JSON.stringify(event).substring(0, 100)}`;
+          const eventId = `${event.type}-${event.timestamp || Date.now()}-${JSON.stringify(
+            event
+          ).substring(0, 100)}`;
           if (processedEventIds.has(eventId)) {
             console.log(`🔄 [${eventTime}] Skipping duplicate event:`, event.type);
             return; // Skip duplicate event
           }
-          setProcessedEventIds(prev => new Set(prev).add(eventId));
+          setProcessedEventIds((prev) => new Set(prev).add(eventId));
 
           // Update runId if we get it from the event
           if ('runId' in event && event.runId && event.runId !== currentRunId) {
             setCurrentRunId(event.runId);
           }
+
+          // Handle tool call events
+          handleToolCallEvent(event);
 
           switch (event.type) {
             case EventType.TEXT_MESSAGE_CONTENT:
@@ -356,7 +481,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               setCurrentStreamingMessage((currentContent) => {
                 const assistantMessage: TimelineMessage = {
                   type: 'message',
-                  id: 'messageId' in event && event.messageId ? event.messageId : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                  id:
+                    'messageId' in event && event.messageId
+                      ? event.messageId
+                      : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                   role: 'assistant',
                   content: currentContent,
                   timestamp: event.timestamp || Date.now(),
@@ -366,10 +494,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 setTimeline((prev) => {
                   // Check if message with same content already exists recently (within 1 second)
                   const isDuplicate = prev.some(
-                    item => item.type === 'message' &&
-                    item.role === 'assistant' &&
-                    item.content === currentContent &&
-                    Math.abs(item.timestamp - (event.timestamp || Date.now())) < 1000
+                    (item) =>
+                      item.type === 'message' &&
+                      item.role === 'assistant' &&
+                      item.content === currentContent &&
+                      Math.abs(item.timestamp - (event.timestamp || Date.now())) < 1000
                   );
                   return isDuplicate ? prev : [...prev, assistantMessage];
                 });
@@ -388,7 +517,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 };
                 setTimeline((prev) => {
                   // Check if tool call with this ID already exists
-                  const existingIndex = prev.findIndex(item => item.id === newToolCall.id);
+                  const existingIndex = prev.findIndex((item) => item.id === newToolCall.id);
                   if (existingIndex !== -1) {
                     // Update existing tool call instead of adding duplicate
                     const updated = [...prev];
@@ -505,6 +634,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     };
   }, [contextManager]);
 
+  // Pass enhanced props to child components
+  const currentState = service.getCurrentState();
+  const enhancedProps = {
+    toolCallStates: currentState.toolCallStates,
+    getActionRenderer: service.getActionRenderer,
+  };
+
   return (
     <ChatContainer layoutMode={layoutMode}>
       <ChatHeader
@@ -521,6 +657,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         isStreaming={isStreaming}
         contextManager={contextManager}
         onResendMessage={handleResendMessage}
+        {...enhancedProps}
       />
 
       <ChatInput
@@ -533,4 +670,4 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       />
     </ChatContainer>
   );
-};
+}

@@ -17,10 +17,14 @@ import { MCPSSEHandler } from './mcp_sse_handler';
 import { OsdMcpServerConfig } from '../config';
 import { registerReduxBridgeRoutes } from './routes/redux_bridge';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsdMcpServerPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsdMcpServerPluginStart {}
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsdMcpServerPluginSetupDeps {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsdMcpServerPluginStartDeps {}
 
 export class OsdMcpServerPlugin
@@ -276,7 +280,7 @@ export class OsdMcpServerPlugin
     );
 
     // Register Redux bridge routes
-    registerReduxBridgeRoutes(router);
+    registerReduxBridgeRoutes(router, this.logger);
 
     this.logger.info('OSD MCP Server HTTP routes registered');
 

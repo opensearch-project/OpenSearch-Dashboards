@@ -34,11 +34,11 @@ export class ContextCaptureService {
   }
 
   public setup(): void {
-    console.log('🔧 Context Capture Service Setup');
+    console.debug('🔧 Context Capture Service Setup');
   }
 
   public start(core: CoreStart, plugins: ContextProviderStartDeps): void {
-    console.log('🚀 Context Capture Service Start');
+    console.debug('🚀 Context Capture Service Start');
     this.coreStart = core;
     this.pluginsStart = plugins;
 
@@ -61,7 +61,7 @@ export class ContextCaptureService {
    * This handles cases like time range changes, filter updates, etc. within the same app
    */
   private setupUrlMonitoring(): void {
-    console.log('🔍 Setting up URL monitoring for automatic context refresh');
+    console.debug('🔍 Setting up URL monitoring for automatic context refresh');
 
     let lastUrl = window.location.href;
     let lastHash = window.location.hash;
@@ -72,14 +72,14 @@ export class ContextCaptureService {
       const currentHash = window.location.hash;
 
       if (currentUrl !== lastUrl || currentHash !== lastHash) {
-        console.log('🔄 URL change detected, refreshing context');
-        console.log('  Previous URL:', lastUrl);
-        console.log('  Current URL:', currentUrl);
+        console.debug('🔄 URL change detected, refreshing context');
+        console.debug('  Previous URL:', lastUrl);
+        console.debug('  Current URL:', currentUrl);
 
         // Get current app and refresh context
         const currentAppId = window.location.pathname.split('/app/')[1]?.split('/')[0];
         if (currentAppId) {
-          console.log(`🎯 Auto-refreshing context for app: ${currentAppId}`);
+          console.debug(`🎯 Auto-refreshing context for app: ${currentAppId}`);
           this.captureStaticContext(currentAppId);
         }
 
@@ -117,9 +117,9 @@ export class ContextCaptureService {
   }
 
   public captureDynamicContext(trigger: string, data: any): void {
-    console.log(`⚡ Context Capture: Processing dynamic context for trigger: ${trigger}`);
-    console.log('🔥 DEBUG: Total registered contributors:', this.contextContributors.size);
-    console.log(
+    console.debug(`⚡ Context Capture: Processing dynamic context for trigger: ${trigger}`);
+    console.debug('🔥 DEBUG: Total registered contributors:', this.contextContributors.size);
+    console.debug(
       '🔥 DEBUG: Registered contributor keys:',
       Array.from(this.contextContributors.keys())
     );
@@ -127,7 +127,7 @@ export class ContextCaptureService {
     // Find all contributors that are interested in this trigger
     const interestedContributors = Array.from(this.contextContributors.values()).filter(
       (contributor) => {
-        console.log(`🔥 DEBUG: Checking contributor ${contributor.appId}:`, {
+        console.debug(`🔥 DEBUG: Checking contributor ${contributor.appId}:`, {
           contextTriggerActions: contributor.contextTriggerActions,
           includesTrigger: contributor.contextTriggerActions?.includes(trigger),
         });
@@ -135,10 +135,10 @@ export class ContextCaptureService {
       }
     );
 
-    console.log(
+    console.debug(
       `🎯 Found ${interestedContributors.length} contributors interested in trigger: ${trigger}`
     );
-    console.log(
+    console.debug(
       '🔥 DEBUG: Interested contributors:',
       interestedContributors.map((c) => c.appId)
     );
@@ -157,7 +157,10 @@ export class ContextCaptureService {
           };
 
           this.dynamicContext$.next(dynamicContext);
-          console.log(`✅ Dynamic context captured for ${contributor.appId}:`, contributorContext);
+          console.debug(
+            `✅ Dynamic context captured for ${contributor.appId}:`,
+            contributorContext
+          );
         } catch (error) {
           console.error(`❌ Error capturing dynamic context for ${contributor.appId}:`, error);
         }
@@ -172,19 +175,19 @@ export class ContextCaptureService {
         data,
       };
       this.dynamicContext$.next(dynamicContext);
-      console.log(`📝 No contributors for trigger ${trigger}, emitting raw context`);
+      console.debug(`📝 No contributors for trigger ${trigger}, emitting raw context`);
     }
   }
 
   public captureGlobalInteraction(interaction: GlobalInteraction): void {
-    console.log('🎯 Global Interaction Captured by Context Provider:', interaction);
+    console.debug('🎯 Global Interaction Captured by Context Provider:', interaction);
 
     // Route to appropriate contributor based on app
     const contributor = this.contextContributors.get(interaction.app || 'unknown');
     if (contributor && contributor.handleGlobalInteraction) {
       try {
         contributor.handleGlobalInteraction(interaction);
-        console.log(`✅ Global interaction routed to ${contributor.appId} contributor`);
+        console.debug(`✅ Global interaction routed to ${contributor.appId} contributor`);
       } catch (error) {
         console.error(
           `❌ Error in ${contributor.appId} contributor handling global interaction:`,
@@ -192,7 +195,7 @@ export class ContextCaptureService {
         );
       }
     } else {
-      console.log(
+      console.debug(
         `⚠️ No contributor found for app: ${interaction.app}, or contributor doesn't handle global interactions`
       );
     }
@@ -206,12 +209,14 @@ export class ContextCaptureService {
     };
 
     this.dynamicContext$.next(dynamicContext);
-    console.log('📡 Global interaction also emitted as dynamic context for backward compatibility');
+    console.debug(
+      '📡 Global interaction also emitted as dynamic context for backward compatibility'
+    );
   }
 
   public registerContextContributor(contributor: ContextContributor): void {
-    console.log(`📝 Registering context contributor for app: ${contributor.appId}`);
-    console.log(`🔍 DEBUG: Contributor details:`, {
+    console.debug(`📝 Registering context contributor for app: ${contributor.appId}`);
+    console.debug(`🔍 DEBUG: Contributor details:`, {
       appId: contributor.appId,
       hasStaticCapture: !!contributor.captureStaticContext,
       hasDynamicCapture: !!contributor.captureDynamicContext,
@@ -220,15 +225,17 @@ export class ContextCaptureService {
 
     this.contextContributors.set(contributor.appId, contributor);
 
-    console.log(`✅ Contributor registered. Total contributors: ${this.contextContributors.size}`);
-    console.log(
+    console.debug(
+      `✅ Contributor registered. Total contributors: ${this.contextContributors.size}`
+    );
+    console.debug(
       `🔍 DEBUG: All registered contributors:`,
       Array.from(this.contextContributors.keys())
     );
   }
 
   public unregisterContextContributor(appId: string): void {
-    console.log(`🗑️ Unregistering context contributor for app: ${appId}`);
+    console.debug(`🗑️ Unregistering context contributor for app: ${appId}`);
     this.contextContributors.delete(appId);
   }
 
@@ -270,7 +277,7 @@ export class ContextCaptureService {
   }
 
   private async captureStaticContext(appId: string): Promise<void> {
-    console.log(`📊 Capturing static context for app: ${appId}`);
+    console.debug(`📊 Capturing static context for app: ${appId}`);
 
     if (!this.coreStart || !this.pluginsStart) {
       console.warn('Services not available for context capture');
@@ -291,19 +298,19 @@ export class ContextCaptureService {
       // 🔧 FIX: Handle app ID variations (e.g., 'explore/logs' -> 'explore')
       if (!contributor && appId.includes('/')) {
         const baseAppId = appId.split('/')[0];
-        console.log(`🔍 DEBUG: Trying base app ID: ${baseAppId}`);
+        console.debug(`🔍 DEBUG: Trying base app ID: ${baseAppId}`);
         contributor = this.contextContributors.get(baseAppId);
       }
 
       // If still no exact match, check if any contributor can handle this app
       if (!contributor) {
-        console.log('🔍 DEBUG: Checking contributors with canHandleApp method');
+        console.debug('🔍 DEBUG: Checking contributors with canHandleApp method');
         for (const [contributorAppId, contributorInstance] of this.contextContributors.entries()) {
           if (
             typeof contributorInstance.canHandleApp === 'function' &&
             contributorInstance.canHandleApp(appId)
           ) {
-            console.log(`✅ Found contributor ${contributorAppId} that can handle app: ${appId}`);
+            console.debug(`✅ Found contributor ${contributorAppId} that can handle app: ${appId}`);
             contributor = contributorInstance;
             break;
           }
@@ -311,25 +318,25 @@ export class ContextCaptureService {
       }
 
       if (contributor && contributor.captureStaticContext) {
-        console.log(
+        console.debug(
           `🎯 Using registered context contributor for app: ${appId} (contributor: ${contributor.appId})`
         );
-        console.log('🔥 DEBUG: About to call contributor.captureStaticContext()');
+        console.debug('🔥 DEBUG: About to call contributor.captureStaticContext()');
 
         const contributorContext = await contributor.captureStaticContext();
         contextData = { ...contextData, ...contributorContext };
 
-        console.log(`✅ Contributor context captured:`, contributorContext);
-        console.log('🔥 DEBUG: Context data keys after contributor:', Object.keys(contextData));
-        console.log(
+        console.debug(`✅ Contributor context captured:`, contributorContext);
+        console.debug('🔥 DEBUG: Context data keys after contributor:', Object.keys(contextData));
+        console.debug(
           '🔥 DEBUG: expandedDocuments in context:',
           contextData.expandedDocuments?.length || 0
         );
       } else {
-        console.log(`⚠️ No registered contributor found for app: ${appId}`);
-        console.log(`🔍 DEBUG: Available contributors:`, this.contextContributors);
-        console.log('🔥 DEBUG: contributor found:', !!contributor);
-        console.log(
+        console.debug(`⚠️ No registered contributor found for app: ${appId}`);
+        console.debug(`🔍 DEBUG: Available contributors:`, this.contextContributors);
+        console.debug('🔥 DEBUG: contributor found:', !!contributor);
+        console.debug(
           '🔥 DEBUG: contributor has captureStaticContext:',
           !!contributor?.captureStaticContext
         );
@@ -363,15 +370,15 @@ export class ContextCaptureService {
       data: deduplicatedData,
     };
 
-    console.log('🔥 DEBUG: About to emit new static context');
-    console.log('🔥 DEBUG: Static context data keys:', Object.keys(deduplicatedData));
-    console.log(
+    console.debug('🔥 DEBUG: About to emit new static context');
+    console.debug('🔥 DEBUG: Static context data keys:', Object.keys(deduplicatedData));
+    console.debug(
       '🔥 DEBUG: expandedDocuments in static context:',
       deduplicatedData.expandedDocuments?.length || 0
     );
 
     this.staticContext$.next(staticContext);
-    console.log('🔥 DEBUG: Static context emitted successfully');
+    console.debug('🔥 DEBUG: Static context emitted successfully');
 
     // 🔧 FIX: Emit custom event to notify AI assistant of static context updates
     window.dispatchEvent(
@@ -379,11 +386,11 @@ export class ContextCaptureService {
         detail: { appId, timestamp: Date.now(), contextData: deduplicatedData },
       })
     );
-    console.log('🔥 DEBUG: staticContextUpdated event dispatched for AI assistant');
+    console.debug('🔥 DEBUG: staticContextUpdated event dispatched for AI assistant');
   }
 
   private async captureDashboardContext(): Promise<Record<string, any>> {
-    console.log('📊 Capturing Dashboard context');
+    console.debug('📊 Capturing Dashboard context');
 
     try {
       // Extract dashboard ID from URL
@@ -421,7 +428,7 @@ export class ContextCaptureService {
   }
 
   private async captureDiscoverContext(): Promise<Record<string, any>> {
-    console.log('🔍 Capturing Discover context');
+    console.debug('🔍 Capturing Discover context');
 
     try {
       const context: Record<string, any> = {
@@ -487,7 +494,7 @@ export class ContextCaptureService {
   }
 
   public async executeAction(actionType: string, params: any): Promise<any> {
-    console.log(`🎯 Executing action: ${actionType}`, params);
+    console.debug(`🎯 Executing action: ${actionType}`, params);
 
     if (!this.coreStart || !this.pluginsStart) {
       throw new Error('Services not available for action execution');
@@ -517,7 +524,7 @@ export class ContextCaptureService {
   }
 
   private async addFilter(params: any): Promise<any> {
-    console.log('➕ Adding filter:', params);
+    console.debug('➕ Adding filter:', params);
 
     if (!params.field || !params.value) {
       throw new Error('Filter requires field and value');
@@ -543,7 +550,7 @@ export class ContextCaptureService {
   }
 
   private async removeFilter(params: any): Promise<any> {
-    console.log('➖ Removing filter:', params);
+    console.debug('➖ Removing filter:', params);
 
     const filters = this.pluginsStart!.data.query.filterManager.getFilters();
     const updatedFilters = filters.filter((filter, index) => {
@@ -561,7 +568,7 @@ export class ContextCaptureService {
   }
 
   private async changeTimeRange(params: any): Promise<any> {
-    console.log('⏰ Changing time range:', params);
+    console.debug('⏰ Changing time range:', params);
 
     if (!params.from || !params.to) {
       throw new Error('Time range requires from and to parameters');
@@ -576,7 +583,7 @@ export class ContextCaptureService {
   }
 
   private async refreshData(): Promise<any> {
-    console.log('🔄 Refreshing data');
+    console.debug('🔄 Refreshing data');
 
     // Trigger a refresh by updating the query state
     const currentQuery = this.pluginsStart!.data.query.queryString.getQuery();
@@ -585,7 +592,7 @@ export class ContextCaptureService {
   }
 
   private async navigateToDiscover(params: any): Promise<any> {
-    console.log('🧭 Navigating to Discover:', params);
+    console.debug('🧭 Navigating to Discover:', params);
 
     await this.coreStart!.application.navigateToApp('discover', {
       path: params.path || '',
@@ -595,7 +602,7 @@ export class ContextCaptureService {
   }
 
   private async navigateToDashboard(params: any): Promise<any> {
-    console.log('🧭 Navigating to Dashboard:', params);
+    console.debug('🧭 Navigating to Dashboard:', params);
 
     const path = params.dashboardId ? `/${params.dashboardId}` : '';
     await this.coreStart!.application.navigateToApp('dashboards', {
@@ -616,7 +623,7 @@ export class ContextCaptureService {
    * Cleanup method to remove URL monitoring listeners
    */
   public stop(): void {
-    console.log('🛑 Context Capture Service Stop');
+    console.debug('🛑 Context Capture Service Stop');
 
     // Cleanup URL monitoring
     if ((this as any).urlMonitoringCleanup) {

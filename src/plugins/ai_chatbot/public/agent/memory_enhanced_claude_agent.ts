@@ -383,8 +383,11 @@ export class MemoryEnhancedClaudeAgent {
             ...contextAny,
             data: contextAny.data || contextAny, // Ensure data property exists
           };
-          console.log('🔥 DEBUG: Calling formatExploreContext with restructured context');
-          console.log('🔥 DEBUG: contextForFormatter keys:', Object.keys(contextForFormatter));
+          // eslint-disable-next-line no-console
+          console.debug('🔥 DEBUG: Calling formatExploreContext with restructured context');
+          // eslint-disable-next-line no-console
+          console.debug('🔥 DEBUG: contextForFormatter keys:', Object.keys(contextForFormatter));
+          // eslint-disable-next-line no-console
           console.log(
             '🔥 DEBUG: contextForFormatter.data keys:',
             contextForFormatter.data ? Object.keys(contextForFormatter.data) : 'no data'

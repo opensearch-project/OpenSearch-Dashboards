@@ -2,14 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
-/*
- * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- */
+/* eslint-disable no-console */
 
 export interface ContextExtractionRule {
   extract: (target: HTMLElement, basicContext: GlobalInteraction) => GlobalInteraction;
@@ -233,7 +226,7 @@ export class GlobalInteractionInterceptor {
   ): Promise<GlobalInteraction> {
     const enrichedContext = { ...basicContext };
 
-    console.log('🔍 DEBUG: Starting context enrichment for:', {
+    console.debug('🔍 DEBUG: Starting context enrichment for:', {
       testSubj: basicContext.testSubj,
       tagName: basicContext.tagName,
       className: basicContext.className,
@@ -241,14 +234,14 @@ export class GlobalInteractionInterceptor {
 
     try {
       // Get UI Actions context
-      console.log('🔍 DEBUG: Getting UI Action context...');
+      console.debug('🔍 DEBUG: Getting UI Action context...');
       const uiActionContext = await this.getUIActionContext(target, event);
-      console.log('🔍 DEBUG: UI Action context result:', uiActionContext);
+      console.debug('🔍 DEBUG: UI Action context result:', uiActionContext);
 
       // Get semantic context from plugins
-      console.log('🔍 DEBUG: Getting semantic context...');
+      console.debug('🔍 DEBUG: Getting semantic context...');
       const semanticContext = await this.getSemanticContext(target, basicContext);
-      console.log('🔍 DEBUG: Semantic context result:', semanticContext);
+      console.debug('🔍 DEBUG: Semantic context result:', semanticContext);
 
       // Only add context object if we have actual data
       if (uiActionContext || semanticContext) {
@@ -273,7 +266,7 @@ export class GlobalInteractionInterceptor {
 
         console.log('🎯 Enriched interaction with context:', enrichedContext);
       } else {
-        console.log('🔍 DEBUG: No rich context found, keeping basic interaction');
+        console.debug('🔍 DEBUG: No rich context found, keeping basic interaction');
       }
     } catch (error) {
       console.warn('❌ Error enriching context:', error);
@@ -286,18 +279,18 @@ export class GlobalInteractionInterceptor {
    * Get context from UI Actions system
    */
   private async getUIActionContext(target: HTMLElement, event: MouseEvent): Promise<any> {
-    console.log('🔍 DEBUG: getUIActionContext called');
-    console.log('🔍 DEBUG: uiActions available:', !!this.deps.uiActions);
+    console.debug('🔍 DEBUG: getUIActionContext called');
+    console.debug('🔍 DEBUG: uiActions available:', !!this.deps.uiActions);
 
     if (!this.deps.uiActions) {
-      console.log('🔍 DEBUG: No uiActions service available, trying window.uiActions');
+      console.debug('🔍 DEBUG: No uiActions service available, trying window.uiActions');
       // Try to get UI Actions from window if not injected
       const windowUIActions = (window as any).uiActions;
       if (windowUIActions) {
-        console.log('🔍 DEBUG: Found uiActions on window, using it');
+        console.debug('🔍 DEBUG: Found uiActions on window, using it');
         this.deps.uiActions = windowUIActions;
       } else {
-        console.log('🔍 DEBUG: No uiActions found anywhere, returning null');
+        console.debug('🔍 DEBUG: No uiActions found anywhere, returning null');
         return null;
       }
     }
@@ -305,10 +298,10 @@ export class GlobalInteractionInterceptor {
     try {
       // Find triggers that might be associated with this element
       const triggers = this.getTriggersForElement(target);
-      console.log('🔍 DEBUG: Found triggers:', triggers);
+      console.debug('🔍 DEBUG: Found triggers:', triggers);
 
       if (triggers.length === 0) {
-        console.log('🔍 DEBUG: No triggers found for element');
+        console.debug('🔍 DEBUG: No triggers found for element');
         return null;
       }
 
@@ -319,7 +312,7 @@ export class GlobalInteractionInterceptor {
         try {
           console.log(`🔍 DEBUG: Processing trigger: ${trigger}`);
           const context = this.buildUIActionContext(target, event);
-          console.log('🔍 DEBUG: Built UI Action context:', context);
+          console.debug('🔍 DEBUG: Built UI Action context:', context);
 
           const actions = this.deps.uiActions.getTriggerActions?.(trigger) || [];
           console.log(`🔍 DEBUG: Actions for trigger ${trigger}:`, actions);
@@ -372,7 +365,7 @@ export class GlobalInteractionInterceptor {
             }
           : null;
 
-      console.log('🔍 DEBUG: Final UI Action context result:', result);
+      console.debug('🔍 DEBUG: Final UI Action context result:', result);
       return result;
     } catch (error) {
       console.warn('❌ Error getting UI Action context:', error);
@@ -393,14 +386,14 @@ export class GlobalInteractionInterceptor {
     );
 
     if (!this.deps.contextProvider) {
-      console.log('🔍 DEBUG: No contextProvider available, trying window.contextProvider');
+      console.debug('🔍 DEBUG: No contextProvider available, trying window.contextProvider');
       // Try to get context provider from window if not injected
       const windowContextProvider = (window as any).contextProvider;
       if (windowContextProvider) {
-        console.log('🔍 DEBUG: Found contextProvider on window, using it');
+        console.debug('🔍 DEBUG: Found contextProvider on window, using it');
         this.deps.contextProvider = windowContextProvider;
       } else {
-        console.log('🔍 DEBUG: No contextProvider found anywhere, returning null');
+        console.debug('🔍 DEBUG: No contextProvider found anywhere, returning null');
         return null;
       }
     }
@@ -417,7 +410,7 @@ export class GlobalInteractionInterceptor {
 
         // Force refresh the context to get the latest state
         const refreshedContext = await this.deps.contextProvider.refreshCurrentContext?.();
-        console.log('🔍 DEBUG: Refreshed context from Context Provider:', refreshedContext);
+        console.debug('🔍 DEBUG: Refreshed context from Context Provider:', refreshedContext);
 
         if (
           refreshedContext &&
@@ -432,7 +425,7 @@ export class GlobalInteractionInterceptor {
 
           // Extract just the expanded documents with parsed fields (no extra contextData)
           const expandedDocs = refreshedContext.data.expandedDocuments;
-          console.log('🔍 DEBUG: Expanded documents:', expandedDocs);
+          console.debug('🔍 DEBUG: Expanded documents:', expandedDocs);
 
           return {
             type: 'DOCUMENT_EXPAND',
@@ -442,9 +435,9 @@ export class GlobalInteractionInterceptor {
         }
 
         // If still no expanded documents, try direct extraction
-        console.log('🔍 DEBUG: No expanded documents found, trying direct extraction');
+        console.debug('🔍 DEBUG: No expanded documents found, trying direct extraction');
         const directContext = await this.getDocumentExpansionContextFromProvider(target);
-        console.log('🔍 DEBUG: Direct extraction result:', directContext);
+        console.debug('🔍 DEBUG: Direct extraction result:', directContext);
         return directContext;
       }
 
@@ -468,7 +461,7 @@ export class GlobalInteractionInterceptor {
       // Extract document data using the same logic as the existing system
       const tableRow = target.closest('tr');
       if (!tableRow) {
-        console.log('🔍 DEBUG: No table row found for document expansion');
+        console.debug('🔍 DEBUG: No table row found for document expansion');
         return null;
       }
 
@@ -477,7 +470,7 @@ export class GlobalInteractionInterceptor {
       const rowIndex = this.getRowIndex(tableRow);
       const tableInfo = this.getTableInfo(tableRow);
 
-      console.log('🔍 DEBUG: Extracted document expansion context:', {
+      console.debug('🔍 DEBUG: Extracted document expansion context:', {
         documentId,
         rowIndex,
         documentDataKeys: Object.keys(documentData),
@@ -526,11 +519,11 @@ export class GlobalInteractionInterceptor {
     // Also check for generic triggers based on element type
     if (target.tagName === 'BUTTON') {
       triggers.push('BUTTON_CLICK_TRIGGER');
-      console.log('🔍 DEBUG: Added BUTTON_CLICK_TRIGGER for button element');
+      console.debug('🔍 DEBUG: Added BUTTON_CLICK_TRIGGER for button element');
     }
 
     const uniqueTriggers = [...new Set(triggers)]; // Remove duplicates
-    console.log('🔍 DEBUG: Final triggers:', uniqueTriggers);
+    console.debug('🔍 DEBUG: Final triggers:', uniqueTriggers);
     return uniqueTriggers;
   }
 
@@ -571,14 +564,14 @@ export class GlobalInteractionInterceptor {
    * Execute action to get context data (without actually performing the action)
    */
   private async executeActionForContext(action: any, context: any): Promise<any> {
-    console.log('🔍 DEBUG: executeActionForContext called with:', { action: action.id, context });
+    console.debug('🔍 DEBUG: executeActionForContext called with:', { action: action.id, context });
 
     try {
       // For document expansion, extract document data
       if (context.testSubj === 'docTableExpandToggleColumn') {
-        console.log('🔍 DEBUG: Processing document expansion context');
+        console.debug('🔍 DEBUG: Processing document expansion context');
         const result = this.extractDocumentExpansionContext(context.element);
-        console.log('🔍 DEBUG: Document expansion context result:', result);
+        console.debug('🔍 DEBUG: Document expansion context result:', result);
         return result;
       }
 
@@ -587,7 +580,7 @@ export class GlobalInteractionInterceptor {
         element: context.testSubj,
         timestamp: new Date().toISOString(),
       };
-      console.log('🔍 DEBUG: Returning basic context:', basicResult);
+      console.debug('🔍 DEBUG: Returning basic context:', basicResult);
       return basicResult;
     } catch (error) {
       console.warn('❌ Error executing action for context:', error);
@@ -599,13 +592,13 @@ export class GlobalInteractionInterceptor {
    * Extract document expansion context
    */
   private extractDocumentExpansionContext(element: HTMLElement): any {
-    console.log('🔍 DEBUG: extractDocumentExpansionContext called with element:', element);
+    console.debug('🔍 DEBUG: extractDocumentExpansionContext called with element:', element);
 
     const tableRow = element.closest('tr');
-    console.log('🔍 DEBUG: Found table row:', !!tableRow);
+    console.debug('🔍 DEBUG: Found table row:', !!tableRow);
 
     if (!tableRow) {
-      console.log('🔍 DEBUG: No table row found, returning null');
+      console.debug('🔍 DEBUG: No table row found, returning null');
       return null;
     }
 
@@ -614,7 +607,7 @@ export class GlobalInteractionInterceptor {
     const rowIndex = this.getRowIndex(tableRow);
     const tableInfo = this.getTableInfo(tableRow);
 
-    console.log('🔍 DEBUG: Extracted document context:', {
+    console.debug('🔍 DEBUG: Extracted document context:', {
       documentId,
       rowIndex,
       documentDataKeys: Object.keys(documentData),

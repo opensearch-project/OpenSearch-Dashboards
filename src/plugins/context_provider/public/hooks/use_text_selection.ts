@@ -2,8 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-/* eslint-disable no-console */
-
 import { useEffect, useRef, useState } from 'react';
 import { useAssistantContext } from './use_assistant_context';
 
@@ -17,22 +15,15 @@ export const useTextSelection = () => {
   const lastSelectedTextRef = useRef<string>('');
   const hasSelectionRef = useRef<boolean>(false);
 
-  console.log('[TEXT_SELECTION] Hook initialized, current selection:', currentSelection);
-
   const handleSelectionChange = () => {
-    console.log('[TEXT_SELECTION] Selection event triggered');
-
     // Get the current selection immediately
     const selection = window.getSelection();
     const selectedText = selection?.toString().trim() || '';
-
-    console.log('[TEXT_SELECTION] Immediate selected text:', selectedText);
 
     // Store if we have a selection right now
     if (selectedText.length >= 3) {
       lastSelectedTextRef.current = selectedText;
       hasSelectionRef.current = true;
-      console.log('[TEXT_SELECTION] Stored valid selection:', selectedText);
     }
 
     // Clear any pending timeout
@@ -44,10 +35,6 @@ export const useTextSelection = () => {
     selectionTimeoutRef.current = setTimeout(() => {
       // If we had a valid selection, use it
       if (hasSelectionRef.current && lastSelectedTextRef.current) {
-        console.log(
-          '[TEXT_SELECTION] Setting selection state to stored:',
-          lastSelectedTextRef.current
-        );
         setCurrentSelection(lastSelectedTextRef.current);
       } else {
         // Only clear if we explicitly have no selection AND no stored selection
@@ -55,7 +42,6 @@ export const useTextSelection = () => {
         const currentText = currentSel?.toString().trim() || '';
 
         if (!currentText && !lastSelectedTextRef.current) {
-          console.log('[TEXT_SELECTION] Clearing selection (no stored or current selection)');
           setCurrentSelection('');
         }
       }
@@ -78,20 +64,15 @@ export const useTextSelection = () => {
         const selectedText = selection?.toString().trim() || '';
 
         if (!selectedText) {
-          console.log('[TEXT_SELECTION] Clearing selection on non-chat click');
           lastSelectedTextRef.current = '';
           hasSelectionRef.current = false;
           setCurrentSelection('');
         }
       }, 100);
-    } else {
-      console.log('[TEXT_SELECTION] Click on chat element, preserving selection');
     }
   };
 
   useEffect(() => {
-    console.log('[TEXT_SELECTION] Setting up event listeners');
-
     // Listen for selection events
     document.addEventListener('selectionchange', handleSelectionChange);
     document.addEventListener('mouseup', handleSelectionChange);
@@ -99,8 +80,6 @@ export const useTextSelection = () => {
     document.addEventListener('mousedown', handleMouseDown);
 
     return () => {
-      console.log('[TEXT_SELECTION] Cleaning up event listeners');
-
       // Cleanup listeners
       document.removeEventListener('selectionchange', handleSelectionChange);
       document.removeEventListener('mouseup', handleSelectionChange);
@@ -127,8 +106,6 @@ export const useTextSelection = () => {
         categories: ['selection', 'chat'],
       }
     : null;
-
-  console.log('[TEXT_SELECTION] Registering context with useAssistantContext:', contextData);
 
   // Register the selected text with assistant context
   useAssistantContext(contextData);

@@ -10,6 +10,7 @@
  * this file be licensed under the Apache-2.0 license or a
  * compatible open source license.
  */
+/* eslint-disable no-console */
 
 import { useState, useEffect } from 'react';
 import { ContextData } from '../types';
@@ -26,11 +27,11 @@ export function useContextProvider() {
         if (contextProvider && typeof contextProvider.getCurrentContext === 'function') {
           const currentContext = await contextProvider.getCurrentContext();
           console.log('🔄 Context updated for AI Chatbot:', currentContext);
-          console.log(
-            '🔥 DEBUG: AI Chatbot received context with keys:',
+          console.debug(
+            '🔥 debug: AI Chatbot received context with keys:',
             currentContext?.data ? Object.keys(currentContext.data) : 'no data'
           );
-          console.log(
+          console.debug(
             '🔥 DEBUG: AI Chatbot expandedDocuments count:',
             currentContext?.data?.expandedDocuments?.length || 0
           );
