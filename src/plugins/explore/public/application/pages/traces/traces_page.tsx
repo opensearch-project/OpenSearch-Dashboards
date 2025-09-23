@@ -8,6 +8,8 @@ import '../explore_page.scss';
 import React from 'react';
 import { EuiErrorBoundary, EuiPage, EuiPageBody } from '@elastic/eui';
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
+import { useDispatch } from 'react-redux';
+import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryPanel } from '../../../components/query_panel';
@@ -20,7 +22,8 @@ import { useDatasetContext } from '../../context';
 import { BottomContainer } from '../../../components/container/bottom_container';
 import { TopNav } from '../../../components/top_nav/top_nav';
 import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
-
+import { EXPLORE_PATTERNS_TAB_ID, EXPLORE_VISUALIZATION_TAB_ID } from '../../../../common';
+import { setActiveTab } from '../../utils/state_management/slices';
 /**
  * Main application component for the Explore plugin
  */
@@ -30,6 +33,34 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { dataset, isLoading } = useDatasetContext();
   const { savedExplore } = useInitPage();
+  const { keyboardShortcut } = services;
+  const dispatch = useDispatch();
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'switchToPatternsTabTraces',
+    pluginId: 'explore',
+    name: i18n.translate('explore.tracesPage.switchToPatternsTabShortcut', {
+      defaultMessage: 'Switch to patterns tab',
+    }),
+    category: i18n.translate('explore.tracesPage.navigationCategory', {
+      defaultMessage: 'Navigation',
+    }),
+    keys: 'shift+p',
+    execute: () => dispatch(setActiveTab(EXPLORE_PATTERNS_TAB_ID)),
+  });
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'switchToVisualizationTabTraces',
+    pluginId: 'explore',
+    name: i18n.translate('explore.tracesPage.switchToVisualizationTabShortcut', {
+      defaultMessage: 'Switch to visualization tab',
+    }),
+    category: i18n.translate('explore.tracesPage.navigationCategory', {
+      defaultMessage: 'Navigation',
+    }),
+    keys: 'shift+v',
+    execute: () => dispatch(setActiveTab(EXPLORE_VISUALIZATION_TAB_ID)),
+  });
 
   useInitialQueryExecution(services);
   useUrlStateSync(services);

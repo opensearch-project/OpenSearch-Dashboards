@@ -9,16 +9,15 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSwitch,
-  EuiFieldText,
   EuiText,
   EuiSplitPanel,
   EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { CategoryAxis, VisColumn, ValueAxis, Positions, AxisRole } from '../../types';
-import { useDebouncedValue } from '../../utils/use_debounced_value';
 import { StyleAccordion } from '../style_accordion';
-import { DebouncedTruncateField } from '.././utils';
+import { DebouncedFieldNumber, DebouncedFieldText } from '.././utils';
+import { AXIS_LABEL_MAX_LENGTH } from '../../constants';
 
 interface AxesOptionsProps {
   categoryAxes: CategoryAxis[];
@@ -30,27 +29,6 @@ interface AxesOptionsProps {
   dateColumns: VisColumn[];
   axisColumnMappings: Partial<Record<AxisRole, VisColumn>>;
 }
-
-// Component for a single axis title input with debouncing
-const DebouncedAxisTitle: React.FC<{
-  value: string;
-  placeholder: string;
-  onChange: (value: string) => void;
-  label: string;
-}> = ({ value, placeholder, onChange, label }) => {
-  const [localValue, handleChange] = useDebouncedValue(value, onChange, 500);
-
-  return (
-    <EuiFormRow label={label}>
-      <EuiFieldText
-        compressed
-        value={localValue}
-        onChange={(e) => handleChange(e.target.value)}
-        placeholder={placeholder}
-      />
-    </EuiFormRow>
-  );
-};
 
 export const AxesOptions: React.FC<AxesOptionsProps> = ({
   categoryAxes,
@@ -80,31 +58,6 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
     onValueAxesChange(updatedAxes);
   };
 
-  const getCategoryAxisDisplayTitle = (axis: CategoryAxis) => {
-    if (axis.title?.text && axis.title.text.trim() !== '') {
-      return axis.title.text;
-    }
-    return (
-      axisColumnMappings[AxisRole.X]?.name ||
-      i18n.translate('explore.vis.gridOptions.categoryFallbackName', {
-        defaultMessage: 'Category',
-      })
-    );
-  };
-  const getValueAxisDisplayTitle = (axis: ValueAxis, index: number) => {
-    if (axis.title?.text && axis.title.text.trim() !== '') {
-      return axis.title.text;
-    }
-    const axisRole = index === 0 ? AxisRole.Y : AxisRole.Y_SECOND;
-    return (
-      axisColumnMappings[axisRole]?.name ||
-      i18n.translate('explore.vis.gridOptions.metricFallbackName', {
-        defaultMessage: 'Metric {index}',
-        values: { index: index + 1 },
-      })
-    );
-  };
-
   // Determine if we're in Rule 2 scenario (2 metrics, 1 date, 0 categories)
   const isRule2 =
     numericalColumns.length === 2 && dateColumns.length === 1 && categoricalColumns.length === 0;
@@ -127,7 +80,12 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
             position: Positions.LEFT, // Force left position for first axis
             show: valueAxes[0]?.show ?? true,
             title: valueAxes[0]?.title || { text: '' },
-            labels: valueAxes[0]?.labels || { show: true, rotate: 0, truncate: 100, filter: false },
+            labels: valueAxes[0]?.labels || {
+              show: true,
+              rotate: 0,
+              truncate: AXIS_LABEL_MAX_LENGTH,
+              filter: false,
+            },
           },
           {
             ...(valueAxes[1] || {}),
@@ -137,7 +95,12 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
             position: Positions.RIGHT, // Force right position for second axis
             show: valueAxes[1]?.show ?? true,
             title: valueAxes[1]?.title || { text: '' },
-            labels: valueAxes[1]?.labels || { show: true, rotate: 0, truncate: 100, filter: false },
+            labels: valueAxes[1]?.labels || {
+              show: true,
+              rotate: 0,
+              truncate: AXIS_LABEL_MAX_LENGTH,
+              filter: false,
+            },
           },
         ];
         onValueAxesChange(newValueAxes);
@@ -148,6 +111,10 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
   if (!categoryAxes || !valueAxes || !onCategoryAxesChange || !onValueAxesChange) {
     return null;
   }
+
+  const axisLabelTruncateFieldTitle = i18n.translate('explore.vis.axis.label.truncate.label', {
+    defaultMessage: 'Truncate after',
+  });
 
   return (
     <StyleAccordion
@@ -184,20 +151,23 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
           </EuiFormRow>
           {axis.show && (
             <>
-              <DebouncedAxisTitle
-                value={getCategoryAxisDisplayTitle(axis)}
-                placeholder={i18n.translate('explore.vis.metric.axisName', {
-                  defaultMessage: 'Axis name',
-                })}
-                onChange={(text) =>
-                  updateCategoryAxis(index, {
-                    title: { ...axis.title, text },
-                  })
-                }
-                label={i18n.translate('explore.vis.gridOptions.axisTitle', {
+              <EuiFormRow
+                label={i18n.translate('explore.vis.axisTitle', {
                   defaultMessage: 'Title',
                 })}
-              />
+              >
+                <DebouncedFieldText
+                  value={axis.title.text ?? ''}
+                  placeholder={i18n.translate('explore.vis.axisName', {
+                    defaultMessage: 'Axis name',
+                  })}
+                  onChange={(value) =>
+                    updateCategoryAxis(index, {
+                      title: { ...axis.title, text: value },
+                    })
+                  }
+                />
+              </EuiFormRow>
               <EuiFormRow
                 label={i18n.translate('explore.vis.gridOptions.axisPosition', {
                   defaultMessage: 'Position',
@@ -277,6 +247,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                           },
                         });
                       }}
+                      onMouseUp={(e) => e.stopPropagation()}
                       options={[
                         { value: 'horizontal', text: 'Horizontal' },
                         { value: 'vertical', text: 'Vertical' },
@@ -285,20 +256,20 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                     />
                   </EuiFormRow>
 
-                  <DebouncedTruncateField
-                    value={axis.labels.truncate ?? 100}
-                    onChange={(truncateValue) => {
-                      updateCategoryAxis(index, {
-                        labels: {
-                          ...axis.labels,
-                          truncate: truncateValue,
-                        },
-                      });
-                    }}
-                    label={i18n.translate('explore.vis.gridOptions.labelTruncate', {
-                      defaultMessage: 'Truncate after',
-                    })}
-                  />
+                  <EuiFormRow label={axisLabelTruncateFieldTitle}>
+                    <DebouncedFieldNumber
+                      value={axis.labels.truncate}
+                      defaultValue={AXIS_LABEL_MAX_LENGTH}
+                      onChange={(truncateValue) => {
+                        updateCategoryAxis(index, {
+                          labels: {
+                            ...axis.labels,
+                            truncate: truncateValue ?? AXIS_LABEL_MAX_LENGTH,
+                          },
+                        });
+                      }}
+                    />
+                  </EuiFormRow>
                 </>
               )}
             </>
@@ -347,20 +318,23 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
 
                 {axis.show && (
                   <>
-                    <DebouncedAxisTitle
-                      value={getValueAxisDisplayTitle(axis, index)}
-                      placeholder={i18n.translate('explore.vis.metric.axisName', {
-                        defaultMessage: 'Axis name',
-                      })}
-                      onChange={(text) =>
-                        updateValueAxis(index, {
-                          title: { ...axis.title, text },
-                        })
-                      }
-                      label={i18n.translate('explore.vis.gridOptions.axisTitle', {
+                    <EuiFormRow
+                      label={i18n.translate('explore.vis.axisTitle', {
                         defaultMessage: 'Title',
                       })}
-                    />
+                    >
+                      <DebouncedFieldText
+                        value={axis.title.text ?? ''}
+                        placeholder={i18n.translate('explore.vis.axisName', {
+                          defaultMessage: 'Axis name',
+                        })}
+                        onChange={(value) =>
+                          updateValueAxis(index, {
+                            title: { ...axis.title, text: value },
+                          })
+                        }
+                      />
+                    </EuiFormRow>
 
                     <EuiFormRow
                       label={i18n.translate('explore.vis.gridOptions.axisPosition', {
@@ -445,6 +419,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                                 },
                               });
                             }}
+                            onMouseUp={(e) => e.stopPropagation()}
                             options={[
                               { value: 'horizontal', text: 'Horizontal' },
                               { value: 'vertical', text: 'Vertical' },
@@ -453,20 +428,20 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                           />
                         </EuiFormRow>
 
-                        <DebouncedTruncateField
-                          value={axis.labels.truncate ?? 100}
-                          onChange={(truncateValue) => {
-                            updateValueAxis(index, {
-                              labels: {
-                                ...axis.labels,
-                                truncate: truncateValue,
-                              },
-                            });
-                          }}
-                          label={i18n.translate('explore.vis.gridOptions.labelTruncate', {
-                            defaultMessage: 'Truncate after',
-                          })}
-                        />
+                        <EuiFormRow label={axisLabelTruncateFieldTitle}>
+                          <DebouncedFieldNumber
+                            value={axis.labels.truncate}
+                            defaultValue={AXIS_LABEL_MAX_LENGTH}
+                            onChange={(truncateValue) => {
+                              updateValueAxis(index, {
+                                labels: {
+                                  ...axis.labels,
+                                  truncate: truncateValue ?? AXIS_LABEL_MAX_LENGTH,
+                                },
+                              });
+                            }}
+                          />
+                        </EuiFormRow>
                       </>
                     )}
                   </>
@@ -502,20 +477,23 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                 </EuiFormRow>
                 {axis.show && (
                   <>
-                    <DebouncedAxisTitle
-                      value={getValueAxisDisplayTitle(axis, index)}
-                      placeholder={i18n.translate('explore.vis.metric.axisName', {
-                        defaultMessage: 'Axis name',
-                      })}
-                      onChange={(text) =>
-                        updateValueAxis(index, {
-                          title: { ...axis.title, text },
-                        })
-                      }
-                      label={i18n.translate('explore.vis.gridOptions.axisTitle', {
+                    <EuiFormRow
+                      label={i18n.translate('explore.vis.axisTitle', {
                         defaultMessage: 'Title',
                       })}
-                    />
+                    >
+                      <DebouncedFieldText
+                        value={axis.title.text ?? ''}
+                        placeholder={i18n.translate('explore.vis.axisName', {
+                          defaultMessage: 'Axis name',
+                        })}
+                        onChange={(value) =>
+                          updateValueAxis(index, {
+                            title: { ...axis.title, text: value },
+                          })
+                        }
+                      />
+                    </EuiFormRow>
 
                     <EuiFormRow
                       label={i18n.translate('explore.vis.gridOptions.axisPosition', {
@@ -599,6 +577,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                                 },
                               });
                             }}
+                            onMouseUp={(e) => e.stopPropagation()}
                             options={[
                               { value: 'horizontal', text: 'Horizontal' },
                               { value: 'vertical', text: 'Vertical' },
@@ -607,20 +586,20 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                           />
                         </EuiFormRow>
 
-                        <DebouncedTruncateField
-                          value={axis.labels.truncate ?? 100}
-                          onChange={(truncateValue) => {
-                            updateValueAxis(index, {
-                              labels: {
-                                ...axis.labels,
-                                truncate: truncateValue,
-                              },
-                            });
-                          }}
-                          label={i18n.translate('explore.vis.gridOptions.labelTruncate', {
-                            defaultMessage: 'Truncate after',
-                          })}
-                        />
+                        <EuiFormRow label={axisLabelTruncateFieldTitle}>
+                          <DebouncedFieldNumber
+                            value={axis.labels.truncate}
+                            defaultValue={AXIS_LABEL_MAX_LENGTH}
+                            onChange={(truncateValue) => {
+                              updateValueAxis(index, {
+                                labels: {
+                                  ...axis.labels,
+                                  truncate: truncateValue ?? AXIS_LABEL_MAX_LENGTH,
+                                },
+                              });
+                            }}
+                          />
+                        </EuiFormRow>
                       </>
                     )}
                   </>

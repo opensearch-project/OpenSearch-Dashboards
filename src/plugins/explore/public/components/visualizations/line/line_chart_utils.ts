@@ -4,7 +4,8 @@
  */
 
 import { LineChartStyleControls } from './line_vis_config';
-import { VisColumn, Positions } from '../types';
+import { VisColumn, Positions, VisFieldType } from '../types';
+import { DEFAULT_OPACITY } from '../constants';
 
 /**
  * Get Vega interpolation from UI lineMode
@@ -31,6 +32,13 @@ type VegaLiteMarkConfig =
       tooltip: boolean;
     }
   | {
+      type: 'area';
+      opacity: number;
+      tooltip: boolean;
+      strokeWidth: number;
+      interpolate: string;
+    }
+  | {
       type: 'point';
       tooltip: boolean;
       size: number;
@@ -48,10 +56,11 @@ type VegaLiteMarkConfig =
  * @param styles The style options
  * @param markType The mark type ('line' or 'bar')
  * @returns The mark configuration object
+ * TODO: refactor this to create chart type specific mark builder instead of having one builder for all
  */
 export const buildMarkConfig = (
   styles: Partial<LineChartStyleControls> | undefined,
-  markType: 'line' | 'bar' = 'line'
+  markType: 'line' | 'bar' | 'area' = 'line'
 ): VegaLiteMarkConfig => {
   // Default values - handle undefined styles object
   const lineStyle = styles?.lineStyle ?? 'both';
@@ -62,8 +71,18 @@ export const buildMarkConfig = (
   if (markType === 'bar') {
     return {
       type: 'bar',
-      opacity: 0.7,
+      opacity: DEFAULT_OPACITY,
       tooltip: showTooltip,
+    };
+  }
+
+  if (markType === 'area') {
+    return {
+      type: 'area',
+      opacity: DEFAULT_OPACITY,
+      tooltip: showTooltip,
+      strokeWidth: lineWidth,
+      interpolate: getVegaInterpolation(lineMode),
     };
   }
 
@@ -171,13 +190,16 @@ export const applyAxisStyling = (
   const isRule2 =
     numericalColumns?.length === 2 && dateColumns?.length === 1 && categoricalColumns?.length === 0;
 
+  // Initialize the axis configuration
+  const axisConfig = { ...baseAxis };
+
   if (axisType === 'category' && styles.categoryAxes && styles.categoryAxes.length > 0) {
     const categoryAxis = styles.categoryAxes[0];
 
     // If show is false, hide the entire axis
     if (categoryAxis.show === false) {
       return {
-        ...baseAxis,
+        ...axisConfig,
         title: null,
         labels: false,
         ticks: false,
@@ -186,16 +208,22 @@ export const applyAxisStyling = (
       };
     }
 
-    return {
-      ...baseAxis,
-      title: categoryAxis.title?.text || baseAxis.title,
-      orient: categoryAxis.position || baseAxis.orient,
-      labelAngle: categoryAxis.labels?.rotate || 0,
-      labelLimit: categoryAxis.labels?.truncate || 100,
-      grid: categoryAxis?.grid?.showLines ?? false, // Explicitly check grid object
-      labels: categoryAxis.labels?.show,
-      labelOverlap: 'greedy',
-    };
+    // Apply category axis styling
+    axisConfig.title = categoryAxis.title?.text || axisConfig.title;
+    axisConfig.orient = categoryAxis.position || axisConfig.orient;
+    axisConfig.labelAngle = categoryAxis.labels?.rotate || 0;
+    axisConfig.labelLimit = categoryAxis.labels?.truncate || 100;
+    axisConfig.grid = categoryAxis?.grid?.showLines ?? false; // Explicitly check grid object
+    axisConfig.labels = categoryAxis.labels?.show;
+    axisConfig.labelOverlap = 'greedy';
+    axisConfig.labelFlush = false;
+
+    // Add time format for date schema
+    if (dateColumns?.length && dateColumns[0]?.schema === VisFieldType.Date) {
+      axisConfig.format = { seconds: '%I:%M:%S', milliseconds: '%I:%M:%S.%L' };
+    }
+
+    return axisConfig;
   } else if (axisType === 'value') {
     // Make sure we have the correct number of value axes for Rule 2
     if (isRule2 && (!styles.valueAxes || styles.valueAxes.length < 2)) {
@@ -238,7 +266,7 @@ export const applyAxisStyling = (
 
       return {
         ...baseAxis,
-        title: valueAxis.title?.text || baseAxis.title,
+        title: valueAxis.title?.text,
         orient,
         labelAngle: valueAxis.labels?.rotate || 0,
         labelLimit: valueAxis.labels?.truncate || 100,

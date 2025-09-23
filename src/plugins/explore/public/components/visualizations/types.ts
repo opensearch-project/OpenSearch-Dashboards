@@ -116,6 +116,7 @@ export interface AxisLabels {
   show: boolean;
   filter: boolean;
   rotate: number;
+  // TODO: make `truncate` optional
   truncate: number;
 }
 
@@ -243,6 +244,53 @@ export enum TimeUnit {
   SECOND = 'yearmonthdatehoursminutesseconds',
 }
 
+export interface AxisConfig {
+  grid: boolean;
+  gridColor?: string;
+  gridOpacity?: number;
+  labelSeparation?: number;
+  orient?: Positions;
+  title?: string | null;
+  labels?: boolean;
+  labelAngle?: number;
+  labelLimit?: number;
+  labelOverlap?: string;
+  labelFlush?: boolean;
+  ticks?: boolean;
+  domain?: boolean;
+  format?: {
+    seconds?: string;
+    milliseconds?: string;
+  };
+}
+
 export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';
 
 export type PercentageColor = 'standard' | 'inverted';
+
+export enum FilterOperator {
+  Contains = 'contains',
+  Equals = 'equals',
+  Equal = '=',
+  NotEqual = '!=',
+  GreaterThan = '>',
+  GreaterThanOrEqual = '>=',
+  LessThan = '<',
+  LessThanOrEqual = '<=',
+}
+
+export type ColorMode = 'auto' | 'colored_text' | 'colored_background';
+
+export type CellAlignment = 'auto' | 'left' | 'center' | 'right';
+export interface UnitItem {
+  id: string;
+  name: string;
+  symbol?: string;
+  display?: (value: number, symbol?: string) => any;
+  fontScale?: number;
+}
+
+export interface Unit {
+  name: string;
+  units: UnitItem[];
+}

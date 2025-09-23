@@ -277,6 +277,7 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
     <I18nProvider>
       <>
         <EuiEmptyPrompt
+          className="exploreNoResults"
           iconType="editorCodeBlock"
           iconColor="default"
           data-test-subj="discoverNoResults"

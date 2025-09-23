@@ -150,7 +150,10 @@ export function TraceDetailsView({ hit }: DocViewRenderProps) {
           filters: [],
         });
 
-        const transformed = transformPPLDataToTraceHits(response);
+        let transformed = transformPPLDataToTraceHits(response);
+        transformed = transformed.filter(
+          (transformedHit) => !!transformedHit.startTimeUnixNano && !!transformedHit.endTimeUnixNano
+        );
         setTransformedHits(transformed);
       } catch (err) {
         // eslint-disable-next-line no-console

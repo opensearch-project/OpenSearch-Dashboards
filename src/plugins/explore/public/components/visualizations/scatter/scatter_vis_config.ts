@@ -15,6 +15,7 @@ import {
   VisFieldType,
   TitleOptions,
 } from '../types';
+import { AXIS_LABEL_MAX_LENGTH } from '../constants';
 
 export interface ExclusiveScatterConfig {
   pointShape: PointShape;
@@ -48,7 +49,7 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
   exclusive: {
     pointShape: PointShape.CIRCLE,
     angle: 0,
-    filled: false,
+    filled: true,
   },
   // Standard axes
   standardAxes: [
@@ -61,7 +62,7 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
         show: true,
         rotate: 0,
         filter: false,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       title: {
         text: '',
@@ -80,7 +81,7 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
         show: true,
         rotate: 0,
         filter: false,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       title: {
         text: '',

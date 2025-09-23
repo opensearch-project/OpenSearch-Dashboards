@@ -14,6 +14,16 @@ jest.mock('@osd/i18n', () => ({
   },
 }));
 
+jest.mock('../style_panel/unit/unit_panel', () => ({
+  UnitPanel: jest.fn(({ unitId, onUnitChange }) => (
+    <div data-test-subj="mockMetricUnitPanel">
+      <select data-test-subj="changeUnit" onClick={() => onUnitChange('number')}>
+        <option value="number">Number</option>
+      </select>
+    </div>
+  )),
+}));
+
 describe('MetricVisStyleControls', () => {
   const mockProps: MetricVisStyleControlsProps = {
     axisColumnMappings: {
@@ -209,5 +219,39 @@ describe('MetricVisStyleControls', () => {
     const titleInput = screen.getByPlaceholderText('Title');
 
     expect(titleInput).toHaveValue('');
+  });
+
+  it('renders unit panel', () => {
+    render(<MetricVisStyleControls {...mockProps} />);
+    expect(screen.getByTestId('mockMetricUnitPanel')).toBeInTheDocument();
+  });
+
+  it('calls onStyleChange when unit is changed', () => {
+    render(<MetricVisStyleControls {...mockProps} />);
+    const unitSelect = screen.getByTestId('changeUnit');
+    fireEvent.click(unitSelect);
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ unitId: 'number' });
+  });
+
+  it('calls stopPropagation on mouseUp for color schema select', () => {
+    const propsWithColor = {
+      ...mockProps,
+      styleOptions: { ...defaultMetricChartStyles, useColor: true },
+    };
+    render(<MetricVisStyleControls {...propsWithColor} />);
+
+    const colorSchemaSelect = screen.getByTestId('colorSchemaSelect');
+    expect(colorSchemaSelect).toBeInTheDocument(); // Verify element exists
+
+    const stopPropagation = jest.fn();
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent, 'stopPropagation', { value: stopPropagation });
+
+    colorSchemaSelect.dispatchEvent(mouseUpEvent);
+
+    expect(stopPropagation).toHaveBeenCalled();
   });
 });

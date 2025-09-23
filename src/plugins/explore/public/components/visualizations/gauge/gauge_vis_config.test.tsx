@@ -6,6 +6,7 @@
 import React from 'react';
 import { createGaugeConfig, GaugeChartStyleControls } from './gauge_vis_config';
 import { GaugeVisStyleControls } from './gauge_vis_options';
+import { CalculationMethod } from '../utils/calculation';
 
 // Mock the React.createElement function
 jest.mock('react', () => ({
@@ -31,7 +32,6 @@ describe('createGaugeConfig', () => {
     expect(defaults.showTitle).toBe(true);
     expect(defaults.title).toBe('');
     expect(defaults.thresholds).toStrictEqual([]);
-    expect(defaults.baseColor).toBe('#9EE9FA');
     expect(defaults.valueCalculation).toBe('last');
   });
 
@@ -45,7 +45,7 @@ describe('createGaugeConfig', () => {
         title: '',
         thresholds: [],
         baseColor: '#9EE9FA',
-        valueCalculation: 'last',
+        valueCalculation: 'last' as CalculationMethod,
       },
       onStyleChange: jest.fn(),
       numericalColumns: [],

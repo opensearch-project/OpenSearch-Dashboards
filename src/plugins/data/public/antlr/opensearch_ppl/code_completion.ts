@@ -10,6 +10,7 @@
  */
 
 import { monaco } from '@osd/monaco';
+import { SimplifiedOpenSearchPPLLexer } from '@osd/antlr-grammar';
 import { CursorPosition, OpenSearchPplAutocompleteResult } from '../shared/types';
 import {
   fetchColumnValues,
@@ -30,7 +31,6 @@ import {
   KEYWORD_ITEM_KIND_MAP,
 } from './constants';
 import { Documentation } from './ppl_documentation';
-
 // Centralized function to generate appropriate insertion text based on context
 function getInsertText(
   text: string,
@@ -265,6 +265,23 @@ export const getSimplifiedPPLSuggestions = async ({
       });
     }
 
+    // Handle single quote suggestions when suggestSingleQuotes flag is set
+    if (suggestions.suggestSingleQuotes) {
+      const singleQuoteDetails = SUPPORTED_NON_LITERAL_KEYWORDS.get(
+        SimplifiedOpenSearchPPLLexer.SQUOTA_STRING
+      );
+      if (singleQuoteDetails) {
+        finalSuggestions.push({
+          text: singleQuoteDetails.label,
+          insertText: singleQuoteDetails.insertText,
+          type: monaco.languages.CompletionItemKind.Keyword,
+          detail: SuggestionItemDetailsTags.Keyword,
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule?.InsertAsSnippet,
+          sortText: singleQuoteDetails.sortText,
+        });
+      }
+    }
+
     // Fill in PPL keywords
     if (suggestions.suggestKeywords?.length) {
       const literalKeywords = suggestions.suggestKeywords.filter((sk) => sk.value);
@@ -272,7 +289,7 @@ export const getSimplifiedPPLSuggestions = async ({
         ...literalKeywords.map((sk) => {
           const keywordDetails = PPL_SUGGESTION_IMPORTANCE.get(sk.id) ?? null;
           if (keywordDetails && keywordDetails.isFunction) {
-            const functionName = sk.value.toLowerCase();
+            const functionName = sk.value;
             return {
               text: `${functionName}()`,
               type:
@@ -289,24 +306,23 @@ export const getSimplifiedPPLSuggestions = async ({
             };
           } else if (keywordDetails && !keywordDetails.isFunction) {
             return {
-              text: sk.value.toLowerCase(),
+              text: sk.value,
               type:
                 KEYWORD_ITEM_KIND_MAP.get(keywordDetails.type) ??
                 monaco.languages.CompletionItemKind.Keyword,
-              insertText: getInsertText(sk.value.toLowerCase(), 'keyword', isInQuotes),
+              insertText: getInsertText(sk.value, 'keyword', isInQuotes),
               detail: keywordDetails.type,
               sortText: keywordDetails.importance,
               documentation: Documentation[sk.value.toUpperCase()] ?? '',
             };
           } else {
             return {
-              text: sk.value.toLowerCase(),
-              insertText: getInsertText(sk.value.toLowerCase(), 'keyword', isInQuotes),
+              text: sk.value,
+              insertText: getInsertText(sk.value, 'keyword', isInQuotes),
               type: monaco.languages.CompletionItemKind.Keyword,
               detail: SuggestionItemDetailsTags.Keyword,
               // sortText is the only option to sort suggestions, compares strings
-              sortText:
-                PPL_SUGGESTION_IMPORTANCE.get(sk.id)?.importance ?? '98' + sk.value.toLowerCase(), // '98' used to devalue every other suggestion
+              sortText: PPL_SUGGESTION_IMPORTANCE.get(sk.id)?.importance ?? '98' + sk.value, // '98' used to devalue every other suggestion
               documentation: Documentation[sk.value.toUpperCase()] ?? '',
             };
           }

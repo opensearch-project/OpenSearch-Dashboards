@@ -18,6 +18,9 @@ import {
 } from '../types';
 import { LineStyle } from './line_exclusive_vis_options';
 import { TooltipOptions } from '../types';
+import { AXIS_LABEL_MAX_LENGTH } from '../constants';
+
+export type LineMode = 'straight' | 'smooth' | 'stepped';
 
 // Complete line chart style controls interface
 export interface LineChartStyleControls {
@@ -26,7 +29,7 @@ export interface LineChartStyleControls {
   addTimeMarker: boolean;
 
   lineStyle: LineStyle;
-  lineMode: string;
+  lineMode: LineMode;
   lineWidth: number;
   tooltipOptions: TooltipOptions;
 
@@ -40,13 +43,13 @@ export interface LineChartStyleControls {
   titleOptions: TitleOptions;
 }
 
-const defaultLineChartStyles: LineChartStyleControls = {
+export const defaultLineChartStyles: LineChartStyleControls = {
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,
 
   lineStyle: 'both',
-  lineMode: 'smooth',
+  lineMode: 'straight',
   lineWidth: 2,
   tooltipOptions: {
     mode: 'all',
@@ -75,13 +78,13 @@ const defaultLineChartStyles: LineChartStyleControls = {
         show: true,
         filter: true,
         rotate: 0,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       title: {
         text: '',
       },
       grid: {
-        showLines: false,
+        showLines: true,
       },
     },
   ],
@@ -98,13 +101,13 @@ const defaultLineChartStyles: LineChartStyleControls = {
         show: true,
         rotate: 0,
         filter: false,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       title: {
         text: '',
       },
       grid: {
-        showLines: false,
+        showLines: true,
       },
     },
   ],

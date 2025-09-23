@@ -12,29 +12,24 @@ import {
   VisColumn,
   AxisColumnMappings,
   AxisSupportedStyles,
+  Threshold,
+  AxisConfig,
 } from '../types';
 
 export const applyAxisStyling = (
   axis?: VisColumn,
   axisStyle?: StandardAxes,
   disableGrid?: boolean
-): any => {
+): AxisConfig => {
   const gridEnabled = disableGrid ? false : axisStyle?.grid.showLines ?? true;
 
-  const fullAxisConfig: any = {
+  const fullAxisConfig: AxisConfig = {
     // Grid settings
     grid: gridEnabled,
-    gridColor: '#E0E0E0',
-    gridOpacity: 0.5,
     labelSeparation: 8,
+    orient: axisStyle?.position,
+    title: axisStyle?.title.text || axis?.name,
   };
-
-  // Apply position
-
-  fullAxisConfig.orient = axisStyle?.position;
-
-  // Apply title settings
-  fullAxisConfig.title = axisStyle?.title.text || axis?.name;
 
   // Apply axis visibility
   if (!axisStyle?.show) {
@@ -47,23 +42,25 @@ export const applyAxisStyling = (
 
   // Apply label settings
   if (axisStyle?.labels) {
-    if (!axisStyle?.labels.show) {
-      fullAxisConfig.labels = false;
-    } else {
-      fullAxisConfig.labels = true;
-      // Apply label rotation/alignment
-      if (axisStyle?.labels.rotate !== undefined) {
-        fullAxisConfig.labelAngle = axisStyle?.labels.rotate;
+    fullAxisConfig.labels = !!axisStyle.labels.show;
+    if (fullAxisConfig.labels) {
+      fullAxisConfig.labelAngle = 0;
+      fullAxisConfig.labelLimit = 100;
+
+      if (axisStyle.labels.rotate !== undefined) {
+        fullAxisConfig.labelAngle = axisStyle.labels.rotate;
+      }
+      if (axisStyle.labels.truncate !== undefined && axisStyle.labels.truncate > 0) {
+        fullAxisConfig.labelLimit = axisStyle.labels.truncate;
       }
 
-      // Apply label truncation
-      if (axisStyle?.labels.truncate !== undefined && axisStyle?.labels.truncate > 0) {
-        fullAxisConfig.labelLimit = axisStyle?.labels.truncate;
-      }
-
-      // Apply label filtering (this controls overlapping labels)
       fullAxisConfig.labelOverlap = 'greedy';
+      fullAxisConfig.labelFlush = false;
     }
+  }
+
+  if (axis?.schema === VisFieldType.Date) {
+    fullAxisConfig.format = { seconds: '%I:%M:%S', milliseconds: '%I:%M:%S.%L' };
   }
 
   return fullAxisConfig;
@@ -271,3 +268,31 @@ export const getTooltipFormat = (
   const timeUnit = inferTimeUnitFromTimestamps(data, field);
   return timeUnit ? timeUnitToFormat[timeUnit] ?? fallback : fallback;
 };
+
+/**
+ * Determines the color for a value based on a set of thresholds.
+ * @param value - The value to evaluate (e.g., a number, string, or any type that can be converted to a number).
+ * @param thresholds - Array of threshold objects with `value` (number) and `color` (string) properties.
+ * @returns The matched threshold
+ */
+export function getThresholdByValue<T>(
+  value: any,
+  thresholds: Threshold[] = []
+): Threshold | undefined {
+  const numValue = Number(value);
+  if (isNaN(numValue)) {
+    return undefined;
+  }
+
+  // Sort thresholds in descending order
+  const sortedThresholds = [...thresholds].sort((a, b) => b.value - a.value);
+
+  // Find the first threshold where the value is greater than or equal to the threshold value
+  for (const threshold of sortedThresholds) {
+    if (numValue >= threshold.value) {
+      return threshold;
+    }
+  }
+
+  return undefined;
+}

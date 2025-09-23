@@ -33,6 +33,7 @@ import 'brace/mode/json';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { EventEmitter } from 'events';
+import { i18n } from '@osd/i18n';
 
 import { EditorRenderProps } from 'src/plugins/visualize/public';
 import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
@@ -71,6 +72,20 @@ function DefaultEditor({
   const onClickCollapse = useCallback(() => {
     setIsCollapsed((value) => !value);
   }, []);
+
+  // Register keyboard shortcut for sidebar toggle
+  core.keyboardShortcut?.useKeyboardShortcut({
+    id: 'toggle_vis_sidebar',
+    pluginId: 'vis_default_editor',
+    name: i18n.translate('visDefaultEditor.sidebarToggleShortcut', {
+      defaultMessage: 'Toggle visualization sidebar',
+    }),
+    category: i18n.translate('visDefaultEditor.panelLayoutCategory', {
+      defaultMessage: 'Panel / layout',
+    }),
+    keys: 'shift+c',
+    execute: onClickCollapse,
+  });
 
   useEffect(() => {
     if (!visRef.current) {

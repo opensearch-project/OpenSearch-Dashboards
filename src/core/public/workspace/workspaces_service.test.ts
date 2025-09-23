@@ -51,6 +51,7 @@ describe('WorkspacesService', () => {
       update: jest.fn(),
       create: jest.fn(),
       delete: jest.fn(),
+      batchDelete: jest.fn(),
     };
     workspacesSetUp.setClient(client);
     expect(workspacesStart.client$.value).toEqual(client);

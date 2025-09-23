@@ -127,4 +127,22 @@ describe('ScatterExclusiveVisOptions', () => {
     expect(screen.getByRole('switch')).toBeInTheDocument(); // Filled switch
     expect(screen.getByRole('spinbutton')).toBeInTheDocument(); // Angle input
   });
+
+  it('calls stopPropagation on mouseUp for shape selector', () => {
+    render(<ScatterExclusiveVisOptions {...defaultProps} />);
+
+    const shapeSelector = screen.getByRole('combobox');
+    expect(shapeSelector).toBeInTheDocument(); // Verify element exists
+
+    const stopPropagation = jest.fn();
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent, 'stopPropagation', { value: stopPropagation });
+
+    shapeSelector.dispatchEvent(mouseUpEvent);
+
+    expect(stopPropagation).toHaveBeenCalled();
+  });
 });

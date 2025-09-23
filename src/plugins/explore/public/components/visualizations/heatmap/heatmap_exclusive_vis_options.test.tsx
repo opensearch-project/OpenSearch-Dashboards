@@ -139,7 +139,7 @@ describe('HeatmapExclusiveVisOptions', () => {
     };
 
     render(<HeatmapExclusiveVisOptions {...props} />);
-    const input = screen.getByPlaceholderText(/Max number of colors/i);
+    const input = screen.getByTestId('visHeatmapMaxNumberOfColors');
     expect(input).toBeDisabled();
   });
 
@@ -178,7 +178,7 @@ describe('HeatmapExclusiveVisOptions', () => {
 
   it('updates maxNumberOfColors and calls onChange after debounce', async () => {
     render(<HeatmapExclusiveVisOptions {...defaultProps} />);
-    const input = screen.getByPlaceholderText(/Max number of colors/i);
+    const input = screen.getByTestId('visHeatmapMaxNumberOfColors');
 
     fireEvent.change(input, { target: { value: '10' } });
 
@@ -222,6 +222,24 @@ describe('HeatmapExclusiveVisOptions', () => {
       ...props.styles,
       customRanges: [{ from: 0, to: 10, color: '#000000' }],
     });
+  });
+
+  it('calls stopPropagation on mouseUp for color schema selector', () => {
+    render(<HeatmapExclusiveVisOptions {...defaultProps} />);
+
+    const colorSchemaSelect = screen.getByRole('combobox');
+    expect(colorSchemaSelect).toBeInTheDocument(); // Verify element exists
+
+    const stopPropagation = jest.fn();
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent, 'stopPropagation', { value: stopPropagation });
+
+    colorSchemaSelect.dispatchEvent(mouseUpEvent);
+
+    expect(stopPropagation).toHaveBeenCalled();
   });
 });
 

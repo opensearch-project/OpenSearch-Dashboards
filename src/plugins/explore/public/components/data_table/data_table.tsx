@@ -41,6 +41,206 @@ const INFINITE_SCROLLED_PAGE_SIZE = 10;
 // How far to queue unrendered rows ahead of time during infinite scrolling
 const DESIRED_ROWS_LOOKAHEAD = 5 * INFINITE_SCROLLED_PAGE_SIZE;
 
+// Content-First Table Width Algorithm Constants
+const MIN_COLUMN_WIDTH = 80;
+const MIN_LARGE_COLUMN_WIDTH = 400; // Minimum width for large columns to avoid too narrow display
+const LARGE_COLUMN_THRESHOLD = 400; // Threshold to classify large content columns
+const HEADER_BUTTON_SPACE = 64; // Space for action buttons
+const COLUMN_BUFFER = 32; // Padding + margins to prevent overlap
+
+// Types for column width calculation
+interface ColumnData {
+  element: HTMLTableCellElement;
+  headerText: string;
+  contentWidth: number;
+  finalWidth: number;
+}
+
+// Helper function to create measuring element with dynamic styling
+const createMeasuringElement = (tableElement?: HTMLTableElement): HTMLDivElement => {
+  const measuringDiv = document.createElement('div');
+
+  /*
+   * Need to use inline styles instead of CSS classes to avoid inheritance issues
+   *
+   * - Previously tried CSS class `.column-width-measuring-element`
+   * {
+   *   position: absolute;
+   *   visibility: hidden;
+   *   white-space: nowrap;
+   *   font-size: $euiFontSizeXS;
+   *   @include ouiCodeFont;
+   *   padding: $euiSizeXS;
+   *   pointer-events: none;
+   * }
+   * - CSS classes can be overridden
+   * - This caused ALL content to measure as a fixed width regardless of actual content:
+   * - Inline styles have the highest CSS priority and cannot be overridden
+   * - This ensures accurate content measurement regardless of other CSS
+   */
+
+  // Position and visibility - make element invisible but measurable
+  measuringDiv.style.position = 'absolute'; // Remove from document flow
+  measuringDiv.style.visibility = 'hidden'; // Invisible but still rendered (unlike display:none)
+  measuringDiv.style.whiteSpace = 'nowrap'; // Prevent text wrapping to get true width
+
+  // Font styling - start with defaults, will be overridden below
+  measuringDiv.style.fontSize = '12px'; // Fallback font size
+  measuringDiv.style.fontFamily = 'monospace'; // Fallback font family
+
+  // Layout reset - prevent any inherited constraints
+  measuringDiv.style.padding = '4px'; // Match table cell padding
+  measuringDiv.style.border = 'none'; // No borders that could affect width
+  measuringDiv.style.margin = '0'; // No margins
+
+  measuringDiv.style.width = 'auto';
+  measuringDiv.style.height = 'auto';
+  measuringDiv.style.maxWidth = 'none';
+  measuringDiv.style.minWidth = '0'; // Allow shrinking to actual content size
+  measuringDiv.style.boxSizing = 'content-box'; // Consistent box model
+
+  // Copy actual table font styles for accurate measurement
+  if (tableElement) {
+    const cellStyles = tableElement.querySelector('tbody td');
+    if (cellStyles) {
+      const computedCellStyles = window.getComputedStyle(cellStyles);
+      // Override defaults with actual table styles for accuracy
+      measuringDiv.style.fontSize = computedCellStyles.fontSize;
+      measuringDiv.style.fontFamily = computedCellStyles.fontFamily;
+      measuringDiv.style.fontWeight = computedCellStyles.fontWeight;
+    }
+  }
+
+  document.body.appendChild(measuringDiv);
+
+  return measuringDiv;
+};
+
+// Helper function to calculate content width for a column
+const calculateColumnContentWidth = (
+  headerText: string,
+  columnIndex: number,
+  tableElement: HTMLTableElement,
+  measuringDiv: HTMLDivElement,
+  calculatedWidthsRef: React.MutableRefObject<Map<string, number>>
+): number => {
+  // Check cache first
+  if (calculatedWidthsRef.current.has(headerText)) {
+    return calculatedWidthsRef.current.get(headerText)!;
+  }
+
+  // Calculate new width for this column
+  const columnCells = tableElement.querySelectorAll(`tbody tr td:nth-child(${columnIndex + 2})`);
+  let maxContentWidth = 0;
+
+  // Measure each content cell to find the widest content
+  columnCells.forEach((cell) => {
+    const cellContent = cell.textContent?.trim() || '';
+    measuringDiv.textContent = cellContent;
+    const contentWidth = measuringDiv.offsetWidth;
+    maxContentWidth = Math.max(maxContentWidth, contentWidth);
+  });
+
+  // Add buffer space and apply minimum width
+  const contentWithBuffer = maxContentWidth + COLUMN_BUFFER;
+  const finalWidth = Math.max(contentWithBuffer, MIN_COLUMN_WIDTH);
+
+  // Cache the calculated width
+  calculatedWidthsRef.current.set(headerText, finalWidth);
+
+  return finalWidth;
+};
+
+// Helper function to classify columns as small or large
+const classifyColumns = (columnData: ColumnData[]) => {
+  const smallColumns: ColumnData[] = [];
+  const largeColumns: ColumnData[] = [];
+  let smallColumnsWidth = 0;
+  let largeColumnsWidth = 0;
+
+  columnData.forEach((col) => {
+    if (col.contentWidth < LARGE_COLUMN_THRESHOLD) {
+      smallColumns.push(col);
+      smallColumnsWidth += col.contentWidth;
+    } else {
+      largeColumns.push(col);
+      largeColumnsWidth += col.contentWidth;
+    }
+  });
+
+  return { smallColumns, largeColumns, smallColumnsWidth, largeColumnsWidth };
+};
+
+// Helper function to distribute extra space proportionally
+const distributeExtraSpace = (
+  columnData: ColumnData[],
+  totalContentWidth: number,
+  extraSpace: number
+) => {
+  columnData.forEach((col) => {
+    const extraForThisColumn = extraSpace * (col.contentWidth / totalContentWidth);
+    col.finalWidth = col.contentWidth + extraForThisColumn;
+  });
+};
+
+// Helper function to apply refined distribution for space shortage
+const applyRefinedDistribution = (
+  smallColumns: ColumnData[],
+  largeColumns: ColumnData[],
+  availableTableWidth: number,
+  smallColumnsWidth: number,
+  largeColumnsWidth: number
+) => {
+  // Small columns keep their calculated width
+  smallColumns.forEach((col) => {
+    col.finalWidth = col.contentWidth;
+  });
+
+  // Large columns share the remaining space proportionally
+  const remainingSpace = availableTableWidth - smallColumnsWidth;
+
+  if (largeColumns.length > 0 && remainingSpace > 0) {
+    largeColumns.forEach((col) => {
+      const originalWidth = col.contentWidth;
+      const proportion = originalWidth / largeColumnsWidth;
+      const newWidth = Math.max(remainingSpace * proportion, MIN_LARGE_COLUMN_WIDTH);
+      col.finalWidth = newWidth;
+    });
+  } else if (largeColumns.length > 0) {
+    // Not enough space even for minimum widths - set to minimum and allow overflow
+    largeColumns.forEach((col) => {
+      col.finalWidth = MIN_LARGE_COLUMN_WIDTH;
+    });
+  }
+};
+
+// Helper function to apply header truncation
+const applyHeaderTruncation = (col: ColumnData, measuringDiv: HTMLDivElement) => {
+  const headerTextElement = col.element.querySelector('.header-text');
+  if (headerTextElement) {
+    const headerElement = headerTextElement as HTMLElement;
+
+    // Measure header text width
+    measuringDiv.textContent = col.headerText;
+    const headerWidth = measuringDiv.offsetWidth;
+    const availableHeaderWidth = Math.round(col.finalWidth) - HEADER_BUTTON_SPACE;
+
+    if (headerWidth > availableHeaderWidth) {
+      // Apply ellipsis to header
+      headerElement.style.maxWidth = availableHeaderWidth + 'px';
+      headerElement.style.overflow = 'hidden';
+      headerElement.style.textOverflow = 'ellipsis';
+      headerElement.style.whiteSpace = 'nowrap';
+    } else {
+      // Header fits, remove any previous ellipsis styles
+      headerElement.style.maxWidth = '';
+      headerElement.style.overflow = '';
+      headerElement.style.textOverflow = '';
+      headerElement.style.whiteSpace = '';
+    }
+  }
+};
+
 const DataTableUI = ({
   columns,
   hits,
@@ -166,6 +366,8 @@ const DataTableUI = ({
 
   // Allow auto column-sizing using the initially rendered rows and then convert to fixed
   const tableLayoutRequestFrameRef = useRef<number>(0);
+  // Store calculated column widths to prevent recalculation when adding columns
+  const calculatedWidthsRef = useRef<Map<string, number>>(new Map());
 
   /* In asynchronous data loading, column metadata may arrive before the corresponding data, resulting in
      layout being calculated for the new column definitions using the old data. To mitigate this issue, we
@@ -178,29 +380,126 @@ const DataTableUI = ({
     typeof dataset?.timeFieldName === 'string' && rows?.[0]?._source?.[dataset.timeFieldName];
 
   useEffect(() => {
-    if (tableElement) {
-      // Load the first batch of rows and adjust the columns to the contents
-      tableElement.style.tableLayout = 'auto';
-      // To prevent influencing the auto-sizing, unset the widths from a previous render
-      tableElement.querySelectorAll('thead > tr > th:not(:first-child)').forEach((th) => {
-        (th as HTMLTableCellElement).style.width = 'unset';
+    if (!tableElement) return;
+
+    // Get all header columns (skip first column which is expand/collapse)
+    const headerCells = tableElement.querySelectorAll('thead > tr > th:not(:first-child)');
+
+    // Check if we need to calculate new widths or can reuse existing ones
+    const needsRecalculation =
+      headerCells.length === 0 ||
+      Array.from(headerCells).some((th) => {
+        const headerText = th.textContent?.trim() || '';
+        return !calculatedWidthsRef.current.has(headerText);
       });
 
-      tableLayoutRequestFrameRef.current = requestAnimationFrame(() => {
-        if (tableElement) {
-          /* Get the widths for each header cell which is the column's width automatically adjusted to the content of
-           * the column. Apply the width as a style and change the layout to fixed. This is to
-           *   1) prevent columns from changing size when more rows are added, and
-           *   2) speed of rendering time of subsequently added rows.
-           *
-           * First cell is skipped because it has a fixed dimension set already.
-           */
-          tableElement.querySelectorAll('thead > tr > th:not(:first-child)').forEach((th) => {
-            (th as HTMLTableCellElement).style.width = th.getBoundingClientRect().width + 'px';
-          });
+    if (needsRecalculation) {
+      // Create measuring element and calculate new column widths
+      const measuringDiv = createMeasuringElement(tableElement);
 
-          tableElement.style.tableLayout = 'fixed';
+      tableLayoutRequestFrameRef.current = requestAnimationFrame(() => {
+        if (!tableElement) return;
+
+        // Calculate available table width (viewport - sidebar - padding)
+        const tableContainer = tableElement.closest('.explore-table-container');
+        const containerWidth = tableContainer
+          ? tableContainer.getBoundingClientRect().width
+          : window.innerWidth * 0.7;
+        const availableTableWidth = containerWidth - 40;
+
+        // Step 1: Measure content-based width for each column
+        const columnData: ColumnData[] = [];
+        headerCells.forEach((th, columnIndex) => {
+          const headerText = th.textContent?.trim() || '';
+
+          const contentWidth = calculateColumnContentWidth(
+            headerText,
+            columnIndex,
+            tableElement,
+            measuringDiv,
+            calculatedWidthsRef
+          );
+
+          columnData.push({
+            element: th as HTMLTableCellElement,
+            headerText,
+            contentWidth,
+            finalWidth: contentWidth,
+          });
+        });
+
+        // Step 2: Apply distribution algorithm
+        const totalContentWidth = columnData.reduce((sum, col) => sum + col.contentWidth, 0);
+
+        if (totalContentWidth <= availableTableWidth) {
+          // Case A: Extra space available - distribute proportionally
+          const extraSpace = availableTableWidth - totalContentWidth;
+          distributeExtraSpace(columnData, totalContentWidth, extraSpace);
+        } else {
+          // Case B: Space shortage - apply refined distribution
+          const {
+            smallColumns,
+            largeColumns,
+            smallColumnsWidth,
+            largeColumnsWidth,
+          } = classifyColumns(columnData);
+          applyRefinedDistribution(
+            smallColumns,
+            largeColumns,
+            availableTableWidth,
+            smallColumnsWidth,
+            largeColumnsWidth
+          );
         }
+
+        // Step 3: Apply final widths and header truncation
+        columnData.forEach((col) => {
+          const finalWidth = Math.round(col.finalWidth);
+
+          // Apply the final width to the column
+          col.element.style.width = finalWidth + 'px';
+          col.element.style.minWidth = finalWidth + 'px';
+
+          // Handle header truncation
+          applyHeaderTruncation(col, measuringDiv);
+        });
+
+        // Set table to fixed layout to lock in our calculated widths
+        tableElement.style.tableLayout = 'fixed';
+
+        // Clean up measuring element
+        document.body.removeChild(measuringDiv);
+      });
+    } else {
+      // Apply cached widths directly
+      tableLayoutRequestFrameRef.current = requestAnimationFrame(() => {
+        if (!tableElement) return;
+
+        headerCells.forEach((th) => {
+          const headerText = th.textContent?.trim() || '';
+          const cachedWidth = calculatedWidthsRef.current.get(headerText);
+
+          if (cachedWidth) {
+            // Apply the cached width
+            (th as HTMLTableCellElement).style.width = cachedWidth + 'px';
+            (th as HTMLTableCellElement).style.minWidth = cachedWidth + 'px';
+
+            // Handle header truncation for cached widths
+            const headerTextElement = th.querySelector('.header-text');
+            if (headerTextElement) {
+              const headerElement = headerTextElement as HTMLElement;
+              const availableHeaderWidth = cachedWidth - HEADER_BUTTON_SPACE;
+
+              // Ensure consistent truncation styles for cached widths
+              if (headerElement.style.maxWidth) {
+                headerElement.style.maxWidth = availableHeaderWidth + 'px';
+              }
+            }
+          }
+        });
+
+        // Set table to fixed layout
+        tableElement.style.tableLayout = 'fixed';
       });
     }
 
