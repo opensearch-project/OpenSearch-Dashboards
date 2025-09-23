@@ -140,10 +140,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
         }
         const defaultDataset =
           filteredDatasets.find((d) => d.id === defaultDataView?.id) ?? filteredDatasets[0];
-        if (
-          defaultDataset &&
-          !(currentDataset && filteredDatasets.find((d) => d.id === currentDataset.id))
-        ) {
+        if (defaultDataset && !currentDataset) {
           onSelect(defaultDataset);
         }
         setDatasets(filteredDatasets);
