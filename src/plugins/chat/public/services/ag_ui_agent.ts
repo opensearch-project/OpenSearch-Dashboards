@@ -30,6 +30,11 @@ export class AgUiAgent {
 
   public runAgent(input: RunAgentInput, handlers?: any): Observable<BaseEvent> {
     return new Observable<BaseEvent>((observer) => {
+      // Check for previous request and abort if needed
+      if (this.abortController) {
+        this.abortController.abort();
+      }
+
       this.abortController = new AbortController();
       this.sseBuffer = ''; // Reset buffer for new request
 
@@ -63,7 +68,9 @@ export class AgUiAgent {
           try {
             while (true) {
               const { done, value } = await reader.read();
-              if (done) break;
+              if (done) {
+                break;
+              }
 
               // Parse Server-Sent Events with proper buffering
               const chunk = new TextDecoder().decode(value);
@@ -104,6 +111,9 @@ export class AgUiAgent {
             return; // Request was cancelled
           }
 
+          // eslint-disable-next-line no-console
+          console.error('AG-UI request failed:', error.message);
+
           observer.next({
             type: EventType.RUN_ERROR,
             message: error.message,
@@ -117,6 +127,7 @@ export class AgUiAgent {
   public abort(): void {
     if (this.abortController) {
       this.abortController.abort();
+      this.abortController = undefined;
     }
   }
 }

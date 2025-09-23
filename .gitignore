@@ -20,6 +20,7 @@ target
 /bwc_tmp
 .jruby
 .idea
+.specify
 *.iml
 *.log
 /test/*/failure_debug

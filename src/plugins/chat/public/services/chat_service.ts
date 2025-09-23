@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Observable } from 'rxjs';
 import { AgUiAgent } from './ag_ui_agent';
 import { ChatContextManager } from './chat_context_manager';
 import { RunAgentInput } from '../../common/types';
@@ -28,6 +29,8 @@ export class ChatService {
   private contextManager?: ChatContextManager;
   public availableTools: ToolDefinition[] = [];
   public events$: any;
+  private activeRequests: Set<string> = new Set();
+  private requestCounter: number = 0;
 
   constructor(serverUrl?: string) {
     this.agent = new AgUiAgent(serverUrl);
@@ -50,6 +53,31 @@ export class ChatService {
     return `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
 
+  private generateRequestId(): string {
+    this.requestCounter++;
+    return `chat-req-${Date.now()}-${this.requestCounter}`;
+  }
+
+  private isRequestActive(): boolean {
+    return this.activeRequests.size > 0;
+  }
+
+  private addActiveRequest(requestId: string): void {
+    this.activeRequests.add(requestId);
+    // eslint-disable-next-line no-console
+    console.log(
+      `📊 [ChatService] Active requests: ${this.activeRequests.size} (added: ${requestId})`
+    );
+  }
+
+  private removeActiveRequest(requestId: string): void {
+    this.activeRequests.delete(requestId);
+    // eslint-disable-next-line no-console
+    console.log(
+      `📊 [ChatService] Active requests: ${this.activeRequests.size} (removed: ${requestId})`
+    );
+  }
+
   public async sendMessage(
     content: string,
     messages: ChatMessage[]
@@ -57,6 +85,9 @@ export class ChatService {
     observable: any;
     userMessage: ChatMessage;
   }> {
+    const requestId = this.generateRequestId();
+
+    this.addActiveRequest(requestId);
     const userMessage: ChatMessage = {
       id: this.generateMessageId(),
       role: 'user',
@@ -76,11 +107,17 @@ export class ChatService {
       threadId: this.threadId,
       runId: this.generateRunId(),
       messages: [
-        ...messages.map((msg) => ({
-          id: msg.id,
-          role: msg.role,
-          content: msg.content,
-        })),
+        ...messages.map((msg) => {
+          const baseMessage: any = {
+            id: msg.id,
+            role: msg.role,
+            content: msg.content,
+          };
+          if (msg.toolCallId) {
+            baseMessage.toolCallId = msg.toolCallId;
+          }
+          return baseMessage;
+        }),
         // IMPORTANT: Reuse the same userMessage so we don't create a second
         // synthetic user entry (which was causing duplicate user prompts
         // to appear / be sent to the agent).
@@ -100,13 +137,13 @@ export class ChatService {
     };
 
     const observable = this.agent.runAgent(runInput, {
-      onTextMessageStartEvent: ({ event }: any) => {
+      onTextMessageStartEvent: () => {
         // Handle message start
       },
-      onTextMessageContentEvent: ({ event }: any) => {
+      onTextMessageContentEvent: () => {
         // Handle streaming text content
       },
-      onTextMessageEndEvent: ({ event }: any) => {
+      onTextMessageEndEvent: () => {
         // Handle message end
       },
       onRunStartedEvent: () => {
@@ -122,10 +159,26 @@ export class ChatService {
       },
     });
 
-    // Store the observable as events$ for tool call handling
-    this.events$ = observable;
+    // Wrap observable to track completion
+    const trackedObservable = new Observable((subscriber: any) => {
+      const subscription = observable.subscribe({
+        next: (value: any) => subscriber.next(value),
+        error: (error: any) => {
+          this.removeActiveRequest(requestId);
+          subscriber.error(error);
+        },
+        complete: () => {
+          this.removeActiveRequest(requestId);
+          subscriber.complete();
+        },
+      });
+      return () => subscription.unsubscribe();
+    });
 
-    return { observable, userMessage };
+    // Store the observable as events$ for tool call handling
+    this.events$ = trackedObservable;
+
+    return { observable: trackedObservable, userMessage };
   }
 
   public async sendToolResult(
@@ -136,10 +189,13 @@ export class ChatService {
     observable: any;
     toolMessage: ChatMessage;
   }> {
-    // Create a tool result message
+    const requestId = this.generateRequestId();
+
+    this.addActiveRequest(requestId);
+    // Create a tool result message - use 'user' role for AG-UI server compatibility
     const toolMessage: ChatMessage = {
       id: this.generateMessageId(),
-      role: 'tool',
+      role: 'user',
       content: typeof result === 'string' ? result : JSON.stringify(result),
       timestamp: Date.now(),
       toolCallId,
@@ -154,23 +210,30 @@ export class ChatService {
     }
 
     // Send the tool result back to the agent with full conversation history
-    const runInput: RunAgentInput = {
-      threadId: this.threadId,
-      runId: this.generateRunId(),
-      messages: [
-        ...messages.map((msg) => ({
+    const mappedMessages = [
+      ...messages.map((msg) => {
+        const baseMessage: any = {
           id: msg.id,
           role: msg.role,
           content: msg.content,
-          toolCallId: msg.toolCallId,
-        })),
-        {
-          id: toolMessage.id,
-          role: toolMessage.role,
-          content: toolMessage.content,
-          toolCallId: toolMessage.toolCallId,
-        },
-      ],
+        };
+        if (msg.toolCallId) {
+          baseMessage.toolCallId = msg.toolCallId;
+        }
+        return baseMessage;
+      }),
+      {
+        id: toolMessage.id,
+        role: toolMessage.role,
+        content: toolMessage.content,
+        toolCallId: toolMessage.toolCallId,
+      },
+    ];
+
+    const runInput: RunAgentInput = {
+      threadId: this.threadId,
+      runId: this.generateRunId(),
+      messages: mappedMessages,
       tools: this.availableTools || [],
       context: assistantContexts, // Include assistant contexts
       state: {
@@ -182,9 +245,26 @@ export class ChatService {
 
     // Continue the conversation with the tool result
     const observable = this.agent.runAgent(runInput, {});
-    this.events$ = observable;
 
-    return { observable, toolMessage };
+    // Wrap observable to track completion
+    const trackedObservable = new Observable((subscriber: any) => {
+      const subscription = observable.subscribe({
+        next: (value: any) => subscriber.next(value),
+        error: (error: any) => {
+          this.removeActiveRequest(requestId);
+          subscriber.error(error);
+        },
+        complete: () => {
+          this.removeActiveRequest(requestId);
+          subscriber.complete();
+        },
+      });
+      return () => subscription.unsubscribe();
+    });
+
+    this.events$ = trackedObservable;
+
+    return { observable: trackedObservable, toolMessage };
   }
 
   public abort(): void {

@@ -25,7 +25,6 @@ import { ChatContainer } from './chat_container';
 import { ChatHeader } from './chat_header';
 import { ChatMessages } from './chat_messages';
 import { ChatInput } from './chat_input';
-import { usePPLQueryAction } from '../actions/ppl_query_action';
 import { useUserConfirmationAction } from '../actions/user_confirmation_action';
 
 interface TimelineMessage {
@@ -90,10 +89,10 @@ function ChatWindowContent({
   const [currentStreamingMessage, setCurrentStreamingMessage] = useState('');
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const [processedEventIds, setProcessedEventIds] = useState<Set<string>>(new Set());
+  const [processedMessageEnds, setProcessedMessageEnds] = useState<Set<string>>(new Set());
   const [pendingToolCalls] = useState<Map<string, PendingToolCall>>(new Map());
 
   // Register actions
-  usePPLQueryAction();
   useUserConfirmationAction();
 
   // Initialize context manager
@@ -124,12 +123,22 @@ function ChatWindowContent({
       .filter((item) => item.type === 'message')
       .map((item) => {
         const msg = item as TimelineMessage;
-        return {
+        const baseMessage = {
           id: msg.id,
           role: msg.role,
           content: msg.content,
           timestamp: msg.timestamp,
         };
+
+        // Add toolCallId for tool messages if it exists
+        if (msg.role === 'tool' && (msg as any).toolCallId) {
+          return {
+            ...baseMessage,
+            toolCallId: (msg as any).toolCallId,
+          };
+        }
+
+        return baseMessage;
       });
   }, []);
 
@@ -191,10 +200,12 @@ function ChatWindowContent({
                   const timelineToolMessage: TimelineMessage = {
                     type: 'message',
                     id: toolMessage.id,
-                    role: toolMessage.role,
+                    role: 'user', // Use user role for AG-UI compatibility
                     content: toolMessage.content,
                     timestamp: toolMessage.timestamp,
                   };
+                  // Add toolCallId to the timeline message for proper tracking
+                  (timelineToolMessage as any).toolCallId = toolMessage.toolCallId;
                   setTimeline((prev) => [...prev, timelineToolMessage]);
                 }
 
@@ -202,9 +213,6 @@ function ChatWindowContent({
                 setIsStreaming(true);
                 const subscription = observable.subscribe({
                   next: (event: ChatEvent) => {
-                    const eventTime = new Date().toLocaleTimeString();
-                    console.log(`🔄 [${eventTime}] Tool result response ${event.type}:`, event);
-
                     switch (event.type) {
                       case EventType.TEXT_MESSAGE_CONTENT:
                         if ('delta' in event) {
@@ -212,19 +220,31 @@ function ChatWindowContent({
                         }
                         break;
                       case EventType.TEXT_MESSAGE_END:
-                        setCurrentStreamingMessage((currentContent) => {
-                          const assistantMessage: TimelineMessage = {
-                            type: 'message',
-                            id:
-                              'messageId' in event && event.messageId
-                                ? event.messageId
-                                : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                            role: 'assistant',
-                            content: currentContent,
-                            timestamp: event.timestamp || Date.now(),
-                          };
+                        // Skip if we've already processed this message end event
+                        const messageId = 'messageId' in event ? event.messageId : null;
+                        if (messageId && processedMessageEnds.has(messageId)) {
+                          break;
+                        }
+                        if (messageId) {
+                          setProcessedMessageEnds(prev => new Set(prev).add(messageId));
+                        }
 
-                          setTimeline((prev) => [...prev, assistantMessage]);
+                        setCurrentStreamingMessage((currentContent) => {
+                          // Only add assistant message if there's actual content
+                          if (currentContent.trim()) {
+                            const assistantMessage: TimelineMessage = {
+                              type: 'message',
+                              id:
+                                'messageId' in event && event.messageId
+                                  ? event.messageId
+                                  : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                              role: 'assistant',
+                              content: currentContent,
+                              timestamp: event.timestamp || Date.now(),
+                            };
+
+                            setTimeline((prev) => [...prev, assistantMessage]);
+                          }
                           return ''; // Clear the streaming message
                         });
                         setIsStreaming(false);
@@ -236,7 +256,6 @@ function ChatWindowContent({
                     setIsStreaming(false);
                   },
                   complete: () => {
-                    console.log('Tool result response complete');
                     setIsStreaming(false);
                   },
                 });
@@ -259,10 +278,12 @@ function ChatWindowContent({
                   const timelineToolMessage: TimelineMessage = {
                     type: 'message',
                     id: toolMessage.id,
-                    role: toolMessage.role,
+                    role: 'user', // Use user role for AG-UI compatibility
                     content: toolMessage.content,
                     timestamp: toolMessage.timestamp,
                   };
+                  // Add toolCallId to the timeline message for proper tracking
+                  (timelineToolMessage as any).toolCallId = toolMessage.toolCallId;
                   setTimeline((prev) => [...prev, timelineToolMessage]);
                 }
 
@@ -270,9 +291,6 @@ function ChatWindowContent({
                 setIsStreaming(true);
                 const subscription = observable.subscribe({
                   next: (event: ChatEvent) => {
-                    const eventTime = new Date().toLocaleTimeString();
-                    console.log(`🔄 [${eventTime}] Tool error response ${event.type}:`, event);
-
                     switch (event.type) {
                       case EventType.TEXT_MESSAGE_CONTENT:
                         if ('delta' in event) {
@@ -280,19 +298,31 @@ function ChatWindowContent({
                         }
                         break;
                       case EventType.TEXT_MESSAGE_END:
-                        setCurrentStreamingMessage((currentContent) => {
-                          const assistantMessage: TimelineMessage = {
-                            type: 'message',
-                            id:
-                              'messageId' in event && event.messageId
-                                ? event.messageId
-                                : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                            role: 'assistant',
-                            content: currentContent,
-                            timestamp: event.timestamp || Date.now(),
-                          };
+                        // Skip if we've already processed this message end event
+                        const messageId2 = 'messageId' in event ? event.messageId : null;
+                        if (messageId2 && processedMessageEnds.has(messageId2)) {
+                          break;
+                        }
+                        if (messageId2) {
+                          setProcessedMessageEnds(prev => new Set(prev).add(messageId2));
+                        }
 
-                          setTimeline((prev) => [...prev, assistantMessage]);
+                        setCurrentStreamingMessage((currentContent) => {
+                          // Only add assistant message if there's actual content
+                          if (currentContent.trim()) {
+                            const assistantMessage: TimelineMessage = {
+                              type: 'message',
+                              id:
+                                'messageId' in event && event.messageId
+                                  ? event.messageId
+                                  : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                              role: 'assistant',
+                              content: currentContent,
+                              timestamp: event.timestamp || Date.now(),
+                            };
+
+                            setTimeline((prev) => [...prev, assistantMessage]);
+                          }
                           return ''; // Clear the streaming message
                         });
                         setIsStreaming(false);
@@ -304,7 +334,6 @@ function ChatWindowContent({
                     setIsStreaming(false);
                   },
                   complete: () => {
-                    console.log('Tool error response complete');
                     setIsStreaming(false);
                   },
                 });
@@ -316,7 +345,7 @@ function ChatWindowContent({
         }
         break;
     }
-  }, [service, pendingToolCalls, chatService, timeline, timelineToMessages]);
+  }, [service, pendingToolCalls, chatService, timeline, timelineToMessages, processedMessageEnds]);
 
   const handleSend = async () => {
     if (!input.trim() || isStreaming) return;
@@ -350,21 +379,15 @@ function ChatWindowContent({
           messageContent.length > 50 ? '...' : ''
         }"`
       );
-      console.log('📤 User message:', messageContent);
 
       // Subscribe to streaming response
       const subscription = observable.subscribe({
         next: (event: ChatEvent) => {
-          // Log every event with timestamp and full data
-          const eventTime = new Date().toLocaleTimeString();
-          console.log(`🔄 [${eventTime}] ${event.type}:`, event);
-
           // Event deduplication - create a unique event identifier
           const eventId = `${event.type}-${event.timestamp || Date.now()}-${JSON.stringify(
             event
           ).substring(0, 100)}`;
           if (processedEventIds.has(eventId)) {
-            console.log(`🔄 [${eventTime}] Skipping duplicate event:`, event.type);
             return; // Skip duplicate event
           }
           setProcessedEventIds((prev) => new Set(prev).add(eventId));
@@ -384,30 +407,31 @@ function ChatWindowContent({
               }
               break;
             case EventType.TEXT_MESSAGE_END:
-              setCurrentStreamingMessage((currentContent) => {
-                const assistantMessage: TimelineMessage = {
-                  type: 'message',
-                  id:
-                    'messageId' in event && event.messageId
-                      ? event.messageId
-                      : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                  role: 'assistant',
-                  content: currentContent,
-                  timestamp: event.timestamp || Date.now(),
-                };
+              // Skip if we've already processed this message end event
+              const messageId = 'messageId' in event ? event.messageId : null;
+              if (messageId && processedMessageEnds.has(messageId)) {
+                break;
+              }
+              if (messageId) {
+                setProcessedMessageEnds(prev => new Set(prev).add(messageId));
+              }
 
-                // Add deduplication check before adding to timeline
-                setTimeline((prev) => {
-                  // Check if message with same content already exists recently (within 1 second)
-                  const isDuplicate = prev.some(
-                    (item) =>
-                      item.type === 'message' &&
-                      item.role === 'assistant' &&
-                      item.content === currentContent &&
-                      Math.abs(item.timestamp - (event.timestamp || Date.now())) < 1000
-                  );
-                  return isDuplicate ? prev : [...prev, assistantMessage];
-                });
+              setCurrentStreamingMessage((currentContent) => {
+                // Only add assistant message if there's actual content
+                if (currentContent.trim()) {
+                  const assistantMessage: TimelineMessage = {
+                    type: 'message',
+                    id:
+                      'messageId' in event && event.messageId
+                        ? event.messageId
+                        : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    role: 'assistant',
+                    content: currentContent,
+                    timestamp: event.timestamp || Date.now(),
+                  };
+
+                  setTimeline((prev) => [...prev, assistantMessage]);
+                }
                 return ''; // Clear the streaming message
               });
               setIsStreaming(false);
@@ -499,15 +523,12 @@ function ChatWindowContent({
           }
         },
         error: (error: any) => {
-          const errorTime = new Date().toLocaleTimeString();
-          console.error(`🚨 [${errorTime}] Subscription error:`, error);
+          console.error('Subscription error:', error);
           console.groupEnd(); // Close the run group
           setIsStreaming(false);
           setCurrentStreamingMessage('');
         },
         complete: () => {
-          const completeTime = new Date().toLocaleTimeString();
-          console.log(`🏁 [${completeTime}] Stream complete`);
           console.groupEnd(); // Close the run group
           setIsStreaming(false);
         },
@@ -515,8 +536,7 @@ function ChatWindowContent({
 
       return () => subscription.unsubscribe();
     } catch (error) {
-      const errorTime = new Date().toLocaleTimeString();
-      console.error(`❌ [${errorTime}] Failed to send message:`, error);
+      console.error('Failed to send message:', error);
       console.groupEnd(); // Close the run group
       setIsStreaming(false);
     }
@@ -572,21 +592,15 @@ function ChatWindowContent({
           message.content.length > 50 ? '...' : ''
         }"`
       );
-      console.log('📤 Resent message:', message.content);
 
       // Subscribe to streaming response (same logic as handleSend)
       const subscription = observable.subscribe({
         next: (event: ChatEvent) => {
-          // Log every event with timestamp and full data
-          const eventTime = new Date().toLocaleTimeString();
-          console.log(`🔄 [${eventTime}] ${event.type}:`, event);
-
           // Event deduplication - create a unique event identifier
           const eventId = `${event.type}-${event.timestamp || Date.now()}-${JSON.stringify(
             event
           ).substring(0, 100)}`;
           if (processedEventIds.has(eventId)) {
-            console.log(`🔄 [${eventTime}] Skipping duplicate event:`, event.type);
             return; // Skip duplicate event
           }
           setProcessedEventIds((prev) => new Set(prev).add(eventId));
@@ -606,30 +620,31 @@ function ChatWindowContent({
               }
               break;
             case EventType.TEXT_MESSAGE_END:
-              setCurrentStreamingMessage((currentContent) => {
-                const assistantMessage: TimelineMessage = {
-                  type: 'message',
-                  id:
-                    'messageId' in event && event.messageId
-                      ? event.messageId
-                      : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                  role: 'assistant',
-                  content: currentContent,
-                  timestamp: event.timestamp || Date.now(),
-                };
+              // Skip if we've already processed this message end event
+              const messageId = 'messageId' in event ? event.messageId : null;
+              if (messageId && processedMessageEnds.has(messageId)) {
+                break;
+              }
+              if (messageId) {
+                setProcessedMessageEnds(prev => new Set(prev).add(messageId));
+              }
 
-                // Add deduplication check before adding to timeline
-                setTimeline((prev) => {
-                  // Check if message with same content already exists recently (within 1 second)
-                  const isDuplicate = prev.some(
-                    (item) =>
-                      item.type === 'message' &&
-                      item.role === 'assistant' &&
-                      item.content === currentContent &&
-                      Math.abs(item.timestamp - (event.timestamp || Date.now())) < 1000
-                  );
-                  return isDuplicate ? prev : [...prev, assistantMessage];
-                });
+              setCurrentStreamingMessage((currentContent) => {
+                // Only add assistant message if there's actual content
+                if (currentContent.trim()) {
+                  const assistantMessage: TimelineMessage = {
+                    type: 'message',
+                    id:
+                      'messageId' in event && event.messageId
+                        ? event.messageId
+                        : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    role: 'assistant',
+                    content: currentContent,
+                    timestamp: event.timestamp || Date.now(),
+                  };
+
+                  setTimeline((prev) => [...prev, assistantMessage]);
+                }
                 return ''; // Clear the streaming message
               });
               setIsStreaming(false);
@@ -721,15 +736,12 @@ function ChatWindowContent({
           }
         },
         error: (error: any) => {
-          const errorTime = new Date().toLocaleTimeString();
-          console.error(`🚨 [${errorTime}] Subscription error:`, error);
+          console.error('Subscription error:', error);
           console.groupEnd(); // Close the run group
           setIsStreaming(false);
           setCurrentStreamingMessage('');
         },
         complete: () => {
-          const completeTime = new Date().toLocaleTimeString();
-          console.log(`🏁 [${completeTime}] Stream complete`);
           console.groupEnd(); // Close the run group
           setIsStreaming(false);
         },
@@ -737,8 +749,7 @@ function ChatWindowContent({
 
       return () => subscription.unsubscribe();
     } catch (error) {
-      const errorTime = new Date().toLocaleTimeString();
-      console.error(`❌ [${errorTime}] Failed to resend message:`, error);
+      console.error('Failed to resend message:', error);
       console.groupEnd(); // Close the run group
       setIsStreaming(false);
     }
