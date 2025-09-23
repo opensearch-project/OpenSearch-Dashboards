@@ -22,7 +22,7 @@ import {
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const noIndexPatterns = 5; // Determines the no of index patterns that should be in the dropdown for filtering test case
+const noIndexPatterns = 2; // Determines the no of index patterns that should be in the dropdown for filtering test case
 
 export const runSimpleDatasetSelectorTests = () => {
   describe('simple dataset selector selecting an index pattern', () => {
@@ -132,6 +132,10 @@ export const runSimpleDatasetSelectorTests = () => {
         page: 'explore/logs',
         isEnhancement: true,
       });
+      // TODO: Reloading as they don't first appear unless you reload
+      cy.wait(5000);
+      cy.getElementByTestId('datasetSelectButton').click({ force: true });
+      cy.reload();
 
       for (let i = 1; i <= noIndexPatterns; i++) {
         validateItemsInSimpleDatasetSelectorDropDown(
