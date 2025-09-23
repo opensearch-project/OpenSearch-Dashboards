@@ -17,7 +17,7 @@ import './chat_messages.scss';
 interface TimelineMessage {
   type: 'message';
   id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'tool';
   content: string;
   timestamp: number;
 }
@@ -108,8 +108,8 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           .sort((a, b) => a.timestamp - b.timestamp)
           .map((item) => {
             if (item.type === 'message') {
-              // Don't render messages with empty content
-              if (!item.content || item.content.trim() === '') {
+              // Don't render messages with empty content or tool messages
+              if (!item.content || item.content.trim() === '' || item.role === 'tool') {
                 return null;
               }
               return (

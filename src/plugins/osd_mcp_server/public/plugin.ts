@@ -2,11 +2,14 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+/* eslint-disable no-console */
 
 import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import './redux_bridge_client';
+// import './redux_bridge_client';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsdMcpServerPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsdMcpServerPluginStart {}
 
 export class OsdMcpServerPlugin

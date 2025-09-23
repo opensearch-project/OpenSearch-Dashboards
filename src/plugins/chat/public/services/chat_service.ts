@@ -128,7 +128,14 @@ export class ChatService {
     return { observable, userMessage };
   }
 
-  public async sendToolResult(toolCallId: string, result: any): Promise<void> {
+  public async sendToolResult(
+    toolCallId: string,
+    result: any,
+    messages: ChatMessage[]
+  ): Promise<{
+    observable: any;
+    toolMessage: ChatMessage;
+  }> {
     // Create a tool result message
     const toolMessage: ChatMessage = {
       id: this.generateMessageId(),
@@ -138,15 +145,25 @@ export class ChatService {
       toolCallId,
     };
 
-    // Get current messages from somewhere (you might need to track this in the service)
-    const messages: ChatMessage[] = []; // This should come from your state management
+    // Get assistant contexts from the store
+    let assistantContexts: Array<{ description: string; value: any }> = [];
+    const contextStore = (window as any).assistantContextStore;
+    if (contextStore) {
+      // Get contexts with 'chat' category for backend
+      assistantContexts = contextStore.getBackendFormattedContexts('chat');
+    }
 
-    // Send the tool result back to the agent
+    // Send the tool result back to the agent with full conversation history
     const runInput: RunAgentInput = {
       threadId: this.threadId,
       runId: this.generateRunId(),
       messages: [
-        ...messages,
+        ...messages.map((msg) => ({
+          id: msg.id,
+          role: msg.role,
+          content: msg.content,
+          toolCallId: msg.toolCallId,
+        })),
         {
           id: toolMessage.id,
           role: toolMessage.role,
@@ -155,7 +172,7 @@ export class ChatService {
         },
       ],
       tools: this.availableTools || [],
-      context: [],
+      context: assistantContexts, // Include assistant contexts
       state: {
         staticContext: this.contextManager?.getRawStaticContext() || null,
         dynamicContext: this.contextManager?.getRawDynamicContext() || null,
@@ -167,11 +184,7 @@ export class ChatService {
     const observable = this.agent.runAgent(runInput, {});
     this.events$ = observable;
 
-    return new Promise((resolve) => {
-      observable.subscribe({
-        complete: () => resolve(),
-      });
-    });
+    return { observable, toolMessage };
   }
 
   public abort(): void {

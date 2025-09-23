@@ -1,7 +1,8 @@
 /*
- * Copyright OpenSearch Contributors
- * SPDX-License-Identifier: Apache-2.0
- */
+* Copyright OpenSearch Contributors
+* SPDX-License-Identifier: Apache-2.0
+*/
+/* eslint-disable no-shadow */
 /* eslint-disable no-console */
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
@@ -30,7 +31,7 @@ import { useUserConfirmationAction } from '../actions/user_confirmation_action';
 interface TimelineMessage {
   type: 'message';
   id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'tool';
   content: string;
   timestamp: number;
 }
@@ -117,6 +118,21 @@ function ChatWindowContent({
     return () => subscription.unsubscribe();
   }, [service, chatService]);
 
+  // Helper function to convert timeline messages to ChatMessage format
+  const timelineToMessages = useCallback((timelineItems: TimelineItem[]) => {
+    return timelineItems
+      .filter((item) => item.type === 'message')
+      .map((item) => {
+        const msg = item as TimelineMessage;
+        return {
+          id: msg.id,
+          role: msg.role,
+          content: msg.content,
+          timestamp: msg.timestamp,
+        };
+      });
+  }, []);
+
   // Extract common tool call handler to avoid duplication
   const handleToolCallEvent = useCallback(async (event: ChatEvent) => {
     switch (event.type) {
@@ -167,7 +183,63 @@ function ChatWindowContent({
 
               // Send tool result back to assistant
               if ((chatService as any).sendToolResult) {
-                await (chatService as any).sendToolResult(toolCall.id, result);
+                const messages = timelineToMessages(timeline);
+                const { observable, toolMessage } = await (chatService as any).sendToolResult(toolCall.id, result, messages);
+
+                // Add tool message to timeline for conversation history
+                if (toolMessage) {
+                  const timelineToolMessage: TimelineMessage = {
+                    type: 'message',
+                    id: toolMessage.id,
+                    role: toolMessage.role,
+                    content: toolMessage.content,
+                    timestamp: toolMessage.timestamp,
+                  };
+                  setTimeline((prev) => [...prev, timelineToolMessage]);
+                }
+
+                // Set streaming state and subscribe to the response stream to handle assistant's response
+                setIsStreaming(true);
+                const subscription = observable.subscribe({
+                  next: (event: ChatEvent) => {
+                    const eventTime = new Date().toLocaleTimeString();
+                    console.log(`🔄 [${eventTime}] Tool result response ${event.type}:`, event);
+
+                    switch (event.type) {
+                      case EventType.TEXT_MESSAGE_CONTENT:
+                        if ('delta' in event) {
+                          setCurrentStreamingMessage((prev) => prev + (event.delta || ''));
+                        }
+                        break;
+                      case EventType.TEXT_MESSAGE_END:
+                        setCurrentStreamingMessage((currentContent) => {
+                          const assistantMessage: TimelineMessage = {
+                            type: 'message',
+                            id:
+                              'messageId' in event && event.messageId
+                                ? event.messageId
+                                : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                            role: 'assistant',
+                            content: currentContent,
+                            timestamp: event.timestamp || Date.now(),
+                          };
+
+                          setTimeline((prev) => [...prev, assistantMessage]);
+                          return ''; // Clear the streaming message
+                        });
+                        setIsStreaming(false);
+                        break;
+                    }
+                  },
+                  error: (error: any) => {
+                    console.error('Tool result response error:', error);
+                    setIsStreaming(false);
+                  },
+                  complete: () => {
+                    console.log('Tool result response complete');
+                    setIsStreaming(false);
+                  },
+                });
               }
             } catch (error: any) {
               service.updateToolCallState(toolCall.id, {
@@ -177,8 +249,64 @@ function ChatWindowContent({
 
               // Send error back to assistant
               if ((chatService as any).sendToolResult) {
-                await (chatService as any).sendToolResult(toolCall.id, {
+                const messages = timelineToMessages(timeline);
+                const { observable, toolMessage } = await (chatService as any).sendToolResult(toolCall.id, {
                   error: error.message,
+                }, messages);
+
+                // Add tool message to timeline for conversation history
+                if (toolMessage) {
+                  const timelineToolMessage: TimelineMessage = {
+                    type: 'message',
+                    id: toolMessage.id,
+                    role: toolMessage.role,
+                    content: toolMessage.content,
+                    timestamp: toolMessage.timestamp,
+                  };
+                  setTimeline((prev) => [...prev, timelineToolMessage]);
+                }
+
+                // Set streaming state and subscribe to the response stream to handle assistant's response
+                setIsStreaming(true);
+                const subscription = observable.subscribe({
+                  next: (event: ChatEvent) => {
+                    const eventTime = new Date().toLocaleTimeString();
+                    console.log(`🔄 [${eventTime}] Tool error response ${event.type}:`, event);
+
+                    switch (event.type) {
+                      case EventType.TEXT_MESSAGE_CONTENT:
+                        if ('delta' in event) {
+                          setCurrentStreamingMessage((prev) => prev + (event.delta || ''));
+                        }
+                        break;
+                      case EventType.TEXT_MESSAGE_END:
+                        setCurrentStreamingMessage((currentContent) => {
+                          const assistantMessage: TimelineMessage = {
+                            type: 'message',
+                            id:
+                              'messageId' in event && event.messageId
+                                ? event.messageId
+                                : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                            role: 'assistant',
+                            content: currentContent,
+                            timestamp: event.timestamp || Date.now(),
+                          };
+
+                          setTimeline((prev) => [...prev, assistantMessage]);
+                          return ''; // Clear the streaming message
+                        });
+                        setIsStreaming(false);
+                        break;
+                    }
+                  },
+                  error: (error: any) => {
+                    console.error('Tool error response error:', error);
+                    setIsStreaming(false);
+                  },
+                  complete: () => {
+                    console.log('Tool error response complete');
+                    setIsStreaming(false);
+                  },
                 });
               }
             }
@@ -188,7 +316,7 @@ function ChatWindowContent({
         }
         break;
     }
-  }, [service, pendingToolCalls, chatService]);
+  }, [service, pendingToolCalls, chatService, timeline, timelineToMessages]);
 
   const handleSend = async () => {
     if (!input.trim() || isStreaming) return;
