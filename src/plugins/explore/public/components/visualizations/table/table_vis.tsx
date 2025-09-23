@@ -34,6 +34,10 @@ export const TableVis = React.memo(
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize });
     const [filters, setFilters] = useState<Record<string, FilterConfig>>({});
     const [popoverOpenColumnId, setPopoverOpenColumnId] = useState<string | null>(null);
+    const [popoverOpenCell, setPopoverOpenCell] = useState<{
+      rowIndex: number;
+      columnId: string;
+    } | null>(null);
 
     const columnUniques = useMemo(() => {
       const uniques: Record<string, Set<any>> = {};
@@ -149,6 +153,12 @@ export const TableVis = React.memo(
             value={cellValue}
             colorMode={columnCellType}
             color={color}
+            dataLinks={styleOptions?.dataLinks}
+            isPopoverOpen={
+              popoverOpenCell?.rowIndex === rowIndex && popoverOpenCell?.columnId === columnId
+            }
+            setPopoverOpen={(open) => setPopoverOpenCell(open ? { rowIndex, columnId } : null)}
+            columnId={columnId}
           />
         );
       },
@@ -159,6 +169,8 @@ export const TableVis = React.memo(
         styleOptions?.baseColor,
         styleOptions?.cellTypes,
         styleOptions?.globalAlignment,
+        styleOptions?.dataLinks,
+        popoverOpenCell,
       ]
     );
 
