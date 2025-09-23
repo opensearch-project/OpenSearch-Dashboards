@@ -163,36 +163,34 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
     setIsOpen(false);
   }, []);
 
-  const options = useMemo(() => {
-    return datasets.map((dataset) => {
-      const { id, title, type, description, displayName } = dataset;
-      const isSelected = id === selectedDataset?.id;
-      const isDefault = id === defaultDatasetId;
-      const typeConfig = datasetService.getType(type);
-      const iconType = typeConfig?.meta?.icon?.type || 'database';
-      const label = displayName || title;
-      // Prepending the label to the searchable label to allow for better search, render will strip it out
-      const searchableLabel = `${label}${typeConfig?.title || DEFAULT_DATA.STRUCTURES.ROOT.title}${
-        description && description.trim() !== '' ? ` - ${description}` : ''
-      }`.trim();
+  const options = datasets.map((dataset) => {
+    const { id, title, type, description, displayName } = dataset;
+    const isSelected = id === selectedDataset?.id;
+    const isDefault = id === defaultDatasetId;
+    const typeConfig = datasetService.getType(type);
+    const iconType = typeConfig?.meta?.icon?.type || 'database';
+    const label = displayName || title;
+    // Prepending the label to the searchable label to allow for better search, render will strip it out
+    const searchableLabel = `${label}${typeConfig?.title || DEFAULT_DATA.STRUCTURES.ROOT.title}${
+      description && description.trim() !== '' ? ` - ${description}` : ''
+    }`.trim();
 
-      return {
-        label,
-        searchableLabel: searchableLabel || title,
-        key: id,
-        checked: isSelected ? ('on' as const) : undefined,
-        prepend: <EuiIcon size="s" type={iconType} />,
-        'data-test-subj': `datasetSelectOption-${title}`,
-        append: isDefault ? (
-          <EuiBadge>
-            {i18n.translate('data.datasetSelect.defaultLabel', {
-              defaultMessage: 'Default',
-            })}
-          </EuiBadge>
-        ) : undefined,
-      };
-    });
-  }, [datasets, selectedDataset?.id, defaultDatasetId, datasetService]);
+    return {
+      label,
+      searchableLabel: searchableLabel || title,
+      key: id,
+      checked: isSelected ? ('on' as const) : undefined,
+      prepend: <EuiIcon size="s" type={iconType} />,
+      'data-test-subj': `datasetSelectOption-${title}`,
+      append: isDefault ? (
+        <EuiBadge>
+          {i18n.translate('data.datasetSelect.defaultLabel', {
+            defaultMessage: 'Default',
+          })}
+        </EuiBadge>
+      ) : undefined,
+    };
+  });
 
   const handleOptionChange = useCallback(
     async (newOptions: EuiSelectableOption[]) => {

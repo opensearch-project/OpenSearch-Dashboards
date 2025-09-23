@@ -371,7 +371,10 @@ cy.explore.add(
         }
       });
     }).as('agentConfigRequest');
-    cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
+    cy.getElementByTestId('datasetSelectButton')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click();
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Index Patterns"]`).click();
 
@@ -409,7 +412,10 @@ cy.explore.add(
       });
     }).as('agentConfigRequest');
 
-    cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
+    cy.getElementByTestId('datasetSelectButton')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click();
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Indexes"]`).click();
     cy.get(`[title="${dataSourceName}"]`).click();
@@ -445,7 +451,10 @@ cy.explore.add('setIndexPatternAsDataset', (indexPattern) => {
     });
   }).as('agentConfigRequest');
 
-  cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
+  cy.getElementByTestId('datasetSelectButton')
+    .should('be.visible')
+    .should('not.be.disabled')
+    .click();
   cy.getElementByTestId(`datasetSelectOption-${indexPattern}`).should('be.visible').click();
 
   // verify that it has been selected
@@ -465,7 +474,10 @@ cy.explore.add(
       });
     }).as('agentConfigRequest');
 
-    cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
+    cy.getElementByTestId('datasetSelectButton')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click();
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Index Patterns"]`).click();
 

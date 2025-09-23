@@ -22,7 +22,7 @@ import {
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const noIndexPatterns = 5; // Determines the no of index patterns that should be in the dropdown for filtering test case
+const noIndexPatterns = 2; // Determines the no of index patterns that should be in the dropdown for filtering test case
 
 export const runSimpleDatasetSelectorTests = () => {
   describe('simple dataset selector selecting an index pattern', () => {
@@ -126,10 +126,7 @@ export const runSimpleDatasetSelectorTests = () => {
       ]);
     });
 
-    // TODO: Skipping this as sometimes the dataset does not appear under the dropdown
-    // It is reproducible sometimes but not always
-    // Most likely it is a race condition
-    it.skip('validate filtering index pattern in simple dataset selector', () => {
+    it('validate filtering index pattern in simple dataset selector', () => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName,
         page: 'explore/logs',

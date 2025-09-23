@@ -65,14 +65,15 @@ const cachingTestSuite = () => {
         isEnhancement: true,
       });
 
-      cy.get('body').then(() => {
-        cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
-      });
+      cy.getElementByTestId('datasetSelectButton')
+        .should('be.visible')
+        .should('not.be.disabled')
+        .click();
 
       cy.getElementByTestId('datasetSelectSelectable')
         .should('be.visible')
         .within(() => {
-          cy.get(`[title="${alternativeIndexPattern}"]`).should('exist');
+          cy.get(`[title="${alternativeIndexPattern}Index Patterns"]`).should('exist');
         });
     });
   });
