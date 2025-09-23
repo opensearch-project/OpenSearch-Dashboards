@@ -258,7 +258,11 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
             return (
               <>
                 <MountPointPortal setMountPoint={setMenuMountPoint}>
-                  <EuiFlexGroup alignItems="stretch" gutterSize="none" className="osdTopNavMenuGroup">
+                  <EuiFlexGroup 
+                    alignItems="stretch"
+                    gutterSize="none"
+                    className="osdTopNavMenuGroup"
+                  >
                     <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                       <EuiTitle size="xs">
                         <h1>{screenTitle}</h1>
