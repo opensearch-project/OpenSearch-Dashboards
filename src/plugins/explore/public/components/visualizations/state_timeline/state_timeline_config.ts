@@ -15,12 +15,21 @@ import {
   TitleOptions,
   ValueMappingOptions,
   ThresholdOptions,
+  DisconnectValuesOption,
+  DisableMode,
 } from '../types';
 import { getColors } from '../theme/default_colors';
 
+interface ConnectNullValuesOption {
+  connectMode: 'never' | 'always' | 'threshold';
+  threshold: string;
+}
 export interface ExclusiveStateTimeLineConfig {
   // mergeConsecutive: boolean;
-  showValues: boolean;
+  showValues?: boolean;
+  rowHeight?: number;
+  disconnectValues?: DisconnectValuesOption;
+  connectNullValues?: ConnectNullValuesOption;
 }
 // Complete line chart style controls interface
 export interface StateTimeLineChartStyleControls {
@@ -53,7 +62,12 @@ export const defaultStateTimeLineChartStyles: StateTimeLineChartStyleControls = 
 
   // exclusive
   exclusive: {
-    showValues: true,
+    showValues: false,
+    rowHeight: 1,
+    disconnectValues: {
+      disableMode: DisableMode.Never,
+      threshold: '1h',
+    },
   },
 
   valueMappingOptions: {

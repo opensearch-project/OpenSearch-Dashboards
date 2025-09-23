@@ -77,7 +77,7 @@ export const StateTimeLineVisStyleControls: React.FC<StateTimeLineVisStyleContro
               styles={styleOptions.exclusive}
               useValueMappingColor={styleOptions?.useValueMappingColor}
               onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
-              handleUseValueMappingColorChange={(v: boolean) =>
+              onUseValueMappingColorChange={(v: boolean) =>
                 updateStyleOption('useValueMappingColor', v)
               }
             />

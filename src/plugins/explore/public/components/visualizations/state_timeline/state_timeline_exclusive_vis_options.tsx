@@ -4,24 +4,40 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { EuiFormRow, EuiButtonGroup, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiButtonGroup } from '@elastic/eui';
 import React from 'react';
 import { StateTimeLineChartStyleControls } from './state_timeline_config';
-import { DebouncedFieldNumber } from '../style_panel/utils';
+import { DebouncedFieldNumber, DebouncedFieldText } from '../style_panel/utils';
 import { StyleAccordion } from '../style_panel/style_accordion';
+import { DisableMode, DisconnectValuesOption } from '../types';
 
 interface StateTimeLineExclusiveVisOptionsProps {
   styles: StateTimeLineChartStyleControls['exclusive'];
   useValueMappingColor?: boolean;
   onChange: (styles: StateTimeLineChartStyleControls['exclusive']) => void;
-  handleUseValueMappingColorChange: (v: boolean) => void;
+  onUseValueMappingColorChange: (useValueMappingColor: boolean) => void;
 }
+
+const disconnectValuesOption = [
+  {
+    id: DisableMode.Never,
+    label: i18n.translate('explore.vis.stateTimeline.disconnectValuesOption.never', {
+      defaultMessage: 'Never',
+    }),
+  },
+  {
+    id: DisableMode.Threshold,
+    label: i18n.translate('explore.vis.stateTimeline.disconnectValuesOption.threshold', {
+      defaultMessage: 'Threshold',
+    }),
+  },
+];
 
 export const StateTimeLineExclusiveVisOptions = ({
   styles,
   useValueMappingColor,
   onChange,
-  handleUseValueMappingColorChange,
+  onUseValueMappingColorChange,
 }: StateTimeLineExclusiveVisOptionsProps) => {
   const updateStyle = <K extends keyof StateTimeLineChartStyleControls['exclusive']>(
     key: K,
@@ -49,7 +65,7 @@ export const StateTimeLineExclusiveVisOptions = ({
           })}
           data-test-subj="useValueMappingColorButton"
           checked={useValueMappingColor ?? false}
-          onChange={(e) => handleUseValueMappingColorChange(e.target.checked)}
+          onChange={(e) => onUseValueMappingColorChange(e.target.checked)}
         />
       </EuiFormRow>
       <EuiFormRow>
@@ -58,49 +74,72 @@ export const StateTimeLineExclusiveVisOptions = ({
           label={i18n.translate('explore.vis.stateTimeline.exclusive.showValues', {
             defaultMessage: 'Show values',
           })}
-          checked={styles.showValues}
+          checked={styles?.showValues ?? false}
           onChange={(e) => updateStyle('showValues', e.target.checked)}
           data-test-subj="showValuesSwtich"
         />
       </EuiFormRow>
 
-      {/* <EuiFormRow
-        label={i18n.translate('explore.vis.stateTimeline.exclusive.valuesAlignment', {
-          defaultMessage: 'Value alignment',
+      <EuiFormRow
+        label={i18n.translate('explore.vis.stateTimeline.exclusive.rowHeight', {
+          defaultMessage: 'Row height',
+        })}
+      >
+        <DebouncedFieldNumber
+          value={styles.rowHeight}
+          onChange={(value) => updateStyle('rowHeight', value)}
+          placeholder="value between 0-1"
+          max={1}
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        label={i18n.translate('explore.vis.stateTimeline.exclusive.disconnectValues.disableMode', {
+          defaultMessage: 'Disconnect values',
         })}
       >
         <EuiButtonGroup
-          legend={i18n.translate('explore.vis.stateTimeline.exclusive.valuesAlignment', {
-            defaultMessage: 'Value alignment',
-          })}
-          options={[
+          legend={i18n.translate(
+            'explore.stylePanel.texclusive.disconnectValues.disableMode.options',
             {
-              id: 'left',
-              label: i18n.translate('explore.vis.stateTimeline.exclusive.valuesAlignment.left', {
-                defaultMessage: 'Left',
-              }),
-            },
-            {
-              id: 'center',
-              label: i18n.translate('explore.vis.stateTimeline.exclusive.valuesAlignment.center', {
-                defaultMessage: 'Center',
-              }),
-            },
-            {
-              id: 'right',
-              label: i18n.translate('explore.vis.stateTimeline.exclusive.valuesAlignment.right', {
-                defaultMessage: 'Right',
-              }),
-            },
-          ]}
-          idSelected={styles.alignValues}
-          onChange={(id) => updateStyle('alignValues', id as 'left' | 'center' | 'right')}
+              defaultMessage: 'Disconnect values options',
+            }
+          )}
+          options={disconnectValuesOption}
+          idSelected={styles?.disconnectValues?.disableMode ?? DisableMode.Never}
+          onChange={(id) =>
+            updateStyle('disconnectValues', {
+              ...styles?.disconnectValues,
+              disableMode: id,
+            } as DisconnectValuesOption)
+          }
           buttonSize="compressed"
-          isFullWidth={true}
-          type="single"
-          data-test-subj="valuesAlignmentButtonGroup"
+          isFullWidth
         />
-      </EuiFormRow> */}
+      </EuiFormRow>
+
+      {styles?.disconnectValues?.disableMode === DisableMode.Threshold && (
+        <EuiFormRow
+          label={i18n.translate(
+            'explore.stylePanel.texclusive.disconnectValues.disableMode.threshold',
+            {
+              defaultMessage: 'Threshold',
+            }
+          )}
+        >
+          <DebouncedFieldText
+            icon="arrowRight"
+            value={styles?.disconnectValues?.threshold}
+            onChange={(value) =>
+              updateStyle('disconnectValues', {
+                ...styles?.disconnectValues,
+                threshold: value,
+              } as DisconnectValuesOption)
+            }
+            placeholder="1h"
+          />
+        </EuiFormRow>
+      )}
     </StyleAccordion>
   );
 };
