@@ -317,3 +317,14 @@ export interface ThresholdOptions {
   baseColor?: string;
   thresholdStyle?: ThresholdLineStyle;
 }
+
+// state timeline
+export enum DisableMode {
+  Never = 'never',
+  Threshold = 'threshold',
+}
+
+export interface DisconnectValuesOption {
+  disableMode: DisableMode;
+  threshold: string;
+}

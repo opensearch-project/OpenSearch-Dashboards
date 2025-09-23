@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AxisColumnMappings, AxisRole, VEGASCHEMA, VisColumn, ValueMapping } from '../types';
+import { AxisColumnMappings, AxisRole, DisableMode, VEGASCHEMA, VisColumn } from '../types';
 import { StateTimeLineChartStyleControls } from './state_timeline_config';
 import { applyAxisStyling, getSwappedAxisRole } from '../utils/utils';
 import { mergeData, mergeNumericalData } from './state_timeline_utils';
@@ -18,6 +18,7 @@ export const createNumercialStateTimeline = (
   styleOptions: Partial<StateTimeLineChartStyleControls>,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
+  console.log('styleOptions', styleOptions);
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(
     styleOptions,
     axisColumnMappings
@@ -26,75 +27,59 @@ export const createNumercialStateTimeline = (
   const rangeFieldColumn = axisColumnMappings?.color as any;
   const rangeField = rangeFieldColumn?.column;
   const rangeName = rangeFieldColumn?.name;
-  const [processedData, validRanges] = mergeNumericalData(
-    transformedData,
-    xAxis?.column,
-    yAxis?.column,
-    rangeField,
-    styleOptions.valueMappingOptions?.valueMappings?.filter((m) => m.type === 'range')
-  );
-
-  console.log('transformedData', transformedData);
-
-  console.log('processedData', processedData);
-
-  // function buildCalculateExpr(valueMappings: ValueMapping[] | undefined) {
-  //   const parts: string[] = [];
-  //   if (!valueMappings) return null;
-  //   valueMappings.forEach((m: any) => {
-  //     if (m.type === 'range' && m.range) {
-  //       const { min, max } = m.range;
-  //       const text = m.displayText ?? `[${min}, ${max})`;
-  //       parts.push(
-  //         `(datum["${yAxis?.column}"] >= ${min} && atum["${yAxis?.column}"] < ${max}) ? '${text}'`
-  //       );
-  //     }
-  //   });
-
-  //   return parts.join(' : ');
-  // }
-
-  // function buildColorScale(valueMappings: ValueMapping[] | undefined) {
-  //   if (!valueMappings) return { domain: [], range: [] };
-
-  //   const domain: string[] = [];
-  //   const range: string[] = [];
-
-  //   valueMappings.forEach((m: any) => {
-  //     if (m.type === 'range' && m.range) {
-  //       const { min, max } = m.range;
-  //       const text = m.displayText ?? `[${min}, ${max}]`;
-  //       domain.push(text);
-  //       range.push(m.color ?? '#ccc');
-  //     }
-  //     if (m.type === 'value') {
-  //       const text = m.displayText ?? String(m.value);
-  //       domain.push(text);
-  //       range.push(m.color ?? '#ccc');
-  //     }
-  //   });
-
-  //   return { domain, range };
-  // }
 
   const rangeMappings = styleOptions?.valueMappingOptions?.valueMappings?.filter(
     (mapping) => mapping?.type === 'range'
   );
 
-  console.log('validRanges', validRanges);
+  const disableThreshold = styleOptions?.exclusive?.disconnectValues?.threshold || '1h';
+
+  const [processedData, validRanges] = mergeNumericalData(
+    transformedData,
+    xAxis?.column,
+    yAxis?.column,
+    rangeField,
+    rangeMappings,
+    styleOptions?.exclusive?.disconnectValues?.disableMode === DisableMode.Threshold
+      ? disableThreshold
+      : undefined
+  );
+
   const canUseValueMapping = styleOptions?.useValueMappingColor && validRanges?.length > 0;
 
+  const rowHeight = 1 - (styleOptions?.exclusive?.rowHeight ?? 0);
+
+  const transformLayer = canUseValueMapping
+    ? [
+        {
+          lookup: 'mergedLabel',
+          from: {
+            data: {
+              values: rangeMappings?.map((mapping) => ({
+                mappingValue: `[${mapping?.range?.min},${mapping?.range?.max})`,
+                displayText: mapping?.displayText,
+              })),
+            },
+            key: 'mappingValue',
+            fields: ['mappingValue', 'displayText'],
+          },
+        },
+        {
+          filter: 'datum.mappingValue !== null',
+        },
+      ]
+    : null;
   const barLayer = {
     params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
     mark: {
-      type: 'bar',
-      band: 0.6,
+      type: 'rect',
       tooltip: styleOptions.tooltipOptions?.mode !== 'hidden',
     },
     encoding: {
       y: {
         field: yAxis?.column,
         type: 'nominal',
+        scale: { padding: rowHeight },
         axis: { ...applyAxisStyling(yAxis, yAxisStyle, true), tickOpacity: 0 },
       },
       x: {
@@ -107,10 +92,15 @@ export const createNumercialStateTimeline = (
       color: {
         field: canUseValueMapping ? 'mergedLabel' : 'mergedCount',
         type: 'nominal',
-        legend: { title: canUseValueMapping ? 'Ranges' : 'Counts' },
+        legend: styleOptions.addLegend
+          ? {
+              title: canUseValueMapping ? 'Ranges' : 'Counts',
+              orient: styleOptions.legendPosition?.toLowerCase() || 'bottom',
+            }
+          : null,
         ...(canUseValueMapping && {
           scale: {
-            domain: rangeMappings?.map((m) => `located in [${m.range?.min},${m.range?.max}]`),
+            domain: rangeMappings?.map((m) => `[${m.range?.min},${m.range?.max})`),
             range: rangeMappings?.map((m, i) => m.color || getCategoryNextColor(i)),
           },
         }),
@@ -143,10 +133,36 @@ export const createNumercialStateTimeline = (
       }),
     },
   };
+
+  const textLayer =
+    canUseValueMapping && styleOptions?.exclusive?.showValues
+      ? {
+          mark: { type: 'text', align: 'center', baseline: 'middle' },
+          transform: [
+            {
+              calculate: 'toDate(datum.start) + (toDate(datum.end) - toDate(datum.start)) / 2',
+              as: 'midX',
+            },
+            {
+              // display text only for bars whose duration is greater than 10 minutes
+              filter: 'datum.start !== datum.end',
+            },
+          ],
+          encoding: {
+            y: {
+              field: yAxis?.column,
+              type: 'nominal',
+            },
+            x: { field: 'midX', type: 'temporal' },
+            text: { field: 'displayText' },
+          },
+        }
+      : null;
   const baseSpec = {
     $schema: VEGASCHEMA,
     data: { values: processedData },
-    layer: [barLayer],
+    transform: transformLayer,
+    layer: [barLayer, textLayer].filter(Boolean),
   };
 
   return baseSpec;
@@ -209,20 +225,20 @@ export const createCategoricalStateTimeline = (
   const barLayer = {
     params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
     mark: {
-      type: 'bar',
-      band: 0.6,
+      type: 'rect',
       tooltip: styleOptions.tooltipOptions?.mode !== 'hidden',
     },
     encoding: {
       y: {
         field: yAxis?.column,
         type: 'nominal',
+        scale: { paddingInner: 0 },
         axis: { ...applyAxisStyling(yAxis, yAxisStyle, true), tickOpacity: 0 },
       },
       x: {
         field: xAxis?.column,
         type: 'temporal',
-        // use the minimum timeunit to avoid bar overlapping
+        // use the minimum timeunit to avoid rect overlapping
         timeUnit: 'yearmonthdatehoursminutesseconds',
         axis: { ...applyAxisStyling(xAxis, xAxisStyle, true), tickOpacity: 0 },
       },
@@ -291,13 +307,13 @@ export const createCategoricalStateTimeline = (
               calculate: 'toDate(datum.start) + (toDate(datum.end) - toDate(datum.start)) / 2',
               as: 'midX',
             },
-            {
-              calculate: 'toDate(datum.end) - toDate(datum.start)',
-              as: 'duration',
-            },
+            // {
+            //   calculate: 'toDate(datum.end) - toDate(datum.start)',
+            //   as: 'duration',
+            // },
             {
               // display text only for bars whose duration is greater than 1 hour
-              filter: 'datum.start !== datum.end && datum.duration > 3600000',
+              filter: 'datum.start !== datum.end',
             },
           ],
           encoding: {
