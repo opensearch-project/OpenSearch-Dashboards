@@ -211,18 +211,22 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
             return (
               <>
                 <MountPointPortal setMountPoint={setMenuMountPoint}>
-                  <EuiFlexGroup alignItems="stretch" gutterSize="none" className="osdTopNavMenuGroup">
-                      <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
-                        <EuiTitle size="xs">
-                          <h1>{screenTitle}</h1>
-                        </EuiTitle>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false} className="osdTopNavMenu">
-                        {renderMenu(menuClassName)}
-                      </EuiFlexItem>
-                      <EuiFlexItem className="osdTopNavSearchBar">
-                        {renderSearchBar({ isFilterBarPortable: true })}
-                      </EuiFlexItem>
+                  <EuiFlexGroup
+                    alignItems="stretch"
+                    gutterSize="none"
+                    className="osdTopNavMenuGroup"
+                  >
+                    <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
+                      <EuiTitle size="xs">
+                        <h1>{screenTitle}</h1>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false} className="osdTopNavMenu">
+                      {renderMenu(menuClassName)}
+                    </EuiFlexItem>
+                    <EuiFlexItem className="osdTopNavSearchBar">
+                      {renderSearchBar({ isFilterBarPortable: true })}
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 </MountPointPortal>
               </>
@@ -233,14 +237,14 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
             return screenTitle ? (
               <MountPointPortal setMountPoint={setMenuMountPoint}>
                 <EuiFlexGroup alignItems="stretch" gutterSize="none" className="osdTopNavMenuGroup">
-                    <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
-                      <EuiTitle size="xs">
-                        <h1>{screenTitle}</h1>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem className="osdTopNavMenu">
-                      {renderMenu(menuClassName, true)}
-                    </EuiFlexItem>
+                  <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
+                    <EuiTitle size="xs">
+                      <h1>{screenTitle}</h1>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem className="osdTopNavMenu">
+                    {renderMenu(menuClassName, true)}
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </MountPointPortal>
             ) : (
