@@ -8,8 +8,11 @@
   }
 }
 
-.osdTopNavMenuWithScreenTitle {
-  display: flex;
+.osdTopNavMenuGroup {
+  > .euiFlexItem {
+    width: auto !important;
+    flex-basis: auto !important;
+  }
 
   h1 {
     font-size: $euiFontSizeS;
