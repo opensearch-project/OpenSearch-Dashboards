@@ -5,6 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { createAsyncThunk } from '@reduxjs/toolkit';
+import moment from 'moment';
 import { ExploreServices } from '../../../../../../../types';
 import { AppDispatch } from '../../../../store';
 import {
@@ -63,6 +64,8 @@ export const callAgentActionCreator = createAsyncThunk<
       // TODO: when we introduce more query languages, this should be no longer be hardcoded to PPL
       language: 'PPL',
       dataSourceId: dataset.dataSource?.id,
+      currentTime: moment().toISOString(),
+      timeField: dataset.timeFieldName,
     };
 
     const response = await services.http.post<QueryAssistResponse>(
