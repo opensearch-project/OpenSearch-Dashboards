@@ -233,6 +233,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
         }
       });
     }
+    hits = hits.filter((hit) => !!hit.startTimeUnixNano && !!hit.endTimeUnixNano);
 
     setTransformedHits(hits);
     if (spanFilters.length === 0) {

@@ -179,6 +179,8 @@ describe('TraceDetails', () => {
       name: 'operation-1',
       startTime: '2023-01-01T00:00:00Z',
       endTime: '2023-01-01T00:00:01Z',
+      startTimeUnixNano: '2023-01-01T00:00:00.000000000Z',
+      endTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
       durationInNanos: 1000000000,
     },
     {
@@ -188,6 +190,8 @@ describe('TraceDetails', () => {
       name: 'operation-2',
       startTime: '2023-01-01T00:00:01Z',
       endTime: '2023-01-01T00:00:02Z',
+      startTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
+      endTimeUnixNano: '2023-01-01T00:00:02.000000000Z',
       durationInNanos: 1000000000,
     },
   ];
@@ -430,6 +434,8 @@ describe('TraceDetails', () => {
         name: 'operation-1',
         startTime: '2023-01-01T00:00:02Z', // Later start time
         parentSpanId: 'parent-1', // Has parent
+        startTimeUnixNano: '2023-01-01T00:00:02.000000000Z',
+        endTimeUnixNano: '2023-01-01T00:00:03.000000000Z',
       },
       {
         spanId: 'span-2',
@@ -438,6 +444,8 @@ describe('TraceDetails', () => {
         name: 'operation-2',
         startTime: '2023-01-01T00:00:01Z', // Earlier start time
         parentSpanId: 'parent-2', // Has parent
+        startTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
+        endTimeUnixNano: '2023-01-01T00:00:02.000000000Z',
       },
     ];
 
@@ -453,6 +461,45 @@ describe('TraceDetails', () => {
 
     await waitFor(() => {
       expect(document.querySelector('[data-testid="span-detail-sidebar"]')).toBeInTheDocument();
+    });
+  });
+
+  it('filters spans without timestamp fields', async () => {
+    const mockDataWithoutTimestamps = [
+      {
+        spanId: 'span-1',
+        traceId: 'test-trace-id',
+        serviceName: 'service-a',
+        name: 'operation-1',
+        startTime: '2023-01-01T00:00:00Z',
+        endTime: null,
+        startTimeUnixNano: '2023-01-01T00:00:00.000000000Z',
+        endTimeUnixNano: null,
+      },
+      {
+        spanId: 'span-2',
+        traceId: 'test-trace-id',
+        serviceName: 'service-b',
+        name: 'operation-2',
+        startTime: null,
+        endTime: '2023-01-01T00:00:02Z',
+        startTimeUnixNano: null,
+        endTimeUnixNano: '2023-01-01T00:00:02.000000000Z',
+      },
+    ];
+
+    mockTransformPPLDataToTraceHits.mockImplementation(() => mockDataWithoutTimestamps);
+
+    const history = createMemoryHistory();
+
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="no-match-message"]')).toBeInTheDocument();
     });
   });
 
@@ -616,6 +663,8 @@ describe('TraceDetails', () => {
         serviceName: 'service-a',
         name: 'operation-1',
         status: { code: 2 }, // Error
+        startTimeUnixNano: '2023-01-01T00:00:00.000000000Z',
+        endTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
       },
       {
         spanId: 'span-2',
@@ -623,6 +672,8 @@ describe('TraceDetails', () => {
         serviceName: 'service-b',
         name: 'operation-2',
         status: { code: 0 }, // No error
+        startTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
+        endTimeUnixNano: '2023-01-01T00:00:02.000000000Z',
       },
     ];
 
