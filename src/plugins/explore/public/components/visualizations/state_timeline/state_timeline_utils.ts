@@ -112,7 +112,6 @@ export const mergeCategoricalData = (
   const sorted = [...data].sort(
     (a, b) => new Date(a[timestampField]).getTime() - new Date(b[timestampField]).getTime()
   );
-
   // Collect all possible values from the secondary field
   const allPossibleOptions = Object.keys(groupBy(sorted, (item) => item[groupField2]));
 

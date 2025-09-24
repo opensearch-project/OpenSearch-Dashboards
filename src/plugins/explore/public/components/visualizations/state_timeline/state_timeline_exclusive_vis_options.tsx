@@ -13,9 +13,7 @@ import { DisableMode, DisconnectValuesOption, ConnectNullValuesOption } from '..
 
 interface StateTimeLineExclusiveVisOptionsProps {
   styles: StateTimeLineChartStyleControls['exclusive'];
-  useValueMappingColor?: boolean;
   onChange: (styles: StateTimeLineChartStyleControls['exclusive']) => void;
-  onUseValueMappingColorChange: (useValueMappingColor: boolean) => void;
 }
 
 const disconnectValuesOption = [
@@ -50,9 +48,7 @@ const connectValuesOption = [
 
 export const StateTimeLineExclusiveVisOptions = ({
   styles,
-  useValueMappingColor,
   onChange,
-  onUseValueMappingColorChange,
 }: StateTimeLineExclusiveVisOptionsProps) => {
   const updateStyle = <K extends keyof StateTimeLineChartStyleControls['exclusive']>(
     key: K,
@@ -72,17 +68,6 @@ export const StateTimeLineExclusiveVisOptions = ({
       })}
       initialIsOpen={true}
     >
-      <EuiFormRow>
-        <EuiSwitch
-          compressed
-          label={i18n.translate('explore.stylePanel.valueMapping.useValueMappingColor', {
-            defaultMessage: 'Use value mappings color',
-          })}
-          data-test-subj="useValueMappingColorButton"
-          checked={useValueMappingColor ?? false}
-          onChange={(e) => onUseValueMappingColorChange(e.target.checked)}
-        />
-      </EuiFormRow>
       <EuiFormRow>
         <EuiSwitch
           compressed

@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import { ColorGroupPanel } from './color_group_panel';
+import { resolveColor } from '../../theme/default_colors';
 import './color_group_panel.scss';
 
 interface ColorGroupButtonProps {
@@ -18,7 +19,10 @@ export const ColorGroupButton: React.FC<ColorGroupButtonProps> = ({ buttonColor,
   const button = (
     <button
       className="colorCircle"
-      style={{ backgroundColor: buttonColor }}
+      style={{
+        backgroundColor: resolveColor(buttonColor),
+        border: buttonColor === 'transparent' ? '1px solid #ccc' : 'none',
+      }}
       onClick={() => setPopover(!isPopoverOpen)}
     />
   );

@@ -75,11 +75,7 @@ export const StateTimeLineVisStyleControls: React.FC<StateTimeLineVisStyleContro
           <EuiFlexItem grow={false}>
             <StateTimeLineExclusiveVisOptions
               styles={styleOptions.exclusive}
-              useValueMappingColor={styleOptions?.useValueMappingColor}
               onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
-              onUseValueMappingColorChange={(v: boolean) =>
-                updateStyleOption('useValueMappingColor', v)
-              }
             />
           </EuiFlexItem>
 

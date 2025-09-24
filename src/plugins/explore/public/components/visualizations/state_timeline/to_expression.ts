@@ -13,6 +13,7 @@ import {
 } from './state_timeline_utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { getCategoryNextColor } from '../theme/default_colors';
+import { resolveColor } from '../theme/default_colors';
 
 export const createNumercialStateTimeline = (
   transformedData: Array<Record<string, any>>,
@@ -107,7 +108,7 @@ export const createNumercialStateTimeline = (
         ...(canUseValueMapping && {
           scale: {
             domain: validRanges?.map((m) => `[${m.range?.min},${m.range?.max})`),
-            range: validRanges?.map((m, i) => m.color || getCategoryNextColor(i)),
+            range: validRanges?.map((m, i) => resolveColor(m.color) || getCategoryNextColor(i)),
           },
         }),
       },
@@ -264,7 +265,7 @@ export const createCategoricalStateTimeline = (
         ...(canUseValueMapping && {
           scale: {
             domain: validValues?.map((m) => m.value),
-            range: validValues?.map((m, i) => m.color || getCategoryNextColor(i)),
+            range: validValues?.map((m, i) => resolveColor(m.color) || getCategoryNextColor(i)),
           },
         }),
         legend: styleOptions.addLegend
@@ -437,7 +438,7 @@ export const createSingleCategoricalStateTimeline = (
         ...(canUseValueMapping && {
           scale: {
             domain: validValues?.map((m) => m.value),
-            range: validValues?.map((m, i) => m.color || getCategoryNextColor(i)),
+            range: validValues?.map((m, i) => resolveColor(m.color) || getCategoryNextColor(i)),
           },
         }),
         legend: styleOptions.addLegend
