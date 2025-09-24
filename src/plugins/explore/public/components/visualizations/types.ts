@@ -337,3 +337,14 @@ export interface DisconnectValuesOption {
   disableMode: DisableMode;
   threshold: string;
 }
+
+// export enum ConnectMode {
+//   Never = 'never',
+//   Threshold = 'threshold',
+//   Always = 'always',
+// }
+
+export interface ConnectNullValuesOption {
+  connectMode: DisableMode;
+  threshold: string;
+}
