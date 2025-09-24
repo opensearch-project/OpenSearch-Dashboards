@@ -13,7 +13,7 @@ import { RenderCustomDataGrid } from '../utils/custom_datagrid';
 import { nanoToMilliSec, round } from '../utils/helper_functions';
 import { extractSpanDuration } from '../utils/span_data_utils';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../utils/shared_const';
-import { resolveServiceNameFromSpan } from './ppl_resolve_helpers';
+import { resolveServiceNameFromSpan, isSpanError } from './ppl_resolve_helpers';
 
 export interface ParsedHit extends Span {
   sort?: any[];
@@ -215,6 +215,9 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
       if (props.filters.length > 0) {
         spans = spans.filter((span: ParsedHit) => {
           return props.filters.every(({ field, value }) => {
+            if (field === 'isError' && value === true) {
+              return isSpanError(span);
+            }
             return span[field] === value;
           });
         });
@@ -320,9 +323,12 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
 
       if (props.filters.length > 0) {
         spans = spans.filter((span: any) => {
-          return props.filters.every(
-            ({ field, value }: { field: string; value: any }) => span[field] === value
-          );
+          return props.filters.every(({ field, value }: { field: string; value: any }) => {
+            if (field === 'isError' && value === true) {
+              return isSpanError(span);
+            }
+            return span[field] === value;
+          });
         });
       }
 
