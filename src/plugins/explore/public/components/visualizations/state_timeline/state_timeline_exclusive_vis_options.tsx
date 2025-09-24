@@ -9,7 +9,7 @@ import React from 'react';
 import { StateTimeLineChartStyleControls } from './state_timeline_config';
 import { DebouncedFieldNumber, DebouncedFieldText } from '../style_panel/utils';
 import { StyleAccordion } from '../style_panel/style_accordion';
-import { DisableMode, DisconnectValuesOption } from '../types';
+import { DisableMode, DisconnectValuesOption, ConnectNullValuesOption } from '../types';
 
 interface StateTimeLineExclusiveVisOptionsProps {
   styles: StateTimeLineChartStyleControls['exclusive'];
@@ -28,6 +28,21 @@ const disconnectValuesOption = [
   {
     id: DisableMode.Threshold,
     label: i18n.translate('explore.vis.stateTimeline.disconnectValuesOption.threshold', {
+      defaultMessage: 'Threshold',
+    }),
+  },
+];
+
+const connectValuesOption = [
+  {
+    id: DisableMode.Never,
+    label: i18n.translate('explore.vis.stateTimeline.connectValuesOption.never', {
+      defaultMessage: 'Never',
+    }),
+  },
+  {
+    id: DisableMode.Threshold,
+    label: i18n.translate('explore.vis.stateTimeline.connectValuesOption.threshold', {
       defaultMessage: 'Threshold',
     }),
   },
@@ -105,6 +120,7 @@ export const StateTimeLineExclusiveVisOptions = ({
               defaultMessage: 'Disconnect values options',
             }
           )}
+          isDisabled={styles?.connectNullValues?.connectMode !== DisableMode.Never}
           options={disconnectValuesOption}
           idSelected={styles?.disconnectValues?.disableMode ?? DisableMode.Never}
           onChange={(id) =>
@@ -135,6 +151,55 @@ export const StateTimeLineExclusiveVisOptions = ({
                 ...styles?.disconnectValues,
                 threshold: value,
               } as DisconnectValuesOption)
+            }
+            placeholder="1h"
+          />
+        </EuiFormRow>
+      )}
+
+      <EuiFormRow
+        label={i18n.translate('explore.vis.stateTimeline.exclusive.connectValues.connectMode', {
+          defaultMessage: 'Connect null values',
+        })}
+      >
+        <EuiButtonGroup
+          legend={i18n.translate(
+            'explore.stylePanel.stateTimeline.exclusive.connectValues.options',
+            {
+              defaultMessage: 'Connect null values',
+            }
+          )}
+          isDisabled={styles?.disconnectValues?.disableMode !== DisableMode.Never}
+          options={connectValuesOption}
+          idSelected={styles?.connectNullValues?.connectMode ?? DisableMode.Never}
+          onChange={(id) =>
+            updateStyle('connectNullValues', {
+              ...styles?.connectNullValues,
+              connectMode: id,
+            } as ConnectNullValuesOption)
+          }
+          buttonSize="compressed"
+          isFullWidth
+        />
+      </EuiFormRow>
+
+      {styles?.connectNullValues?.connectMode === DisableMode.Threshold && (
+        <EuiFormRow
+          label={i18n.translate(
+            'explore.stylePanel.texclusive.disconnectValues.disableMode.threshold',
+            {
+              defaultMessage: 'Threshold',
+            }
+          )}
+        >
+          <DebouncedFieldText
+            icon="arrowLeft"
+            value={styles?.connectNullValues?.threshold}
+            onChange={(value) =>
+              updateStyle('connectNullValues', {
+                ...styles?.connectNullValues,
+                threshold: value,
+              } as ConnectNullValuesOption)
             }
             placeholder="1h"
           />

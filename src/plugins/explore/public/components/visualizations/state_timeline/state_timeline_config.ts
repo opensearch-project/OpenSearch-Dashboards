@@ -16,14 +16,11 @@ import {
   ValueMappingOptions,
   ThresholdOptions,
   DisconnectValuesOption,
+  ConnectNullValuesOption,
   DisableMode,
 } from '../types';
 import { getColors } from '../theme/default_colors';
 
-interface ConnectNullValuesOption {
-  connectMode: 'never' | 'always' | 'threshold';
-  threshold: string;
-}
 export interface ExclusiveStateTimeLineConfig {
   // mergeConsecutive: boolean;
   showValues?: boolean;
@@ -66,6 +63,10 @@ export const defaultStateTimeLineChartStyles: StateTimeLineChartStyleControls = 
     rowHeight: 1,
     disconnectValues: {
       disableMode: DisableMode.Never,
+      threshold: '1h',
+    },
+    connectNullValues: {
+      connectMode: DisableMode.Never,
       threshold: '1h',
     },
   },
