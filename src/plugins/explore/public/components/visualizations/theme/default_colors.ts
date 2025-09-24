@@ -71,50 +71,67 @@ export const getColors = () => {
 };
 
 export const DEFAULT_GREY = '#d3d3d3';
-export const getColorGroups = () => {
+
+function hexToRgb(hex: string) {
+  hex = hex.replace(/^#/, '');
+  if (hex.length === 3) {
+    hex = hex
+      .split('')
+      .map((x) => x + x)
+      .join('');
+  }
   return {
-    red: {
-      red1: '#c4152a',
-      red2: '#e02f44',
-      red3: '#ff4b5e',
-      red4: '#ff7f87',
-      red5: '#ffb3b8',
-    },
-    orange: {
-      orange1: '#fa6501',
-      orange2: '#ff780b',
-      orange3: '#ff9830',
-      orange4: '#ffb357',
-      orange5: '#ffcb7e',
-    },
-    yellow: {
-      yellow1: '#e0b400',
-      yellow2: '#ffca00',
-      yellow3: '#ffdb4a',
-      yellow4: '#ffe680',
-      yellow5: '#fff2b3',
-    },
-    green: {
-      green1: '#37872d',
-      green2: '#57a64b',
-      green3: '#73bf69',
-      green4: '#96d98d',
-      green5: '#c9f2c2',
-    },
-    blue: {
-      blue1: '#2061c4',
-      blue2: '#3275d9',
-      blue3: '#5794f2',
-      blue4: '#8ab8ff',
-      blue5: '#c0d8ff',
-    },
-    purple: {
-      purple1: '#8f3bb8',
-      purple2: '#a352cd',
-      purple3: '#b977d9',
-      purple4: '#ca96e5',
-      purple5: '#deb7f2',
-    },
+    r: parseInt(hex.slice(0, 2), 16),
+    g: parseInt(hex.slice(2, 4), 16),
+    b: parseInt(hex.slice(4, 6), 16),
+  };
+}
+
+function rgbToHex(r: number, g: number, b: number) {
+  return (
+    '#' +
+    [r, g, b]
+      .map((x) => {
+        const hex = x.toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+      })
+      .join('')
+  );
+}
+
+function generateColorGroup(start: string, end: string, groupName: string, nums: number = 5) {
+  const s = hexToRgb(start);
+  const e = hexToRgb(end);
+
+  const colors: Record<string, string> = {};
+  for (let i = 0; i < nums; i++) {
+    const t = i / (nums - 1);
+    const r = Math.round(s.r + (e.r - s.r) * t);
+    const g = Math.round(s.g + (e.g - s.g) * t);
+    const b = Math.round(s.b + (e.b - s.b) * t);
+    colors[`${groupName}${i + 1}`] = rgbToHex(r, g, b);
+  }
+  return colors;
+}
+
+export const getColorGroups = () => {
+  if (darkMode) {
+    return {
+      red: generateColorGroup('#ffb3b8', '#c4152a', 'red'),
+      orange: generateColorGroup('#ffcb7e', '#fa6501', 'orange'),
+      yellow: generateColorGroup('#fff2b3', '#e0b400', 'yellow'),
+      green: generateColorGroup('#c9f2c2', '#37872d', 'green'),
+      blue: generateColorGroup('#c0d8ff', '#2061c4', 'blue'),
+      purple: generateColorGroup('#deb7f2', '#A669E2', 'purple'),
+    };
+  }
+  return {
+    red: generateColorGroup('#c4152a', '#ffb3b8', 'red'),
+    orange: generateColorGroup('#FF4B14', '#ffcb7e', 'orange'),
+    yellow: generateColorGroup('#F90', '#fff2b3', 'yellow'),
+    green: generateColorGroup('#005237', '#c9f2c2', 'green'),
+    blue: generateColorGroup('#5C7FFF', '#c0d8ff', 'blue'),
+    purple: generateColorGroup('#A669E2', '#deb7f2', 'purple'),
   };
 };
 
@@ -122,4 +139,22 @@ export const greyDefault = '#cdccdc';
 
 export const getCategoryNextColor = (index: number) => {
   return getColors().categories[index % getColors().categories.length];
+};
+
+// Resolve color name to hex value
+export const resolveColor = (colorName?: string) => {
+  if (!colorName) return undefined;
+
+  // Return hex color from theme
+  if (colorName.startsWith('#')) return colorName;
+  const colorGroups = getColorGroups();
+
+  for (const group of Object.values(colorGroups)) {
+    if (colorName in group) {
+      return group[colorName as keyof typeof group];
+    }
+  }
+
+  // Return hex color from color picker
+  return colorName;
 };

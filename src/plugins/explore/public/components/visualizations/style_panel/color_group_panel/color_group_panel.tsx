@@ -11,12 +11,11 @@ import {
   EuiText,
   EuiColorPicker,
   EuiFlexGroup,
-  EuiFlexGrid,
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import { getColorGroups, greyDefault } from '../../../visualizations/theme/default_colors';
+import { getColorGroups } from '../../../visualizations/theme/default_colors';
 import { useDebouncedValue } from '../../utils/use_debounced_value';
 import './color_group_panel.scss';
 
@@ -36,19 +35,19 @@ export const ColorGroupPanel: React.FC<ColorGroupPanelProps> = ({ color, onChang
 
   const renderColorGroup = (groupName: string, group: Record<string, string>) => {
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
           <EuiText size="s">{groupName}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
+          <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="flexEnd">
             {Object.entries(group).map(([key, value]) => (
               <EuiFlexItem grow={false} key={key}>
                 <button
-                  className="colorCircle"
+                  className="colorSquare"
                   style={{ backgroundColor: value }}
                   onClick={() => {
-                    onChange(value);
+                    onChange(key); // Store color name instead of hex
                     onClose();
                   }}
                 />
@@ -76,35 +75,24 @@ export const ColorGroupPanel: React.FC<ColorGroupPanelProps> = ({ color, onChang
         <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
           {renderAllColorGroups()}
           <EuiSpacer size="m" />
-          <EuiFlexGrid columns={2}>
-            {[
-              {
-                label: 'Transparent',
-                circleColor: 'transparent',
-              },
-              { label: 'Text Color', circleColor: greyDefault },
-            ].map(({ label, circleColor }) => (
-              <EuiFlexItem key={label}>
-                <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued">
-                      {label}
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <button
-                      className="colorCircle"
-                      style={{ backgroundColor: circleColor }}
-                      onClick={() => {
-                        onChange(circleColor);
-                        onClose();
-                      }}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
+
+          <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {'Transparent'}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <button
+                className="colorCircle"
+                style={{ backgroundColor: 'transparent', border: '1px solid #ccc' }}
+                onClick={() => {
+                  onChange('transparent');
+                  onClose();
+                }}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPanel>
       ),
     },
