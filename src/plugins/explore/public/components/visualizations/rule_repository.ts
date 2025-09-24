@@ -50,6 +50,7 @@ import { HeatmapChartStyle } from './heatmap/heatmap_vis_config';
 import {
   createNumercialStateTimeline,
   createCategoricalStateTimeline,
+  createSingleCategoricalStateTimeline,
 } from './state_timeline/to_expression';
 
 type RuleMatchIndex = [number, number, number];
@@ -720,6 +721,33 @@ const twoCateOneDateRule: VisualizationRule = {
   },
 };
 
+const oneCateOneDateRule: VisualizationRule = {
+  id: 'one-category-one-date',
+  name: 'two category and one date',
+  description: 'stateTimeLine for one category and one date',
+  matches: (numerical, categorical, date) =>
+    compare([0, 1, 1], [numerical.length, categorical.length, date.length]),
+  chartTypes: [{ ...CHART_METADATA.state_timeline, priority: 100 }],
+  toSpec: (
+    transformedData,
+    numericalColumns,
+    categoricalColumns,
+    dateColumns,
+    styleOptions,
+    chartType = 'scatter',
+    axisColumnMappings
+  ) => {
+    return createSingleCategoricalStateTimeline(
+      transformedData,
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      styleOptions,
+      axisColumnMappings
+    );
+  },
+};
+
 // Export all rules
 export const ALL_VISUALIZATION_RULES: VisualizationRule[] = [
   oneMetricOneDateRule,
@@ -734,4 +762,5 @@ export const ALL_VISUALIZATION_RULES: VisualizationRule[] = [
   threeMetricOneCateRule,
   oneMetricRule,
   twoCateOneDateRule,
+  oneCateOneDateRule,
 ];

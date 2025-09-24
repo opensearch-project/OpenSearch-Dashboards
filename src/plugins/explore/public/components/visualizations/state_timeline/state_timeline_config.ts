@@ -150,6 +150,10 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
         [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
         [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
       },
+      {
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
+      },
     ],
   },
 });
