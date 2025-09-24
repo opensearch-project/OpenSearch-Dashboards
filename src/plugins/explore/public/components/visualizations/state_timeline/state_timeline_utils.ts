@@ -354,9 +354,8 @@ const fallbackForSingleCategorical = (
   groupField1: string
 ) => {
   const merged: Array<Record<string, any>> = [];
-
+  let buffer: Array<Record<string, any>> = [];
   for (let i = 0; i < sorted.length; i++) {
-    let buffer: Array<Record<string, any>> = [];
     const curr = sorted[i];
     const prev = buffer.length ? buffer[0][groupField1] : null;
 
@@ -374,12 +373,11 @@ const fallbackForSingleCategorical = (
       }
       buffer = [curr];
     }
-
-    // Merge any remaining buffered entries
-    if (buffer.length) {
-      const rec = mergeRecords(buffer, timestampField);
-      if (rec) merged.push(rec);
-    }
+  }
+  // Merge any remaining buffered entries
+  if (buffer.length) {
+    const rec = mergeRecords(buffer, timestampField);
+    if (rec) merged.push(rec);
   }
 
   return merged;
