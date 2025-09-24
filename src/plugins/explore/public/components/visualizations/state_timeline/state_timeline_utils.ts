@@ -41,11 +41,11 @@ const disconnectValues = (next: string, last: string, disableThreshold?: string)
   const nextTime = new Date(next).getTime();
   const lastTimeWithThreshold = disableThreshold
     ? addThresholdTime(last, disableThreshold)
-    : new Date(last).getTime();
+    : undefined;
 
   // If the adjusted last time exists and is earlier than the next time,
   // return it as the disconnect point
-  if (lastTimeWithThreshold !== undefined && lastTimeWithThreshold < nextTime) {
+  if (lastTimeWithThreshold && lastTimeWithThreshold < nextTime) {
     return new Date(lastTimeWithThreshold).toISOString();
   }
 
@@ -112,92 +112,110 @@ export const mergeData = (
 
   const groups = groupBy(sorted, (item) => item[groupField1]);
 
-  const merged: Array<Record<string, any>> = [];
+  // const merged: Array<Record<string, any>> = [];
+
+  const isEqual = (value: string, lastNotNull: Record<string, any>) => {
+    return lastNotNull[groupField2] === value;
+  };
 
   const findValue = (value: string) => validValues?.find((v) => v.value === value)?.value;
 
-  for (const g1 of Object.values(groups)) {
-    // Buffer for consecutive same-value entries in a group
-    let buffer: Array<Record<string, any>> = [];
-    let currentValue: string | undefined;
-    let firstInvalidValueTime;
+  const merged = mergeByGroup<string>({
+    sorted,
+    groupField: groupField1,
+    valueField: groupField2,
+    timestampField,
+    disableThreshold,
+    connectThreshold,
+    findTarget: findValue,
+    mergeFn: mergeRecords,
+    isEqual,
+  });
 
-    for (let i = 0; i < g1.length; i++) {
-      const curr = g1[i];
-      // const prev = buffer.length ? buffer[0][groupField2] : null;
+  // for (const g1 of Object.values(groups)) {
+  //   // Buffer for consecutive same-value entries in a group
+  //   let buffer: Array<Record<string, any>> = [];
+  //   let currentValue: string | undefined;
+  //   let firstInvalidValueTime;
 
-      const targetValue = findValue(curr[groupField2]);
+  //   for (let i = 0; i < g1.length; i++) {
+  //     const curr = g1[i];
+  //     // const prev = buffer.length ? buffer[0][groupField2] : null;
 
-      // If the current data point does not belong to any defined value mappings
-      if (!targetValue && buffer.length > 0) {
-        // record the first InvalidValueTime
-        firstInvalidValueTime ??= curr[timestampField];
+  //     const targetValue = findValue(curr[groupField2]);
 
-        const newTime = disconnectValues(
-          curr[timestampField],
-          buffer[buffer.length - 1][timestampField],
-          disableThreshold
-        );
-        const rec = mergeRecords(buffer, timestampField, newTime);
-        merged.push(rec);
-        buffer = [];
-        currentValue = undefined;
+  //     // If the current data point does not belong to any defined value mappings
+  //     if (!targetValue) {
+  //       if (buffer.length > 0) {
+  //         // record the first InvalidValueTime
+  //         firstInvalidValueTime ??= curr[timestampField];
 
-        continue;
-      }
+  //         const newTime = disconnectValues(
+  //           curr[timestampField],
+  //           buffer[buffer.length - 1][timestampField],
+  //           disableThreshold
+  //         );
+  //         const rec = mergeRecords(buffer, timestampField, newTime);
+  //         merged.push(rec);
+  //         buffer = [];
+  //         currentValue = undefined;
+  //       }
 
-      // first valid record after a lists of invalid records
-      if (!currentValue && merged.length > 0 && firstInvalidValueTime && connectThreshold) {
-        const lastNotNull = merged[merged.length - 1];
+  //       continue;
+  //     }
 
-        // only connect entries that has same value
-        if (lastNotNull[groupField2] === curr[groupField2]) {
-          const newTime = connectNullValue(curr[timestampField], lastNotNull.end, connectThreshold);
+  //     // first valid record after a lists of invalid records
+  //     if (!currentValue && merged.length > 0 && firstInvalidValueTime && connectThreshold) {
+  //       const lastNotNull = merged[merged.length - 1];
 
-          merged[merged.length - 1] = {
-            ...lastNotNull,
-            end: newTime,
-          };
-        }
+  //       // only connect entries that has same value
+  //       if (lastNotNull[groupField2] === curr[groupField2]) {
+  //         const newTime = connectNullValue(curr[timestampField], lastNotNull.end, connectThreshold);
 
-        firstInvalidValueTime = undefined;
-      }
+  //         merged[merged.length - 1] = {
+  //           ...lastNotNull,
+  //           end: newTime,
+  //         };
+  //       }
 
-      // If current value as previous or first entry, add to buffer
-      if (currentValue === targetValue || currentValue === undefined) {
-        buffer.push(curr);
-        currentValue = targetValue;
-      } else {
-        // Value changed - merge buffered entries and start new buffer
-        if (buffer.length > 0) {
-          // use disthreshold to get the endTime
-          const newTime = disconnectValues(
-            curr[timestampField],
-            buffer[buffer.length - 1][timestampField],
-            disableThreshold
-          );
+  //       firstInvalidValueTime = undefined;
+  //     }
 
-          const rec = mergeRecords(buffer, timestampField, newTime);
-          merged.push(rec);
-        }
-        currentValue = targetValue;
-        buffer = [curr];
-      }
-    }
-    // Merge any remaining buffered entries
-    if (buffer.length > 0) {
-      const rec = mergeRecords(buffer, timestampField);
-      merged.push(rec);
-    }
-  }
+  //     // If current value as previous or first entry, add to buffer
+  //     if (currentValue === targetValue || currentValue === undefined) {
+  //       buffer.push(curr);
+  //       currentValue = targetValue;
+  //     } else {
+  //       // Value changed - merge buffered entries and start new buffer
+  //       if (buffer.length > 0) {
+  //         // use disthreshold to get the endTime
+  //         const newTime = disconnectValues(
+  //           curr[timestampField],
+  //           buffer[buffer.length - 1][timestampField],
+  //           disableThreshold
+  //         );
+
+  //         const rec = mergeRecords(buffer, timestampField, newTime);
+  //         merged.push(rec);
+  //       }
+  //       currentValue = targetValue;
+  //       buffer = [curr];
+  //     }
+  //   }
+  //   // Merge any remaining buffered entries
+  //   if (buffer.length > 0) {
+  //     const rec = mergeRecords(buffer, timestampField);
+  //     merged.push(rec);
+  //   }
+  // }
   return [merged, validValues];
 };
 
 const mergeNumercialRecord = (
   records: Array<Record<string, any>>,
   timestampField: string,
-  range: RangeValue | undefined,
-  nextData?: string
+  nextData?: string,
+  range?: RangeValue
 ) => {
   return {
     ...records[0],
@@ -249,88 +267,107 @@ export const mergeNumericalData = (
     return [fallbackMerge(sorted, timestampField, groupField), []];
   }
 
-  const groups = groupBy(sorted, (item) => item[groupField]);
-  const merged: Array<Record<string, any>> = [];
+  // const groups = groupBy(sorted, (item) => item[groupField]);
+  // const merged: Array<Record<string, any>> = [];
 
-  const findRange = (value: number) =>
-    validRanges?.find(
+  const findRange = (value: string) => {
+    const numberValue = Number(value);
+    return validRanges?.find(
       (r) =>
         r?.range?.min !== undefined &&
         r?.range?.max !== undefined &&
-        r.range.min <= value &&
-        r.range.max > value
+        r.range.min <= numberValue &&
+        r.range.max > numberValue
     )?.range;
+  };
 
-  for (const g1 of Object.values(groups)) {
-    let buffer: Array<Record<string, any>> = [];
-    let currentRange: RangeValue | undefined;
-    let firstInvalidValueTime;
+  const isEqual = (range: RangeValue, lastNotNull: Record<string, any>) => {
+    return lastNotNull.mergedLabel === `[${range?.min},${range?.max})`;
+  };
+  const merged = mergeByGroup<RangeValue>({
+    sorted,
+    groupField,
+    valueField: rangeField,
+    timestampField,
+    disableThreshold,
+    connectThreshold,
+    findTarget: findRange,
+    mergeFn: mergeNumercialRecord,
+    isEqual,
+  });
+  // console.log('merged', merged);
+  // for (const g1 of Object.values(groups)) {
+  //   let buffer: Array<Record<string, any>> = [];
+  //   let currentRange: RangeValue | undefined;
+  //   let firstInvalidValueTime;
 
-    for (let i = 0; i < g1.length; i++) {
-      const curr = g1[i];
+  //   for (let i = 0; i < g1.length; i++) {
+  //     const curr = g1[i];
 
-      const range = findRange(Number(curr[rangeField]));
+  //     const range = findRange(curr[rangeField]);
 
-      // If the current data point does not belong to any defined ranges
-      if (!range && buffer.length > 0) {
-        firstInvalidValueTime ??= curr[timestampField];
+  //     // If the current data point does not belong to any defined ranges
+  //     if (!range) {
+  //       if (buffer.length > 0) {
+  //         firstInvalidValueTime ??= curr[timestampField];
 
-        const next = disconnectValues(
-          curr[timestampField],
-          buffer[buffer.length - 1][timestampField],
-          disableThreshold
-        );
-        const rec = mergeNumercialRecord(buffer, timestampField, currentRange, next);
-        merged.push(rec);
-        buffer = [];
-        currentRange = undefined;
+  //         const next = disconnectValues(
+  //           curr[timestampField],
+  //           buffer[buffer.length - 1][timestampField],
+  //           disableThreshold
+  //         );
+  //         const rec = mergeNumercialRecord(buffer, timestampField, next, currentRange);
+  //         merged.push(rec);
+  //         buffer = [];
+  //         currentRange = undefined;
+  //       }
 
-        continue;
-      }
+  //       continue;
+  //     }
 
-      // first valid record after a lists of invalid records
-      if (!currentRange && merged.length > 0 && firstInvalidValueTime && connectThreshold) {
-        const lastNotNull = merged[merged.length - 1];
+  //     // first valid record after a lists of invalid records
+  //     if (!currentRange && merged.length > 0 && firstInvalidValueTime && connectThreshold) {
+  //       const lastNotNull = merged[merged.length - 1];
 
-        if (lastNotNull.mergedLabel === `[${range?.min},${range?.max})`) {
-          const newTime = connectNullValue(curr[timestampField], lastNotNull.end, connectThreshold);
+  //       if (lastNotNull.mergedLabel === `[${range?.min},${range?.max})`) {
+  //         const newTime = connectNullValue(curr[timestampField], lastNotNull.end, connectThreshold);
 
-          merged[merged.length - 1] = {
-            ...lastNotNull,
-            end: newTime,
-          };
-        }
+  //         merged[merged.length - 1] = {
+  //           ...lastNotNull,
+  //           end: newTime,
+  //         };
+  //       }
 
-        firstInvalidValueTime = undefined;
-      }
+  //       firstInvalidValueTime = undefined;
+  //     }
 
-      // If same range as previous or first entry, add to buffer
-      if (currentRange === range || currentRange === undefined) {
-        buffer.push(curr);
-        currentRange = range;
-      } else {
-        // Range changed - merge buffered entries and start new buffer
-        if (buffer.length > 0) {
-          const next = disconnectValues(
-            curr[timestampField],
-            buffer[buffer.length - 1][timestampField],
-            disableThreshold
-          );
-          const rec = mergeNumercialRecord(buffer, timestampField, currentRange, next);
-          merged.push(rec);
-        }
+  //     // If same range as previous or first entry, add to buffer
+  //     if (currentRange === range || currentRange === undefined) {
+  //       buffer.push(curr);
+  //       currentRange = range;
+  //     } else {
+  //       // Range changed - merge buffered entries and start new buffer
+  //       if (buffer.length > 0) {
+  //         const next = disconnectValues(
+  //           curr[timestampField],
+  //           buffer[buffer.length - 1][timestampField],
+  //           disableThreshold
+  //         );
+  //         const rec = mergeNumercialRecord(buffer, timestampField, next, currentRange);
+  //         merged.push(rec);
+  //       }
 
-        buffer = [curr];
-        currentRange = range;
-      }
-    }
+  //       buffer = [curr];
+  //       currentRange = range;
+  //     }
+  //   }
 
-    // Merge any remaining buffered entries, no need to pass nextTime
-    if (buffer.length > 0) {
-      const rec = mergeNumercialRecord(buffer, timestampField, currentRange);
-      merged.push(rec);
-    }
-  }
+  //   // Merge any remaining buffered entries, no need to pass nextTime
+  //   if (buffer.length > 0) {
+  //     const rec = mergeNumercialRecord(buffer, timestampField, undefined, currentRange);
+  //     merged.push(rec);
+  //   }
+  // }
 
   return [merged, validRanges];
 };
@@ -396,6 +433,113 @@ const fallbackForCategorical = (
     if (buffer.length) {
       const rec = mergeRecords(buffer, timestampField);
       if (rec) merged.push(rec);
+    }
+  }
+
+  return merged;
+};
+
+type MergeFn<T extends string | RangeValue> = (
+  buffer: Array<Record<string, any>>,
+  timestampField: string,
+  endTime?: string,
+  vaule?: T
+) => any;
+interface MergeOptions<T extends string | RangeValue> {
+  sorted: Array<Record<string, any>>;
+  timestampField: string;
+  groupField: string;
+  valueField: string;
+  disableThreshold?: string;
+  connectThreshold?: string;
+  findTarget: (value: string) => T | undefined;
+  mergeFn: MergeFn<T>;
+  isEqual: (value: T, lastNotNull: Record<string, any>) => boolean;
+}
+const mergeByGroup = <T extends string | RangeValue>({
+  sorted,
+  groupField,
+  valueField,
+  timestampField,
+  disableThreshold,
+  connectThreshold,
+  findTarget,
+  mergeFn,
+  isEqual,
+}: MergeOptions<T>) => {
+  const groups = groupBy(sorted, (item) => item[groupField]);
+  const merged: Array<Record<string, any>> = [];
+
+  for (const g1 of Object.values(groups)) {
+    let buffer: Array<Record<string, any>> = [];
+    let currentValue: T | undefined;
+    let firstInvalidValueTime;
+
+    for (let i = 0; i < g1.length; i++) {
+      const curr = g1[i];
+
+      const target = findTarget(curr[valueField]);
+
+      // If the current data point does not belong to any defined values or ranges
+      if (!target) {
+        if (buffer.length > 0) {
+          firstInvalidValueTime ??= curr[timestampField];
+
+          const next = disconnectValues(
+            curr[timestampField],
+            buffer[buffer.length - 1][timestampField],
+            disableThreshold
+          );
+          const rec = mergeFn(buffer, timestampField, next, currentValue);
+          merged.push(rec);
+          buffer = [];
+          currentValue = undefined;
+        }
+
+        continue;
+      }
+
+      // first valid record after a lists of invalid records
+      if (!currentValue && merged.length > 0 && firstInvalidValueTime && connectThreshold) {
+        const lastNotNull = merged[merged.length - 1];
+
+        if (isEqual(target, lastNotNull)) {
+          const newTime = connectNullValue(curr[timestampField], lastNotNull.end, connectThreshold);
+
+          merged[merged.length - 1] = {
+            ...lastNotNull,
+            end: newTime,
+          };
+        }
+
+        firstInvalidValueTime = undefined;
+      }
+
+      // If same range as previous or first entry, add to buffer
+      if (currentValue === target || currentValue === undefined) {
+        buffer.push(curr);
+        currentValue = target;
+      } else {
+        // Range changed - merge buffered entries and start new buffer
+        if (buffer.length > 0) {
+          const next = disconnectValues(
+            curr[timestampField],
+            buffer[buffer.length - 1][timestampField],
+            disableThreshold
+          );
+          const rec = mergeFn(buffer, timestampField, next, currentValue);
+          merged.push(rec);
+        }
+
+        buffer = [curr];
+        currentValue = target;
+      }
+    }
+
+    // Merge any remaining buffered entries, no need to pass nextTime
+    if (buffer.length > 0) {
+      const rec = mergeFn(buffer, timestampField, undefined, currentValue);
+      merged.push(rec);
     }
   }
 
