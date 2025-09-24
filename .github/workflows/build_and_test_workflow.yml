@@ -32,7 +32,7 @@ env:
   TEST_OPENSEARCH_PORT: 9400
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
   OSD_OPTIMIZER_MAX_WORKERS: 8
-  NODE_OPTIONS: '--max-old-space-size=8192 --max-semi-space-size=64 --dns-result-order=ipv4first'
+  NODE_OPTIONS: '--max-old-space-size=12288 --max-semi-space-size=128 --dns-result-order=ipv4first'
 
 jobs:
   build-test:
