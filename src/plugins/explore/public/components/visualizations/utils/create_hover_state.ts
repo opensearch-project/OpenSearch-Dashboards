@@ -36,7 +36,7 @@ function createTooltip(fields: Field[]) {
   return tooltip;
 }
 
-function createPointLayer(xField: Field, yFields: Field[], orient = 'left', colorField?: Field) {
+function createPointLayer(xField: Field, yFields: Field[], colorField?: Field) {
   let color = null;
   if (colorField) {
     color = { field: colorField.name, type: colorField.type };
@@ -154,12 +154,12 @@ export function createCrosshairLayers(axisConfig: AxisConfig, options: Options) 
   const layers = [];
   const yFields = Array<Field>().concat(axisConfig.y);
 
-  const pointLayer = createPointLayer(axisConfig.x, yFields, 'left', axisConfig.color);
+  const pointLayer = createPointLayer(axisConfig.x, yFields, axisConfig.color);
   layers.push(pointLayer);
 
   if (axisConfig.y1) {
     const y1Fields = Array<Field>().concat(axisConfig.y1);
-    const pointLayer1 = createPointLayer(axisConfig.x, y1Fields, 'right', axisConfig.color);
+    const pointLayer1 = createPointLayer(axisConfig.x, y1Fields, axisConfig.color);
     layers.push(pointLayer1);
   }
 
@@ -199,11 +199,11 @@ export function createHighlightBarLayers(axisConfig: AxisConfig, options: Option
   const yFields = Array<Field>().concat(axisConfig.y);
   const y1Fields = Array<Field>().concat(axisConfig.y1 ? axisConfig.y1 : []);
 
-  const pointLayer = createPointLayer(axisConfig.x, yFields, 'left', axisConfig.color);
+  const pointLayer = createPointLayer(axisConfig.x, yFields, axisConfig.color);
   layers.push(pointLayer);
 
   if (y1Fields.length > 0) {
-    const pointLayer1 = createPointLayer(axisConfig.x, y1Fields, 'right', axisConfig.color);
+    const pointLayer1 = createPointLayer(axisConfig.x, y1Fields, axisConfig.color);
     layers.push(pointLayer1);
   }
 
