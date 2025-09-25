@@ -74,7 +74,6 @@ const mergeRecords = (
     ...records[0],
     start: records[0][timestampField],
     end: nextData ? nextData : records[records.length - 1][timestampField],
-    last: records[records.length - 1][timestampField],
     mergedCount: records.length,
   };
 };
@@ -89,7 +88,6 @@ const mergeNumercialRecord = (
     ...records[0],
     start: records[0][timestampField],
     end: nextData ? nextData : records[records.length - 1][timestampField],
-    last: records[records.length - 1][timestampField],
     ...(range ? { mergedLabel: `[${range?.min},${range?.max})` } : {}),
     mergedCount: records.length,
   };
@@ -461,7 +459,7 @@ interface MergeInAGroupOptions<T extends string | RangeValue> {
   isEqual: (value: T, lastNotNull: Record<string, any>) => boolean;
 }
 
-const mergeInAGroup = <T extends string | RangeValue>({
+export const mergeInAGroup = <T extends string | RangeValue>({
   sorted,
   valueField,
   timestampField,

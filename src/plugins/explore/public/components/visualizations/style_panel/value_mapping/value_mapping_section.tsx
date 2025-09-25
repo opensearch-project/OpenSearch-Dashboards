@@ -74,23 +74,11 @@ export const ValueMappingSection = ({ valueMappings, onChange }: ValueMappingPro
   };
 
   return (
-    // <EuiSplitPanel.Inner paddingSize="s" color="subdued" data-test-subj="valueMappingSection">
-    //   <EuiText size="s" style={{ fontWeight: 600 }}>
-    //     {i18n.translate('explore.stylePanel.valueMapping', {
-    //       defaultMessage: 'Mappings',
-    //     })}
-    //   </EuiText>
-    //   <EuiSpacer />
     <>
       {valueMappings?.map((mapping, index) => renderMappingItem(mapping, index))}
 
       <EuiSpacer size="xs" />
-      <EuiButton
-        data-test-subj="exploreValueMappingEditButton"
-        onClick={showModal}
-        fullWidth
-        size="s"
-      >
+      <EuiButton data-test-subj="valueMappingEditButton" onClick={showModal} fullWidth size="s">
         {i18n.translate('explore.stylePanel.valueMapping.editButton', {
           defaultMessage: 'Edit value mappings',
         })}
@@ -104,7 +92,6 @@ export const ValueMappingSection = ({ valueMappings, onChange }: ValueMappingPro
         />
       )}
     </>
-    // </EuiSplitPanel.Inner>
   );
 };
 

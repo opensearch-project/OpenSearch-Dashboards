@@ -15,7 +15,7 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import { getColorGroups } from '../../../visualizations/theme/default_colors';
+import { getColorGroups, resolveColor } from '../../../visualizations/theme/default_colors';
 import { useDebouncedValue } from '../../utils/use_debounced_value';
 import './color_group_panel.scss';
 
@@ -28,7 +28,7 @@ export const ColorGroupPanel: React.FC<ColorGroupPanelProps> = ({ color, onChang
   const colors = getColorGroups();
 
   const [debouncedColor, setDebouncedColor] = useDebouncedValue<string | undefined>(
-    color,
+    resolveColor(color),
     (val) => onChange(val),
     100
   );
@@ -121,7 +121,13 @@ export const ColorGroupPanel: React.FC<ColorGroupPanelProps> = ({ color, onChang
     {
       id: 0,
       content: (
-        <EuiTabbedContent initialSelectedTab={tabs[0]} size="s" autoFocus="selected" tabs={tabs} />
+        <EuiTabbedContent
+          data-test-subj="colorGroupPanel"
+          initialSelectedTab={tabs[0]}
+          size="s"
+          autoFocus="selected"
+          tabs={tabs}
+        />
       ),
     },
   ];
