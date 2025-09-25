@@ -164,6 +164,10 @@ export const createNumercialStateTimeline = (
 
   const baseSpec = {
     $schema: VEGASCHEMA,
+    title: styleOptions.titleOptions?.show
+      ? styleOptions.titleOptions?.titleName ||
+        `${yAxis?.name} × ${xAxis?.name} × ${rangeFieldColumn?.name} State Timeline`
+      : undefined,
     data: { values: processedData },
     transform: transformLayer,
     layer: [barLayer, textLayer].filter(Boolean),
@@ -340,7 +344,7 @@ export const createCategoricalStateTimeline = (
     $schema: VEGASCHEMA,
     title: styleOptions.titleOptions?.show
       ? styleOptions.titleOptions?.titleName ||
-        `${yAxis?.name} by ${xAxis?.name} and ${categoryName2}`
+        `${yAxis?.name} × ${xAxis?.name} × ${categoryName2} State Timeline`
       : undefined,
     data: { values: processedData },
     transform: transformLayer,
@@ -504,6 +508,9 @@ export const createSingleCategoricalStateTimeline = (
 
   const baseSpec = {
     $schema: VEGASCHEMA,
+    title: styleOptions.titleOptions?.show
+      ? styleOptions.titleOptions?.titleName || `${yAxis?.name} by ${xAxis?.name}`
+      : undefined,
     data: { values: processedData },
     transform: transformLayer,
     layer: [barLayer, textLayer].filter(Boolean),

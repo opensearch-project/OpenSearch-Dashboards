@@ -321,12 +321,6 @@ export interface ValueMappingOptions {
   valueMappings?: ValueMapping[];
 }
 
-export interface ThresholdOptions {
-  thresholds?: Threshold[];
-  baseColor?: string;
-  thresholdStyle?: ThresholdLineStyle;
-}
-
 // state timeline
 export enum DisableMode {
   Never = 'never',
