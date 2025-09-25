@@ -131,7 +131,7 @@ const getColumns = (): EuiDataGridColumn[] => [
   },
 ];
 
-const HierarchyServiceSpanCell = ({
+export const HierarchyServiceSpanCell = ({
   rowIndex,
   columnId,
   items,
@@ -202,7 +202,7 @@ const HierarchyServiceSpanCell = ({
   );
 };
 
-const SpanCell = ({
+export const SpanCell = ({
   rowIndex,
   columnId,
   items,
