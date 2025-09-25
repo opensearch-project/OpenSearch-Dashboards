@@ -38,7 +38,7 @@ describe('create_hover_state', () => {
 
       const layers = createCrosshairLayers(axisConfig, options);
 
-      expect(layers).toHaveLength(4);
+      expect(layers).toHaveLength(3);
       expect(layers).toMatchSnapshot();
     });
 
@@ -53,7 +53,7 @@ describe('create_hover_state', () => {
       const layers = createCrosshairLayers(axisConfig, options);
 
       // Should create 5 layers: point layer for y, point layer for y1, hidden bar layer, x rule layer, and y rule layer
-      expect(layers).toHaveLength(5);
+      expect(layers).toHaveLength(4);
       expect(layers).toMatchSnapshot();
     });
 

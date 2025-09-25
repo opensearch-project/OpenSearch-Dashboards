@@ -9,6 +9,7 @@ import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../lin
 import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold_lines/utils';
 import { getTooltipFormat } from '../utils/utils';
 import { DEFAULT_OPACITY } from '../constants';
+import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
 
 /**
  * Create a simple area chart with one metric and one date
@@ -33,6 +34,7 @@ export const createSimpleAreaChart = (
   const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
   const layers: any[] = [];
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   const mainLayer = {
     mark: {
@@ -70,7 +72,7 @@ export const createSimpleAreaChart = (
           dateColumns
         ),
       },
-      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+      ...(showTooltip && {
         tooltip: [
           {
             field: dateField,
@@ -85,6 +87,24 @@ export const createSimpleAreaChart = (
   };
 
   layers.push(mainLayer);
+  layers.push({
+    layer: createCrosshairLayers(
+      {
+        x: {
+          name: dateField ?? '',
+          type: 'temporal',
+          title: dateName,
+          format: getTooltipFormat(transformedData, dateField),
+        },
+        y: {
+          name: metricField ?? '',
+          type: 'quantitative',
+          title: metricName,
+        },
+      },
+      { showTooltip, data: transformedData }
+    ),
+  });
 
   // Add threshold layer if enabled
   const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
@@ -142,6 +162,7 @@ export const createMultiAreaChart = (
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
   const categoryName = colorColumn?.name;
   const layers: any[] = [];
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   const mainLayer = {
     mark: {
@@ -190,7 +211,7 @@ export const createMultiAreaChart = (
           : null,
       },
       // Optional: Add tooltip with all information if tooltip mode is not hidden
-      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+      ...(showTooltip && {
         tooltip: [
           {
             field: dateField,
@@ -206,6 +227,30 @@ export const createMultiAreaChart = (
   };
 
   layers.push(mainLayer);
+  layers.push({
+    layer: createCrosshairLayers(
+      {
+        x: {
+          name: dateField ?? '',
+          type: 'temporal',
+          title: dateName,
+          format: getTooltipFormat(transformedData, dateField),
+        },
+        y: {
+          name: metricField ?? '',
+          type: 'quantitative',
+          title: metricName,
+          stack: true,
+        },
+        color: {
+          name: categoryField ?? '',
+          type: 'nominal',
+          title: categoryName,
+        },
+      },
+      { showTooltip, data: transformedData }
+    ),
+  });
 
   // Add threshold layer if enabled
   const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
@@ -259,6 +304,7 @@ export const createFacetedMultiAreaChart = (
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   return {
     $schema: VEGASCHEMA,
@@ -321,7 +367,7 @@ export const createFacetedMultiAreaChart = (
                 : null,
             },
             // Optional: Add tooltip with all information if tooltip mode is not hidden
-            ...(styles.tooltipOptions?.mode !== 'hidden' && {
+            ...(showTooltip && {
               tooltip: [
                 {
                   field: dateField,
@@ -334,6 +380,30 @@ export const createFacetedMultiAreaChart = (
               ],
             }),
           },
+        },
+        {
+          layer: createCrosshairLayers(
+            {
+              x: {
+                name: dateField ?? '',
+                type: 'temporal',
+                title: dateName,
+                format: getTooltipFormat(transformedData, dateField),
+              },
+              y: {
+                name: metricField ?? '',
+                type: 'quantitative',
+                title: metricName,
+                stack: true,
+              },
+              color: {
+                name: category1Field ?? '',
+                type: 'nominal',
+                title: category1Name,
+              },
+            },
+            { showTooltip, data: transformedData }
+          ),
         },
         // Add threshold layer to each facet if enabled
         ...(styles.thresholdLines && styles.thresholdLines.length > 0
@@ -421,6 +491,7 @@ export const createCategoryAreaChart = (
   const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
   const categoryName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
   const layers: any[] = [];
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   const mainLayer = {
     mark: {
@@ -459,7 +530,7 @@ export const createCategoryAreaChart = (
         ),
       },
       // Optional: Add tooltip with all information if tooltip mode is not hidden
-      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+      ...(showTooltip && {
         tooltip: [
           { field: categoryField, type: 'nominal', title: categoryName },
           { field: metricField, type: 'quantitative', title: metricName },
@@ -469,6 +540,23 @@ export const createCategoryAreaChart = (
   };
 
   layers.push(mainLayer);
+  layers.push({
+    layer: createHighlightBarLayers(
+      {
+        x: {
+          name: categoryField ?? '',
+          type: 'nominal',
+          title: categoryName,
+        },
+        y: {
+          name: metricField ?? '',
+          type: 'quantitative',
+          title: metricName,
+        },
+      },
+      { showTooltip, data: transformedData }
+    ),
+  });
 
   // Add threshold layer if enabled
   const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
@@ -517,16 +605,13 @@ export const createStackedAreaChart = (
   const metricName = styles.valueAxes?.[0]?.title?.text || yAxisMapping?.name;
   const categoryName1 = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
   const categoryName2 = colorMapping?.name;
+  const layers = [];
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
-  const spec: any = {
-    $schema: VEGASCHEMA,
-    title: styles.titleOptions?.show
-      ? styles.titleOptions?.titleName || `${metricName} by ${categoryName1} and ${categoryName2}`
-      : undefined,
-    data: { values: transformedData },
+  const mainLayer = {
     mark: {
       type: 'area',
-      opacity: styles.areaOpacity || 0.6,
+      opacity: styles.areaOpacity || DEFAULT_OPACITY,
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
     },
     encoding: {
@@ -571,7 +656,7 @@ export const createStackedAreaChart = (
           : null,
       },
       // Optional: Add tooltip with all information if tooltip mode is not hidden
-      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+      ...(showTooltip && {
         tooltip: [
           { field: categoryField1, type: 'nominal', title: categoryName1 },
           { field: categoryField2, type: 'nominal', title: categoryName2 },
@@ -580,14 +665,43 @@ export const createStackedAreaChart = (
       }),
     },
   };
+  layers.push(mainLayer);
+  layers.push({
+    layer: createHighlightBarLayers(
+      {
+        x: {
+          name: categoryField1 ?? '',
+          type: 'nominal',
+          title: categoryName1,
+        },
+        y: {
+          name: metricField ?? '',
+          type: 'quantitative',
+          title: metricName,
+          stack: 'normalize',
+        },
+        color: {
+          name: categoryField2 ?? '',
+          type: 'nominal',
+          title: categoryName2,
+        },
+      },
+      { showTooltip, data: transformedData }
+    ),
+  });
 
   // Add threshold layer if enabled
   const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
   if (thresholdLayer) {
-    spec.layer = [{ mark: spec.mark, encoding: spec.encoding }, ...thresholdLayer.layer];
-    delete spec.mark;
-    delete spec.encoding;
+    layers.push(thresholdLayer);
   }
 
-  return spec;
+  return {
+    $schema: VEGASCHEMA,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${metricName} by ${categoryName1} and ${categoryName2}`
+      : undefined,
+    data: { values: transformedData },
+    layer: layers,
+  };
 };

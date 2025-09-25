@@ -145,7 +145,7 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('title', 'value1 Over Time');
       expect(result).toHaveProperty('data.values', transformedData);
       expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(7); // Main layer + threshold + time marker + hover state layers
+      expect(result.layer).toHaveLength(6); // Main layer + threshold + time marker + hover state layers
 
       // Verify the main layer
       expect(result.layer[0]).toHaveProperty('mark');

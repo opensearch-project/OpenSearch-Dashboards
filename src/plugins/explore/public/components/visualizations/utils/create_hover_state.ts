@@ -10,6 +10,7 @@ interface Field {
   type: string;
   title?: string;
   format?: string;
+  stack?: boolean | string;
 }
 
 interface AxisConfig {
@@ -44,10 +45,10 @@ function createPointLayer(xField: Field, yFields: Field[], colorField?: Field) {
 
   let y = null;
   if (yFields.length === 1) {
-    y = { field: yFields[0].name, type: yFields[0].type };
+    y = { field: yFields[0].name, type: yFields[0].type, stack: yFields[0].stack };
   }
 
-  const pointLayerTransform = [];
+  const pointLayerTransform: any[] = [];
   if (yFields.length > 1) {
     pointLayerTransform.push({
       fold: yFields.map((f) => f.name),
@@ -56,16 +57,36 @@ function createPointLayer(xField: Field, yFields: Field[], colorField?: Field) {
     color = { field: 'key', type: 'nominal' };
     y = { field: 'value', type: 'quantitative' };
   }
-  const pointLayer = {
-    mark: {
+
+  const marks = [
+    {
+      type: 'point',
+      shape: 'circle',
+      size: 60,
+      filled: true,
+    },
+    {
+      type: 'point',
+      shape: 'circle',
+      size: 60,
+      stroke: '#fff',
+      strokeWidth: 1,
+      filled: false,
+      fill: '',
+    },
+    {
       type: 'point',
       shape: 'circle',
       size: 90,
       strokeWidth: 3,
       filled: false,
       fill: '',
-      strokeOpacity: 0.3,
+      strokeOpacity: 0.5,
     },
+  ];
+
+  const pointLayers = marks.map((mark) => ({
+    mark,
     transform: pointLayerTransform,
     encoding: {
       x: { field: xField.name, type: xField.type },
@@ -76,8 +97,9 @@ function createPointLayer(xField: Field, yFields: Field[], colorField?: Field) {
         value: 0,
       },
     },
-  };
-  return pointLayer;
+  }));
+
+  return { layer: pointLayers };
 }
 
 function createHiddenBarLayer(axisConfig: AxisConfig, options: Options & { barOpacity: number }) {
@@ -154,9 +176,6 @@ export function createCrosshairLayers(axisConfig: AxisConfig, options: Options) 
   const layers = [];
   const yFields = Array<Field>().concat(axisConfig.y);
 
-  const pointLayer = createPointLayer(axisConfig.x, yFields, axisConfig.color);
-  layers.push(pointLayer);
-
   if (axisConfig.y1) {
     const y1Fields = Array<Field>().concat(axisConfig.y1);
     const pointLayer1 = createPointLayer(axisConfig.x, y1Fields, axisConfig.color);
@@ -165,6 +184,7 @@ export function createCrosshairLayers(axisConfig: AxisConfig, options: Options) 
 
   layers.push(createHiddenBarLayer(axisConfig, { ...options, barOpacity: 0 }));
 
+  const ruleLayers = [];
   const xRuleLayer = {
     mark: { type: 'rule', color: colors.text, strokeDash: [3, 3] },
     encoding: {
@@ -175,7 +195,7 @@ export function createCrosshairLayers(axisConfig: AxisConfig, options: Options) 
       },
     },
   };
-  layers.push(xRuleLayer);
+  ruleLayers.push(xRuleLayer);
 
   if (!axisConfig.color && yFields.length === 1) {
     const yRuleLayer = {
@@ -188,8 +208,12 @@ export function createCrosshairLayers(axisConfig: AxisConfig, options: Options) 
         },
       },
     };
-    layers.push(yRuleLayer);
+    ruleLayers.push(yRuleLayer);
   }
+  layers.push({ layer: ruleLayers });
+
+  const pointLayer = createPointLayer(axisConfig.x, yFields, axisConfig.color);
+  layers.push(pointLayer);
 
   return layers;
 }
