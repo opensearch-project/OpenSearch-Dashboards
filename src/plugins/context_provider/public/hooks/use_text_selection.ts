@@ -93,22 +93,24 @@ export const useTextSelection = () => {
     };
   }, []);
 
-  // Log when context is being registered
-  const contextData = currentSelection
-    ? {
-        description: `Selected text from the page`,
-        value: {
-          text: currentSelection,
-          url: window.location.href,
-          timestamp: Date.now(),
-        },
-        label: `"${currentSelection.substring(0, 30)}${currentSelection.length > 30 ? '...' : ''}"`,
-        categories: ['selection', 'chat'],
-      }
-    : null;
-
-  // Register the selected text with assistant context
-  useAssistantContext(contextData);
+  // Register the selected text with assistant context (only when there's a selection)
+  useAssistantContext(
+    currentSelection
+      ? {
+          description: `Selected text from the page`,
+          value: currentSelection,
+          label: `"${currentSelection.substring(0, 30)}${
+            currentSelection.length > 30 ? '...' : ''
+          }"`,
+          categories: ['dynamic', 'selection', 'chat'],
+        }
+      : {
+          description: '',
+          value: '',
+          label: '',
+          categories: [],
+        }
+  );
 
   return currentSelection;
 };

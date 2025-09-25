@@ -237,7 +237,6 @@
     "@types/ndjson": "^2.0.4",
     "@types/yauzl": "^2.9.1",
     "@xyflow/react": "^12.8.2",
-    "abortcontroller-polyfill": "^1.4.0",
     "ajv": "^8.11.0",
     "antlr4-c3": "^3.4.3",
     "antlr4ng": "^3.0.16",

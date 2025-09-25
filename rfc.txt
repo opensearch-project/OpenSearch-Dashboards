@@ -1,0 +1,751 @@
+(Draft) RFC: Context Design and Page Tools Architecture for OSD AI Assistant
+
+Problem Statement
+
+Current Challenges 
+
+* Context Fragmentation: Different applications capture context in inconsistent ways 
+* Tool Registration Complexity: No standardized way for applications to expose actions to the assistant 
+* State Management: Difficulty tracking tool execution states and rendering appropriate UI feedback 
+* Scalability: Hard to add new applications or tools without significant refactoring 
+* User Experience: Inconsistent interaction patterns across different application contexts
+
+Goal
+
+* Every plugin becomes AI-aware through simple hooks
+* Users interact naturally with data through chat, prompts, and suggestions
+* AI agents can perform actions across all applications seamlessly
+* Context flows automatically between applications and AI
+* Developers can easily add AI capabilities without complex integrations
+
+
+
+Overall architecture
+
+
+1. Plugin Layer: Applications use simple React hooks to register context, tools, slash commands, and suggestions
+2. Hook Layer: APIs that abstract complexity from plugin developers
+3. UI Actions Layer: OpenSearch Dashboards' native registry system used as the underlying mechanism
+4. Service Layer: Core services that manage context capture, tool execution, prompt handling, and suggestion generation
+5. AG-UI Protocol: Standardized format for agent communication with state, context[], tools[], messages[] properties
+6. Agent Layer: Various AI agents (LangGraph, custom) that process requests and execute tools
+7. Chat Interface: User-facing components that render conversations, tool results, slash command autocomplete, and suggestions
+
+Complete System Flow
+
+The following diagram shows how context and tools flow through the entire system when a user interacts with the AI assistant:
+
+? Do I need to add more flows here? 
+
+Developer Interfaces Overview
+
+Core Hooks Available to Plugin Developers
+
+// 1. Page Context Hook
+import { usePageContext, useDynamicContext } from '@osd/context-provider';
+
+// 2. Page Tools Hook  
+import { useAssistantAction } from '@osd/context-provider';
+
+// 3. Page Prompts Hook
+import { useAssistantPrompts } from '@osd/context-provider';
+
+// 4. Page Additional Instruction Hook
+import { useAssistantAdditionalContext } from '@osd/context-provider';
+
+// 5. Suggestion Provider Hook
+import { useChatSuggestions } from '@osd/context-provider';
+
+Plugin Setup
+
+// In plugin's public/plugin.ts
+export class YourPlugin {
+  public setup(core: CoreSetup, deps: { contextProvider: ContextProviderSetup }) {
+    // Register plugin with the context provider
+    deps.contextProvider.registerPlugin({
+      id: 'your-plugin',
+      name: 'Your Plugin Name',
+      capabilities: ['context', 'tools', 'prompts', 'suggestions']
+    });
+  }
+
+  public start(core: CoreStart, deps: { contextProvider: ContextProviderStart }) {
+    // Plugin start logic
+    return {};
+  }
+}
+
+
+
+Page Context Integration
+
+This section covers simple hooks for providing context to the AI assistant. 
+Key Concepts: 
+
+* usePageContext(): Auto-captures URL state with zero configuration
+    * usePageContext({ convert }): Allow custom URL state parsing and conversion
+* useDynamicContext(): Capture any React state not in the url or user actions
+* Automatic Updates: Context updates automatically when dependencies change
+* Simple Integration: Just add hooks anywhere in the component tree
+
+usePageContext Hook
+
+The usePageContext hook provides a React-friendly way to capture and manage page context for the AI assistant.
+
+* usePageContext()
+* usePageContext(description: string, convert: (page_state) => {})
+
+Auto URL Context - Zero Configuration
+
+* What to do: Just use  usePageContext() with no parameters in your top-level component.
+* When to use: Your app stores everything in URL parameters (search terms, filters, selected items, etc.) 
+* Result: Automatically detects URL changes.
+
+import { usePageContext } from '@osd/context-provider';
+
+export function MyApp() {
+  // Add this line
+  usePageContext();
+  
+  return <div>Your App UI...</div>;
+}
+
+Custom URL Context - With Conversion
+
+* What to do: Use usePageContext({ description, convert }) to parse and transform URL state into meaningful context.  
+* When to use: Your URL has complex state (like _a and _g parameters) that needs parsing or transformation.  
+* Result: AI gets clean, structured context instead of raw URL parameters. Automatically detects URL changes.
+
+export function DiscoverApp() {
+  usePageContext({
+    description: "Discover page context",
+    convert: (urlState) => {
+      // Parse _a and _g parameters
+      const appState = urlState._a ? JSON.parse(urlState._a) : {};
+      const globalState = urlState._g ? JSON.parse(urlState._g) : {};
+      
+      return {
+        // Clean, structured context for AI
+        query: appState.query || { query: '', language: 'kuery' },
+        filters: globalState.filters || [],
+        timeRange: globalState.time || { from: 'now-15m', to: 'now' },
+      };
+    }
+  }); // Define convert
+  
+  return <div>Discover UI...</div>;
+}
+
+useDynamicContext Hook
+
+useDynamicContext({
+  description: string,
+  value: any
+  label?: string // @label 
+  auto?: boolean // whether add to context automatically
+})
+
+* What to do: Use useDynamicContext({ description, value }) for any React state you want the AI to know about. 
+* When to use: You have React state (selections, expanded items, user interactions) that the AI should be aware of.  
+* Result: Automatically updates when the value changes.
+
+export function DataTable() {
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [expandedItems, setExpandedItems] = useState(new Set());
+  
+  // AI knows about selected rows
+  useDynamicContext({
+    description: "Currently selected table rows",
+    value: selectedRows.map(row => ({ id: row.id, name: row.name })),
+  });
+  
+  // AI knows about expanded items
+  useDynamicContext({
+    description: "Expanded items that user is examining",
+    value: Array.from(expandedItems),
+  });
+  
+  return (
+    <div>
+      <table>
+        {/* Your table UI */}
+      </table>
+    </div>
+  );
+}
+
+Manual Context with @ Labels
+
+What to do: Add label: "@keyword" to make context available via @ mentions in chat. 
+When to use: You want users to be able to manually reference specific context with @keywords.
+Result: Users can type "@selected-rows" in chat to include that specific context.
+
+export function MyComponent() {
+  const [selectedData, setSelectedData] = useState([]);
+  
+  // Users can reference this with @selected-data in chat
+  useDynamicContext({
+    description: "Data that user has selected for analysis",
+    value: selectedData,
+    label: "@selected-data"  // Enables @selected-data in chat
+  });
+  
+  return <div>Your UI...</div>;
+}
+
+
+
+Page Tools Integration
+
+This section explains how to register tools that the AI assistant can execute using the useAssistantAction hook. Tools are functions the agent can call to perform actions in your application, with full UI feedback and error handling.
+
+Key Concepts:
+
+* useAssistantAction : Simple hook to register tools the AI can execute
+* Tool Definition: Name, description, JSON Schema parameters, and handler function 
+* Automatic UI Feedback: Built-in progress indicators and result display
+* Real-time Execution: Tools execute in real-time with streaming feedback to users
+
+useAssistantAction Hook
+
+export interface AssistantAction<T = any> {
+  // REQUIRED PROPERTIES
+  name: string;                    // Unique tool identifier (e.g., 'search_data')
+  description: string;             // Clear description for AI (e.g., 'Search through current dataset')
+  parameters: {                    // JSON Schema defining expected parameters
+    type: 'object';
+    properties: Record<string, any>;
+    required: string[];
+  };
+  
+  // OPTIONAL PROPERTIES
+  handler?: (args: T) => Promise<any>; // Function that executes the tool
+  render?: (props: RenderProps<T>) => ReactNode; // Custom UI for tool execution
+  available?: 'enabled' | 'disabled'; // 'disabled' for render-only actions
+  enabled?: boolean;               // Whether tool is available (default: true)
+  deps?: any[];                    // Dependencies for re-registration
+}
+
+// Supporting Types 
+export type ToolStatus = 'pending' | 'executing' | 'complete' | 'failed';
+
+export interface RenderProps<T = any> {
+  status: ToolStatus;              // Current execution state
+  args?: T;                        // Arguments passed to the tool
+  result?: any;                    // Result returned by the handler
+  error?: Error;                   // Error object if execution failed
+}
+
+What to do: Use useAssistantAction with name, description, parameters (JSON Schema), and handler function.  
+When to use: You want the AI to perform actions in your app (refresh data, run searches, export files, etc.) 
+Result: AI can call your functions and show progress/results to users.
+
+Simple example
+
+import { useAssistantAction } from '@osd/context-provider';
+
+export function useRefreshTool() {
+  useAssistantAction({
+    name: 'refresh_data',
+    description: 'Refresh the current data display',
+    parameters: { type: 'object', properties: {} }, // No parameters needed
+    handler: async () => {
+      await refreshData();
+      return {
+        success: true,
+        message: 'Data refreshed successfully',
+      };
+    },
+  });
+}
+
+Complex example with render
+
+useAssistantAction<PPLExecuteQueryArgs>({
+  name: 'execute_ppl_query',
+  description: 'Update the query bar with a PPL query and optionally execute it',
+  parameters: {
+    type: 'object',
+    properties: {
+      query: {
+        type: 'string',
+        description: 'The PPL query to set in the query bar',
+      },
+      autoExecute: {
+        type: 'boolean',
+        description: 'Whether to automatically execute the query (default: true)',
+      },
+      description: {
+        type: 'string',
+        description: 'Optional description of what the query does',
+      },
+    },
+    required: ['query'],
+  },
+  handler: async (args) => {
+    try {
+      const shouldExecute = args.autoExecute !== false;
+      
+      if (shouldExecute) {
+        dispatch(loadQueryActionCreator(services, setEditorTextWithQuery, args.query));
+        return {
+          success: true,
+          executed: true,
+          query: args.query,
+          message: 'Query updated and executed',
+        };
+      } else {
+        setEditorTextWithQuery(args.query);
+        return {
+          success: true,
+          executed: false,
+          query: args.query,
+          message: 'Query updated',
+        };
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        query: args.query,
+      };
+    }
+  },
+  render: ({ status, args, result }) => {
+    if (!args) return null;
+
+    const getStatusColor = () => {
+      if (status === 'failed' || (result && !result.success)) return 'danger';
+      if (status === 'complete' && result?.executed) return 'success';
+      if (status === 'complete') return 'primary';
+      return 'subdued';
+    };
+
+    const getStatusIcon = () => {
+      if (status === 'failed' || (result && !result.success)) return '✗';
+      if (status === 'executing') return '⟳';
+      return '✓';
+    };
+
+    return (
+      <EuiPanel paddingSize="s" color={getStatusColor()}>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <strong>{getStatusIcon()}</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              {status === 'executing' && 'Updating query...'}
+              {status === 'complete' && result?.message}
+              {status === 'failed' && (result?.error || 'Failed to update query')}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {args.description && (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText size="xs" color="subdued">
+              {args.description}
+            </EuiText>
+          </>
+        )}
+        <EuiSpacer size="xs" />
+        <EuiText size="xs">
+          <EuiCode transparentBackground>{args.query}</EuiCode>
+        </EuiText>
+      </EuiPanel>
+    );
+  },
+});
+
+
+
+Page Prompts System
+
+This section covers simple prompts that users can trigger with / commands in chat. Like CopilotKit's approach, these are lightweight shortcuts for common questions.
+
+Key Concepts: 
+
+* useAssistantPrompts: Simple hook for sending messages programmatically  
+* Slash Commands: Users type /help or /analyze to trigger predefined prompts  
+* Zero Configuration: Just add the hook and prompts work automatically 
+* Dynamic Prompts: Prompts that appear based on current app state
+
+useAssistantPrompts Hook
+
+export function useAssistantPrompts() {
+  return {
+    // For programmatic messaging
+    sendMessage: (message: string) => Promise<void>,
+    
+    // For registering known slash commands (optional)
+    registerCommands: (commands: SlashCommand[]) => void
+  };
+}
+
+interface SlashCommand {
+  command: string;        // e.g., '/analyze'
+  description: string;    // e.g., 'Analyze current data'
+  prompt: string;         // e.g., 'Analyze the current data and show key insights'
+}
+
+* What to do: Get a function that can send messages to the AI programmatically.
+* When to use
+    * Registered Commands (via useAssistantPrompts): /analyze → Executes predefined prompt
+    * Unregistered Commands: /debug Debug the log using current time range → Treats the whole thing as a custom prompt
+* Result: Users can type /help to trigger prompts, or new prompt can be registered in chat directly.
+
+Usage Examples:
+
+export function MyApp() {
+  const { sendMessage, registerCommands } = useAssistant();
+  
+  // Register known commands (optional)
+  registerCommands([
+    {
+      command: '/analyze',
+      description: 'Analyze current data',
+      prompt: 'Analyze the current data and show key insights'
+    },
+    {
+      command: '/help',
+      description: 'Get help',
+      prompt: 'Show me what I can do in this application'
+    }
+  ]);
+  
+  // Programmatic messaging
+  const handleAnalyze = () => {
+    sendMessage("Analyze the current data and show key insights");
+  };
+  
+  return <button onClick={handleAnalyze}>Analyze</button>;
+}
+
+Chat UI Behavior:
+
+// In the chat input handler
+function handleChatInput(input: string) {
+  if (input.startsWith('/')) {
+    const [command, ...rest] = input.split(' ');
+    const promptText = rest.join(' ');
+    
+    // Check if it's a registered command
+    const registeredCommand = findRegisteredCommand(command);
+    
+    if (registeredCommand) {
+      // Use the predefined prompt
+      sendToAI(registeredCommand.prompt);
+    } else {
+      // auto register
+      const newCommand = {
+        command: command,
+        description: `Custom command: ${command.substring(1)}`,
+        prompt: promptText
+      };
+      registerCommand(newCommand);
+      
+      sendToAI(promptText);
+    }
+  } else {
+    // Regular chat message
+    sendToAI(input);
+  }
+}
+
+
+
+Additional Context System
+
+This section covers background context that gets included with every AI request. 
+
+import { useAssistantAdditionalContext } from '@osd/context-provider';
+
+// simple use case
+export function MyComponent() {
+  // Always tell the AI about app capabilities
+  useAssistantAdditionalContext({
+    instructions: "This application can export data to CSV and JSON formats. Users can create visualizations and apply filters."
+  });
+}
+
+// conditional use caseexport function MyComponent() 
+export function MyComponent() {
+  const [showDocument, setShowDocument] = useState(false);
+  useAssistantAdditionalContext({
+    available: showDocument ? "true" : "false",
+    instructions: "This application can export data to CSV and JSON formats. Users can create visualizations and apply filters."
+  });
+}
+
+Suggestion Providers
+
+This section covers contextual suggestions that appear in the chat UI.  This hook can help users discover what they can ask. Key Concepts: 
+
+*  useAssistantSuggestions: Simple hook for chat suggestions
+*  Context-Aware: Suggestions change based on current app state 
+* Clickable: Users can click suggestions to ask questions 
+* Automatic Updates: Suggestions update when app state changes
+
+useChatSuggestions Hook
+
+* What to do: Use useAssistantSuggestions() to show helpful suggestions in the chat UI. 
+* When to use: You want to help users discover what they can ask the AI to do. 
+* Result: Chat UI shows clickable suggestion buttons that adapt to current context.
+
+import { useAssistantSuggestions } from '@osd/context-provider';
+
+export function MyComponent() {
+  const [employees, setEmployees] = useState([]);
+  
+  // Show suggestions based on current data
+  useAssistantSuggestions({
+    instructions: `The following employees are available: ${JSON.stringify(employees)}. Suggest relevant actions.`
+  });
+}
+
+export function MyComponent() {
+  useAssistantSuggestions(
+    {
+      instructions: `
+        Current state: ${hasData ? 'data loaded' : 'no data'}
+        Selected items: ${selectedItems.length}
+        Suggest the most relevant next actions.
+      `
+    },
+    [hasData, selectedItems] // Update when these change
+  );
+}
+
+
+
+UI Actions Integration
+
+How Context and Tools Work with UI Actions
+
+The system uses OpenSearch Dashboards' UI Actions registry as the underlying mechanism for page tools and context message passing:
+
+// 1. Register UI Actions for your tools
+export function registerDataExplorationActions(uiActions: UiActionsSetup) {
+  // Register execute query action
+  uiActions.registerAction({
+    id: 'execute-query-action',
+    type: 'execute-query',
+    getDisplayName: () => 'Execute Query',
+    execute: async (context) => {
+      // This gets called by the assistant action service
+      return await executeQuery(context.query, context.dataSource);
+    },
+  });
+  
+  // Register context capture action
+  uiActions.registerAction({
+    id: 'capture-context-action',
+    type: 'capture-context',
+    execute: async (context) => {
+      return {
+        currentQuery: getCurrentQuery(),
+        selectedData: getSelectedData(),
+        filters: getActiveFilters(),
+      };
+    },
+  });
+}
+
+// 2. UI Actions Registry as Tool Wrapper
+class AssistantActionService {
+  constructor(private uiActions: UiActionsStart) {}
+  
+  // useAssistantAction hook internally uses UI Actions
+  registerTool(toolDefinition: AssistantAction) {
+    // Register as UI Action
+    this.uiActions.registerAction({
+      id: `assistant-${toolDefinition.name}`,
+      type: 'assistant-tool',
+      execute: toolDefinition.handler,
+      // ... other properties
+    });
+    
+    // Store tool definition for AG-UI protocol
+    this.toolDefinitions.set(toolDefinition.name, toolDefinition);
+  }
+  
+  // Execute tool via UI Actions
+  async executeAction(toolName: string, args: any) {
+    const actionId = `assistant-${toolName}`;
+    return await this.uiActions.executeTriggerActions('assistant-tool', {
+      actionId,
+      args,
+    });
+  }
+}
+
+Context Message Passing via UI Actions
+
+// Context updates flow through UI Actions
+class ContextCaptureService {
+  constructor(private uiActions: UiActionsStart) {}
+  
+  // Capture context via UI Actions
+  async captureContext(appId: string) {
+    const contextActions = this.uiActions.getActions({
+      type: 'capture-context',
+      appId,
+    });
+    
+    const contextData = {};
+    for (const action of contextActions) {
+      const result = await action.execute({ appId });
+      Object.assign(contextData, result);
+    }
+    
+    return contextData;
+  }
+  
+  // Listen for context updates
+  subscribeToContextUpdates(callback: (context: any) => void) {
+    this.uiActions.addTriggerAction('context-updated', {
+      execute: callback,
+    });
+  }
+}
+
+
+
+AG-UI Protocol Integration
+
+How Plugin Context and Tools Map to AG-UI Request Properties
+
+When you use the simple hooks in your plugin, they automatically get mapped to the AG-UI agent request:
+
+interface AGUIRequest {
+  state: SharedState;        // ← Agent's working memory
+  context: ContextItem[];    // ← Your page context + instructions
+  tools: ToolDefinition[];   // ← Your useAssistantAction tools
+  messages: Message[];       // ← Chat history + slash commands
+}
+
+Simple Hook Mapping
+
+New Hook	AG-UI Property	How It Maps
+usePageContext + useDynamicContext	context[]	Combined into page context items
+useAssistantAction	tools[]	Direct mapping to tool definitions
+useAssistantPrompts	messages[]	Slash commands and programmatic messages
+useAssistantAdditionalContext	messages[] (system)	Instructions as system message
+useAssistantSuggestions	context[]	Context for suggestion generation
+
+When the chat service sends a request to the AG-UI agent, your plugin's context and tools are mapped to specific AG-UI request properties:
+
+interface AGUIRequest {
+  // 1. state: Shared state between agent and UI (owned by agent)
+  state: {
+    // Agent can modify this state
+    currentStep?: string;
+    userIntent?: string;
+    agentMemory?: any;
+    // Your plugin can contribute to initial state
+    pluginState?: {
+      [pluginId: string]: any;
+    };
+  };
+  
+  // 2. context: Array of context items (read-only for agent)
+  context: Array<{
+    value: any;
+    description: string;
+    source: string;
+    type: 'static' | 'dynamic' | 'additional';
+  }>;
+  
+  // 3. tools: Available tools the agent can call
+  tools: Array<{
+    name: string;
+    description: string;
+    parameters: JSONSchema;
+  }>;
+  
+  // 4. messages: Conversation history
+  messages: Message[];
+  
+  // 5. id: Request identifier 
+  id: string;
+}
+
+Context Mapping to AG-UI
+
+// When user sends a chat message, this happens automatically:
+class ChatService {
+  async sendMessage(userMessage: string) {
+    // 1. Collect your page context
+    const pageContext = await this.getPageContext(); // from usePageContext + useDynamicContext
+    
+    // 2. Get your background instructions  
+    const instructions = await this.getInstructions(); // from useAssistantAdditionalContext
+    
+    // 3. Build the AG-UI request
+    const request: AGUIRequest = {
+      state: this.getAgentState(),
+      context: [
+        {
+          value: pageContext,
+          description: 'Current page state and user interactions',
+          source: 'page-context',
+          type: 'page'
+        }
+      ],
+      tools: this.getRegisteredTools(), // from useAssistantAction
+      messages: this.buildMessages(userMessage, instructions),
+    };
+    
+    // 4. Send to AI agent
+    return await this.agentService.processRequest(request);
+  }
+  
+  private buildMessages(userMessage: string, instructions?: string): Message[] {
+    const messages = this.getChatHistory();
+    
+    // Add instructions as system message
+    if (instructions) {
+      messages.unshift({
+        role: 'system',
+        content: instructions,
+        timestamp: Date.now()
+      });
+    }
+    
+    // Add user message
+    messages.push({
+      role: 'user', 
+      content: userMessage,
+      timestamp: Date.now()
+    });
+    
+    return messages;
+  }
+}
+
+Tool Execution Flow
+
+// When AI calls your tools, this happens:
+class ToolExecutionService {
+  async executeToolFromAgent(toolName: string, args: any) {
+    // 1. Find your registered tool
+    const tool = this.registeredTools.get(toolName); // from useAssistantAction
+    
+    // 2. Update UI state
+    this.updateToolState(toolName, { status: 'executing', args });
+    
+    // 3. Execute your handler
+    try {
+      const result = await tool.handler(args);
+      this.updateToolState(toolName, { status: 'complete', result });
+      return result;
+    } catch (error) {
+      this.updateToolState(toolName, { status: 'failed', error });
+      throw error;
+    }
+  }
+}
+

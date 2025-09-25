@@ -4,8 +4,6 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { stringify } from 'query-string';
-import rison from 'rison-node';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 import {
@@ -25,7 +23,6 @@ import {
 import {
   createOsdUrlStateStorage,
   createOsdUrlTracker,
-  url,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
 import { ExploreFlavor, PLUGIN_ID, PLUGIN_NAME } from '../common';
@@ -33,7 +30,6 @@ import { ConfigSchema } from '../common/config';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
 import {
-  getServices,
   setDocViewsLinksRegistry,
   setDocViewsRegistry,
   setServices as setLegacyServices,
@@ -71,9 +67,6 @@ import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
 import { setServices } from './services/services';
 
-// Context Provider Integration
-import { ExploreContextContributor } from './context_contributor';
-
 // UI Actions Integration
 import { registerExploreUIActions } from './ui_actions/explore_ui_actions';
 
@@ -104,9 +97,6 @@ export class ExplorePlugin
   private tabRegistry: TabRegistryService = new TabRegistryService();
   private visualizationRegistryService = new VisualizationRegistryService();
   private queryPanelActionsRegistryService = new QueryPanelActionsRegistryService();
-
-  // Context Provider Integration
-  private contextContributor?: ExploreContextContributor;
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.config = this.initializerContext.config.get();
@@ -290,38 +280,6 @@ export class ExplorePlugin
         services.uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, abortAction);
         setServices(services);
 
-        // Make services globally available for MCP integration
-        (global as any).exploreServices = services;
-        console.log('🌐 Explore services made globally available for MCP integration');
-
-        // Make Redux actions globally available for MCP integration
-        const setupReduxActions = async () => {
-          try {
-            const { setQueryStringWithHistory, setQueryState } = await import(
-              './application/utils/state_management/slices/query/query_slice'
-            );
-            const { executeQueries } = await import(
-              './application/utils/state_management/actions/query_actions'
-            );
-            const { callAgentActionCreator } = await import(
-              './application/utils/state_management/actions/query_editor/on_editor_run/call_agent'
-            );
-
-            (global as any).exploreReduxActions = {
-              setQueryStringWithHistory,
-              setQueryState,
-              executeQueries,
-              callAgentActionCreator,
-            };
-            console.log('🌐 Explore Redux actions made globally available for MCP integration');
-            console.log('🤖 callAgentActionCreator now available for MCP integration');
-          } catch (error) {
-            console.warn('⚠️ Failed to expose Redux actions globally:', error);
-          }
-        };
-
-        setupReduxActions();
-
         appMounted();
 
         // Call renderApp with params, services, and store
@@ -415,19 +373,8 @@ export class ExplorePlugin
       registerFeature(setupDeps.home);
     } */
 
-    // Context Provider Integration - Setup Phase
-    console.log('🔧 Explore Plugin Setup - Context Provider Integration');
-    console.log('🔍 DEBUG: contextProvider in setupDeps:', !!setupDeps.contextProvider);
-    if (setupDeps.contextProvider) {
-      console.log('📝 Context Provider detected during setup');
-    } else {
-      console.log('⚠️ Context Provider not available during setup');
-    }
-
     // Register UI Actions for explore
-    console.log('🔧 Registering Explore UI Actions');
     registerExploreUIActions(setupDeps.uiActions);
-    console.log('✅ Explore UI Actions registered');
 
     return {
       docViews: {
@@ -438,13 +385,11 @@ export class ExplorePlugin
           this.docViewsLinksRegistry?.addDocViewLink(docViewLinkSpec as any),
       },
       visualizationRegistry: visualizationRegistryService.setup(),
+      queryPanelActionsRegistry: this.queryPanelActionsRegistryService.setup(),
     };
   }
 
   public start(core: CoreStart, plugins: ExploreStartDependencies): ExplorePluginStart {
-    console.log('🚀 Explore Plugin Start - STARTING');
-    console.log('🔍 DEBUG: Start dependencies:', Object.keys(plugins));
-
     setUiActions(plugins.uiActions);
     setDashboard(plugins.dashboard);
     const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
@@ -477,42 +422,6 @@ export class ExplorePlugin
 
     this.initializeServices();
 
-    // Context Provider Integration - Start Phase
-    console.log('🚀 Explore Plugin Start - Context Provider Integration');
-    console.log('🔍 DEBUG: Available plugins:', Object.keys(plugins));
-    console.log('🔍 DEBUG: Context Provider available:', !!plugins.contextProvider);
-
-    // Register context contributor if Context Provider is available
-    if (plugins.contextProvider) {
-      console.log('📝 Registering Explore Context Contributor');
-
-      this.contextContributor = new ExploreContextContributor(core.savedObjects.client);
-
-      console.log('🔍 DEBUG: Created contributor with appId:', this.contextContributor.appId);
-
-      // Initialize the contributor
-      this.contextContributor.initialize();
-
-      // Register with Context Provider
-      plugins.contextProvider.registerContextContributor(this.contextContributor);
-
-      console.log('✅ Explore Context Contributor registered successfully');
-      console.log('🔍 DEBUG: Contributor registered for appId:', this.contextContributor.appId);
-
-      // Make it globally available for testing
-      (window as any).exploreContextContributor = this.contextContributor;
-      console.log('🌐 Explore Context Contributor available at window.exploreContextContributor');
-
-      // Register context extraction rules with Global Interaction Interceptor
-      this.registerGlobalInteractionRules(core);
-
-      // Add debugging for document expansion detection
-      this.setupDocumentExpansionDetection();
-    } else {
-      console.log('⚠️ Context Provider not available, skipping context contributor registration');
-      console.log('🔍 DEBUG: Available plugins:', Object.keys(plugins));
-    }
-
     const savedExploreLoader = createSavedExploreLoader({
       savedObjectsClient: core.savedObjects.client,
       indexPatterns: plugins.data.indexPatterns,
@@ -526,8 +435,6 @@ export class ExplorePlugin
       savedSearchLoader: savedExploreLoader, // For backward compatibility
       savedExploreLoader,
       visualizationRegistry: this.visualizationRegistryService.start(),
-      // Expose context contributor for testing
-      getContextContributor: () => this.contextContributor || null,
     };
   }
 
@@ -535,285 +442,6 @@ export class ExplorePlugin
     if (this.stopUrlTracking) {
       this.stopUrlTracking();
     }
-
-    // Context Provider Integration - Cleanup
-    console.log('🛑 Explore Plugin Stop - Context Provider Integration');
-    if (this.contextContributor) {
-      this.contextContributor.cleanup();
-      delete (window as any).exploreContextContributor;
-    }
-  }
-
-  /**
-   * Set up detection for document expansion in the Explore UI
-   */
-  private setupDocumentExpansionDetection(): void {
-    console.log('🔍 Setting up document expansion detection for Explore');
-
-    // Listen for clicks on document expansion buttons
-    document.addEventListener(
-      'click',
-      (event: MouseEvent) => {
-        const target = event.target as HTMLElement;
-
-        // Check if click is on a document expansion toggle
-        if (
-          target &&
-          (target.getAttribute('data-test-subj') === 'docTableExpandToggleColumn' ||
-            target.closest('[data-test-subj="docTableExpandToggleColumn"]'))
-        ) {
-          console.log('🔍 Document expansion toggle clicked!');
-
-          // Find the table row
-          const tableRow = target.closest('tr');
-          if (tableRow) {
-            const rowIndex = Array.from(tableRow.parentElement?.children || []).indexOf(tableRow);
-
-            // Extract document data from the row - look for the actual document content
-            const documentData: Record<string, any> = {};
-
-            // Try to find the document viewer or expanded content
-            const docViewer =
-              tableRow.querySelector('.osdDocViewer') ||
-              tableRow.nextElementSibling?.querySelector('.osdDocViewer');
-
-            if (docViewer) {
-              // Extract from document viewer if available
-              const docViewTable = docViewer.querySelector('.osdDocViewerTable');
-              if (docViewTable) {
-                const rows = docViewTable.querySelectorAll('tr');
-                rows.forEach((row) => {
-                  const fieldCell = row.querySelector('.osdDocViewer__field');
-                  const valueCell = row.querySelector('.osdDocViewer__value');
-                  if (fieldCell && valueCell) {
-                    const fieldName = fieldCell.textContent?.trim();
-                    const fieldValue = valueCell.textContent?.trim();
-                    if (fieldName && fieldValue) {
-                      documentData[fieldName] = fieldValue;
-                    }
-                  }
-                });
-              }
-            }
-
-            // Fallback: extract from table cells if no document viewer found
-            if (Object.keys(documentData).length === 0) {
-              const cells = tableRow.querySelectorAll('td');
-              cells.forEach((cell, index) => {
-                const fieldName = cell.getAttribute('data-test-subj') || `field_${index}`;
-                const textContent = cell.textContent?.trim() || '';
-                if (textContent && fieldName !== 'docTableExpandToggleColumn') {
-                  documentData[fieldName] = textContent;
-                }
-              });
-            }
-
-            // Use a more meaningful document ID based on actual document content
-            const documentId =
-              documentData._id || documentData.id || `doc_${rowIndex}_${Date.now()}`;
-
-            console.log('📄 Document expansion detected:', {
-              documentId,
-              rowIndex,
-              documentData,
-              documentFields: Object.keys(documentData).length,
-            });
-
-            // Trigger the context capture
-            console.log('🔥 DEBUG: About to trigger context capture');
-            console.log(
-              '🔥 DEBUG: window.contextProvider exists:',
-              !!(window as any).contextProvider
-            );
-
-            const contextProvider = (window as any).contextProvider;
-            if (contextProvider && contextProvider.triggerTestCapture) {
-              console.log('🔥 DEBUG: Calling triggerTestCapture with data:', {
-                documentId,
-                rowIndex,
-                documentData,
-                source: 'ui_detection',
-                timestamp: Date.now(),
-                expandedFields: Object.keys(documentData).length,
-              });
-
-              contextProvider.triggerTestCapture('DOCUMENT_EXPAND', {
-                documentId,
-                rowIndex,
-                documentData,
-                source: 'ui_detection',
-                timestamp: Date.now(),
-                expandedFields: Object.keys(documentData).length,
-              });
-
-              console.log('🔥 DEBUG: triggerTestCapture called successfully');
-            } else {
-              console.warn('⚠️ Context Provider not available for dynamic context capture');
-              console.log('🔥 DEBUG: contextProvider:', contextProvider);
-              console.log(
-                '🔥 DEBUG: triggerTestCapture method:',
-                contextProvider?.triggerTestCapture
-              );
-            }
-          }
-        }
-      },
-      { capture: true }
-    );
-
-    console.log('✅ Document expansion detection set up');
-  }
-
-  /**
-   * Register context extraction rules with the Global Interaction Interceptor
-   */
-  private registerGlobalInteractionRules(core: CoreStart): void {
-    console.log('🔧 Registering Global Interaction Rules for Explore');
-
-    // Check if Global Interaction Interceptor is available
-    const globalInteractionInterceptor =
-      (core as any).globalInteractionInterceptor || (window as any).globalInteractionInterceptor;
-    if (!globalInteractionInterceptor) {
-      console.warn('⚠️ Global Interaction Interceptor not available');
-      console.log(
-        '🔍 DEBUG: Checked core.globalInteractionInterceptor:',
-        !!(core as any).globalInteractionInterceptor
-      );
-      console.log(
-        '🔍 DEBUG: Checked window.globalInteractionInterceptor:',
-        !!(window as any).globalInteractionInterceptor
-      );
-      return;
-    }
-
-    // Register context extraction rules for Explore-specific elements
-    const exploreRules = [
-      {
-        // Document expansion button
-        selector: '[data-test-subj="docTableExpandToggleColumn"]',
-        contextExtractor: (element: HTMLElement, event: MouseEvent) => {
-          const tableRow = element.closest('tr');
-          if (!tableRow) return null;
-
-          const rowIndex = Array.from(tableRow.parentElement?.children || []).indexOf(tableRow);
-
-          // Extract document data from the row
-          const documentData: Record<string, any> = {};
-
-          // Try to find the document viewer or expanded content
-          const docViewer =
-            tableRow.querySelector('.osdDocViewer') ||
-            tableRow.nextElementSibling?.querySelector('.osdDocViewer');
-
-          if (docViewer) {
-            // Extract from document viewer if available
-            const docViewTable = docViewer.querySelector('.osdDocViewerTable');
-            if (docViewTable) {
-              const rows = docViewTable.querySelectorAll('tr');
-              rows.forEach((row) => {
-                const fieldCell = row.querySelector('.osdDocViewer__field');
-                const valueCell = row.querySelector('.osdDocViewer__value');
-                if (fieldCell && valueCell) {
-                  const fieldName = fieldCell.textContent?.trim();
-                  const fieldValue = valueCell.textContent?.trim();
-                  if (fieldName && fieldValue) {
-                    documentData[fieldName] = fieldValue;
-                  }
-                }
-              });
-            }
-          }
-
-          // Fallback: extract from table cells if no document viewer found
-          if (Object.keys(documentData).length === 0) {
-            const cells = tableRow.querySelectorAll('td');
-            cells.forEach((cell, index) => {
-              const fieldName = cell.getAttribute('data-test-subj') || `field_${index}`;
-              const textContent = cell.textContent?.trim() || '';
-              if (textContent && fieldName !== 'docTableExpandToggleColumn') {
-                documentData[fieldName] = textContent;
-              }
-            });
-          }
-
-          const documentId = documentData._id || documentData.id || `doc_${rowIndex}_${Date.now()}`;
-
-          return {
-            type: 'DOCUMENT_EXPAND',
-            documentId,
-            rowIndex,
-            documentData,
-            expandedFields: Object.keys(documentData).length,
-            timestamp: Date.now(),
-          };
-        },
-      },
-      {
-        // Filter controls
-        selector: '[data-test-subj*="filter"]',
-        contextExtractor: (element: HTMLElement, event: MouseEvent) => {
-          const filterType = element.getAttribute('data-test-subj') || 'unknown_filter';
-          const filterValue = element.textContent?.trim() || '';
-
-          return {
-            type: 'FILTER_ACTION',
-            filterType,
-            filterValue,
-            action: 'click',
-            timestamp: Date.now(),
-          };
-        },
-      },
-      {
-        // Search and query controls
-        selector: '[data-test-subj*="query"], [data-test-subj*="search"]',
-        contextExtractor: (element: HTMLElement, event: MouseEvent) => {
-          const controlType = element.getAttribute('data-test-subj') || 'unknown_control';
-          const inputValue =
-            (element as HTMLInputElement).value || element.textContent?.trim() || '';
-
-          return {
-            type: 'QUERY_ACTION',
-            controlType,
-            inputValue,
-            action: event.type,
-            timestamp: Date.now(),
-          };
-        },
-      },
-      {
-        // Navigation elements
-        selector: '[data-test-subj*="nav"], [data-test-subj*="tab"]',
-        contextExtractor: (element: HTMLElement, event: MouseEvent) => {
-          const navType = element.getAttribute('data-test-subj') || 'unknown_nav';
-          const navText = element.textContent?.trim() || '';
-
-          return {
-            type: 'NAVIGATION',
-            navType,
-            navText,
-            action: 'click',
-            timestamp: Date.now(),
-          };
-        },
-      },
-    ];
-
-    // Register each rule with the Global Interaction Interceptor
-    exploreRules.forEach((rule, index) => {
-      try {
-        globalInteractionInterceptor.registerContextRule(
-          `explore_rule_${index}`,
-          rule.selector,
-          rule.contextExtractor
-        );
-        console.log(`✅ Registered rule ${index}: ${rule.selector}`);
-      } catch (error) {
-        console.error(`❌ Failed to register rule ${index}:`, error);
-      }
-    });
-
-    console.log('✅ Global Interaction Rules registered for Explore');
   }
 
   private registerEmbeddable(
