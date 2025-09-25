@@ -461,7 +461,7 @@ describe('SpanCell', () => {
     render(<SpanCell {...defaultProps} />);
 
     expect(setCellPropsMock).toHaveBeenCalledWith({
-      className: ['exploreSpanDetailTable__selectedRow'],
+      className: 'exploreSpanDetailTable__selectedRow',
     });
 
     fireEvent.click(screen.getByText('test-span'));
@@ -471,7 +471,7 @@ describe('SpanCell', () => {
   it('handles disabled interactions', () => {
     render(<SpanCell {...defaultProps} disableInteractions={true} />);
 
-    expect(setCellPropsMock).toHaveBeenCalledWith({ className: [] });
+    expect(setCellPropsMock).toHaveBeenCalledWith({});
 
     fireEvent.click(screen.getByText('test-span'));
     expect(openFlyoutMock).not.toHaveBeenCalled();
