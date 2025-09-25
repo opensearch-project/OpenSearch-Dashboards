@@ -19,6 +19,10 @@ import { MetricsPage } from './pages/metrics';
 import { EditorContextProvider } from './context';
 import { TraceDetails } from './pages/traces/trace_details/trace_view';
 
+// RFC Context Hooks
+import { usePageContext } from '../../../context_provider/public';
+import type { URLState } from '../../../context_provider/public';
+
 // Route component props interface
 interface ExploreRouteProps {
   services: ExploreServices;
@@ -27,6 +31,57 @@ interface ExploreRouteProps {
 
 type ExploreComponentProps = ExploreRouteProps &
   Partial<Pick<AppMountParameters, 'setHeaderActionMenu'>>;
+
+// Component that handles page context for all Explore flavors
+const ExplorePageContextProvider: React.FC<{
+  flavor: ExploreFlavor;
+  children: React.ReactNode;
+}> = ({ flavor, children }) => {
+  // RFC Hook: Page Context - Static context from URL parameters (_g, _a, _q)
+  usePageContext({
+    description: `Explore ${flavor} page context`,
+    convert: (urlState: URLState) => {
+      // Extract time range from _g parameter
+      const timeRange = urlState._g?.time || { from: 'now-15m', to: 'now' };
+
+      // Extract query from _q parameter
+      const query = {
+        query: urlState._q?.query || '',
+        language: urlState._q?.language || 'PPL',
+      };
+
+      // Extract dataset info from _q parameter (without nested dataSource)
+      const dataset = urlState._q?.dataset
+        ? {
+            id: urlState._q.dataset.id,
+            title: urlState._q.dataset.title,
+            type: urlState._q.dataset.type,
+            timeFieldName: urlState._q.dataset.timeFieldName,
+          }
+        : null;
+
+      // Extract dataSource from dataset (move to root level)
+      const dataSource = urlState._q?.dataset?.dataSource
+        ? {
+            id: urlState._q.dataset.dataSource.id,
+            title: urlState._q.dataset.dataSource.title,
+            type: urlState._q.dataset.dataSource.type,
+          }
+        : null;
+
+      return {
+        appId: `explore`,
+        timeRange,
+        query,
+        dataset,
+        dataSource,
+      };
+    },
+    categories: ['page', 'explore', 'static'],
+  });
+
+  return <>{children}</>;
+};
 
 const renderExploreFlavor = (flavor: ExploreFlavor, props: ExploreComponentProps) => {
   switch (flavor) {
@@ -68,23 +123,25 @@ export const renderApp = (
           <EditorContextProvider>
             <DatasetProvider>
               <services.core.i18n.Context>
-                <Switch>
-                  {/* View route for saved searches */}
-                  {/* TODO: Do we need this? We might not need to, please revisit */}
-                  <Route path="/view/:id" exact>
-                    <ViewRoute {...mainRouteProps} />
-                  </Route>
-
-                  {flavor === ExploreFlavor.Traces && (
-                    <Route path="/traceDetails" exact={false}>
-                      <TraceDetails setMenuMountPoint={setHeaderActionMenu} />
+                <ExplorePageContextProvider flavor={flavor}>
+                  <Switch>
+                    {/* View route for saved searches */}
+                    {/* TODO: Do we need this? We might not need to, please revisit */}
+                    <Route path="/view/:id" exact>
+                      <ViewRoute {...mainRouteProps} />
                     </Route>
-                  )}
 
-                  <Route path={[`/`]} exact={false}>
-                    {renderExploreFlavor(flavor, mainRouteProps)}
-                  </Route>
-                </Switch>
+                    {flavor === ExploreFlavor.Traces && (
+                      <Route path="/traceDetails" exact={false}>
+                        <TraceDetails setMenuMountPoint={setHeaderActionMenu} />
+                      </Route>
+                    )}
+
+                    <Route path={[`/`]} exact={false}>
+                      {renderExploreFlavor(flavor, mainRouteProps)}
+                    </Route>
+                  </Switch>
+                </ExplorePageContextProvider>
               </services.core.i18n.Context>
             </DatasetProvider>
           </EditorContextProvider>

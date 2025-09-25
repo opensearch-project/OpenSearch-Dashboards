@@ -5,7 +5,6 @@
 
 import { Observable } from 'rxjs';
 import { AgUiAgent } from './ag_ui_agent';
-import { ChatContextManager } from './chat_context_manager';
 import { RunAgentInput } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
 
@@ -26,7 +25,6 @@ export interface ChatState {
 export class ChatService {
   private agent: AgUiAgent;
   private threadId: string;
-  private contextManager?: ChatContextManager;
   public availableTools: ToolDefinition[] = [];
   public events$: any;
   private activeRequests: Set<string> = new Set();
@@ -35,10 +33,6 @@ export class ChatService {
   constructor(serverUrl?: string) {
     this.agent = new AgUiAgent(serverUrl);
     this.threadId = this.generateThreadId();
-  }
-
-  public setContextManager(contextManager: ChatContextManager): void {
-    this.contextManager = contextManager;
   }
 
   private generateThreadId(): string {
@@ -129,10 +123,6 @@ export class ChatService {
       ],
       tools: this.availableTools || [], // Pass available tools to AG-UI server
       context: assistantContexts, // Include assistant contexts
-      state: {
-        staticContext: this.contextManager?.getRawStaticContext() || null,
-        dynamicContext: this.contextManager?.getRawDynamicContext() || null,
-      },
       forwardedProps: {},
     };
 
@@ -236,10 +226,6 @@ export class ChatService {
       messages: mappedMessages,
       tools: this.availableTools || [],
       context: assistantContexts, // Include assistant contexts
-      state: {
-        staticContext: this.contextManager?.getRawStaticContext() || null,
-        dynamicContext: this.contextManager?.getRawDynamicContext() || null,
-      },
       forwardedProps: {},
     };
 

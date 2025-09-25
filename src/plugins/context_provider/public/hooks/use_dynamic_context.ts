@@ -20,10 +20,10 @@ export interface UseDynamicContextOptions<T> {
 /**
  * Hook for registering dynamic context based on React state.
  * Similar to CopilotKit's useCopilotReadable hook.
- * 
+ *
  * This hook automatically tracks changes to React state and updates
  * the assistant context accordingly.
- * 
+ *
  * @example
  * ```typescript
  * const [selectedItems, setSelectedItems] = useState([]);
@@ -34,7 +34,7 @@ export interface UseDynamicContextOptions<T> {
  *   categories: ['selection', 'ui-state']
  * });
  * ```
- * 
+ *
  * @example
  * ```typescript
  * const [filters, setFilters] = useState({ status: 'active' });
@@ -44,20 +44,20 @@ export interface UseDynamicContextOptions<T> {
  *   categories: ['filters', 'state']
  * });
  * ```
- * 
+ *
  * @param options - Configuration for the dynamic context
  * @returns Context ID for the registered context
  */
-export function useDynamicContext<T>(options: UseDynamicContextOptions<T>): string {
+export function useDynamicContext<T>(options: UseDynamicContextOptions<T> | null): string {
   // Prepare context options with memoization for performance
   const contextOptions = useMemo(() => {
+    // Handle null options (no dynamic context)
+    if (!options) {
+      return null;
+    }
+
     if (options.enabled === false) {
-      return {
-        description: 'Disabled dynamic context',
-        value: null,
-        label: 'Disabled',
-        categories: ['disabled'],
-      };
+      return null; // Return null instead of disabled context
     }
 
     return {
@@ -66,13 +66,7 @@ export function useDynamicContext<T>(options: UseDynamicContextOptions<T>): stri
       label: options.label || options.description,
       categories: options.categories || ['dynamic', 'state'],
     };
-  }, [
-    options.description,
-    JSON.stringify(options.value), // Deep comparison for React state changes
-    options.label,
-    JSON.stringify(options.categories),
-    options.enabled,
-  ]);
+  }, [options]);
 
   return useAssistantContext(contextOptions);
 }
@@ -80,7 +74,11 @@ export function useDynamicContext<T>(options: UseDynamicContextOptions<T>): stri
 /**
  * Convenience hook for simple string-based dynamic context
  */
-export function useStringContext(description: string, value: string, categories?: string[]): string {
+export function useStringContext(
+  description: string,
+  value: string,
+  categories?: string[]
+): string {
   return useDynamicContext({
     description,
     value,
@@ -106,11 +104,7 @@ export function useObjectContext<T extends Record<string, any>>(
 /**
  * Convenience hook for array-based dynamic context
  */
-export function useArrayContext<T>(
-  description: string,
-  value: T[],
-  categories?: string[]
-): string {
+export function useArrayContext<T>(description: string, value: T[], categories?: string[]): string {
   return useDynamicContext({
     description,
     value,

@@ -11,7 +11,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
-import { useAssistantContext } from '../../../../../context_provider/public';
+import { useDynamicContext } from '../../../../../context_provider/public';
 import {
   DocViewFilterFn,
   DocViewsRegistry,
@@ -50,14 +50,14 @@ export const TableRowUI = ({
     setIsExpanded,
   ]);
 
-  // Register context when row is expanded
-  useAssistantContext(
+  // Register dynamic context when row is expanded
+  useDynamicContext(
     isExpanded
       ? {
-          description: `Expanded row  ${index !== undefined ? index + 1 : 'Entry'} from data table`,
+          description: `Expanded row ${index !== undefined ? index + 1 : 'Entry'} from data table`,
           value: row._source,
           label: `Row ${index !== undefined ? index + 1 : 'Entry'}`,
-          categories: ['explore', 'chat'],
+          categories: ['explore', 'chat', 'dynamic'],
         }
       : null
   );

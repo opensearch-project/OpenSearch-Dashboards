@@ -16,6 +16,7 @@ export interface URLState {
   searchParams: Record<string, string>;
   _g?: any; // Global state parameter
   _a?: any; // App state parameter
+  _q?: any; // Query state parameter (for Explore)
 }
 
 /**
@@ -36,11 +37,12 @@ function parseOSDUrlParam(paramName: string): any {
     const urlParams = new URLSearchParams(window.location.search);
     const param = urlParams.get(paramName);
     if (!param) return null;
-    
+
     // Decode and parse the parameter
     const decoded = decodeURIComponent(param);
     return JSON.parse(decoded);
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.debug(`Failed to parse URL parameter ${paramName}:`, error);
     return null;
   }
@@ -51,7 +53,7 @@ function parseOSDUrlParam(paramName: string): any {
  */
 function captureCurrentURLState(): URLState {
   const url = new URL(window.location.href);
-  
+
   return {
     pathname: url.pathname,
     search: url.search,
@@ -59,17 +61,18 @@ function captureCurrentURLState(): URLState {
     searchParams: Object.fromEntries(url.searchParams.entries()),
     _g: parseOSDUrlParam('_g'),
     _a: parseOSDUrlParam('_a'),
+    _q: parseOSDUrlParam('_q'),
   };
 }
 
 /**
  * Hook for automatically capturing page context from URL state.
- * 
+ *
  * Zero-config usage:
  * ```typescript
  * const pageContextId = usePageContext();
  * ```
- * 
+ *
  * Custom usage with conversion:
  * ```typescript
  * const pageContextId = usePageContext({
@@ -82,13 +85,11 @@ function captureCurrentURLState(): URLState {
  * });
  * ```
  */
-export function usePageContext(): string;
-export function usePageContext(options: UsePageContextOptions): string;
 export function usePageContext(options?: UsePageContextOptions): string {
   // Auto-capture URL state
   const [urlState, setUrlState] = useState<URLState>(() => captureCurrentURLState());
 
-  // Monitor URL changes (similar to ContextCaptureService.setupUrlMonitoring)
+  // Monitor URL changes
   useEffect(() => {
     if (options?.enabled === false) return;
 
@@ -109,7 +110,7 @@ export function usePageContext(options?: UsePageContextOptions): string {
     // Listen for browser navigation events
     window.addEventListener('popstate', handleURLChange);
     window.addEventListener('hashchange', handleURLChange);
-    
+
     // Poll for programmatic URL changes (OpenSearch Dashboards URL state management)
     const interval = setInterval(handleURLChange, 1000);
 
@@ -132,7 +133,7 @@ export function usePageContext(options?: UsePageContextOptions): string {
     }
 
     const processedValue = options?.convert ? options.convert(urlState) : urlState;
-    
+
     return {
       description: options?.description || `Page context for ${urlState.pathname}`,
       value: processedValue,

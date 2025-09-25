@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { useEffect, useRef, useState } from 'react';
-import { useAssistantContext } from './use_assistant_context';
+import { useDynamicContext } from './use_dynamic_context';
 
 /**
  * Hook that monitors text selection and registers it with the assistant context
@@ -95,8 +95,8 @@ export const useTextSelection = () => {
     };
   }, []);
 
-  // Register the selected text with assistant context (only when there's a selection)
-  useAssistantContext(
+  // Register the selected text with dynamic context (only when there's a selection)
+  useDynamicContext(
     currentSelection
       ? {
           description: `Selected text: "${currentSelection.substring(0, 50)}${
@@ -108,12 +108,7 @@ export const useTextSelection = () => {
           }"`,
           categories: ['dynamic', 'selection', 'chat'],
         }
-      : {
-          description: '',
-          value: '',
-          label: '',
-          categories: [],
-        }
+      : null
   );
 
   return currentSelection;
