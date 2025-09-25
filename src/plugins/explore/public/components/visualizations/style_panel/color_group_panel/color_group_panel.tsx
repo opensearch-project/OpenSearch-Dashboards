@@ -28,7 +28,7 @@ export const ColorGroupPanel: React.FC<ColorGroupPanelProps> = ({ color, onChang
   const colors = getColorGroups();
 
   const [debouncedColor, setDebouncedColor] = useDebouncedValue<string | undefined>(
-    resolveColor(color),
+    color,
     (val) => onChange(val),
     100
   );
@@ -109,7 +109,7 @@ export const ColorGroupPanel: React.FC<ColorGroupPanelProps> = ({ color, onChang
               setDebouncedColor(val);
               onClose();
             }}
-            color={debouncedColor}
+            color={resolveColor(debouncedColor)}
             display="inline"
           />
         </EuiPanel>
