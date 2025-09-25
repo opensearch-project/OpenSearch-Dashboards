@@ -3,116 +3,42 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef } from 'react';
-import { AssistantContextOptions } from '../types';
+import { useEffect, useState } from 'react';
+import { AssistantContextOptions, AssistantContextStore } from '../types';
 
 /**
- * Hook for registering context with the assistant
- *
- * @example
- * ```tsx
- * useAssistantContext({
- *   description: "Currently expanded document details",
- *   value: expandedDocument,
- *   label: `Document ${expandedDocument.id}`,
- *   categories: ['chat', 'explore']
- * });
- * ```
+ * Base hook for registering context with the assistant context store.
+ * This hook automatically handles registration/cleanup lifecycle.
+ * 
+ * @param options - Context options to register
+ * @returns Context ID for the registered context
  */
-export function useAssistantContext(options: AssistantContextOptions | null) {
-  const contextIdRef = useRef<string | null>(null);
-  const optionsRef = useRef<AssistantContextOptions | null>(null);
+export function useAssistantContext(options: AssistantContextOptions): string {
+  const [contextId, setContextId] = useState<string | null>(null);
 
   useEffect(() => {
-    // Get context store from window (will be set by context provider)
-    const contextStore = (window as any).assistantContextStore;
-
+    // Get the global assistant context store
+    const contextStore = (window as any).assistantContextStore as AssistantContextStore;
+    
     if (!contextStore) {
-      // eslint-disable-next-line no-console
-      console.warn('⚠️ Assistant context store not available');
+      console.warn('Assistant context store not available. Make sure context provider is initialized.');
       return;
     }
 
-    // Remove previous context if options changed
-    if (contextIdRef.current && optionsRef.current !== options) {
-      contextStore.removeContext(contextIdRef.current);
-      contextIdRef.current = null;
-    }
-
-    // Add new context if provided
-    if (options) {
-      contextIdRef.current = contextStore.addContext(options);
-      optionsRef.current = options;
-    }
-
-    // Cleanup on unmount or when options become null
-    return () => {
-      if (contextIdRef.current) {
-        contextStore.removeContext(contextIdRef.current);
-        contextIdRef.current = null;
-      }
-    };
-  }, [options]);
-}
-
-/**
- * Higher-level hook for managing multiple contexts
- *
- * @example
- * ```tsx
- * const { addContext, removeContext } = useAssistantContexts();
- *
- * useEffect(() => {
- *   const id = addContext({
- *     description: "Selected table cells",
- *     value: selectedCells,
- *     label: `${selectedCells.length} cells selected`,
- *     categories: ['chat', 'table']
- *   });
- *
- *   return () => removeContext(id);
- * }, [selectedCells]);
- * ```
- */
-export function useAssistantContexts() {
-  const contextIdsRef = useRef<Set<string>>(new Set());
-
-  const addContext = (options: AssistantContextOptions): string => {
-    const contextStore = (window as any).assistantContextStore;
-
-    if (!contextStore) {
-      // eslint-disable-next-line no-console
-      console.warn('⚠️ Assistant context store not available');
-      return '';
-    }
-
+    // Register the context
     const id = contextStore.addContext(options);
-    contextIdsRef.current.add(id);
-    return id;
-  };
+    setContextId(id);
 
-  const removeContext = (id: string): void => {
-    const contextStore = (window as any).assistantContextStore;
-
-    if (!contextStore) return;
-
-    contextStore.removeContext(id);
-    contextIdsRef.current.delete(id);
-  };
-
-  // Cleanup all contexts on unmount
-  useEffect(() => {
-    // Snapshot the current IDs so the cleanup uses the same list even if the ref changes later
-    const ids = Array.from(contextIdsRef.current);
+    // Cleanup on unmount
     return () => {
-      const contextStore = (window as any).assistantContextStore;
-      if (contextStore) {
-        ids.forEach((id) => {
-          contextStore.removeContext(id);
-        });
-      }
+      contextStore.removeContext(id);
     };
-  }, []);
+  }, [
+    options.description,
+    JSON.stringify(options.value), // Deep comparison for value changes
+    options.label,
+    JSON.stringify(options.categories),
+  ]);
 
-  return { addContext, removeContext };
+  return contextId || '';
 }

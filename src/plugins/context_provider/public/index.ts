@@ -19,10 +19,24 @@ export function plugin() {
 
 export { ContextProviderPlugin };
 export * from './types';
+
+// Context hooks
 export { useAssistantContext } from './hooks/use_assistant_context';
+export { usePageContext } from './hooks/use_page_context';
+export { useDynamicContext, useStringContext, useObjectContext, useArrayContext } from './hooks/use_dynamic_context';
+
+// Other hooks
 export { useTextSelection } from './hooks/use_text_selection';
-export { TextSelectionMonitor } from './components/text_selection_monitor';
 export { useAssistantAction } from './hooks/use_assistant_action';
+
+// Components
+export { TextSelectionMonitor } from './components/text_selection_monitor';
+
+// Services
 export { AssistantActionService } from './services/assistant_action_service';
+
+// Types
 export type { AssistantAction, RenderProps, ToolStatus } from './hooks/use_assistant_action';
 export type { ToolCallState, ToolDefinition } from './services/assistant_action_service';
+export type { URLState, UsePageContextOptions } from './hooks/use_page_context';
+export type { UseDynamicContextOptions } from './hooks/use_dynamic_context';
