@@ -116,6 +116,7 @@ export const StateTimeLineExclusiveVisOptions = ({
           }
           buttonSize="compressed"
           isFullWidth
+          data-test-subj="disconnectValuesGroupButton"
         />
       </EuiFormRow>
 
@@ -138,6 +139,7 @@ export const StateTimeLineExclusiveVisOptions = ({
               } as DisconnectValuesOption)
             }
             placeholder="1h"
+            data-test-subj="disableValuesThreshold"
           />
         </EuiFormRow>
       )}
@@ -151,7 +153,7 @@ export const StateTimeLineExclusiveVisOptions = ({
           legend={i18n.translate(
             'explore.stylePanel.stateTimeline.exclusive.connectValues.options',
             {
-              defaultMessage: 'Connect null values',
+              defaultMessage: 'Connect null values options',
             }
           )}
           isDisabled={styles?.disconnectValues?.disableMode !== DisableMode.Never}
@@ -165,13 +167,14 @@ export const StateTimeLineExclusiveVisOptions = ({
           }
           buttonSize="compressed"
           isFullWidth
+          data-test-subj="connectValuesGroupButton"
         />
       </EuiFormRow>
 
       {styles?.connectNullValues?.connectMode === DisableMode.Threshold && (
         <EuiFormRow
           label={i18n.translate(
-            'explore.stylePanel.texclusive.disconnectValues.disableMode.threshold',
+            'explore.stylePanel.texclusive.connectValues.connectMode.threshold',
             {
               defaultMessage: 'Threshold',
             }
@@ -187,6 +190,7 @@ export const StateTimeLineExclusiveVisOptions = ({
               } as ConnectNullValuesOption)
             }
             placeholder="1h"
+            data-test-subj="connectValuesThreshold"
           />
         </EuiFormRow>
       )}

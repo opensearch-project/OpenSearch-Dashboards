@@ -82,7 +82,6 @@ export const computing = (
     i++;
   }
   const displayNum = finalNum / units[i].value;
-
   return `${Math.round(displayNum * 100) / 100} ${units[i].symbol}`;
 };
 

@@ -329,12 +329,6 @@ export interface DisconnectValuesOption {
   threshold: string;
 }
 
-// export enum ConnectMode {
-//   Never = 'never',
-//   Threshold = 'threshold',
-//   Always = 'always',
-// }
-
 export interface ConnectNullValuesOption {
   connectMode: DisableMode;
   threshold: string;

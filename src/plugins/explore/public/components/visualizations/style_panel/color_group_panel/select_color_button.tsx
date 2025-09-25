@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import React, { useState } from 'react';
 import { EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import { ColorGroupPanel } from './color_group_panel';
@@ -15,7 +16,11 @@ export const SelectColorButton: React.FC<SelectColorButtonProps> = ({ onChange }
   const [isPopoverOpen, setPopover] = useState(false);
 
   const button = (
-    <EuiButtonEmpty onClick={() => setPopover(!isPopoverOpen)}>Select color</EuiButtonEmpty>
+    <EuiButtonEmpty onClick={() => setPopover(!isPopoverOpen)}>
+      {i18n.translate('explore.stylePanel.colorGroupPanel.selectColorButton', {
+        defaultMessage: 'Select color',
+      })}
+    </EuiButtonEmpty>
   );
 
   return (
