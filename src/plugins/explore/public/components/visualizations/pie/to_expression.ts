@@ -42,7 +42,6 @@ export const createPieSpec = (
     params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
     mark: {
       type: 'arc',
-      // TODO: make radius relative to the chart width/height
       innerRadius: styleOptions.exclusive?.donut ? { expr: '7*stepSize' } : 0,
       radius: { expr: '9*stepSize' },
       tooltip: styleOptions?.tooltipOptions?.mode === 'all',
@@ -59,6 +58,21 @@ export const createPieSpec = (
           { field: numericField, type: 'quantitative', title: numericName },
         ],
       }),
+    },
+  };
+
+  const hoverStateLayer = {
+    mark: {
+      type: 'arc',
+      innerRadius: styleOptions.exclusive?.donut ? { expr: '7*stepSize' } : 0,
+      radius: { expr: '10*stepSize' },
+      padAngle: styleOptions.exclusive?.donut ? 0.01 : 0,
+    },
+    encoding: {
+      opacity: {
+        value: 0,
+        condition: { param: 'highlight', value: DEFAULT_OPACITY / 3, empty: false },
+      },
     },
   };
 
@@ -97,6 +111,7 @@ export const createPieSpec = (
     params: [{ name: 'stepSize', expr: 'min(width, height) / 20' }],
     data: { values: transformedData },
     layer: [
+      hoverStateLayer,
       markLayer,
       styleOptions.exclusive?.showLabels ? labelLayer : null,
       styleOptions.exclusive?.showValues ? valueLayer : null,

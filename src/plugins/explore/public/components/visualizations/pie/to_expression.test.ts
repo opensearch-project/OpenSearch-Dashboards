@@ -72,16 +72,16 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('$schema');
       expect(result).toHaveProperty('data.values', transformedData);
       expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(2); // Main layer + label layer (no value layer)
+      expect(result.layer).toHaveLength(3); // Main layer + label layer (no value layer) + hover state layer
 
       // Verify the main layer (arc mark)
-      expect(result.layer[0]).toHaveProperty('mark.type', 'arc');
-      expect(result.layer[0]).toHaveProperty('mark.innerRadius', 0); // Not a donut
-      expect(result.layer[0]).toHaveProperty('mark.tooltip', true);
+      expect(result.layer[1]).toHaveProperty('mark.type', 'arc');
+      expect(result.layer[1]).toHaveProperty('mark.innerRadius', 0); // Not a donut
+      expect(result.layer[1]).toHaveProperty('mark.tooltip', true);
 
       // Verify the label layer
-      expect(result.layer[1]).toHaveProperty('mark.type', 'text');
-      expect(result.layer[1]).toHaveProperty('encoding.text.field', 'field-2');
+      expect(result.layer[2]).toHaveProperty('mark.type', 'text');
+      expect(result.layer[2]).toHaveProperty('encoding.text.field', 'field-2');
 
       // Verify the encoding
       expect(result).toHaveProperty('encoding.theta.field', 'field-1');
@@ -177,8 +177,8 @@ describe('to_expression', () => {
       );
 
       // Verify the donut configuration
-      expect(result.layer[0]).toHaveProperty('mark.innerRadius', { expr: '7*stepSize' });
-      expect(result.layer[0]).toHaveProperty('mark.radius', { expr: '9*stepSize' });
+      expect(result.layer[1]).toHaveProperty('mark.innerRadius', { expr: '7*stepSize' });
+      expect(result.layer[1]).toHaveProperty('mark.radius', { expr: '9*stepSize' });
     });
 
     it('should include value layer when showValues is true', () => {
@@ -205,11 +205,11 @@ describe('to_expression', () => {
       );
 
       // Verify the layer count
-      expect(result.layer).toHaveLength(3); // Main layer + label layer + value layer
+      expect(result.layer).toHaveLength(4); // Main layer + label layer + value layer + hover state layer
 
       // Verify the value layer
-      expect(result.layer[2]).toHaveProperty('mark.type', 'text');
-      expect(result.layer[2]).toHaveProperty('encoding.text.field', 'field-1');
+      expect(result.layer[3]).toHaveProperty('mark.type', 'text');
+      expect(result.layer[3]).toHaveProperty('encoding.text.field', 'field-1');
     });
 
     it('should not include label layer when showLabels is false', () => {
@@ -236,7 +236,7 @@ describe('to_expression', () => {
       );
 
       // Verify the layer count
-      expect(result.layer).toHaveLength(1); // Only main layer
+      expect(result.layer).toHaveLength(2); // main layer + hover state layer
 
       // Verify the main layer
       expect(result.layer[0]).toHaveProperty('mark.type', 'arc');
@@ -265,7 +265,7 @@ describe('to_expression', () => {
       );
 
       // Verify tooltip is disabled
-      expect(result.layer[0]).toHaveProperty('mark.tooltip', false);
+      expect(result.layer[1]).toHaveProperty('mark.tooltip', false);
     });
 
     it('should apply custom truncate value for labels', () => {
@@ -292,7 +292,7 @@ describe('to_expression', () => {
       );
 
       // Verify the truncate value
-      expect(result.layer[1]).toHaveProperty('mark.limit', 50);
+      expect(result.layer[2]).toHaveProperty('mark.limit', 50);
     });
 
     it('should not include legend when addLegend is false', () => {
