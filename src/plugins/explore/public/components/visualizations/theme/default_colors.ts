@@ -145,7 +145,7 @@ export const getCategoryNextColor = (index: number) => {
 export const resolveColor = (colorName?: string) => {
   if (!colorName) return undefined;
 
-  // Return hex color from theme
+  // Return hex color
   if (colorName.startsWith('#')) return colorName;
   const colorGroups = getColorGroups();
 
@@ -155,6 +155,5 @@ export const resolveColor = (colorName?: string) => {
     }
   }
 
-  // Return hex color from color picker
   return colorName;
 };
