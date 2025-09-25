@@ -14,7 +14,6 @@ import {
   VisFieldType,
   TitleOptions,
   ValueMappingOptions,
-  ThresholdOptions,
   DisconnectValuesOption,
   ConnectNullValuesOption,
   DisableMode,
@@ -22,7 +21,6 @@ import {
 import { getColors } from '../theme/default_colors';
 
 export interface ExclusiveStateTimeLineConfig {
-  // mergeConsecutive: boolean;
   showValues?: boolean;
   rowHeight?: number;
   disconnectValues?: DisconnectValuesOption;
@@ -42,9 +40,6 @@ export interface StateTimeLineChartStyleControls {
   titleOptions: TitleOptions;
 
   valueMappingOptions?: ValueMappingOptions;
-  thresholdOptions?: ThresholdOptions;
-
-  useValueMappingColor?: boolean;
 }
 
 export const defaultStateTimeLineChartStyles: StateTimeLineChartStyleControls = {
@@ -54,8 +49,6 @@ export const defaultStateTimeLineChartStyles: StateTimeLineChartStyleControls = 
   },
   addLegend: true,
   legendPosition: Positions.RIGHT,
-
-  useValueMappingColor: false,
 
   // exclusive
   exclusive: {
@@ -72,10 +65,7 @@ export const defaultStateTimeLineChartStyles: StateTimeLineChartStyleControls = 
   },
 
   valueMappingOptions: {
-    valueMappings: [
-      { type: 'value', value: 'text', displayText: '012', color: '#1d53b8ff' },
-      { type: 'range', range: { min: 10, max: 20 }, displayText: '123', color: '#cece0dff' },
-    ],
+    valueMappings: [],
   },
   // Standard axes
   standardAxes: [
@@ -122,11 +112,6 @@ export const defaultStateTimeLineChartStyles: StateTimeLineChartStyleControls = 
   titleOptions: {
     show: false,
     titleName: '',
-  },
-
-  thresholdOptions: {
-    baseColor: getColors().statusGreen,
-    thresholds: [],
   },
 };
 

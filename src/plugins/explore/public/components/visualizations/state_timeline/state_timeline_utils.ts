@@ -53,7 +53,7 @@ const disconnectValues = (next: string, last: string, disableThreshold?: string)
 };
 
 const connectNullValue = (curr: string, end: string, connectThreshold: string) => {
-  // try to "extend" lastNotNull's timestamp forward,
+  // try to extend lastNotNull's timestamp forward,
   // if the gap between lastNotNull and curr fits within connectThreshold, use currentTime, or use firstNullTime
 
   const lastNotNullTimeAddThreshold = addThresholdTime(end, connectThreshold);
@@ -110,7 +110,7 @@ export const mergeCategoricalData = (
   const sorted = [...data].sort(
     (a, b) => new Date(a[timestampField]).getTime() - new Date(b[timestampField]).getTime()
   );
-  // Collect all possible values from the secondary field
+  // Collect all possible values from the secondary categorical field
   const allPossibleOptions = Object.keys(groupBy(sorted, (item) => item[groupField2]));
 
   const validValues = mappings?.filter((r) => {
