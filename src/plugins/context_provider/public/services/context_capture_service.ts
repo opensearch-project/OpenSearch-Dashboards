@@ -13,7 +13,6 @@ import {
   StaticContext,
   DynamicContext,
   ContextContributor,
-  GlobalInteraction,
   AssistantContextStore,
 } from '../types';
 import { AssistantContextStoreImpl } from './assistant_context_store';
@@ -177,41 +176,6 @@ export class ContextCaptureService {
       this.dynamicContext$.next(dynamicContext);
       console.debug(`📝 No contributors for trigger ${trigger}, emitting raw context`);
     }
-  }
-
-  public captureGlobalInteraction(interaction: GlobalInteraction): void {
-    console.debug('🎯 Global Interaction Captured by Context Provider:', interaction);
-
-    // Route to appropriate contributor based on app
-    const contributor = this.contextContributors.get(interaction.app || 'unknown');
-    if (contributor && contributor.handleGlobalInteraction) {
-      try {
-        contributor.handleGlobalInteraction(interaction);
-        console.debug(`✅ Global interaction routed to ${contributor.appId} contributor`);
-      } catch (error) {
-        console.error(
-          `❌ Error in ${contributor.appId} contributor handling global interaction:`,
-          error
-        );
-      }
-    } else {
-      console.debug(
-        `⚠️ No contributor found for app: ${interaction.app}, or contributor doesn't handle global interactions`
-      );
-    }
-
-    // Also emit as dynamic context for backward compatibility
-    const dynamicContext: DynamicContext = {
-      appId: interaction.app,
-      trigger: interaction.interactionType || 'GLOBAL_CLICK',
-      timestamp: interaction.timestamp,
-      data: interaction,
-    };
-
-    this.dynamicContext$.next(dynamicContext);
-    console.debug(
-      '📡 Global interaction also emitted as dynamic context for backward compatibility'
-    );
   }
 
   public registerContextContributor(contributor: ContextContributor): void {

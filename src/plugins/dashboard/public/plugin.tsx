@@ -28,9 +28,6 @@
  * under the License.
  */
 
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-var-requires */
-
 import * as React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
@@ -166,7 +163,6 @@ interface StartDependencies {
   share?: SharePluginStart;
   uiActions: UiActionsStart;
   savedObjects: SavedObjectsStart;
-  contextProvider?: import('../../context_provider/public').ContextProviderStart;
 }
 
 export type RegisterDashboardProviderFn = (provider: DashboardProvider) => void;
@@ -219,7 +215,6 @@ export class DashboardPlugin
 
   private dashboardProviders: { [key: string]: DashboardProvider } = {};
   private dashboardUrlGenerator?: DashboardUrlGenerator;
-  private currentDashboardContainer?: import('./application/embeddable/dashboard_container').DashboardContainer;
 
   public setup(
     core: CoreSetup<StartDependencies, DashboardStart>,
@@ -578,35 +573,7 @@ export class DashboardPlugin
       uiActions,
       data: { indexPatterns, search },
       embeddable,
-      contextProvider,
     } = plugins;
-
-    // Register Dashboard Context Contributor with Context Provider
-    if (contextProvider) {
-      const { DashboardContextContributor } = require('./context_contributor');
-      const dashboardContextContributor = new DashboardContextContributor(() => {
-        console.log('🔍 Dashboard: Getting current container:', {
-          hasContainer: !!this.currentDashboardContainer,
-          containerType: this.currentDashboardContainer?.type,
-          containerId: this.currentDashboardContainer?.id,
-        });
-        return this.currentDashboardContainer;
-      }, core.savedObjects.client);
-
-      contextProvider.registerContextContributor(dashboardContextContributor);
-      console.log('📝 Dashboard: Context contributor registered with Context Provider');
-    } else {
-      console.log(
-        '⚠️ Dashboard: Context Provider plugin not available, skipping context registration'
-      );
-    }
-
-    // AI Chatbot Integration - Register Test UI Actions
-    console.log('🤖 Dashboard Plugin - Registering AI Chatbot UI Actions');
-    this.registerAIChatbotActions(uiActions);
-
-    // Make plugin instance available globally so dashboard components can set the container
-    (window as any).dashboardPlugin = this;
 
     const SavedObjectFinder = getSavedObjectFinder(
       core.savedObjects,
@@ -614,30 +581,6 @@ export class DashboardPlugin
       plugins.data,
       core.application
     );
-
-    // Register dashboard navigation shortcuts only when workspace is available
-    if (core.keyboardShortcut) {
-      // Check if workspaces are initialized and available
-      const isInitialized = core.workspaces.initialized$.getValue();
-      const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
-
-      if (isInitialized && currentWorkspace) {
-        core.keyboardShortcut.register({
-          id: 'nav.dashboard',
-          name: i18n.translate('dashboard.keyboardShortcut.goToDashboard.name', {
-            defaultMessage: 'Go to dashboard',
-          }),
-          pluginId: 'dashboard',
-          category: i18n.translate('dashboard.keyboardShortcut.category.navigation', {
-            defaultMessage: 'Navigation',
-          }),
-          keys: 'g b',
-          execute: () => {
-            core.application.navigateToApp('dashboards');
-          },
-        });
-      }
-    }
 
     const changeViewAction = new ReplacePanelAction(
       core,
@@ -700,96 +643,5 @@ export class DashboardPlugin
     if (this.stopUrlTracking) {
       this.stopUrlTracking();
     }
-  }
-
-  /**
-   * Set the current dashboard container (called from dashboard components)
-   */
-  public setCurrentDashboardContainer(
-    container: import('./application/embeddable/dashboard_container').DashboardContainer
-  ): void {
-    console.log('🔗 Dashboard Plugin: Setting current dashboard container:', {
-      containerType: container.type,
-      containerId: container.id,
-      childCount: container.getChildIds().length,
-    });
-    this.currentDashboardContainer = container;
-
-    // Note: Context refresh is now handled by dashboard editor after embeddables load
-  }
-
-  /**
-   * Register test UI Actions for AI Chatbot integration
-   */
-  private registerAIChatbotActions(uiActions: any) {
-    console.log('🤖 Registering AI Chatbot test UI Actions');
-
-    // Register ADD_FILTER_TRIGGER
-    uiActions.registerTrigger({
-      id: 'ADD_FILTER_TRIGGER',
-      title: 'Add Filter',
-      description: 'Add a filter to the dashboard',
-    });
-
-    uiActions.registerAction({
-      id: 'ADD_FILTER_ACTION',
-      type: 'ADD_FILTER_TRIGGER',
-      getDisplayName: () => 'Add Filter',
-      execute: async (context: any) => {
-        console.log('🎯 ADD_FILTER_ACTION executed:', context);
-
-        // Show a notification for testing
-        const { notifications } = (window as any).aiChatbotServices?.core || {};
-        if (notifications) {
-          notifications.toasts.addSuccess({
-            title: 'Filter Added',
-            text: `Added filter: ${context.field} = ${context.value}`,
-            'data-test-subj': 'ai-chatbot-filter-success',
-          });
-        } else {
-          // Fallback alert for testing
-          alert(`✅ Filter added: ${context.field} = ${context.value}`);
-        }
-
-        return Promise.resolve();
-      },
-    });
-
-    uiActions.attachAction('ADD_FILTER_TRIGGER', 'ADD_FILTER_ACTION');
-
-    // Register EXPAND_PANEL_TRIGGER
-    uiActions.registerTrigger({
-      id: 'EXPAND_PANEL_TRIGGER',
-      title: 'Expand Panel',
-      description: 'Expand a dashboard panel to full screen',
-    });
-
-    uiActions.registerAction({
-      id: 'EXPAND_PANEL_ACTION',
-      type: 'EXPAND_PANEL_TRIGGER',
-      getDisplayName: () => 'Expand Panel',
-      execute: async (context: any) => {
-        console.log('🎯 EXPAND_PANEL_ACTION executed:', context);
-
-        // Show a notification for testing
-        const { notifications } = (window as any).aiChatbotServices?.core || {};
-        if (notifications) {
-          notifications.toasts.addSuccess({
-            title: 'Panel Expanded',
-            text: `Expanded panel: ${context.panelId}`,
-            'data-test-subj': 'ai-chatbot-expand-success',
-          });
-        } else {
-          // Fallback alert for testing
-          alert(`✅ Panel expanded: ${context.panelId}`);
-        }
-
-        return Promise.resolve();
-      },
-    });
-
-    uiActions.attachAction('EXPAND_PANEL_TRIGGER', 'EXPAND_PANEL_ACTION');
-
-    console.log('✅ AI Chatbot UI Actions registered successfully');
   }
 }

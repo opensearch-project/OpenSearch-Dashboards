@@ -58,16 +58,6 @@ export class ContextProviderPlugin
       this.contextCaptureService!.captureDynamicContext(trigger, data);
     });
 
-    // 🔑 INJECT UI Actions into Global Interaction Interceptor
-    if ((window as any).injectUIActionsToGlobalInterceptor) {
-      console.log(
-        '💉 Injecting UI Actions into Global Interaction Interceptor from Context Provider'
-      );
-      (window as any).injectUIActionsToGlobalInterceptor(plugins.uiActions);
-    } else {
-      console.warn('⚠️ Global Interaction Interceptor UI Actions injection method not available');
-    }
-
     // Subscribe to context updates
     this.contextCaptureService.getStaticContext$().subscribe((context) => {
       this.currentContext = context;
@@ -122,8 +112,6 @@ export class ContextProviderPlugin
       testTableRowClick: () => this.testTableRowClick(),
       testEmbeddableHover: () => this.testEmbeddableHover(),
       testFilterApplication: () => this.testFilterApplication(),
-      // NEW: Global interaction capture
-      captureGlobalInteraction: this.captureGlobalInteraction.bind(this),
     };
 
     console.log('🌐 Context Provider API available at window.contextProvider');
@@ -139,7 +127,6 @@ export class ContextProviderPlugin
       // Expose Observable methods for real-time context updates
       getStaticContext$: () => this.contextCaptureService!.getStaticContext$(),
       getDynamicContext$: () => this.contextCaptureService!.getDynamicContext$(),
-      captureGlobalInteraction: this.captureGlobalInteraction.bind(this),
       // Assistant Context System
       getAssistantContextStore: () => this.contextCaptureService!.getAssistantContextStore(),
     };
@@ -249,15 +236,6 @@ export class ContextProviderPlugin
     console.log('🗑️ Unregistering context contributor via plugin API:', appId);
     if (this.contextCaptureService) {
       this.contextCaptureService.unregisterContextContributor(appId);
-    }
-  }
-
-  private captureGlobalInteraction(interaction: any): void {
-    console.log('🎯 Context Provider Plugin received global interaction:', interaction);
-    if (this.contextCaptureService) {
-      this.contextCaptureService.captureGlobalInteraction(interaction);
-    } else {
-      console.warn('⚠️ Context Capture Service not available for global interaction');
     }
   }
 

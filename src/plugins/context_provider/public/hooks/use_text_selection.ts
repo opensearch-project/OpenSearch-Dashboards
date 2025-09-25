@@ -20,7 +20,7 @@ export const useTextSelection = () => {
     const selection = window.getSelection();
     const selectedText = selection?.toString().trim() || '';
 
-    // Store if we have a selection right now
+    // Store if we have a valid selection right now
     if (selectedText.length >= 3) {
       lastSelectedTextRef.current = selectedText;
       hasSelectionRef.current = true;
@@ -45,17 +45,19 @@ export const useTextSelection = () => {
           setCurrentSelection('');
         }
       }
-    }, 500);
+    }, 300); // Reduced debounce time for better responsiveness
   };
 
   const handleMouseDown = (e: MouseEvent) => {
-    // Check if clicking on chat-related elements
+    // Check if clicking on chat-related elements or context pills
     const target = e.target as HTMLElement;
     const isClickOnChat =
       target.closest('.chat-sidecar') ||
       target.closest('.chatInput') ||
       target.closest('.chatMessages') ||
-      target.closest('[aria-label="Toggle chat assistant"]');
+      target.closest('.context-pill') ||
+      target.closest('[aria-label="Toggle chat assistant"]') ||
+      target.closest('[data-test-subj="context-pill"]');
 
     if (!isClickOnChat) {
       // Only clear if there's no new selection after a brief delay
@@ -97,9 +99,11 @@ export const useTextSelection = () => {
   useAssistantContext(
     currentSelection
       ? {
-          description: `Selected text from the page`,
+          description: `Selected text: "${currentSelection.substring(0, 50)}${
+            currentSelection.length > 50 ? '...' : ''
+          }"`,
           value: currentSelection,
-          label: `"${currentSelection.substring(0, 30)}${
+          label: `Selected: "${currentSelection.substring(0, 30)}${
             currentSelection.length > 30 ? '...' : ''
           }"`,
           categories: ['dynamic', 'selection', 'chat'],
