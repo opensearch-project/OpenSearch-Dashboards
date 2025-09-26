@@ -1,0 +1,2 @@
+feat:
+- Add toggle to show full time range on time-based axes ([#10562](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10562))
