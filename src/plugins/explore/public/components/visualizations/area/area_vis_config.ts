@@ -9,15 +9,17 @@ import { VisualizationType } from '../utils/use_visualization_types';
 import {
   CategoryAxis,
   ThresholdLines,
-  ThresholdLineStyle,
+  ThresholdMode,
   ValueAxis,
   Positions,
   TooltipOptions,
   AxisRole,
   VisFieldType,
   TitleOptions,
+  ThresholdOptions,
 } from '../types';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
+import { getColors } from '../theme/default_colors';
 
 // Complete area chart style controls interface
 export interface AreaChartStyleControls {
@@ -28,14 +30,18 @@ export interface AreaChartStyleControls {
   areaOpacity?: number;
   tooltipOptions: TooltipOptions;
 
-  // Threshold and grid
-  thresholdLines: ThresholdLines;
+  /**
+   * @deprecated - use thresholdOptions instead
+   */
+  thresholdLines?: ThresholdLines;
 
   // Axes configuration
   categoryAxes: CategoryAxis[];
   valueAxes: ValueAxis[];
 
   titleOptions: TitleOptions;
+
+  thresholdOptions?: ThresholdOptions;
 }
 
 const defaultAreaChartStyles: AreaChartStyleControls = {
@@ -47,18 +53,12 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
     mode: 'all',
   },
 
-  // Threshold and grid
-  thresholdLines: [
-    {
-      id: '1',
-      color: '#E7664C',
-      show: false,
-      style: ThresholdLineStyle.Full,
-      value: 10,
-      width: 1,
-      name: '',
-    },
-  ],
+  // Threshold options
+  thresholdOptions: {
+    baseColor: getColors().statusGreen,
+    thresholds: [],
+    thresholdStyle: ThresholdMode.Off,
+  },
 
   // Category axes
   categoryAxes: [

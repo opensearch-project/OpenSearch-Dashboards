@@ -95,10 +95,11 @@ export function SpanDetailPanel(props: {
           availableWidth={availableWidth}
           payloadData={payloadData}
           filters={spanFilters}
+          selectedSpanId={props.selectedSpanId}
         />
       </div>
     ),
-    [onSpanSelect, payloadData, spanFilters, availableWidth]
+    [onSpanSelect, payloadData, spanFilters, availableWidth, props.selectedSpanId]
   );
 
   const spanDetailTableHierarchy = useMemo(
@@ -114,10 +115,11 @@ export function SpanDetailPanel(props: {
           availableWidth={availableWidth}
           payloadData={payloadData}
           filters={spanFilters}
+          selectedSpanId={props.selectedSpanId}
         />
       </div>
     ),
-    [onSpanSelect, payloadData, spanFilters, availableWidth]
+    [onSpanSelect, payloadData, spanFilters, availableWidth, props.selectedSpanId]
   );
 
   const parsedData = useMemo(() => {

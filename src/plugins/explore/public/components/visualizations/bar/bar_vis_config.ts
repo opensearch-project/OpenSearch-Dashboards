@@ -9,7 +9,7 @@ import { VisualizationType } from '../utils/use_visualization_types';
 import {
   Positions,
   ThresholdLines,
-  ThresholdLineStyle,
+  ThresholdMode,
   TooltipOptions,
   VisFieldType,
   AxisRole,
@@ -18,9 +18,11 @@ import {
   AggregationType,
   BucketOptions,
   TimeUnit,
+  ThresholdOptions,
 } from '../types';
 import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
+import { getColors } from '../theme/default_colors';
 
 export interface BarChartStyleControls {
   // Basic controls
@@ -37,8 +39,10 @@ export interface BarChartStyleControls {
   barBorderWidth: number;
   barBorderColor: string;
 
-  // Threshold and grid
-  thresholdLines: ThresholdLines;
+  /**
+   * @deprecated - use thresholdOptions instead
+   */
+  thresholdLines?: ThresholdLines;
   // Axes configuration
   standardAxes: StandardAxes[];
 
@@ -48,6 +52,10 @@ export interface BarChartStyleControls {
 
   // histogram bucket config
   bucket?: BucketOptions;
+
+  thresholdOptions?: ThresholdOptions;
+
+  useThresholdColor?: boolean;
 }
 
 export const defaultBarChartStyles: BarChartStyleControls = {
@@ -67,19 +75,13 @@ export const defaultBarChartStyles: BarChartStyleControls = {
   barBorderWidth: 1,
   barBorderColor: '#000000',
 
-  // Threshold and grid
-  thresholdLines: [
-    {
-      id: '1',
-      color: '#E7664C',
-      show: false,
-      style: ThresholdLineStyle.Full,
-      value: 10,
-      width: 1,
-      name: '',
-    },
-  ],
-
+  // Threshold options
+  thresholdOptions: {
+    baseColor: getColors().statusGreen,
+    thresholds: [],
+    thresholdStyle: ThresholdMode.Off,
+  },
+  useThresholdColor: false,
   standardAxes: [
     {
       id: 'Axis-1',
