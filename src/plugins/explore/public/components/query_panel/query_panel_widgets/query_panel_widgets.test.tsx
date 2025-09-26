@@ -48,7 +48,6 @@ jest.mock('./language_toggle', () => ({
   LanguageToggle: () => <div data-test-subj="language-toggle">Language Toggle</div>,
 }));
 
-
 jest.mock('./query_panel_actions', () => ({
   QueryPanelActions: ({ registry }: { registry: QueryPanelActionsRegistryService }) => (
     <div data-test-subj="query-panel-actions" data-registry-empty={registry.isEmpty()}>
