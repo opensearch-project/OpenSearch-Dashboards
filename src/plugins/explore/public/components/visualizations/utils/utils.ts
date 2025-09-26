@@ -328,3 +328,32 @@ export const mergeStyles = (dest: ChartStyles, source: StyleOptions | undefined)
 
   return mergeWith(copiedDest, source, customMerge);
 };
+
+export function buildTimeRangeLayer(
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string },
+  switchAxes: boolean = false
+) {
+  if (!axisColumnMappings || !timeRange) return null;
+
+  const timeAxisEntry = Object.entries(axisColumnMappings).find(
+    ([, col]) => getSchemaByAxis(col) === 'temporal'
+  );
+
+  if (!timeAxisEntry) return null;
+
+  const [axisRole, timeAxis] = timeAxisEntry;
+  const dateField = timeAxis?.column;
+
+  const targetRole = axisRole === AxisRole.X ? (switchAxes ? 'y' : 'x') : switchAxes ? 'x' : 'y';
+
+  return {
+    data: {
+      values: [{ [dateField]: timeRange.from }, { [dateField]: timeRange.to }],
+    },
+    mark: { type: 'point', opacity: 0 },
+    encoding: {
+      [targetRole]: { field: dateField, type: 'temporal' },
+    },
+  };
+}

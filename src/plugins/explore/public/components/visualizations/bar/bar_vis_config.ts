@@ -57,6 +57,7 @@ export interface BarChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
 
   useThresholdColor?: boolean;
+  showFullTimeRange: boolean;
 }
 
 export type BarChartStyle = Required<
@@ -136,6 +137,7 @@ export const defaultBarChartStyles: BarChartStyle = {
     aggregationType: AggregationType.SUM,
     bucketTimeUnit: TimeUnit.AUTO,
   },
+  showFullTimeRange: false,
 };
 
 export const createBarConfig = (): VisualizationType<'bar'> => ({

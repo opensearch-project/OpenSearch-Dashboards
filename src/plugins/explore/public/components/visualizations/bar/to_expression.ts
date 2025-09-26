@@ -14,7 +14,12 @@ import {
 } from '../types';
 import { BarChartStyle, defaultBarChartStyles } from './bar_vis_config';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
-import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
+import {
+  applyAxisStyling,
+  getSwappedAxisRole,
+  getSchemaByAxis,
+  buildTimeRangeLayer,
+} from '../utils/utils';
 
 import {
   inferTimeIntervals,
@@ -144,7 +149,8 @@ export const createTimeBarChart = (
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styleOptions: BarChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length === 0 || dateColumns.length === 0) {
@@ -221,6 +227,11 @@ export const createTimeBarChart = (
     layers.push(...thresholdLayer.layer);
   }
 
+  const domainLayer = styles.showFullTimeRange
+    ? buildTimeRangeLayer(axisColumnMappings, timeRange, styles.switchAxes)
+    : null;
+  if (domainLayer) layers.push(domainLayer);
+
   return {
     $schema: VEGASCHEMA,
     params: [...(timeAxis ? [createTimeRangeUpdater()] : [])],
@@ -247,7 +258,8 @@ export const createGroupedTimeBarChart = (
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styleOptions: BarChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   // Check if we have the required columns
   if (
@@ -342,6 +354,11 @@ export const createGroupedTimeBarChart = (
     layer.push(...thresholdLayer.layer);
   }
 
+  const domainLayer = styles.showFullTimeRange
+    ? buildTimeRangeLayer(axisColumnMappings, timeRange, styles.switchAxes)
+    : null;
+  if (domainLayer) layer.push(domainLayer);
+
   const spec: any = {
     $schema: VEGASCHEMA,
     params: [...(timeAxis ? [createTimeRangeUpdater()] : [])],
@@ -370,7 +387,8 @@ export const createFacetedTimeBarChart = (
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styleOptions: BarChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length === 0 || categoricalColumns.length < 2 || dateColumns.length === 0) {
@@ -416,6 +434,10 @@ export const createFacetedTimeBarChart = (
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
 
   const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
+
+  const domainLayer = styles.showFullTimeRange
+    ? buildTimeRangeLayer(axisColumnMappings, timeRange, styles.switchAxes)
+    : null;
 
   return {
     $schema: VEGASCHEMA,
@@ -486,6 +508,8 @@ export const createFacetedTimeBarChart = (
 
         // Add threshold layer to each facet if enabled
         ...(thresholdLayer?.layer ?? []),
+
+        ...(domainLayer ? [domainLayer] : []),
       ],
     },
   };

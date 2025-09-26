@@ -12,7 +12,7 @@ import {
   ValueAxisPosition,
 } from './line_chart_utils';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
-import { getTooltipFormat } from '../utils/utils';
+import { buildTimeRangeLayer, getTooltipFormat } from '../utils/utils';
 import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
 
@@ -29,7 +29,8 @@ export const createSimpleLineChart = (
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styles: LineChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
   const xAxisColumn = axisColumnMappings?.[AxisRole.X];
@@ -119,6 +120,11 @@ export const createSimpleLineChart = (
     layers.push(timeMarkerLayer);
   }
 
+  const domainLayer = styles.showFullTimeRange
+    ? buildTimeRangeLayer(axisColumnMappings, timeRange)
+    : null;
+  if (domainLayer) layers.push(domainLayer);
+
   return {
     $schema: VEGASCHEMA,
     params: [...(dateField ? [createTimeRangeUpdater()] : [])],
@@ -143,7 +149,8 @@ export const createLineBarChart = (
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styles: LineChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
   const xAxisMapping = axisColumnMappings?.[AxisRole.X];
@@ -302,6 +309,11 @@ export const createLineBarChart = (
     layers.push(timeMarkerLayer);
   }
 
+  const domainLayer = styles.showFullTimeRange
+    ? buildTimeRangeLayer(axisColumnMappings, timeRange)
+    : null;
+  if (domainLayer) layers.push(domainLayer);
+
   return {
     $schema: VEGASCHEMA,
     params: [...(dateField ? [createTimeRangeUpdater()] : [])],
@@ -331,7 +343,8 @@ export const createMultiLineChart = (
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styles: LineChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
   const xAxisColumn = axisColumnMappings?.[AxisRole.X];
@@ -441,6 +454,11 @@ export const createMultiLineChart = (
     layers.push(timeMarkerLayer);
   }
 
+  const domainLayer = styles.showFullTimeRange
+    ? buildTimeRangeLayer(axisColumnMappings, timeRange)
+    : null;
+  if (domainLayer) layers.push(domainLayer);
+
   return {
     $schema: VEGASCHEMA,
     params: [...(dateField ? [createTimeRangeUpdater()] : [])],
@@ -467,7 +485,8 @@ export const createFacetedMultiLineChart = (
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styles: LineChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
   const xAxisMapping = axisColumnMappings?.[AxisRole.X];
@@ -488,6 +507,10 @@ export const createFacetedMultiLineChart = (
   const facetMarkConfig = buildMarkConfig(styles, 'line');
 
   const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
+  const domainLayer =
+    styles.showFullTimeRange && timeRange
+      ? buildTimeRangeLayer(axisColumnMappings, timeRange)
+      : null;
 
   return {
     $schema: VEGASCHEMA,
@@ -609,6 +632,7 @@ export const createFacetedMultiLineChart = (
               },
             ]
           : []),
+        ...(domainLayer ? [domainLayer] : []),
       ],
     },
   };

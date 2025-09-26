@@ -43,6 +43,7 @@ export interface AreaChartStyleOptions {
   titleOptions?: TitleOptions;
 
   thresholdOptions?: ThresholdOptions;
+  showFullTimeRange: boolean;
 }
 
 export type AreaChartStyle = Required<
@@ -115,6 +116,8 @@ const defaultAreaChartStyles: AreaChartStyle = {
     show: false,
     titleName: '',
   },
+
+  showFullTimeRange: false,
 };
 
 export const createAreaConfig = (): VisualizationType<'area'> => ({
