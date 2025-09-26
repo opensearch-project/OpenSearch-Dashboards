@@ -8,7 +8,7 @@ import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { LineVisStyleControls } from './line_vis_options';
 import { LineChartStyleControls } from './line_vis_config';
-import { ThresholdLineStyle, VisColumn, VisFieldType, Positions } from '../types';
+import { ThresholdMode, VisColumn, VisFieldType, Positions } from '../types';
 
 export default {
   component: LineVisStyleControls,
@@ -91,7 +91,7 @@ const defaultStyleOptions: LineChartStyleControls = {
     {
       color: '#E7664C',
       show: false,
-      style: ThresholdLineStyle.Full,
+      style: ThresholdMode.Full,
       value: 10,
       width: 1,
     },

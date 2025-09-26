@@ -13,8 +13,10 @@ import {
   VisFieldType,
   PercentageColor,
   UnitItem,
+  ThresholdOptions,
 } from '../types';
 import { CalculationMethod } from '../utils/calculation';
+import { getColors } from '../theme/default_colors';
 
 export type TextAlignment = 'auto' | 'center';
 
@@ -24,13 +26,26 @@ export interface MetricChartStyleControls {
   fontSize?: number;
   titleSize?: number;
   percentageSize?: number;
-  useColor: boolean;
+  /**
+   * @deprecated - use useThresholdColor instead
+   */
+  useColor?: boolean;
   showPercentage?: boolean;
-  colorSchema: ColorSchemas;
+  /**
+   * @deprecated - use global thresholdOptions
+   */
+  colorSchema?: ColorSchemas;
   valueCalculation?: CalculationMethod;
   percentageColor?: PercentageColor;
+  /**
+   * @deprecated - use global thresholdOptions instead
+   */
   customRanges?: RangeValue[];
   unitId?: string;
+  thresholdOptions?: ThresholdOptions;
+  min?: number;
+  max?: number;
+  useThresholdColor?: boolean;
 }
 
 // TODO: refactor other type of chart to ensure the default style control object is properly typed
@@ -42,13 +57,18 @@ export type DefaultMetricChartStyleControls = MetricChartStyleControls &
 export const defaultMetricChartStyles: DefaultMetricChartStyleControls = {
   showTitle: true,
   title: '',
-  useColor: false,
   showPercentage: false,
   percentageColor: 'standard',
-  colorSchema: ColorSchemas.BLUES,
   valueCalculation: 'last',
+  // useColor: true,
+  colorSchema: ColorSchemas.GREENS,
+  // customRanges: [{ min: 10, max: 100 }],
   // add default range for metric
-  customRanges: [{ min: 0, max: 100 }],
+  thresholdOptions: {
+    baseColor: getColors().statusGreen,
+    thresholds: [],
+  },
+  useThresholdColor: false,
 };
 
 export const createMetricConfig = (): VisualizationType<'metric'> => ({

@@ -20,7 +20,9 @@ describe('ScatterExclusiveVisOptions', () => {
       angle: 0,
       filled: false,
     },
+    useThresholdColor: false,
     onChange: jest.fn(),
+    onUseThresholdColorChange: jest.fn(),
   };
 
   beforeEach(() => {
@@ -39,7 +41,7 @@ describe('ScatterExclusiveVisOptions', () => {
 
   it('calls onChange when filled switch is toggled', () => {
     render(<ScatterExclusiveVisOptions {...defaultProps} />);
-    const filledSwitch = screen.getByRole('switch');
+    const filledSwitch = screen.getAllByRole('switch')[1];
     fireEvent.click(filledSwitch);
     expect(defaultProps.onChange).toHaveBeenCalledWith({
       ...defaultProps.styles,
@@ -124,7 +126,7 @@ describe('ScatterExclusiveVisOptions', () => {
 
     // Check for specific controls
     expect(screen.getByRole('combobox')).toBeInTheDocument(); // Shape selector
-    expect(screen.getByRole('switch')).toBeInTheDocument(); // Filled switch
+    expect(screen.getAllByRole('switch')).toHaveLength(2); // Filled switch and useThresholdcolor
     expect(screen.getByRole('spinbutton')).toBeInTheDocument(); // Angle input
   });
 

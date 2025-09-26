@@ -69,3 +69,5 @@ export const getColors = () => {
     categories: euiPaletteColorBlind(),
   };
 };
+
+export const DEFAULT_GREY = '#d3d3d3';
