@@ -18,6 +18,7 @@ import { CategoryAxis, VisColumn, ValueAxis, Positions, AxisRole } from '../../t
 import { StyleAccordion } from '../style_accordion';
 import { DebouncedFieldNumber, DebouncedFieldText } from '.././utils';
 import { AXIS_LABEL_MAX_LENGTH } from '../../constants';
+import { getSchemaByAxis } from '../../utils/utils';
 
 interface AxesOptionsProps {
   categoryAxes: CategoryAxis[];
@@ -28,6 +29,8 @@ interface AxesOptionsProps {
   categoricalColumns: VisColumn[];
   dateColumns: VisColumn[];
   axisColumnMappings: Partial<Record<AxisRole, VisColumn>>;
+  showFullTimeRange: boolean;
+  onShowFullTimeRangeChange: (showFullTimeRange: boolean) => void;
 }
 
 export const AxesOptions: React.FC<AxesOptionsProps> = ({
@@ -39,6 +42,8 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
   categoricalColumns,
   dateColumns,
   axisColumnMappings,
+  showFullTimeRange,
+  onShowFullTimeRangeChange,
 }) => {
   const updateCategoryAxis = (index: number, updates: Partial<CategoryAxis>) => {
     const updatedAxes = [...categoryAxes];
@@ -116,6 +121,8 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
     defaultMessage: 'Truncate after',
   });
 
+  const isDateXAxis = getSchemaByAxis(axisColumnMappings?.[AxisRole.X]) === 'temporal';
+
   return (
     <StyleAccordion
       id="axesSection"
@@ -190,6 +197,18 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                   isFullWidth
                 />
               </EuiFormRow>
+              {isDateXAxis && (
+                <EuiFormRow>
+                  <EuiSwitch
+                    compressed
+                    label={i18n.translate('explore.vis.gridOptions.showFullTimeRange', {
+                      defaultMessage: 'Show full time range',
+                    })}
+                    checked={showFullTimeRange}
+                    onChange={(e) => onShowFullTimeRangeChange(e.target.checked)}
+                  />
+                </EuiFormRow>
+              )}
               <EuiFormRow>
                 <EuiSwitch
                   compressed

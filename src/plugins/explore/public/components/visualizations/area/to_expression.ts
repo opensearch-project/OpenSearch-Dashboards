@@ -7,7 +7,7 @@ import { AreaChartStyle } from './area_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
-import { getTooltipFormat } from '../utils/utils';
+import { buildTimeRangeLayer, getTooltipFormat } from '../utils/utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
@@ -25,7 +25,8 @@ export const createSimpleAreaChart = (
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styles: AreaChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
   const xAxisColumn = axisColumnMappings?.[AxisRole.X];
@@ -120,6 +121,11 @@ export const createSimpleAreaChart = (
     layers.push(timeMarkerLayer);
   }
 
+  const domainLayer = styles.showFullTimeRange
+    ? buildTimeRangeLayer(axisColumnMappings, timeRange)
+    : null;
+  if (domainLayer) layers.push(domainLayer);
+
   return {
     $schema: VEGASCHEMA,
     params: [...(dateField ? [createTimeRangeUpdater()] : [])],
@@ -152,7 +158,8 @@ export const createMultiAreaChart = (
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styles: AreaChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
   const xAxisColumn = axisColumnMappings?.[AxisRole.X];
@@ -268,6 +275,11 @@ export const createMultiAreaChart = (
     layers.push(timeMarkerLayer);
   }
 
+  const domainLayer = styles.showFullTimeRange
+    ? buildTimeRangeLayer(axisColumnMappings, timeRange)
+    : null;
+  if (domainLayer) layers.push(domainLayer);
+
   return {
     $schema: VEGASCHEMA,
     params: [...(dateField ? [createTimeRangeUpdater()] : [])],
@@ -294,7 +306,8 @@ export const createFacetedMultiAreaChart = (
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styles: AreaChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
   const xAxisMapping = axisColumnMappings?.[AxisRole.X];
@@ -312,6 +325,11 @@ export const createFacetedMultiAreaChart = (
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
+  const domainLayer =
+    styles.showFullTimeRange && timeRange
+      ? buildTimeRangeLayer(axisColumnMappings, timeRange)
+      : null;
+
   return {
     $schema: VEGASCHEMA,
     params: [...(dateField ? [createTimeRangeUpdater()] : [])],
@@ -440,6 +458,7 @@ export const createFacetedMultiAreaChart = (
               },
             ]
           : []),
+        ...(domainLayer ? [domainLayer] : []),
       ],
     },
   };

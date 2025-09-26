@@ -55,7 +55,8 @@ export interface VisualizationRule {
     dateColumns: VisColumn[],
     styleOptions: ChartStylesMapping[ChartType],
     chartType?: ChartType,
-    axisColumnMappings?: AxisColumnMappings
+    axisColumnMappings?: AxisColumnMappings,
+    timeRange?: { from: string; to: string }
   ) => any;
 }
 export interface VisColumn {
