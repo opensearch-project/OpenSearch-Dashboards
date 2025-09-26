@@ -67,6 +67,10 @@ export const [getUiService, setUiService] = createGetterSetter<DataPublicPluginS
 
 export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
 
+export const [getSavedObjects, setSavedObjects] = createGetterSetter<CoreStart['savedObjects']>(
+  'SavedObjects'
+);
+
 let useNewSavedQueriesUI = false;
 
 export function getUseNewSavedQueriesUI() {

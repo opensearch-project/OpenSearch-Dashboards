@@ -10,8 +10,18 @@ import { IDataPluginServices } from '../../types';
 import { QuerySuggestion } from '../../autocomplete';
 import * as utils from '../shared/utils';
 import { PPL_AGGREGATE_FUNCTIONS } from './constants';
+import * as querySnippets from '../../query_snippet_suggestions/ppl/suggestions';
 
 describe('ppl code_completion', () => {
+  // Mock the query snippet suggestions function at the top level
+  beforeEach(() => {
+    jest.spyOn(querySnippets, 'getPPLQuerySnippetForSuggestions').mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   const mockIndexPattern = {
     title: 'test-index',
     fields: [
@@ -467,6 +477,98 @@ describe('ppl code_completion', () => {
 
       const resultValue = results1.find((result) => result.text === 'value1');
       expect(resultValue?.insertText).toBe('value1');
+    });
+
+    it('should include query snippet suggestions in results', async () => {
+      const mockSnippetSuggestions = [
+        {
+          text: 'stats count() by field1',
+          insertText: 'stats count() by field1 ',
+          type: monaco.languages.CompletionItemKind.Reference,
+          detail: 'Saved Query Snippet',
+        },
+      ];
+
+      // Override the default mock for this specific test
+      (querySnippets.getPPLQuerySnippetForSuggestions as jest.Mock).mockResolvedValue(
+        mockSnippetSuggestions
+      );
+
+      const result = await getSimpleSuggestions('source = test-index | ');
+
+      expect(querySnippets.getPPLQuerySnippetForSuggestions).toHaveBeenCalled();
+      checkSuggestionsContain(result, {
+        text: 'stats count() by field1',
+        type: monaco.languages.CompletionItemKind.Reference,
+      });
+    });
+
+    it('should pass correct query text to snippet suggestions', async () => {
+      const query = 'source = test-index | where field1 = "value" | ';
+      const position = new monaco.Position(1, query.length);
+
+      await getSimpleSuggestions(query, position);
+
+      expect(querySnippets.getPPLQuerySnippetForSuggestions).toHaveBeenCalledWith(query.trim());
+    });
+
+    it('should handle multiline queries correctly for snippet suggestions', async () => {
+      const query = `source = test-index
+      | where field1 = "value"
+      | `;
+      const position = new monaco.Position(3, 7); // Line 3, column 7
+
+      await getSimpleSuggestions(query, position);
+
+      const expectedQueryTillCursor = `source = test-index
+      | where field1 = "value"
+      `;
+      expect(querySnippets.getPPLQuerySnippetForSuggestions).toHaveBeenCalledWith(
+        expectedQueryTillCursor
+      );
+    });
+
+    describe('extractQueryTillCursor behavior', () => {
+      it('should handle single line queries correctly', async () => {
+        const query = 'source = test-index | where field1 = "value" ';
+        const position = new monaco.Position(1, 25); // At "value"
+
+        await getSimpleSuggestions(query, position);
+
+        expect(querySnippets.getPPLQuerySnippetForSuggestions).toHaveBeenCalledWith(
+          'source = test-index | wh'
+        );
+      });
+
+      it('should handle multiline queries and extract text up to cursor', async () => {
+        const query = `source = test-index
+| where field1 = "value"
+| stats count()`;
+        const position = new monaco.Position(2, 10); // Line 2, column 10
+
+        await getSimpleSuggestions(query, position);
+
+        const expectedExtracted = `source = test-index
+| where f`;
+        expect(querySnippets.getPPLQuerySnippetForSuggestions).toHaveBeenCalledWith(
+          expectedExtracted
+        );
+      });
+
+      it('should handle empty lines correctly', async () => {
+        const query = `source = test-index
+
+| where field1 = "value"`;
+        const position = new monaco.Position(2, 1); // Empty line
+
+        await getSimpleSuggestions(query, position);
+
+        const expectedExtracted = `source = test-index
+`;
+        expect(querySnippets.getPPLQuerySnippetForSuggestions).toHaveBeenCalledWith(
+          expectedExtracted
+        );
+      });
     });
   });
 });
