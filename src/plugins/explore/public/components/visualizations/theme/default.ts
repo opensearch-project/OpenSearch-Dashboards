@@ -20,6 +20,7 @@ export const defaultTheme: Config = {
   line: { stroke: colorPalettes.categories[0] },
   point: { fill: colorPalettes.categories[0], filled: true },
   text: { fill: colorPalettes.text },
+  mark: { color: colorPalettes.categories[0] },
   style: {
     'guide-label': {
       fontSize: 12,
