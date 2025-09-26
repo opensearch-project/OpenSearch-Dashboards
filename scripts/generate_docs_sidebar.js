@@ -66,7 +66,7 @@ function findMarkdownFiles(dir, prefix = '', baseDir = '', recursively = true) {
           results.push({
             type: 'directory',
             name: entry.name,
-            children: [nestedResults],
+            children: nestedResults,
             readme: readme,
             baseDir,
           });
@@ -101,17 +101,37 @@ function generateSidebarContent(items, nestLevel = 0) {
 
   items.forEach((item) => {
     if (item.type === 'directory') {
-      // If there is a readme in the directory, use that as the reference for the directory.
-      if (item.readme) {
-        const linkLabel = item.name
-          .replace(/-/g, ' ')
-          .replace(/\.md$/, '')
-          .replace(/^\w/, (c) => c.toUpperCase());
+      const linkLabel = item.name
+        .replace(/-/g, ' ')
+        .replace(/\.md$/, '')
+        .replace(/^\w/, (c) => c.toUpperCase());
+
+      // If there is a readme in the directory and the directory has children,
+      // create an expandable section
+      if (item.readme && item.children && item.children.length > 0) {
+        // Create expandable section header (no direct link)
+        content += `${'  '.repeat(nestLevel)}  - ${linkLabel}\n`;
+
+        // Add README as first child with "Overview" or similar label
+        const readmeLinkLabel =
+          item.readme.name === 'README.md'
+            ? 'Overview'
+            : item.readme.name
+                .replace(/-/g, ' ')
+                .replace(/\.md$/, '')
+                .replace(/^\w/, (c) => c.toUpperCase());
+        content += `${'  '.repeat(nestLevel + 1)}    - [${readmeLinkLabel}](${item.readme.path})\n`;
+
+        // Add other children
+        content += generateSidebarContent(item.children, nestLevel + 1);
+      } else if (item.readme) {
+        // Directory with README but no other children - single link
         content += `${'  '.repeat(nestLevel)}  - [${linkLabel}](${item.readme.path})\n`;
       } else {
-        content += `${'  '.repeat(nestLevel)}  - ${item.name}\n`;
+        // Directory without README - expandable section
+        content += `${'  '.repeat(nestLevel)}  - ${linkLabel}\n`;
+        content += generateSidebarContent(item.children, nestLevel + 1);
       }
-      content += generateSidebarContent(item.children, nestLevel + 1);
     } else if (item.type === 'file') {
       const linkLabel = item.name
         .replace(/-/g, ' ')
