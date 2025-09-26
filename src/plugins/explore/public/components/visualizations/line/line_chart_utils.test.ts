@@ -242,7 +242,12 @@ describe('Line Chart Utils', () => {
         labels: true,
         labelOverlap: 'greedy',
         labelFlush: false,
-        format: { seconds: '%I:%M:%S', milliseconds: '%I:%M:%S.%L' },
+        format: {
+          hours: '%H:%M',
+          minutes: '%H:%M',
+          seconds: '%H:%M:%S',
+          milliseconds: '%H:%M:%S.%L',
+        },
       });
     });
 
@@ -279,7 +284,12 @@ describe('Line Chart Utils', () => {
         labels: true,
         labelOverlap: 'greedy',
         labelFlush: false,
-        format: { seconds: '%I:%M:%S', milliseconds: '%I:%M:%S.%L' }, // Date format applied
+        format: {
+          hours: '%H:%M',
+          minutes: '%H:%M',
+          seconds: '%H:%M:%S',
+          milliseconds: '%H:%M:%S.%L',
+        },
       });
     });
 

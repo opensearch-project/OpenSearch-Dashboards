@@ -266,6 +266,8 @@ export interface AxisConfig {
   ticks?: boolean;
   domain?: boolean;
   format?: {
+    hours?: string;
+    minutes?: string;
     seconds?: string;
     milliseconds?: string;
   };
