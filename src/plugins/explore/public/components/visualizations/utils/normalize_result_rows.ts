@@ -7,6 +7,22 @@ import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { FIELD_TYPE_MAP } from '../constants';
 import { VisColumn, VisFieldType } from '../types';
 
+/**
+ * Normalize date string values returned from queries.
+ *
+ * PPL returns datetime fields as UTC strings without timezone info
+ * (e.g. "2025-09-24 14:50:00"). To ensure correct parsing in visualizations,
+ * we standardize them into ISO 8601 with explicit UTC suffix
+ * (e.g. "2025-09-24T14:50:00Z").
+ */
+export const normalizeDateString = (value: string): string => {
+  if (!value) return value;
+  if (value.includes('T') && value.endsWith('Z')) {
+    return value;
+  }
+  return value.replace(' ', 'T') + 'Z';
+};
+
 export const normalizeResultRows = <T = unknown>(
   rows: Array<OpenSearchSearchHit<T>>,
   schema: Array<{ type?: string; name?: string }>
@@ -27,7 +43,11 @@ export const normalizeResultRows = <T = unknown>(
     for (const column of columns) {
       // Type assertion for _source since it's marked as unknown
       const source = row._source as Record<string, any>;
-      transformedRow[column.column] = source[column.name];
+      let value = source[column.name];
+      if (column.schema === VisFieldType.Date && typeof value === 'string') {
+        value = normalizeDateString(value);
+      }
+      transformedRow[column.column] = value;
     }
     return transformedRow;
   });
