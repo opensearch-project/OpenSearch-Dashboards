@@ -36,6 +36,8 @@ export interface AreaChartStyleControls {
   valueAxes: ValueAxis[];
 
   titleOptions: TitleOptions;
+
+  showFullTimeRange: boolean;
 }
 
 const defaultAreaChartStyles: AreaChartStyleControls = {
@@ -109,6 +111,8 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
     show: false,
     titleName: '',
   },
+
+  showFullTimeRange: false,
 };
 
 export const createAreaConfig = (): VisualizationType<'area'> => ({

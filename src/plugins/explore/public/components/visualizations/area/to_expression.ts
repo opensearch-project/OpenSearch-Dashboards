@@ -7,7 +7,7 @@ import { AreaChartStyleControls } from './area_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
 import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold_lines/utils';
-import { getTooltipFormat } from '../utils/utils';
+import { buildTimeRangeLayer, getTooltipFormat } from '../utils/utils';
 import { DEFAULT_OPACITY } from '../constants';
 
 /**
@@ -23,7 +23,8 @@ export const createSimpleAreaChart = (
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styles: Partial<AreaChartStyleControls>,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
   const xAxisColumn = axisColumnMappings?.[AxisRole.X];
@@ -98,6 +99,11 @@ export const createSimpleAreaChart = (
     layers.push(timeMarkerLayer);
   }
 
+  const domainLayer = styles.showFullTimeRange
+    ? buildTimeRangeLayer(axisColumnMappings, timeRange)
+    : null;
+  if (domainLayer) layers.push(domainLayer);
+
   return {
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
@@ -129,7 +135,8 @@ export const createMultiAreaChart = (
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styles: Partial<AreaChartStyleControls>,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
   const xAxisColumn = axisColumnMappings?.[AxisRole.X];
@@ -219,6 +226,11 @@ export const createMultiAreaChart = (
     layers.push(timeMarkerLayer);
   }
 
+  const domainLayer = styles.showFullTimeRange
+    ? buildTimeRangeLayer(axisColumnMappings, timeRange)
+    : null;
+  if (domainLayer) layers.push(domainLayer);
+
   return {
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
@@ -244,7 +256,8 @@ export const createFacetedMultiAreaChart = (
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styles: Partial<AreaChartStyleControls>,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
   const xAxisMapping = axisColumnMappings?.[AxisRole.X];
@@ -259,6 +272,11 @@ export const createFacetedMultiAreaChart = (
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
+
+  const domainLayer =
+    styles.showFullTimeRange && timeRange
+      ? buildTimeRangeLayer(axisColumnMappings, timeRange)
+      : null;
 
   return {
     $schema: VEGASCHEMA,
@@ -384,6 +402,7 @@ export const createFacetedMultiAreaChart = (
               },
             ]
           : []),
+        ...(domainLayer ? [domainLayer] : []),
       ],
     },
   };

@@ -50,7 +50,8 @@ export interface VisualizationRule {
     dateColumns: VisColumn[],
     styleOptions: any,
     chartType?: string,
-    axisColumnMappings?: AxisColumnMappings
+    axisColumnMappings?: AxisColumnMappings,
+    timeRange?: { from: string; to: string }
   ) => any;
 }
 export interface VisColumn {
