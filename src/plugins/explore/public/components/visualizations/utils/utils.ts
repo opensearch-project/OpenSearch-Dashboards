@@ -62,7 +62,12 @@ export const applyAxisStyling = (
   }
 
   if (axis?.schema === VisFieldType.Date) {
-    fullAxisConfig.format = { seconds: '%I:%M:%S', milliseconds: '%I:%M:%S.%L' };
+    fullAxisConfig.format = {
+      hours: '%H:%M',
+      minutes: '%H:%M',
+      seconds: '%H:%M:%S',
+      milliseconds: '%H:%M:%S.%L',
+    };
   }
 
   return fullAxisConfig;
