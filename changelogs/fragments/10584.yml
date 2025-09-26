@@ -1,0 +1,2 @@
+fix:
+- Inconsistent icons in table fields ([#10584](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10584))
