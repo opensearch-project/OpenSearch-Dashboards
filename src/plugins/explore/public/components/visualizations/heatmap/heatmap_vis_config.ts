@@ -17,7 +17,9 @@ import {
   AggregationType,
   VisFieldType,
   TitleOptions,
+  ThresholdOptions,
 } from '../types';
+import { getColors } from '../theme/default_colors';
 
 export interface HeatmapLabels {
   show: boolean;
@@ -33,8 +35,15 @@ export interface ExclusiveHeatmapConfig {
   scaleToDataBounds: boolean;
   percentageMode: boolean;
   maxNumberOfColors: number;
-  useCustomRanges: boolean;
+  /**
+   * @deprecated - use useThresholdColor instead
+   */
+  useCustomRanges?: boolean;
   label: HeatmapLabels;
+
+  /**
+   * @deprecated - use global thresholdOptions instead
+   */
   customRanges?: RangeValue[];
 }
 // Complete heatmap chart style controls interface
@@ -51,6 +60,8 @@ export interface HeatmapChartStyleControls {
   switchAxes: boolean;
 
   titleOptions: TitleOptions;
+  useThresholdColor?: boolean;
+  thresholdOptions?: ThresholdOptions;
 }
 
 export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
@@ -70,7 +81,7 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
     scaleToDataBounds: false,
     percentageMode: false,
     maxNumberOfColors: 4,
-    useCustomRanges: false,
+
     label: {
       type: AggregationType.SUM,
       show: false,
@@ -78,6 +89,11 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
       overwriteColor: false,
       color: 'black',
     },
+  },
+  useThresholdColor: false,
+  thresholdOptions: {
+    baseColor: getColors().statusGreen,
+    thresholds: [],
   },
 
   // Standard axes

@@ -11,7 +11,7 @@ import {
   applyAxisStyling,
   ValueAxisPosition,
 } from './line_chart_utils';
-import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold_lines/utils';
+import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
 import { getTooltipFormat } from '../utils/utils';
 import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
 
@@ -107,7 +107,7 @@ export const createSimpleLineChart = (
   );
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
@@ -263,7 +263,7 @@ export const createLineBarChart = (
   };
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     barWithThresholdLayer.layer.push(thresholdLayer);
   }
@@ -425,7 +425,7 @@ export const createMultiLineChart = (
   );
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }
@@ -480,6 +480,8 @@ export const createFacetedMultiLineChart = (
 
   // Create a mark config for the faceted spec
   const facetMarkConfig = buildMarkConfig(styles, 'line');
+
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
 
   return {
     $schema: VEGASCHEMA,
@@ -573,32 +575,7 @@ export const createFacetedMultiLineChart = (
           { showTooltip, data: transformedData }
         ),
         // Add threshold layer to each facet if enabled
-        ...(styles?.thresholdLines && styles.thresholdLines.length > 0
-          ? styles.thresholdLines
-              .filter((threshold) => threshold.show)
-              .map((threshold) => ({
-                mark: {
-                  type: 'rule',
-                  color: threshold.color,
-                  strokeWidth: threshold.width,
-                  strokeDash: getStrokeDash(threshold.style),
-                  tooltip: styles?.tooltipOptions?.mode !== 'hidden',
-                },
-                encoding: {
-                  y: {
-                    datum: threshold.value,
-                    type: 'quantitative',
-                  },
-                  ...(styles?.tooltipOptions?.mode !== 'hidden' && {
-                    tooltip: {
-                      value: `${threshold.name ? threshold.name + ': ' : ''}Threshold: ${
-                        threshold.value
-                      }`,
-                    },
-                  }),
-                },
-              }))
-          : []),
+        ...(thresholdLayer?.layer ?? []),
         // Add time marker to each facet if enabled
         ...(styles?.addTimeMarker
           ? [
@@ -724,7 +701,7 @@ export const createCategoryLineChart = (
   );
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }

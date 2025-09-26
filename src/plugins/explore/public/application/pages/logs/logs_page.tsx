@@ -18,7 +18,6 @@ import { useUrlStateSync } from '../../utils/hooks/use_url_state_sync';
 import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subscription';
 import { useHeaderVariants } from '../../utils/hooks/use_header_variants';
 import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
-import { useDatasetContext } from '../../context';
 import { BottomContainer } from '../../../components/container/bottom_container';
 import { TopNav } from '../../../components/top_nav/top_nav';
 import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
@@ -36,7 +35,6 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
   setHeaderActionMenu,
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
-  const { dataset, isLoading } = useDatasetContext();
   const { savedExplore } = useInitPage();
   const { keyboardShortcut } = services;
   const dispatch = useDispatch();
@@ -94,7 +92,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
             <NewExperienceBanner />
 
             <div className="dscCanvas__queryPanel">
-              {dataset && !isLoading ? <QueryPanel /> : null}
+              <QueryPanel />
             </div>
 
             {/* Main content area with resizable panels under QueryPanel */}

@@ -6,7 +6,7 @@
 import { AreaChartStyleControls } from './area_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
-import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold_lines/utils';
+import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
 import { getTooltipFormat } from '../utils/utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
@@ -107,7 +107,7 @@ export const createSimpleAreaChart = (
   });
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -253,7 +253,7 @@ export const createMultiAreaChart = (
   });
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -306,6 +306,7 @@ export const createFacetedMultiAreaChart = (
   const category2Name = facetMapping?.name;
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   return {
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
@@ -406,29 +407,7 @@ export const createFacetedMultiAreaChart = (
           ),
         },
         // Add threshold layer to each facet if enabled
-        ...(styles.thresholdLines && styles.thresholdLines.length > 0
-          ? styles.thresholdLines
-              .filter((threshold) => threshold.show)
-              .map((threshold) => ({
-                mark: {
-                  type: 'rule',
-                  color: threshold.color || '#E7664C',
-                  strokeWidth: threshold.width || 1,
-                  strokeDash: getStrokeDash(threshold.style),
-                  tooltip: styles.tooltipOptions?.mode !== 'hidden',
-                },
-                encoding: {
-                  y: { value: threshold.value || 0 },
-                  ...(styles.tooltipOptions?.mode !== 'hidden' && {
-                    tooltip: {
-                      value: `${threshold.name ? threshold.name + ': ' : ''}Threshold: ${
-                        threshold.value
-                      }`,
-                    },
-                  }),
-                },
-              }))
-          : []),
+        ...(thresholdLayer?.layer ?? []),
         // Add time marker to each facet if enabled
         ...(styles?.addTimeMarker
           ? [
@@ -559,7 +538,7 @@ export const createCategoryAreaChart = (
   });
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -691,7 +670,7 @@ export const createStackedAreaChart = (
   });
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(thresholdLayer);
   }

@@ -5,14 +5,14 @@
 
 import { GaugeChartStyleControls, defaultGaugeChartStyles } from './gauge_vis_config';
 import { VisColumn, AxisRole, AxisColumnMappings, VEGASCHEMA } from '../types';
+import { generateArcExpression } from './gauge_chart_utils';
+import { calculateValue } from '../utils/calculation';
 import {
   locateThreshold,
   generateRanges,
-  generateArcExpression,
   mergeThresholdsWithBase,
-} from './gauge_chart_utils';
-import { calculateValue } from '../utils/calculation';
-import { getColors } from '../theme/default_colors';
+} from '../style_panel/threshold/threshold_utils';
+import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 
 export const createGauge = (
@@ -55,8 +55,9 @@ export const createGauge = (
   const mergedThresholds = mergeThresholdsWithBase(
     minBase,
     maxBase,
-    styleOptions.baseColor || colors.statusBlue,
-    styleOptions.thresholds
+    // TODO: update to use the color from color palette
+    styleOptions?.thresholdOptions?.baseColor || colors.statusBlue,
+    styleOptions?.thresholdOptions?.thresholds
   );
 
   // Locate which threshold the target value falls into
@@ -65,7 +66,7 @@ export const createGauge = (
   // if threshold is not found or minBase > targetValue or minBase >= maxBase, use default gray color
   const fillColor =
     !targetThreshold || minBase > targetValue || minBase >= maxBase || !isValidNumber
-      ? '#cbd1d6'
+      ? DEFAULT_GREY
       : targetThreshold.color;
 
   const ranges = generateRanges(mergedThresholds, maxBase);
@@ -155,7 +156,9 @@ export const createGauge = (
         x: { expr: 'centerX' },
         dy: { expr: `-fontFactor*30 * ${selectedUnit?.fontScale ?? 1}` },
         fontSize: { expr: `fontFactor * 25 * ${selectedUnit?.fontScale ?? 1}` },
-        fill: { expr: 'fillColor' },
+        fill: {
+          expr: `${styleOptions?.useThresholdColor ?? false} ? fillColor : fontColor`,
+        },
       },
       encoding: {
         text: {

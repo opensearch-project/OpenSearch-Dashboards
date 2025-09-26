@@ -6,6 +6,8 @@
 import { ScatterChartStyleControls } from './scatter_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
+import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
+import { buildThresholdColorEncoding } from '../bar/bar_chart_utils';
 
 const DEFAULT_POINTER_SIZE = 80;
 const DEFAULT_STROKE_OPACITY = 0.65;
@@ -42,6 +44,8 @@ export const createTwoMetricScatter = (
 ): any => {
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
+  const colorEncodingLayer = buildThresholdColorEncoding(yAxis, styles);
+
   const markLayer = {
     params: hoverParams,
     mark: {
@@ -65,6 +69,7 @@ export const createTwoMetricScatter = (
         axis: applyAxisStyling(yAxis, yAxisStyle),
       },
       ...hoverStateEncoding,
+      color: styles?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -82,10 +87,13 @@ export const createTwoMetricScatter = (
     },
   };
 
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
+
   const baseSpec = {
     $schema: VEGASCHEMA,
     data: { values: transformedData },
-    layer: [markLayer].filter(Boolean),
+    layer: [markLayer, thresholdLayer].filter(Boolean),
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${xAxis?.name} with ${yAxis?.name}`
       : undefined,
@@ -157,11 +165,14 @@ export const createTwoMetricOneCateScatter = (
     },
   };
 
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
+
   const baseSpec = {
     $schema: VEGASCHEMA,
     autosize: { type: 'fit', contains: 'padding' },
     data: { values: transformedData },
-    layer: [markLayer].filter(Boolean),
+    layer: [markLayer, thresholdLayer].filter(Boolean),
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${xAxis?.name} with ${yAxis?.name} by ${categoryNames}`
       : undefined,
@@ -247,11 +258,13 @@ export const createThreeMetricOneCateScatter = (
     },
   };
 
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
+
   const baseSpec = {
     $schema: VEGASCHEMA,
     autosize: { type: 'fit', contains: 'padding' },
     data: { values: transformedData },
-    layer: [markLayer].filter(Boolean),
+    layer: [markLayer, thresholdLayer].filter(Boolean),
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName ||
         `${xAxis?.name} with ${yAxis?.name} by ${categoryNames} (Size shows ${numericalSize?.name})`

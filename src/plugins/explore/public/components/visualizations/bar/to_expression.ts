@@ -13,7 +13,7 @@ import {
   AggregationType,
 } from '../types';
 import { BarChartStyleControls, defaultBarChartStyles } from './bar_vis_config';
-import { createThresholdLayer } from '../style_panel/threshold_lines/utils';
+import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
 
 import {
@@ -21,6 +21,7 @@ import {
   buildEncoding,
   buildTooltipEncoding,
   adjustBucketBins,
+  buildThresholdColorEncoding,
 } from './bar_chart_utils';
 import { DEFAULT_OPACITY } from '../constants';
 
@@ -68,6 +69,10 @@ export const createBarSpec = (
     barMark.strokeWidth = styles.barBorderWidth || 1;
   }
 
+  const numericalAxis = yAxis?.schema === VisFieldType.Numerical ? yAxis : xAxis;
+
+  const colorEncodingLayer = buildThresholdColorEncoding(numericalAxis, styleOptions);
+
   const mainLayer = {
     params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
     mark: barMark,
@@ -80,6 +85,7 @@ export const createBarSpec = (
       [valueAxis]: {
         ...buildEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType),
       },
+      color: styleOptions?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -96,17 +102,12 @@ export const createBarSpec = (
       },
     },
   };
-
   layers.push(mainLayer);
 
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles.thresholdLines,
-    styles.tooltipOptions?.mode,
-    barEncodingDefault
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -153,6 +154,10 @@ export const createTimeBarChart = (
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const timeAxis = xAxis?.schema === VisFieldType.Date ? xAxis : yAxis;
+  // Determine the numerical axis for the title
+  const numericalAxis = xAxis?.schema === VisFieldType.Date ? yAxis : xAxis;
+
+  const colorEncodingLayer = buildThresholdColorEncoding(numericalAxis, styleOptions);
 
   const interval =
     styles?.bucket?.bucketTimeUnit === TimeUnit.AUTO
@@ -184,6 +189,7 @@ export const createTimeBarChart = (
       y: {
         ...buildEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
       },
+      color: styleOptions?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -205,17 +211,10 @@ export const createTimeBarChart = (
 
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles.thresholdLines,
-    styles.tooltipOptions?.mode,
-    barEncodingDefault
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
-
-  // Determine the numerical axis for the title
-  const numericalAxis = getSchemaByAxis(xAxis) === 'temporal' ? yAxis : xAxis;
 
   return {
     $schema: VEGASCHEMA,
@@ -329,11 +328,7 @@ export const createGroupedTimeBarChart = (
 
   // Add threshold layer if enabled
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
-  const thresholdLayer = createThresholdLayer(
-    styles.thresholdLines,
-    styles.tooltipOptions?.mode,
-    barEncodingDefault
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
   if (thresholdLayer) {
     layer.push(...thresholdLayer.layer);
   }
@@ -410,11 +405,7 @@ export const createFacetedTimeBarChart = (
 
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
 
-  const thresholdLayer = createThresholdLayer(
-    styles.thresholdLines,
-    styles.tooltipOptions?.mode,
-    barEncodingDefault
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
 
   return {
     $schema: VEGASCHEMA,
@@ -573,11 +564,7 @@ export const createStackedBarSpec = (
 
   // Add threshold layer if enabled
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
-  const thresholdLayer = createThresholdLayer(
-    styles.thresholdLines,
-    styles.tooltipOptions?.mode,
-    barEncodingDefault
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
 
   if (thresholdLayer) {
     layer.push(...thresholdLayer.layer);
@@ -625,6 +612,8 @@ export const createNumericalHistogramBarChart = (
     barMark.strokeWidth = styles.barBorderWidth || 1;
   }
 
+  const colorEncodingLayer = buildThresholdColorEncoding(yAxis, styleOptions);
+
   const mainLayer = {
     mark: barMark,
     encoding: {
@@ -640,6 +629,7 @@ export const createNumericalHistogramBarChart = (
         type: getSchemaByAxis(yAxis),
         axis: applyAxisStyling(yAxis, yAxisStyle),
       },
+      color: styleOptions?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -663,11 +653,7 @@ export const createNumericalHistogramBarChart = (
 
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles.thresholdLines,
-    styles.tooltipOptions?.mode,
-    barEncodingDefault
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -704,6 +690,8 @@ export const createSingleBarChart = (
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
   };
 
+  const colorEncodingLayer = buildThresholdColorEncoding(undefined, styleOptions);
+
   configureBarSizeAndSpacing(barMark, styles);
 
   // Add border if enabled
@@ -726,6 +714,7 @@ export const createSingleBarChart = (
         type: 'quantitative',
         axis: applyAxisStyling(yAxis, yAxisStyle),
       },
+      color: styleOptions?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -746,11 +735,7 @@ export const createSingleBarChart = (
   layers.push(mainLayer);
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles.thresholdLines,
-    styles.tooltipOptions?.mode,
-    'y'
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, 'y');
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
