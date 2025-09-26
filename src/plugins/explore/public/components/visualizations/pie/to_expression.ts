@@ -6,6 +6,7 @@
 import { defaultPieChartStyles, PieChartStyleControls } from './pie_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { DEFAULT_OPACITY } from '../constants';
+import { findLegend } from '../utils/utils';
 
 export const createPieSpec = (
   transformedData: Array<Record<string, any>>,
@@ -22,6 +23,7 @@ export const createPieSpec = (
   const numericName = thetaColumn?.name;
   const categoryField = colorColumn?.column;
   const categoryName = colorColumn?.name;
+  const colorLegend = findLegend(styleOptions, 'color');
 
   const encodingBase = {
     theta: {
@@ -32,8 +34,12 @@ export const createPieSpec = (
     color: {
       field: categoryField,
       type: 'nominal',
-      legend: styleOptions.addLegend
-        ? { title: numericName, orient: styleOptions.legendPosition, symbolLimit: 10 }
+      legend: colorLegend?.show
+        ? {
+            title: colorLegend.title || numericName,
+            orient: colorLegend.position,
+            symbolLimit: 10,
+          }
         : null,
     },
   };

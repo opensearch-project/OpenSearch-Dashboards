@@ -5,7 +5,7 @@
 
 import { ScatterChartStyleControls } from './scatter_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
-import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
+import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis, findLegend } from '../utils/utils';
 
 export const createTwoMetricScatter = (
   transformedData: Array<Record<string, any>>,
@@ -76,6 +76,8 @@ export const createTwoMetricOneCateScatter = (
   const categoryFields = axisColumnMappings?.color?.column!;
   const categoryNames = axisColumnMappings?.color?.name!;
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const colorLegend = findLegend(styles, 'color');
   const markLayer = {
     mark: {
       type: 'point',
@@ -98,10 +100,10 @@ export const createTwoMetricOneCateScatter = (
       color: {
         field: categoryFields,
         type: getSchemaByAxis(colorColumn),
-        legend: styles?.addLegend
+        legend: colorLegend?.show
           ? {
-              title: categoryNames || 'Metrics',
-              orient: styles?.legendPosition,
+              title: colorLegend.title || categoryNames,
+              orient: colorLegend.position,
               symbolLimit: 10,
             }
           : null,
@@ -149,6 +151,8 @@ export const createThreeMetricOneCateScatter = (
   const categoryNames = axisColumnMappings?.color?.name!;
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
+  const colorLegend = findLegend(styles, 'color');
+  const sizeLegend = findLegend(styles, 'size');
   const numericalSize = axisColumnMappings?.size;
   const markLayer = {
     mark: {
@@ -172,25 +176,26 @@ export const createThreeMetricOneCateScatter = (
       color: {
         field: categoryFields,
         type: getSchemaByAxis(colorColumn),
-        legend: styles?.addLegend
+        legend: colorLegend?.show
           ? {
-              title: categoryNames || 'Metrics',
-              orient: styles?.legendPosition,
+              title: colorLegend.title || categoryNames,
+              orient: colorLegend.position,
               symbolLimit: 10,
             }
           : null,
       },
-      size: {
-        field: numericalSize?.column,
-        type: getSchemaByAxis(numericalSize),
-        legend: styles?.addLegend
-          ? {
-              title: numericalSize?.name || 'Metrics',
-              orient: styles?.legendPosition,
+      ...(numericalSize &&
+        sizeLegend?.show && {
+          size: {
+            field: numericalSize.column,
+            type: getSchemaByAxis(numericalSize),
+            legend: {
+              title: sizeLegend.title || numericalSize.name,
+              orient: sizeLegend.position,
               symbolLimit: 10,
-            }
-          : null,
-      },
+            },
+          },
+        }),
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {

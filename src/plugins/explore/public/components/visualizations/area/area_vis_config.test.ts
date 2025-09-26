@@ -15,8 +15,14 @@ describe('area_vis_config', () => {
   describe('defaultAreaChartStyles', () => {
     test('should have the expected default values', () => {
       expect(defaultAreaChartStyles).toMatchObject({
-        addLegend: true,
-        legendPosition: Positions.RIGHT,
+        legends: [
+          {
+            show: true,
+            position: Positions.RIGHT,
+            role: 'color',
+            title: '',
+          },
+        ],
         addTimeMarker: false,
         tooltipOptions: {
           mode: 'all',

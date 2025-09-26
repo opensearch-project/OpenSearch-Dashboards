@@ -40,19 +40,19 @@ jest.mock('../style_panel/legend/legend', () => ({
     <div data-test-subj="mockLegendOptionsPanel">
       <button
         data-test-subj="mockLegendShow"
-        onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
+        onClick={() => onLegendOptionsChange(0, { show: !legendOptions[0].show })}
       >
         Toggle Legend
       </button>
       <button
         data-test-subj="mockLegendPosition"
-        onClick={() => onLegendOptionsChange({ position: 'bottom' })}
+        onClick={() => onLegendOptionsChange(0, { position: 'bottom' })}
       >
         Change Position
       </button>
       <button
         data-test-subj="mockLegendBoth"
-        onClick={() => onLegendOptionsChange({ show: !legendOptions.show, position: 'top' })}
+        onClick={() => onLegendOptionsChange(0, { show: !legendOptions[0].show, position: 'top' })}
       >
         Change Both
       </button>
@@ -270,8 +270,14 @@ describe('LineVisStyleControls', () => {
 
   const mockProps: LineVisStyleControlsProps = {
     styleOptions: {
-      addLegend: true,
-      legendPosition: Positions.RIGHT,
+      legends: [
+        {
+          show: true,
+          position: Positions.RIGHT,
+          role: 'color',
+          title: '',
+        },
+      ],
       addTimeMarker: false,
       lineStyle: 'both' as LineStyle,
       lineMode: 'smooth',
@@ -377,14 +383,36 @@ describe('LineVisStyleControls', () => {
     render(<LineVisStyleControls {...propsWithColorMapping} />);
 
     await userEvent.click(screen.getByTestId('mockLegendShow'));
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      legends: [
+        {
+          ...propsWithColorMapping.styleOptions.legends[0],
+          show: !propsWithColorMapping.styleOptions.legends[0].show,
+        },
+      ],
+    });
 
     await userEvent.click(screen.getByTestId('mockLegendPosition'));
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: 'bottom' });
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      legends: [
+        {
+          ...propsWithColorMapping.styleOptions.legends[0],
+          position: 'bottom',
+        },
+      ],
+    });
 
+    jest.clearAllMocks();
     await userEvent.click(screen.getByTestId('mockLegendBoth'));
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: 'top' });
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      legends: [
+        {
+          ...propsWithColorMapping.styleOptions.legends[0],
+          show: !propsWithColorMapping.styleOptions.legends[0].show,
+          position: 'top',
+        },
+      ],
+    });
   });
 
   test('calls onStyleChange with correct parameters for threshold options', async () => {

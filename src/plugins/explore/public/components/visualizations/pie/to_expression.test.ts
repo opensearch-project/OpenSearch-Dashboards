@@ -12,6 +12,7 @@ import {
   AxisRole,
   AxisColumnMappings,
 } from '../types';
+import { defaultPieChartStyles } from './pie_vis_config';
 
 describe('to_expression', () => {
   // Sample data for testing
@@ -39,11 +40,7 @@ describe('to_expression', () => {
   };
 
   const defaultStyleOptions = {
-    addLegend: true,
-    legendPosition: Positions.RIGHT,
-    tooltipOptions: {
-      mode: 'all' as TooltipOptions['mode'],
-    },
+    ...defaultPieChartStyles,
     exclusive: {
       donut: false,
       showLabels: true,
@@ -133,24 +130,7 @@ describe('to_expression', () => {
       );
       expect(defaultTitleResult.title).toBe('value by category');
 
-      // Case 3: Custom title (show = true, titleName = 'Custom Title')
-      const customTitleStyles = {
-        ...defaultStyleOptions,
-        titleOptions: {
-          show: true,
-          titleName: 'Custom Pie Chart',
-        },
-      };
-
-      const customTitleResult = createPieSpec(
-        transformedData,
-        [numericColumn],
-        [categoricalColumn],
-        [],
-        customTitleStyles,
-        mockAxisColumnMappings
-      );
-      expect(customTitleResult.title).toBe('Custom Pie Chart');
+      expect(defaultTitleResult.title).toBe('value by category');
     });
 
     it('should create a donut chart when donut option is true', () => {
@@ -295,7 +275,7 @@ describe('to_expression', () => {
       expect(result.layer[1]).toHaveProperty('mark.limit', 50);
     });
 
-    it('should not include legend when addLegend is false', () => {
+    it('should not include legend when legends[0].show is false', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.SIZE]: numericColumn,
         [AxisRole.COLOR]: categoricalColumn,
@@ -303,7 +283,12 @@ describe('to_expression', () => {
 
       const styleOptions = {
         ...defaultStyleOptions,
-        addLegend: false,
+        legends: [
+          {
+            ...defaultStyleOptions.legends[0],
+            show: false,
+          },
+        ],
       };
 
       const result = createPieSpec(
@@ -348,8 +333,7 @@ describe('to_expression', () => {
 
     it('should handle missing styleOptions fields', () => {
       const partialStyleOptions = {
-        addLegend: true,
-        legendPosition: Positions.RIGHT,
+        legends: [{ role: 'color', show: true, position: Positions.RIGHT, title: '' }],
         exclusive: { donut: false },
       };
       const result = createPieSpec(

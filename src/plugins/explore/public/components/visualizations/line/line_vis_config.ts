@@ -19,13 +19,13 @@ import {
 import { LineStyle } from './line_exclusive_vis_options';
 import { TooltipOptions } from '../types';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
+import { LegendOptions } from '../style_panel/legend/legend';
 
 export type LineMode = 'straight' | 'smooth' | 'stepped';
 
 // Complete line chart style controls interface
 export interface LineChartStyleControls {
-  addLegend: boolean;
-  legendPosition: Positions;
+  legends: LegendOptions[];
   addTimeMarker: boolean;
 
   lineStyle: LineStyle;
@@ -44,8 +44,7 @@ export interface LineChartStyleControls {
 }
 
 export const defaultLineChartStyles: LineChartStyleControls = {
-  addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legends: [{ role: 'color', show: true, position: Positions.RIGHT, title: '' }],
   addTimeMarker: false,
 
   lineStyle: 'both',
