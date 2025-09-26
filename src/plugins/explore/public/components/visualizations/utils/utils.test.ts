@@ -12,6 +12,7 @@ import {
   getSchemaByAxis,
   inferTimeUnitFromTimestamps,
   getTooltipFormat,
+  buildTimeRangeLayer,
 } from './utils';
 import { AxisRole, Positions, ColorSchemas, VisFieldType, StandardAxes } from '../types';
 
@@ -362,5 +363,104 @@ describe('getTooltipFormat', () => {
     const customFallback = '%Y-%m-%d';
     const data = [{ timestamp: '2023-01-01T00:00:00' }];
     expect(getTooltipFormat(data, field, customFallback)).toBe(customFallback);
+  });
+});
+
+describe('buildTimeRangeLayer', () => {
+  const baseAxis = {
+    id: 1,
+    name: 'Test Axis',
+    column: 'test',
+    validValuesCount: 10,
+    uniqueValuesCount: 10,
+  };
+
+  const timeRange = { from: '2023-01-01', to: '2023-12-31' };
+
+  it('returns null when axisColumnMappings is undefined', () => {
+    expect(buildTimeRangeLayer(undefined, timeRange)).toBeNull();
+  });
+
+  it('returns null when timeRange is undefined', () => {
+    const axisColumnMappings = {
+      x: { ...baseAxis, schema: VisFieldType.Date },
+    };
+    expect(buildTimeRangeLayer(axisColumnMappings, undefined)).toBeNull();
+  });
+
+  it('returns null when no temporal axis is found', () => {
+    const axisColumnMappings = {
+      x: { ...baseAxis, schema: VisFieldType.Numerical },
+      y: { ...baseAxis, schema: VisFieldType.Categorical },
+    };
+    expect(buildTimeRangeLayer(axisColumnMappings, timeRange)).toBeNull();
+  });
+
+  it('builds layer with x encoding when temporal axis is on X and switchAxes is false', () => {
+    const axisColumnMappings = {
+      x: { ...baseAxis, schema: VisFieldType.Date, column: 'date_x' },
+      y: { ...baseAxis, schema: VisFieldType.Numerical },
+    };
+    const layer = buildTimeRangeLayer(axisColumnMappings, timeRange, false);
+    expect(layer).toEqual({
+      data: {
+        values: [{ date_x: '2023-01-01' }, { date_x: '2023-12-31' }],
+      },
+      mark: { type: 'point', opacity: 0 },
+      encoding: {
+        x: { field: 'date_x', type: 'temporal' },
+      },
+    });
+  });
+
+  it('builds layer with y encoding when temporal axis is on X and switchAxes is true', () => {
+    const axisColumnMappings = {
+      x: { ...baseAxis, schema: VisFieldType.Date, column: 'date_x' },
+      y: { ...baseAxis, schema: VisFieldType.Numerical },
+    };
+    const layer = buildTimeRangeLayer(axisColumnMappings, timeRange, true);
+    expect(layer).toEqual({
+      data: {
+        values: [{ date_x: '2023-01-01' }, { date_x: '2023-12-31' }],
+      },
+      mark: { type: 'point', opacity: 0 },
+      encoding: {
+        y: { field: 'date_x', type: 'temporal' },
+      },
+    });
+  });
+
+  it('builds layer with y encoding when temporal axis is on Y and switchAxes is false', () => {
+    const axisColumnMappings = {
+      x: { ...baseAxis, schema: VisFieldType.Numerical },
+      y: { ...baseAxis, schema: VisFieldType.Date, column: 'date_y' },
+    };
+    const layer = buildTimeRangeLayer(axisColumnMappings, timeRange, false);
+    expect(layer).toEqual({
+      data: {
+        values: [{ date_y: '2023-01-01' }, { date_y: '2023-12-31' }],
+      },
+      mark: { type: 'point', opacity: 0 },
+      encoding: {
+        y: { field: 'date_y', type: 'temporal' },
+      },
+    });
+  });
+
+  it('builds layer with x encoding when temporal axis is on Y and switchAxes is true', () => {
+    const axisColumnMappings = {
+      x: { ...baseAxis, schema: VisFieldType.Numerical },
+      y: { ...baseAxis, schema: VisFieldType.Date, column: 'date_y' },
+    };
+    const layer = buildTimeRangeLayer(axisColumnMappings, timeRange, true);
+    expect(layer).toEqual({
+      data: {
+        values: [{ date_y: '2023-01-01' }, { date_y: '2023-12-31' }],
+      },
+      mark: { type: 'point', opacity: 0 },
+      encoding: {
+        x: { field: 'date_y', type: 'temporal' },
+      },
+    });
   });
 });

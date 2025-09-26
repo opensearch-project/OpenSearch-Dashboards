@@ -60,7 +60,12 @@ export const applyAxisStyling = (
   }
 
   if (axis?.schema === VisFieldType.Date) {
-    fullAxisConfig.format = { seconds: '%I:%M:%S', milliseconds: '%I:%M:%S.%L' };
+    fullAxisConfig.format = {
+      hours: '%H:%M',
+      minutes: '%H:%M',
+      seconds: '%H:%M:%S',
+      milliseconds: '%H:%M:%S.%L',
+    };
   }
 
   return fullAxisConfig;
@@ -295,4 +300,33 @@ export function getThresholdByValue<T>(
   }
 
   return undefined;
+}
+
+export function buildTimeRangeLayer(
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string },
+  switchAxes: boolean = false
+) {
+  if (!axisColumnMappings || !timeRange) return null;
+
+  const timeAxisEntry = Object.entries(axisColumnMappings).find(
+    ([, col]) => getSchemaByAxis(col) === 'temporal'
+  );
+
+  if (!timeAxisEntry) return null;
+
+  const [axisRole, timeAxis] = timeAxisEntry;
+  const dateField = timeAxis?.column;
+
+  const targetRole = axisRole === AxisRole.X ? (switchAxes ? 'y' : 'x') : switchAxes ? 'x' : 'y';
+
+  return {
+    data: {
+      values: [{ [dateField]: timeRange.from }, { [dateField]: timeRange.to }],
+    },
+    mark: { type: 'point', opacity: 0 },
+    encoding: {
+      [targetRole]: { field: dateField, type: 'temporal' },
+    },
+  };
 }

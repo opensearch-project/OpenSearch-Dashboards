@@ -48,6 +48,8 @@ export interface BarChartStyleControls {
 
   // histogram bucket config
   bucket?: BucketOptions;
+
+  showFullTimeRange: boolean;
 }
 
 export const defaultBarChartStyles: BarChartStyleControls = {
@@ -128,6 +130,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
     aggregationType: AggregationType.SUM,
     bucketTimeUnit: TimeUnit.AUTO,
   },
+  showFullTimeRange: false,
 };
 
 export const createBarConfig = (): VisualizationType<'bar'> => ({

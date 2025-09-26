@@ -26,6 +26,24 @@ jest.mock('./utils/to_expression', () => ({
   toExpression: jest.fn(() => 'mocked-expression'),
 }));
 
+// Mock getServices
+jest.mock('../../services/services', () => ({
+  getServices: jest.fn(() => ({
+    data: {
+      query: {
+        timefilter: {
+          timefilter: {
+            getTime: jest.fn(() => ({
+              from: 'now-15m',
+              to: 'now',
+            })),
+          },
+        },
+      },
+    },
+  })),
+}));
+
 describe('VisualizationRender', () => {
   // Sample data for testing
   const mockVisData: VisData = {

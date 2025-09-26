@@ -72,6 +72,10 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
               categoricalColumns={categoricalColumns}
               dateColumns={dateColumns}
               axisColumnMappings={axisColumnMappings}
+              showFullTimeRange={styleOptions.showFullTimeRange}
+              onShowFullTimeRangeChange={(showFullTimeRange) =>
+                updateStyleOption('showFullTimeRange', showFullTimeRange)
+              }
             />
           </EuiFlexItem>
 

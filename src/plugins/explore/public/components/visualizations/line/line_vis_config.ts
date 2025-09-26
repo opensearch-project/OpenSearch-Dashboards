@@ -41,6 +41,8 @@ export interface LineChartStyleControls {
   valueAxes: ValueAxis[];
 
   titleOptions: TitleOptions;
+
+  showFullTimeRange: boolean;
 }
 
 export const defaultLineChartStyles: LineChartStyleControls = {
@@ -116,6 +118,8 @@ export const defaultLineChartStyles: LineChartStyleControls = {
     show: false,
     titleName: '',
   },
+
+  showFullTimeRange: false,
 };
 
 export const createLineConfig = (): VisualizationType<'line'> => ({
