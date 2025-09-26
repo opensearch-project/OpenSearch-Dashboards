@@ -48,9 +48,6 @@ jest.mock('./language_toggle', () => ({
   LanguageToggle: () => <div data-test-subj="language-toggle">Language Toggle</div>,
 }));
 
-jest.mock('./query_panel_error', () => ({
-  QueryPanelError: () => <div data-test-subj="query-panel-error">Query Panel Error</div>,
-}));
 
 jest.mock('./query_panel_actions', () => ({
   QueryPanelActions: ({ registry }: { registry: QueryPanelActionsRegistryService }) => (
@@ -127,7 +124,6 @@ describe('QueryPanelWidgets', () => {
       expect(screen.getByTestId('dataset-select-widget')).toBeInTheDocument();
       expect(screen.getByTestId('recent-queries-button')).toBeInTheDocument();
       expect(screen.getByTestId('save-query-button')).toBeInTheDocument();
-      expect(screen.getByTestId('query-panel-error')).toBeInTheDocument();
 
       // Check right section components
       expect(screen.getByTestId('language-reference')).toBeInTheDocument();
@@ -190,7 +186,6 @@ describe('QueryPanelWidgets', () => {
         'recent-queries-button',
         'save-query-button',
         'query-panel-actions',
-        'query-panel-error',
       ]);
     });
 
