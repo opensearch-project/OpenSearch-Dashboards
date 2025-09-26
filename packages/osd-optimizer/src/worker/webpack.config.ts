@@ -251,6 +251,19 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           },
         },
         {
+          test: /\.js$/,
+          /* @ag-ui need transpilation for modern JS features */
+          include: /node_modules[\\/]@ag-ui/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              envName: worker.dist ? 'production' : 'development',
+              presets: [BABEL_PRESET_PATH],
+            },
+          },
+        },
+        {
           test: /\.(html|md|txt|tmpl)$/,
           use: {
             loader: 'raw-loader',
