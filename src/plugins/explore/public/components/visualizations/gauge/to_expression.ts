@@ -50,7 +50,7 @@ export const createGauge = (
   const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
 
   const minBase = styleOptions?.min || 0;
-  const maxBase = styleOptions?.max || maxNumber;
+  const maxBase = styleOptions?.max || Math.max(maxNumber, calculatedValue ?? 0);
 
   const mergedThresholds = mergeThresholdsWithBase(
     minBase,

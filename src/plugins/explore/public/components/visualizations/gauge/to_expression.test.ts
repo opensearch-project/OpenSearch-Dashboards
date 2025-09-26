@@ -6,6 +6,7 @@
 import { createGauge } from './to_expression';
 import { VisColumn, VisFieldType, AxisRole } from '../types';
 import { defaultGaugeChartStyles } from './gauge_vis_config';
+import { CalculationMethod } from '../utils/calculation';
 
 jest.mock('./gauge_chart_utils', () => ({
   mergeThresholdsWithBase: jest.fn(() => [{ value: 0, color: '#00BD6B' }]),
@@ -15,7 +16,10 @@ jest.mock('./gauge_chart_utils', () => ({
 }));
 
 jest.mock('../utils/calculation', () => ({
-  calculateValue: jest.fn(() => 50),
+  calculateValue: jest.fn((values: any[], method: string) => {
+    if (method === 'total') return 60;
+    else return 50;
+  }),
 }));
 
 describe('createGauge', () => {
@@ -68,6 +72,25 @@ describe('createGauge', () => {
 
     expect(spec.params.find((p) => p.name === 'minValue')?.value).toBe(10);
     expect(spec.params.find((p) => p.name === 'maxValue')?.value).toBe(200);
+  });
+
+  it('uses Math.max of maxNumber and calculatedValue when max is undefined', () => {
+    const customStyles = {
+      ...defaultGaugeChartStyles,
+      valueCalculation: 'total' as CalculationMethod,
+    };
+
+    const spec = createGauge(
+      mockData,
+      [mockNumericalColumn],
+      [],
+      [],
+      customStyles,
+      mockAxisColumnMappings
+    );
+
+    expect(spec.params.find((p) => p.name === 'minValue')?.value).toBe(0);
+    expect(spec.params.find((p) => p.name === 'maxValue')?.value).toBe(60);
   });
 
   it('includes title when showTitle is true', () => {
