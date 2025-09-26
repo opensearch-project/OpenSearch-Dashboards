@@ -7,6 +7,7 @@ import React, { useMemo } from 'react';
 import { Observable } from 'rxjs';
 import { useObservable } from 'react-use';
 import { VisData } from './visualization_builder.types';
+import dateMath from '@elastic/datemath';
 import { TableVis } from './table/table_vis';
 import { defaultTableChartStyles, TableChartStyle } from './table/table_vis_config';
 import { convertStringsToMappings } from './visualization_builder_utils';
@@ -39,6 +40,8 @@ export const VisualizationRender = (props: Props) => {
   const visualizationData = useObservable(props.data$);
   const visConfig = useObservable(props.config$);
   const showRawTable = useObservable(props.showRawTable$);
+  const { from, to } = props.searchContext?.timeRange || {};
+
   const rows = useMemo(() => {
     return visualizationData?.transformedData ?? [];
   }, [visualizationData?.transformedData]);
@@ -54,6 +57,13 @@ export const VisualizationRender = (props: Props) => {
     visualizationData?.categoricalColumns,
     visualizationData?.dateColumns,
   ]);
+
+  const timeRange = useMemo(() => {
+    return {
+      from: from ? dateMath.parse(from)?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '' : '',
+      to: to ? dateMath.parse(to, { roundUp: true })?.format('YYYY-MM-DDTHH:mm:ss.SSSZ') ?? '' : '',
+    };
+  }, [from, to]);
 
   const spec = useMemo(() => {
     if (!visualizationData) {
@@ -76,9 +86,10 @@ export const VisualizationRender = (props: Props) => {
       visualizationData.dateColumns,
       visConfig.styles,
       visConfig.type,
-      axisColumnMappings
+      axisColumnMappings,
+      timeRange
     );
-  }, [columns, visConfig, visualizationData]);
+  }, [columns, visConfig, visualizationData, timeRange]);
 
   if (!visualizationData) {
     return null;

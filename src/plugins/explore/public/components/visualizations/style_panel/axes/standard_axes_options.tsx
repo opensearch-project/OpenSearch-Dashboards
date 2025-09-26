@@ -18,6 +18,7 @@ import { StandardAxes, Positions, AxisRole, VisColumn } from '../../types';
 import { DebouncedFieldText, DebouncedFieldNumber } from '.././utils';
 import { StyleAccordion } from '../../style_panel/style_accordion';
 import { AXIS_LABEL_MAX_LENGTH } from '../../constants';
+import { getSchemaByAxis } from '../../utils/utils';
 
 interface AllAxesOptionsProps {
   standardAxes: StandardAxes[];
@@ -25,6 +26,8 @@ interface AllAxesOptionsProps {
   axisColumnMappings: Partial<Record<AxisRole, VisColumn>>;
   disableGrid?: boolean;
   switchAxes?: boolean;
+  showFullTimeRange: boolean;
+  onShowFullTimeRangeChange: (showFullTimeRange: boolean) => void;
 }
 
 export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
@@ -33,6 +36,8 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
   axisColumnMappings,
   disableGrid = false,
   switchAxes = false,
+  showFullTimeRange,
+  onShowFullTimeRangeChange,
 }) => {
   const updateAxis = (index: number, updates: Partial<StandardAxes>) => {
     const updatedAxes = [...standardAxes];
@@ -165,6 +170,20 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                       isFullWidth
                     />
                   </EuiFormRow>
+
+                  {getSchemaByAxis(axisColumnMappings?.[axis.axisRole]) === 'temporal' && (
+                    <EuiFormRow>
+                      <EuiSwitch
+                        compressed
+                        label={i18n.translate('explore.vis.standardAxes.showFullTimeRange', {
+                          defaultMessage: 'Show full time range',
+                        })}
+                        checked={showFullTimeRange}
+                        onChange={(e) => onShowFullTimeRangeChange(e.target.checked)}
+                        data-testid="showFullTimeRangeSwitch"
+                      />
+                    </EuiFormRow>
+                  )}
 
                   {!disableGrid && (
                     <EuiFormRow>
