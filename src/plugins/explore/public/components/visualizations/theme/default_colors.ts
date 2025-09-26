@@ -117,16 +117,16 @@ function generateColorGroup(start: string, end: string, groupName: string, nums:
 export const getColorGroups = () => {
   if (darkMode) {
     return {
-      red: generateColorGroup('#ffb3b8', '#c4152a', 'red'),
-      orange: generateColorGroup('#ffcb7e', '#fa6501', 'orange'),
-      yellow: generateColorGroup('#fff2b3', '#e0b400', 'yellow'),
-      green: generateColorGroup('#c9f2c2', '#37872d', 'green'),
-      blue: generateColorGroup('#c0d8ff', '#2061c4', 'blue'),
+      red: generateColorGroup('#ffb3b8', '#DB0000', 'red'),
+      orange: generateColorGroup('#ffcb7e', '#FF6A3D', 'orange'),
+      yellow: generateColorGroup('#fff2b3', '#F90', 'yellow'),
+      green: generateColorGroup('#c9f2c2', '#00BD6B', 'green'),
+      blue: generateColorGroup('#c0d8ff', '#7598FF', 'blue'),
       purple: generateColorGroup('#deb7f2', '#A669E2', 'purple'),
     };
   }
   return {
-    red: generateColorGroup('#c4152a', '#ffb3b8', 'red'),
+    red: generateColorGroup('#DB0000', '#ffb3b8', 'red'),
     orange: generateColorGroup('#FF4B14', '#ffcb7e', 'orange'),
     yellow: generateColorGroup('#F90', '#fff2b3', 'yellow'),
     green: generateColorGroup('#005237', '#c9f2c2', 'green'),
@@ -134,8 +134,6 @@ export const getColorGroups = () => {
     purple: generateColorGroup('#A669E2', '#deb7f2', 'purple'),
   };
 };
-
-export const greyDefault = '#cdccdc';
 
 export const getCategoryNextColor = (index: number) => {
   return getColors().categories[index % getColors().categories.length];
