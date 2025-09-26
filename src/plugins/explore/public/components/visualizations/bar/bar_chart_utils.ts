@@ -13,7 +13,7 @@ import {
 } from '../types';
 import { applyAxisStyling, getSchemaByAxis } from '../utils/utils';
 import { BarChartStyleControls } from './bar_vis_config';
-import { getColors, DEFAULTGREY } from '../theme/default_colors';
+import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
@@ -156,7 +156,7 @@ export const buildThresholdColorEncoding = (
         type: 'threshold',
         domain: colorDomain,
         // require one more color for values below the first threshold(base)
-        range: [DEFAULTGREY, ...colorRange],
+        range: [DEFAULT_GREY, ...colorRange],
       },
       legend: styleOptions.addLegend
         ? {
@@ -173,7 +173,7 @@ export const buildThresholdColorEncoding = (
     scale: {
       type: 'threshold',
       domain: colorDomain,
-      range: [DEFAULTGREY, ...colorRange],
+      range: [DEFAULT_GREY, ...colorRange],
     },
     legend: styleOptions.addLegend
       ? {

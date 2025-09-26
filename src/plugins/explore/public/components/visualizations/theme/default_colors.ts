@@ -52,4 +52,4 @@ export const getColors = () => {
   };
 };
 
-export const DEFAULTGREY = '#d3d3d3';
+export const DEFAULT_GREY = '#d3d3d3';
