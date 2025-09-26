@@ -7,6 +7,31 @@ import { ScatterChartStyleControls } from './scatter_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
 
+const DEFAULT_POINTER_SIZE = 80;
+const DEFAULT_STROKE_OPACITY = 0.65;
+
+const hoverParams = [
+  {
+    name: 'hover',
+    select: { type: 'point', on: 'mouseover' },
+  },
+];
+
+const hoverStateEncoding = {
+  opacity: {
+    value: DEFAULT_STROKE_OPACITY,
+    condition: { param: 'hover', value: 1, empty: false },
+  },
+  stroke: {
+    value: null,
+    condition: { param: 'hover', value: 'white', empty: false },
+  },
+  strokeWidth: {
+    value: 0,
+    condition: { param: 'hover', value: 2, empty: false },
+  },
+};
+
 export const createTwoMetricScatter = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
@@ -18,12 +43,15 @@ export const createTwoMetricScatter = (
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const markLayer = {
+    params: hoverParams,
     mark: {
       type: 'point',
       tooltip: styles?.tooltipOptions?.mode !== 'hidden',
       shape: styles?.exclusive?.pointShape,
       angle: styles?.exclusive?.angle,
       filled: styles?.exclusive?.filled,
+      size: DEFAULT_POINTER_SIZE,
+      strokeOpacity: DEFAULT_STROKE_OPACITY,
     },
     encoding: {
       x: {
@@ -36,6 +64,7 @@ export const createTwoMetricScatter = (
         type: getSchemaByAxis(yAxis),
         axis: applyAxisStyling(yAxis, yAxisStyle),
       },
+      ...hoverStateEncoding,
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -77,12 +106,15 @@ export const createTwoMetricOneCateScatter = (
   const categoryNames = axisColumnMappings?.color?.name!;
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
   const markLayer = {
+    params: hoverParams,
     mark: {
       type: 'point',
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
       shape: styles.exclusive?.pointShape,
       angle: styles.exclusive?.angle,
       filled: styles.exclusive?.filled,
+      size: DEFAULT_POINTER_SIZE,
+      strokeOpacity: DEFAULT_STROKE_OPACITY,
     },
     encoding: {
       x: {
@@ -106,6 +138,7 @@ export const createTwoMetricOneCateScatter = (
             }
           : null,
       },
+      ...hoverStateEncoding,
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -151,12 +184,15 @@ export const createThreeMetricOneCateScatter = (
 
   const numericalSize = axisColumnMappings?.size;
   const markLayer = {
+    params: hoverParams,
     mark: {
       type: 'point',
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
       shape: styles.exclusive?.pointShape,
       angle: styles.exclusive?.angle,
       filled: styles.exclusive?.filled,
+      size: DEFAULT_POINTER_SIZE,
+      strokeOpacity: DEFAULT_STROKE_OPACITY,
     },
     encoding: {
       x: {
@@ -191,6 +227,7 @@ export const createThreeMetricOneCateScatter = (
             }
           : null,
       },
+      ...hoverStateEncoding,
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
