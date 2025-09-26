@@ -21,6 +21,7 @@ import {
 } from '../types';
 import * as lineChartUtils from './line_chart_utils';
 import * as thresholdUtils from '../style_panel/threshold/threshold_utils';
+import { defaultLineChartStyles } from './line_vis_config';
 
 // Mock the line chart utils
 jest.mock('./line_chart_utils', () => ({
@@ -92,6 +93,7 @@ describe('to_expression', () => {
   };
 
   const styleOptions = {
+    ...defaultLineChartStyles,
     addLegend: true,
     legendPosition: Positions.RIGHT,
     thresholdLines: [],

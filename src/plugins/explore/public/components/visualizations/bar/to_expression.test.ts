@@ -12,7 +12,7 @@ import {
   createNumericalHistogramBarChart,
   createSingleBarChart,
 } from './to_expression';
-import { defaultBarChartStyles, BarChartStyleControls } from './bar_vis_config';
+import { defaultBarChartStyles, BarChartStyle } from './bar_vis_config';
 import {
   VisColumn,
   VisFieldType,
@@ -159,7 +159,7 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'manual',
         barWidth: 0.5,
@@ -192,7 +192,7 @@ describe('bar to_expression', () => {
     });
 
     test('does not apply size and spacing when barSizeMode is auto', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'auto',
         barWidth: 0.5,
@@ -515,7 +515,7 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'manual',
         barWidth: 0.5,
@@ -717,7 +717,7 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'manual',
         barWidth: 0.5,
@@ -924,7 +924,7 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'manual',
         barWidth: 0.5,

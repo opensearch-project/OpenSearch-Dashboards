@@ -6,11 +6,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiDataGrid, EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
 import { VisColumn, VisFieldType } from '../types';
-import {
-  defaultTableChartStyles,
-  CellTypeConfig,
-  TableChartStyleControls,
-} from './table_vis_config';
+import { defaultTableChartStyles, CellTypeConfig, TableChartStyle } from './table_vis_config';
 import { FilterConfig, TableColumnHeader } from './table_vis_filter';
 import { calculateValue } from '../utils/calculation';
 import { CellValue } from './cell_value';
@@ -22,7 +18,7 @@ import './table_vis.scss';
 interface TableVisProps {
   rows: Array<Record<string, any>>;
   columns: VisColumn[];
-  styleOptions?: TableChartStyleControls;
+  styleOptions?: TableChartStyle;
   pageSizeOptions?: number[];
   showStyleSelector?: boolean;
 }

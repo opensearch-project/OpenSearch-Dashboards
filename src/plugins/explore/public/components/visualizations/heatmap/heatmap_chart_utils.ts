@@ -5,13 +5,13 @@
 
 import type { Encoding } from 'vega-lite/build/src/encoding';
 import { AggregationType, VisColumn } from '../types';
-import { HeatmapChartStyleControls } from './heatmap_vis_config';
+import { HeatmapChartStyle } from './heatmap_vis_config';
 
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 
 // isRegular=== true refers to 2 dimension and 1 metric heatmap.
 export const createLabelLayer = (
-  styles: Partial<HeatmapChartStyleControls>,
+  styles: HeatmapChartStyle,
   isRegular: boolean,
   colorField: string,
   xAxis?: VisColumn,
@@ -67,7 +67,7 @@ export const getDataBound = (
   return values.length > 0 ? [Math.min(...values), Math.max(...values)] : [];
 };
 
-export const addTransform = (styles: Partial<HeatmapChartStyleControls>, numericFields: string) => {
+export const addTransform = (styles: HeatmapChartStyle, numericFields: string) => {
   if (styles?.exclusive?.percentageMode) {
     return [
       {
@@ -84,7 +84,7 @@ export const addTransform = (styles: Partial<HeatmapChartStyleControls>, numeric
 
 export const enhanceStyle = (
   markLayer: any,
-  styles: Partial<HeatmapChartStyleControls>,
+  styles: HeatmapChartStyle,
   transformedData: Array<Record<string, any>>,
   colorField: string
 ) => {

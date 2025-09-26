@@ -6,15 +6,15 @@
 import { i18n } from '@osd/i18n';
 import { EuiRange, EuiSwitch, EuiFormRow, EuiSelect } from '@elastic/eui';
 import React from 'react';
-import { defaultScatterChartStyles, ScatterChartStyleControls } from './scatter_vis_config';
+import { defaultScatterChartStyles, ScatterChartStyle } from './scatter_vis_config';
 import { PointShape } from '../types';
 import { getPointShapes } from '../utils/collections';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { useDebouncedNumber } from '../utils/use_debounced_value';
 
 interface ScatterVisOptionsProps {
-  styles: ScatterChartStyleControls['exclusive'];
-  onChange: (styles: ScatterChartStyleControls['exclusive']) => void;
+  styles: ScatterChartStyle['exclusive'];
+  onChange: (styles: ScatterChartStyle['exclusive']) => void;
   useThresholdColor?: boolean;
   onUseThresholdColorChange: (useThresholdColor: boolean) => void;
   shouldDisableUseThresholdColor?: boolean;
@@ -27,9 +27,9 @@ export const ScatterExclusiveVisOptions = ({
   onUseThresholdColorChange,
   shouldDisableUseThresholdColor = false,
 }: ScatterVisOptionsProps) => {
-  const updateStyle = <K extends keyof ScatterChartStyleControls['exclusive']>(
+  const updateStyle = <K extends keyof ScatterChartStyle['exclusive']>(
     key: K,
-    value: ScatterChartStyleControls['exclusive'][K]
+    value: ScatterChartStyle['exclusive'][K]
   ) => {
     onChange({
       ...styles,

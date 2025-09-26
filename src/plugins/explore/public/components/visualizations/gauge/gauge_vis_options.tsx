@@ -6,16 +6,8 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSwitch,
-  EuiSplitPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import { GaugeChartStyleControls } from './gauge_vis_config';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSwitch, EuiSpacer } from '@elastic/eui';
+import { GaugeChartStyle } from './gauge_vis_config';
 import { AxisRole } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { StyleControlsProps } from '../utils/use_visualization_types';
@@ -26,7 +18,7 @@ import { ValueCalculationSelector } from '../style_panel/value/value_calculation
 import { UnitPanel } from '../style_panel/unit/unit_panel';
 import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
 
-export type GaugeVisStyleControlsProps = StyleControlsProps<GaugeChartStyleControls>;
+export type GaugeVisStyleControlsProps = StyleControlsProps<GaugeChartStyle>;
 
 export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
   styleOptions,
@@ -39,9 +31,9 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof GaugeChartStyleControls>(
+  const updateStyleOption = <K extends keyof GaugeChartStyle>(
     key: K,
-    value: GaugeChartStyleControls[K]
+    value: GaugeChartStyle[K]
   ) => {
     onStyleChange({ [key]: value });
   };

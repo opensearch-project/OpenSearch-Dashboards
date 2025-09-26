@@ -12,8 +12,10 @@ import {
   getSchemaByAxis,
   inferTimeUnitFromTimestamps,
   getTooltipFormat,
+  mergeStyles,
 } from './utils';
 import { AxisRole, Positions, ColorSchemas, VisFieldType, StandardAxes } from '../types';
+import { ChartStyles, StyleOptions } from './use_visualization_types';
 
 describe('applyAxisStyling', () => {
   const defaultAxis = {
@@ -362,5 +364,209 @@ describe('getTooltipFormat', () => {
     const customFallback = '%Y-%m-%d';
     const data = [{ timestamp: '2023-01-01T00:00:00' }];
     expect(getTooltipFormat(data, field, customFallback)).toBe(customFallback);
+  });
+});
+
+describe('mergeStyles', () => {
+  it('should return a copy of dest when source is undefined', () => {
+    const dest = ({ color: 'red', size: 10 } as unknown) as ChartStyles;
+    const result = mergeStyles(dest, undefined);
+
+    // Result should equal dest but not be the same object
+    expect(result).toEqual(dest);
+    expect(result).not.toBe(dest);
+  });
+
+  it('should merge top-level properties', () => {
+    const dest = ({ color: 'red', size: 10 } as unknown) as ChartStyles;
+    const source = ({ color: 'blue', weight: 'bold' } as unknown) as StyleOptions;
+    const result = mergeStyles(dest, source);
+
+    expect(result).toEqual({
+      color: 'blue',
+      size: 10,
+      weight: 'bold',
+    });
+  });
+
+  it('should merge nested objects by replacing properties', () => {
+    const dest = ({
+      font: {
+        family: 'Arial',
+        size: 12,
+        style: 'normal',
+      },
+    } as unknown) as ChartStyles;
+
+    const source = ({
+      font: {
+        size: 14,
+        weight: 'bold',
+      },
+    } as unknown) as StyleOptions;
+
+    const result = mergeStyles(dest, source);
+
+    // The nested object should have properties from both objects
+    expect(result).toEqual({
+      font: {
+        family: 'Arial',
+        size: 14,
+        style: 'normal',
+        weight: 'bold',
+      },
+    });
+  });
+
+  it('should replace arrays instead of merging them', () => {
+    const dest = ({
+      colors: ['red', 'green', 'blue'],
+    } as unknown) as ChartStyles;
+
+    const source = ({
+      colors: ['yellow', 'purple'],
+    } as unknown) as StyleOptions;
+
+    const result = mergeStyles(dest, source);
+
+    // Arrays should be replaced, not merged
+    expect(result).toEqual({
+      colors: ['yellow', 'purple'],
+    });
+  });
+
+  it('should handle complex nested structures', () => {
+    const dest = ({
+      title: 'Chart',
+      axes: {
+        x: {
+          title: 'X Axis',
+          labels: {
+            show: true,
+            rotate: 0,
+          },
+        },
+        y: {
+          title: 'Y Axis',
+          labels: {
+            show: true,
+            rotate: 0,
+          },
+        },
+      },
+      legend: {
+        show: true,
+        position: 'right',
+      },
+    } as unknown) as ChartStyles;
+
+    const source = ({
+      title: 'Updated Chart',
+      axes: {
+        x: {
+          labels: {
+            rotate: 45,
+          },
+        },
+        y: {
+          title: 'Updated Y Axis',
+        },
+      },
+      legend: {
+        position: 'bottom',
+      },
+    } as unknown) as StyleOptions;
+
+    const result = mergeStyles(dest, source);
+
+    expect(result).toEqual({
+      title: 'Updated Chart',
+      axes: {
+        x: {
+          title: 'X Axis',
+          labels: {
+            show: true,
+            rotate: 45,
+          },
+        },
+        y: {
+          title: 'Updated Y Axis',
+          labels: {
+            show: true,
+            rotate: 0,
+          },
+        },
+      },
+      legend: {
+        show: true,
+        position: 'bottom',
+      },
+    });
+  });
+
+  it('should handle null values', () => {
+    const dest = ({
+      title: 'Chart',
+      subtitle: 'Subtitle',
+    } as unknown) as ChartStyles;
+
+    const source = ({
+      title: null,
+      description: 'Description',
+    } as unknown) as StyleOptions;
+
+    const result = mergeStyles(dest, source);
+
+    expect(result).toEqual({
+      title: null,
+      subtitle: 'Subtitle',
+      description: 'Description',
+    });
+  });
+
+  it('should handle empty objects', () => {
+    const dest = ({
+      title: 'Chart',
+      config: {
+        showGrid: true,
+        showLabels: true,
+      },
+    } as unknown) as ChartStyles;
+
+    const source = ({
+      config: {},
+    } as unknown) as StyleOptions;
+
+    const result = mergeStyles(dest, source);
+
+    // Empty object should not override properties
+    expect(result).toEqual({
+      title: 'Chart',
+      config: {
+        showGrid: true,
+        showLabels: true,
+      },
+    });
+  });
+
+  it('should not override with undefined values in source', () => {
+    const dest = ({
+      title: 'Chart',
+      subtitle: 'Subtitle',
+    } as unknown) as ChartStyles;
+
+    const source = ({
+      title: undefined,
+      description: 'Description',
+    } as unknown) as StyleOptions;
+
+    const result = mergeStyles(dest, source);
+
+    // Undefined values should not override
+    expect(result).toEqual({
+      title: 'Chart',
+      subtitle: 'Subtitle',
+      description: 'Description',
+    });
   });
 });

@@ -3,10 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ChartStyleControlMap } from '../visualizations/utils/use_visualization_types';
+import {
+  ChartStylesMapping,
+  ChartStyles,
+  ChartType,
+} from '../visualizations/utils/use_visualization_types';
+import { ChartConfig } from './visualization_builder.types';
 
 type AxisSupportedChartTypes = 'bar' | 'scatter' | 'heatmap';
-export type AxisSupportedStyles = ChartStyleControlMap[AxisSupportedChartTypes];
+export type AxisSupportedStyles = ChartStylesMapping[AxisSupportedChartTypes];
 
 export enum Positions {
   RIGHT = 'right',
@@ -48,8 +53,8 @@ export interface VisualizationRule {
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[],
-    styleOptions: any,
-    chartType?: string,
+    styleOptions: ChartStylesMapping[ChartType],
+    chartType?: ChartType,
     axisColumnMappings?: AxisColumnMappings
   ) => any;
 }
@@ -299,4 +304,8 @@ export interface UnitItem {
 export interface Unit {
   name: string;
   units: UnitItem[];
+}
+
+export interface RenderChartConfig extends ChartConfig {
+  styles: ChartStyles;
 }

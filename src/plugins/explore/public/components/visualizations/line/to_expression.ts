@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LineChartStyleControls } from './line_vis_config';
+import { LineChartStyle } from './line_vis_config';
 import { VisColumn, Positions, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import {
   buildMarkConfig,
@@ -26,7 +26,7 @@ export const createSimpleLineChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>,
+  styles: LineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
@@ -119,7 +119,7 @@ export const createLineBarChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>,
+  styles: LineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
@@ -281,7 +281,7 @@ export const createMultiLineChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>,
+  styles: LineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
@@ -391,7 +391,7 @@ export const createFacetedMultiLineChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>,
+  styles: LineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
@@ -529,7 +529,7 @@ export const createCategoryLineChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<LineChartStyleControls>,
+  styles: LineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns

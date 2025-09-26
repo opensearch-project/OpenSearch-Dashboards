@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { createMetricConfig, MetricChartStyleControls } from './metric_vis_config';
+import { createMetricConfig } from './metric_vis_config';
 import { MetricVisStyleControls } from './metric_vis_options';
 
 // Mock the React.createElement function
@@ -26,7 +26,7 @@ describe('createMetrictmapeConfig', () => {
 
   it('should have the correct default style settings', () => {
     const config = createMetricConfig();
-    const defaults = config.ui.style.defaults as MetricChartStyleControls;
+    const defaults = config.ui.style.defaults;
     // Verify basic controls
     expect(defaults.showTitle).toBe(true);
     expect(defaults.title).toBe('');
@@ -43,6 +43,7 @@ describe('createMetrictmapeConfig', () => {
     // Mock props
     const mockProps = {
       styleOptions: {
+        ...config.ui.style.defaults,
         showTitle: true,
         title: '',
         fontSize: 60,

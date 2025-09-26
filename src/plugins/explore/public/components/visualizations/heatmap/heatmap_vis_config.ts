@@ -46,25 +46,27 @@ export interface ExclusiveHeatmapConfig {
    */
   customRanges?: RangeValue[];
 }
-// Complete heatmap chart style controls interface
-export interface HeatmapChartStyleControls {
+// Complete heatmap chart style options interface
+export interface HeatmapChartStyleOptions {
   // Basic controls
-  tooltipOptions: TooltipOptions;
-  addLegend: boolean;
-  legendPosition: Positions;
+  tooltipOptions?: TooltipOptions;
+  addLegend?: boolean;
+  legendPosition?: Positions;
 
   // Axes configuration
-  standardAxes: StandardAxes[];
+  standardAxes?: StandardAxes[];
 
-  exclusive: ExclusiveHeatmapConfig;
-  switchAxes: boolean;
+  exclusive?: ExclusiveHeatmapConfig;
+  switchAxes?: boolean;
 
-  titleOptions: TitleOptions;
+  titleOptions?: TitleOptions;
   useThresholdColor?: boolean;
   thresholdOptions?: ThresholdOptions;
 }
 
-export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
+export type HeatmapChartStyle = Required<HeatmapChartStyleOptions>;
+
+export const defaultHeatmapChartStyles: HeatmapChartStyle = {
   switchAxes: false,
   // Basic controls
   tooltipOptions: {

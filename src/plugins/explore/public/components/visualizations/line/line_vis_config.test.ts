@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { createLineConfig, LineChartStyleControls } from './line_vis_config';
+import { createLineConfig } from './line_vis_config';
 import { LineVisStyleControls } from './line_vis_options';
 import {
   CategoryAxis,
@@ -40,7 +40,7 @@ describe('line_vis_config', () => {
 
     it('should have the correct default style settings', () => {
       const config = createLineConfig();
-      const defaults = config.ui.style.defaults as LineChartStyleControls;
+      const defaults = config.ui.style.defaults;
 
       // Verify basic controls
       expect(defaults.addLegend).toBe(true);

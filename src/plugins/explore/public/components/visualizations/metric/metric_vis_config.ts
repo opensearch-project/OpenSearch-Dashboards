@@ -12,7 +12,6 @@ import {
   AxisRole,
   VisFieldType,
   PercentageColor,
-  UnitItem,
   ThresholdOptions,
 } from '../types';
 import { CalculationMethod } from '../utils/calculation';
@@ -20,9 +19,9 @@ import { getColors } from '../theme/default_colors';
 
 export type TextAlignment = 'auto' | 'center';
 
-export interface MetricChartStyleControls {
-  showTitle: boolean;
-  title: string;
+export interface MetricChartStyleOptions {
+  showTitle?: boolean;
+  title?: string;
   fontSize?: number;
   titleSize?: number;
   percentageSize?: number;
@@ -48,20 +47,33 @@ export interface MetricChartStyleControls {
   useThresholdColor?: boolean;
 }
 
-// TODO: refactor other type of chart to ensure the default style control object is properly typed
-export type DefaultMetricChartStyleControls = MetricChartStyleControls &
-  Required<
-    Pick<MetricChartStyleControls, 'showPercentage' | 'percentageColor' | 'valueCalculation'>
+export type MetricChartStyle = Required<
+  Omit<
+    MetricChartStyleOptions,
+    | 'fontSize'
+    | 'titleSize'
+    | 'percentageSize'
+    | 'unitId'
+    | 'colorSchema'
+    | 'customRanges'
+    | 'useColor'
+    | 'min'
+    | 'max'
+  >
+> &
+  Pick<
+    MetricChartStyleOptions,
+    'fontSize' | 'titleSize' | 'percentageSize' | 'unitId' | 'min' | 'max'
   >;
 
-export const defaultMetricChartStyles: DefaultMetricChartStyleControls = {
+export const defaultMetricChartStyles: MetricChartStyle = {
   showTitle: true,
   title: '',
   showPercentage: false,
   percentageColor: 'standard',
   valueCalculation: 'last',
   // useColor: true,
-  colorSchema: ColorSchemas.GREENS,
+  // colorSchema: ColorSchemas.GREENS,
   // customRanges: [{ min: 10, max: 100 }],
   // add default range for metric
   thresholdOptions: {

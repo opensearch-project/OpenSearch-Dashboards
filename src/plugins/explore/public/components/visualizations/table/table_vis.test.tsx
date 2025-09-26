@@ -11,6 +11,7 @@ import { TableColumnHeader } from './table_vis_filter';
 import { EuiDataGrid } from '@elastic/eui';
 import { DataLink } from './data_link_options';
 import * as CellValueModule from './cell_value';
+import { defaultTableChartStyles } from './table_vis_config';
 
 interface EuiDataGridColumn {
   id: string;
@@ -250,7 +251,13 @@ describe('TableVis', () => {
   });
 
   test('renders with custom page size', () => {
-    render(<TableVis rows={mockRows} columns={mockColumns} styleOptions={{ pageSize: 15 }} />);
+    render(
+      <TableVis
+        rows={mockRows}
+        columns={mockColumns}
+        styleOptions={{ ...defaultTableChartStyles, pageSize: 15 }}
+      />
+    );
     expect(screen.getByTestId('mockPageSize').textContent).toBe('15');
   });
 
@@ -291,7 +298,7 @@ describe('TableVis', () => {
       <TableVis
         rows={mockRows}
         columns={mockColumns}
-        styleOptions={{ pageSize: 10, showColumnFilter: true }}
+        styleOptions={{ ...defaultTableChartStyles, pageSize: 10, showColumnFilter: true }}
       />
     );
     const headerColumn1 = screen.getByTestId('mockTableColumnHeader-column1');
@@ -307,7 +314,7 @@ describe('TableVis', () => {
       <TableVis
         rows={mockRows}
         columns={mockColumns}
-        styleOptions={{ pageSize: 10, showColumnFilter: true }}
+        styleOptions={{ ...defaultTableChartStyles, pageSize: 10, showColumnFilter: true }}
       />
     );
     expect(TableColumnHeader).toHaveBeenCalled();
@@ -318,7 +325,7 @@ describe('TableVis', () => {
       <TableVis
         rows={mockRows}
         columns={mockColumns}
-        styleOptions={{ pageSize: 10, showColumnFilter: false }}
+        styleOptions={{ ...defaultTableChartStyles, pageSize: 10, showColumnFilter: false }}
       />
     );
     expect(screen.getByTestId('mockRowCount').textContent).toBe('2');
@@ -333,7 +340,7 @@ describe('TableVis', () => {
       <TableVis
         rows={mockRows}
         columns={mockColumns}
-        styleOptions={{ pageSize: 10, showColumnFilter: true }}
+        styleOptions={{ ...defaultTableChartStyles, pageSize: 10, showColumnFilter: true }}
       />
     );
     expect(TableColumnHeader).toHaveBeenCalled();
@@ -354,6 +361,7 @@ describe('TableVis', () => {
 
   test('renders footer with calculations', () => {
     const styleOptions = {
+      ...defaultTableChartStyles,
       pageSize: 10,
       showFooter: true,
       footerCalculations: [{ fields: ['column1'], calculation: 'mean' as const }],
@@ -365,6 +373,7 @@ describe('TableVis', () => {
 
   test('handles empty footer calculations', () => {
     const styleOptions = {
+      ...defaultTableChartStyles,
       pageSize: 10,
       showFooter: true,
       footerCalculations: [],
@@ -376,6 +385,7 @@ describe('TableVis', () => {
 
   test('applies type-based alignment when globalAlignment is auto', () => {
     const styleOptions = {
+      ...defaultTableChartStyles,
       pageSize: 10,
       globalAlignment: 'auto' as const,
       showFooter: true,
@@ -452,6 +462,7 @@ describe('TableVis', () => {
 
   test('handles popover open/close in CellValue with multiple data links', async () => {
     const styleOptions = {
+      ...defaultTableChartStyles,
       pageSize: 10,
       dataLinks: mockDataLinks,
     };

@@ -7,9 +7,9 @@ import React, { useState } from 'react';
 import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { TableFooterOptions, TableFooterStyleControlsProps } from './table_vis_footer_options';
-import { TableChartStyleControls } from './table_vis_config';
 import { AxisRole, AxisColumnMappings, VisColumn, VisFieldType } from '../types';
 import { CalculationMethod } from '../utils/calculation';
+import { defaultTableChartStyles, TableChartStyle } from './table_vis_config';
 
 jest.mock('@osd/i18n', () => ({
   i18n: {
@@ -100,9 +100,8 @@ const axisColumnMappings: AxisColumnMappings = {
   [AxisRole.Y]: numericalColumns[0],
 };
 
-const makeDefaultStyleOptions = (
-  overrides?: Partial<TableChartStyleControls>
-): TableChartStyleControls => ({
+const makeDefaultStyleOptions = (overrides?: Partial<TableChartStyle>): TableChartStyle => ({
+  ...defaultTableChartStyles,
   pageSize: 10,
   globalAlignment: 'auto',
   showColumnFilter: false,
@@ -116,7 +115,7 @@ const TestWrapper: React.FC<{
 }> = ({ initialProps }) => {
   const [styleOptions, setStyleOptions] = useState(initialProps.styleOptions);
 
-  const onStyleChange = (changes: Partial<TableChartStyleControls>) => {
+  const onStyleChange = (changes: Partial<TableChartStyle>) => {
     setStyleOptions((prev) => ({ ...prev, ...changes }));
     initialProps.onStyleChange(changes);
   };
