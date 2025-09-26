@@ -84,6 +84,15 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
         {timeline
           .sort((a, b) => a.timestamp - b.timestamp)
           .map((item) => {
+            // Debug timeline items
+            if (
+              item.type === 'message' &&
+              item.content &&
+              item.content.includes('graph_timeseries_data')
+            ) {
+              // Found message with graph data
+            }
+
             if (item.type === 'message') {
               // Don't render messages with empty content
               if (!item.content || item.content.trim() === '') {

@@ -182,10 +182,9 @@ export class ChatService {
     const requestId = this.generateRequestId();
 
     this.addActiveRequest(requestId);
-    // Create a tool result message - use 'user' role for AG-UI server compatibility
     const toolMessage: ChatMessage = {
       id: this.generateMessageId(),
-      role: 'user',
+      role: 'tool',
       content: typeof result === 'string' ? result : JSON.stringify(result),
       timestamp: Date.now(),
       toolCallId,

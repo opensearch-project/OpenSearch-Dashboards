@@ -49,6 +49,7 @@ selenium
 package-lock.json
 .yo-rc.json
 .vscode
+.kiro
 *.sublime-*
 npm-debug.log*
 .tern-project

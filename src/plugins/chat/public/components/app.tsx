@@ -23,6 +23,8 @@ import {
 
 import { CoreStart } from '../../../../core/public';
 import { NavigationPublicPluginStart } from '../../../navigation/public';
+import { ChartsPluginStart } from '../../../charts/public';
+import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 
 import { PLUGIN_ID, PLUGIN_NAME } from '../../common';
 
@@ -31,9 +33,10 @@ interface ChatAppDeps {
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   navigation: NavigationPublicPluginStart;
+  charts: ChartsPluginStart;
 }
 
-export const ChatApp = ({ basename, notifications, http, navigation }: ChatAppDeps) => {
+export const ChatApp = ({ basename, notifications, http, navigation, charts }: ChatAppDeps) => {
   // Use React hooks to manage state.
   const [timestamp, setTimestamp] = useState<string | undefined>();
 
@@ -55,61 +58,63 @@ export const ChatApp = ({ basename, notifications, http, navigation }: ChatAppDe
   return (
     <Router basename={basename}>
       <I18nProvider>
-        <>
-          <navigation.ui.TopNavMenu
-            appName={PLUGIN_ID}
-            showSearchBar={true}
-            useDefaultBehaviors={true}
-          />
-          <EuiPage restrictWidth="1000px">
-            <EuiPageBody component="main">
-              <EuiPageHeader>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="chat.helloWorldText"
-                      defaultMessage="{name}"
-                      values={{ name: PLUGIN_NAME }}
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiPageHeader>
-              <EuiPageContent>
-                <EuiPageContentHeader>
-                  <EuiTitle>
-                    <h2>
+        <OpenSearchDashboardsContextProvider services={{ charts }}>
+          <>
+            <navigation.ui.TopNavMenu
+              appName={PLUGIN_ID}
+              showSearchBar={true}
+              useDefaultBehaviors={true}
+            />
+            <EuiPage restrictWidth="1000px">
+              <EuiPageBody component="main">
+                <EuiPageHeader>
+                  <EuiTitle size="l">
+                    <h1>
                       <FormattedMessage
-                        id="chat.congratulationsTitle"
-                        defaultMessage="Congratulations, you have successfully created a new OpenSearch Dashboards Plugin!"
+                        id="chat.helloWorldText"
+                        defaultMessage="{name}"
+                        values={{ name: PLUGIN_NAME }}
                       />
-                    </h2>
+                    </h1>
                   </EuiTitle>
-                </EuiPageContentHeader>
-                <EuiPageContentBody>
-                  <EuiText>
-                    <p>
-                      <FormattedMessage
-                        id="chat.content"
-                        defaultMessage="Look through the generated code and check out the plugin development documentation."
-                      />
-                    </p>
-                    <EuiHorizontalRule />
-                    <p>
-                      <FormattedMessage
-                        id="chat.timestampText"
-                        defaultMessage="Last timestamp: {time}"
-                        values={{ time: timestamp ? timestamp : 'Unknown' }}
-                      />
-                    </p>
-                    <EuiButton type="primary" size="s" onClick={onClickHandler}>
-                      <FormattedMessage id="chat.buttonText" defaultMessage="Get data" />
-                    </EuiButton>
-                  </EuiText>
-                </EuiPageContentBody>
-              </EuiPageContent>
-            </EuiPageBody>
-          </EuiPage>
-        </>
+                </EuiPageHeader>
+                <EuiPageContent>
+                  <EuiPageContentHeader>
+                    <EuiTitle>
+                      <h2>
+                        <FormattedMessage
+                          id="chat.congratulationsTitle"
+                          defaultMessage="Congratulations, you have successfully created a new OpenSearch Dashboards Plugin!"
+                        />
+                      </h2>
+                    </EuiTitle>
+                  </EuiPageContentHeader>
+                  <EuiPageContentBody>
+                    <EuiText>
+                      <p>
+                        <FormattedMessage
+                          id="chat.content"
+                          defaultMessage="Look through the generated code and check out the plugin development documentation."
+                        />
+                      </p>
+                      <EuiHorizontalRule />
+                      <p>
+                        <FormattedMessage
+                          id="chat.timestampText"
+                          defaultMessage="Last timestamp: {time}"
+                          values={{ time: timestamp ? timestamp : 'Unknown' }}
+                        />
+                      </p>
+                      <EuiButton type="primary" size="s" onClick={onClickHandler}>
+                        <FormattedMessage id="chat.buttonText" defaultMessage="Get data" />
+                      </EuiButton>
+                    </EuiText>
+                  </EuiPageContentBody>
+                </EuiPageContent>
+              </EuiPageBody>
+            </EuiPage>
+          </>
+        </OpenSearchDashboardsContextProvider>
       </I18nProvider>
     </Router>
   );

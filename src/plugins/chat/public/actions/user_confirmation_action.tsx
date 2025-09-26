@@ -27,6 +27,7 @@ interface UserConfirmationArgs {
  * This demonstrates human-in-the-loop workflows
  */
 export function useUserConfirmationAction() {
+  // Registering request_user_confirmation action
   useAssistantAction<UserConfirmationArgs>({
     name: 'request_user_confirmation',
     description: 'Request confirmation from the user before proceeding with an action',
@@ -58,11 +59,38 @@ export function useUserConfirmationAction() {
       });
     },
     render: ({ status, args, result }) => {
-      if (status === 'executing' && args) {
-        return <UserConfirmationUI args={args} />;
+      // User confirmation render called
+
+      if (status === 'executing') {
+        // Rendering user confirmation UI
+
+        // If args are provided, use them; otherwise check global pending confirmation
+        let confirmationArgs = args;
+        if (!confirmationArgs && (window as any).__pendingConfirmation) {
+          confirmationArgs = (window as any).__pendingConfirmation.args;
+          // Using args from global pending confirmation
+        }
+
+        if (confirmationArgs) {
+          return <UserConfirmationUI args={confirmationArgs} />;
+        } else {
+          // Fallback UI when no args are available
+          return (
+            <EuiPanel paddingSize="m" color="warning">
+              <EuiTitle size="xs">
+                <h4>User Confirmation Required</h4>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiText size="s">
+                <p>Waiting for confirmation...</p>
+              </EuiText>
+            </EuiPanel>
+          );
+        }
       }
 
       if (status === 'complete') {
+        // Rendering completion status
         return (
           <EuiPanel paddingSize="s" color="success">
             <EuiText size="s">
@@ -72,6 +100,7 @@ export function useUserConfirmationAction() {
         );
       }
 
+      // No render condition met
       return null;
     },
   });

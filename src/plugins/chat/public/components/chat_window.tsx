@@ -26,6 +26,7 @@ import { ChatMessages } from './chat_messages';
 import { ChatInput } from './chat_input';
 import { ContextTreeView } from './context_tree_view';
 import { useUserConfirmationAction } from '../actions/user_confirmation_action';
+import { useGraphTimeseriesDataAction } from '../actions/graph_timeseries_data_action';
 
 interface TimelineMessage {
   type: 'message';
@@ -94,6 +95,7 @@ function ChatWindowContent({
 
   // Register actions
   useUserConfirmationAction();
+  useGraphTimeseriesDataAction();
 
   // Context is now handled by RFC hooks - no need for context manager
   // The chat service will get context directly from assistantContextStore
@@ -184,24 +186,25 @@ function ChatWindowContent({
                 result,
               });
 
+              // Update timeline ToolCallRow with the result
+              setTimeline((prev) =>
+                prev.map((item) =>
+                  item.type === 'tool_call' && item.id === event.toolCallId
+                    ? {
+                        ...item,
+                        status: 'completed' as const,
+                        result: JSON.stringify(result), // Store result as JSON string
+                        timestamp: event.timestamp || item.timestamp,
+                      }
+                    : item
+                )
+              );
+
               // Send tool result back to assistant
               if ((chatService as any).sendToolResult) {
                 const messages = timelineToMessages(timeline);
                 const { observable, toolMessage } = await (chatService as any).sendToolResult(toolCall.id, result, messages);
 
-                // Add tool message to timeline for conversation history
-                if (toolMessage) {
-                  const timelineToolMessage: TimelineMessage = {
-                    type: 'message',
-                    id: toolMessage.id,
-                    role: 'user', // Use user role for AG-UI compatibility
-                    content: toolMessage.content,
-                    timestamp: toolMessage.timestamp,
-                  };
-                  // Add toolCallId to the timeline message for proper tracking
-                  (timelineToolMessage as any).toolCallId = toolMessage.toolCallId;
-                  setTimeline((prev) => [...prev, timelineToolMessage]);
-                }
 
                 // Set streaming state and subscribe to the response stream to handle assistant's response
                 setIsStreaming(true);
@@ -266,20 +269,6 @@ function ChatWindowContent({
                 const { observable, toolMessage } = await (chatService as any).sendToolResult(toolCall.id, {
                   error: error.message,
                 }, messages);
-
-                // Add tool message to timeline for conversation history
-                if (toolMessage) {
-                  const timelineToolMessage: TimelineMessage = {
-                    type: 'message',
-                    id: toolMessage.id,
-                    role: 'user', // Use user role for AG-UI compatibility
-                    content: toolMessage.content,
-                    timestamp: toolMessage.timestamp,
-                  };
-                  // Add toolCallId to the timeline message for proper tracking
-                  (timelineToolMessage as any).toolCallId = toolMessage.toolCallId;
-                  setTimeline((prev) => [...prev, timelineToolMessage]);
-                }
 
                 // Set streaming state and subscribe to the response stream to handle assistant's response
                 setIsStreaming(true);

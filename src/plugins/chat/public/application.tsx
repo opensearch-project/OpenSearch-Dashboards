@@ -11,7 +11,7 @@ import { ChatApp } from './components/app';
 
 export const renderApp = (
   { notifications, http }: CoreStart,
-  { navigation }: AppPluginStartDependencies,
+  { navigation, charts }: AppPluginStartDependencies,
   { appBasePath, element }: AppMountParameters
 ) => {
   ReactDOM.render(
@@ -20,6 +20,7 @@ export const renderApp = (
       notifications={notifications}
       http={http}
       navigation={navigation}
+      charts={charts}
     />,
     element
   );

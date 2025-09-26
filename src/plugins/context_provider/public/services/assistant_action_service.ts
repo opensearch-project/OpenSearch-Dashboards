@@ -145,6 +145,7 @@ export class AssistantActionService {
   getActionRenderer = (name: string) => {
     const currentState = this.state$.getValue();
     const action = currentState.actions.get(name);
+    // Service getActionRenderer called
     return action?.render;
   };
 

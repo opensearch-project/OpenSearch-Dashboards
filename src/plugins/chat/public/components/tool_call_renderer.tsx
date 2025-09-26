@@ -12,18 +12,27 @@ interface ToolCallRendererProps {
 }
 
 export function ToolCallRenderer({ toolCallId }: ToolCallRendererProps) {
+  // ToolCallRenderer called with toolCallId
+
   const context = useContext(AssistantActionContext);
 
   if (!context) {
+    // No AssistantActionContext found
     return null;
   }
 
   const { toolCallStates, getActionRenderer } = context;
   const toolCallState = toolCallStates.get(toolCallId);
 
-  if (!toolCallState) return null;
+  // Tool call state retrieved
+
+  if (!toolCallState) {
+    // No tool call state found for ID
+    return null;
+  }
 
   const renderer = getActionRenderer(toolCallState.name);
+  // Renderer lookup completed
 
   // If no custom renderer, show default status
   if (!renderer) {
@@ -45,6 +54,7 @@ export function ToolCallRenderer({ toolCallId }: ToolCallRendererProps) {
   }
 
   // Use custom renderer
+  // Using custom renderer
   return (
     <div className="tool-call-render">
       {renderer({

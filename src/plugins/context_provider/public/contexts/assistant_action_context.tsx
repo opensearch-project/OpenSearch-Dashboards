@@ -48,6 +48,7 @@ export function AssistantActionProvider({
   children,
   onToolsUpdated,
 }: AssistantActionProviderProps) {
+  // AssistantActionProvider initialized
   const [actions] = useState(() => new Map<string, AssistantAction>());
   const [toolCallStates] = useState(() => new Map<string, ToolCallState>());
   const [, forceUpdate] = useState({});

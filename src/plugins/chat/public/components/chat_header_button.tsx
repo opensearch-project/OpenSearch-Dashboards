@@ -9,6 +9,7 @@ import { CoreStart, MountPoint, SIDECAR_DOCKED_MODE } from '../../../../core/pub
 import { ChatWindow } from './chat_window';
 import { ChatProvider } from '../contexts/chat_context';
 import { ChatService } from '../services/chat_service';
+import { GlobalAssistantProvider } from '../../../context_provider/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ContextProviderStart, TextSelectionMonitor } from '../../../context_provider/public';
 
@@ -21,12 +22,14 @@ interface ChatHeaderButtonProps {
   core: CoreStart;
   chatService: ChatService;
   contextProvider?: ContextProviderStart;
+  charts?: any;
 }
 
 export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
   core,
   chatService,
   contextProvider,
+  charts,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [layoutMode, setLayoutMode] = useState<ChatLayoutMode>(ChatLayoutMode.SIDECAR);
@@ -144,10 +147,16 @@ export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
         }}
       >
         <div style={{ height: '100%', boxSizing: 'border-box' }}>
-          <OpenSearchDashboardsContextProvider services={{ core, contextProvider }}>
-            <ChatProvider chatService={chatService}>
-              <ChatWindow layoutMode={layoutMode} onToggleLayout={toggleLayoutMode} />
-            </ChatProvider>
+          <OpenSearchDashboardsContextProvider services={{ core, contextProvider, charts }}>
+            <GlobalAssistantProvider
+              onToolsUpdated={(tools) => {
+                // Tools updated in chat
+              }}
+            >
+              <ChatProvider chatService={chatService}>
+                <ChatWindow layoutMode={layoutMode} onToggleLayout={toggleLayoutMode} />
+              </ChatProvider>
+            </GlobalAssistantProvider>
           </OpenSearchDashboardsContextProvider>
         </div>
       </div>

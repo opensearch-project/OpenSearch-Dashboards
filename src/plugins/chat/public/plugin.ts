@@ -78,6 +78,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
                 core,
                 chatService,
                 contextProvider: deps.contextProvider,
+                charts: deps.charts,
               })
             );
             unmountComponent = mountPoint(element);

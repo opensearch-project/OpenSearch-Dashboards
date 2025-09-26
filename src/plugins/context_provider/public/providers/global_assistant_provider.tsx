@@ -23,32 +23,49 @@ export function GlobalAssistantProvider({
   const [, forceUpdate] = useState({});
 
   useEffect(() => {
-    // Subscribe to service updates to trigger re-renders
-    const unsubscribe = service.addListener(() => {
+    // Subscribe to service state updates to trigger re-renders
+    const subscription = service.getState$().subscribe(() => {
       forceUpdate({});
     });
 
     return () => {
-      unsubscribe();
+      subscription.unsubscribe();
     };
   }, [service]);
 
   useEffect(() => {
     if (onToolsUpdated) {
-      // Add callback to service for tools updates
-      const unsubscribe = service.addToolsUpdatedCallback(onToolsUpdated);
+      // Subscribe to state changes and call onToolsUpdated when tools change
+      const subscription = service.getState$().subscribe((state) => {
+        onToolsUpdated(state.toolDefinitions);
+      });
 
       // Immediately notify with current tools
       onToolsUpdated(service.getToolDefinitions());
 
       return () => {
-        unsubscribe();
+        subscription.unsubscribe();
       };
     }
   }, [onToolsUpdated, service]);
 
+  // Create context value from service methods
+  const contextValue = {
+    actions: service.getCurrentState().actions,
+    toolCallStates: service.getCurrentState().toolCallStates,
+    registerAction: service.registerAction,
+    unregisterAction: service.unregisterAction,
+    executeAction: async (name: string, args: any) => {
+      // This would need to be implemented if needed
+      throw new Error('executeAction not implemented in GlobalAssistantProvider');
+    },
+    getToolDefinitions: service.getToolDefinitions,
+    updateToolCallState: service.updateToolCallState,
+    getActionRenderer: service.getActionRenderer,
+  };
+
   return (
-    <AssistantActionContext.Provider value={service.getContextValue()}>
+    <AssistantActionContext.Provider value={contextValue}>
       {children}
     </AssistantActionContext.Provider>
   );
