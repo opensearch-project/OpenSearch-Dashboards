@@ -65,7 +65,7 @@ export const createPieSpec = (
     mark: {
       type: 'arc',
       innerRadius: styleOptions.exclusive?.donut ? { expr: '7*stepSize' } : 0,
-      radius: { expr: '10*stepSize' },
+      radius: { expr: '9*stepSize + 0.35*stepSize' },
       padAngle: styleOptions.exclusive?.donut ? 0.01 : 0,
     },
     encoding: {
