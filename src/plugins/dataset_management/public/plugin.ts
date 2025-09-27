@@ -24,6 +24,7 @@ import { ManagementSetup } from '../../management/public';
 import { AppStatus, DEFAULT_NAV_GROUPS } from '../../../core/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
+import { ConfigSchema } from '../common/config';
 
 export interface DatasetManagementSetupDependencies {
   management: ManagementSetup;
@@ -44,6 +45,12 @@ export type DatasetManagementStart = DatasetManagementServiceStart;
 const sectionsHeader = i18n.translate('datasetManagement.dataset.sectionsHeader', {
   defaultMessage: 'Datasets',
 });
+const sectionsHeaderIndexPattern = i18n.translate(
+  'datasetManagement.dataset.sectionsHeaderIndexPattern',
+  {
+    defaultMessage: 'Index patterns',
+  }
+);
 
 /**
  * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
@@ -58,9 +65,12 @@ export class DatasetManagementPlugin
       DatasetManagementSetupDependencies,
       DatasetManagementStartDependencies
     > {
+  private config: ConfigSchema;
   private readonly datasetManagementService = new DatasetManagementService();
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<ConfigSchema>();
+  }
 
   public setup(
     core: CoreSetup<DatasetManagementStartDependencies, DatasetManagementStart>,
@@ -89,7 +99,7 @@ export class DatasetManagementPlugin
 
     opensearchDashboardsSection.registerApp({
       id: DM_APP_ID,
-      title: sectionsHeader,
+      title: this.config.aliasedAsIndexPattern ? sectionsHeaderIndexPattern : sectionsHeader,
       order: 0,
       mount: async (params) => {
         if (core.chrome.navGroup.getNavGroupEnabled()) {
@@ -116,7 +126,7 @@ export class DatasetManagementPlugin
 
     core.application.register({
       id: DM_APP_ID,
-      title: sectionsHeader,
+      title: this.config.aliasedAsIndexPattern ? sectionsHeaderIndexPattern : sectionsHeader,
       description: i18n.translate('datasetManagement.dataset.description', {
         defaultMessage: 'Manage datasets to retrieve your data.',
       }),
@@ -153,7 +163,7 @@ export class DatasetManagementPlugin
         core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
           {
             id: DM_APP_ID,
-            title: sectionsHeader,
+            title: this.config.aliasedAsIndexPattern ? sectionsHeaderIndexPattern : sectionsHeader,
             order: 400,
           },
         ]);
