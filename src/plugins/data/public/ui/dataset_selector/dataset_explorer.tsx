@@ -266,11 +266,10 @@ export const DatasetExplorer = ({
         </div>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>
+        <EuiButtonEmpty data-test-subj="datasetSelectorCancel" onClick={onCancel}>
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.cancel"
             defaultMessage="Cancel"
-            data-test-subj="datasetSelectorCancel"
           />
         </EuiButtonEmpty>
         <EuiButton

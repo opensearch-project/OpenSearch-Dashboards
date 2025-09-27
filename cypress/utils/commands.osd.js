@@ -6,13 +6,28 @@
 import moment from 'moment';
 import { TestFixtureHandler } from '../lib/test_fixture_handler';
 import initCommandNamespace from './command_namespace';
-import { DATASOURCE_NAME, PATHS } from './constants';
+import { DATASOURCE_NAME, PATHS, WAIT_MS, WAIT_MS_LONG } from './constants';
 
 /**
  * This file houses all the commands specific to OSD. For commands that are used across the project please move it to the general commands file
  */
 
 initCommandNamespace(cy, 'osd');
+
+/**
+ * Wait for env WAIT_MS milliseconds. A naive way to let the engine have some time for
+ * async operations to complete.
+ *
+ * Useful for async operations if the engine is under heavy load:
+ * - For DELETE it will mark a document as deleted but the index will not be refreshed yet.
+ * - For CREATE, it will create the document but it could be not be searchable yet.
+ *
+ * In general, if the engine is being hit by many non-bulk operations, this could be
+ * increasing latencies.
+ */
+cy.osd.add('waitForSync', () => {
+  cy.wait(WAIT_MS);
+});
 
 cy.osd.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceName) => {
   cy.intercept('POST', '/api/workspaces').as('createWorkspaceInterception');
@@ -40,6 +55,7 @@ cy.osd.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceNa
     cy.wrap(interception.response.body.result.id).as('WORKSPACE_ID');
   });
   cy.contains(/successfully/);
+  cy.osd.waitForSync();
 });
 
 cy.osd.add('deleteIndex', (indexName, options = {}) => {
@@ -54,6 +70,7 @@ cy.osd.add('deleteIndex', (indexName, options = {}) => {
     failOnStatusCode: false,
     ...options,
   });
+  cy.osd.waitForSync();
 });
 
 cy.osd.add('setupTestData', (endpoint, mappingFiles, dataFiles) => {
@@ -78,6 +95,7 @@ cy.osd.add('setupTestData', (endpoint, mappingFiles, dataFiles) => {
       .then(() => handler.importMapping(mappingFile))
       .then(() => handler.importData(dataFiles[index]));
   });
+  cy.osd.waitForSync();
 
   return chain;
 });
@@ -137,6 +155,8 @@ cy.osd.add('addDataSource', (options) => {
     cy.wrap(interception.response.body.id).as('DATASOURCE_ID');
   });
 
+  cy.osd.waitForSync();
+
   // Verify redirect to data sources list page
   cy.location('pathname', { timeout: 6000 }).should(
     'include',
@@ -152,8 +172,10 @@ cy.osd.add('deleteDataSourceByName', (dataSourceName) => {
 
   // Navigate to the dataSource Management page
   cy.visit('app/dataSources');
-  cy.contains('h1', 'Data sources', { timeout: 20000 }).should('be.visible');
-  cy.wait(2000);
+  cy.osd.waitForLoader(true);
+  cy.wait(WAIT_MS);
+  cy.contains('h1', 'Data sources', { timeout: 60000 }).should('be.visible');
+  cy.wait(WAIT_MS_LONG);
 
   // Check if data source exists before trying to delete
   cy.get('body').then(($body) => {
@@ -177,6 +199,7 @@ cy.osd.add('deleteDataSourceByName', (dataSourceName) => {
     cy.get('a').contains(dataSourceName).click();
     cy.getElementByTestId('editDatasourceDeleteIcon').should('be.visible').click();
     cy.getElementByTestId('confirmModalConfirmButton').should('be.visible').click();
+    cy.osd.waitForSync();
   });
 });
 
@@ -212,6 +235,7 @@ cy.osd.add('deleteAllDataSources', () => {
       cy.getElementByTestId('deleteDataSourceConnections').should('be.visible').click();
 
       cy.getElementByTestId('confirmModalConfirmButton').should('be.visible').click();
+      cy.osd.waitForSync();
     }
   });
 });
@@ -330,6 +354,7 @@ cy.osd.add('deleteSavedObject', (type, id, options = {}) => {
     failOnStatusCode: false,
     ...options,
   });
+  cy.osd.waitForSync();
 });
 
 cy.osd.add('deleteSavedObjectsByType', (workspaceId, type, search) => {
@@ -347,6 +372,7 @@ cy.osd.add('deleteSavedObjectsByType', (workspaceId, type, search) => {
   return cy.request(url).then((response) => {
     response.body.saved_objects.map(({ id }) => {
       cy.osd.deleteSavedObject(type, id);
+      cy.osd.waitForSync();
     });
   });
 });
@@ -435,6 +461,13 @@ cy.osd.add('cleanupWorkspaceAndDataSourceAndIndices', (workspaceName, indices) =
 });
 
 cy.osd.add('ensureTopNavExists', () => {
+  // Simply check for the existence of either date picker button
+  // Cypress will automatically retry this until the timeout
+  // return cy.getElementsByTestIds(
+  //   ['superDatePickerstartDatePopoverButton', 'superDatePickerShowDatesButton'],
+  //   { timeout: 30000 }
+  // );
+
   const MAX_RETRY = 3;
 
   const getTopNavOrRetry = (attempt = 1) => {

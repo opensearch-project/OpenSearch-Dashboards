@@ -49,11 +49,13 @@ import { ManagementSetup } from '../../management/public';
 import { AppStatus, DEFAULT_NAV_GROUPS } from '../../../core/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
+import { DatasetManagementSetup } from '../../dataset_management/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
   urlForwarding: UrlForwardingSetup;
   dataSource?: DataSourcePluginSetup;
+  datasetManagement?: DatasetManagementSetup;
 }
 
 export interface IndexPatternManagementStartDependencies {
@@ -91,7 +93,9 @@ export class IndexPatternManagementPlugin
     core: CoreSetup<IndexPatternManagementStartDependencies, IndexPatternManagementStart>,
     dependencies: IndexPatternManagementSetupDependencies
   ) {
-    const { urlForwarding, management, dataSource } = dependencies;
+    const { urlForwarding, management, dataSource, datasetManagement } = dependencies;
+    // Check if dataset management plugin is present, which indicates it's enabled
+    const isDatasetManagementEnabled = !!datasetManagement;
 
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
@@ -112,78 +116,81 @@ export class IndexPatternManagementPlugin
       return pathInApp && `/patterns${pathInApp}`;
     });
 
-    opensearchDashboardsSection.registerApp({
-      id: IPM_APP_ID,
-      title: sectionsHeader,
-      order: 0,
-      mount: async (params) => {
-        if (core.chrome.navGroup.getNavGroupEnabled()) {
-          const [coreStart] = await core.getStartServices();
-          const urlForStandardIPMApp = new URL(
-            coreStart.application.getUrlForApp(IPM_APP_ID),
-            window.location.href
+    // only display if datasetManagement is not enabled
+    if (!isDatasetManagementEnabled) {
+      opensearchDashboardsSection.registerApp({
+        id: IPM_APP_ID,
+        title: sectionsHeader,
+        order: 0,
+        mount: async (params) => {
+          if (core.chrome.navGroup.getNavGroupEnabled()) {
+            const [coreStart] = await core.getStartServices();
+            const urlForStandardIPMApp = new URL(
+              coreStart.application.getUrlForApp(IPM_APP_ID),
+              window.location.href
+            );
+            const targetUrl = new URL(window.location.href);
+            targetUrl.pathname = urlForStandardIPMApp.pathname;
+            coreStart.application.navigateToUrl(targetUrl.toString());
+            return () => {};
+          }
+          const { mountManagementSection } = await import('./management_app');
+
+          return mountManagementSection(
+            core.getStartServices,
+            params,
+            () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
+            dataSource
           );
-          const targetUrl = new URL(window.location.href);
-          targetUrl.pathname = urlForStandardIPMApp.pathname;
-          coreStart.application.navigateToUrl(targetUrl.toString());
-          return () => {};
+        },
+      });
+
+      core.application.register({
+        id: IPM_APP_ID,
+        title: sectionsHeader,
+        description: i18n.translate('indexPatternManagement.indexPattern.description', {
+          defaultMessage: 'Manage index patterns to retrieve data from OpenSearch.',
+        }),
+        status: core.chrome.navGroup.getNavGroupEnabled()
+          ? AppStatus.accessible
+          : AppStatus.inaccessible,
+        mount: async (params: AppMountParameters) => {
+          const { mountManagementSection } = await import('./management_app');
+          const [coreStart] = await core.getStartServices();
+
+          return mountManagementSection(
+            core.getStartServices,
+            {
+              ...params,
+              basePath: core.http.basePath.get(),
+              setBreadcrumbs: (breadCrumbs) =>
+                coreStart.chrome.setBreadcrumbs(getScopedBreadcrumbs(breadCrumbs, params.history)),
+              wrapInPage: true,
+            },
+            () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
+            dataSource
+          );
+        },
+      });
+
+      core.getStartServices().then(([coreStart]) => {
+        /**
+         * The `capabilities.workspaces.enabled` indicates
+         * if workspace feature flag is turned on or not and
+         * the global index pattern management page should only be registered
+         * to settings and setup when workspace is turned off,
+         */
+        if (!coreStart.application.capabilities.workspaces.enabled) {
+          core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+            {
+              id: IPM_APP_ID,
+              title: sectionsHeader,
+              order: 400,
+            },
+          ]);
         }
-        const { mountManagementSection } = await import('./management_app');
-
-        return mountManagementSection(
-          core.getStartServices,
-          params,
-          () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
-          dataSource
-        );
-      },
-    });
-
-    core.application.register({
-      id: IPM_APP_ID,
-      title: sectionsHeader,
-      description: i18n.translate('indexPatternManagement.indexPattern.description', {
-        defaultMessage: 'Manage index patterns to retrieve data from OpenSearch.',
-      }),
-      status: core.chrome.navGroup.getNavGroupEnabled()
-        ? AppStatus.accessible
-        : AppStatus.inaccessible,
-      mount: async (params: AppMountParameters) => {
-        const { mountManagementSection } = await import('./management_app');
-        const [coreStart] = await core.getStartServices();
-
-        return mountManagementSection(
-          core.getStartServices,
-          {
-            ...params,
-            basePath: core.http.basePath.get(),
-            setBreadcrumbs: (breadCrumbs) =>
-              coreStart.chrome.setBreadcrumbs(getScopedBreadcrumbs(breadCrumbs, params.history)),
-            wrapInPage: true,
-          },
-          () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
-          dataSource
-        );
-      },
-    });
-
-    core.getStartServices().then(([coreStart]) => {
-      /**
-       * The `capabilities.workspaces.enabled` indicates
-       * if workspace feature flag is turned on or not and
-       * the global index pattern management page should only be registered
-       * to settings and setup when workspace is turned off,
-       */
-      if (!coreStart.application.capabilities.workspaces.enabled) {
-        core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
-          {
-            id: IPM_APP_ID,
-            title: sectionsHeader,
-            order: 400,
-          },
-        ]);
-      }
-    });
+      });
+    }
 
     return this.indexPatternManagementService.setup({ httpClient: core.http });
   }

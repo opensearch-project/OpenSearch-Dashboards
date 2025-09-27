@@ -35,6 +35,7 @@ export interface IDataView extends IIndexPattern {
   displayName?: string;
   description?: string;
   type?: string;
+  signalType?: string;
   dataSourceRef?: DataViewSavedObjectReference;
 
   /**

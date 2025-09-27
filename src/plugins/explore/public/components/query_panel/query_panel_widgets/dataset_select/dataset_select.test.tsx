@@ -120,7 +120,7 @@ jest.doMock('../../../../../../data/common', () => ({
   EMPTY_QUERY: {
     QUERY: '',
   },
-  SignalType: {
+  CORE_SIGNAL_TYPES: {
     LOGS: 'logs',
     METRICS: 'metrics',
     TRACES: 'traces',

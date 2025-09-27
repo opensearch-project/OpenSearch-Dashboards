@@ -1,0 +1,231 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header should mark the input as invalid 1`] = `
+<div>
+  <EuiTitle
+    size="s"
+  >
+    <h2>
+      <FormattedMessage
+        defaultMessage="Step {currentStepNumber} of {totalStepNumber}: Define an index pattern"
+        id="datasetManagement.createDataset.stepHeader"
+        values={
+          Object {
+            "currentStepNumber": 0,
+            "totalStepNumber": 0,
+          }
+        }
+      />
+    </h2>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiForm
+        isInvalid={true}
+      >
+        <EuiCompressedFormRow
+          describedByIds={Array []}
+          display="rowCompressed"
+          error={
+            Array [
+              "Input is invalid",
+            ]
+          }
+          fullWidth={true}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          helpText={
+            <React.Fragment>
+              <FormattedMessage
+                defaultMessage="Use an asterisk ({asterisk}) to match multiple indices."
+                id="datasetManagement.createDataset.step.dataset.allowLabel"
+                values={
+                  Object {
+                    "asterisk": <strong>
+                      *
+                    </strong>,
+                  }
+                }
+              />
+               
+              <FormattedMessage
+                defaultMessage="Spaces and the characters {characterList} are not allowed."
+                id="datasetManagement.createDataset.step.dataset.disallowLabel"
+                values={
+                  Object {
+                    "characterList": <strong>
+                      %
+                    </strong>,
+                  }
+                }
+              />
+            </React.Fragment>
+          }
+          isInvalid={true}
+          label={
+            <FormattedMessage
+              defaultMessage="Index pattern name"
+              id="datasetManagement.createDataset.step.datasetLabel"
+              values={Object {}}
+            />
+          }
+          labelType="label"
+        >
+          <EuiCompressedFieldText
+            data-test-subj="createDatasetNameInput"
+            fullWidth={true}
+            isInvalid={true}
+            name="dataset"
+            onChange={[Function]}
+            placeholder="index-name-*"
+            value="%"
+          />
+        </EuiCompressedFormRow>
+      </EuiForm>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiCompressedFormRow
+        describedByIds={Array []}
+        display="rowCompressed"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={true}
+        labelType="label"
+      >
+        <EuiSmallButton
+          data-test-subj="createDatasetGoToStep2Button"
+          fill={true}
+          iconSide="right"
+          iconType="arrowRight"
+          isDisabled={true}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Next step"
+            id="datasetManagement.createDataset.step.nextStepButton"
+            values={Object {}}
+          />
+        </EuiSmallButton>
+      </EuiCompressedFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`Header should render normally 1`] = `
+<div>
+  <EuiTitle
+    size="s"
+  >
+    <h2>
+      <FormattedMessage
+        defaultMessage="Step {currentStepNumber} of {totalStepNumber}: Define an index pattern"
+        id="datasetManagement.createDataset.stepHeader"
+        values={
+          Object {
+            "currentStepNumber": 0,
+            "totalStepNumber": 0,
+          }
+        }
+      />
+    </h2>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup>
+    <EuiFlexItem>
+      <EuiForm
+        isInvalid={false}
+      >
+        <EuiCompressedFormRow
+          describedByIds={Array []}
+          display="rowCompressed"
+          error={Array []}
+          fullWidth={true}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          helpText={
+            <React.Fragment>
+              <FormattedMessage
+                defaultMessage="Use an asterisk ({asterisk}) to match multiple indices."
+                id="datasetManagement.createDataset.step.dataset.allowLabel"
+                values={
+                  Object {
+                    "asterisk": <strong>
+                      *
+                    </strong>,
+                  }
+                }
+              />
+               
+              <FormattedMessage
+                defaultMessage="Spaces and the characters {characterList} are not allowed."
+                id="datasetManagement.createDataset.step.dataset.disallowLabel"
+                values={
+                  Object {
+                    "characterList": <strong>
+                      %
+                    </strong>,
+                  }
+                }
+              />
+            </React.Fragment>
+          }
+          isInvalid={false}
+          label={
+            <FormattedMessage
+              defaultMessage="Index pattern name"
+              id="datasetManagement.createDataset.step.datasetLabel"
+              values={Object {}}
+            />
+          }
+          labelType="label"
+        >
+          <EuiCompressedFieldText
+            data-test-subj="createDatasetNameInput"
+            fullWidth={true}
+            isInvalid={false}
+            name="dataset"
+            onChange={[Function]}
+            placeholder="index-name-*"
+            value="k"
+          />
+        </EuiCompressedFormRow>
+      </EuiForm>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiCompressedFormRow
+        describedByIds={Array []}
+        display="rowCompressed"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={true}
+        labelType="label"
+      >
+        <EuiSmallButton
+          data-test-subj="createDatasetGoToStep2Button"
+          fill={true}
+          iconSide="right"
+          iconType="arrowRight"
+          isDisabled={false}
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Next step"
+            id="datasetManagement.createDataset.step.nextStepButton"
+            values={Object {}}
+          />
+        </EuiSmallButton>
+      </EuiCompressedFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;

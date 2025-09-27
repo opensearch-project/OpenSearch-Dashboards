@@ -79,6 +79,85 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm 1`] = `
 </Fragment>
 `;
 
+exports[`SetupIntegrationForm tests renders SetupIntegrationForm 2`] = `
+<Fragment>
+  <EuiPageContent>
+    <EuiPageContentBody>
+      <SetupIntegrationFormInputs
+        config={
+          Object {
+            "checkpointLocation": "",
+            "connectionDataSource": "",
+            "connectionLocation": "",
+            "connectionTableName": "test_integration",
+            "connectionType": "index",
+            "displayName": "test_integration Integration",
+            "enabledWorkflows": Array [],
+          }
+        }
+        http={
+          Object {
+            "get": [MockFunction],
+            "post": [MockFunction],
+          }
+        }
+        integration={
+          Object {
+            "assets": Array [],
+            "components": Array [],
+            "license": "",
+            "name": "test_integration",
+            "type": "",
+            "version": "",
+          }
+        }
+        lockConnectionType={false}
+        setupCallout={
+          Object {
+            "show": false,
+          }
+        }
+        updateConfig={[Function]}
+      />
+    </EuiPageContentBody>
+  </EuiPageContent>
+  <EuiBottomBar>
+    <SetupBottomBar
+      config={
+        Object {
+          "checkpointLocation": "",
+          "connectionDataSource": "",
+          "connectionLocation": "",
+          "connectionTableName": "test_integration",
+          "connectionType": "index",
+          "displayName": "test_integration Integration",
+          "enabledWorkflows": Array [],
+        }
+      }
+      http={
+        Object {
+          "get": [MockFunction],
+          "post": [MockFunction],
+        }
+      }
+      integration={
+        Object {
+          "assets": Array [],
+          "components": Array [],
+          "license": "",
+          "name": "test_integration",
+          "type": "",
+          "version": "",
+        }
+      }
+      loading={false}
+      setLoading={[Function]}
+      setSetupCallout={[Function]}
+    />
+  </EuiBottomBar>
+</Fragment>
+`;
+
 exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches snapshot 1`] = `
 <SetupIntegrationForm
   http={
@@ -91,15 +170,8 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
           Array [
             "/api/integrations/repository/test_integration",
           ],
-          Array [
-            "/api/integrations/repository/test_integration",
-          ],
         ],
         "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
           Object {
             "type": "return",
             "value": Promise {},
@@ -132,29 +204,15 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
               },
             },
           ],
-          Array [
-            "/api/console/proxy",
-            Object {
-              "body": "{}",
-              "query": Object {
-                "method": "GET",
-                "path": "_data_stream/ss4o_*",
-              },
-            },
-          ],
         ],
         "results": Array [
           Object {
             "type": "return",
-            "value": undefined,
+            "value": Promise {},
           },
           Object {
             "type": "return",
-            "value": undefined,
-          },
-          Object {
-            "type": "return",
-            "value": undefined,
+            "value": Promise {},
           },
         ],
       },
@@ -199,15 +257,8 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                       Array [
                         "/api/integrations/repository/test_integration",
                       ],
-                      Array [
-                        "/api/integrations/repository/test_integration",
-                      ],
                     ],
                     "results": Array [
-                      Object {
-                        "type": "return",
-                        "value": Promise {},
-                      },
                       Object {
                         "type": "return",
                         "value": Promise {},
@@ -240,29 +291,15 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                           },
                         },
                       ],
-                      Array [
-                        "/api/console/proxy",
-                        Object {
-                          "body": "{}",
-                          "query": Object {
-                            "method": "GET",
-                            "path": "_data_stream/ss4o_*",
-                          },
-                        },
-                      ],
                     ],
                     "results": Array [
                       Object {
                         "type": "return",
-                        "value": undefined,
+                        "value": Promise {},
                       },
                       Object {
                         "type": "return",
-                        "value": undefined,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": undefined,
+                        "value": Promise {},
                       },
                     ],
                   },
@@ -472,15 +509,8 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                             Array [
                               "/api/integrations/repository/test_integration",
                             ],
-                            Array [
-                              "/api/integrations/repository/test_integration",
-                            ],
                           ],
                           "results": Array [
-                            Object {
-                              "type": "return",
-                              "value": Promise {},
-                            },
                             Object {
                               "type": "return",
                               "value": Promise {},
@@ -513,29 +543,15 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                                 },
                               },
                             ],
-                            Array [
-                              "/api/console/proxy",
-                              Object {
-                                "body": "{}",
-                                "query": Object {
-                                  "method": "GET",
-                                  "path": "_data_stream/ss4o_*",
-                                },
-                              },
-                            ],
                           ],
                           "results": Array [
                             Object {
                               "type": "return",
-                              "value": undefined,
+                              "value": Promise {},
                             },
                             Object {
                               "type": "return",
-                              "value": undefined,
-                            },
-                            Object {
-                              "type": "return",
-                              "value": undefined,
+                              "value": Promise {},
                             },
                           ],
                         },
@@ -883,7 +899,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                                               style={
                                                 Object {
                                                   "boxSizing": "content-box",
-                                                  "width": "2px",
+                                                  "width": "1px",
                                                 }
                                               }
                                               value=""
@@ -1148,15 +1164,8 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                       Array [
                         "/api/integrations/repository/test_integration",
                       ],
-                      Array [
-                        "/api/integrations/repository/test_integration",
-                      ],
                     ],
                     "results": Array [
-                      Object {
-                        "type": "return",
-                        "value": Promise {},
-                      },
                       Object {
                         "type": "return",
                         "value": Promise {},
@@ -1189,29 +1198,15 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                           },
                         },
                       ],
-                      Array [
-                        "/api/console/proxy",
-                        Object {
-                          "body": "{}",
-                          "query": Object {
-                            "method": "GET",
-                            "path": "_data_stream/ss4o_*",
-                          },
-                        },
-                      ],
                     ],
                     "results": Array [
                       Object {
                         "type": "return",
-                        "value": undefined,
+                        "value": Promise {},
                       },
                       Object {
                         "type": "return",
-                        "value": undefined,
-                      },
-                      Object {
-                        "type": "return",
-                        "value": undefined,
+                        "value": Promise {},
                       },
                     ],
                   },

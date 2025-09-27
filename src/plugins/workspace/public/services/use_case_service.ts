@@ -101,6 +101,11 @@ export class UseCaseService {
               order: 400,
             },
             {
+              id: 'datasets',
+              category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+              order: 400,
+            },
+            {
               id: 'objects',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 500,

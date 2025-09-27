@@ -38,6 +38,15 @@ export const TRACE_INDEX_PATTERN = 'otel_v1_apm_span_*';
 export const TRACE_TIME_FIELD = 'endTimeUnixNano';
 export const TRACE_INDEX = 'otel_v1_apm_span_sample_1';
 
+export const RESOURCES = {
+  DATASETS: {
+    OTEL_V1_APM_SPAN: {
+      title: 'otel-v1-apm-span-*',
+      timeFieldName: 'endTime',
+    },
+  },
+};
+
 /**
  * The dataset type in Explore
  * @typedef {('INDEXES'|'INDEX_PATTERN')} ExploreDataset
