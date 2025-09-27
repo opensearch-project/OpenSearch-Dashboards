@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import moment from 'moment';
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow } from '@elastic/eui';
 import React, { SyntheticEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
@@ -74,6 +75,8 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
       index: selectedIndex,
       language: props.dependencies.language,
       dataSourceId: selectedDataset?.dataSource?.id,
+      currentTime: moment().format('YYYY-MM-DD HH:mm:ss'),
+      timeField: selectedDataset?.timeFieldName,
     };
     const { response, error } = await generateQuery(params);
     if (error) {
@@ -103,7 +106,13 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
         question: previousQuestionRef.current,
         generatedQuery: response.query,
       });
-      if (response.timeRange) services.data.query.timefilter.timefilter.setTime(response.timeRange);
+      if (response.timeRange) {
+        const convertedTimeRange = {
+          from: moment(response.timeRange.from, 'YYYY-MM-DD HH:mm:ss').toISOString(),
+          to: moment(response.timeRange.to, 'YYYY-MM-DD HH:mm:ss').toISOString(),
+        };
+        services.data.query.timefilter.timefilter.setTime(convertedTimeRange);
+      }
       setCallOutType('query_generated');
     }
   };

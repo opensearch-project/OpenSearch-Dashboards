@@ -245,6 +245,8 @@ describe('QueryAssistBar', () => {
         index: 'Default Index Pattern',
         language: 'PPL',
         dataSourceId: 'mock-data-source-id',
+        currentTime: expect.any(String),
+        timeField: '@timestamp',
       });
     });
 
