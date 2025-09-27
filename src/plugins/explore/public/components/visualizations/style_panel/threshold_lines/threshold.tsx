@@ -20,7 +20,7 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
-import { ThresholdLine, ThresholdLineStyle, ThresholdLines } from '../../types';
+import { ThresholdLine, ThresholdMode, ThresholdLines } from '../../types';
 import { StyleAccordion } from '../style_accordion';
 import { useDebouncedValue } from '../../utils/use_debounced_value';
 
@@ -31,19 +31,19 @@ export interface ThresholdOptionsProps {
 
 const thresholdStyleOptions = [
   {
-    id: ThresholdLineStyle.Full,
+    id: ThresholdMode.Full,
     label: i18n.translate('explore.stylePanel.threshold.lineStyle.solid', {
       defaultMessage: 'Solid',
     }),
   },
   {
-    id: ThresholdLineStyle.DotDashed,
+    id: ThresholdMode.DotDashed,
     label: i18n.translate('explore.stylePanel.threshold.lineStyle.dot', {
       defaultMessage: 'Dot',
     }),
   },
   {
-    id: ThresholdLineStyle.Dashed,
+    id: ThresholdMode.Dashed,
     label: i18n.translate('explore.stylePanel.threshold.lineStyle.dash', {
       defaultMessage: 'Dash',
     }),
@@ -54,7 +54,7 @@ export const ThresholdOptions = ({
   thresholdLines,
   onThresholdLinesChange,
 }: ThresholdOptionsProps) => {
-  const [thresholdStyle, setThresholdStyle] = useState<ThresholdLineStyle>(ThresholdLineStyle.Full);
+  const [thresholdStyle, setThresholdStyle] = useState<ThresholdMode>(ThresholdMode.Full);
 
   const [debouncedThresholds, handleDebouncedThresholdChange] = useDebouncedValue(
     thresholdLines,
@@ -120,12 +120,12 @@ export const ThresholdOptions = ({
   const activeThresholds = debouncedThresholds.filter((threshold) => threshold.show);
 
   const handleStyleChange = (style: string) => {
-    setThresholdStyle(style as ThresholdLineStyle);
+    setThresholdStyle(style as ThresholdMode);
 
     // Update all existing thresholds with the new style
     const updatedThresholds = thresholdLines.map((threshold) => ({
       ...threshold,
-      style: style as ThresholdLineStyle,
+      style: style as ThresholdMode,
     }));
 
     onThresholdLinesChange(updatedThresholds);
