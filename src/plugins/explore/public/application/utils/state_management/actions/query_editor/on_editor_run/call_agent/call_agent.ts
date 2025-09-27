@@ -64,7 +64,7 @@ export const callAgentActionCreator = createAsyncThunk<
       // TODO: when we introduce more query languages, this should be no longer be hardcoded to PPL
       language: 'PPL',
       dataSourceId: dataset.dataSource?.id,
-      currentTime: moment().toISOString(),
+      currentTime: moment().format('YYYY-MM-DD HH:mm:ss'),
       timeField: dataset.timeFieldName,
     };
 
@@ -76,7 +76,11 @@ export const callAgentActionCreator = createAsyncThunk<
     );
 
     if (response.timeRange) {
-      services.data.query.timefilter.timefilter.setTime(response.timeRange);
+      const convertedTimeRange = {
+        from: moment(response.timeRange.from, 'YYYY-MM-DD HH:mm:ss').toISOString(),
+        to: moment(response.timeRange.to, 'YYYY-MM-DD HH:mm:ss').toISOString(),
+      };
+      services.data.query.timefilter.timefilter.setTime(convertedTimeRange);
     }
 
     dispatch(runQueryActionCreator(services, response.query));

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import moment from 'moment';
 import { callAgentActionCreator } from './call_agent';
 import {
   setPromptToQueryIsLoading,
@@ -101,8 +102,8 @@ describe('callAgentActionCreator', () => {
     const mockResponse = {
       query: '| where user_count > 0 | head 10',
       timeRange: {
-        from: 'now-7d',
-        to: 'now',
+        from: '2025-04-25 03:05:42',
+        to: '2025-05-02 03:05:42',
       },
     };
 
@@ -153,9 +154,10 @@ describe('callAgentActionCreator', () => {
 
       await thunk(mockDispatch, jest.fn(), undefined);
 
-      expect(mockServices.data.query.timefilter.timefilter.setTime).toHaveBeenCalledWith(
-        mockResponse.timeRange
-      );
+      expect(mockServices.data.query.timefilter.timefilter.setTime).toHaveBeenCalledWith({
+        from: moment(mockResponse.timeRange.from, 'YYYY-MM-DD HH:mm:ss').toISOString(),
+        to: moment(mockResponse.timeRange.to, 'YYYY-MM-DD HH:mm:ss').toISOString(),
+      });
     });
 
     it('should set last executed translated query', async () => {
