@@ -7,6 +7,8 @@ import './table_vis_app.scss';
 import React, { useEffect } from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { I18nProvider } from '@osd/i18n/react';
+import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { EuiFlexGroup } from '@elastic/eui';
 import { PersistedState } from '../../../visualizations/public';
@@ -17,7 +19,6 @@ import { TableVisComponent } from './table_vis_component';
 import { TableVisComponentGroup } from './table_vis_component_group';
 import { getTableUIState, TableUiState } from '../utils';
 import { VisualizationContainer } from '../../../visualizations/public';
-
 interface TableVisAppProps {
   services: CoreStart;
   visData: TableVisData;
@@ -55,8 +56,16 @@ export const TableVisApp = ({
             alignItems={direction === 'column' ? 'flexStart' : 'stretch'}
           >
             {shouldShowWarning && (
-              <EuiCallOut title="Warning: Partial results" color="warning" iconType="alert">
-                Some data was omitted due to bucket size limits.
+              <EuiCallOut
+                title={i18n.translate('visTypeTable.tableVis.warning.partialResultsTitle', {
+                  defaultMessage: 'Warning: Partial results',
+                })}
+                color="warning"
+                iconType="alert"
+              >
+                {i18n.translate('visTypeTable.tableVis.warning.partialResultsDescription', {
+                  defaultMessage: 'Some data was omitted due to bucket size limits.',
+                })}
               </EuiCallOut>
             )}
 

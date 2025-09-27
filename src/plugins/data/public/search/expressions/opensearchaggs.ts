@@ -201,23 +201,22 @@ const handleCourierRequest = async ({
 
   (searchSource as any).finalResponse = resp;
 
-  function extractSumOtherDocCount(aggregations) {
+  function extractSumOtherDocCount(aggregations: any): number {
     let results = 0;
 
-    function traverse(obj, path = '') {
+    function traverse(obj: any): void {
       if (typeof obj !== 'object' || obj === null) {
         return;
       }
 
-      // Check if current object has sum_other_doc_count
+      // Check if current object has sum_other_doc_count, if sum_other_doc_count >0 it indicates some buckets were dropped due to bucket size limit
       if (obj.hasOwnProperty('sum_other_doc_count')) {
         results += obj.sum_other_doc_count;
       }
 
       // Recursively traverse all properties
       Object.keys(obj).forEach((key) => {
-        const newPath = path ? `${path}.${key}` : key;
-        traverse(obj[key], newPath);
+        traverse(obj[key]);
       });
     }
 
@@ -324,7 +323,7 @@ export const opensearchaggs = (): OpenSearchaggsExpressionFunctionDefinition => 
       abortSignal: (abortSignal as unknown) as AbortSignal,
     });
 
-    const table: OpenSearchDashboardsDatatable & { meta?: any } = {
+    const table: OpenSearchDashboardsDatatable = {
       type: 'opensearch_dashboards_datatable',
       rows: response.rows,
       columns: response.columns.map((column: any) => {
