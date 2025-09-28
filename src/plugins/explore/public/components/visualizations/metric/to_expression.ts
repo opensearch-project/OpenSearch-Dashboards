@@ -10,7 +10,11 @@ import { calculatePercentage, calculateValue } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 import { DEFAULT_OPACITY } from '../constants';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
-import { mergeThresholdsWithBase, locateThreshold } from '../style_panel/threshold/threshold_utils';
+import {
+  mergeThresholdsWithBase,
+  locateThreshold,
+  getMaxAndMinBase,
+} from '../style_panel/threshold/threshold_utils';
 
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
@@ -50,8 +54,12 @@ export const createSingleMetric = (
 
   const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
 
-  const minBase = styles?.min || 0;
-  const maxBase = styles?.max || maxNumber;
+  const { minBase, maxBase } = getMaxAndMinBase(
+    maxNumber,
+    styles?.min,
+    styles?.max,
+    calculatedValue
+  );
 
   const targetValue = calculatedValue || 0;
 

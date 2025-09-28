@@ -266,3 +266,17 @@ export const createThresholdLayer = (
   // Return a layer object with the layers array
   return layers.length > 0 ? { layer: layers } : null;
 };
+
+export const getMaxAndMinBase = (
+  maxNumber: number,
+  min?: number,
+  max?: number,
+  calculatedValue?: number
+) => {
+  const minBase = min || 0;
+  const maxBase = max || Math.max(maxNumber, calculatedValue ?? 0);
+  return {
+    minBase,
+    maxBase,
+  };
+};
