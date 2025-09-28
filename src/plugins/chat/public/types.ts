@@ -8,9 +8,8 @@ import { ContextProviderStart } from '../../context_provider/public';
 import { ChartsPluginStart } from '../../charts/public';
 import { ChatService } from './services/chat_service';
 
-export interface ChatPluginSetup {
-  getGreeting: () => string;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ChatPluginSetup {}
 
 export interface ChatPluginStart {
   chatService: ChatService;
