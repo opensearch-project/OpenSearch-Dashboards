@@ -67,9 +67,6 @@ import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
 import { setServices } from './services/services';
 
-// UI Actions Integration
-import { registerExploreUIActions } from './ui_actions/explore_ui_actions';
-
 export class ExplorePlugin
   implements
     Plugin<
@@ -372,9 +369,6 @@ export class ExplorePlugin
     /* if (setupDeps.home) {
       registerFeature(setupDeps.home);
     } */
-
-    // Register UI Actions for explore
-    registerExploreUIActions(setupDeps.uiActions);
 
     return {
       docViews: {

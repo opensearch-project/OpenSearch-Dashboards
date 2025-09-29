@@ -3,15 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { EuiIcon, EuiText } from '@elastic/eui';
 import { ChatLayoutMode } from './chat_header_button';
 import { MessageRow } from './message_row';
 import { ToolCallRow } from './tool_call_row';
 import { ErrorRow } from './error_row';
-import { ContextTreeView } from './context_tree_view';
-import { ChatContextManager } from '../services/chat_context_manager';
-import { StaticContext, DynamicContext } from '../../../context_provider/public';
 import './chat_messages.scss';
 
 interface TimelineMessage {
@@ -46,7 +43,6 @@ interface ChatMessagesProps {
   timeline: TimelineItem[];
   currentStreamingMessage: string;
   isStreaming: boolean;
-  contextManager: ChatContextManager;
   onResendMessage?: (message: TimelineMessage) => void;
 }
 
@@ -55,12 +51,11 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   timeline,
   currentStreamingMessage,
   isStreaming,
-  contextManager,
   onResendMessage,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [staticContext, setStaticContext] = useState<StaticContext | null>(null);
-  const [dynamicContext, setDynamicContext] = useState<DynamicContext | null>(null);
+  // Context is now handled by RFC hooks and context pills
+  // No need for separate context display here
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -70,29 +65,11 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
     scrollToBottom();
   }, [timeline, currentStreamingMessage]);
 
-  useEffect(() => {
-    if (!contextManager) return;
-
-    const staticSub = contextManager.getRawStaticContext$().subscribe(setStaticContext);
-    const dynamicSub = contextManager.getRawDynamicContext$().subscribe(setDynamicContext);
-
-    // Get initial values
-    setStaticContext(contextManager.getRawStaticContext());
-    setDynamicContext(contextManager.getRawDynamicContext());
-
-    return () => {
-      staticSub.unsubscribe();
-      dynamicSub.unsubscribe();
-    };
-  }, [contextManager]);
+  // Context is now handled by RFC hooks - no subscriptions needed
 
   return (
     <>
-      {/* Context Tree View */}
-      <div className="chatMessages__context">
-        <ContextTreeView staticContext={staticContext} dynamicContext={dynamicContext} />
-      </div>
-
+      {/* Context is now displayed via context pills in the chat interface */}
       {/* Timeline Area */}
       <div className={`chatMessages chatMessages--${layoutMode}`}>
         {timeline.length === 0 && !currentStreamingMessage && (
@@ -108,8 +85,8 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           .sort((a, b) => a.timestamp - b.timestamp)
           .map((item) => {
             if (item.type === 'message') {
-              // Don't render messages with empty content or tool messages
-              if (!item.content || item.content.trim() === '' || item.role === 'tool') {
+              // Don't render messages with empty content
+              if (!item.content || item.content.trim() === '') {
                 return null;
               }
               return (

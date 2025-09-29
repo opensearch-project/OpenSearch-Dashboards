@@ -1,15 +1,16 @@
 # Context Provider Plugin
 
-A modern React hooks-based context capture system for OpenSearch Dashboards. This plugin provides a clean, declarative way to capture both static and dynamic context from user interactions using RFC-compliant hooks.
+A modern React hooks-based context capture system for OpenSearch Dashboards. This plugin provides a clean, declarative way to capture both static and dynamic context from user interactions using direct browser URL monitoring.
 
 ## Features
 
-- **React Hooks Architecture**: Modern hooks for context capture (`usePageContext`, `useDynamicContext`, `useAssistantContext`)
+- **React Hooks Architecture**: Modern hooks for context capture (`usePageContext`, `useDynamicContext`)
 - **Static Context Capture**: Automatically captures URL-based context (time range, queries, datasets)
 - **Dynamic Context Capture**: Captures user interactions (document expansion, text selection, table rows)
-- **Context Pills UI**: Removable context badges in chat interface
-- **Assistant Integration**: Global context store for AI assistant and MCP servers
+- **Text Selection**: Built-in text selection capture with visual indicators
+- **MCP Integration**: Global context store for AI assistant and MCP servers
 - **Zero Plugin Modifications**: Works without modifying existing plugins
+- **Direct Browser URL Monitoring**: Uses native browser APIs for universal compatibility
 
 ## Installation
 
@@ -17,63 +18,67 @@ A modern React hooks-based context capture system for OpenSearch Dashboards. Thi
 2. Add `contextProvider` to the `src/plugins/opensearch_dashboards.json` optional plugins list
 3. Restart OpenSearch Dashboards
 
-## Core Hooks
+## Available Hooks
 
-### `usePageContext` - Static Context from URLs
-Automatically captures context from URL parameters (`_g`, `_a`, `_q`):
+### `usePageContext` - Automatic URL State Capture
 
+Automatically captures page context from URL state, including OpenSearch Dashboards-specific parameters like `_g` and `_a`. Uses direct browser URL monitoring for universal compatibility across all plugins.
+
+#### Zero-config usage:
 ```typescript
 import { usePageContext } from '../../../context_provider/public';
 
-const MyApp: React.FC = () => {
-  usePageContext({
-    description: 'Explore page context',
-    convert: (urlState) => ({
-      appId: 'explore',
-      timeRange: urlState._g?.time || { from: 'now-15m', to: 'now' },
-      query: {
-        query: urlState._q?.query || '',
-        language: urlState._q?.language || 'PPL'
-      },
-      dataset: urlState._q?.dataset,
-      dataSource: urlState._q?.dataset?.dataSource
-    }),
-    categories: ['page', 'explore', 'static']
-  });
-
-  return <YourAppContent />;
-};
+// Automatically captures current URL state
+const pageContextId = usePageContext();
 ```
 
-### `useDynamicContext` - State-Aware Context
-Automatically re-registers context when React state changes:
+#### Custom usage with conversion:
+```typescript
+const pageContextId = usePageContext({
+  description: "Current dashboard state",
+  convert: (urlState) => ({
+    dashboardId: urlState._a?.dashboardId,
+    timeRange: urlState._g?.time,
+    filters: urlState._g?.filters,
+  }),
+  categories: ['dashboard', 'page']
+});
+```
+
+### `useDynamicContext` - Manual Context Registration
+
+Base hook for registering context with the assistant context store. Tracks React state and automatically updates assistant context when state changes.
 
 ```typescript
 import { useDynamicContext } from '../../../context_provider/public';
 
+const contextId = useDynamicContext({
+  description: "User preferences",
+  value: { theme: 'dark', language: 'en' },
+  label: "User Settings",
+  categories: ['user', 'preferences']
+});
+```
+
+#### State-aware usage:
+```typescript
+const [selectedItems, setSelectedItems] = useState([]);
+const selectionContextId = useDynamicContext({
+  description: "Currently selected items",
+  value: selectedItems,
+  label: `${selectedItems.length} items selected`,
+  categories: ['selection', 'ui-state']
+});
+```
+
+#### Conditional context:
+```typescript
 const TableRow: React.FC = ({ rowData, isExpanded }) => {
   useDynamicContext(isExpanded ? {
     description: `Expanded document: ${rowData.id}`,
     value: rowData,
     categories: ['dynamic', 'explore', 'document']
   } : null);
-
-  return <div>...</div>;
-};
-```
-
-### `useAssistantContext` - Base Context Registration
-Direct context registration without state monitoring:
-
-```typescript
-import { useAssistantContext } from '../../../context_provider/public';
-
-const MyComponent: React.FC = () => {
-  useAssistantContext({
-    description: 'User preferences',
-    value: { theme: 'dark', language: 'en' },
-    categories: ['static', 'user']
-  });
 
   return <div>...</div>;
 };
@@ -98,33 +103,31 @@ const SelectableContent: React.FC = () => {
 ```
 usePageContext (URL-based static context)
     ↓
-useDynamicContext (React state-aware wrapper)
-    ↓  
-useAssistantContext (Base registration hook)
+useDynamicContext (Base registration hook)
     ↓
 AssistantContextStore (Global context storage)
 ```
 
+### How It Works
+
+1. **Registration**: Hooks automatically register context with the global `AssistantContextStore`
+2. **Updates**: Context is updated when dependencies change (URL changes, React state changes)
+3. **Cleanup**: Context is automatically removed when components unmount
+4. **Categories**: Context can be categorized for filtering (e.g., only send 'chat' category contexts to chat)
+5. **MCP Integration**: Context flows through global store → MCP servers → AI agents
+
+### URL Monitoring Architecture
+
+The system uses **direct browser URL monitoring** for universal compatibility:
+
+- **Browser Events**: `hashchange`, `popstate` events for navigation detection
+- **History Interception**: Monitors `pushState`, `replaceState` for programmatic navigation
+- **Polling Fallback**: 1-second polling as safety net for edge cases
+- **OpenSearch Dashboards Utilities**: Uses built-in `getStateFromOsdUrl` for automatic rison decoding
+- **Plugin Boundary Respect**: No plugin dependencies, works universally
+
 ### State Change Detection
-`useDynamicContext` automatically monitors React state changes:
-
-```typescript
-// The hook uses useMemo with JSON.stringify to detect state changes
-const contextOptions = useMemo(() => {
-  return options ? {
-    description: options.description,
-    value: options.value, // ← React state value
-    categories: options.categories || ['dynamic', 'state'],
-  } : null;
-}, [
-  options?.description,
-  JSON.stringify(options?.value), // ← Deep comparison detects React state changes
-  options?.label,
-  JSON.stringify(options?.categories),
-]);
-```
-
-When React state changes, `JSON.stringify(options?.value)` produces a different string, triggering `useMemo` to recalculate, which causes `useAssistantContext` to re-register the context with updated values.
+`useDynamicContext` automatically monitors React state changes using deep comparison to detect when context should be re-registered with updated values.
 
 ## Context Structure
 
@@ -164,10 +167,9 @@ When React state changes, `JSON.stringify(options?.value)` produces a different 
 
 ## Context Categories
 
-- **Static Context**: `['page', 'explore', 'static']` - URL-based, doesn't change during session
-- **Dynamic Context**: `['dynamic', 'explore', 'document']` - User interactions, changes frequently  
+- **Static Context**: `['static', 'explore']` - URL-based, doesn't change during session
+- **Dynamic Context**: `['dynamic', 'explore', 'document']` - User interactions, changes frequently
 - **Selection Context**: `['dynamic', 'selection', 'text']` - Text/element selection
-- **Chat Context**: `['dynamic', 'selection', 'chat']` - Chat-specific interactions
 
 ## Integration Examples
 
@@ -186,7 +188,7 @@ const ExploreApp: React.FC = ({ flavor }) => {
       dataset: urlState._q?.dataset,
       dataSource: urlState._q?.dataset?.dataSource
     }),
-    categories: ['page', 'explore', 'static']
+    categories: ['static', 'explore']
   });
 
   return <ExploreContent />;
@@ -228,14 +230,31 @@ const DocumentViewer: React.FC = () => {
 ## Context Flow
 
 ```
-URL Parameters → usePageContext → Static Context
-     ↓
-User Interactions → useDynamicContext → Dynamic Context
-     ↓
-Context Store → Chat Interface → Context Pills
-     ↓
-Assistant Context → MCP Server → AI Response
+React Component
+    ↓ (usePageContext/useDynamicContext)
+AssistantContextStore
+    ↓ (window.assistantContextStore)
+MCP Server Integration
+    ↓ (contextStore.getBackendFormattedContexts())
+AI Agent
 ```
+
+### Categories
+
+Context can be categorized for different use cases:
+
+- `static`, `page` - Page and URL-based context
+- `dynamic`, `explore` - React state context
+- `selection`, `text` - UI interaction context
+- `document` - Document-specific context
+
+### Best Practices
+
+1. **Use descriptive descriptions**: The description is sent to the AI agent
+2. **Categorize appropriately**: Use categories to control which contexts are sent to which agents
+3. **Avoid large objects**: Context values are serialized, so keep them reasonably sized
+4. **Use enabled flag**: Conditionally enable/disable context registration
+5. **Leverage conversion functions**: Transform URL state into meaningful context for your use case
 
 ## Browser Console API
 
@@ -257,29 +276,66 @@ const unsubscribe = window.assistantContextStore.subscribe(
 )
 ```
 
-## Available Actions
+## Context Options Interface
 
-The plugin supports actions for AI assistant integration:
-
-- `ADD_FILTER`: Add a filter to current view
-- `REMOVE_FILTER`: Remove filters  
-- `CHANGE_TIME_RANGE`: Change the time range
-- `REFRESH_DATA`: Refresh current data
-- `NAVIGATE_TO_DISCOVER`: Navigate to Discover app
-- `NAVIGATE_TO_DASHBOARD`: Navigate to Dashboard app
-
-```javascript
-// Execute actions via global API
-await window.contextProvider.executeAction('ADD_FILTER', {
-  field: 'response.keyword',
-  value: '200'
-})
-
-await window.contextProvider.executeAction('CHANGE_TIME_RANGE', {
-  from: 'now-1h',
-  to: 'now'
-})
+```typescript
+interface AssistantContextOptions {
+  description: string;    // Backend description of the context
+  value: any;            // Actual data payload for backend
+  label?: string;        // User-friendly label for UI display
+  categories?: string[]; // Optional categories for filtering (default: ['default'])
+  id?: string;          // Optional unique ID (auto-generated if not provided)
+}
 ```
+
+## Backend Integration
+
+The system formats contexts for backend consumption:
+
+```typescript
+// Only description and value are sent to backend
+const backendContexts = contextStore.getBackendFormattedContexts('chat');
+// Returns: Array<{ description: string; value: any }>
+```
+
+## Key Features
+
+1. **Multi-Context Support**: Multiple contexts accumulate from different components simultaneously
+2. **Automatic Lifecycle Management**: Contexts are automatically cleaned up when components unmount or state changes
+3. **Category-Based Organization**: Contexts are organized by purpose for efficient filtering
+4. **Optimized Backend Communication**: UI labels stay client-side, only essential data sent to backend
+5. **Full TypeScript Support**: Type-safe interfaces for all context operations
+6. **Direct Browser URL Monitoring**: Universal compatibility without plugin dependencies
+
+## Action System
+
+For executing actions (filters, navigation, etc.), use the modern `AssistantActionService` instead of the legacy action system. Actions are now handled through the dynamic action registration system for better modularity and flexibility.
+
+## Migration from Manual Context Registration
+
+If you're currently using manual context registration:
+
+```typescript
+// Old way
+useEffect(() => {
+  const contextStore = window.assistantContextStore;
+  const id = contextStore.addContext({
+    description: "My context",
+    value: myValue,
+    categories: ['my-category']
+  });
+  return () => contextStore.removeContext(id);
+}, [myValue]);
+
+// New way
+const contextId = useDynamicContext({
+  description: "My context",
+  value: myValue,
+  categories: ['my-category']
+});
+```
+
+The new hooks provide automatic lifecycle management and better performance through memoization.
 
 ## Benefits of Hook Architecture
 
@@ -290,6 +346,7 @@ await window.contextProvider.executeAction('CHANGE_TIME_RANGE', {
 5. **React Native**: Uses standard React patterns
 6. **Performance**: Efficient re-registration only when needed
 7. **Debugging**: Clear component-level context ownership
+8. **Universal Compatibility**: Works across all plugins without dependencies
 
 ## Debugging
 
@@ -332,7 +389,7 @@ const MyApp: React.FC = () => {
         timestamp: Date.now()
       };
     },
-    categories: ['page', 'custom']
+    categories: ['static', 'custom']
   });
 
   return <AppContent />;
@@ -356,14 +413,14 @@ const ConditionalContext: React.FC = ({ data, shouldCapture }) => {
 ```typescript
 const MultiContextComponent: React.FC = ({ user, settings, data }) => {
   // Static user context
-  useAssistantContext({
+  useDynamicContext({
     description: 'User information',
     value: user,
     categories: ['static', 'user']
   });
 
   // Static settings context
-  useAssistantContext({
+  useDynamicContext({
     description: 'Application settings',
     value: settings,
     categories: ['static', 'settings']

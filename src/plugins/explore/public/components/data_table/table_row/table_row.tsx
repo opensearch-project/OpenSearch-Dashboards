@@ -9,7 +9,7 @@
  * GitHub history for details.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
 import { useDynamicContext } from '../../../../../context_provider/public';
 import {
@@ -50,17 +50,20 @@ export const TableRowUI = ({
     setIsExpanded,
   ]);
 
+  // Memoize the context object to prevent infinite re-renders
+  const expandedContext = useMemo(() => {
+    if (!isExpanded) return null;
+
+    return {
+      description: `Expanded row ${index !== undefined ? index + 1 : 'Entry'} from data table`,
+      value: row._source,
+      label: `Row ${index !== undefined ? index + 1 : 'Entry'}`,
+      categories: ['explore', 'chat', 'dynamic'],
+    };
+  }, [isExpanded, index, row._source]);
+
   // Register dynamic context when row is expanded
-  useDynamicContext(
-    isExpanded
-      ? {
-          description: `Expanded row ${index !== undefined ? index + 1 : 'Entry'} from data table`,
-          value: row._source,
-          label: `Row ${index !== undefined ? index + 1 : 'Entry'}`,
-          categories: ['explore', 'chat', 'dynamic'],
-        }
-      : null
-  );
+  useDynamicContext(expandedContext);
 
   return (
     <>

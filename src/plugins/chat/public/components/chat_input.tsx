@@ -6,7 +6,6 @@
 import React from 'react';
 import { EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import { ChatLayoutMode } from './chat_header_button';
-import { ContextPills } from './context_pills';
 import './chat_input.scss';
 
 interface ChatInputProps {
@@ -28,7 +27,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 }) => {
   return (
     <div className={`chatInput chatInput--${layoutMode}`}>
-      <ContextPills category="chat" />
       <div className="chatInput__inputRow">
         <EuiFieldText
           placeholder="Type your message..."

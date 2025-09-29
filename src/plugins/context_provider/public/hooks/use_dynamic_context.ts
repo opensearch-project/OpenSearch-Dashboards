@@ -3,112 +3,74 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo } from 'react';
-import { useAssistantContext } from './use_assistant_context';
+import { useEffect, useRef, useMemo } from 'react';
+import { AssistantContextOptions, AssistantContextStore } from '../types';
 
 /**
- * Options for useDynamicContext hook
+ * Deep comparison utility for context options
  */
-export interface UseDynamicContextOptions<T> {
-  description: string;
-  value: T;
-  label?: string;
-  categories?: string[];
-  enabled?: boolean;
+function deepEqual(a: any, b: any): boolean {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (typeof a !== typeof b) return false;
+
+  if (typeof a === 'object') {
+    const keysA = Object.keys(a);
+    const keysB = Object.keys(b);
+
+    if (keysA.length !== keysB.length) return false;
+
+    for (const key of keysA) {
+      if (!keysB.includes(key)) return false;
+      if (!deepEqual(a[key], b[key])) return false;
+    }
+
+    return true;
+  }
+
+  return false;
 }
 
 /**
- * Hook for registering dynamic context based on React state.
- * Similar to CopilotKit's useCopilotReadable hook.
+ * Base hook for registering context with the assistant context store.
+ * This hook automatically handles registration/cleanup lifecycle.
  *
- * This hook automatically tracks changes to React state and updates
- * the assistant context accordingly.
- *
- * @example
- * ```typescript
- * const [selectedItems, setSelectedItems] = useState([]);
- * const selectionContextId = useDynamicContext({
- *   description: "Currently selected items",
- *   value: selectedItems,
- *   label: `${selectedItems.length} items selected`,
- *   categories: ['selection', 'ui-state']
- * });
- * ```
- *
- * @example
- * ```typescript
- * const [filters, setFilters] = useState({ status: 'active' });
- * const filterContextId = useDynamicContext({
- *   description: "Current filter state",
- *   value: filters,
- *   categories: ['filters', 'state']
- * });
- * ```
- *
- * @param options - Configuration for the dynamic context
+ * @param options - Context options to register
  * @returns Context ID for the registered context
  */
-export function useDynamicContext<T>(options: UseDynamicContextOptions<T> | null): string {
-  // Prepare context options with memoization for performance
-  const contextOptions = useMemo(() => {
-    // Handle null options (no dynamic context)
+export function useDynamicContext(options: AssistantContextOptions | null): string {
+  const previousOptionsRef = useRef<AssistantContextOptions | null>(null);
+
+  useEffect(() => {
+    // Check if options have actually changed using deep comparison
+    if (deepEqual(options, previousOptionsRef.current)) {
+      return; // No change, skip re-registration
+    }
+
+    // Update the reference
+    previousOptionsRef.current = options;
+
+    // Handle null options (no context to register)
     if (!options) {
-      return null;
+      return;
     }
 
-    if (options.enabled === false) {
-      return null; // Return null instead of disabled context
+    // Get the global assistant context store
+    const contextStore = (window as any).assistantContextStore as AssistantContextStore;
+
+    if (!contextStore) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        'Assistant context store not available. Make sure context provider is initialized.'
+      );
+      return;
     }
 
-    return {
-      description: options.description,
-      value: options.value,
-      label: options.label || options.description,
-      categories: options.categories || ['dynamic', 'state'],
-    };
+    // Register the context (store handles replacement automatically)
+    contextStore.addContext(options);
+
+    // No cleanup needed - store handles context replacement automatically
   }, [options]);
 
-  return useAssistantContext(contextOptions);
-}
-
-/**
- * Convenience hook for simple string-based dynamic context
- */
-export function useStringContext(
-  description: string,
-  value: string,
-  categories?: string[]
-): string {
-  return useDynamicContext({
-    description,
-    value,
-    categories,
-  });
-}
-
-/**
- * Convenience hook for object-based dynamic context
- */
-export function useObjectContext<T extends Record<string, any>>(
-  description: string,
-  value: T,
-  categories?: string[]
-): string {
-  return useDynamicContext({
-    description,
-    value,
-    categories,
-  });
-}
-
-/**
- * Convenience hook for array-based dynamic context
- */
-export function useArrayContext<T>(description: string, value: T[], categories?: string[]): string {
-  return useDynamicContext({
-    description,
-    value,
-    label: `${description} (${value.length} items)`,
-    categories,
-  });
+  return 'context';
 }

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import { Provider as ReduxProvider } from 'react-redux';
@@ -19,9 +19,8 @@ import { MetricsPage } from './pages/metrics';
 import { EditorContextProvider } from './context';
 import { TraceDetails } from './pages/traces/trace_details/trace_view';
 
-// RFC Context Hooks
+// RFC Context Hooks - Direct browser URL monitoring
 import { usePageContext } from '../../../context_provider/public';
-import type { URLState } from '../../../context_provider/public';
 
 // Route component props interface
 interface ExploreRouteProps {
@@ -32,52 +31,24 @@ interface ExploreRouteProps {
 type ExploreComponentProps = ExploreRouteProps &
   Partial<Pick<AppMountParameters, 'setHeaderActionMenu'>>;
 
-// Component that handles page context for all Explore flavors
+// Component that handles page context for all Explore flavors using osdUrlStateStorage
 const ExplorePageContextProvider: React.FC<{
   flavor: ExploreFlavor;
   children: React.ReactNode;
 }> = ({ flavor, children }) => {
-  // RFC Hook: Page Context - Static context from URL parameters (_g, _a, _q)
+  // Use direct page context with simplified categories
   usePageContext({
-    description: `Explore ${flavor} page context`,
-    convert: (urlState: URLState) => {
-      // Extract time range from _g parameter
-      const timeRange = urlState._g?.time || { from: 'now-15m', to: 'now' };
-
-      // Extract query from _q parameter
-      const query = {
+    description: 'Explore application page context',
+    convert: (urlState) => ({
+      appId: 'explore',
+      timeRange: urlState._g?.time,
+      query: {
         query: urlState._q?.query || '',
         language: urlState._q?.language || 'PPL',
-      };
-
-      // Extract dataset info from _q parameter (without nested dataSource)
-      const dataset = urlState._q?.dataset
-        ? {
-            id: urlState._q.dataset.id,
-            title: urlState._q.dataset.title,
-            type: urlState._q.dataset.type,
-            timeFieldName: urlState._q.dataset.timeFieldName,
-          }
-        : null;
-
-      // Extract dataSource from dataset (move to root level)
-      const dataSource = urlState._q?.dataset?.dataSource
-        ? {
-            id: urlState._q.dataset.dataSource.id,
-            title: urlState._q.dataset.dataSource.title,
-            type: urlState._q.dataset.dataSource.type,
-          }
-        : null;
-
-      return {
-        appId: `explore`,
-        timeRange,
-        query,
-        dataset,
-        dataSource,
-      };
-    },
-    categories: ['page', 'explore', 'static'],
+      },
+      dataset: urlState._q?.dataset,
+    }),
+    categories: ['static', 'explore'],
   });
 
   return <>{children}</>;

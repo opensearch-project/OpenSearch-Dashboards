@@ -4,7 +4,8 @@
  */
 
 import { useEffect, useState, useMemo } from 'react';
-import { useAssistantContext } from './use_assistant_context';
+import { useDynamicContext } from './use_dynamic_context';
+import { getStateFromOsdUrl } from '../../../opensearch_dashboards_utils/public';
 
 /**
  * URL state interface for OpenSearch Dashboards
@@ -23,105 +24,97 @@ export interface URLState {
  * Options for usePageContext hook
  */
 export interface UsePageContextOptions {
-  description: string;
+  description?: string;
   convert?: (urlState: URLState) => any;
   categories?: string[];
   enabled?: boolean;
 }
 
-/**
- * Parse OpenSearch Dashboards URL parameter (like _g or _a)
- */
-function parseOSDUrlParam(paramName: string): any {
-  try {
-    const urlParams = new URLSearchParams(window.location.search);
-    const param = urlParams.get(paramName);
-    if (!param) return null;
-
-    // Decode and parse the parameter
-    const decoded = decodeURIComponent(param);
-    return JSON.parse(decoded);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.debug(`Failed to parse URL parameter ${paramName}:`, error);
-    return null;
-  }
-}
+// Constants for stable references
+const DEFAULT_CATEGORIES = ['page', 'url', 'static'];
 
 /**
- * Capture current URL state including OpenSearch Dashboards specific parameters
+ * Capture current URL state using direct browser URL monitoring
+ * Uses OpenSearch Dashboards' existing URL parsing utilities
  */
 function captureCurrentURLState(): URLState {
   const url = new URL(window.location.href);
 
-  return {
+  // Use OpenSearch Dashboards' built-in URL state parsing utilities
+  // These handle rison decoding automatically
+  const _g = getStateFromOsdUrl('_g', url.href);
+  const _a = getStateFromOsdUrl('_a', url.href);
+  const _q = getStateFromOsdUrl('_q', url.href);
+
+  const urlState: URLState = {
     pathname: url.pathname,
     search: url.search,
     hash: url.hash,
     searchParams: Object.fromEntries(url.searchParams.entries()),
-    _g: parseOSDUrlParam('_g'),
-    _a: parseOSDUrlParam('_a'),
-    _q: parseOSDUrlParam('_q'),
+    _g,
+    _a,
+    _q,
   };
+
+  return urlState;
 }
 
 /**
  * Hook for automatically capturing page context from URL state.
- *
- * Zero-config usage:
- * ```typescript
- * const pageContextId = usePageContext();
- * ```
- *
- * Custom usage with conversion:
- * ```typescript
- * const pageContextId = usePageContext({
- *   description: "Dashboard state",
- *   convert: (urlState) => ({
- *     dashboardId: urlState._a?.dashboardId,
- *     timeRange: urlState._g?.time,
- *   }),
- *   categories: ['dashboard', 'page']
- * });
- * ```
+ * Uses direct browser URL monitoring with OpenSearch Dashboards parsing utilities.
  */
 export function usePageContext(options?: UsePageContextOptions): string {
-  // Auto-capture URL state
-  const [urlState, setUrlState] = useState<URLState>(() => captureCurrentURLState());
+  const [urlState, setUrlState] = useState<URLState | null>(null);
 
-  // Monitor URL changes
   useEffect(() => {
     if (options?.enabled === false) return;
 
-    let lastUrl = window.location.href;
-    let lastHash = window.location.hash;
+    // Initial state capture
+    const initialState = captureCurrentURLState();
+    setUrlState(initialState);
 
-    const handleURLChange = () => {
-      const currentUrl = window.location.href;
-      const currentHash = window.location.hash;
-
-      if (currentUrl !== lastUrl || currentHash !== lastHash) {
-        setUrlState(captureCurrentURLState());
-        lastUrl = currentUrl;
-        lastHash = currentHash;
-      }
+    // Set up URL change monitoring
+    const handleUrlChange = (source: string) => {
+      const newState = captureCurrentURLState();
+      setUrlState(newState);
     };
 
-    // Listen for browser navigation events
-    window.addEventListener('popstate', handleURLChange);
-    window.addEventListener('hashchange', handleURLChange);
+    // 1. Monitor hash changes (PRIMARY method for OpenSearch Dashboards)
+    // This covers most URL changes in OSD since it uses hash-based routing
+    const hashChangeHandler = () => handleUrlChange('hashchange');
+    window.addEventListener('hashchange', hashChangeHandler);
 
-    // Poll for programmatic URL changes (OpenSearch Dashboards URL state management)
-    const interval = setInterval(handleURLChange, 1000);
+    // 2. Monitor popstate for back/forward navigation
+    const popstateHandler = () => handleUrlChange('popstate');
+    window.addEventListener('popstate', popstateHandler);
 
+    // 3. Monitor pushState/replaceState (for programmatic navigation)
+    // These are the main methods used by OpenSearch Dashboards for navigation
+    const originalPushState = history.pushState;
+    const originalReplaceState = history.replaceState;
+
+    history.pushState = function (...args) {
+      originalPushState.apply(history, args);
+      // Use microtask to ensure URL is updated before we check it
+      queueMicrotask(() => handleUrlChange('pushState'));
+    };
+
+    history.replaceState = function (...args) {
+      originalReplaceState.apply(history, args);
+      // Use microtask to ensure URL is updated before we check it
+      queueMicrotask(() => handleUrlChange('replaceState'));
+    };
+
+    // Cleanup
     return () => {
-      window.removeEventListener('popstate', handleURLChange);
-      window.removeEventListener('hashchange', handleURLChange);
-      clearInterval(interval);
+      window.removeEventListener('hashchange', hashChangeHandler);
+      window.removeEventListener('popstate', popstateHandler);
+      history.pushState = originalPushState;
+      history.replaceState = originalReplaceState;
     };
   }, [options?.enabled]);
 
-  // Prepare context options
+  // Simplified context options with stable references
   const contextOptions = useMemo(() => {
     if (options?.enabled === false) {
       return {
@@ -132,15 +125,22 @@ export function usePageContext(options?: UsePageContextOptions): string {
       };
     }
 
+    if (!urlState) {
+      return null;
+    }
+
+    // Create processed value
     const processedValue = options?.convert ? options.convert(urlState) : urlState;
 
     return {
       description: options?.description || `Page context for ${urlState.pathname}`,
       value: processedValue,
       label: `Page: ${urlState.pathname}`,
-      categories: options?.categories || ['page', 'url'],
+      categories: options?.categories || DEFAULT_CATEGORIES,
     };
-  }, [urlState, options]);
+  }, [urlState, options]); // Include options in dependencies
 
-  return useAssistantContext(contextOptions);
+  const contextId = useDynamicContext(contextOptions);
+
+  return contextId;
 }

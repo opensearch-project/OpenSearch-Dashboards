@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import {
   EuiTreeView,
   EuiToken,
@@ -14,11 +14,11 @@ import {
   EuiBadge,
   EuiToolTip,
 } from '@elastic/eui';
-import { StaticContext, DynamicContext } from '../../../context_provider/public';
+import type { AssistantContextOptions } from '../../../context_provider/public';
 
 interface ContextTreeViewProps {
-  staticContext: StaticContext | null;
-  dynamicContext: DynamicContext | null;
+  staticCategory?: string;
+  dynamicCategory?: string;
 }
 
 interface TreeNode {
@@ -29,9 +29,37 @@ interface TreeNode {
 }
 
 export const ContextTreeView: React.FC<ContextTreeViewProps> = ({
-  staticContext,
-  dynamicContext,
+  staticCategory = 'static',
+  dynamicCategory = 'dynamic',
 }) => {
+  const [staticContexts, setStaticContexts] = useState<AssistantContextOptions[]>([]);
+  const [dynamicContexts, setDynamicContexts] = useState<AssistantContextOptions[]>([]);
+
+  useEffect(() => {
+    const contextStore = (window as any).assistantContextStore;
+
+    if (!contextStore) {
+      return;
+    }
+
+    const updateContexts = () => {
+      const staticCtx = contextStore.getContextsByCategory(staticCategory);
+      const dynamicCtx = contextStore.getContextsByCategory(dynamicCategory);
+      setStaticContexts(staticCtx);
+      setDynamicContexts(dynamicCtx);
+    };
+
+    updateContexts();
+
+    const unsubscribe = contextStore.subscribe(() => {
+      updateContexts();
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [staticCategory, dynamicCategory]);
+
   // Helper function to render truncated badges with tooltips
   const renderTruncatedBadge = useCallback((value: string, maxLength: number = 30) => {
     const stringValue = String(value);
@@ -42,6 +70,7 @@ export const ContextTreeView: React.FC<ContextTreeViewProps> = ({
 
     return shouldTruncate ? <EuiToolTip content={stringValue}>{badge}</EuiToolTip> : badge;
   }, []);
+
   // Helper function to recursively build tree nodes from any data structure
   const buildDataNodes = useMemo(
     () => (data: any, idPrefix: string, level = 0): TreeNode[] => {
@@ -171,34 +200,20 @@ export const ContextTreeView: React.FC<ContextTreeViewProps> = ({
     const items: TreeNode[] = [];
 
     // Static Context Tree
-    if (staticContext) {
+    if (staticContexts.length > 0) {
       const staticChildren: TreeNode[] = [];
 
-      // Add appId as a top-level field
-      if (staticContext.appId) {
-        staticChildren.push({
-          id: 'static-appId',
-          icon: <EuiToken iconType="apps" color="euiColorVis1" />,
-          label: (
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s">
-                  <strong>App ID:</strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{renderTruncatedBadge(staticContext.appId)}</EuiFlexItem>
-            </EuiFlexGroup>
-          ),
-        });
-      }
-
-      // Add all data fields recursively
-      const dataNodes = buildDataNodes(staticContext.data, 'static-data');
-      staticChildren.push(...dataNodes);
+      staticContexts.forEach((context, index) => {
+        // Add all data fields directly to static children (flatten structure)
+        if (context.value) {
+          const dataNodes = buildDataNodes(context.value, `static-${index}-data`);
+          staticChildren.push(...dataNodes);
+        }
+      });
 
       if (staticChildren.length > 0) {
         items.push({
-          id: 'static-context',
+          id: 'static-context-root',
           icon: <EuiToken iconType="documents" color="euiColorVis1" />,
           label: (
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
@@ -208,9 +223,7 @@ export const ContextTreeView: React.FC<ContextTreeViewProps> = ({
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="primary">
-                  {new Date(staticContext.timestamp).toLocaleTimeString()}
-                </EuiBadge>
+                <EuiBadge color="primary">{staticContexts.length} items</EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
@@ -220,50 +233,58 @@ export const ContextTreeView: React.FC<ContextTreeViewProps> = ({
     }
 
     // Dynamic Context Tree
-    if (dynamicContext) {
+    if (dynamicContexts.length > 0) {
       const dynamicChildren: TreeNode[] = [];
 
-      // Add trigger as a top-level field
-      dynamicChildren.push({
-        id: 'dynamic-trigger',
-        icon: <EuiToken iconType="bolt" color="euiColorVis2" />,
-        label: (
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <strong>Trigger:</strong>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{renderTruncatedBadge(dynamicContext.trigger)}</EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-      });
+      dynamicContexts.forEach((context, index) => {
+        const contextChildren: TreeNode[] = [];
 
-      // Add appId if present
-      if (dynamicContext.appId) {
+        // Add description
+        if (context.description) {
+          contextChildren.push({
+            id: `dynamic-${index}-description`,
+            icon: <EuiToken iconType="tokenString" color="euiColorVis2" />,
+            label: (
+              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <strong>Description:</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{renderTruncatedBadge(context.description)}</EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+          });
+        }
+
+        // Add all data fields recursively
+        if (context.value) {
+          const dataNodes = buildDataNodes(context.value, `dynamic-${index}-data`);
+          contextChildren.push(...dataNodes);
+        }
+
         dynamicChildren.push({
-          id: 'dynamic-appId',
-          icon: <EuiToken iconType="apps" color="euiColorVis3" />,
+          id: `dynamic-context-${index}`,
+          icon: <EuiToken iconType="bolt" color="euiColorVis2" />,
           label: (
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiText size="s">
-                  <strong>App ID:</strong>
+                  <strong>{context.label || `Context ${index + 1}`}</strong>
                 </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>{renderTruncatedBadge(dynamicContext.appId)}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="accent">Dynamic</EuiBadge>
+              </EuiFlexItem>
             </EuiFlexGroup>
           ),
+          children: contextChildren.length > 0 ? contextChildren : undefined,
         });
-      }
-
-      // Add all data fields recursively
-      const dataNodes = buildDataNodes(dynamicContext.data, 'dynamic-data');
-      dynamicChildren.push(...dataNodes);
+      });
 
       if (dynamicChildren.length > 0) {
         items.push({
-          id: 'dynamic-context',
+          id: 'dynamic-context-root',
           icon: <EuiToken iconType="bolt" color="euiColorVis2" />,
           label: (
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
@@ -273,9 +294,7 @@ export const ContextTreeView: React.FC<ContextTreeViewProps> = ({
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="accent">
-                  {new Date(dynamicContext.timestamp).toLocaleTimeString()}
-                </EuiBadge>
+                <EuiBadge color="accent">{dynamicContexts.length} items</EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
@@ -285,7 +304,7 @@ export const ContextTreeView: React.FC<ContextTreeViewProps> = ({
     }
 
     return items;
-  }, [staticContext, dynamicContext, buildDataNodes, renderTruncatedBadge]);
+  }, [staticContexts, dynamicContexts, buildDataNodes, renderTruncatedBadge]);
 
   if (treeItems.length === 0) {
     return (

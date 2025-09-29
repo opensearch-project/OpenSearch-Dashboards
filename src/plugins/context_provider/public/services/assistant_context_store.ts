@@ -5,125 +5,71 @@
 /* eslint-disable no-console */
 
 import { BehaviorSubject } from 'rxjs';
-import { AssistantContextOptions, ContextEntry, AssistantContextStore } from '../types';
+import { AssistantContextOptions, AssistantContextStore } from '../types';
 
 /**
  * Store for managing assistant contexts with category-based organization
  */
 export class AssistantContextStoreImpl implements AssistantContextStore {
-  private contexts = new Map<string, ContextEntry>();
-  private categoryIndex = new Map<string, Set<string>>();
-  private contexts$ = new BehaviorSubject<ContextEntry[]>([]);
-  private nextId = 1;
+  private contextsByCategory = new Map<string, AssistantContextOptions[]>();
+  private contexts$ = new BehaviorSubject<AssistantContextOptions[]>([]);
 
   /**
-   * Add a new context to the store
+   * Add a new context to the store (replaces existing contexts in the same categories)
    */
-  addContext(options: AssistantContextOptions): string {
-    const id = options.id || `context_${this.nextId++}`;
-
-    const entry: ContextEntry = {
-      ...options,
-      id,
-      timestamp: Date.now(),
-    };
-
-    // Add to main store
-    this.contexts.set(id, entry);
-
-    // Update category indexes
+  addContext(options: AssistantContextOptions): void {
     const categories = options.categories || ['default'];
+
+    // Clear existing contexts in these categories first
     categories.forEach((category) => {
-      if (!this.categoryIndex.has(category)) {
-        this.categoryIndex.set(category, new Set());
-      }
-      this.categoryIndex.get(category)!.add(id);
+      this.contextsByCategory.set(category, []);
+    });
+
+    // Add the new context to all specified categories
+    categories.forEach((category) => {
+      const categoryContexts = this.contextsByCategory.get(category) || [];
+      categoryContexts.push(options);
+      this.contextsByCategory.set(category, categoryContexts);
     });
 
     // Notify subscribers
     this.emitContexts();
-
-    console.log(`📝 Added context: ${id} with categories: ${categories.join(', ')}`);
-    return id;
-  }
-
-  /**
-   * Remove a context from the store
-   */
-  removeContext(id: string): void {
-    const context = this.contexts.get(id);
-    if (!context) return;
-
-    // Remove from category indexes
-    const categories = context.categories || ['default'];
-    categories.forEach((category) => {
-      const categorySet = this.categoryIndex.get(category);
-      if (categorySet) {
-        categorySet.delete(id);
-        if (categorySet.size === 0) {
-          this.categoryIndex.delete(category);
-        }
-      }
-    });
-
-    // Remove from main store
-    this.contexts.delete(id);
-
-    // Notify subscribers
-    this.emitContexts();
-
-    console.log(`🗑️ Removed context: ${id}`);
   }
 
   /**
    * Get all contexts for a specific category
    */
-  getContextsByCategory(category: string): ContextEntry[] {
-    const contextIds = this.categoryIndex.get(category);
-    if (!contextIds) return [];
-
-    return Array.from(contextIds)
-      .map((id) => this.contexts.get(id))
-      .filter((context): context is ContextEntry => context !== undefined)
-      .sort((a, b) => b.timestamp - a.timestamp); // Most recent first
+  getContextsByCategory(category: string): AssistantContextOptions[] {
+    return this.contextsByCategory.get(category) || [];
   }
 
   /**
-   * Get all contexts
+   * Get all contexts from all categories
    */
-  getAllContexts(): ContextEntry[] {
-    return Array.from(this.contexts.values()).sort((a, b) => b.timestamp - a.timestamp); // Most recent first
+  getAllContexts(): AssistantContextOptions[] {
+    const allContexts: AssistantContextOptions[] = [];
+    const seen = new Set<string>();
+
+    // Collect unique contexts from all categories
+    this.contextsByCategory.forEach((contexts) => {
+      contexts.forEach((context) => {
+        const key = `${context.description}-${JSON.stringify(context.value)}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          allContexts.push(context);
+        }
+      });
+    });
+
+    return allContexts;
   }
 
   /**
    * Clear all contexts in a specific category
    */
   clearCategory(category: string): void {
-    const contextIds = this.categoryIndex.get(category);
-    if (!contextIds) return;
-
-    // Remove each context in the category
-    contextIds.forEach((id) => {
-      const context = this.contexts.get(id);
-      if (context) {
-        // Check if context has other categories
-        const otherCategories = (context.categories || []).filter((c) => c !== category);
-        if (otherCategories.length > 0) {
-          // Update context to remove this category
-          context.categories = otherCategories;
-        } else {
-          // Remove context entirely if no other categories
-          this.contexts.delete(id);
-        }
-      }
-    });
-
-    // Clear the category index
-    this.categoryIndex.delete(category);
-
-    // Notify subscribers
+    this.contextsByCategory.delete(category);
     this.emitContexts();
-
     console.log(`🧹 Cleared category: ${category}`);
   }
 
@@ -131,17 +77,15 @@ export class AssistantContextStoreImpl implements AssistantContextStore {
    * Clear all contexts
    */
   clearAll(): void {
-    this.contexts.clear();
-    this.categoryIndex.clear();
+    this.contextsByCategory.clear();
     this.emitContexts();
-
     console.log('🧹 Cleared all contexts');
   }
 
   /**
    * Subscribe to context changes
    */
-  subscribe(callback: (contexts: ContextEntry[]) => void): () => void {
+  subscribe(callback: (contexts: AssistantContextOptions[]) => void): () => void {
     const subscription = this.contexts$.subscribe((contexts) => {
       callback(contexts);
     });

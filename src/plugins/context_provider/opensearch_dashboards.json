@@ -6,5 +6,5 @@
   "ui": true,
   "requiredPlugins": ["uiActions", "data", "embeddable"],
   "optionalPlugins": [],
-  "requiredBundles": []
+  "requiredBundles": ["opensearchDashboardsUtils"]
 }

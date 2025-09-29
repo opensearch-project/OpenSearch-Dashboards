@@ -30,27 +30,17 @@ export interface AssistantContextOptions {
   value: any; // Sent to backend
   label: string; // UI display only
   categories?: string[]; // Categories for filtering (e.g., ['chat', 'explore'])
-  id?: string; // Optional unique ID
-}
-
-export interface ContextEntry extends AssistantContextOptions {
-  id: string; // Always has ID (generated if not provided)
-  timestamp: number; // When context was registered
-  source?: string; // Optional source identifier
 }
 
 export interface AssistantContextStore {
-  addContext(options: AssistantContextOptions): string;
-  removeContext(id: string): void;
-  getContextsByCategory(category: string): ContextEntry[];
-  getAllContexts(): ContextEntry[];
+  addContext(options: AssistantContextOptions): void;
+  getContextsByCategory(category: string): AssistantContextOptions[];
+  getAllContexts(): AssistantContextOptions[];
   clearCategory(category: string): void;
   clearAll(): void;
-  subscribe(callback: (contexts: ContextEntry[]) => void): () => void;
+  subscribe(callback: (contexts: AssistantContextOptions[]) => void): () => void;
 }
 
 export interface ContextProviderStart {
-  executeAction(actionType: string, params: any): Promise<any>;
-  getAvailableActions(): string[];
   getAssistantContextStore(): AssistantContextStore;
 }

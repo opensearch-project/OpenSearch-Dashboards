@@ -8,7 +8,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { CoreStart } from '../../../../core/public';
 import { useChatContext } from '../contexts/chat_context';
-import { ChatContextManager } from '../services/chat_context_manager';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import {
   ContextProviderStart,
@@ -25,12 +24,13 @@ import { ChatContainer } from './chat_container';
 import { ChatHeader } from './chat_header';
 import { ChatMessages } from './chat_messages';
 import { ChatInput } from './chat_input';
+import { ContextTreeView } from './context_tree_view';
 import { useUserConfirmationAction } from '../actions/user_confirmation_action';
 
 interface TimelineMessage {
   type: 'message';
   id: string;
-  role: 'user' | 'assistant' | 'tool';
+  role: 'user' | 'assistant';
   content: string;
   timestamp: number;
 }
@@ -95,14 +95,8 @@ function ChatWindowContent({
   // Register actions
   useUserConfirmationAction();
 
-  // Initialize context manager
-  const contextManager = useMemo(() => {
-    const manager = new ChatContextManager();
-    manager.start(services.contextProvider);
-    // Set context manager in chat service
-    chatService.setContextManager(manager);
-    return manager;
-  }, [chatService, services.contextProvider]);
+  // Context is now handled by RFC hooks - no need for context manager
+  // The chat service will get context directly from assistantContextStore
 
   // Subscribe to tool updates from the service
   useEffect(() => {
@@ -130,8 +124,8 @@ function ChatWindowContent({
           timestamp: msg.timestamp,
         };
 
-        // Add toolCallId for tool messages if it exists
-        if (msg.role === 'tool' && (msg as any).toolCallId) {
+        // Add toolCallId for messages if it exists (for tool result tracking)
+        if ((msg as any).toolCallId) {
           return {
             ...baseMessage,
             toolCallId: (msg as any).toolCallId,
@@ -366,7 +360,7 @@ function ChatWindowContent({
       const timelineUserMessage: TimelineMessage = {
         type: 'message',
         id: userMessage.id,
-        role: userMessage.role,
+        role: userMessage.role as 'user' | 'assistant',
         content: userMessage.content,
         timestamp: userMessage.timestamp,
       };
@@ -579,7 +573,7 @@ function ChatWindowContent({
       const timelineUserMessage: TimelineMessage = {
         type: 'message',
         id: userMessage.id,
-        role: userMessage.role,
+        role: userMessage.role as 'user' | 'assistant',
         content: userMessage.content,
         timestamp: userMessage.timestamp,
       };
@@ -762,16 +756,10 @@ function ChatWindowContent({
     setCurrentRunId(null);
     setIsStreaming(false);
     setProcessedEventIds(new Set()); // Reset processed events for new chat
-    // Refresh context for new chat
-    contextManager.refreshContext();
+    // Context is automatically managed by RFC hooks
   };
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      contextManager.stop();
-    };
-  }, [contextManager]);
+  // No cleanup needed - RFC hooks handle their own lifecycle
 
   // Pass enhanced props to child components
   const currentState = service.getCurrentState();
@@ -789,12 +777,14 @@ function ChatWindowContent({
         onNewChat={handleNewChat}
       />
 
+      {/* Context Tree View at the top - Shows both static and dynamic context */}
+      <ContextTreeView staticCategory="static" dynamicCategory="dynamic" />
+
       <ChatMessages
         layoutMode={layoutMode}
         timeline={timeline}
         currentStreamingMessage={currentStreamingMessage}
         isStreaming={isStreaming}
-        contextManager={contextManager}
         onResendMessage={handleResendMessage}
         {...enhancedProps}
       />
