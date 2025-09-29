@@ -1,0 +1,47 @@
+.timelineRuler {
+  color: $euiColorMediumShade;
+
+  &__baseline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: currentColor;
+  }
+
+  &__tickContainer {
+    position: absolute;
+    bottom: 0;
+    transform: translateX(-50%);
+
+    .timelineRuler__label {
+      font-size: $euiFontSizeXS;
+      line-height: 1;
+      white-space: nowrap;
+      margin-bottom: 2px;
+
+      &--first {
+        text-align: left;
+        margin-left: 50%;
+      }
+
+      &--last {
+        position: relative;
+        right: 50%;
+        text-align: right;
+      }
+
+      &--center {
+        text-align: center;
+      }
+    }
+
+    .timelineRuler__tick {
+      height: 8px;
+      width: 2px;
+      background-color: currentColor;
+      margin: 0 auto;
+    }
+  }
+}
