@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getPosition, getOsdSidecarPaddingStyle, getSidecarLeftNavStyle } from './helper';
+import {
+  getPosition,
+  getOsdSidecarPaddingStyle,
+  getOsdSidecarPaddingStyleForHeader,
+  getSidecarLeftNavStyle,
+} from './helper';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from './sidecar_service';
 
 describe('sidecar helper', () => {
@@ -57,6 +62,40 @@ describe('sidecar helper', () => {
       expect(
         getOsdSidecarPaddingStyle({ ...props, dockedMode: SIDECAR_DOCKED_MODE.TAKEOVER })
       ).toEqual({});
+    });
+  });
+
+  describe('getOsdSidecarPaddingStyleForHeader', () => {
+    const props: ISidecarConfig = {
+      paddingSize: 460,
+      dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
+      isHidden: false,
+    };
+
+    test('return paddingRight style object with 8px added when dockedMode is right', () => {
+      expect(
+        getOsdSidecarPaddingStyleForHeader({ ...props, dockedMode: SIDECAR_DOCKED_MODE.RIGHT })
+      ).toEqual({ paddingRight: 468 }); // 460 + 8
+    });
+
+    test('return paddingLeft style object with 8px added when dockedMode is left', () => {
+      expect(
+        getOsdSidecarPaddingStyleForHeader({ ...props, dockedMode: SIDECAR_DOCKED_MODE.LEFT })
+      ).toEqual({ paddingLeft: 468 }); // 460 + 8
+    });
+
+    test('return empty object when isHidden is true', () => {
+      expect(getOsdSidecarPaddingStyleForHeader({ ...props, isHidden: true })).toEqual({});
+    });
+
+    test('return empty object when dockedMode is takeover', () => {
+      expect(
+        getOsdSidecarPaddingStyleForHeader({ ...props, dockedMode: SIDECAR_DOCKED_MODE.TAKEOVER })
+      ).toEqual({});
+    });
+
+    test('return empty object when config is undefined', () => {
+      expect(getOsdSidecarPaddingStyleForHeader(undefined)).toEqual({});
     });
   });
 
