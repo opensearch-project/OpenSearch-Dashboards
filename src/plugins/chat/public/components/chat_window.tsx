@@ -264,9 +264,6 @@ function ChatWindowContent({
         onNewChat={handleNewChat}
       />
 
-      {/* Context Tree View at the top - Shows both static and dynamic context */}
-      <ContextTreeView staticCategory="static" dynamicCategory="dynamic" />
-
       <ChatMessages
         layoutMode={layoutMode}
         timeline={timeline}
