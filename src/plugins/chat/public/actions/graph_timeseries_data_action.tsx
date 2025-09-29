@@ -47,61 +47,8 @@ export function useGraphTimeseriesDataAction() {
       type: 'object',
       properties: {
         data: {
-          oneOf: [
-            {
-              type: 'array',
-              description: 'Simple array of data points with timestamp and value properties',
-              items: {
-                type: 'object',
-                properties: {
-                  timestamp: {
-                    type: ['string', 'number'],
-                    description: 'Timestamp for the data point (ISO string or Unix timestamp)',
-                  },
-                  value: {
-                    type: 'number',
-                    description: 'Numeric value for the data point',
-                  },
-                },
-                required: ['timestamp', 'value'],
-              },
-            },
-            {
-              type: 'object',
-              description: 'Prometheus-style data with result array containing metric and values',
-              properties: {
-                resultType: {
-                  type: 'string',
-                  description: 'Optional Prometheus result type (e.g., "matrix", "vector")',
-                },
-                result: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      metric: {
-                        type: 'object',
-                        description: 'Metric labels',
-                      },
-                      values: {
-                        type: 'array',
-                        description: 'Array of [timestamp, value] pairs',
-                        items: {
-                          type: 'array',
-                          items: [
-                            { type: 'number', description: 'Unix timestamp' },
-                            { type: 'string', description: 'Value as string' },
-                          ],
-                        },
-                      },
-                    },
-                    required: ['metric', 'values'],
-                  },
-                },
-              },
-              required: ['result'],
-            },
-          ],
+          type: 'object',
+          description: 'Timeseries data in Prometheus format or simple array format',
         },
         query: {
           type: 'string',
