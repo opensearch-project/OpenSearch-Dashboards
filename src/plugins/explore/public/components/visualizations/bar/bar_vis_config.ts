@@ -57,7 +57,7 @@ export interface BarChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
 
   useThresholdColor?: boolean;
-  showFullTimeRange: boolean;
+  showFullTimeRange?: boolean;
 }
 
 export type BarChartStyle = Required<
