@@ -12,6 +12,7 @@ jest.mock('../utils/utils', () => ({
   generateColorBySchema: jest.fn().mockReturnValue(['#123456', '#789abc', '#def012']),
   calculateValue: jest.fn().mockReturnValue(45),
   getTooltipFormat: jest.fn().mockReturnValue('%b %d, %Y %H:%M:%S'),
+  getMaxAndMinBase: jest.fn(() => ({ minBase: 10, maxBase: 200 })),
 }));
 
 describe('to_expression', () => {

@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { mergeThresholdsWithBase, locateThreshold, generateRanges } from './threshold_utils';
+import {
+  mergeThresholdsWithBase,
+  locateThreshold,
+  generateRanges,
+  getMaxAndMinBase,
+} from './threshold_utils';
 
 describe('gauge_chart_utils', () => {
   describe('mergeThresholdsWithBase', () => {
@@ -101,5 +106,31 @@ describe('gauge_chart_utils', () => {
       const result = generateRanges(mergedRanges, 1);
       expect(result).toEqual([]);
     });
+  });
+});
+
+describe('getMaxAndMinBase', () => {
+  it('uses provided min and max values', () => {
+    const result = getMaxAndMinBase(50, 10, 100, 75);
+    expect(result.minBase).toBe(10);
+    expect(result.maxBase).toBe(100);
+  });
+
+  it('uses 0 as default min when not provided', () => {
+    const result = getMaxAndMinBase(50, undefined, 100, 75);
+    expect(result.minBase).toBe(0);
+    expect(result.maxBase).toBe(100);
+  });
+
+  it('uses Math.max of maxNumber and calculatedValue when max is undefined', () => {
+    const result = getMaxAndMinBase(30, undefined, undefined, 60);
+    expect(result.minBase).toBe(0);
+    expect(result.maxBase).toBe(60);
+  });
+
+  it('uses maxNumber when calculatedValue is undefined', () => {
+    const result = getMaxAndMinBase(40, undefined, undefined, undefined);
+    expect(result.minBase).toBe(0);
+    expect(result.maxBase).toBe(40);
   });
 });
