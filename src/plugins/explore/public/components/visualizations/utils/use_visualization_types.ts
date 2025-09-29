@@ -3,20 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LineChartStyleControls } from '../line/line_vis_config';
-import { PieChartStyleControls } from '../pie/pie_vis_config';
-import { MetricChartStyleControls } from '../metric/metric_vis_config';
-import { HeatmapChartStyleControls } from '../heatmap/heatmap_vis_config';
-import { ScatterChartStyleControls } from '../scatter/scatter_vis_config';
-import { AreaChartStyleControls } from '../area/area_vis_config';
+import { LineChartStyle, LineChartStyleOptions } from '../line/line_vis_config';
+import { PieChartStyle, PieChartStyleOptions } from '../pie/pie_vis_config';
+import { MetricChartStyle, MetricChartStyleOptions } from '../metric/metric_vis_config';
+import { HeatmapChartStyle, HeatmapChartStyleOptions } from '../heatmap/heatmap_vis_config';
+import { ScatterChartStyle, ScatterChartStyleOptions } from '../scatter/scatter_vis_config';
+import { AreaChartStyle, AreaChartStyleOptions } from '../area/area_vis_config';
 import { AxisColumnMappings, AxisRole, ChartTypeMapping, VisColumn, VisFieldType } from '../types';
 import { visualizationRegistry } from '../visualization_registry';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
-import { BarChartStyleControls } from '../bar/bar_vis_config';
+import { BarChartStyle, BarChartStyleOptions } from '../bar/bar_vis_config';
 import { UpdateVisualizationProps } from '../visualization_container';
-import { TableChartStyleControls } from '../table/table_vis_config';
-import { GaugeChartStyleControls } from '../gauge/gauge_vis_config';
+import { TableChartStyle, TableChartStyleOptions } from '../table/table_vis_config';
+import { GaugeChartStyle, GaugeChartStyleOptions } from '../gauge/gauge_vis_config';
 
 export type ChartType =
   | 'line'
@@ -29,32 +29,32 @@ export type ChartType =
   | 'table'
   | 'gauge';
 
-export interface ChartStyleControlMap {
-  line: LineChartStyleControls;
-  pie: PieChartStyleControls;
-  metric: MetricChartStyleControls;
-  heatmap: HeatmapChartStyleControls;
-  scatter: ScatterChartStyleControls;
-  bar: BarChartStyleControls;
-  area: AreaChartStyleControls;
-  table: TableChartStyleControls;
-  gauge: GaugeChartStyleControls;
+export interface ChartStylesMapping {
+  line: LineChartStyle;
+  pie: PieChartStyle;
+  metric: MetricChartStyle;
+  heatmap: HeatmapChartStyle;
+  scatter: ScatterChartStyle;
+  bar: BarChartStyle;
+  area: AreaChartStyle;
+  table: TableChartStyle;
+  gauge: GaugeChartStyle;
 }
 
-export type StyleOptions = ChartStyleControlMap[ChartType];
+export type StyleOptions =
+  | LineChartStyleOptions
+  | PieChartStyleOptions
+  | BarChartStyleOptions
+  | MetricChartStyleOptions
+  | HeatmapChartStyleOptions
+  | ScatterChartStyleOptions
+  | AreaChartStyleOptions
+  | TableChartStyleOptions
+  | GaugeChartStyleOptions;
 
-type AllChartStyleControls =
-  | LineChartStyleControls
-  | PieChartStyleControls
-  | BarChartStyleControls
-  | MetricChartStyleControls
-  | HeatmapChartStyleControls
-  | ScatterChartStyleControls
-  | AreaChartStyleControls
-  | TableChartStyleControls
-  | GaugeChartStyleControls;
+export type ChartStyles = ChartStylesMapping[ChartType];
 
-export interface StyleControlsProps<T extends AllChartStyleControls> {
+export interface StyleControlsProps<T extends ChartStyles> {
   styleOptions: T;
   onStyleChange: (newStyle: Partial<T>) => void;
   numericalColumns?: VisColumn[];
@@ -73,8 +73,8 @@ export interface VisualizationType<T extends ChartType> {
   readonly type: T;
   readonly ui: {
     style: {
-      defaults: ChartStyleControlMap[T];
-      render: (props: StyleControlsProps<ChartStyleControlMap[T]>) => JSX.Element;
+      defaults: ChartStylesMapping[T];
+      render: (props: StyleControlsProps<ChartStylesMapping[T]>) => JSX.Element;
     };
     availableMappings: ChartTypePossibleMapping[];
   };

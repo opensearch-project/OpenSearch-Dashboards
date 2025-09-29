@@ -56,7 +56,7 @@ export const TableCellUI = ({
           <EuiButtonIcon
             size="xs"
             onClick={() => onFilter?.(columnId, fieldMapping, '+')}
-            iconType="plusInCircle"
+            iconType="magnifyWithPlus"
             aria-label={i18n.translate('explore.filterForValue', {
               defaultMessage: 'Filter for value',
             })}
@@ -72,7 +72,7 @@ export const TableCellUI = ({
           <EuiButtonIcon
             size="xs"
             onClick={() => onFilter?.(columnId, fieldMapping, '-')}
-            iconType="minusInCircle"
+            iconType="magnifyWithMinus"
             aria-label={i18n.translate('explore.filterOutValue', {
               defaultMessage: 'Filter out value',
             })}

@@ -48,6 +48,11 @@
       - [Data_importer](../src/plugins/data_importer/README.md)
       - [Data_source](../src/plugins/data_source/README.md)
       - [Data_source_management](../src/plugins/data_source_management/README.md)
+      - dataset_management
+        - public
+          - components
+            - create_dataset_wizard
+              - [CREATE_DATASET](../src/plugins/dataset_management/public/components/create_dataset_wizard/CREATE_DATASET.md)
       - [Dev_tools](../src/plugins/dev_tools/README.md)
       - [Discover](../src/plugins/discover/README.md)
       - [Embeddable](../src/plugins/embeddable/README.md)

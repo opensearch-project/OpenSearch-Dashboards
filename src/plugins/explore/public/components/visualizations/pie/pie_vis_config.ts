@@ -9,28 +9,31 @@ import { VisualizationType } from '../utils/use_visualization_types';
 import { PieVisStyleControls } from './pie_vis_options';
 import { AxisRole, Positions, TitleOptions, TooltipOptions, VisFieldType } from '../types';
 
-export interface PieExclusiveStyleControl {
-  donut: boolean;
-  showValues: boolean;
-  showLabels: boolean;
-  truncate: number;
+export interface PieExclusiveStyleOptions {
+  donut?: boolean;
+  showValues?: boolean;
+  showLabels?: boolean;
+  truncate?: number;
   // Todo:  shall we support 2 layers pie chart?
   showTopLevelOnly?: boolean;
 }
-export interface PieChartStyleControls {
+
+export interface PieChartStyleOptions {
   // Basic controls
-  addTooltip: boolean;
-  addLegend: boolean;
-  legendPosition: Positions;
-  tooltipOptions: TooltipOptions;
+  addTooltip?: boolean;
+  addLegend?: boolean;
+  legendPosition?: Positions;
+  tooltipOptions?: TooltipOptions;
 
   // Exclusive controls
-  exclusive: PieExclusiveStyleControl;
+  exclusive?: PieExclusiveStyleOptions;
 
-  titleOptions: TitleOptions;
+  titleOptions?: TitleOptions;
 }
 
-export const defaultPieChartStyles: PieChartStyleControls = {
+export type PieChartStyle = Required<PieChartStyleOptions>;
+
+export const defaultPieChartStyles: PieChartStyle = {
   // Basic controls
   addTooltip: true,
   addLegend: true,

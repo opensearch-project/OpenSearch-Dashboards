@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { ScatterVisStyleControls } from './scatter_vis_options';
-import { ScatterChartStyleControls, defaultScatterChartStyles } from './scatter_vis_config';
+import { defaultScatterChartStyles } from './scatter_vis_config';
 import { VisColumn, PointShape, Positions, AxisRole, VisFieldType } from '../types';
 
 export default {
@@ -48,7 +48,7 @@ const mockDateColumns: VisColumn[] = [];
 
 const Template: ComponentStory<typeof ScatterVisStyleControls> = (args) => {
   // Use state to track changes
-  const [styleOptions, setStyleOptions] = useState<ScatterChartStyleControls>(args.styleOptions);
+  const [styleOptions, setStyleOptions] = useState(args.styleOptions);
   useEffect(() => {
     setStyleOptions(args.styleOptions);
   }, [args.styleOptions]);

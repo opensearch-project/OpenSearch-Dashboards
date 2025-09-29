@@ -43,7 +43,6 @@ import {
   IndexPatternFieldMap,
   IndexPatternSpec,
   SavedObjectReference,
-  SignalType,
   SourceFilter,
   TypeMeta,
 } from '../types';
@@ -62,6 +61,7 @@ interface SavedObjectBody {
   title?: string;
   displayName?: string;
   description?: string;
+  signalType?: string;
   timeFieldName?: string;
   intervalName?: string;
   fields?: string;
@@ -69,7 +69,6 @@ interface SavedObjectBody {
   fieldFormatMap?: string;
   typeMeta?: string;
   type?: string;
-  signalType?: string;
 }
 
 type FormatFieldFn = (
@@ -84,6 +83,7 @@ export class IndexPattern implements IIndexPattern {
   public title: string = '';
   public displayName?: string;
   public description?: string;
+  public signalType?: string;
   public fieldFormatMap: Record<string, any>;
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
@@ -102,7 +102,6 @@ export class IndexPattern implements IIndexPattern {
   public sourceFilters?: SourceFilter[];
   public dataSourceRef?: SavedObjectReference;
   public fieldsLoading?: boolean;
-  public signalType?: SignalType;
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
@@ -137,6 +136,7 @@ export class IndexPattern implements IIndexPattern {
     this.title = spec.title || '';
     this.displayName = spec.displayName;
     this.description = spec.description;
+    this.signalType = spec.signalType;
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
     this.signalType = spec.signalType;
@@ -240,13 +240,13 @@ export class IndexPattern implements IIndexPattern {
       title: this.title,
       displayName: this.displayName,
       description: this.description,
+      signalType: this.signalType,
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters,
       fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
       typeMeta: this.typeMeta,
       type: this.type,
       dataSourceRef: this.dataSourceRef,
-      signalType: this.signalType,
     };
   }
 
@@ -380,6 +380,7 @@ export class IndexPattern implements IIndexPattern {
       title: this.title,
       displayName: this.displayName,
       description: this.description,
+      signalType: this.signalType,
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
@@ -387,7 +388,6 @@ export class IndexPattern implements IIndexPattern {
       fieldFormatMap,
       type: this.type,
       typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
-      signalType: this.signalType,
     };
   }
 

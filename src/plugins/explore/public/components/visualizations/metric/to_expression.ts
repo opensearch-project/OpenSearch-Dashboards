@@ -3,30 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  DefaultMetricChartStyleControls,
-  defaultMetricChartStyles,
-  MetricChartStyleControls,
-} from './metric_vis_config';
+import { MetricChartStyle } from './metric_vis_config';
 import { VisColumn, VEGASCHEMA, AxisRole, AxisColumnMappings, Threshold } from '../types';
 import { getTooltipFormat } from '../utils/utils';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 import { DEFAULT_OPACITY } from '../constants';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
-import { mergeThresholdsWithBase, locateThreshold } from '../style_panel/threshold/threshold_utils';
+import {
+  mergeThresholdsWithBase,
+  locateThreshold,
+  getMaxAndMinBase,
+} from '../style_panel/threshold/threshold_utils';
 
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions: Partial<MetricChartStyleControls>,
+  styles: MetricChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {
   const colorPalette = getColors();
-  // TODO: refactor other type of charts to have the default styles merged with the styleOptions
-  const styles: DefaultMetricChartStyleControls = { ...defaultMetricChartStyles, ...styleOptions };
+  // const styles: MetricChartStyle = { ...defaultMetricChartStyles, ...styleOptions };
   // Only contains one and the only one value
   const valueColumn = axisColumnMappings?.[AxisRole.Value];
   const numericField = valueColumn?.column;
@@ -51,12 +50,16 @@ export const createSingleMetric = (
   const isValidNumber =
     calculatedValue !== undefined && typeof calculatedValue === 'number' && !isNaN(calculatedValue);
 
-  const selectedUnit = getUnitById(styleOptions?.unitId);
+  const selectedUnit = getUnitById(styles?.unitId);
 
   const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
 
-  const minBase = styleOptions?.min || 0;
-  const maxBase = styleOptions?.max || maxNumber;
+  const { minBase, maxBase } = getMaxAndMinBase(
+    maxNumber,
+    styles?.min,
+    styles?.max,
+    calculatedValue
+  );
 
   const targetValue = calculatedValue || 0;
 
@@ -181,18 +184,18 @@ export const createSingleMetric = (
 
     let color = colorPalette.text;
     if (percentage !== undefined && percentage > 0) {
-      if (styleOptions.percentageColor === 'standard') {
+      if (styles.percentageColor === 'standard') {
         color = colorPalette.statusGreen;
-      } else if (styleOptions.percentageColor === 'inverted') {
+      } else if (styles.percentageColor === 'inverted') {
         color = colorPalette.statusRed;
       } else {
         color = colorPalette.statusGreen;
       }
     }
     if (percentage !== undefined && percentage < 0) {
-      if (styleOptions.percentageColor === 'standard') {
+      if (styles.percentageColor === 'standard') {
         color = colorPalette.statusRed;
-      } else if (styleOptions.percentageColor === 'inverted') {
+      } else if (styles.percentageColor === 'inverted') {
         color = colorPalette.statusGreen;
       } else {
         color = colorPalette.statusRed;

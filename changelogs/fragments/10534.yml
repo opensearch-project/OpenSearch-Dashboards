@@ -1,0 +1,3 @@
+refactor:
+- Chart style options are always optional, default styles are applied if not provided ([#10534](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10534))
+- Refactor explore visualization TS types ([#10534](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10534))
