@@ -97,28 +97,7 @@ export class ChatService {
       forwardedProps: {},
     };
 
-    const observable = this.agent.runAgent(runInput, {
-      onTextMessageStartEvent: () => {
-        // Handle message start
-      },
-      onTextMessageContentEvent: () => {
-        // Handle streaming text content
-      },
-      onTextMessageEndEvent: () => {
-        // Handle message end
-      },
-      onRunStartedEvent: () => {
-        // Handle run started
-      },
-      onRunFinishedEvent: () => {
-        // Handle run finished
-      },
-      onRunErrorEvent: ({ event }: any) => {
-        // Handle errors
-        // eslint-disable-next-line no-console
-        console.error('Chat error:', event.message);
-      },
-    });
+    const observable = this.agent.runAgent(runInput);
 
     // Wrap observable to track completion
     const trackedObservable = new Observable((subscriber: any) => {
@@ -181,7 +160,7 @@ export class ChatService {
     };
 
     // Continue the conversation with the tool result
-    const observable = this.agent.runAgent(runInput, {});
+    const observable = this.agent.runAgent(runInput);
 
     // Wrap observable to track completion
     const trackedObservable = new Observable((subscriber: any) => {

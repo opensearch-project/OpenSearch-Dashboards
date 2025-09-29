@@ -39,11 +39,9 @@ interface PendingToolCall {
  * Extracts business logic from the UI component
  */
 export class ChatEventHandler {
-  private processedEventIds = new Set<string>();
-  private processedMessageEnds = new Set<string>();
+  private activeAssistantMessages = new Map<string, AssistantMessage>();
   private pendingToolCalls = new Map<string, ToolCall>();
-  private currentStreamingMessage = '';
-  private currentAssistantMessage: AssistantMessage | null = null;
+  private lastTextMessageStartId: string | null = null;
   private lastAssistantMessageId: string | null = null;
   private toolExecutor: ToolExecutor;
 
@@ -51,7 +49,6 @@ export class ChatEventHandler {
     private assistantActionService: AssistantActionService,
     private chatService: ChatService | null,
     private onTimelineUpdate: (updater: (prev: Message[]) => Message[]) => void,
-    private onStreamingMessageUpdate: (message: string) => void,
     private onStreamingStateChange: (isStreaming: boolean) => void,
     private getTimeline: () => Message[]
   ) {
@@ -63,6 +60,14 @@ export class ChatEventHandler {
    */
   async handleEvent(event: ChatEvent): Promise<void> {
     switch (event.type) {
+      case EventType.RUN_STARTED:
+        this.handleRunStarted(event);
+        break;
+
+      case EventType.RUN_FINISHED:
+        this.handleRunFinished(event);
+        break;
+
       case EventType.TEXT_MESSAGE_START:
         this.handleTextMessageStart(event as TextMessageStartEvent);
         break;
@@ -91,7 +96,6 @@ export class ChatEventHandler {
         this.handleToolCallResult(event as ToolCallResultEvent);
         break;
 
-      // Add other event types as needed
       case EventType.RUN_ERROR:
         this.handleRunError(event);
         break;
@@ -99,21 +103,40 @@ export class ChatEventHandler {
   }
 
   /**
+   * Handle run started - set streaming state
+   */
+  private handleRunStarted(event: any): void {
+    this.onStreamingStateChange(true);
+  }
+
+  /**
+   * Handle run finished - clear streaming state and cleanup
+   */
+  private handleRunFinished(event: any): void {
+    this.onStreamingStateChange(false);
+    // Clear any remaining active messages (cleanup)
+    this.activeAssistantMessages.clear();
+  }
+
+  /**
    * Handle start of a text message
    */
   private handleTextMessageStart(event: TextMessageStartEvent): void {
-    // Reset streaming message
-    this.currentStreamingMessage = '';
-    this.onStreamingMessageUpdate('');
-    this.onStreamingStateChange(true);
+    // Track this as the last TEXT_MESSAGE_START for tool call association
+    this.lastTextMessageStartId = event.messageId;
 
-    // Initialize new assistant message for tracking tool calls
-    this.currentAssistantMessage = {
+    // Create new message
+    const newMessage: AssistantMessage = {
       id: event.messageId,
       role: 'assistant',
-      content: '', // Will be populated by TEXT_MESSAGE_CONTENT
-      toolCalls: [], // Will be populated by TOOL_CALL events
+      toolCalls: [],
     };
+
+    // Track this message
+    this.activeAssistantMessages.set(event.messageId, newMessage);
+
+    // Add to timeline immediately so it appears in UI
+    this.onTimelineUpdate((prev) => [...prev, newMessage]);
   }
 
   /**
@@ -121,8 +144,24 @@ export class ChatEventHandler {
    */
   private handleTextMessageContent(event: TextMessageContentEvent): void {
     if ('delta' in event && event.delta) {
-      this.currentStreamingMessage += event.delta;
-      this.onStreamingMessageUpdate(this.currentStreamingMessage);
+      const messageId = event.messageId;
+      const assistantMessage = this.activeAssistantMessages.get(messageId);
+
+      if (assistantMessage) {
+        // Append content to this specific message
+        assistantMessage.content = (assistantMessage.content || '') + event.delta;
+
+        // Update the timeline with the updated message
+        this.onTimelineUpdate((prev) => {
+          const index = prev.findIndex((m) => m.id === messageId);
+          if (index >= 0) {
+            const updated = [...prev];
+            updated[index] = { ...assistantMessage };
+            return updated;
+          }
+          return prev;
+        });
+      }
     }
   }
 
@@ -130,52 +169,39 @@ export class ChatEventHandler {
    * Handle end of text message
    */
   private handleTextMessageEnd(event: TextMessageEndEvent): void {
-    // Skip if we've already processed this message end event
     const messageId = event.messageId;
-    if (messageId && this.processedMessageEnds.has(messageId)) {
-      return;
-    }
-    if (messageId) {
-      this.processedMessageEnds.add(messageId);
+
+    // Get message from active tracking
+    const assistantMessage = this.activeAssistantMessages.get(messageId);
+    if (!assistantMessage) {
+      return; // Already processed or doesn't exist
     }
 
-    // Finalize and add the complete assistant message with all tool calls
-    if (this.currentAssistantMessage) {
-      // Set final content (only if there's actual content)
-      if (this.currentStreamingMessage.trim()) {
-        this.currentAssistantMessage.content = this.currentStreamingMessage;
+    // Finalize the message - remove empty content property
+    if (!assistantMessage.content?.trim()) {
+      delete assistantMessage.content;
+    }
+
+    // Remove empty toolCalls array
+    if (assistantMessage.toolCalls?.length === 0) {
+      delete assistantMessage.toolCalls;
+    }
+
+    this.lastAssistantMessageId = assistantMessage.id;
+
+    // Final update in timeline
+    this.onTimelineUpdate((prev) => {
+      const index = prev.findIndex((m) => m.id === assistantMessage.id);
+      if (index >= 0) {
+        const updated = [...prev];
+        updated[index] = { ...assistantMessage };
+        return updated;
       }
+      return [...prev, assistantMessage];
+    });
 
-      // Remove empty toolCalls array if no tools were called
-      if (this.currentAssistantMessage.toolCalls?.length === 0) {
-        delete this.currentAssistantMessage.toolCalls;
-      }
-
-      // Store this as the last assistant message for tool call association
-      this.lastAssistantMessageId = this.currentAssistantMessage.id;
-
-      // Add or update in timeline
-      this.onTimelineUpdate((prev) => {
-        // Check if already exists (from tool call updates)
-        const existingIndex = prev.findIndex((m) => m.id === this.currentAssistantMessage!.id);
-        if (existingIndex >= 0) {
-          // Update existing
-          const updated = [...prev];
-          updated[existingIndex] = this.currentAssistantMessage!;
-          return updated;
-        } else {
-          // Add new
-          return [...prev, this.currentAssistantMessage!];
-        }
-      });
-
-      this.currentAssistantMessage = null;
-    }
-
-    // Clear streaming state
-    this.currentStreamingMessage = '';
-    this.onStreamingMessageUpdate('');
-    this.onStreamingStateChange(false);
+    // Remove from active tracking
+    this.activeAssistantMessages.delete(messageId);
   }
 
   /**
@@ -205,19 +231,8 @@ export class ChatEventHandler {
     // Add to pending map for args accumulation
     this.pendingToolCalls.set(toolCallId, toolCall);
 
-    // Determine which message to associate this tool call with
-    let targetMessageId: string | null = null;
-
-    if (parentMessageId) {
-      // Use the specified parent message
-      targetMessageId = parentMessageId;
-    } else if (this.currentAssistantMessage) {
-      // Use the current streaming message
-      targetMessageId = this.currentAssistantMessage.id;
-    } else if (this.lastAssistantMessageId) {
-      // Fall back to the last assistant message
-      targetMessageId = this.lastAssistantMessageId;
-    }
+    // Use the last TEXT_MESSAGE_START message ID for association
+    const targetMessageId = parentMessageId || this.lastTextMessageStartId;
 
     if (targetMessageId) {
       this.addToolCallToMessage(targetMessageId, toolCall);
@@ -379,38 +394,29 @@ export class ChatEventHandler {
   }
 
   /**
-   * Update assistant message in timeline (for real-time tool call updates)
-   */
-  private updateAssistantMessageInTimeline(): void {
-    if (!this.currentAssistantMessage) return;
-
-    this.onTimelineUpdate((prev) => {
-      const existingIndex = prev.findIndex((m) => m.id === this.currentAssistantMessage!.id);
-      if (existingIndex >= 0) {
-        // Update existing
-        const updated = [...prev];
-        updated[existingIndex] = { ...this.currentAssistantMessage! };
-        return updated;
-      } else {
-        // Add new (shouldn't happen but safe fallback)
-        return [...prev, { ...this.currentAssistantMessage! }];
-      }
-    });
-  }
-
-  /**
    * Add tool call to a specific message in timeline
    */
   private addToolCallToMessage(messageId: string, toolCall: ToolCall): void {
-    // If it's the current streaming message, update it directly
-    if (this.currentAssistantMessage && this.currentAssistantMessage.id === messageId) {
-      this.currentAssistantMessage.toolCalls = this.currentAssistantMessage.toolCalls || [];
-      this.currentAssistantMessage.toolCalls.push(toolCall);
-      this.updateAssistantMessageInTimeline();
+    // Check if message is in active messages
+    const activeMessage = this.activeAssistantMessages.get(messageId);
+    if (activeMessage) {
+      activeMessage.toolCalls = activeMessage.toolCalls || [];
+      activeMessage.toolCalls.push(toolCall);
+
+      // Update timeline
+      this.onTimelineUpdate((prev) => {
+        const index = prev.findIndex((m) => m.id === messageId);
+        if (index >= 0) {
+          const updated = [...prev];
+          updated[index] = { ...activeMessage };
+          return updated;
+        }
+        return prev;
+      });
       return;
     }
 
-    // Otherwise, find and update the message in timeline
+    // Otherwise find in timeline and update
     this.onTimelineUpdate((prev) => {
       const updated = [...prev];
       const messageIndex = updated.findIndex((m) => m.id === messageId);
@@ -433,15 +439,25 @@ export class ChatEventHandler {
    * Update tool call in whichever message contains it
    */
   private updateToolCallInMessage(toolCallId: string, updatedToolCall: ToolCall): void {
-    // If it's in the current streaming message, update it directly
-    if (this.currentAssistantMessage && this.currentAssistantMessage.toolCalls) {
-      const toolCallIndex = this.currentAssistantMessage.toolCalls.findIndex(
-        (tc) => tc.id === toolCallId
-      );
-      if (toolCallIndex >= 0) {
-        this.currentAssistantMessage.toolCalls[toolCallIndex] = updatedToolCall;
-        this.updateAssistantMessageInTimeline();
-        return;
+    // First check active messages
+    for (const [messageId, activeMessage] of this.activeAssistantMessages) {
+      if (activeMessage.toolCalls) {
+        const toolCallIndex = activeMessage.toolCalls.findIndex((tc) => tc.id === toolCallId);
+        if (toolCallIndex >= 0) {
+          activeMessage.toolCalls[toolCallIndex] = updatedToolCall;
+
+          // Update timeline
+          this.onTimelineUpdate((prev) => {
+            const index = prev.findIndex((m) => m.id === messageId);
+            if (index >= 0) {
+              const updated = [...prev];
+              updated[index] = { ...activeMessage };
+              return updated;
+            }
+            return prev;
+          });
+          return;
+        }
       }
     }
 
@@ -510,12 +526,10 @@ export class ChatEventHandler {
    * Clear all state (useful for resetting)
    */
   clearState(): void {
-    this.processedEventIds.clear();
-    this.processedMessageEnds.clear();
+    this.activeAssistantMessages.clear();
     this.pendingToolCalls.clear();
     this.toolExecutor.clearAllPendingTools();
-    this.currentStreamingMessage = '';
-    this.currentAssistantMessage = null;
-    this.onStreamingMessageUpdate('');
+    this.lastTextMessageStartId = null;
+    this.lastAssistantMessageId = null;
   }
 }

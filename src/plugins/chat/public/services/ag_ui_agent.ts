@@ -28,7 +28,7 @@ export class AgUiAgent {
     this.serverUrl = serverUrl;
   }
 
-  public runAgent(input: RunAgentInput, handlers?: any): Observable<BaseEvent> {
+  public runAgent(input: RunAgentInput): Observable<BaseEvent> {
     return new Observable<BaseEvent>((observer) => {
       // Check for previous request and abort if needed
       if (this.abortController) {

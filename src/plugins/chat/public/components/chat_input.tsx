@@ -37,9 +37,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           fullWidth
         />
         <EuiButtonIcon
-          iconType={isStreaming ? 'loading' : 'generate'}
+          iconType={isStreaming ? 'generate' : 'sortUp'}
           onClick={onSend}
-          disabled={input.trim().length === 0 || isStreaming}
+          isDisabled={input.trim().length === 0 || isStreaming}
           aria-label="Send message"
           size="m"
           color="primary"

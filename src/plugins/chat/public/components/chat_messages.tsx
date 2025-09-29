@@ -29,7 +29,6 @@ function getToolStatus(
 interface ChatMessagesProps {
   layoutMode: ChatLayoutMode;
   timeline: Message[];
-  currentStreamingMessage: string;
   isStreaming: boolean;
   onResendMessage?: (message: Message) => void;
 }
@@ -37,7 +36,6 @@ interface ChatMessagesProps {
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
   layoutMode,
   timeline,
-  currentStreamingMessage,
   isStreaming,
   onResendMessage,
 }) => {
@@ -51,7 +49,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
   useEffect(() => {
     scrollToBottom();
-  }, [timeline, currentStreamingMessage]);
+  }, [timeline]);
 
   // Context is now handled by RFC hooks - no subscriptions needed
 
@@ -64,7 +62,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
       {/* Timeline Area */}
       <div className={`chatMessages chatMessages--${layoutMode}`}>
-        {timeline.length === 0 && !currentStreamingMessage && (
+        {timeline.length === 0 && !isStreaming && (
           <div className="chatMessages__emptyState">
             <EuiIcon type="generate" size="xl" />
             <EuiText color="subdued" size="s">
@@ -81,10 +79,27 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
           if (message.role === 'assistant') {
             const assistantMsg = message as AssistantMessage;
+            const isEmptyAndStreaming =
+              !assistantMsg.content?.trim() && !assistantMsg.toolCalls?.length && isStreaming;
+
             return (
               <div key={message.id}>
+                {/* Show thinking indicator for empty streaming messages */}
+                {isEmptyAndStreaming && (
+                  <div className="messageRow">
+                    <div className="messageRow__icon">
+                      <EuiIcon type="console" size="m" color="success" />
+                    </div>
+                    <div className="messageRow__content">
+                      <div className="chatMessages__thinkingText">Thinking...</div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Assistant message content */}
-                {assistantMsg.content && <MessageRow message={assistantMsg} />}
+                {assistantMsg.content && assistantMsg.content.trim() && (
+                  <MessageRow message={assistantMsg} />
+                )}
 
                 {/* Tool calls below the message */}
                 {assistantMsg.toolCalls?.map((toolCall) => {
@@ -126,7 +141,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
         })}
 
         {/* Loading indicator - waiting for agent response */}
-        {isStreaming && currentStreamingMessage === '' && (
+        {isStreaming && timeline.length === 0 && (
           <div className="chatMessages__loadingIndicator">
             <div className="messageRow">
               <div className="messageRow__icon">
@@ -137,18 +152,6 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
               </div>
             </div>
           </div>
-        )}
-
-        {/* Streaming Message */}
-        {currentStreamingMessage && (
-          <MessageRow
-            message={{
-              id: 'streaming',
-              role: 'assistant',
-              content: currentStreamingMessage,
-            }}
-            isStreaming={true}
-          />
         )}
 
         <div ref={messagesEndRef} />
