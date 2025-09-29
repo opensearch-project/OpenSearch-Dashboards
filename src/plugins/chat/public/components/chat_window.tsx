@@ -2,12 +2,13 @@
 * Copyright OpenSearch Contributors
 * SPDX-License-Identifier: Apache-2.0
 */
-/* eslint-disable no-shadow */
+
 /* eslint-disable no-console */
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { CoreStart } from '../../../../core/public';
 import { useChatContext } from '../contexts/chat_context';
+import { ChatEventHandler } from '../services/chat_event_handler';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import {
   ContextProviderStart,
@@ -15,7 +16,6 @@ import {
 } from '../../../context_provider/public';
 import type { ToolDefinition } from '../../../context_provider/public';
 import {
-  EventType,
   // eslint-disable-next-line prettier/prettier
   type Event as ChatEvent,
 } from '../../common/events';
@@ -59,12 +59,6 @@ interface ChatWindowProps {
   onToggleLayout?: () => void;
 }
 
-interface PendingToolCall {
-  id: string;
-  name: string;
-  args: string;
-}
-
 /**
  * ChatWindow with AssistantAction support
  */
@@ -88,9 +82,20 @@ function ChatWindowContent({
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentStreamingMessage, setCurrentStreamingMessage] = useState('');
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
-  const [processedEventIds, setProcessedEventIds] = useState<Set<string>>(new Set());
-  const [processedMessageEnds, setProcessedMessageEnds] = useState<Set<string>>(new Set());
-  const [pendingToolCalls] = useState<Map<string, PendingToolCall>>(new Map());
+
+  // Create the event handler using useMemo
+  const eventHandler = useMemo(
+    () =>
+      new ChatEventHandler(
+        service,
+        chatService,
+        setTimeline,
+        setCurrentStreamingMessage,
+        setIsStreaming,
+        () => timeline
+      ),
+    [service, chatService, timeline] // Only recreate if services change
+  );
 
   // Register actions
   // useGraphTimeseriesDataAction(); // TODO: Fix the data type. lets kep the type limited to one of object, boolean, number or string and their arrays for now.
@@ -111,222 +116,12 @@ function ChatWindowContent({
     return () => subscription.unsubscribe();
   }, [service, chatService]);
 
-  // Helper function to convert timeline messages to ChatMessage format
-  const timelineToMessages = useCallback((timelineItems: TimelineItem[]) => {
-    return timelineItems
-      .filter((item) => item.type === 'message')
-      .map((item) => {
-        const msg = item as TimelineMessage;
-        const baseMessage = {
-          id: msg.id,
-          role: msg.role,
-          content: msg.content,
-          timestamp: msg.timestamp,
-        };
-
-        // Add toolCallId for messages if it exists (for tool result tracking)
-        if ((msg as any).toolCallId) {
-          return {
-            ...baseMessage,
-            toolCallId: (msg as any).toolCallId,
-          };
-        }
-
-        return baseMessage;
-      });
-  }, []);
-
-  // Extract common tool call handler to avoid duplication
-  const handleToolCallEvent = useCallback(async (event: ChatEvent) => {
-    switch (event.type) {
-      case EventType.TOOL_CALL_START:
-        if ('toolCallId' in event && 'toolCallName' in event) {
-          service.updateToolCallState(event.toolCallId, {
-            id: event.toolCallId,
-            name: event.toolCallName,
-            status: 'pending',
-            timestamp: Date.now(),
-          });
-
-          pendingToolCalls.set(event.toolCallId, {
-            id: event.toolCallId,
-            name: event.toolCallName,
-            args: '',
-          });
-        }
-        break;
-
-      case EventType.TOOL_CALL_ARGS:
-        if ('toolCallId' in event && 'delta' in event) {
-          const toolCall = pendingToolCalls.get(event.toolCallId);
-          if (toolCall) {
-            toolCall.args += event.delta;
-          }
-        }
-        break;
-
-      case EventType.TOOL_CALL_END:
-        if ('toolCallId' in event) {
-          const toolCall = pendingToolCalls.get(event.toolCallId);
-          if (toolCall) {
-            try {
-              const args = JSON.parse(toolCall.args);
-
-              service.updateToolCallState(toolCall.id, {
-                status: 'executing',
-                args,
-              });
-
-              const result = await service.executeAction(toolCall.name, args);
-
-              service.updateToolCallState(toolCall.id, {
-                status: 'complete',
-                result,
-              });
-
-              // Update timeline ToolCallRow with the result
-              setTimeline((prev) =>
-                prev.map((item) =>
-                  item.type === 'tool_call' && item.id === event.toolCallId
-                    ? {
-                        ...item,
-                        status: 'completed' as const,
-                        result: JSON.stringify(result), // Store result as JSON string
-                        timestamp: event.timestamp || item.timestamp,
-                      }
-                    : item
-                )
-              );
-
-              // Send tool result back to assistant
-              if ((chatService as any).sendToolResult) {
-                const messages = timelineToMessages(timeline);
-                const { observable, toolMessage } = await (chatService as any).sendToolResult(toolCall.id, result, messages);
-
-
-                // Set streaming state and subscribe to the response stream to handle assistant's response
-                setIsStreaming(true);
-                const subscription = observable.subscribe({
-                  next: (event: ChatEvent) => {
-                    switch (event.type) {
-                      case EventType.TEXT_MESSAGE_CONTENT:
-                        if ('delta' in event) {
-                          setCurrentStreamingMessage((prev) => prev + (event.delta || ''));
-                        }
-                        break;
-                      case EventType.TEXT_MESSAGE_END:
-                        // Skip if we've already processed this message end event
-                        const messageId = 'messageId' in event ? event.messageId : null;
-                        if (messageId && processedMessageEnds.has(messageId)) {
-                          break;
-                        }
-                        if (messageId) {
-                          setProcessedMessageEnds(prev => new Set(prev).add(messageId));
-                        }
-
-                        setCurrentStreamingMessage((currentContent) => {
-                          // Only add assistant message if there's actual content
-                          if (currentContent.trim()) {
-                            const assistantMessage: TimelineMessage = {
-                              type: 'message',
-                              id:
-                                'messageId' in event && event.messageId
-                                  ? event.messageId
-                                  : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                              role: 'assistant',
-                              content: currentContent,
-                              timestamp: event.timestamp || Date.now(),
-                            };
-
-                            setTimeline((prev) => [...prev, assistantMessage]);
-                          }
-                          return ''; // Clear the streaming message
-                        });
-                        setIsStreaming(false);
-                        break;
-                    }
-                  },
-                  error: (error: any) => {
-                    console.error('Tool result response error:', error);
-                    setIsStreaming(false);
-                  },
-                  complete: () => {
-                    setIsStreaming(false);
-                  },
-                });
-              }
-            } catch (error: any) {
-              service.updateToolCallState(toolCall.id, {
-                status: 'failed',
-                error,
-              });
-
-              // Send error back to assistant
-              if ((chatService as any).sendToolResult) {
-                const messages = timelineToMessages(timeline);
-                const { observable, toolMessage } = await (chatService as any).sendToolResult(toolCall.id, {
-                  error: error.message,
-                }, messages);
-
-                // Set streaming state and subscribe to the response stream to handle assistant's response
-                setIsStreaming(true);
-                const subscription = observable.subscribe({
-                  next: (event: ChatEvent) => {
-                    switch (event.type) {
-                      case EventType.TEXT_MESSAGE_CONTENT:
-                        if ('delta' in event) {
-                          setCurrentStreamingMessage((prev) => prev + (event.delta || ''));
-                        }
-                        break;
-                      case EventType.TEXT_MESSAGE_END:
-                        // Skip if we've already processed this message end event
-                        const messageId2 = 'messageId' in event ? event.messageId : null;
-                        if (messageId2 && processedMessageEnds.has(messageId2)) {
-                          break;
-                        }
-                        if (messageId2) {
-                          setProcessedMessageEnds(prev => new Set(prev).add(messageId2));
-                        }
-
-                        setCurrentStreamingMessage((currentContent) => {
-                          // Only add assistant message if there's actual content
-                          if (currentContent.trim()) {
-                            const assistantMessage: TimelineMessage = {
-                              type: 'message',
-                              id:
-                                'messageId' in event && event.messageId
-                                  ? event.messageId
-                                  : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                              role: 'assistant',
-                              content: currentContent,
-                              timestamp: event.timestamp || Date.now(),
-                            };
-
-                            setTimeline((prev) => [...prev, assistantMessage]);
-                          }
-                          return ''; // Clear the streaming message
-                        });
-                        setIsStreaming(false);
-                        break;
-                    }
-                  },
-                  error: (error: any) => {
-                    console.error('Tool error response error:', error);
-                    setIsStreaming(false);
-                  },
-                  complete: () => {
-                    setIsStreaming(false);
-                  },
-                });
-              }
-            }
-
-            pendingToolCalls.delete(event.toolCallId);
-          }
-        }
-        break;
-    }
-  }, [service, pendingToolCalls, chatService, timeline, timelineToMessages, processedMessageEnds]);
+  // Clean up event handler on component unmount
+  useEffect(() => {
+    return () => {
+      eventHandler.clearState();
+    };
+  }, [eventHandler]);
 
   const handleSend = async () => {
     if (!input.trim() || isStreaming) return;
@@ -335,7 +130,6 @@ function ChatWindowContent({
     setInput('');
     setIsStreaming(true);
     setCurrentStreamingMessage('');
-    setProcessedEventIds(new Set()); // Reset processed events for new message
 
     try {
       const { observable, userMessage } = await chatService.sendMessage(
@@ -361,147 +155,16 @@ function ChatWindowContent({
         }"`
       );
 
-      // Subscribe to streaming response
+      // Subscribe to streaming response - now much cleaner!
       const subscription = observable.subscribe({
-        next: (event: ChatEvent) => {
-          // Event deduplication - create a unique event identifier
-          const eventId = `${event.type}-${event.timestamp || Date.now()}-${JSON.stringify(
-            event
-          ).substring(0, 100)}`;
-          if (processedEventIds.has(eventId)) {
-            return; // Skip duplicate event
-          }
-          setProcessedEventIds((prev) => new Set(prev).add(eventId));
-
+        next: async (event: ChatEvent) => {
           // Update runId if we get it from the event
           if ('runId' in event && event.runId && event.runId !== currentRunId) {
             setCurrentRunId(event.runId);
           }
 
-          // Handle tool call events
-          handleToolCallEvent(event);
-
-          switch (event.type) {
-            case EventType.TEXT_MESSAGE_CONTENT:
-              if ('delta' in event) {
-                setCurrentStreamingMessage((prev) => prev + (event.delta || ''));
-              }
-              break;
-            case EventType.TEXT_MESSAGE_END:
-              // Skip if we've already processed this message end event
-              const messageId = 'messageId' in event ? event.messageId : null;
-              if (messageId && processedMessageEnds.has(messageId)) {
-                break;
-              }
-              if (messageId) {
-                setProcessedMessageEnds(prev => new Set(prev).add(messageId));
-              }
-
-              setCurrentStreamingMessage((currentContent) => {
-                // Only add assistant message if there's actual content
-                if (currentContent.trim()) {
-                  const assistantMessage: TimelineMessage = {
-                    type: 'message',
-                    id:
-                      'messageId' in event && event.messageId
-                        ? event.messageId
-                        : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                    role: 'assistant',
-                    content: currentContent,
-                    timestamp: event.timestamp || Date.now(),
-                  };
-
-                  setTimeline((prev) => [...prev, assistantMessage]);
-                }
-                return ''; // Clear the streaming message
-              });
-              setIsStreaming(false);
-              break;
-            case EventType.TOOL_CALL_START:
-              if ('toolCallId' in event && 'toolCallName' in event) {
-                const newToolCall: TimelineToolCall = {
-                  type: 'tool_call',
-                  id: event.toolCallId,
-                  toolName: event.toolCallName,
-                  status: 'running',
-                  timestamp: event.timestamp || Date.now(),
-                };
-                setTimeline((prev) => {
-                  // Check if tool call with this ID already exists
-                  const existingIndex = prev.findIndex((item) => item.id === newToolCall.id);
-                  if (existingIndex !== -1) {
-                    // Update existing tool call instead of adding duplicate
-                    const updated = [...prev];
-                    updated[existingIndex] = newToolCall;
-                    return updated;
-                  }
-                  // Add new tool call
-                  return [...prev, newToolCall];
-                });
-              }
-              break;
-            case EventType.TOOL_CALL_END:
-              if ('toolCallId' in event) {
-                setTimeline((prev) =>
-                  prev.map((item) =>
-                    item.type === 'tool_call' && item.id === event.toolCallId
-                      ? {
-                          ...item,
-                          status: 'completed' as const,
-                          timestamp: event.timestamp || item.timestamp,
-                        }
-                      : item
-                  )
-                );
-              }
-              break;
-            case EventType.TOOL_CALL_RESULT:
-              if ('toolCallId' in event && 'content' in event) {
-                setTimeline((prev) =>
-                  prev.map((item) => {
-                    if (item.type === 'tool_call' && item.id === event.toolCallId) {
-                      let resultContent = event.content;
-                      // Try to parse the content if it's JSON stringified
-                      try {
-                        const parsed = JSON.parse(event.content);
-                        if (parsed.content && Array.isArray(parsed.content)) {
-                          // Extract text from content array
-                          resultContent = parsed.content
-                            .filter((contentItem: any) => contentItem.type === 'text')
-                            .map((contentItem: any) => contentItem.text)
-                            .join('\n');
-                        }
-                      } catch {
-                        // If parsing fails, use the raw content
-                        resultContent = event.content;
-                      }
-                      return {
-                        ...item,
-                        status: 'completed' as const,
-                        result: resultContent,
-                        timestamp: event.timestamp || item.timestamp,
-                      };
-                    }
-                    return item;
-                  })
-                );
-              }
-              break;
-            case EventType.RUN_ERROR:
-              if ('message' in event) {
-                const errorItem: TimelineError = {
-                  type: 'error',
-                  id: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                  message: event.message,
-                  code: 'code' in event ? event.code : undefined,
-                  timestamp: event.timestamp || Date.now(),
-                };
-                setTimeline((prev) => [...prev, errorItem]);
-              }
-              setIsStreaming(false);
-              setCurrentStreamingMessage('');
-              break;
-          }
+          // Handle all events through the event handler service
+          await eventHandler.handleEvent(event);
         },
         error: (error: any) => {
           console.error('Subscription error:', error);
@@ -548,7 +211,6 @@ function ChatWindowContent({
     setCurrentStreamingMessage('');
     setInput('');
     setIsStreaming(true);
-    setProcessedEventIds(new Set()); // Reset processed events for new message
 
     try {
       const { observable, userMessage } = await chatService.sendMessage(
@@ -574,147 +236,16 @@ function ChatWindowContent({
         }"`
       );
 
-      // Subscribe to streaming response (same logic as handleSend)
+      // Subscribe to streaming response - now using the event handler!
       const subscription = observable.subscribe({
-        next: (event: ChatEvent) => {
-          // Event deduplication - create a unique event identifier
-          const eventId = `${event.type}-${event.timestamp || Date.now()}-${JSON.stringify(
-            event
-          ).substring(0, 100)}`;
-          if (processedEventIds.has(eventId)) {
-            return; // Skip duplicate event
-          }
-          setProcessedEventIds((prev) => new Set(prev).add(eventId));
-
+        next: async (event: ChatEvent) => {
           // Update runId if we get it from the event
           if ('runId' in event && event.runId && event.runId !== currentRunId) {
             setCurrentRunId(event.runId);
           }
 
-          // Handle tool call events
-          handleToolCallEvent(event);
-
-          switch (event.type) {
-            case EventType.TEXT_MESSAGE_CONTENT:
-              if ('delta' in event) {
-                setCurrentStreamingMessage((prev) => prev + (event.delta || ''));
-              }
-              break;
-            case EventType.TEXT_MESSAGE_END:
-              // Skip if we've already processed this message end event
-              const messageId = 'messageId' in event ? event.messageId : null;
-              if (messageId && processedMessageEnds.has(messageId)) {
-                break;
-              }
-              if (messageId) {
-                setProcessedMessageEnds(prev => new Set(prev).add(messageId));
-              }
-
-              setCurrentStreamingMessage((currentContent) => {
-                // Only add assistant message if there's actual content
-                if (currentContent.trim()) {
-                  const assistantMessage: TimelineMessage = {
-                    type: 'message',
-                    id:
-                      'messageId' in event && event.messageId
-                        ? event.messageId
-                        : `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                    role: 'assistant',
-                    content: currentContent,
-                    timestamp: event.timestamp || Date.now(),
-                  };
-
-                  setTimeline((prev) => [...prev, assistantMessage]);
-                }
-                return ''; // Clear the streaming message
-              });
-              setIsStreaming(false);
-              break;
-            case EventType.TOOL_CALL_START:
-              if ('toolCallId' in event && 'toolCallName' in event) {
-                const newToolCall: TimelineToolCall = {
-                  type: 'tool_call',
-                  id: event.toolCallId,
-                  toolName: event.toolCallName,
-                  status: 'running',
-                  timestamp: event.timestamp || Date.now(),
-                };
-                setTimeline((prev) => {
-                  // Check if tool call with this ID already exists
-                  const existingIndex = prev.findIndex((item) => item.id === newToolCall.id);
-                  if (existingIndex !== -1) {
-                    // Update existing tool call instead of adding duplicate
-                    const updated = [...prev];
-                    updated[existingIndex] = newToolCall;
-                    return updated;
-                  }
-                  // Add new tool call
-                  return [...prev, newToolCall];
-                });
-              }
-              break;
-            case EventType.TOOL_CALL_END:
-              if ('toolCallId' in event) {
-                setTimeline((prev) =>
-                  prev.map((item) =>
-                    item.type === 'tool_call' && item.id === event.toolCallId
-                      ? {
-                          ...item,
-                          status: 'completed' as const,
-                          timestamp: event.timestamp || item.timestamp,
-                        }
-                      : item
-                  )
-                );
-              }
-              break;
-            case EventType.TOOL_CALL_RESULT:
-              if ('toolCallId' in event && 'content' in event) {
-                setTimeline((prev) =>
-                  prev.map((item) => {
-                    if (item.type === 'tool_call' && item.id === event.toolCallId) {
-                      let resultContent = event.content;
-                      // Try to parse the content if it's JSON stringified
-                      try {
-                        const parsed = JSON.parse(event.content);
-                        if (parsed.content && Array.isArray(parsed.content)) {
-                          // Extract text from content array
-                          resultContent = parsed.content
-                            .filter((contentItem: any) => contentItem.type === 'text')
-                            .map((contentItem: any) => contentItem.text)
-                            .join('\n');
-                        }
-                      } catch {
-                        // If parsing fails, use the raw content
-                        resultContent = event.content;
-                      }
-                      return {
-                        ...item,
-                        status: 'completed' as const,
-                        result: resultContent,
-                        timestamp: event.timestamp || item.timestamp,
-                      };
-                    }
-                    return item;
-                  })
-                );
-              }
-              break;
-            case EventType.RUN_ERROR:
-              if ('message' in event) {
-                const errorItem: TimelineError = {
-                  type: 'error',
-                  id: `error-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                  message: event.message,
-                  code: 'code' in event ? event.code : undefined,
-                  timestamp: event.timestamp || Date.now(),
-                };
-                setTimeline((prev) => [...prev, errorItem]);
-              }
-              setIsStreaming(false);
-              setCurrentStreamingMessage('');
-              break;
-          }
+          // Handle all events through the event handler service
+          await eventHandler.handleEvent(event);
         },
         error: (error: any) => {
           console.error('Subscription error:', error);
@@ -742,8 +273,6 @@ function ChatWindowContent({
     setCurrentStreamingMessage('');
     setCurrentRunId(null);
     setIsStreaming(false);
-    setProcessedEventIds(new Set()); // Reset processed events for new chat
-    // Context is automatically managed by RFC hooks
   };
 
   // No cleanup needed - RFC hooks handle their own lifecycle
