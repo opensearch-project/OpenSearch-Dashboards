@@ -7,7 +7,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AllAxesOptions } from './standard_axes_options';
-import { StandardAxes, Positions, AxisRole } from '../../types';
+import { StandardAxes, Positions, AxisRole, VisFieldType } from '../../types';
 import configureMockStore from 'redux-mock-store';
 
 const mockStore = configureMockStore([]);
@@ -111,6 +111,8 @@ describe('AllAxesOptions', () => {
     onChangeSwitchAxes: jest.fn(),
     disableGrid: false,
     axisColumnMappings: {},
+    showFullTimeRange: false,
+    onShowFullTimeRangeChange: jest.fn(),
   };
 
   beforeEach(() => {
@@ -325,5 +327,30 @@ describe('AllAxesOptions', () => {
     alignmentSelect.dispatchEvent(mouseUpEvent);
 
     expect(stopPropagation).toHaveBeenCalled();
+  });
+
+  it('does not render "Show full time range" when axis is not temporal', () => {
+    const axisColumnMappingsNonTemporal = {
+      [AxisRole.X]: {
+        id: 2,
+        name: 'category',
+        column: 'category',
+        schema: VisFieldType.Categorical,
+        validValuesCount: 10,
+        uniqueValuesCount: 5,
+      },
+    };
+
+    render(
+      <Provider store={store}>
+        <AllAxesOptions
+          {...defaultProps}
+          axisColumnMappings={axisColumnMappingsNonTemporal}
+          showFullTimeRange={false}
+        />
+      </Provider>
+    );
+
+    expect(screen.queryByTestId('showFullTimeRangeSwitch')).toBeNull();
   });
 });
