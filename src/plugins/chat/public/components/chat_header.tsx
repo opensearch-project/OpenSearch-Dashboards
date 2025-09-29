@@ -41,7 +41,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           />
         )}
         <EuiButtonIcon
-          iconType="refresh"
+          iconType="plus"
           onClick={onNewChat}
           disabled={isStreaming}
           aria-label="New chat"

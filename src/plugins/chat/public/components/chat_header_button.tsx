@@ -128,7 +128,7 @@ export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
 
       <EuiToolTip content="Open Chat Assistant">
         <EuiButtonIcon
-          iconType="plus"
+          iconType="generate"
           onClick={toggleSidecar}
           color={isOpen ? 'primary' : 'text'}
           size="s"

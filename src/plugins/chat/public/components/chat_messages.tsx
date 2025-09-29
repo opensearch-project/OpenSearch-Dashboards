@@ -57,7 +57,11 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
   return (
     <>
-      {/* Context is now displayed via context pills in the chat interface */}
+      {/* Context Tree View: Hiding this for now. Uncomment for development */}
+      {/* <div className="chatMessages__context">
+        <ContextTreeView staticContext={staticContext} dynamicContext={dynamicContext} />
+      </div> */}
+
       {/* Timeline Area */}
       <div className={`chatMessages chatMessages--${layoutMode}`}>
         {timeline.length === 0 && !currentStreamingMessage && (

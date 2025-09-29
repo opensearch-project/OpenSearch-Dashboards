@@ -14,21 +14,18 @@ import type {
   ToolCallEndEvent,
   ToolCallResultEvent,
 } from '../../common/events';
-import type { Message, AssistantMessage, ToolMessage, ToolCall } from '../../common/types';
+import type {
+  Message,
+  AssistantMessage,
+  ToolMessage,
+  ToolCall,
+  SystemMessage,
+} from '../../common/types';
 import { AssistantActionService } from '../../../context_provider/public';
 import { ToolExecutor } from './tool_executor';
 import { ChatService } from './chat_service';
 
-// Error type for timeline (since AG-UI doesn't have error messages)
-interface TimelineError {
-  type: 'error';
-  id: string;
-  message: string;
-  timestamp: number;
-}
-
-// Timeline is now primarily AG-UI Messages
-type TimelineItem = Message | TimelineError;
+// Timeline is now purely AG-UI Messages
 
 interface PendingToolCall {
   id: string;
@@ -371,14 +368,13 @@ export class ChatEventHandler {
    * Handle run errors
    */
   private handleRunError(event: any): void {
-    const errorItem: TimelineError = {
-      type: 'error',
+    const errorMessage: SystemMessage = {
       id: `error-${Date.now()}`,
-      message: event.message || 'An error occurred',
-      timestamp: event.timestamp || Date.now(),
+      role: 'system',
+      content: `Error: ${event.message || 'An error occurred'}`,
     };
 
-    this.onTimelineUpdate((prev) => [...prev, errorItem]);
+    this.onTimelineUpdate((prev) => [...prev, errorMessage]);
     this.onStreamingStateChange(false);
   }
 
