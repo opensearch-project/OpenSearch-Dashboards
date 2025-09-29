@@ -77,7 +77,7 @@ export class ChatService {
     const userMessage: UserMessage = {
       id: this.generateMessageId(),
       role: 'user',
-      content,
+      content: content.trim(),
     };
 
     // Get assistant contexts from the store
@@ -94,6 +94,7 @@ export class ChatService {
       messages: [...messages, userMessage],
       tools: this.availableTools || [], // Pass available tools to AG-UI server
       context: assistantContexts, // Include assistant contexts
+      state: {}, // Required by AG-UI backend - can be empty object as placeholder
       forwardedProps: {},
     };
 
@@ -156,6 +157,7 @@ export class ChatService {
       messages: mappedMessages,
       tools: this.availableTools || [],
       context: assistantContexts, // Include assistant contexts
+      state: {}, // Required by AG-UI backend - can be empty object as placeholder
       forwardedProps: {},
     };
 
