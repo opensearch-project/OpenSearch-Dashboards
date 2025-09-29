@@ -67,7 +67,7 @@ function getInsertText(
         }
         return `${text}()`;
       case 'table':
-        return `${text} `;
+        return `\`${text}\` `;
       default:
         return `${text} `;
     }
