@@ -114,7 +114,7 @@
 .primaryApplicationHeader {
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  .euiHeaderSection>.euiHeaderSectionItem {
+  .euiHeaderSection > .euiHeaderSectionItem {
     align-items: stretch;
   }
 
