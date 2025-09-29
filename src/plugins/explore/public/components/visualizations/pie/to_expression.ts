@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { defaultPieChartStyles, PieChartStyleControls } from './pie_vis_config';
+import { defaultPieChartStyles, PieChartStyle } from './pie_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { DEFAULT_OPACITY } from '../constants';
 
@@ -12,7 +12,7 @@ export const createPieSpec = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions: Partial<PieChartStyleControls>,
+  styleOptions: PieChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {
   const colorColumn = axisColumnMappings?.[AxisRole.COLOR];

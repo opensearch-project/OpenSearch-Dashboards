@@ -19,7 +19,7 @@ import {
   AxisRole,
   AxisColumnMappings,
 } from '../types';
-import { AreaChartStyleControls } from './area_vis_config';
+import { AreaChartStyle } from './area_vis_config';
 
 describe('Area Chart to_expression', () => {
   // Mock data for testing
@@ -73,7 +73,7 @@ describe('Area Chart to_expression', () => {
     },
   ];
 
-  const mockStyles: Partial<AreaChartStyleControls> = {
+  const mockStyles: AreaChartStyle = {
     addLegend: true,
     legendPosition: Positions.RIGHT,
     addTimeMarker: false,
@@ -90,6 +90,8 @@ describe('Area Chart to_expression', () => {
       show: true,
       titleName: '',
     },
+    categoryAxes: [],
+    valueAxes: [],
   };
 
   describe('createSimpleAreaChart', () => {

@@ -25,15 +25,15 @@ import { getColors } from '../theme/default_colors';
 export type LineMode = 'straight' | 'smooth' | 'stepped';
 
 // Complete line chart style controls interface
-export interface LineChartStyleControls {
-  addLegend: boolean;
-  legendPosition: Positions;
-  addTimeMarker: boolean;
+export interface LineChartStyleOptions {
+  addLegend?: boolean;
+  legendPosition?: Positions;
+  addTimeMarker?: boolean;
 
-  lineStyle: LineStyle;
-  lineMode: LineMode;
-  lineWidth: number;
-  tooltipOptions: TooltipOptions;
+  lineStyle?: LineStyle;
+  lineMode?: LineMode;
+  lineWidth?: number;
+  tooltipOptions?: TooltipOptions;
 
   /**
    * @deprecated - use thresholdOptions instead
@@ -41,14 +41,16 @@ export interface LineChartStyleControls {
   thresholdLines?: ThresholdLines;
 
   // Axes configuration
-  categoryAxes: CategoryAxis[];
-  valueAxes: ValueAxis[];
+  categoryAxes?: CategoryAxis[];
+  valueAxes?: ValueAxis[];
 
-  titleOptions: TitleOptions;
+  titleOptions?: TitleOptions;
   thresholdOptions?: ThresholdOptions;
 }
 
-export const defaultLineChartStyles: LineChartStyleControls = {
+export type LineChartStyle = Required<Omit<LineChartStyleOptions, 'thresholdLines'>>;
+
+export const defaultLineChartStyles: LineChartStyle = {
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,

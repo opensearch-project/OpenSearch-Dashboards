@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { GaugeChartStyleControls, defaultGaugeChartStyles } from './gauge_vis_config';
+import { GaugeChartStyle } from './gauge_vis_config';
 import { VisColumn, AxisRole, AxisColumnMappings, VEGASCHEMA } from '../types';
 import { generateArcExpression } from './gauge_chart_utils';
 import { calculateValue } from '../utils/calculation';
@@ -20,7 +20,7 @@ export const createGauge = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<GaugeChartStyleControls>,
+  styleOptions: GaugeChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {
   const colors = getColors();
@@ -35,8 +35,6 @@ export const createGauge = (
     numericalValues = transformedData.map((d) => d[numericField]);
     maxNumber = Math.max(...numericalValues);
   }
-
-  const styleOptions = { ...defaultGaugeChartStyles, ...styles };
 
   const calculatedValue = calculateValue(numericalValues, styleOptions.valueCalculation);
 

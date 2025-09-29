@@ -5,7 +5,7 @@
 import { createLabelLayer, getDataBound, addTransform, enhanceStyle } from './heatmap_chart_utils';
 import { AggregationType, VisFieldType, ColorSchemas, ScaleType, VisColumn } from '../types';
 import { DEFAULT_GREY } from '../theme/default_colors';
-import { defaultHeatmapChartStyles, HeatmapLabels } from './heatmap_vis_config';
+import { defaultHeatmapChartStyles, HeatmapLabels, HeatmapChartStyle } from './heatmap_vis_config';
 
 describe('createLabelLayer', () => {
   const xAxis: VisColumn = {
@@ -147,6 +147,7 @@ describe('getDataBound', () => {
 
 describe('addTransform', () => {
   const styles = {
+    ...defaultHeatmapChartStyles,
     exclusive: {
       percentageMode: true,
       colorSchema: ColorSchemas.BLUES,
@@ -174,6 +175,7 @@ describe('addTransform', () => {
   it('should return empty array when percentageMode is false', () => {
     const result = addTransform(
       {
+        ...defaultHeatmapChartStyles,
         exclusive: {
           ...styles.exclusive,
           percentageMode: false,
@@ -206,6 +208,7 @@ describe('enhanceStyle', () => {
 
   it('applies percentageMode settings if enabled and addLegend is true', () => {
     const styles = {
+      ...defaultHeatmapChartStyles,
       exclusive: {
         customRanges: [],
         colorSchema: ColorSchemas.GREENS,
@@ -229,6 +232,7 @@ describe('enhanceStyle', () => {
 
   it('applies scaleToDataBounds if enabled', () => {
     const styles = {
+      ...defaultHeatmapChartStyles,
       exclusive: {
         customRanges: [],
         colorSchema: ColorSchemas.GREENS,
@@ -250,6 +254,7 @@ describe('enhanceStyle', () => {
 
   it('applies thresholds if enabled useThresholdColor', () => {
     const styles = {
+      ...defaultHeatmapChartStyles,
       exclusive: {
         colorSchema: ColorSchemas.GREENS,
         percentageMode: true,
@@ -284,6 +289,7 @@ describe('enhanceStyle', () => {
 
   it('prefers thresholds over scaleToDataBounds when both are enabled', () => {
     const styles = {
+      ...defaultHeatmapChartStyles,
       exclusive: {
         colorSchema: ColorSchemas.GREENS,
         percentageMode: true,
@@ -317,7 +323,7 @@ describe('enhanceStyle', () => {
 
   it('does nothing if no matching flags are set', () => {
     const markLayer = JSON.parse(JSON.stringify(baseMarkLayer));
-    enhanceStyle(markLayer, {}, transformedData, colorField);
+    enhanceStyle(markLayer, ({} as unknown) as HeatmapChartStyle, transformedData, colorField);
 
     expect(markLayer).toEqual(baseMarkLayer);
   });

@@ -4,11 +4,7 @@
  */
 
 import React from 'react';
-import {
-  createScatterConfig,
-  ScatterChartStyleControls,
-  defaultScatterChartStyles,
-} from './scatter_vis_config';
+import { createScatterConfig, defaultScatterChartStyles } from './scatter_vis_config';
 import { ScatterVisStyleControls } from './scatter_vis_options';
 import { Positions, PointShape, AxisRole, ThresholdMode } from '../types';
 
@@ -31,7 +27,7 @@ describe('createScatterConfig', () => {
 
   it('should have the correct default style settings', () => {
     const config = createScatterConfig();
-    const defaults = config.ui.style.defaults as ScatterChartStyleControls;
+    const defaults = config.ui.style.defaults;
     // Verify basic controls
     expect(defaults.tooltipOptions.mode).toBe('all');
     expect(defaults.addLegend).toBe(true);

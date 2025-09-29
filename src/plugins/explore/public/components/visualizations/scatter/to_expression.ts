@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ScatterChartStyleControls } from './scatter_vis_config';
+import { ScatterChartStyle } from './scatter_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
@@ -14,7 +14,7 @@ export const createTwoMetricScatter = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<ScatterChartStyleControls>,
+  styles: ScatterChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
@@ -77,7 +77,7 @@ export const createTwoMetricOneCateScatter = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<ScatterChartStyleControls>,
+  styles: ScatterChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const colorColumn = axisColumnMappings?.color;
@@ -152,7 +152,7 @@ export const createThreeMetricOneCateScatter = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<ScatterChartStyleControls>,
+  styles: ScatterChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const colorColumn = axisColumnMappings?.color;

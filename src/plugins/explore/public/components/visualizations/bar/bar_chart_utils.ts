@@ -12,7 +12,7 @@ import {
   AggregationType,
 } from '../types';
 import { applyAxisStyling, getSchemaByAxis } from '../utils/utils';
-import { BarChartStyleControls } from './bar_vis_config';
+import { BarChartStyle } from './bar_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
@@ -132,7 +132,7 @@ export const buildTooltipEncoding = (
 
 export const buildThresholdColorEncoding = (
   numericalField: VisColumn | undefined,
-  styleOptions: Partial<BarChartStyleControls>
+  styleOptions: Partial<BarChartStyle>
 ) => {
   // support old thresholdLines config to be compatible with new thresholds
 
