@@ -208,6 +208,9 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         query: {
           queryString: {
             getQuery: jest.fn().mockReturnValue({ query: '', language: 'PPL' }),
+            getLanguageService: jest.fn().mockReturnValue({
+              getLanguage: jest.fn().mockReturnValue({}),
+            }),
           },
           filterManager: {
             getFilters: jest.fn().mockReturnValue([]),
@@ -640,7 +643,6 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       mockBuildPointSeriesData.mockReturnValue([{ x: 1609459200000, y: 5 }] as any);
       mockTabifyAggResponse.mockReturnValue({ rows: [], columns: [] } as any);
     });
-
     it('should process histogram data when timeFieldName exists', () => {
       const rawResults = {
         hits: {
@@ -1158,7 +1160,34 @@ describe('Query Actions - Comprehensive Test Suite', () => {
             },
           },
         ]),
+        aggs: [
+          {} as any,
+          {
+            buckets: {
+              getInterval: jest.fn(() => ({ interval: '1h', scale: 1 })),
+            },
+          } as any,
+        ],
       } as any);
+      mockSearchSource.fetch.mockReset();
+      mockSearchSource.fetch.mockResolvedValue({
+        hits: {
+          hits: [
+            { _id: '1', _source: { field1: 'value1' } },
+            { _id: '2', _source: { field2: 'value2' } },
+          ],
+          total: 2,
+        },
+        took: 5,
+        aggregations: {
+          histogram: {
+            buckets: [
+              { key: 1609459200000, doc_count: 5 },
+              { key: 1609462800000, doc_count: 3 },
+            ],
+          },
+        },
+      });
     });
 
     it('should execute histogram query with custom interval', async () => {
@@ -1174,6 +1203,17 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       expect(mockServices.data.dataViews.get).toHaveBeenCalled();
       expect(mockSearchSource.fetch).toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            cacheKey: 'test-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.READY,
+            }),
+          }),
+        })
+      );
     });
 
     it('should handle missing interval gracefully', async () => {
@@ -1187,6 +1227,18 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       await thunk(mockDispatch, mockGetState, undefined);
 
       expect(mockServices.data.dataViews.get).toHaveBeenCalled();
+      expect(mockSearchSource.fetch).toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            cacheKey: 'test-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.READY,
+            }),
+          }),
+        })
+      );
     });
 
     it('should handle dataView without timeFieldName', async () => {
@@ -1202,16 +1254,32 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       const thunk = executeHistogramQuery(params);
       await thunk(mockDispatch, mockGetState, undefined);
-
+      expect(mockServices.data.dataViews.get).toHaveBeenCalled();
       expect(mockSearchSource.fetch).toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            cacheKey: 'test-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.READY,
+            }),
+          }),
+        })
+      );
     });
 
     it('should handle search errors gracefully', async () => {
       const error = {
         body: {
           error: 'Search failed',
-          message:
-            '{"error":{"details":"Query syntax error","reason":"Invalid query","type":"parsing_exception"}}',
+          message: JSON.stringify({
+            error: {
+              details: 'Query syntax error',
+              reason: 'Invalid query',
+              type: 'parsing_exception',
+            },
+          }),
           statusCode: 400,
         },
       };
@@ -1235,11 +1303,20 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       // Verify error status is set in Redux
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: expect.stringContaining('setIndividualQueryStatus'),
+          type: 'queryEditor/setIndividualQueryStatus',
           payload: expect.objectContaining({
             cacheKey: 'test-cache-key',
             status: expect.objectContaining({
               status: QueryExecutionStatus.ERROR,
+              error: expect.objectContaining({
+                error: 'Search failed',
+                message: {
+                  details: 'Query syntax error',
+                  reason: 'Invalid query',
+                  type: 'parsing_exception',
+                },
+                statusCode: 400,
+              }),
             }),
           }),
         })
@@ -1384,6 +1461,17 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       const mockIndexPatterns = dataPublicModule.indexPatterns as any;
       mockIndexPatterns.isDefault.mockReturnValue(true);
+      mockSearchSource.fetch.mockReset();
+      mockSearchSource.fetch.mockResolvedValue({
+        hits: {
+          hits: [
+            { _id: '1', _source: { field1: 'value1' } },
+            { _id: '2', _source: { field2: 'value2' } },
+          ],
+          total: 2,
+        },
+        took: 5,
+      });
     });
 
     it('should execute tab query successfully', async () => {
@@ -1399,6 +1487,17 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(mockServices.data.dataViews.get).toHaveBeenCalled();
       expect(mockSearchSource.fetch).toHaveBeenCalled();
       expect(setResults).toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            cacheKey: 'test-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.READY,
+            }),
+          }),
+        })
+      );
     });
 
     it('should handle missing services gracefully', async () => {
