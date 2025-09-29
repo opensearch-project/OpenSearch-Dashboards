@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback, useRef, useState, useEffect } from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CoreStart, MountPoint, SIDECAR_DOCKED_MODE } from '../../../../core/public';
 import { ChatWindow } from './chat_window';
 import { ChatProvider } from '../contexts/chat_context';
@@ -12,6 +12,7 @@ import { ChatService } from '../services/chat_service';
 import { GlobalAssistantProvider } from '../../../context_provider/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ContextProviderStart, TextSelectionMonitor } from '../../../context_provider/public';
+import './chat_header_button.scss';
 
 export enum ChatLayoutMode {
   SIDECAR = 'sidecar',
@@ -126,27 +127,30 @@ export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
       {/* Text selection monitor - always active when chat UI is rendered */}
       <TextSelectionMonitor />
 
-      <EuiToolTip content="Open Chat Assistant">
-        <EuiButtonIcon
-          iconType="generate"
-          onClick={toggleSidecar}
-          color={isOpen ? 'primary' : 'text'}
-          size="s"
-          aria-label="Toggle chat assistant"
-          display="base"
-        />
-      </EuiToolTip>
+      <div className="chatHeaderButton__container">
+        <EuiToolTip content="Open Chat Assistant (Experimental)">
+          <EuiButtonIcon
+            iconType="generate"
+            onClick={toggleSidecar}
+            color={isOpen ? 'primary' : 'subdued'}
+            size="s"
+            aria-label="Toggle chat assistant"
+            display="empty"
+          />
+        </EuiToolTip>
+        <EuiBadge color="warning" className="chatHeaderButton__experimentalBadge">
+          Experimental
+        </EuiBadge>
+      </div>
 
       {/* Mount point for sidecar content */}
       <div
         ref={mountPointRef}
-        style={{
-          width: '100%',
-          height: '100%',
-          display: isOpen ? 'block' : 'none',
-        }}
+        className={`chatHeaderButton__mountPoint ${
+          isOpen ? 'chatHeaderButton__mountPoint--visible' : 'chatHeaderButton__mountPoint--hidden'
+        }`}
       >
-        <div style={{ height: '100%', boxSizing: 'border-box' }}>
+        <div className="chatHeaderButton__content">
           <OpenSearchDashboardsContextProvider services={{ core, contextProvider, charts }}>
             <GlobalAssistantProvider
               onToolsUpdated={(tools) => {
