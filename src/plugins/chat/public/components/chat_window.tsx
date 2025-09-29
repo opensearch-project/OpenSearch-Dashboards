@@ -170,8 +170,11 @@ function ChatWindowContent({
     }
   };
 
-  const handleResendMessage = async (message: UserMessage) => {
+  const handleResendMessage = async (message: Message) => {
     if (isStreaming) return;
+
+    // Only user messages can be resent
+    if (message.role !== 'user') return;
 
     // Find the index of this message in the timeline
     const messageIndex = timeline.findIndex(

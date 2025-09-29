@@ -5,4 +5,4 @@
 
 export { ChatService } from './chat_service';
 export { AgUiAgent } from './ag_ui_agent';
-export type { ChatMessage, ChatState } from './chat_service';
+export type { ChatState } from './chat_service';

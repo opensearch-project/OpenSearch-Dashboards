@@ -5,19 +5,11 @@
 
 import { Observable } from 'rxjs';
 import { AgUiAgent } from './ag_ui_agent';
-import { RunAgentInput } from '../../common/types';
+import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
 
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant' | 'tool';
-  content: string;
-  timestamp: number;
-  toolCallId?: string;
-}
-
 export interface ChatState {
-  messages: ChatMessage[];
+  messages: Message[];
   isStreaming: boolean;
   currentStreamingMessage?: string;
 }
@@ -74,19 +66,18 @@ export class ChatService {
 
   public async sendMessage(
     content: string,
-    messages: ChatMessage[]
+    messages: Message[]
   ): Promise<{
     observable: any;
-    userMessage: ChatMessage;
+    userMessage: UserMessage;
   }> {
     const requestId = this.generateRequestId();
 
     this.addActiveRequest(requestId);
-    const userMessage: ChatMessage = {
+    const userMessage: UserMessage = {
       id: this.generateMessageId(),
       role: 'user',
       content,
-      timestamp: Date.now(),
     };
 
     // Get assistant contexts from the store
@@ -100,27 +91,7 @@ export class ChatService {
     const runInput: RunAgentInput = {
       threadId: this.threadId,
       runId: this.generateRunId(),
-      messages: [
-        ...messages.map((msg) => {
-          const baseMessage: any = {
-            id: msg.id,
-            role: msg.role,
-            content: msg.content,
-          };
-          if (msg.toolCallId) {
-            baseMessage.toolCallId = msg.toolCallId;
-          }
-          return baseMessage;
-        }),
-        // IMPORTANT: Reuse the same userMessage so we don't create a second
-        // synthetic user entry (which was causing duplicate user prompts
-        // to appear / be sent to the agent).
-        {
-          id: userMessage.id,
-          role: userMessage.role,
-          content: userMessage.content,
-        },
-      ],
+      messages: [...messages, userMessage],
       tools: this.availableTools || [], // Pass available tools to AG-UI server
       context: assistantContexts, // Include assistant contexts
       forwardedProps: {},
@@ -174,19 +145,18 @@ export class ChatService {
   public async sendToolResult(
     toolCallId: string,
     result: any,
-    messages: ChatMessage[]
+    messages: Message[]
   ): Promise<{
     observable: any;
-    toolMessage: ChatMessage;
+    toolMessage: ToolMessage;
   }> {
     const requestId = this.generateRequestId();
 
     this.addActiveRequest(requestId);
-    const toolMessage: ChatMessage = {
+    const toolMessage: ToolMessage = {
       id: this.generateMessageId(),
       role: 'tool',
       content: typeof result === 'string' ? result : JSON.stringify(result),
-      timestamp: Date.now(),
       toolCallId,
     };
 
@@ -199,25 +169,7 @@ export class ChatService {
     }
 
     // Send the tool result back to the agent with full conversation history
-    const mappedMessages = [
-      ...messages.map((msg) => {
-        const baseMessage: any = {
-          id: msg.id,
-          role: msg.role,
-          content: msg.content,
-        };
-        if (msg.toolCallId) {
-          baseMessage.toolCallId = msg.toolCallId;
-        }
-        return baseMessage;
-      }),
-      {
-        id: toolMessage.id,
-        role: toolMessage.role,
-        content: toolMessage.content,
-        toolCallId: toolMessage.toolCallId,
-      },
-    ];
+    const mappedMessages = [...messages, toolMessage];
 
     const runInput: RunAgentInput = {
       threadId: this.threadId,
