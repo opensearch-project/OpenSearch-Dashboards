@@ -55,7 +55,17 @@ export const useChartsBaseTheme = (): Theme => {
       background: {
         color: '#FFFFFF',
       },
-    };
+      axes: {
+        axisTitle: {
+          fontSize: 12,
+          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+        },
+        tickLabel: {
+          fontSize: 11,
+          fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
+        },
+      },
+    } as Theme;
   }
 };
 
@@ -64,8 +74,13 @@ export const useChartsBaseTheme = (): Theme => {
  * @returns boolean - True if dark mode is enabled, false otherwise
  */
 export const useDarkMode = (): boolean => {
-  const themeService = useChartsThemeService();
-  return themeService.useDarkMode();
+  try {
+    const themeService = useChartsThemeService();
+    return themeService.useDarkMode();
+  } catch (error) {
+    // Dark mode service not available, defaulting to light mode
+    return false;
+  }
 };
 
 /**

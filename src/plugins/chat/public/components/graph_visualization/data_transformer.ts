@@ -301,14 +301,10 @@ export function validateInputData(
  */
 export function transformGraphData(args: GraphTimeseriesDataArgs): TransformationResult {
   try {
-    // transformGraphData called with args
-
     // Validate input data
     const validation = validateInputData(args.data);
-    // Data validation completed
 
     if (!validation.isValid) {
-      // Data validation failed
       return {
         success: false,
         error: {

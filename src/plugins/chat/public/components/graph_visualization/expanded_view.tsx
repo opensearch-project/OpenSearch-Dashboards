@@ -105,7 +105,7 @@ export const ExpandedView: React.FC<ExpandedViewProps> = ({
                 position={Position.Bottom}
                 title={chartData.xAxisLabel}
                 showOverlappingTicks={false}
-                showGridLines={false}
+                gridLine={{ visible: false }}
                 tickFormat={(value) => {
                   const date = new Date(value);
                   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -133,8 +133,8 @@ export const ExpandedView: React.FC<ExpandedViewProps> = ({
                     title={chartData.yAxisLabel}
                     position={Position.Left}
                     domain={yDomain}
-                    showGridLines={true}
                     gridLine={{
+                      visible: true,
                       stroke: '#E5E5E5',
                       strokeWidth: 1,
                       opacity: 0.5,

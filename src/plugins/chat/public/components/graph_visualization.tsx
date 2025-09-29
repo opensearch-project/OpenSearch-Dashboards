@@ -75,16 +75,30 @@ class GraphVisualizationErrorBoundary extends React.Component<
 
   render() {
     if (this.state.hasError) {
+      const errorMessage = this.state.error?.message || 'Unknown error occurred';
+      const isDataError =
+        errorMessage.toLowerCase().includes('data') ||
+        errorMessage.toLowerCase().includes('format') ||
+        errorMessage.toLowerCase().includes('parse');
+
       return (
         <EuiEmptyPrompt
           iconType="alert"
           color="danger"
           title={<h3>Chart rendering failed</h3>}
           body={
-            <p>
-              An error occurred while rendering the chart. Please try refreshing or contact support
-              if the problem persists.
-            </p>
+            <div>
+              <p>
+                {isDataError
+                  ? 'There was an issue with the chart data format. Please check that the data is properly formatted.'
+                  : 'An error occurred while rendering the chart. This may be due to browser compatibility or data complexity.'}
+              </p>
+              {errorMessage && (
+                <EuiCallOut title="Error details" color="danger" iconType="alert" size="s">
+                  <p style={{ fontSize: '12px', fontFamily: 'monospace' }}>{errorMessage}</p>
+                </EuiCallOut>
+              )}
+            </div>
           }
           actions={
             <EuiButton color="primary" fill onClick={this.handleRetry}>
@@ -157,6 +171,11 @@ const LoadingDisplay: React.FC = () => (
     <EuiFlexItem grow={false}>
       <EuiLoadingChart size="l" />
     </EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="s" color="subdued">
+        Loading chart...
+      </EuiText>
+    </EuiFlexItem>
   </EuiFlexGroup>
 );
 
@@ -169,10 +188,8 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
   showExpandButton = true,
   onExpand,
 }) => {
-  // GraphVisualization component rendered with data
   // State management
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [seriesVisibility, setSeriesVisibility] = useState<Record<string, boolean>>({});
   const [retryCount, setRetryCount] = useState(0);
 
@@ -183,16 +200,10 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
 
   // Transform and validate data
   const transformationResult = useMemo(() => {
-    // Starting data transformation
-    setIsLoading(true);
     try {
       const result = transformGraphData(data);
-      // Data transformation completed
-      setIsLoading(false);
       return result;
     } catch (error) {
-      // Data transformation error
-      setIsLoading(false);
       return {
         success: false,
         error: {
@@ -203,6 +214,8 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
       };
     }
   }, [data]);
+
+  const isLoading = !transformationResult;
 
   // Initialize series visibility when data changes
   const chartData = useMemo(() => {
@@ -276,7 +289,8 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
   }, []);
 
   const handleRenderError = useCallback((error: Error, errorInfo: ErrorInfo) => {
-    // Chart render error occurred
+    // Error is already caught by GraphVisualizationErrorBoundary and will be displayed in UI
+    // This callback can be used for additional error reporting if needed
   }, []);
 
   // Tooltip settings
@@ -316,8 +330,6 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
       </EuiPanel>
     );
   }
-
-  // Render empty data state
 
   if (!chartData || chartData.series.length === 0) {
     return (
@@ -394,9 +406,9 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
         <div style={{ height: '500px', width: '100%', minWidth: '300px', maxWidth: '100%' }}>
           <Chart size={{ width: '100%', height: '500px' }}>
             <Settings
-              showLegend={true}
-              tooltip={{ type: 'vertical' }}
-              theme={chartsTheme}
+              showLegend={optimizedSettings.showLegend}
+              tooltip={tooltipSettings}
+              theme={[chartsTheme, graphTheme]}
               baseTheme={chartsBaseTheme}
             />
 
@@ -405,7 +417,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
               position={Position.Bottom}
               title={chartData.xAxisLabel}
               showOverlappingTicks={false}
-              showGridLines={false}
+              gridLine={{ visible: false }}
               ticks={5}
               tickFormat={(value) => {
                 const date = new Date(value);
@@ -440,8 +452,8 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
                   title={chartData.yAxisLabel}
                   position={Position.Left}
                   domain={yDomain}
-                  showGridLines={true}
                   gridLine={{
+                    visible: true,
                     stroke: '#E5E5E5',
                     strokeWidth: 1,
                     opacity: 0.5,
@@ -475,8 +487,6 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = ({
                   x: point.x instanceof Date ? point.x.getTime() : point.x,
                   y: point.y,
                 }));
-
-                // Data converted for chart rendering
 
                 return (
                   <LineSeries
