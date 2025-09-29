@@ -10,6 +10,7 @@ import { EuiErrorBoundary, EuiPage, EuiPageBody } from '@elastic/eui';
 import { AppMountParameters, HeaderVariant } from 'opensearch-dashboards/public';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@osd/i18n';
+import { Card } from '@amzn/oui';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { QueryPanel } from '../../../components/query_panel';
@@ -89,6 +90,7 @@ export const LogsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActio
         <EuiPage className="explore-layout" paddingSize="none" grow={false}>
           <EuiPageBody className="explore-layout__page-body">
             <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
+            <Card />
             <NewExperienceBanner />
 
             <div className="dscCanvas__queryPanel">

@@ -215,16 +215,40 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         {
           test: /\.(js|tsx?)$/,
           exclude: [
-            /* vega-lite and some of its dependencies don't have es5 builds
-             * so we need to build from source and transpile for webpack v4
-             */
-            /[\/\\]node_modules[\/\\](?!vega(-lite|-label|-functions|-scenegraph)?[\/\\])/,
+            // Exclude all node_modules first, then add back specific inclusions
+            /[\/\\]node_modules[\/\\]/,
 
             // Don't attempt to look into release artifacts of the plugins
             /[\/\\]plugins[\/\\][^\/\\]+[\/\\]build[\/\\]/,
 
             // exclude stories
             /\.stories\.(js|jsx|ts|tsx)$/,
+          ],
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              envName: worker.dist ? 'production' : 'development',
+              presets: [BABEL_PRESET_PATH],
+            },
+          },
+        },
+        {
+          test: /\.(js|tsx?)$/,
+          /* vega-lit, @amzn/oui and their dependencies don't have es5 builds
+           * so we need to build from source and transpile for webpack v4
+           */
+          include: [
+            /node_modules[\/\\]vega(-lite|-label|-functions|-scenegraph)?[\/\\]/,
+            /node_modules[\/\\]@amzn[\/\\]oui/,
+            /node_modules[\/\\]@radix-ui/,
+            /node_modules[\/\\]react-day-picker/,
+            /node_modules[\/\\]date-fns/,
+            /node_modules[\/\\]tailwind-merge/,
+            /node_modules[\/\\]cmdk/,
+            /node_modules[\/\\]vaul/,
+            /node_modules[\/\\]sonner/,
+            /node_modules[\/\\]react-resizable-panels/
           ],
           use: {
             loader: 'babel-loader',
@@ -291,6 +315,8 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       alias: {
         core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
         'opensearch-dashboards/public': Path.resolve(worker.repoRoot, 'src/core/public'),
+        // NOTE: react-resizable-panels brought in by @amzn/oui - can be removed with webpack 5 upgrade
+        'react-resizable-panels': Path.resolve(worker.repoRoot, 'node_modules/react-resizable-panels/dist/react-resizable-panels.browser.js'),
       },
     },
 
