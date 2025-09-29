@@ -6,20 +6,13 @@
 import React, { useState } from 'react';
 import { EuiPanel, EuiIcon, EuiButtonIcon } from '@elastic/eui';
 import { Markdown } from '../../../opensearch_dashboards_react/public';
+import type { Message } from '../../common/types';
 import './message_row.scss';
 
-interface TimelineMessage {
-  type: 'message';
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: number;
-}
-
 interface MessageRowProps {
-  message: TimelineMessage;
+  message: Message;
   isStreaming?: boolean;
-  onResend?: (message: TimelineMessage) => void;
+  onResend?: (message: Message) => void;
 }
 
 export const MessageRow: React.FC<MessageRowProps> = ({
@@ -34,6 +27,9 @@ export const MessageRow: React.FC<MessageRowProps> = ({
       onResend(message);
     }
   };
+
+  // Handle optional content
+  const content = message.content || '';
 
   return (
     <div
@@ -51,7 +47,7 @@ export const MessageRow: React.FC<MessageRowProps> = ({
       <div className="messageRow__content">
         <EuiPanel paddingSize="s" color={message.role === 'user' ? 'primary' : 'plain'}>
           <div className="messageRow__markdown">
-            <Markdown markdown={message.content} openLinksInNewTab={true} />
+            <Markdown markdown={content} openLinksInNewTab={true} />
             {isStreaming && <span className="messageRow__cursor">|</span>}
           </div>
         </EuiPanel>

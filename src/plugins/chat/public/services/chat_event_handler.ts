@@ -14,28 +14,12 @@ import type {
   ToolCallEndEvent,
   ToolCallResultEvent,
 } from '../../common/events';
+import type { Message, AssistantMessage, ToolMessage, ToolCall } from '../../common/types';
 import { AssistantActionService } from '../../../context_provider/public';
 import { ToolExecutor } from './tool_executor';
 import { ChatService } from './chat_service';
 
-// Timeline types (matching existing types in chat_window.tsx)
-interface TimelineMessage {
-  type: 'message';
-  id: string;
-  role: 'user' | 'assistant' | 'tool';
-  content: string;
-  timestamp: number;
-}
-
-interface TimelineToolCall {
-  type: 'tool_call';
-  id: string;
-  toolName: string;
-  status: 'running' | 'completed' | 'error';
-  result?: string;
-  timestamp: number;
-}
-
+// Error type for timeline (since AG-UI doesn't have error messages)
 interface TimelineError {
   type: 'error';
   id: string;
@@ -43,7 +27,8 @@ interface TimelineError {
   timestamp: number;
 }
 
-type TimelineItem = TimelineMessage | TimelineToolCall | TimelineError;
+// Timeline is now primarily AG-UI Messages
+type TimelineItem = Message | TimelineError;
 
 interface PendingToolCall {
   id: string;
@@ -59,17 +44,19 @@ interface PendingToolCall {
 export class ChatEventHandler {
   private processedEventIds = new Set<string>();
   private processedMessageEnds = new Set<string>();
-  private pendingToolCalls = new Map<string, PendingToolCall>();
+  private pendingToolCalls = new Map<string, ToolCall>();
   private currentStreamingMessage = '';
+  private currentAssistantMessage: AssistantMessage | null = null;
+  private lastAssistantMessageId: string | null = null;
   private toolExecutor: ToolExecutor;
 
   constructor(
     private assistantActionService: AssistantActionService,
     private chatService: ChatService | null,
-    private onTimelineUpdate: (updater: (prev: TimelineItem[]) => TimelineItem[]) => void,
+    private onTimelineUpdate: (updater: (prev: Message[]) => Message[]) => void,
     private onStreamingMessageUpdate: (message: string) => void,
     private onStreamingStateChange: (isStreaming: boolean) => void,
-    private getTimeline: () => TimelineItem[]
+    private getTimeline: () => Message[]
   ) {
     this.toolExecutor = new ToolExecutor(assistantActionService);
   }
@@ -78,12 +65,6 @@ export class ChatEventHandler {
    * Main event handler - routes events to appropriate handlers
    */
   async handleEvent(event: ChatEvent): Promise<void> {
-    // Prevent duplicate processing for events with IDs
-    if ('messageId' in event && event.messageId) {
-      if (this.processedEventIds.has(event.messageId)) return;
-      this.processedEventIds.add(event.messageId);
-    }
-
     switch (event.type) {
       case EventType.TEXT_MESSAGE_START:
         this.handleTextMessageStart(event as TextMessageStartEvent);
@@ -128,6 +109,14 @@ export class ChatEventHandler {
     this.currentStreamingMessage = '';
     this.onStreamingMessageUpdate('');
     this.onStreamingStateChange(true);
+
+    // Initialize new assistant message for tracking tool calls
+    this.currentAssistantMessage = {
+      id: event.messageId,
+      role: 'assistant',
+      content: '', // Will be populated by TEXT_MESSAGE_CONTENT
+      toolCalls: [], // Will be populated by TOOL_CALL events
+    };
   }
 
   /**
@@ -153,17 +142,37 @@ export class ChatEventHandler {
       this.processedMessageEnds.add(messageId);
     }
 
-    // Only add assistant message if there's actual content
-    if (this.currentStreamingMessage.trim()) {
-      const assistantMessage: TimelineMessage = {
-        type: 'message',
-        id: messageId || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        role: 'assistant',
-        content: this.currentStreamingMessage,
-        timestamp: event.timestamp || Date.now(),
-      };
+    // Finalize and add the complete assistant message with all tool calls
+    if (this.currentAssistantMessage) {
+      // Set final content (only if there's actual content)
+      if (this.currentStreamingMessage.trim()) {
+        this.currentAssistantMessage.content = this.currentStreamingMessage;
+      }
 
-      this.onTimelineUpdate((prev) => [...prev, assistantMessage]);
+      // Remove empty toolCalls array if no tools were called
+      if (this.currentAssistantMessage.toolCalls?.length === 0) {
+        delete this.currentAssistantMessage.toolCalls;
+      }
+
+      // Store this as the last assistant message for tool call association
+      this.lastAssistantMessageId = this.currentAssistantMessage.id;
+
+      // Add or update in timeline
+      this.onTimelineUpdate((prev) => {
+        // Check if already exists (from tool call updates)
+        const existingIndex = prev.findIndex((m) => m.id === this.currentAssistantMessage!.id);
+        if (existingIndex >= 0) {
+          // Update existing
+          const updated = [...prev];
+          updated[existingIndex] = this.currentAssistantMessage!;
+          return updated;
+        } else {
+          // Add new
+          return [...prev, this.currentAssistantMessage!];
+        }
+      });
+
+      this.currentAssistantMessage = null;
     }
 
     // Clear streaming state
@@ -186,24 +195,36 @@ export class ChatEventHandler {
       timestamp: Date.now(),
     });
 
-    // Track pending tool call
-    this.pendingToolCalls.set(toolCallId, {
+    // Create tool call structure for AG-UI
+    const toolCall: ToolCall = {
       id: toolCallId,
-      name: toolCallName,
-      args: '',
-      messageId: parentMessageId,
-    });
-
-    // Add tool call to timeline
-    const toolCallItem: TimelineToolCall = {
-      type: 'tool_call',
-      id: toolCallId,
-      toolName: toolCallName,
-      status: 'running',
-      timestamp: event.timestamp || Date.now(),
+      type: 'function',
+      function: {
+        name: toolCallName,
+        arguments: '', // Will be populated by TOOL_CALL_ARGS
+      },
     };
 
-    this.onTimelineUpdate((prev) => [...prev, toolCallItem]);
+    // Add to pending map for args accumulation
+    this.pendingToolCalls.set(toolCallId, toolCall);
+
+    // Determine which message to associate this tool call with
+    let targetMessageId: string | null = null;
+
+    if (parentMessageId) {
+      // Use the specified parent message
+      targetMessageId = parentMessageId;
+    } else if (this.currentAssistantMessage) {
+      // Use the current streaming message
+      targetMessageId = this.currentAssistantMessage.id;
+    } else if (this.lastAssistantMessageId) {
+      // Fall back to the last assistant message
+      targetMessageId = this.lastAssistantMessageId;
+    }
+
+    if (targetMessageId) {
+      this.addToolCallToMessage(targetMessageId, toolCall);
+    }
   }
 
   /**
@@ -214,7 +235,10 @@ export class ChatEventHandler {
     const toolCall = this.pendingToolCalls.get(toolCallId);
 
     if (toolCall && delta) {
-      toolCall.args += delta;
+      toolCall.function.arguments += delta;
+
+      // Update whichever message contains this tool call
+      this.updateToolCallInMessage(toolCallId, toolCall);
     }
   }
 
@@ -233,7 +257,7 @@ export class ChatEventHandler {
 
     try {
       // Parse arguments
-      const args = toolCall.args ? JSON.parse(toolCall.args) : {};
+      const args = toolCall.function.arguments ? JSON.parse(toolCall.function.arguments) : {};
 
       // Update state to executing
       this.assistantActionService.updateToolCallState(toolCallId, {
@@ -242,11 +266,15 @@ export class ChatEventHandler {
       });
 
       // Execute the tool
-      const result = await this.toolExecutor.executeTool(toolCall.name, args);
+      const result = await this.toolExecutor.executeTool(toolCall.function.name, args);
 
       if (result.waitingForAgentResponse) {
         // Agent will handle this tool and send results back via events
-        this.toolExecutor.markToolPending(toolCallId, toolCall);
+        this.toolExecutor.markToolPending(toolCallId, {
+          id: toolCallId,
+          name: toolCall.function.name,
+          args: toolCall.function.arguments,
+        });
         // Don't send result back immediately, wait for TOOL_CALL_RESULT event
       } else {
         // Tool was executed locally
@@ -255,11 +283,15 @@ export class ChatEventHandler {
           result: result.data,
         });
 
-        // Update timeline with result
-        this.updateToolCallInTimeline(toolCallId, {
-          status: 'completed',
-          result: JSON.stringify(result.data),
-        });
+        // Add tool result message to timeline
+        const toolMessage: ToolMessage = {
+          id: `tool-result-${toolCallId}`,
+          role: 'tool',
+          content: typeof result.data === 'string' ? result.data : JSON.stringify(result.data),
+          toolCallId,
+        };
+
+        this.onTimelineUpdate((prev) => [...prev, toolMessage]);
 
         // Send tool result back to assistant if chatService is available
         if (this.chatService && (this.chatService as any).sendToolResult) {
@@ -268,7 +300,7 @@ export class ChatEventHandler {
       }
     } catch (error: any) {
       // eslint-disable-next-line no-console
-      console.error(`Error executing tool ${toolCall.name}:`, error);
+      console.error(`Error executing tool ${toolCall.function.name}:`, error);
 
       // Update state to failed
       this.assistantActionService.updateToolCallState(toolCallId, {
@@ -276,11 +308,16 @@ export class ChatEventHandler {
         error: error.message,
       });
 
-      // Update timeline with error
-      this.updateToolCallInTimeline(toolCallId, {
-        status: 'error',
-        result: error.message,
-      });
+      // Add error tool result message to timeline
+      const errorToolMessage: ToolMessage = {
+        id: `tool-error-${toolCallId}`,
+        role: 'tool',
+        content: error.message,
+        toolCallId,
+        error: error.message,
+      };
+
+      this.onTimelineUpdate((prev) => [...prev, errorToolMessage]);
 
       // Send error back to assistant
       if (this.chatService && (this.chatService as any).sendToolResult) {
@@ -314,11 +351,15 @@ export class ChatEventHandler {
       resultContent = content;
     }
 
-    // Update timeline with the result
-    this.updateToolCallInTimeline(toolCallId, {
-      status: 'completed',
-      result: resultContent,
-    });
+    // Add tool result message to timeline
+    const toolMessage: ToolMessage = {
+      id: `tool-result-${toolCallId}`,
+      role: 'tool',
+      content: resultContent,
+      toolCallId,
+    };
+
+    this.onTimelineUpdate((prev) => [...prev, toolMessage]);
 
     // Clear pending tool if it was an agent-only tool
     if (this.toolExecutor.isPendingAgentResponse(toolCallId)) {
@@ -342,16 +383,93 @@ export class ChatEventHandler {
   }
 
   /**
-   * Update tool call in timeline
+   * Update assistant message in timeline (for real-time tool call updates)
    */
-  private updateToolCallInTimeline(toolCallId: string, updates: Partial<TimelineToolCall>): void {
-    this.onTimelineUpdate((prev) =>
-      prev.map((item) =>
-        item.type === 'tool_call' && item.id === toolCallId
-          ? { ...item, ...updates, timestamp: updates.timestamp || item.timestamp }
-          : item
-      )
-    );
+  private updateAssistantMessageInTimeline(): void {
+    if (!this.currentAssistantMessage) return;
+
+    this.onTimelineUpdate((prev) => {
+      const existingIndex = prev.findIndex((m) => m.id === this.currentAssistantMessage!.id);
+      if (existingIndex >= 0) {
+        // Update existing
+        const updated = [...prev];
+        updated[existingIndex] = { ...this.currentAssistantMessage! };
+        return updated;
+      } else {
+        // Add new (shouldn't happen but safe fallback)
+        return [...prev, { ...this.currentAssistantMessage! }];
+      }
+    });
+  }
+
+  /**
+   * Add tool call to a specific message in timeline
+   */
+  private addToolCallToMessage(messageId: string, toolCall: ToolCall): void {
+    // If it's the current streaming message, update it directly
+    if (this.currentAssistantMessage && this.currentAssistantMessage.id === messageId) {
+      this.currentAssistantMessage.toolCalls = this.currentAssistantMessage.toolCalls || [];
+      this.currentAssistantMessage.toolCalls.push(toolCall);
+      this.updateAssistantMessageInTimeline();
+      return;
+    }
+
+    // Otherwise, find and update the message in timeline
+    this.onTimelineUpdate((prev) => {
+      const updated = [...prev];
+      const messageIndex = updated.findIndex((m) => m.id === messageId);
+
+      if (messageIndex >= 0) {
+        const message = updated[messageIndex];
+        if (message.role === 'assistant') {
+          const assistantMsg = message as AssistantMessage;
+          assistantMsg.toolCalls = assistantMsg.toolCalls || [];
+          assistantMsg.toolCalls.push(toolCall);
+          updated[messageIndex] = { ...assistantMsg };
+        }
+      }
+
+      return updated;
+    });
+  }
+
+  /**
+   * Update tool call in whichever message contains it
+   */
+  private updateToolCallInMessage(toolCallId: string, updatedToolCall: ToolCall): void {
+    // If it's in the current streaming message, update it directly
+    if (this.currentAssistantMessage && this.currentAssistantMessage.toolCalls) {
+      const toolCallIndex = this.currentAssistantMessage.toolCalls.findIndex(
+        (tc) => tc.id === toolCallId
+      );
+      if (toolCallIndex >= 0) {
+        this.currentAssistantMessage.toolCalls[toolCallIndex] = updatedToolCall;
+        this.updateAssistantMessageInTimeline();
+        return;
+      }
+    }
+
+    // Otherwise, find and update the tool call in timeline
+    this.onTimelineUpdate((prev) => {
+      const updated = [...prev];
+
+      for (let i = 0; i < updated.length; i++) {
+        const message = updated[i];
+        if (message.role === 'assistant') {
+          const assistantMsg = message as AssistantMessage;
+          if (assistantMsg.toolCalls) {
+            const toolCallIndex = assistantMsg.toolCalls.findIndex((tc) => tc.id === toolCallId);
+            if (toolCallIndex >= 0) {
+              assistantMsg.toolCalls[toolCallIndex] = updatedToolCall;
+              updated[i] = { ...assistantMsg };
+              break;
+            }
+          }
+        }
+      }
+
+      return updated;
+    });
   }
 
   /**
@@ -359,7 +477,7 @@ export class ChatEventHandler {
    */
   private async sendToolResultToAssistant(toolCallId: string, result: any): Promise<void> {
     try {
-      const messages = this.timelineToMessages(this.getTimeline());
+      const messages = this.getTimeline(); // Now pass timeline directly - no transformation needed
       const { observable } = await (this.chatService as any).sendToolResult(
         toolCallId,
         result,
@@ -390,21 +508,7 @@ export class ChatEventHandler {
     }
   }
 
-  /**
-   * Convert timeline to messages format (helper function)
-   */
-  private timelineToMessages(timelineItems: TimelineItem[]): any[] {
-    return timelineItems
-      .filter((item) => item.type === 'message')
-      .map((item) => {
-        const msg = item as TimelineMessage;
-        return {
-          id: msg.id,
-          role: msg.role,
-          content: msg.content,
-        };
-      });
-  }
+  // timelineToMessages method removed - timeline is now directly AG-UI compatible
 
   /**
    * Clear all state (useful for resetting)
@@ -415,6 +519,7 @@ export class ChatEventHandler {
     this.pendingToolCalls.clear();
     this.toolExecutor.clearAllPendingTools();
     this.currentStreamingMessage = '';
+    this.currentAssistantMessage = null;
     this.onStreamingMessageUpdate('');
   }
 }

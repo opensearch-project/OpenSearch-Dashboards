@@ -9,41 +9,29 @@ import { ChatLayoutMode } from './chat_header_button';
 import { MessageRow } from './message_row';
 import { ToolCallRow } from './tool_call_row';
 import { ErrorRow } from './error_row';
+import type { Message, AssistantMessage, ToolMessage, ToolCall } from '../../common/types';
 import './chat_messages.scss';
 
-interface TimelineMessage {
-  type: 'message';
-  id: string;
-  role: 'user' | 'assistant' | 'tool';
-  content: string;
-  timestamp: number;
-}
+type TimelineItem = Message;
 
-interface TimelineToolCall {
-  type: 'tool_call';
-  id: string;
-  toolName: string;
-  status: 'running' | 'completed' | 'error';
-  result?: string;
-  timestamp: number;
+/**
+ * Determine tool status based on tool call and result
+ */
+function getToolStatus(
+  toolCall: ToolCall,
+  toolResult?: ToolMessage
+): 'running' | 'completed' | 'error' {
+  if (!toolResult) return 'running';
+  if (toolResult.error) return 'error';
+  return 'completed';
 }
-
-interface TimelineError {
-  type: 'error';
-  id: string;
-  message: string;
-  code?: string;
-  timestamp: number;
-}
-
-type TimelineItem = TimelineMessage | TimelineToolCall | TimelineError;
 
 interface ChatMessagesProps {
   layoutMode: ChatLayoutMode;
-  timeline: TimelineItem[];
+  timeline: Message[];
   currentStreamingMessage: string;
   isStreaming: boolean;
-  onResendMessage?: (message: TimelineMessage) => void;
+  onResendMessage?: (message: Message) => void;
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
@@ -81,37 +69,57 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           </div>
         )}
 
-        {timeline
-          .sort((a, b) => a.timestamp - b.timestamp)
-          .map((item) => {
-            // Debug timeline items
-            if (
-              item.type === 'message' &&
-              item.content &&
-              item.content.includes('graph_timeseries_data')
-            ) {
-              // Found message with graph data
-            }
+        {timeline.map((message) => {
+          // Handle different message types
+          if (message.role === 'user') {
+            return <MessageRow key={message.id} message={message} onResend={onResendMessage} />;
+          }
 
-            if (item.type === 'message') {
-              // Don't render messages with empty content
-              if (!item.content || item.content.trim() === '') {
-                return null;
-              }
-              return (
-                <MessageRow
-                  key={item.id}
-                  message={item}
-                  onResend={item.role === 'user' ? onResendMessage : undefined}
-                />
-              );
-            } else if (item.type === 'tool_call') {
-              return <ToolCallRow key={item.id} toolCall={item} />;
-            } else if (item.type === 'error') {
-              return <ErrorRow key={item.id} error={item} />;
-            }
+          if (message.role === 'assistant') {
+            const assistantMsg = message as AssistantMessage;
+            return (
+              <div key={message.id}>
+                {/* Assistant message content */}
+                {assistantMsg.content && <MessageRow message={assistantMsg} />}
+
+                {/* Tool calls below the message */}
+                {assistantMsg.toolCalls?.map((toolCall) => {
+                  // Find corresponding tool result
+                  const toolResult = timeline.find(
+                    (m): m is ToolMessage =>
+                      m.role === 'tool' && (m as ToolMessage).toolCallId === toolCall.id
+                  );
+
+                  return (
+                    <ToolCallRow
+                      key={toolCall.id}
+                      toolCall={{
+                        type: 'tool_call',
+                        id: toolCall.id,
+                        toolName: toolCall.function.name,
+                        status: getToolStatus(toolCall, toolResult),
+                        result: toolResult?.content,
+                        timestamp: Date.now(), // Not used in display
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            );
+          }
+
+          // Don't render tool messages separately (they're shown in ToolCallRow)
+          if (message.role === 'tool') {
             return null;
-          })}
+          }
+
+          // Handle system messages as errors
+          if (message.role === 'system') {
+            return <ErrorRow key={message.id} error={message} />;
+          }
+
+          return null;
+        })}
 
         {/* Loading indicator - waiting for agent response */}
         {isStreaming && currentStreamingMessage === '' && (
@@ -131,11 +139,9 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
         {currentStreamingMessage && (
           <MessageRow
             message={{
-              type: 'message',
               id: 'streaming',
               role: 'assistant',
               content: currentStreamingMessage,
-              timestamp: Date.now(),
             }}
             isStreaming={true}
           />
