@@ -37,15 +37,15 @@
     }
 
     // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-    &>.euiFlexGroup {
+    & > .euiFlexGroup {
       gap: $euiSizeS;
     }
 
     // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-    &>.euiHeaderLinks>.euiHeaderLinks__list {
+    & > .euiHeaderLinks > .euiHeaderLinks__list {
       gap: $euiSizeS;
 
-      &>* {
+      & > * {
         margin: 0;
       }
     }
@@ -63,7 +63,7 @@
     }
 
     // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-    &>.euiHeaderSection {
+    & > .euiHeaderSection {
       align-items: baseline;
     }
   }
@@ -82,7 +82,7 @@
     }
 
     // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-    &>.euiHeaderSectionItem:empty {
+    & > .euiHeaderSectionItem:empty {
       display: none;
     }
   }
@@ -96,7 +96,7 @@
   @include euiBreakpoint("xs", "s") {
 
     // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-    &>.euiHeaderSection {
+    & > .euiHeaderSection {
       align-items: baseline;
     }
   }
@@ -162,7 +162,7 @@
     .euiHeaderSection--right {
 
       // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-      .euiFlexGroup--responsive>.euiFlexItem {
+      .euiFlexGroup--responsive > .euiFlexItem {
         margin: $euiSizeXS 0 !important; // set as !important in eui
       }
     }
