@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiText, EuiButtonIcon } from '@elastic/eui';
+import { EuiText, EuiButtonIcon, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ChatLayoutMode } from './chat_header_button';
 import './chat_header.scss';
 
@@ -23,9 +23,18 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 }) => {
   return (
     <div className="chatHeader">
-      <EuiText size="m">
-        <h3>Assistant</h3>
-      </EuiText>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="m">
+            <h3>Assistant</h3>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="warning" className="chatHeader__experimentalBadge">
+            Experimental
+          </EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <div className="chatHeader__buttons">
         {onToggleLayout && (
           <EuiButtonIcon

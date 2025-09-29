@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback, useRef, useState, useEffect } from 'react';
-import { EuiButtonIcon, EuiToolTip, EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { CoreStart, MountPoint, SIDECAR_DOCKED_MODE } from '../../../../core/public';
 import { ChatWindow } from './chat_window';
 import { ChatProvider } from '../contexts/chat_context';
@@ -127,21 +127,16 @@ export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
       {/* Text selection monitor - always active when chat UI is rendered */}
       <TextSelectionMonitor />
 
-      <div className="chatHeaderButton__container">
-        <EuiToolTip content="Open Chat Assistant (Experimental)">
-          <EuiButtonIcon
-            iconType="generate"
-            onClick={toggleSidecar}
-            color={isOpen ? 'primary' : 'subdued'}
-            size="s"
-            aria-label="Toggle chat assistant"
-            display="empty"
-          />
-        </EuiToolTip>
-        <EuiBadge color="warning" className="chatHeaderButton__experimentalBadge">
-          Experimental
-        </EuiBadge>
-      </div>
+      <EuiToolTip content="Open Chat Assistant">
+        <EuiButtonIcon
+          iconType="generate"
+          onClick={toggleSidecar}
+          color={isOpen ? 'primary' : 'subdued'}
+          size="s"
+          aria-label="Toggle chat assistant"
+          display="empty"
+        />
+      </EuiToolTip>
 
       {/* Mount point for sidecar content */}
       <div
