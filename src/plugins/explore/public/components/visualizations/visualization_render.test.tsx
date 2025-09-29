@@ -6,8 +6,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
+import dateMath from '@elastic/datemath';
 import { VisualizationRender } from './visualization_render';
-import { VisData, ChartConfig } from './visualization_builder.types';
+import { VisData } from './visualization_builder.types';
 import { VisFieldType, Positions, RenderChartConfig } from './types';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { defaultBarChartStyles } from './bar/bar_vis_config';
@@ -185,5 +186,26 @@ describe('VisualizationRender', () => {
     );
 
     expect(screen.getByTestId('visualizationEmptyState')).toBeInTheDocument();
+  });
+
+  it('parses timeRange `from` and `to` with correct roundUp options', () => {
+    const parseSpy = jest.spyOn(dateMath, 'parse');
+
+    const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
+
+    render(
+      <VisualizationRender
+        data$={data$}
+        config$={visConfig$}
+        showRawTable$={showRawTable$}
+        searchContext={mockSearchContext}
+        ExpressionRenderer={mockExpressionRenderer}
+      />
+    );
+
+    expect(parseSpy).toHaveBeenCalledWith('now-15m');
+    expect(parseSpy).toHaveBeenCalledWith('now', { roundUp: true });
   });
 });
