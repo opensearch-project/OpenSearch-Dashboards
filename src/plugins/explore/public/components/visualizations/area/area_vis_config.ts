@@ -42,7 +42,7 @@ export interface AreaChartStyleOptions {
   titleOptions?: TitleOptions;
 
   thresholdOptions?: ThresholdOptions;
-  showFullTimeRange: boolean;
+  showFullTimeRange?: boolean;
 }
 
 export type AreaChartStyle = Required<
