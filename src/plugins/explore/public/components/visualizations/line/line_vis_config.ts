@@ -46,6 +46,8 @@ export interface LineChartStyleOptions {
 
   titleOptions?: TitleOptions;
   thresholdOptions?: ThresholdOptions;
+
+  showFullTimeRange?: boolean;
 }
 
 export type LineChartStyle = Required<Omit<LineChartStyleOptions, 'thresholdLines'>>;
@@ -118,6 +120,8 @@ export const defaultLineChartStyles: LineChartStyle = {
     show: false,
     titleName: '',
   },
+
+  showFullTimeRange: false,
 };
 
 export const createLineConfig = (): VisualizationType<'line'> => ({
