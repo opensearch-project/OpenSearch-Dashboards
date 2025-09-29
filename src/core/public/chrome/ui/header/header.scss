@@ -4,6 +4,7 @@
 */
 
 .newTopNavHeader {
+  justify-content: normal;
   z-index: 1000;
   padding: 0 $euiSizeS $euiSizeS;
   box-shadow: none;
@@ -36,15 +37,15 @@
     }
 
     // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-    & > .euiFlexGroup {
+    &>.euiFlexGroup {
       gap: $euiSizeS;
     }
 
     // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-    & > .euiHeaderLinks > .euiHeaderLinks__list {
+    &>.euiHeaderLinks>.euiHeaderLinks__list {
       gap: $euiSizeS;
 
-      & > * {
+      &>* {
         margin: 0;
       }
     }
@@ -55,14 +56,14 @@
       flex-wrap: wrap;
 
       .globalDatePicker {
-        flex-basis: 100%;
-        width: 100%;
-        margin-left: 0;
+        .euiPopover {
+          float: right;
+        }
       }
     }
 
     // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-    & > .euiHeaderSection {
+    &>.euiHeaderSection {
       align-items: baseline;
     }
   }
@@ -72,7 +73,7 @@
   }
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  & > .euiHeaderSection {
+  &>.euiHeaderSection {
     gap: $euiSizeS;
     align-items: center;
 
@@ -81,7 +82,7 @@
     }
 
     // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-    & > .euiHeaderSectionItem:empty {
+    &>.euiHeaderSectionItem:empty {
       display: none;
     }
   }
@@ -93,8 +94,9 @@
   }
 
   @include euiBreakpoint("xs", "s") {
+
     // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-    & > .euiHeaderSection {
+    &>.euiHeaderSection {
       align-items: baseline;
     }
   }
@@ -112,7 +114,7 @@
 .primaryApplicationHeader {
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  .euiHeaderSection > .euiHeaderSectionItem {
+  .euiHeaderSection>.euiHeaderSectionItem {
     align-items: stretch;
   }
 
@@ -160,7 +162,7 @@
     .euiHeaderSection--right {
 
       // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-      .euiFlexGroup--responsive > .euiFlexItem {
+      .euiFlexGroup--responsive>.euiFlexItem {
         margin: $euiSizeXS 0 !important; // set as !important in eui
       }
     }
