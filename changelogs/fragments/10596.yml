@@ -1,0 +1,2 @@
+fix:
+- Insert dataset names with backquotes ([#10596](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10596))
