@@ -12,9 +12,12 @@ import {
   adaptLegacyData,
 } from './visualization_builder_utils';
 import { AxisRole, VisColumn, VisFieldType, ThresholdMode, ColorSchemas } from './types';
-import { BehaviorSubject } from 'rxjs';
 import { ChartConfig } from './visualization_builder.types';
-import { ChartStyleControlMap } from './utils/use_visualization_types';
+import { MetricChartStyleOptions } from './metric/metric_vis_config';
+import { BarChartStyleOptions } from './bar/bar_vis_config';
+import { LineChartStyleOptions } from './line/line_vis_config';
+import { GaugeChartStyleOptions } from './gauge/gauge_vis_config';
+import { HeatmapChartStyleOptions } from './heatmap/heatmap_vis_config';
 
 jest.mock('./rule_repository', () => ({
   ALL_VISUALIZATION_RULES: [
@@ -265,16 +268,16 @@ describe('visualization_container_utils', () => {
         styles: {
           thresholds: [{ value: 10, color: '#red' }],
           baseColor: '#9ecae1',
-        } as ChartStyleControlMap['gauge'],
+        } as GaugeChartStyleOptions,
       };
 
       const value = adaptLegacyData(config);
 
       expect(value?.styles).toMatchObject({
+        useThresholdColor: false,
         thresholdOptions: {
           baseColor: '#9ecae1',
           thresholds: [{ value: 10, color: '#red' }],
-          useThresholdColor: false,
         },
       });
     });
@@ -286,16 +289,16 @@ describe('visualization_container_utils', () => {
           colorSchema: ColorSchemas.BLUES,
           customRanges: [{ min: 0, max: 100 }],
           useColor: true,
-        } as ChartStyleControlMap['metric'],
+        } as MetricChartStyleOptions,
       };
 
       const value = adaptLegacyData(config);
 
       expect(value?.styles).toMatchObject({
+        useThresholdColor: true,
         thresholdOptions: {
           baseColor: '#9ecae1',
           thresholds: [{ value: 10, color: '#red' }],
-          useThresholdColor: true,
         },
       });
     });
@@ -306,7 +309,7 @@ describe('visualization_container_utils', () => {
         styles: {
           colorSchema: ColorSchemas.BLUES,
           thresholdOptions: { baseColor: '#fffff' },
-        } as ChartStyleControlMap['metric'],
+        } as MetricChartStyleOptions,
       };
 
       const value = adaptLegacyData(config);
@@ -326,16 +329,16 @@ describe('visualization_container_utils', () => {
             customRanges: [{ min: 0, max: 50 }],
             useCustomRanges: true,
           },
-        } as ChartStyleControlMap['heatmap'],
+        } as HeatmapChartStyleOptions,
       };
 
       const value = adaptLegacyData(config);
 
       expect(value?.styles).toMatchObject({
+        useThresholdColor: true,
         thresholdOptions: {
           baseColor: '#9ecae1',
           thresholds: [{ value: 10, color: '#red' }],
-          useThresholdColor: true,
         },
       });
     });
@@ -353,17 +356,17 @@ describe('visualization_container_utils', () => {
               width: 2,
             },
           ],
-        } as ChartStyleControlMap['bar'],
+        } as BarChartStyleOptions,
       };
 
       const value = adaptLegacyData(config);
 
       expect(value?.styles).toMatchObject({
+        useThresholdColor: false,
         thresholdOptions: {
           thresholds: [{ value: 20, color: '#blue' }],
           baseColor: '#green',
           thresholdStyle: ThresholdMode.Dashed,
-          useThresholdColor: false,
         },
       });
     });
@@ -381,17 +384,17 @@ describe('visualization_container_utils', () => {
               width: 2,
             },
           ],
-        } as ChartStyleControlMap['line'],
+        } as LineChartStyleOptions,
       };
 
       const value = adaptLegacyData(config);
 
       expect(value?.styles).toMatchObject({
+        useThresholdColor: false,
         thresholdOptions: {
           thresholds: [{ value: 20, color: '#blue' }],
           baseColor: '#green',
           thresholdStyle: ThresholdMode.Off,
-          useThresholdColor: false,
         },
       });
     });
