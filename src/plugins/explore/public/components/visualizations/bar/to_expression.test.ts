@@ -21,8 +21,24 @@ import {
   ThresholdMode,
   AggregationType,
 } from '../types';
+import * as Utils from '../utils/utils';
+
+jest.mock('../utils/utils', () => {
+  const actual = jest.requireActual('../utils/utils');
+  return {
+    ...actual,
+    buildTimeRangeLayer: jest.fn(() => ({
+      mark: { type: 'rule' },
+      data: { name: 'domainLayer' },
+      encoding: {},
+    })),
+  };
+});
 
 describe('bar to_expression', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   // Create mock VisColumn objects
   const mockNumericalColumn: VisColumn = {
     id: 1,
@@ -636,6 +652,38 @@ describe('bar to_expression', () => {
       expect(spec.layer[0].encoding.y.field).toBe('date');
       expect(spec.layer[0].encoding.y.type).toBe('temporal');
     });
+
+    test('adds domain layer when showFullTimeRange is true (createTimeBarChart)', () => {
+      const styles: BarChartStyle = {
+        ...defaultBarChartStyles,
+        showFullTimeRange: true,
+      };
+      const axisMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      };
+      const timeRange = {
+        from: '2024-01-01T00:00:00.000Z',
+        to: '2024-01-31T00:00:00.000Z',
+      };
+
+      const spec = createTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockDateColumn],
+        styles,
+        axisMappings,
+        timeRange
+      );
+
+      expect(Utils.buildTimeRangeLayer).toHaveBeenCalledWith(
+        axisMappings,
+        timeRange,
+        styles.switchAxes
+      );
+      const lastLayer = spec.layer[spec.layer.length - 1];
+      expect(lastLayer).toEqual(expect.objectContaining({ data: { name: 'domainLayer' } }));
+    });
   });
 
   describe('createGroupedTimeBarChart', () => {
@@ -850,6 +898,40 @@ describe('bar to_expression', () => {
       }).toThrow(
         'Grouped time bar chart requires at least one numerical column, one categorical column, and one date column'
       );
+    });
+
+    test('adds domain layer when showFullTimeRange is true (createGroupedTimeBarChart)', () => {
+      const styles: BarChartStyle = {
+        ...defaultBarChartStyles,
+        showFullTimeRange: true,
+      };
+      const axisMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.COLOR]: mockCategoricalColumn,
+      };
+      const timeRange = {
+        from: '2024-02-01T00:00:00.000Z',
+        to: '2024-02-29T00:00:00.000Z',
+      };
+
+      const spec = createGroupedTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn],
+        [mockDateColumn],
+        styles,
+        axisMappings,
+        timeRange
+      );
+
+      expect(Utils.buildTimeRangeLayer).toHaveBeenCalledWith(
+        axisMappings,
+        timeRange,
+        styles.switchAxes
+      );
+      const lastLayer = spec.layer[spec.layer.length - 1];
+      expect(lastLayer).toEqual(expect.objectContaining({ data: { name: 'domainLayer' } }));
     });
   });
 
@@ -1067,6 +1149,41 @@ describe('bar to_expression', () => {
       }).toThrow(
         'Faceted time bar chart requires at least one numerical column, two categorical columns, and one date column'
       );
+    });
+
+    test('adds domain layer when showFullTimeRange is true (createFacetedTimeBarChart)', () => {
+      const styles: BarChartStyle = {
+        ...defaultBarChartStyles,
+        showFullTimeRange: true,
+      };
+      const axisMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.COLOR]: mockCategoricalColumn,
+        [AxisRole.FACET]: mockCategoricalColumn2,
+      };
+      const timeRange = {
+        from: '2024-03-01T00:00:00.000Z',
+        to: '2024-03-31T00:00:00.000Z',
+      };
+
+      const spec = createFacetedTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn, mockCategoricalColumn2],
+        [mockDateColumn],
+        styles,
+        axisMappings,
+        timeRange
+      );
+      expect(Utils.buildTimeRangeLayer).toHaveBeenCalledWith(
+        axisMappings,
+        timeRange,
+        styles.switchAxes
+      );
+      const layers = spec.spec.layer;
+      const lastLayer = layers[layers.length - 1];
+      expect(lastLayer).toEqual(expect.objectContaining({ data: { name: 'domainLayer' } }));
     });
   });
 

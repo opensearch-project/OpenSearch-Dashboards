@@ -328,6 +328,15 @@ describe('AxesOptions', () => {
     });
   });
 
+  it('calls onShowFullTimeRangeChange when the show full time range switch is toggled', () => {
+    render(<AxesOptions {...rule2Props} />);
+
+    const fullTimeRangeSwitch = screen.getByTestId('showFullTimeRangeSwitch');
+    fireEvent.click(fullTimeRangeSwitch);
+
+    expect(rule2Props.onShowFullTimeRangeChange).toHaveBeenCalledWith(false);
+  });
+
   it('updates label rotation when alignment is changed', () => {
     render(<AxesOptions {...defaultProps} />);
 

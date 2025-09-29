@@ -206,6 +206,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                     })}
                     checked={showFullTimeRange}
                     onChange={(e) => onShowFullTimeRangeChange(e.target.checked)}
+                    data-test-subj="showFullTimeRangeSwitch"
                   />
                 </EuiFormRow>
               )}
