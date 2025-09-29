@@ -1,0 +1,2 @@
+feat:
+- Remove error popover from query panel ([#10581](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10581))
