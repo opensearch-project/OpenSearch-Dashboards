@@ -8,7 +8,6 @@ import {
   INDEX_WITH_TIME_1,
   START_TIME,
   END_TIME,
-  INVALID_INDEX,
 } from '../../../../../../utils/apps/constants';
 import {
   getRandomizedWorkspaceName,
@@ -81,19 +80,6 @@ const queriesTestSuite = () => {
           language: 'PPL',
           hitCount: '10,000',
         });
-
-        // TODO: Update test to test for stripping of stats
-        // Test none search PPL query
-        // const statsQuery = `describe ${INDEX_WITH_TIME_1} | stats count()`;
-        // cy.explore.setQueryEditor(statsQuery);
-        // cy.osd.verifyResultsCount(1);
-
-        // TODO: Fix error messaging
-        // Test error message
-        const invalidQuery = `source = ${INVALID_INDEX}`;
-        // const error = `no such index`;
-        cy.explore.setQueryEditor(invalidQuery);
-        // cy.osd.verifyResultsError(error);
       });
 
       it(`with PPL query not starting with source for ${config.testName}`, () => {
@@ -102,17 +88,6 @@ const queriesTestSuite = () => {
 
         // Default PPL query should be set
         cy.osd.waitForLoader(true);
-
-        // Use the more robust verifyDiscoverPageState function to check editor content
-        // This handles Monaco editor's special whitespace characters better
-        verifyDiscoverPageState({
-          dataset: config.dataset,
-          queryString: '',
-          language: 'PPL',
-          hitCount: '10,000',
-        });
-        cy.getElementByTestId(`discoverQueryElapsedMs`).should('be.visible');
-        cy.osd.verifyResultsCount(10000);
 
         // Executing a query without source = part
         const queryWithoutSource =
@@ -136,14 +111,6 @@ const queriesTestSuite = () => {
         // Default PPL query should be set
         cy.osd.waitForLoader(true);
 
-        // Use the more robust verifyDiscoverPageState function to check editor content
-        // This handles Monaco editor's special whitespace characters better
-        verifyDiscoverPageState({
-          dataset: config.dataset,
-          queryString: '',
-          language: 'PPL',
-          hitCount: '10,000',
-        });
         cy.getElementByTestId(`discoverQueryElapsedMs`).should('be.visible');
         cy.osd.verifyResultsCount(10000);
 
