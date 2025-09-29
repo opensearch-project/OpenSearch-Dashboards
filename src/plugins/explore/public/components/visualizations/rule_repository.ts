@@ -47,6 +47,7 @@ import { MetricChartStyle } from './metric/metric_vis_config';
 import { PieChartStyle } from './pie/pie_vis_config';
 import { ScatterChartStyle } from './scatter/scatter_vis_config';
 import { HeatmapChartStyle } from './heatmap/heatmap_vis_config';
+import { StateTimeLineChartStyle } from './state_timeline/state_timeline_config';
 import {
   createNumercialStateTimeline,
   createCategoricalStateTimeline,
@@ -249,7 +250,7 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
           numericalColumns,
           categoricalColumns,
           dateColumns,
-          styleOptions,
+          styleOptions as StateTimeLineChartStyle,
           axisColumnMappings
         );
       default:
@@ -715,7 +716,7 @@ const twoCateOneDateRule: VisualizationRule = {
       numericalColumns,
       categoricalColumns,
       dateColumns,
-      styleOptions,
+      styleOptions as StateTimeLineChartStyle,
       axisColumnMappings
     );
   },
@@ -742,7 +743,7 @@ const oneCateOneDateRule: VisualizationRule = {
       numericalColumns,
       categoricalColumns,
       dateColumns,
-      styleOptions,
+      styleOptions as StateTimeLineChartStyle,
       axisColumnMappings
     );
   },

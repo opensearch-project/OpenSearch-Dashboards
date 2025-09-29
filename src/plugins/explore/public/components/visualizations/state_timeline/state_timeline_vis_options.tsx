@@ -6,7 +6,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { StateTimeLineChartStyleControls } from './state_timeline_config';
+import { StateTimeLineChartStyle, StateTimeLineChartStyleOptions } from './state_timeline_config';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
@@ -16,9 +16,7 @@ import { TitleOptionsPanel } from '../style_panel/title/title';
 import { ValueMappingPanel } from '../style_panel/value_mapping/value_mapping_panel';
 import { StateTimeLineExclusiveVisOptions } from './state_timeline_exclusive_vis_options';
 
-export type StateTimeLineVisStyleControlsProps = StyleControlsProps<
-  StateTimeLineChartStyleControls
->;
+export type StateTimeLineVisStyleControlsProps = StyleControlsProps<StateTimeLineChartStyle>;
 
 export const StateTimeLineVisStyleControls: React.FC<StateTimeLineVisStyleControlsProps> = ({
   styleOptions,
@@ -31,9 +29,9 @@ export const StateTimeLineVisStyleControls: React.FC<StateTimeLineVisStyleContro
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof StateTimeLineChartStyleControls>(
+  const updateStyleOption = <K extends keyof StateTimeLineChartStyleOptions>(
     key: K,
-    value: StateTimeLineChartStyleControls[K]
+    value: StateTimeLineChartStyleOptions[K]
   ) => {
     onStyleChange({ [key]: value });
   };

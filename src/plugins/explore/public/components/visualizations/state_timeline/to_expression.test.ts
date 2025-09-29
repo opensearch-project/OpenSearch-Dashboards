@@ -265,11 +265,8 @@ describe('to_expression', () => {
       // Verify encoding
       expect(markLayer).toHaveProperty('encoding.x.field', 'timestamp');
       expect(markLayer).toHaveProperty('encoding.x.type', 'temporal');
-      expect(markLayer).toHaveProperty('encoding.x.type', 'temporal');
       expect(markLayer).toHaveProperty('encoding.x2.field', 'end');
-
-      expect(markLayer).toHaveProperty('encoding.y.field', 'category');
-      expect(markLayer).toHaveProperty('encoding.y.type', 'nominal');
+      expect(markLayer).toHaveProperty('encoding.y.field', 'fakeYAxis');
       expect(markLayer).toHaveProperty('encoding.color.field', 'mappingValue');
     });
 

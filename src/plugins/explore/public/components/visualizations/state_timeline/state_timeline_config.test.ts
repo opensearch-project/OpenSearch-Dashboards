@@ -6,7 +6,7 @@
 import React from 'react';
 import {
   createStateTimelineConfig,
-  StateTimeLineChartStyleControls,
+  StateTimeLineChartStyle,
   defaultStateTimeLineChartStyles,
 } from './state_timeline_config';
 import { AxisRole, Positions, DisableMode } from '../types';
@@ -31,7 +31,7 @@ describe('createStateTimelineConfig', () => {
 
   it('should have the correct default style settings', () => {
     const config = createStateTimelineConfig();
-    const defaults = config.ui.style.defaults as StateTimeLineChartStyleControls;
+    const defaults = config.ui.style.defaults as StateTimeLineChartStyle;
     // Verify basic controls
     expect(defaults.tooltipOptions.mode).toBe('all');
     expect(defaults.legendPosition).toBe(Positions.RIGHT);

@@ -18,7 +18,6 @@ import {
   ConnectNullValuesOption,
   DisableMode,
 } from '../types';
-import { getColors } from '../theme/default_colors';
 
 export interface ExclusiveStateTimeLineConfig {
   showValues?: boolean;
@@ -27,22 +26,24 @@ export interface ExclusiveStateTimeLineConfig {
   connectNullValues?: ConnectNullValuesOption;
 }
 // Complete line chart style controls interface
-export interface StateTimeLineChartStyleControls {
+export interface StateTimeLineChartStyleOptions {
   // Basic controls
-  tooltipOptions: TooltipOptions;
-  addLegend: boolean;
-  legendPosition: Positions;
+  tooltipOptions?: TooltipOptions;
+  addLegend?: boolean;
+  legendPosition?: Positions;
   // Axes configuration
-  standardAxes: StandardAxes[];
+  standardAxes?: StandardAxes[];
 
-  exclusive: ExclusiveStateTimeLineConfig;
+  exclusive?: ExclusiveStateTimeLineConfig;
 
-  titleOptions: TitleOptions;
+  titleOptions?: TitleOptions;
 
   valueMappingOptions?: ValueMappingOptions;
 }
 
-export const defaultStateTimeLineChartStyles: StateTimeLineChartStyleControls = {
+export type StateTimeLineChartStyle = Required<StateTimeLineChartStyleOptions>;
+
+export const defaultStateTimeLineChartStyles: StateTimeLineChartStyle = {
   // Basic controls
   tooltipOptions: {
     mode: 'all',
@@ -137,7 +138,7 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
       },
       {
         [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
-        [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
       },
     ],
   },

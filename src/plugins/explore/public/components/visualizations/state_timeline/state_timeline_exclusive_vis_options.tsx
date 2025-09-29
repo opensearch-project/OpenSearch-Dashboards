@@ -6,14 +6,14 @@
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiSwitch, EuiButtonGroup } from '@elastic/eui';
 import React from 'react';
-import { StateTimeLineChartStyleControls } from './state_timeline_config';
+import { StateTimeLineChartStyle } from './state_timeline_config';
 import { DebouncedFieldNumber, DebouncedFieldText } from '../style_panel/utils';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { DisableMode, DisconnectValuesOption, ConnectNullValuesOption } from '../types';
 
 interface StateTimeLineExclusiveVisOptionsProps {
-  styles: StateTimeLineChartStyleControls['exclusive'];
-  onChange: (styles: StateTimeLineChartStyleControls['exclusive']) => void;
+  styles: StateTimeLineChartStyle['exclusive'];
+  onChange: (styles: StateTimeLineChartStyle['exclusive']) => void;
 }
 
 const disconnectValuesOption = [
@@ -50,9 +50,9 @@ export const StateTimeLineExclusiveVisOptions = ({
   styles,
   onChange,
 }: StateTimeLineExclusiveVisOptionsProps) => {
-  const updateStyle = <K extends keyof StateTimeLineChartStyleControls['exclusive']>(
+  const updateStyle = <K extends keyof StateTimeLineChartStyle['exclusive']>(
     key: K,
-    value: StateTimeLineChartStyleControls['exclusive'][K]
+    value: StateTimeLineChartStyle['exclusive'][K]
   ) => {
     onChange({
       ...styles,

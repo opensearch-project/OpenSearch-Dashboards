@@ -4,7 +4,7 @@
  */
 
 import { AxisColumnMappings, AxisRole, DisableMode, VEGASCHEMA, VisColumn } from '../types';
-import { StateTimeLineChartStyleControls } from './state_timeline_config';
+import { StateTimeLineChartStyle } from './state_timeline_config';
 import { applyAxisStyling, getSwappedAxisRole } from '../utils/utils';
 import {
   mergeCategoricalData,
@@ -20,7 +20,7 @@ export const createNumercialStateTimeline = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions: Partial<StateTimeLineChartStyleControls>,
+  styleOptions: StateTimeLineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(
@@ -181,7 +181,7 @@ export const createCategoricalStateTimeline = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions: Partial<StateTimeLineChartStyleControls>,
+  styleOptions: StateTimeLineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(
@@ -359,7 +359,7 @@ export const createSingleCategoricalStateTimeline = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions: Partial<StateTimeLineChartStyleControls>,
+  styleOptions: StateTimeLineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(
@@ -370,6 +370,11 @@ export const createSingleCategoricalStateTimeline = (
   const rangeMappings = styleOptions?.valueMappingOptions?.valueMappings?.filter(
     (mapping) => mapping?.type === 'value'
   );
+
+  const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
+
+  const categoryField = colorMapping?.column;
+  const categoryName = colorMapping?.name;
 
   const disableThreshold =
     styleOptions?.exclusive?.disconnectValues?.disableMode === DisableMode.Threshold
@@ -384,7 +389,7 @@ export const createSingleCategoricalStateTimeline = (
   const [processedData, validValues] = mergeSingleCategoricalData(
     transformedData,
     xAxis?.column,
-    yAxis?.column,
+    categoryField,
     rangeMappings,
     disableThreshold,
     connectThreshold
@@ -397,7 +402,7 @@ export const createSingleCategoricalStateTimeline = (
   const transformLayer = canUseValueMapping
     ? [
         {
-          lookup: yAxis?.column,
+          lookup: categoryField,
           from: {
             data: {
               values: validValues?.map((mapping) => ({
@@ -413,7 +418,7 @@ export const createSingleCategoricalStateTimeline = (
           filter: 'datum.mappingValue !== null',
         },
       ]
-    : null;
+    : [];
 
   const barLayer = {
     params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
@@ -423,10 +428,13 @@ export const createSingleCategoricalStateTimeline = (
     },
     encoding: {
       y: {
-        field: yAxis?.column,
-        type: 'nominal',
+        field: 'fakeYAxis',
         scale: { padding: rowHeight },
-        axis: { ...applyAxisStyling(yAxis, yAxisStyle, true), tickOpacity: 0 },
+        axis: {
+          ...applyAxisStyling(colorMapping, yAxisStyle, true),
+          labels: false,
+          tickOpacity: 0,
+        },
       },
       x: {
         field: xAxis?.column,
@@ -437,7 +445,7 @@ export const createSingleCategoricalStateTimeline = (
       },
       x2: { field: 'end', type: 'temporal' },
       color: {
-        field: canUseValueMapping ? 'mappingValue' : yAxis?.column,
+        field: canUseValueMapping ? 'mappingValue' : categoryField,
         type: 'nominal',
         ...(canUseValueMapping && {
           scale: {
@@ -447,7 +455,7 @@ export const createSingleCategoricalStateTimeline = (
         }),
         legend: styleOptions.addLegend
           ? {
-              title: yAxis?.name,
+              title: categoryName,
               orient: styleOptions.legendPosition?.toLowerCase() || 'bottom',
             }
           : null,
@@ -455,9 +463,9 @@ export const createSingleCategoricalStateTimeline = (
       ...(styleOptions.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
-            field: yAxis?.column,
+            field: categoryField,
             type: 'nominal',
-            title: yAxisStyle?.title?.text || yAxis?.name,
+            title: yAxisStyle?.title?.text || categoryName,
           },
           {
             field: xAxis?.column,
@@ -497,8 +505,7 @@ export const createSingleCategoricalStateTimeline = (
           ],
           encoding: {
             y: {
-              field: yAxis?.column,
-              type: 'nominal',
+              field: 'fakeYAxis',
             },
             x: { field: 'midX', type: 'temporal' },
             text: { field: 'displayText' },
@@ -509,10 +516,17 @@ export const createSingleCategoricalStateTimeline = (
   const baseSpec = {
     $schema: VEGASCHEMA,
     title: styleOptions.titleOptions?.show
-      ? styleOptions.titleOptions?.titleName || `${yAxis?.name} by ${xAxis?.name}`
+      ? styleOptions.titleOptions?.titleName || `${categoryName} by ${xAxis?.name}`
       : undefined,
     data: { values: processedData },
-    transform: transformLayer,
+    transform: [
+      ...transformLayer,
+      // This is a fake field intentionally created to force Vega-Lite to draw an axis.
+      {
+        calculate: "'Response'",
+        as: 'fakeYAxis',
+      },
+    ],
     layer: [barLayer, textLayer].filter(Boolean),
   };
 
