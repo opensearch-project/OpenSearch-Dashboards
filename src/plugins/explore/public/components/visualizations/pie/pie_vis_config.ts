@@ -23,6 +23,7 @@ export interface PieChartStyleOptions {
   addTooltip?: boolean;
   addLegend?: boolean;
   legendPosition?: Positions;
+  legendTitle?: string;
   tooltipOptions?: TooltipOptions;
 
   // Exclusive controls
@@ -38,6 +39,7 @@ export const defaultPieChartStyles: PieChartStyle = {
   addTooltip: true,
   addLegend: true,
   legendPosition: Positions.RIGHT,
+  legendTitle: '',
   tooltipOptions: {
     mode: 'all',
   },

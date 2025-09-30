@@ -31,6 +31,8 @@ export interface ScatterChartStyleOptions {
   tooltipOptions?: TooltipOptions;
   addLegend?: boolean;
   legendPosition?: Positions;
+  legendTitle?: string;
+  legendTitle2?: string;
   // Axes configuration
   standardAxes?: StandardAxes[];
 
@@ -52,6 +54,8 @@ export const defaultScatterChartStyles: ScatterChartStyle = {
   },
   addLegend: true,
   legendPosition: Positions.RIGHT,
+  legendTitle: '',
+  legendTitle2: '',
 
   // exclusive
   exclusive: {

@@ -28,6 +28,7 @@ export type LineMode = 'straight' | 'smooth' | 'stepped';
 export interface LineChartStyleOptions {
   addLegend?: boolean;
   legendPosition?: Positions;
+  legendTitle?: string;
   addTimeMarker?: boolean;
 
   lineStyle?: LineStyle;
@@ -53,6 +54,7 @@ export type LineChartStyle = Required<Omit<LineChartStyleOptions, 'thresholdLine
 export const defaultLineChartStyles: LineChartStyle = {
   addLegend: true,
   legendPosition: Positions.RIGHT,
+  legendTitle: '',
   addTimeMarker: false,
 
   lineStyle: 'both',

@@ -96,6 +96,9 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
                   if (legendOptions.position !== undefined) {
                     updateStyleOption('legendPosition', legendOptions.position);
                   }
+                  if (legendOptions.title !== undefined) {
+                    updateStyleOption('legendTitle', legendOptions.title);
+                  }
                 }}
               />
             </EuiFlexItem>

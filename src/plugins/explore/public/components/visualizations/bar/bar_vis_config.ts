@@ -28,6 +28,7 @@ export interface BarChartStyleOptions {
   // Basic controls
   addLegend?: boolean;
   legendPosition?: Positions;
+  legendTitle?: string;
   legendShape?: 'circle' | 'square';
   tooltipOptions?: TooltipOptions;
 
@@ -66,6 +67,7 @@ export const defaultBarChartStyles: BarChartStyle = {
   switchAxes: false,
   addLegend: true,
   legendPosition: Positions.RIGHT,
+  legendTitle: '',
   tooltipOptions: {
     mode: 'all',
   },
