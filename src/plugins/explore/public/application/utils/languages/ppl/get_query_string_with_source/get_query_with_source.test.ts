@@ -221,4 +221,14 @@ describe('getQueryWithSource', () => {
     const result = getQueryWithSource(query);
     expect(result).toEqual(query);
   });
+
+  it('should handle if we have a field Expression infront of SOURCE command', () => {
+    const query: Query = {
+      query: 'unique_category = "Configuration" source = `data_logs_small_time_1*`',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'ppl',
+    };
+    const result = getQueryWithSource(query);
+    expect(result).toEqual(query);
+  });
 });
