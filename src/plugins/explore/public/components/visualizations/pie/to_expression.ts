@@ -33,7 +33,11 @@ export const createPieSpec = (
       field: categoryField,
       type: 'nominal',
       legend: styleOptions.addLegend
-        ? { title: numericName, orient: styleOptions.legendPosition, symbolLimit: 10 }
+        ? {
+            title: styleOptions.legendTitle || numericName,
+            orient: styleOptions.legendPosition,
+            symbolLimit: 10,
+          }
         : null,
     },
   };

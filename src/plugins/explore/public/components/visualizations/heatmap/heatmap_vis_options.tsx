@@ -103,6 +103,9 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
                   if (legendOptions.position !== undefined) {
                     updateStyleOption('legendPosition', legendOptions.position);
                   }
+                  if (legendOptions.title !== undefined) {
+                    updateStyleOption('legendTitle', legendOptions.title);
+                  }
                 }}
               />
             </EuiFlexItem>

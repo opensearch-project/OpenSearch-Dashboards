@@ -113,6 +113,9 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
                   if (legendOptions.position !== undefined) {
                     updateStyleOption('legendPosition', legendOptions.position);
                   }
+                  if (legendOptions.title !== undefined) {
+                    updateStyleOption('legendTitle', legendOptions.title);
+                  }
                 }}
               />
             </EuiFlexItem>

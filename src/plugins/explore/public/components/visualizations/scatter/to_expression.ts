@@ -108,7 +108,7 @@ export const createTwoMetricOneCateScatter = (
         type: getSchemaByAxis(colorColumn),
         legend: styles?.addLegend
           ? {
-              title: categoryNames || 'Metrics',
+              title: styles?.legendTitle || categoryNames || 'Metrics',
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
@@ -185,7 +185,7 @@ export const createThreeMetricOneCateScatter = (
         type: getSchemaByAxis(colorColumn),
         legend: styles?.addLegend
           ? {
-              title: categoryNames || 'Metrics',
+              title: styles?.legendTitle || categoryNames || 'Metrics',
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
@@ -196,7 +196,7 @@ export const createThreeMetricOneCateScatter = (
         type: getSchemaByAxis(numericalSize),
         legend: styles?.addLegend
           ? {
-              title: numericalSize?.name || 'Metrics',
+              title: styles?.legendTitle2 || numericalSize?.name || 'Metrics',
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }

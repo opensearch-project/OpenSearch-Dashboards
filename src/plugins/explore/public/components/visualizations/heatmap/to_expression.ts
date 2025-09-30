@@ -54,7 +54,7 @@ export const createHeatmapWithBin = (
         },
         legend: styles.addLegend
           ? {
-              title: colorName || 'Metrics',
+              title: styles.legendTitle || colorName || 'Metrics',
               orient: styles.legendPosition,
             }
           : null,
@@ -136,7 +136,7 @@ export const createRegularHeatmap = (
         },
         legend: styles.addLegend
           ? {
-              title: colorName || 'Metrics',
+              title: styles.legendTitle || colorName || 'Metrics',
               orient: styles.legendPosition,
             }
           : null,
