@@ -38,7 +38,6 @@ export {
   OverlaySidecarOpenOptions,
   ISidecarConfig,
   getOsdSidecarPaddingStyle,
-  getOsdSidecarPaddingStyleForHeader,
   SIDECAR_DOCKED_MODE,
   getSidecarLeftNavStyle,
 } from './sidecar';

@@ -10,8 +10,4 @@ export {
   ISidecarConfig,
   SIDECAR_DOCKED_MODE,
 } from './sidecar_service';
-export {
-  getOsdSidecarPaddingStyle,
-  getOsdSidecarPaddingStyleForHeader,
-  getSidecarLeftNavStyle,
-} from './helper';
+export { getOsdSidecarPaddingStyle, getSidecarLeftNavStyle } from './helper';
