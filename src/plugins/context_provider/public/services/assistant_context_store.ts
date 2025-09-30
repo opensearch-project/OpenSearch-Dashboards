@@ -15,14 +15,25 @@ export class AssistantContextStoreImpl implements AssistantContextStore {
   private contexts$ = new BehaviorSubject<AssistantContextOptions[]>([]);
 
   /**
-   * Add a new context to the store (replaces existing context with same ID if provided)
+   * Add a new context to the store
+   * - If context has an ID: remove existing context with same ID, then add (allows accumulation)
+   * - If context has no ID: clear the category first, then add (replaces previous contexts)
    */
   addContext(options: AssistantContextOptions): void {
     const categories = options.categories || ['default'];
 
-    // If context has an ID, remove any existing context with the same ID first
     if (options.id) {
+      // Context with ID: Remove any existing context with the same ID first
+      // This allows multiple contexts with different IDs to coexist
       this.removeContextById(options.id);
+    } else {
+      // Context without ID: Clear existing contexts in these categories first
+      // This ensures only one context without ID exists per category (e.g., page context)
+      categories.forEach((category) => {
+        const categoryContexts = this.contextsByCategory.get(category) || [];
+        const filteredContexts = categoryContexts.filter((context) => context.id);
+        this.contextsByCategory.set(category, filteredContexts);
+      });
     }
 
     // Add the new context to all specified categories

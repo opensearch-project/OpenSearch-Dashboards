@@ -87,6 +87,88 @@ describe('AssistantContextStoreImpl', () => {
       });
     });
 
+    it('should replace contexts without ID in same category', () => {
+      const options1: AssistantContextOptions = {
+        description: 'First page context',
+        value: { page: 'first' },
+        label: 'First Page',
+        categories: ['page'],
+      };
+
+      const options2: AssistantContextOptions = {
+        description: 'Second page context',
+        value: { page: 'second' },
+        label: 'Second Page',
+        categories: ['page'],
+      };
+
+      store.addContext(options1);
+      store.addContext(options2);
+      const contexts = store.getContextsByCategory('page');
+
+      // Should only have the second context (replaced the first)
+      expect(contexts).toHaveLength(1);
+      expect(contexts[0]).toMatchObject({
+        description: 'Second page context',
+        value: { page: 'second' },
+        label: 'Second Page',
+      });
+    });
+
+    it('should allow multiple contexts with different IDs to coexist', () => {
+      const options1: AssistantContextOptions = {
+        id: 'doc-1',
+        description: 'First document',
+        value: { doc: 'first' },
+        label: 'Document 1',
+        categories: ['dynamic'],
+      };
+
+      const options2: AssistantContextOptions = {
+        id: 'doc-2',
+        description: 'Second document',
+        value: { doc: 'second' },
+        label: 'Document 2',
+        categories: ['dynamic'],
+      };
+
+      store.addContext(options1);
+      store.addContext(options2);
+      const contexts = store.getContextsByCategory('dynamic');
+
+      // Should have both contexts
+      expect(contexts).toHaveLength(2);
+      expect(contexts.map((c) => c.id)).toEqual(['doc-1', 'doc-2']);
+    });
+
+    it('should preserve contexts with IDs when adding context without ID to same category', () => {
+      const contextWithId: AssistantContextOptions = {
+        id: 'doc-1',
+        description: 'Document context',
+        value: { doc: 'data' },
+        label: 'Document',
+        categories: ['mixed'],
+      };
+
+      const contextWithoutId: AssistantContextOptions = {
+        description: 'Page context',
+        value: { page: 'data' },
+        label: 'Page',
+        categories: ['mixed'],
+      };
+
+      store.addContext(contextWithId);
+      store.addContext(contextWithoutId);
+      const contexts = store.getContextsByCategory('mixed');
+
+      // Should have both: the context with ID should be preserved
+      expect(contexts).toHaveLength(2);
+      expect(contexts.some((c) => c.id === 'doc-1')).toBe(true);
+      expect(contexts.some((c) => c.id === undefined && c.description === 'Page context')).toBe(
+        true
+      );
+    });
+
     it('should use default categories when none provided', () => {
       const options: AssistantContextOptions = {
         description: 'Test context',
@@ -276,12 +358,14 @@ describe('AssistantContextStoreImpl', () => {
   describe('clearAll', () => {
     it('should remove all contexts', () => {
       store.addContext({
+        id: 'context-1',
         description: 'Context 1',
         value: { data: 1 },
         label: 'Label 1',
       });
 
       store.addContext({
+        id: 'context-2',
         description: 'Context 2',
         value: { data: 2 },
         label: 'Label 2',
