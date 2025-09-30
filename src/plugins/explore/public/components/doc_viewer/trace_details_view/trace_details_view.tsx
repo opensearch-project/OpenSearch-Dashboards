@@ -151,9 +151,12 @@ export function TraceDetailsView({ hit }: DocViewRenderProps) {
         });
 
         let transformed = transformPPLDataToTraceHits(response);
-        transformed = transformed.filter(
-          (transformedHit) => !!transformedHit.startTimeUnixNano && !!transformedHit.endTimeUnixNano
-        );
+        transformed = transformed.filter((transformedHit) => {
+          const hasUnixNano =
+            !!transformedHit.startTimeUnixNano && !!transformedHit.endTimeUnixNano;
+          const hasRegularTime = !!transformedHit.startTime && !!transformedHit.endTime;
+          return hasUnixNano || hasRegularTime;
+        });
         setTransformedHits(transformed);
       } catch (err) {
         // eslint-disable-next-line no-console
