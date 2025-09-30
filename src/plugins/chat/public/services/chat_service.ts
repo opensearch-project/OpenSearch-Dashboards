@@ -80,21 +80,23 @@ export class ChatService {
       content: content.trim(),
     };
 
-    // Get assistant contexts from the store
-    let assistantContexts: Array<{ description: string; value: any }> = [];
+    // Get all contexts from the assistant context store (static + dynamic)
     const contextStore = (window as any).assistantContextStore;
-    if (contextStore) {
-      // Get contexts with 'chat' category for backend
-      assistantContexts = contextStore.getBackendFormattedContexts('chat');
-    }
+    const allContexts = contextStore ? contextStore.getAllContexts() : [];
+
+    // Convert to AG-UI format: {description: string, value: string}
+    const context = allContexts.map((ctx: any) => ({
+      description: ctx.description,
+      value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
+    }));
 
     const runInput: RunAgentInput = {
       threadId: this.threadId,
       runId: this.generateRunId(),
       messages: [...messages, userMessage],
       tools: this.availableTools || [], // Pass available tools to AG-UI server
-      context: assistantContexts, // Include assistant contexts
-      state: {}, // Required by AG-UI backend - can be empty object as placeholder
+      context, // All contexts (static + dynamic) with stringified values
+      state: {}, // Empty for agent internal use only
       forwardedProps: {},
     };
 
@@ -140,13 +142,15 @@ export class ChatService {
       toolCallId,
     };
 
-    // Get assistant contexts from the store
-    let assistantContexts: Array<{ description: string; value: any }> = [];
+    // Get all contexts from the assistant context store (static + dynamic)
     const contextStore = (window as any).assistantContextStore;
-    if (contextStore) {
-      // Get contexts with 'chat' category for backend
-      assistantContexts = contextStore.getBackendFormattedContexts('chat');
-    }
+    const allContexts = contextStore ? contextStore.getAllContexts() : [];
+
+    // Convert to AG-UI format: {description: string, value: string}
+    const context = allContexts.map((ctx: any) => ({
+      description: ctx.description,
+      value: typeof ctx.value === 'string' ? ctx.value : JSON.stringify(ctx.value),
+    }));
 
     // Send the tool result back to the agent with full conversation history
     const mappedMessages = [...messages, toolMessage];
@@ -156,8 +160,8 @@ export class ChatService {
       runId: this.generateRunId(),
       messages: mappedMessages,
       tools: this.availableTools || [],
-      context: assistantContexts, // Include assistant contexts
-      state: {}, // Required by AG-UI backend - can be empty object as placeholder
+      context, // All contexts (static + dynamic) with stringified values
+      state: {}, // Empty for agent internal use only
       forwardedProps: {},
     };
 
