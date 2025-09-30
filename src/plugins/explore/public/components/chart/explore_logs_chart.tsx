@@ -31,6 +31,7 @@ import {
   executeQueries,
   executeHistogramQuery,
   prepareHistogramCacheKey,
+  defaultPrepareQueryString,
 } from '../../application/utils/state_management/actions/query_actions';
 import { ResultsSummary } from '../results_summary/results_summary';
 import { selectSummaryAgentIsAvailable } from '../../application/utils/state_management/selectors';
@@ -73,7 +74,12 @@ export const ExploreLogsChart = ({
     dispatch(clearResultsByKey(cacheKey));
     dispatch(clearQueryStatusMapByKey(cacheKey));
     dispatch(
-      executeHistogramQuery({ services, cacheKey, interval: newInterval, queryString: cacheKey })
+      executeHistogramQuery({
+        services,
+        cacheKey,
+        interval: newInterval,
+        queryString: defaultPrepareQueryString(query),
+      })
     );
   };
   const timefilterUpdateHandler = useCallback(
