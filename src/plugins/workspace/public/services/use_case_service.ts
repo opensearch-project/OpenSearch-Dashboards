@@ -124,11 +124,11 @@ export class UseCaseService {
   }
 
   setup({ chrome, workspaces, getStartServices }: UseCaseServiceSetupDeps) {
-    this.registerManageWorkspaceCategory({
+    /* this.registerManageWorkspaceCategory({
       chrome,
       workspaces,
       getStartServices,
-    });
+    }); */
   }
 
   start({
