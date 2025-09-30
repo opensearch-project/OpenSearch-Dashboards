@@ -3,33 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef } from 'react';
+import deepEqual from 'fast-deep-equal';
 import { AssistantContextOptions, AssistantContextStore } from '../types';
-
-/**
- * Deep comparison utility for context options
- */
-function deepEqual(a: any, b: any): boolean {
-  if (a === b) return true;
-  if (a == null || b == null) return false;
-  if (typeof a !== typeof b) return false;
-
-  if (typeof a === 'object') {
-    const keysA = Object.keys(a);
-    const keysB = Object.keys(b);
-
-    if (keysA.length !== keysB.length) return false;
-
-    for (const key of keysA) {
-      if (!keysB.includes(key)) return false;
-      if (!deepEqual(a[key], b[key])) return false;
-    }
-
-    return true;
-  }
-
-  return false;
-}
 
 /**
  * Base hook for registering context with the assistant context store.

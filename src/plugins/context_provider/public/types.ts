@@ -3,21 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { UiActionsSetup, UiActionsStart } from '../../../plugins/ui_actions/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plugins/data/public';
-import { EmbeddableSetup, EmbeddableStart } from '../../../plugins/embeddable/public';
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ContextProviderSetupDeps {}
 
-export interface ContextProviderSetupDeps {
-  uiActions: UiActionsSetup;
-  data: DataPublicPluginSetup;
-  embeddable: EmbeddableSetup;
-}
-
-export interface ContextProviderStartDeps {
-  uiActions: UiActionsStart;
-  data: DataPublicPluginStart;
-  embeddable: EmbeddableStart;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ContextProviderStartDeps {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextProviderSetup {

@@ -4,7 +4,7 @@
   "opensearchDashboardsVersion": "opensearchDashboards",
   "server": false,
   "ui": true,
-  "requiredPlugins": ["uiActions", "data", "embeddable"],
+  "requiredPlugins": [],
   "optionalPlugins": [],
   "requiredBundles": ["opensearchDashboardsUtils"]
 }
