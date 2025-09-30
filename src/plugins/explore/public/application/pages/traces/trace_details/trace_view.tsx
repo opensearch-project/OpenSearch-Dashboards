@@ -47,6 +47,10 @@ import { Dataset } from '../../../../../../data/common';
 import { TraceDetailTab } from './constants/trace_detail_tabs';
 import { isSpanError } from './public/traces/ppl_resolve_helpers';
 
+/*
+ * Trace:Details
+ * @experimental
+ */
 export interface SpanFilter {
   field: string;
   value: string | number | boolean;

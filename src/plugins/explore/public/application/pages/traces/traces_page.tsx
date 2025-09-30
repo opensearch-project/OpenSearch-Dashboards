@@ -26,6 +26,7 @@ import { EXPLORE_PATTERNS_TAB_ID, EXPLORE_VISUALIZATION_TAB_ID } from '../../../
 import { setActiveTab } from '../../utils/state_management/slices';
 /**
  * Main application component for the Explore plugin
+ * @experimental
  */
 export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActionMenu'>>> = ({
   setHeaderActionMenu,
