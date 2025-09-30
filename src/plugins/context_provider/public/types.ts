@@ -26,6 +26,7 @@ export interface ContextProviderSetup {
 
 // Assistant Context System Types
 export interface AssistantContextOptions {
+  id?: string; // Unique identifier for context management
   description: string; // Sent to backend
   value: any; // Sent to backend
   label: string; // UI display only
@@ -34,6 +35,7 @@ export interface AssistantContextOptions {
 
 export interface AssistantContextStore {
   addContext(options: AssistantContextOptions): void;
+  removeContextById(id: string): void;
   getContextsByCategory(category: string): AssistantContextOptions[];
   getAllContexts(): AssistantContextOptions[];
   clearCategory(category: string): void;

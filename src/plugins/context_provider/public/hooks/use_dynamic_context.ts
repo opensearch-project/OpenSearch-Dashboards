@@ -40,19 +40,12 @@ function deepEqual(a: any, b: any): boolean {
  */
 export function useDynamicContext(options: AssistantContextOptions | null): string {
   const previousOptionsRef = useRef<AssistantContextOptions | null>(null);
+  const contextIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     // Check if options have actually changed using deep comparison
     if (deepEqual(options, previousOptionsRef.current)) {
       return; // No change, skip re-registration
-    }
-
-    // Update the reference
-    previousOptionsRef.current = options;
-
-    // Handle null options (no context to register)
-    if (!options) {
-      return;
     }
 
     // Get the global assistant context store
@@ -66,11 +59,36 @@ export function useDynamicContext(options: AssistantContextOptions | null): stri
       return;
     }
 
+    // If we had a previous context with an ID, remove it
+    if (previousOptionsRef.current?.id && contextStore.removeContextById) {
+      contextStore.removeContextById(previousOptionsRef.current.id);
+    }
+
+    // Update the reference
+    previousOptionsRef.current = options;
+
+    // Handle null options (remove context)
+    if (!options) {
+      contextIdRef.current = null;
+      return;
+    }
+
+    // Store the context ID for cleanup
+    contextIdRef.current = options.id || null;
+
     // Register the context (store handles replacement automatically)
     contextStore.addContext(options);
-
-    // No cleanup needed - store handles context replacement automatically
   }, [options]);
 
-  return 'context';
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      const contextStore = (window as any).assistantContextStore as AssistantContextStore;
+      if (contextStore && contextIdRef.current && contextStore.removeContextById) {
+        contextStore.removeContextById(contextIdRef.current);
+      }
+    };
+  }, []);
+
+  return contextIdRef.current || 'context';
 }

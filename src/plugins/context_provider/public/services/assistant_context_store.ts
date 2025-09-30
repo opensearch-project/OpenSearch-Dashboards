@@ -15,15 +15,15 @@ export class AssistantContextStoreImpl implements AssistantContextStore {
   private contexts$ = new BehaviorSubject<AssistantContextOptions[]>([]);
 
   /**
-   * Add a new context to the store (replaces existing contexts in the same categories)
+   * Add a new context to the store (replaces existing context with same ID if provided)
    */
   addContext(options: AssistantContextOptions): void {
     const categories = options.categories || ['default'];
 
-    // Clear existing contexts in these categories first
-    categories.forEach((category) => {
-      this.contextsByCategory.set(category, []);
-    });
+    // If context has an ID, remove any existing context with the same ID first
+    if (options.id) {
+      this.removeContextById(options.id);
+    }
 
     // Add the new context to all specified categories
     categories.forEach((category) => {
@@ -33,6 +33,19 @@ export class AssistantContextStoreImpl implements AssistantContextStore {
     });
 
     // Notify subscribers
+    this.emitContexts();
+  }
+
+  /**
+   * Remove a context by its ID from all categories
+   */
+  removeContextById(id: string): void {
+    this.contextsByCategory.forEach((contexts, category) => {
+      const filteredContexts = contexts.filter((context) => context.id !== id);
+      this.contextsByCategory.set(category, filteredContexts);
+    });
+
+    // Notify subscribers of the change
     this.emitContexts();
   }
 

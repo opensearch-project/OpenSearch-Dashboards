@@ -99,6 +99,7 @@ export const useTextSelection = () => {
   useDynamicContext(
     currentSelection
       ? {
+          id: 'text-selection',
           description: `Selected text: "${currentSelection.substring(0, 50)}${
             currentSelection.length > 50 ? '...' : ''
           }"`,

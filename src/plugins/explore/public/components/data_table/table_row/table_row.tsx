@@ -50,17 +50,20 @@ export const TableRowUI = ({
     setIsExpanded,
   ]);
 
-  // Memoize the context object to prevent infinite re-renders
   const expandedContext = useMemo(() => {
     if (!isExpanded) return null;
 
+    // Create unique ID for this document expansion
+    const documentId = row._id || `row-${index}`;
+
     return {
+      id: `document-expansion-${documentId}`,
       description: `Expanded row ${index !== undefined ? index + 1 : 'Entry'} from data table`,
       value: row._source,
       label: `Row ${index !== undefined ? index + 1 : 'Entry'}`,
       categories: ['explore', 'chat', 'dynamic'],
     };
-  }, [isExpanded, index, row._source]);
+  }, [isExpanded, index, row._source, row._id]);
 
   // Register dynamic context when row is expanded
   useDynamicContext(expandedContext);

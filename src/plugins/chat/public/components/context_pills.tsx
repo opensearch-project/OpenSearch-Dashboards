@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
-import type { ContextEntry } from '../../../context_provider/public';
+import type { AssistantContextOptions } from '../../../context_provider/public';
 import './context_pills.scss';
 
 interface ContextPillsProps {
@@ -17,7 +17,7 @@ export const ContextPills: React.FC<ContextPillsProps> = ({
   category = 'chat',
   maxDisplay = 5,
 }) => {
-  const [contexts, setContexts] = useState<ContextEntry[]>([]);
+  const [contexts, setContexts] = useState<AssistantContextOptions[]>([]);
 
   useEffect(() => {
     const contextStore = (window as any).assistantContextStore;
@@ -51,7 +51,7 @@ export const ContextPills: React.FC<ContextPillsProps> = ({
   const handleRemove = (contextId: string) => {
     const contextStore = (window as any).assistantContextStore;
     if (contextStore) {
-      contextStore.removeContext(contextId);
+      contextStore.removeContextById(contextId);
     }
   };
 
@@ -59,12 +59,12 @@ export const ContextPills: React.FC<ContextPillsProps> = ({
     <div className="contextPills">
       <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
         {contexts.map((context) => (
-          <EuiFlexItem grow={false} key={context.id}>
+          <EuiFlexItem grow={false} key={context.id || context.description}>
             <EuiBadge
               color="hollow"
               iconType="cross"
               iconSide="right"
-              iconOnClick={() => handleRemove(context.id)}
+              iconOnClick={() => handleRemove(context.id || context.description)}
               iconOnClickAriaLabel={`Remove ${context.label}`}
               className="contextPills__pill"
             >
