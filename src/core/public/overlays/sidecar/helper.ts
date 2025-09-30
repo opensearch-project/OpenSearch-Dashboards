@@ -29,8 +29,7 @@ export const getOsdSidecarPaddingStyle = (config: ISidecarConfig | undefined) =>
       config?.dockedMode === SIDECAR_DOCKED_MODE.RIGHT)
   ) {
     const { dockedMode, paddingSize } = config;
-    // TODO: Replace hardcoded 8px with EUI spacing variable (e.g., euiTheme.size.s or euiSizeS)
-    // This 8px adjustment is needed for newTopNavHeader to match other elements
+    // 8px adjustment needed for newTopNavHeader to match other elements
     const adjustedPaddingSize = paddingSize + 8;
     return {
       [`padding${dockedMode === SIDECAR_DOCKED_MODE.LEFT ? 'Left' : 'Right'}`]: adjustedPaddingSize,
