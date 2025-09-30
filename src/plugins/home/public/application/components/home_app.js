@@ -99,9 +99,21 @@ export function HomeApp({ directories, solutions }) {
 
   useEffect(() => {
     const checkExperienceSelection = async () => {
+      // First check session storage (for read-only users)
+      try {
+        const sessionDismissed = sessionStorage.getItem(KEY_EXPERIENCE_NOTICE_DISMISSED);
+        if (sessionDismissed === 'true') {
+          setShowExperienceSelection(false);
+          setIsCheckingExperience(false);
+          return;
+        }
+      } catch (storageErr) {
+        // Ignore storage errors and continue with saved objects check
+      }
+
+      // Then check saved objects (for users with write permissions)
       try {
         const result = await savedObjectsClient.get('config', KEY_EXPERIENCE_NOTICE_DISMISSED);
-        // Already dismissed
 
         if (result.error?.statusCode === 404) {
           // Not dismissed yet - show modal
@@ -121,16 +133,32 @@ export function HomeApp({ directories, solutions }) {
   }, [savedObjectsClient]);
 
   const dismissExperienceSelection = async () => {
+    let savedObjectSuccess = false;
+
     try {
-      await savedObjectsClient.create(
+      const result = await savedObjectsClient.create(
         'config',
         { dismissedAt: new Date().toISOString() },
         { id: KEY_EXPERIENCE_NOTICE_DISMISSED, overwrite: true }
       );
+      if (!result.error) {
+        savedObjectSuccess = true;
+      }
     } catch (err) {
-      console.error('Failed to save dismissal state:', err);
+      // eslint-disable-next-line no-empty
+    } finally {
+      // If saving to savedObjects failed for any reason or for read-only user, use session storage as fallback
+      if (!savedObjectSuccess) {
+        try {
+          sessionStorage.setItem(KEY_EXPERIENCE_NOTICE_DISMISSED, 'true');
+        } catch (storageErr) {
+          console.error('Failed to save dismissal to session storage:', storageErr);
+        }
+      }
+
+      // Always dismiss the modal
+      setShowExperienceSelection(false);
     }
-    setShowExperienceSelection(false);
   };
 
   // Show loading or modal before rendering routes
