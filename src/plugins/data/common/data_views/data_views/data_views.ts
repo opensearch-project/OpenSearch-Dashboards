@@ -21,7 +21,7 @@ import {
   DataViewFieldSpec,
   DataViewFieldMap,
 } from '../types';
-import { FieldFormatMap, SignalType } from '../../index_patterns/types';
+import { FieldFormatMap } from '../../index_patterns/types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/common';
 import { DataViewMissingIndices } from '../lib';
@@ -379,6 +379,7 @@ export class DataViewsService {
         title,
         displayName,
         description,
+        signalType,
         timeFieldName,
         intervalName,
         fields,
@@ -386,7 +387,6 @@ export class DataViewsService {
         fieldFormatMap,
         typeMeta,
         type,
-        signalType,
       },
       references,
     } = savedObject;
@@ -404,6 +404,7 @@ export class DataViewsService {
       title,
       displayName,
       description,
+      signalType,
       intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
@@ -411,7 +412,6 @@ export class DataViewsService {
       typeMeta: parsedTypeMeta,
       type,
       dataSourceRef,
-      signalType: signalType as SignalType,
     };
   };
 

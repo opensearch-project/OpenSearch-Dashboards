@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header should render normally 1`] = `
+<div>
+  <EuiTitle
+    size="s"
+  >
+    <h2>
+      <FormattedMessage
+        defaultMessage="Step {currentStepNumber} of {totalStepNumber}: Configure settings"
+        id="datasetManagement.createDataset.stepTimeHeader"
+        values={
+          Object {
+            "currentStepNumber": 0,
+            "totalStepNumber": 0,
+          }
+        }
+      />
+    </h2>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiText>
+    <FormattedMessage
+      defaultMessage="Specify settings for your {dataset} {datasetName}."
+      id="datasetManagement.createDataset.stepTimeLabel"
+      values={
+        Object {
+          "dataset": <strong>
+            ki*
+          </strong>,
+          "datasetName": "ki*",
+        }
+      }
+    />
+  </EuiText>
+</div>
+`;

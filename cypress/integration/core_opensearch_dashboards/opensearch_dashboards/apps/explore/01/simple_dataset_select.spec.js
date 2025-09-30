@@ -22,7 +22,7 @@ import {
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
-const noIndexPatterns = 5; // Determines the no of index patterns that should be in the dropdown for filtering test case
+const noIndexPatterns = 2; // Determines the no of index patterns that should be in the dropdown for filtering test case
 
 export const runSimpleDatasetSelectorTests = () => {
   describe('simple dataset selector selecting an index pattern', () => {

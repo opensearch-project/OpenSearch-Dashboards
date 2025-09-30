@@ -694,15 +694,15 @@ describe('Area Chart to_expression', () => {
       expect(result).toHaveProperty('data.values', mockTransformedData);
 
       // Verify encoding
-      expect(result).toHaveProperty('encoding.x.field', 'category');
-      expect(result).toHaveProperty('encoding.y.field', 'value');
-      expect(result).toHaveProperty('encoding.y.stack', 'normalize');
-      expect(result).toHaveProperty('encoding.color.field', 'category2');
+      expect(result.layer[0]).toHaveProperty('encoding.x.field', 'category');
+      expect(result.layer[0]).toHaveProperty('encoding.y.field', 'value');
+      expect(result.layer[0]).toHaveProperty('encoding.y.stack', 'normalize');
+      expect(result.layer[0]).toHaveProperty('encoding.color.field', 'category2');
 
       // Verify tooltip configuration
-      expect(result.encoding).toHaveProperty('tooltip');
-      expect(Array.isArray(result.encoding.tooltip)).toBe(true);
-      expect(result.encoding.tooltip).toHaveLength(3);
+      expect(result.layer[0].encoding).toHaveProperty('tooltip');
+      expect(Array.isArray(result.layer[0].encoding.tooltip)).toBe(true);
+      expect(result.layer[0].encoding.tooltip).toHaveLength(3);
     });
 
     it('should handle different title display options', () => {

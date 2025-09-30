@@ -1,0 +1,90 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header should match snapshot when useUpdatedUX equal false 1`] = `
+<div
+  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+>
+  <div
+    class="euiFlexItem"
+  >
+    <h3
+      class="euiTitle euiTitle--small"
+    >
+      Scripted fields
+    </h3>
+    <div
+      class="euiText euiText--small"
+    >
+      <p>
+        You can use scripted fields in visualizations and display them in your documents. However, you cannot search scripted fields.
+      </p>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <button
+      class="euiButton euiButton--primary euiButton--small"
+      data-test-subj="addScriptedFieldLink"
+      type="button"
+    >
+      <span
+        class="euiButtonContent euiButton__content"
+      >
+        <span
+          class="euiButton__text"
+        >
+          Add scripted field
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Header should render normally 1`] = `
+<div
+  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+>
+  <div
+    class="euiFlexItem"
+  >
+    <h3
+      class="euiTitle euiTitle--small"
+    >
+      Scripted fields
+    </h3>
+    <div
+      class="euiText euiText--small"
+    >
+      <p>
+        You can use scripted fields in visualizations and display them in your documents. However, you cannot search scripted fields.
+      </p>
+    </div>
+  </div>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <button
+      class="euiButton euiButton--primary euiButton--small"
+      data-test-subj="addScriptedFieldLink"
+      type="button"
+    >
+      <span
+        class="euiButtonContent euiButton__content"
+      >
+        <span
+          class="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="plusInCircle"
+        />
+        <span
+          class="euiButton__text"
+        >
+          Add scripted field
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
