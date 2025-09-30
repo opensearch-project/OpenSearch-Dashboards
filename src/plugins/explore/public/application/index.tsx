@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import { Provider as ReduxProvider } from 'react-redux';
@@ -18,8 +18,6 @@ import { TracesPage } from './pages/traces';
 import { MetricsPage } from './pages/metrics';
 import { EditorContextProvider } from './context';
 import { TraceDetails } from './pages/traces/trace_details/trace_view';
-
-// RFC Context Hooks - Direct browser URL monitoring
 import { usePageContext } from '../../../context_provider/public';
 
 // Route component props interface
@@ -31,12 +29,10 @@ interface ExploreRouteProps {
 type ExploreComponentProps = ExploreRouteProps &
   Partial<Pick<AppMountParameters, 'setHeaderActionMenu'>>;
 
-// Component that handles page context for all Explore flavors using osdUrlStateStorage
+// Component that handles page context for all Explore flavors
 const ExplorePageContextProvider: React.FC<{
-  flavor: ExploreFlavor;
   children: React.ReactNode;
-}> = ({ flavor, children }) => {
-  // Use direct page context with simplified categories
+}> = ({ children }) => {
   usePageContext({
     description: 'Explore application page context',
     convert: (urlState) => ({
@@ -94,7 +90,7 @@ export const renderApp = (
           <EditorContextProvider>
             <DatasetProvider>
               <services.core.i18n.Context>
-                <ExplorePageContextProvider flavor={flavor}>
+                <ExplorePageContextProvider>
                   <Switch>
                     {/* View route for saved searches */}
                     {/* TODO: Do we need this? We might not need to, please revisit */}

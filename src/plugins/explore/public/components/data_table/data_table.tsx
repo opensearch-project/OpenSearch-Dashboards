@@ -528,7 +528,7 @@ const DataTableUI = ({
             (row, index: number) => {
               return (
                 <TableRow
-                  key={index}
+                  key={row._id}
                   row={row}
                   index={index}
                   columns={columnNames}

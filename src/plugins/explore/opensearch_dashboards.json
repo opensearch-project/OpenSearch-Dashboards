@@ -21,6 +21,6 @@
     "dashboard"
   ],
   "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils", "dashboard", "contextProvider"],
-  "optionalPlugins": ["home", "share", "contextProvider"],
+  "optionalPlugins": ["home", "share"],
   "configPath": ["explore"]
 }

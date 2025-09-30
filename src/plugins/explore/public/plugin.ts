@@ -4,6 +4,8 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { stringify } from 'query-string';
+import rison from 'rison-node';
 import { BehaviorSubject } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 import {
@@ -23,6 +25,7 @@ import {
 import {
   createOsdUrlStateStorage,
   createOsdUrlTracker,
+  url,
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
 import { ExploreFlavor, PLUGIN_ID, PLUGIN_NAME } from '../common';
@@ -30,6 +33,7 @@ import { ConfigSchema } from '../common/config';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
 import {
+  getServices,
   setDocViewsLinksRegistry,
   setDocViewsRegistry,
   setServices as setLegacyServices,
@@ -95,24 +99,37 @@ export class ExplorePlugin
   private visualizationRegistryService = new VisualizationRegistryService();
   private queryPanelActionsRegistryService = new QueryPanelActionsRegistryService();
 
-  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
-    this.config = this.initializerContext.config.get();
+  constructor(private readonly initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<ConfigSchema>();
   }
 
   public setup(
     core: CoreSetup<ExploreStartDependencies, ExplorePluginStart>,
     setupDeps: ExploreSetupDependencies
   ): ExplorePluginSetup {
-    // Use setupDeps directly instead of destructuring to avoid unused variable warnings
-    const visualizationRegistryService = this.visualizationRegistryService;
+    // Set usage collector
+    setUsageCollector(setupDeps.usageCollection);
+    this.registerExploreVisualization(core, setupDeps);
+    const visualizationRegistryService = this.visualizationRegistryService.setup();
 
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
-    this.docViewsLinksRegistry = new DocViewsLinksRegistry();
-    setDocViewsLinksRegistry(this.docViewsLinksRegistry);
+    this.docViewsRegistry.addDocView({
+      title: i18n.translate('explore.docViews.trace.timeline.title', {
+        defaultMessage: 'Timeline',
+      }),
+      order: 5,
+      component: TraceDetailsView,
+      shouldShow: (hit) => {
+        // Only show the Timeline tab when on the traces flavor
+        const currentPath = window.location.pathname;
+        const currentHash = window.location.hash;
+        return currentPath.includes('/explore/traces') || currentHash.includes('/explore/traces');
+      },
+    });
 
     this.docViewsRegistry.addDocView({
-      title: i18n.translate('explore.docViews.table.tableTitle', {
+      title: i18n.translate('explore.discover.docViews.table.tableTitle', {
         defaultMessage: 'Table',
       }),
       order: 10,
@@ -120,33 +137,73 @@ export class ExplorePlugin
     });
 
     this.docViewsRegistry.addDocView({
-      title: i18n.translate('explore.docViews.json.jsonTitle', {
+      title: i18n.translate('explore.discover.docViews.json.jsonTitle', {
         defaultMessage: 'JSON',
       }),
       order: 20,
       component: JsonCodeBlock,
     });
+    this.docViewsLinksRegistry = new DocViewsLinksRegistry();
+    setDocViewsLinksRegistry(this.docViewsLinksRegistry);
 
-    this.docViewsRegistry.addDocView({
-      title: i18n.translate('explore.docViews.trace.traceTitle', {
-        defaultMessage: 'Trace',
+    this.docViewsLinksRegistry.addDocViewLink({
+      label: i18n.translate('explore.discover.docTable.tableRow.viewSurroundingDocumentsLinkText', {
+        defaultMessage: 'View surrounding documents',
       }),
-      order: 30,
-      component: TraceDetailsView,
+      generateCb: (renderProps: Record<string, unknown>) => {
+        const queryString = getServices().data.query.queryString;
+        const showDocLinks =
+          queryString.getLanguageService().getLanguage(queryString.getQuery().language)
+            ?.showDocLinks ?? undefined;
+
+        // Note: Explore uses Redux for filter management, not filterManager
+        // So we don't include filter state in URLs for context links
+        const hash = stringify(
+          url.encodeQuery({
+            _g: rison.encode({}), // No global filters (explore uses Redux)
+            _a: rison.encode({
+              columns: (renderProps as any).columns,
+              // No filters since explore uses Redux store instead of filterManager
+            }),
+          }),
+          { encode: false, sort: false }
+        );
+
+        const contextUrl = `#/context/${encodeURIComponent(
+          (renderProps as any).indexPattern.id
+        )}/${encodeURIComponent((renderProps as any).hit._id)}?${hash}`;
+
+        return {
+          url: generateDocViewsUrl(contextUrl),
+          hide:
+            (showDocLinks !== undefined ? !showDocLinks : false) ||
+            !(renderProps as any).indexPattern.isTimeBased(),
+        };
+      },
+      order: 1,
     });
 
     this.docViewsLinksRegistry.addDocViewLink({
-      order: 10,
-      label: i18n.translate('explore.docTable.tableRow.viewSingleDocumentLinkTextSimple', {
+      label: i18n.translate('explore.discover.docTable.tableRow.viewSingleDocumentLinkText', {
         defaultMessage: 'View single document',
       }),
-      generateCb: (renderProps: any) => ({ url: generateDocViewsUrl(renderProps) }),
-      href: '#',
-    });
+      generateCb: (renderProps) => {
+        const queryString = getServices().data.query.queryString;
+        const showDocLinks =
+          queryString.getLanguageService().getLanguage(queryString.getQuery().language)
+            ?.showDocLinks ?? undefined;
 
-    if (setupDeps.usageCollection) {
-      setUsageCollector(setupDeps.usageCollection);
-    }
+        const docUrl = `#/doc/${renderProps.indexPattern.id}/${
+          renderProps.hit._index
+        }?id=${encodeURIComponent(renderProps.hit._id)}`;
+
+        return {
+          url: generateDocViewsUrl(docUrl),
+          hide: showDocLinks !== undefined ? !showDocLinks : false,
+        };
+      },
+      order: 2,
+    });
 
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
       baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
@@ -179,7 +236,7 @@ export class ExplorePlugin
 
     setupDeps.data.__enhance({
       editor: {
-        queryEditorExtension: createQueryEditorExtensionConfig(core as any),
+        queryEditorExtension: createQueryEditorExtensionConfig(core),
       },
     });
 
@@ -342,12 +399,12 @@ export class ExplorePlugin
         parentNavLinkId: PLUGIN_ID,
       }, */
     ]);
-    this.registerEmbeddable(core as any, setupDeps);
+    this.registerEmbeddable(core, setupDeps);
 
-    setupDeps.urlForwarding.forwardApp('doc', PLUGIN_ID, (path: string) => {
+    setupDeps.urlForwarding.forwardApp('doc', PLUGIN_ID, (path) => {
       return `#${path}`;
     });
-    setupDeps.urlForwarding.forwardApp('context', PLUGIN_ID, (path: string) => {
+    setupDeps.urlForwarding.forwardApp('context', PLUGIN_ID, (path) => {
       const urlParts = path.split('/');
       // take care of urls containing legacy url, those split in the following way
       // ["", "context", indexPatternId, _type, id + params]
@@ -358,7 +415,7 @@ export class ExplorePlugin
       }
       return `#${path}`;
     });
-    setupDeps.urlForwarding.forwardApp('discover', PLUGIN_ID, (path: string) => {
+    setupDeps.urlForwarding.forwardApp('discover', PLUGIN_ID, (path) => {
       const [, id, tail] = /discover\/([^\?]+)(.*)/.exec(path) || [];
       if (!id) {
         return `#${path.replace('/discover', '') || '/'}`;
@@ -378,7 +435,7 @@ export class ExplorePlugin
         addDocViewLink: (docViewLinkSpec: unknown) =>
           this.docViewsLinksRegistry?.addDocViewLink(docViewLinkSpec as any),
       },
-      visualizationRegistry: visualizationRegistryService.setup(),
+      visualizationRegistry: visualizationRegistryService,
       queryPanelActionsRegistry: this.queryPanelActionsRegistryService.setup(),
     };
   }
@@ -482,7 +539,7 @@ export class ExplorePlugin
       appExtensions: {
         visualizations: {
           docTypes: [SAVED_OBJECT_TYPE],
-          toListItem: ({ id, attributes, updated_at: updatedAt }: any) => {
+          toListItem: ({ id, attributes, updated_at: updatedAt }) => {
             let iconType = '';
             let chartName = '';
             try {
@@ -525,7 +582,7 @@ export class ExplorePlugin
       const visTypes = pluginsStart.visualizations.all();
       const aliasTypes = pluginsStart.visualizations.getAliases();
       const allVisTypes = [...visTypes, ...aliasTypes];
-      dashboardVisActions.forEach((action: any) => {
+      dashboardVisActions.forEach((action) => {
         const visOfAction = allVisTypes.find((vis) => action.id === `add_vis_action_${vis.name}`);
         if (visOfAction && visOfAction.isClassic) {
           action.grouping?.push({
@@ -538,7 +595,7 @@ export class ExplorePlugin
     } else {
       const registeredVisAlias = pluginsStart.visualizations
         .getAliases()
-        .find((v: any) => v.name === this.DISCOVER_VISUALIZATION_NAME);
+        .find((v) => v.name === this.DISCOVER_VISUALIZATION_NAME);
 
       // if current workspace has NO explore enabled, the explore visualization ingress should be hidden
       if (registeredVisAlias) {
