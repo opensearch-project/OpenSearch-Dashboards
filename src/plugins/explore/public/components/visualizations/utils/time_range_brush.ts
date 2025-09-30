@@ -17,7 +17,7 @@ export const createTimeRangeBrush = (options: { timeAxis: 'x' | 'y' }) => {
   };
 };
 
-export const createTimeRangeUpdater = (options: { dateField: string; timeAxis: 'x' | 'y' }) => {
+export const createTimeRangeUpdater = () => {
   return {
     name: 'applyTimeFilter',
     value: null,

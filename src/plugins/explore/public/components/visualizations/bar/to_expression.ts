@@ -222,16 +222,7 @@ export const createTimeBarChart = (
 
   return {
     $schema: VEGASCHEMA,
-    params: [
-      ...(timeAxis
-        ? [
-            createTimeRangeUpdater({
-              dateField: timeAxis.column,
-              timeAxis: styles.switchAxes ? 'y' : 'x',
-            }),
-          ]
-        : []),
-    ],
+    params: [...(timeAxis ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${numericalAxis?.name} Over Time`
       : undefined,
@@ -352,16 +343,7 @@ export const createGroupedTimeBarChart = (
 
   const spec: any = {
     $schema: VEGASCHEMA,
-    params: [
-      ...(timeAxis
-        ? [
-            createTimeRangeUpdater({
-              dateField: timeAxis.column,
-              timeAxis: styles.switchAxes ? 'y' : 'x',
-            }),
-          ]
-        : []),
-    ],
+    params: [...(timeAxis ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${yAxis?.name} Over Time by ${categoryName}`
       : undefined,
@@ -436,16 +418,7 @@ export const createFacetedTimeBarChart = (
 
   return {
     $schema: VEGASCHEMA,
-    params: [
-      ...(timeAxis
-        ? [
-            createTimeRangeUpdater({
-              dateField: timeAxis.column,
-              timeAxis: styles.switchAxes ? 'y' : 'x',
-            }),
-          ]
-        : []),
-    ],
+    params: [...(timeAxis ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName ||
         `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`

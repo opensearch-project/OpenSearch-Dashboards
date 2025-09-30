@@ -87,6 +87,7 @@ export const createSimpleLineChart = (
     },
   };
 
+  layers.push(mainLayer);
   layers.push(
     ...createCrosshairLayers(
       {
@@ -105,7 +106,6 @@ export const createSimpleLineChart = (
       { showTooltip }
     )
   );
-  layers.push(mainLayer);
 
   // Add threshold layer if enabled
   const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
@@ -121,7 +121,7 @@ export const createSimpleLineChart = (
 
   return {
     $schema: VEGASCHEMA,
-    params: [...(dateField ? [createTimeRangeUpdater({ dateField, timeAxis: 'x' })] : [])],
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metricName} Over Time`
       : undefined,
@@ -304,7 +304,7 @@ export const createLineBarChart = (
 
   return {
     $schema: VEGASCHEMA,
-    params: [...(dateField ? [createTimeRangeUpdater({ dateField, timeAxis: 'x' })] : [])],
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metric1Name} (Bar) and ${metric2Name} (Line) Over Time`
       : undefined,
@@ -443,7 +443,7 @@ export const createMultiLineChart = (
 
   return {
     $schema: VEGASCHEMA,
-    params: [...(dateField ? [createTimeRangeUpdater({ dateField, timeAxis: 'x' })] : [])],
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metricName} Over Time by ${categoryName}`
       : undefined,
@@ -491,7 +491,7 @@ export const createFacetedMultiLineChart = (
 
   return {
     $schema: VEGASCHEMA,
-    params: [...(dateField ? [createTimeRangeUpdater({ dateField, timeAxis: 'x' })] : [])],
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName ||
         `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`

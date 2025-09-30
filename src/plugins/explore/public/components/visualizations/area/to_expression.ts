@@ -122,7 +122,7 @@ export const createSimpleAreaChart = (
 
   return {
     $schema: VEGASCHEMA,
-    params: [...(dateField ? [createTimeRangeUpdater({ dateField, timeAxis: 'x' })] : [])],
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metricName} Over Time`
       : undefined,
@@ -270,7 +270,7 @@ export const createMultiAreaChart = (
 
   return {
     $schema: VEGASCHEMA,
-    params: [...(dateField ? [createTimeRangeUpdater({ dateField, timeAxis: 'x' })] : [])],
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metricName} Over Time by ${categoryName}`
       : undefined,
@@ -314,7 +314,7 @@ export const createFacetedMultiAreaChart = (
   const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   return {
     $schema: VEGASCHEMA,
-    params: [...(dateField ? [createTimeRangeUpdater({ dateField, timeAxis: 'x' })] : [])],
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName ||
         `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`
