@@ -28,7 +28,8 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { ExperienceSelectionModal } from './explore_experience';
 import { I18nProvider } from '@osd/i18n/react';
 import PropTypes from 'prop-types';
 import { Home } from './legacy/home';
@@ -42,6 +43,8 @@ import { getServices } from '../opensearch_dashboards_services';
 import { useMount } from 'react-use';
 import { USE_NEW_HOME_PAGE } from '../../../common/constants';
 import { HOME_PAGE_ID } from '../../../../content_management/public';
+
+const KEY_EXPERIENCE_NOTICE_DISMISSED = 'explore-experience-notice-dismissed';
 
 const RedirectToDefaultApp = () => {
   useMount(() => {
@@ -90,6 +93,59 @@ export function HomeApp({ directories, solutions }) {
     uiSettings,
     contentManagement,
   } = getServices();
+
+  const [showExperienceSelection, setShowExperienceSelection] = useState(false);
+  const [isCheckingExperience, setIsCheckingExperience] = useState(true);
+
+  useEffect(() => {
+    const checkExperienceSelection = async () => {
+      try {
+        const result = await savedObjectsClient.get('config', KEY_EXPERIENCE_NOTICE_DISMISSED);
+        // Already dismissed
+
+        if (result.error?.statusCode === 404) {
+          // Not dismissed yet - show modal
+          setShowExperienceSelection(true);
+        } else {
+          // Other error - don't show
+          setShowExperienceSelection(false);
+        }
+      } catch (error) {
+        setShowExperienceSelection(false);
+      } finally {
+        setIsCheckingExperience(false);
+      }
+    };
+
+    checkExperienceSelection();
+  }, [savedObjectsClient]);
+
+  const dismissExperienceSelection = async () => {
+    try {
+      await savedObjectsClient.create(
+        'config',
+        { dismissedAt: new Date().toISOString() },
+        { id: KEY_EXPERIENCE_NOTICE_DISMISSED, overwrite: true }
+      );
+    } catch (err) {
+      console.error('Failed to save dismissal state:', err);
+    }
+    setShowExperienceSelection(false);
+  };
+
+  // Show loading or modal before rendering routes
+  if (isCheckingExperience) {
+    return null; // or a loading spinner
+  }
+
+  if (showExperienceSelection) {
+    return (
+      <I18nProvider>
+        <ExperienceSelectionModal onClose={dismissExperienceSelection} />
+      </I18nProvider>
+    );
+  }
+
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
 
