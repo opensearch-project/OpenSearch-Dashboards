@@ -87,8 +87,89 @@ export const buildQuery = (
         mode: 'absolute',
       }) || '1h';
   }
-
   return `${query} | stats count() by span(${timeFieldName}, ${effectiveInterval})`;
+};
+
+export const processRawResultsForHistogram = (
+  queryString: string,
+  dataView: DataView,
+  rawResults: ISearchResult,
+  interval: string | undefined,
+  services: ExploreServices,
+  getState: () => RootState
+) => {
+  const state = getState();
+  const effectiveInterval = interval || state.legacy?.interval || 'auto';
+
+  const histogramConfigs = createHistogramConfigs(dataView, effectiveInterval, services.data);
+
+  const aggs = histogramConfigs?.toDsl();
+
+  if (!aggs) return rawResults;
+
+  const aggsConfig: any = {};
+
+  Object.entries(aggs as Record<number, any>).forEach(([key, value]) => {
+    const aggTypeKeys = Object.keys(value);
+    if (aggTypeKeys.length === 0) {
+      return aggsConfig;
+    }
+    const aggTypeKey = aggTypeKeys[0];
+    if (aggTypeKey === 'date_histogram') {
+      aggsConfig[aggTypeKey] = {
+        ...value[aggTypeKey],
+      };
+      aggsConfig.qs = { [key]: queryString };
+    }
+  });
+
+  const responseAggs: any = {};
+
+  for (const [key, _aggQueryString] of Object.entries(aggsConfig.qs)) {
+    responseAggs[key] = rawResults?.hits.hits.map((hit) => {
+      if (rawResults?.fieldSchema && rawResults.fieldSchema.length >= 2) {
+        const valueField = rawResults.fieldSchema[0].name!;
+        const keyField = rawResults.fieldSchema[1].name!;
+        return {
+          key: hit._source[keyField],
+          value: hit._source[valueField],
+        };
+      }
+      const sourceValues = Object.values(hit._source);
+      return {
+        key: sourceValues[1],
+        value: sourceValues[0],
+      };
+    });
+  }
+
+  const tempResult: ISearchResult = { ...rawResults, aggregations: {} };
+
+  Object.entries(responseAggs).forEach(([id, value]) => {
+    if (aggsConfig && aggsConfig.date_histogram) {
+      let totalHits = rawResults.hits.total;
+      const buckets = value as Array<{ key: string; value: number }>;
+      tempResult.aggregations[id] = {
+        buckets: buckets.map((bucket) => {
+          const timestamp =
+            bucket.key.includes('Z') ||
+            bucket.key.includes('+') ||
+            (bucket.key.includes('-') && bucket.key.lastIndexOf('-') > 10)
+              ? new Date(bucket.key).getTime()
+              : new Date(bucket.key + 'Z').getTime();
+          totalHits += bucket.value;
+          return {
+            key_as_string: bucket.key,
+            key: timestamp,
+            doc_count: bucket.value,
+          };
+        }),
+      };
+      tempResult.hits.total = totalHits;
+    }
+  });
+
+  return tempResult;
 };
 
 /**
@@ -344,6 +425,7 @@ const executeQueryBase = async (
     includeHistogram: boolean;
     interval?: string;
     avoidDispatchingError?: (error: any, cacheKey: string) => boolean;
+    isHistogramQuery?: boolean;
   },
   thunkAPI: {
     getState: () => RootState;
@@ -357,6 +439,7 @@ const executeQueryBase = async (
     includeHistogram,
     interval,
     avoidDispatchingError,
+    isHistogramQuery,
   } = params;
   const { getState, dispatch } = thunkAPI;
 
@@ -416,7 +499,9 @@ const executeQueryBase = async (
     const preparedQueryObject = {
       ...query,
       dataset,
-      query: queryString,
+      query: isHistogramQuery
+        ? buildQuery(queryString, getState().query?.dataset?.timeFieldName, interval, services)
+        : queryString,
     };
 
     let searchSource;
@@ -463,11 +548,22 @@ const executeQueryBase = async (
       .ok({ json: rawResults });
 
     // Store RAW results in cache
-    const rawResultsWithMeta: ISearchResult = {
+    let rawResultsWithMeta: ISearchResult = {
       ...rawResults,
       elapsedMs: inspectorRequest.getTime()!,
       fieldSchema: searchSource.getDataFrame()?.schema,
     };
+
+    if (isHistogramQuery) {
+      rawResultsWithMeta = processRawResultsForHistogram(
+        queryString,
+        dataView,
+        rawResultsWithMeta,
+        interval,
+        services,
+        getState
+      );
+    }
 
     dispatch(setResults({ cacheKey, results: rawResultsWithMeta }));
 
@@ -606,13 +702,16 @@ export const executeHistogramQuery = createAsyncThunk<
   return executeQueryBase(
     {
       ...params,
-      includeHistogram: false,
-      queryString: buildQuery(
-        queryString,
-        getState().query?.dataset?.timeFieldName,
-        interval,
-        services
-      ),
+      includeHistogram: true,
+      queryString,
+      // includeHistogram: false,
+      // isHistogramQuery: true,
+      // // queryString: buildQuery(
+      // //   queryString,
+      // //   getState().query?.dataset?.timeFieldName,
+      // //   interval,
+      // //   services
+      // ),
     },
     thunkAPI
   );
