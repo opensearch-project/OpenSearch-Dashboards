@@ -39,6 +39,7 @@ jest.mock('../style_panel/axes/axes_selector', () => ({
     </div>
   )),
 }));
+
 jest.mock('../style_panel/legend/legend', () => ({
   LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
     <div data-test-subj="legend-panel">
@@ -60,6 +61,11 @@ jest.mock('../style_panel/legend/legend', () => ({
       >
         Change Both
       </button>
+      <input
+        data-test-subj="legend-title-input"
+        placeholder="Legend Title"
+        onChange={(e) => onLegendOptionsChange({ title: e.target.value })}
+      />
     </div>
   )),
 }));
@@ -175,6 +181,7 @@ describe('AreaVisStyleControls', () => {
     styleOptions: {
       addLegend: true,
       legendPosition: Positions.RIGHT,
+      legendTitle: '',
       addTimeMarker: false,
       // Threshold options
       thresholdOptions: {
@@ -353,6 +360,17 @@ describe('AreaVisStyleControls', () => {
 
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: Positions.TOP });
+  });
+
+  test('updates legend title correctly', async () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    const legendTitleInput = screen.getByTestId('legend-title-input');
+    await userEvent.type(legendTitleInput, 'New Legend Title');
+
+    await waitFor(() => {
+      expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendTitle: 'New Legend Title' });
+    });
   });
 
   test('adds threshold lines correctly', async () => {

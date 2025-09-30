@@ -55,6 +55,11 @@ jest.mock('../style_panel/legend/legend', () => ({
       >
         Change Both
       </button>
+      <input
+        data-test-subj="mockLegendTitle"
+        placeholder="Legend Title"
+        onChange={(e) => onLegendOptionsChange({ title: e.target.value })}
+      />
     </div>
   )),
 }));
@@ -261,6 +266,7 @@ describe('LineVisStyleControls', () => {
     styleOptions: {
       addLegend: true,
       legendPosition: Positions.RIGHT,
+      legendTitle: '',
       addTimeMarker: false,
       lineStyle: 'both' as LineStyle,
       lineMode: 'smooth',
@@ -378,6 +384,12 @@ describe('LineVisStyleControls', () => {
     await userEvent.click(screen.getByTestId('mockLegendBoth'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: 'top' });
+
+    const legendTitleInput = screen.getByTestId('mockLegendTitle');
+    await userEvent.type(legendTitleInput, 'New Legend Title');
+    await waitFor(() => {
+      expect(mockProps.onStyleChange).toHaveBeenCalledWith({ legendTitle: 'New Legend Title' });
+    });
   });
 
   test('calls onStyleChange with correct parameters for threshold options', async () => {

@@ -14,10 +14,28 @@ jest.mock('@osd/i18n', () => ({
   },
 }));
 
+jest.mock('../utils', () => ({
+  DebouncedFieldText: (props: any) => {
+    const { value, onChange, ...rest } = props;
+    const testSubj = props['data-test-subj'];
+    return (
+      <input
+        {...rest}
+        data-test-subj={testSubj}
+        data-testid={testSubj}
+        value={value ?? ''}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    );
+  },
+}));
+
 describe('LegendOptionsPanel', () => {
   const mockLegend = {
     show: true,
     position: Positions.BOTTOM,
+    title: 'Legend Title',
+    title2: 'Size Legend Title',
   };
 
   const mockOnLegendChange = jest.fn();
@@ -33,12 +51,32 @@ describe('LegendOptionsPanel', () => {
 
     const legendModeSwitch = screen.getByTestId('legendModeSwitch');
     const legendPositionSelect = screen.getByTestId('legendPositionSelect');
+    const legendTitleInput = screen.getByTestId('legendTitleInput');
 
     expect(legendModeSwitch).toBeInTheDocument();
     expect(legendPositionSelect).toBeInTheDocument();
+    expect(legendTitleInput).toBeInTheDocument();
   });
 
-  it('update legend mode correctly', () => {
+  it('renders second legend title input when hasTwoLegends is true', () => {
+    render(
+      <LegendOptionsPanel
+        legendOptions={mockLegend}
+        onLegendOptionsChange={mockOnLegendChange}
+        hasTwoLegends={true}
+      />
+    );
+
+    const legendTitleInput = screen.getByTestId('legendTitleInput');
+    const legendTitle2Input = screen.getByTestId('legendTitle2Input');
+
+    expect(legendTitleInput).toBeInTheDocument();
+    expect(legendTitle2Input).toBeInTheDocument();
+    expect(legendTitleInput).toHaveAttribute('placeholder', 'Color legend name');
+    expect(legendTitle2Input).toHaveAttribute('placeholder', 'Size legend name');
+  });
+
+  it('updates legend mode correctly', () => {
     render(
       <LegendOptionsPanel legendOptions={mockLegend} onLegendOptionsChange={mockOnLegendChange} />
     );
@@ -51,7 +89,7 @@ describe('LegendOptionsPanel', () => {
     });
   });
 
-  it('update legend position correctly', () => {
+  it('updates legend position correctly', () => {
     render(
       <LegendOptionsPanel legendOptions={mockLegend} onLegendOptionsChange={mockOnLegendChange} />
     );
@@ -61,6 +99,36 @@ describe('LegendOptionsPanel', () => {
     fireEvent.change(legendPositionSelect, { target: { value: Positions.RIGHT } });
     expect(mockOnLegendChange).toHaveBeenLastCalledWith({
       position: Positions.RIGHT,
+    });
+  });
+
+  it('updates legend title correctly', () => {
+    render(
+      <LegendOptionsPanel legendOptions={mockLegend} onLegendOptionsChange={mockOnLegendChange} />
+    );
+
+    const legendTitleInput = screen.getByTestId('legendTitleInput');
+
+    fireEvent.change(legendTitleInput, { target: { value: 'New Legend Title' } });
+    expect(mockOnLegendChange).toHaveBeenLastCalledWith({
+      title: 'New Legend Title',
+    });
+  });
+
+  it('updates second legend title correctly when hasTwoLegends is true', () => {
+    render(
+      <LegendOptionsPanel
+        legendOptions={mockLegend}
+        onLegendOptionsChange={mockOnLegendChange}
+        hasTwoLegends={true}
+      />
+    );
+
+    const legendTitle2Input = screen.getByTestId('legendTitle2Input');
+
+    fireEvent.change(legendTitle2Input, { target: { value: 'New Size Legend Title' } });
+    expect(mockOnLegendChange).toHaveBeenLastCalledWith({
+      title2: 'New Size Legend Title',
     });
   });
 
