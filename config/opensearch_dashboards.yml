@@ -264,8 +264,6 @@
 # functionality in Visualization.
 # vis_builder.enabled: false
 
-# Set the value of this setting to true to enable multiple data source feature.
-#data_source.enabled: false
 # Set the value of this setting to true to hide local cluster in data source feature.
 #data_source.hideLocalCluster: false
 # Set the value of these settings to customize crypto materials to encryption saved credentials
@@ -342,10 +340,6 @@
 # if the security plugin is not installed and this config is true, permission control takes no effect.
 # savedObjects.permission.enabled: true
 
-# Set the value to true to enable workspace feature
-# Please note, workspace will not work with multi-tenancy. To enable workspace feature, you need to disable multi-tenancy first with `opensearch_security.multitenancy.enabled: false`
-# Please uncomment below uiSettings to enable new home/navigation experience when workspace is enabled
-# workspace.enabled: false
 # uiSettings:
 #   overrides:
 #     "home:useNewHomePage": true
@@ -393,3 +387,17 @@
 # datasetManagement.enabled: true
 # set the value to false to call the label as dataset
 # datasetManagement.aliasedAsIndexPattern: false
+
+# ===========================================
+# The new OpenSearch Dashboards Experience
+# Enable the following three flags together for the new OpenSearch Dashboards discover features
+# ===========================================
+
+# Set the value of this setting to true to enable multiple data source feature.
+# data_source.enabled: false
+
+# Set the value to true to enable workspace feature
+# Please note, workspace will not work with multi-tenancy. To enable workspace feature, you need to disable multi-tenancy first with `opensearch_security.multitenancy.enabled: false`
+# workspace.enabled: false
+
+# explore.enabled: false
