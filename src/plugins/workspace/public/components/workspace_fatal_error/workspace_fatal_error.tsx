@@ -44,7 +44,7 @@ export function WorkspaceFatalError(props: { error?: string }) {
               <p>
                 <FormattedMessage
                   id="workspace.fatalErrors.tryGoBackToDefaultWorkspaceDescription"
-                  defaultMessage="The workspace you are trying to access cannot be found. Please return to the homepage and try again."
+                  defaultMessage="The team you are trying to access cannot be found. Please return to the homepage and try again."
                 />
               </p>
             }

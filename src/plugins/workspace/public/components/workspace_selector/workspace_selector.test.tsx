@@ -59,7 +59,7 @@ describe('<WorkspaceSelector />', () => {
     jest.restoreAllMocks();
   });
 
-  it('should display the current workspace name', () => {
+  it('should display the current team name', () => {
     render(<WorkspaceSelectorCreatorComponent />);
     expect(screen.getByTestId('workspace-selector-current-title')).toBeInTheDocument();
     expect(screen.getByTestId('workspace-selector-current-name')).toBeInTheDocument();
@@ -170,7 +170,7 @@ describe('<WorkspaceSelector />', () => {
     });
   });
 
-  it('should navigate to the workspace detail page when use case is all', () => {
+  it('should navigate to the team detail page when use case is all', () => {
     coreStartMock.workspaces.workspaceList$.next([
       { id: 'workspace-1', name: 'workspace 1', features: ['use-case-all'] },
     ]);

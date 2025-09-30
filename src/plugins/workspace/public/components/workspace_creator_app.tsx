@@ -29,7 +29,7 @@ export const WorkspaceCreatorApp = (props: WorkspaceCreatorProps) => {
       homeBreadcrumb,
       {
         text: i18n.translate('workspace.workspaceCreateTitle', {
-          defaultMessage: 'Create a workspace',
+          defaultMessage: 'Create a team',
         }),
       },
     ]);

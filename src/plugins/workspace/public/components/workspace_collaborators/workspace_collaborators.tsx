@@ -63,7 +63,7 @@ export const WorkspaceCollaborators = () => {
     const showErrorNotification = (errorText?: string) => {
       notifications?.toasts.addDanger({
         title: i18n.translate('workspace.collaborators.update.failed.message', {
-          defaultMessage: 'Failed to update workspace collaborators',
+          defaultMessage: 'Failed to update team collaborators',
         }),
         ...(errorText ? { text: errorText } : {}),
       });
@@ -104,7 +104,7 @@ export const WorkspaceCollaborators = () => {
         controls={[
           {
             description: i18n.translate('workspace.collaborators.description', {
-              defaultMessage: 'Manage workspace access and permissions.',
+              defaultMessage: 'Manage team access and permissions.',
             }),
             links: {
               label: i18n.translate('workspace.form.panels.collaborator.learnMore', {

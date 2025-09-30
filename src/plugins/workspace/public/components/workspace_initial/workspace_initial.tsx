@@ -103,7 +103,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
       onClick={() => setIsCreateWorkspacePopoverOpen((isPopoverOpen) => !isPopoverOpen)}
     >
       {i18n.translate('workspace.initial.card.createWorkspace.button', {
-        defaultMessage: 'Create Workspace',
+        defaultMessage: 'Create Team',
       })}
       &nbsp;&nbsp;
       <EuiIcon type="arrowDown" />
@@ -170,7 +170,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
               <EuiTitle size="m">
                 <h2>
                   {i18n.translate('workspace.initial.workspace.title', {
-                    defaultMessage: 'My workspaces',
+                    defaultMessage: 'My teams',
                   })}
                 </h2>
               </EuiTitle>
@@ -178,7 +178,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
             <EuiText size="s">
               {i18n.translate('workspace.initial.createWorkspace.describe', {
                 defaultMessage:
-                  'Collaborate on use-case based projects with workspaces. {hasWorkspace, select, true { Select a workspace to get started.} false {}}',
+                  'Collaborate on use-case based projects with teams. {hasWorkspace, select, true { Select a team to get started.} false {}}',
                 values: { hasWorkspace: workspaceList.length > 0 },
               })}
             </EuiText>
@@ -233,7 +233,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
                 }}
               >
                 {i18n.translate('workspace.initial.button.view', {
-                  defaultMessage: 'View all workspaces',
+                  defaultMessage: 'View all teams',
                 })}
               </EuiLink>
             </EuiText>

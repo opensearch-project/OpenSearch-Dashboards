@@ -209,7 +209,7 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
         !chromeless &&
         workspaceAvailability !== WorkspaceAvailability.outsideWorkspace;
       // If the category is management, only retain Dashboards Management which contains saved objects and index patterns.
-      // Saved objects can show all saved objects in the current workspace and index patterns is at workspace level.
+      // Saved objects can show all saved objects in the current team and index patterns is at workspace level.
       if (category?.id === DEFAULT_APP_CATEGORIES.management.id) {
         return filterCondition && id === 'management';
       }

@@ -64,7 +64,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.delete.failed', {
-            defaultMessage: 'Failed to delete workspace',
+            defaultMessage: 'Failed to delete team',
           }),
           text: error instanceof Error ? error.message : JSON.stringify(error),
         });
@@ -75,7 +75,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
       if (result?.fail === 0) {
         notifications?.toasts.addSuccess({
           title: i18n.translate('workspace.delete.success', {
-            defaultMessage: '{successCount} workspaces deleted successfully',
+            defaultMessage: '{successCount} teams deleted successfully',
             values: {
               successCount: result.success,
             },
@@ -108,14 +108,14 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
         notifications?.toasts[isAllFailed ? 'addDanger' : 'addWarning']({
           title: isAllFailed
             ? i18n.translate('workspace.delete.allFailed', {
-                defaultMessage: '{failCount} workspaces failed to delete',
+                defaultMessage: '{failCount} teams failed to delete',
                 values: {
                   failCount: result.fail,
                 },
               })
             : i18n.translate('workspace.delete.warning', {
                 defaultMessage:
-                  '{successCount} workspaces deleted successfully, {failCount} failed to delete',
+                  '{successCount} teams deleted successfully, {failCount} failed to delete',
                 values: {
                   failCount: result.fail,
                   successCount: result.success,
@@ -125,7 +125,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
             <>
               <div>
                 {i18n.translate('workspace.delete.failed.name', {
-                  defaultMessage: 'Failed workspace name ',
+                  defaultMessage: 'Failed team name ',
                 })}
                 {failedWorksapces.map((selectedWorkspace) => selectedWorkspace.name).join(', ')}{' '}
               </div>
@@ -158,7 +158,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
       <EuiModalHeader data-test-subj="delete-workspace-modal-header">
         <EuiModalHeaderTitle>
           {i18n.translate('workspace.delete.title', {
-            defaultMessage: 'Delete workspace',
+            defaultMessage: 'Delete team',
           })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>

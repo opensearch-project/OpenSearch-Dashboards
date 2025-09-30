@@ -324,7 +324,7 @@ describe('workspace utils: filterWorkspaceConfigurableApps', () => {
       navLinkStatus: 1,
     },
   ] as PublicAppInfo[];
-  it('should filters out apps that are not accessible in the workspace', () => {
+  it('should filters out apps that are not accessible in the team', () => {
     const filteredApps = filterWorkspaceConfigurableApps(defaultApplications);
     expect(filteredApps.length).toEqual(2);
     expect(filteredApps[0].id).toEqual('dashboards');

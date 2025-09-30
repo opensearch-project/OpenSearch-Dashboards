@@ -49,7 +49,7 @@ export const CreatorDetailsPanel = ({
       <EuiText size="s">
         <h2>
           {i18n.translate('workspace.creator.details.panel.title', {
-            defaultMessage: 'Workspace details',
+            defaultMessage: 'Team details',
           })}
         </h2>
       </EuiText>
@@ -58,13 +58,13 @@ export const CreatorDetailsPanel = ({
         title={
           <h4 {...generateRightSidebarScrollProps(RightSidebarScrollField.Name)}>
             {i18n.translate('workspace.creator.details.panel.fields.name.title', {
-              defaultMessage: 'Workspace name',
+              defaultMessage: 'Team name',
             })}
           </h4>
         }
         description={i18n.translate('workspace.creator.details.panel.fields.name.description', {
           defaultMessage:
-            'Use a unique name for the workspace. Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space). You can also select a color for the workspace icon.',
+            'Use a unique name for the team. Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space). You can also select a color for the team icon.',
         })}
       >
         <EuiFlexGroup gutterSize="s">
@@ -105,7 +105,7 @@ export const CreatorDetailsPanel = ({
               placeholder={i18n.translate(
                 'workspace.creator.details.panel.fields.name.placeholder',
                 {
-                  defaultMessage: 'Enter the name for the workspace',
+                  defaultMessage: 'Enter the name for the team',
                 }
               )}
               showDescription={false}
@@ -118,7 +118,7 @@ export const CreatorDetailsPanel = ({
         title={
           <h4 {...generateRightSidebarScrollProps(RightSidebarScrollField.Description)}>
             {i18n.translate('workspace.creator.details.panel.fields.description.title', {
-              defaultMessage: 'Workspace description',
+              defaultMessage: 'Team description',
             })}
           </h4>
         }

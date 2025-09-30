@@ -75,7 +75,7 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
     } catch (error) {
       notifications?.toasts?.addError(error, {
         title: i18n.translate('workspace.collaborator.changePrivacyType.failed.message', {
-          defaultMessage: `Error updating workspace privacy type`,
+          defaultMessage: `Error updating team privacy type`,
         }),
       });
       return;
@@ -83,7 +83,7 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
     if (result?.success) {
       notifications?.toasts?.addSuccess({
         title: i18n.translate('workspace.collaborator.changePrivacyType.success.message', {
-          defaultMessage: `Change workspace privacy successfully.`,
+          defaultMessage: `Change team privacy successfully.`,
         }),
       });
     }

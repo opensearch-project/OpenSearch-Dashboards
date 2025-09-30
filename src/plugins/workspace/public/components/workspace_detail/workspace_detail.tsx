@@ -108,14 +108,14 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
         setIsDefaultWorkspace(true);
         notifications?.toasts.addSuccess(
           i18n.translate('workspace.setDefaultWorkspace.success.message', {
-            defaultMessage: 'Default workspace been set to {name}',
+            defaultMessage: 'Default team been set to {name}',
             values: { name: workspace.name },
           })
         );
       } else {
         notifications?.toasts.addWarning(
           i18n.translate('workspace.setDefaultWorkspace.error.message', {
-            defaultMessage: 'Failed to set workspace {name} as default workspace.',
+            defaultMessage: 'Failed to set team {name} as default team.',
             values: { name: workspace.name },
           })
         );
@@ -152,13 +152,13 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
                   color: 'danger',
                   iconType: 'trash',
                   ariaLabel: i18n.translate('workspace.detail.delete.button', {
-                    defaultMessage: 'Delete workspace',
+                    defaultMessage: 'Delete team',
                   }),
                   testId: 'workspace-detail-delete-button',
                   controlType: 'icon',
                   display: 'base',
                   tooltip: i18n.translate('workspace.detail.delete.button.tooltip', {
-                    defaultMessage: 'Delete workspace',
+                    defaultMessage: 'Delete team',
                   }),
                 } as TopNavControlIconData,
               ]
@@ -173,7 +173,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
                 controlType: 'button',
                 isDisabled: true,
                 tooltip: i18n.translate('workspace.detail.defaultWorkspace.badge.tooltip', {
-                  defaultMessage: 'Default workspace',
+                  defaultMessage: 'Default team',
                 }),
               } as TopNavControlButtonData)
             : ({
@@ -194,13 +194,13 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
             },
             iconType: 'popout',
             label: i18n.translate('workspace.detail.WorkspaceOverview.button', {
-              defaultMessage: 'Workspace overview',
+              defaultMessage: 'Team overview',
             }),
             testId: 'workspace-detail-workspace-overview-button',
             controlType: 'button',
             iconSide: 'right',
             tooltip: i18n.translate('workspace.detail.WorkspaceOverview.button.tooltip', {
-              defaultMessage: 'Workspace overview',
+              defaultMessage: 'Team overview',
             }),
           } as TopNavControlButtonData,
         ]}

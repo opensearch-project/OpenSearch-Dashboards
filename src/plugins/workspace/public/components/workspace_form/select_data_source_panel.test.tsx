@@ -147,7 +147,7 @@ describe('SelectDataSourcePanel', () => {
     fireEvent.click(getByTestId('workspace-creator-dataSources-assign-button'));
     expect(
       getByText(
-        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
+        'Add data sources that will be available in the team. If a selected data source has related Direct Query data sources, they will also be available in the team.'
       )
     ).toBeInTheDocument();
   });
@@ -163,7 +163,7 @@ describe('SelectDataSourcePanel', () => {
     await waitFor(() => {
       expect(
         getByText(
-          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
+          'Add data sources that will be available in the team. If a selected data source has related Direct Query data sources, they will also be available in the team.'
         )
       ).toBeInTheDocument();
       expect(getByText(assignedDataSourcesConnections[1].name)).toBeInTheDocument();
@@ -201,7 +201,7 @@ describe('SelectDataSourcePanel', () => {
     await waitFor(() => {
       expect(
         getByText(
-          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
+          'Add data sources that will be available in the team. If a selected data source has related Direct Query data sources, they will also be available in the team.'
         )
       ).toBeInTheDocument();
       expect(getByText(assignedDataSourcesConnections[0].name)).toBeInTheDocument();
@@ -225,14 +225,14 @@ describe('SelectDataSourcePanel', () => {
     await waitFor(() => {
       expect(
         getByText(
-          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
+          'Add data sources that will be available in the team. If a selected data source has related Direct Query data sources, they will also be available in the team.'
         )
       ).toBeInTheDocument();
       fireEvent.click(getByText('Cancel'));
     });
     expect(
       queryByText(
-        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
+        'Add data sources that will be available in the team. If a selected data source has related Direct Query data sources, they will also be available in the team.'
       )
     ).toBeNull();
   });

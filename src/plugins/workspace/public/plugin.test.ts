@@ -54,7 +54,7 @@ describe('Workspace plugin', () => {
     expect(savedObjectManagementSetupMock.columns.register).toBeCalledTimes(1);
   });
 
-  it('#call savedObjectsClient.setCurrentWorkspace when current workspace id changed', async () => {
+  it('#call savedObjectsClient.setCurrentWorkspace when current team id changed', async () => {
     const workspacePlugin = new WorkspacePlugin();
     const setupMock = getSetupMock();
     const coreStart = coreMock.createStart();
@@ -302,7 +302,7 @@ describe('Workspace plugin', () => {
     expect(startMock.application.navigateToApp).toBeCalledWith(WORKSPACE_FATAL_ERROR_APP_ID, {
       replace: true,
       state: {
-        error: 'Cannot find current workspace since it is stale',
+        error: 'Cannot find current team since it is stale',
       },
     });
     windowSpy.mockRestore();

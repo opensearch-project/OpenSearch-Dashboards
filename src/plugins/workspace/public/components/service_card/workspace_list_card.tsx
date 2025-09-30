@@ -93,7 +93,7 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
   const isDashboardAdmin = application.capabilities.dashboards?.isDashboardAdmin;
 
   const createWorkspace = i18n.translate('workspace.list.card.createWorkspace', {
-    defaultMessage: 'Create workspace',
+    defaultMessage: 'Create team',
   });
 
   const workspaceAvailable = workspaceList && workspaceList.length > 0;
@@ -117,7 +117,7 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
     <EuiText color="subdued" size="s">
       {i18n.translate('workspace.list.card.empty.readOnly', {
         defaultMessage:
-          'Contact your administrator to create a workspace or to be added to an existing one.',
+          'Contact your administrator to create a team or to be added to an existing one.',
       })}
     </EuiText>
   );
@@ -127,7 +127,7 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
       <>
         <EuiText color="subdued" size="s">
           {i18n.translate('workspace.list.card.empty', {
-            defaultMessage: 'Create a workspace to get started.',
+            defaultMessage: 'Create a team to get started.',
           })}
         </EuiText>
         <EuiSpacer size="s" />
@@ -140,7 +140,7 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
             >
               <EuiText size="s">
                 {i18n.translate('workspace.list.card.manageWorkspaces', {
-                  defaultMessage: 'Manage workspaces',
+                  defaultMessage: 'Manage teams',
                 })}
               </EuiText>
             </EuiLink>

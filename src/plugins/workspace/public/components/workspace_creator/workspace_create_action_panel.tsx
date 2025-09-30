@@ -69,7 +69,7 @@ export const WorkspaceCreateActionPanel = ({
             isLoading={isSubmitting}
           >
             {i18n.translate('workspace.form.right.sidebar.buttons.createWorkspaceText', {
-              defaultMessage: 'Create workspace',
+              defaultMessage: 'Create team',
             })}
           </EuiSmallButton>
         </EuiFlexItem>

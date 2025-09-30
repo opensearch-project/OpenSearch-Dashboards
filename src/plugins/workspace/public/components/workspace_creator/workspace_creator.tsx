@@ -136,7 +136,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.create.success', {
-              defaultMessage: 'Create workspace successfully',
+              defaultMessage: 'Create team successfully',
             }),
           });
           if (application && http) {
@@ -170,7 +170,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.create.failed', {
-            defaultMessage: 'Failed to create workspace',
+            defaultMessage: 'Failed to create team',
           }),
           text: error instanceof Error ? error.message : JSON.stringify(error),
         });
@@ -204,7 +204,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
         controls={[
           {
             description: i18n.translate('workspace.creator.description', {
-              defaultMessage: 'Organize collaborative projects in use-case-specific workspaces.',
+              defaultMessage: 'Organize collaborative projects in use-case-specific teams.',
             }),
           },
         ]}

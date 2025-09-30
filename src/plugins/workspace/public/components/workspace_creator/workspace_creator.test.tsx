@@ -368,7 +368,7 @@ describe('WorkspaceCreator', () => {
     await waitFor(() => {
       expect(
         getByText(
-          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
+          'Add data sources that will be available in the team. If a selected data source has related Direct Query data sources, they will also be available in the team.'
         )
       ).toBeInTheDocument();
       expect(getByText(dataSourcesList[0].title)).toBeInTheDocument();
@@ -419,7 +419,7 @@ describe('WorkspaceCreator', () => {
     await waitFor(() => {
       expect(
         getByText(
-          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
+          'Add data sources that will be available in the team. If a selected data source has related Direct Query data sources, they will also be available in the team.'
         )
       ).toBeInTheDocument();
       expect(getByText(dataSourcesList[2].title)).toBeInTheDocument();

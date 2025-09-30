@@ -103,7 +103,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
                 <EuiText size="xs">
                   {i18n.translate('workspace.creator.form.associateDataSourceDescription', {
                     defaultMessage:
-                      'Add at least one data source that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.',
+                      'Add at least one data source that will be available in the team. If a selected data source has related Direct Query data sources, they will also be available in the team.',
                   })}
                 </EuiText>
                 <SelectDataSourcePanel

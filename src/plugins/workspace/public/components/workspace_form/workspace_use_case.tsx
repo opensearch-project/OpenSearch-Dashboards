@@ -123,7 +123,7 @@ export const WorkspaceUseCase = ({
       <EuiText size="xs">
         {i18n.translate('workspace.form.panels.useCase.description', {
           defaultMessage:
-            'The use case defines the set of features that will be available in the workspace. You can change the use case later only to one with more features than the current use case.',
+            'The use case defines the set of features that will be available in the team. You can change the use case later only to one with more features than the current use case.',
         })}
         &nbsp;
         <EuiLink onClick={handleLearnMoreClick}>

@@ -32,7 +32,7 @@ export const showDeleteDetailsModal = (
   let updateMessages: EuiCommentProps[] = [
     {
       username: 'Delete Process',
-      event: 'started to delete workspaces',
+      event: 'started to delete teams',
       type: 'update',
       timelineIcon: 'trash',
     },
@@ -78,7 +78,7 @@ export const showDeleteDetailsModal = (
       <EuiModalHeader data-test-subj="delete-details-modal-header">
         <EuiModalHeaderTitle data-test-subj="delete-details-modal-title">
           {i18n.translate('workspace.deleteDetails.title', {
-            defaultMessage: 'Delete workspace details',
+            defaultMessage: 'Delete team details',
           })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>

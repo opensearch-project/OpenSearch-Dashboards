@@ -132,7 +132,7 @@ describe('<WorkspaceMenu />', () => {
     expect(screen.getByText(/no workspace available/i)).toBeInTheDocument();
   });
 
-  it('should display current workspace name, use case name and associated icon', () => {
+  it('should display current team name, use case name and associated icon', () => {
     coreStartMock.workspaces.currentWorkspace$.next({
       id: 'workspace-1',
       name: 'workspace 1',
@@ -172,7 +172,7 @@ describe('<WorkspaceMenu />', () => {
     });
   });
 
-  it('should navigate to the workspace detail page when use case is all', () => {
+  it('should navigate to the team detail page when use case is all', () => {
     coreStartMock.workspaces.workspaceList$.next([
       { id: 'workspace-1', name: 'workspace 1', features: ['use-case-all'] },
     ]);

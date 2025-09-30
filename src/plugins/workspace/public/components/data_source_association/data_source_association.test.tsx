@@ -97,7 +97,7 @@ describe('<DataSourceAssociation />', () => {
     await waitFor(() => {
       expect(associateMock).toHaveBeenCalled();
       expect(servicesMock.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-        expect.objectContaining({ title: '2 data sources been associated to the workspace' })
+        expect.objectContaining({ title: '2 data sources been associated to the team' })
       );
     });
   });
@@ -132,7 +132,7 @@ describe('<DataSourceAssociation />', () => {
     await waitFor(() => {
       expect(associateMock).toHaveBeenCalled();
       expect(servicesMock.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-        expect.objectContaining({ title: '2 data sources been associated to the workspace' })
+        expect.objectContaining({ title: '2 data sources been associated to the team' })
       );
     });
   });
@@ -165,7 +165,7 @@ describe('<DataSourceAssociation />', () => {
     await waitFor(() => {
       expect(associateMock).toHaveBeenCalled();
       expect(servicesMock.notifications.toasts.addDanger).toHaveBeenCalledWith(
-        expect.objectContaining({ title: 'Failed to associate 2 data sources to the workspace' })
+        expect.objectContaining({ title: 'Failed to associate 2 data sources to the team' })
       );
     });
   });
@@ -202,10 +202,10 @@ describe('<DataSourceAssociation />', () => {
     await waitFor(() => {
       expect(associateMock).toHaveBeenCalled();
       expect(servicesMock.notifications.toasts.addDanger).toHaveBeenCalledWith(
-        expect.objectContaining({ title: 'Failed to associate 1 data source to the workspace' })
+        expect.objectContaining({ title: 'Failed to associate 1 data source to the team' })
       );
       expect(servicesMock.notifications.toasts.addSuccess).toHaveBeenCalledWith(
-        expect.objectContaining({ title: '1 data source been associated to the workspace' })
+        expect.objectContaining({ title: '1 data source been associated to the team' })
       );
     });
   });

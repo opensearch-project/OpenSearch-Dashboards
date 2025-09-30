@@ -70,7 +70,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
     chrome?.setBreadcrumbs([
       {
         text: i18n.translate('workspace.detail.title', {
-          defaultMessage: 'Workspace details',
+          defaultMessage: 'Team details',
         }),
       },
     ]);
@@ -103,7 +103,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
       if (!currentWorkspace) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.detail.notFoundError', {
-            defaultMessage: 'Cannot update workspace',
+            defaultMessage: 'Cannot update team',
           }),
         });
         return;
@@ -133,7 +133,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.update.success', {
-              defaultMessage: 'Update workspace successfully',
+              defaultMessage: 'Update team successfully',
             }),
           });
           return result;
@@ -143,7 +143,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.update.failed', {
-            defaultMessage: 'Failed to update workspace',
+            defaultMessage: 'Failed to update team',
           }),
           text: error instanceof Error ? error.message : JSON.stringify(error),
         });

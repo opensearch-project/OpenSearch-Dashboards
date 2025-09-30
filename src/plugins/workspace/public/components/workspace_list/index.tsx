@@ -188,13 +188,13 @@ export const WorkspaceListInner = ({
         title={
           <h3>
             {i18n.translate('workspace.workspaceList.emptyState.title', {
-              defaultMessage: 'No workspace available',
+              defaultMessage: 'No team available',
             })}
           </h3>
         }
         titleSize="s"
         body={i18n.translate('workspace.workspaceList.emptyState.body', {
-          defaultMessage: 'There are no workspace to display. Create workspace to get started.',
+          defaultMessage: 'There are no teams to display. Create team to get started.',
         })}
         actions={
           isDashboardAdmin && (
@@ -204,7 +204,7 @@ export const WorkspaceListInner = ({
               data-test-subj="workspaceList-create-workspace"
             >
               {i18n.translate('workspace.workspaceList.buttons.createWorkspace', {
-                defaultMessage: 'Create workspace',
+                defaultMessage: 'Create team',
               })}
             </EuiSmallButton>
           )
@@ -220,7 +220,7 @@ export const WorkspaceListInner = ({
           {
             controlType: 'button',
             label: i18n.translate('workspace.list.buttons.createWorkspace', {
-              defaultMessage: 'Create workspace',
+              defaultMessage: 'Create team',
             }),
             testId: 'workspaceList-create-workspace',
             iconType: 'plus',
@@ -236,7 +236,7 @@ export const WorkspaceListInner = ({
   const handleCopyId = (id: string) => {
     copyToClipboard(id);
     notifications?.toasts.addSuccess(
-      i18n.translate('workspace.copyWorkspaceId.message', { defaultMessage: 'Workspace ID copied' })
+      i18n.translate('workspace.copyWorkspaceId.message', { defaultMessage: 'Team ID copied' })
     );
   };
 
@@ -267,7 +267,7 @@ export const WorkspaceListInner = ({
         setDefaultWorkspaceId(item.id);
         notifications?.toasts.addSuccess(
           i18n.translate('workspace.setDefaultWorkspace.success.message', {
-            defaultMessage: 'Default workspace been set to {name}',
+            defaultMessage: 'Default team been set to {name}',
             values: { name: item.name },
           })
         );
@@ -275,7 +275,7 @@ export const WorkspaceListInner = ({
         // toast
         notifications?.toasts.addWarning(
           i18n.translate('workspace.setDefaultWorkspace.error.message', {
-            defaultMessage: 'Failed to set workspace {name} as default workspace.',
+            defaultMessage: 'Failed to set team {name} as default team.',
             values: { name: item.name },
           })
         );
@@ -355,7 +355,7 @@ export const WorkspaceListInner = ({
         >
           {i18n.translate('workspace.list.page.delete.button.info', {
             defaultMessage:
-              '{selectedCount, plural, one {Delete # workspace} other {Delete # workspaces}}',
+              '{selectedCount, plural, one {Delete # workspace} other {Delete # teams}}',
             values: {
               selectedCount: selection.length,
             },
@@ -413,7 +413,7 @@ export const WorkspaceListInner = ({
                 <EuiFlexItem grow={false}>
                   <EuiBadge>
                     {i18n.translate('workspace.defaultWorkspace.title', {
-                      defaultMessage: 'Default workspace',
+                      defaultMessage: 'Default team',
                     })}
                   </EuiBadge>
                 </EuiFlexItem>
@@ -482,7 +482,7 @@ export const WorkspaceListInner = ({
       icon: 'copy',
       type: 'icon',
       description: i18n.translate('workspace.list.actions.copyId.description', {
-        defaultMessage: 'Copy workspace id',
+        defaultMessage: 'Copy team id',
       }),
       'data-test-subj': 'workspace-list-copy-id-icon',
       onClick: ({ id }: WorkspaceAttribute) => handleCopyId(id),
@@ -496,7 +496,7 @@ export const WorkspaceListInner = ({
       icon: 'pencil',
       type: 'icon',
       description: i18n.translate('workspace.list.actions.edit.description', {
-        defaultMessage: 'Edit workspace',
+        defaultMessage: 'Edit team',
       }),
       'data-test-subj': 'workspace-list-edit-icon',
       onClick: ({ id }: WorkspaceAttribute) => handleSwitchWorkspace(id, WORKSPACE_DETAIL_APP_ID),
@@ -512,7 +512,7 @@ export const WorkspaceListInner = ({
       icon: 'flag',
       type: 'icon',
       description: i18n.translate('workspace.list.actions.setDefault.description', {
-        defaultMessage: 'Set as my default workspace',
+        defaultMessage: 'Set as my default team',
       }),
       'data-test-subj': 'workspace-list-set-default-icon',
       onClick: (item: WorkspaceAttribute) => handleSetDefaultWorkspace(item),
@@ -526,7 +526,7 @@ export const WorkspaceListInner = ({
       icon: 'exit',
       type: 'icon',
       description: i18n.translate('workspace.list.actions.leave.description', {
-        defaultMessage: 'Leave workspace',
+        defaultMessage: 'Leave team',
       }),
       'data-test-subj': 'workspace-list-leave-icon',
       available: () => false,
@@ -541,7 +541,7 @@ export const WorkspaceListInner = ({
       type: 'icon',
       isPrimary: false,
       description: i18n.translate('workspace.list.actions.delete.description', {
-        defaultMessage: 'Delete workspace',
+        defaultMessage: 'Delete team',
       }),
       'data-test-subj': 'workspace-list-delete-icon',
       available: () => isDashboardAdmin,
@@ -619,8 +619,7 @@ export const WorkspaceListInner = ({
           controls={[
             {
               description: i18n.translate('workspace.list.description', {
-                defaultMessage:
-                  'Organize collaborative projects with use-case-specific workspaces.',
+                defaultMessage: 'Organize collaborative projects with use-case-specific teams.',
               }),
             },
           ]}

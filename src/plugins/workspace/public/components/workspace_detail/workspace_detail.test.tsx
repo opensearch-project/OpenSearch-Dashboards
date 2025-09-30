@@ -178,7 +178,7 @@ describe('WorkspaceDetail', () => {
     expect(container).toMatchSnapshot();
   });
 
-  it('should show current workspace information', async () => {
+  it('should show current team information', async () => {
     const { getByText, getAllByText, getByDisplayValue } = render(WorkspaceDetailPage({}));
     expect(getAllByText('Observability').length).toEqual(2);
     expect(getByText(workspaceObject.id)).toBeInTheDocument();
@@ -188,7 +188,7 @@ describe('WorkspaceDetail', () => {
     expect(getByDisplayValue(workspaceObject.color)).toBeInTheDocument();
   });
 
-  it('can edit current workspace', async () => {
+  it('can edit current team', async () => {
     const { getByTestId } = render(WorkspaceDetailPage({}));
     const editButton = getByTestId('workspaceForm-workspaceDetails-edit');
     expect(editButton).toBeInTheDocument();

@@ -158,7 +158,7 @@ export class WorkspaceClient implements IWorkspaceClient {
   }
 
   /**
-   * A bypass layer to get current workspace id
+   * A bypass layer to get current team id
    */
   public getCurrentWorkspaceId(): IResponse<WorkspaceAttributeWithPermission['id']> {
     const currentWorkspaceId = this.workspaces.currentWorkspaceId$.getValue();
@@ -166,7 +166,7 @@ export class WorkspaceClient implements IWorkspaceClient {
       return {
         success: false,
         error: i18n.translate('workspace.error.notInWorkspace', {
-          defaultMessage: 'You are not in any workspace yet.',
+          defaultMessage: 'You are not in any team yet.',
         }),
       };
     }
@@ -178,7 +178,7 @@ export class WorkspaceClient implements IWorkspaceClient {
   }
 
   /**
-   * Do a find in the latest workspace list with current workspace id
+   * Do a find in the latest workspace list with current team id
    */
   public async getCurrentWorkspace(): Promise<IResponse<WorkspaceAttributeWithPermission>> {
     const currentWorkspaceIdResp = this.getCurrentWorkspaceId();
@@ -231,7 +231,7 @@ export class WorkspaceClient implements IWorkspaceClient {
     const result = await this.safeFetch<null>(this.getPath(id), { method: 'DELETE' });
 
     if (result.success) {
-      // After deleting workspace, need to reset current workspace ID.
+      // After deleting workspace, need to reset current team ID.
       this.workspaces.currentWorkspaceId$.next('');
 
       await this.updateWorkspaceList();

@@ -154,7 +154,7 @@ export const WorkspaceDetailFormContent = ({
           description={
             <FormattedMessage
               id="workspace.form.details.panels.privacy.description"
-              defaultMessage="Manage who can view or edit workspace and assign workspace administrators on the {collaboratorsLink} page."
+              defaultMessage="Manage who can view or edit team and assign team administrators on the {collaboratorsLink} page."
               values={{
                 collaboratorsLink: (
                   <EuiLink

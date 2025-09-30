@@ -83,7 +83,7 @@ export class WorkspaceValidationService {
             chrome,
             reason === WorkspaceError.WORKSPACE_IS_STALE
               ? i18n.translate('workspace.error.workspaceIsStale', {
-                  defaultMessage: 'Cannot find current workspace since it is stale',
+                  defaultMessage: 'Cannot find current team since it is stale',
                 })
               : reason
           );

@@ -80,7 +80,7 @@ const changeAccessModalWarning = i18n.translate(
 );
 
 const deletionModalConfirm = i18n.translate('workspace.detail.collaborator.modal.delete.confirm', {
-  defaultMessage: 'Delete collaborator? The collaborators will not have access to the workspace.',
+  defaultMessage: 'Delete collaborator? The collaborators will not have access to the team.',
 });
 
 const BaseConfirmModal = ({
@@ -210,14 +210,14 @@ export const WorkspaceCollaboratorTable = ({
             title={
               <h3>
                 {i18n.translate('workspace.workspaceDetail.collaborator.emptyState.title', {
-                  defaultMessage: 'Your workspace doesn’t have any collaborators.',
+                  defaultMessage: 'Your team doesn’t have any collaborators.',
                 })}
               </h3>
             }
             titleSize="s"
             body={i18n.translate('workspace.workspaceDetail.collaborator.emptyState.body', {
               defaultMessage:
-                'Currently you’re the only user who has access to the workspace as an owner. Share this workspace by adding collaborators.',
+                'Currently you’re the only user who has access to the team as an owner. Share this workspace by adding collaborators.',
             })}
             actions={
               <AddCollaboratorButton

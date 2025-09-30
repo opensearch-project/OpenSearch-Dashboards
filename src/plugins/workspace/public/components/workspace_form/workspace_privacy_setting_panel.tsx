@@ -57,7 +57,7 @@ export const WorkspacePrivacySettingPanel = ({
       </EuiText>
       <EuiText size="xs">
         {i18n.translate('workspace.form.panels.privacy.description', {
-          defaultMessage: 'Who has access to the workspace',
+          defaultMessage: 'Who has access to the team',
         })}
       </EuiText>
       <EuiSpacer size="m" />
@@ -91,7 +91,7 @@ export const WorkspacePrivacySettingPanel = ({
         checked={goToCollaborators}
         onChange={(event) => onGoToCollaboratorsChange(event.target.checked)}
         label={i18n.translate('workspace.form.panels.privacy.jumpToCollaborators.label', {
-          defaultMessage: 'Add collaborators after workspace creation.',
+          defaultMessage: 'Add collaborators after team creation.',
         })}
         data-test-subj="jumpToCollaboratorsCheckbox"
       />

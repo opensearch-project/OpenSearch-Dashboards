@@ -88,7 +88,7 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
             id: 'workspace_data_source_association_failed',
             title: i18n.translate('workspace.dataSource.association.failedTitle', {
               defaultMessage:
-                'Failed to associate {failedCount, plural, one {# data source} other {# data sources}} to the workspace',
+                'Failed to associate {failedCount, plural, one {# data source} other {# data sources}} to the team',
               values: { failedCount },
             }),
           });
@@ -98,7 +98,7 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
             id: 'workspace_data_source_association_succeed',
             title: i18n.translate('workspace.dataSource.association.succeedTitle', {
               defaultMessage:
-                '{succeedCount, plural, one {# data source} other {# data sources}} been associated to the workspace',
+                '{succeedCount, plural, one {# data source} other {# data sources}} been associated to the team',
               values: { succeedCount: objects.length - failedCount },
             }),
           });

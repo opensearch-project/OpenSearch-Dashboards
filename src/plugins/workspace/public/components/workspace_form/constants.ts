@@ -47,7 +47,7 @@ export const selectDataSourceTitle = i18n.translate('workspace.form.selectDataSo
 });
 
 export const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndPermissions.title', {
-  defaultMessage: 'Workspace access',
+  defaultMessage: 'Team access',
 });
 
 export const usersAndPermissionsCreatePageTitle = i18n.translate(
@@ -74,14 +74,14 @@ export const detailsNamePlaceholder = i18n.translate(
 export const detailsDescriptionIntroduction = i18n.translate(
   'workspace.form.workspaceDetails.description.introduction',
   {
-    defaultMessage: 'Describe the workspace.',
+    defaultMessage: 'Describe the team.',
   }
 );
 
 export const detailsDescriptionPlaceholder = i18n.translate(
   'workspace.form.workspaceDetails.description.placeholder',
   {
-    defaultMessage: 'Describe the workspace',
+    defaultMessage: 'Describe the team',
   }
 );
 
@@ -97,20 +97,20 @@ export const detailsUseCaseHelpText = i18n.translate(
 );
 
 export const detailsColorLabel = i18n.translate('workspace.form.workspaceDetails.color.label', {
-  defaultMessage: 'Workspace icon color',
+  defaultMessage: 'Team icon color',
 });
 
 export const detailsColorHelpText = i18n.translate(
   'workspace.form.workspaceDetails.color.helpText',
   {
-    defaultMessage: 'The background color of the icon that represents the workspace.',
+    defaultMessage: 'The background color of the icon that represents the team.',
   }
 );
 
 export const workspacePrivacyTitle = i18n.translate(
   'workspace.form.collaborators.panels.privacy.title',
   {
-    defaultMessage: 'Workspace privacy',
+    defaultMessage: 'Team privacy',
   }
 );
 
@@ -120,13 +120,13 @@ export const privacyType2TextMap = {
       defaultMessage: 'Private to collaborators',
     }),
     description: i18n.translate('workspace.privacy.privateToCollaborators.description', {
-      defaultMessage: 'Only collaborators can access the workspace.',
+      defaultMessage: 'Only collaborators can access the team.',
     }),
     additionalDescription: i18n.translate(
       'workspace.privacy.privateToCollaborators.additionalDescription',
       {
         defaultMessage:
-          'You can add collaborators who can view or edit workspace and assign workspace administrators once the workspace is created.',
+          'You can add collaborators who can view or edit team and assign team administrators once the team is created.',
       }
     ),
   },
@@ -135,11 +135,11 @@ export const privacyType2TextMap = {
       defaultMessage: 'Anyone can view',
     }),
     description: i18n.translate('workspace.privacy.anyoneCanView.description', {
-      defaultMessage: 'Anyone can view workspace assets.',
+      defaultMessage: 'Anyone can view team assets.',
     }),
     additionalDescription: i18n.translate('workspace.privacy.anyoneCanView.additionalDescription', {
       defaultMessage:
-        'You can add collaborators who can edit workspace and assign workspace administrators once the workspace is created.',
+        'You can add collaborators who can edit team and assign team administrators once the team is created.',
     }),
   },
   [WorkspacePrivacyItemType.AnyoneCanEdit]: {
@@ -147,10 +147,10 @@ export const privacyType2TextMap = {
       defaultMessage: 'Anyone can edit',
     }),
     description: i18n.translate('workspace.privacy.anyoneCanEdit.description', {
-      defaultMessage: 'Anyone can view and edit workspace assets.',
+      defaultMessage: 'Anyone can view and edit team assets.',
     }),
     additionalDescription: i18n.translate('workspace.privacy.anyoneCanEdit.additionalDescription', {
-      defaultMessage: 'You can assign workspace administrators once the workspace is created.',
+      defaultMessage: 'You can assign team administrators once the team is created.',
     }),
   },
 };

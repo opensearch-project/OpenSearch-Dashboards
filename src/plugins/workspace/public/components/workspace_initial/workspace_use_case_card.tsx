@@ -72,14 +72,13 @@ export const WorkspaceUseCaseCard = ({
   const adminCreateWorkspaceText = i18n.translate(
     'workspace.initial.useCaseCard.adminCreateWorkspaceText',
     {
-      defaultMessage:
-        'Create a workspace or request a workspace owner to add you as a collaborator.',
+      defaultMessage: 'Create a team or request a team owner to add you as a collaborator.',
     }
   );
   const noAdminCreateWorkspaceText = i18n.translate(
     'workspace.initial.useCaseCard.noAdminCreateWorkspaceText',
     {
-      defaultMessage: 'Request a workspace owner to add you as a collaborator.',
+      defaultMessage: 'Request a team owner to add you as a collaborator.',
     }
   );
 
@@ -190,12 +189,12 @@ export const WorkspaceUseCaseCard = ({
                   <EuiToolTip
                     position="top"
                     content={i18n.translate('workspace.initial.useCaseCard.button.create', {
-                      defaultMessage: 'Create workspace',
+                      defaultMessage: 'Create team',
                     })}
                   >
                     <EuiSmallButtonIcon
                       aria-label={i18n.translate('workspace.initial.useCaseCard.button.plus', {
-                        defaultMessage: 'Create workspace',
+                        defaultMessage: 'Create team',
                       })}
                       onClick={handleClickCreateButton}
                       display="base"
@@ -228,7 +227,7 @@ export const WorkspaceUseCaseCard = ({
               <EuiTitle size="xs">
                 <h4>
                   {i18n.translate('workspace.initial.useCaseCard.noWorkspaces.title', {
-                    defaultMessage: 'No workspaces',
+                    defaultMessage: 'No teams',
                   })}
                 </h4>
               </EuiTitle>
@@ -247,7 +246,7 @@ export const WorkspaceUseCaseCard = ({
                   onClick={handleClickCreateButton}
                 >
                   {i18n.translate('workspace.initial.useCaseCard.button.createWorkspace', {
-                    defaultMessage: 'Create workspace',
+                    defaultMessage: 'Create team',
                   })}
                 </EuiSmallButton>
               </EuiFlexItem>

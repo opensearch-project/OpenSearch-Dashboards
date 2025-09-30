@@ -83,7 +83,7 @@ describe('WorkspaceUseCaseCard', () => {
       queryByTestId('workspace-initial-useCaseCard-observability-button-createWorkspace')
     ).toBeInTheDocument();
     expect(
-      queryByText('Create a workspace or request a workspace owner to add you as a collaborator.')
+      queryByText('Create a workspace or request a team owner to add you as a collaborator.')
     ).toBeInTheDocument();
   });
 
@@ -103,8 +103,6 @@ describe('WorkspaceUseCaseCard', () => {
     expect(
       queryByTestId('workspace-initial-useCaseCard-observability-button-createWorkspace')
     ).toBeNull();
-    expect(
-      queryByText('Request a workspace owner to add you as a collaborator.')
-    ).toBeInTheDocument();
+    expect(queryByText('Request a team owner to add you as a collaborator.')).toBeInTheDocument();
   });
 });

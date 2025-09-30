@@ -154,7 +154,7 @@ describe('AssociationDataSourceModal', () => {
     expect(screen.getByText('Associate OpenSearch data sources')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
+        'Add data sources that will be available in the team. If a selected data source has related Direct Query data sources, they will also be available in the team.'
       )
     ).toBeInTheDocument();
     await waitFor(() => {
@@ -204,7 +204,7 @@ describe('AssociationDataSourceModal', () => {
     });
     expect(
       screen.getByText(
-        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
+        'Add data sources that will be available in the team. If a selected data source has related Direct Query data sources, they will also be available in the team.'
       )
     ).toBeInTheDocument();
     await waitFor(() => {

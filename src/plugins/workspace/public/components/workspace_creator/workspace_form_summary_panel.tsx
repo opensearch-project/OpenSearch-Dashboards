@@ -25,7 +25,7 @@ import { privacyType2TextMap, WorkspacePrivacyItemType } from '../workspace_form
 
 const SCROLL_FIELDS = {
   [RightSidebarScrollField.Name]: i18n.translate('workspace.form.summary.panel.name.title', {
-    defaultMessage: 'Workspace name',
+    defaultMessage: 'Team name',
   }),
   [RightSidebarScrollField.Description]: i18n.translate(
     'workspace.form.summary.panel.description.title',
@@ -54,7 +54,7 @@ const SCROLL_FIELDS = {
   [RightSidebarScrollField.PrivacyType]: i18n.translate(
     'workspace.form.summary.panel.privacyType.title',
     {
-      defaultMessage: 'Workspace privacy',
+      defaultMessage: 'Team privacy',
     }
   ),
 };

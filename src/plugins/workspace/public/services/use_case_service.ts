@@ -75,7 +75,7 @@ export class UseCaseService {
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 100,
               title: i18n.translate('workspace.settings.workspaceDetails', {
-                defaultMessage: 'Workspace details',
+                defaultMessage: 'Team details',
               }),
             },
             ...(isPermissionEnabled

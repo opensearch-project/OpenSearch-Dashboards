@@ -47,7 +47,7 @@ describe('showDeleteDetailsModal', () => {
     expect(screen.getByTestId('delete-details-modal-title')).toBeInTheDocument();
     expect(screen.getByTestId('delete-details-modal-body')).toBeInTheDocument();
     expect(screen.getByTestId('delete-details-modal-list')).toBeInTheDocument();
-    expect(screen.getByText('Delete workspace details')).toBeInTheDocument();
+    expect(screen.getByText('Delete team details')).toBeInTheDocument();
     expect(screen.getByText('started to delete workspaces')).toBeInTheDocument();
     expect(screen.getAllByTestId('delete-details-modal-name')).toHaveLength(2);
 
@@ -80,7 +80,7 @@ describe('showDeleteDetailsModal', () => {
     expect(screen.getByTestId('delete-details-modal-header')).toBeInTheDocument();
     expect(screen.getByTestId('delete-details-modal-body')).toBeInTheDocument();
     expect(screen.getByTestId('delete-details-modal-list')).toBeInTheDocument();
-    expect(screen.getByText('Delete workspace details')).toBeInTheDocument();
+    expect(screen.getByText('Delete team details')).toBeInTheDocument();
     expect(screen.getByText('started to delete workspaces')).toBeInTheDocument();
     expect(screen.getAllByTestId('delete-details-modal-name')).toHaveLength(3);
 
@@ -117,7 +117,7 @@ describe('showDeleteDetailsModal', () => {
     expect(screen.getByTestId('delete-details-modal-header')).toBeInTheDocument();
     expect(screen.getByTestId('delete-details-modal-body')).toBeInTheDocument();
     expect(screen.getByTestId('delete-details-modal-list')).toBeInTheDocument();
-    expect(screen.getByText('Delete workspace details')).toBeInTheDocument();
+    expect(screen.getByText('Delete team details')).toBeInTheDocument();
     expect(screen.getByText('started to delete workspaces')).toBeInTheDocument();
     expect(screen.getAllByTestId('delete-details-modal-name')).toHaveLength(2);
 

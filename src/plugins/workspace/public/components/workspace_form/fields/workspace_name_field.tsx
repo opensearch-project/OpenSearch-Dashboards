@@ -55,7 +55,7 @@ export const WorkspaceNameField = ({
               <br />
               {i18n.translate('workspace.form.workspaceDetails.name.helpTextLong', {
                 defaultMessage:
-                  'Use a unique name for the workspace. Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
+                  'Use a unique name for the team. Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
               })}
             </>
           )}
