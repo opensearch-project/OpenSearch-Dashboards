@@ -1,0 +1,2 @@
+fix:
+- [MDS] Add endpoint validation for test connection API ([#10605](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10605))
