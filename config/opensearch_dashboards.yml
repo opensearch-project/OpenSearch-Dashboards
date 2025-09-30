@@ -388,3 +388,8 @@
 
 # set the value to false to disable the keyboard shortcuts
 # opensearchDashboards.keyboardShortcuts.enabled: false
+
+# set the value to true to enable dataset management
+# datasetManagement.enabled: true
+# set the value to false to call the label as dataset
+# datasetManagement.aliasedAsIndexPattern: false

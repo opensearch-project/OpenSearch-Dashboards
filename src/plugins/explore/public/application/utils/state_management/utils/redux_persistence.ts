@@ -15,7 +15,12 @@ import {
   TabState,
   UIState,
 } from '../slices';
-import { Dataset, DataStructure, DEFAULT_DATA, SignalType } from '../../../../../../data/common';
+import {
+  Dataset,
+  DataStructure,
+  DEFAULT_DATA,
+  CORE_SIGNAL_TYPES,
+} from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
 import {
   DEFAULT_TRACE_COLUMNS_SETTING,
@@ -140,7 +145,7 @@ export const getPreloadedState = async (services: ExploreServices): Promise<Root
  */
 const fetchFirstAvailableDataset = async (
   services: ExploreServices,
-  requiredSignalType?: SignalType
+  requiredSignalType?: string
 ): Promise<Dataset | undefined> => {
   try {
     const datasetService = services.data?.query?.queryString?.getDatasetService();
@@ -184,7 +189,7 @@ const fetchFirstAvailableDataset = async (
           } else {
             // If requiredSignalType is not specified (i.e., not Traces),
             // dataset should not have signalType equal to Traces
-            if (dataView?.signalType !== SignalType.TRACES) {
+            if (dataView?.signalType !== CORE_SIGNAL_TYPES.TRACES) {
               return dataset;
             }
           }
@@ -209,7 +214,7 @@ const resolveDataset = async (services: ExploreServices): Promise<Dataset | unde
   const currentAppId = await getCurrentAppId(services);
   const flavorFromAppId = getFlavorFromAppId(currentAppId);
   const requiredSignalType =
-    flavorFromAppId === ExploreFlavor.Traces ? SignalType.TRACES : undefined;
+    flavorFromAppId === ExploreFlavor.Traces ? CORE_SIGNAL_TYPES.TRACES : undefined;
 
   // Get existing dataset from QueryStringManager
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
@@ -232,7 +237,7 @@ const resolveDataset = async (services: ExploreServices): Promise<Dataset | unde
       } else {
         // If requiredSignalType is not specified (i.e., not Traces),
         // dataset should not have signalType equal to Traces
-        if (dataView?.signalType !== SignalType.TRACES) {
+        if (dataView?.signalType !== CORE_SIGNAL_TYPES.TRACES) {
           return existingDataset;
         }
       }
