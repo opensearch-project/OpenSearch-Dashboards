@@ -1,0 +1,47 @@
+{
+  "name": "ai-agent-scripts",
+  "version": "1.0.0",
+  "description": "AI Agent with MCP/AG UI integration",
+  "main": "src/main.ts",
+  "scripts": {
+    "start": "ts-node src/main.ts",
+    "dev": "ts-node --watch src/main.ts",
+    "start:ag-ui": "ts-node src/main_ag_ui.ts",
+    "dev:ag-ui": "ts-node --watch src/main_ag_ui.ts",
+    "build": "tsc",
+    "clean": "find . -name '*.js' -not -path './node_modules/*' -delete",
+    "opensearch:ingest": "ts-node src/opensearch-ingestion.ts",
+    "opensearch:watch": "ts-node src/opensearch-ingestion.ts --watch"
+  },
+  "dependencies": {
+    "@ag-ui/client": "^0.0.39",
+    "@ag-ui/core": "^0.0.36",
+    "@aws-sdk/client-bedrock-runtime": "^3.886.0",
+    "@langchain/anthropic": "^0.2.0",
+    "@langchain/aws": "^0.1.15",
+    "@langchain/core": "^0.3.73",
+    "@langchain/langgraph": "^0.4.9",
+    "@langchain/langgraph-checkpoint-sqlite": "^0.2.1",
+    "@modelcontextprotocol/sdk": "^1.18.0",
+    "@opensearch-project/opensearch": "^2.13.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/js-yaml": "^4.0.5",
+    "@types/node": "~20.10.5",
+    "@types/uuid": "^3.4.4",
+    "cors": "^2.8.5",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "js-yaml": "^4.1.0",
+    "node-fetch": "^2.6.7",
+    "ts-node": "^10.9.2",
+    "typescript": "4.5.5",
+    "uuid": "3.3.2",
+    "ws": "^8.18.3",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.6.7"
+  }
+}
