@@ -144,7 +144,8 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       dataSourceService,
       cryptographyServiceSetup,
       authRegistryPromise,
-      customApiSchemaRegistryPromise
+      customApiSchemaRegistryPromise,
+      config.endpointDeniedIPs
     );
     registerFetchDataSourceMetaDataRoute(
       router,

@@ -11,13 +11,15 @@ import { DataSourceServiceSetup } from '../data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';
 import { IAuthenticationMethodRegistry } from '../auth_registry';
 import { CustomApiSchemaRegistry } from '../schema_registry/custom_api_schema_registry';
+import { isValidURL } from '../util/endpoint_validator';
 
 export const registerTestConnectionRoute = async (
   router: IRouter,
   dataSourceServiceSetup: DataSourceServiceSetup,
   cryptography: CryptographyServiceSetup,
   authRegistryPromise: Promise<IAuthenticationMethodRegistry>,
-  customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>
+  customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>,
+  endpointDeniedIPs?: string[]
 ) => {
   const authRegistry = await authRegistryPromise;
   router.post(
@@ -75,6 +77,20 @@ export const registerTestConnectionRoute = async (
     },
     async (context, request, response) => {
       const { dataSourceAttr, id: dataSourceId } = request.body;
+
+      // Validate endpoint before attempting connection
+      const { endpoint } = dataSourceAttr;
+      if (!isValidURL(endpoint, endpointDeniedIPs)) {
+        return response.customError({
+          statusCode: 400,
+          body: {
+            message: 'Endpoint URL is not valid or allowed',
+            attributes: {
+              error: 'Invalid endpoint',
+            },
+          },
+        });
+      }
 
       try {
         const dataSourceClient: OpenSearchClient = await dataSourceServiceSetup.getDataSourceClient(
