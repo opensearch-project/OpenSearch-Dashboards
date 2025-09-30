@@ -10,13 +10,32 @@
     - [Client_management_design](multi-datasource/client_management_design.md)
     - [High_level_design](multi-datasource/high_level_design.md)
     - [User_stories](multi-datasource/user_stories.md)
+  - Onboarding
+      - [Overview](onboarding/README.md)
+    - Reference
+        - [Overview](onboarding/reference/README.md)
+      - [Api reference](onboarding/reference/api-reference.md)
+      - [Configuration reference](onboarding/reference/configuration-reference.md)
+      - [Glossary](onboarding/reference/glossary.md)
+      - [Migration guide](onboarding/reference/migration-guide.md)
+      - [Plugin templates](onboarding/reference/plugin-templates.md)
+      - [Troubleshooting guide](onboarding/reference/troubleshooting-guide.md)
+    - [Advanced_topics](onboarding/advanced_topics.md)
+    - [Building_and_testing](onboarding/building_and_testing.md)
+    - [Contributing_and_community](onboarding/contributing_and_community.md)
+    - [Core_framework_architecture](onboarding/core_framework_architecture.md)
+    - [Data_services_api_patterns](onboarding/data_services_api_patterns.md)
+    - [Deployment_and_production](onboarding/deployment_and_production.md)
+    - [Getting_started](onboarding/getting_started.md)
+    - [Plugin_system](onboarding/plugin_system.md)
+    - [Ui_framework_and_components](onboarding/ui_framework_and_components.md)
   - [Openapi](openapi/README.md)
   - Plugins
-    - data
-      - datasets
+    - Data
+      - Datasets
         - [Data_views](plugins/data/datasets/data_views.md)
       - [Query editor enhancements](plugins/data/query-editor-enhancements.md)
-    - discover
+    - Discover
       - [Getting_started_with_discover](plugins/discover/getting_started_with_discover.md)
       - [Understand_and_extend_discover](plugins/discover/understand_and_extend_discover.md)
     - explore
@@ -26,24 +45,70 @@
     - [Saved_object_repository_factory_design](saved_objects/saved_object_repository_factory_design.md)
   - Telemetry
     - [Telemetry](telemetry/telemetry.md)
-  - src
-    - [Core](../src/core/README.md)
-    - dev
+  - Src
+    - Core
+        - [Overview](../src/core/README.md)
+      - Public
+        - [Chrome](../src/core/public/chrome/README.md)
+        - [Public.api](../src/core/public/public.api.md)
+      - Server
+        - Core_app
+          - Assets
+            - Fonts
+                - [Readme](../src/core/server/core_app/assets/fonts/readme.md)
+              - Source_code_pro
+                - [LICENSE](../src/core/server/core_app/assets/fonts/source_code_pro/LICENSE.md)
+              - Source_sans_3
+                - [LICENSE](../src/core/server/core_app/assets/fonts/source_sans_3/LICENSE.md)
+        - [Cross_compatibility](../src/core/server/cross_compatibility/README.md)
+        - [Logging](../src/core/server/logging/README.md)
+        - Saved_objects
+          - [Migrations](../src/core/server/saved_objects/migrations/README.md)
+        - Utils
+          - Crypto
+            - [__fixtures__](../src/core/server/utils/crypto/__fixtures__/README.md)
+        - [Server.api](../src/core/server/server.api.md)
+      - [CONVENTIONS](../src/core/CONVENTIONS.md)
+      - [PRINCIPLES](../src/core/PRINCIPLES.md)
+      - [TESTING](../src/core/TESTING.md)
+    - Dev
       - [Build](../src/dev/build/README.md)
       - [I18n](../src/dev/i18n/README.md)
-    - plugins
+    - Plugins
       - [Application_config](../src/plugins/application_config/README.md)
-      - [Banner](../src/plugins/banner/README.md)
-      - [Bfetch](../src/plugins/bfetch/README.md)
-      - [Charts](../src/plugins/charts/README.md)
-      - console
-        - public
-          - application
+      - Banner
+          - [Overview](../src/plugins/banner/README.md)
+        - Docs
+          - [Technical_details](../src/plugins/banner/docs/technical_details.md)
+      - Bfetch
+          - [Overview](../src/plugins/bfetch/README.md)
+        - Docs
+          - Browser
+            - [Reference](../src/plugins/bfetch/docs/browser/reference.md)
+          - Server
+            - [Reference](../src/plugins/bfetch/docs/server/reference.md)
+      - Charts
+          - [Overview](../src/plugins/charts/README.md)
+        - Public
+          - Services
+            - [Theme](../src/plugins/charts/public/services/theme/README.md)
+      - Console
+        - Public
+          - Application
             - [Hooks](../src/plugins/console/public/application/hooks/README.md)
       - [Content_management](../src/plugins/content_management/README.md)
       - [Csp_handler](../src/plugins/csp_handler/README.md)
       - [Dashboard](../src/plugins/dashboard/README.md)
-      - [Data](../src/plugins/data/README.md)
+      - Data
+          - [Overview](../src/plugins/data/README.md)
+        - Public
+          - Query
+            - [State_sync](../src/plugins/data/public/query/state_sync/README.md)
+          - [Public.api](../src/plugins/data/public/public.api.md)
+        - Server
+          - [Search](../src/plugins/data/server/search/README.md)
+          - [Plugins_data_server.api](../src/plugins/data/server/plugins_data_server.api.md)
+          - [Server.api](../src/plugins/data/server/server.api.md)
       - [Data_explorer](../src/plugins/data_explorer/README.md)
       - [Data_importer](../src/plugins/data_importer/README.md)
       - [Data_source](../src/plugins/data_source/README.md)
@@ -54,40 +119,136 @@
             - create_dataset_wizard
               - [CREATE_DATASET](../src/plugins/dataset_management/public/components/create_dataset_wizard/CREATE_DATASET.md)
       - [Dev_tools](../src/plugins/dev_tools/README.md)
-      - [Discover](../src/plugins/discover/README.md)
-      - [Embeddable](../src/plugins/embeddable/README.md)
-      - [Explore](../src/plugins/explore/README.md)
+      - Discover
+          - [Overview](../src/plugins/discover/README.md)
+        - Public
+          - Application
+            - Components
+              - Doc_views
+                - Context
+                  - [NOTES](../src/plugins/discover/public/application/components/doc_views/context/NOTES.md)
+      - Embeddable
+          - [Overview](../src/plugins/embeddable/README.md)
+        - Docs
+            - [Overview](../src/plugins/embeddable/docs/README.md)
+          - [Containers_and_inherited_state](../src/plugins/embeddable/docs/containers_and_inherited_state.md)
+          - [Input_and_output_state](../src/plugins/embeddable/docs/input_and_output_state.md)
+        - Public
+          - [Public.api](../src/plugins/embeddable/public/public.api.md)
+      - Explore
+          - [Overview](../src/plugins/explore/README.md)
+        - Public
+          - Application
+            - Legacy
+              - Discover
+                - Application
+                  - Components
+                    - Doc_views
+                      - Context
+                        - [NOTES](../src/plugins/explore/public/application/legacy/discover/application/components/doc_views/context/NOTES.md)
+            - Utils
+              - [State_management](../src/plugins/explore/public/application/utils/state_management/README.md)
+          - Components
+            - Visualizations
+                - [Overview](../src/plugins/explore/public/components/visualizations/README.md)
+              - [RULES](../src/plugins/explore/public/components/visualizations/RULES.md)
       - [Expressions](../src/plugins/expressions/README.md)
       - [Home](../src/plugins/home/README.md)
-      - index_pattern_management
-        - public
-          - components
-            - create_index_pattern_wizard
+      - Index_pattern_management
+        - Public
+          - Components
+            - Create_index_pattern_wizard
               - [CREATE_INDEX_PATTERN](../src/plugins/index_pattern_management/public/components/create_index_pattern_wizard/CREATE_INDEX_PATTERN.md)
       - [Input_control_vis](../src/plugins/input_control_vis/README.md)
       - [Inspector](../src/plugins/inspector/README.md)
       - [Navigation](../src/plugins/navigation/README.md)
-      - [Opensearch_dashboards_legacy](../src/plugins/opensearch_dashboards_legacy/README.md)
+      - Opensearch_dashboards_legacy
+          - [Overview](../src/plugins/opensearch_dashboards_legacy/README.md)
+        - Public
+          - Notify
+            - Toasts
+              - [TOAST_NOTIFICATIONS](../src/plugins/opensearch_dashboards_legacy/public/notify/toasts/TOAST_NOTIFICATIONS.md)
       - [Opensearch_dashboards_overview](../src/plugins/opensearch_dashboards_overview/README.md)
-      - [Opensearch_dashboards_react](../src/plugins/opensearch_dashboards_react/README.md)
-      - [Opensearch_dashboards_usage_collection](../src/plugins/opensearch_dashboards_usage_collection/README.md)
-      - [Opensearch_dashboards_utils](../src/plugins/opensearch_dashboards_utils/README.md)
-      - opensearch_ui_shared
-        - public
-          - forms
+      - Opensearch_dashboards_react
+          - [Overview](../src/plugins/opensearch_dashboards_react/README.md)
+        - Public
+          - [Code_editor](../src/plugins/opensearch_dashboards_react/public/code_editor/README.md)
+          - [State_management](../src/plugins/opensearch_dashboards_react/public/state_management/README.md)
+          - [Table_list_view](../src/plugins/opensearch_dashboards_react/public/table_list_view/README.md)
+      - Opensearch_dashboards_usage_collection
+          - [Overview](../src/plugins/opensearch_dashboards_usage_collection/README.md)
+        - Server
+          - Collectors
+            - [Application_usage](../src/plugins/opensearch_dashboards_usage_collection/server/collectors/application_usage/README.md)
+      - Opensearch_dashboards_utils
+          - [Overview](../src/plugins/opensearch_dashboards_utils/README.md)
+        - Common
+          - State_containers
+              - [Overview](../src/plugins/opensearch_dashboards_utils/common/state_containers/README.md)
+            - [Common.api](../src/plugins/opensearch_dashboards_utils/common/state_containers/common.api.md)
+        - Docs
+          - State_containers
+              - [Overview](../src/plugins/opensearch_dashboards_utils/docs/state_containers/README.md)
+            - React
+              - [Connect](../src/plugins/opensearch_dashboards_utils/docs/state_containers/react/connect.md)
+              - [Context](../src/plugins/opensearch_dashboards_utils/docs/state_containers/react/context.md)
+              - [Use_container](../src/plugins/opensearch_dashboards_utils/docs/state_containers/react/use_container.md)
+              - [Use_selector](../src/plugins/opensearch_dashboards_utils/docs/state_containers/react/use_selector.md)
+              - [Use_state](../src/plugins/opensearch_dashboards_utils/docs/state_containers/react/use_state.md)
+              - [Use_transitions](../src/plugins/opensearch_dashboards_utils/docs/state_containers/react/use_transitions.md)
+            - [Creation](../src/plugins/opensearch_dashboards_utils/docs/state_containers/creation.md)
+            - [No_react](../src/plugins/opensearch_dashboards_utils/docs/state_containers/no_react.md)
+            - [React](../src/plugins/opensearch_dashboards_utils/docs/state_containers/react.md)
+            - [Redux](../src/plugins/opensearch_dashboards_utils/docs/state_containers/redux.md)
+            - [Transitions](../src/plugins/opensearch_dashboards_utils/docs/state_containers/transitions.md)
+          - State_sync
+              - [Overview](../src/plugins/opensearch_dashboards_utils/docs/state_sync/README.md)
+            - Storages
+                - [Overview](../src/plugins/opensearch_dashboards_utils/docs/state_sync/storages/README.md)
+              - [Osd_url_storage](../src/plugins/opensearch_dashboards_utils/docs/state_sync/storages/osd_url_storage.md)
+              - [Session_storage](../src/plugins/opensearch_dashboards_utils/docs/state_sync/storages/session_storage.md)
+            - [Data_plugin_helpers](../src/plugins/opensearch_dashboards_utils/docs/state_sync/data_plugin_helpers.md)
+            - [Empty_or_incomplete_incoming_state](../src/plugins/opensearch_dashboards_utils/docs/state_sync/empty_or_incomplete_incoming_state.md)
+            - [Error_handling](../src/plugins/opensearch_dashboards_utils/docs/state_sync/error_handling.md)
+            - [Initial_state](../src/plugins/opensearch_dashboards_utils/docs/state_sync/initial_state.md)
+            - [No_state_containers](../src/plugins/opensearch_dashboards_utils/docs/state_sync/no_state_containers.md)
+            - [On_fly_state_migrations](../src/plugins/opensearch_dashboards_utils/docs/state_sync/on_fly_state_migrations.md)
+            - [Sync_states](../src/plugins/opensearch_dashboards_utils/docs/state_sync/sync_states.md)
+          - [Global_data_persistence](../src/plugins/opensearch_dashboards_utils/docs/global_data_persistence.md)
+        - Public
+          - State_sync
+              - [Overview](../src/plugins/opensearch_dashboards_utils/public/state_sync/README.md)
+            - [Public.api](../src/plugins/opensearch_dashboards_utils/public/state_sync/public.api.md)
+      - Opensearch_ui_shared
+        - Public
+          - Forms
             - [Form_wizard](../src/plugins/opensearch_ui_shared/public/forms/form_wizard/README.md)
             - [Multi_content](../src/plugins/opensearch_ui_shared/public/forms/multi_content/README.md)
       - [Query_enhancements](../src/plugins/query_enhancements/README.md)
       - [Saved_objects](../src/plugins/saved_objects/README.md)
       - [Saved_objects_management](../src/plugins/saved_objects_management/README.md)
-      - [Share](../src/plugins/share/README.md)
+      - Share
+          - [Overview](../src/plugins/share/README.md)
+        - Public
+          - [Url_generators](../src/plugins/share/public/url_generators/README.md)
       - [Telemetry](../src/plugins/telemetry/README.md)
       - [Telemetry_collection_manager](../src/plugins/telemetry_collection_manager/README.md)
       - [Telemetry_management_section](../src/plugins/telemetry_management_section/README.md)
-      - [Ui_actions](../src/plugins/ui_actions/README.md)
+      - Ui_actions
+          - [Overview](../src/plugins/ui_actions/README.md)
+        - Public
+          - [Tests](../src/plugins/ui_actions/public/tests/README.md)
       - [Url_forwarding](../src/plugins/url_forwarding/README.md)
-      - [Usage_collection](../src/plugins/usage_collection/README.md)
-      - [Vis_augmenter](../src/plugins/vis_augmenter/README.md)
+      - Usage_collection
+          - [Overview](../src/plugins/usage_collection/README.md)
+        - Server
+          - Routes
+            - [Stats](../src/plugins/usage_collection/server/routes/stats/README.md)
+      - Vis_augmenter
+          - [Overview](../src/plugins/vis_augmenter/README.md)
+        - Public
+          - [Vega](../src/plugins/vis_augmenter/public/vega/README.md)
+          - [View_events_flyout](../src/plugins/vis_augmenter/public/view_events_flyout/README.md)
       - [Vis_builder](../src/plugins/vis_builder/README.md)
       - [Vis_default_editor](../src/plugins/vis_default_editor/README.md)
       - [Vis_type_markdown](../src/plugins/vis_type_markdown/README.md)
@@ -97,16 +258,20 @@
       - [Vis_type_timeline](../src/plugins/vis_type_timeline/README.md)
       - [Vis_type_timeseries](../src/plugins/vis_type_timeseries/README.md)
       - [Vis_type_vega](../src/plugins/vis_type_vega/README.md)
-      - [Vis_type_vislib](../src/plugins/vis_type_vislib/README.md)
+      - Vis_type_vislib
+          - [Overview](../src/plugins/vis_type_vislib/README.md)
+        - Public
+          - Vislib
+            - [VISLIB](../src/plugins/vis_type_vislib/public/vislib/VISLIB.md)
       - [Vis_type_xy](../src/plugins/vis_type_xy/README.md)
       - [Visualizations](../src/plugins/visualizations/README.md)
       - [Visualize](../src/plugins/visualize/README.md)
       - [Workspace](../src/plugins/workspace/README.md)
-  - examples
+  - Examples
     - [Dashboard_embeddable_examples](../examples/dashboard_embeddable_examples/README.md)
     - [Developer_examples](../examples/developer_examples/README.md)
-    - embeddable_examples
-      - public
+    - Embeddable_examples
+      - Public
         - [Todo](../examples/embeddable_examples/public/todo/README.md)
     - [Expressions_example](../examples/expressions_example/README.md)
     - [Multiple_data_source_examples](../examples/multiple_data_source_examples/README.md)
@@ -117,7 +282,7 @@
     - [Ui_actions_explorer](../examples/ui_actions_explorer/README.md)
     - [Url_generators_examples](../examples/url_generators_examples/README.md)
     - [Url_generators_explorer](../examples/url_generators_explorer/README.md)
-  - packages
+  - Packages
     - [Opensearch datemath](../packages/opensearch-datemath/readme.md)
     - [Opensearch eslint config opensearch dashboards](../packages/opensearch-eslint-config-opensearch-dashboards/README.md)
     - [Opensearch safer lodash set](../packages/opensearch-safer-lodash-set/README.md)
@@ -127,13 +292,23 @@
     - [Osd config](../packages/osd-config/README.md)
     - [Osd config schema](../packages/osd-config-schema/README.md)
     - [Osd cross platform](../packages/osd-cross-platform/README.md)
-    - [Osd dev utils](../packages/osd-dev-utils/README.md)
+    - Osd dev utils
+        - [Overview](../packages/osd-dev-utils/README.md)
+      - [Certs](../packages/osd-dev-utils/certs/README.md)
+      - Src
+        - [Ci_stats_reporter](../packages/osd-dev-utils/src/ci_stats_reporter/README.md)
+        - [Run](../packages/osd-dev-utils/src/run/README.md)
     - [Osd eslint import resolver opensearch dashboards](../packages/osd-eslint-import-resolver-opensearch-dashboards/README.md)
     - [Osd eslint plugin eslint](../packages/osd-eslint-plugin-eslint/README.md)
     - [Osd expect](../packages/osd-expect/README.md)
-    - [Osd i18n](../packages/osd-i18n/README.md)
+    - Osd i18n
+        - [Overview](../packages/osd-i18n/README.md)
+      - [GUIDELINE](../packages/osd-i18n/GUIDELINE.md)
     - [Osd logging](../packages/osd-logging/README.md)
-    - [Osd monaco](../packages/osd-monaco/README.md)
+    - Osd monaco
+        - [Overview](../packages/osd-monaco/README.md)
+      - Src
+        - [Xjson](../packages/osd-monaco/src/xjson/README.md)
     - [Osd opensearch](../packages/osd-opensearch/README.md)
     - [Osd optimizer](../packages/osd-optimizer/README.md)
     - [Osd plugin generator](../packages/osd-plugin-generator/README.md)
@@ -143,16 +318,31 @@
     - [Osd std](../packages/osd-std/README.md)
     - [Osd storybook](../packages/osd-storybook/README.md)
     - [Osd stylelint config](../packages/osd-stylelint-config/README.md)
-    - [Osd stylelint plugin stylelint](../packages/osd-stylelint-plugin-stylelint/README.md)
-    - [Osd telemetry tools](../packages/osd-telemetry-tools/README.md)
-    - [Osd test](../packages/osd-test/README.md)
+    - Osd stylelint plugin stylelint
+        - [Overview](../packages/osd-stylelint-plugin-stylelint/README.md)
+      - Src
+        - [Utils](../packages/osd-stylelint-plugin-stylelint/src/utils/README.md)
+    - Osd telemetry tools
+        - [Overview](../packages/osd-telemetry-tools/README.md)
+      - [GUIDELINE](../packages/osd-telemetry-tools/GUIDELINE.md)
+    - Osd test
+        - [Overview](../packages/osd-test/README.md)
+      - Src
+        - [Failed_tests_reporter](../packages/osd-test/src/failed_tests_reporter/README.md)
+        - Functional_test_runner
+          - Lib
+            - [Docker_servers](../packages/osd-test/src/functional_test_runner/lib/docker_servers/README.md)
+      - [Types](../packages/osd-test/types/README.md)
     - [Osd test subj selector](../packages/osd-test-subj-selector/README.md)
     - [Osd ui framework](../packages/osd-ui-framework/README.md)
-    - [Osd ui shared deps](../packages/osd-ui-shared-deps/README.md)
+    - Osd ui shared deps
+        - [Overview](../packages/osd-ui-shared-deps/README.md)
+      - Flot_charts
+        - [API](../packages/osd-ui-shared-deps/flot_charts/API.md)
     - [Osd utility types](../packages/osd-utility-types/README.md)
     - [Osd utils](../packages/osd-utils/README.md)
     - [README](../packages/README.md)
-  - release-notes
+  - Release notes
     - [Opensearch dashboards.release notes 1.0.0 rc1](../release-notes/opensearch-dashboards.release-notes-1.0.0-rc1.md)
     - [Opensearch dashboards.release notes 1.0.0](../release-notes/opensearch-dashboards.release-notes-1.0.0.md)
     - [Opensearch dashboards.release notes 1.1.0](../release-notes/opensearch-dashboards.release-notes-1.1.0.md)
@@ -206,7 +396,7 @@
     - [Opensearch dashboards.release notes 3.0.0](../release-notes/opensearch-dashboards.release-notes-3.0.0.md)
     - [Opensearch dashboards.release notes 3.1.0](../release-notes/opensearch-dashboards.release-notes-3.1.0.md)
     - [Opensearch dashboards.release notes 3.2.0](../release-notes/opensearch-dashboards.release-notes-3.2.0.md)
-  - scripts
+  - Scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)
   - [Theme](theme.md)
