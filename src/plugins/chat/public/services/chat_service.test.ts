@@ -118,6 +118,7 @@ describe('ChatService', () => {
       // Mock window.assistantContextStore
       (global as any).window = {
         assistantContextStore: {
+          getAllContexts: jest.fn().mockReturnValue([]),
           getBackendFormattedContexts: jest.fn().mockReturnValue([]),
         },
       };
@@ -216,6 +217,7 @@ describe('ChatService', () => {
     beforeEach(() => {
       (global as any).window = {
         assistantContextStore: {
+          getAllContexts: jest.fn().mockReturnValue([]),
           getBackendFormattedContexts: jest.fn().mockReturnValue([]),
         },
       };
