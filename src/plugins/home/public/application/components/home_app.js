@@ -92,6 +92,7 @@ export function HomeApp({ directories, solutions }) {
     telemetry,
     uiSettings,
     contentManagement,
+    homeConfig,
   } = getServices();
 
   const [showExperienceSelection, setShowExperienceSelection] = useState(false);
@@ -99,6 +100,13 @@ export function HomeApp({ directories, solutions }) {
 
   useEffect(() => {
     const checkExperienceSelection = async () => {
+      // Check if experience modal is disabled in configuration
+      if (homeConfig.disableExperienceModal) {
+        setShowExperienceSelection(false);
+        setIsCheckingExperience(false);
+        return;
+      }
+
       // First check session storage (for read-only users)
       try {
         const sessionDismissed = sessionStorage.getItem(KEY_EXPERIENCE_NOTICE_DISMISSED);
@@ -130,7 +138,7 @@ export function HomeApp({ directories, solutions }) {
     };
 
     checkExperienceSelection();
-  }, [savedObjectsClient]);
+  }, [savedObjectsClient, homeConfig.disableExperienceModal]);
 
   const dismissExperienceSelection = async () => {
     let savedObjectSuccess = false;
