@@ -77,6 +77,20 @@ export interface Ordered {
   min: Moment;
   max: Moment;
 }
+
+export interface HistogramDataPoint {
+  x: number;
+  y: number;
+  breakdown?: string;
+}
+
+export interface HistogramSeries {
+  id: string;
+  name: string;
+  data: HistogramDataPoint[];
+  color?: string;
+}
+
 export interface Chart {
   values: Array<{
     x: number;
@@ -87,6 +101,8 @@ export interface Chart {
   xAxisLabel: Column['name'];
   yAxisLabel?: Column['name'];
   ordered: Ordered;
+  series?: HistogramSeries[];
+  breakdownField?: string;
 }
 
 export const buildPointSeriesData = (table: Table, dimensions: Dimensions) => {
