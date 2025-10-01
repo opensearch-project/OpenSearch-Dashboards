@@ -22,18 +22,17 @@ Based on the requirements document, the feature must:
 ```
 src/plugins/explore/public/components/
 ├── tabs/
-│   ├── field_stats_tab.tsx              # Main tab component
-│   └── ...
-├── field_stats/
-│   ├── field_stats_container.tsx        # Data fetching and state management
-│   ├── field_stats_table.tsx            # Table component
-│   ├── field_stats_table_columns.tsx    # Column definitions
-│   ├── field_stats_row_details.tsx      # Expandable row details
-│   ├── field_stats_loading.tsx          # Loading state component
-│   └── utils/
-│       ├── constants.ts                 # Constants and field names
-│       ├── field_stats_query.ts         # PPL query generation
-│       └── field_type_handlers.ts       # Type-specific statistics logic
+│   └── field_stats_tab.tsx              # Main tab component
+└── field_stats/
+    ├── field_stats_container.tsx        # Data fetching and state management
+    ├── field_stats_table.tsx            # Table component with column definitions
+    ├── field_stats_row_details.tsx      # Expandable row details
+    ├── field_stats_queries.ts           # PPL query generation functions
+    ├── field_stats_types.ts             # TypeScript interfaces and types
+    └── detail_sections/
+        ├── top_values_section.tsx       # Top values detail component
+        ├── numeric_summary_section.tsx  # Numeric statistics component
+        └── date_range_section.tsx       # Date range detail component
 ```
 
 ### Tab Registration
