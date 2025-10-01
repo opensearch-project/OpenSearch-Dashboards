@@ -388,7 +388,6 @@
 # set the value to false to call the label as dataset
 # datasetManagement.aliasedAsIndexPattern: false
 
-# ===========================================
 # The new OpenSearch Dashboards Experience
 # Enable the following three flags together for the new OpenSearch Dashboards discover features
 # ===========================================
@@ -401,3 +400,6 @@
 # workspace.enabled: false
 
 # explore.enabled: false
+
+# Enable Chat Plugin
+# chat.enabled: true

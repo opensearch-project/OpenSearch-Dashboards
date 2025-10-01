@@ -40,13 +40,13 @@ describe('sidecar helper', () => {
     test('return paddingRight style object when dockedMode is right ', () => {
       expect(
         getOsdSidecarPaddingStyle({ ...props, dockedMode: SIDECAR_DOCKED_MODE.RIGHT })
-      ).toEqual({ paddingRight: 460 });
+      ).toEqual({ paddingRight: 468 }); // 460 + 8
     });
 
     test('return paddingLeft style object when dockedMode is left ', () => {
       expect(
         getOsdSidecarPaddingStyle({ ...props, dockedMode: SIDECAR_DOCKED_MODE.LEFT })
-      ).toEqual({ paddingLeft: 460 });
+      ).toEqual({ paddingLeft: 468 }); // 460 + 8
     });
 
     test('return null object when isHidden is true ', () => {

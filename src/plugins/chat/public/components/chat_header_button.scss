@@ -1,0 +1,36 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.chatHeaderButton {
+  &__container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__experimentalBadge {
+    font-size: 9px;
+    padding: 2px 4px;
+    line-height: 1;
+  }
+
+  &__mountPoint {
+    width: 100%;
+    height: 100%;
+
+    &--hidden {
+      display: none;
+    }
+
+    &--visible {
+      display: block;
+    }
+  }
+
+  &__content {
+    height: 100%;
+    box-sizing: border-box;
+  }
+}

@@ -9,8 +9,9 @@
  * GitHub history for details.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
+import { useDynamicContext } from '../../../../../context_provider/public';
 import {
   DocViewFilterFn,
   DocViewsRegistry,
@@ -21,6 +22,7 @@ import { TableRowContent } from './table_row_content';
 
 export interface TableRowProps {
   row: OpenSearchSearchHit<Record<string, unknown>>;
+  index?: number;
   columns: string[];
   dataset: IndexPattern | Dataset;
   onRemoveColumn?: (column: string) => void;
@@ -33,6 +35,7 @@ export interface TableRowProps {
 
 export const TableRowUI = ({
   row,
+  index,
   columns,
   dataset,
   onFilter,
@@ -46,6 +49,24 @@ export const TableRowUI = ({
   const handleExpanding = useCallback(() => setIsExpanded((prevState) => !prevState), [
     setIsExpanded,
   ]);
+
+  const expandedContext = useMemo(() => {
+    if (!isExpanded) return null;
+
+    // Create unique ID for this document expansion
+    const documentId = row._id || `row-${index}`;
+
+    return {
+      id: `document-expansion-${documentId}`,
+      description: `Expanded row ${index !== undefined ? index + 1 : 'Entry'} from data table`,
+      value: row._source,
+      label: `Row ${index !== undefined ? index + 1 : 'Entry'}`,
+      categories: ['explore', 'chat', 'dynamic'],
+    };
+  }, [isExpanded, index, row._source, row._id]);
+
+  // Register dynamic context when row is expanded
+  useDynamicContext(expandedContext);
 
   return (
     <>
