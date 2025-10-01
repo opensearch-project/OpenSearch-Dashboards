@@ -28,4 +28,25 @@
  * under the License.
  */
 
+var execSync = require('child_process').execSync;
+var existsSync = require('fs').existsSync;
+var path = require('path');
+
+// Check if optimizer CLI exists
+var optimizerCliPath = path.resolve(__dirname, '../packages/osd-optimizer/target/cli.js');
+
+if (!existsSync(optimizerCliPath)) {
+  console.log('Building @osd/optimizer package...');
+  try {
+    execSync('yarn workspace @osd/optimizer build', {
+      stdio: 'inherit',
+      cwd: path.resolve(__dirname, '..'),
+    });
+  } catch (error) {
+    console.error('Failed to build @osd/optimizer package');
+    process.exit(1);
+  }
+}
+
+// Now require the CLI
 require('@osd/optimizer/target/cli');
