@@ -42,14 +42,6 @@ export class BedrockClient {
       // Let our custom retry logic handle throttling with better logging
       maxAttempts: 1, // Disable SDK retries, use our callBedrockWithRetry instead
     });
-
-    this.logger.info('BedrockClient initialized', {
-      region,
-      hasAwsAccessKey: !!process.env.AWS_ACCESS_KEY_ID,
-      hasAwsSecretKey: !!process.env.AWS_SECRET_ACCESS_KEY,
-      hasAwsProfile: !!process.env.AWS_PROFILE,
-      hasAwsSessionToken: !!process.env.AWS_SESSION_TOKEN,
-    });
   }
 
   /**
