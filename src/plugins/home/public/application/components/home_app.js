@@ -44,7 +44,7 @@ import { useMount } from 'react-use';
 import { USE_NEW_HOME_PAGE } from '../../../common/constants';
 import { HOME_PAGE_ID } from '../../../../content_management/public';
 
-const KEY_EXPERIENCE_NOTICE_DISMISSED = 'explore-experience-notice-dismissed';
+export const KEY_EXPERIENCE_NOTICE_DISMISSED = 'home:enhancedDiscover:dismissed';
 
 const RedirectToDefaultApp = () => {
   useMount(() => {
@@ -107,10 +107,10 @@ export function HomeApp({ directories, solutions }) {
         return;
       }
 
-      // First check session storage (for read-only users)
+      // First check local storage (for read-only users)
       try {
-        const sessionDismissed = sessionStorage.getItem(KEY_EXPERIENCE_NOTICE_DISMISSED);
-        if (sessionDismissed === 'true') {
+        const localDismissed = localStorage.getItem(KEY_EXPERIENCE_NOTICE_DISMISSED);
+        if (localDismissed === 'true') {
           setShowExperienceSelection(false);
           setIsCheckingExperience(false);
           return;
@@ -155,12 +155,12 @@ export function HomeApp({ directories, solutions }) {
     } catch (err) {
       // eslint-disable-next-line no-empty
     } finally {
-      // If saving to savedObjects failed for any reason or for read-only user, use session storage as fallback
+      // If saving to savedObjects failed for any reason or for read-only user, use local storage as fallback
       if (!savedObjectSuccess) {
         try {
-          sessionStorage.setItem(KEY_EXPERIENCE_NOTICE_DISMISSED, 'true');
+          localStorage.setItem(KEY_EXPERIENCE_NOTICE_DISMISSED, 'true');
         } catch (storageErr) {
-          console.error('Failed to save dismissal to session storage:', storageErr);
+          console.error('Failed to save dismissal to local storage:', storageErr);
         }
       }
 
