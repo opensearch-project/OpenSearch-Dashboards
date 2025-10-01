@@ -19,15 +19,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
-const KEY_EXPERIENCE_NOTICE_DISMISSED = 'home:enhancedDiscover:dismissed';
-
 interface ConfigNoticeModalProps {
   onClose: () => void;
 }
 
 export const ExperienceSelectionModal = ({ onClose }: ConfigNoticeModalProps) => {
   const handleDismiss = () => {
-    localStorage.setItem(KEY_EXPERIENCE_NOTICE_DISMISSED, 'true');
     onClose();
   };
   return (
