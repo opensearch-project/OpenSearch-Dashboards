@@ -29,14 +29,6 @@ export const ExperienceSelectionModal = ({ onClose }: ConfigNoticeModalProps) =>
   };
   return (
     <EuiModal onClose={onClose} maxWidth={800}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          {i18n.translate('home.enhancedDiscover.modal.title', {
-            defaultMessage: 'Enhanced Discover Experience',
-          })}
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-
       <EuiModalBody>
         <EuiEmptyPrompt
           iconType="cheer"
