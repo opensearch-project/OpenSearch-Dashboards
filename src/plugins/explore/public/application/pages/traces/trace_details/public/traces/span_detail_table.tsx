@@ -172,10 +172,10 @@ export const HierarchyServiceSpanCell = ({
   setExpandedRows: React.Dispatch<React.SetStateAction<Set<string>>>;
 }) => {
   const item = items[rowIndex];
-  const value = item[columnId];
+  const value = item?.[columnId];
 
   const isRowSelected =
-    props.selectedSpanId && props.selectedSpanId === item.spanId && !disableInteractions;
+    item && props.selectedSpanId && props.selectedSpanId === item.spanId && !disableInteractions;
 
   useEffect(() => {
     if (isRowSelected) {
@@ -185,14 +185,14 @@ export const HierarchyServiceSpanCell = ({
     } else {
       setCellProps?.({ className: ['treeCell--firstColumn'] });
     }
-  }, [props.selectedSpanId, item.spanId, disableInteractions, isRowSelected, setCellProps]);
+  }, [props.selectedSpanId, item?.spanId, disableInteractions, isRowSelected, setCellProps]);
 
-  const indentation = `${(item.level || 0) * 20}px`;
-  const isExpanded = expandedRows.has(item.spanId);
+  const indentation = `${(item?.level || 0) * 20}px`;
+  const isExpanded = expandedRows.has(item?.spanId);
 
   const cellContent = (
     <div className="exploreSpanDetailTable__hierarchyCell" style={{ paddingLeft: indentation }}>
-      {item.children && item.children.length > 0 ? (
+      {item?.children && item.children.length > 0 ? (
         <EuiIcon
           type={isExpanded ? 'arrowDown' : 'arrowRight'}
           onClick={() => {
@@ -216,7 +216,7 @@ export const HierarchyServiceSpanCell = ({
     </div>
   );
 
-  return disableInteractions ? (
+  return disableInteractions || !item ? (
     cellContent
   ) : (
     <button onClick={() => props.openFlyout(item.spanId)}>{cellContent}</button>
@@ -248,16 +248,21 @@ export const SpanCell = ({
   const item = items[adjustedRowIndex];
 
   useEffect(() => {
-    if (props.selectedSpanId && props.selectedSpanId === item.spanId && !disableInteractions) {
+    if (
+      item &&
+      props.selectedSpanId &&
+      props.selectedSpanId === item.spanId &&
+      !disableInteractions
+    ) {
       setCellProps?.({ className: 'exploreSpanDetailTable__selectedRow' });
     } else {
       setCellProps?.({});
     }
-  }, [props.selectedSpanId, item.spanId, disableInteractions]);
+  }, [props.selectedSpanId, item?.spanId, disableInteractions]);
 
   const cellContent = renderSpanCellValue({ item, columnId }, traceTimeRange, colorMap);
 
-  return disableInteractions ? (
+  return disableInteractions || !item ? (
     cellContent
   ) : (
     <button
