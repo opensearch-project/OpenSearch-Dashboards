@@ -124,6 +124,7 @@
     - [Opensearch eslint config opensearch dashboards](../packages/opensearch-eslint-config-opensearch-dashboards/README.md)
     - [Opensearch safer lodash set](../packages/opensearch-safer-lodash-set/README.md)
     - [Osd ace](../packages/osd-ace/README.md)
+    - [Osd agents](../packages/osd-agents/README.md)
     - [Osd apm config loader](../packages/osd-apm-config-loader/README.md)
     - [Osd babel preset](../packages/osd-babel-preset/README.md)
     - [Osd config](../packages/osd-config/README.md)
