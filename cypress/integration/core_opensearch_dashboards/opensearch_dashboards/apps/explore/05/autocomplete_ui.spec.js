@@ -117,17 +117,6 @@ export const runAutocompleteTests = () => {
             validateQueryResults('unique_category', 'Development');
           });
 
-          it('should validate that error markers are shown for invalide query', () => {
-            cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-            setDatePickerDatesAndSearchIfRelevant(config.language);
-            cy.wait(2000);
-            cy.explore.clearQueryEditor();
-
-            createInvalidQuery(config); // use keyboard
-
-            validateEditorContainsError();
-          });
-
           it('should validate that error markers are shown for invalid query', () => {
             cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
             setDatePickerDatesAndSearchIfRelevant(config.language);
