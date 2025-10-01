@@ -17,6 +17,7 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 
 interface ConfigNoticeModalProps {
   onClose: () => void;
@@ -26,19 +27,33 @@ export const ExperienceSelectionModal = ({ onClose }: ConfigNoticeModalProps) =>
   return (
     <EuiModal onClose={onClose} maxWidth={800}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Enhanced Discover Experience</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {i18n.translate('home.enhancedDiscover.modal.title', {
+            defaultMessage: 'Enhanced Discover Experience',
+          })}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <EuiEmptyPrompt
           iconType="cheer"
-          title={<h2>New! Enhanced Discover experience available</h2>}
+          title={
+            <h2>
+              {i18n.translate('home.enhancedDiscover.modal.emptyPrompt.title', {
+                defaultMessage: 'New! Enhanced Discover experience available',
+              })}
+            </h2>
+          }
           body={
             <p>
-              To use the enhanced experience, you need to enable Workspaces, Datasources, and
-              Explore. You can try out the new experience by enabling the following configurations
-              in your <code>opensearch_dashboards.yml</code> file and restarting OpenSearch
-              Dashboards to apply the changes.
+              {i18n.translate('home.enhancedDiscover.modal.emptyPrompt.bodyPrefix', {
+                defaultMessage:
+                  'To use the enhanced experience, you need to enable Workspaces, Datasources, and Explore. You can try out the new experience by enabling the following configurations in your ',
+              })}
+              <code>opensearch_dashboards.yml</code>
+              {i18n.translate('home.enhancedDiscover.modal.emptyPrompt.bodySuffix', {
+                defaultMessage: ' file and restarting OpenSearch Dashboards to apply the changes.',
+              })}
             </p>
           }
         />
@@ -46,14 +61,16 @@ export const ExperienceSelectionModal = ({ onClose }: ConfigNoticeModalProps) =>
         <EuiSpacer size="m" />
 
         <EuiCodeBlock language="yaml" fontSize="m" paddingSize="m" isCopyable>
-          {`# Set the value to true to enable multiple data source feature
+          {i18n.translate('home.enhancedDiscover.modal.configBlock', {
+            defaultMessage: `# Set the value to true to enable multiple data source feature
 data_source.enabled: true
 
 # Set the value to true to enable workspace feature
 workspace.enabled: true
 
 # Set the value to true to enable explore feature
-explore.enabled: true`}
+explore.enabled: true`,
+          })}
         </EuiCodeBlock>
       </EuiModalBody>
 
@@ -61,7 +78,9 @@ explore.enabled: true`}
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButton onClick={onClose} fill data-test-subj="dismissEnhancedDiscoverModal">
-              Dismiss
+              {i18n.translate('home.enhancedDiscover.modal.dismissButton', {
+                defaultMessage: 'Dismiss',
+              })}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
