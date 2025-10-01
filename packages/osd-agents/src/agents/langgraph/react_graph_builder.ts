@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { StateGraph, START, END, Annotation } from '@langchain/langgraph';
-import { SqliteSaver } from '@langchain/langgraph-checkpoint-sqlite';
+import { StateGraph, START, END, Annotation, MemorySaver } from '@langchain/langgraph';
 import { Logger } from '../../utils/logger';
 import { ReactAgentState } from './react_agent';
 
@@ -159,9 +158,10 @@ export class ReactGraphBuilder {
 
     graph.addEdge('generateResponse' as '__start__', END as '__end__');
 
-    // Compile the graph with SQLite checkpointer for memory persistence
-    // Use in-memory SQLite database (no setup required)
-    const checkpointer = SqliteSaver.fromConnString(':memory:');
+    // Using MemorySaver for in-memory checkpointing
+    // Note: Current implementation is stateless (unique thread per request)
+    // For persistent conversations, consider SqliteCheckpointSaver with stable thread IDs
+    const checkpointer = new MemorySaver();
 
     return graph.compile({ checkpointer });
   }

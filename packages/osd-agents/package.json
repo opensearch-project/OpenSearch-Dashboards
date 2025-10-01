@@ -21,7 +21,6 @@
     "@langchain/aws": "^0.1.15",
     "@langchain/core": "^0.3.73",
     "@langchain/langgraph": "^0.4.9",
-    "@langchain/langgraph-checkpoint-sqlite": "^0.2.1",
     "@modelcontextprotocol/sdk": "^1.18.0",
     "@opensearch-project/opensearch": "^2.13.0",
     "@types/cors": "^2.8.19",

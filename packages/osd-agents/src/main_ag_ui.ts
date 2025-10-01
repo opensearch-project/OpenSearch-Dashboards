@@ -23,7 +23,6 @@
 
 import * as dotenv from 'dotenv';
 import { BaseAGUIAdapter, BaseAGUIConfig } from './ag_ui/base_ag_ui_adapter';
-import { LangGraphAGUIAdapter } from './ag_ui/langgraph_ag_ui_adapter';
 import { AgentFactory } from './agents/agent_factory';
 import { MCPServerConfig } from './types/mcp_types';
 import { Logger } from './utils/logger';
