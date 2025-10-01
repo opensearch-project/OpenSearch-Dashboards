@@ -91,10 +91,10 @@ export const parseHighPrecisionTimestamp = (timestampStr: string): number => {
       const fractionalPart = fractionalMatch[1];
       const millisecondsFromFraction = parseFloat('0.' + fractionalPart) * 1000;
 
+      // Get the base timestamp without milliseconds, then add the high-precision fractional part
       const baseMs = Math.floor(date.getTime() / 1000) * 1000;
-      const secondsMs = date.getSeconds() * 1000;
 
-      return baseMs + secondsMs + millisecondsFromFraction;
+      return baseMs + millisecondsFromFraction;
     }
 
     return date.getTime();

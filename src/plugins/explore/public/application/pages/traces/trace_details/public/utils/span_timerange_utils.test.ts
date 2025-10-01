@@ -35,6 +35,25 @@ describe('span_timerange_utils', () => {
       expect(result).toBe(1672531200123);
     });
 
+    it('should correctly parse high-precision timestamps with many decimal places', () => {
+      // Test case for the bug fix: timestamps with high precision fractional seconds
+      const startTime = '2025-10-01 20:27:43.971744429';
+      const endTime = '2025-10-01 20:27:44.00006722';
+
+      const startMs = parseHighPrecisionTimestamp(startTime);
+      const endMs = parseHighPrecisionTimestamp(endTime);
+
+      // The duration should be approximately 28.322 ms (from the bug report)
+      const durationMs = endMs - startMs;
+
+      // Should be around 28-29 ms, not 1000+ ms as in the original bug
+      expect(durationMs).toBeGreaterThan(25);
+      expect(durationMs).toBeLessThan(35);
+
+      // More specific check - should be close to 28.322 ms
+      expect(Math.abs(durationMs - 28.322)).toBeLessThan(1);
+    });
+
     it('should return 0 for invalid timestamp', () => {
       const result = parseHighPrecisionTimestamp('invalid');
       expect(isNaN(result) || result === 0).toBe(true);
@@ -59,8 +78,8 @@ describe('span_timerange_utils', () => {
 
       const result = calculateSpanTimeRange(span);
       expect(result.startTimeMs).toBe(1672531200000);
-      expect(result.endTimeMs).toBe(1672531202000);
-      expect(result.durationMs).toBe(2000);
+      expect(result.endTimeMs).toBe(1672531201000);
+      expect(result.durationMs).toBe(1000);
     });
 
     it('should use span duration field as fallback when timestamps lack nanosecond precision', () => {
@@ -76,7 +95,7 @@ describe('span_timerange_utils', () => {
 
       const result = calculateSpanTimeRange(span);
       expect(result.startTimeMs).toBe(1672531200000);
-      expect(result.endTimeMs).toBe(1672531202000);
+      expect(result.endTimeMs).toBe(1672531201000);
       expect(result.durationMs).toBe(500);
     });
   });
@@ -105,8 +124,8 @@ describe('span_timerange_utils', () => {
 
       const result = calculateTraceTimeRange(spans);
       expect(result.startTimeMs).toBe(1672531200000);
-      expect(result.endTimeMs).toBe(1672531204000);
-      expect(result.durationMs).toBe(4000);
+      expect(result.endTimeMs).toBe(1672531202000);
+      expect(result.durationMs).toBe(2000);
     });
   });
 });
