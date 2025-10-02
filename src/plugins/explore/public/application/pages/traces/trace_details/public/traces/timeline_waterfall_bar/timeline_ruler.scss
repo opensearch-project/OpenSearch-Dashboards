@@ -1,4 +1,9 @@
-.timelineRuler {
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.timeline_ruler {
   color: $euiColorMediumShade;
 
   &__baseline {
@@ -10,12 +15,12 @@
     background-color: currentColor;
   }
 
-  &__tickContainer {
+  &__tick_container {
     position: absolute;
     bottom: 0;
     transform: translateX(-50%);
 
-    .timelineRuler__label {
+    .timeline_ruler__label {
       font-size: $euiFontSizeXS;
       line-height: 1;
       white-space: nowrap;
@@ -37,7 +42,7 @@
       }
     }
 
-    .timelineRuler__tick {
+    .timeline_ruler__tick {
       height: 8px;
       width: 2px;
       background-color: currentColor;

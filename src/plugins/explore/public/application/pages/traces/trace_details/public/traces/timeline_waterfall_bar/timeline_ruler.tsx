@@ -20,30 +20,30 @@ export const TimelineRuler: React.FC<TimelineRulerProps> = ({
   const ticks = useTimelineTicks(traceTimeRange.durationMs, 0, 8, paddingPercent);
 
   return (
-    <div className="timelineRuler" style={{ height: '30px', position: 'relative' }}>
-      <div className="timelineRuler__baseline" />
+    <div className="timeline_ruler" style={{ height: '30px', position: 'relative' }}>
+      <div className="timeline_ruler__baseline" />
       {ticks.map((tick, index) => {
         const labelClassName =
           index === 0
-            ? 'timelineRuler__label--first'
+            ? 'timeline_ruler__label--first'
             : index === ticks.length - 1
-            ? 'timelineRuler__label--last'
-            : 'timelineRuler__label--center';
+            ? 'timeline_ruler__label--last'
+            : 'timeline_ruler__label--center';
 
         return (
           <div
             key={tick.value}
-            className="timelineRuler__tickContainer"
+            className="timeline_ruler__tick_container"
             style={{ left: `${tick.offsetPercent}%` }}
             data-test-subj={`tick-container-${tick.value}`}
           >
             <div
-              className={`timelineRuler__label ${labelClassName}`}
+              className={`timeline_ruler__label ${labelClassName}`}
               data-test-subj={`tick-label-${tick.value}`}
             >
               {tick.value}ms
             </div>
-            <div className="timelineRuler__tick" data-test-subj={`tick-mark-${tick.value}`} />
+            <div className="timeline_ruler__tick" data-test-subj={`tick-mark-${tick.value}`} />
           </div>
         );
       })}
