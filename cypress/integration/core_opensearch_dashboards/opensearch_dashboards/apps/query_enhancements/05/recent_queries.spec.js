@@ -50,6 +50,10 @@ const runRecentQueryTests = () => {
       cy.window().then((win) => {
         win.localStorage.clear();
         win.sessionStorage.clear();
+        // Force garbage collection if available
+        if (win.gc) {
+          win.gc();
+        }
       });
     });
 
