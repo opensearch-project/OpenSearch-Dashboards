@@ -22,6 +22,7 @@
     - explore
       - [Query panel actions](plugins/explore/query-panel-actions.md)
     - [Data_persistence](plugins/data_persistence.md)
+    - [Plugin framework guide](plugins/plugin-framework-guide.md)
   - Saved_objects
     - [Saved_object_repository_factory_design](saved_objects/saved_object_repository_factory_design.md)
   - Telemetry

@@ -243,6 +243,7 @@ Now that you have a development environment to play with, there are a number of 
 
 - [Introduction to OpenSearch Dashboards Plugins](https://opensearch.org/blog/dashboards-plugins-intro/) blog post
 - [OpenSearch Dashboards plugin user documentation](https://opensearch.org/docs/latest/install-and-configure/install-dashboards/plugins/) (install, update, and remove)
+- [Plugin framework guide](docs/plugins/plugin-framework-guide.md)
 - Much of the technical architectural information about the plugin system is located in `/src/core`
   - [README](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/README.md)
   - [Plugin principles](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/PRINCIPLES.md)
