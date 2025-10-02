@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.timeline_ruler {
+.exploreTimelineRuler {
   color: $euiColorMediumShade;
 
   &__baseline {
@@ -15,12 +15,12 @@
     background-color: currentColor;
   }
 
-  &__tick_container {
+  &__tickContainer {
     position: absolute;
     bottom: 0;
     transform: translateX(-50%);
 
-    .timeline_ruler__label {
+    .exploreTimelineRuler__label {
       font-size: $euiFontSizeXS;
       line-height: 1;
       white-space: nowrap;
@@ -42,7 +42,7 @@
       }
     }
 
-    .timeline_ruler__tick {
+    .exploreTimelineRuler__tick {
       height: 8px;
       width: 2px;
       background-color: currentColor;
