@@ -17,6 +17,9 @@ export const config: PluginConfigDescriptor<ChatConfigType> = {
   },
 };
 
+/**
+ * @experimental This plugin is experimental and will change in future releases.
+ */
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ChatPlugin(initializerContext);
 }

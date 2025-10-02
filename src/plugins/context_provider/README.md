@@ -1,4 +1,6 @@
-# Context Provider Plugin
+# Context Provider Plugin (experimental)
+
+**⚠️ This plugin is experimental and will change in future releases.**
 
 A React hooks-based context capture system for OpenSearch Dashboards that enables AI assistants to understand user interactions and page state.
 

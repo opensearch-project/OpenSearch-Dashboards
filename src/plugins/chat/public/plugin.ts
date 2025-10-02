@@ -10,6 +10,10 @@ import { ChatService } from './services/chat_service';
 import { ChatHeaderButton } from './components/chat_header_button';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 
+/**
+ * @experimental
+ * Chat plugin for AI-powered interactions. This plugin is experimental and will change in future releases.
+ */
 export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private chatService: ChatService | undefined;
 
