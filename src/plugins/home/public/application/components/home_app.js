@@ -44,7 +44,8 @@ import { useMount } from 'react-use';
 import { USE_NEW_HOME_PAGE } from '../../../common/constants';
 import { HOME_PAGE_ID } from '../../../../content_management/public';
 
-const KEY_EXPERIENCE_NOTICE_DISMISSED = 'explore-experience-notice-dismissed';
+const KEY_EXPERIENCE_NOTICE_DISMISSED_CONFIG = 'explore-experience-notice-dismissed';
+const KEY_EXPERIENCE_NOTICE_DISMISSED_LOCAL_STORAGE = 'home:enhancedDiscover:dismissed';
 
 const RedirectToDefaultApp = () => {
   useMount(() => {
@@ -107,10 +108,10 @@ export function HomeApp({ directories, solutions }) {
         return;
       }
 
-      // First check session storage (for read-only users)
+      // First check local storage (for read-only users)
       try {
-        const sessionDismissed = sessionStorage.getItem(KEY_EXPERIENCE_NOTICE_DISMISSED);
-        if (sessionDismissed === 'true') {
+        const localDismissed = localStorage.getItem(KEY_EXPERIENCE_NOTICE_DISMISSED_LOCAL_STORAGE);
+        if (localDismissed === 'true') {
           setShowExperienceSelection(false);
           setIsCheckingExperience(false);
           return;
@@ -121,7 +122,10 @@ export function HomeApp({ directories, solutions }) {
 
       // Then check saved objects (for users with write permissions)
       try {
-        const result = await savedObjectsClient.get('config', KEY_EXPERIENCE_NOTICE_DISMISSED);
+        const result = await savedObjectsClient.get(
+          'config',
+          KEY_EXPERIENCE_NOTICE_DISMISSED_CONFIG
+        );
 
         if (result.error?.statusCode === 404) {
           // Not dismissed yet - show modal
@@ -130,6 +134,7 @@ export function HomeApp({ directories, solutions }) {
           // Other error - don't show
           setShowExperienceSelection(false);
         }
+        return;
       } catch (error) {
         setShowExperienceSelection(false);
       } finally {
@@ -147,7 +152,7 @@ export function HomeApp({ directories, solutions }) {
       const result = await savedObjectsClient.create(
         'config',
         { dismissedAt: new Date().toISOString() },
-        { id: KEY_EXPERIENCE_NOTICE_DISMISSED, overwrite: true }
+        { id: KEY_EXPERIENCE_NOTICE_DISMISSED_CONFIG, overwrite: true }
       );
       if (!result.error) {
         savedObjectSuccess = true;
@@ -155,12 +160,12 @@ export function HomeApp({ directories, solutions }) {
     } catch (err) {
       // eslint-disable-next-line no-empty
     } finally {
-      // If saving to savedObjects failed for any reason or for read-only user, use session storage as fallback
+      // If saving to savedObjects failed for any reason or for read-only user, use local storage as fallback
       if (!savedObjectSuccess) {
         try {
-          sessionStorage.setItem(KEY_EXPERIENCE_NOTICE_DISMISSED, 'true');
+          localStorage.setItem(KEY_EXPERIENCE_NOTICE_DISMISSED_LOCAL_STORAGE, 'true');
         } catch (storageErr) {
-          console.error('Failed to save dismissal to session storage:', storageErr);
+          console.error('Failed to save dismissal to local storage:', storageErr);
         }
       }
 

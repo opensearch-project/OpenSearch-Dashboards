@@ -13,6 +13,9 @@
 
 import { ContextProviderPlugin } from './plugin';
 
+/**
+ * @experimental This plugin is experimental and will change in future releases.
+ */
 export function plugin() {
   return new ContextProviderPlugin();
 }

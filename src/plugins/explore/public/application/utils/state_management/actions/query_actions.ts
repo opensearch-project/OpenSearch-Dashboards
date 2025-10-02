@@ -123,7 +123,7 @@ const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
       const result = getFieldValueCounts({
         hits,
         field,
-        indexPattern: dataset, // DataView extends IndexPattern
+        dataSet: dataset, // DataView extends IndexPattern
         count: 5,
         grouped: false,
       });
