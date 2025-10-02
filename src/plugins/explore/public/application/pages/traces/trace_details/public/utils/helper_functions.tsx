@@ -42,6 +42,19 @@ export function round(value: number, precision: number = 0): number {
   return Math.round(value * multiplier) / multiplier;
 }
 
+export function getServiceInfo(selectedSpan: any, traceId?: string): string {
+  if (selectedSpan) {
+    const serviceName = selectedSpan.serviceName || 'Unknown Service';
+    const operationName = selectedSpan.name || 'Unknown Operation';
+    return `${serviceName}: ${operationName}`;
+  } else if (traceId) {
+    return i18n.translate('explore.traceDetails.header.unknownTrace', {
+      defaultMessage: 'Unknown Trace',
+    });
+  }
+  return '';
+}
+
 interface NoMatchMessageProps {
   traceId: string;
 }

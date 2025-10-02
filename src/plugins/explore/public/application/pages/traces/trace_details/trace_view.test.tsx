@@ -8,6 +8,7 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import { TraceDetails } from './trace_view';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
+import { getServiceInfo, NoMatchMessage } from './public/utils/helper_functions';
 
 const mockChrome = {
   setBreadcrumbs: jest.fn(),
@@ -147,28 +148,7 @@ jest.mock('./public/traces/generate_color_map', () => ({
   })),
 }));
 
-jest.mock('./public/utils/helper_functions', () => ({
-  NoMatchMessage: ({ traceId }: any) => (
-    <div data-testid="no-match-message">No data for trace: {traceId}</div>
-  ),
-  isEmpty: (value: any) => {
-    return (
-      value === undefined ||
-      value === null ||
-      (typeof value === 'object' && Object.keys(value).length === 0) ||
-      (typeof value === 'string' && value.trim().length === 0) ||
-      (Array.isArray(value) && value.length === 0)
-    );
-  },
-  nanoToMilliSec: (nano: number) => {
-    if (typeof nano !== 'number' || isNaN(nano)) return 0;
-    return nano / 1000000;
-  },
-  round: (value: number, precision: number = 0) => {
-    const multiplier = Math.pow(10, precision);
-    return Math.round(value * multiplier) / multiplier;
-  },
-}));
+// Use the actual helper functions instead of mocking them
 
 describe('TraceDetails', () => {
   const mockTraceData = [
@@ -303,7 +283,7 @@ describe('TraceDetails', () => {
     );
 
     await waitFor(() => {
-      expect(document.querySelector('[data-testid="no-match-message"]')).toBeInTheDocument();
+      expect(document.querySelector('.euiCallOut')).toBeInTheDocument();
     });
   });
 
@@ -340,19 +320,73 @@ describe('TraceDetails', () => {
     await waitFor(() => {
       expect(mockChrome.setBreadcrumbs).toHaveBeenCalledWith([
         {
-          text: 'Trace: test-trace-id',
+          text: 'service-a: operation-1',
         },
       ]);
     });
   });
 
+  it('getServiceInfo function works correctly with span data', () => {
+    const mockSpan = {
+      serviceName: 'test-service',
+      name: 'test-operation',
+    };
+
+    const result = getServiceInfo(mockSpan, 'test-trace-id');
+    expect(result).toBe('test-service: test-operation');
+  });
+
+  it('getServiceInfo function handles missing service name', () => {
+    const mockSpan = {
+      name: 'test-operation',
+    };
+
+    const result = getServiceInfo(mockSpan, 'test-trace-id');
+    expect(result).toBe('Unknown Service: test-operation');
+  });
+
+  it('getServiceInfo function handles missing operation name', () => {
+    const mockSpan = {
+      serviceName: 'test-service',
+    };
+
+    const result = getServiceInfo(mockSpan, 'test-trace-id');
+    expect(result).toBe('test-service: Unknown Operation');
+  });
+
+  it('getServiceInfo function returns Unknown Trace when no span but has traceId', () => {
+    const result = getServiceInfo(null, 'test-trace-id');
+    expect(result).toBe('Unknown Trace');
+  });
+
+  it('getServiceInfo function returns empty string when no span and no traceId', () => {
+    const result = getServiceInfo(null);
+    expect(result).toBe('');
+  });
+
+  it('NoMatchMessage component renders correctly', () => {
+    const testTraceId = 'test-trace-123';
+    const { container } = render(<NoMatchMessage traceId={testTraceId} />);
+
+    // Check that the actual NoMatchMessage component renders with EuiCallOut
+    const callOut = container.querySelector('.euiCallOut');
+    expect(callOut).toBeInTheDocument();
+
+    // Check for the error styling
+    expect(callOut).toHaveClass('euiCallOut--danger');
+
+    // Check for the expected text content with trace ID
+    expect(callOut).toHaveTextContent(`Error loading Trace Id: ${testTraceId}`);
+    expect(callOut).toHaveTextContent('The Trace Id is invalid or could not be found');
+  });
+
   it('sets breadcrumb for unknown trace', async () => {
-    // Mock state container to return empty traceId
+    // Mock state container to return empty traceId and no data
     const mockCreateTraceAppState = jest.requireMock('./state/trace_app_state').createTraceAppState;
     mockCreateTraceAppState.mockReturnValueOnce({
       stateContainer: {
         get: () => ({
-          traceId: '', // Empty trace ID
+          traceId: 'no-trace-id', // Non-empty trace ID but no data
           dataset: {
             id: 'test-dataset-id',
             title: 'test-index-*',
@@ -373,6 +407,9 @@ describe('TraceDetails', () => {
       },
       stopStateSync: jest.fn(),
     });
+
+    // Mock empty data response
+    mockTransformPPLDataToTraceHits.mockImplementation(() => []);
 
     const history = createMemoryHistory();
 
@@ -499,7 +536,7 @@ describe('TraceDetails', () => {
     );
 
     await waitFor(() => {
-      expect(document.querySelector('[data-testid="no-match-message"]')).toBeInTheDocument();
+      expect(document.querySelector('.euiCallOut')).toBeInTheDocument();
     });
   });
 
