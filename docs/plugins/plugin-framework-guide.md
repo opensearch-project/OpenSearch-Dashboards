@@ -11,8 +11,9 @@ This comprehensive guide covers the essentials of developing plugins for OpenSea
 5. [Plugin Configuration](#5-plugin-configuration)
 6. [Plugin Lifecycle](#6-plugin-lifecycle)
 7. [Core Services](#7-core-services)
-8. [Best Practices](#8-best-practices)
-9. [Additional Resources](#9-additional-resources)
+8. [Integrating Custom Datasources](#8-integrating-custom-datasources)
+9. [Best Practices](#9-best-practices)
+10. [Additional Resources](#10-additional-resources)
 
 ## 1. Overview
 
@@ -691,9 +692,368 @@ core.uiSettings.register({
 const value = await context.core.uiSettings.client.get('myPlugin:setting');
 ```
 
-## 8. Best Practices
+## 8. Integrating Custom Datasources
 
-### 8.1. Type Safety
+OpenSearch Dashboards can be extended to query and visualize data from arbitrary external datasources, such as custom microservices, data stores, REST APIs. This integration enables users to use Discover and Dashboards with data that isn't stored in OpenSearch.
+
+This section explains how to integrate custom datasources by implementing:
+1. **Server-side Search Strategy** - Handles query execution and result retrieval
+2. **Dataset Type Configuration** - Defines how the datasource appears in the UI
+3. **Data Structure Management** - Provides navigation of databases, tables, and schemas
+
+### 8.1. Architecture Overview
+
+Integrating a custom datasource requires coordination between server and client components:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        Browser (Public)                     │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ Dataset Type Config                                    │ │
+│  │ - UI metadata (icon, tooltip)                          │ │
+│  │ - Data structure fetching (data sources, tables)       │ │
+│  │ - Field schema fetching                                │ │
+│  │ - Query string generation                              │ │
+│  │ - Search strategy selection                            │ │
+│  └────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                           │
+                           │ HTTP
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      Server (Backend)                       │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ Search Strategy                                        │ │
+│  │ - Start query execution                                │ │
+│  │ - Poll query status                                    │ │
+│  │ - Fetch and transform results                          │ │
+│  └────────────────────────────────────────────────────────┘ │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ HTTP Routes                                            │ │
+│  │ - Get tables                                           │ │
+│  │ - Get schema                                           │ │
+│  └────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                           │
+                           │ HTTP/gRPC/Custom Protocol
+                           ▼
+              ┌──────────────────────────┐
+              │   External Datasource    │
+              │  (microservice, REST     │
+              │   API, etc.)             │
+              └──────────────────────────┘
+```
+
+### 8.2. Server-Side: Implementing a Search Strategy
+
+A search strategy handles the execution of queries against your external datasource. It must implement the `ISearchStrategy` interface from the `data` plugin.
+
+> **See also:**
+> - [ISearchStrategy interface](../../src/plugins/data/server/search/types.ts) - Full interface definition
+> - [IDataFrameResponse type](../../src/plugins/data/common/data_frames/types.ts) - Response format
+> - [Example: PPL Async Search Strategy](../../src/plugins/query_enhancements/server/search/ppl_async_search_strategy.ts) - Real-world implementation
+
+#### 8.2.1. ISearchStrategy Interface
+
+Your search strategy class must implement the following interface:
+
+```typescript
+/**
+ * Search strategy interface contains a search method that takes in a request and returns a promise
+ * that resolves to a response.
+ */
+interface ISearchStrategy<
+  SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
+  SearchStrategyResponse extends
+    | IOpenSearchDashboardsSearchResponse
+    | IDataFrameResponse = IOpenSearchSearchResponse
+> {
+  search: (
+    context: RequestHandlerContext,
+    request: SearchStrategyRequest,
+    options?: ISearchOptions
+  ) => Promise<SearchStrategyResponse>;
+  cancel?: (context: RequestHandlerContext, id: string) => Promise<void>;
+}
+```
+
+**Key components:**
+
+- **`search` method**: Main entry point that receives search requests and returns responses
+- **`request`**: Contains the query, dataset info
+- **`options`**: Optional search configuration (e.g., signal for abort)
+
+#### 8.2.2. Implementation Example
+
+Here's a general pattern for implementing an async search strategy:
+
+```typescript
+export const mySearchStrategyProvider = (
+  logger: Logger,
+  client: MyDataSourceClient
+): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
+  return {
+    search: async (context, request, options) => {
+      try {
+        const query = request.body.query;
+        const pollParams = request.body.pollQueryResultsParams;
+        const queryId = pollParams?.queryId;
+
+        // If no queryId, start a new query
+        if (!queryId) {
+          const response = await client.startQuery({
+            query: query.query,
+            language: query.language,
+            dataSource: query.dataset?.dataSource?.title,
+          });
+
+          return {
+            type: DATA_FRAME_TYPES.POLLING,
+            status: 'started',
+            body: {
+              queryStatusConfig: {
+                queryId: response.queryId,
+                sessionId: response.sessionId,
+              },
+            },
+          };
+        }
+
+        // Poll for query status
+        const statusResponse = await client.getQueryStatus(queryId);
+        const status = statusResponse.status?.toUpperCase();
+
+        if (status === 'SUCCESS') {
+          // Transform results to DataFrame
+          const fields = statusResponse.schema.map(field => ({
+            name: field.name,
+            type: field.type,
+            values: statusResponse.rows.map(row => row[field.name]),
+          }));
+
+          return {
+            type: DATA_FRAME_TYPES.POLLING,
+            status: 'success',
+            body: {
+              fields,
+              size: statusResponse.rows.length,
+            },
+          };
+        }
+
+        if (status === 'FAILED') {
+          return {
+            type: DATA_FRAME_TYPES.POLLING,
+            status: 'failed',
+            body: {
+              error: statusResponse.error,
+            },
+          };
+        }
+
+        // Still running
+        return {
+          type: DATA_FRAME_TYPES.POLLING,
+          status: status.toLowerCase(),
+        };
+      } catch (error) {
+        logger.error(`Search strategy error: ${error.message}`);
+        throw error;
+      }
+    },
+  };
+};
+```
+
+#### 8.2.3. Registering the Search Strategy
+
+Register your search strategy during plugin setup:
+
+```typescript
+// In server/plugin.ts setup() method
+plugins.data.search.registerSearchStrategy(
+  'myCustomStrategy',
+  searchStrategy
+);
+
+plugins.queryEnhancements.defineSearchStrategyRoute(
+  'myCustomStrategy',
+  searchStrategy
+);
+```
+
+### 8.3. Client-Side: Dataset Type Configuration
+
+The dataset type configuration defines how your datasource appears and behaves in the OpenSearch Dashboards UI (Discover, Dashboards, etc.).
+
+> **See also:**
+> - [DatasetTypeConfig interface](../../src/plugins/data/public/query/query_string/dataset_service/types.ts) - Full interface definition
+> - [DataStructure and Dataset interfaces](../../src/plugins/data/common/datasets/types.ts) - Data structure types
+> - [Example: S3 Dataset Type Config](../../src/plugins/query_enhancements/public/datasets/s3_type.ts) - Real-world implementation
+
+#### 8.3.1. DatasetTypeConfig Interface
+
+Your dataset type must implement the `DatasetTypeConfig` interface with the following properties:
+
+**Core Properties:**
+
+- **`id`** (string): Unique identifier for the datasource type
+- **`title`** (string): Display name shown in the UI
+- **`meta`** (object): UI metadata
+  - `icon`: Icon configuration (type, color)
+  - `tooltip`: Description shown on hover
+  - `isFieldLoadAsync`: Set to `true` if field loading is slow/async
+  - `searchOnLoad`: Set to `false` to prevent automatic query execution
+
+**Required Methods:**
+
+- **`toDataset(path: DataStructure[]): Dataset`**
+  - Converts a data structure path (connection → database → table) into a Dataset object
+  - Returns dataset with `id`, `title`, `type`, and `dataSource` information
+
+- **`fetch(services, path, options): Promise<DataStructure>`**
+  - Fetches child data structures for the current path
+  - Handles hierarchical navigation: connections → databases → tables
+  - Returns structure with `columnHeader`, `hasNext`, and `children` array
+  - Switch on `path[path.length - 1].type` to handle different levels
+
+- **`fetchFields(dataset: Dataset): Promise<DatasetField[]>`**
+  - Retrieves field schema for a specific dataset/table
+  - Returns array of fields with `name` and `type` (e.g., 'string', 'number', 'date')
+
+- **`supportedLanguages(dataset: Dataset): string[]`**
+  - Returns list of query languages supported (e.g., `['SQL', 'PPL']`)
+
+- **`getSearchOptions(): object`**
+  - Returns search configuration including `strategy` name
+  - Links this dataset type to your registered search strategy
+
+**Optional Methods:**
+
+- **`getInitialQueryString(query: Query): string | undefined`**
+  - Generates starter query when user selects a dataset
+  - Can customize based on query language and dataset
+
+- **`languageOverrides`**: Per-language UI behavior overrides (e.g., hide date picker)
+- **`combineDataStructures`**: Merge multiple data structures (for multi-select)
+
+#### 8.3.2. Implementation Example
+
+Here's a simplified dataset type configuration example:
+
+```typescript
+export const myDatasourceTypeConfig: DatasetTypeConfig = {
+  id: 'myDatasource',
+  title: 'My Custom Datasource',
+  meta: {
+    icon: { type: MY_DATASOURCE_ICON },
+    tooltip: 'My Custom Datasource',
+  },
+
+  toDataset: (path: DataStructure[]): Dataset => {
+    const table = path[path.length - 1];
+    const connection = path.find(ds => ds.type === 'DATA_CONNECTION');
+
+    return {
+      id: table.id,
+      title: table.title,
+      type: 'myDatasource',
+      dataSource: {
+        id: connection.id,
+        title: connection.title,
+        type: connection.type,
+      },
+    };
+  },
+
+  fetch: async (services, path, options) => {
+    const current = path[path.length - 1];
+
+    switch (current.type) {
+      case 'DATA_CONNECTION':
+        // Fetch tables for this connection
+        const tables = await services.http.get('/api/my-datasource/tables', {
+          query: { connectionId: current.id },
+        });
+        return {
+          ...current,
+          columnHeader: 'Tables',
+          hasNext: false,
+          children: tables.map(table => ({
+            id: `${current.id}.${table.name}`,
+            title: table.name,
+            type: 'TABLE',
+          })),
+        };
+
+      default:
+        // Fetch connections from saved objects
+        const connections = await services.savedObjects.client.find({
+          type: 'data-connection',
+          perPage: 10000,
+        });
+        return {
+          ...current,
+          columnHeader: 'Connections',
+          hasNext: true,
+          children: connections.savedObjects
+            .filter(obj => obj.attributes.type === 'My Datasource')
+            .map(obj => ({
+              id: obj.id,
+              title: obj.attributes.connectionId,
+              type: 'DATA_CONNECTION',
+            })),
+        };
+    }
+  },
+
+  fetchFields: async (dataset: Dataset): Promise<DatasetField[]> => {
+    const response = await services.http.get('/api/my-datasource/schema', {
+      query: {
+        connectionId: dataset.dataSource?.id,
+        tableId: dataset.id,
+      },
+    });
+    return response.fields.map(field => ({
+      name: field.name,
+      type: field.type,
+    }));
+  },
+
+  supportedLanguages: () => ['PPL'],
+
+  getSearchOptions: () => ({ strategy: 'myCustomStrategy' })
+};
+```
+
+#### 8.3.3. Data Structure Hierarchy
+
+The `fetch` method implements a two-level hierarchy in this simplified example:
+
+1. **Root level**: Fetch data connections from saved objects
+2. **DATA_CONNECTION level**: Fetch next level for the selected connection (e.g. databases)
+3. Any other sub-level required (e.g. tables)
+
+Each level returns a `DataStructure` with:
+- **`columnHeader`**: Label for the column in the UI
+- **`hasNext`**: Whether there are more levels to navigate
+- **`children`**: Array of child structures with `id`, `title`, `type`
+
+#### 8.3.4. Registering the Dataset Type
+
+Register your dataset type during plugin setup:
+
+```typescript
+// In public/plugin.ts setup() method
+const typeConfig = getMyDatasourceTypeConfig(core.http);
+data.query.queryString.getDatasetService().registerType(typeConfig);
+```
+
+You should be able to see your datasource in Discover.
+
+## 9. Best Practices
+
+### 9.1. Type Safety
 
 Always define clear TypeScript interfaces for your plugin contracts:
 
@@ -709,7 +1069,7 @@ export interface MyPluginSetup {
 }
 ```
 
-### 8.2. Separation of Concerns
+### 9.2. Separation of Concerns
 
 Keep your plugin modular:
 
@@ -722,7 +1082,7 @@ my-plugin/
 │   └── types.ts           # Type definitions
 ```
 
-### 8.3. Error Handling
+### 9.3. Error Handling
 
 Always handle errors gracefully:
 
@@ -741,7 +1101,7 @@ router.get({ path: '/api/data', validate: false }, async (context, req, res) => 
 });
 ```
 
-### 8.4. Logging
+### 9.4. Logging
 
 Use structured logging with appropriate levels:
 
@@ -752,7 +1112,7 @@ this.logger.warn('Potential issues');
 this.logger.error('Errors that need attention');
 ```
 
-### 8.5. Testing
+### 9.5. Testing
 
 Structure your code for testability:
 
@@ -774,7 +1134,7 @@ const mockLogger = loggingSystemMock.createLogger();
 const service = new MyService(mockLogger, mockConfig);
 ```
 
-### 8.6. Backward Compatibility
+### 9.6. Backward Compatibility
 
 When evolving APIs, maintain backward compatibility:
 
@@ -789,7 +1149,7 @@ export interface MyPluginSetup {
 }
 ```
 
-### 8.7. Documentation
+### 9.7. Documentation
 
 Document your public APIs:
 
@@ -809,7 +1169,7 @@ Document your public APIs:
 getData(id: string): Promise<Data>;
 ````
 
-### 8.8. Resource Cleanup
+### 9.8. Resource Cleanup
 
 Always clean up in the `stop` method:
 
@@ -821,7 +1181,7 @@ public stop() {
 }
 ```
 
-## 9. Additional Resources
+## 10. Additional Resources
 
 - [OpenSearch Dashboards Plugin Examples](../../examples) - Working example plugins demonstrating various plugin patterns
 - [Core API Documentation](../openapi) - Complete OpenAPI specifications for core services
