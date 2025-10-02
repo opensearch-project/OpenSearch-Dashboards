@@ -58,12 +58,7 @@ export const createNewVisActions = (services: {
   const visTypes = types.all();
   const aliasTypes = types.getAliases();
   const allTypes = [...visTypes, ...aliasTypes]
-    .filter((t) => {
-      if (!isLabsEnabled && t.stage === 'experimental') {
-        return false;
-      }
-      return true;
-    })
+    .filter((t) => (isLabsEnabled || t.stage !== 'experimental') && !t.hidden)
     .sort((a, b) => a.title.localeCompare(b.title));
 
   allTypes.forEach((visType, i) => {

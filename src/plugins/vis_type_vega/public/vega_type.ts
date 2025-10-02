@@ -60,6 +60,7 @@ export const createVegaTypeDefinition = (
     }),
     icon: 'visVega',
     isClassic: true,
+    hidden: true,
     visConfig: { defaults: { spec: getDefaultSpec() } },
     editorConfig: {
       optionsTemplate: VegaVisEditor,

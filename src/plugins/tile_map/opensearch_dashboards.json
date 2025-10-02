@@ -14,8 +14,6 @@
     "share"
   ],
   "requiredBundles": [
-    "opensearchDashboardsUtils",
-    "charts",
-    "visDefaultEditor"
+    "opensearchDashboardsUtils"
   ]
 }

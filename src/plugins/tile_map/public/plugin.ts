@@ -110,7 +110,7 @@ export class TileMapPlugin implements Plugin<TileMapPluginSetup, TileMapPluginSt
 
     expressions.registerFunction(() => createTileMapFn(visualizationDependencies));
 
-    visualizations.createBaseVisualization(createTileMapTypeDefinition(visualizationDependencies));
+    // visualizations.createBaseVisualization(createTileMapTypeDefinition(visualizationDependencies));
 
     const config = this.initializerContext.config.get<TileMapConfigType>();
     return {
