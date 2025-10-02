@@ -116,6 +116,10 @@ export class ChatEventHandler {
     this.onStreamingStateChange(false);
     // Clear any remaining active messages (cleanup)
     this.activeAssistantMessages.clear();
+    // Reset the connection state to allow new chats
+    if (this.chatService && (this.chatService as any).resetConnection) {
+      (this.chatService as any).resetConnection();
+    }
   }
 
   /**
