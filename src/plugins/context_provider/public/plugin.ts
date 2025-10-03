@@ -12,6 +12,10 @@ import {
 } from './types';
 import { ContextCaptureService } from './services/context_capture_service';
 
+/**
+ * @experimental
+ * Context Provider plugin for React hooks-based context capture system. This plugin is experimental and will change in future releases.
+ */
 export class ContextProviderPlugin
   implements
     Plugin<

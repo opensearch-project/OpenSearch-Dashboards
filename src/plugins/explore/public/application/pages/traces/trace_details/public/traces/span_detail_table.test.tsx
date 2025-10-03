@@ -476,6 +476,12 @@ describe('SpanCell', () => {
     fireEvent.click(screen.getByText('test-span'));
     expect(openFlyoutMock).not.toHaveBeenCalled();
   });
+
+  it('handles undefined item', () => {
+    render(<SpanCell {...defaultProps} items={[]} />);
+
+    expect(screen.getByText('-')).toBeInTheDocument();
+  });
 });
 
 describe('HierarchyServiceSpanCell', () => {
@@ -533,6 +539,12 @@ describe('HierarchyServiceSpanCell', () => {
 
     fireEvent.click(screen.getByText('hierarchy-service'));
     expect(openFlyoutMock).not.toHaveBeenCalled();
+  });
+
+  it('handles undefined item', () => {
+    render(<HierarchyServiceSpanCell {...defaultProps} items={[]} />);
+
+    expect(screen.getByText('-')).toBeInTheDocument();
   });
 });
 

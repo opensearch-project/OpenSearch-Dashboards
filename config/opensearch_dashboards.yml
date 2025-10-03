@@ -46,6 +46,9 @@
 # Set the value to true to disable the welcome screen
 #home.disableWelcomeScreen: false
 
+# Set the value to true to disable the experience selection modal
+#home.disableExperienceModal: false
+
 # Setting for an optimized healthcheck that only uses the local OpenSearch node to do Dashboards healthcheck.
 # This settings should be used for large clusters or for clusters with ingest heavy nodes.
 # It allows Dashboards to only healthcheck using the local OpenSearch node rather than fan out requests across all nodes.

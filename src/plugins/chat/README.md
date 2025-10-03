@@ -1,4 +1,6 @@
-# Chat Plugin
+# Chat Plugin (experimental)
+
+**⚠️ This plugin is experimental and will change in future releases.**
 
 A OpenSearch Dashboards plugin for AI-powered chat interactions using AG-UI (Agent UI) framework.
 

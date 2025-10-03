@@ -3,42 +3,42 @@ name: Run cypress tests
 # trigger on every PR for all branches
 on:
   pull_request:
-    branches: ['**']
+    branches: ["**"]
     paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.lycheeignore'
-      - 'CODEOWNERS'
-      - 'changelogs/fragments/**'
+      - "**/*.md"
+      - "docs/**"
+      - ".lycheeignore"
+      - "CODEOWNERS"
+      - "changelogs/fragments/**"
   workflow_dispatch:
     inputs:
       test_repo:
-        description: 'Cypress test repo'
-        default: 'opensearch-project/opensearch-dashboards-functional-test'
+        description: "Cypress test repo"
+        default: "opensearch-project/opensearch-dashboards-functional-test"
         required: true
         type: string
       test_branch:
-        description: 'Cypress test branch (default: source branch)'
+        description: "Cypress test branch (default: source branch)"
         required: false
         type: string
       specs:
-        description: 'Tests to run (default: osd:ciGroup)'
+        description: "Tests to run (default: osd:ciGroup)"
         required: false
         type: string
       pr_number:
-        description: 'PR Number (optional)'
+        description: "PR Number (optional)"
         required: false
         type: number
 
 env:
   TEST_REPO: ${{ inputs.test_repo != '' && inputs.test_repo || 'opensearch-project/opensearch-dashboards-functional-test' }}
   TEST_BRANCH: "${{ inputs.test_branch != '' && inputs.test_branch || github.base_ref }}"
-  FTR_PATH: 'ftr'
-  CYPRESS_BROWSER: 'chromium'
+  FTR_PATH: "ftr"
+  CYPRESS_BROWSER: "chromium"
   CYPRESS_VISBUILDER_ENABLED: true
   CYPRESS_DATASOURCE_MANAGEMENT_ENABLED: false
-  CYPRESS_MEMORY_LIMIT: '12288'
-  CYPRESS_CACHE_FOLDER: '${{ github.workspace }}/.cypress-cache'
+  CYPRESS_MEMORY_LIMIT: "12288"
+  CYPRESS_CACHE_FOLDER: "${{ github.workspace }}/.cypress-cache"
   # Optimize Chrome
   CYPRESS_CHROME_ARGS: >-
     --disable-dev-shm-usage
@@ -48,11 +48,11 @@ env:
     --js-flags="--max-old-space-size=12288"
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
   OSD_OPTIMIZER_MAX_WORKERS: 12
-  NODE_OPTIONS: '--max-old-space-size=12288 --max-semi-space-size=128 --dns-result-order=ipv4first'
-  COMMENT_TAG: '[MANUAL CYPRESS TEST RUN RESULTS]'
-  COMMENT_SUCCESS_MSG: ':white_check_mark: Cypress test run succeeded!'
-  COMMENT_FAILURE_MSG: ':x: Cypress test run failed!'
-  LATEST_VERSION: '2.17.0'
+  NODE_OPTIONS: "--max-old-space-size=12288 --max-semi-space-size=128 --dns-result-order=ipv4first"
+  COMMENT_TAG: "[MANUAL CYPRESS TEST RUN RESULTS]"
+  COMMENT_SUCCESS_MSG: ":white_check_mark: Cypress test run succeeded!"
+  COMMENT_FAILURE_MSG: ":x: Cypress test run failed!"
+  LATEST_VERSION: "2.17.0"
 
 jobs:
   cypress-tests:
@@ -143,15 +143,15 @@ jobs:
             test_location: source
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
-      options: '--user 1001 --shm-size=4g'
+      options: "--user 1001 --shm-size=4g"
     env:
       START_CMD: ${{ matrix.config == 'query_enhanced' &&
-        'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true' ||
+        'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --home.disableExperienceModal=true' ||
         matrix.config == 'explore' &&
-        'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true --explore.discoverTraces.enabled=true' ||
+        'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true --data.savedQueriesNewUI.enabled=true --explore.enabled=true --explore.discoverTraces.enabled=true --home.disableExperienceModal=true' ||
         matrix.config == 'dashboard' &&
-        'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true' ||
-        'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false' }}
+        'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --home.disableExperienceModal=true' ||
+        'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false --home.disableExperienceModal=true' }}
       OPENSEARCH_SNAPSHOT_CMD:
         ${{ (matrix.config == 'query_enhanced' || matrix.config == 'explore') &&
         '/bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"' ||
@@ -188,32 +188,32 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ env.SOURCE_REPO }}
-          ref: '${{ env.SOURCE_BRANCH }}'
+          ref: "${{ env.SOURCE_BRANCH }}"
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
+          node-version-file: ".nvmrc"
+          registry-url: "https://registry.npmjs.org"
 
       - name: Setup Yarn
         run: |
-            npm uninstall -g yarn
-            npm i -g yarn@^1.22.10
-            yarn config set network-timeout 1000000 -g
+          npm uninstall -g yarn
+          npm i -g yarn@^1.22.10
+          yarn config set network-timeout 1000000 -g
 
       - name: Run bootstrap
         run: yarn osd bootstrap
 
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
-    
+
       - name: Checkout FT repo
         uses: actions/checkout@v4
         with:
           path: ${{ env.FTR_PATH }}
           repository: ${{ env.TEST_REPO }}
-          ref: '${{ env.TEST_BRANCH }}'
+          ref: "${{ env.TEST_BRANCH }}"
           clean: true
 
       - name: Setup spec files by input
@@ -267,7 +267,7 @@ jobs:
         with:
           working-directory: ${{ env.FTR_PATH }}
           start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
-          wait-on: 'http://localhost:9200, http://localhost:5601'
+          wait-on: "http://localhost:9200, http://localhost:5601"
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
 
       - name: Download OpenSearch
@@ -308,7 +308,7 @@ jobs:
         with:
           install-command: npx cypress install --force
           start: ${{ env.START_CMD }}
-          wait-on: 'http://localhost:9200, http://localhost:5601'
+          wait-on: "http://localhost:9200, http://localhost:5601"
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
 
       - name: Run OSD Cypress tests without query enhancements
@@ -317,7 +317,7 @@ jobs:
         with:
           install-command: npx cypress install --force
           start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
-          wait-on: 'http://localhost:9200, http://localhost:5601'
+          wait-on: "http://localhost:9200, http://localhost:5601"
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
 
       - name: Compress FT repo artifacts
@@ -373,8 +373,8 @@ jobs:
         id: fc
         with:
           issue-number: ${{ inputs.pr_number }}
-          comment-author: 'github-actions[bot]'
-          body-includes: '${{ env.COMMENT_TAG }}'
+          comment-author: "github-actions[bot]"
+          body-includes: "${{ env.COMMENT_TAG }}"
 
       - name: Add comment on the PR
         uses: peter-evans/create-or-update-comment@v3

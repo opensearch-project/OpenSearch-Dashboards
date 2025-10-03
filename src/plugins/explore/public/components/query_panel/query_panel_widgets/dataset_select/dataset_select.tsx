@@ -18,12 +18,14 @@ import { setQueryWithHistory } from '../../../../application/utils/state_managem
 import { selectQuery } from '../../../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import { ExploreFlavor } from '../../../../../common';
+import { useClearEditors } from '../../../../application/hooks';
 
 export const DatasetSelectWidget = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const flavorId = useFlavorId();
   const dispatch = useDispatch();
   const currentQuery = useSelector(selectQuery);
+  const clearEditors = useClearEditors();
 
   const {
     data: {
@@ -92,13 +94,14 @@ export const DatasetSelectWidget = () => {
             ...queryString.getQuery(),
           })
         );
+        clearEditors();
       } catch (error) {
         services.notifications?.toasts.addError(error, {
           title: 'Error selecting dataset',
         });
       }
     },
-    [queryString, dispatch, services]
+    [queryString, dispatch, clearEditors, services.notifications?.toasts]
   );
 
   const supportedTypes = useMemo(() => {

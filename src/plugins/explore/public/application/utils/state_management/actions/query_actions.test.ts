@@ -16,7 +16,6 @@ import {
 import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
 import { Query, DataView } from 'src/plugins/data/common';
-import { DataPublicPluginStart } from '../../../../../../data/public';
 import { ExploreServices } from '../../../../types';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 
@@ -439,7 +438,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(mockGetFieldValueCounts).toHaveBeenCalledWith({
         hits: rawResults.hits.hits,
         field: mockField,
-        indexPattern: mockDatasetWithFields,
+        dataSet: mockDatasetWithFields,
         count: 5,
         grouped: false,
       });
