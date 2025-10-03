@@ -134,6 +134,7 @@
     "**/es5-ext": "^0.10.63",
     "**/fetch-mock/path-to-regexp": "^3.3.0",
     "**/follow-redirects": "^1.15.4",
+    "**/form-data": "^4.0.4",
     "**/glob-parent": "^6.0.0",
     "**/hoist-non-react-statics": "^3.3.2",
     "**/jest-config": "npm:@amoo-miki/jest-config@27.5.1",
