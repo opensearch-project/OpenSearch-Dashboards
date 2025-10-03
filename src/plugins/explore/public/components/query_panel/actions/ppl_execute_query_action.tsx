@@ -17,14 +17,15 @@ interface PPLExecuteQueryArgs {
   description?: string;
 }
 
+const NOOP_ASSISTANT_ACTION_HOOK = (_action: any) => {};
+
 export function usePPLExecuteQueryAction(
   setEditorTextWithQuery: ReturnType<typeof useSetEditorTextWithQuery>
 ) {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
-
   const useAssistantAction =
-    services.contextProvider?.hooks?.useAssistantAction || ((_action: any) => {});
+    services.contextProvider?.hooks?.useAssistantAction || NOOP_ASSISTANT_ACTION_HOOK;
 
   useAssistantAction<PPLExecuteQueryArgs>({
     name: 'execute_ppl_query',
