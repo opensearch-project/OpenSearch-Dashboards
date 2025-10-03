@@ -113,10 +113,14 @@ const traceTestSuite = () => {
           cy.log(`Captured trace URL: ${traceUrl}`);
           cy.visit(traceUrl);
         });
-      // verify that we are on the Trace Details page
-      cy.getElementByTestId('headerApplicationTitle').contains(
-        'Trace: 68b0ad76fc05c5a5f5e3738d42b8a735'
-      );
+
+      // Wait for page to load
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+      // verify that we are on the Trace Details page by checking the trace ID badge
+      cy.get('.euiBadge')
+        .contains('Trace ID: 68b0ad76fc05c5a5f5e3738d42b8a735')
+        .should('be.visible');
     });
   });
 
@@ -128,11 +132,14 @@ const traceTestSuite = () => {
 
     describe('Page Load and Structure', () => {
       it('should load trace details page with correct structure', () => {
-        // Verify page loads with trace ID in title
+        // Wait for page to load
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+        // Verify page loads with trace ID in badge
         cy.url().should('include', 'traceDetails');
-        cy.getElementByTestId('headerApplicationTitle').contains(
-          'Trace: 68b0ad76fc05c5a5f5e3738d42b8a735'
-        );
+        cy.get('.euiBadge')
+          .contains('Trace ID: 68b0ad76fc05c5a5f5e3738d42b8a735')
+          .should('be.visible');
 
         // Verify Timeline tab is active by default
         cy.get('button[role="tab"][aria-selected="true"]').should('contain', 'Timeline');
@@ -149,10 +156,13 @@ const traceTestSuite = () => {
       });
 
       it('should display correct trace information in breadcrumb', () => {
-        // verify that we are on the Trace Details page
-        cy.getElementByTestId('headerApplicationTitle').contains(
-          'Trace: 68b0ad76fc05c5a5f5e3738d42b8a735'
-        );
+        // Wait for page to load
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+        // verify that we are on the Trace Details page by checking the trace ID badge
+        cy.get('.euiBadge')
+          .contains('Trace ID: 68b0ad76fc05c5a5f5e3738d42b8a735')
+          .should('be.visible');
       });
     });
 
