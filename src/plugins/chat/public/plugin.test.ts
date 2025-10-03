@@ -26,7 +26,7 @@ describe('ChatPlugin', () => {
     // Mock initializer context
     mockInitializerContext = {
       config: {
-        get: jest.fn().mockReturnValue({ agUiUrl: 'http://test-ag-ui:3000' }),
+        get: jest.fn().mockReturnValue({ enabled: true, agUiUrl: 'http://test-ag-ui:3000' }),
       },
     };
 
@@ -91,11 +91,38 @@ describe('ChatPlugin', () => {
     });
 
     it('should handle missing AG-UI URL configuration', () => {
-      mockInitializerContext.config.get = jest.fn().mockReturnValue({});
+      mockInitializerContext.config.get = jest.fn().mockReturnValue({ enabled: true });
 
-      plugin.start(mockCoreStart, mockDeps);
+      const startContract = plugin.start(mockCoreStart, mockDeps);
 
-      expect(ChatService).toHaveBeenCalledWith(undefined);
+      expect(ChatService).not.toHaveBeenCalled();
+      expect(startContract.chatService).toBeUndefined();
+      expect(mockCoreStart.chrome.navControls.registerRight).not.toHaveBeenCalled();
+    });
+
+    it('should not initialize when plugin is disabled', () => {
+      mockInitializerContext.config.get = jest.fn().mockReturnValue({
+        enabled: false,
+        agUiUrl: 'http://test-ag-ui:3000',
+      });
+
+      const startContract = plugin.start(mockCoreStart, mockDeps);
+
+      expect(ChatService).not.toHaveBeenCalled();
+      expect(startContract.chatService).toBeUndefined();
+      expect(mockCoreStart.chrome.navControls.registerRight).not.toHaveBeenCalled();
+    });
+
+    it('should not initialize when enabled is missing (defaults to false)', () => {
+      mockInitializerContext.config.get = jest.fn().mockReturnValue({
+        agUiUrl: 'http://test-ag-ui:3000',
+      });
+
+      const startContract = plugin.start(mockCoreStart, mockDeps);
+
+      expect(ChatService).not.toHaveBeenCalled();
+      expect(startContract.chatService).toBeUndefined();
+      expect(mockCoreStart.chrome.navControls.registerRight).not.toHaveBeenCalled();
     });
   });
 
@@ -232,9 +259,11 @@ describe('ChatPlugin', () => {
   describe('configuration handling', () => {
     it('should handle different configuration formats', () => {
       const configs = [
-        { agUiUrl: 'http://localhost:3000' },
-        { agUiUrl: 'https://remote-server:8080' },
-        {},
+        { enabled: true, agUiUrl: 'http://localhost:3000' },
+        { enabled: true, agUiUrl: 'https://remote-server:8080' },
+        { enabled: false, agUiUrl: 'http://localhost:3000' },
+        { enabled: true }, // Missing agUiUrl
+        {}, // Missing both enabled and agUiUrl
       ];
 
       configs.forEach((config) => {
@@ -242,6 +271,11 @@ describe('ChatPlugin', () => {
         const testPlugin = new ChatPlugin(mockInitializerContext);
 
         expect(() => testPlugin.start(mockCoreStart, mockDeps)).not.toThrow();
+
+        // Only first two configs should initialize the service
+        if (config.enabled && config.agUiUrl) {
+          expect(ChatService).toHaveBeenCalledWith(config.agUiUrl);
+        }
       });
     });
   });

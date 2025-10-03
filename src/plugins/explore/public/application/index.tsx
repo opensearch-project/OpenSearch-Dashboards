@@ -18,7 +18,6 @@ import { TracesPage } from './pages/traces';
 import { MetricsPage } from './pages/metrics';
 import { EditorContextProvider } from './context';
 import { TraceDetails } from './pages/traces/trace_details/trace_view';
-import { usePageContext } from '../../../context_provider/public';
 
 // Route component props interface
 interface ExploreRouteProps {
@@ -32,10 +31,13 @@ type ExploreComponentProps = ExploreRouteProps &
 // Component that handles page context for all Explore flavors
 const ExplorePageContextProvider: React.FC<{
   children: React.ReactNode;
-}> = ({ children }) => {
+  services: ExploreServices;
+}> = ({ children, services }) => {
+  const usePageContext = services.contextProvider?.hooks?.usePageContext || (() => {});
+
   usePageContext({
     description: 'Explore application page context',
-    convert: (urlState) => ({
+    convert: (urlState: any) => ({
       appId: 'explore',
       timeRange: urlState._g?.time,
       query: {
@@ -90,7 +92,7 @@ export const renderApp = (
           <EditorContextProvider>
             <DatasetProvider>
               <services.core.i18n.Context>
-                <ExplorePageContextProvider>
+                <ExplorePageContextProvider services={services}>
                   <Switch>
                     {/* View route for saved searches */}
                     {/* TODO: Do we need this? We might not need to, please revisit */}

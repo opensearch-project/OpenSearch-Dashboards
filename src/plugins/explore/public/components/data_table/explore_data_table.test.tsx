@@ -70,7 +70,7 @@ jest.mock('../../application/legacy/discover/opensearch_dashboards_services', ()
 }));
 
 jest.mock('./data_table', () => ({
-  DataTable: ({ rows }: { rows: any[] }) => (
+  DataTable: ({ rows, services }: { rows: any[]; services?: any }) => (
     <div data-test-subj="data-table">Data Table with {rows.length} rows</div>
   ),
 }));
