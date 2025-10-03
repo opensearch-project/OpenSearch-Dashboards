@@ -235,11 +235,6 @@ export const useSearch = (services: DiscoverViewServices) => {
     ).pipe(debounceTime(100));
 
     const subscription = fetch$.subscribe(() => {
-      if (skipInitialFetch.current) {
-        skipInitialFetch.current = false; // Reset so future fetches will proceed normally
-        return; // Skip the first fetch
-      }
-
       (async () => {
         try {
           await fetch();
