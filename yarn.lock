@@ -10405,13 +10405,14 @@ ci-info@^4.0.0:
   resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-4.2.0.tgz#cbd21386152ebfe1d56f280a3b5feccbd96764c7"
   integrity sha512-cYY9mypksY8NRqgDB1XD1RiJL338v/551niynFTGkZOO2LHuB2OmOYxDIe/ttN9AHwrqdum1360G3ald0W9kCg==
 
-cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/cipher-base/-/cipher-base-1.0.4.tgz#8760e4ecc272f4c363532f926d874aae2c1397de"
-  integrity sha512-Kkht5ye6ZGmwv40uUDZztayT2ThLQGfnj/T71N/XzeZeo3nf8foyW7zGTsPYkEya3m5f3cAypH+qe7YOrM1U2Q==
+cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3, cipher-base@^1.0.5:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/cipher-base/-/cipher-base-1.0.7.tgz#bd094bfef42634ccfd9e13b9fc73274997111e39"
+  integrity sha512-Mz9QMT5fJe7bKI7MH31UilT5cEK5EHHRCccw/YRFsRY47AuNgaV6HY3rscp0/I4Q+tTW/5zoqpSeRRI54TkDWA==
   dependencies:
-    inherits "^2.0.1"
-    safe-buffer "^5.0.1"
+    inherits "^2.0.4"
+    safe-buffer "^5.2.1"
+    to-buffer "^1.2.2"
 
 cjs-module-lexer@^1.0.0:
   version "1.2.2"
@@ -19083,40 +19084,12 @@ minimalistic-crypto-utils@^1.0.1:
   resolved "https://registry.yarnpkg.com/minimalistic-crypto-utils/-/minimalistic-crypto-utils-1.0.1.tgz#f6c00c1c0b082246e5c4d99dfb8c7c083b2b582a"
   integrity sha1-9sAMHAsIIkblxNmd+4x8CDsrWCo=
 
-"minimatch@2 || 3", minimatch@^3.0.2, minimatch@^3.0.4, minimatch@^3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.1.2.tgz#19cd194bfd3e428f049a70817c038d89ab4be35b"
-  integrity sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==
-  dependencies:
-    brace-expansion "^1.1.7"
-
-minimatch@^5.0.1, minimatch@^5.1.6:
+"minimatch@2 || 3", minimatch@^3.0.2, minimatch@^3.0.4, minimatch@^3.1.2, minimatch@^5.0.1, minimatch@^5.1.6, minimatch@^8.0.2, minimatch@^9.0.4, minimatch@~3.0.4:
   version "5.1.6"
   resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-5.1.6.tgz#1cfcb8cf5522ea69952cd2af95ae09477f122a96"
   integrity sha512-lKwV/1brpG6mBUFHtb7NUmtABCb2WZZmm2wNiOA5hAb8VdCS4B3dtMWyvcoViccwAW/COERjXLt0zP1zXUN26g==
   dependencies:
     brace-expansion "^2.0.1"
-
-minimatch@^8.0.2:
-  version "8.0.4"
-  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-8.0.4.tgz#847c1b25c014d4e9a7f68aaf63dedd668a626229"
-  integrity sha512-W0Wvr9HyFXZRGIDgCicunpQ299OKXs9RgZfaukz4qAW/pJhcpUfupc9c+OObPOFueNy8VSrZgEmDtk6Kh4WzDA==
-  dependencies:
-    brace-expansion "^2.0.1"
-
-minimatch@^9.0.4:
-  version "9.0.4"
-  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-9.0.4.tgz#8e49c731d1749cbec05050ee5145147b32496a51"
-  integrity sha512-KqWh+VchfxcMNRAJjj2tnsSJdNbHsVgnkBhTNrW7AjVo6OvLtxw8zfT9oLw1JSohlFzJ8jCoTgaoXvJ+kHt6fw==
-  dependencies:
-    brace-expansion "^2.0.1"
-
-minimatch@~3.0.4:
-  version "3.0.8"
-  resolved "https://registry.yarnpkg.com/minimatch/-/minimatch-3.0.8.tgz#5e6a59bd11e2ab0de1cfb843eb2d82e546c321c1"
-  integrity sha512-6FsRAQsxQ61mw+qP1ZzbL9Bc78x2p5OqNgNpnoAFLTrX8n5Kxph0CsnhmKKNXTWjXqU5L0pGPR7hYk+XWZr60Q==
-  dependencies:
-    brace-expansion "^1.1.7"
 
 minimist-options@4.1.0, minimist-options@^4.0.2:
   version "4.1.0"
@@ -23169,15 +23142,7 @@ setprototypeof@1.2.0:
   resolved "https://registry.yarnpkg.com/setprototypeof/-/setprototypeof-1.2.0.tgz#66c9a24a73f9fc28cbe66b09fed3d33dcaf1b424"
   integrity sha512-E5LDX7Wrp85Kil5bhZv46j8jOeboKq5JMmYM3gVGdGH8xFpPWXUMsNrlODCrkoxMEeNi/XZIwuRvY4XNwYMJpw==
 
-sha.js@^2.4.0, sha.js@^2.4.8:
-  version "2.4.11"
-  resolved "https://registry.yarnpkg.com/sha.js/-/sha.js-2.4.11.tgz#37a5cf0b81ecbc6943de109ba2960d1b26584ae7"
-  integrity sha512-QMEp5B7cftE7APOjk5Y6xgrbWu+WkLVQwk8JNjZ8nKRciZaByEW6MubieAiToS7+dwvrjGhH8jRXz3MVd0AYqQ==
-  dependencies:
-    inherits "^2.0.1"
-    safe-buffer "^5.0.1"
-
-sha.js@^2.4.11:
+sha.js@^2.4.0, sha.js@^2.4.11, sha.js@^2.4.12, sha.js@^2.4.8:
   version "2.4.12"
   resolved "https://registry.yarnpkg.com/sha.js/-/sha.js-2.4.12.tgz#eb8b568bf383dfd1867a32c3f2b74eb52bdbf23f"
   integrity sha512-8LzC5+bvI45BjpfXU8V5fdU2mfeKiQe1D1gIMn7XUlF3OTUrpdJpPPH4EMAnF0DsHHdSZqCdSss5qCmJKuiO3w==
@@ -24855,6 +24820,15 @@ to-buffer@^1.2.0:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/to-buffer/-/to-buffer-1.2.1.tgz#2ce650cdb262e9112a18e65dc29dcb513c8155e0"
   integrity sha512-tB82LpAIWjhLYbqjx3X4zEeHN6M8CiuOEy2JY8SEQVdYRe3CCHOFaqrBW1doLDrfpWhplcW7BL+bO3/6S3pcDQ==
+  dependencies:
+    isarray "^2.0.5"
+    safe-buffer "^5.2.1"
+    typed-array-buffer "^1.0.3"
+
+to-buffer@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/to-buffer/-/to-buffer-1.2.2.tgz#ffe59ef7522ada0a2d1cb5dfe03bb8abc3cdc133"
+  integrity sha512-db0E3UJjcFhpDhAF4tLo03oli3pwl3dbnzXOUIlRKrp+ldk/VUxzpWYZENsw2SZiuBjHAk7DfB0VU7NKdpb6sw==
   dependencies:
     isarray "^2.0.5"
     safe-buffer "^5.2.1"

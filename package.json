@@ -149,6 +149,7 @@
     "**/load-bmfont/phin": "^3.7.1",
     "**/loader-utils": "^2.0.4",
     "**/minimist": "^1.2.6",
+    "**/minimatch": "^5.1.6",
     "**/nanoid": "^3.3.8",
     "**/node-jose": "^2.2.0",
     "**/nth-check": "^2.0.1",
@@ -166,7 +167,9 @@
     "**/json5": "^2.2.3",
     "**/mime": "^3.0.0",
     "**/performance-now": "^2.1.0",
-    "**/prismjs": "^1.30.0"
+    "**/prismjs": "^1.30.0",
+    "**/sha.js": "^2.4.12",
+    "**/cipher-base": "^1.0.5"
   },
   "workspaces": {
     "packages": [
