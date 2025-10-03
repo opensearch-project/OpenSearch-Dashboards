@@ -1,0 +1,2 @@
+feat:
+- Chat(feat): implement plugin configuration controls for chat and context_provider plugins ([#10639](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10639))
