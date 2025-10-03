@@ -14,6 +14,9 @@ import { nanoToMilliSec, round } from '../utils/helper_functions';
 import { extractSpanDuration } from '../utils/span_data_utils';
 import { TRACE_ANALYTICS_DATE_FORMAT } from '../utils/shared_const';
 import { resolveServiceNameFromSpan, isSpanError } from './ppl_resolve_helpers';
+import { TimelineWaterfallBar } from './timeline_waterfall_bar/timeline_waterfall_bar';
+import { TimelineHeader } from './timeline_waterfall_bar/timeline_header';
+import { calculateTraceTimeRange, TraceTimeRange } from '../utils/span_timerange_utils';
 
 export interface ParsedHit extends Span {
   sort?: any[];
@@ -49,9 +52,10 @@ interface SpanDetailTableProps {
     value: any;
   }>;
   selectedSpanId?: string;
+  colorMap?: Record<string, string>;
 }
 
-interface Span {
+export interface Span {
   spanId: string;
   parentSpanId?: string;
   children: Span[];
@@ -66,70 +70,87 @@ export interface SpanSearchParams {
   }>;
 }
 
-const getColumns = (): EuiDataGridColumn[] => [
-  {
-    id: 'serviceName',
-    display: i18n.translate('explore.spanDetailTable.column.service', {
-      defaultMessage: 'Service',
-    }),
-  },
-  {
-    id: 'name',
-    display: i18n.translate('explore.spanDetailTable.column.operation', {
-      defaultMessage: 'Operation',
-    }),
-  },
-  {
-    id: 'spanId',
-    display: i18n.translate('explore.spanDetailTable.column.spanId', {
-      defaultMessage: 'Span Id',
-    }),
-  },
-  {
-    id: 'parentSpanId',
-    display: i18n.translate('explore.spanDetailTable.column.parentSpanId', {
-      defaultMessage: 'Parent span Id',
-    }),
-  },
-  {
-    id: 'traceId',
-    display: i18n.translate('explore.spanDetailTable.column.traceId', {
-      defaultMessage: 'Trace Id',
-    }),
-  },
-  {
-    id: 'traceGroup',
-    display: i18n.translate('explore.spanDetailTable.column.traceGroup', {
-      defaultMessage: 'Trace group',
-    }),
-  },
-  {
-    id: 'durationInNanos',
-    display: i18n.translate('explore.spanDetailTable.column.duration', {
-      defaultMessage: 'Duration',
-    }),
-    initialWidth: 100,
-  },
-  {
-    id: 'status.code',
-    display: i18n.translate('explore.spanDetailTable.column.errors', {
-      defaultMessage: 'Errors',
-    }),
-    initialWidth: 100,
-  },
-  {
-    id: 'startTime',
-    display: i18n.translate('explore.spanDetailTable.column.startTime', {
-      defaultMessage: 'Start time',
-    }),
-  },
-  {
-    id: 'endTime',
-    display: i18n.translate('explore.spanDetailTable.column.endTime', {
-      defaultMessage: 'End time',
-    }),
-  },
-];
+const getColumns = (traceTimeRange?: TraceTimeRange): EuiDataGridColumn[] => {
+  const baseColumns: EuiDataGridColumn[] = [
+    {
+      id: 'serviceName',
+      display: i18n.translate('explore.spanDetailTable.column.service', {
+        defaultMessage: 'Service',
+      }),
+    },
+    {
+      id: 'name',
+      display: i18n.translate('explore.spanDetailTable.column.operation', {
+        defaultMessage: 'Operation',
+      }),
+    },
+    {
+      id: 'spanId',
+      display: i18n.translate('explore.spanDetailTable.column.spanId', {
+        defaultMessage: 'Span Id',
+      }),
+    },
+    {
+      id: 'parentSpanId',
+      display: i18n.translate('explore.spanDetailTable.column.parentSpanId', {
+        defaultMessage: 'Parent span Id',
+      }),
+    },
+    {
+      id: 'traceId',
+      display: i18n.translate('explore.spanDetailTable.column.traceId', {
+        defaultMessage: 'Trace Id',
+      }),
+    },
+    {
+      id: 'traceGroup',
+      display: i18n.translate('explore.spanDetailTable.column.traceGroup', {
+        defaultMessage: 'Trace group',
+      }),
+    },
+    {
+      id: 'status.code',
+      display: i18n.translate('explore.spanDetailTable.column.errors', {
+        defaultMessage: 'Errors',
+      }),
+      initialWidth: 80,
+    },
+  ];
+
+  if (traceTimeRange) {
+    baseColumns.push({
+      id: 'timeline',
+      display: <TimelineHeader traceTimeRange={traceTimeRange} />,
+      initialWidth: 320,
+      isExpandable: false,
+      isResizable: true,
+    });
+  }
+
+  baseColumns.push(
+    {
+      id: 'durationInNanos',
+      display: i18n.translate('explore.spanDetailTable.column.duration', {
+        defaultMessage: 'Duration',
+      }),
+      initialWidth: 100,
+    },
+    {
+      id: 'startTime',
+      display: i18n.translate('explore.spanDetailTable.column.startTime', {
+        defaultMessage: 'Start time',
+      }),
+    },
+    {
+      id: 'endTime',
+      display: i18n.translate('explore.spanDetailTable.column.endTime', {
+        defaultMessage: 'End time',
+      }),
+    }
+  );
+
+  return baseColumns;
+};
 
 export const HierarchyServiceSpanCell = ({
   rowIndex,
@@ -210,6 +231,8 @@ export const SpanCell = ({
   disableInteractions,
   props,
   setCellProps,
+  traceTimeRange,
+  colorMap,
 }: {
   rowIndex: number;
   columnId: string;
@@ -218,6 +241,8 @@ export const SpanCell = ({
   disableInteractions: boolean;
   props: SpanDetailTableProps;
   setCellProps?: (props: any) => void;
+  traceTimeRange?: TraceTimeRange;
+  colorMap?: Record<string, string>;
 }) => {
   const adjustedRowIndex = rowIndex - tableParams.page * tableParams.size;
   const item = items[adjustedRowIndex];
@@ -235,7 +260,7 @@ export const SpanCell = ({
     }
   }, [props.selectedSpanId, item?.spanId, disableInteractions]);
 
-  const cellContent = renderSpanCellValue({ item, columnId });
+  const cellContent = renderSpanCellValue({ item, columnId }, traceTimeRange, colorMap);
 
   return disableInteractions || !item ? (
     cellContent
@@ -249,7 +274,11 @@ export const SpanCell = ({
   );
 };
 
-const renderSpanCellValue = ({ columnId, item }: { item: Span; columnId: string }) => {
+const renderSpanCellValue = (
+  { columnId, item }: { item: Span; columnId: string },
+  traceTimeRange?: TraceTimeRange,
+  colorMap?: Record<string, string>
+) => {
   if (!item) return '-';
 
   const value = item[columnId];
@@ -268,6 +297,10 @@ const renderSpanCellValue = ({ columnId, item }: { item: Span; columnId: string 
       );
     case 'spanId':
       return <span>{value}</span>;
+    case 'timeline':
+      return traceTimeRange ? (
+        <TimelineWaterfallBar span={item} traceTimeRange={traceTimeRange} colorMap={colorMap} />
+      ) : null;
     case 'durationInNanos':
       return `${round(nanoToMilliSec(Math.max(0, extractSpanDuration(item))), 2)} ms`;
     case 'startTime':
@@ -305,7 +338,6 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
     }
     try {
       const hitsArray = parseHits(props.payloadData);
-
       let spans = hitsArray;
 
       // Apply filters passed as a prop.
@@ -363,7 +395,7 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
     setTableParams((prev) => ({ ...prev, size, page: 0 }));
   };
 
-  const columns = useMemo(() => getColumns(), []);
+  const columns = useMemo(() => getColumns(), []); // No timeline for span list
   const renderCellValue = useCallback(
     ({ rowIndex, columnId, disableInteractions, setCellProps }) => (
       <SpanCell
@@ -406,16 +438,20 @@ export function SpanDetailTable(props: SpanDetailTableProps) {
 }
 
 export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
-  const { hiddenColumns, availableWidth, openFlyout } = props;
+  const { hiddenColumns, availableWidth, openFlyout, colorMap } = props;
   const [items, setItems] = useState<Span[]>([]);
+  const [allSpans, setAllSpans] = useState<Span[]>([]);
   const [_total, setTotal] = useState(0);
   const [expandedRows, setExpandedRows] = useState(new Set<string>());
   const [isSpansTableDataLoading, setIsSpansTableDataLoading] = useState(false);
+
+  const traceTimeRange = useMemo(() => calculateTraceTimeRange(allSpans), [allSpans]);
 
   useEffect(() => {
     if (!props.payloadData) return;
     try {
       const hitsArray = parseHits(props.payloadData);
+      setAllSpans(hitsArray);
 
       // Use hits directly since they're already flattened
       let spans = hitsArray;
@@ -495,7 +531,7 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
 
   const flattenedItems = useMemo(() => flattenHierarchy(items), [items, expandedRows]);
 
-  const columns = useMemo(() => getColumns(), []);
+  const columns = useMemo(() => getColumns(traceTimeRange), [traceTimeRange]); // Include timeline for hierarchy
   const visibleColumns = useMemo(
     () => columns.filter(({ id }) => !hiddenColumns.includes(id)).map(({ id }) => id),
     [columns, hiddenColumns]
@@ -537,10 +573,12 @@ export function SpanDetailTableHierarchy(props: SpanDetailTableProps) {
           disableInteractions={disableInteractions}
           props={props}
           setCellProps={setCellProps}
+          traceTimeRange={traceTimeRange}
+          colorMap={colorMap}
         />
       );
     },
-    [flattenedItems, expandedRows, openFlyout]
+    [flattenedItems, expandedRows, openFlyout, traceTimeRange, colorMap]
   );
 
   const toolbarButtons = [
