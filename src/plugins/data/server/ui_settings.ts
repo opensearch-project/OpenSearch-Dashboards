@@ -513,6 +513,17 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.string(),
     },
+    [UI_SETTINGS.DATA_WITH_LONG_NUMERALS]: {
+      name: i18n.translate('data.advancedSettings.data.withLongNumeralsTitle', {
+        defaultMessage: 'Extend Numeric Precision',
+      }),
+      value: true,
+      description: i18n.translate('data.advancedSettings.data.withLongNumeralsText', {
+        defaultMessage:
+          "Turn on for precise handling of extremely large numbers. Turn off to optimize performance when high precision for large values isn't required.",
+      }),
+      schema: schema.boolean(),
+    },
     [UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS]: {
       name: i18n.translate('data.advancedSettings.timepicker.refreshIntervalDefaultsTitle', {
         defaultMessage: 'Time filter refresh interval',

@@ -699,6 +699,10 @@ export class IndexPatternsService {
     indexPatternCache.clear(indexPatternId);
     return this.savedObjectsClient.delete('index-pattern', indexPatternId);
   }
+
+  isLongNumeralsSupported() {
+    return this.config.get(UI_SETTINGS.DATA_WITH_LONG_NUMERALS);
+  }
 }
 
 export type IndexPatternsContract = PublicMethodsOf<IndexPatternsService>;
