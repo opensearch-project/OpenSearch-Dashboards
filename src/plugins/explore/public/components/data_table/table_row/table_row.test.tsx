@@ -7,6 +7,22 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TableRow, TableRowProps } from './table_row';
 
+// Create a mock function that we can track
+const mockUseDynamicContextFn = jest.fn().mockReturnValue('test-context-id');
+
+// Mock the OpenSearch Dashboards React hook
+jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
+  useOpenSearchDashboards: jest.fn(() => ({
+    services: {
+      contextProvider: {
+        hooks: {
+          useDynamicContext: mockUseDynamicContextFn,
+        },
+      },
+    },
+  })),
+}));
+
 // Mock the child components
 jest.mock('../table_cell/source_field_table_cell', () => ({
   SourceFieldTableCell: ({ isShortDots }: { isShortDots: boolean }) => (
@@ -32,8 +48,58 @@ jest.mock('./expanded_table_row/expanded_table_row', () => ({
   ),
 }));
 
+jest.mock('./table_row_content', () => ({
+  TableRowContent: ({
+    columns,
+    dataset,
+    row,
+    isExpanded,
+    onToggleExpand,
+    isShortDots,
+  }: {
+    columns: string[];
+    dataset: any;
+    row: any;
+    isExpanded: boolean;
+    onToggleExpand: () => void;
+    isShortDots: boolean;
+  }) => {
+    const renderCell = (column: string) => {
+      if (column === '_source') {
+        return (
+          <td key={column}>
+            <div data-test-subj="table-source-cell">
+              Source Cell - Short dots: {isShortDots.toString()}
+            </div>
+          </td>
+        );
+      }
+
+      const formattedValue = dataset.formatField(row, column);
+      const cellValue = formattedValue !== undefined ? formattedValue : '-';
+
+      return (
+        <td key={column} data-test-subj={`table-cell-${column}`}>
+          {cellValue}
+        </td>
+      );
+    };
+
+    return (
+      <tr className={row.isAnchor ? 'exploreDocTable__row--highlight' : ''}>
+        <td data-test-subj="docTableExpandToggleColumn">
+          <button aria-label="Toggle row details" onClick={onToggleExpand}>
+            {isExpanded ? 'Collapse' : 'Expand'}
+          </button>
+        </td>
+        {columns.map(renderCell)}
+      </tr>
+    );
+  },
+}));
+
 describe('TableRow', () => {
-  const mockUseDynamicContext = jest.fn();
+  let mockUseDynamicContext: jest.Mock;
 
   const mockDataset = {
     fields: {
@@ -74,14 +140,6 @@ describe('TableRow', () => {
     registry: [],
   } as any;
 
-  const mockServices = {
-    contextProvider: {
-      hooks: {
-        useDynamicContext: mockUseDynamicContext,
-      },
-    },
-  };
-
   const defaultProps: TableRowProps = {
     row: mockRow,
     columns: ['timestamp', 'message'],
@@ -92,11 +150,13 @@ describe('TableRow', () => {
     onClose: jest.fn(),
     isShortDots: false,
     docViewsRegistry: mockDocViewsRegistry,
-    services: mockServices as any,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Use the mock function we created
+    mockUseDynamicContext = mockUseDynamicContextFn;
     mockUseDynamicContext.mockReturnValue('test-context-id');
   });
 

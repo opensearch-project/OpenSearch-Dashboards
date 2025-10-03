@@ -15,7 +15,6 @@ import {
   DocViewsRegistry,
   OpenSearchSearchHit,
 } from '../../types/doc_views_types';
-import { ExploreServices } from '../../types';
 import { TableRow } from './table_row/table_row';
 import { LegacyDisplayedColumn } from '../../helpers/data_table_helper';
 import { Pagination } from './pagination/pagination';
@@ -34,7 +33,6 @@ export interface DataTableProps {
   onFilter: DocViewFilterFn;
   onClose?: () => void;
   scrollToTop?: () => void;
-  services?: ExploreServices;
 }
 
 // ToDo: These would need to be read from an upcoming config panel
@@ -257,7 +255,6 @@ const DataTableUI = ({
   onFilter,
   onClose,
   scrollToTop,
-  services,
 }: DataTableProps) => {
   const columnNames = columns.map((column) => column.name);
 
@@ -542,7 +539,6 @@ const DataTableUI = ({
                   onClose={onClose}
                   isShortDots={isShortDots}
                   docViewsRegistry={docViewsRegistry}
-                  services={services}
                 />
               );
             }

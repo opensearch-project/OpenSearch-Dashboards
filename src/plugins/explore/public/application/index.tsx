@@ -11,7 +11,10 @@ import { Store } from 'redux';
 import { AppMountParameters } from '../../../../core/public';
 import { ExploreServices } from '../types';
 import { LogsPage } from './pages/logs';
-import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
+import {
+  OpenSearchDashboardsContextProvider,
+  useOpenSearchDashboards,
+} from '../../../opensearch_dashboards_react/public';
 import { DatasetProvider } from './context';
 import { ExploreFlavor } from '../../common';
 import { TracesPage } from './pages/traces';
@@ -28,13 +31,14 @@ interface ExploreRouteProps {
 type ExploreComponentProps = ExploreRouteProps &
   Partial<Pick<AppMountParameters, 'setHeaderActionMenu'>>;
 
+const NOOP_PAGE_CONTEXT_HOOK = (options?: any): string => '';
+
 // Component that handles page context for all Explore flavors
 const ExplorePageContextProvider: React.FC<{
   children: React.ReactNode;
-  services: ExploreServices;
-}> = ({ children, services }) => {
-  const usePageContext = services.contextProvider?.hooks?.usePageContext || (() => {});
-
+}> = ({ children }) => {
+  const { services } = useOpenSearchDashboards<ExploreServices>();
+  const usePageContext = services.contextProvider?.hooks?.usePageContext || NOOP_PAGE_CONTEXT_HOOK;
   usePageContext({
     description: 'Explore application page context',
     convert: (urlState: any) => ({
@@ -92,7 +96,7 @@ export const renderApp = (
           <EditorContextProvider>
             <DatasetProvider>
               <services.core.i18n.Context>
-                <ExplorePageContextProvider services={services}>
+                <ExplorePageContextProvider>
                   <Switch>
                     {/* View route for saved searches */}
                     {/* TODO: Do we need this? We might not need to, please revisit */}
