@@ -116,7 +116,7 @@ export function SpanDetailPanel(props: {
           payloadData={payloadData}
           filters={spanFilters}
           selectedSpanId={props.selectedSpanId}
-colorMap={colorMap}
+          colorMap={colorMap}
         />
       </div>
     ),
