@@ -25,16 +25,14 @@ export const SpanRawSpanTab: React.FC<SpanRawSpanTabProps> = ({ selectedSpan }) 
   }
 
   return (
-    <>
-      <EuiCodeBlock
-        language="json"
-        paddingSize="s"
-        isCopyable
-        overflowHeight={600}
-        whiteSpace="pre"
-      >
-        {JSON.stringify(selectedSpan, null, 2)}
-      </EuiCodeBlock>
-    </>
+    <EuiCodeBlock
+      language="json"
+      paddingSize="s"
+      isCopyable
+      whiteSpace="pre-wrap"
+      className="exploreSpanTabs__codeBlock"
+    >
+      {JSON.stringify(selectedSpan, null, 2)}
+    </EuiCodeBlock>
   );
 };
