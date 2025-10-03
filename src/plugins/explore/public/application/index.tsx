@@ -18,6 +18,7 @@ import { TracesPage } from './pages/traces';
 import { MetricsPage } from './pages/metrics';
 import { EditorContextProvider } from './context';
 import { TraceDetails } from './pages/traces/trace_details/trace_view';
+import { usePageContext } from '../../../context_provider/public';
 
 // Route component props interface
 interface ExploreRouteProps {
@@ -27,6 +28,27 @@ interface ExploreRouteProps {
 
 type ExploreComponentProps = ExploreRouteProps &
   Partial<Pick<AppMountParameters, 'setHeaderActionMenu'>>;
+
+// Component that handles page context for all Explore flavors
+const ExplorePageContextProvider: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
+  usePageContext({
+    description: 'Explore application page context',
+    convert: (urlState) => ({
+      appId: 'explore',
+      timeRange: urlState._g?.time,
+      query: {
+        query: urlState._q?.query || '',
+        language: urlState._q?.language || 'PPL',
+      },
+      dataset: urlState._q?.dataset,
+    }),
+    categories: ['static', 'explore'],
+  });
+
+  return <>{children}</>;
+};
 
 const renderExploreFlavor = (flavor: ExploreFlavor, props: ExploreComponentProps) => {
   switch (flavor) {
@@ -68,23 +90,25 @@ export const renderApp = (
           <EditorContextProvider>
             <DatasetProvider>
               <services.core.i18n.Context>
-                <Switch>
-                  {/* View route for saved searches */}
-                  {/* TODO: Do we need this? We might not need to, please revisit */}
-                  <Route path="/view/:id" exact>
-                    <ViewRoute {...mainRouteProps} />
-                  </Route>
-
-                  {flavor === ExploreFlavor.Traces && (
-                    <Route path="/traceDetails" exact={false}>
-                      <TraceDetails setMenuMountPoint={setHeaderActionMenu} />
+                <ExplorePageContextProvider>
+                  <Switch>
+                    {/* View route for saved searches */}
+                    {/* TODO: Do we need this? We might not need to, please revisit */}
+                    <Route path="/view/:id" exact>
+                      <ViewRoute {...mainRouteProps} />
                     </Route>
-                  )}
 
-                  <Route path={[`/`]} exact={false}>
-                    {renderExploreFlavor(flavor, mainRouteProps)}
-                  </Route>
-                </Switch>
+                    {flavor === ExploreFlavor.Traces && (
+                      <Route path="/traceDetails" exact={false}>
+                        <TraceDetails setMenuMountPoint={setHeaderActionMenu} />
+                      </Route>
+                    )}
+
+                    <Route path={[`/`]} exact={false}>
+                      {renderExploreFlavor(flavor, mainRouteProps)}
+                    </Route>
+                  </Switch>
+                </ExplorePageContextProvider>
               </services.core.i18n.Context>
             </DatasetProvider>
           </EditorContextProvider>

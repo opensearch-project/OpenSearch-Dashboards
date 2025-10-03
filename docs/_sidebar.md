@@ -36,11 +36,13 @@
       - [Banner](../src/plugins/banner/README.md)
       - [Bfetch](../src/plugins/bfetch/README.md)
       - [Charts](../src/plugins/charts/README.md)
+      - [Chat](../src/plugins/chat/README.md)
       - console
         - public
           - application
             - [Hooks](../src/plugins/console/public/application/hooks/README.md)
       - [Content_management](../src/plugins/content_management/README.md)
+      - [Context_provider](../src/plugins/context_provider/README.md)
       - [Csp_handler](../src/plugins/csp_handler/README.md)
       - [Dashboard](../src/plugins/dashboard/README.md)
       - [Data](../src/plugins/data/README.md)
@@ -122,6 +124,7 @@
     - [Opensearch eslint config opensearch dashboards](../packages/opensearch-eslint-config-opensearch-dashboards/README.md)
     - [Opensearch safer lodash set](../packages/opensearch-safer-lodash-set/README.md)
     - [Osd ace](../packages/osd-ace/README.md)
+    - [Osd agents](../packages/osd-agents/README.md)
     - [Osd apm config loader](../packages/osd-apm-config-loader/README.md)
     - [Osd babel preset](../packages/osd-babel-preset/README.md)
     - [Osd config](../packages/osd-config/README.md)
