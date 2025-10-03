@@ -336,13 +336,20 @@ describe('TraceDetails', () => {
     expect(result).toBe('test-service: test-operation');
   });
 
-  it('getServiceInfo function handles missing service name', () => {
+  it('getServiceInfo function uses span name as service fallback', () => {
     const mockSpan = {
       name: 'test-operation',
     };
 
     const result = getServiceInfo(mockSpan, 'test-trace-id');
-    expect(result).toBe('Unknown Service: test-operation');
+    expect(result).toBe('test-operation: test-operation');
+  });
+
+  it('getServiceInfo function handles completely empty span', () => {
+    const mockSpan = {};
+
+    const result = getServiceInfo(mockSpan, 'test-trace-id');
+    expect(result).toBe('Unknown Service: Unknown Operation');
   });
 
   it('getServiceInfo function handles missing operation name', () => {

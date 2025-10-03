@@ -82,13 +82,14 @@ describe('getServiceInfo', () => {
     expect(result).toBe('test-service: test-operation');
   });
 
-  it('handles missing serviceName with default value', () => {
+  it('uses span name as service fallback when serviceName is missing', () => {
     const spanWithoutService = {
-      ...mockSpan,
-      serviceName: undefined,
+      name: 'test-operation',
+      spanId: 'span-123',
+      // No serviceName property at all
     };
     const result = getServiceInfo(spanWithoutService);
-    expect(result).toBe('Unknown Service: test-operation');
+    expect(result).toBe('test-operation: test-operation');
   });
 
   it('handles missing operation name with default value', () => {
@@ -102,9 +103,8 @@ describe('getServiceInfo', () => {
 
   it('handles both missing serviceName and operation name', () => {
     const spanWithoutBoth = {
-      ...mockSpan,
-      serviceName: undefined,
-      name: undefined,
+      spanId: 'span-123',
+      // No serviceName, no name, no resource attributes
     };
     const result = getServiceInfo(spanWithoutBoth);
     expect(result).toBe('Unknown Service: Unknown Operation');
@@ -128,5 +128,53 @@ describe('getServiceInfo', () => {
   it('prioritizes selectedSpan over traceId when both are provided', () => {
     const result = getServiceInfo(mockSpan, 'test-trace-id');
     expect(result).toBe('test-service: test-operation');
+  });
+
+  it('handlesbservice name format (resource.attributes.service.name)', () => {
+    const otelSpan = {
+      resource: {
+        attributes: {
+          service: {
+            name: 'otel-service',
+          },
+        },
+      },
+      name: 'otel-operation',
+      spanId: 'span-456',
+    };
+    const result = getServiceInfo(otelSpan);
+    expect(result).toBe('otel-service: otel-operation');
+  });
+
+  it('handles alternative service name format (resource.attributes["service.name"])', () => {
+    const otelSpan = {
+      resource: {
+        attributes: {
+          'service.name': 'alt-otel-service',
+        },
+      },
+      name: 'alt-otel-operation',
+      spanId: 'span-789',
+    };
+    const result = getServiceInfo(otelSpan);
+    expect(result).toBe('alt-otel-service: alt-otel-operation');
+  });
+
+  it('falls back to span.name when serviceName is not available', () => {
+    const spanWithoutService = {
+      name: 'fallback-operation',
+      spanId: 'span-fallback',
+    };
+    const result = getServiceInfo(spanWithoutService);
+    expect(result).toBe('fallback-operation: fallback-operation');
+  });
+
+  it('handles completely empty span with Unknown Service and Unknown Operation', () => {
+    const emptySpan = {
+      spanId: 'span-empty',
+      // No serviceName, no name, no resource attributes
+    };
+    const result = getServiceInfo(emptySpan);
+    expect(result).toBe('Unknown Service: Unknown Operation');
   });
 });
