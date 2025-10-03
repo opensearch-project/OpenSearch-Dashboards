@@ -1,4 +1,9 @@
-.timelineRuler {
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreTimelineRuler {
   color: $euiColorMediumShade;
 
   &__baseline {
@@ -15,7 +20,7 @@
     bottom: 0;
     transform: translateX(-50%);
 
-    .timelineRuler__label {
+    .exploreTimelineRuler__label {
       font-size: $euiFontSizeXS;
       line-height: 1;
       white-space: nowrap;
@@ -37,7 +42,7 @@
       }
     }
 
-    .timelineRuler__tick {
+    .exploreTimelineRuler__tick {
       height: 8px;
       width: 2px;
       background-color: currentColor;

@@ -56,9 +56,9 @@ describe('TimelineRuler', () => {
 
     const { getByTestId } = render(<TimelineRuler traceTimeRange={mockTraceTimeRange} />);
 
-    expect(getByTestId('tick-label-0')).toHaveClass('timelineRuler__label--first');
-    expect(getByTestId('tick-label-500')).toHaveClass('timelineRuler__label--center');
-    expect(getByTestId('tick-label-1000')).toHaveClass('timelineRuler__label--last');
+    expect(getByTestId('tick-label-0')).toHaveClass('exploreTimelineRuler__label--first');
+    expect(getByTestId('tick-label-500')).toHaveClass('exploreTimelineRuler__label--center');
+    expect(getByTestId('tick-label-1000')).toHaveClass('exploreTimelineRuler__label--last');
   });
 
   it('should pass correct parameters to useTimelineTicks', () => {
@@ -74,6 +74,6 @@ describe('TimelineRuler', () => {
 
     const { container } = render(<TimelineRuler traceTimeRange={mockTraceTimeRange} />);
 
-    expect(container.querySelectorAll('.timelineRuler__tickContainer')).toHaveLength(0);
+    expect(container.querySelectorAll('.exploreTimelineRuler__tickContainer')).toHaveLength(0);
   });
 });
