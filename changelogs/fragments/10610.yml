@@ -1,0 +1,2 @@
+fix:
+- Add Timeline waterfall bars column to SpanDetailTableHierarchy ([#10610](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10610))
