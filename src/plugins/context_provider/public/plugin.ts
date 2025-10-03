@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import {
   ContextProviderSetup,
   ContextProviderStart,
@@ -11,6 +11,9 @@ import {
   ContextProviderStartDeps,
 } from './types';
 import { ContextCaptureService } from './services/context_capture_service';
+import { usePageContext } from './hooks/use_page_context';
+import { useDynamicContext } from './hooks/use_dynamic_context';
+import { useAssistantAction } from './hooks/use_assistant_action';
 
 /**
  * @experimental
@@ -26,23 +29,44 @@ export class ContextProviderPlugin
     > {
   private contextCaptureService?: ContextCaptureService;
 
-  public setup(core: CoreSetup, plugins: ContextProviderSetupDeps): ContextProviderSetup {
-    this.contextCaptureService = new ContextCaptureService(core, plugins);
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
+  public setup(core: CoreSetup, plugins: ContextProviderSetupDeps): ContextProviderSetup {
+    // Check if context provider is enabled
+    const config = this.initializerContext.config.get<{ enabled: boolean }>();
+    if (!config.enabled) {
+      return {};
+    }
+
+    this.contextCaptureService = new ContextCaptureService(core, plugins);
     this.contextCaptureService.setup();
 
     return {};
   }
 
   public start(core: CoreStart, plugins: ContextProviderStartDeps): ContextProviderStart {
-    if (!this.contextCaptureService) {
-      throw new Error('Context Provider services not initialized');
+    // Check if context provider is enabled
+    const config = this.initializerContext.config.get<{ enabled: boolean }>();
+    if (!config.enabled || !this.contextCaptureService) {
+      return {
+        getAssistantContextStore: () => undefined as any,
+        hooks: {
+          usePageContext: () => '',
+          useDynamicContext: () => '',
+          useAssistantAction: () => undefined,
+        },
+      };
     }
 
     this.contextCaptureService.start(core, plugins);
 
     return {
       getAssistantContextStore: () => this.contextCaptureService!.getAssistantContextStore(),
+      hooks: {
+        usePageContext,
+        useDynamicContext,
+        useAssistantAction,
+      },
     };
   }
 

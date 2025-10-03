@@ -6,12 +6,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TableRow, TableRowProps } from './table_row';
-import { useDynamicContext } from '../../../../../context_provider/public';
-
-// Mock the context provider hook
-jest.mock('../../../../../context_provider/public', () => ({
-  useDynamicContext: jest.fn(),
-}));
 
 // Mock the child components
 jest.mock('../table_cell/source_field_table_cell', () => ({
@@ -39,7 +33,7 @@ jest.mock('./expanded_table_row/expanded_table_row', () => ({
 }));
 
 describe('TableRow', () => {
-  let mockUseDynamicContext: jest.Mock;
+  const mockUseDynamicContext = jest.fn();
 
   const mockDataset = {
     fields: {
@@ -80,6 +74,14 @@ describe('TableRow', () => {
     registry: [],
   } as any;
 
+  const mockServices = {
+    contextProvider: {
+      hooks: {
+        useDynamicContext: mockUseDynamicContext,
+      },
+    },
+  };
+
   const defaultProps: TableRowProps = {
     row: mockRow,
     columns: ['timestamp', 'message'],
@@ -90,13 +92,11 @@ describe('TableRow', () => {
     onClose: jest.fn(),
     isShortDots: false,
     docViewsRegistry: mockDocViewsRegistry,
+    services: mockServices as any,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Mock useDynamicContext
-    mockUseDynamicContext = useDynamicContext as jest.Mock;
     mockUseDynamicContext.mockReturnValue('test-context-id');
   });
 

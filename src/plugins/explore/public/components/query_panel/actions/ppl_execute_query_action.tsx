@@ -6,7 +6,6 @@
 import React from 'react';
 import { EuiPanel, EuiText, EuiSpacer, EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
-import { useAssistantAction } from '../../../../../context_provider/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { loadQueryActionCreator } from '../../../application/utils/state_management/actions/query_editor/load_query';
@@ -23,6 +22,9 @@ export function usePPLExecuteQueryAction(
 ) {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
+
+  const useAssistantAction =
+    services.contextProvider?.hooks?.useAssistantAction || ((_action: any) => {});
 
   useAssistantAction<PPLExecuteQueryArgs>({
     name: 'execute_ppl_query',
@@ -45,7 +47,7 @@ export function usePPLExecuteQueryAction(
       },
       required: ['query'],
     },
-    handler: async (args) => {
+    handler: async (args: any) => {
       try {
         // Check if we should auto-execute
         const shouldExecute = args.autoExecute !== false; // Default to true
@@ -80,7 +82,7 @@ export function usePPLExecuteQueryAction(
         };
       }
     },
-    render: ({ status, args, result }) => {
+    render: ({ status, args, result }: any) => {
       if (!args) return null;
 
       const getStatusColor = () => {

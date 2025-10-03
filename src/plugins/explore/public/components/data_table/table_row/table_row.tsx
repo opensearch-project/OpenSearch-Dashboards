@@ -11,12 +11,12 @@
 
 import React, { useCallback, useState, useMemo } from 'react';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
-import { useDynamicContext } from '../../../../../context_provider/public';
 import {
   DocViewFilterFn,
   DocViewsRegistry,
   OpenSearchSearchHit,
 } from '../../../types/doc_views_types';
+import { ExploreServices } from '../../../types';
 import { ExpandedTableRow } from './expanded_table_row/expanded_table_row';
 import { TableRowContent } from './table_row_content';
 
@@ -31,6 +31,7 @@ export interface TableRowProps {
   onClose?: () => void;
   isShortDots: boolean;
   docViewsRegistry: DocViewsRegistry;
+  services?: ExploreServices;
 }
 
 export const TableRowUI = ({
@@ -44,6 +45,7 @@ export const TableRowUI = ({
   onClose,
   isShortDots,
   docViewsRegistry,
+  services,
 }: TableRowProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const handleExpanding = useCallback(() => setIsExpanded((prevState) => !prevState), [
@@ -65,7 +67,8 @@ export const TableRowUI = ({
     };
   }, [isExpanded, index, row._source, row._id]);
 
-  // Register dynamic context when row is expanded
+  // Register dynamic context when row is expanded using dependency injection
+  const useDynamicContext = services?.contextProvider?.hooks?.useDynamicContext || (() => {});
   useDynamicContext(expandedContext);
 
   return (

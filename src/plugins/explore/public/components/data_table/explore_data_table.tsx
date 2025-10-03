@@ -145,6 +145,7 @@ const ExploreDataTableComponent = () => {
             scrollToTop={scrollToTop}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
+            services={services}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
