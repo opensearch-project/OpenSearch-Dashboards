@@ -419,6 +419,9 @@ cy.explore.add(
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Indexes"]`).click();
     cy.get(`[title="${dataSourceName}"]`).click();
+    cy.getElementByTestId('dataset-index-selector')
+      .find('[data-test-subj="comboBoxInput"]')
+      .click();
     // this element is sometimes dataSourceName masked by another element
     cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
