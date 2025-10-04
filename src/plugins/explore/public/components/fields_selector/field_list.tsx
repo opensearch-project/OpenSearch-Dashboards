@@ -50,11 +50,11 @@ export const FieldList = ({
         {title}
       </EuiButtonEmpty>
       {expanded &&
-        fields.map((field: DataViewField, index) => {
+        fields.map((field: DataViewField) => {
           return (
             <EuiPanel
               data-attr-field={field.name}
-              key={field.name + index}
+              key={field.name}
               paddingSize="none"
               hasBorder={false}
               hasShadow={false}
