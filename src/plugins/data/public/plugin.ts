@@ -199,7 +199,7 @@ export class DataPublicPlugin
 
     const useNewSavedQueriesUI =
       core.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) &&
-      this.config.savedQueriesNewUI.enabled;
+      this.config.savedQueriesNewUI?.enabled;
     setUseNewSavedQueriesUI(useNewSavedQueriesUI);
 
     return {
