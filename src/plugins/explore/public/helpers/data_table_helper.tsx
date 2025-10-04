@@ -92,6 +92,8 @@ function getColumnDisplayName(column: string): string {
       return 'Status';
     case 'spanId':
       return 'SpanID';
+    case 'kind':
+      return 'Service Kind';
     default:
       return column;
   }
