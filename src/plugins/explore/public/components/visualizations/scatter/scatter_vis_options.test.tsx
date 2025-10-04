@@ -94,7 +94,6 @@ jest.mock('./scatter_exclusive_vis_options', () => ({
       >
         Update Scatter Style
       </button>
-
       <button
         data-test-subj="changeScatterFilled"
         onClick={() =>
@@ -105,7 +104,6 @@ jest.mock('./scatter_exclusive_vis_options', () => ({
       >
         Update Scatter Filled
       </button>
-
       <button
         data-test-subj="changeScatterAngled"
         onClick={() =>
@@ -124,7 +122,7 @@ jest.mock('../style_panel/legend/legend', () => {
   // Import Positions inside the mock to avoid reference error
   const { Positions: PositionsEnum } = jest.requireActual('../types');
   return {
-    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
+    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, hasTwoLegends }) => (
       <div data-test-subj="mockLegendOptionsPanel">
         <button
           data-test-subj="mockLegendShow"
@@ -138,6 +136,18 @@ jest.mock('../style_panel/legend/legend', () => {
         >
           Change Position
         </button>
+        <input
+          data-test-subj="mockLegendTitle"
+          placeholder="Legend Title"
+          onChange={(e) => onLegendOptionsChange({ title: e.target.value })}
+        />
+        {hasTwoLegends && (
+          <input
+            data-test-subj="mockLegendTitle2"
+            placeholder="Size Legend Title"
+            onChange={(e) => onLegendOptionsChange({ title2: e.target.value })}
+          />
+        )}
       </div>
     )),
   };
@@ -226,6 +236,21 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     },
   };
 
+  const propsWithCategoryColorAndSize: ScatterVisStyleControlsProps = {
+    ...propsWithCategoryColor,
+    axisColumnMappings: {
+      ...propsWithCategoryColor.axisColumnMappings,
+      [AxisRole.SIZE]: {
+        id: 5,
+        name: 'Size Value',
+        schema: VisFieldType.Numerical,
+        column: 'size',
+        validValuesCount: 6,
+        uniqueValuesCount: 6,
+      },
+    },
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -240,7 +265,7 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     expect(screen.getByTestId('allAxesOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('scatterExclusiveOptions')).toBeInTheDocument();
-    expect(screen.queryByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockLegendOptionsPanel')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
   });
 
@@ -274,6 +299,38 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     fireEvent.click(screen.getByTestId('mockLegendPosition'));
     expect(propsWithCategoryColor.onStyleChange).toHaveBeenCalledWith({
       legendPosition: Positions.BOTTOM,
+    });
+  });
+
+  it('calls onStyleChange with correct parameters for legend title options', async () => {
+    render(
+      <Provider store={store}>
+        <ScatterVisStyleControls {...propsWithCategoryColor} />
+      </Provider>
+    );
+
+    // Test legend title change
+    const legendTitleInput = screen.getByTestId('mockLegendTitle');
+    await userEvent.type(legendTitleInput, 'New Legend Title');
+
+    expect(propsWithCategoryColor.onStyleChange).toHaveBeenCalledWith({
+      legendTitle: 'New Legend Title',
+    });
+  });
+
+  it('calls onStyleChange with correct parameters for second legend title when size mapping is present', async () => {
+    render(
+      <Provider store={store}>
+        <ScatterVisStyleControls {...propsWithCategoryColorAndSize} />
+      </Provider>
+    );
+
+    // Test second legend title change
+    const legendTitle2Input = screen.getByTestId('mockLegendTitle2');
+    await userEvent.type(legendTitle2Input, 'New Size Legend Title');
+
+    expect(propsWithCategoryColorAndSize.onStyleChange).toHaveBeenCalledWith({
+      legendTitle2: 'New Size Legend Title',
     });
   });
 
@@ -398,8 +455,8 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     const titleInput = screen.getByPlaceholderText('Default title');
     await userEvent.type(titleInput, 'New Chart Title');
 
-    waitFor(() => {
-      expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+    await waitFor(() => {
+      expect(props.onStyleChange).toHaveBeenCalledWith({
         titleOptions: {
           ...props.styleOptions.titleOptions,
           titleName: 'New Chart Title',
@@ -409,7 +466,11 @@ describe('ScatterVisStyleControls (updated structure)', () => {
   });
 
   it('calls onStyleChange with correct parameters for threshold options', async () => {
-    render(<ScatterVisStyleControls {...mockProps} />);
+    render(
+      <Provider store={store}>
+        <ScatterVisStyleControls {...mockProps} />
+      </Provider>
+    );
 
     await userEvent.click(screen.getByTestId('mockUpdateThreshold'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({

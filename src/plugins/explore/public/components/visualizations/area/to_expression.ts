@@ -129,6 +129,7 @@ export const createSimpleAreaChart = (
     legend: styles.addLegend
       ? {
           orient: styles.legendPosition?.toLowerCase() || 'right',
+          title: styles.legendTitle || undefined,
         }
       : null,
   };
@@ -205,7 +206,7 @@ export const createMultiAreaChart = (
         type: 'nominal',
         legend: styles.addLegend
           ? {
-              title: categoryName,
+              title: styles.legendTitle || categoryName,
               orient: styles.legendPosition?.toLowerCase() || 'right',
             }
           : null,
@@ -362,7 +363,7 @@ export const createFacetedMultiAreaChart = (
               type: 'nominal',
               legend: styles.addLegend
                 ? {
-                    title: category1Name,
+                    title: styles.legendTitle || category1Name,
                     orient: styles.legendPosition?.toLowerCase() || 'right',
                   }
                 : null,
@@ -554,6 +555,7 @@ export const createCategoryAreaChart = (
     legend: styles.addLegend
       ? {
           orient: styles.legendPosition?.toLowerCase() || 'right',
+          title: styles.legendTitle || undefined,
         }
       : null,
   };
@@ -629,7 +631,7 @@ export const createStackedAreaChart = (
         type: 'nominal',
         legend: styles.addLegend
           ? {
-              title: categoryName2,
+              title: styles.legendTitle || categoryName2,
               orient: styles.legendPosition?.toLowerCase() || 'bottom',
             }
           : null,

@@ -41,6 +41,8 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
   // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
   const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
+  const hasSizeMapping = !!axisColumnMappings?.[AxisRole.SIZE];
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -86,22 +88,31 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
             />
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <LegendOptionsPanel
-              legendOptions={{
-                show: styleOptions.addLegend,
-                position: styleOptions.legendPosition,
-              }}
-              onLegendOptionsChange={(legendOptions) => {
-                if (legendOptions.show !== undefined) {
-                  updateStyleOption('addLegend', legendOptions.show);
-                }
-                if (legendOptions.position !== undefined) {
-                  updateStyleOption('legendPosition', legendOptions.position);
-                }
-              }}
-            />
-          </EuiFlexItem>
+          {hasColorMapping && (
+            <EuiFlexItem grow={false}>
+              <LegendOptionsPanel
+                legendOptions={{
+                  show: styleOptions.addLegend,
+                  position: styleOptions.legendPosition,
+                }}
+                onLegendOptionsChange={(legendOptions) => {
+                  if (legendOptions.show !== undefined) {
+                    updateStyleOption('addLegend', legendOptions.show);
+                  }
+                  if (legendOptions.position !== undefined) {
+                    updateStyleOption('legendPosition', legendOptions.position);
+                  }
+                  if (legendOptions.title !== undefined) {
+                    updateStyleOption('legendTitle', legendOptions.title);
+                  }
+                  if (legendOptions.title2 !== undefined) {
+                    updateStyleOption('legendTitle2', legendOptions.title2);
+                  }
+                }}
+                hasTwoLegends={hasSizeMapping}
+              />
+            </EuiFlexItem>
+          )}
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel

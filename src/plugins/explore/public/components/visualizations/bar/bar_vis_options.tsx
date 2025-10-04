@@ -120,22 +120,27 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
             />
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <LegendOptionsPanel
-              legendOptions={{
-                show: styleOptions.addLegend,
-                position: styleOptions.legendPosition,
-              }}
-              onLegendOptionsChange={(legendOptions) => {
-                if (legendOptions.show !== undefined) {
-                  updateStyleOption('addLegend', legendOptions.show);
-                }
-                if (legendOptions.position !== undefined) {
-                  updateStyleOption('legendPosition', legendOptions.position);
-                }
-              }}
-            />
-          </EuiFlexItem>
+          {hasColorMapping && (
+            <EuiFlexItem grow={false}>
+              <LegendOptionsPanel
+                legendOptions={{
+                  show: styleOptions.addLegend,
+                  position: styleOptions.legendPosition,
+                }}
+                onLegendOptionsChange={(legendOptions) => {
+                  if (legendOptions.show !== undefined) {
+                    updateStyleOption('addLegend', legendOptions.show);
+                  }
+                  if (legendOptions.position !== undefined) {
+                    updateStyleOption('legendPosition', legendOptions.position);
+                  }
+                  if (legendOptions.title !== undefined) {
+                    updateStyleOption('legendTitle', legendOptions.title);
+                  }
+                }}
+              />
+            </EuiFlexItem>
+          )}
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel

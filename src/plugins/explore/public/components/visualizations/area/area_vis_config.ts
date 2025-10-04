@@ -26,6 +26,7 @@ export interface AreaChartStyleOptions {
   // Basic controls
   addLegend?: boolean;
   legendPosition?: Positions;
+  legendTitle?: string;
   addTimeMarker?: boolean;
   areaOpacity?: number;
   tooltipOptions?: TooltipOptions;
@@ -53,6 +54,7 @@ const defaultAreaChartStyles: AreaChartStyle = {
   // Basic controls
   addLegend: true,
   legendPosition: Positions.RIGHT,
+  legendTitle: '',
   addTimeMarker: false,
   tooltipOptions: {
     mode: 'all',
