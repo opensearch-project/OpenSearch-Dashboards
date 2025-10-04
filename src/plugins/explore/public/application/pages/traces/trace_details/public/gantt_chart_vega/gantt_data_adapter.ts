@@ -10,6 +10,7 @@ import {
   resolveServiceNameFromSpan,
   hasNanosecondPrecision,
 } from '../traces/ppl_resolve_helpers';
+import { parseHighPrecisionTimestamp } from '../utils/span_timerange_utils';
 
 interface SpanSource {
   traceId: string;
@@ -79,38 +80,6 @@ interface VegaGanttData {
 interface HierarchicalSpan extends SpanData {
   children: HierarchicalSpan[];
   level: number;
-}
-
-function parseHighPrecisionTimestamp(timestampStr: string): number {
-  if (!timestampStr) return 0;
-
-  try {
-    let normalizedTimestamp = timestampStr;
-
-    if (timestampStr.includes(' ') && !timestampStr.includes('T')) {
-      normalizedTimestamp = timestampStr.replace(' ', 'T');
-      if (!normalizedTimestamp.includes('Z')) {
-        normalizedTimestamp += 'Z';
-      }
-    }
-
-    const date = new Date(normalizedTimestamp);
-
-    const fractionalMatch = timestampStr.match(/\.(\d+)/);
-    if (fractionalMatch) {
-      const fractionalPart = fractionalMatch[1];
-      const millisecondsFromFraction = parseFloat('0.' + fractionalPart) * 1000;
-
-      const baseMs = Math.floor(date.getTime() / 1000) * 1000;
-      const secondsMs = date.getSeconds() * 1000;
-
-      return baseMs + secondsMs + millisecondsFromFraction;
-    }
-
-    return date.getTime();
-  } catch (error) {
-    return 0;
-  }
 }
 
 function buildHierarchicalStructure(spans: SpanData[]): HierarchicalSpan[] {
