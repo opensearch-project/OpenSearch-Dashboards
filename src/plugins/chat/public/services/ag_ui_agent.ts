@@ -23,6 +23,7 @@ export class AgUiAgent {
   private serverUrl: string;
   private abortController?: AbortController;
   private sseBuffer: string = '';
+  private activeConnection: boolean = false;
 
   constructor(serverUrl: string = 'http://localhost:3000') {
     this.serverUrl = serverUrl;
@@ -30,13 +31,20 @@ export class AgUiAgent {
 
   public runAgent(input: RunAgentInput): Observable<BaseEvent> {
     return new Observable<BaseEvent>((observer) => {
-      // Check for previous request and abort if needed
-      if (this.abortController) {
+      // Only abort if we're not in the middle of an active connection
+      // This prevents tool result submissions from breaking the main SSE stream
+      if (this.abortController && !this.activeConnection) {
         this.abortController.abort();
       }
 
-      this.abortController = new AbortController();
-      this.sseBuffer = ''; // Reset buffer for new request
+      // If there's already an active connection, reuse the existing controller
+      if (!this.abortController) {
+        this.abortController = new AbortController();
+        this.sseBuffer = ''; // Reset buffer for new request
+      }
+
+      // Set active connection flag
+      this.activeConnection = true;
 
       // Make request to AG-UI server
       fetch(this.serverUrl, {
@@ -87,12 +95,16 @@ export class AgUiAgent {
               }
             }
 
+            this.activeConnection = false;
             observer.complete();
           } finally {
             reader.releaseLock();
+            this.activeConnection = false;
           }
         })
         .catch((error) => {
+          this.activeConnection = false;
+
           if (error.name === 'AbortError') {
             return; // Request was cancelled
           }
@@ -114,6 +126,13 @@ export class AgUiAgent {
     if (this.abortController) {
       this.abortController.abort();
       this.abortController = undefined;
+      this.activeConnection = false;
     }
+  }
+
+  public resetConnection(): void {
+    this.activeConnection = false;
+    this.abortController = undefined;
+    this.sseBuffer = '';
   }
 }

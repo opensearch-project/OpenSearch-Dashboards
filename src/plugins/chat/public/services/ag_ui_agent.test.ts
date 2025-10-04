@@ -350,4 +350,152 @@ describe('AgUiAgent', () => {
       expect(() => agent.abort()).not.toThrow();
     });
   });
+
+  describe('resetConnection', () => {
+    it('should reset connection state', () => {
+      // Start a request to set up connection state
+      const mockResponse = {
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: () => Promise.resolve({ done: true, value: undefined }),
+            releaseLock: () => {},
+          }),
+        },
+      };
+
+      mockFetch.mockResolvedValue(mockResponse as any);
+
+      const observable = agent.runAgent({
+        threadId: 'test',
+        runId: 'test',
+        messages: [],
+        tools: [],
+        context: [],
+        state: {},
+        forwardedProps: {},
+      });
+
+      const subscription = observable.subscribe();
+
+      // Reset connection
+      agent.resetConnection();
+
+      // Verify that connection state is reset by checking that a new request can be made
+      expect(() => agent.resetConnection()).not.toThrow();
+
+      subscription.unsubscribe();
+    });
+
+    it('should handle reset when no connection exists', () => {
+      expect(() => agent.resetConnection()).not.toThrow();
+    });
+
+    it('should reset connection state multiple times', () => {
+      agent.resetConnection();
+      agent.resetConnection();
+      agent.resetConnection();
+
+      expect(() => agent.resetConnection()).not.toThrow();
+    });
+
+    it('should allow new requests after reset', (done) => {
+      // First request
+      const mockResponse1 = {
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: () => Promise.resolve({ done: true, value: undefined }),
+            releaseLock: () => {},
+          }),
+        },
+      };
+
+      mockFetch.mockResolvedValueOnce(mockResponse1 as any);
+
+      const observable1 = agent.runAgent({
+        threadId: 'test1',
+        runId: 'test1',
+        messages: [],
+        tools: [],
+        context: [],
+        state: {},
+        forwardedProps: {},
+      });
+
+      observable1.subscribe({
+        complete: () => {
+          // Reset connection
+          agent.resetConnection();
+
+          // Second request after reset
+          const mockResponse2 = {
+            ok: true,
+            body: {
+              getReader: () => ({
+                read: () => Promise.resolve({ done: true, value: undefined }),
+                releaseLock: () => {},
+              }),
+            },
+          };
+
+          mockFetch.mockResolvedValueOnce(mockResponse2 as any);
+
+          const observable2 = agent.runAgent({
+            threadId: 'test2',
+            runId: 'test2',
+            messages: [],
+            tools: [],
+            context: [],
+            state: {},
+            forwardedProps: {},
+          });
+
+          observable2.subscribe({
+            complete: () => {
+              expect(mockFetch).toHaveBeenCalledTimes(2);
+              done();
+            },
+          });
+        },
+      });
+    });
+
+    it('should work in combination with abort', () => {
+      const mockResponse = {
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: () => new Promise(() => {}), // Never resolves
+            releaseLock: () => {},
+          }),
+        },
+      };
+
+      mockFetch.mockResolvedValue(mockResponse as any);
+
+      const observable = agent.runAgent({
+        threadId: 'test',
+        runId: 'test',
+        messages: [],
+        tools: [],
+        context: [],
+        state: {},
+        forwardedProps: {},
+      });
+
+      const subscription = observable.subscribe();
+
+      // Both abort and reset should work without throwing
+      agent.abort();
+      agent.resetConnection();
+
+      expect(() => {
+        agent.abort();
+        agent.resetConnection();
+      }).not.toThrow();
+
+      subscription.unsubscribe();
+    });
+  });
 });

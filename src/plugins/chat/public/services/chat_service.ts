@@ -28,24 +28,20 @@ export class ChatService {
   }
 
   private generateThreadId(): string {
-    return `thread-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `thread-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
   private generateRunId(): string {
-    return `run-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `run-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
   private generateMessageId(): string {
-    return `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
   private generateRequestId(): string {
     this.requestCounter++;
     return `chat-req-${Date.now()}-${this.requestCounter}`;
-  }
-
-  private isRequestActive(): boolean {
-    return this.activeRequests.size > 0;
   }
 
   private addActiveRequest(requestId: string): void {
@@ -191,6 +187,10 @@ export class ChatService {
 
   public abort(): void {
     this.agent.abort();
+  }
+
+  public resetConnection(): void {
+    this.agent.resetConnection();
   }
 
   public newThread(): void {
