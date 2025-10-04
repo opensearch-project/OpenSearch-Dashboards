@@ -35,6 +35,7 @@ export const PreviewComponent = ({
   existingMapping,
 }: PreviewComponentProps) => {
   const [searchQuery, setSearchQuery] = useState('');
+  previewData = previewData.flat();
   const totalRows = previewData?.length;
   const loadedRows = Math.min(visibleRows, totalRows);
 
