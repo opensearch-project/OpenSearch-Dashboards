@@ -75,6 +75,9 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
         expression={searchProps.expression ?? ''}
         searchContext={searchProps.searchContext}
         key={JSON.stringify(searchProps.searchContext) + searchProps.expression}
+        onEvent={(e) => {
+          searchProps.onExpressionEvent?.(e);
+        }}
       />
     );
   };

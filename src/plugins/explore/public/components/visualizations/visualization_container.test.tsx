@@ -5,6 +5,8 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import * as ReactRedux from 'react-redux';
+
 import { VisualizationContainer } from './visualization_container';
 import * as VB from './visualization_builder';
 import * as TabResultsHooks from '../../application/utils/hooks/use_tab_results';
@@ -81,6 +83,7 @@ describe('VisualizationContainer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(mockVisualizationBuilder as any);
+    jest.spyOn(ReactRedux, 'useDispatch').mockReturnValue(jest.fn());
   });
 
   it('renders the visualization container', () => {

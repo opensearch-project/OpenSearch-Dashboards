@@ -24,6 +24,7 @@ import { StylePanelRender } from './style_panel_render';
 import { adaptLegacyData } from './visualization_builder_utils';
 import { mergeStyles } from './utils/utils';
 import { RenderChartConfig } from './types';
+import { TimeRange } from '../../../../data/common';
 
 interface VisState {
   styleOptions?: StyleOptions;
@@ -374,7 +375,13 @@ export class VisualizationBuilder {
     );
   }
 
-  renderVisualization({ searchContext }: { searchContext?: ExecutionContextSearch }) {
+  renderVisualization({
+    searchContext,
+    onSelectTimeRange,
+  }: {
+    searchContext?: ExecutionContextSearch;
+    onSelectTimeRange?: (range?: TimeRange) => void;
+  }) {
     const ExpressionRenderer = this.getExpression()?.ReactExpressionRenderer;
     if (!ExpressionRenderer) {
       return null;
@@ -386,6 +393,7 @@ export class VisualizationBuilder {
       showRawTable$: this.showRawTable$,
       searchContext,
       ExpressionRenderer,
+      onSelectTimeRange,
     });
   }
 
