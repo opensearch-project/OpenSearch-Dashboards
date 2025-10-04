@@ -53,13 +53,13 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
         defaultMessage: 'Timeline',
       }),
     },
-    // Service Map tab
-    {
-      id: TraceDetailTab.SERVICE_MAP,
-      name: i18n.translate('explore.traceView.tab.serviceMap', {
-        defaultMessage: 'Service map',
-      }),
-    },
+    // Disabled: Service Map tab
+    // {
+    //   id: TraceDetailTab.SERVICE_MAP,
+    //   name: i18n.translate('explore.traceView.tab.serviceMap', {
+    //     defaultMessage: 'Service map',
+    //   }),
+    // },
     {
       id: TraceDetailTab.SPAN_LIST,
       name: (

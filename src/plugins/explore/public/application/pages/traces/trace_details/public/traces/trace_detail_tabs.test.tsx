@@ -36,7 +36,8 @@ describe('TraceDetailTabs', () => {
     render(<TraceDetailTabs {...defaultProps} />);
 
     expect(screen.getByText('Timeline')).toBeInTheDocument();
-    expect(screen.getByText('Service map')).toBeInTheDocument();
+    // Service map tab is currently disabled
+    expect(screen.queryByText('Service map')).not.toBeInTheDocument();
     expect(screen.getByText('Span list')).toBeInTheDocument();
     expect(screen.getByText('Tree view')).toBeInTheDocument();
   });
