@@ -5,9 +5,10 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { ConfigureDirectQueryDataSourceWithRouter } from './configure_direct_query_data_sources';
+import { DirectQueryDataSourceConfigure } from './configure_direct_query_data_sources';
 import { NotificationsStart } from '../../../../../../core/public';
-import { MemoryRouter } from 'react-router-dom';
+import { act } from 'react-dom/test-utils';
+import { createMemoryHistory } from 'history';
 
 const mockSetBreadcrumbs = jest.fn();
 const mockToasts = {
@@ -16,7 +17,7 @@ const mockToasts = {
 };
 const mockHttp = {
   get: jest.fn().mockResolvedValue({ data: { role1: {}, role2: {} } }),
-  post: jest.fn(),
+  post: jest.fn().mockResolvedValue({}),
 };
 
 const mockUseOpenSearchDashboards = jest.fn(() => ({
@@ -69,22 +70,20 @@ jest.mock('react', () => ({
 
 describe('ConfigureDirectQueryDataSourceWithRouter', () => {
   const mockNotifications = ({ toasts: mockToasts } as unknown) as NotificationsStart;
-  const mockHistory = { push: jest.fn() };
   const mockLocation = { pathname: '', search: '', state: '', hash: '' };
   const mockMatch = { params: { type: 'AmazonS3AWSGlue' }, isExact: true, path: '', url: '' };
+  const mockHistory = createMemoryHistory();
 
   const mountComponent = (type: string) => {
     mockUseParams.mockReturnValue({ type });
     return mount(
-      <MemoryRouter>
-        <ConfigureDirectQueryDataSourceWithRouter
-          notifications={mockNotifications}
-          // @ts-expect-error TS2322 TODO(ts-error): fixme
-          history={mockHistory as any}
-          location={mockLocation}
-          match={{ ...mockMatch, params: { type } }}
-        />
-      </MemoryRouter>
+      <DirectQueryDataSourceConfigure
+        notifications={mockNotifications}
+        history={mockHistory}
+        location={mockLocation}
+        match={{ ...mockMatch, params: { type } }}
+        useNewUX={false}
+      />
     );
   };
 
@@ -107,5 +106,30 @@ describe('ConfigureDirectQueryDataSourceWithRouter', () => {
   it('sets breadcrumbs', () => {
     mountComponent('AmazonS3AWSGlue');
     expect(mockSetBreadcrumbs).toHaveBeenCalled();
+  });
+
+  it('redirects to root path after successful data source creation', async () => {
+    // Mount the component
+    const wrapper = mountComponent('Prometheus');
+    const pushSpy = jest.spyOn(mockHistory, 'push');
+
+    await act(async () => {
+      // Find and fill in the data source name
+      const nameInput = wrapper.find('input[data-test-subj="direct_query-data-source-name"]');
+      nameInput.simulate('change', { target: { value: 'test' } });
+
+      // Find and fill in the Prometheus URI
+      const uriInput = wrapper.find('input[data-test-subj="Prometheus-URI"]');
+      uriInput.simulate('change', { target: { value: 'http://localhost:9090/' } });
+
+      // Find the create button and simulate click
+      const createButton = wrapper.find('button[data-test-subj="createButton"]');
+      createButton.simulate('click');
+
+      // Wait for the promise to resolve
+      await new Promise((resolve) => setImmediate(resolve));
+    });
+
+    expect(pushSpy).toHaveBeenCalledWith('/');
   });
 });
