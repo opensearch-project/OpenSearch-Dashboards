@@ -12,7 +12,7 @@ import { ChatService } from './services/chat_service';
 export interface ChatPluginSetup {}
 
 export interface ChatPluginStart {
-  chatService: ChatService;
+  chatService: ChatService | undefined;
 }
 
 export interface AppPluginStartDependencies {

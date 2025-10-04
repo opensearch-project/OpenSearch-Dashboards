@@ -7,7 +7,6 @@ import { schema, TypeOf } from '@osd/config-schema';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
-  agUiUrl: schema.maybe(schema.string()),
 });
 
-export type ChatConfigType = TypeOf<typeof configSchema>;
+export type ContextProviderConfigType = TypeOf<typeof configSchema>;

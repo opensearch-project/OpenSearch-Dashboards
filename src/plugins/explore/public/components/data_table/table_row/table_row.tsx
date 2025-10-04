@@ -11,14 +11,18 @@
 
 import React, { useCallback, useState, useMemo } from 'react';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
-import { useDynamicContext } from '../../../../../context_provider/public';
 import {
   DocViewFilterFn,
   DocViewsRegistry,
   OpenSearchSearchHit,
 } from '../../../types/doc_views_types';
+import { ExploreServices } from '../../../types';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExpandedTableRow } from './expanded_table_row/expanded_table_row';
 import { TableRowContent } from './table_row_content';
+
+// Create stable NOOP hook reference outside component to avoid re-renders
+const NOOP_DYNAMIC_CONTEXT_HOOK = (options?: any): string => '';
 
 export interface TableRowProps {
   row: OpenSearchSearchHit<Record<string, unknown>>;
@@ -45,6 +49,7 @@ export const TableRowUI = ({
   isShortDots,
   docViewsRegistry,
 }: TableRowProps) => {
+  const { services } = useOpenSearchDashboards<ExploreServices>();
   const [isExpanded, setIsExpanded] = useState(false);
   const handleExpanding = useCallback(() => setIsExpanded((prevState) => !prevState), [
     setIsExpanded,
@@ -66,6 +71,8 @@ export const TableRowUI = ({
   }, [isExpanded, index, row._source, row._id]);
 
   // Register dynamic context when row is expanded
+  const useDynamicContext =
+    services.contextProvider?.hooks?.useDynamicContext || NOOP_DYNAMIC_CONTEXT_HOOK;
   useDynamicContext(expandedContext);
 
   return (

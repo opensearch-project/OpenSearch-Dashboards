@@ -407,5 +407,11 @@
 # @experimental Set the value to true to enable discover traces
 # explore.discoverTraces.enabled: true
 
-# @experimental Enable Chat Plugin
-# chat.enabled: true
+# @experimental Set the enabled value to true and provide an AG-UI agent to enable chat
+# chat:
+  # enabled: true
+  # agUiUrl: "http://your-ai-agent-url:port"
+
+# @experimental Set the value to true to enable context provider
+# contextProvider:
+#   enabled: true
