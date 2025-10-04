@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
@@ -47,9 +47,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     it('should show href and generateCb doc views link and not show generateCbHidden doc views link', async () => {
       const hrefLink = await find.byLinkText('href doc view link');
       const generateCbLink = await find.byLinkText('generateCb doc view link');
-      expect(await hrefLink.isDisplayed()).to.be(true);
-      expect(await generateCbLink.isDisplayed()).to.be(true);
-      expect(await find.existsByLinkText('generateCbHidden doc view link')).to.eql(false);
+      expect(await hrefLink.isDisplayed()).toBe(true);
+      expect(await generateCbLink.isDisplayed()).toBe(true);
+      expect(await find.existsByLinkText('generateCbHidden doc view link')).toEqual(false);
     });
 
     it('should render href doc view link', async () => {
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await browser.switchTab(originalTabCount);
 
       const currentUrl = await browser.getCurrentUrl();
-      expect(currentUrl).to.eql('http://some-url/');
+      expect(currentUrl).toEqual('http://some-url/');
 
       // close new tab and switch back to original tab
       await browser.closeCurrentWindow();
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await browser.switchTab(originalTabCount);
 
       const currentUrl = await browser.getCurrentUrl();
-      expect(currentUrl).to.eql('http://some-url/');
+      expect(currentUrl).toEqual('http://some-url/');
 
       // close new tab and switch back to original tab
       await browser.closeCurrentWindow();

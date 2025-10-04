@@ -30,7 +30,6 @@
 
 import fn from './average';
 import moment from 'moment';
-const expect = require('chai').expect;
 import _ from 'lodash';
 
 describe('average.js', function () {
@@ -50,7 +49,7 @@ describe('average.js', function () {
         [moment.utc('1984', 'YYYY').valueOf(), null],
       ];
 
-      expect(_.map(fn(data, target), 1)).to.eql([10, 20, 30, 40, 50]);
+      expect(_.map(fn(data, target), 1)).toEqual([10, 20, 30, 40, 50]);
     });
 
     describe('sampling', function () {
@@ -69,7 +68,7 @@ describe('average.js', function () {
           [moment.utc('1985', 'YYYY').valueOf(), null],
         ];
 
-        expect(_.map(fn(data, target), 1)).to.eql([10, 20, 30, 50, 70]);
+        expect(_.map(fn(data, target), 1)).toEqual([10, 20, 30, 50, 70]);
       });
 
       it('down', function () {
@@ -94,7 +93,7 @@ describe('average.js', function () {
         // interpolating a weekly series into daily, in which the buckets fall on sundays, this coming Sunday's bucket
         // will be distributed Mon-Sun instead of say Thur-Wed.
         // Essentially the algorithm is left aligned instead of centered
-        expect(_.map(fn(data, target), 1)).to.eql([1, 5, 9]);
+        expect(_.map(fn(data, target), 1)).toEqual([1, 5, 9]);
       });
     });
   });

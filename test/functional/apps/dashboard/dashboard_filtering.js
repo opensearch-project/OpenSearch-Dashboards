@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 /**
  * Test the querying capabilities of dashboard, and make sure visualizations show the expected results, especially
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('tsvb time series shows no data message', async () => {
-        expect(await testSubjects.exists('noTSVBDataMessage')).to.be(true);
+        expect(await testSubjects.exists('noTSVBDataMessage')).toBe(true);
       });
 
       it('metric value shows no data', async () => {

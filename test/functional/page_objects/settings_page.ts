@@ -29,7 +29,7 @@
  */
 
 import { map as mapAsync } from 'bluebird';
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SettingsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -76,7 +76,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     async expectDisabledAdvancedSetting(propertyName: string) {
       expect(
         await testSubjects.getAttribute(`advancedSetting-editField-${propertyName}`, 'disabled')
-      ).to.eql('true');
+      ).toEqual('true');
     }
 
     async getAdvancedSettingCheckbox(propertyName: string) {
@@ -409,7 +409,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       }
       const currentName = await field.getAttribute('value');
       log.debug(`setIndexPatternField set to ${currentName}`);
-      expect(currentName).to.eql(indexPatternName);
+      expect(currentName).toEqual(indexPatternName);
     }
 
     async getCreateIndexPatternGoToStep2Button() {

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 import '../../plugins/core_app_status/public/types';
 
@@ -70,43 +70,45 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     it('navigates to another app without performing a full page refresh', async () => {
       await testSubjects.click('applink-basic-test');
 
-      expect(await testSubjects.exists('app-applink_end')).to.eql(true);
-      expect(getPathWithHash(await browser.getCurrentUrl())).to.eql('/app/applink_end');
-      expect(await wasReloaded()).to.eql(false);
+      expect(await testSubjects.exists('app-applink_end')).toEqual(true);
+      expect(getPathWithHash(await browser.getCurrentUrl())).toEqual('/app/applink_end');
+      expect(await wasReloaded()).toEqual(false);
     });
 
     it('handles the path of the link', async () => {
       await testSubjects.click('applink-path-test');
 
-      expect(await testSubjects.exists('app-applink_end')).to.eql(true);
-      expect(getPathWithHash(await browser.getCurrentUrl())).to.eql('/app/applink_end/some-path');
-      expect(await wasReloaded()).to.eql(false);
+      expect(await testSubjects.exists('app-applink_end')).toEqual(true);
+      expect(getPathWithHash(await browser.getCurrentUrl())).toEqual('/app/applink_end/some-path');
+      expect(await wasReloaded()).toEqual(false);
     });
 
     it('handles hash in urls', async () => {
       await testSubjects.click('applink-hash-test');
 
-      expect(await testSubjects.exists('app-applink_end')).to.eql(true);
-      expect(getPathWithHash(await browser.getCurrentUrl())).to.eql(
+      expect(await testSubjects.exists('app-applink_end')).toEqual(true);
+      expect(getPathWithHash(await browser.getCurrentUrl())).toEqual(
         '/app/applink_end/some-path#/some/hash'
       );
-      expect(await wasReloaded()).to.eql(false);
+      expect(await wasReloaded()).toEqual(false);
     });
 
     it('works in a nested dom structure', async () => {
       await testSubjects.click('applink-nested-test');
 
-      expect(await testSubjects.exists('app-applink_end')).to.eql(true);
-      expect(getPathWithHash(await browser.getCurrentUrl())).to.eql('/app/applink_end#bang');
-      expect(await wasReloaded()).to.eql(false);
+      expect(await testSubjects.exists('app-applink_end')).toEqual(true);
+      expect(getPathWithHash(await browser.getCurrentUrl())).toEqual('/app/applink_end#bang');
+      expect(await wasReloaded()).toEqual(false);
     });
 
     it('works for intra-app links', async () => {
       await testSubjects.click('applink-intra-test');
 
-      expect(await testSubjects.exists('app-applink_start')).to.eql(true);
-      expect(getPathWithHash(await browser.getCurrentUrl())).to.eql('/app/applink_start/some-path');
-      expect(await wasReloaded()).to.eql(false);
+      expect(await testSubjects.exists('app-applink_start')).toEqual(true);
+      expect(getPathWithHash(await browser.getCurrentUrl())).toEqual(
+        '/app/applink_start/some-path'
+      );
+      expect(await wasReloaded()).toEqual(false);
     });
   });
 }

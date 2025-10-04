@@ -29,7 +29,7 @@
  */
 
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
@@ -101,9 +101,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       const time = await PageObjects.timePicker.getTimeConfig();
       const refresh = await PageObjects.timePicker.getRefreshConfig();
-      expect(time.start).to.be('Nov 17, 2012 @ 00:00:00.000');
-      expect(time.end).to.be('Nov 17, 2015 @ 18:01:36.621');
-      expect(refresh.interval).to.be('2');
+      expect(time.start).toBe('Nov 17, 2012 @ 00:00:00.000');
+      expect(time.end).toBe('Nov 17, 2015 @ 18:01:36.621');
+      expect(refresh.interval).toBe('2');
     });
 
     it('Timepicker respects dateFormat from UI settings', async () => {

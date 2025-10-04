@@ -44,7 +44,7 @@
 //   appends closing braces, for exmaple, if you type opening square brace [
 //   it will automatically insert a a closing square brace ], etc.
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const opensearchArchiver = getService('opensearchArchiver');
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.clickSaveScriptedField();
       await retry.try(async () => {
         const invalidScriptErrorExists = await testSubjects.exists('invalidScriptError');
-        expect(invalidScriptErrorExists).to.be(true);
+        expect(invalidScriptErrorExists).toBe(true);
       });
     });
 
@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }) {
           script
         );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).toBe(
             startingCount + 1
           );
         });
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }) {
         for (let i = 0; i < 3; i++) {
           await PageObjects.settings.editScriptedField(scriptedPainlessFieldName);
           const fieldSaveButton = await testSubjects.exists('fieldSaveButton');
-          expect(fieldSaveButton).to.be(true);
+          expect(fieldSaveButton).toBe(true);
           await PageObjects.settings.clickSaveScriptedField();
         }
       });
@@ -151,7 +151,7 @@ export default function ({ getService, getPageObjects }) {
           script
         );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).toBe(
             startingCount + 1
           );
         });
@@ -171,8 +171,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const rowData = await PageObjects.discover.getDocTableRowsText();
-        expect(rowData[0]).to.be('Sep 18, 2015 @ 18:20:57.916');
-        expect(rowData[1]).to.be('18');
+        expect(rowData[0]).toBe('Sep 18, 2015 @ 18:20:57.916');
+        expect(rowData[1]).toBe('18');
       });
 
       //add a test to sort numeric scripted field
@@ -207,7 +207,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
-          expect(await PageObjects.discover.getHitCount()).to.be('31');
+          expect(await PageObjects.discover.getHitCount()).toBe('31');
         });
       });
 
@@ -246,7 +246,7 @@ export default function ({ getService, getPageObjects }) {
           await inspector.expectTableData(expectedChartValues);
         } else {
           // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).toContain(
             'Average of ram_Pain1'
           );
         }
@@ -272,7 +272,7 @@ export default function ({ getService, getPageObjects }) {
           "if (doc['response.raw'].value == '200') { return 'good'} else { return 'bad'}"
         );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).toBe(
             startingCount + 1
           );
         });
@@ -292,8 +292,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const rowData = await PageObjects.discover.getDocTableRowsText();
-        expect(rowData[0]).to.be('Sep 18, 2015 @ 18:20:57.916');
-        expect(rowData[1]).to.be('good');
+        expect(rowData[0]).toBe('Sep 18, 2015 @ 18:20:57.916');
+        expect(rowData[1]).toBe('good');
       });
 
       //add a test to sort string scripted field
@@ -328,7 +328,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
-          expect(await PageObjects.discover.getHitCount()).to.be('27');
+          expect(await PageObjects.discover.getHitCount()).toBe('27');
         });
         await filterBar.removeAllFilters();
       });
@@ -345,7 +345,7 @@ export default function ({ getService, getPageObjects }) {
           ]);
         } else {
           // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).toContain(
             'Top values of painString'
           );
         }
@@ -371,7 +371,7 @@ export default function ({ getService, getPageObjects }) {
           "doc['response.raw'].value == '200'"
         );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).toBe(
             startingCount + 1
           );
         });
@@ -391,8 +391,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const rowData = await PageObjects.discover.getDocTableRowsText();
-        expect(rowData[0]).to.be('Sep 18, 2015 @ 18:20:57.916');
-        expect(rowData[1]).to.be('true');
+        expect(rowData[0]).toBe('Sep 18, 2015 @ 18:20:57.916');
+        expect(rowData[1]).toBe('true');
       });
 
       // existing bug: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5126 hence the issue is skipped
@@ -427,7 +427,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
-          expect(await PageObjects.discover.getHitCount()).to.be('359');
+          expect(await PageObjects.discover.getHitCount()).toBe('359');
         });
         await filterBar.removeAllFilters();
       });
@@ -444,7 +444,7 @@ export default function ({ getService, getPageObjects }) {
           ]);
         } else {
           // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).toContain(
             'Top values of painBool'
           );
         }
@@ -470,7 +470,7 @@ export default function ({ getService, getPageObjects }) {
           "doc['utc_time'].value.toInstant().toEpochMilli() + (1000) * 60 * 60"
         );
         await retry.try(async function () {
-          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).toBe(
             startingCount + 1
           );
         });
@@ -490,8 +490,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const rowData = await PageObjects.discover.getDocTableRowsText();
-        expect(rowData[0]).to.be('Sep 18, 2015 @ 06:52:55.953');
-        expect(rowData[1]).to.be('2015-09-18 07:00');
+        expect(rowData[0]).toBe('Sep 18, 2015 @ 06:52:55.953');
+        expect(rowData[1]).toBe('2015-09-18 07:00');
       });
 
       // existing bug: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5127 hence the issue is skipped
@@ -525,7 +525,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await retry.try(async function () {
-          expect(await PageObjects.discover.getHitCount()).to.be('1');
+          expect(await PageObjects.discover.getHitCount()).toBe('1');
         });
         await filterBar.removeAllFilters();
       });
@@ -562,7 +562,7 @@ export default function ({ getService, getPageObjects }) {
           ]);
         } else {
           // verify Lens opens a visualization
-          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).to.contain(
+          expect(await testSubjects.getVisibleTextAll('lns-dimensionTrigger')).toContain(
             'painDate'
           );
         }

@@ -31,7 +31,6 @@
 import fn from './trim';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('trim.js', () => {
@@ -42,31 +41,31 @@ describe('trim.js', () => {
 
   it('Sets the first and last values to null by default', () => {
     return invoke(fn, [seriesList]).then((r) => {
-      expect(_.map(r.output.list[1].data, 1)).to.eql([null, 50, 50, null]);
+      expect(_.map(r.output.list[1].data, 1)).toEqual([null, 50, 50, null]);
     });
   });
 
   it('Trims more from the beginning', () => {
     return invoke(fn, [seriesList, 2]).then((r) => {
-      expect(_.map(r.output.list[1].data, 1)).to.eql([null, null, 50, null]);
+      expect(_.map(r.output.list[1].data, 1)).toEqual([null, null, 50, null]);
     });
   });
 
   it('Trims more from the end', () => {
     return invoke(fn, [seriesList, null, 2]).then((r) => {
-      expect(_.map(r.output.list[1].data, 1)).to.eql([null, 50, null, null]);
+      expect(_.map(r.output.list[1].data, 1)).toEqual([null, 50, null, null]);
     });
   });
 
   it('Trims nothing from the end', () => {
     return invoke(fn, [seriesList, 1, 0]).then((r) => {
-      expect(_.map(r.output.list[1].data, 1)).to.eql([null, 50, 50, 20]);
+      expect(_.map(r.output.list[1].data, 1)).toEqual([null, 50, 50, 20]);
     });
   });
 
   it('Trims nothing from the beginning', () => {
     return invoke(fn, [seriesList, 0, 2]).then((r) => {
-      expect(_.map(r.output.list[1].data, 1)).to.eql([100, 50, null, null]);
+      expect(_.map(r.output.list[1].data, 1)).toEqual([100, 50, null, null]);
     });
   });
 });

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects, updateBaselines }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common', 'timePicker']);
@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-      expect(percentDifference).to.be.lessThan(0.02);
+      expect(percentDifference).toBeLessThan(0.02);
     });
 
     it('compare area chart snapshot', async () => {
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       );
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
-      expect(percentDifference).to.be.lessThan(0.02);
+      expect(percentDifference).toBeLessThan(0.02);
     });
   });
 }

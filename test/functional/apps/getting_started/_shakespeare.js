@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('Create shakespeare index pattern');
       await PageObjects.settings.createIndexPattern('shakespeare', null);
       const patternName = await PageObjects.settings.getIndexPageHeading();
-      expect(patternName).to.be('shakespeare');
+      expect(patternName).toBe('shakespeare');
     });
 
     /* 1. Click New and select Vertical bar chart.
@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }) {
         const data = await PageObjects.visChart.getBarChartData('Count');
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
-        expect(data[0] - expectedChartValues[0]).to.be.lessThan(5);
+        expect(data[0] - expectedChartValues[0]).toBeLessThan(5);
       });
     });
 
@@ -114,10 +114,10 @@ export default function ({ getService, getPageObjects }) {
         const data = await PageObjects.visChart.getBarChartData('Speaking Parts');
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
-        expect(data).to.eql(expectedChartValues);
+        expect(data).toEqual(expectedChartValues);
       });
       const title = await PageObjects.visChart.getYAxisTitle();
-      expect(title).to.be('Speaking Parts');
+      expect(title).toBe('Speaking Parts');
     });
 
     /* 4. To show the different plays long the x-axis, select the X-Axis buckets
@@ -140,11 +140,11 @@ export default function ({ getService, getPageObjects }) {
         const data = await PageObjects.visChart.getBarChartData('Speaking Parts');
         log.debug('data=' + data);
         log.debug('data.length=' + data.length);
-        expect(data).to.eql(expectedChartValues);
+        expect(data).toEqual(expectedChartValues);
       });
 
       const labels = await PageObjects.visChart.getXAxisLabels();
-      expect(labels).to.eql([
+      expect(labels).toEqual([
         'Richard III',
         'Henry VI Part 2',
         'Coriolanus',
@@ -181,12 +181,12 @@ export default function ({ getService, getPageObjects }) {
         log.debug('data.length=' + data.length);
         log.debug('data2=' + data2);
         log.debug('data2.length=' + data2.length);
-        expect(data).to.eql(expectedChartValues);
-        expect(data2).to.eql(expectedChartValues2);
+        expect(data).toEqual(expectedChartValues);
+        expect(data2).toEqual(expectedChartValues2);
       });
 
       const labels = await PageObjects.visChart.getXAxisLabels();
-      expect(labels).to.eql([
+      expect(labels).toEqual([
         'Richard III',
         'Henry VI Part 2',
         'Coriolanus',
@@ -214,8 +214,8 @@ export default function ({ getService, getPageObjects }) {
         log.debug('data.length=' + data.length);
         log.debug('data2=' + data2);
         log.debug('data2.length=' + data2.length);
-        expect(data).to.eql(expectedChartValues);
-        expect(data2).to.eql(expectedChartValues2);
+        expect(data).toEqual(expectedChartValues);
+        expect(data2).toEqual(expectedChartValues2);
       });
     });
 
@@ -240,8 +240,8 @@ export default function ({ getService, getPageObjects }) {
         log.debug('data.length=' + data.length);
         log.debug('data2=' + data2);
         log.debug('data2.length=' + data2.length);
-        expect(data).to.eql(expectedChartValues);
-        expect(data2).to.eql(expectedChartValues2);
+        expect(data).toEqual(expectedChartValues);
+        expect(data2).toEqual(expectedChartValues2);
       });
     });
   });
