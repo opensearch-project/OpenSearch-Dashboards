@@ -1,0 +1,2 @@
+fix:
+- [Explore] Allow empty prompt execution in AI mode with default query fallback ([#10445](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10445))
