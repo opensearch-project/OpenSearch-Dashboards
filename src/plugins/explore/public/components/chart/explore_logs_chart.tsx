@@ -30,6 +30,7 @@ import { RootState } from '../../application/utils/state_management/store';
 import {
   executeQueries,
   executeHistogramQuery,
+  prepareHistogramCacheKey,
   defaultPrepareQueryString,
 } from '../../application/utils/state_management/actions/query_actions';
 import { ResultsSummary } from '../results_summary/results_summary';
@@ -67,12 +68,19 @@ export const ExploreLogsChart = ({
   const { interval } = useSelector((state: RootState) => state.legacy);
   const query = useSelector((state: RootState) => state.query);
   const dispatch = useDispatch();
-  const cacheKey = defaultPrepareQueryString(query);
+  const cacheKey = prepareHistogramCacheKey(query);
   const onChangeInterval = (newInterval: string) => {
     dispatch(setInterval(newInterval));
     dispatch(clearResultsByKey(cacheKey));
     dispatch(clearQueryStatusMapByKey(cacheKey));
-    dispatch(executeHistogramQuery({ services, cacheKey, interval: newInterval }));
+    dispatch(
+      executeHistogramQuery({
+        services,
+        cacheKey,
+        interval: newInterval,
+        queryString: defaultPrepareQueryString(query),
+      })
+    );
   };
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
