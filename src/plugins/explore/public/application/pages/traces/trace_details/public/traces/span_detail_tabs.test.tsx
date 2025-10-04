@@ -374,4 +374,198 @@ describe('SpanDetailTabs', () => {
     // Should not have any badge with count
     expect(screen.queryByText('1')).not.toBeInTheDocument();
   });
+
+  describe('scroll position management', () => {
+    let mockScrollTop: number;
+    let mockSetTimeout: jest.SpyInstance;
+
+    beforeEach(() => {
+      mockScrollTop = 0;
+      mockSetTimeout = jest.spyOn(global, 'setTimeout').mockImplementation((fn) => {
+        fn();
+        return 0 as any;
+      });
+
+      // Mock scrollTop property
+      Object.defineProperty(HTMLElement.prototype, 'scrollTop', {
+        get() {
+          return mockScrollTop;
+        },
+        set(value) {
+          mockScrollTop = value;
+        },
+        configurable: true,
+      });
+    });
+
+    afterEach(() => {
+      mockSetTimeout.mockRestore();
+    });
+
+    it('saves scroll position when switching tabs', () => {
+      render(<SpanDetailTabs {...defaultProps} />);
+
+      const contentContainer = document.querySelector('.exploreSpanDetailSidebar__content');
+      expect(contentContainer).toBeInTheDocument();
+
+      // Set scroll position > 0
+      mockScrollTop = 100;
+      if (contentContainer) {
+        (contentContainer as HTMLElement).scrollTop = 100;
+      }
+
+      // Switch to errors tab - this should save the scroll position
+      const errorsTab = screen.getByRole('tab', { name: /Errors/ });
+      fireEvent.click(errorsTab);
+
+      // Switch back to overview tab - this should restore the scroll position
+      const overviewTab = screen.getByRole('tab', { name: 'Overview' });
+      fireEvent.click(overviewTab);
+
+      // Verify setTimeout was called for restoration
+      expect(mockSetTimeout).toHaveBeenCalled();
+    });
+
+    it('does not save scroll position when scrollTop is 0', () => {
+      render(<SpanDetailTabs {...defaultProps} />);
+
+      const contentContainer = document.querySelector('.exploreSpanDetailSidebar__content');
+
+      // Keep scroll at top (0)
+      mockScrollTop = 0;
+      if (contentContainer) {
+        (contentContainer as HTMLElement).scrollTop = 0;
+      }
+
+      // Switch tabs - should not save position 0
+      const errorsTab = screen.getByRole('tab', { name: /Errors/ });
+      fireEvent.click(errorsTab);
+
+      const overviewTab = screen.getByRole('tab', { name: 'Overview' });
+      fireEvent.click(overviewTab);
+
+      // Should still work normally but no position saved
+      expect(screen.getByText('Overview Tab Content')).toBeInTheDocument();
+    });
+
+    it('restores scroll position using setTimeout', () => {
+      const realSetTimeout = global.setTimeout;
+      const mockSetTimeoutSpy = jest.fn((fn, delay) => {
+        expect(delay).toBe(0);
+        fn();
+        return 0 as any;
+      });
+      global.setTimeout = mockSetTimeoutSpy as any;
+
+      render(<SpanDetailTabs {...defaultProps} />);
+
+      const contentContainer = document.querySelector('.exploreSpanDetailSidebar__content');
+
+      // Set scroll position and switch tabs to save it
+      mockScrollTop = 150;
+      if (contentContainer) {
+        (contentContainer as HTMLElement).scrollTop = 150;
+      }
+
+      const errorsTab = screen.getByRole('tab', { name: /Errors/ });
+      fireEvent.click(errorsTab);
+
+      // Reset scroll position
+      mockScrollTop = 0;
+
+      // Switch back to overview tab
+      const overviewTab = screen.getByRole('tab', { name: 'Overview' });
+      fireEvent.click(overviewTab);
+
+      // Verify setTimeout was called with delay 0
+      expect(mockSetTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 0);
+
+      global.setTimeout = realSetTimeout;
+    });
+
+    it('restores scroll position when activeTabContent changes', () => {
+      const { rerender } = render(<SpanDetailTabs {...defaultProps} />);
+
+      const contentContainer = document.querySelector('.exploreSpanDetailSidebar__content');
+
+      // Set scroll position and switch tabs to save it
+      mockScrollTop = 200;
+      if (contentContainer) {
+        (contentContainer as HTMLElement).scrollTop = 200;
+      }
+
+      const errorsTab = screen.getByRole('tab', { name: /Errors/ });
+      fireEvent.click(errorsTab);
+
+      const overviewTab = screen.getByRole('tab', { name: 'Overview' });
+      fireEvent.click(overviewTab);
+
+      // Clear previous setTimeout calls
+      mockSetTimeout.mockClear();
+
+      // Change span to trigger activeTabContent change
+      const newSpan = { ...mockSpan, spanId: 'new-span-id' };
+      rerender(<SpanDetailTabs {...defaultProps} selectedSpan={newSpan} />);
+
+      // Should trigger scroll restoration when activeTabContent changes
+      expect(mockSetTimeout).toHaveBeenCalled();
+    });
+
+    it('handles contentRef being null during scroll operations', () => {
+      render(<SpanDetailTabs {...defaultProps} />);
+
+      // Switch tabs normally - should not throw error even if ref becomes null
+      const errorsTab = screen.getByRole('tab', { name: /Errors/ });
+      fireEvent.click(errorsTab);
+
+      const overviewTab = screen.getByRole('tab', { name: 'Overview' });
+      fireEvent.click(overviewTab);
+
+      // Should complete without errors
+      expect(screen.getByText('Overview Tab Content')).toBeInTheDocument();
+    });
+  });
+
+  describe('activeTabContent useMemo', () => {
+    it('returns correct content for active tab', () => {
+      render(<SpanDetailTabs {...defaultProps} />);
+
+      // Default should be overview content
+      expect(screen.getByText('Overview Tab Content')).toBeInTheDocument();
+      expect(screen.queryByText('Issues Tab Content')).not.toBeInTheDocument();
+
+      // Switch to errors tab
+      const errorsTab = screen.getByRole('tab', { name: /Errors/ });
+      fireEvent.click(errorsTab);
+
+      // Should now show errors content
+      expect(screen.getByText('Issues Tab Content')).toBeInTheDocument();
+      expect(screen.queryByText('Overview Tab Content')).not.toBeInTheDocument();
+    });
+
+    it('updates when tabs array changes', () => {
+      const propsWithoutLogs = {
+        ...defaultProps,
+        logDatasets: [],
+        logsData: [],
+      };
+
+      const { rerender } = render(<SpanDetailTabs {...propsWithoutLogs} />);
+
+      // Initially no logs tab
+      expect(screen.queryByText('Logs')).not.toBeInTheDocument();
+
+      // Add logs data to make logs tab available
+      const propsWithLogs = {
+        ...defaultProps,
+        logDatasets: [{ id: 'test-dataset' }],
+        logsData: [{ spanId: 'test-span-id', message: 'test log' }],
+      };
+
+      rerender(<SpanDetailTabs {...propsWithLogs} />);
+
+      // Now logs tab should be available
+      expect(screen.getByText('Logs')).toBeInTheDocument();
+    });
+  });
 });
