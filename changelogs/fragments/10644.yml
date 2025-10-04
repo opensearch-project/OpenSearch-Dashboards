@@ -1,0 +1,2 @@
+feat:
+- Traces bugs fixes and enhanced information by adding span kind column ([#10644](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10644))
