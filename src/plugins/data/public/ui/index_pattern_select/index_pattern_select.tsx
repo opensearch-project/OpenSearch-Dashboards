@@ -68,7 +68,7 @@ const getIndexPatterns = async (
     type: 'index-pattern',
     fields,
     search: `${search}*`,
-    searchFields: ['title'],
+    searchFields: ['title', 'displayName'],
     perPage: 100,
   });
   return resp.savedObjects;
@@ -144,7 +144,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
   debouncedFetch = _.debounce(async (searchValue: string) => {
     const { fieldTypes, onNoIndexPatterns, savedObjectsClient } = this.props;
 
-    const savedObjectFields = ['title'];
+    const savedObjectFields = ['title', 'displayName'];
     if (fieldTypes) {
       savedObjectFields.push('fields');
     }
@@ -199,21 +199,23 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
 
       const options = savedObjects.map((indexPatternSavedObject: SimpleSavedObject<any>) => {
         const dataSourceReference = getDataSourceReference(indexPatternSavedObject.references);
+        // Use displayName if available, otherwise fall back to title
+        const displayLabel =
+          indexPatternSavedObject.attributes.displayName ||
+          indexPatternSavedObject.attributes.title;
+
         if (dataSourceReference) {
           const dataSourceTitle =
             this.state.dataSourceIdToTitle.get(dataSourceReference.id) ||
             dataSourceIdToTitleToUpdate.get(dataSourceReference.id) ||
             dataSourceReference.id;
           return {
-            label: `${concatDataSourceWithIndexPattern(
-              dataSourceTitle,
-              indexPatternSavedObject.attributes.title
-            )}`,
+            label: `${concatDataSourceWithIndexPattern(dataSourceTitle, displayLabel)}`,
             value: indexPatternSavedObject.id,
           };
         }
         return {
-          label: indexPatternSavedObject.attributes.title,
+          label: displayLabel,
           value: indexPatternSavedObject.id,
         };
       });

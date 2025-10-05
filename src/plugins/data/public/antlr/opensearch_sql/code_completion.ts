@@ -135,7 +135,7 @@ export const getSuggestions = async ({
 
     if (suggestions.suggestViewsOrTables) {
       finalSuggestions.push({
-        text: indexPattern.title,
+        text: indexPattern.getDisplayName(),
         type: monaco.languages.CompletionItemKind.Struct,
         insertText: `${indexPattern.title} `,
         detail: SuggestionItemDetailsTags.Table,

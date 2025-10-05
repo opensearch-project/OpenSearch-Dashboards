@@ -98,7 +98,7 @@ export class DataViewsService {
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = await this.savedObjectsClient.find<DataViewSavedObjectAttrs>({
       type: 'index-pattern',
-      fields: ['title'],
+      fields: ['title', 'displayName'],
       perPage: 10000,
     });
 
@@ -569,9 +569,9 @@ export class DataViewsService {
   find = async (search: string, size: number = 10): Promise<DataView[]> => {
     const savedObjects = await this.savedObjectsClient.find<DataViewSavedObjectAttrs>({
       type: 'index-pattern',
-      fields: ['title'],
+      fields: ['title', 'displayName'],
       search,
-      searchFields: ['title'],
+      searchFields: ['title', 'displayName'],
       perPage: size,
     });
     const getDataViewPromises = savedObjects.map(async (savedObject) => {
@@ -731,6 +731,7 @@ export class DataViewsService {
     return {
       id: dataView.id || '',
       title: dataView.title,
+      displayName: dataView.displayName, // Include displayName for UI presentation
       type: dataView.type || DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       timeFieldName: dataView.timeFieldName,
       ...(dataView.dataSourceRef?.id && {

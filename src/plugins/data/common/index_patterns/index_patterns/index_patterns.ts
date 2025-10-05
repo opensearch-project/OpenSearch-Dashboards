@@ -121,7 +121,7 @@ export class IndexPatternsService {
   private async refreshSavedObjectsCache() {
     this.savedObjectsCache = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: 'index-pattern',
-      fields: ['title'],
+      fields: ['title', 'displayName'],
       perPage: 10000,
     });
 
@@ -601,9 +601,9 @@ export class IndexPatternsService {
   find = async (search: string, size: number = 10): Promise<IndexPattern[]> => {
     const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: 'index-pattern',
-      fields: ['title'],
+      fields: ['title', 'displayName'],
       search,
-      searchFields: ['title'],
+      searchFields: ['title', 'displayName'],
       perPage: size,
     });
     const getIndexPatternPromises = savedObjects.map(async (savedObject) => {

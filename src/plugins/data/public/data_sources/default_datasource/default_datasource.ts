@@ -55,6 +55,7 @@ export class DefaultDslDataSource extends DataSource<
         return {
           id: savedObject.id,
           title: savedObject.attributes.title,
+          displayName: savedObject.attributes.displayName, // Include displayName for UI
           dataSourceId: getDataSourceReference(savedObject.references)?.id,
         };
       }),

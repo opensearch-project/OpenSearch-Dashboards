@@ -134,6 +134,8 @@ export interface DataStructure {
   title: string;
   /** The type of the data structure */
   type: string;
+  /** Optional display name for UI (different from title) */
+  displayName?: string;
   /** Optional description of the data structure */
   description?: string;
   /** Optional reference to the parent data structure */
@@ -227,6 +229,8 @@ export interface BaseDataset {
   id: string;
   /** Human-readable name of the dataset that is used to query */
   title: string;
+  /** Optional display name for UI presentation (different from title) */
+  displayName?: string;
   /** The type of the dataset, registered by other classes */
   type: string;
   /** Optional reference to the data source */

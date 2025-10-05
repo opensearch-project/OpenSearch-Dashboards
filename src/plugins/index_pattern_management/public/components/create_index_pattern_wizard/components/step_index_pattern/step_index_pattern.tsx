@@ -62,6 +62,7 @@ interface StepIndexPatternProps {
   indexPatternCreationType: IndexPatternCreationConfig;
   goToPreviousStep: () => void;
   goToNextStep: (query: string, timestampField?: string) => void;
+  onDisplayNameChange?: (displayName: string) => void;
   initialQuery?: string;
   showSystemIndices: boolean;
   dataSourceRef?: DataSourceRef;
@@ -84,6 +85,7 @@ interface StepIndexPatternState {
   showingIndexPatternQueryErrors: boolean;
   indexPatternName: string;
   isIncludingSystemIndices: boolean;
+  displayName: string;
 }
 
 export const canPreselectTimeField = (indices: MatchedItem[]) => {
@@ -129,6 +131,7 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     showingIndexPatternQueryErrors: false,
     indexPatternName: '',
     isIncludingSystemIndices: false,
+    displayName: '',
   };
 
   ILLEGAL_CHARACTERS = [...indexPatterns.ILLEGAL_CHARACTERS];
@@ -277,6 +280,14 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
     this.lastQuery = query;
     this.setState({ query, showingIndexPatternQueryErrors: !!query.length });
     this.fetchIndices(query);
+  };
+
+  onDisplayNameChanged = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const displayName = e.target.value;
+    this.setState({ displayName });
+    if (this.props.onDisplayNameChange) {
+      this.props.onDisplayNameChange(displayName);
+    }
   };
 
   renderLoadingState() {
@@ -428,6 +439,8 @@ export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndex
         characterList={characterList}
         query={query}
         onQueryChanged={this.onQueryChanged}
+        displayName={this.state.displayName}
+        onDisplayNameChanged={this.onDisplayNameChanged}
         goToNextStep={() => goToNextStep(query, canPreselectTimeField(indices))}
         isNextStepDisabled={isNextStepDisabled}
         onChangeIncludingSystemIndices={this.onChangeIncludingSystemIndices}
