@@ -28,7 +28,7 @@ import { WorkspacePickerContent } from '../workspace_picker_content/workspace_pi
 import './workspace_selector.scss';
 
 const createWorkspaceButton = i18n.translate('workspace.menu.button.createWorkspace', {
-  defaultMessage: 'Create team',
+  defaultMessage: 'Create workspace',
 });
 
 const manageWorkspacesButton = i18n.translate('workspace.menu.button.manageWorkspaces', {
@@ -66,7 +66,7 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
   };
 
   const button = currentWorkspace ? (
-    <div className="workspaceSelectorPopoverButtonContainer" data-label="Team">
+    <div className="workspaceSelectorPopoverButtonContainer" data-label="Workspace">
       <EuiPanel
         className="workspaceSelectorPopoverButton"
         data-test-subj="workspace-selector-button"
@@ -113,7 +113,7 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
       </EuiPanel>
     </div>
   ) : (
-    <EuiButton onClick={onButtonClick}>Select a Team</EuiButton>
+    <EuiButton onClick={onButtonClick}>Select a Workspace</EuiButton>
   );
 
   return (

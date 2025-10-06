@@ -134,7 +134,7 @@ export const SelectDataSourcePanel = ({
           body={
             <EuiText size="s">
               {i18n.translate('workspace.forms.selectDataSourcePanel.emptyTableDescription', {
-                defaultMessage: 'At least one data source is required to create a team.',
+                defaultMessage: 'At least one data source is required to create a workspace.',
               })}
             </EuiText>
           }

@@ -28,11 +28,11 @@ import { WorkspacePickerContent } from '../workspace_picker_content/workspace_pi
 import './workspace_menu.scss';
 
 const defaultHeaderName = i18n.translate('workspace.menu.defaultHeaderName', {
-  defaultMessage: 'Teams',
+  defaultMessage: 'Workspaces',
 });
 
 const createWorkspaceButton = i18n.translate('workspace.menu.button.createWorkspace', {
-  defaultMessage: 'Create team',
+  defaultMessage: 'Create workspace',
 });
 
 const manageWorkspacesButton = i18n.translate('workspace.menu.button.manageWorkspaces', {
@@ -74,7 +74,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
   const currentWorkspaceButton = (
     <EuiToolTip
       content={i18n.translate('workspace.icon.menu.title', {
-        defaultMessage: 'Teams',
+        defaultMessage: 'Workspaces',
       })}
     >
       <EuiButtonIcon

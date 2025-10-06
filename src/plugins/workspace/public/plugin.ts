@@ -121,8 +121,8 @@ export class WorkspacePlugin
   }
 
   /**
-   * Filter nav links by the current team, once the current team change, the nav links(left nav bar)
-   * should also be updated according to the configured features of the current team
+   * Filter nav links by the current workspace, once the current workspace change, the nav links(left nav bar)
+   * should also be updated according to the configured features of the current workspace
    */
   private filterNavLinks = (core: CoreStart) => {
     const currentWorkspace$ = core.workspaces.currentWorkspace$;
@@ -157,7 +157,7 @@ export class WorkspacePlugin
             return;
           }
           /**
-           * Change the app to `inaccessible` if it is not configured in the team
+           * Change the app to `inaccessible` if it is not configured in the workspace
            * If trying to access such app, an "Application Not Found" page will be displayed
            */
           return { status: AppStatus.inaccessible };
@@ -179,7 +179,7 @@ export class WorkspacePlugin
            * The following logic determines whether a navigation group should be hidden or not based on the workspace's feature configurations.
            * It checks the following conditions:
            * 1. The navigation group is not a system-level group.
-           * 2. The current team has feature configurations set up.
+           * 2. The current workspace has feature configurations set up.
            * 3. The current navigation group is not included in the feature configurations of the workspace.
            *
            * If all these conditions are true, it means that the navigation group should be hidden.
@@ -316,7 +316,7 @@ export class WorkspacePlugin
     core.application.register({
       id: WORKSPACE_CREATE_APP_ID,
       title: i18n.translate('workspace.settings.workspaceCreate', {
-        defaultMessage: 'Create a team',
+        defaultMessage: 'Create a workspace',
       }),
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
@@ -343,7 +343,7 @@ export class WorkspacePlugin
     core.application.register({
       id: WORKSPACE_DETAIL_APP_ID,
       title: i18n.translate('workspace.settings.workspaceDetail', {
-        defaultMessage: 'Team Detail',
+        defaultMessage: 'Workspace Detail',
       }),
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.visible
@@ -355,7 +355,7 @@ export class WorkspacePlugin
     });
 
     /**
-     * register team collaborators page
+     * register workspace collaborators page
      */
     core.application.register({
       id: WORKSPACE_COLLABORATORS_APP_ID,
@@ -376,7 +376,7 @@ export class WorkspacePlugin
     core.application.register({
       id: WORKSPACE_INITIAL_APP_ID,
       title: i18n.translate('workspace.settings.workspaceInitial', {
-        defaultMessage: 'Team Initial',
+        defaultMessage: 'Workspace Initial',
       }),
       navLinkStatus: AppNavLinkStatus.hidden,
       chromeless: true,
@@ -426,7 +426,7 @@ export class WorkspacePlugin
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,
       description: i18n.translate('workspace.workspaceList.description', {
-        defaultMessage: 'Organize collaborative projects in use-case-specific teams.',
+        defaultMessage: 'Organize collaborative projects in use-case-specific workspaces.',
       }),
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');
@@ -526,7 +526,7 @@ export class WorkspacePlugin
         id: WORKSPACE_LIST_APP_ID,
         order: 350,
         title: i18n.translate('workspace.settings.workspaces', {
-          defaultMessage: 'Teams',
+          defaultMessage: 'Workspaces',
         }),
       },
     ]);

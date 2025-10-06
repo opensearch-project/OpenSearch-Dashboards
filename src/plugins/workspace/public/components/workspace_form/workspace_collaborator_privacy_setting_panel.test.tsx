@@ -152,7 +152,7 @@ describe('WorkspaceCollaboratorPrivacySettingPanel', () => {
     const addSuccessMock = useOpenSearchDashboards().services.notifications?.toasts.addSuccess;
     await waitFor(() => {
       expect(addSuccessMock).toHaveBeenCalledWith({
-        title: 'Change team privacy successfully.',
+        title: 'Change workspace privacy successfully.',
       });
     });
   });
@@ -178,7 +178,7 @@ describe('WorkspaceCollaboratorPrivacySettingPanel', () => {
     const addErrorMock = useOpenSearchDashboards().services.notifications?.toasts.addError;
     await waitFor(() => {
       expect(addErrorMock).toHaveBeenCalledWith(expect.any(Error), {
-        title: 'Error updating team privacy type',
+        title: 'Error updating workspace privacy type',
       });
     });
   });

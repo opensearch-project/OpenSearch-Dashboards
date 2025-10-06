@@ -28,7 +28,7 @@ import { validateWorkspaceColor } from '../../../common/utils';
 import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
 
 const searchFieldPlaceholder = i18n.translate('workspace.menu.search.placeholder', {
-  defaultMessage: 'Search team name',
+  defaultMessage: 'Search workspace name',
 });
 
 const getValidWorkspaceColor = (color?: string) =>
@@ -128,7 +128,7 @@ export const WorkspacePickerContent = ({
           <EuiText size="m">
             <p>
               {i18n.translate('workspace.picker.empty.state.title', {
-                defaultMessage: 'No team available',
+                defaultMessage: 'No workspace available',
               })}
             </p>
           </EuiText>
@@ -138,11 +138,11 @@ export const WorkspacePickerContent = ({
             <p>
               {isDashboardAdmin
                 ? i18n.translate('workspace.picker.empty.state.description.admin', {
-                    defaultMessage: 'Create a team to get start',
+                    defaultMessage: 'Create a workspace to get start',
                   })
                 : i18n.translate('workspace.picker.empty.state.description.noAdmin', {
                     defaultMessage:
-                      'Contact your administrator to create a team or to be added to an existing one',
+                      'Contact your administrator to create a workspace or to be added to an existing one',
                   })}
             </p>
           </EuiText>

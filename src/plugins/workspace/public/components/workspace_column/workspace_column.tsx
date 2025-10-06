@@ -47,8 +47,8 @@ export function WorkspaceColumn({ coreSetup, workspaces }: WorkspaceColumnProps)
               iconSide="right"
               onClick={toggleBadgePopover}
               iconOnClick={toggleBadgePopover}
-              iconOnClickAriaLabel="Open teams popover"
-              onClickAriaLabel="Open teams popover"
+              iconOnClickAriaLabel="Open workspaces popover"
+              onClickAriaLabel="Open workspaces popover"
               data-test-subj="workspace-column-more-workspaces-badge"
             >
               + {remainingWorkspacesCount} more
@@ -85,7 +85,7 @@ export function getWorkspaceColumn(
       align: 'left',
       field: 'workspaces',
       name: i18n.translate('workspace.objectsTable.table.columnWorkspacesName', {
-        defaultMessage: 'Team',
+        defaultMessage: 'Workspace',
       }),
       render: (workspaces: string[]) => {
         return <WorkspaceColumn coreSetup={coreSetup} workspaces={workspaces} />;

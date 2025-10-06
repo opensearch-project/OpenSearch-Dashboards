@@ -57,7 +57,7 @@ export const WorkspaceDescriptionField = ({
         data-test-subj="workspaceForm-workspaceDetails-descriptionInputText"
         rows={4}
         placeholder={i18n.translate('workspace.form.workspaceDetails.description.placeholder', {
-          defaultMessage: 'Describe the team',
+          defaultMessage: 'Describe the workspace',
         })}
         readOnly={readOnly}
       />
