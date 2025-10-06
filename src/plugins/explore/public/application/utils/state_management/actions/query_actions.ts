@@ -23,8 +23,10 @@ import {
 } from '../../../../../../data/public';
 import {
   buildPointSeriesData,
+  buildChartFromBreakdownSeries,
   createHistogramConfigs,
   getDimensions,
+  Dimensions,
 } from '../../../../components/chart/utils';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 import { RootState } from '../store';
@@ -174,8 +176,17 @@ export const histogramResultsProcessor: HistogramDataProcessor = (
     const dimensions = getDimensions(histogramConfigs, data);
 
     result.bucketInterval = bucketAggConfig.buckets?.getInterval();
-    // @ts-ignore tabifiedData is compatible but due to the way it is typed typescript complains
-    result.chartData = buildPointSeriesData(tabifiedData, dimensions);
+
+    // Check if we have a breakdown series response
+    if ((rawResults as any).breakdownSeries && dimensions) {
+      result.chartData = buildChartFromBreakdownSeries(
+        (rawResults as any).breakdownSeries,
+        dimensions as Dimensions
+      ) as ChartData;
+    } else if (dimensions) {
+      // @ts-ignore tabifiedData is compatible but due to the way it is typed typescript complains
+      result.chartData = buildPointSeriesData(tabifiedData, dimensions);
+    }
   }
 
   return result;
@@ -525,7 +536,20 @@ const createSearchSourceWithQuery = async (
     breakdownField
   );
   if (histogramConfigs) {
-    searchSource.setField('aggs', histogramConfigs.toDsl());
+    const aggDsl = histogramConfigs.toDsl();
+
+    // Manually inject breakdownField into the date_histogram aggregation
+    // because toDsl() strips custom parameters
+    if (breakdownField && aggDsl) {
+      Object.keys(aggDsl).forEach((key) => {
+        const agg = aggDsl[key];
+        if (agg && agg.date_histogram) {
+          agg.date_histogram.breakdownField = breakdownField;
+        }
+      });
+    }
+
+    searchSource.setField('aggs', aggDsl);
   }
 
   return searchSource;

@@ -346,7 +346,7 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
         yAccessors={['y']}
         data={series.data}
         timeZone={timeZone}
-        color={series.color || colorPalette[index % colorPalette.length]}
+        color={colorPalette[index % colorPalette.length]}
       />
     ));
   };

@@ -165,20 +165,35 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       }
       const aggTypeKey = aggTypeKeys[0];
       if (aggTypeKey === 'date_histogram') {
+        const dateHistogramAgg = value[aggTypeKey];
+        const breakdownField = dateHistogramAgg.breakdownField;
+
         aggsConfig[aggTypeKey] = {
-          ...value[aggTypeKey],
+          ...dateHistogramAgg,
         };
-        aggsConfig.qs = {
-          [key]: `${query.query} | stats count() by span(${query.dataset!.timeFieldName}, ${
-            value[aggTypeKey].fixed_interval ??
-            value[aggTypeKey].calendar_interval ??
-            this.aggsService.calculateAutoTimeExpression({
-              from: fromDate,
-              to: toDate,
-              mode: 'absolute',
-            })
-          })`,
-        };
+
+        const interval =
+          dateHistogramAgg.fixed_interval ??
+          dateHistogramAgg.calendar_interval ??
+          this.aggsService.calculateAutoTimeExpression({
+            from: fromDate,
+            to: toDate,
+            mode: 'absolute',
+          });
+
+        if (breakdownField) {
+          // Generate timechart query with breakdown
+          aggsConfig.qs = {
+            [key]: `${query.query} | timechart span=${interval} limit=4 count() by ${breakdownField}`,
+          };
+        } else {
+          // Standard stats query without breakdown
+          aggsConfig.qs = {
+            [key]: `${query.query} | stats count() by span(${
+              query.dataset!.timeFieldName
+            }, ${interval})`,
+          };
+        }
       }
     });
 
