@@ -28,14 +28,13 @@ export const IndexDataStructureCreator: React.FC<DataStructureCreatorProps> = ({
   const isLast = index === path.length - 1;
   const isFinal = isLast && !current.hasNext;
 
-  // State management
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('single');
   const [customPrefix, setCustomPrefix] = useState('');
   const [validationError, setValidationError] = useState<string>('');
   const [appendedWildcard, setAppendedWildcard] = useState(false);
   const [selectedIndexId, setSelectedIndexId] = useState<string | null>(null);
 
-  // Get matching indices for the custom prefix
+  // Filter indices that match the custom prefix pattern
   const matchingIndices = useMemo(() => {
     if (selectionMode !== 'prefix' || !customPrefix) {
       return [];
@@ -48,13 +47,11 @@ export const IndexDataStructureCreator: React.FC<DataStructureCreatorProps> = ({
     return children.filter((child) => regex.test(child.title)).map((child) => child.title);
   }, [selectionMode, customPrefix, current.children]);
 
-  // Event handlers
   const handleModeChange = (selectedOptions: Array<{ label: string; value?: string }>) => {
     if (selectedOptions.length > 0 && selectedOptions[0].value) {
       const newMode = selectedOptions[0].value as SelectionMode;
       setSelectionMode(newMode);
 
-      // Set default prefix to '*' when switching to prefix mode
       if (newMode === 'prefix') {
         setCustomPrefix('*');
       } else {
@@ -70,28 +67,24 @@ export const IndexDataStructureCreator: React.FC<DataStructureCreatorProps> = ({
     const { target } = e;
     let value = target.value;
 
-    // Automatic asterisk appending logic (exact match to dataset creation wizard)
+    // Auto-append wildcard when user types a single alphanumeric character
+    // Places cursor before the wildcard for continued typing
     if (value.length === 1 && canAppendWildcard(value)) {
       value += '*';
       setAppendedWildcard(true);
-      // Set cursor position after the first character, before the asterisk
       setTimeout(() => target.setSelectionRange(1, 1));
     } else {
-      // Only reset appendedWildcard when user deletes back to just '*'
       if (value === '*' && appendedWildcard) {
         value = '';
         setAppendedWildcard(false);
       }
-      // Note: Unlike my previous version, we don't always set appendedWildcard to false
     }
 
     setCustomPrefix(value);
 
-    // Validate and process the prefix directly (like the original working version)
     const error = validatePrefix(value);
     setValidationError(error);
 
-    // If valid prefix and has matches, create a custom DataStructure
     if (!error && value.trim()) {
       const children = current.children || [];
       const pattern = value.replace(/\*/g, '.*');
@@ -105,7 +98,6 @@ export const IndexDataStructureCreator: React.FC<DataStructureCreatorProps> = ({
           })
         );
       } else {
-        // Create a custom DataStructure for the prefix
         const dataSourceId = path.find((item) => item.type === 'DATA_SOURCE')?.id || 'local';
         const customDataStructure: DataStructure = {
           id: `${dataSourceId}::${value}`,
@@ -118,7 +110,6 @@ export const IndexDataStructureCreator: React.FC<DataStructureCreatorProps> = ({
           },
         };
 
-        // Call selectDataStructure with the custom structure
         selectDataStructure(customDataStructure, path.slice(0, index + 1));
       }
     }

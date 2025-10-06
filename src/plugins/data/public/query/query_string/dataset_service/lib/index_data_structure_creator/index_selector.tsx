@@ -4,10 +4,11 @@
  */
 
 import React from 'react';
-import { EuiComboBox, EuiIcon } from '@elastic/eui';
+import { EuiComboBox, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataStructure, DATA_STRUCTURE_META_TYPES } from '../../../../../../common';
 import { appendIcon } from './index_data_structure_creator_utils';
+import './index_selector.scss';
 
 interface IndexSelectorProps {
   children: DataStructure[] | undefined;
@@ -59,11 +60,18 @@ export const IndexSelector: React.FC<IndexSelectorProps> = ({
         const appendIconElement = appendIcon(child);
 
         return (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
-            {prependIcon}
-            <span style={{ flex: 1 }}>{option.label}</span>
-            {appendIconElement}
-          </div>
+          <EuiFlexGroup
+            className="indexSelectorOption"
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+          >
+            {prependIcon && <EuiFlexItem grow={false}>{prependIcon}</EuiFlexItem>}
+            <EuiFlexItem grow={true}>
+              <span>{option.label}</span>
+            </EuiFlexItem>
+            {appendIconElement && <EuiFlexItem grow={false}>{appendIconElement}</EuiFlexItem>}
+          </EuiFlexGroup>
         );
       }}
       singleSelection

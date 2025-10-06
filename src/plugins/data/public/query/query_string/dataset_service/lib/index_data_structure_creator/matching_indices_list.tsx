@@ -15,6 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+import './matching_indices_list.scss';
 
 interface MatchingIndicesListProps {
   matchingIndices: string[];
@@ -60,7 +61,7 @@ export const MatchingIndicesList: React.FC<MatchingIndicesListProps> = ({
   ));
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none" style={{ maxHeight: '300px' }}>
+    <EuiFlexGroup className="matchingIndicesList" direction="column" gutterSize="none">
       <EuiFlexItem grow={false}>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
@@ -74,7 +75,7 @@ export const MatchingIndicesList: React.FC<MatchingIndicesListProps> = ({
         </EuiText>
         <EuiSpacer size="xs" />
       </EuiFlexItem>
-      <EuiFlexItem style={{ minHeight: 0, height: '100%', overflowY: 'auto' }}>
+      <EuiFlexItem className="matchingIndicesList__scrollable">
         <EuiTable responsive={false} tableLayout="auto">
           <EuiTableBody>{rows}</EuiTableBody>
         </EuiTable>
