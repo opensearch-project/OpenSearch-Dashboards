@@ -12,8 +12,9 @@ This comprehensive guide covers the essentials of developing plugins for OpenSea
 6. [Plugin Lifecycle](#6-plugin-lifecycle)
 7. [Core Services](#7-core-services)
 8. [Integrating Custom Datasources](#8-integrating-custom-datasources)
-9. [Best Practices](#9-best-practices)
-10. [Additional Resources](#10-additional-resources)
+9. [Using OUI v2](#9-using-oui-v2)
+10. [Best Practices](#10-best-practices)
+11. [Additional Resources](#11-additional-resources)
 
 ## 1. Overview
 
@@ -96,13 +97,43 @@ Every plugin requires an `opensearch_dashboards.json` file at its root. This man
 
 ## 4. Creating a Plugin
 
+### 4.1. Core Plugins vs External Plugins
+
+OpenSearch Dashboards has two types of plugins based on their location:
+
+#### 4.1.1. Core Plugins (`src/plugins/`)
+
+Core plugins are part of the main OpenSearch Dashboards repository.
+
+- Located in `src/plugins/`
+- Subject to core contribution guidelines and review process
+- Must maintain backward compatibility
+- Can be depended upon by external plugins
+
+#### 4.1.2. External Plugins (`plugins/`)
+
+External plugins are developed outside the core repository and cloned separately. They can still be shipped with OSD distribution by default.
+
+- Located in `plugins/` directory
+- Can be developed independently
+- Can be released independently or bundled with OSD distribution
+- More flexibility in breaking changes
+- Can depend on core plugins but not vice versa
+
+**When to create a core vs non-core plugin:**
+See https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9807
+
+### 4.2. Using the Plugin Generator
+
 The easiest way to create a new plugin is to use the OpenSearch Dashboards Plugin Generator. Run the following command from the OpenSearch Dashboards repository root:
 
 ```bash
 node scripts/generate_plugin --name my_plugin_name -y
 ```
 
-Options:
+This creates a plugin in the `plugins/` directory by default. You can move it to `src/plugins/` to include it as a new core plugin.
+
+**Options:**
 
 ```bash
 node scripts/generate_plugin
@@ -1051,9 +1082,81 @@ data.query.queryString.getDatasetService().registerType(typeConfig);
 
 You should be able to see your datasource in Discover.
 
-## 9. Best Practices
+## 9. Using OUI v2
 
-### 9.1. Type Safety
+OpenSearch Dashboards is transitioning to OUI v2, a new design system based on shadcn/ui. **All new plugin development should use OUI v2.** OUI v1 (`@elastic/eui`) remains available for backward compatibility with existing code during transitioning.
+
+### 9.1. Import and Use Components
+
+OUI v2 is available to use. It is currently `@amzn/oui` and will eventually point to the official package.
+
+Use named imports to bring in components:
+
+```tsx
+import { Card, Button, Input } from "@amzn/oui";
+
+export const MyComponent = () => {
+  return (
+    <Card>
+      <Button>Click Me</Button>
+      <Input placeholder="Enter text" />
+    </Card>
+  );
+};
+```
+
+### 9.2. Component Documentation (TBD)
+
+For complete component documentation and theming:
+- **Component Reference**: https://ui.shadcn.com/docs/components
+- **Theming Guide**: https://ui.shadcn.com/docs/theming
+
+### 9.3. Guidelines
+
+1. **New Components**: Always use OUI v2 and prefer to reuse shared components from core when available.
+1. **New Features in Existing Plugins**: Prefer OUI v2 unless extensive refactoring of existing OUI v1 code is required.
+1. **Existing Code Maintenance**: Keep OUI v1 code as-is unless actively migrating to OUI v2. Migrating existing usage of v1 to v2 is a separate track.
+1. **Avoid Mixed Usage**: Minimize mixing both libraries within the same component to avoid CSS conflicts and design inconsistency.
+
+For reference, OUI v1 uses the `@elastic/eui` package (aliased to `@opensearch-project/oui`). You may encounter this in existing code:
+
+```typescript
+// Legacy OUI v1 - for reference only
+import { EuiButton, EuiCard, EuiFieldText } from "@elastic/eui";
+```
+
+#### 9.4.1. Shared Components from Core Plugins
+
+Before building custom UI components, check if shared components are available from core plugins. These components will be maintained and migrated to OUI v2 centrally, reducing maintenance burden across the codebase. Here are some examples of shared components.
+
+**From `data` plugin** (`src/plugins/data`):
+```typescript
+import {
+  SearchBar,           // Complete search interface with query input
+  QueryStringInput,    // Query language input field
+  DatasetSelector,     // Dataset/data source picker
+  FilterLabel,         // Display filter labels
+  QueryEditor,         // Code editor for queries
+} from 'src/plugins/data/public';
+```
+
+**From `opensearch_dashboards_react` plugin** (`src/plugins/opensearch_dashboards_react`):
+```typescript
+import {
+  CodeEditor,          // Monaco-based code editor
+  FieldIcon,           // Icons for field types
+  FieldButton,         // Field selection buttons
+  TableListView,       // Table with search/pagination
+  Markdown,            // Markdown renderer
+  OverviewPageHeader,  // Standard page header
+  ValidatedDualRange,  // Dual-handle range input
+  SplitPanel,          // Resizable split panel
+} from 'src/plugins/opensearch_dashboards_react/public';
+```
+
+## 10. Best Practices
+
+### 10.1. Type Safety
 
 Always define clear TypeScript interfaces for your plugin contracts:
 
@@ -1069,7 +1172,7 @@ export interface MyPluginSetup {
 }
 ```
 
-### 9.2. Separation of Concerns
+### 10.2. Separation of Concerns
 
 Keep your plugin modular:
 
@@ -1082,7 +1185,7 @@ my-plugin/
 │   └── types.ts           # Type definitions
 ```
 
-### 9.3. Error Handling
+### 10.3. Error Handling
 
 Always handle errors gracefully:
 
@@ -1101,7 +1204,7 @@ router.get({ path: '/api/data', validate: false }, async (context, req, res) => 
 });
 ```
 
-### 9.4. Logging
+### 10.4. Logging
 
 Use structured logging with appropriate levels:
 
@@ -1112,7 +1215,7 @@ this.logger.warn('Potential issues');
 this.logger.error('Errors that need attention');
 ```
 
-### 9.5. Testing
+### 10.5. Testing
 
 Structure your code for testability:
 
@@ -1134,7 +1237,7 @@ const mockLogger = loggingSystemMock.createLogger();
 const service = new MyService(mockLogger, mockConfig);
 ```
 
-### 9.6. Backward Compatibility
+### 10.6. Backward Compatibility
 
 When evolving APIs, maintain backward compatibility:
 
@@ -1149,7 +1252,7 @@ export interface MyPluginSetup {
 }
 ```
 
-### 9.7. Documentation
+### 10.7. Documentation
 
 Document your public APIs:
 
@@ -1169,7 +1272,7 @@ Document your public APIs:
 getData(id: string): Promise<Data>;
 ````
 
-### 9.8. Resource Cleanup
+### 10.8. Resource Cleanup
 
 Always clean up in the `stop` method:
 
@@ -1181,7 +1284,7 @@ public stop() {
 }
 ```
 
-## 10. Additional Resources
+## 11. Additional Resources
 
 - [OpenSearch Dashboards Plugin Examples](../../examples) - Working example plugins demonstrating various plugin patterns
 - [Core API Documentation](../openapi) - Complete OpenAPI specifications for core services
