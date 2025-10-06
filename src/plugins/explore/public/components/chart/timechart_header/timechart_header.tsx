@@ -41,6 +41,9 @@ import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import { DiscoverChartToggleId } from '../utils/use_persist_chart_state';
+import { BreakdownFieldSelector } from '../breakdown_field_selector';
+import { shouldShowBreakdownSelector } from '../utils/breakdown_utils';
+import { useDatasetContext } from '../../../application/context/dataset_context/dataset_context';
 
 export interface TimechartHeaderBucketInterval {
   scaled?: boolean;
@@ -106,6 +109,8 @@ export function TimechartHeader({
   toggleIdSelected,
 }: TimechartHeaderProps) {
   const [interval, setInterval] = useState(stateInterval);
+  const { dataset } = useDatasetContext();
+  const showBreakdownSelector = shouldShowBreakdownSelector(dataset);
 
   const toMoment = useCallback(
     (datetime: string) => {
@@ -233,6 +238,7 @@ export function TimechartHeader({
                 }
               />
             </EuiFlexItem>
+            {showBreakdownSelector && <BreakdownFieldSelector />}
           </>
         )}
         {additionalControl}

@@ -40,4 +40,15 @@
       font-weight: 600;
     }
   }
+
+  &__breakdown {
+    min-width: $euiSize * 15;
+
+    &__prependText {
+      font-weight: 600;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+    }
+  }
 }
