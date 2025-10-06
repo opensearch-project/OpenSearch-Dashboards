@@ -1,0 +1,2 @@
+test:
+- Reduce runtime of recent queries cypress ([#10656](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10656))
