@@ -158,24 +158,6 @@ export function TimechartHeader({
         {(toggleIdSelected === 'histogram' || additionalControl == null) && (
           <>
             <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate('explore.discover.howToChangeTheTimeTooltip', {
-                  defaultMessage: 'To change the time, use the global time filter above',
-                })}
-                delay="long"
-              >
-                <EuiText data-test-subj="discoverIntervalDateRange" size="s">
-                  {`${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${
-                    interval !== 'auto'
-                      ? i18n.translate('explore.discover.timechartHeader.timeIntervalSelect.per', {
-                          defaultMessage: 'per',
-                        })
-                      : ''
-                  }`}
-                </EuiText>
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
               <EuiSelect
                 className="exploreChart__TimechartHeader__selection"
                 aria-label={i18n.translate(
