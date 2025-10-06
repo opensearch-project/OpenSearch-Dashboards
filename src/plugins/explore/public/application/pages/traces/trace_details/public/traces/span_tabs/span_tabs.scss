@@ -6,7 +6,7 @@
 // Issues Tab Styles
 .exploreSpanTabs__issuesContainer {
   min-height: auto;
-  max-height: 300px;
+  max-height: none;
   overflow: auto;
 }
 
@@ -14,6 +14,7 @@
   min-height: auto;
   max-height: none;
   word-break: break-word;
+  white-space: pre-wrap;
 }
 
 // Overview Tab Styles

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -54,6 +54,9 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
   isLogsLoading = false,
 }) => {
   const [activeTab, setActiveTab] = useState<TabId>(SpanDetailTab.OVERVIEW);
+  const [scrollPositions, setScrollPositions] = useState<Partial<Record<TabId, number>>>({});
+  const contentRef = useRef<HTMLDivElement>(null);
+  const previousActiveTab = useRef<TabId>(activeTab);
 
   // Calculate counts for badges
   const issueCount = useMemo(() => {
@@ -138,6 +141,39 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
 
     return tabList;
   }, [selectedSpan, addSpanFilter, issueCount, logDatasets, logsData, spanLogs, isLogsLoading]);
+  const activeTabContent = useMemo(() => {
+    const tab = tabs.find((t) => t.id === activeTab);
+    return tab?.content || null;
+  }, [tabs, activeTab]);
+
+  // Save scroll position when switching tabs
+  useEffect(() => {
+    if (previousActiveTab.current !== activeTab && contentRef.current) {
+      // Save scroll position of the previous tab
+      const scrollTop = contentRef.current.scrollTop;
+      if (scrollTop > 0) {
+        setScrollPositions((prev) => ({
+          ...prev,
+          [previousActiveTab.current]: scrollTop,
+        }));
+      }
+
+      // Update the previous active tab reference
+      previousActiveTab.current = activeTab;
+    }
+  }, [activeTab]);
+
+  // Restore scroll position when tab content changes
+  useEffect(() => {
+    if (contentRef.current && scrollPositions[activeTab] !== undefined) {
+      // Use setTimeout to ensure the content is rendered before scrolling
+      setTimeout(() => {
+        if (contentRef.current) {
+          contentRef.current.scrollTop = scrollPositions[activeTab] || 0;
+        }
+      }, 0);
+    }
+  }, [activeTab, activeTabContent, scrollPositions]);
 
   // Auto-fallback to 'overview' tab when the current active tab is no longer available
   useEffect(() => {
@@ -145,11 +181,6 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
     if (!availableTabIds.includes(activeTab)) {
       setActiveTab(SpanDetailTab.OVERVIEW);
     }
-  }, [tabs, activeTab]);
-
-  const activeTabContent = useMemo(() => {
-    const tab = tabs.find((t) => t.id === activeTab);
-    return tab?.content || null;
   }, [tabs, activeTab]);
 
   return (
@@ -196,7 +227,7 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
       </div>
 
       {/* Scrollable content section */}
-      <div className="exploreSpanDetailSidebar__content">
+      <div className="exploreSpanDetailSidebar__content" ref={contentRef}>
         <EuiSpacer size="s" />
         {activeTabContent}
       </div>
