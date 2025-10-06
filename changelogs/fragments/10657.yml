@@ -1,2 +1,5 @@
+fix:
+- Made scroll persistent between tabs ([#10657](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10657))
+
 feat:
 - Traces bugs fixes and enhanced information by adding span kind column ([#10657](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10657))
