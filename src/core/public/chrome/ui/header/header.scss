@@ -4,6 +4,7 @@
 */
 
 .newTopNavHeader {
+  justify-content: normal;
   z-index: 1000;
   padding: 0 $euiSizeS $euiSizeS;
   box-shadow: none;
@@ -55,9 +56,11 @@
       flex-wrap: wrap;
 
       .globalDatePicker {
-        flex-basis: 100%;
-        width: 100%;
-        margin-left: 0;
+
+        // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+        .euiPopover {
+          float: right;
+        }
       }
     }
 
@@ -93,6 +96,7 @@
   }
 
   @include euiBreakpoint("xs", "s") {
+
     // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
     & > .euiHeaderSection {
       align-items: baseline;
