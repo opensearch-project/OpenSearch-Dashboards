@@ -156,8 +156,8 @@ jobs:
         ${{ (matrix.config == 'query_enhanced' || matrix.config == 'explore') &&
         '/bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"' ||
         matrix.config == 'dashboard' &&
-        'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none' ||
-        'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none' }}
+        'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none -E cluster.blocks.create_index=false' ||
+        'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none -E cluster.blocks.create_index=false' }}
       # prevents extra Cypress installation progress messages
       CI: 1
       # avoid warnings like "tput: No value for $TERM and no -T specified"
@@ -294,6 +294,25 @@ jobs:
         run: |
           /bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"
           sleep 30
+        shell: bash
+
+      - name: Configure OpenSearch cluster settings to prevent index creation blocking
+        if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
+        run: |
+          # Wait for OpenSearch to be ready and configure cluster settings
+          until curl -s http://localhost:9200/_cluster/health; do
+            echo "Waiting for OpenSearch to start..."
+            sleep 5
+          done
+
+          # Disable cluster-level index creation blocks
+          curl -X PUT "http://localhost:9200/_cluster/settings" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "persistent": {
+                "cluster.blocks.create_index": false
+              }
+            }' || echo "Failed to set cluster settings, continuing..."
         shell: bash
 
       # Clear Cypress Cache before running OSD tests
