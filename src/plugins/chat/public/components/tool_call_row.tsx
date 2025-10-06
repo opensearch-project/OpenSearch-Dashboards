@@ -48,8 +48,8 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
     // For graph visualization tools, get the data from context
     if (isGraphTool) {
       // Check context toolCallStates for immediate data availability
-      let args = undefined;
-      let result = undefined;
+      let args;
+      let result;
 
       if (context?.toolCallStates) {
         const ourToolState = context.toolCallStates.get(toolCall.id);
@@ -73,7 +73,7 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
 
       // Determine the correct status and result
       let renderStatus = 'executing';
-      let renderResult = result;
+      const renderResult = result;
 
       // If we have a result from the context, the tool is complete
       if (result && typeof result === 'object' && result.success !== undefined) {
