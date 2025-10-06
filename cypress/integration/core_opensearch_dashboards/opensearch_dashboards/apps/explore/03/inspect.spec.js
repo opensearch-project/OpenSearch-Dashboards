@@ -42,6 +42,7 @@ const inspectTestSuite = () => {
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
+      cy.osd.grabDataSourceId(workspaceName, DATASOURCE_NAME);
       cy.get('@WORKSPACE_ID').then((workspaceID) => {
         cy.get('@DATASOURCE_ID').then((dataSourceId) => {
           cy.request({
