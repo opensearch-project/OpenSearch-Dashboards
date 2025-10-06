@@ -27,10 +27,116 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
   const context = useContext(AssistantActionContext);
 
   // Try to get custom renderer if context is available
-  const renderer = context?.getActionRenderer?.(toolCall.toolName);
+  // Handle tool name mapping for graph visualization
+  const actualToolName =
+    toolCall.toolName === 'execute_promql_query' ? 'graph_timeseries_data' : toolCall.toolName;
+  const renderer = context?.getActionRenderer?.(actualToolName);
 
-  // Direct graph rendering for graph_timeseries_data tool
-  if (toolCall.toolName === 'graph_timeseries_data') {
+  // Check if this is a graph visualization tool (handles both names)
+  const isGraphTool =
+    toolCall.toolName === 'graph_timeseries_data' || toolCall.toolName === 'execute_promql_query';
+
+  // Try to use context-based custom renderer first if available
+  const shouldUseCustomRenderer =
+    context &&
+    renderer &&
+    (toolCall.toolName === 'request_user_confirmation' || // Always render for user confirmation
+      isGraphTool || // Always render for graph visualization (both names)
+      (toolCall.status === 'completed' && toolCall.result && toolCall.toolName === 'ppl_query')); // Other completed tools
+
+  if (shouldUseCustomRenderer) {
+    // For graph visualization tools, get the data from context
+    if (isGraphTool) {
+      // Check context toolCallStates for immediate data availability
+      let args = undefined;
+      let result = undefined;
+
+      if (context?.toolCallStates) {
+        const ourToolState = context.toolCallStates.get(toolCall.id);
+        if (ourToolState?.args) {
+          args = ourToolState.args;
+        }
+        if (ourToolState?.result) {
+          result = ourToolState.result;
+        }
+      }
+
+      // Also try to parse result from toolCall.result
+      if (!result && toolCall.result) {
+        try {
+          result = JSON.parse(toolCall.result);
+        } catch (error) {
+          // Not JSON, use as is
+          result = toolCall.result;
+        }
+      }
+
+      // Determine the correct status and result
+      let renderStatus = 'executing';
+      let renderResult = result;
+
+      // If we have a result from the context, the tool is complete
+      if (result && typeof result === 'object' && result.success !== undefined) {
+        renderStatus = result.success ? 'complete' : 'failed';
+      } else if (toolCall.status === 'completed') {
+        renderStatus = 'complete';
+      } else if (toolCall.status === 'error') {
+        renderStatus = 'failed';
+      }
+
+      return (
+        <div className="toolCallRow">
+          {renderer({
+            status: renderStatus,
+            args,
+            result: renderResult,
+            error: toolCall.status === 'error' ? toolCall.result : undefined,
+          })}
+        </div>
+      );
+    }
+
+    // For user confirmation, we don't need to parse result - just pass the status and args
+    if (toolCall.toolName === 'request_user_confirmation') {
+      return (
+        <div className="toolCallRow">
+          {renderer({
+            status: toolCall.status === 'running' ? 'executing' : 'complete',
+            args: undefined, // Args would come from the tool execution context
+            result: toolCall.result,
+            error: undefined,
+          })}
+        </div>
+      );
+    }
+
+    // For other tools, try to parse JSON result
+    try {
+      const parsedResult = JSON.parse(toolCall.result!);
+      const isStructuredResult =
+        typeof parsedResult === 'object' &&
+        (parsedResult.success !== undefined || parsedResult.graphData !== undefined);
+
+      if (isStructuredResult) {
+        return (
+          <div className="toolCallRow">
+            {renderer({
+              status: 'complete',
+              args: parsedResult.graphData || parsedResult,
+              result: parsedResult,
+              error: undefined,
+            })}
+          </div>
+        );
+      }
+    } catch (error) {
+      // Tool result is not JSON, fall through to default rendering
+      // In production, this would be logged through a proper logging service
+    }
+  }
+
+  // Direct graph rendering for graph visualization tools (fallback)
+  if (isGraphTool) {
     // Function to find graph data from context or toolCall
     const findGraphData = () => {
       // Check toolCall result first
@@ -248,53 +354,6 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
           </div>
         </div>
       );
-    }
-  }
-
-  // Try to use context-based custom renderer if available
-  const shouldUseCustomRenderer =
-    context &&
-    renderer &&
-    (toolCall.toolName === 'request_user_confirmation' || // Always render for user confirmation
-      (toolCall.status === 'completed' && toolCall.result && toolCall.toolName === 'ppl_query')); // Other completed tools
-
-  if (shouldUseCustomRenderer) {
-    // For user confirmation, we don't need to parse result - just pass the status and args
-    if (toolCall.toolName === 'request_user_confirmation') {
-      return (
-        <div className="toolCallRow">
-          {renderer({
-            status: toolCall.status === 'running' ? 'executing' : 'complete',
-            args: undefined, // Args would come from the tool execution context
-            result: toolCall.result,
-            error: undefined,
-          })}
-        </div>
-      );
-    }
-
-    // For other tools, try to parse JSON result
-    try {
-      const parsedResult = JSON.parse(toolCall.result!);
-      const isStructuredResult =
-        typeof parsedResult === 'object' &&
-        (parsedResult.success !== undefined || parsedResult.graphData !== undefined);
-
-      if (isStructuredResult) {
-        return (
-          <div className="toolCallRow">
-            {renderer({
-              status: 'complete',
-              args: parsedResult.graphData || parsedResult,
-              result: parsedResult,
-              error: undefined,
-            })}
-          </div>
-        );
-      }
-    } catch (error) {
-      // Tool result is not JSON, fall through to default rendering
-      // In production, this would be logged through a proper logging service
     }
   }
 

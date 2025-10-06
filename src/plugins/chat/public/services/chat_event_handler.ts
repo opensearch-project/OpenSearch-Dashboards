@@ -294,6 +294,7 @@ export class ChatEventHandler {
         // Don't send result back immediately, wait for TOOL_CALL_RESULT event
       } else {
         // Tool was executed locally
+
         this.assistantActionService.updateToolCallState(toolCallId, {
           status: 'complete',
           result: result.data,
