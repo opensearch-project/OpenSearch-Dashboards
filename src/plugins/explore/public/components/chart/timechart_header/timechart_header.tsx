@@ -95,6 +95,10 @@ export interface TimechartHeaderProps {
    * Additional control element
    */
   additionalControl?: React.JSX.Element;
+  /**
+   * Explore services for executing queries
+   */
+  services?: any;
 }
 
 export function TimechartHeader({
@@ -107,6 +111,7 @@ export function TimechartHeader({
   stateInterval,
   additionalControl,
   toggleIdSelected,
+  services,
 }: TimechartHeaderProps) {
   const [interval, setInterval] = useState(stateInterval);
   const { dataset } = useDatasetContext();
@@ -238,7 +243,7 @@ export function TimechartHeader({
                 }
               />
             </EuiFlexItem>
-            {showBreakdownSelector && <BreakdownFieldSelector />}
+            {showBreakdownSelector && services && <BreakdownFieldSelector services={services} />}
           </>
         )}
         {additionalControl}

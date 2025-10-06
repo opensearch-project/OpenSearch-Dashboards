@@ -358,12 +358,15 @@ const executeQueryBase = async (
       // Histogram-specific: Get interval and create with aggregations
       const state = getState();
       const effectiveInterval = interval || state.legacy?.interval || 'auto';
+      const breakdownField = state.queryEditor.breakdownField;
       searchSource = await createSearchSourceWithQuery(
         preparedQueryObject,
         dataView,
         services,
         true, // Include histogram
-        effectiveInterval
+        effectiveInterval,
+        undefined, // size
+        breakdownField
       );
     } else {
       // Tab-specific: Create without aggregations
@@ -476,7 +479,8 @@ const createSearchSourceWithQuery = async (
   services: ExploreServices,
   includeHistogram: boolean = false,
   customInterval?: string,
-  sizeParam?: number
+  sizeParam?: number,
+  breakdownField?: string
 ) => {
   const { uiSettings, data } = services;
   const size = sizeParam || uiSettings.get(SAMPLE_SIZE_SETTING);
@@ -514,7 +518,12 @@ const createSearchSourceWithQuery = async (
   }
 
   // Add histogram aggregations if requested and time-based
-  const histogramConfigs = createHistogramConfigs(dataView, customInterval, services.data);
+  const histogramConfigs = createHistogramConfigs(
+    dataView,
+    customInterval,
+    services.data,
+    breakdownField
+  );
   if (histogramConfigs) {
     searchSource.setField('aggs', histogramConfigs.toDsl());
   }

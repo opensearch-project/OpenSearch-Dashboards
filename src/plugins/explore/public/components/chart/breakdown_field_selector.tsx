@@ -11,13 +11,28 @@ import { DataViewField } from '../../../../data/common';
 import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
 import { RootState } from '../../application/utils/state_management/store';
 import { setBreakdownField } from '../../application/utils/state_management/slices/query_editor';
+import {
+  clearResultsByKey,
+  clearQueryStatusMapByKey,
+} from '../../application/utils/state_management/slices';
+import {
+  executeHistogramQuery,
+  defaultPrepareQueryString,
+} from '../../application/utils/state_management/actions/query_actions';
+import { ExploreServices } from '../../types';
 
-export const BreakdownFieldSelector: React.FC = () => {
+export interface BreakdownFieldSelectorProps {
+  services: ExploreServices;
+}
+
+export const BreakdownFieldSelector: React.FC<BreakdownFieldSelectorProps> = ({ services }) => {
   const dispatch = useDispatch();
   const { dataset, isLoading } = useDatasetContext();
 
   // Read breakdown field from Redux state
   const breakdownField = useSelector((state: RootState) => state.queryEditor.breakdownField);
+  const query = useSelector((state: RootState) => state.query);
+  const interval = useSelector((state: RootState) => state.legacy.interval);
   const [error, setError] = useState<string | undefined>(undefined);
 
   // Get available fields from the dataset
@@ -40,6 +55,12 @@ export const BreakdownFieldSelector: React.FC = () => {
   const handleFieldChange = (selected: Array<{ label: string; value?: string }>) => {
     const newField = selected.length > 0 && selected[0].value ? selected[0].value : undefined;
     dispatch(setBreakdownField(newField));
+
+    // Clear cache and trigger new histogram query with the breakdown field
+    const cacheKey = defaultPrepareQueryString(query);
+    dispatch(clearResultsByKey(cacheKey));
+    dispatch(clearQueryStatusMapByKey(cacheKey));
+    dispatch(executeHistogramQuery({ services, cacheKey, interval }));
   };
 
   return (

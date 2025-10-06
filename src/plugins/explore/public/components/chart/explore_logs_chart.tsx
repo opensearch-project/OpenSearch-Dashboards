@@ -129,6 +129,7 @@ export const ExploreLogsChart = ({
         stateInterval={interval || ''}
         toggleIdSelected={toggleIdSelected}
         additionalControl={buttonGroup}
+        services={services}
       />
     </div>
   );
