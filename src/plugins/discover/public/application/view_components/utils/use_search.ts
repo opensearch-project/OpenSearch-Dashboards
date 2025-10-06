@@ -11,7 +11,7 @@ import { useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
-import { search } from '../../../../../data/public';
+import { search, UI_SETTINGS } from '../../../../../data/public';
 import { validateTimeRange } from '../../helpers/validate_time_range';
 import { updateSearchSource } from './update_search_source';
 import { useIndexPattern } from './use_index_pattern';
@@ -156,7 +156,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       // Execute the search
       const fetchResp = await searchSource.fetch({
         abortSignal: fetchStateRef.current.abortController.signal,
-        withLongNumeralsSupport: true,
+        withLongNumeralsSupport: await services.uiSettings.get(UI_SETTINGS.DATA_WITH_LONG_NUMERALS),
       });
 
       inspectorRequest

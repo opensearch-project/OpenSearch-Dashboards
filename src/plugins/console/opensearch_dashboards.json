@@ -3,7 +3,7 @@
   "version": "opensearchDashboards",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["devTools"],
+  "requiredPlugins": ["devTools", "data"],
   "optionalPlugins": ["usageCollection", "home", "dataSource"],
   "requiredBundles": [
     "opensearchUiShared",
