@@ -49,7 +49,7 @@ import {
   SavedObjectsPermissionControl,
   SavedObjectsPermissionControlContract,
 } from './permission_control/client';
-import { updateDashboardAdminStateForRequest } from './utils';
+import { translatePermissionsToRole, updateDashboardAdminStateForRequest } from './utils';
 import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consumer_wrapper';
 import { WorkspaceUiSettingsClientWrapper } from './saved_objects/workspace_ui_settings_client_wrapper';
 import { uiSettings } from './ui_settings';
@@ -297,6 +297,8 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
 
     return {
       client: this.client,
+      permissionsControlClient: this.permissionControl,
+      translatePermissionsToModeId: translatePermissionsToRole,
     };
   }
 
