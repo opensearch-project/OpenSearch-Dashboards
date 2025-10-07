@@ -70,9 +70,10 @@ describe('gantt_chart_spec', () => {
     // Check data sources
     expect(spec.data).toBeDefined();
     if (spec.data) {
-      expect(spec.data.length).toBe(2);
+      expect(spec.data.length).toBe(3);
       expect(spec.data[0].name).toBe('spans');
       expect(spec.data[1].name).toBe('error_spans');
+      expect(spec.data[2].name).toBe('fault_spans');
 
       // Check error_spans filter
       expect((spec.data[1] as any).source).toBe('spans');
@@ -81,7 +82,17 @@ describe('gantt_chart_spec', () => {
         expect(spec.data[1].transform.length).toBe(1);
         const transform = spec.data[1].transform[0] as any;
         expect(transform.type).toBe('filter');
-        expect(transform.expr).toBe('datum.hasError');
+        expect(transform.expr).toBe('datum.hasClientError');
+      }
+
+      // Check fault_spans filter
+      expect((spec.data[2] as any).source).toBe('spans');
+
+      if (spec.data[2].transform && spec.data[2].transform.length > 0) {
+        expect(spec.data[2].transform.length).toBe(1);
+        const transform = spec.data[2].transform[0] as any;
+        expect(transform.type).toBe('filter');
+        expect(transform.expr).toBe('datum.hasServerFault');
       }
     }
   });
@@ -155,6 +166,11 @@ describe('gantt_chart_spec', () => {
         (mark) => mark.type === 'symbol' && mark.from && (mark.from as any).data === 'error_spans'
       );
       expect(errorIndicators).toBeDefined();
+
+      const faultIndicators = spec.marks.find(
+        (mark) => mark.type === 'symbol' && mark.from && (mark.from as any).data === 'fault_spans'
+      );
+      expect(faultIndicators).toBeDefined();
 
       const textLabels = spec.marks.filter((mark) => mark.type === 'text');
       expect(textLabels.length).toBeGreaterThan(0);

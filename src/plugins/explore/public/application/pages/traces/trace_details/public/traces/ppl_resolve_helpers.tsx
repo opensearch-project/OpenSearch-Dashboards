@@ -261,7 +261,11 @@ export function resolveInstrumentationScopeFromDatarows(
 }
 
 export function isSpanError(span: any): boolean {
-  if (!span) return false;
+  return isSpanClientError(span) || isSpanServerFault(span);
+}
+
+export function isSpanServerFault(span: any): boolean {
+  if (!span || isSpanClientError(span)) return false;
 
   if (span['status.code'] === 2) {
     return true;
@@ -275,11 +279,16 @@ export function isSpanError(span: any): boolean {
   }
 
   const httpStatusCode = extractHttpStatusCode(span);
-  if (httpStatusCode && httpStatusCode >= 400) {
+  if (httpStatusCode && httpStatusCode >= 500) {
     return true;
   }
 
   return false;
+}
+
+export function isSpanClientError(span: any): boolean {
+  const httpStatusCode = extractHttpStatusCode(span);
+  return !!httpStatusCode && 400 <= httpStatusCode && httpStatusCode < 500;
 }
 
 function extractHttpStatusCode(span: any): number | undefined {

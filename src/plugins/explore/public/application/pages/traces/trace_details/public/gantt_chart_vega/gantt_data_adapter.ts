@@ -9,7 +9,10 @@ import {
   isSpanError,
   resolveServiceNameFromSpan,
   hasNanosecondPrecision,
+  isSpanClientError,
+  isSpanServerFault,
 } from '../traces/ppl_resolve_helpers';
+import { extractHttpStatusCode } from '../utils/span_data_utils';
 
 interface SpanSource {
   traceId: string;
@@ -23,6 +26,7 @@ interface SpanSource {
   'status.code': number;
   traceGroup?: string;
   kind?: string;
+  'http.status_code'?: number;
 }
 
 interface SpanData {
@@ -56,6 +60,7 @@ function getSpanSource(span: SpanData): SpanSource {
     'status.code': span['status.code'] || 0,
     traceGroup: span.traceGroup,
     kind: span.kind,
+    'http.status_code': extractHttpStatusCode(span),
   };
 }
 
@@ -68,6 +73,8 @@ interface VegaSpan {
   duration: number;
   level: number;
   hasError: boolean;
+  hasClientError: boolean;
+  hasServerFault: boolean;
   color: string;
 }
 
@@ -259,6 +266,8 @@ export function convertToVegaGanttData(
       duration,
       level,
       hasError: isSpanError(source),
+      hasClientError: isSpanClientError(source),
+      hasServerFault: isSpanServerFault(source),
       color: serviceColorMap[serviceName],
     };
   });

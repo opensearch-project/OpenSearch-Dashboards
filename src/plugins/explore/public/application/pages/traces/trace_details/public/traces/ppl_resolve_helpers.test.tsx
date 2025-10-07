@@ -21,6 +21,8 @@ import {
   resolveInstrumentationScopeFromDatarows,
   isSpanError,
   resolveServiceNameFromSpan,
+  isSpanServerFault,
+  isSpanClientError,
 } from './ppl_resolve_helpers';
 
 describe('ppl_resolve_helpers', () => {
@@ -479,6 +481,79 @@ describe('ppl_resolve_helpers', () => {
     it('returns false when no error indicators found', () => {
       expect(isSpanError({})).toBe(false);
       expect(isSpanError({ name: 'test-span' })).toBe(false);
+    });
+  });
+
+  describe('isSpanServerFault', () => {
+    it('detects error from status.code field (legacy format)', () => {
+      expect(isSpanServerFault({ 'status.code': 2 })).toBe(true);
+      expect(isSpanServerFault({ 'status.code': 1 })).toBe(false);
+      expect(isSpanServerFault({ 'status.code': 0 })).toBe(false);
+    });
+
+    it('detects error from nested status object', () => {
+      expect(isSpanServerFault({ status: { code: 2 } })).toBe(true);
+      expect(isSpanServerFault({ status: { code: 'ERROR' } })).toBe(true);
+      expect(isSpanServerFault({ status: { code: 'OK' } })).toBe(false);
+    });
+
+    it('detects error from HTTP status codes (5xx)', () => {
+      expect(isSpanServerFault({ attributes: { http: { status_code: 500 } } })).toBe(true);
+      expect(isSpanServerFault({ attributes: { http: { status_code: 200 } } })).toBe(false);
+      expect(isSpanServerFault({ attributes: { http: { status_code: 301 } } })).toBe(false);
+      expect(isSpanServerFault({ attributes: { http: { status_code: 404 } } })).toBe(false);
+    });
+
+    it('handles various HTTP status code formats', () => {
+      expect(isSpanServerFault({ 'attributes.http.status_code': 500 })).toBe(true);
+      expect(isSpanServerFault({ attributes: { 'http.status_code': 500 } })).toBe(true);
+      expect(isSpanServerFault({ attributes: { http: { response: { status_code: 500 } } } })).toBe(
+        true
+      );
+      expect(isSpanServerFault({ 'http.status_code': 503 })).toBe(true);
+      expect(isSpanServerFault({ statusCode: 500 })).toBe(true);
+    });
+
+    it('returns false for null/undefined span', () => {
+      expect(isSpanServerFault(null)).toBe(false);
+      expect(isSpanServerFault(undefined)).toBe(false);
+    });
+
+    it('returns false when no error indicators found', () => {
+      expect(isSpanServerFault({})).toBe(false);
+      expect(isSpanServerFault({ name: 'test-span' })).toBe(false);
+    });
+  });
+
+  describe('isSpanClientError', () => {
+    it('detects error from HTTP status codes (4xx)', () => {
+      expect(isSpanClientError({ attributes: { http: { status_code: 404 } } })).toBe(true);
+      expect(isSpanClientError({ attributes: { http: { status_code: 200 } } })).toBe(false);
+      expect(isSpanClientError({ attributes: { http: { status_code: 301 } } })).toBe(false);
+      expect(isSpanClientError({ attributes: { http: { status_code: 500 } } })).toBe(false);
+    });
+
+    it('handles various HTTP status code formats', () => {
+      expect(isSpanClientError({ 'attributes.http.status_code': 404 })).toBe(true);
+      expect(isSpanClientError({ attributes: { 'http.status_code': 400 } })).toBe(true);
+      expect(isSpanClientError({ attributes: { http: { response: { status_code: 400 } } } })).toBe(
+        true
+      );
+      expect(isSpanClientError({ 'http.status_code': 400 })).toBe(true);
+      expect(isSpanClientError({ statusCode: 422 })).toBe(true);
+    });
+
+    it('returns false for null/undefined span', () => {
+      expect(isSpanClientError(null)).toBe(false);
+      expect(isSpanClientError(undefined)).toBe(false);
+    });
+
+    it('returns false when no error indicators found', () => {
+      expect(isSpanClientError({})).toBe(false);
+      expect(isSpanClientError({ name: 'test-span' })).toBe(false);
+      expect(isSpanClientError({ 'status.code': 2 })).toBe(false);
+      expect(isSpanClientError({ status: { code: 2 } })).toBe(false);
+      expect(isSpanClientError({ status: { code: 'ERROR' } })).toBe(false);
     });
   });
 

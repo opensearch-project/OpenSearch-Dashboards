@@ -29,6 +29,11 @@ describe('gantt_data_adapter', () => {
       endTime: '2023-01-01T10:00:00.080Z',
       durationInNanos: 60000000,
       'status.code': 0,
+      attributes: {
+        http: {
+          status_code: 400,
+        },
+      },
     },
     {
       spanId: 'span-3',
@@ -92,16 +97,22 @@ describe('gantt_data_adapter', () => {
     expect(span1?.hasError).toBe(false);
 
     // Check that error spans are marked correctly
+    const span2 = result.values.find((span) => span.spanId === 'span-2');
+    expect(span2).toBeDefined();
+    expect(span2?.hasError).toBe(true);
+    expect(span2?.hasClientError).toBe(true);
+    expect(span2?.hasServerFault).toBe(false);
+
+    // Check that fault spans are marked correctly
     const span3 = result.values.find((span) => span.spanId === 'span-3');
     expect(span3).toBeDefined();
     expect(span3?.hasError).toBe(true);
+    expect(span3?.hasServerFault).toBe(true);
+    expect(span3?.hasClientError).toBe(false);
 
     // Check that hierarchy levels are set correctly
     expect(span1?.level).toBe(0); // Root span
-
-    const span2 = result.values.find((span) => span.spanId === 'span-2');
     expect(span2?.level).toBe(1); // Child span
-
     expect(span3?.level).toBe(1); // Child span
   });
 

@@ -79,7 +79,17 @@ export function createGanttSpec(
         transform: [
           {
             type: 'filter',
-            expr: 'datum.hasError',
+            expr: 'datum.hasClientError',
+          },
+        ],
+      },
+      {
+        name: 'fault_spans',
+        source: 'spans',
+        transform: [
+          {
+            type: 'filter',
+            expr: 'datum.hasServerFault',
           },
         ],
       },
@@ -176,7 +186,7 @@ export function createGanttSpec(
       // Error indicators
       {
         type: 'symbol',
-        from: { data: 'error_spans' },
+        from: { data: 'fault_spans' },
         encode: {
           enter: {
             y: { scale: 'yscale', field: 'label', band: 0.5 },
@@ -184,6 +194,29 @@ export function createGanttSpec(
             size: { value: 120 },
             shape: { value: 'triangle-up' },
             fill: { value: '#c14125' },
+            stroke: { value: 'white' },
+            strokeWidth: { value: 1 },
+            tooltip: {
+              signal:
+                "'" +
+                i18n.translate('explore.ganttChart.tooltip.faultInSpan', {
+                  defaultMessage: 'Fault in span',
+                }) +
+                "'",
+            },
+          },
+        },
+      },
+      {
+        type: 'symbol',
+        from: { data: 'error_spans' },
+        encode: {
+          enter: {
+            y: { scale: 'yscale', field: 'label', band: 0.5 },
+            x: { value: 5 }, // Position after serviceName text (which ends at x: -5)
+            size: { value: 120 },
+            shape: { value: 'triangle-up' },
+            fill: { value: '#F5A700' },
             stroke: { value: 'white' },
             strokeWidth: { value: 1 },
             tooltip: {
@@ -294,19 +327,27 @@ export function createGanttSpec(
             x: { scale: 'xscale', field: 'endTime', offset: 8 },
             text: {
               signal:
-                'datum.hasError ? "' +
+                'datum.hasServerFault ? "' +
+                i18n.translate('explore.ganttChart.label.fault', {
+                  defaultMessage: 'Fault',
+                }) +
+                '" : datum.hasClientError ? "' +
                 i18n.translate('explore.ganttChart.label.error', {
                   defaultMessage: 'Error',
                 }) +
                 '" : datum.duration + " ms"',
             },
             fill: {
-              signal: `datum.hasError ? "#c14125" : "${isDarkMode ? '#ffffff' : '#000000'}"`,
+              signal: `datum.hasServerFault ? "#c14125" : datum.hasClientError ? "#F5A700" : "${
+                isDarkMode ? '#ffffff' : '#000000'
+              }"`,
             },
           },
           hover: {
             fill: {
-              signal: `datum.hasError ? "#d14a2a" : "${isDarkMode ? '#cccccc' : '#333333'}"`,
+              signal: `datum.hasServerFault ? "#d14a2a" : datum.hasClientError ? "#F5A700" : "${
+                isDarkMode ? '#cccccc' : '#333333'
+              }"`,
             },
           },
         },
