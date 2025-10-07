@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { TraceTimeRange } from '../../utils/span_timerange_utils';
+import { TraceTimeRange } from '../../../utils/span_timerange_utils';
 import './timeline_ruler.scss';
 import { useTimelineTicks } from './timeline_ruler_hooks';
 

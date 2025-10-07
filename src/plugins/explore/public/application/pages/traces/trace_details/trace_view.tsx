@@ -526,8 +526,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                           )}
 
                           {(activeTab === TraceDetailTab.TIMELINE ||
-                            activeTab === TraceDetailTab.SPAN_LIST ||
-                            activeTab === TraceDetailTab.TREE_VIEW) && (
+                            activeTab === TraceDetailTab.SPAN_LIST) && (
                             <SpanDetailPanel
                               key={`span-panel-${visualizationKey}`}
                               chrome={chrome}
