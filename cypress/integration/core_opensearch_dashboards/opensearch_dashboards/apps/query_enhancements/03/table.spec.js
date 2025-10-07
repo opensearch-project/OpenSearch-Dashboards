@@ -148,6 +148,8 @@ export const runTableTests = () => {
           // Add fields
           testFields.forEach((field) => {
             selectFieldFromSidebar(field);
+            // Trigger hover to make sort button visible
+            cy.getElementByTestId(`docTableHeader-${field}`).trigger('mouseover');
             // Default is no sort
             cy.getElementByTestId(`docTableHeaderFieldSort_${field}`).should(
               'have.attr',
