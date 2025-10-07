@@ -86,6 +86,16 @@ describe('getQueryWithSource', () => {
     expect(result).toEqual({ ...query, query: 'source=`existing-index` | where field=value' });
   });
 
+  it('should handle no whitespace between source and dataSource and pipe', () => {
+    const query: Query = {
+      query: 'source=existing-index|where field=value',
+      dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      language: 'ppl',
+    };
+    const result = getQueryWithSource(query);
+    expect(result).toEqual({ ...query, query: 'source=`existing-index`|where field=value' });
+  });
+
   it('should handle flexible whitespace between search, source and =', () => {
     const query: Query = {
       query: 'search    source   =existing-index | where field=value',

@@ -23,7 +23,7 @@ export const getQueryWithSource = (query: Query): QueryWithQueryAsString => {
   if (query.dataset && ['INDEXES', 'INDEX_PATTERN'].includes(query.dataset.type)) {
     if (hasSource) {
       // Replace source=anything with source=`anything` (handling spaces around = and ensuring anything is not already backticked)
-      const updatedQuery = queryString.replace(/(\bsource\s*=\s*)([^`\s][^\s]*)/gi, '$1`$2`');
+      const updatedQuery = queryString.replace(/(\bsource\s*=\s*)([^`\s][^\s|]*)/gi, '$1`$2`');
       return { ...query, query: updatedQuery };
     }
 
