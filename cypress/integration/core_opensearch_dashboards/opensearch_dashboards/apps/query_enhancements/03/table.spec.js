@@ -148,6 +148,9 @@ export const runTableTests = () => {
           // Add fields
           testFields.forEach((field) => {
             selectFieldFromSidebar(field);
+            // adding a wait due to flakiness
+            cy.wait(1000);
+            cy.getElementByTestId('docTableHeader-category').should('exist');
             // Default is no sort
             cy.getElementByTestId(`docTableHeaderFieldSort_${field}`).should(
               'have.attr',
