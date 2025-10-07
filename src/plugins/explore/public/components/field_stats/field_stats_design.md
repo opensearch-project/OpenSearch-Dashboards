@@ -212,7 +212,7 @@ Manages data fetching and state, including expanding row behavior:
 export const FieldStatsContainer = () => {
   const dataset = useSelector(selectDataset);
   const [fieldStats, setFieldStats] = useState<Record<string, FieldStatsItem>>({});
-  const [loadingFields, setLoadingFields] = useState<Set<string>>(new Set());
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [fieldDetails, setFieldDetails] = useState<Record<string, any>>({});
   const [detailsLoading, setDetailsLoading] = useState<Set<string>>(new Set());
@@ -226,7 +226,7 @@ export const FieldStatsContainer = () => {
   // Fetch field statistics on mount
   useEffect(() => {
     if (!fields.length || !dataset) return;
-    fetchAllFieldStats(fields, dataset, setFieldStats, setLoadingFields);
+    fetchAllFieldStats(fields, dataset, setFieldStats, setIsLoading);
   }, [fields, dataset]);
 
   // Handle row expansion
@@ -264,7 +264,7 @@ export const FieldStatsContainer = () => {
       expandedRows={expandedRows}
       fieldDetails={fieldDetails}
       onRowExpand={handleRowExpand}
-      loadingFields={loadingFields}
+      isLoading={isLoading}
       detailsLoading={detailsLoading}
     />
   );
@@ -276,8 +276,8 @@ export const FieldStatsContainer = () => {
 Renders the EuiBasicTable with expandable rows:
 
 ```typescript
-export const FieldStatsTable = ({ items, expandedRows, fieldDetails, onRowExpand, loadingFields, detailsLoading }) => {
-  const columns = getFieldStatsColumns(expandedRows, onRowExpand, loadingFields);
+export const FieldStatsTable = ({ items, expandedRows, fieldDetails, onRowExpand, isLoading, detailsLoading }) => {
+  const columns = getFieldStatsColumns(expandedRows, onRowExpand);
 
   const itemIdToExpandedRowMap = useMemo(() => {
     const map: Record<string, ReactNode> = {};
@@ -293,6 +293,19 @@ export const FieldStatsTable = ({ items, expandedRows, fieldDetails, onRowExpand
     });
     return map;
   }, [expandedRows, fieldDetails, items]);
+
+  // Show loading state while fetching field statistics
+  if (isLoading) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '400px' }}>
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" />
+          <EuiSpacer size="m" />
+          <EuiText>Searching in progress...</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   return (
     <EuiBasicTable
@@ -322,51 +335,62 @@ const fetchAllFieldStats = async (
   fields: DataViewField[],
   dataset: DataView,
   setFieldStats: React.Dispatch<React.SetStateAction<Record<string, FieldStatsItem>>>,
-  setLoadingFields: React.Dispatch<React.SetStateAction<Set<string>>>
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
-  // Mark all fields as loading
-  setLoadingFields(new Set(fields.map((f) => f.name)));
+  // Set loading state to true at the start
+  setIsLoading(true);
 
-  // Fetch stats for each field in parallel
-  const promises = fields.map(async (field) => {
-    try {
-      const query = getFieldStatsQuery(dataset.title, field.name);
-      const result = await executeQuery(query);
+  try {
+    // Fetch stats for each field in parallel
+    const results = await Promise.allSettled(
+      fields.map(async (field) => {
+        try {
+          const query = getFieldStatsQuery(dataset.title, field.name);
+          const result = await executeQuery(query);
 
-      // Process result and update state
-      const stats: FieldStatsItem = {
-        name: field.name,
-        type: field.type,
-        docCount: result.hits[0]?.count || 0,
-        distinctCount: result.hits[0]?.dc || 0,
-        docPercentage: result.hits[0]?.percentage_total || 0,
-      };
+          // Return the processed result
+          return {
+            name: field.name,
+            stats: {
+              name: field.name,
+              type: field.type,
+              docCount: result.hits[0]?.count || 0,
+              distinctCount: result.hits[0]?.dc || 0,
+              docPercentage: result.hits[0]?.percentage_total || 0,
+            },
+          };
+        } catch (error) {
+          console.error(`Failed to fetch stats for field ${field.name}:`, error);
+          // Return default values on error
+          return {
+            name: field.name,
+            stats: {
+              name: field.name,
+              type: field.type,
+              docCount: 0,
+              distinctCount: 0,
+              docPercentage: 0,
+              error: true,
+            },
+          };
+        }
+      })
+    );
 
-      setFieldStats((prev) => ({ ...prev, [field.name]: stats }));
-    } catch (error) {
-      console.error(`Failed to fetch stats for field ${field.name}:`, error);
-      // Set default values on error
-      setFieldStats((prev) => ({
-        ...prev,
-        [field.name]: {
-          name: field.name,
-          type: field.type,
-          docCount: 0,
-          distinctCount: 0,
-          docPercentage: 0,
-          error: true,
-        },
-      }));
-    } finally {
-      setLoadingFields((prev) => {
-        const next = new Set(prev);
-        next.delete(field.name);
-        return next;
-      });
-    }
-  });
+    // Collect all results into a single object
+    const allFieldStats: Record<string, FieldStatsItem> = {};
+    results.forEach((result) => {
+      if (result.status === 'fulfilled' && result.value) {
+        allFieldStats[result.value.name] = result.value.stats;
+      }
+    });
 
-  await Promise.all(promises);
+    // Update state once with all field statistics
+    setFieldStats(allFieldStats);
+  } finally {
+    // Set loading to false when complete
+    setIsLoading(false);
+  }
 };
 ```
 
@@ -481,8 +505,7 @@ const fetchFieldDetails = async (
 ```typescript
 export const getFieldStatsColumns = (
   expandedRows: Set<string>,
-  onRowExpand: (fieldName: string) => void,
-  loadingFields: Set<string>
+  onRowExpand: (fieldName: string) => void
 ): Array<EuiBasicTableColumn<FieldStatsItem>> => [
   {
     width: '40px',
@@ -518,9 +541,6 @@ export const getFieldStatsColumns = (
     sortable: true,
     width: '20%',
     render: (docCount: number, item: FieldStatsItem) => {
-      if (loadingFields.has(item.name)) {
-        return <EuiLoadingSpinner size="s" />;
-      }
       return (
         <span>
           {docCount.toLocaleString()} ({item.docPercentage.toFixed(1)}%)
@@ -533,10 +553,7 @@ export const getFieldStatsColumns = (
     name: 'Distinct Values',
     sortable: true,
     width: '20%',
-    render: (count: number, item: FieldStatsItem) => {
-      if (loadingFields.has(item.name)) {
-        return <EuiLoadingSpinner size="s" />;
-      }
+    render: (count: number) => {
       return count?.toLocaleString() || '—';
     },
   },
@@ -644,4 +661,4 @@ export const DateRangeSection: React.FC<{ data: any; field: FieldStatsItem }> = 
 2. **Pagination**: Implement virtual scrolling for large numbers of fields
 3. **Parallel Queries**: Execute field statistics queries in parallel for faster loading
 4. **Debouncing**: Debounce rapid expand/collapse actions
-5. **Progressive Loading**: Show fields immediately from the dataset, then load statistics progressively
+5. **Batch Loading**: Show loading indicator until all field statistics are fetched, then display complete table with all data at once
