@@ -599,7 +599,7 @@ describe('redux_persistence', () => {
       (mockServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
         id: 'logs-dataset',
         title: 'Logs Dataset',
-        signalType: SignalType.LOGS,
+        signalType: CORE_SIGNAL_TYPES.LOGS,
       });
 
       const result = await loadReduxState(mockServices);
@@ -636,7 +636,7 @@ describe('redux_persistence', () => {
       (tracesServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
         id: 'logs-dataset',
         title: 'Logs Dataset',
-        signalType: SignalType.LOGS,
+        signalType: CORE_SIGNAL_TYPES.LOGS,
       });
 
       // Mock dataset service to return a traces dataset
@@ -654,9 +654,9 @@ describe('redux_persistence', () => {
       // Mock dataViews.get for the fetched traces dataset
       (tracesServices.data.dataViews!.get as jest.Mock).mockImplementation((id) => {
         if (id === 'traces-dataset') {
-          return Promise.resolve({ signalType: SignalType.TRACES });
+          return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.TRACES });
         }
-        return Promise.resolve({ signalType: SignalType.LOGS });
+        return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.LOGS });
       });
 
       const result = await loadReduxState(tracesServices);
@@ -692,9 +692,9 @@ describe('redux_persistence', () => {
       // Mock dataViews.get to return TRACES signal type (incompatible with logs)
       (logsServices.data.dataViews!.get as jest.Mock).mockImplementation((id) => {
         if (id === 'traces-dataset') {
-          return Promise.resolve({ signalType: SignalType.TRACES });
+          return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.TRACES });
         }
-        return Promise.resolve({ signalType: SignalType.LOGS });
+        return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.LOGS });
       });
 
       // Mock dataset service to return a logs dataset
@@ -738,7 +738,7 @@ describe('redux_persistence', () => {
           return Promise.reject(new Error('Dataset not found'));
         }
         if (id === 'fallback-dataset') {
-          return Promise.resolve({ signalType: SignalType.LOGS });
+          return Promise.resolve({ signalType: CORE_SIGNAL_TYPES.LOGS });
         }
         return Promise.reject(new Error('Unknown dataset'));
       });
