@@ -19,6 +19,7 @@ import {
   selectTabState,
   selectUIState,
   selectQueryStatus,
+  selectIsQueryRunning,
 } from '../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { getTopNavLinks } from './top_nav_links';
@@ -28,6 +29,7 @@ import { SavedExplore } from '../../saved_explore';
 import { setDateRange } from '../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { useClearEditors, useEditorRef } from '../../application/hooks';
 import { onEditorRunActionCreator } from '../../application/utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
+import { abortAllActiveQueries } from '../../application/utils/state_management/actions/query_actions';
 import { QueryExecutionButton } from './query_execution_button';
 import { Query, TimeRange } from '../../../../data/common';
 
@@ -58,6 +60,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const uiState = useNewStateSelector(selectUIState);
   const tabState = useNewStateSelector(selectTabState);
   const queryStatus = useNewStateSelector(selectQueryStatus);
+  const isQueryRunning = useNewStateSelector(selectIsQueryRunning);
 
   const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
 
@@ -159,6 +162,10 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     },
     [dispatch, services, editorRef]
   );
+
+  const handleQueryCancel = useCallback(() => {
+    abortAllActiveQueries();
+  }, []);
 
   const handleOpenShortcut = useCallback(() => {
     const openButtonRun = getOpenButtonRun(services);
@@ -266,6 +273,9 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       showQueryBar={true}
       showQueryInput={false}
       showFilterBar={false}
+      showCancelButton={true}
+      onQueryCancel={handleQueryCancel}
+      isQueryRunning={isQueryRunning}
     />
   );
 };

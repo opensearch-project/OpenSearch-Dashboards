@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
+  EuiButton,
   OnRefreshProps,
   prettyDuration,
 } from '@elastic/eui';
@@ -66,6 +67,9 @@ export interface QueryEditorTopRowProps {
   datePickerRef?: React.RefObject<HTMLDivElement>;
   savedQueryManagement?: any;
   queryStatus?: QueryStatus;
+  showCancelButton?: boolean;
+  onCancel?: () => void;
+  isQueryRunning?: boolean;
 }
 
 // Needed for React.lazy
@@ -305,7 +309,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function renderUpdateButton() {
-    const button = props.customSubmitButton ? (
+    const runButton = props.customSubmitButton ? (
       React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
     ) : (
       <EuiSuperUpdateButton
@@ -321,15 +325,36 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       />
     );
 
+    const cancelButton = props.showCancelButton && props.isQueryRunning ? (
+      <EuiButton
+        size="s"
+        color="danger"
+        onClick={props.onCancel}
+        data-test-subj="queryCancelButton"
+        isLoading={false}
+      >
+        {i18n.translate('data.query.queryBar.queryCancelButtonLabel', {
+          defaultMessage: 'Cancel',
+        })}
+      </EuiButton>
+    ) : null;
+
+    const buttonGroup = (
+      <EuiFlexGroup gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>{runButton}</EuiFlexItem>
+        {cancelButton && <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>}
+      </EuiFlexGroup>
+    );
+
     if (!shouldRenderDatePicker()) {
-      return button;
+      return buttonGroup;
     }
 
     return (
       <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
         <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
           {renderDatePicker()}
-          <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{buttonGroup}</EuiFlexItem>
         </EuiFlexGroup>
       </NoDataPopover>
     );
