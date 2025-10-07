@@ -8,6 +8,7 @@ import { EuiPanel, EuiText, EuiIcon, EuiBadge, EuiAccordion, EuiCodeBlock } from
 import { AssistantActionContext } from '../../../context_provider/public';
 import { GraphVisualization } from './graph_visualization';
 import './tool_call_row.scss';
+import { log } from 'console';
 
 interface TimelineToolCall {
   type: 'tool_call';
@@ -131,7 +132,6 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
       }
     } catch (error) {
       // Tool result is not JSON, fall through to default rendering
-      // In production, this would be logged through a proper logging service
     }
   }
 

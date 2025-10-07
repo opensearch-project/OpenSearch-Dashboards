@@ -205,6 +205,18 @@ export function useGraphTimeseriesDataAction() {
             </>
           )}
 
+          {args.query && (
+            <>
+              <EuiSpacer size="xs" />
+              <EuiText size="xs">
+                <strong>Query:</strong>
+              </EuiText>
+              <EuiCode language="promql" fontSize="xs" paddingSize="xs">
+                {args.query}
+              </EuiCode>
+            </>
+          )}
+
           {args.description && (
             <>
               <EuiSpacer size="xs" />
