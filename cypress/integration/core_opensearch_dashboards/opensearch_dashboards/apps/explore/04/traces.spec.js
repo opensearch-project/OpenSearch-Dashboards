@@ -54,6 +54,7 @@ const traceTestSuite = () => {
         page: 'explore/traces',
         isEnhancement: true,
       });
+      cy.wait(5000);
       cy.explore.setTopNavDate('Jan 1, 2024 @ 00:00:00.000', 'Dec 31, 2025 @ 00:00:00.000');
     });
 
