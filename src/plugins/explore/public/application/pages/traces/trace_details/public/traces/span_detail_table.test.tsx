@@ -18,6 +18,14 @@ jest.mock('../utils/helper_functions', () => ({
   nanoToMilliSec: jest.fn((nanos: number) => nanos / 1000000),
 }));
 
+jest.mock('../utils/span_timerange_utils', () => ({
+  calculateTraceTimeRange: jest.fn(() => ({
+    durationMs: 1000,
+    startTimeMs: 0,
+    endTimeMs: 1000,
+  })),
+}));
+
 jest.mock('../utils/custom_datagrid', () => ({
   RenderCustomDataGrid: jest.fn(({ toolbarButtons, props }) => {
     const mockData = {
