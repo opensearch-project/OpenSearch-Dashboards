@@ -64,11 +64,13 @@ interface ResizeObserverTarget extends Element {
 export interface TraceDetailsProps {
   setMenuMountPoint?: (mount: MountPoint | undefined) => void;
   isEmbedded?: boolean;
+  isFlyout?: boolean;
 }
 
 export const TraceDetails: React.FC<TraceDetailsProps> = ({
   setMenuMountPoint,
   isEmbedded = false,
+  isFlyout = false,
 }) => {
   const {
     services: { chrome, data, osdUrlStateStorage, savedObjects, uiSettings },
@@ -395,20 +397,24 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
   // Set breadcrumb with service name from root span
   useEffect(() => {
-    chrome?.setBreadcrumbs([
-      {
-        text: getServiceInfo(rootSpan, traceId),
-      },
-    ]);
-  }, [chrome, rootSpan, traceId]);
+    if (!isFlyout) {
+      chrome?.setBreadcrumbs([
+        {
+          text: getServiceInfo(rootSpan, traceId),
+        },
+      ]);
+    }
+  }, [chrome, rootSpan, traceId, isFlyout]);
 
   return (
     <>
-      <TraceTopNavMenu
-        payloadData={transformedHits}
-        setMenuMountPoint={setMenuMountPoint}
-        traceId={traceId}
-      />
+      {!isFlyout && (
+        <TraceTopNavMenu
+          payloadData={transformedHits}
+          setMenuMountPoint={setMenuMountPoint}
+          traceId={traceId}
+        />
+      )}
 
       {isLoading ? (
         <EuiPanel paddingSize="l">
@@ -494,13 +500,17 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
               {/* Resizable container underneath filter badges */}
               <EuiResizableContainer
-                direction="horizontal"
                 className="exploreTraceView__resizableContainer"
+                direction={isFlyout ? 'vertical' : 'horizontal'}
               >
                 {(EuiResizablePanel, EuiResizableButton) => (
                   <>
-                    <EuiResizablePanel initialSize={70} minSize="50%" wrapperPadding="none">
-                      <EuiPanel paddingSize="s" className="exploreTraceView__contentPanel">
+                    <EuiResizablePanel
+                      initialSize={isFlyout ? 50 : 70}
+                      minSize={isFlyout ? '30%' : '50%'}
+                      wrapperPadding="none"
+                    >
+                      <div className="exploreTraceView__contentPanel">
                         {/* Tab content */}
                         <div ref={mainPanelRef} className="exploreTraceView__mainPanel">
                           {activeTab === TraceDetailTab.SERVICE_MAP && (
@@ -541,13 +551,16 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                             />
                           )}
                         </div>
-                      </EuiPanel>
+                      </div>
                     </EuiResizablePanel>
 
                     <EuiResizableButton />
 
-                    <EuiResizablePanel initialSize={30} minSize="300px">
-                      <EuiPanel paddingSize="s" className="exploreTraceView__sidebarPanel">
+                    <EuiResizablePanel
+                      initialSize={isFlyout ? 50 : 30}
+                      minSize={isFlyout ? '30%' : '300px'}
+                    >
+                      <div className="exploreTraceView__sidebarPanel">
                         <SpanDetailTabs
                           selectedSpan={selectedSpan}
                           addSpanFilter={(field: string, value: string | number | boolean) => {
@@ -567,7 +580,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                           logsData={logsData}
                           isLogsLoading={isLogsLoading}
                         />
-                      </EuiPanel>
+                      </div>
                     </EuiResizablePanel>
                   </>
                 )}
