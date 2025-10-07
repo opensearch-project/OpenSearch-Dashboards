@@ -12,6 +12,7 @@ import {
   DataView,
   IndexPatternField,
   formatTimePickerDate,
+  AggConfigs,
 } from '../../../../../../../../src/plugins/data/common';
 import { QueryExecutionStatus } from '../types';
 import { setResults, ISearchResult } from '../slices';
@@ -39,6 +40,15 @@ import {
 } from '../../interfaces';
 import { defaultPreparePplQuery, getQueryWithSource } from '../../languages';
 
+interface HistogramConfig {
+  histogramConfigs: AggConfigs | undefined;
+  aggs: Record<string, any> | undefined;
+  effectiveInterval: string;
+  fromDate: string;
+  toDate: string;
+  timeFieldName: string;
+}
+
 // Module-level storage for abort controllers keyed by cacheKey
 const activeQueryAbortControllers = new Map<string, AbortController>();
 
@@ -64,48 +74,77 @@ export const defaultPrepareQueryString = (query: Query): string => {
   }
 };
 
-export const buildQuery = (
-  query: string,
-  timeFieldName: string | undefined,
+/**
+ * Creates histogram configuration with computed interval and time range
+ */
+const createHistogramConfigWithInterval = (
+  dataView: DataView,
   interval: string | undefined,
-  services: ExploreServices
-): string => {
-  if (!timeFieldName || !interval) {
-    return query;
+  services: ExploreServices,
+  getState: () => RootState
+): HistogramConfig | null => {
+  if (!dataView.timeFieldName || !interval) {
+    return null;
   }
+
+  const state = getState();
+  const effectiveInterval = interval || state.legacy?.interval || 'auto';
+
+  const histogramConfigs = createHistogramConfigs(dataView, effectiveInterval, services.data);
+  const aggs = histogramConfigs?.toDsl();
+
+  if (!aggs) {
+    return null;
+  }
+
   const { fromDate, toDate } = formatTimePickerDate(
     services.data.query.timefilter.timefilter.getTime(),
     'YYYY-MM-DD HH:mm:ss.SSS'
   );
 
-  let effectiveInterval = interval;
-  if (interval === 'auto') {
-    effectiveInterval =
-      services.data.search.aggs.calculateAutoTimeExpression({
-        from: fromDate,
-        to: toDate,
-        mode: 'absolute',
-      }) || '1h';
+  return {
+    histogramConfigs,
+    aggs,
+    effectiveInterval,
+    fromDate,
+    toDate,
+    timeFieldName: dataView.timeFieldName,
+  };
+};
+
+export const buildQuery = (
+  query: string,
+  histogramConfig: HistogramConfig,
+  services: ExploreServices
+): string => {
+  const { aggs, fromDate, toDate, timeFieldName } = histogramConfig;
+
+  if (!aggs || !timeFieldName) {
+    return query;
   }
-  return `${query} | stats count() by span(${timeFieldName}, ${effectiveInterval})`;
+
+  const finalInterval =
+    aggs[2].date_histogram.fixed_interval ??
+    aggs[2].date_histogram.calendar_interval ??
+    services.data.search.aggs.calculateAutoTimeExpression({
+      from: fromDate,
+      to: toDate,
+      mode: 'absolute',
+    });
+
+  return `${query} | stats count() by span(${timeFieldName}, ${finalInterval})`;
 };
 
 export const processRawResultsForHistogram = (
   queryString: string,
-  dataView: DataView,
   rawResults: ISearchResult,
-  interval: string | undefined,
-  services: ExploreServices,
-  getState: () => RootState
+  histogramConfig: HistogramConfig
 ) => {
-  const state = getState();
-  const effectiveInterval = interval || state.legacy?.interval || 'auto';
+  const { aggs } = histogramConfig;
 
-  const histogramConfigs = createHistogramConfigs(dataView, effectiveInterval, services.data);
-
-  const aggs = histogramConfigs?.toDsl();
-
-  if (!aggs) return rawResults;
+  if (!aggs) {
+    return rawResults;
+  }
 
   const aggsConfig: any = {};
 
@@ -496,15 +535,23 @@ const executeQueryBase = async (
 
     const dataset = services.data.dataViews.convertToDataset(dataView);
 
+    // Create histogram config once for use in both query building and result processing
+    let histogramConfig: HistogramConfig | null = null;
+    if (isHistogramQuery) {
+      histogramConfig = createHistogramConfigWithInterval(dataView, interval, services, getState);
+    }
+
     const preparedQueryObject = {
       ...query,
       dataset,
-      query: isHistogramQuery
-        ? buildQuery(queryString, getState().query?.dataset?.timeFieldName, interval, services)
-        : queryString,
+      query:
+        isHistogramQuery && histogramConfig
+          ? buildQuery(queryString, histogramConfig, services)
+          : queryString,
     };
 
     let searchSource;
+    // TODO: Following split queries change, we can move away from creating search source with includeHistogram
     if (includeHistogram) {
       // Histogram-specific: Get interval and create with aggregations
       const state = getState();
@@ -554,14 +601,11 @@ const executeQueryBase = async (
       fieldSchema: searchSource.getDataFrame()?.schema,
     };
 
-    if (isHistogramQuery) {
+    if (isHistogramQuery && histogramConfig) {
       rawResultsWithMeta = processRawResultsForHistogram(
         queryString,
-        dataView,
         rawResultsWithMeta,
-        interval,
-        services,
-        getState
+        histogramConfig
       );
     }
 
@@ -697,21 +741,13 @@ export const executeHistogramQuery = createAsyncThunk<
   },
   { state: RootState }
 >('query/executeHistogramQuery', async (params, thunkAPI) => {
-  const { services, queryString, interval } = params;
-  const { getState } = thunkAPI;
+  const { queryString } = params;
   return executeQueryBase(
     {
       ...params,
-      includeHistogram: true,
+      includeHistogram: false,
       queryString,
-      // includeHistogram: false,
-      // isHistogramQuery: true,
-      // // queryString: buildQuery(
-      // //   queryString,
-      // //   getState().query?.dataset?.timeFieldName,
-      // //   interval,
-      // //   services
-      // ),
+      isHistogramQuery: true,
     },
     thunkAPI
   );
