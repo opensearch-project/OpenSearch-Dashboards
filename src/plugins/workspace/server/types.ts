@@ -14,8 +14,6 @@ import {
   WorkspaceFindOptions,
 } from '../../../core/server';
 import { PermissionModeId } from '../../../core/server';
-import { SavedObjectsPermissionControlContract } from './permission_control/client';
-import { translatePermissionsToRole } from './utils';
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
   permissionMode?: PermissionModeId;
@@ -167,8 +165,6 @@ export type IResponse<T> =
 
 export interface WorkspacePluginSetup {
   client: IWorkspaceClientImpl;
-  permissionControlClient?: SavedObjectsPermissionControlContract;
-  translatePermissionsToModeId: typeof translatePermissionsToRole;
 }
 
 export interface WorkspacePluginStart {
