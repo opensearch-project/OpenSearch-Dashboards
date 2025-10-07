@@ -16,7 +16,7 @@ describe('getQueryWithSource', () => {
     const result = getQueryWithSource(query);
     expect(result).toEqual({
       ...query,
-      query: 'source = test-dataset',
+      query: 'source = `test-dataset`',
     });
   });
 
@@ -27,7 +27,7 @@ describe('getQueryWithSource', () => {
       language: 'ppl',
     };
     const result = getQueryWithSource(query);
-    expect(result).toEqual(query);
+    expect(result).toEqual({ ...query, query: 'source=`existing-index` | where field=value' });
   });
 
   it('should return original query when it starts with "SOURCE" (case insensitive)', () => {
@@ -37,7 +37,7 @@ describe('getQueryWithSource', () => {
       language: 'ppl',
     };
     const result = getQueryWithSource(query);
-    expect(result).toEqual(query);
+    expect(result).toEqual({ ...query, query: 'SOURCE=`existing-index` | where field=value' });
   });
 
   it('should return original query when it starts with "search source" (case sensitive)', () => {
@@ -47,7 +47,10 @@ describe('getQueryWithSource', () => {
       language: 'ppl',
     };
     const result = getQueryWithSource(query);
-    expect(result).toEqual(query);
+    expect(result).toEqual({
+      ...query,
+      query: 'search source=`existing-index` | where field=value',
+    });
   });
 
   it('should return original query when it starts with "SEARCH SOURCE" (case insensitive)', () => {
@@ -57,7 +60,10 @@ describe('getQueryWithSource', () => {
       language: 'ppl',
     };
     const result = getQueryWithSource(query);
-    expect(result).toEqual(query);
+    expect(result).toEqual({
+      ...query,
+      query: 'SEARCH SOURCE=`existing-index` | where field=value',
+    });
   });
 
   it('should handle flexible whitespace between source and =', () => {
@@ -67,7 +73,7 @@ describe('getQueryWithSource', () => {
       language: 'ppl',
     };
     const result = getQueryWithSource(query);
-    expect(result).toEqual(query);
+    expect(result).toEqual({ ...query, query: 'source   =`existing-index` | where field=value' });
   });
 
   it('should handle no whitespace between source and =', () => {
@@ -77,7 +83,7 @@ describe('getQueryWithSource', () => {
       language: 'ppl',
     };
     const result = getQueryWithSource(query);
-    expect(result).toEqual(query);
+    expect(result).toEqual({ ...query, query: 'source=`existing-index` | where field=value' });
   });
 
   it('should handle flexible whitespace between search, source and =', () => {
@@ -87,7 +93,10 @@ describe('getQueryWithSource', () => {
       language: 'ppl',
     };
     const result = getQueryWithSource(query);
-    expect(result).toEqual(query);
+    expect(result).toEqual({
+      ...query,
+      query: 'search    source   =`existing-index` | where field=value',
+    });
   });
 
   it('should handle single space between search and source with no space before =', () => {
@@ -97,7 +106,10 @@ describe('getQueryWithSource', () => {
       language: 'ppl',
     };
     const result = getQueryWithSource(query);
-    expect(result).toEqual(query);
+    expect(result).toEqual({
+      ...query,
+      query: 'search source=`existing-index` | where field=value',
+    });
   });
 
   it('should prepend source for empty query string', () => {
@@ -109,7 +121,7 @@ describe('getQueryWithSource', () => {
     const result = getQueryWithSource(query);
     expect(result).toEqual({
       ...query,
-      query: 'source = test-dataset',
+      query: 'source = `test-dataset`',
     });
   });
 
@@ -122,7 +134,7 @@ describe('getQueryWithSource', () => {
     const result = getQueryWithSource(query);
     expect(result).toEqual({
       ...query,
-      query: 'source = test-dataset',
+      query: 'source = `test-dataset`',
     });
   });
 
@@ -135,7 +147,7 @@ describe('getQueryWithSource', () => {
     const result = getQueryWithSource(query);
     expect(result).toEqual({
       ...query,
-      query: 'source = test-dataset | where level="error"',
+      query: 'source = `test-dataset` | where level="error"',
     });
   });
 
@@ -148,7 +160,7 @@ describe('getQueryWithSource', () => {
     const result = getQueryWithSource(query);
     expect(result).toEqual({
       ...query,
-      query: 'source = test-dataset   | where level="error"',
+      query: 'source = `test-dataset`   | where level="error"',
     });
   });
 
@@ -159,7 +171,10 @@ describe('getQueryWithSource', () => {
       language: 'ppl',
     };
     const result = getQueryWithSource(query);
-    expect(result).toEqual(query);
+    expect(result).toEqual({
+      ...query,
+      query: ' source = `data_logs_small_time_1*` | where unique_category = "Configuration"',
+    });
   });
 
   it('should handle leading whitespace before search source', () => {
@@ -169,7 +184,10 @@ describe('getQueryWithSource', () => {
       language: 'ppl',
     };
     const result = getQueryWithSource(query);
-    expect(result).toEqual(query);
+    expect(result).toEqual({
+      ...query,
+      query: '  search source=`existing-index` | where field=value',
+    });
   });
 
   it('should return original query when it starts with "describe"', () => {
