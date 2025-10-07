@@ -8,7 +8,6 @@ import { EuiPanel, EuiText, EuiIcon, EuiBadge, EuiAccordion, EuiCodeBlock } from
 import { AssistantActionContext } from '../../../context_provider/public';
 import { GraphVisualization } from './graph_visualization';
 import './tool_call_row.scss';
-import { log } from 'console';
 
 interface TimelineToolCall {
   type: 'tool_call';
