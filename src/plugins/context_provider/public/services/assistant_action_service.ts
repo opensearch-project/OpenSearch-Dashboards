@@ -84,6 +84,7 @@ export class AssistantActionService {
     // Only trigger updates if something actually changed
     if (hasChanged) {
       const toolDefinitions = this.createToolDefinitions(newActions);
+
       this.state$.next({
         ...currentState,
         actions: newActions,
@@ -145,7 +146,7 @@ export class AssistantActionService {
   getActionRenderer = (name: string) => {
     const currentState = this.state$.getValue();
     const action = currentState.actions.get(name);
-    // Service getActionRenderer called
+
     return action?.render;
   };
 
