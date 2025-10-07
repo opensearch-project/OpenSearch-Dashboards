@@ -148,6 +148,8 @@ export const runTableTests = () => {
           // Add fields
           testFields.forEach((field) => {
             selectFieldFromSidebar(field);
+            // Trigger hover to make sort button visible
+            cy.getElementByTestId(`docTableHeader-${field}`).trigger('mouseover');
             // Default is no sort
             cy.getElementByTestId(`docTableHeaderFieldSort_${field}`).should(
               'have.attr',
@@ -156,17 +158,21 @@ export const runTableTests = () => {
             );
           });
           // Sort asc
+          cy.getElementByTestId(`docTableHeader-${testFields[0]}`).trigger('mouseover');
           cy.getElementByTestId(`docTableHeaderFieldSort_${testFields[0]}`).should('exist').click();
           cy.getElementByTestId('osdDocTableCellDataField')
             .eq(0)
             .should('have.text', 'Application');
           // Sort desc
+          cy.getElementByTestId(`docTableHeader-${testFields[0]}`).trigger('mouseover');
           cy.getElementByTestId(`docTableHeaderFieldSort_${testFields[0]}`).should('exist').click();
           cy.getElementByTestId('osdDocTableCellDataField').eq(0).should('have.text', 'Security');
           // Sort asc on the 2nd col
+          cy.getElementByTestId(`docTableHeader-${testFields[1]}`).trigger('mouseover');
           cy.getElementByTestId(`docTableHeaderFieldSort_${testFields[1]}`).should('exist').click();
           cy.getElementByTestId('osdDocTableCellDataField').eq(1).should('have.text', '0.1');
           // Sort desc on the 2nd col
+          cy.getElementByTestId(`docTableHeader-${testFields[1]}`).trigger('mouseover');
           cy.getElementByTestId(`docTableHeaderFieldSort_${testFields[1]}`).should('exist').click();
           cy.getElementByTestId('osdDocTableCellDataField').eq(1).should('have.text', '5');
         });
