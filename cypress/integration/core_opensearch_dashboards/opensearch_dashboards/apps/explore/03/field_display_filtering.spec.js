@@ -22,7 +22,7 @@ const fieldDisplayFilteringTestSuite = () => {
   describe('filter for value spec', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspace,
         indexPattern: INDEX_WITH_TIME_1,
         timefieldName: 'timestamp',

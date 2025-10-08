@@ -24,7 +24,7 @@ const runSavedExploreTests = () => {
         INDEX_WITH_TIME_1,
         INDEX_WITH_TIME_2,
       ]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
         timefieldName: 'timestamp',

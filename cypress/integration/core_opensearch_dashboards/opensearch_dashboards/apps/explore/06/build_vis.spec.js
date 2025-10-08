@@ -34,7 +34,7 @@ export const runBuildVisTests = () => {
 
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_WITH_TIME_1,
         timefieldName: 'timestamp',

@@ -20,7 +20,7 @@ const traceTestSuite = () => {
 
   before(() => {
     cy.explore.setupWorkspaceAndDataSourceWithTraces(workspaceName, [TRACE_INDEX]);
-    cy.createWorkspaceIndexPatterns({
+    cy.explore.createWorkspaceDataSets({
       workspaceName: workspaceName,
       indexPattern: TRACE_INDEX_PATTERN.replace('*', ''),
       timefieldName: TRACE_TIME_FIELD,

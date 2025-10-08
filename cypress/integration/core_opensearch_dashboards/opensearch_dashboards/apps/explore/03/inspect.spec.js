@@ -34,7 +34,7 @@ const inspectTestSuite = () => {
   describe('inspect spec', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
         timefieldName: 'timestamp',
