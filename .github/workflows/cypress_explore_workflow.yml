@@ -85,7 +85,7 @@ jobs:
       CI: 1
       # avoid warnings like "tput: No value for $TERM and no -T specified"
       TERM: xterm
-    name: Run cypress tests (osd:ciGroup${{ matrix.group }})
+    name: Run cypress Explore tests (osd:ciGroup${{ matrix.group }})
     steps:
       - name: Get source information from PR number
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.pr_number != '' }}
