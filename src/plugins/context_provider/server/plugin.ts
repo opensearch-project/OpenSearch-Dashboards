@@ -11,14 +11,14 @@ import {
   Logger,
 } from '../../../core/server';
 
-import { ChatPluginSetup, ChatPluginStart } from './types';
-import { defineRoutes } from './routes';
+import { ContextProviderServerPluginSetup, ContextProviderServerPluginStart } from './types';
 
 /**
  * @experimental
- * Chat plugin for AI-powered interactions. This plugin is experimental and will change in future releases.
+ * Context Provider plugin for React hooks-based context capture system. This plugin is experimental and will change in future releases.
  */
-export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
+export class ContextProviderServerPlugin
+  implements Plugin<ContextProviderServerPluginSetup, ContextProviderServerPluginStart> {
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -26,17 +26,12 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   }
 
   public setup(core: CoreSetup) {
-    this.logger.debug('chat: Setup');
-    const router = core.http.createRouter();
-
-    // Register server side APIs
-    defineRoutes(router);
-
+    this.logger.debug('contextProvider: Setup');
     return {};
   }
 
   public start(core: CoreStart) {
-    this.logger.debug('chat: Started');
+    this.logger.debug('contextProvider: Started');
     return {};
   }
 

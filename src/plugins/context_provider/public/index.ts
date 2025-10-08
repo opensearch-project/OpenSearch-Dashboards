@@ -3,21 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/*
- * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- */
-
 import { ContextProviderPlugin } from './plugin';
+import { PluginInitializerContext } from '../../../core/public';
 
 /**
  * @experimental This plugin is experimental and will change in future releases.
  */
-export function plugin() {
-  return new ContextProviderPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new ContextProviderPlugin(initializerContext);
 }
 
 export { ContextProviderPlugin };
