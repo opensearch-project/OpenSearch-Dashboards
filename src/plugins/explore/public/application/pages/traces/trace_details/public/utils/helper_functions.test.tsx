@@ -5,7 +5,12 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { NoMatchMessage, microToMilliSec, nanoToMilliSec } from './helper_functions';
+import {
+  NoMatchMessage,
+  microToMilliSec,
+  nanoToMilliSec,
+  getServiceInfo,
+} from './helper_functions';
 
 describe('microToMilliSec', () => {
   it('converts microseconds to milliseconds', () => {
@@ -62,5 +67,114 @@ describe('NoMatchMessage', () => {
     const { container } = render(<NoMatchMessage traceId={testTraceId} />);
 
     expect(container.querySelector('.euiCallOut--danger')).toBeInTheDocument();
+  });
+});
+
+describe('getServiceInfo', () => {
+  const mockSpan = {
+    serviceName: 'test-service',
+    name: 'test-operation',
+    spanId: 'span-123',
+  };
+
+  it('returns formatted service info when selectedSpan is provided', () => {
+    const result = getServiceInfo(mockSpan);
+    expect(result).toBe('test-service: test-operation');
+  });
+
+  it('uses span name as service fallback when serviceName is missing', () => {
+    const spanWithoutService = {
+      name: 'test-operation',
+      spanId: 'span-123',
+      // No serviceName property at all
+    };
+    const result = getServiceInfo(spanWithoutService);
+    expect(result).toBe('test-operation: test-operation');
+  });
+
+  it('handles missing operation name with default value', () => {
+    const spanWithoutOperation = {
+      ...mockSpan,
+      name: undefined,
+    };
+    const result = getServiceInfo(spanWithoutOperation);
+    expect(result).toBe('test-service: Unknown Operation');
+  });
+
+  it('handles both missing serviceName and operation name', () => {
+    const spanWithoutBoth = {
+      spanId: 'span-123',
+      // No serviceName, no name, no resource attributes
+    };
+    const result = getServiceInfo(spanWithoutBoth);
+    expect(result).toBe('Unknown Service: Unknown Operation');
+  });
+
+  it('returns "Unknown Trace" when selectedSpan is null but traceId is provided', () => {
+    const result = getServiceInfo(null, 'test-trace-id');
+    expect(result).toBe('Unknown Trace');
+  });
+
+  it('returns empty string when both selectedSpan and traceId are not provided', () => {
+    const result = getServiceInfo(null);
+    expect(result).toBe('');
+  });
+
+  it('returns empty string when selectedSpan is undefined', () => {
+    const result = getServiceInfo(undefined);
+    expect(result).toBe('');
+  });
+
+  it('prioritizes selectedSpan over traceId when both are provided', () => {
+    const result = getServiceInfo(mockSpan, 'test-trace-id');
+    expect(result).toBe('test-service: test-operation');
+  });
+
+  it('handlesbservice name format (resource.attributes.service.name)', () => {
+    const otelSpan = {
+      resource: {
+        attributes: {
+          service: {
+            name: 'otel-service',
+          },
+        },
+      },
+      name: 'otel-operation',
+      spanId: 'span-456',
+    };
+    const result = getServiceInfo(otelSpan);
+    expect(result).toBe('otel-service: otel-operation');
+  });
+
+  it('handles alternative service name format (resource.attributes["service.name"])', () => {
+    const otelSpan = {
+      resource: {
+        attributes: {
+          'service.name': 'alt-otel-service',
+        },
+      },
+      name: 'alt-otel-operation',
+      spanId: 'span-789',
+    };
+    const result = getServiceInfo(otelSpan);
+    expect(result).toBe('alt-otel-service: alt-otel-operation');
+  });
+
+  it('falls back to span.name when serviceName is not available', () => {
+    const spanWithoutService = {
+      name: 'fallback-operation',
+      spanId: 'span-fallback',
+    };
+    const result = getServiceInfo(spanWithoutService);
+    expect(result).toBe('fallback-operation: fallback-operation');
+  });
+
+  it('handles completely empty span with Unknown Service and Unknown Operation', () => {
+    const emptySpan = {
+      spanId: 'span-empty',
+      // No serviceName, no name, no resource attributes
+    };
+    const result = getServiceInfo(emptySpan);
+    expect(result).toBe('Unknown Service: Unknown Operation');
   });
 });

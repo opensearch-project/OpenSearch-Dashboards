@@ -2,7 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { i18n } from '@osd/i18n';
 import {
   EuiOverlayMask,
@@ -13,47 +14,82 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiCodeBlock,
+  EuiBadge,
+  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import type { MountPoint } from 'opensearch-dashboards/public';
-import { TopNavMenu } from '../../../../../../../navigation/public';
-import type { TopNavMenuData } from '../../../../../../../navigation/public';
 
 export interface TraceTopNavMenuProps {
   payloadData: any[];
   setMenuMountPoint?: (mount: MountPoint | undefined) => void;
+  traceId?: string;
 }
 
 export const TraceTopNavMenu: React.FC<TraceTopNavMenuProps> = ({
   payloadData,
   setMenuMountPoint,
+  traceId,
 }) => {
   const [isRawModalOpen, setRawModalOpen] = useState(false);
 
-  const menuActions: TopNavMenuData[] = [
-    {
-      id: 'viewRawData',
-      label: i18n.translate('explore.traceDetails.topNav.viewRawData', {
-        defaultMessage: 'View raw trace',
-      }),
-      run: () => setRawModalOpen(true),
-      testId: 'viewRawDataBtn',
-      emphasize: true,
-    },
-  ];
+  const copyTraceId = async () => {
+    if (traceId) {
+      try {
+        await navigator.clipboard.writeText(traceId);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to copy trace ID to clipboard:', error);
+      }
+    }
+  };
+
+  const HeaderContent: React.FC = () => (
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      {traceId && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content="Click to copy Trace ID">
+            <EuiBadge
+              color="hollow"
+              onClick={copyTraceId}
+              onClickAriaLabel="Copy Trace ID"
+              style={{ cursor: 'pointer' }}
+            >
+              {i18n.translate('explore.traceDetails.topNav.traceIdLabel', {
+                defaultMessage: 'Trace ID: {traceId}',
+                values: { traceId },
+              })}
+            </EuiBadge>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiButton size="s" onClick={() => setRawModalOpen(true)} data-test-subj="viewRawDataBtn">
+          {i18n.translate('explore.traceDetails.topNav.viewRawData', {
+            defaultMessage: 'View raw trace',
+          })}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  useEffect(() => {
+    if (setMenuMountPoint) {
+      const mount: MountPoint = (element) => {
+        ReactDOM.render(<HeaderContent />, element);
+        return () => ReactDOM.unmountComponentAtNode(element);
+      };
+      setMenuMountPoint(mount);
+
+      return () => {
+        setMenuMountPoint(undefined);
+      };
+    }
+  }, [setMenuMountPoint, traceId, setRawModalOpen]);
 
   return (
     <>
-      <TopNavMenu
-        config={menuActions}
-        setMenuMountPoint={setMenuMountPoint}
-        showSearchBar={false}
-        showQueryBar={false}
-        showQueryInput={false}
-        showDatePicker={false}
-        showFilterBar={false}
-        showDataSourceMenu={false}
-        appName={'TraceDetails'}
-      />
       {isRawModalOpen && (
         <EuiOverlayMask>
           <EuiModal onClose={() => setRawModalOpen(false)}>

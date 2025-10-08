@@ -4,8 +4,9 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { resolveServiceNameFromSpan } from '../traces/ppl_resolve_helpers';
 
 export function microToMilliSec(micro: number) {
   if (typeof micro !== 'number' || isNaN(micro)) return 0;
@@ -40,6 +41,27 @@ export function isEmpty(value: any): boolean {
 export function round(value: number, precision: number = 0): number {
   const multiplier = Math.pow(10, precision);
   return Math.round(value * multiplier) / multiplier;
+}
+
+export function getServiceInfo(selectedSpan: any, traceId?: string): string {
+  if (selectedSpan) {
+    const serviceName =
+      resolveServiceNameFromSpan(selectedSpan) ||
+      i18n.translate('explore.traceDetails.header.unknownService', {
+        defaultMessage: 'Unknown Service',
+      });
+    const operationName =
+      selectedSpan.name ||
+      i18n.translate('explore.traceDetails.header.unknownOperation', {
+        defaultMessage: 'Unknown Operation',
+      });
+    return `${serviceName}: ${operationName}`;
+  } else if (traceId) {
+    return i18n.translate('explore.traceDetails.header.unknownTrace', {
+      defaultMessage: 'Unknown Trace',
+    });
+  }
+  return '';
 }
 
 interface NoMatchMessageProps {
