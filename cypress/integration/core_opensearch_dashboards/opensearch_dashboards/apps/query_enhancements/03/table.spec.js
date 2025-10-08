@@ -81,6 +81,46 @@ export const runTableTests = () => {
       ]);
     });
 
+    generateIndexPatternTestConfigurations(generateTableTestConfiguration, {
+      indexPattern: INDEX_PATTERN_WITH_NO_TIME_1,
+      supportedLanguages: [QueryLanguages.DQL, QueryLanguages.Lucene],
+    }).forEach((config) => {
+      describe(`${config.testName}`, () => {
+        // TODO: Currently sort is not applicable for nested field. Should include and test nested field if sort can support.
+        const testFields = ['category', 'response_time'];
+
+        it(`sort for ${config.testName}`, () => {
+          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.setQueryLanguage(config.language);
+          // Add fields
+          testFields.forEach((field) => {
+            selectFieldFromSidebar(field);
+            cy.wait(500); // Wait for field to be added
+            // Default is no sort
+            cy.getElementByTestId(`docTableHeaderFieldSort_${field}`).should(
+              'have.attr',
+              'aria-label',
+              `Sort ${field} ascending`
+            );
+          });
+          // Sort asc
+          cy.getElementByTestId(`docTableHeaderFieldSort_${testFields[0]}`).should('exist').click();
+          cy.getElementByTestId('osdDocTableCellDataField')
+            .eq(0)
+            .should('have.text', 'Application');
+          // Sort desc
+          cy.getElementByTestId(`docTableHeaderFieldSort_${testFields[0]}`).should('exist').click();
+          cy.getElementByTestId('osdDocTableCellDataField').eq(0).should('have.text', 'Security');
+          // Sort asc on the 2nd col
+          cy.getElementByTestId(`docTableHeaderFieldSort_${testFields[1]}`).should('exist').click();
+          cy.getElementByTestId('osdDocTableCellDataField').eq(1).should('have.text', '0.1');
+          // Sort desc on the 2nd col
+          cy.getElementByTestId(`docTableHeaderFieldSort_${testFields[1]}`).should('exist').click();
+          cy.getElementByTestId('osdDocTableCellDataField').eq(1).should('have.text', '5');
+        });
+      });
+    });
+
     generateAllTestConfigurations(generateTableTestConfiguration, {
       indexPattern: INDEX_PATTERN_WITH_TIME_1,
       index: INDEX_WITH_TIME_1,
@@ -129,52 +169,6 @@ export const runTableTests = () => {
             cy.setQueryLanguage('OpenSearch SQL');
           }
           cy.get('[data-test-subj="tableDocViewRow-_index"]').should('have.length', 2);
-        });
-      });
-    });
-
-    generateIndexPatternTestConfigurations(generateTableTestConfiguration, {
-      indexPattern: INDEX_PATTERN_WITH_NO_TIME_1,
-      supportedLanguages: [QueryLanguages.DQL, QueryLanguages.Lucene],
-    }).forEach((config) => {
-      describe(`${config.testName}`, () => {
-        // TODO: Currently sort is not applicable for nested field. Should include and test nested field if sort can support.
-        const testFields = ['category', 'response_time'];
-
-        it(`sort for ${config.testName}`, () => {
-          // Setup - add wait to avoid version conflicts
-          cy.wait(2000);
-          cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-          cy.wait(1000);
-          cy.setQueryLanguage(config.language);
-          cy.wait(1000);
-          // Add fields
-          testFields.forEach((field) => {
-            selectFieldFromSidebar(field);
-            cy.wait(500); // Wait for field to be added
-            // Default is no sort
-            cy.getElementByTestId(`docTableHeaderFieldSort_${field}`).should(
-              'have.attr',
-              'aria-label',
-              `Sort ${field} ascending`
-            );
-          });
-          // Wait for all fields to be fully loaded before starting sort operations
-          cy.wait(1000);
-          // Sort asc
-          cy.getElementByTestId(`docTableHeaderFieldSort_${testFields[0]}`).should('exist').click();
-          cy.getElementByTestId('osdDocTableCellDataField')
-            .eq(0)
-            .should('have.text', 'Application');
-          // Sort desc
-          cy.getElementByTestId(`docTableHeaderFieldSort_${testFields[0]}`).should('exist').click();
-          cy.getElementByTestId('osdDocTableCellDataField').eq(0).should('have.text', 'Security');
-          // Sort asc on the 2nd col
-          cy.getElementByTestId(`docTableHeaderFieldSort_${testFields[1]}`).should('exist').click();
-          cy.getElementByTestId('osdDocTableCellDataField').eq(1).should('have.text', '0.1');
-          // Sort desc on the 2nd col
-          cy.getElementByTestId(`docTableHeaderFieldSort_${testFields[1]}`).should('exist').click();
-          cy.getElementByTestId('osdDocTableCellDataField').eq(1).should('have.text', '5');
         });
       });
     });
