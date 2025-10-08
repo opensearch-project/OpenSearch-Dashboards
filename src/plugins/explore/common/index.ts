@@ -21,6 +21,7 @@ export const EXPLORE_DEFAULT_LANGUAGE = 'PPL';
 export const EXPLORE_LOGS_TAB_ID = 'logs';
 export const EXPLORE_PATTERNS_TAB_ID = 'explore_patterns_tab';
 export const EXPLORE_VISUALIZATION_TAB_ID = 'explore_visualization_tab';
+export const EXPLORE_FIELD_STATS_TAB_ID = 'explore_field_stats_tab';
 
 export enum ExploreFlavor {
   Logs = 'logs',
