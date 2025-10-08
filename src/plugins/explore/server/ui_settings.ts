@@ -51,7 +51,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     name: i18n.translate('explore.discover.advancedSettings.defaultColumnsTitle', {
       defaultMessage: 'Default columns',
     }),
-    value: ['kind', '_source'],
+    value: ['_source'],
     description: i18n.translate('explore.discover.advancedSettings.defaultColumnsText', {
       defaultMessage: 'Columns displayed by default in the Discovery tab',
     }),
