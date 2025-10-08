@@ -911,4 +911,16 @@ describe('TraceDetails', () => {
     // Should not call fetchTraceSpans when required params are missing
     expect(mockPplService.fetchTraceSpans).not.toHaveBeenCalled();
   });
+
+  it('does not set breadcrumbs when isFlyout is true', async () => {
+    const history = createMemoryHistory();
+
+    render(
+      <Router history={history}>
+        <TraceDetails isFlyout={true} />
+      </Router>
+    );
+
+    expect(mockChrome.setBreadcrumbs).not.toHaveBeenCalled();
+  });
 });

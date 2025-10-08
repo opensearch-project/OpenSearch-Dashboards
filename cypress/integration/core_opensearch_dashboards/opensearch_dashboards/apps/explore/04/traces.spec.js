@@ -89,39 +89,31 @@ const traceTestSuite = () => {
       cy.osd.verifyResultsCount(2);
     });
 
-    it('Expanding a span entry shows the correct info', () => {
+    it('Clicking a span entry opens the trace flyout', () => {
       cy.explore.setQueryEditor("| WHERE spanId = '58f52f0436530c7c'");
       cy.osd.verifyResultsCount(1);
-      cy.getElementByTestId('docTableExpandToggleColumn').first().click();
-      cy.getElementByTestId('osdDocViewer').should('be.visible');
-      // Test that timeline is selected as default
-      cy.get('#osd_doc_viewer_tab_0.euiTab-isSelected > .euiTab__content').contains('Timeline');
-      cy.get('#osd_doc_viewer_tab_1 > .euiTab__content').contains('Table');
-      cy.get('#osd_doc_viewer_tab_2 > .euiTab__content').contains('JSON');
+      cy.getElementByTestId('traceFlyoutButton').first().click();
 
-      // Intercept window.open to capture URL and navigate in same tab
-      cy.window().then((win) => {
-        cy.stub(win, 'open').as('windowOpen');
+      // Verify flyout header
+      cy.getElementByTestId('traceFlyout').should(
+        'contain.text',
+        'Trace: 68b0ad76fc05c5a5f5e3738d42b8a735'
+      );
+
+      cy.getElementByTestId('traceFlyout').within(() => {
+        // Verify Timeline tab is active by default
+        cy.get('button[role="tab"][aria-selected="true"]').should('contain', 'Timeline');
+
+        // Check for gantt chart container
+        cy.get('.exploreGanttChart__container').should('be.visible');
       });
 
-      // Click within gantt chart
-      cy.get('[aria-label="Trace spans Gantt chart"]').find('path[stroke-width="3"]').click();
-
-      cy.get('@windowOpen')
-        .should('have.been.called')
-        .then((stub) => {
-          traceUrl = stub.args[0][0];
-          cy.log(`Captured trace URL: ${traceUrl}`);
-          cy.visit(traceUrl);
-        });
-
-      // Wait for page to load
-      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-
-      // verify that we are on the Trace Details page by checking the trace ID badge
-      cy.get('.euiBadge')
-        .contains('Trace ID: 68b0ad76fc05c5a5f5e3738d42b8a735')
-        .should('be.visible');
+      // Get Trace Details link
+      cy.getElementByTestId('traceDetailsLink').should('have.prop', 'href');
+      cy.getElementByTestId('traceDetailsLink').then(function ($a) {
+        traceUrl = $a.prop('href');
+        cy.log(`Captured trace URL: ${traceUrl}`);
+      });
     });
   });
 
