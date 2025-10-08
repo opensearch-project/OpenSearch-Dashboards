@@ -10,7 +10,7 @@ import { NavigationPublicPluginStart } from '../../../plugins/navigation/public'
 import { ContentManagementPluginStart } from '../../../plugins/content_management/public';
 import { DataSourceAttributes } from '../../../plugins/data_source/common/data_sources';
 import type { AddCollaboratorsModal } from './components/add_collaborators_modal';
-import { WorkspaceCollaboratorTypesService } from './services';
+import { UseCaseService, WorkspaceCollaboratorTypesService } from './services';
 
 export type Services = CoreStart & {
   workspaceClient: WorkspaceClient;
@@ -18,6 +18,7 @@ export type Services = CoreStart & {
   navigationUI?: NavigationPublicPluginStart['ui'];
   contentManagement?: ContentManagementPluginStart;
   collaboratorTypes: WorkspaceCollaboratorTypesService;
+  useCaseService: UseCaseService;
 };
 
 export interface WorkspaceUseCaseFeature {
@@ -53,4 +54,5 @@ export interface WorkspacePluginSetup {
   ui: {
     AddCollaboratorsModal: typeof AddCollaboratorsModal;
   };
+  registerSupportedUseCasesForServerlessCollections: UseCaseService['registerSupportedUseCasesForServerlessCollections'];
 }

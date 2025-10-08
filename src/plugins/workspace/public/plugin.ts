@@ -299,12 +299,13 @@ export class WorkspacePlugin
       const [coreStart, { navigation }] = await core.getStartServices();
       const workspaceClient = coreStart.workspaces.client$.getValue() as WorkspaceClient;
 
-      const services = {
+      const services: Services = {
         ...coreStart,
         workspaceClient,
         dataSourceManagement,
         collaboratorTypes: this.collaboratorTypes,
         navigationUI: navigation.ui,
+        useCaseService: this.useCase,
       };
 
       return renderApp(params, services, {
@@ -435,6 +436,8 @@ export class WorkspacePlugin
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
+    const useCase = this.useCase;
+
     if (core.chrome.navGroup.getNavGroupEnabled() && contentManagement) {
       // workspace essential use case overview
       core.application.register({
@@ -453,6 +456,7 @@ export class WorkspacePlugin
             dataSourceManagement,
             contentManagement: contentManagementStart,
             navigationUI: navigationStart.ui,
+            useCaseService: useCase,
           };
 
           return renderUseCaseOverviewApp(params, services, ESSENTIAL_OVERVIEW_PAGE_ID);
@@ -490,6 +494,7 @@ export class WorkspacePlugin
             dataSourceManagement,
             contentManagement: contentManagementStart,
             navigationUI: navigationStart.ui,
+            useCaseService: useCase,
           };
 
           return renderUseCaseOverviewApp(params, services, ANALYTICS_ALL_OVERVIEW_PAGE_ID);
@@ -561,6 +566,8 @@ export class WorkspacePlugin
       ui: {
         AddCollaboratorsModal,
       },
+      registerSupportedUseCasesForServerlessCollections: this.useCase
+        .registerSupportedUseCasesForServerlessCollections,
     };
   }
 
@@ -662,6 +669,7 @@ export class WorkspacePlugin
         workspaceClient,
         navigationUI: navigation.ui,
         collaboratorTypes: this.collaboratorTypes,
+        useCaseService: this.useCase,
       };
       contentManagement.registerContentProvider({
         id: 'default_workspace_list',
