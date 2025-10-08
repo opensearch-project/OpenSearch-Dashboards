@@ -117,6 +117,10 @@ jobs:
           - group: 15
             config: query_enhanced
             test_location: source
+          # Dashboard tests with query enhanced - group flaky
+          - group: 16
+            config: query_enhanced
+            test_location: source
           # Explore tests - group 1
           - group: 10Explore
             config: explore

@@ -99,6 +99,7 @@
     "osd:ciGroup13": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/query_enhancements/03/*.spec.js\"",
     "osd:ciGroup14": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/query_enhancements/04/*.spec.js\"",
     "osd:ciGroup15": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/query_enhancements/05/*.spec.js\"",
+    "osd:ciGroup16": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/query_enhancements/06/*.spec.js\"",
     "osd:ciGroupS3": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/query_enhancements/s3_tests/*.spec.js\"",
     "osd:ciGroup10Explore": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/explore/01/*.spec.js\"",
     "osd:ciGroup12Explore": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/explore/02/*.spec.js\"",
