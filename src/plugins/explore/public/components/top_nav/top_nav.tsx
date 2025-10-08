@@ -20,18 +20,20 @@ import {
   selectUIState,
   selectQueryStatus,
   selectIsQueryRunning,
+  selectShouldShowCancelButton,
 } from '../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { getTopNavLinks } from './top_nav_links';
 import { getOpenButtonRun } from './top_nav_links/top_nav_open/top_nav_open';
 import { getSaveButtonRun } from './top_nav_links/top_nav_save/top_nav_save';
 import { SavedExplore } from '../../saved_explore';
-import { setDateRange } from '../../application/utils/state_management/slices/query_editor/query_editor_slice';
+import { setDateRange, setHasUserInitiatedQuery, setOverallQueryStatus } from '../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { useClearEditors, useEditorRef } from '../../application/hooks';
 import { onEditorRunActionCreator } from '../../application/utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
 import { abortAllActiveQueries } from '../../application/utils/state_management/actions/query_actions';
 import { QueryExecutionButton } from './query_execution_button';
 import { Query, TimeRange } from '../../../../data/common';
+import { QueryExecutionStatus } from '../../application/utils/state_management/types';
 
 export interface TopNavProps {
   savedExplore?: SavedExplore;
@@ -61,6 +63,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const tabState = useNewStateSelector(selectTabState);
   const queryStatus = useNewStateSelector(selectQueryStatus);
   const isQueryRunning = useNewStateSelector(selectIsQueryRunning);
+  const shouldShowCancelButton = useNewStateSelector(selectShouldShowCancelButton);
 
   const tabDefinition = services.tabRegistry?.getTab?.(uiState.activeTabId);
 
@@ -165,7 +168,15 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
 
   const handleQueryCancel = useCallback(() => {
     abortAllActiveQueries();
-  }, []);
+    dispatch(setHasUserInitiatedQuery(false));
+    // Reset overall query status to UNINITIALIZED to stop spinner immediately
+    dispatch(setOverallQueryStatus({
+      status: QueryExecutionStatus.UNINITIALIZED,
+      startTime: undefined,
+      elapsedMs: undefined,
+      error: undefined,
+    }));
+  }, [dispatch]);
 
   const handleOpenShortcut = useCallback(() => {
     const openButtonRun = getOpenButtonRun(services);
@@ -240,12 +251,9 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     execute: () => handleQuerySubmit(),
   });
 
-  const handleCustomButtonClick = useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      handleQuerySubmit();
-    },
-    [handleQuerySubmit]
-  );
+  const handleCustomButtonClick = useCallback(() => {
+    handleQuerySubmit();
+  }, [handleQuerySubmit]);
 
   const customSubmitButton = useMemo(() => {
     return <QueryExecutionButton onClick={handleCustomButtonClick} />;
@@ -273,7 +281,7 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
       showQueryBar={true}
       showQueryInput={false}
       showFilterBar={false}
-      showCancelButton={true}
+      showCancelButton={shouldShowCancelButton}
       onQueryCancel={handleQueryCancel}
       isQueryRunning={isQueryRunning}
     />

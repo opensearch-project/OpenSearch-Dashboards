@@ -75,3 +75,13 @@ export const selectIsQueryEditorDirty = createSelector(
   [selectState],
   (state) => state.isQueryEditorDirty
 );
+
+export const selectHasUserInitiatedQuery = createSelector(
+  [selectState],
+  (state) => state.hasUserInitiatedQuery
+);
+
+export const selectShouldShowCancelButton = createSelector(
+  [selectIsLoading, selectHasUserInitiatedQuery],
+  (isLoading, hasUserInitiatedQuery) => isLoading && hasUserInitiatedQuery
+);

@@ -25,6 +25,7 @@ export interface QueryEditorSliceState {
   queryExecutionButtonStatus: QueryExecutionButtonStatus;
   dateRange?: { from: string; to: string };
   isQueryEditorDirty: boolean;
+  hasUserInitiatedQuery: boolean;
 }
 
 const initialState: QueryEditorSliceState = {
@@ -43,6 +44,7 @@ const initialState: QueryEditorSliceState = {
   queryExecutionButtonStatus: 'REFRESH',
   dateRange: undefined,
   isQueryEditorDirty: false,
+  hasUserInitiatedQuery: false,
 };
 
 const queryEditorSlice = createSlice({
@@ -135,6 +137,9 @@ const queryEditorSlice = createSlice({
     setIsQueryEditorDirty: (state, action: PayloadAction<boolean>) => {
       state.isQueryEditorDirty = action.payload;
     },
+    setHasUserInitiatedQuery: (state, action: PayloadAction<boolean>) => {
+      state.hasUserInitiatedQuery = action.payload;
+    },
   },
 });
 
@@ -158,6 +163,7 @@ export const {
   setQueryExecutionButtonStatus,
   setDateRange,
   setIsQueryEditorDirty,
+  setHasUserInitiatedQuery,
 } = queryEditorSlice.actions;
 export const queryEditorReducer = queryEditorSlice.reducer;
 export const queryEditorInitialState = initialState;

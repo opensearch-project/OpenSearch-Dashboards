@@ -80,6 +80,6 @@ export const selectSavedSearch = createSelector(
 /**
  * Query execution status selectors
  */
-export { selectIsLoading as selectIsQueryRunning } from './query_editor';
+export { selectIsLoading as selectIsQueryRunning, selectShouldShowCancelButton } from './query_editor';
 
 export * from './query_editor';

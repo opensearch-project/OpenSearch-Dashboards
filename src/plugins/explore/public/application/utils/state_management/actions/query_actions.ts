@@ -428,8 +428,19 @@ const executeQueryBase = async (
     // Clean up aborted/failed query from active controllers
     activeQueryAbortControllers.delete(cacheKey);
 
-    // Handle abort errors
+    // Handle abort errors - reset query status to initial state
     if (error instanceof Error && error.name === 'AbortError') {
+      dispatch(
+        setIndividualQueryStatus({
+          cacheKey,
+          status: {
+            status: QueryExecutionStatus.UNINITIALIZED,
+            startTime: undefined,
+            elapsedMs: undefined,
+            error: undefined,
+          },
+        })
+      );
       return;
     }
 
