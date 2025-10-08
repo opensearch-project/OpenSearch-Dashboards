@@ -83,7 +83,7 @@ describe('FacetValue', () => {
     render(<FacetValue {...mockProps} />);
 
     const valueSpan = screen.getByTestId('field-success');
-    expect(valueSpan).toHaveClass('exploreSidebarFacetValue__name');
+    expect(valueSpan).toHaveClass('exploreSidebarField__name');
   });
 
   it('handles useShortDots option', () => {
@@ -114,13 +114,13 @@ describe('FacetValue', () => {
     const container = screen.getByTestId('exploreSidebarFacetValue');
     expect(container).toHaveClass('exploreSidebarFacetValue');
 
-    const actionButtons = container.querySelector('.exploreSidebarFacetValue__actionButtons');
+    const actionButtons = container.querySelector('.exploreSidebarField__actionButtons');
     expect(actionButtons).toBeInTheDocument();
 
     const countElement = container.querySelector('.exploreSidebarFacetValue__count');
     expect(countElement).toBeInTheDocument();
 
-    const actionButton = container.querySelector('.exploreSidebarFacetValue__actionButton');
+    const actionButton = container.querySelector('.exploreSidebarField__actionButton');
     expect(actionButton).toBeInTheDocument();
   });
 });
