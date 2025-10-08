@@ -396,8 +396,10 @@ export const mergeDataSourcesWithConnections = (
   return result;
 };
 
-// If all connected data sources are serverless, will only allow to select essential use case.
-export const getIsOnlyAllowEssentialUseCase = async (client: SavedObjectsStart['client']) => {
+// If all connected data sources are serverless, will use the list of registered use cases specifically for serverless collections.
+export const areAllDataSourcesOpenSearchServerless = async (
+  client: SavedObjectsStart['client']
+) => {
   const allDataSources = await getDataSourcesList(client);
   if (allDataSources.length > 0) {
     return allDataSources.every(
