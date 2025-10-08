@@ -159,7 +159,7 @@ describe('SpanCell', () => {
 
   it('renders button when interactions enabled', () => {
     render(<SpanCell {...defaultSpanCellProps} />);
-    
+
     const button = screen.getByRole('button');
     expect(button).toHaveClass('exploreSpanDetailTable__flyoutButton');
     expect(screen.getByText('test-span-id')).toBeInTheDocument();
@@ -167,21 +167,21 @@ describe('SpanCell', () => {
 
   it('calls openFlyout when button clicked', () => {
     render(<SpanCell {...defaultSpanCellProps} />);
-    
+
     fireEvent.click(screen.getByRole('button'));
     expect(mockOpenFlyout).toHaveBeenCalledWith('test-span-id');
   });
 
   it('renders content without button when interactions disabled', () => {
     render(<SpanCell {...defaultSpanCellProps} disableInteractions={true} />);
-    
+
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(screen.getByText('test-span-id')).toBeInTheDocument();
   });
 
   it('renders content without button when item is null', () => {
     render(<SpanCell {...defaultSpanCellProps} items={[]} />);
-    
+
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
     expect(screen.getByText('-')).toBeInTheDocument();
   });
@@ -193,7 +193,7 @@ describe('SpanCell', () => {
     };
 
     render(<SpanCell {...defaultSpanCellProps} props={propsWithSelectedSpan} />);
-    
+
     expect(mockSetCellProps).toHaveBeenCalledWith({
       className: 'exploreSpanDetailTable__selectedRow',
     });
@@ -201,14 +201,14 @@ describe('SpanCell', () => {
 
   it('clears cell props when span is not selected', () => {
     render(<SpanCell {...defaultSpanCellProps} />);
-    
+
     expect(mockSetCellProps).toHaveBeenCalledWith({});
   });
 
   it('handles different page and row index', () => {
     const tableParams = { page: 1, size: 10 };
     render(<SpanCell {...defaultSpanCellProps} rowIndex={15} tableParams={tableParams} />);
-    
+
     // Should access items[5] (15 - 1*10 = 5) which doesn't exist, so shows '-'
     expect(screen.getByText('-')).toBeInTheDocument();
   });
@@ -218,11 +218,7 @@ describe('SpanCell', () => {
     const colorMap = { 'test-service': '#ff0000' };
 
     render(
-      <SpanCell
-        {...defaultSpanCellProps}
-        traceTimeRange={traceTimeRange}
-        colorMap={colorMap}
-      />
+      <SpanCell {...defaultSpanCellProps} traceTimeRange={traceTimeRange} colorMap={colorMap} />
     );
 
     // Just verify the component renders with the props

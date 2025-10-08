@@ -14,7 +14,9 @@ jest.mock('../../utils/custom_datagrid', () => ({
 }));
 
 jest.mock('./hierarchy_span_cell', () => ({
-  HierarchySpanCell: jest.fn(() => <div data-test-subj="hierarchy-span-cell">HierarchySpanCell</div>),
+  HierarchySpanCell: jest.fn(() => (
+    <div data-test-subj="hierarchy-span-cell">HierarchySpanCell</div>
+  )),
 }));
 
 jest.mock('./span_cell', () => ({
@@ -30,10 +32,14 @@ import { isSpanError } from '../ppl_resolve_helpers';
 import { parseHits } from './utils';
 import { calculateTraceTimeRange } from '../../utils/span_timerange_utils';
 
-const mockRenderCustomDataGrid = RenderCustomDataGrid as jest.MockedFunction<typeof RenderCustomDataGrid>;
+const mockRenderCustomDataGrid = RenderCustomDataGrid as jest.MockedFunction<
+  typeof RenderCustomDataGrid
+>;
 const mockIsSpanError = isSpanError as jest.MockedFunction<typeof isSpanError>;
 const mockParseHits = parseHits as jest.MockedFunction<typeof parseHits>;
-const mockCalculateTraceTimeRange = calculateTraceTimeRange as jest.MockedFunction<typeof calculateTraceTimeRange>;
+const mockCalculateTraceTimeRange = calculateTraceTimeRange as jest.MockedFunction<
+  typeof calculateTraceTimeRange
+>;
 
 describe('SpanHierarchyTable', () => {
   const mockOpenFlyout = jest.fn();

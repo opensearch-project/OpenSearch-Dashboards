@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiText } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import './span_detail_table.scss';
 import { resolveServiceNameFromSpan, isSpanError } from '../ppl_resolve_helpers';
@@ -45,9 +45,8 @@ export const HierarchySpanCell = ({
   const serviceName = resolveServiceNameFromSpan(item);
   const operationName = item?.name;
   const hasError = isSpanError(item);
-  const fullText = `${serviceName || '-'}${operationName ? ` ${operationName}` : ''}`;
 
-  const ExpandCollapseIcon = () => (
+  const ExpandCollapseIcon = () =>
     item?.children && item.children.length > 0 ? (
       <EuiIcon
         type={isExpanded ? 'arrowDown' : 'arrowRight'}
@@ -68,17 +67,23 @@ export const HierarchySpanCell = ({
       />
     ) : (
       <EuiIcon type="empty" className="exploreSpanDetailTable__hiddenIcon" />
-    )
-  );
+    );
 
   const SpanText = () => (
-    <EuiToolTip content={fullText}>
+    <EuiToolTip
+      content={
+        <EuiText size="s">
+          <strong>{serviceName || '-'}</strong>
+          {operationName && ` ${operationName}`}
+        </EuiText>
+      }
+    >
       <span
         style={{
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
-          display: 'block'
+          display: 'block',
         }}
       >
         <strong>{serviceName || '-'}</strong>
@@ -87,23 +92,10 @@ export const HierarchySpanCell = ({
     </EuiToolTip>
   );
 
-  const ErrorIcon = () => (
-    hasError ? (
-      <EuiIcon
-        type="alert"
-        color="danger"
-        size="s"
-      />
-    ) : null
-  );
+  const ErrorIcon = () => (hasError ? <EuiIcon type="alert" color="danger" size="s" /> : null);
 
   const SpanContent = () => (
-    <EuiFlexGroup 
-      alignItems="center" 
-      gutterSize="none" 
-      responsive={false}
-      style={{ minWidth: 0 }}
-    >
+    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} style={{ minWidth: 0 }}>
       <EuiFlexItem grow={true} style={{ minWidth: 0 }}>
         <SpanText />
       </EuiFlexItem>

@@ -24,7 +24,9 @@ import { RenderCustomDataGrid } from '../../utils/custom_datagrid';
 import { isSpanError } from '../ppl_resolve_helpers';
 import { parseHits } from './utils';
 
-const mockRenderCustomDataGrid = RenderCustomDataGrid as jest.MockedFunction<typeof RenderCustomDataGrid>;
+const mockRenderCustomDataGrid = RenderCustomDataGrid as jest.MockedFunction<
+  typeof RenderCustomDataGrid
+>;
 const mockIsSpanError = isSpanError as jest.MockedFunction<typeof isSpanError>;
 const mockParseHits = parseHits as jest.MockedFunction<typeof parseHits>;
 
@@ -41,7 +43,7 @@ describe('SpanListTable', () => {
       'status.code': 0,
       startTime: '2023-01-01T00:00:00.000Z',
       endTime: '2023-01-01T00:00:01.000Z',
-      children: []
+      children: [],
     },
     {
       spanId: 'span-2',
@@ -199,12 +201,14 @@ describe('SpanListTable', () => {
   });
 
   it('handles hits.hits format payload', () => {
-    mockParseHits.mockReturnValue([{
-      spanId: 'span-3',
-      serviceName: 'service-3',
-      name: 'operation-3',
-      children: [],
-    }]);
+    mockParseHits.mockReturnValue([
+      {
+        spanId: 'span-3',
+        serviceName: 'service-3',
+        name: 'operation-3',
+        children: [],
+      },
+    ]);
 
     const { getByTestId } = render(<SpanListTable {...defaultProps} />);
 
@@ -231,7 +235,7 @@ describe('SpanListTable', () => {
       'endTime',
     ];
 
-    expectedColumns.forEach(columnId => {
+    expectedColumns.forEach((columnId) => {
       expect(columnIds).toContain(columnId);
     });
   });

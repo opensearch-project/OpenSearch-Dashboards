@@ -4,15 +4,15 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import {EuiDataGridColumn} from '@elastic/eui';
-import {i18n} from '@osd/i18n';
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import { EuiDataGridColumn } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import './span_detail_table.scss';
-import {RenderCustomDataGrid} from '../../utils/custom_datagrid';
-import {isSpanError} from '../ppl_resolve_helpers';
-import {ParsedHit, Span, SpanTableProps} from './types';
-import {SpanCell} from './span_cell';
-import {parseHits} from './utils';
+import { RenderCustomDataGrid } from '../../utils/custom_datagrid';
+import { isSpanError } from '../ppl_resolve_helpers';
+import { ParsedHit, Span, SpanTableProps } from './types';
+import { SpanCell } from './span_cell';
+import { parseHits } from './utils';
 
 const getListColumns = (): EuiDataGridColumn[] => {
   return [
@@ -200,4 +200,4 @@ export const SpanListTable: React.FC<SpanTableProps> = (props) => {
     availableWidth: props.availableWidth,
     isTableDataLoading: isSpansTableDataLoading,
   });
-}
+};

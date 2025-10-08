@@ -51,6 +51,7 @@ export const SpanCell = ({
     } else {
       setCellProps?.({});
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.selectedSpanId, item?.spanId, disableInteractions]);
 
   const cellContent = renderSpanCellValue({ item, columnId }, traceTimeRange, colorMap);

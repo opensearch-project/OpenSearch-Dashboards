@@ -37,8 +37,11 @@ describe('parseHits', () => {
 
     const result = parseHits(payloadData);
     expect(result).toEqual([]);
-    expect(consoleSpy).toHaveBeenCalledWith('Error processing payloadData:', expect.any(SyntaxError));
-    
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Error processing payloadData:',
+      expect.any(SyntaxError)
+    );
+
     consoleSpy.mockRestore();
   });
 
@@ -65,7 +68,7 @@ describe('parseHits', () => {
     const result = parseHits('');
     expect(result).toEqual([]);
     expect(consoleSpy).toHaveBeenCalled();
-    
+
     consoleSpy.mockRestore();
   });
 });

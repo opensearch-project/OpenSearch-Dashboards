@@ -78,7 +78,7 @@ describe('HierarchySpanCell', () => {
 
   it('shows expand arrow for items with children', () => {
     const item = createMockItem({
-      children: [createMockItem({ spanId: 'child-span' })]
+      children: [createMockItem({ spanId: 'child-span' })],
     });
     render(<HierarchySpanCell {...defaultProps} items={[item]} />);
 
@@ -95,7 +95,7 @@ describe('HierarchySpanCell', () => {
   it('toggles expansion when arrow clicked', () => {
     const item = createMockItem({
       spanId: 'parent-span',
-      children: [createMockItem({ spanId: 'child-span' })]
+      children: [createMockItem({ spanId: 'child-span' })],
     });
     render(<HierarchySpanCell {...defaultProps} items={[item]} />);
 
@@ -107,7 +107,7 @@ describe('HierarchySpanCell', () => {
   it('shows down arrow when expanded', () => {
     const item = createMockItem({
       spanId: 'parent-span',
-      children: [createMockItem({ spanId: 'child-span' })]
+      children: [createMockItem({ spanId: 'child-span' })],
     });
     const expandedRows = new Set(['parent-span']);
 
@@ -120,7 +120,7 @@ describe('HierarchySpanCell', () => {
   it('shows right arrow when collapsed', () => {
     const item = createMockItem({
       spanId: 'parent-span',
-      children: [createMockItem({ spanId: 'child-span' })]
+      children: [createMockItem({ spanId: 'child-span' })],
     });
 
     render(<HierarchySpanCell {...defaultProps} items={[item]} />);

@@ -21,7 +21,7 @@ const getHierarchyTableColumns = (traceTimeRange: TraceTimeRange): EuiDataGridCo
   return [
     {
       id: 'span',
-      display: i18n.translate('explore.spanDetailTable.column.service', {
+      display: i18n.translate('explore.spanDetailTable.column.span', {
         defaultMessage: 'Span',
       }),
       isExpandable: false,
@@ -41,9 +41,9 @@ const getHierarchyTableColumns = (traceTimeRange: TraceTimeRange): EuiDataGridCo
       }),
       initialWidth: 100,
       isExpandable: false,
-    }
+    },
   ];
-}
+};
 
 export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
   const { hiddenColumns, availableWidth, openFlyout, colorMap } = props;
@@ -225,4 +225,4 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     visibleColumns,
     isTableDataLoading: isSpansTableDataLoading,
   });
-}
+};
