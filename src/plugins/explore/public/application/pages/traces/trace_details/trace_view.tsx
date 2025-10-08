@@ -36,7 +36,7 @@ import { DataExplorerServices } from '../../../../../../data_explorer/public';
 import { generateColorMap } from './public/traces/generate_color_map';
 import { SpanDetailPanel } from './public/traces/span_detail_panel';
 import { ServiceMap } from './public/services/service_map';
-import { NoMatchMessage } from './public/utils/helper_functions';
+import { NoMatchMessage, getServiceInfo } from './public/utils/helper_functions';
 import { createTraceAppState } from './state/trace_app_state';
 import { SpanDetailTabs } from './public/traces/span_detail_tabs';
 import { TraceDetailTabs } from './public/traces/trace_detail_tabs';
@@ -150,21 +150,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     setSpanFilters(newFilters);
   };
 
-  useEffect(() => {
-    chrome?.setBreadcrumbs([
-      {
-        text: traceId
-          ? i18n.translate('explore.traceDetails.breadcrumb.traceTitle', {
-              defaultMessage: 'Trace: {traceId}',
-              values: { traceId },
-            })
-          : i18n.translate('explore.traceDetails.breadcrumb.unknownTrace', {
-              defaultMessage: 'Unknown Trace',
-            }),
-      },
-    ]);
-  }, [chrome, traceId]);
-
   // Check for correlations and fetch logs data
   useEffect(() => {
     if (dataset?.id && correlationService && data && traceId) {
@@ -257,17 +242,11 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     };
   }, [stopStateSync]);
 
-  // Find selected span, with fallback to root span logic
-  const selectedSpan = useMemo((): TraceHit | undefined => {
+  // Find root span for breadcrumb (always shows root span info)
+  const rootSpan = useMemo((): TraceHit | undefined => {
     if (transformedHits.length === 0) return undefined;
 
-    // If we have a specific spanId, try to find it first
-    if (spanId) {
-      const found = transformedHits.find((span) => span.spanId === spanId);
-      if (found) return found;
-    }
-
-    // Fallback to root span logic if no specific span selected or found
+    // Find span without parent first
     const spanWithoutParent = transformedHits.find((span) => !span.parentSpanId);
     if (spanWithoutParent) return spanWithoutParent;
 
@@ -278,7 +257,21 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
       const currentTime = new Date(current.startTime || 0).getTime();
       return currentTime < earliestTime ? current : earliest;
     }, undefined);
-  }, [spanId, transformedHits]);
+  }, [transformedHits]);
+
+  // Find selected span, with fallback to root span logic
+  const selectedSpan = useMemo((): TraceHit | undefined => {
+    if (transformedHits.length === 0) return undefined;
+
+    // If we have a specific spanId, try to find it first
+    if (spanId) {
+      const found = transformedHits.find((span) => span.spanId === spanId);
+      if (found) return found;
+    }
+
+    // Fallback to root span if no specific span selected or found
+    return rootSpan;
+  }, [spanId, transformedHits, rootSpan]);
 
   // Update URL state when fallback span selection occurs
   useEffect(() => {
@@ -400,9 +393,22 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     };
   }, [forceVisualizationResize, isEmbedded]);
 
+  // Set breadcrumb with service name from root span
+  useEffect(() => {
+    chrome?.setBreadcrumbs([
+      {
+        text: getServiceInfo(rootSpan, traceId),
+      },
+    ]);
+  }, [chrome, rootSpan, traceId]);
+
   return (
     <>
-      <TraceTopNavMenu payloadData={transformedHits} setMenuMountPoint={setMenuMountPoint} />
+      <TraceTopNavMenu
+        payloadData={transformedHits}
+        setMenuMountPoint={setMenuMountPoint}
+        traceId={traceId}
+      />
 
       {isLoading ? (
         <EuiPanel paddingSize="l">
