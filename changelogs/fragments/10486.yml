@@ -1,2 +1,0 @@
-fix:
-- Remove extra empty space above editor and fix default horizontal scroll in logs table ([#10486](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10486))

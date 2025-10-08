@@ -4,6 +4,173 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [3.3.0-2025-10-08](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/3.3.0)
+
+### 💥 Breaking Changes
+
+ - Patterns tab adaptation to calcite issues. ([#10535](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10535))
+
+### Deprecations
+
+### 🛡 Security
+
+ - [CVE-2025-6545][CVE-2025-7783] Bump pbkdf2 from 3.1.2 to 3.1.3 and set form-data to 4.0.4 ([#10378](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10378))
+ - Fix GHSA-cpq7-6gpm-g9rc by bumping cipher-base,sha.js ([#10442](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10442))
+
+### 📈 Features/Enhancements
+
+ - Enhanced plugin version compatibility with strict/ignore modes. ([#10273](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10273))
+ - Add `--single-version` flag with 'strict' and 'ignore' options. ([#10273](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10273))
+ - Refactor Banner Extensibility Model via Chrome Service ([#10324](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10324))
+ - Update for datasets, redirection, and accordion timeline ([#10355](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10355))
+ - Introduce facet filter ([#10362](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10362))
+ - Allow apps to configure available types in the dataset explorer ([#10379](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10379))
+ - Adds a correlation Saved object which creates a saved object for the related traces and logs ([#10386](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10386))
+ - Add traces chart ([#10392](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10392))
+ - Trace Details: Log correlation (tabs+redirect) ([#10393](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10393))
+ - Add experimental default trace columns UI setting for Explore traces tab and apply it. ([#10406](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10406))
+ - Add keyboard shortcuts configuration option to opensearch_dashboards.yml ([#10409](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10409))
+ - Introduce tab content error guard ([#10412](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10412))
+ - Trace Details add support external datasets ([#10418](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10418))
+ - Infer axis date format ([#10425](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10425))
+ - Switch primary schema for trace details, disable service map ([#10431](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10431))
+ - Update default columns and facets ([#10432](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10432))
+ - Revert "[Explore] Default to AI mode when available instead of PPL" ([#10443](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10443))
+ - Update metric viz to support sparkline ([#10449](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10449))
+ - Add a link to detail page in expanded row ([#10450](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10450))
+ - Improve gantt chart ([#10452](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10452))
+ - Add useKeyboardShortcut hook for registering keyboard shortcuts in React components ([#10455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10455))
+ - Patterns tab flyout ([#10464](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10464))
+ - Add histogram ([#10465](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10465))
+ - Add keyboard shortcut help modal with interactive icon component ([#10466](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10466))
+ - Discover visualization color and default settings updates ([#10469](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10469))
+ - Table visualization enhancement ([#10470](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10470))
+ - Update metric styles and add option to show value percentage change ([#10482](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10482))
+ - Implements 'search with pattern' functionality within Patterns' tab flyout ([#10489](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10489))
+ - Introduce dataset SignalType ([#10491](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10491))
+ - Add PPL Formatter in Query panel ([#10503](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10503))
+ - Add more keyboard shortcuts for OSD ([#10509](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10509))
+ - Add "Show Raw Data" toggle ([#10516](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10516))
+ - Add query panel actions registry to explore ([#10526](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10526))
+ - Update Simplified PPL grammar to latest version ([#10536](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10536))
+ - Custom patterns error page ([#10540](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10540))
+ - Add crypess test for keyboard shortcut ([#10543](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10543))
+ - Enable Shortcuts to Comment Lines in Query Editor ([#10545](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10545))
+ - Dataset type and management ([#10554](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10554))
+ - Show query panel in Explore even if there are no datasets ([#10557](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10557))
+ - Add mouse hover state for explore line charts ([#10560](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10560))
+ - Remove error popover from query panel ([#10581](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10581))
+ - Explore experience will auto turn on few other flags ([#10588](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10588))
+ - Add experimental AI Chat and Context Provider plugins for OpenSearch Dashboards ([#10600](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10600))
+ - Add explore experience modal ([#10607](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10607))
+ - [AI] AG-UI compliant Langgraph ReAct agent implementation ([#10612](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10612))
+ - Enhance explore modal UI ([#10622](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10622))
+ - Chat(feat): mark context provider and chat as experimental ([#10624](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10624))
+ - Add Timeline waterfall bars column to SpanDetailTableHierarchy ([#10642](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10642))
+ - Add batch delete method, fix deletion error ([#9781](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9781))
+
+### 🐛 Bug Fixes
+
+ - Update chart axis titles to new field names after axis switch ([#10316](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10316))
+ - Persist banner dismissal across session reloads using sessionStorage ([#10325](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10325))
+ - Fix vega data url with signal not working ([#10339](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10339))
+ - The updated query not properly apply when with the snapshot url of a saved search ([#10357](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10357))
+ - The query reset to empty after saving a saved search ([#10357](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10357))
+ - Infer tooltip date format dynamically ([#10358](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10358))
+ - Error Highlighting after switching languages ([#10363](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10363))
+ - Discover visualization empty state should use correct PPL ([#10365](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10365))
+ - Reset legacy state when switching dataset ([#10366](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10366))
+ - Make the advanced dataset selector respect the language config ([#10368](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10368))
+ - [Explore] Resolve ScopedHistory navigation scope error in explore plugin ([#10369](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10369))
+ - [Explore] Allow Refresh to run query ([#10370](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10370))
+ - [Explore] Preserve active tab when saving and loading explores in dashboards ([#10388](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10388))
+ - [Explore] Remove Explore from Patterns tab ([#10391](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10391))
+ - Functional issues with patterns field selector ([#10394](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10394))
+ - It should only show index selector when needed ([#10400](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10400))
+ - Correlation object to have entities field which is dynamic and not strict ([#10403](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10403))
+ - Value Suggestions for Columns containing @ and . ([#10408](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10408))
+ - Remaining fixes for ui settings ([#10410](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10410))
+ - Fix global search url inside workspace ([#10414](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10414))
+ - Max row per page not working after adding table viz to a dashboard ([#10420](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10420))
+ - Max row per page can set to value < 1 ([#10420](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10420))
+ - Update the console warn and throw error message ([#10430](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10430))
+ - [Query Enhancement] Fix Enter command behaviour in query editor ([#10446](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10446))
+ - Add gauge vis ([#10451](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10451))
+ - Vega visualization tooltip flashing when mouse move ([#10467](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10467))
+ - Move the Data Importer plugin to Data Administration under settings ([#10478](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10478))
+ - Discover:Traces Span-redirection, instant hover, bug fixes ([#10479](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10479))
+ - Remove extra empty space above editor and fix default horizontal scroll in logs table ([#10486](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10486))
+ - Add units panel for gauge and metric ([#10497](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10497))
+ - Add sanitization for axis label and name ([#10499](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10499))
+ - Explore embeddable not handle ppl without source ([#10502](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10502))
+ - Explore embeddable display name ([#10502](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10502))
+ - Capitalize PPL Keywords in suggestions ([#10505](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10505))
+ - Header breadcrumb and responsiveness ([#10507](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10507))
+ - Banner font fix ([#10508](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10508))
+ - Fix remaining ui settings tests ([#10510](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10510))
+ - Do not expose `VEGA_DEBUG` object to `window` by default ([#10511](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10511))
+ - Make global setting nullable when getting / updating workspace scope settings ([#10528](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10528))
+ - Fix result table error ui ([#10532](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10532))
+ - Prevent general query error from hiding tabs ([#10540](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10540))
+ - Filter out spans without timestamp nano field ([#10552](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10552))
+ - Update span table flyout button ([#10565](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10565))
+ - Trace:Details Span MetaData format ([#10566](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10566))
+ - Value options sum in gauge and metric panels are not working ([#10579](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10579))
+ - Inconsistent icons in table fields ([#10584](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10584))
+ - Remaining fix for global threshold ([#10589](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10589))
+ - Source command detection if we have a field expression before source ([#10598](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10598))
+ - Handle undefined items in span table ([#10608](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10608))
+ - Update discover traces column names ([#10609](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10609))
+ - Discover:Traces feature flag and bug fixes ([#10611](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10611))
+ - Fix CI/CD failure: Cannot find module @osd/optimizer/target/cli ([#10613](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10613))
+ - Column Value Caching for Autocomplete ([#10621](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10621))
+ - Fix default data source not set when re-associating after deletion ([#9805](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9805))
+
+### 🚞 Infrastructure
+
+### 📝 Documentation
+
+ - Add documentation for explore query panel actions ([#10531](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10531))
+
+### 🛠 Maintenance
+
+ - Update scroll bar style in table ([#10346](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10346))
+ - Query panel generated query ui updates ([#10353](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10353))
+ - Add error boundary to tab content on Explore page ([#10360](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10360))
+ - Update error and lantency schema on Traces page ([#10415](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10415))
+ - Ignore .claude directory from git. ([#10417](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10417))
+ - Add common Dashboards run configurations ([#10426](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10426))
+ - Disable charts in traces ([#10444](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10444))
+ - Remove obsolete Web API polyfills ([#10471](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10471))
+ - Update dataset interface in fields selector component ([#10483](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10483))
+ - Remove unnecessary service name fallback ([#10496](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10496))
+ - Only show facet filter on Traces page ([#10498](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10498))
+ - Trace:Details Filter errors button update for additional error fields and filtering ([#10501](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10501))
+ - Update vega and vega-lite to v5 latest ([#10556](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10556))
+ - Add backticks when source is omitted ([#10573](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10573))
+ - Change exposeDebugObjectToWindow default value to true ([#10590](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10590))
+ - Bumps cypress-request to 3.0.9 ([#10618](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10618))
+
+### 🪛 Refactoring
+
+ - Move viz render functions to VisualizationBuilder ([#10390](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10390))
+ - Update visualization registry to remove the usage of `matchIndex` ([#10419](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10419))
+ - Chart style options are always optional, default styles are applied if not provided ([#10534](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10534))
+ - Refactor explore visualization TS types ([#10534](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10534))
+ - Add a flag to config discover vis theme from localStorage for development ([#10548](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10548))
+
+### 🔩 Tests
+
+ - Cypress tests for new discover saved search ([#10364](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10364))
+ - Remove skipped tests for explore ([#10372](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10372))
+ - Fix Autocomplete Tests to accomodate for AI mode ([#10387](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10387))
+ - Discover:Traces + Trace Details Sanity testing ([#10448](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10448))
+ - Add Cypress Test for Enter key behaviour in Query Editor ([#10453](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10453))
+ - Add Cypress test data creation for trace exploration ([#10492](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10492))
+ - Trace:Details Cypress testing ([#10504](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10504))
+ - Add Cypress to check for tab switching of vizualization ([#10514](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10514))
+ - Backport fix CI group 13+15 test failures ([#10665](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10665))
+
 ## [3.2.0-2025-08-06](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/3.2.0)
 
 ### 💥 Breaking Changes
