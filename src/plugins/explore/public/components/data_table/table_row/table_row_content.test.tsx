@@ -10,6 +10,11 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TableRowContent } from './table_row_content';
+import { isOnTracesPage } from '../table_cell/trace_utils/trace_utils';
+
+jest.mock('../table_cell/trace_utils/trace_utils', () => ({
+  isOnTracesPage: jest.fn().mockReturnValue(false),
+}));
 
 // Mock child components
 jest.mock('../table_cell/table_cell', () => ({
@@ -145,5 +150,18 @@ describe('TableRowContent', () => {
 
     expect(screen.getByTestId('table-cell-field1')).toBeInTheDocument();
     expect(screen.getByTestId('table-cell-field2')).toBeInTheDocument();
+  });
+
+  it('hides expand toggle when on traces page', () => {
+    jest.mocked(isOnTracesPage).mockReturnValue(true);
+
+    render(
+      <table>
+        <tbody>
+          <TableRowContent {...(defaultProps as any)} />
+        </tbody>
+      </table>
+    );
+    expect(screen.queryByTestId('docTableExpandToggleColumn')).not.toBeInTheDocument();
   });
 });

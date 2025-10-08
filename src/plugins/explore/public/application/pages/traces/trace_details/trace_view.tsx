@@ -36,7 +36,7 @@ import { DataExplorerServices } from '../../../../../../data_explorer/public';
 import { generateColorMap } from './public/traces/generate_color_map';
 import { SpanDetailPanel } from './public/traces/span_detail_panel';
 import { ServiceMap } from './public/services/service_map';
-import { NoMatchMessage } from './public/utils/helper_functions';
+import { NoMatchMessage, getServiceInfo } from './public/utils/helper_functions';
 import { createTraceAppState } from './state/trace_app_state';
 import { SpanDetailTabs } from './public/traces/span_detail_tabs';
 import { TraceDetailTabs } from './public/traces/trace_detail_tabs';
@@ -64,11 +64,13 @@ interface ResizeObserverTarget extends Element {
 export interface TraceDetailsProps {
   setMenuMountPoint?: (mount: MountPoint | undefined) => void;
   isEmbedded?: boolean;
+  isFlyout?: boolean;
 }
 
 export const TraceDetails: React.FC<TraceDetailsProps> = ({
   setMenuMountPoint,
   isEmbedded = false,
+  isFlyout = false,
 }) => {
   const {
     services: { chrome, data, osdUrlStateStorage, savedObjects, uiSettings },
@@ -149,21 +151,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const setSpanFiltersWithStorage = (newFilters: SpanFilter[]) => {
     setSpanFilters(newFilters);
   };
-
-  useEffect(() => {
-    chrome?.setBreadcrumbs([
-      {
-        text: traceId
-          ? i18n.translate('explore.traceDetails.breadcrumb.traceTitle', {
-              defaultMessage: 'Trace: {traceId}',
-              values: { traceId },
-            })
-          : i18n.translate('explore.traceDetails.breadcrumb.unknownTrace', {
-              defaultMessage: 'Unknown Trace',
-            }),
-      },
-    ]);
-  }, [chrome, traceId]);
 
   // Check for correlations and fetch logs data
   useEffect(() => {
@@ -257,17 +244,11 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     };
   }, [stopStateSync]);
 
-  // Find selected span, with fallback to root span logic
-  const selectedSpan = useMemo((): TraceHit | undefined => {
+  // Find root span for breadcrumb (always shows root span info)
+  const rootSpan = useMemo((): TraceHit | undefined => {
     if (transformedHits.length === 0) return undefined;
 
-    // If we have a specific spanId, try to find it first
-    if (spanId) {
-      const found = transformedHits.find((span) => span.spanId === spanId);
-      if (found) return found;
-    }
-
-    // Fallback to root span logic if no specific span selected or found
+    // Find span without parent first
     const spanWithoutParent = transformedHits.find((span) => !span.parentSpanId);
     if (spanWithoutParent) return spanWithoutParent;
 
@@ -278,7 +259,21 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
       const currentTime = new Date(current.startTime || 0).getTime();
       return currentTime < earliestTime ? current : earliest;
     }, undefined);
-  }, [spanId, transformedHits]);
+  }, [transformedHits]);
+
+  // Find selected span, with fallback to root span logic
+  const selectedSpan = useMemo((): TraceHit | undefined => {
+    if (transformedHits.length === 0) return undefined;
+
+    // If we have a specific spanId, try to find it first
+    if (spanId) {
+      const found = transformedHits.find((span) => span.spanId === spanId);
+      if (found) return found;
+    }
+
+    // Fallback to root span if no specific span selected or found
+    return rootSpan;
+  }, [spanId, transformedHits, rootSpan]);
 
   // Update URL state when fallback span selection occurs
   useEffect(() => {
@@ -400,9 +395,26 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     };
   }, [forceVisualizationResize, isEmbedded]);
 
+  // Set breadcrumb with service name from root span
+  useEffect(() => {
+    if (!isFlyout) {
+      chrome?.setBreadcrumbs([
+        {
+          text: getServiceInfo(rootSpan, traceId),
+        },
+      ]);
+    }
+  }, [chrome, rootSpan, traceId, isFlyout]);
+
   return (
     <>
-      <TraceTopNavMenu payloadData={transformedHits} setMenuMountPoint={setMenuMountPoint} />
+      {!isFlyout && (
+        <TraceTopNavMenu
+          payloadData={transformedHits}
+          setMenuMountPoint={setMenuMountPoint}
+          traceId={traceId}
+        />
+      )}
 
       {isLoading ? (
         <EuiPanel paddingSize="l">
@@ -488,13 +500,17 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
               {/* Resizable container underneath filter badges */}
               <EuiResizableContainer
-                direction="horizontal"
                 className="exploreTraceView__resizableContainer"
+                direction={isFlyout ? 'vertical' : 'horizontal'}
               >
                 {(EuiResizablePanel, EuiResizableButton) => (
                   <>
-                    <EuiResizablePanel initialSize={70} minSize="50%" wrapperPadding="none">
-                      <EuiPanel paddingSize="s" className="exploreTraceView__contentPanel">
+                    <EuiResizablePanel
+                      initialSize={isFlyout ? 50 : 70}
+                      minSize={isFlyout ? '30%' : '50%'}
+                      wrapperPadding="none"
+                    >
+                      <div className="exploreTraceView__contentPanel">
                         {/* Tab content */}
                         <div ref={mainPanelRef} className="exploreTraceView__mainPanel">
                           {activeTab === TraceDetailTab.SERVICE_MAP && (
@@ -535,13 +551,16 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                             />
                           )}
                         </div>
-                      </EuiPanel>
+                      </div>
                     </EuiResizablePanel>
 
                     <EuiResizableButton />
 
-                    <EuiResizablePanel initialSize={30} minSize="300px">
-                      <EuiPanel paddingSize="s" className="exploreTraceView__sidebarPanel">
+                    <EuiResizablePanel
+                      initialSize={isFlyout ? 50 : 30}
+                      minSize={isFlyout ? '30%' : '300px'}
+                    >
+                      <div className="exploreTraceView__sidebarPanel">
                         <SpanDetailTabs
                           selectedSpan={selectedSpan}
                           addSpanFilter={(field: string, value: string | number | boolean) => {
@@ -561,7 +580,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                           logsData={logsData}
                           isLogsLoading={isLogsLoading}
                         />
-                      </EuiPanel>
+                      </div>
                     </EuiResizablePanel>
                   </>
                 )}

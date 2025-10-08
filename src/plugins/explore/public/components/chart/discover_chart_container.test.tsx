@@ -89,6 +89,7 @@ jest.mock('../../application/utils/state_management/actions/query_actions', () =
     hits: { total: 10 },
   })),
   defaultPrepareQueryString: jest.fn(() => 'test-cache-key'),
+  prepareHistogramCacheKey: jest.fn(() => 'histogram:test-cache-key'),
 }));
 
 jest.mock(
@@ -139,6 +140,14 @@ describe('DiscoverChartContainer', () => {
         results: hasResults
           ? {
               'test-cache-key': {
+                elapsedMs: 100,
+                took: 10,
+                timed_out: false,
+                _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+                hits: { hits: [], total: 10, max_score: 1.0 },
+                fieldSchema: [],
+              },
+              'histogram:test-cache-key': {
                 elapsedMs: 100,
                 took: 10,
                 timed_out: false,

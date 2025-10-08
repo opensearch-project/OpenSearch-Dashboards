@@ -13,7 +13,7 @@ import { ExploreLogsChart } from './explore_logs_chart';
 import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
 import {
   histogramResultsProcessor,
-  defaultPrepareQueryString,
+  prepareHistogramCacheKey,
 } from '../../application/utils/state_management/actions/query_actions';
 import { RootState } from '../../application/utils/state_management/store';
 import { selectShowHistogram } from '../../application/utils/state_management/selectors';
@@ -39,7 +39,7 @@ export const DiscoverChartContainer = () => {
 
   // Use default cache key computation for histogram data
   const cacheKey = useMemo(() => {
-    return defaultPrepareQueryString(query);
+    return prepareHistogramCacheKey(query);
   }, [query]);
 
   const rawResults = cacheKey ? results[cacheKey] : null;

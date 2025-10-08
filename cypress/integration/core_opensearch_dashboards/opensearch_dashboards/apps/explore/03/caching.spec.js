@@ -18,7 +18,7 @@ const cachingTestSuite = () => {
   describe('caching spec', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
         timefieldName: 'timestamp',
@@ -50,7 +50,7 @@ const cachingTestSuite = () => {
         DATASOURCE_NAME,
         DatasetTypes.INDEX_PATTERN.name
       );
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: alternativeIndexPatternName,
         timefieldName: 'timestamp',

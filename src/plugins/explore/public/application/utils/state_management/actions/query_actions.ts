@@ -11,7 +11,7 @@ import {
   Query,
   DataView,
   IndexPatternField,
-} from 'src/plugins/data/common';
+} from '../../../../../../../../src/plugins/data/common';
 import { QueryExecutionStatus } from '../types';
 import { setResults, ISearchResult } from '../slices';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
@@ -37,6 +37,12 @@ import {
   ProcessedSearchResults,
 } from '../../interfaces';
 import { defaultPreparePplQuery, getQueryWithSource } from '../../languages';
+import {
+  HistogramConfig,
+  buildPPLHistogramQuery,
+  processRawResultsForHistogram,
+  createHistogramConfigWithInterval,
+} from './utils';
 
 // Module-level storage for abort controllers keyed by cacheKey
 const activeQueryAbortControllers = new Map<string, AbortController>();
@@ -61,6 +67,13 @@ export const defaultPrepareQueryString = (query: Query): string => {
         `defaultPrepareQueryString encountered unhandled language: ${query.language}`
       );
   }
+};
+
+/**
+ * Prepare cache key for data table queries (no aggregations)
+ */
+export const prepareHistogramCacheKey = (query: Query): string => {
+  return `histogram:${defaultPrepareQueryString(query)}`;
 };
 
 /**
@@ -182,7 +195,7 @@ export const histogramResultsProcessor: HistogramDataProcessor = (
 };
 
 /**
- * Enhanced executeQueries orchestrator (simplified - no cache logic)
+ * Enhanced executeQueries orchestrator - executes queries independently without blocking
  */
 export const executeQueries = createAsyncThunk<
   void,
@@ -199,6 +212,44 @@ export const executeQueries = createAsyncThunk<
   }
 
   const defaultCacheKey = defaultPrepareQueryString(query);
+  // Use separate cache keys for data table and histogram
+  const dataTableCacheKey = defaultCacheKey;
+  const histogramCacheKey = prepareHistogramCacheKey(query);
+
+  // Check what needs execution for core queries
+  const needsDataTableQuery = !results[dataTableCacheKey];
+  const needsHistogramQuery = !results[histogramCacheKey];
+
+  const promises = [];
+
+  // Execute query without aggregations
+  if (needsDataTableQuery) {
+    promises.push(
+      dispatch(
+        executeDataTableQuery({
+          services,
+          cacheKey: dataTableCacheKey,
+          queryString: defaultPrepareQueryString(query),
+        })
+      )
+    );
+  }
+
+  if (needsHistogramQuery) {
+    const interval = state.legacy?.interval;
+    promises.push(
+      dispatch(
+        executeHistogramQuery({
+          services,
+          cacheKey: histogramCacheKey,
+          queryString: defaultPrepareQueryString(query),
+          interval,
+        })
+      )
+    );
+  }
+
+  // Handle tab queries as before (keeping existing tab logic)
   const visualizationTab = services.tabRegistry.getTab('explore_visualization_tab');
   let visualizationTabPrepareQuery = defaultPrepareQueryString;
   if (visualizationTab?.prepareQuery) {
@@ -223,7 +274,6 @@ export const executeQueries = createAsyncThunk<
   }
 
   // Check what needs execution
-  const needsDefaultQuery = !results[defaultCacheKey];
   const needsVisualizationTabQuery =
     visualizationTabCacheKey !== defaultCacheKey && !results[visualizationTabCacheKey];
   const needsActiveTabQuery =
@@ -231,29 +281,14 @@ export const executeQueries = createAsyncThunk<
     activeTabCacheKey !== defaultCacheKey &&
     !results[activeTabCacheKey];
 
-  const promises = [];
-
-  // Execute default query for histogram/sidebar
-  if (needsDefaultQuery) {
-    const interval = state.legacy?.interval;
-    promises.push(
-      dispatch(
-        executeHistogramQuery({
-          services,
-          cacheKey: defaultCacheKey,
-          interval, // Pass interval from Redux state
-        })
-      )
-    );
-  }
-
-  // Execute visualization tab query for dynamic tab selection
+  // Execute visualization tab query independently
   if (needsVisualizationTabQuery) {
     promises.push(
       dispatch(
         executeTabQuery({
           services,
           cacheKey: visualizationTabCacheKey,
+          queryString: visualizationTabCacheKey, // For tabs, cache key IS the query string
         })
       )
     );
@@ -266,6 +301,7 @@ export const executeQueries = createAsyncThunk<
         executeTabQuery({
           services,
           cacheKey: activeTabCacheKey,
+          queryString: activeTabCacheKey, // For tabs, cache key IS the query string
         })
       )
     );
@@ -282,16 +318,26 @@ const executeQueryBase = async (
   params: {
     services: ExploreServices;
     cacheKey: string;
+    queryString: string;
     includeHistogram: boolean;
     interval?: string;
     avoidDispatchingError?: (error: any, cacheKey: string) => boolean;
+    isHistogramQuery?: boolean;
   },
   thunkAPI: {
     getState: () => RootState;
     dispatch: any;
   }
 ) => {
-  const { services, cacheKey, includeHistogram, interval, avoidDispatchingError } = params;
+  const {
+    services,
+    cacheKey,
+    queryString,
+    includeHistogram,
+    interval,
+    avoidDispatchingError,
+    isHistogramQuery,
+  } = params;
   const { getState, dispatch } = thunkAPI;
 
   if (!services) {
@@ -347,13 +393,23 @@ const executeQueryBase = async (
 
     const dataset = services.data.dataViews.convertToDataset(dataView);
 
+    // Create histogram config once for use in both query building and result processing
+    let histogramConfig: HistogramConfig | null = null;
+    if (isHistogramQuery) {
+      histogramConfig = createHistogramConfigWithInterval(dataView, interval, services, getState);
+    }
+
     const preparedQueryObject = {
       ...query,
       dataset,
-      query: cacheKey,
+      query:
+        isHistogramQuery && histogramConfig
+          ? buildPPLHistogramQuery(queryString, histogramConfig, services)
+          : queryString,
     };
 
     let searchSource;
+    // TODO: Following split queries change, we can move away from creating search source with includeHistogram
     if (includeHistogram) {
       // Histogram-specific: Get interval and create with aggregations
       const state = getState();
@@ -397,11 +453,19 @@ const executeQueryBase = async (
       .ok({ json: rawResults });
 
     // Store RAW results in cache
-    const rawResultsWithMeta: ISearchResult = {
+    let rawResultsWithMeta: ISearchResult = {
       ...rawResults,
       elapsedMs: inspectorRequest.getTime()!,
       fieldSchema: searchSource.getDataFrame()?.schema,
     };
+
+    if (isHistogramQuery && histogramConfig) {
+      rawResultsWithMeta = processRawResultsForHistogram(
+        queryString,
+        rawResultsWithMeta,
+        histogramConfig
+      );
+    }
 
     dispatch(setResults({ cacheKey, results: rawResultsWithMeta }));
 
@@ -530,14 +594,18 @@ export const executeHistogramQuery = createAsyncThunk<
   {
     services: ExploreServices;
     cacheKey: string;
+    queryString: string;
     interval?: string;
   },
   { state: RootState }
 >('query/executeHistogramQuery', async (params, thunkAPI) => {
+  const { queryString } = params;
   return executeQueryBase(
     {
       ...params,
-      includeHistogram: true,
+      includeHistogram: false,
+      queryString,
+      isHistogramQuery: true,
     },
     thunkAPI
   );
@@ -551,6 +619,7 @@ export const executeTabQuery = createAsyncThunk<
   {
     services: ExploreServices;
     cacheKey: string;
+    queryString: string;
   },
   { state: RootState }
 >('query/executeTabQuery', async (params, thunkAPI) => {
@@ -581,6 +650,28 @@ export const executeTabQuery = createAsyncThunk<
   );
 
   return queryBaseResult;
+});
+
+/**
+ * Execute data table query without aggregations
+ */
+export const executeDataTableQuery = createAsyncThunk<
+  any,
+  {
+    services: ExploreServices;
+    cacheKey: string;
+    queryString: string;
+  },
+  { state: RootState }
+>('query/executeDataTableQuery', async (params, thunkAPI) => {
+  return executeQueryBase(
+    {
+      ...params,
+      includeHistogram: false, // Data table doesn't need histogram
+      interval: undefined, // Data table doesn't need intervals
+    },
+    thunkAPI
+  );
 });
 
 /**
