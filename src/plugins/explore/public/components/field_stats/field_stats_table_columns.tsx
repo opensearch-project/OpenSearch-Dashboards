@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { FieldStatsItem } from './field_stats_types';
 import { FieldIcon } from '../../../../opensearch_dashboards_react/public';
 
@@ -24,7 +25,15 @@ export const getFieldStatsColumns = ({
       render: (item: FieldStatsItem) => (
         <EuiButtonIcon
           onClick={() => onRowExpand(item.name)}
-          aria-label={expandedRows.has(item.name) ? 'Collapse' : 'Expand'}
+          aria-label={
+            expandedRows.has(item.name)
+              ? i18n.translate('explore.fieldStats.table.collapseAriaLabel', {
+                  defaultMessage: 'Collapse',
+                })
+              : i18n.translate('explore.fieldStats.table.expandAriaLabel', {
+                  defaultMessage: 'Expand',
+                })
+          }
           iconType={expandedRows.has(item.name) ? 'arrowDown' : 'arrowRight'}
           data-test-subj={`fieldStatsExpandButton-${item.name}`}
         />
@@ -32,7 +41,9 @@ export const getFieldStatsColumns = ({
     },
     {
       field: 'type',
-      name: 'Type',
+      name: i18n.translate('explore.fieldStats.table.typeColumnLabel', {
+        defaultMessage: 'Type',
+      }),
       sortable: true,
       width: '60px',
       align: 'center',
@@ -40,13 +51,17 @@ export const getFieldStatsColumns = ({
     },
     {
       field: 'name',
-      name: 'Field Name',
+      name: i18n.translate('explore.fieldStats.table.fieldNameColumnLabel', {
+        defaultMessage: 'Field Name',
+      }),
       sortable: true,
       render: (name: string) => <strong>{name}</strong>,
     },
     {
       field: 'docCount',
-      name: 'Document Count',
+      name: i18n.translate('explore.fieldStats.table.documentCountColumnLabel', {
+        defaultMessage: 'Document Count',
+      }),
       sortable: true,
       width: '200px',
       align: 'right',
@@ -60,7 +75,9 @@ export const getFieldStatsColumns = ({
     },
     {
       field: 'distinctCount',
-      name: 'Distinct Values',
+      name: i18n.translate('explore.fieldStats.table.distinctValuesColumnLabel', {
+        defaultMessage: 'Distinct Values',
+      }),
       sortable: true,
       width: '180px',
       align: 'right',

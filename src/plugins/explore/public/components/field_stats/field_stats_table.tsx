@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   Direction,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { FieldStatsItem } from './field_stats_types';
 import { FieldStatsRowDetails } from './field_stats_row_details';
 import { getFieldStatsColumns } from './field_stats_table_columns';
@@ -101,7 +102,11 @@ export const FieldStatsTable: React.FC<FieldStatsTableProps> = ({
         <EuiFlexItem grow={false}>
           <EuiLoadingSpinner size="xl" />
           <EuiSpacer size="m" />
-          <EuiText>Searching in progress...</EuiText>
+          <EuiText>
+            {i18n.translate('explore.fieldStats.table.searchingInProgress', {
+              defaultMessage: 'Searching in progress...',
+            })}
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

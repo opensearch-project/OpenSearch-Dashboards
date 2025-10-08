@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { i18n } from '@osd/i18n';
 import { FieldStatsTable } from './field_stats_table';
 import { FieldStatsItem } from './field_stats_types';
 import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
@@ -140,7 +141,13 @@ export const FieldStatsContainer = () => {
   }, [fieldStats]);
 
   if (!dataset) {
-    return <div>No dataset selected</div>;
+    return (
+      <div>
+        {i18n.translate('explore.fieldStats.container.noDatasetSelected', {
+          defaultMessage: 'No dataset selected',
+        })}
+      </div>
+    );
   }
 
   return (
