@@ -27,7 +27,7 @@ describe('createQuerySyncMiddleware', () => {
 
     expect(mockNext).toHaveBeenCalledWith(action);
     expect(mockServices.data.query.queryString.setQuery).toHaveBeenCalledWith({
-      query: 'source=hello',
+      query: 'source=`hello`',
       language: 'PPL',
       dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
     });
@@ -41,7 +41,7 @@ describe('createQuerySyncMiddleware', () => {
 
     expect(mockNext).toHaveBeenCalledWith(action);
     expect(mockServices.data.query.queryString.setQuery).toHaveBeenCalledWith({
-      query: 'source=hello',
+      query: 'source=`hello`',
       language: 'PPL',
       dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
     });
@@ -58,12 +58,16 @@ describe('createQuerySyncMiddleware', () => {
   it('should not sync when queries are equal but still add to history if requested', () => {
     // Mock getQuery to return the same query as in state
     mockServices.data.query.queryString.getQuery = jest.fn().mockReturnValue({
-      query: 'source=hello',
+      query: 'source=`hello`',
       language: 'PPL',
       dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
     });
 
-    const action = setQueryWithHistory({ query: 'source=hello', language: 'PPL' });
+    const action = setQueryWithHistory({
+      query: 'source=`hello`',
+      language: 'PPL',
+      dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' } as any,
+    });
 
     middleware(action);
 
@@ -84,12 +88,12 @@ describe('createQuerySyncMiddleware', () => {
   it('should not sync when queries are equal and not add to history for setQueryState', () => {
     // Mock getQuery to return the same query as in state
     mockServices.data.query.queryString.getQuery = jest.fn().mockReturnValue({
-      query: 'source=hello',
+      query: 'source=`hello`',
       language: 'PPL',
       dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
     });
 
-    const action = setQueryState({ query: 'source=hello', language: 'PPL' });
+    const action = setQueryState({ query: 'source=`hello`', language: 'PPL' });
 
     middleware(action);
 
@@ -131,7 +135,7 @@ describe('createQuerySyncMiddleware', () => {
   it('should add to history even when queries are equal if action has addToHistory meta', () => {
     // Mock getQuery to return the same query as in state
     mockServices.data.query.queryString.getQuery = jest.fn().mockReturnValue({
-      query: 'source=hello',
+      query: 'source=`hello`',
       language: 'PPL',
       dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
     });
@@ -166,7 +170,7 @@ describe('createQuerySyncMiddleware', () => {
 
     expect(mockNext).toHaveBeenCalledWith(action);
     expect(mockServices.data.query.queryString.setQuery).toHaveBeenCalledWith({
-      query: 'source=hello',
+      query: 'source=`hello`',
       language: 'PPL',
       dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
     });
@@ -183,7 +187,7 @@ describe('createQuerySyncMiddleware', () => {
   it('should not sync when queries are equal but still add to history for setQueryStringWithHistory', () => {
     // Mock getQuery to return the same query as in state
     mockServices.data.query.queryString.getQuery = jest.fn().mockReturnValue({
-      query: 'source=hello',
+      query: 'source=`hello`',
       language: 'PPL',
       dataset: { id: 'test-dataset', type: 'INDEX_PATTERN' },
     });
