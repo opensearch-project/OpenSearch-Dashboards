@@ -29,7 +29,7 @@ import {
   useOpenSearchDashboards,
   toMountPoint,
 } from '../../../../opensearch_dashboards_react/public';
-import { Dataset, DEFAULT_DATA, Query } from '../../../common';
+import { CORE_SIGNAL_TYPES, Dataset, DEFAULT_DATA, Query } from '../../../common';
 import { IDataPluginServices } from '../../types';
 import { DatasetDetails, DatasetDetailsBody, DatasetDetailsHeader } from './dataset_details';
 import { AdvancedSelector } from '../dataset_selector/advanced_selector';
@@ -43,20 +43,14 @@ export interface DetailedDataset extends Dataset {
 
 export interface DatasetSelectProps {
   onSelect: (dataset: Dataset) => void;
-  appName: string;
   supportedTypes?: string[];
-  onFilter?: (dataset: Dataset) => boolean;
+  singalType: string | null;
 }
 
 /**
  * @experimental This component is experimental and may change in future versions
  */
-const DatasetSelect: React.FC<DatasetSelectProps> = ({
-  onSelect,
-  appName,
-  supportedTypes,
-  onFilter = () => true,
-}) => {
+const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes, singalType }) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const isMounted = useRef(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -109,56 +103,77 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
   );
   const datasetIcon = datasetTypeConfig?.meta?.icon?.type || 'database';
 
+  const fetchDatasets = useCallback(async () => {
+    if (!isMounted.current) return;
+
+    setIsLoading(true);
+
+    try {
+      const datasetIds = await dataViews.getIds(true);
+      const fetchedDatasets: DetailedDataset[] = [];
+
+      for (const id of datasetIds) {
+        const dataView = await dataViews.get(id);
+        const dataset = await dataViews.convertToDataset(dataView);
+
+        fetchedDatasets.push({
+          ...dataset,
+          description: dataView.description,
+          displayName: dataView.displayName,
+          signalType: dataView.signalType,
+        });
+      }
+
+      const onFilter = (detailedDataset: DetailedDataset) => {
+        // Filter by signal type
+        const signalTypeMatch =
+          singalType === CORE_SIGNAL_TYPES.TRACES
+            ? detailedDataset.signalType === CORE_SIGNAL_TYPES.TRACES
+            : detailedDataset.signalType !== CORE_SIGNAL_TYPES.TRACES;
+
+        if (!signalTypeMatch) {
+          return false;
+        }
+
+        // Filter by supportedAppNames
+        const typeConfig = datasetService.getType(detailedDataset.type);
+        const appNameMatch =
+          !typeConfig?.meta?.supportedAppNames ||
+          typeConfig.meta.supportedAppNames.includes(services.appName);
+
+        return appNameMatch;
+      };
+
+      const filteredDatasets = fetchedDatasets.filter(onFilter);
+
+      const defaultDataView = await dataViews.getDefault();
+      if (defaultDataView) {
+        setDefaultDatasetId(defaultDataView.id);
+      }
+      const defaultDataset =
+        filteredDatasets.find((d) => d.id === defaultDataView?.id) ?? filteredDatasets[0];
+      // Get fresh current dataset value at execution time
+      const currentlySelectedDataset = queryString.getQuery().dataset;
+      if (defaultDataset && !currentlySelectedDataset) {
+        onSelect(defaultDataset);
+      }
+      setDatasets(filteredDatasets);
+    } finally {
+      if (isMounted.current) {
+        setIsLoading(false);
+      }
+    }
+  }, [dataViews, singalType, onSelect, queryString, datasetService, services.appName]);
+
   useEffect(() => {
     isMounted.current = true;
-    const fetchDatasets = async () => {
-      if (!isMounted.current) return;
-
-      setIsLoading(true);
-
-      try {
-        const datasetIds = await dataViews.getIds(true);
-        const fetchedDatasets: DetailedDataset[] = [];
-
-        for (const id of datasetIds) {
-          const dataView = await dataViews.get(id);
-          const dataset = await dataViews.convertToDataset(dataView);
-
-          fetchedDatasets.push({
-            ...dataset,
-            description: dataView.description,
-            displayName: dataView.displayName,
-            signalType: dataView.signalType,
-          });
-        }
-
-        const filteredDatasets = fetchedDatasets.filter(onFilter);
-
-        const defaultDataView = await dataViews.getDefault();
-        if (defaultDataView) {
-          setDefaultDatasetId(defaultDataView.id);
-        }
-        const defaultDataset =
-          filteredDatasets.find((d) => d.id === defaultDataView?.id) ?? filteredDatasets[0];
-        if (defaultDataset && !currentDataset) {
-          onSelect(defaultDataset);
-        }
-        setDatasets(filteredDatasets);
-      } finally {
-        if (isMounted.current) {
-          setIsLoading(false);
-        }
-      }
-    };
-
     fetchDatasets();
     return () => {
       isMounted.current = false;
     };
-  }, [datasetService, dataViews, currentDataset, onSelect, onFilter]);
+  }, [fetchDatasets]);
 
   const togglePopover = useCallback(() => setIsOpen(!isOpen), [isOpen]);
-
   const closePopover = useCallback(() => {
     setIsOpen(false);
   }, []);
@@ -406,19 +421,43 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({
                 const overlay = overlays?.openModal(
                   toMountPoint(
                     <AdvancedSelector
+                      useConfiguratorV2
                       services={services}
-                      onSelect={async (query: Partial<Query>) => {
+                      onSelect={async (query: Partial<Query>, saveDataset) => {
                         overlay?.close();
                         if (query?.dataset) {
                           try {
-                            await datasetService.cacheDataset(query.dataset, services, false);
+                            if (saveDataset) {
+                              await datasetService.saveDataset(
+                                query.dataset,
+                                services,
+                                singalType || undefined
+                              );
+                            } else {
+                              await datasetService.cacheDataset(
+                                query.dataset,
+                                services,
+                                false,
+                                singalType || undefined
+                              );
+                            }
                             const dataView = await data.dataViews.get(
                               query.dataset.id,
                               query.dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
                             );
 
                             if (dataView) {
-                              onSelect(query.dataset);
+                              // Refresh datasets list if a new dataset was saved
+                              if (saveDataset) {
+                                // Convert dataView back to dataset to get the correct type
+                                const updatedDataset = await dataViews.convertToDataset(dataView);
+                                onSelect(updatedDataset);
+                                // Clear cache to ensure getIds() returns fresh results including the newly saved dataset
+                                dataViews.clearCache();
+                                await fetchDatasets();
+                              } else {
+                                onSelect(query.dataset);
+                              }
                             }
                           } catch (error) {
                             services.notifications?.toasts.addError(error, {

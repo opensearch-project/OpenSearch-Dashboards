@@ -19,8 +19,7 @@ jest.mock('../../services', () => ({
   getQueryService: jest.fn(),
 }));
 
-// TODO: Enable this test. skipping due to it hanging
-describe.skip('DatasetSelect', () => {
+describe('DatasetSelect', () => {
   const mockOnSelect = jest.fn();
   const mockQuery = {
     dataset: {
@@ -45,6 +44,7 @@ describe.skip('DatasetSelect', () => {
         icon: {
           type: 'database',
         },
+        supportedAppNames: undefined, // undefined means supported by all apps
       },
     }),
     cacheDataset: jest.fn(),
@@ -77,6 +77,7 @@ describe.skip('DatasetSelect', () => {
         type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       });
     }),
+    clearCache: jest.fn(),
   };
 
   // Create services for the component
@@ -100,7 +101,7 @@ describe.skip('DatasetSelect', () => {
 
   const defaultProps: DatasetSelectProps = {
     onSelect: mockOnSelect,
-    appName: 'testApp',
+    singalType: null,
   };
 
   const renderWithContext = (props: DatasetSelectProps = defaultProps) => {
@@ -203,5 +204,108 @@ describe.skip('DatasetSelect', () => {
       expect(mockDataViews.getDefault).toHaveBeenCalled();
       expect(mockOnSelect).toHaveBeenCalled();
     });
+  });
+
+  it('filters datasets by supportedAppNames', async () => {
+    // Create a dataset type that only supports 'otherApp'
+    const mockGetTypeRestricted = jest.fn().mockReturnValue({
+      id: 'restricted-type',
+      title: 'Restricted Type',
+      meta: {
+        icon: { type: 'database' },
+        supportedAppNames: ['otherApp'], // Does not include 'testApp'
+      },
+    });
+
+    mockQueryService.queryString.getDatasetService = jest.fn().mockReturnValue({
+      getType: mockGetTypeRestricted,
+      cacheDataset: jest.fn(),
+    });
+
+    // Mock a dataset with the restricted type
+    mockDataViews.getIds = jest.fn().mockResolvedValue(['restricted-id']);
+    mockDataViews.get = jest.fn().mockResolvedValue({
+      id: 'restricted-id',
+      title: 'Restricted Dataset',
+      displayName: 'Restricted Dataset',
+      type: 'restricted-type',
+    });
+    mockDataViews.convertToDataset = jest.fn().mockResolvedValue({
+      id: 'restricted-id',
+      title: 'Restricted Dataset',
+      type: 'restricted-type',
+    });
+
+    renderWithContext();
+
+    await waitFor(() => {
+      expect(mockDataViews.getIds).toHaveBeenCalled();
+    });
+
+    // The dataset should be filtered out since it doesn't support 'testApp'
+    const button = screen.getByTestId('datasetSelectButton');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+    });
+
+    // The restricted dataset should not appear in the list
+    expect(screen.queryByText('Restricted Dataset')).not.toBeInTheDocument();
+  });
+
+  it('includes datasets when supportedAppNames is undefined', async () => {
+    // Dataset type with undefined supportedAppNames (supports all apps)
+    const mockGetTypeAll = jest.fn().mockReturnValue({
+      id: 'all-apps-type',
+      title: 'All Apps Type',
+      meta: {
+        icon: { type: 'database' },
+        supportedAppNames: undefined,
+      },
+    });
+
+    mockQueryService.queryString.getDatasetService = jest.fn().mockReturnValue({
+      getType: mockGetTypeAll,
+      cacheDataset: jest.fn(),
+    });
+
+    mockDataViews.getIds = jest.fn().mockResolvedValue(['all-apps-id']);
+    mockDataViews.get = jest.fn().mockResolvedValue({
+      id: 'all-apps-id',
+      title: 'all-apps-dataset',
+      displayName: 'All Apps Dataset',
+      type: 'all-apps-type',
+    });
+    mockDataViews.convertToDataset = jest.fn().mockResolvedValue({
+      id: 'all-apps-id',
+      title: 'all-apps-dataset',
+      type: 'all-apps-type',
+    });
+    mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
+      dataset: {
+        id: 'all-apps-id',
+        title: 'all-apps-dataset',
+        type: 'all-apps-type',
+      },
+    });
+
+    renderWithContext();
+
+    await waitFor(() => {
+      expect(mockDataViews.getIds).toHaveBeenCalled();
+      expect(mockDataViews.get).toHaveBeenCalled();
+    });
+
+    const button = screen.getByTestId('datasetSelectButton');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+    });
+
+    // The dataset should appear since supportedAppNames is undefined (checking by display name)
+    const allAppsElements = screen.getAllByText('All Apps Dataset');
+    expect(allAppsElements.length).toBeGreaterThan(0);
   });
 });
