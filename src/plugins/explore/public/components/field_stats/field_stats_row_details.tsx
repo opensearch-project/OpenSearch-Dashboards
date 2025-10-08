@@ -4,9 +4,16 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiTitle,
+  EuiSpacer,
+  EuiCallOut,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import moment from 'moment';
 import { FieldStatsItem } from './field_stats_types';
 import { TopValuesSection } from './detail_sections/top_values_section';
 import { NumericSummarySection } from './detail_sections/numeric_summary_section';
@@ -16,40 +23,14 @@ import { ExamplesSection } from './detail_sections/examples_section';
 interface FieldStatsRowDetailsProps {
   field?: FieldStatsItem;
   details: any;
+  isLoading?: boolean;
 }
 
-// Helper to generate mocked top values
-const getMockedTopValues = (fieldName: string, fieldType: string) => {
-  const limit = fieldType === 'boolean' ? 2 : 10;
-  return Array.from({ length: limit }, (_, i) => ({
-    value: fieldType === 'boolean' ? (i === 0 ? 'true' : 'false') : `${fieldName}_value_${i + 1}`,
-    count: Math.floor(Math.random() * 1000),
-    percentage: Math.random() * 100,
-  }));
-};
-
-// Helper to generate mocked numeric summary
-const getMockedNumericSummary = () => ({
-  min: Math.floor(Math.random() * 100),
-  median: Math.floor(Math.random() * 500) + 100,
-  avg: Math.floor(Math.random() * 500) + 200,
-  max: Math.floor(Math.random() * 1000) + 500,
-});
-
-// Helper to generate mocked date range
-const getMockedDateRange = () => ({
-  earliest: moment().subtract(30, 'days').toISOString(),
-  latest: moment().toISOString(),
-});
-
-// Helper to generate mocked example values
-const getMockedExamples = (fieldName: string, fieldType: string) => {
-  return Array.from({ length: 10 }, (_, i) => ({
-    value: `${fieldName}_example_${i + 1}`,
-  }));
-};
-
-export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({ field, details }) => {
+export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({
+  field,
+  details,
+  isLoading,
+}) => {
   if (!field) {
     return (
       <EuiCallOut
@@ -58,6 +39,22 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({ fiel
           defaultMessage: 'Field information not available',
         })}
       />
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ padding: '2rem' }}>
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" />
+          <EuiSpacer size="s" />
+          <span>
+            {i18n.translate('explore.fieldStats.rowDetails.loadingDetails', {
+              defaultMessage: 'Loading details...',
+            })}
+          </span>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -72,12 +69,11 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({ fiel
     );
   }
 
-  const fieldType = field.type.toLowerCase();
-
-  // Determine which sections to show based on field type
-  const showTopValues = ['string', 'keyword', 'number', 'ip', 'boolean'].includes(fieldType);
-  const showNumericSummary = fieldType === 'number';
-  const showDateRange = fieldType === 'date';
+  // Determine which sections to show based on what data is available
+  const hasTopValues = details?.topValues && details.topValues.length > 0;
+  const hasNumericSummary = details?.numericSummary;
+  const hasDateRange = details?.dateRange;
+  const hasExamples = details?.examples && details.examples.length > 0;
 
   return (
     <EuiFlexGroup
@@ -85,7 +81,7 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({ fiel
       gutterSize="m"
       data-test-subj={`fieldStatsRowDetails-${field.name}`}
     >
-      {showTopValues && (
+      {hasTopValues && (
         <EuiFlexItem>
           <EuiPanel paddingSize="s">
             <EuiTitle size="xs">
@@ -96,12 +92,12 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({ fiel
               </h4>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <TopValuesSection data={getMockedTopValues(field.name, fieldType)} field={field} />
+            <TopValuesSection data={details.topValues} field={field} />
           </EuiPanel>
         </EuiFlexItem>
       )}
 
-      {showNumericSummary && (
+      {hasNumericSummary && (
         <EuiFlexItem>
           <EuiPanel paddingSize="s">
             <EuiTitle size="xs">
@@ -112,12 +108,12 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({ fiel
               </h4>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <NumericSummarySection data={getMockedNumericSummary()} field={field} />
+            <NumericSummarySection data={details.numericSummary} field={field} />
           </EuiPanel>
         </EuiFlexItem>
       )}
 
-      {showDateRange && (
+      {hasDateRange && (
         <EuiFlexItem>
           <EuiPanel paddingSize="s">
             <EuiTitle size="xs">
@@ -128,12 +124,12 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({ fiel
               </h4>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <DateRangeSection data={getMockedDateRange()} field={field} />
+            <DateRangeSection data={details.dateRange} field={field} />
           </EuiPanel>
         </EuiFlexItem>
       )}
 
-      {!showTopValues && !showNumericSummary && !showDateRange && (
+      {!hasTopValues && !hasNumericSummary && !hasDateRange && hasExamples && (
         <EuiFlexItem>
           <EuiPanel paddingSize="s">
             <EuiTitle size="xs">
@@ -144,8 +140,23 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({ fiel
               </h4>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <ExamplesSection data={getMockedExamples(field.name, fieldType)} field={field} />
+            <ExamplesSection data={details.examples} field={field} />
           </EuiPanel>
+        </EuiFlexItem>
+      )}
+
+      {!hasTopValues && !hasNumericSummary && !hasDateRange && !hasExamples && (
+        <EuiFlexItem>
+          <EuiCallOut
+            title={i18n.translate('explore.fieldStats.rowDetails.noDetailsAvailable', {
+              defaultMessage: 'No details available',
+            })}
+            iconType="iInCircle"
+          >
+            {i18n.translate('explore.fieldStats.rowDetails.noDetailsAvailableDescription', {
+              defaultMessage: 'Details could not be retrieved for this field.',
+            })}
+          </EuiCallOut>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

@@ -10,7 +10,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiSpacer,
   Direction,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -46,17 +45,19 @@ export const FieldStatsTable: React.FC<FieldStatsTableProps> = ({
   const itemIdToExpandedRowMap = useMemo(() => {
     const map: Record<string, ReactNode> = {};
     expandedRows.forEach((fieldName) => {
-      if (fieldDetails[fieldName]) {
-        map[fieldName] = (
-          <FieldStatsRowDetails
-            field={items.find((item) => item.name === fieldName)}
-            details={fieldDetails[fieldName]}
-          />
-        );
-      }
+      const field = items.find((item) => item.name === fieldName);
+      const isLoadingDetails = detailsLoading.has(fieldName);
+
+      map[fieldName] = (
+        <FieldStatsRowDetails
+          field={field}
+          details={fieldDetails[fieldName]}
+          isLoading={isLoadingDetails}
+        />
+      );
     });
     return map;
-  }, [expandedRows, fieldDetails, items]);
+  }, [expandedRows, fieldDetails, items, detailsLoading]);
 
   // Sort items based on current sort state
   const sortedItems = useMemo(() => {

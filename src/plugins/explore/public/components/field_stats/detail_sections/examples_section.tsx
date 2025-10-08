@@ -9,7 +9,7 @@ import { i18n } from '@osd/i18n';
 import { FieldStatsItem } from '../field_stats_types';
 
 interface ExampleValue {
-  value: string | number;
+  value: any;
 }
 
 interface ExamplesSectionProps {
@@ -24,7 +24,12 @@ export const ExamplesSection: React.FC<ExamplesSectionProps> = ({ data }) => {
       name: i18n.translate('explore.fieldStats.examples.exampleValuesColumnLabel', {
         defaultMessage: 'Example Values',
       }),
-      render: (value: string | number) => String(value),
+      render: (value: any) => {
+        if (typeof value === 'object' && value !== null) {
+          return JSON.stringify(value);
+        }
+        return String(value);
+      },
     },
   ];
 

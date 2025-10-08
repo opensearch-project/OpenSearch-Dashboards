@@ -10,7 +10,14 @@ import { FieldStatsItem } from './field_stats_types';
 import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
-import { getFieldStatsQuery, executeFieldStatsQuery } from './field_stats_queries';
+import {
+  getFieldStatsQuery,
+  executeFieldStatsQuery,
+  getFieldTopValuesQuery,
+  getFieldSummaryQuery,
+  getFieldDateRangeQuery,
+  getFieldExamplesQuery,
+} from './field_stats_queries';
 
 export const FieldStatsContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -121,19 +128,144 @@ export const FieldStatsContainer = () => {
   // Handle row expansion
   const handleRowExpand = async (fieldName: string) => {
     const newExpanded = new Set(expandedRows);
+
+    // Toggle expansion
     if (newExpanded.has(fieldName)) {
       newExpanded.delete(fieldName);
-    } else {
-      newExpanded.add(fieldName);
-      // Add mock detail data for Phase 1 (will be replaced with real data in Phase 4)
-      if (!fieldDetails[fieldName]) {
-        setFieldDetails((prev) => ({
-          ...prev,
-          [fieldName]: { mocked: true },
-        }));
-      }
+      setExpandedRows(newExpanded);
+      return;
     }
+
+    newExpanded.add(fieldName);
     setExpandedRows(newExpanded);
+
+    const field = fieldStats[fieldName];
+    if (!field || !dataset) return;
+
+    // Don't fetch if already fetched
+    if (fieldDetails[fieldName]) return;
+
+    setDetailsLoading((prev) => new Set(prev).add(fieldName));
+
+    try {
+      const details: any = {};
+      const fieldType = field.type.toLowerCase();
+
+      // Fetch appropriate details based on field type
+      const promises: Array<Promise<void>> = [];
+
+      // Top values for string, keyword, number, ip, boolean
+      if (['string', 'keyword', 'number', 'ip', 'boolean'].includes(fieldType)) {
+        promises.push(
+          (async () => {
+            const limit = fieldType === 'boolean' ? 2 : 10;
+            const query = getFieldTopValuesQuery(dataset.title, fieldName, limit);
+            const result = await executeFieldStatsQuery(
+              services,
+              query,
+              dataset.id || '',
+              dataset.type
+            );
+
+            // Parse top values from result
+            const hits = result?.hits?.hits || [];
+            details.topValues = hits.map((hit: any) => {
+              const source = hit._source || {};
+              return {
+                value: source[fieldName],
+                count: source.count || 0,
+                percentage: source.percentage || 0,
+              };
+            });
+          })()
+        );
+      }
+
+      // Numeric summary for number fields
+      if (fieldType === 'number') {
+        promises.push(
+          (async () => {
+            const query = getFieldSummaryQuery(dataset.title, fieldName);
+            const result = await executeFieldStatsQuery(
+              services,
+              query,
+              dataset.id || '',
+              dataset.type
+            );
+
+            const hits = result?.hits?.hits || [];
+            const stats = hits[0]?._source || {};
+            details.numericSummary = {
+              min: stats.min || 0,
+              median: stats.median || 0,
+              avg: stats.avg || 0,
+              max: stats.max || 0,
+            };
+          })()
+        );
+      }
+
+      // Date range for date fields
+      if (fieldType === 'date') {
+        promises.push(
+          (async () => {
+            const query = getFieldDateRangeQuery(dataset.title, fieldName);
+            const result = await executeFieldStatsQuery(
+              services,
+              query,
+              dataset.id || '',
+              dataset.type
+            );
+
+            const hits = result?.hits?.hits || [];
+            const range = hits[0]?._source || {};
+            details.dateRange = {
+              earliest: range.earliest || null,
+              latest: range.latest || null,
+            };
+          })()
+        );
+      }
+
+      // Examples for all other field types
+      if (!['string', 'keyword', 'number', 'ip', 'boolean', 'date'].includes(fieldType)) {
+        promises.push(
+          (async () => {
+            const query = getFieldExamplesQuery(dataset.title, fieldName);
+            const result = await executeFieldStatsQuery(
+              services,
+              query,
+              dataset.id || '',
+              dataset.type
+            );
+
+            const hits = result?.hits?.hits || [];
+            details.examples = hits
+              .map((hit: any) => {
+                const source = hit._source || {};
+                return {
+                  value: source[fieldName],
+                };
+              })
+              .filter((example: any) => example.value !== undefined && example.value !== null);
+          })()
+        );
+      }
+
+      // Execute all queries in parallel
+      await Promise.all(promises);
+
+      setFieldDetails((prev) => ({ ...prev, [fieldName]: details }));
+    } catch (error) {
+      // TODO: put in a UI error within the expanded row panel
+      setFieldDetails((prev) => ({ ...prev, [fieldName]: { error: true } }));
+    } finally {
+      setDetailsLoading((prev) => {
+        const next = new Set(prev);
+        next.delete(fieldName);
+        return next;
+      });
+    }
   };
 
   const sortedFieldStats = useMemo(() => {
