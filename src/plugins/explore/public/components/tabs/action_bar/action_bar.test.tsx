@@ -72,6 +72,16 @@ jest.mock('../../../application/utils/hooks/use_tab_results', () => ({
   }),
 }));
 
+jest.mock('../../../application/utils/hooks/use_histogram_results', () => ({
+  useHistogramResults: () => ({
+    results: {
+      hits: {
+        total: { value: 10, relation: 'eq' },
+      },
+    },
+  }),
+}));
+
 describe('ActionBar', () => {
   test('should render the action bar component', () => {
     render(<ActionBar />);
