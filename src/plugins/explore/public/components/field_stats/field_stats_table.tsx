@@ -90,7 +90,6 @@ export const FieldStatsTable: React.FC<FieldStatsTableProps> = ({
     }
   };
 
-  // Show loading state while fetching field statistics
   if (isLoading) {
     return (
       <EuiFlexGroup
@@ -100,13 +99,18 @@ export const FieldStatsTable: React.FC<FieldStatsTableProps> = ({
         data-test-subj="fieldStatsLoading"
       >
         <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="xl" />
-          <EuiSpacer size="m" />
-          <EuiText>
-            {i18n.translate('explore.fieldStats.table.searchingInProgress', {
-              defaultMessage: 'Searching in progress...',
-            })}
-          </EuiText>
+          <EuiFlexGroup direction="column" alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="xl" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                {i18n.translate('explore.fieldStats.table.searchingInProgress', {
+                  defaultMessage: 'Searching in progress...',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
