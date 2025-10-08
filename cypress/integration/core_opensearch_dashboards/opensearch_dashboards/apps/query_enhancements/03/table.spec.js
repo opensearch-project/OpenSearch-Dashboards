@@ -142,14 +142,16 @@ export const runTableTests = () => {
         const testFields = ['category', 'response_time'];
 
         it(`sort for ${config.testName}`, () => {
-          // Setup
+          // Setup - add wait to avoid version conflicts
+          cy.wait(2000);
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+          cy.wait(1000);
           cy.setQueryLanguage(config.language);
+          cy.wait(1000);
           // Add fields
           testFields.forEach((field) => {
             selectFieldFromSidebar(field);
-            // Trigger hover to make sort button visible
-            cy.getElementByTestId(`docTableHeader-${field}`).trigger('mouseover');
+            cy.wait(500); // Wait for field to be added
             // Default is no sort
             cy.getElementByTestId(`docTableHeaderFieldSort_${field}`).should(
               'have.attr',
@@ -157,22 +159,20 @@ export const runTableTests = () => {
               `Sort ${field} ascending`
             );
           });
+          // Wait for all fields to be fully loaded before starting sort operations
+          cy.wait(1000);
           // Sort asc
-          cy.getElementByTestId(`docTableHeader-${testFields[0]}`).trigger('mouseover');
           cy.getElementByTestId(`docTableHeaderFieldSort_${testFields[0]}`).should('exist').click();
           cy.getElementByTestId('osdDocTableCellDataField')
             .eq(0)
             .should('have.text', 'Application');
           // Sort desc
-          cy.getElementByTestId(`docTableHeader-${testFields[0]}`).trigger('mouseover');
           cy.getElementByTestId(`docTableHeaderFieldSort_${testFields[0]}`).should('exist').click();
           cy.getElementByTestId('osdDocTableCellDataField').eq(0).should('have.text', 'Security');
           // Sort asc on the 2nd col
-          cy.getElementByTestId(`docTableHeader-${testFields[1]}`).trigger('mouseover');
           cy.getElementByTestId(`docTableHeaderFieldSort_${testFields[1]}`).should('exist').click();
           cy.getElementByTestId('osdDocTableCellDataField').eq(1).should('have.text', '0.1');
           // Sort desc on the 2nd col
-          cy.getElementByTestId(`docTableHeader-${testFields[1]}`).trigger('mouseover');
           cy.getElementByTestId(`docTableHeaderFieldSort_${testFields[1]}`).should('exist').click();
           cy.getElementByTestId('osdDocTableCellDataField').eq(1).should('have.text', '5');
         });
