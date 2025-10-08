@@ -14,7 +14,7 @@
 
 .osdDocTableHeader__move,
 .osdDocTableHeader__sortChange {
-  opacity: 1;
+  opacity: 1 !important;
 
   &:focus,
   th:hover & {
@@ -24,7 +24,7 @@
 
 .docTableHeaderField {
   &__actionButton {
-    opacity: 0;
+    opacity: 1 !important;
     height: 10px;
     width: 10px;
     transition: opacity $euiAnimSpeedFast;
