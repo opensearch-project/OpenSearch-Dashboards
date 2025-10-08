@@ -120,6 +120,16 @@ export function TableHeaderColumn({
       tooltip: getSortButtonAriaLabel(),
       iconType: btnSortIcon,
     },
+    // Sort Button
+    {
+      active: true,
+      ariaLabel: 'test',
+      className: btnSortClassName,
+      onClick: () => {},
+      testSubject: `docTableHeaderFieldSortTest_${name}`,
+      tooltip: getSortButtonAriaLabel(),
+      iconType: isSortable ? 'check' : 'cross',
+    },
     // Remove Button
     {
       active: isRemoveable && typeof onRemoveColumn === 'function',
