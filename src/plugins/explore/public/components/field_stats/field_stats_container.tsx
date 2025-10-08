@@ -7,8 +7,12 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { FieldStatsTable } from './field_stats_table';
 import { FieldStatsItem } from './field_stats_types';
 import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { ExploreServices } from '../../types';
+import { getFieldStatsQuery, executeFieldStatsQuery } from './field_stats_queries';
 
 export const FieldStatsContainer = () => {
+  const { services } = useOpenSearchDashboards<ExploreServices>();
   const { dataset } = useDatasetContext();
   const [fieldStats, setFieldStats] = useState<Record<string, FieldStatsItem>>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -18,33 +22,100 @@ export const FieldStatsContainer = () => {
 
   const fields = useMemo(() => {
     if (!dataset || !dataset.fields) return [];
-    return dataset.fields.getAll();
+
+    // Get the list of meta fields from the dataset configuration
+    const metaFieldsSet = new Set(dataset.metaFields || []);
+
+    return dataset.fields.getAll().filter((field) => {
+      // Filter out meta/internal fields that are in the metaFields configuration
+      // This programmatically identifies system fields based on DataView settings
+      if (metaFieldsSet.has(field.name)) {
+        return false;
+      }
+
+      // Filter out multi-fields (like .keyword) using OpenSearch metadata
+      if (field.subType?.multi?.parent) {
+        return false;
+      }
+
+      // Filter out scripted fields
+      if (field.scripted) {
+        return false;
+      }
+
+      return true;
+    });
   }, [dataset]);
 
-  // Simulate loading with mocked data
+  // Fetch real field statistics
   useEffect(() => {
     if (!fields.length || !dataset) return;
 
-    setIsLoading(true);
+    const fetchAllFieldStats = async () => {
+      setIsLoading(true);
 
-    // Simulate API delay
-    setTimeout(() => {
-      const mockedStats: Record<string, FieldStatsItem> = {};
+      try {
+        // Fetch stats for each field in parallel
+        const results = await Promise.allSettled(
+          fields.map(async (field) => {
+            try {
+              const query = getFieldStatsQuery(dataset.title, field.name);
+              const result = await executeFieldStatsQuery(
+                services,
+                query,
+                dataset.id || '',
+                dataset.type
+              );
 
-      fields.forEach((field) => {
-        mockedStats[field.name] = {
-          name: field.name,
-          type: field.type,
-          docCount: Math.floor(Math.random() * 10000),
-          distinctCount: Math.floor(Math.random() * 1000),
-          docPercentage: Math.random() * 100,
-        };
-      });
+              // Extract results from response
+              // PPL stats queries return results in hits.hits[0]._source
+              const hits = result?.hits?.hits || [];
+              const firstHit = hits[0]?._source || {};
 
-      setFieldStats(mockedStats);
-      setIsLoading(false);
-    }, 2000); // 2 second delay to test loading state
-  }, [fields, dataset]);
+              return {
+                name: field.name,
+                stats: {
+                  name: field.name,
+                  type: field.type,
+                  docCount: firstHit.count || 0,
+                  distinctCount: firstHit.dc || 0,
+                  docPercentage: firstHit.percentage_total || 0,
+                },
+              };
+            } catch (error) {
+              // TODO: put in a UI error state that covers the field row or extended row panel
+              return {
+                name: field.name,
+                stats: {
+                  name: field.name,
+                  type: field.type,
+                  docCount: 0,
+                  distinctCount: 0,
+                  docPercentage: 0,
+                  error: true,
+                },
+              };
+            }
+          })
+        );
+
+        // Collect all results into a single object
+        const allFieldStats: Record<string, FieldStatsItem> = {};
+        results.forEach((result) => {
+          if (result.status === 'fulfilled' && result.value) {
+            allFieldStats[result.value.name] = result.value.stats;
+          }
+        });
+
+        // Update state once with all field statistics
+        setFieldStats(allFieldStats);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAllFieldStats();
+  }, [fields, dataset, services]);
 
   // Handle row expansion
   const handleRowExpand = async (fieldName: string) => {

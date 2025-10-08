@@ -34,24 +34,22 @@ export const getFieldStatsColumns = ({
       field: 'type',
       name: 'Type',
       sortable: true,
-      width: '20%',
-      render: (type: string) => (
-        <span>
-          <FieldIcon type={type} size="s" /> {type}
-        </span>
-      ),
+      width: '60px',
+      align: 'center',
+      render: (type: string) => <FieldIcon type={type} size="s" />,
     },
     {
       field: 'name',
       name: 'Field Name',
       sortable: true,
-      width: '30%',
+      render: (name: string) => <strong>{name}</strong>,
     },
     {
       field: 'docCount',
       name: 'Document Count',
       sortable: true,
-      width: '20%',
+      width: '200px',
+      align: 'right',
       render: (docCount: number, item: FieldStatsItem) => {
         return (
           <span>
@@ -64,7 +62,8 @@ export const getFieldStatsColumns = ({
       field: 'distinctCount',
       name: 'Distinct Values',
       sortable: true,
-      width: '20%',
+      width: '180px',
+      align: 'right',
       render: (count: number) => {
         return count?.toLocaleString() || '—';
       },
