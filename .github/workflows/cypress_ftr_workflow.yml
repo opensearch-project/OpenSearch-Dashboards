@@ -1,4 +1,4 @@
-name: Run cypress tests
+name: Run cypress FTR tests
 
 # trigger on every PR for all branches
 on:
@@ -64,83 +64,22 @@ jobs:
           # Standard test configs (groups 1-9)
           - group: 1
             config: standard
-            test_location: ftr
           - group: 2
             config: standard
-            test_location: ftr
           - group: 3
             config: standard
-            test_location: ftr
           - group: 4
             config: standard
-            test_location: ftr
           - group: 5
             config: standard
-            test_location: ftr
           - group: 6
             config: standard
-            test_location: ftr
           - group: 7
             config: standard
-            test_location: ftr
           - group: 8
             config: standard
-            test_location: ftr
           - group: 9
             config: standard
-            test_location: ftr
-          # Dashboard tests with query enhanced - group 1
-          - group: 10Fast
-            config: query_enhanced
-            test_location: source
-          # Dashboard tests with query enhanced - group 1 but slow tests
-          - group: 10Slow
-            config: query_enhanced
-            test_location: source
-          # Dashboard tests with no query enhanced
-          - group: 11
-            config: dashboard
-            test_location: source
-          # Dashboard tests with query enhanced - group 2
-          - group: 12
-            config: query_enhanced
-            test_location: source
-          # Dashboard tests with query enhanced - group 3
-          - group: 13
-            config: query_enhanced
-            test_location: source
-          # Dashboard tests with query enhanced - group 4
-          - group: 14
-            config: query_enhanced
-            test_location: source
-          # Dashboard tests with query enhanced - group 5
-          - group: 15
-            config: query_enhanced
-            test_location: source
-          # Explore tests - group 1
-          - group: 10Explore
-            config: explore
-            test_location: source
-          # Explore tests - group 2
-          - group: 12Explore
-            config: explore
-            test_location: source
-          # Explore tests - group 3
-          - group: 13Explore
-            config: explore
-            test_location: source
-          # Explore tests - group 4
-          - group: 14Explore
-            config: explore
-            test_location: source
-          # Explore tests - group 5
-          - group: 15Explore
-            config: explore
-            test_location: source
-
-          - group: 16Explore
-            config: explore
-            test_location: source
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: "--user 1001 --shm-size=4g"
@@ -223,7 +162,7 @@ jobs:
 
       # Setup spec files for existing Functional Test repo cypress tests
       - name: Setup spec files
-        if: ${{ inputs.specs == '' && matrix.test_location == 'ftr' }}
+        if: ${{ inputs.specs == '' }}
         working-directory: ${{ env.FTR_PATH }}
         shell: bash
         run: |
@@ -234,15 +173,6 @@ jobs:
           done
           echo "SPEC=${FORMATTED_SPEC}" >> $GITHUB_ENV
           echo "SPEC=${FORMATTED_SPEC}"
-
-      # Setup spec files for OSD in-house cypress tests
-      - name: Setup spec files for OSD tests
-        if: ${{ inputs.specs == '' && matrix.test_location == 'source' }}
-        shell: bash
-        run: |
-          DASHBOARDS_SPEC="$(yarn --silent osd:ciGroup${{ matrix.group }})"
-          echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}" >> $GITHUB_ENV
-          echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}"
 
       - name: Get Cypress version
         id: cypress_version
@@ -262,7 +192,6 @@ jobs:
 
       # Run tests based on configuration
       - name: Run FT repo tests
-        if: matrix.test_location == 'ftr'
         uses: cypress-io/github-action@v6
         with:
           working-directory: ${{ env.FTR_PATH }}
@@ -296,32 +225,7 @@ jobs:
           sleep 30
         shell: bash
 
-      # Clear Cypress Cache before running OSD tests
-      - name: Clear Cypress Cache
-        if: matrix.test_location == 'source'
-        run: npx cypress cache clear
-
-      # Run OSD Cypress tests within the source repo
-      - name: Run OSD Cypress tests with query enhancements
-        if: matrix.test_location == 'source' && (matrix.config == 'query_enhanced' || matrix.config == 'explore')
-        uses: cypress-io/github-action@v6
-        with:
-          install-command: npx cypress install --force
-          start: ${{ env.START_CMD }}
-          wait-on: "http://localhost:9200, http://localhost:5601"
-          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
-
-      - name: Run OSD Cypress tests without query enhancements
-        if: matrix.test_location == 'source' && matrix.config == 'dashboard'
-        uses: cypress-io/github-action@v6
-        with:
-          install-command: npx cypress install --force
-          start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
-          wait-on: "http://localhost:9200, http://localhost:5601"
-          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
-
       - name: Compress FT repo artifacts
-        if: always() && matrix.test_location == 'ftr'
         run: |
           mkdir -p ftr-artifacts
           for dir in screenshots videos results; do
@@ -333,33 +237,11 @@ jobs:
         shell: bash
 
       - name: Upload FT repo artifacts
-        if: always() && matrix.test_location == 'ftr'
         uses: actions/upload-artifact@v4
         with:
           name: ftr-cypress-artifacts-${{ matrix.group }}
           path: ftr-cypress-artifacts-${{ matrix.group }}.tar.gz
           retention-days: 1
-
-      - name: Compress OSD repo artifacts
-        if: always() && matrix.test_location == 'source'
-        run: |
-          mkdir -p osd-artifacts
-            for dir in screenshots videos results; do
-              if [ -d "cypress/$dir" ]; then
-                cp -r "cypress/$dir" osd-artifacts/
-              fi
-          done
-          tar -czf osd-cypress-artifacts-${{ matrix.group }}.tar.gz -C osd-artifacts .
-        shell: bash
-
-      - name: Upload OSD repo artifacts
-        if: always() && matrix.test_location == 'source'
-        uses: actions/upload-artifact@v4
-        with:
-          name: osd-cypress-artifacts-${{ matrix.group }}
-          path: osd-cypress-artifacts-${{ matrix.group }}.tar.gz
-          retention-days: 1
-          overwrite: true
 
   add-comment:
     needs: [cypress-tests]
