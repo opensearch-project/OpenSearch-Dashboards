@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Mock moment-timezone BEFORE any imports to prevent loading issues
+jest.mock('moment-timezone', () => {
+  const moment = jest.requireActual('moment');
+  if (!moment) {
+    // Fallback if moment isn't available
+    return {
+      tz: {
+        guess: () => 'America/New_York',
+        setDefault: () => {},
+      },
+    };
+  }
+
+  // Extend moment with timezone methods
+  moment.tz = {
+    guess: () => 'America/New_York',
+    setDefault: () => {},
+  };
+
+  return moment;
+});
+
 import { configureStore } from '@reduxjs/toolkit';
 import {
   abortAllActiveQueries,
@@ -37,6 +59,9 @@ jest.mock('moment', () => {
   });
   Object.assign(mockMoment, {
     duration: actualMoment.duration,
+    isMoment: actualMoment.isMoment,
+    utc: actualMoment.utc,
+    unix: actualMoment.unix,
   });
   return mockMoment;
 });
@@ -174,6 +199,9 @@ describe('Query Actions - Comprehensive Test Suite', () => {
             create: jest.fn().mockResolvedValue(mockSearchSource),
           },
           showError: jest.fn(),
+          aggs: {
+            calculateAutoTimeExpression: jest.fn().mockReturnValue('1h'),
+          },
         },
         query: {
           queryString: {
@@ -185,6 +213,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           timefilter: {
             timefilter: {
               createFilter: jest.fn().mockReturnValue({}),
+              getTime: jest.fn().mockReturnValue({
+                from: 'now-1h',
+                to: 'now',
+              }),
             },
           },
         },
@@ -792,7 +824,16 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       // Using mockCreateHistogramConfigs from module scope
       mockCreateHistogramConfigs.mockReturnValue({
-        toDsl: jest.fn().mockReturnValue({}),
+        toDsl: jest.fn().mockReturnValue([
+          {},
+          {},
+          {
+            date_histogram: {
+              fixed_interval: '5m',
+              field: '@timestamp',
+            },
+          },
+        ]),
       } as any);
     });
 
