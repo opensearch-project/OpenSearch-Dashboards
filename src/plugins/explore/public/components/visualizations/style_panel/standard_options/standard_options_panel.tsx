@@ -28,7 +28,7 @@ export const StandardOptionsPanel = ({
       accordionLabel={i18n.translate('explore.stylePanel.threshold', {
         defaultMessage: 'Standard options',
       })}
-      initialIsOpen={true}
+      initialIsOpen={false}
     >
       <MinMaxControls min={min} max={max} onMaxChange={onMaxChange} onMinChange={onMinChange} />
     </StyleAccordion>
