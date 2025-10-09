@@ -17,6 +17,7 @@ export const CHART_METADATA: Record<ChartType, ChartMetadata> = {
   scatter: { type: 'scatter', name: 'Scatter', icon: '' },
   table: { type: 'table', name: 'Table', icon: 'visTable' },
   gauge: { type: 'gauge', name: 'Gauge', icon: 'visGauge' },
+  bar_gauge: { type: 'bar_gauge', name: 'Bar Gauge', icon: 'visBarHorizontal' },
 };
 
 // Map both OSD_FIELD_TYPES and OPENSEARCH_FIELD_TYPES to VisFieldType

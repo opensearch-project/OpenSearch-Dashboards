@@ -45,8 +45,10 @@ import { GaugeChartStyle } from './gauge/gauge_vis_config';
 import { LineChartStyle } from './line/line_vis_config';
 import { MetricChartStyle } from './metric/metric_vis_config';
 import { PieChartStyle } from './pie/pie_vis_config';
+import { BarGaugeChartStyle } from './bar_gauge/bar_gauge_vis_config';
 import { ScatterChartStyle } from './scatter/scatter_vis_config';
 import { HeatmapChartStyle } from './heatmap/heatmap_vis_config';
+import { createBarGaugeSpec } from './bar_gauge/to_expression';
 
 type RuleMatchIndex = [number, number, number];
 
@@ -462,10 +464,11 @@ const oneMetricOneCateRule: VisualizationRule = {
   matches: (numerical, categorical, date) =>
     compare([1, 1, 0], [numerical.length, categorical.length, date.length]),
   chartTypes: [
-    { ...CHART_METADATA.bar, priority: 100 },
+    { ...CHART_METADATA.bar_gauge, priority: 100 },
     { ...CHART_METADATA.pie, priority: 80 },
     { ...CHART_METADATA.line, priority: 60 },
     { ...CHART_METADATA.area, priority: 40 },
+    { ...CHART_METADATA.bar, priority: 20 },
   ],
   toSpec: (
     transformedData,
@@ -477,6 +480,15 @@ const oneMetricOneCateRule: VisualizationRule = {
     axisColumnMappings
   ) => {
     switch (chartType) {
+      case 'bar_gauge':
+        return createBarGaugeSpec(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions as BarGaugeChartStyle,
+          axisColumnMappings
+        );
       case 'bar':
         return createBarSpec(
           transformedData,

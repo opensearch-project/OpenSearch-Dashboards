@@ -119,13 +119,6 @@ export const createBarSpec = (
       : undefined,
     data: { values: transformedData },
     layer: layers,
-    // Add legend configuration if needed, or explicitly set to null if disabled
-    legend: styles.addLegend
-      ? {
-          orient: styles.legendPosition?.toLowerCase() || 'right',
-          symbolType: styles.legendShape ?? 'circle',
-        }
-      : null,
   };
 };
 
