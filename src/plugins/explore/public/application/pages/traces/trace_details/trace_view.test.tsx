@@ -4,14 +4,13 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 import { TraceDetails } from './trace_view';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
 import { getServiceInfo, NoMatchMessage } from './public/utils/helper_functions';
 
 const mockChrome = {
-  setBreadcrumbs: jest.fn(),
   getIsNavDrawerLocked$: () => ({
     subscribe: jest.fn(),
   }),
@@ -111,8 +110,9 @@ jest.mock('./public/traces/trace_detail_tabs', () => ({
 }));
 
 jest.mock('./public/top_nav_buttons', () => ({
-  TraceTopNavMenu: ({ traceId }: any) => (
+  TraceTopNavMenu: ({ traceId, title }: any) => (
     <div data-testid="trace-top-nav">
+      <div data-test-subj="trace-details-title">{title}</div>
       <span data-testid="trace-id">{traceId || 'no-trace-id'}</span>
     </div>
   ),
@@ -308,7 +308,7 @@ describe('TraceDetails', () => {
     consoleSpy.mockRestore();
   });
 
-  it('sets breadcrumbs correctly', async () => {
+  it('sets page title correctly', async () => {
     const history = createMemoryHistory();
 
     render(
@@ -318,12 +318,10 @@ describe('TraceDetails', () => {
     );
 
     await waitFor(() => {
-      expect(mockChrome.setBreadcrumbs).toHaveBeenCalledWith([
-        {
-          text: 'service-a: operation-1',
-        },
-      ]);
+      expect(document.querySelector('[data-testid="trace-top-nav"]')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('trace-details-title')).toHaveTextContent('service-a: operation-1');
   });
 
   it('getServiceInfo function works correctly with span data', () => {
@@ -387,7 +385,7 @@ describe('TraceDetails', () => {
     expect(callOut).toHaveTextContent('The Trace Id is invalid or could not be found');
   });
 
-  it('sets breadcrumb for unknown trace', async () => {
+  it('sets page title for unknown trace', async () => {
     // Mock state container to return empty traceId and no data
     const mockCreateTraceAppState = jest.requireMock('./state/trace_app_state').createTraceAppState;
     mockCreateTraceAppState.mockReturnValueOnce({
@@ -427,12 +425,10 @@ describe('TraceDetails', () => {
     );
 
     await waitFor(() => {
-      expect(mockChrome.setBreadcrumbs).toHaveBeenCalledWith([
-        {
-          text: 'Unknown Trace',
-        },
-      ]);
+      expect(document.querySelector('[data-testid="trace-top-nav"]')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('trace-details-title')).toHaveTextContent('Unknown Trace');
   });
 
   it('handles span filter updates', async () => {
@@ -910,17 +906,5 @@ describe('TraceDetails', () => {
 
     // Should not call fetchTraceSpans when required params are missing
     expect(mockPplService.fetchTraceSpans).not.toHaveBeenCalled();
-  });
-
-  it('does not set breadcrumbs when isFlyout is true', async () => {
-    const history = createMemoryHistory();
-
-    render(
-      <Router history={history}>
-        <TraceDetails isFlyout={true} />
-      </Router>
-    );
-
-    expect(mockChrome.setBreadcrumbs).not.toHaveBeenCalled();
   });
 });

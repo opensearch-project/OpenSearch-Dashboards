@@ -10,11 +10,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TableRowContent } from './table_row_content';
-import { isOnTracesPage } from '../table_cell/trace_utils/trace_utils';
-
-jest.mock('../table_cell/trace_utils/trace_utils', () => ({
-  isOnTracesPage: jest.fn().mockReturnValue(false),
-}));
 
 // Mock child components
 jest.mock('../table_cell/table_cell', () => ({
@@ -68,6 +63,7 @@ describe('TableRowContent', () => {
     isShortDots: false,
     isExpanded: false,
     onToggleExpand: mockOnToggleExpand,
+    isOnTracesPage: false,
   };
 
   beforeEach(() => {
@@ -153,12 +149,10 @@ describe('TableRowContent', () => {
   });
 
   it('hides expand toggle when on traces page', () => {
-    jest.mocked(isOnTracesPage).mockReturnValue(true);
-
     render(
       <table>
         <tbody>
-          <TableRowContent {...(defaultProps as any)} />
+          <TableRowContent {...(defaultProps as any)} isOnTracesPage={true} />
         </tbody>
       </table>
     );
