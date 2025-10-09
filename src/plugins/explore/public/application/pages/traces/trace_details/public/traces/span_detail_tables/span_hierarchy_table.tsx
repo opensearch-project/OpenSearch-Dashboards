@@ -215,14 +215,18 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     </EuiButtonEmpty>,
   ];
 
-  return RenderCustomDataGrid({
-    columns,
-    renderCellValue,
-    rowCount: flattenedItems.length,
-    toolbarButtons,
-    fullScreen: false,
-    availableWidth,
-    visibleColumns,
-    isTableDataLoading: isSpansTableDataLoading,
-  });
+  return (
+    <div data-test-subj="span-hierarchy-table">
+      {RenderCustomDataGrid({
+        columns,
+        renderCellValue,
+        rowCount: flattenedItems.length,
+        toolbarButtons,
+        fullScreen: false,
+        availableWidth,
+        visibleColumns,
+        isTableDataLoading: isSpansTableDataLoading,
+      })}
+    </div>
+  );
 };
