@@ -157,7 +157,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     if (dataset?.id && correlationService && data && traceId) {
       setIsLogsLoading(true);
       correlationService
-        .checkCorrelationsAndFetchLogs(dataset, data, traceId)
+        .checkCorrelationsAndFetchLogs(dataset, data, traceId, 10)
         .then((result) => {
           setLogDatasets(result.logDatasets);
           setLogsData(result.logs);

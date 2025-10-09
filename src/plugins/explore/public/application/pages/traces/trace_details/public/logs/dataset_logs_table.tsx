@@ -27,8 +27,6 @@ export const DatasetLogsTable: React.FC<DatasetLogsTableProps> = ({
   onSpanClick,
   compactMode = false,
 }) => {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(50);
   const [sortField, setSortField] = useState<keyof LogHit>('timestamp');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -179,7 +177,7 @@ export const DatasetLogsTable: React.FC<DatasetLogsTableProps> = ({
   }, [expandedRows, logs]);
 
   const sortedLogs = useMemo(() => {
-    // In compact mode, show all logs without sorting or pagination
+    // In compact mode, show all logs without sorting
     if (compactMode) {
       return logs;
     }
@@ -208,36 +206,17 @@ export const DatasetLogsTable: React.FC<DatasetLogsTableProps> = ({
       return 0;
     });
 
-    const startIndex = pageIndex * pageSize;
-    return sorted.slice(startIndex, startIndex + pageSize);
-  }, [logs, sortField, sortDirection, pageIndex, pageSize, compactMode]);
-
-  const pagination = useMemo(
-    () => ({
-      pageIndex,
-      pageSize,
-      totalItemCount: logs.length,
-      pageSizeOptions: [10, 25, 50, 100],
-    }),
-    [pageIndex, pageSize, logs.length]
-  );
+    return sorted;
+  }, [logs, sortField, sortDirection, compactMode]);
 
   interface TableChangeParams {
-    page?: {
-      index: number;
-      size: number;
-    };
     sort?: {
       field: keyof LogHit;
       direction: 'asc' | 'desc';
     };
   }
 
-  const onTableChange = ({ page, sort }: TableChangeParams) => {
-    if (page) {
-      setPageIndex(page.index);
-      setPageSize(page.size);
-    }
+  const onTableChange = ({ sort }: TableChangeParams) => {
     if (sort) {
       setSortField(sort.field);
       setSortDirection(sort.direction);
@@ -266,7 +245,6 @@ export const DatasetLogsTable: React.FC<DatasetLogsTableProps> = ({
     ...(compactMode
       ? {}
       : {
-          pagination,
           sorting: {
             sort: {
               field: sortField,
