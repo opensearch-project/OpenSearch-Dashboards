@@ -3,10 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ChartStyleControlMap } from '../visualizations/utils/use_visualization_types';
+import {
+  ChartStylesMapping,
+  ChartStyles,
+  ChartType,
+} from '../visualizations/utils/use_visualization_types';
+import { ChartConfig } from './visualization_builder.types';
 
 type AxisSupportedChartTypes = 'bar' | 'scatter' | 'heatmap';
-export type AxisSupportedStyles = ChartStyleControlMap[AxisSupportedChartTypes];
+export type AxisSupportedStyles = ChartStylesMapping[AxisSupportedChartTypes];
 
 export enum Positions {
   RIGHT = 'right',
@@ -48,8 +53,8 @@ export interface VisualizationRule {
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[],
-    styleOptions: any,
-    chartType?: string,
+    styleOptions: ChartStylesMapping[ChartType],
+    chartType?: ChartType,
     axisColumnMappings?: AxisColumnMappings
   ) => any;
 }
@@ -69,16 +74,17 @@ export enum VisFieldType {
   Unknown = 'unknown',
 }
 
-export enum ThresholdLineStyle {
-  Full = 'full',
+export enum ThresholdMode {
+  Solid = 'solid',
   Dashed = 'dashed',
   DotDashed = 'dot-dashed',
+  Off = 'off',
 }
 
 export interface ThresholdLine {
   color: string;
   show: boolean;
-  style: ThresholdLineStyle;
+  style: ThresholdMode;
   value: number;
   width: number;
 }
@@ -86,7 +92,7 @@ export interface ThresholdLine {
 export interface ThresholdLine {
   color: string;
   show: boolean;
-  style: ThresholdLineStyle;
+  style: ThresholdMode;
   value: number;
   width: number;
   name?: string;
@@ -263,6 +269,11 @@ export interface AxisConfig {
     milliseconds?: string;
   };
 }
+export interface ThresholdOptions {
+  thresholds?: Threshold[];
+  baseColor?: string;
+  thresholdStyle?: ThresholdMode;
+}
 
 export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';
 
@@ -293,4 +304,8 @@ export interface UnitItem {
 export interface Unit {
   name: string;
   units: UnitItem[];
+}
+
+export interface RenderChartConfig extends ChartConfig {
+  styles: ChartStyles;
 }

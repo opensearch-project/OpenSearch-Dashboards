@@ -21,6 +21,7 @@ export const traceUiSettings: Record<string, UiSettingsParams> = {
       'attributes.service.name',
       'resource.attributes.service.name',
       'serviceName',
+      'kind',
       'name',
       'durationNano',
       'durationInNanos',

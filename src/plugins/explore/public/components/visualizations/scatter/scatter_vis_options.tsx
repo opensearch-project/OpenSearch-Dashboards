@@ -6,7 +6,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { ScatterChartStyleControls } from './scatter_vis_config';
+import { ScatterChartStyle, ScatterChartStyleOptions } from './scatter_vis_config';
 import { ScatterExclusiveVisOptions } from './scatter_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
@@ -15,8 +15,9 @@ import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole } from '../types';
+import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 
-export type ScatterVisStyleControlsProps = StyleControlsProps<ScatterChartStyleControls>;
+export type ScatterVisStyleControlsProps = StyleControlsProps<ScatterChartStyle>;
 
 export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = ({
   styleOptions,
@@ -29,22 +30,17 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof ScatterChartStyleControls>(
+  const updateStyleOption = <K extends keyof ScatterChartStyleOptions>(
     key: K,
-    value: ScatterChartStyleControls[K]
+    value: ScatterChartStyleOptions[K]
   ) => {
     onStyleChange({ [key]: value });
   };
 
-  // Determine if the legend should be shown based on the registration of a COLOR or FACET field
-  const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
-  const hasFacetMapping = !!axisColumnMappings?.[AxisRole.FACET];
-  const shouldShowLegend = hasColorMapping || hasFacetMapping;
-
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
-
+  const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -61,6 +57,13 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
       </EuiFlexItem>
       {hasMappingSelected && (
         <>
+          <EuiFlexItem>
+            <ThresholdPanel
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+              showThresholdStyle={true}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AllAxesOptions
               switchAxes={styleOptions.switchAxes}
@@ -74,27 +77,32 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
           <EuiFlexItem grow={false}>
             <ScatterExclusiveVisOptions
               styles={styleOptions.exclusive}
+              useThresholdColor={styleOptions?.useThresholdColor}
               onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
+              onUseThresholdColorChange={(useThresholdColor) =>
+                updateStyleOption('useThresholdColor', useThresholdColor)
+              }
+              shouldDisableUseThresholdColor={hasColorMapping}
             />
           </EuiFlexItem>
-          {shouldShowLegend && (
-            <EuiFlexItem grow={false}>
-              <LegendOptionsPanel
-                legendOptions={{
-                  show: styleOptions.addLegend,
-                  position: styleOptions.legendPosition,
-                }}
-                onLegendOptionsChange={(legendOptions) => {
-                  if (legendOptions.show !== undefined) {
-                    updateStyleOption('addLegend', legendOptions.show);
-                  }
-                  if (legendOptions.position !== undefined) {
-                    updateStyleOption('legendPosition', legendOptions.position);
-                  }
-                }}
-              />
-            </EuiFlexItem>
-          )}
+
+          <EuiFlexItem grow={false}>
+            <LegendOptionsPanel
+              legendOptions={{
+                show: styleOptions.addLegend,
+                position: styleOptions.legendPosition,
+              }}
+              onLegendOptionsChange={(legendOptions) => {
+                if (legendOptions.show !== undefined) {
+                  updateStyleOption('addLegend', legendOptions.show);
+                }
+                if (legendOptions.position !== undefined) {
+                  updateStyleOption('legendPosition', legendOptions.position);
+                }
+              }}
+            />
+          </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel
               titleOptions={styleOptions.titleOptions}

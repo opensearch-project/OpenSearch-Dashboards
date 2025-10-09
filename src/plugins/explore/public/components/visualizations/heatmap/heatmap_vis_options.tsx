@@ -6,7 +6,7 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { HeatmapChartStyleControls } from './heatmap_vis_config';
+import { HeatmapChartStyle, HeatmapChartStyleOptions } from './heatmap_vis_config';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { HeatmapExclusiveVisOptions } from './heatmap_exclusive_vis_options';
@@ -15,8 +15,9 @@ import { StyleControlsProps } from '../utils/use_visualization_types';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole } from '../types';
+import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 
-export type HeatmapVisStyleControlsProps = StyleControlsProps<HeatmapChartStyleControls>;
+export type HeatmapVisStyleControlsProps = StyleControlsProps<HeatmapChartStyle>;
 
 export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = ({
   styleOptions,
@@ -30,9 +31,9 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
   updateVisualization,
 }) => {
   const shouldShowTypeAndGrid = numericalColumns.length === 3;
-  const updateStyleOption = <K extends keyof HeatmapChartStyleControls>(
+  const updateStyleOption = <K extends keyof HeatmapChartStyleOptions>(
     key: K,
-    value: HeatmapChartStyleControls[K]
+    value: HeatmapChartStyleOptions[K]
   ) => {
     onStyleChange({ [key]: value });
   };
@@ -60,6 +61,12 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
       </EuiFlexItem>
       {hasMappingSelected && (
         <>
+          <EuiFlexItem>
+            <ThresholdPanel
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AllAxesOptions
               axisColumnMappings={axisColumnMappings}
@@ -73,9 +80,12 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <HeatmapExclusiveVisOptions
-              shouldShowType={shouldShowTypeAndGrid}
+              useThresholdColor={styleOptions?.useThresholdColor ?? false}
               styles={styleOptions.exclusive}
               onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
+              onUseThresholdColorChange={(useThresholdColor) =>
+                updateStyleOption('useThresholdColor', useThresholdColor)
+              }
             />
           </EuiFlexItem>
 

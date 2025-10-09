@@ -79,14 +79,16 @@ export const detectAndSetOptimalTab = createAsyncThunk<
   const visualizationResults = results[visualizationTabCacheKey];
   const visualizationQueryStatus = queryStatusMap[visualizationTabCacheKey];
 
+  let activeTab = '';
+
   if (visualizationQueryStatus.status === QueryExecutionStatus.ERROR) {
-    dispatch(setActiveTab(EXPLORE_VISUALIZATION_TAB_ID));
+    activeTab = EXPLORE_VISUALIZATION_TAB_ID;
   }
 
   if (visualizationResults && visualizationResults.hits?.hits?.length > 0) {
-    const optimalTab = determineOptimalTab(visualizationResults, services);
-    dispatch(setActiveTab(optimalTab));
+    activeTab = determineOptimalTab(visualizationResults, services);
   }
+  dispatch(setActiveTab(activeTab));
 });
 
 export { canResultsBeVisualized, determineOptimalTab };

@@ -9,41 +9,48 @@ import { VisualizationType } from '../utils/use_visualization_types';
 import {
   CategoryAxis,
   ThresholdLines,
-  ThresholdLineStyle,
+  ThresholdMode,
   ValueAxis,
   Positions,
   AxisRole,
   VisFieldType,
   TitleOptions,
+  ThresholdOptions,
 } from '../types';
 import { LineStyle } from './line_exclusive_vis_options';
 import { TooltipOptions } from '../types';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
+import { getColors } from '../theme/default_colors';
 
 export type LineMode = 'straight' | 'smooth' | 'stepped';
 
 // Complete line chart style controls interface
-export interface LineChartStyleControls {
-  addLegend: boolean;
-  legendPosition: Positions;
-  addTimeMarker: boolean;
+export interface LineChartStyleOptions {
+  addLegend?: boolean;
+  legendPosition?: Positions;
+  addTimeMarker?: boolean;
 
-  lineStyle: LineStyle;
-  lineMode: LineMode;
-  lineWidth: number;
-  tooltipOptions: TooltipOptions;
+  lineStyle?: LineStyle;
+  lineMode?: LineMode;
+  lineWidth?: number;
+  tooltipOptions?: TooltipOptions;
 
-  // Threshold and grid
-  thresholdLines: ThresholdLines;
+  /**
+   * @deprecated - use thresholdOptions instead
+   */
+  thresholdLines?: ThresholdLines;
 
   // Axes configuration
-  categoryAxes: CategoryAxis[];
-  valueAxes: ValueAxis[];
+  categoryAxes?: CategoryAxis[];
+  valueAxes?: ValueAxis[];
 
-  titleOptions: TitleOptions;
+  titleOptions?: TitleOptions;
+  thresholdOptions?: ThresholdOptions;
 }
 
-export const defaultLineChartStyles: LineChartStyleControls = {
+export type LineChartStyle = Required<Omit<LineChartStyleOptions, 'thresholdLines'>>;
+
+export const defaultLineChartStyles: LineChartStyle = {
   addLegend: true,
   legendPosition: Positions.RIGHT,
   addTimeMarker: false,
@@ -55,17 +62,12 @@ export const defaultLineChartStyles: LineChartStyleControls = {
     mode: 'all',
   },
 
-  thresholdLines: [
-    {
-      id: '1',
-      color: '#E7664C',
-      show: false,
-      style: ThresholdLineStyle.Full,
-      value: 10,
-      width: 1,
-      name: '',
-    },
-  ],
+  // Threshold options
+  thresholdOptions: {
+    baseColor: getColors().statusGreen,
+    thresholds: [],
+    thresholdStyle: ThresholdMode.Off,
+  },
 
   // Category axes
   categoryAxes: [

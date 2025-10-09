@@ -70,7 +70,9 @@ export const ExploreTracesChart = ({
     dispatch(setInterval(newInterval));
     dispatch(clearResultsByKey(cacheKey));
     dispatch(clearQueryStatusMapByKey(cacheKey));
-    dispatch(executeHistogramQuery({ services, cacheKey, interval: newInterval }));
+    dispatch(
+      executeHistogramQuery({ services, cacheKey, queryString: query.query, interval: newInterval })
+    );
   };
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {

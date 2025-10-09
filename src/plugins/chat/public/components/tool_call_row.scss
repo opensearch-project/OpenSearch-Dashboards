@@ -1,0 +1,37 @@
+@import "@elastic/eui/src/global_styling/variables";
+
+.toolCallRow {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: start;
+
+  &__icon {
+    margin-top: 4px;
+  }
+
+  &__content {
+    background: $euiColorLightestShade;
+    border: $euiBorderThin;
+    border-radius: 6px;
+    padding: 8px 12px;
+  }
+
+  &__info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  &__result {
+    margin-top: 8px;
+  }
+
+  &__resultText {
+    white-space: pre-wrap;
+    max-height: 200px;
+    overflow-y: scroll;
+    word-break: break-word;
+  }
+}

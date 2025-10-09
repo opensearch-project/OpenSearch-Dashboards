@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HeatmapChartStyleControls } from './heatmap_vis_config';
+import { HeatmapChartStyle } from './heatmap_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
 import { createLabelLayer, enhanceStyle, addTransform } from './heatmap_chart_utils';
@@ -11,7 +11,7 @@ import { createLabelLayer, enhanceStyle, addTransform } from './heatmap_chart_ut
 export const createHeatmapWithBin = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
-  styles: Partial<HeatmapChartStyleControls>,
+  styles: HeatmapChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
@@ -44,7 +44,7 @@ export const createHeatmapWithBin = (
         field: colorField,
         type: getSchemaByAxis(colorFieldColumn),
         // TODO: a dedicate method to handle scale type is log especially in percentage mode
-        bin: !styles.exclusive?.useCustomRanges
+        bin: !styles?.useThresholdColor
           ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
           : false,
         scale: {
@@ -94,7 +94,7 @@ export const createHeatmapWithBin = (
 export const createRegularHeatmap = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
-  styles: Partial<HeatmapChartStyleControls>,
+  styles: HeatmapChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
@@ -126,7 +126,7 @@ export const createRegularHeatmap = (
         field: colorField,
         type: getSchemaByAxis(colorFieldColumn),
         // TODO: a dedicate method to handle scale type is log especially in percentage mode
-        bin: !styles.exclusive?.useCustomRanges
+        bin: !styles?.useThresholdColor
           ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
           : false,
         scale: {

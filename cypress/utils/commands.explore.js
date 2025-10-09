@@ -302,6 +302,7 @@ cy.explore.add(
     // The force is necessary as there is occasionally a popover that covers the button
     cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
     cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+    cy.osd.waitForSync();
   }
 );
 
@@ -334,6 +335,7 @@ cy.explore.add('deleteSavedQuery', (name) => {
     .click();
 
   cy.getElementByTestId('confirmModalConfirmButton').click();
+  cy.osd.waitForSync();
 });
 
 cy.explore.add('setDataset', (dataset, dataSourceName, type) => {
@@ -369,7 +371,10 @@ cy.explore.add(
         }
       });
     }).as('agentConfigRequest');
-    cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
+    cy.getElementByTestId('datasetSelectButton')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click();
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Index Patterns"]`).click();
 
@@ -407,10 +412,16 @@ cy.explore.add(
       });
     }).as('agentConfigRequest');
 
-    cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
+    cy.getElementByTestId('datasetSelectButton')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click();
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Indexes"]`).click();
     cy.get(`[title="${dataSourceName}"]`).click();
+    cy.getElementByTestId('dataset-index-selector')
+      .find('[data-test-subj="comboBoxInput"]')
+      .click();
     // this element is sometimes dataSourceName masked by another element
     cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
@@ -443,8 +454,11 @@ cy.explore.add('setIndexPatternAsDataset', (indexPattern) => {
     });
   }).as('agentConfigRequest');
 
-  cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
-  cy.get(`[title="${indexPattern}"]`).should('be.visible').click();
+  cy.getElementByTestId('datasetSelectButton')
+    .should('be.visible')
+    .should('not.be.disabled')
+    .click();
+  cy.getElementByTestId(`datasetSelectOption-${indexPattern}`).should('be.visible').click();
 
   // verify that it has been selected
   cy.getElementByTestId('datasetSelectButton').should('contain.text', `${indexPattern}`);
@@ -463,7 +477,10 @@ cy.explore.add(
       });
     }).as('agentConfigRequest');
 
-    cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
+    cy.getElementByTestId('datasetSelectButton')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click();
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Index Patterns"]`).click();
 
@@ -562,3 +579,113 @@ cy.explore.add('cleanupWorkspaceAndDataSourceAndTraces', (workspaceName, traceIn
     cy.osd.deleteIndex(index);
   }
 });
+
+cy.explore.add(
+  // Creates an index pattern within the workspace using cluster
+  // Don't use * in the indexPattern it adds it by default at the end of name
+  'createWorkspaceDataSets',
+  (opts) => {
+    const {
+      workspaceName,
+      indexPattern,
+      timefieldName,
+      indexPatternHasTimefield = true,
+      dataSource,
+      isEnhancement = false,
+      signalType = 'logs',
+    } = opts;
+
+    // TODO: use the UI creation flow to add signalType once we have it
+    cy.intercept('POST', '/w/*/api/saved_objects/index-pattern', (req) => {
+      req.body.attributes = { ...req.body.attributes, signalType };
+      req.continue();
+    }).as('createDatasetInterception');
+
+    // Navigate to Workspace Specific IndexPattern Page
+    cy.osd.navigateToWorkSpaceSpecificPage({
+      workspaceName,
+      page: 'datasets',
+      isEnhancement,
+    });
+
+    // There is a bug in Neo where the header of the index pattern page has the home page's header. Happens only in cypress
+    // Therefore it is unreliable to leverage the "create" button to navigate to this page
+    if (Cypress.env('CYPRESS_RUNTIME_ENV') === 'neo') {
+      cy.get('@WORKSPACE_ID').then((workspaceId) => {
+        cy.visit(`/w/${workspaceId}/app/indexPatterns/create`);
+      });
+    } else {
+      // Navigate to Workspace Specific IndexPattern Page
+      cy.osd.navigateToWorkSpaceSpecificPage({
+        workspaceName,
+        page: 'datasets',
+        isEnhancement,
+      });
+
+      // adding a wait here as sometimes the button doesn't click below
+      cy.wait(2000);
+
+      // adding a force as sometimes the button is hidden behind a popup
+      cy.getElementByTestId('createDatasetButton').click({ force: true });
+    }
+
+    cy.osd.waitForLoader(isEnhancement);
+
+    const disableLocalCluster = !!Cypress.env('DISABLE_LOCAL_CLUSTER');
+
+    if (dataSource) {
+      if (!disableLocalCluster) {
+        // When data source is provided, we automatically switch to external data source
+        // First select "Use external data source connection" radio button
+        // Ensure the radio is enabled and need to force click it
+        // This is due to data-test-subj="createIndexPatternStepDataSourceUseDataSourceRadio") is on the parent div, not on the actual radio input element
+        cy.get('input#useDataSource').should('not.be.disabled').click({ force: true });
+      }
+
+      if (disableLocalCluster) {
+        // When local cluster is disabled, directly select from the list
+        cy.get('.euiSelectableListItem')
+          .filter((_, el) => {
+            return Cypress.$(el).find('.euiSelectableListItem__text').text().trim() === dataSource;
+          })
+          .first()
+          .click();
+      } else {
+        // When local cluster is enabled, use the type="data-source" selector
+        cy.get('[type="data-source"]')
+          .filter((_, el) => {
+            return Cypress.$(el).text().trim() === dataSource;
+          })
+          .first()
+          .click();
+      }
+    }
+
+    cy.getElementByTestId('createDatasetStepDataSourceNextStepButton').click();
+
+    cy.getElementByTestId('createDatasetNameInput').should('be.visible').clear().type(indexPattern);
+    cy.getElementByTestId('createDatasetGoToStep2Button').click();
+
+    // wait for the select input if it exists
+    if (indexPatternHasTimefield || timefieldName) {
+      cy.getElementByTestId('createDatasetTimeFieldSelect').should('be.visible');
+    }
+
+    if (indexPatternHasTimefield && !!timefieldName) {
+      cy.getElementByTestId('createDatasetTimeFieldSelect').select(timefieldName);
+    } else if (indexPatternHasTimefield && !timefieldName) {
+      cy.getElementByTestId('createDatasetTimeFieldSelect').select(
+        "I don't want to use the time filter"
+      );
+    }
+
+    cy.getElementByTestId('createDatasetButton').should('be.visible').click();
+
+    cy.wait('@createDatasetInterception').then((interception) => {
+      // save the created index pattern ID as an alias
+      cy.wrap(interception.response.body.id).as('INDEX_PATTERN_ID');
+    });
+
+    cy.getElementByTestId('headerApplicationTitle').contains(indexPattern);
+  }
+);

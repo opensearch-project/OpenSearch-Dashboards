@@ -5,11 +5,25 @@
 
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import { SpanDetailTable, SpanDetailTableHierarchy, parseHits } from './span_detail_table';
+import {
+  HierarchyServiceSpanCell,
+  SpanCell,
+  SpanDetailTable,
+  SpanDetailTableHierarchy,
+  parseHits,
+} from './span_detail_table';
 import { RenderCustomDataGrid } from '../utils/custom_datagrid';
 
 jest.mock('../utils/helper_functions', () => ({
   nanoToMilliSec: jest.fn((nanos: number) => nanos / 1000000),
+}));
+
+jest.mock('../utils/span_timerange_utils', () => ({
+  calculateTraceTimeRange: jest.fn(() => ({
+    durationMs: 1000,
+    startTimeMs: 0,
+    endTimeMs: 1000,
+  })),
 }));
 
 jest.mock('../utils/custom_datagrid', () => ({
@@ -37,7 +51,7 @@ jest.mock('../utils/custom_datagrid', () => ({
           <div data-test-subj="cell-name">operation-1</div>
           <div data-test-subj="cell-spanId">
             <button
-              data-test-subj="spanId-link"
+              data-test-subj="spanId-flyout-button"
               onClick={() => props?.openFlyout && props.openFlyout('span-1')}
             >
               span-1
@@ -205,7 +219,7 @@ describe('SpanDetailTable', () => {
   it('handles span ID click', () => {
     render(<SpanDetailTable {...defaultProps} />);
 
-    const spanIdLink = screen.getByTestId('spanId-link');
+    const spanIdLink = screen.getByTestId('spanId-flyout-button');
     fireEvent.click(spanIdLink);
 
     defaultProps.openFlyout('span-1');
@@ -368,7 +382,7 @@ describe('RenderSpanCellValue function coverage', () => {
       columnId: 'serviceName',
       disableInteractions: false,
     });
-    expect(missingItemResult).toBe('-');
+    expect(missingItemResult).toBeDefined();
   });
 
   it('covers event handler functions', () => {
@@ -411,6 +425,134 @@ describe('RenderSpanCellValue function coverage', () => {
     }
 
     expect(RenderCustomDataGrid).toHaveBeenCalled();
+  });
+});
+
+describe('SpanCell', () => {
+  const openFlyoutMock = jest.fn();
+  const setCellPropsMock = jest.fn();
+
+  const testData = [
+    {
+      spanId: 'test-span',
+      serviceName: 'test-service',
+      name: 'test-operation',
+      durationInNanos: 1000000000,
+      'status.code': 0,
+      children: [],
+    },
+  ];
+
+  const defaultProps = {
+    rowIndex: 0,
+    columnId: 'spanId',
+    disableInteractions: false,
+    setCellProps: setCellPropsMock,
+    expandedRows: new Set<string>(),
+    setExpandedRows: jest.fn(),
+    items: testData,
+    tableParams: { page: 0, size: 10 },
+    props: {
+      selectedSpanId: 'test-span',
+      hiddenColumns: [],
+      openFlyout: openFlyoutMock,
+      filters: [],
+      payloadData: '',
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('handles span flyout button', () => {
+    render(<SpanCell {...defaultProps} />);
+
+    expect(setCellPropsMock).toHaveBeenCalledWith({
+      className: 'exploreSpanDetailTable__selectedRow',
+    });
+
+    fireEvent.click(screen.getByText('test-span'));
+    expect(openFlyoutMock).toHaveBeenCalledWith('test-span');
+  });
+
+  it('handles disabled interactions', () => {
+    render(<SpanCell {...defaultProps} disableInteractions={true} />);
+
+    expect(setCellPropsMock).toHaveBeenCalledWith({});
+
+    fireEvent.click(screen.getByText('test-span'));
+    expect(openFlyoutMock).not.toHaveBeenCalled();
+  });
+
+  it('handles undefined item', () => {
+    render(<SpanCell {...defaultProps} items={[]} />);
+
+    expect(screen.getByText('-')).toBeInTheDocument();
+  });
+});
+
+describe('HierarchyServiceSpanCell', () => {
+  const openFlyoutMock = jest.fn();
+  const setCellPropsMock = jest.fn();
+  const testData = [
+    {
+      spanId: 'hierarchy-span',
+      serviceName: 'hierarchy-service',
+      name: 'hierarchy-operation',
+      durationInNanos: 1000000000,
+      'status.code': 0,
+      children: [],
+    },
+  ];
+
+  const defaultProps = {
+    rowIndex: 0,
+    columnId: 'serviceName',
+    disableInteractions: false,
+    setCellProps: setCellPropsMock,
+    expandedRows: new Set<string>(),
+    setExpandedRows: jest.fn(),
+    items: testData,
+    props: {
+      selectedSpanId: 'hierarchy-span',
+      hiddenColumns: [],
+      openFlyout: openFlyoutMock,
+      filters: [],
+      payloadData: '',
+    },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('handles span flyout button', () => {
+    render(<HierarchyServiceSpanCell {...defaultProps} />);
+
+    expect(setCellPropsMock).toHaveBeenCalledWith({
+      className: ['treeCell--firstColumn', 'exploreSpanDetailTable__selectedRow'],
+    });
+
+    fireEvent.click(screen.getByText('hierarchy-service'));
+    expect(openFlyoutMock).toHaveBeenCalledWith('hierarchy-span');
+  });
+
+  it('handles disabled interactions', () => {
+    render(<HierarchyServiceSpanCell {...defaultProps} disableInteractions={true} />);
+
+    expect(setCellPropsMock).toHaveBeenCalledWith({
+      className: ['treeCell--firstColumn'],
+    });
+
+    fireEvent.click(screen.getByText('hierarchy-service'));
+    expect(openFlyoutMock).not.toHaveBeenCalled();
+  });
+
+  it('handles undefined item', () => {
+    render(<HierarchyServiceSpanCell {...defaultProps} items={[]} />);
+
+    expect(screen.getByText('-')).toBeInTheDocument();
   });
 });
 
@@ -497,7 +639,7 @@ describe('renderSpanCellValue function coverage', () => {
       columnId: 'serviceName',
       disableInteractions: false,
     });
-    expect(nullItemResult).toBe('-');
+    expect(nullItemResult).toBeDefined();
   });
 
   it('covers error status case', () => {
@@ -650,7 +792,7 @@ describe('renderSpanCellValue function coverage', () => {
       columnId: 'nonExistentField',
       disableInteractions: false,
     });
-    expect(defaultMissingResult).toBe('-');
+    expect(defaultMissingResult).toBeDefined();
   });
 });
 

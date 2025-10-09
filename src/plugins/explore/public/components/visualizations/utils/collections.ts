@@ -11,6 +11,7 @@ import {
   AggregationType,
   PointShape,
   TimeUnit,
+  ThresholdMode,
 } from '../types';
 
 export const getPositions = () => [
@@ -210,5 +211,32 @@ export const getTimeUnits = () => [
       defaultMessage: 'Auto',
     }),
     value: TimeUnit.AUTO,
+  },
+];
+
+export const getThresholdOptions = () => [
+  {
+    text: i18n.translate('explore.vis.threshold.off', {
+      defaultMessage: 'Off',
+    }),
+    value: ThresholdMode.Off,
+  },
+  {
+    text: i18n.translate('explore.vis.threshold.lines', {
+      defaultMessage: 'Solid lines',
+    }),
+    value: ThresholdMode.Solid,
+  },
+  {
+    text: i18n.translate('explore.vis.threshold.dashed', {
+      defaultMessage: 'Dashed lines',
+    }),
+    value: ThresholdMode.Dashed,
+  },
+  {
+    text: i18n.translate('explore.vis.threshold.dotted', {
+      defaultMessage: 'Dotted lines',
+    }),
+    value: ThresholdMode.DotDashed,
   },
 ];

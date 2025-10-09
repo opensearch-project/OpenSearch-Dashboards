@@ -3,6 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Mock moment-timezone BEFORE any imports to prevent loading issues
+jest.mock('moment-timezone', () => {
+  const moment = jest.requireActual('moment');
+  if (!moment) {
+    // Fallback if moment isn't available
+    return {
+      tz: {
+        guess: () => 'America/New_York',
+        setDefault: () => {},
+      },
+    };
+  }
+
+  // Extend moment with timezone methods
+  moment.tz = {
+    guess: () => 'America/New_York',
+    setDefault: () => {},
+  };
+
+  return moment;
+});
+
 import { configureStore } from '@reduxjs/toolkit';
 import {
   abortAllActiveQueries,
@@ -12,11 +34,11 @@ import {
   executeQueries,
   executeHistogramQuery,
   executeTabQuery,
+  executeDataTableQuery,
 } from './query_actions';
 import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
 import { Query, DataView } from 'src/plugins/data/common';
-import { DataPublicPluginStart } from '../../../../../../data/public';
 import { ExploreServices } from '../../../../types';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 
@@ -37,6 +59,9 @@ jest.mock('moment', () => {
   });
   Object.assign(mockMoment, {
     duration: actualMoment.duration,
+    isMoment: actualMoment.isMoment,
+    utc: actualMoment.utc,
+    unix: actualMoment.unix,
   });
   return mockMoment;
 });
@@ -174,6 +199,9 @@ describe('Query Actions - Comprehensive Test Suite', () => {
             create: jest.fn().mockResolvedValue(mockSearchSource),
           },
           showError: jest.fn(),
+          aggs: {
+            calculateAutoTimeExpression: jest.fn().mockReturnValue('1h'),
+          },
         },
         query: {
           queryString: {
@@ -185,6 +213,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           timefilter: {
             timefilter: {
               createFilter: jest.fn().mockReturnValue({}),
+              getTime: jest.fn().mockReturnValue({
+                from: 'now-1h',
+                to: 'now',
+              }),
             },
           },
         },
@@ -439,7 +471,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(mockGetFieldValueCounts).toHaveBeenCalledWith({
         hits: rawResults.hits.hits,
         field: mockField,
-        indexPattern: mockDatasetWithFields,
+        dataSet: mockDatasetWithFields,
         count: 5,
         grouped: false,
       });
@@ -792,7 +824,16 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       // Using mockCreateHistogramConfigs from module scope
       mockCreateHistogramConfigs.mockReturnValue({
-        toDsl: jest.fn().mockReturnValue({}),
+        toDsl: jest.fn().mockReturnValue([
+          {},
+          {},
+          {
+            date_histogram: {
+              fixed_interval: '5m',
+              field: '@timestamp',
+            },
+          },
+        ]),
       } as any);
     });
 
@@ -800,6 +841,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
         interval: '5m',
       };
 
@@ -814,6 +856,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeHistogramQuery(params);
@@ -829,6 +872,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
         interval: '1h',
       };
 
@@ -852,6 +896,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
         interval: '1h',
       };
 
@@ -885,6 +930,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
         interval: '1h',
       };
 
@@ -893,6 +939,103 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       expect(result.payload).toBeUndefined();
       expect(mockServices.data.search.showError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('executeDataTableQuery', () => {
+    let mockGetState: jest.Mock;
+    let mockDispatch: jest.Mock;
+
+    beforeEach(() => {
+      mockGetState = jest.fn();
+      mockDispatch = jest.fn();
+
+      mockGetState.mockReturnValue({
+        query: {
+          query: 'source=logs',
+          language: 'PPL',
+          dataset: { id: 'test', type: 'INDEX_PATTERN' },
+        },
+      });
+
+      const mockIndexPatterns = dataPublicModule.indexPatterns as any;
+      mockIndexPatterns.isDefault.mockReturnValue(true);
+    });
+
+    it('should execute data table query successfully', async () => {
+      const params = {
+        services: mockServices,
+        cacheKey: 'test-datatable-cache-key',
+        queryString: 'source=logs',
+      };
+
+      const thunk = executeDataTableQuery(params);
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockServices.data.dataViews.get).toHaveBeenCalled();
+      expect(mockSearchSource.fetch).toHaveBeenCalled();
+      expect(setResults).toHaveBeenCalled();
+    });
+
+    it('should execute without histogram aggregations', async () => {
+      const params = {
+        services: mockServices,
+        cacheKey: 'test-datatable-cache-key',
+        queryString: 'source=logs',
+      };
+
+      const thunk = executeDataTableQuery(params);
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      // Verify that no aggregations are added to the search source
+      expect(mockSearchSource.setField).not.toHaveBeenCalledWith('aggs', expect.anything());
+    });
+
+    it('should set query status to READY when results found', async () => {
+      mockSearchSource.fetch.mockResolvedValue({
+        hits: {
+          hits: [{ _id: '1', _source: { field: 'value' } }],
+          total: 1,
+        },
+      });
+
+      const params = {
+        services: mockServices,
+        cacheKey: 'test-datatable-cache-key',
+        queryString: 'source=logs',
+      };
+
+      const thunk = executeDataTableQuery(params);
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: {
+            cacheKey: 'test-datatable-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.READY,
+            }),
+          },
+        })
+      );
+    });
+
+    it('should use separate cache key from query string', async () => {
+      const params = {
+        services: mockServices,
+        cacheKey: 'source=logs__datatable',
+        queryString: 'source=logs',
+      };
+
+      const thunk = executeDataTableQuery(params);
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      // Verify that results are stored with the cache key, not query string
+      expect(setResults).toHaveBeenCalledWith({
+        cacheKey: 'source=logs__datatable',
+        results: expect.any(Object),
+      });
     });
   });
 
@@ -923,6 +1066,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -937,6 +1081,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: undefined as any,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -951,6 +1096,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -972,6 +1118,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -989,6 +1136,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -1001,6 +1149,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -1030,6 +1179,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -1059,6 +1209,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -1081,6 +1232,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -1213,11 +1365,18 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         executeHistogramQuery({
           services: mockServices,
           cacheKey: 'histogram-query',
+          queryString: 'source=logs',
           interval: '1h',
         }),
         executeTabQuery({
           services: mockServices,
           cacheKey: 'tab-query',
+          queryString: 'source=logs',
+        }),
+        executeDataTableQuery({
+          services: mockServices,
+          cacheKey: 'datatable-query',
+          queryString: 'source=logs',
         }),
       ];
 
@@ -1236,8 +1395,8 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         promises.map((thunk) => thunk(mockDispatch, mockGetState, undefined))
       );
 
-      expect(results).toHaveLength(2);
-      expect(mockSearchSource.fetch).toHaveBeenCalledTimes(2);
+      expect(results).toHaveLength(3);
+      expect(mockSearchSource.fetch).toHaveBeenCalledTimes(3);
     });
   });
 });

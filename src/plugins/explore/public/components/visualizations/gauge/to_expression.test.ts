@@ -8,10 +8,11 @@ import { VisColumn, VisFieldType, AxisRole } from '../types';
 import { defaultGaugeChartStyles } from './gauge_vis_config';
 
 jest.mock('./gauge_chart_utils', () => ({
-  mergeThresholdsWithBase: jest.fn(() => [{ value: 0, color: '#9EE9FA' }]),
-  locateThreshold: jest.fn(() => ({ value: 0, color: '#9EE9FA' })),
-  generateRanges: jest.fn(() => [{ min: 0, max: 100, color: '#9EE9FA' }]),
+  mergeThresholdsWithBase: jest.fn(() => [{ value: 0, color: '#00BD6B' }]),
+  locateThreshold: jest.fn(() => ({ value: 0, color: '#00BD6B' })),
+  generateRanges: jest.fn(() => [{ min: 0, max: 100, color: '#00BD6B' }]),
   generateArcExpression: jest.fn(() => ({ mark: { type: 'arc' } })),
+  getMaxAndMinBase: jest.fn(() => ({ minBase: 10, maxBase: 200 })),
 }));
 
 jest.mock('../utils/calculation', () => ({

@@ -129,14 +129,9 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
 
   useEffect(() => {
     // capitalize first letter
-    const flavorPrefix = flavorId ? `${flavorId[0].toUpperCase()}${flavorId.slice(1)}/ ` : '';
-    setScreenTitle(
-      flavorPrefix +
-        (savedExplore?.title ||
-          i18n.translate('explore.discover.savedSearch.newTitle', {
-            defaultMessage: 'Search',
-          }))
-    );
+    const flavorPrefix = flavorId ? `${flavorId[0].toUpperCase()}${flavorId.slice(1)}` : '';
+
+    setScreenTitle(flavorPrefix + (savedExplore?.title ? `: ${savedExplore?.title}` : ''));
   }, [flavorId, savedExplore?.title]);
 
   const showDatePicker = useMemo(() => {

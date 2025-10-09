@@ -1,0 +1,2 @@
+fix:
+- Handle undefined items in span table ([#10608](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10608))

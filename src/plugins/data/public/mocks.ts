@@ -138,6 +138,7 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
           },
         })
       ),
+      getIds: jest.fn().mockReturnValue(Promise.resolve(['id'])),
       getDefault: jest.fn().mockReturnValue(
         Promise.resolve({
           name: 'Default name',
@@ -151,6 +152,7 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
         type: 'INDEX_PATTERN',
       }),
       saveToCache: jest.fn(),
+      convertToDataset: jest.fn(),
     } as unknown) as DataViewsContract,
     dataSources: dataSourceServiceMock.createStartContract(),
   };

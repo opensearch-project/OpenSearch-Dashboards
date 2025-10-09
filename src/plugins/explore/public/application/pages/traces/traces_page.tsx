@@ -24,8 +24,11 @@ import { TopNav } from '../../../components/top_nav/top_nav';
 import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
 import { EXPLORE_PATTERNS_TAB_ID, EXPLORE_VISUALIZATION_TAB_ID } from '../../../../common';
 import { setActiveTab } from '../../utils/state_management/slices';
+import { TraceFlyout } from './trace_flyout/trace_flyout';
+import { TraceFlyoutProvider } from './trace_flyout/trace_flyout_context';
 /**
  * Main application component for the Explore plugin
+ * @experimental
  */
 export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderActionMenu'>>> = ({
   setHeaderActionMenu,
@@ -69,21 +72,24 @@ export const TracesPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAct
 
   return (
     <EuiErrorBoundary>
-      <div className="mainPage">
-        <EuiPage className="explore-layout" paddingSize="none" grow={false}>
-          <EuiPageBody className="explore-layout__page-body">
-            <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
-            <NewExperienceBanner />
+      <TraceFlyoutProvider>
+        <div className="mainPage">
+          <EuiPage className="explore-layout" paddingSize="none" grow={false}>
+            <EuiPageBody className="explore-layout__page-body">
+              <TopNav setHeaderActionMenu={setHeaderActionMenu} savedExplore={savedExplore} />
+              <NewExperienceBanner />
 
-            <div className="dscCanvas__queryPanel">
-              {dataset && !isLoading ? <QueryPanel /> : null}
-            </div>
+              <div className="dscCanvas__queryPanel">
+                {dataset && !isLoading ? <QueryPanel /> : null}
+              </div>
 
-            {/* Main content area with resizable panels under QueryPanel */}
-            <BottomContainer />
-          </EuiPageBody>
-        </EuiPage>
-      </div>
+              {/* Main content area with resizable panels under QueryPanel */}
+              <BottomContainer />
+            </EuiPageBody>
+          </EuiPage>
+        </div>
+        <TraceFlyout />
+      </TraceFlyoutProvider>
     </EuiErrorBoundary>
   );
 };

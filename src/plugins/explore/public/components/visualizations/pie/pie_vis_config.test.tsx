@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { createPieConfig, PieChartStyleControls, defaultPieChartStyles } from './pie_vis_config';
+import { createPieConfig, defaultPieChartStyles } from './pie_vis_config';
 import { PieVisStyleControls } from './pie_vis_options';
 import { Positions } from '../types';
 
@@ -27,7 +27,7 @@ describe('createPieConfig', () => {
 
   it('should have the correct default style settings', () => {
     const config = createPieConfig();
-    const defaults = config.ui.style.defaults as PieChartStyleControls;
+    const defaults = config.ui.style.defaults;
     // Verify basic controls
     expect(defaults.addTooltip).toBe(true);
     expect(defaults.addLegend).toBe(true);
@@ -75,21 +75,6 @@ describe('createPieConfig', () => {
     renderFunction(mockProps);
     // Verify that React.createElement was called with the correct arguments
     expect(React.createElement).toHaveBeenCalledWith(PieVisStyleControls, mockProps);
-  });
-
-  it('should handle missing styleOptions in render function', () => {
-    const config = createPieConfig();
-    const renderFunction = config.ui.style.render;
-    const mockProps = {
-      styleOptions: {} as PieChartStyleControls,
-      onStyleChange: jest.fn(),
-      numericalColumns: [],
-      categoricalColumns: [],
-      dateColumns: [],
-      axisColumnMappings: {},
-      updateVisualization: jest.fn(),
-    };
-    expect(() => renderFunction(mockProps)).not.toThrow();
   });
 
   it('should handle missing axisColumnMappings in render function', () => {

@@ -7,6 +7,7 @@ import './trace_details_view.scss';
 import React, { useMemo, useState } from 'react';
 import { EuiEmptyPrompt, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TRACE_ID_FIELD_PATHS, SPAN_ID_FIELD_PATHS } from '../../../utils/trace_field_constants';
 import { SpanDetailPanel } from '../../../application/pages/traces/trace_details/public/traces/span_detail_panel';
 import { DocViewRenderProps } from '../../../types/doc_views_types';
@@ -150,7 +151,13 @@ export function TraceDetailsView({ hit }: DocViewRenderProps) {
           filters: [],
         });
 
-        const transformed = transformPPLDataToTraceHits(response);
+        let transformed = transformPPLDataToTraceHits(response);
+        transformed = transformed.filter((transformedHit) => {
+          const hasUnixNano =
+            !!transformedHit.startTimeUnixNano && !!transformedHit.endTimeUnixNano;
+          const hasRegularTime = !!transformedHit.startTime && !!transformedHit.endTime;
+          return hasUnixNano || hasRegularTime;
+        });
         setTransformedHits(transformed);
       } catch (err) {
         // eslint-disable-next-line no-console
@@ -208,11 +215,18 @@ export function TraceDetailsView({ hit }: DocViewRenderProps) {
     <div className="exploreTraceDetailsView">
       {isLoading ? (
         <div className="exploreTraceDetailsView__loadingContainer">
-          <EuiText>
-            {i18n.translate('explore.docViews.traceDetails.loading', {
-              defaultMessage: 'Loading trace gantt chart...',
-            })}
-          </EuiText>
+          <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="xl" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                {i18n.translate('explore.docViews.traceDetails.loading', {
+                  defaultMessage: 'Loading...',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </div>
       ) : transformedHits.length > 0 ? (
         <SpanDetailPanel

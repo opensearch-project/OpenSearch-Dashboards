@@ -34,13 +34,29 @@ const inspectTestSuite = () => {
   describe('inspect spec', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
         timefieldName: 'timestamp',
         indexPatternHasTimefield: true,
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
+      });
+      cy.osd.grabDataSourceId(workspaceName, DATASOURCE_NAME);
+      cy.get('@WORKSPACE_ID').then((workspaceID) => {
+        cy.get('@DATASOURCE_ID').then((dataSourceId) => {
+          cy.request({
+            method: 'POST',
+            url: `${BASE_PATH}/w/${workspaceID}/api/sample_data/flights?data_source_id=${dataSourceId}`,
+            headers: {
+              'Content-Type': 'application/json',
+              'osd-xsrf': true,
+            },
+            failOnStatusCode: false,
+          }).then((response) => {
+            expect(response.status).to.eq(200);
+          });
+        });
       });
     });
 
@@ -90,20 +106,6 @@ const inspectTestSuite = () => {
     });
 
     it('should test visualizations inspect', () => {
-      cy.osd.navigateToWorkSpaceSpecificPage({
-        url: BASE_PATH,
-        workspaceName: workspaceName,
-        page: 'import_sample_data',
-        isEnhancement: true,
-      });
-
-      // adding a wait here as sometimes the button doesn't click below
-      cy.wait(3000);
-
-      cy.getElementByTestId('addSampleDataSetflights').should('be.visible').click();
-
-      cy.getElementByTestId('sampleDataSetInstallToast').should('exist');
-
       cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspaceName,

@@ -20,6 +20,7 @@ const mockGetQuery = jest.fn();
 const mockToastAddError = jest.fn();
 const mockToastAddWarning = jest.fn();
 const mockUseFlavorId = jest.fn();
+const mockClearEditors = jest.fn();
 
 jest.doMock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -94,6 +95,7 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
       http: {},
     },
   }),
+  withOpenSearchDashboards: (Component: any) => (props: any) => <Component {...props} />,
 }));
 
 jest.doMock('../../utils', () => ({
@@ -120,7 +122,7 @@ jest.doMock('../../../../../../data/common', () => ({
   EMPTY_QUERY: {
     QUERY: '',
   },
-  SignalType: {
+  CORE_SIGNAL_TYPES: {
     LOGS: 'logs',
     METRICS: 'metrics',
     TRACES: 'traces',
@@ -135,6 +137,10 @@ jest.doMock('../../../../../common', () => ({
   ExploreFlavor: {
     Traces: 'traces',
   },
+}));
+
+jest.doMock('../../../../application/hooks', () => ({
+  useClearEditors: () => mockClearEditors,
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -217,6 +223,7 @@ describe('DatasetSelectWidget', () => {
         dataset: { id: 'test-dataset', type: 'index_pattern' },
       });
       expect(mockDispatch).toHaveBeenCalledWith(mockSetQueryWithHistory());
+      expect(mockClearEditors).toHaveBeenCalled();
     });
   });
 

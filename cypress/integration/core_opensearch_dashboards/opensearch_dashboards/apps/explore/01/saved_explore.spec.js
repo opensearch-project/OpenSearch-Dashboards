@@ -24,7 +24,7 @@ const runSavedExploreTests = () => {
         INDEX_WITH_TIME_1,
         INDEX_WITH_TIME_2,
       ]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
         timefieldName: 'timestamp',
@@ -59,7 +59,7 @@ const runSavedExploreTests = () => {
 
       // Set query input
       cy.explore.clearQueryEditor();
-      const query = `source=${INDEX_PATTERN_WITH_TIME} | stats count() by category`;
+      const query = `source=\`${INDEX_PATTERN_WITH_TIME}\` | stats count() by category`;
       cy.explore.setQueryEditor(query, { submit: false });
 
       // Run the query
@@ -106,7 +106,7 @@ const runSavedExploreTests = () => {
 
       // Update the saved search with a new query
       cy.explore.clearQueryEditor();
-      const newQuery = `source=${INDEX_PATTERN_WITH_TIME} | stats count()`;
+      const newQuery = `source=\`${INDEX_PATTERN_WITH_TIME}\` | stats count()`;
       cy.explore.setQueryEditor(newQuery, { submit: false });
 
       // Run the query

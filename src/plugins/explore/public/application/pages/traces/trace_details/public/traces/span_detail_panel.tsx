@@ -95,17 +95,18 @@ export function SpanDetailPanel(props: {
           availableWidth={availableWidth}
           payloadData={payloadData}
           filters={spanFilters}
+          selectedSpanId={props.selectedSpanId}
         />
       </div>
     ),
-    [onSpanSelect, payloadData, spanFilters, availableWidth]
+    [onSpanSelect, payloadData, spanFilters, availableWidth, props.selectedSpanId]
   );
 
   const spanDetailTableHierarchy = useMemo(
     () => (
       <div className="exploreSpanDetailPanel__tableContainer">
         <SpanDetailTableHierarchy
-          hiddenColumns={['traceId', 'traceGroup', 'startTime', 'endTime']}
+          hiddenColumns={['traceId', 'traceGroup', 'startTime', 'endTime', 'parentSpanId']}
           openFlyout={(spanId: string) => {
             if (onSpanSelect) {
               onSpanSelect(spanId);
@@ -114,10 +115,12 @@ export function SpanDetailPanel(props: {
           availableWidth={availableWidth}
           payloadData={payloadData}
           filters={spanFilters}
+          selectedSpanId={props.selectedSpanId}
+          colorMap={colorMap}
         />
       </div>
     ),
-    [onSpanSelect, payloadData, spanFilters, availableWidth]
+    [onSpanSelect, payloadData, spanFilters, availableWidth, props.selectedSpanId, colorMap]
   );
 
   const parsedData = useMemo(() => {

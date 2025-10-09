@@ -4,20 +4,9 @@
  */
 
 import React from 'react';
-import {
-  createHeatmapConfig,
-  HeatmapChartStyleControls,
-  HeatmapLabels,
-} from './heatmap_vis_config';
+import { createHeatmapConfig, defaultHeatmapChartStyles } from './heatmap_vis_config';
 import { HeatmapVisStyleControls } from './heatmap_vis_options';
-import {
-  AggregationType,
-  Positions,
-  ColorSchemas,
-  ScaleType,
-  AxisRole,
-  StandardAxes,
-} from '../types';
+import { AggregationType, Positions, ColorSchemas, ScaleType, AxisRole } from '../types';
 
 // Mock the React.createElement function
 jest.mock('react', () => ({
@@ -38,7 +27,7 @@ describe('createHeatmapeConfig', () => {
 
   it('should have the correct default style settings', () => {
     const config = createHeatmapConfig();
-    const defaults = config.ui.style.defaults as HeatmapChartStyleControls;
+    const defaults = config.ui.style.defaults;
     // Verify basic controls
     expect(defaults.tooltipOptions.mode).toBe('all');
     expect(defaults.addLegend).toBe(true);
@@ -49,8 +38,11 @@ describe('createHeatmapeConfig', () => {
     expect(defaults.exclusive.colorScaleType).toBe(ScaleType.LINEAR);
     expect(defaults.exclusive.scaleToDataBounds).toBe(false);
     expect(defaults.exclusive.maxNumberOfColors).toBe(4);
-    expect(defaults.exclusive.useCustomRanges).toBe(false);
-    expect(defaults.exclusive.customRanges).toBeUndefined();
+    expect(defaults.useThresholdColor).toBe(false);
+    expect(defaults.thresholdOptions).toMatchObject({
+      baseColor: '#00BD6B',
+      thresholds: [],
+    });
 
     // Verify label settings
     expect(defaults.exclusive.label).toEqual({
@@ -88,23 +80,7 @@ describe('createHeatmapeConfig', () => {
     const renderFunction = config.ui.style.render;
     // Mock props
     const mockProps = {
-      styleOptions: {
-        switchAxes: false,
-        tooltipOptions: { mode: 'hidden' as const },
-        addLegend: false,
-        legendPosition: Positions.RIGHT,
-        exclusive: {
-          colorSchema: ColorSchemas.BLUES,
-          reverseSchema: false,
-          colorScaleType: ScaleType.LINEAR,
-          scaleToDataBounds: false,
-          percentageMode: false,
-          maxNumberOfColors: 4,
-          useCustomRanges: false,
-          label: {} as HeatmapLabels,
-        },
-        standardAxes: [] as StandardAxes[],
-      } as HeatmapChartStyleControls,
+      styleOptions: defaultHeatmapChartStyles,
       onStyleChange: jest.fn(),
       numericalColumns: [],
       categoricalColumns: [],

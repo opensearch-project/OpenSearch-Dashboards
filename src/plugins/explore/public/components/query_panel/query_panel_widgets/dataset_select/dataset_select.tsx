@@ -7,18 +7,25 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { DetailedDataset } from '../../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { Dataset, DEFAULT_DATA, EMPTY_QUERY, SignalType } from '../../../../../../data/common';
+import {
+  CORE_SIGNAL_TYPES,
+  Dataset,
+  DEFAULT_DATA,
+  EMPTY_QUERY,
+} from '../../../../../../data/common';
 import { ExploreServices } from '../../../../types';
 import { setQueryWithHistory } from '../../../../application/utils/state_management/slices';
 import { selectQuery } from '../../../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import { ExploreFlavor } from '../../../../../common';
+import { useClearEditors } from '../../../../application/hooks';
 
 export const DatasetSelectWidget = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const flavorId = useFlavorId();
   const dispatch = useDispatch();
   const currentQuery = useSelector(selectQuery);
+  const clearEditors = useClearEditors();
 
   const {
     data: {
@@ -87,13 +94,14 @@ export const DatasetSelectWidget = () => {
             ...queryString.getQuery(),
           })
         );
+        clearEditors();
       } catch (error) {
         services.notifications?.toasts.addError(error, {
           title: 'Error selecting dataset',
         });
       }
     },
-    [queryString, dispatch, services]
+    [queryString, dispatch, clearEditors, services.notifications?.toasts]
   );
 
   const supportedTypes = useMemo(() => {
@@ -108,9 +116,9 @@ export const DatasetSelectWidget = () => {
   const onFilter = useCallback(
     (detailedDataset: DetailedDataset) => {
       if (flavorId === ExploreFlavor.Traces) {
-        return detailedDataset.signalType === SignalType.TRACES;
+        return detailedDataset.signalType === CORE_SIGNAL_TYPES.TRACES;
       }
-      return detailedDataset.signalType !== SignalType.TRACES;
+      return detailedDataset.signalType !== CORE_SIGNAL_TYPES.TRACES;
     },
     [flavorId]
   );

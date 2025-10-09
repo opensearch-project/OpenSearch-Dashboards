@@ -15,7 +15,12 @@ import {
   TabState,
   UIState,
 } from '../slices';
-import { Dataset, DataStructure, DEFAULT_DATA, SignalType } from '../../../../../../data/common';
+import {
+  Dataset,
+  DataStructure,
+  DEFAULT_DATA,
+  CORE_SIGNAL_TYPES,
+} from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
 import {
   DEFAULT_TRACE_COLUMNS_SETTING,
@@ -64,26 +69,29 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     const queryState = services.osdUrlStateStorage.get('_q') as QueryState | null;
     const appState = services.osdUrlStateStorage.get('_a') as AppState | null;
 
-    // Query state handling
-    let finalQueryState: QueryState;
+    // Query state handling - always resolve dataset to ensure SignalType validation
+    let urlDataset: Dataset | undefined;
     if (queryState?.dataset) {
-      // The dataset from URL should already be minimal, but ensure it only has the necessary properties
-      finalQueryState = {
-        ...queryState,
-        dataset: queryState.dataset
-          ? {
-              id: queryState.dataset.id,
-              title: queryState.dataset.title,
-              type: queryState.dataset.type,
-              timeFieldName: queryState.dataset.timeFieldName,
-              // Map dataSource if it exists
-              dataSource: queryState.dataset.dataSource,
-            }
-          : undefined,
+      // Extract minimal dataset from URL state
+      urlDataset = {
+        id: queryState.dataset.id,
+        title: queryState.dataset.title,
+        type: queryState.dataset.type,
+        timeFieldName: queryState.dataset.timeFieldName,
+        dataSource: queryState.dataset.dataSource,
       };
-    } else {
-      finalQueryState = await getPreloadedQueryState(services);
     }
+
+    // Always call getPreloadedQueryState to ensure SignalType validation runs
+    const resolvedQueryState = await getPreloadedQueryState(services, urlDataset);
+
+    // Use the resolved dataset but preserve other query state from URL if available
+    const finalQueryState: QueryState = queryState
+      ? {
+          ...queryState,
+          dataset: resolvedQueryState.dataset,
+        }
+      : resolvedQueryState;
     services.data.query.queryString.setQuery(finalQueryState);
     const timefilter = services?.data?.query?.timefilter?.timefilter;
     if (timefilter) {
@@ -140,7 +148,7 @@ export const getPreloadedState = async (services: ExploreServices): Promise<Root
  */
 const fetchFirstAvailableDataset = async (
   services: ExploreServices,
-  requiredSignalType?: SignalType
+  requiredSignalType?: string
 ): Promise<Dataset | undefined> => {
   try {
     const datasetService = services.data?.query?.queryString?.getDatasetService();
@@ -184,7 +192,7 @@ const fetchFirstAvailableDataset = async (
           } else {
             // If requiredSignalType is not specified (i.e., not Traces),
             // dataset should not have signalType equal to Traces
-            if (dataView?.signalType !== SignalType.TRACES) {
+            if (dataView?.signalType !== CORE_SIGNAL_TYPES.TRACES) {
               return dataset;
             }
           }
@@ -205,16 +213,19 @@ const fetchFirstAvailableDataset = async (
 /**
  * Resolves the dataset to use for the initial query state
  */
-const resolveDataset = async (services: ExploreServices): Promise<Dataset | undefined> => {
+const resolveDataset = async (
+  services: ExploreServices,
+  preferredDataset?: Dataset
+): Promise<Dataset | undefined> => {
   const currentAppId = await getCurrentAppId(services);
   const flavorFromAppId = getFlavorFromAppId(currentAppId);
   const requiredSignalType =
-    flavorFromAppId === ExploreFlavor.Traces ? SignalType.TRACES : undefined;
+    flavorFromAppId === ExploreFlavor.Traces ? CORE_SIGNAL_TYPES.TRACES : undefined;
 
-  // Get existing dataset from QueryStringManager
+  // Get existing dataset from QueryStringManager or use preferred dataset
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
   const defaultQuery = services.data?.query?.queryString?.getDefaultQuery();
-  const existingDataset = queryStringQuery?.dataset || defaultQuery?.dataset;
+  const existingDataset = preferredDataset || queryStringQuery?.dataset || defaultQuery?.dataset;
 
   // If we have an existing dataset, validate SignalType compatibility
   if (existingDataset) {
@@ -232,7 +243,7 @@ const resolveDataset = async (services: ExploreServices): Promise<Dataset | unde
       } else {
         // If requiredSignalType is not specified (i.e., not Traces),
         // dataset should not have signalType equal to Traces
-        if (dataView?.signalType !== SignalType.TRACES) {
+        if (dataView?.signalType !== CORE_SIGNAL_TYPES.TRACES) {
           return existingDataset;
         }
       }
@@ -249,9 +260,12 @@ const resolveDataset = async (services: ExploreServices): Promise<Dataset | unde
 /**
  * Get preloaded query state with dataset initialization
  */
-const getPreloadedQueryState = async (services: ExploreServices): Promise<QueryState> => {
-  // Resolve the dataset to use for the initial query state
-  const selectedDataset = await resolveDataset(services);
+const getPreloadedQueryState = async (
+  services: ExploreServices,
+  preferredDataset?: Dataset
+): Promise<QueryState> => {
+  // Always resolve the dataset to ensure SignalType validation runs
+  const selectedDataset = await resolveDataset(services, preferredDataset);
 
   // Use toDataset method if available, otherwise extract minimal properties
   let minimalDataset: Dataset | undefined;

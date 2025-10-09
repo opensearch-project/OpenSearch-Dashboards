@@ -4,9 +4,8 @@
  */
 
 import React from 'react';
-import { createMetricConfig, MetricChartStyleControls } from './metric_vis_config';
+import { createMetricConfig } from './metric_vis_config';
 import { MetricVisStyleControls } from './metric_vis_options';
-import { ColorSchemas } from '../types';
 
 // Mock the React.createElement function
 jest.mock('react', () => ({
@@ -27,13 +26,15 @@ describe('createMetrictmapeConfig', () => {
 
   it('should have the correct default style settings', () => {
     const config = createMetricConfig();
-    const defaults = config.ui.style.defaults as MetricChartStyleControls;
+    const defaults = config.ui.style.defaults;
     // Verify basic controls
     expect(defaults.showTitle).toBe(true);
     expect(defaults.title).toBe('');
     expect(defaults.fontSize).toBe(undefined);
-    expect(defaults.useColor).toBe(false);
-    expect(defaults.colorSchema).toBe(ColorSchemas.BLUES);
+    expect(defaults.thresholdOptions).toMatchObject({
+      baseColor: '#00BD6B',
+      thresholds: [],
+    });
   });
 
   it('should render the MetricVisStyleControls component with the provided props', () => {
@@ -42,11 +43,12 @@ describe('createMetrictmapeConfig', () => {
     // Mock props
     const mockProps = {
       styleOptions: {
+        ...config.ui.style.defaults,
         showTitle: true,
         title: '',
         fontSize: 60,
-        useColor: false,
-        colorSchema: ColorSchemas.BLUES,
+        useThresholdColor: false,
+        thresholdOptions: { thresholds: [], baseColor: '#00BD6B' },
       },
       onStyleChange: jest.fn(),
       numericalColumns: [],

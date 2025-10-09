@@ -6,11 +6,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiDataGrid, EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
 import { VisColumn, VisFieldType } from '../types';
-import {
-  defaultTableChartStyles,
-  CellTypeConfig,
-  TableChartStyleControls,
-} from './table_vis_config';
+import { defaultTableChartStyles, CellTypeConfig, TableChartStyle } from './table_vis_config';
 import { FilterConfig, TableColumnHeader } from './table_vis_filter';
 import { calculateValue } from '../utils/calculation';
 import { CellValue } from './cell_value';
@@ -22,7 +18,7 @@ import './table_vis.scss';
 interface TableVisProps {
   rows: Array<Record<string, any>>;
   columns: VisColumn[];
-  styleOptions?: TableChartStyleControls;
+  styleOptions?: TableChartStyle;
   pageSizeOptions?: number[];
   showStyleSelector?: boolean;
 }
@@ -34,6 +30,10 @@ export const TableVis = React.memo(
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize });
     const [filters, setFilters] = useState<Record<string, FilterConfig>>({});
     const [popoverOpenColumnId, setPopoverOpenColumnId] = useState<string | null>(null);
+    const [popoverOpenCell, setPopoverOpenCell] = useState<{
+      rowIndex: number;
+      columnId: string;
+    } | null>(null);
 
     const columnUniques = useMemo(() => {
       const uniques: Record<string, Set<any>> = {};
@@ -149,6 +149,12 @@ export const TableVis = React.memo(
             value={cellValue}
             colorMode={columnCellType}
             color={color}
+            dataLinks={styleOptions?.dataLinks}
+            isPopoverOpen={
+              popoverOpenCell?.rowIndex === rowIndex && popoverOpenCell?.columnId === columnId
+            }
+            setPopoverOpen={(open) => setPopoverOpenCell(open ? { rowIndex, columnId } : null)}
+            columnId={columnId}
           />
         );
       },
@@ -159,6 +165,8 @@ export const TableVis = React.memo(
         styleOptions?.baseColor,
         styleOptions?.cellTypes,
         styleOptions?.globalAlignment,
+        styleOptions?.dataLinks,
+        popoverOpenCell,
       ]
     );
 

@@ -7,6 +7,22 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TableRow, TableRowProps } from './table_row';
 
+// Create a mock function that we can track
+const mockUseDynamicContextFn = jest.fn().mockReturnValue('test-context-id');
+
+// Mock the OpenSearch Dashboards React hook
+jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
+  useOpenSearchDashboards: jest.fn(() => ({
+    services: {
+      contextProvider: {
+        hooks: {
+          useDynamicContext: mockUseDynamicContextFn,
+        },
+      },
+    },
+  })),
+}));
+
 // Mock the child components
 jest.mock('../table_cell/source_field_table_cell', () => ({
   SourceFieldTableCell: ({ isShortDots }: { isShortDots: boolean }) => (
@@ -32,7 +48,59 @@ jest.mock('./expanded_table_row/expanded_table_row', () => ({
   ),
 }));
 
+jest.mock('./table_row_content', () => ({
+  TableRowContent: ({
+    columns,
+    dataset,
+    row,
+    isExpanded,
+    onToggleExpand,
+    isShortDots,
+  }: {
+    columns: string[];
+    dataset: any;
+    row: any;
+    isExpanded: boolean;
+    onToggleExpand: () => void;
+    isShortDots: boolean;
+  }) => {
+    const renderCell = (column: string) => {
+      if (column === '_source') {
+        return (
+          <td key={column}>
+            <div data-test-subj="table-source-cell">
+              Source Cell - Short dots: {isShortDots.toString()}
+            </div>
+          </td>
+        );
+      }
+
+      const formattedValue = dataset.formatField(row, column);
+      const cellValue = formattedValue !== undefined ? formattedValue : '-';
+
+      return (
+        <td key={column} data-test-subj={`table-cell-${column}`}>
+          {cellValue}
+        </td>
+      );
+    };
+
+    return (
+      <tr className={row.isAnchor ? 'exploreDocTable__row--highlight' : ''}>
+        <td data-test-subj="docTableExpandToggleColumn">
+          <button aria-label="Toggle row details" onClick={onToggleExpand}>
+            {isExpanded ? 'Collapse' : 'Expand'}
+          </button>
+        </td>
+        {columns.map(renderCell)}
+      </tr>
+    );
+  },
+}));
+
 describe('TableRow', () => {
+  let mockUseDynamicContext: jest.Mock;
+
   const mockDataset = {
     fields: {
       getByName: jest.fn((fieldName) => {
@@ -86,6 +154,10 @@ describe('TableRow', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Use the mock function we created
+    mockUseDynamicContext = mockUseDynamicContextFn;
+    mockUseDynamicContext.mockReturnValue('test-context-id');
   });
 
   it('renders table row with expand toggle', () => {
@@ -101,13 +173,23 @@ describe('TableRow', () => {
 
     const expandButton = screen.getByRole('button');
 
-    // Initially collapsed
+    // Initially collapsed - should call useDynamicContext with null
     expect(screen.queryByTestId('expanded-table-row')).not.toBeInTheDocument();
+    expect(mockUseDynamicContext).toHaveBeenCalledWith(null);
 
     // Click to expand
     fireEvent.click(expandButton);
     expect(screen.getByTestId('expanded-table-row')).toBeInTheDocument();
     expect(screen.getByText('Expanded Table Row for test-row-1')).toBeInTheDocument();
+
+    // Should call useDynamicContext with expanded context (no index provided, so uses "Entry")
+    expect(mockUseDynamicContext).toHaveBeenCalledWith({
+      id: 'document-expansion-test-row-1',
+      description: 'Expanded row Entry from data table',
+      value: mockRow._source,
+      label: 'Row Entry',
+      categories: ['explore', 'chat', 'dynamic'],
+    });
   });
 
   it('renders highlighted row when isAnchor is true', () => {
@@ -201,5 +283,80 @@ describe('TableRow', () => {
     render(<TableRow {...defaultProps} isShortDots={true} columns={['_source']} />);
 
     expect(screen.getByText('Source Cell - Short dots: true')).toBeInTheDocument();
+  });
+
+  it('registers dynamic context when row is expanded', () => {
+    render(<TableRow {...defaultProps} index={2} />);
+
+    const expandButton = screen.getByRole('button');
+
+    // Initially collapsed - context should be null
+    expect(mockUseDynamicContext).toHaveBeenCalledWith(null);
+
+    // Expand the row
+    fireEvent.click(expandButton);
+
+    // Should register context with correct structure
+    expect(mockUseDynamicContext).toHaveBeenCalledWith({
+      id: 'document-expansion-test-row-1',
+      description: 'Expanded row 3 from data table',
+      value: mockRow._source,
+      label: 'Row 3',
+      categories: ['explore', 'chat', 'dynamic'],
+    });
+  });
+
+  it('handles row without _id by using index fallback', () => {
+    const rowWithoutId = { ...mockRow, _id: undefined };
+    render(<TableRow {...defaultProps} row={rowWithoutId} index={5} />);
+
+    const expandButton = screen.getByRole('button');
+    fireEvent.click(expandButton);
+
+    // Should use row-index format when _id is not available
+    expect(mockUseDynamicContext).toHaveBeenCalledWith({
+      id: 'document-expansion-row-5',
+      description: 'Expanded row 6 from data table',
+      value: rowWithoutId._source,
+      label: 'Row 6',
+      categories: ['explore', 'chat', 'dynamic'],
+    });
+  });
+
+  it('handles row without index by using Entry fallback', () => {
+    render(<TableRow {...defaultProps} />);
+
+    const expandButton = screen.getByRole('button');
+    fireEvent.click(expandButton);
+
+    // Should use 'Entry' when index is not provided
+    expect(mockUseDynamicContext).toHaveBeenCalledWith({
+      id: 'document-expansion-test-row-1',
+      description: 'Expanded row Entry from data table',
+      value: mockRow._source,
+      label: 'Row Entry',
+      categories: ['explore', 'chat', 'dynamic'],
+    });
+  });
+
+  it('clears dynamic context when row is collapsed', () => {
+    render(<TableRow {...defaultProps} />);
+
+    const expandButton = screen.getByRole('button');
+
+    // Expand first
+    fireEvent.click(expandButton);
+    expect(mockUseDynamicContext).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'document-expansion-test-row-1',
+      })
+    );
+
+    // Clear mock calls to focus on collapse behavior
+    mockUseDynamicContext.mockClear();
+
+    // Collapse
+    fireEvent.click(expandButton);
+    expect(mockUseDynamicContext).toHaveBeenCalledWith(null);
   });
 });

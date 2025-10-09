@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React, { useMemo } from 'react';
-import { EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiAccordion, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { isEmpty } from '../../utils/helper_functions';
 import { formatSpanAttributes, sortAttributes } from '../../utils/span_data_utils';
@@ -160,7 +160,7 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
           <EuiSpacer size="s" />
           {renderAttributeList(attributes)}
         </EuiAccordion>
-        <EuiSpacer size="m" />
+        <EuiHorizontalRule margin="xs" />
       </>
     );
   };

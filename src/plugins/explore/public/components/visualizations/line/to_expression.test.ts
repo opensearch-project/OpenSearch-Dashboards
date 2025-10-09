@@ -11,7 +11,7 @@ import {
   createCategoryLineChart,
 } from './to_expression';
 import {
-  ThresholdLineStyle,
+  ThresholdMode,
   VisColumn,
   VisFieldType,
   Positions,
@@ -20,7 +20,8 @@ import {
   AxisColumnMappings,
 } from '../types';
 import * as lineChartUtils from './line_chart_utils';
-import * as thresholdUtils from '../style_panel/threshold_lines/utils';
+import * as thresholdUtils from '../style_panel/threshold/threshold_utils';
+import { defaultLineChartStyles } from './line_vis_config';
 
 // Mock the line chart utils
 jest.mock('./line_chart_utils', () => ({
@@ -34,7 +35,7 @@ jest.mock('./line_chart_utils', () => ({
 }));
 
 // Mock the threshold utils
-jest.mock('../style_panel/threshold_lines/utils', () => ({
+jest.mock('../style_panel/threshold/threshold_utils', () => ({
   getStrokeDash: jest.fn().mockReturnValue([5, 5]),
   createThresholdLayer: jest.fn().mockReturnValue(null),
 }));
@@ -92,19 +93,15 @@ describe('to_expression', () => {
   };
 
   const styleOptions = {
+    ...defaultLineChartStyles,
     addLegend: true,
     legendPosition: Positions.RIGHT,
-    thresholdLines: [
-      {
-        id: '1',
-        show: false,
-        value: 100,
-        color: 'red',
-        width: 1,
-        style: ThresholdLineStyle.Dashed,
-        name: '',
-      },
-    ],
+    thresholdLines: [],
+    thresholdOptions: {
+      baseColor: '#00BD6B',
+      thresholds: [{ value: 100, color: 'red' }],
+      thresholdStyle: ThresholdMode.Solid,
+    },
     tooltipOptions: {
       mode: 'all' as TooltipOptions['mode'],
     },
@@ -145,7 +142,7 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('title', 'value1 Over Time');
       expect(result).toHaveProperty('data.values', transformedData);
       expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(3); // Main layer + threshold + time marker
+      expect(result.layer).toHaveLength(6); // Main layer + threshold + time marker + hover state layers
 
       // Verify the main layer
       expect(result.layer[0]).toHaveProperty('mark');
@@ -156,8 +153,7 @@ describe('to_expression', () => {
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
       expect(thresholdUtils.createThresholdLayer).toHaveBeenCalledWith(
-        styleOptions.thresholdLines,
-        styleOptions.tooltipOptions?.mode
+        styleOptions?.thresholdOptions
       );
       expect(lineChartUtils.createTimeMarkerLayer).toHaveBeenCalledWith(styleOptions);
     });
@@ -263,7 +259,7 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('title', 'value1 (Bar) and value2 (Line) Over Time');
       expect(result).toHaveProperty('data.values', transformedData);
       expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(2); // Bar layer + line layer (no threshold or time marker in this test)
+      expect(result.layer).toHaveLength(5); // Bar layer + line layer (no threshold or time marker in this test) + hover state layers
 
       // Verify the bar layer
       expect(result.layer[0].layer[0]).toHaveProperty('encoding.x.field', 'field-0');
@@ -391,7 +387,7 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('title', 'value1 Over Time by category1');
       expect(result).toHaveProperty('data.values', transformedData);
       expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(1); // Main layer only (no threshold or time marker in this test)
+      expect(result.layer).toHaveLength(4); // Main layer only (no threshold or time marker in this test) + hover state layers
 
       // Verify the main layer
       expect(result.layer[0]).toHaveProperty('encoding.x.field', 'field-0');
@@ -492,8 +488,14 @@ describe('to_expression', () => {
   describe('createFacetedMultiLineChart', () => {
     it('should create a faceted multi-line chart with one metric, one date, and two categorical columns', () => {
       // Enable threshold and time marker for this test
-      styleOptions.thresholdLines[0].show = true;
+      styleOptions.thresholdOptions.thresholdStyle = ThresholdMode.Solid;
       styleOptions.addTimeMarker = true;
+
+      // Mock threshold layer with proper structure
+      const mockThresholdLayer = {
+        layer: [{ mark: { type: 'rule' }, encoding: { y: { datum: 100 } } }],
+      };
+      (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
 
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: numericColumn1,
@@ -520,7 +522,7 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('data.values', transformedData);
       expect(result).toHaveProperty('facet.field', 'field-3');
       expect(result).toHaveProperty('spec.layer');
-      expect(result.spec.layer).toHaveLength(3); // Main layer + threshold + time marker
+      expect(result.spec.layer).toHaveLength(6); // Main layer + threshold + time marker + hover state layers
 
       // Verify the main layer
       expect(result.spec.layer[0]).toHaveProperty('encoding.x.field', 'field-0');
@@ -528,17 +530,16 @@ describe('to_expression', () => {
       expect(result.spec.layer[0]).toHaveProperty('encoding.color.field', 'field-2');
 
       // Verify the threshold layer
-      expect(result.spec.layer[1]).toHaveProperty('mark.type', 'rule');
-      expect(result.spec.layer[1]).toHaveProperty('encoding.y.datum', 100);
+      expect(result.spec.layer[4]).toHaveProperty('mark.type', 'rule');
+      expect(result.spec.layer[4]).toHaveProperty('encoding.y.datum', 100);
 
       // Verify the time marker layer
-      expect(result.spec.layer[2]).toHaveProperty('mark.type', 'rule');
-      expect(result.spec.layer[2]).toHaveProperty('encoding.x.datum');
+      expect(result.spec.layer[5]).toHaveProperty('mark.type', 'rule');
+      expect(result.spec.layer[5]).toHaveProperty('encoding.x.datum');
 
       // Verify utility functions were called
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
-      expect(thresholdUtils.getStrokeDash).toHaveBeenCalled();
     });
 
     it('should handle different title display options', () => {
@@ -654,7 +655,7 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('title', 'value1 by category1');
       expect(result).toHaveProperty('data.values', transformedData);
       expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(2); // Main layer + threshold
+      expect(result.layer).toHaveLength(4); // Main layer + threshold + hover layers
 
       // Verify the main layer
       expect(result.layer[0]).toHaveProperty('mark');
@@ -667,8 +668,7 @@ describe('to_expression', () => {
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
       expect(thresholdUtils.createThresholdLayer).toHaveBeenCalledWith(
-        styleOptions.thresholdLines,
-        styleOptions.tooltipOptions?.mode
+        styleOptions?.thresholdOptions
       );
     });
 
