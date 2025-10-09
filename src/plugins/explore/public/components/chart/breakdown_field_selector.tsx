@@ -39,9 +39,12 @@ export const BreakdownFieldSelector: React.FC<BreakdownFieldSelectorProps> = ({ 
   // Get available fields from the dataset
   const availableFields = ((dataset?.fields?.getAll() || []) as unknown) as DataViewField[];
 
-  // Filter for string-type, aggregatable, non-scripted fields
   const stringFields = availableFields.filter(
-    (field) => field.type === 'string' && !field.scripted
+    (field) =>
+      field.type === 'string' &&
+      !field.scripted &&
+      !field.subType && // Filters out both multi-fields (.keyword) and nested fields
+      !dataset?.metaFields?.includes(field.name) // Filters out meta fields like _id, _index
   );
 
   const options = stringFields.map((field) => ({
