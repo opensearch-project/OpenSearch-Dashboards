@@ -22,10 +22,10 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../../common';
-import { getIndexPatterns, getQueryService } from '../../services';
-import { IDataPluginServices } from '../../types';
-import { DatasetIndexedView } from '../../query/query_string/dataset_service';
+import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../../../common';
+import { getIndexPatterns, getQueryService } from '../../../services';
+import { IDataPluginServices } from '../../../types';
+import { DatasetIndexedView } from '../../../query/query_string/dataset_service';
 
 export const Configurator = ({
   services,
