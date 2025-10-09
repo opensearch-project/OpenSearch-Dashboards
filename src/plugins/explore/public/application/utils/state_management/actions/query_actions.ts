@@ -425,15 +425,12 @@ const executeQueryBase = async (
       // Histogram-specific: Get interval and create with aggregations
       const state = getState();
       const effectiveInterval = interval || state.legacy?.interval || 'auto';
-      const breakdownField = state.queryEditor.breakdownField;
       searchSource = await createSearchSourceWithQuery(
         preparedQueryObject,
         dataView,
         services,
         true, // Include histogram
-        effectiveInterval,
-        undefined, // size
-        breakdownField
+        effectiveInterval
       );
     } else {
       // Tab-specific: Create without aggregations
@@ -554,8 +551,7 @@ const createSearchSourceWithQuery = async (
   services: ExploreServices,
   includeHistogram: boolean = false,
   customInterval?: string,
-  sizeParam?: number,
-  breakdownField?: string
+  sizeParam?: number
 ) => {
   const { uiSettings, data } = services;
   const size = sizeParam || uiSettings.get(SAMPLE_SIZE_SETTING);
@@ -593,27 +589,9 @@ const createSearchSourceWithQuery = async (
   }
 
   // Add histogram aggregations if requested and time-based
-  const histogramConfigs = createHistogramConfigs(
-    dataView,
-    customInterval,
-    services.data,
-    breakdownField
-  );
+  const histogramConfigs = createHistogramConfigs(dataView, customInterval, services.data);
   if (histogramConfigs) {
-    const aggDsl = histogramConfigs.toDsl();
-
-    // Manually inject breakdownField into the date_histogram aggregation
-    // because toDsl() strips custom parameters
-    if (breakdownField && aggDsl) {
-      Object.keys(aggDsl).forEach((key) => {
-        const agg = aggDsl[key];
-        if (agg && agg.date_histogram) {
-          agg.date_histogram.breakdownField = breakdownField;
-        }
-      });
-    }
-
-    searchSource.setField('aggs', aggDsl);
+    searchSource.setField('aggs', histogramConfigs.toDsl());
   }
 
   return searchSource;
