@@ -87,7 +87,6 @@ export const TraceLogsTab: React.FC<TraceLogsTabProps> = ({
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
-
       <DatasetLogsTable logs={logsData} isLoading={isLoading} onSpanClick={onSpanClick} />
     </EuiPanel>
   );
