@@ -42,8 +42,13 @@ import { defaultPreparePplQuery, getQueryWithSource } from '../../languages';
 const activeQueryAbortControllers = new Map<string, AbortController>();
 
 // Helper function to abort all active queries
+// Backend cancellation is handled automatically via AbortSignal in search strategies
 export const abortAllActiveQueries = () => {
   activeQueryAbortControllers.forEach((controller, cacheKey) => {
+    // This triggers the abort signal, which in turn:
+    // 1. Cancels frontend HTTP requests immediately
+    // 2. Triggers AbortSignal event listeners in search strategies
+    // 3. Search strategies then call their backend cancel APIs
     controller.abort();
   });
   activeQueryAbortControllers.clear();

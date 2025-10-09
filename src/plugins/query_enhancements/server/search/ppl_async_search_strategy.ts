@@ -14,7 +14,7 @@ import {
 } from '../../../data/common';
 import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import { buildQueryStatusConfig, getFields, throwFacetError, SEARCH_STRATEGY } from '../../common';
-import { Facet } from '../utils';
+import { Facet, cancelQueryByDataSource, createQueryCancellationHandler } from '../utils';
 
 export const pplAsyncSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -40,6 +40,18 @@ export const pplAsyncSearchStrategyProvider = (
         const query: Query = request.body.query;
         const pollQueryResultsParams = request.body.pollQueryResultsParams;
         const inProgressQueryId = pollQueryResultsParams?.queryId;
+
+        // Handle abort signal for backend query cancellation
+        if (options?.abortSignal && inProgressQueryId) {
+          const cancellationHandler = createQueryCancellationHandler(
+            inProgressQueryId,
+            query,
+            client,
+            logger,
+            'PPL'
+          );
+          options.abortSignal.addEventListener('abort', cancellationHandler);
+        }
 
         if (!inProgressQueryId) {
           request.body = { ...request.body, lang: SEARCH_STRATEGY.PPL };
@@ -99,6 +111,21 @@ export const pplAsyncSearchStrategyProvider = (
         logger.error(`pplAsyncSearchStrategy: ${e.message}`);
         if (usage) usage.trackError();
         throw e;
+      }
+    },
+
+    // Implement backend query cancellation for PPL with data source detection
+    cancel: async (context, queryId: string, dataSourceType?: string) => {
+      try {
+        logger.info(`pplAsyncSearchStrategy: Cancelling backend query ${queryId} for data source ${dataSourceType || 'default'}`);
+
+        // Use the helper function to cancel based on data source type
+        await cancelQueryByDataSource(queryId, dataSourceType, client, logger, 'PPL');
+
+        logger.info(`pplAsyncSearchStrategy: Successfully cancelled backend query ${queryId}`);
+      } catch (error) {
+        logger.error(`pplAsyncSearchStrategy: Failed to cancel backend query ${queryId}: ${error.message}`);
+        throw error;
       }
     },
   };
