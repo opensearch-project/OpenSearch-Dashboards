@@ -57,62 +57,13 @@ export const pplSearchStrategyProvider = (
             request.body.query.query = aggQueryString;
             const rawAggs: any = await pplFacet.describeQuery(context, request);
             if (!rawAggs.success) continue;
-
-            const queryString = String(aggQueryString);
-            const isTimechart = queryString.includes('timechart') && queryString.includes(' by ');
-
-            if (isTimechart) {
-              // Extract breakdown field from aggConfig
-              const breakdownField = (aggConfig.date_histogram as any)?.breakdownField;
-              if (!breakdownField) continue;
-
-              // Find column indices from schema
-              const schema = rawAggs.data.schema;
-              const timestampIdx = 0; // First column
-              const breakdownIdx = schema.findIndex((col: any) => col.name === breakdownField);
-              const countIdx = schema.findIndex((col: any) => col.name === 'count');
-
-              if (breakdownIdx === -1 || countIdx === -1) continue;
-
-              // Group datarows by breakdown value
-              const seriesMap = new Map<string, Array<[string, number]>>();
-
-              rawAggs.data.datarows.forEach((row: any[]) => {
-                const timestamp = String(row[timestampIdx]);
-                const breakdownValue = String(row[breakdownIdx]);
-                const count = Number(row[countIdx]) || 0;
-
-                if (!seriesMap.has(breakdownValue)) {
-                  seriesMap.set(breakdownValue, []);
-                }
-                seriesMap.get(breakdownValue)!.push([timestamp, count]);
-              });
-
-              // Create series structure
-              const series = Array.from(seriesMap.entries()).map(
-                ([breakdownValue, dataPoints]) => ({
-                  breakdownValue,
-                  dataPoints, // [[timestampString, count], ...]
-                })
-              );
-
-              // Attach to dataFrame
-              (dataFrame as any).breakdownSeries = {
-                breakdownField,
-                series,
+            (dataFrame as IDataFrameWithAggs).aggs = {};
+            (dataFrame as IDataFrameWithAggs).aggs[key] = rawAggs.data.datarows?.map((hit: any) => {
+              return {
+                key: hit[1],
+                value: hit[0],
               };
-            } else {
-              // Standard stats aggregation
-              (dataFrame as IDataFrameWithAggs).aggs = {};
-              (dataFrame as IDataFrameWithAggs).aggs[key] = rawAggs.data.datarows?.map(
-                (hit: any) => {
-                  return {
-                    key: hit[1],
-                    value: hit[0],
-                  };
-                }
-              );
-            }
+            });
           }
         }
 

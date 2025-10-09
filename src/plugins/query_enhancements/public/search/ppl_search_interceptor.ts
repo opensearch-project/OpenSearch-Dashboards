@@ -150,6 +150,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     };
   }
 
+  // PPL aggregations are not in use for the histogram anymore
   private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {
     const { aggs } = request.params.body;
     if (!aggs || !query.dataset || !query.dataset.timeFieldName) return;
@@ -165,35 +166,20 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       }
       const aggTypeKey = aggTypeKeys[0];
       if (aggTypeKey === 'date_histogram') {
-        const dateHistogramAgg = value[aggTypeKey];
-        const breakdownField = dateHistogramAgg.breakdownField;
-
         aggsConfig[aggTypeKey] = {
-          ...dateHistogramAgg,
+          ...value[aggTypeKey],
         };
-
-        const interval =
-          dateHistogramAgg.fixed_interval ??
-          dateHistogramAgg.calendar_interval ??
-          this.aggsService.calculateAutoTimeExpression({
-            from: fromDate,
-            to: toDate,
-            mode: 'absolute',
-          });
-
-        if (breakdownField) {
-          // Generate timechart query with breakdown
-          aggsConfig.qs = {
-            [key]: `${query.query} | timechart span=${interval} limit=4 count() by ${breakdownField}`,
-          };
-        } else {
-          // Standard stats query without breakdown
-          aggsConfig.qs = {
-            [key]: `${query.query} | stats count() by span(${
-              query.dataset!.timeFieldName
-            }, ${interval})`,
-          };
-        }
+        aggsConfig.qs = {
+          [key]: `${query.query} | stats count() by span(${query.dataset!.timeFieldName}, ${
+            value[aggTypeKey].fixed_interval ??
+            value[aggTypeKey].calendar_interval ??
+            this.aggsService.calculateAutoTimeExpression({
+              from: fromDate,
+              to: toDate,
+              mode: 'absolute',
+            })
+          })`,
+        };
       }
     });
 
