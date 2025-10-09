@@ -13,6 +13,7 @@ import {
 
 import { ChatPluginSetup, ChatPluginStart } from './types';
 import { defineRoutes } from './routes';
+import { savedObjectTypes } from './saved_objects';
 
 /**
  * @experimental
@@ -31,6 +32,9 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
 
     // Register server side APIs
     defineRoutes(router);
+
+    // Register saved object types
+    core.savedObjects.registerType(savedObjectTypes[0]);
 
     return {};
   }

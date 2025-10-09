@@ -5,6 +5,8 @@
 # The default is 'localhost', which usually means remote machines will not be able to connect.
 # To allow connections from remote users, set this parameter to a non-loopback address.
 # server.host: "localhost"
+opensearch.hosts: ['http://localhost:9201']
+server.host: '127.0.0.1'
 
 # Enables you to specify a path to mount OpenSearch Dashboards at if you are running behind a proxy.
 # Use the `server.rewriteBasePath` setting to tell OpenSearch Dashboards if it should remove the basePath
@@ -344,9 +346,9 @@
 # if the security plugin is not installed and this config is true, permission control takes no effect.
 # savedObjects.permission.enabled: true
 
-# uiSettings:
-#   overrides:
-#     "home:useNewHomePage": true
+uiSettings:
+  overrides:
+    'home:useNewHomePage': true
 
 # Set a maximum number of workspaces
 # by default, there is no limit.
@@ -397,22 +399,22 @@
 # ===========================================
 
 # Set the value of this setting to true to enable multiple data source feature.
-# data_source.enabled: true
+data_source.enabled: true
 
 # Set the value to true to enable workspace feature
 # Please note, workspace will not work with multi-tenancy. To enable workspace feature, you need to disable multi-tenancy first with `opensearch_security.multitenancy.enabled: false`
-# workspace.enabled: true
+workspace.enabled: true
 
-# explore.enabled: true
+explore.enabled: true
 
 # @experimental Set the value to true to enable discover traces
-# explore.discoverTraces.enabled: true
+explore.discoverTraces.enabled: true
 
 # @experimental Set the enabled value to true and provide an AG-UI agent to enable chat
-# chat:
-  # enabled: true
-  # agUiUrl: "http://your-ai-agent-url:port"
+chat:
+  enabled: true
+  agUiUrl: 'http://localhost:5050/api/agui/chat'
 
 # @experimental Set the value to true to enable context provider
-# contextProvider:
-#   enabled: true
+contextProvider:
+  enabled: true

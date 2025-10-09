@@ -6,7 +6,8 @@
 import React, { useContext } from 'react';
 import { EuiPanel, EuiText, EuiIcon, EuiBadge, EuiAccordion, EuiCodeBlock } from '@elastic/eui';
 import { AssistantActionContext } from '../../../context_provider/public';
-import { GraphVisualization } from './graph_visualization';
+import { ExploreVisualization } from './explore_visualization';
+import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import './tool_call_row.scss';
 
 interface TimelineToolCall {
@@ -25,6 +26,7 @@ interface ToolCallRowProps {
 export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
   // Always call useContext at the top level - React Hook rules
   const context = useContext(AssistantActionContext);
+  const { services } = useOpenSearchDashboards();
 
   // Try to get custom renderer if context is available
   // Handle tool name mapping for graph visualization
@@ -85,12 +87,12 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
       }
 
       return (
-        <div className="toolCallRow">
+        <div className="toolCallRow toolCallRow--visualization">
           {renderer({
-            status: renderStatus,
+            status: renderStatus as 'executing' | 'complete' | 'failed',
             args,
             result: renderResult,
-            error: toolCall.status === 'error' ? toolCall.result : undefined,
+            error: toolCall.status === 'error' ? new Error(toolCall.result || '') : undefined,
           })}
         </div>
       );
@@ -176,7 +178,7 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
     // Render graph if data is available
     if (foundGraphData && foundGraphData.graphData) {
       return (
-        <div className="toolCallRow">
+        <div className="toolCallRow toolCallRow--visualization">
           <div className="toolCallRow__icon">
             <EuiIcon type="visLine" size="m" color="success" />
           </div>
@@ -189,8 +191,8 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
                 {toolCall.status === 'completed' ? 'Completed' : 'Ready'}
               </EuiBadge>
             </div>
-            <div style={{ marginTop: '8px' }}>
-              <GraphVisualization data={foundGraphData.graphData} height={300} />
+            <div style={{ marginTop: '8px', width: '100%', maxWidth: '100%' }}>
+              <ExploreVisualization data={foundGraphData.graphData} height={300} />
             </div>
           </div>
         </div>
@@ -211,7 +213,7 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
               </EuiText>
               <EuiBadge color="danger">Error</EuiBadge>
             </div>
-            <EuiPanel paddingSize="m" style={{ marginTop: '8px' }}>
+            <EuiPanel paddingSize="m" style={{ marginTop: '8px', width: '100%' }}>
               <EuiText size="s" color="danger">
                 {foundGraphData.error || 'Failed to generate graph visualization'}
               </EuiText>
@@ -235,7 +237,7 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
               </EuiText>
               <EuiBadge color="primary">Running</EuiBadge>
             </div>
-            <EuiPanel paddingSize="m" style={{ height: '300px', marginTop: '8px' }}>
+            <EuiPanel paddingSize="m" style={{ height: '300px', marginTop: '8px', width: '100%' }}>
               <div
                 style={{
                   display: 'flex',
@@ -264,7 +266,7 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
         // Check if this is a successful graph result with graphData
         if (parsedResult.success && parsedResult.graphData) {
           return (
-            <div className="toolCallRow">
+            <div className="toolCallRow toolCallRow--visualization">
               <div className="toolCallRow__icon">
                 <EuiIcon type="visLine" size="m" color="success" />
               </div>
@@ -275,8 +277,8 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
                   </EuiText>
                   <EuiBadge color="success">Completed</EuiBadge>
                 </div>
-                <div style={{ marginTop: '8px' }}>
-                  <GraphVisualization data={parsedResult.graphData} height={300} />
+                <div style={{ marginTop: '8px', width: '100%', maxWidth: '100%' }}>
+                  <ExploreVisualization data={parsedResult.graphData} height={300} />
                 </div>
               </div>
             </div>
@@ -297,7 +299,7 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
                   </EuiText>
                   <EuiBadge color="danger">Error</EuiBadge>
                 </div>
-                <EuiPanel paddingSize="m" style={{ marginTop: '8px' }}>
+                <EuiPanel paddingSize="m" style={{ marginTop: '8px', width: '100%' }}>
                   <EuiText size="s" color="danger">
                     {parsedResult.error || 'Failed to generate graph visualization'}
                   </EuiText>
@@ -320,7 +322,7 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
                 </EuiText>
                 <EuiBadge color="danger">Error</EuiBadge>
               </div>
-              <EuiPanel paddingSize="m" style={{ marginTop: '8px' }}>
+              <EuiPanel paddingSize="m" style={{ marginTop: '8px', width: '100%' }}>
                 <EuiText size="s" color="danger">
                   Failed to parse graph data
                 </EuiText>
@@ -345,7 +347,7 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
               </EuiText>
               <EuiBadge color="danger">Error</EuiBadge>
             </div>
-            <EuiPanel paddingSize="m" style={{ marginTop: '8px' }}>
+            <EuiPanel paddingSize="m" style={{ marginTop: '8px', width: '100%' }}>
               <EuiText size="s" color="danger">
                 {toolCall.result || 'An error occurred while generating the graph'}
               </EuiText>

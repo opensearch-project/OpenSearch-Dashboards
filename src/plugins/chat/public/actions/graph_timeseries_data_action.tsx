@@ -6,7 +6,7 @@
 import React from 'react';
 import { EuiPanel, EuiText, EuiSpacer, EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useAssistantAction } from '../../../context_provider/public';
-import { GraphVisualization } from '../components/graph_visualization';
+import { ExploreVisualization } from '../components/explore_visualization';
 
 // Support both simple and Prometheus-style data formats
 interface SimpleDataPoint {
@@ -180,7 +180,7 @@ export function useGraphTimeseriesDataAction() {
       };
 
       return (
-        <EuiPanel paddingSize="s" color={getStatusColor()}>
+        <EuiPanel paddingSize="s" color={getStatusColor()} style={{ width: '100%' }}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiText size="s">
@@ -211,9 +211,7 @@ export function useGraphTimeseriesDataAction() {
               <EuiText size="xs">
                 <strong>Query:</strong>
               </EuiText>
-              <EuiCode language="promql" fontSize="xs" paddingSize="xs">
-                {args.query}
-              </EuiCode>
+              <EuiCode language="promql">{args.query}</EuiCode>
             </>
           )}
 
@@ -239,7 +237,9 @@ export function useGraphTimeseriesDataAction() {
           {status === 'complete' && result?.success && result?.graphData && (
             <>
               <EuiSpacer size="s" />
-              <GraphVisualization data={result.graphData} />
+              <div style={{ width: '100%', maxWidth: '100%' }}>
+                <ExploreVisualization data={result.graphData} />
+              </div>
             </>
           )}
         </EuiPanel>

@@ -12,6 +12,8 @@ import { ChatService } from '../services/chat_service';
 import { GlobalAssistantProvider } from '../../../context_provider/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ContextProviderStart, TextSelectionMonitor } from '../../../context_provider/public';
+import { ExpressionsStart } from '../../../expressions/public';
+import { DashboardStart } from '../../../dashboard/public';
 import './chat_header_button.scss';
 
 export enum ChatLayoutMode {
@@ -24,6 +26,8 @@ interface ChatHeaderButtonProps {
   chatService: ChatService;
   contextProvider?: ContextProviderStart;
   charts?: any;
+  expressions?: ExpressionsStart;
+  dashboard?: DashboardStart;
 }
 
 export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
@@ -31,6 +35,8 @@ export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
   chatService,
   contextProvider,
   charts,
+  expressions,
+  dashboard,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [layoutMode, setLayoutMode] = useState<ChatLayoutMode>(ChatLayoutMode.SIDECAR);
@@ -146,7 +152,9 @@ export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
         }`}
       >
         <div className="chatHeaderButton__content">
-          <OpenSearchDashboardsContextProvider services={{ core, contextProvider, charts }}>
+          <OpenSearchDashboardsContextProvider
+            services={{ core, contextProvider, charts, expressions, dashboard }}
+          >
             <GlobalAssistantProvider
               onToolsUpdated={(tools) => {
                 // Tools updated in chat
