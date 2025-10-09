@@ -6,14 +6,7 @@
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 import { BarGaugeVisStyleControls } from './bar_gauge_vis_options';
-import {
-  TitleOptions,
-  AxisRole,
-  VisFieldType,
-  ThresholdOptions,
-  Positions,
-  TooltipOptions,
-} from '../types';
+import { TitleOptions, AxisRole, VisFieldType, ThresholdOptions, TooltipOptions } from '../types';
 import { CalculationMethod } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 
@@ -23,13 +16,9 @@ export interface ExclusiveBarGaugeConfig {
   valueDisplay: 'valueColor' | 'textColor';
   namePlacement: 'auto' | 'hidden';
   showUnfilledArea: boolean;
-  // barSizeMode?: 'auto' | 'manual';
-  // barWidth?: number;
 }
 
 export interface BarGaugeChartStyleOptions {
-  addLegend?: boolean;
-  legendPosition?: Positions;
   tooltipOptions?: TooltipOptions;
   exclusive?: ExclusiveBarGaugeConfig;
   thresholdOptions?: ThresholdOptions;
@@ -43,8 +32,6 @@ export type BarGaugeChartStyle = Required<Omit<BarGaugeChartStyleOptions, 'min' 
   Pick<BarGaugeChartStyleOptions, 'min' | 'max'>;
 
 export const defaultBarGaugeChartStyles: BarGaugeChartStyle = {
-  addLegend: true,
-  legendPosition: Positions.RIGHT,
   tooltipOptions: {
     mode: 'all',
   },

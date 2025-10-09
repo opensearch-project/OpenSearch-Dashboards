@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisColumn, AxisColumnMappings, VEGASCHEMA, Threshold } from '../types';
+import { AxisColumnMappings, Threshold } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 
 export const getBarOrientation = (
@@ -16,9 +16,9 @@ export const getBarOrientation = (
   if (styles?.exclusive.orientation === 'horizontal') {
     return {
       xAxis: yAxis,
-      xAxisStyle: { axis: { tickOpacity: 0, grid: false, title: null, labelAngle: 0 } },
+      xAxisStyle: { axis: null },
       yAxis: xAxis,
-      yAxisStyle: { axis: { tickOpacity: 0, grid: false, title: null } },
+      yAxisStyle: { axis: { tickOpacity: 0, grid: false, title: null, labelAngle: 0 } },
     };
   }
 
@@ -50,8 +50,6 @@ export const getDisplayMode = (
   orientationMode: string,
   displayMode: string,
   threshold: Threshold,
-  completeThreshold: Threshold[],
-  index: number,
   nextColor: string
 ) => {
   if (orientationMode === 'horizontal') {

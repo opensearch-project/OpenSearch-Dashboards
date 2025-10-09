@@ -104,6 +104,7 @@ export const createBarGaugeSpec = (
               domain: completeThreshold.map((t) => t.value),
               range: [DEFAULT_GREY, ...completeThreshold.map((t) => t.color)],
             },
+            legend: null,
           },
         }
       : {}),
@@ -112,10 +113,12 @@ export const createBarGaugeSpec = (
         {
           field: yAxis?.column,
           type: getSchemaByAxis(yAxis),
+          title: yAxis?.name,
         },
         {
           field: xAxis?.column,
           type: getSchemaByAxis(xAxis),
+          title: xAxis?.name,
         },
       ],
     }),
@@ -166,8 +169,6 @@ export const createBarGaugeSpec = (
               styleOptions.exclusive.orientation,
               styleOptions.exclusive.displayMode,
               threshold,
-              completeThreshold,
-              index,
               completeThreshold[index + 1].color
             ),
           },
@@ -187,8 +188,6 @@ export const createBarGaugeSpec = (
               styleOptions.exclusive.orientation,
               styleOptions.exclusive.displayMode,
               threshold,
-              completeThreshold,
-              index,
               darkenColor(threshold.color ?? DEFAULT_GREY, 1.2)
             ),
             fillOpacity: { expr: `datum.useSolidColor ? 1 : 0` },
@@ -233,12 +232,7 @@ export const createBarGaugeSpec = (
             domain: completeThreshold.map((t) => t.value),
             range: [DEFAULT_GREY, ...completeThreshold.map((t) => t.color)],
           },
-          legend: styleOptions.addLegend
-            ? {
-                title: numericalMapping?.name,
-                orient: styleOptions.legendPosition?.toLowerCase() || 'right',
-              }
-            : null,
+          legend: null,
         },
       },
     };
