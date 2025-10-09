@@ -220,8 +220,6 @@ export function SpanDetailPanel(props: {
             </div>
           ) : (
             <>
-              <EuiHorizontalRule margin="m" />
-
               <EuiFlexItem
                 className={`exploreSpanDetailPanel__contentContainer${
                   needsScrollableContainer
