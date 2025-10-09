@@ -54,8 +54,7 @@ const mockOnPrevious = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
-  // @ts-expect-error TS2345 TODO(ts-error): fixme
-  setQueryService(mockServices.getQueryService());
+  setQueryService(mockServices.getQueryService() as any);
   setIndexPatterns(mockServices.getIndexPatterns());
 });
 
@@ -64,8 +63,7 @@ describe('ConfiguratorV2', () => {
     render(
       <IntlProvider locale="en">
         <ConfiguratorV2
-          // @ts-expect-error
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -81,8 +79,7 @@ describe('ConfiguratorV2', () => {
     render(
       <IntlProvider locale="en">
         <ConfiguratorV2
-          // @ts-expect-error
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -99,8 +96,7 @@ describe('ConfiguratorV2', () => {
     render(
       <IntlProvider locale="en">
         <ConfiguratorV2
-          // @ts-expect-error
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -117,8 +113,7 @@ describe('ConfiguratorV2', () => {
     render(
       <IntlProvider locale="en">
         <ConfiguratorV2
-          // @ts-expect-error
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -135,8 +130,7 @@ describe('ConfiguratorV2', () => {
     render(
       <IntlProvider locale="en">
         <ConfiguratorV2
-          // @ts-expect-error
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -154,8 +148,7 @@ describe('ConfiguratorV2', () => {
     render(
       <IntlProvider locale="en">
         <ConfiguratorV2
-          // @ts-expect-error
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -173,8 +166,7 @@ describe('ConfiguratorV2', () => {
     render(
       <IntlProvider locale="en">
         <ConfiguratorV2
-          // @ts-expect-error
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}

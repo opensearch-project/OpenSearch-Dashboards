@@ -110,7 +110,7 @@ export const DatasetSelectWidget = () => {
     <DatasetSelect
       onSelect={handleDatasetSelect}
       supportedTypes={supportedTypes}
-      singalType={flavorId}
+      signalType={flavorId}
     />
   );
 };

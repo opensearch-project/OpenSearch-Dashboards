@@ -108,8 +108,7 @@ const mockOnPrevious = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
-  // @ts-expect-error TS2345 TODO(ts-error): fixme
-  setQueryService(mockServices.getQueryService());
+  setQueryService(mockServices.getQueryService() as any);
   setIndexPatterns(mockServices.getIndexPatterns());
 });
 
@@ -119,8 +118,7 @@ describe('Configurator Component', () => {
       <IntlProvider locale="en" messages={messages}>
         {/* Wrap with IntlProvider */}
         <Configurator
-          // @ts-expect-error TS2740 TODO(ts-error): fixme
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -139,8 +137,7 @@ describe('Configurator Component', () => {
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
-          // @ts-expect-error TS2322 TODO(ts-error): fixme
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -157,8 +154,7 @@ describe('Configurator Component', () => {
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
-          // @ts-expect-error TS2322 TODO(ts-error): fixme
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -176,8 +172,7 @@ describe('Configurator Component', () => {
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
-          // @ts-expect-error TS2322 TODO(ts-error): fixme
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -187,12 +182,10 @@ describe('Configurator Component', () => {
     );
     const languageSelect = screen.getByText('Lucene');
     expect(languageSelect).toBeInTheDocument();
-    // @ts-expect-error TS2339 TODO(ts-error): fixme
-    expect(languageSelect.value).toBe('lucene');
+    expect((languageSelect as any).value).toBe('lucene');
     fireEvent.change(languageSelect, { target: { value: 'kuery' } });
     await waitFor(() => {
-      // @ts-expect-error TS2339 TODO(ts-error): fixme
-      expect(languageSelect.value).toBe('kuery');
+      expect((languageSelect as any).value).toBe('kuery');
     });
     expect(mockOnConfirm).not.toHaveBeenCalled();
   });
@@ -201,8 +194,7 @@ describe('Configurator Component', () => {
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
-          // @ts-expect-error TS2322 TODO(ts-error): fixme
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -223,8 +215,7 @@ describe('Configurator Component', () => {
     const container = render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
-          // @ts-expect-error TS2322 TODO(ts-error): fixme
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -251,8 +242,7 @@ describe('Configurator Component', () => {
     const container = render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
-          // @ts-expect-error TS2322 TODO(ts-error): fixme
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -269,12 +259,10 @@ describe('Configurator Component', () => {
     });
     const indexedViewSelector = screen.getByText('view1');
     expect(indexedViewSelector).toBeInTheDocument();
-    // @ts-expect-error TS2339 TODO(ts-error): fixme
-    expect(indexedViewSelector.value).toBe('view1');
+    expect((indexedViewSelector as any).value).toBe('view1');
     fireEvent.change(indexedViewSelector, { target: { value: 'view2' } });
     await waitFor(() => {
-      // @ts-expect-error TS2339 TODO(ts-error): fixme
-      expect(indexedViewSelector.value).toBe('view2');
+      expect((indexedViewSelector as any).value).toBe('view2');
     });
     expect(mockOnConfirm).not.toHaveBeenCalled();
   });
@@ -283,8 +271,7 @@ describe('Configurator Component', () => {
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
-          // @ts-expect-error TS2322 TODO(ts-error): fixme
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -304,8 +291,7 @@ describe('Configurator Component', () => {
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
-          // @ts-expect-error TS2322 TODO(ts-error): fixme
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -326,16 +312,16 @@ describe('Configurator Component', () => {
       dataset: undefined,
     });
 
+    const servicesWithAppName = { ...mockServices, appName: 'unsupportedApp' };
+
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
-          // @ts-expect-error TS2322 TODO(ts-error): fixme
-          services={mockServices}
+          services={servicesWithAppName as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
           onPrevious={mockOnPrevious}
-          appId="unsupportedApp"
         />
       </IntlProvider>
     );
@@ -349,8 +335,7 @@ describe('Configurator Component', () => {
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
-          // @ts-expect-error TS2322 TODO(ts-error): fixme
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -372,16 +357,16 @@ describe('Configurator Component', () => {
       dataset: undefined,
     });
 
+    const servicesWithAppName = { ...mockServices, appName: 'supportedApp' };
+
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
-          // @ts-expect-error TS2322 TODO(ts-error): fixme
-          services={mockServices}
+          services={servicesWithAppName as any}
           baseDataset={mockBaseDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
           onPrevious={mockOnPrevious}
-          appId="supportedApp"
         />
       </IntlProvider>
     );
@@ -400,8 +385,7 @@ describe('Configurator Component', () => {
     const { container } = render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
-          // @ts-expect-error TS2322 TODO(ts-error): fixme
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -436,8 +420,7 @@ describe('Configurator Component', () => {
     const { container } = render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
-          // @ts-expect-error TS2322 TODO(ts-error): fixme
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
@@ -473,8 +456,7 @@ describe('Configurator Component', () => {
     const { container } = render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
-          // @ts-expect-error TS2322 TODO(ts-error): fixme
-          services={mockServices}
+          services={mockServices as any}
           baseDataset={mockDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}

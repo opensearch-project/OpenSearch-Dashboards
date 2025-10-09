@@ -101,7 +101,7 @@ describe('DatasetSelect', () => {
 
   const defaultProps: DatasetSelectProps = {
     onSelect: mockOnSelect,
-    singalType: null,
+    signalType: null,
   };
 
   const renderWithContext = (props: DatasetSelectProps = defaultProps) => {

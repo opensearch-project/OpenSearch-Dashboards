@@ -44,13 +44,13 @@ export interface DetailedDataset extends Dataset {
 export interface DatasetSelectProps {
   onSelect: (dataset: Dataset) => void;
   supportedTypes?: string[];
-  singalType: string | null;
+  signalType: string | null;
 }
 
 /**
  * @experimental This component is experimental and may change in future versions
  */
-const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes, singalType }) => {
+const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes, signalType }) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const isMounted = useRef(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -127,7 +127,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
       const onFilter = (detailedDataset: DetailedDataset) => {
         // Filter by signal type
         const signalTypeMatch =
-          singalType === CORE_SIGNAL_TYPES.TRACES
+          signalType === CORE_SIGNAL_TYPES.TRACES
             ? detailedDataset.signalType === CORE_SIGNAL_TYPES.TRACES
             : detailedDataset.signalType !== CORE_SIGNAL_TYPES.TRACES;
 
@@ -163,7 +163,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
         setIsLoading(false);
       }
     }
-  }, [dataViews, singalType, onSelect, queryString, datasetService, services.appName]);
+  }, [dataViews, signalType, onSelect, queryString, datasetService, services.appName]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -431,14 +431,14 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
                               await datasetService.saveDataset(
                                 query.dataset,
                                 services,
-                                singalType || undefined
+                                signalType || undefined
                               );
                             } else {
                               await datasetService.cacheDataset(
                                 query.dataset,
                                 services,
                                 false,
-                                singalType || undefined
+                                signalType || undefined
                               );
                             }
                             const dataView = await data.dataViews.get(

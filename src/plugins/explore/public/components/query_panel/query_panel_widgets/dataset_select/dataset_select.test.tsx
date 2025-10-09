@@ -36,7 +36,7 @@ jest.doMock('react-redux', () => {
   };
 });
 
-let capturedSingalType: string | null | undefined;
+let capturedSignalType: string | null | undefined;
 
 jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: () => ({
@@ -59,12 +59,12 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
         ui: {
           DatasetSelect: ({
             onSelect,
-            singalType,
+            signalType,
           }: {
             onSelect: (dataset: any) => void;
-            singalType: string | null;
+            signalType: string | null;
           }) => {
-            capturedSingalType = singalType;
+            capturedSignalType = signalType;
             return (
               <div data-test-subj="dataset-select">
                 <button
@@ -74,7 +74,7 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
                   Select Dataset
                 </button>
                 <div data-test-subj="dataset-singaltype-prop">
-                  {singalType !== undefined ? `Signal type: ${singalType}` : 'No signal type'}
+                  {signalType !== undefined ? `Signal type: ${signalType}` : 'No signal type'}
                 </div>
               </div>
             );
@@ -227,43 +227,43 @@ describe('DatasetSelectWidget', () => {
     });
   });
 
-  it('provides singalType prop to DatasetSelect', () => {
+  it('provides signalType prop to DatasetSelect', () => {
     mockUseFlavorId.mockReturnValue('traces');
     renderWithStore();
     expect(screen.getByTestId('dataset-singaltype-prop')).toHaveTextContent('Signal type: traces');
   });
 
-  describe('singalType functionality', () => {
+  describe('signalType functionality', () => {
     beforeEach(() => {
-      capturedSingalType = undefined;
+      capturedSignalType = undefined;
     });
 
     it('passes traces signal type for Traces flavor', () => {
       mockUseFlavorId.mockReturnValue('traces');
       renderWithStore();
 
-      expect(capturedSingalType).toBe('traces');
+      expect(capturedSignalType).toBe('traces');
     });
 
     it('passes logs signal type for Logs flavor', () => {
       mockUseFlavorId.mockReturnValue('logs');
       renderWithStore();
 
-      expect(capturedSingalType).toBe('logs');
+      expect(capturedSignalType).toBe('logs');
     });
 
     it('passes metrics signal type for Metrics flavor', () => {
       mockUseFlavorId.mockReturnValue('metrics');
       renderWithStore();
 
-      expect(capturedSingalType).toBe('metrics');
+      expect(capturedSignalType).toBe('metrics');
     });
 
     it('passes null when flavor is null', () => {
       mockUseFlavorId.mockReturnValue(null);
       renderWithStore();
 
-      expect(capturedSingalType).toBe(null);
+      expect(capturedSignalType).toBe(null);
     });
   });
 });
