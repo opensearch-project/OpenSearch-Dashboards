@@ -4,8 +4,8 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { EuiSwitch, EuiButtonGroup, EuiColorPicker, EuiFormRow, EuiSelect } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { EuiSwitch, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
+import React from 'react';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { StyleAccordion } from '../style_panel/style_accordion';
 
@@ -76,21 +76,6 @@ const namePlacementOption = [
     id: 'hidden',
     label: i18n.translate('explore.vis.barGauge.namePlacement.hidden', {
       defaultMessage: 'Hidden',
-    }),
-  },
-];
-
-const sizeModeOptions = [
-  {
-    id: 'auto',
-    label: i18n.translate('explore.stylePanel.bar.sizeModeAuto', {
-      defaultMessage: 'Auto',
-    }),
-  },
-  {
-    id: 'manual',
-    label: i18n.translate('explore.stylePanel.bar.sizeModeManual', {
-      defaultMessage: 'Manual',
     }),
   },
 ];
