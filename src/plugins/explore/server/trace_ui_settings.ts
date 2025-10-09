@@ -19,7 +19,6 @@ export const traceUiSettings: Record<string, UiSettingsParams> = {
       'status.code',
       'attributes.http.status_code',
       'resource.attributes.service.name',
-      'serviceName',
       'kind',
       'name',
       'durationNano',
