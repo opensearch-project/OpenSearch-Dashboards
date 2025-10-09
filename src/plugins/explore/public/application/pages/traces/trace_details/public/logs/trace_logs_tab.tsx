@@ -12,7 +12,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { LogsDataTable } from './logs_data_table';
+import { DatasetLogsTable } from './dataset_logs_table';
 import { LogHit } from '../../server/ppl_request_logs';
 import { Dataset } from '../../../../../../../../data/common';
 import { buildExploreLogsUrl, getTimeRangeFromTraceData } from './url_builder';
@@ -88,7 +88,7 @@ export const TraceLogsTab: React.FC<TraceLogsTabProps> = ({
 
       <EuiSpacer size="s" />
 
-      <LogsDataTable logs={logsData} isLoading={isLoading} onSpanClick={onSpanClick} />
+      <DatasetLogsTable logs={logsData} isLoading={isLoading} onSpanClick={onSpanClick} />
     </EuiPanel>
   );
 };
