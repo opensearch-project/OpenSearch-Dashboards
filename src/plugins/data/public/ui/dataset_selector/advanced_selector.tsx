@@ -13,7 +13,8 @@ import {
 } from '../../../common';
 import { getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
-import { Configurator } from './configurator';
+import { Configurator } from './configurator/configurator';
+import { ConfiguratorV2 } from './configurator/configurator_v2';
 import { DatasetExplorer } from './dataset_explorer';
 
 export const AdvancedSelector = ({
@@ -21,11 +22,13 @@ export const AdvancedSelector = ({
   onSelect,
   onCancel,
   supportedTypes,
+  useConfiguratorV2,
 }: {
   services: IDataPluginServices;
-  onSelect: (query: Partial<Query>) => void;
+  onSelect: (query: Partial<Query>, saveDataset?: boolean) => void;
   onCancel: () => void;
   supportedTypes?: string[];
+  useConfiguratorV2?: boolean;
 }) => {
   const queryString = getQueryService().queryString;
 
@@ -39,8 +42,9 @@ export const AdvancedSelector = ({
         .getTypes()
         .filter(
           (type) =>
-            type.meta.supportedAppNames === undefined ||
-            type.meta.supportedAppNames.includes(services.appName)
+            (!supportedTypes?.length || supportedTypes.includes(type.id)) &&
+            (type.meta.supportedAppNames === undefined ||
+              type.meta.supportedAppNames.includes(services.appName))
         )
         .map((type) => {
           return {
@@ -57,8 +61,10 @@ export const AdvancedSelector = ({
   ]);
   const [selectedDataset, setSelectedDataset] = useState<BaseDataset | undefined>();
 
+  const ConfiguratorComponent = useConfiguratorV2 ? ConfiguratorV2 : Configurator;
+
   return selectedDataset ? (
-    <Configurator
+    <ConfiguratorComponent
       services={services}
       baseDataset={selectedDataset}
       onConfirm={onSelect}
@@ -73,7 +79,6 @@ export const AdvancedSelector = ({
       setPath={setPath}
       onNext={(dataset) => setSelectedDataset(dataset)}
       onCancel={onCancel}
-      supportedTypes={supportedTypes}
     />
   );
 };

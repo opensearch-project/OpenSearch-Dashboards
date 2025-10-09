@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -40,7 +40,6 @@ export const DatasetExplorer = ({
   setPath,
   onNext,
   onCancel,
-  supportedTypes,
 }: {
   services: IDataPluginServices;
   queryString: QueryStringContract;
@@ -48,31 +47,11 @@ export const DatasetExplorer = ({
   setPath: (path: DataStructure[]) => void;
   onNext: (dataset: BaseDataset) => void;
   onCancel: () => void;
-  supportedTypes?: string[];
 }) => {
   const uiSettings = services.uiSettings;
   const [explorerDataset, setExplorerDataset] = useState<BaseDataset | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const datasetService = queryString.getDatasetService();
-
-  useEffect(() => {
-    const availableTypes = path[0]?.children;
-    // Prevents the ability to set the supported types to an empty array and causing no option
-    const shouldFilter = availableTypes && supportedTypes?.length;
-
-    if (shouldFilter) {
-      const filteredTypes = availableTypes.filter((type) => supportedTypes!.includes(type.id));
-      if (filteredTypes.length !== availableTypes.length) {
-        setPath([
-          {
-            ...path[0],
-            children: filteredTypes,
-          },
-          ...path.slice(1),
-        ]);
-      }
-    }
-  }, [path, supportedTypes, setPath]);
 
   const fetchNextDataStructure = async (
     nextPath: DataStructure[],

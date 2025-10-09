@@ -187,6 +187,87 @@ describe('DatasetService', () => {
     expect(indexPatterns.saveToCache).toHaveBeenCalledTimes(0);
   });
 
+  test('cacheDataset passes signalType to index pattern spec', async () => {
+    const mockDataset = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      type: mockType.id,
+    } as Dataset;
+    service.registerType(mockType);
+
+    await service.cacheDataset(mockDataset, mockDataPluginServices, true, 'logs');
+    expect(indexPatterns.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        signalType: 'logs',
+      }),
+      true
+    );
+  });
+
+  test('saveDataset creates and saves a new dataset', async () => {
+    const mockDataset = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      displayName: 'My Dataset',
+      description: 'Test description',
+      type: mockType.id,
+      timeFieldName: 'timestamp',
+    } as Dataset;
+
+    const mockDataViews = {
+      createAndSave: jest.fn().mockResolvedValue({}),
+    };
+
+    const servicesWithDataViews = {
+      ...mockDataPluginServices,
+      data: {
+        ...dataPluginMock.createStartContract(),
+        dataViews: mockDataViews as any,
+      },
+    };
+
+    service.registerType(mockType);
+    await service.saveDataset(mockDataset, servicesWithDataViews, 'metrics');
+
+    expect(mockDataViews.createAndSave).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'test-dataset',
+        title: 'Test Dataset',
+        displayName: 'My Dataset',
+        description: 'Test description',
+        timeFieldName: 'timestamp',
+        signalType: 'metrics',
+      }),
+      undefined,
+      false
+    );
+  });
+
+  test('saveDataset does not save index pattern datasets', async () => {
+    const mockDataset = {
+      id: 'test-index-pattern',
+      title: 'Test Index Pattern',
+      type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+    } as Dataset;
+
+    const mockDataViews = {
+      createAndSave: jest.fn(),
+    };
+
+    const servicesWithDataViews = {
+      ...mockDataPluginServices,
+      data: {
+        ...dataPluginMock.createStartContract(),
+        dataViews: mockDataViews as any,
+      },
+    };
+
+    service.registerType(indexPatternTypeConfig);
+    await service.saveDataset(mockDataset, servicesWithDataViews);
+
+    expect(mockDataViews.createAndSave).not.toHaveBeenCalled();
+  });
+
   test('addRecentDataset adds a dataset', () => {
     const mockDataset1: Dataset = {
       id: 'dataset1',

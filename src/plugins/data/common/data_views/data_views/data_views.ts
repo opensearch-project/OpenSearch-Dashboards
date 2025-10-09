@@ -733,6 +733,8 @@ export class DataViewsService {
       title: dataView.title,
       type: dataView.type || DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       timeFieldName: dataView.timeFieldName,
+      displayName: dataView.displayName,
+      description: dataView.description,
       ...(dataView.dataSourceRef?.id && {
         dataSource: {
           id: dataView.dataSourceRef.id,
