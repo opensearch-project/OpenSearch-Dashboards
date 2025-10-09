@@ -18,6 +18,7 @@ import {
 import {
   executeHistogramQuery,
   defaultPrepareQueryString,
+  prepareHistogramCacheKey,
 } from '../../application/utils/state_management/actions/query_actions';
 import { ExploreServices } from '../../types';
 
@@ -57,10 +58,13 @@ export const BreakdownFieldSelector: React.FC<BreakdownFieldSelectorProps> = ({ 
     dispatch(setBreakdownField(newField));
 
     // Clear cache and trigger new histogram query with the breakdown field
-    const cacheKey = defaultPrepareQueryString(query);
-    dispatch(clearResultsByKey(cacheKey));
-    dispatch(clearQueryStatusMapByKey(cacheKey));
-    dispatch(executeHistogramQuery({ services, cacheKey, interval }));
+    const histogramCacheKey = prepareHistogramCacheKey(query);
+    const queryString = defaultPrepareQueryString(query);
+    dispatch(clearResultsByKey(histogramCacheKey));
+    dispatch(clearQueryStatusMapByKey(histogramCacheKey));
+    dispatch(
+      executeHistogramQuery({ services, cacheKey: histogramCacheKey, queryString, interval })
+    );
   };
 
   return (

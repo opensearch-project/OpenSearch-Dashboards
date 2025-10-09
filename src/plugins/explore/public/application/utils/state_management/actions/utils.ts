@@ -20,6 +20,7 @@ export interface HistogramConfig {
   fromDate: string;
   toDate: string;
   timeFieldName: string;
+  breakdownField?: string;
 }
 
 export const buildPPLHistogramQuery = (
@@ -27,7 +28,7 @@ export const buildPPLHistogramQuery = (
   histogramConfig: HistogramConfig,
   services: ExploreServices
 ): string => {
-  const { aggs, fromDate, toDate, timeFieldName } = histogramConfig;
+  const { aggs, fromDate, toDate, timeFieldName, breakdownField } = histogramConfig;
 
   if (!aggs || !timeFieldName) {
     return query;
@@ -42,7 +43,11 @@ export const buildPPLHistogramQuery = (
       mode: 'absolute',
     });
 
-  return `${query} | stats count() by span(${timeFieldName}, ${finalInterval})`;
+  if (breakdownField) {
+    return `${query} | timechart span=${finalInterval} limit=4 count() by ${breakdownField}`;
+  } else {
+    return `${query} | stats count() by span(${timeFieldName}, ${finalInterval})`;
+  }
 };
 
 export const processRawResultsForHistogram = (
@@ -50,7 +55,7 @@ export const processRawResultsForHistogram = (
   rawResults: ISearchResult,
   histogramConfig: HistogramConfig
 ) => {
-  const { aggs } = histogramConfig;
+  const { aggs, breakdownField } = histogramConfig;
 
   if (!aggs) {
     return rawResults;
@@ -72,53 +77,112 @@ export const processRawResultsForHistogram = (
     }
   });
 
-  const responseAggs: any = {};
+  const isTimechart = breakdownField; // TODO: find some way of checking the RESULTS to see if its a timechart response
 
-  for (const [key, _aggQueryString] of Object.entries(aggsConfig.qs)) {
-    responseAggs[key] = rawResults?.hits.hits.map((hit) => {
-      if (rawResults?.fieldSchema && rawResults.fieldSchema.length >= 2) {
-        const valueField = rawResults.fieldSchema[0].name!;
-        const keyField = rawResults.fieldSchema[1].name!;
-        return {
-          key: hit._source[keyField],
-          value: hit._source[valueField],
-        };
-      }
-      const sourceValues = Object.values(hit._source);
-      return {
-        key: sourceValues[1],
-        value: sourceValues[0],
-      };
-    });
-  }
+  if (isTimechart) {
+    const seriesMap = new Map<string, Array<[string, number]>>();
+    const fieldSchema = rawResults.fieldSchema;
 
-  const tempResult: ISearchResult = { ...rawResults, aggregations: {} };
-
-  Object.entries(responseAggs).forEach(([id, value]) => {
-    if (aggsConfig && aggsConfig.date_histogram) {
-      let totalHits = rawResults.hits.total;
-      const buckets = value as Array<{ key: string; value: number }>;
-      tempResult.aggregations[id] = {
-        buckets: buckets.map((bucket) => {
-          const timestamp =
-            bucket.key.includes('Z') ||
-            bucket.key.includes('+') ||
-            (bucket.key.includes('-') && bucket.key.lastIndexOf('-') > 10)
-              ? new Date(bucket.key).getTime()
-              : new Date(bucket.key + 'Z').getTime();
-          totalHits += bucket.value;
-          return {
-            key_as_string: bucket.key,
-            key: timestamp,
-            doc_count: bucket.value,
-          };
-        }),
-      };
-      tempResult.hits.total = totalHits;
+    if (!fieldSchema || fieldSchema.length < 3) {
+      return rawResults;
     }
-  });
 
-  return tempResult;
+    const timestampIdx = 0; // TODO: pull from fieldSchema that matches the timestamp
+    const breakdownIdx = fieldSchema.findIndex((col: any) => col.name === breakdownField);
+    const countIdx = fieldSchema.findIndex((col: any) => col.name === 'count');
+
+    if (breakdownIdx === -1 || countIdx === -1) {
+      return rawResults;
+    }
+
+    let totalHits = 0;
+    rawResults.hits.hits.forEach((hit) => {
+      const sourceValues = Object.values(hit._source);
+      const timestampStr = String(sourceValues[timestampIdx]);
+      const breakdownValue = String(sourceValues[breakdownIdx]);
+      const count = Number(sourceValues[countIdx]) || 0;
+
+      // TODO: redundant logic, put this out in a function
+      const timestamp =
+        timestampStr.includes('Z') ||
+        timestampStr.includes('+') ||
+        (timestampStr.includes('-') && timestampStr.lastIndexOf('-') > 10)
+          ? new Date(timestampStr).getTime()
+          : new Date(timestampStr + 'Z').getTime();
+
+      totalHits += count;
+
+      if (!seriesMap.has(breakdownValue)) {
+        seriesMap.set(breakdownValue, []);
+      }
+      seriesMap.get(breakdownValue)!.push([String(timestamp), count]);
+    });
+
+    const series = Array.from(seriesMap.entries()).map(([breakdownValue, dataPoints]) => ({
+      breakdownValue,
+      dataPoints,
+    }));
+
+    return {
+      ...rawResults,
+      hits: {
+        ...rawResults.hits,
+        total: totalHits,
+      },
+      breakdownSeries: {
+        breakdownField,
+        series,
+      },
+    };
+  } else {
+    const responseAggs: any = {};
+
+    for (const [key, _aggQueryString] of Object.entries(aggsConfig.qs)) {
+      responseAggs[key] = rawResults?.hits.hits.map((hit) => {
+        if (rawResults?.fieldSchema && rawResults.fieldSchema.length >= 2) {
+          const valueField = rawResults.fieldSchema[0].name!;
+          const keyField = rawResults.fieldSchema[1].name!;
+          return {
+            key: hit._source[keyField],
+            value: hit._source[valueField],
+          };
+        }
+        const sourceValues = Object.values(hit._source);
+        return {
+          key: sourceValues[1],
+          value: sourceValues[0],
+        };
+      });
+    }
+
+    const tempResult: ISearchResult = { ...rawResults, aggregations: {} };
+
+    Object.entries(responseAggs).forEach(([id, value]) => {
+      if (aggsConfig && aggsConfig.date_histogram) {
+        let totalHits = rawResults.hits.total;
+        const buckets = value as Array<{ key: string; value: number }>;
+        tempResult.aggregations[id] = {
+          buckets: buckets.map((bucket) => {
+            const timestamp =
+              bucket.key.includes('Z') ||
+              bucket.key.includes('+') ||
+              (bucket.key.includes('-') && bucket.key.lastIndexOf('-') > 10)
+                ? new Date(bucket.key).getTime()
+                : new Date(bucket.key + 'Z').getTime();
+            totalHits += bucket.value;
+            return {
+              key_as_string: bucket.key,
+              key: timestamp,
+              doc_count: bucket.value,
+            };
+          }),
+        };
+        tempResult.hits.total = totalHits;
+      }
+    });
+
+    return tempResult;
+  }
 };
 
 /**
@@ -136,6 +200,7 @@ export const createHistogramConfigWithInterval = (
 
   const state = getState();
   const effectiveInterval = interval || state.legacy?.interval || 'auto';
+  const breakdownField = state.queryEditor.breakdownField;
 
   const histogramConfigs = createHistogramConfigs(dataView, effectiveInterval, services.data);
   const aggs = histogramConfigs?.toDsl();
@@ -156,5 +221,6 @@ export const createHistogramConfigWithInterval = (
     fromDate,
     toDate,
     timeFieldName: dataView.timeFieldName,
+    breakdownField,
   };
 };
