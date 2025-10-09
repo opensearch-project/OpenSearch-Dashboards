@@ -480,11 +480,11 @@ const oneMetricOneCateRule: VisualizationRule = {
   matches: (numerical, categorical, date) =>
     compare([1, 1, 0], [numerical.length, categorical.length, date.length]),
   chartTypes: [
-    { ...CHART_METADATA.bar_gauge, priority: 100 },
-    { ...CHART_METADATA.pie, priority: 80 },
-    { ...CHART_METADATA.line, priority: 60 },
-    { ...CHART_METADATA.area, priority: 40 },
-    { ...CHART_METADATA.bar, priority: 20 },
+    { ...CHART_METADATA.bar, priority: 100 },
+    { ...CHART_METADATA.bar_gauge, priority: 80 },
+    { ...CHART_METADATA.pie, priority: 60 },
+    { ...CHART_METADATA.line, priority: 40 },
+    { ...CHART_METADATA.area, priority: 20 },
   ],
   toSpec: (
     transformedData,

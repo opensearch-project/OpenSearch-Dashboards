@@ -68,7 +68,7 @@ export const createBarGaugeSpec = (
     ...validThresholds,
     {
       value: maxNumber,
-      color: darkenColor(lastThreshold?.color ?? DEFAULT_GREY, 1.2),
+      color: darkenColor(lastThreshold?.color ?? styleOptions.thresholdOptions.baseColor, 2),
     } as Threshold,
   ];
 
@@ -188,7 +188,7 @@ export const createBarGaugeSpec = (
               styleOptions.exclusive.orientation,
               styleOptions.exclusive.displayMode,
               threshold,
-              darkenColor(threshold.color ?? DEFAULT_GREY, 1.2)
+              darkenColor(threshold.color ?? DEFAULT_GREY, 2)
             ),
             fillOpacity: { expr: `datum.useSolidColor ? 1 : 0` },
           },
