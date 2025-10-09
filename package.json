@@ -41,7 +41,7 @@
   "author": "opensearch-project",
   "scripts": {
     "preinstall": "scripts/use_node ./preinstall_check",
-    "postinstall": "scripts/use_node scripts/postinstall",
+    "postinstall": "scripts/use_node scripts/postinstall && patch-package",
     "osd": "scripts/use_node scripts/osd",
     "opensearch": "scripts/use_node scripts/opensearch",
     "test": "grunt test",
@@ -121,7 +121,6 @@
     "**/@storybook/**/webpack": "npm:@amoo-miki/webpack@4.46.0-xxhash.1",
     "**/@storybook/**/micromatch": "^4.0.8",
     "**/@lhci/**/lighthouse": "^12.3.0",
-    "**/axios": "^1.8.2",
     "**/browserify-rsa": "^4.1.1",
     "**/@babel/helpers": "^7.27.0",
     "**/@babel/runtime": "^7.27.0",
@@ -216,6 +215,7 @@
     "@hapi/podium": "^4.1.3",
     "@hapi/vision": "^6.1.0",
     "@hapi/wreck": "^17.1.0",
+    "@modelcontextprotocol/sdk": "^1.18.0",
     "@opensearch-dashboards-test/opensearch-dashboards-test-library": "https://github.com/opensearch-project/opensearch-dashboards-test-library/archive/refs/tags/1.0.6.tar.gz",
     "@opensearch-project/opensearch": "^2.13.0",
     "@opensearch/datemath": "5.0.3",
@@ -237,6 +237,7 @@
     "@types/ndjson": "^2.0.4",
     "@types/yauzl": "^2.9.1",
     "@xyflow/react": "^12.8.2",
+    "JSONStream": "1.3.5",
     "ajv": "^8.11.0",
     "antlr4-c3": "^3.4.3",
     "antlr4ng": "^3.0.16",
@@ -274,7 +275,6 @@
     "json-stable-stringify": "^1.0.1",
     "json-stringify-safe": "5.0.1",
     "json5": "^2.2.3",
-    "JSONStream": "1.3.5",
     "lodash": "^4.17.21",
     "lru-cache": "^4.1.5",
     "lucene": "^2.1.1",
@@ -314,8 +314,7 @@
     "use-sync-external-store": "^1.5.0",
     "uuid": "3.3.2",
     "whatwg-fetch": "^3.0.0",
-    "yauzl": "^2.10.0",
-    "@modelcontextprotocol/sdk": "^1.18.0"
+    "yauzl": "^2.10.0"
   },
   "devDependencies": {
     "@babel/core": "^7.22.9",
@@ -526,6 +525,7 @@
     "node-stream-zip": "^1.15.0",
     "normalize-path": "^3.0.0",
     "nyc": "^15.1.0",
+    "patch-package": "^8.0.1",
     "pixelmatch": "^5.1.0",
     "pngjs": "^3.4.0",
     "postcss": "^8.4.31",
