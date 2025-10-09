@@ -3,10 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import moment from 'moment';
 import {
   AggConfigs,
   DataView,
   formatTimePickerDate,
+  parseInterval,
 } from '../../../../../../../../src/plugins/data/common';
 import { ExploreServices } from '../../../../types';
 import { ISearchResult } from '../slices';
@@ -21,6 +23,63 @@ export interface HistogramConfig {
   toDate: string;
   timeFieldName: string;
   breakdownField?: string;
+}
+
+/**
+ * Fills in missing timestamps in a time series map with zero values
+ *
+ * @param seriesMap - Map of series names to arrays of [timestamp, count] tuples
+ * @param intervalStr - Interval string (e.g., '1h', '5m', '1d')
+ * @param fromDate - Start date string in format 'YYYY-MM-DD HH:mm:ss.SSS'
+ * @param toDate - End date string in format 'YYYY-MM-DD HH:mm:ss.SSS'
+ * @returns New Map with all series filled with complete timestamp arrays
+ */
+export function fillMissingTimestamps(
+  seriesMap: Map<string, Array<[number, number]>>,
+  intervalStr: string,
+  fromDate: string,
+  toDate: string
+): Map<string, Array<[number, number]>> {
+  if (seriesMap.size === 0) {
+    return new Map();
+  }
+
+  const intervalDuration = parseInterval(intervalStr);
+  if (!intervalDuration) {
+    return seriesMap;
+  }
+
+  const startTime = moment(fromDate, 'YYYY-MM-DD HH:mm:ss.SSS');
+  const endTime = moment(toDate, 'YYYY-MM-DD HH:mm:ss.SSS');
+
+  // generate complete timestamp array (inclusive of start and end)
+  const allTimestamps: number[] = [];
+  const currentTime = startTime.clone();
+
+  while (currentTime.isSameOrBefore(endTime)) {
+    allTimestamps.push(currentTime.valueOf());
+    currentTime.add(intervalDuration);
+  }
+
+  const filledSeriesMap = new Map<string, Array<[number, number]>>();
+
+  seriesMap.forEach((dataPoints, seriesName) => {
+    // create a map of existing timestamps to counts for fast lookup
+    const existingDataMap = new Map<number, number>();
+    dataPoints.forEach(([timestamp, count]) => {
+      existingDataMap.set(timestamp, count);
+    });
+
+    // generate filled array with all timestamps
+    const filledDataPoints: Array<[number, number]> = allTimestamps.map((timestamp) => {
+      const count = existingDataMap.get(timestamp) ?? 0;
+      return [timestamp, count];
+    });
+
+    filledSeriesMap.set(seriesName, filledDataPoints);
+  });
+
+  return filledSeriesMap;
 }
 
 export const buildPPLHistogramQuery = (
@@ -80,7 +139,7 @@ export const processRawResultsForHistogram = (
   const isTimechart = breakdownField; // TODO: find some way of checking the RESULTS to see if its a timechart response
 
   if (isTimechart) {
-    const seriesMap = new Map<string, Array<[string, number]>>();
+    const seriesMap = new Map<string, Array<[number, number]>>();
     const fieldSchema = rawResults.fieldSchema;
 
     if (!fieldSchema || fieldSchema.length < 3) {
@@ -115,10 +174,18 @@ export const processRawResultsForHistogram = (
       if (!seriesMap.has(breakdownValue)) {
         seriesMap.set(breakdownValue, []);
       }
-      seriesMap.get(breakdownValue)!.push([String(timestamp), count]);
+      seriesMap.get(breakdownValue)!.push([timestamp, count]);
     });
 
-    const series = Array.from(seriesMap.entries()).map(([breakdownValue, dataPoints]) => ({
+    // fill in missing timestamps with zeros
+    const filledSeriesMap = fillMissingTimestamps(
+      seriesMap,
+      histogramConfig.effectiveInterval,
+      histogramConfig.fromDate,
+      histogramConfig.toDate
+    );
+
+    const series = Array.from(filledSeriesMap.entries()).map(([breakdownValue, dataPoints]) => ({
       breakdownValue,
       dataPoints,
     }));
