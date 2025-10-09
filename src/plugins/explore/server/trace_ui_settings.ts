@@ -18,7 +18,6 @@ export const traceUiSettings: Record<string, UiSettingsParams> = {
       'spanId',
       'status.code',
       'attributes.http.status_code',
-      'attributes.service.name',
       'resource.attributes.service.name',
       'serviceName',
       'kind',
