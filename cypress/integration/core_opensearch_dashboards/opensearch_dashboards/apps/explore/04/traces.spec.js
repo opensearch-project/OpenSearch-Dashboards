@@ -96,8 +96,8 @@ const traceTestSuite = () => {
 
       // Verify flyout header
       cy.getElementByTestId('traceFlyout').should(
-        'contain.text',
-        'Trace: 68b0ad76fc05c5a5f5e3738d42b8a735'
+        'include.text',
+        'pet-clinic-frontend-java: GET /api/payments/owners/{ownerId}/pets/{petId}'
       );
 
       cy.getElementByTestId('traceFlyout').within(() => {

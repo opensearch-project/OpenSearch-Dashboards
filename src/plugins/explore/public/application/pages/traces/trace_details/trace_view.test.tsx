@@ -88,15 +88,27 @@ jest.mock('./public/traces/span_detail_panel', () => ({
 }));
 
 jest.mock('./public/traces/span_detail_tabs', () => ({
-  SpanDetailTabs: ({ selectedSpan }: any) => (
+  SpanDetailTabs: ({ selectedSpan, addSpanFilter }: any) => (
     <div data-testid="span-detail-sidebar">
       <div>Span: {selectedSpan?.spanId || 'none'}</div>
+      <button
+        onClick={() => addSpanFilter('spanId', selectedSpan.spanId)}
+        data-test-subj="addSpanFilterButton"
+      >
+        Add span filter
+      </button>
     </div>
   ),
 }));
 
 jest.mock('./public/traces/trace_detail_tabs', () => ({
-  TraceDetailTabs: ({ activeTab, setActiveTab, transformedHits, errorCount }: any) => (
+  TraceDetailTabs: ({
+    activeTab,
+    setActiveTab,
+    transformedHits,
+    errorCount,
+    setIsServiceLegendOpen,
+  }: any) => (
     <div data-testid="trace-detail-tabs">
       <div data-testid="active-tab">{activeTab}</div>
       <div data-testid="hits-count">{transformedHits?.length || 0}</div>
@@ -105,6 +117,12 @@ jest.mock('./public/traces/trace_detail_tabs', () => ({
       <button onClick={() => setActiveTab && setActiveTab('span_list')}>Span list</button>
       <button onClick={() => setActiveTab && setActiveTab('tree_view')}>Tree view</button>
       <button onClick={() => setActiveTab && setActiveTab('service_map')}>Service map</button>
+      <button
+        data-test-subj="openServiceLegendModalButton"
+        onClick={() => setIsServiceLegendOpen(true)}
+      >
+        Open service legend
+      </button>
     </div>
   ),
 }));
@@ -447,6 +465,14 @@ describe('TraceDetails', () => {
     // Simulate filter update through SpanDetailSidebar
     const sidebar = document.querySelector('[data-testid="span-detail-sidebar"]');
     expect(sidebar).toBeInTheDocument();
+
+    // Add filter
+    fireEvent.click(screen.getByTestId('addSpanFilterButton'));
+    expect(screen.getByText('spanId: span-1')).toBeInTheDocument();
+
+    // Remove filter
+    fireEvent.click(screen.getByLabelText('Remove filter'));
+    expect(screen.queryByText('spanId: span-1')).not.toBeInTheDocument();
   });
 
   it('handles span filtering when no filters applied', async () => {
@@ -748,8 +774,13 @@ describe('TraceDetails', () => {
       expect(document.querySelector('[data-testid="trace-detail-tabs"]')).toBeInTheDocument();
     });
 
-    const traceDetailTabs = document.querySelector('[data-testid="trace-detail-tabs"]');
-    expect(traceDetailTabs).toBeInTheDocument();
+    const serviceLegendButton = screen.getByTestId('openServiceLegendModalButton');
+    fireEvent.click(serviceLegendButton);
+    expect(screen.getByTestId('serviceLegendModal')).toBeInTheDocument();
+
+    const closeButton = screen.getByTestId('closeServiceLegendModalButton');
+    fireEvent.click(closeButton);
+    expect(screen.queryByTestId('serviceLegendModal')).not.toBeInTheDocument();
   });
 
   it('handles filter operations', async () => {
@@ -906,5 +937,23 @@ describe('TraceDetails', () => {
 
     // Should not call fetchTraceSpans when required params are missing
     expect(mockPplService.fetchTraceSpans).not.toHaveBeenCalled();
+  });
+
+  it('handles flyout case', async () => {
+    const history = createMemoryHistory();
+
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="span-detail-panel"]')).toBeInTheDocument();
+      expect(document.querySelector('[data-testid="span-detail-sidebar"]')).toBeInTheDocument();
+    });
+
+    const resizableContainer = document.querySelector('.euiResizableContainer');
+    expect(resizableContainer).toBeInTheDocument();
   });
 });

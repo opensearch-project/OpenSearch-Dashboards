@@ -579,7 +579,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
         {/* Service Legend Modal */}
         {isServiceLegendOpen && (
           <EuiOverlayMask>
-            <EuiModal onClose={() => setIsServiceLegendOpen(false)}>
+            <EuiModal
+              onClose={() => setIsServiceLegendOpen(false)}
+              data-test-subj="serviceLegendModal"
+            >
               <EuiModalHeader>
                 <EuiModalHeaderTitle>
                   {i18n.translate('explore.traceView.modal.serviceLegendTitle', {
@@ -611,7 +614,11 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                 </EuiFlexGroup>
               </EuiModalBody>
               <EuiModalFooter>
-                <EuiButton onClick={() => setIsServiceLegendOpen(false)} fill>
+                <EuiButton
+                  onClick={() => setIsServiceLegendOpen(false)}
+                  data-test-subj="closeServiceLegendModalButton"
+                  fill
+                >
                   {i18n.translate('explore.traceView.modal.closeButton', {
                     defaultMessage: 'Close',
                   })}
