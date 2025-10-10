@@ -4,8 +4,13 @@
  */
 
 import { i18n } from '@osd/i18n';
+import moment from 'moment';
+
 import { Data, UrlObject, PPLQueryRequest } from './types';
 import { SearchAPI } from './search_api';
+import { TimeCache } from './time_cache';
+
+const TIMEFIELD = '%timefield%';
 
 const getRequestName = (request: PPLQueryRequest, index: number) =>
   request.dataObject.name ||
@@ -15,13 +20,29 @@ const getRequestName = (request: PPLQueryRequest, index: number) =>
   });
 
 export class PPLQueryParser {
-  searchAPI: SearchAPI;
-
-  constructor(searchAPI: SearchAPI) {
+  constructor(private readonly timeCache: TimeCache, private readonly searchAPI: SearchAPI) {
     this.searchAPI = searchAPI;
   }
 
+  injectTimeFilter(query: string, timefield: string) {
+    if (this.timeCache._timeRange) {
+      const [source, ...others] = query.split('|');
+      const bounds = this.timeCache.getTimeBounds();
+      const from = moment.utc(bounds.min).format('YYYY-MM-DD HH:mm:ss.SSS');
+      const to = moment.utc(bounds.max).format('YYYY-MM-DD HH:mm:ss.SSS');
+      const timeFilter = `where \`${timefield}\` >= '${from}' and \`${timefield}\` <= '${to}'`;
+      if (others.length > 0) {
+        return `${source.trim()} | ${timeFilter} | ${others.map((s) => s.trim()).join(' | ')}`;
+      }
+      return `${source.trim()} | ${timeFilter}`;
+    }
+    return query;
+  }
+
   parseUrl(dataObject: Data, url: UrlObject) {
+    const timefield = url[TIMEFIELD];
+    delete url[TIMEFIELD];
+
     // data.url.body.query must be defined
     if (!url.body || !url.body.query || typeof url.body.query !== 'string') {
       throw new Error(
@@ -32,6 +53,11 @@ export class PPLQueryParser {
           },
         })
       );
+    }
+
+    if (timefield) {
+      const query = this.injectTimeFilter(url.body.query, timefield);
+      url.body.query = query;
     }
 
     return { dataObject, url };
