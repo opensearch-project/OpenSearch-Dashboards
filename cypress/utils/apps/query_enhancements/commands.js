@@ -179,18 +179,12 @@ Cypress.Commands.add(
 Cypress.Commands.add(
   'setIndexPatternAsDataset',
   (indexPattern, dataSourceName, datasetEnabled = false) => {
+    const title = datasetEnabled ? indexPattern : `${dataSourceName}::${indexPattern}`;
     cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
-    if (datasetEnabled) {
-      cy.get(`[title="${indexPattern}"]`).should('be.visible').click();
-    } else {
-      cy.get(`[title="${dataSourceName}::${indexPattern}"]`).should('be.visible').click();
-    }
+    cy.get(`[title="${title}"]`).should('be.visible').click();
 
     // verify that it has been selected
-    cy.getElementByTestId('datasetSelectorButton').should(
-      'contain.text',
-      `${dataSourceName}::${indexPattern}`
-    );
+    cy.getElementByTestId('datasetSelectorButton').should('contain.text', `${title}`);
   }
 );
 
