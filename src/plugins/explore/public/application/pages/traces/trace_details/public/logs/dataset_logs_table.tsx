@@ -106,6 +106,10 @@ export const DatasetLogsTable: React.FC<DatasetLogsTableProps> = ({
         }),
         truncateText: true,
         sortable: false,
+        width: '300px',
+        css: {
+          minWidth: '200px',
+        },
       },
       {
         field: 'spanId',
