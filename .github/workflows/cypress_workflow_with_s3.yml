@@ -10,17 +10,12 @@ on:
       - 'changelogs/fragments/**'
   workflow_dispatch:
     inputs:
-      test_repo:
-        description: 'Cypress test repo'
-        default: 'opensearch-project/opensearch-dashboards-functional-test'
-        required: true
-        type: string
       test_branch:
         description: 'Cypress test branch (default: source branch)'
         required: false
         type: string
       specs:
-        description: 'Tests to run (default: osd:ciGroup10)'
+        description: 'Tests to run'
         required: false
         type: string
       pr_number:
@@ -29,7 +24,6 @@ on:
         type: number
 
 env:
-  TEST_REPO: ${{ inputs.test_repo != '' && inputs.test_repo || 'opensearch-project/opensearch-dashboards-functional-test' }}
   TEST_BRANCH: "${{ inputs.test_branch != '' && inputs.test_branch || github.base_ref }}"
   FTR_PATH: 'ftr'
   CYPRESS_BROWSER: 'chromium'
@@ -42,14 +36,13 @@ env:
 jobs:
   cypress-tests:
     runs-on: ubuntu-latest
-    environment: flint-test
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
     env:
       START_CMD: 'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true'
       OPENSEARCH_SNAPSHOT_CMD: '/bin/bash -c "./opensearch-2.17.0/opensearch-tar-install.sh &"'
-    name: Run cypress tests (osd:ciGroup10)
+    name: Run cypress tests with S3
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -71,18 +64,11 @@ jobs:
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
 
-      - name: Checkout FT repo
-        uses: actions/checkout@v2
-        with:
-          path: ${{ env.FTR_PATH }}
-          repository: ${{ env.TEST_REPO }}
-          ref: '${{ env.TEST_BRANCH }}'
-
       - name: Setup spec files
         if: ${{ inputs.specs == '' }}
         shell: bash
         run: |
-          DASHBOARDS_SPEC="$(yarn --silent osd:ciGroup10)"
+          DASHBOARDS_SPEC="$(yarn --silent osd:ciGroupS3)"
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}" >> $GITHUB_ENV
           echo "DASHBOARDS_SPEC=${DASHBOARDS_SPEC}"
 
@@ -127,7 +113,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: dashboards-cypress-screenshots-10
+          name: dashboards-cypress-screenshots-s3
           path: cypress/screenshots
           retention-days: 1
 
@@ -135,7 +121,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: dashboards-cypress-videos-10
+          name: dashboards-cypress-videos-s3
           path: cypress/videos
           retention-days: 1
 
@@ -143,6 +129,6 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: dashboards-cypress-results-10
+          name: dashboards-cypress-results-s3
           path: cypress/results
           retention-days: 1
