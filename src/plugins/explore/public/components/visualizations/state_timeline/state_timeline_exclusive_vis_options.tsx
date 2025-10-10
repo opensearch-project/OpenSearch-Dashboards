@@ -14,6 +14,8 @@ import { DisableMode, DisconnectValuesOption, ConnectNullValuesOption } from '..
 interface StateTimeLineExclusiveVisOptionsProps {
   styles: StateTimeLineChartStyle['exclusive'];
   onChange: (styles: StateTimeLineChartStyle['exclusive']) => void;
+  useThresholdColor?: boolean;
+  onUseThresholdColorChange: (useThresholdColor: boolean) => void;
 }
 
 const disconnectValuesOption = [
@@ -49,6 +51,8 @@ const connectValuesOption = [
 export const StateTimeLineExclusiveVisOptions = ({
   styles,
   onChange,
+  useThresholdColor,
+  onUseThresholdColorChange,
 }: StateTimeLineExclusiveVisOptionsProps) => {
   const updateStyle = <K extends keyof StateTimeLineChartStyle['exclusive']>(
     key: K,
@@ -68,6 +72,18 @@ export const StateTimeLineExclusiveVisOptions = ({
       })}
       initialIsOpen={true}
     >
+      <EuiFormRow>
+        <EuiSwitch
+          compressed
+          label={i18n.translate('explore.vis.scatter.useThresholdColor', {
+            defaultMessage: 'Use threshold colors',
+          })}
+          data-test-subj="useThresholdColorButton"
+          checked={useThresholdColor ?? false}
+          onChange={(e) => onUseThresholdColorChange(e.target.checked)}
+        />
+      </EuiFormRow>
+
       <EuiFormRow>
         <EuiSwitch
           compressed

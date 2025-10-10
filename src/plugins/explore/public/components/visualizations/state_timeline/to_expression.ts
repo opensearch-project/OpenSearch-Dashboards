@@ -3,13 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AxisColumnMappings, AxisRole, DisableMode, VEGASCHEMA, VisColumn } from '../types';
+import {
+  AxisColumnMappings,
+  AxisRole,
+  DisableMode,
+  VEGASCHEMA,
+  VisColumn,
+  Threshold,
+} from '../types';
 import { StateTimeLineChartStyle } from './state_timeline_config';
 import { applyAxisStyling, getSwappedAxisRole } from '../utils/utils';
 import {
   mergeCategoricalData,
   mergeNumericalData,
   mergeSingleCategoricalData,
+  convertThresholdsToValueMappings,
 } from './state_timeline_utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { getCategoryNextColor } from '../theme/default_colors';
@@ -45,12 +53,22 @@ export const createNumercialStateTimeline = (
       ? styleOptions?.exclusive?.connectNullValues?.threshold || '1h'
       : undefined;
 
+  const completeThreshold =
+    styleOptions.thresholdOptions.thresholds && styleOptions.thresholdOptions.thresholds?.length > 0
+      ? [
+          { value: 0, color: styleOptions.thresholdOptions.baseColor } as Threshold,
+          ...styleOptions.thresholdOptions.thresholds,
+        ]
+      : [];
+
+  const convertedThresholds = convertThresholdsToValueMappings(completeThreshold);
+
   const [processedData, validRanges] = mergeNumericalData(
     transformedData,
     xAxis?.column,
     yAxis?.column,
     rangeField,
-    rangeMappings,
+    styleOptions.useThresholdColor ? convertedThresholds : rangeMappings,
     disableThreshold,
     connectThreshold
   );

@@ -15,6 +15,7 @@ import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
 import { ValueMappingPanel } from '../style_panel/value_mapping/value_mapping_panel';
 import { StateTimeLineExclusiveVisOptions } from './state_timeline_exclusive_vis_options';
+import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 
 export type StateTimeLineVisStyleControlsProps = StyleControlsProps<StateTimeLineChartStyle>;
 
@@ -60,6 +61,12 @@ export const StateTimeLineVisStyleControls: React.FC<StateTimeLineVisStyleContro
               onChange={(val) => updateStyleOption('valueMappingOptions', val)}
             />
           </EuiFlexItem>
+          <EuiFlexItem>
+            <ThresholdPanel
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AllAxesOptions
               axisColumnMappings={axisColumnMappings}
@@ -73,7 +80,11 @@ export const StateTimeLineVisStyleControls: React.FC<StateTimeLineVisStyleContro
           <EuiFlexItem grow={false}>
             <StateTimeLineExclusiveVisOptions
               styles={styleOptions.exclusive}
+              useThresholdColor={styleOptions?.useThresholdColor}
               onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
+              onUseThresholdColorChange={(useThresholdColor) =>
+                updateStyleOption('useThresholdColor', useThresholdColor)
+              }
             />
           </EuiFlexItem>
 

@@ -64,6 +64,7 @@ jest.mock('./state_timeline_utils', () => ({
     ],
     [{ value: 'A', color: '#ff0000' }],
   ]),
+  convertThresholdsToValueMappings: jest.fn(),
 }));
 
 const mockData = [

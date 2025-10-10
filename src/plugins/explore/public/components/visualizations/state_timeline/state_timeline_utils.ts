@@ -4,7 +4,7 @@
  */
 
 import { groupBy } from 'lodash';
-import { RangeValue, ValueMapping } from '../types';
+import { RangeValue, Threshold, ValueMapping } from '../types';
 
 const addThresholdTime = (currentTime: string, threshold: string): number | undefined => {
   const date = new Date(currentTime.replace(' ', 'T'));
@@ -93,6 +93,19 @@ const mergeNumercialRecord = (
   };
 };
 
+export const convertThresholdsToValueMappings = (thresholds: Threshold[]): ValueMapping[] => {
+  return thresholds.slice(0, -1).map((t, i) => {
+    return {
+      type: 'range',
+      range: {
+        min: t.value,
+        max: thresholds[i + 1].value,
+      },
+      color: t.color,
+    };
+  });
+};
+
 /**
  * Merges consecutive data points with the same categorical value.
  */
@@ -167,7 +180,7 @@ export const mergeSingleCategoricalData = (
   });
 
   // if validValues doesn't exist, fallback to group values by groupField2 and present a stacked bar
-  if (validValues?.length === 0) {
+  if (!validValues || validValues?.length === 0) {
     return [fallbackForSingleCategorical(sorted, timestampField, groupField1), []];
   }
 

@@ -9,6 +9,7 @@ import { StateTimeLineExclusiveVisOptions } from './state_timeline_exclusive_vis
 import { DisableMode } from '../types';
 
 const mockOnChange = jest.fn();
+const mockOnUseThresholdColorChange = jest.fn();
 
 const defaultStyles = {
   showValues: false,
@@ -49,7 +50,14 @@ describe('StateTimeLineExclusiveVisOptions', () => {
   });
 
   it('renders all vis controls', () => {
-    render(<StateTimeLineExclusiveVisOptions styles={defaultStyles} onChange={mockOnChange} />);
+    render(
+      <StateTimeLineExclusiveVisOptions
+        styles={defaultStyles}
+        onChange={mockOnChange}
+        useThresholdColor={false}
+        onUseThresholdColorChange={mockOnUseThresholdColorChange}
+      />
+    );
 
     expect(screen.getByText('Show values')).toBeInTheDocument();
     expect(screen.getByText('Row height')).toBeInTheDocument();
@@ -58,7 +66,14 @@ describe('StateTimeLineExclusiveVisOptions', () => {
   });
 
   it('handles show values toggle', () => {
-    render(<StateTimeLineExclusiveVisOptions styles={defaultStyles} onChange={mockOnChange} />);
+    render(
+      <StateTimeLineExclusiveVisOptions
+        styles={defaultStyles}
+        onChange={mockOnChange}
+        useThresholdColor={false}
+        onUseThresholdColorChange={mockOnUseThresholdColorChange}
+      />
+    );
 
     const toggle = screen.getByTestId('showValuesSwtich');
     fireEvent.click(toggle);
@@ -79,7 +94,12 @@ describe('StateTimeLineExclusiveVisOptions', () => {
     };
 
     render(
-      <StateTimeLineExclusiveVisOptions styles={stylesWithThreshold} onChange={mockOnChange} />
+      <StateTimeLineExclusiveVisOptions
+        styles={stylesWithThreshold}
+        onChange={mockOnChange}
+        useThresholdColor={false}
+        onUseThresholdColorChange={mockOnUseThresholdColorChange}
+      />
     );
 
     expect(screen.getByTestId('disableValuesThreshold')).toBeInTheDocument();
@@ -95,7 +115,12 @@ describe('StateTimeLineExclusiveVisOptions', () => {
     };
 
     render(
-      <StateTimeLineExclusiveVisOptions styles={stylesWithThreshold} onChange={mockOnChange} />
+      <StateTimeLineExclusiveVisOptions
+        styles={stylesWithThreshold}
+        onChange={mockOnChange}
+        useThresholdColor={false}
+        onUseThresholdColorChange={mockOnUseThresholdColorChange}
+      />
     );
 
     expect(screen.queryByTestId('disableValuesThreshold')).not.toBeInTheDocument();
@@ -111,7 +136,12 @@ describe('StateTimeLineExclusiveVisOptions', () => {
     };
 
     render(
-      <StateTimeLineExclusiveVisOptions styles={stylesWithThreshold} onChange={mockOnChange} />
+      <StateTimeLineExclusiveVisOptions
+        styles={stylesWithThreshold}
+        onChange={mockOnChange}
+        useThresholdColor={false}
+        onUseThresholdColorChange={mockOnUseThresholdColorChange}
+      />
     );
 
     expect(screen.getByTestId('connectValuesThreshold')).toBeInTheDocument();
@@ -127,7 +157,12 @@ describe('StateTimeLineExclusiveVisOptions', () => {
     };
 
     render(
-      <StateTimeLineExclusiveVisOptions styles={stylesWithThreshold} onChange={mockOnChange} />
+      <StateTimeLineExclusiveVisOptions
+        styles={stylesWithThreshold}
+        onChange={mockOnChange}
+        useThresholdColor={false}
+        onUseThresholdColorChange={mockOnUseThresholdColorChange}
+      />
     );
 
     expect(screen.queryByTestId('connectValuesThreshold')).not.toBeInTheDocument();
@@ -143,7 +178,12 @@ describe('StateTimeLineExclusiveVisOptions', () => {
     };
 
     render(
-      <StateTimeLineExclusiveVisOptions styles={stylesWithDisconnect} onChange={mockOnChange} />
+      <StateTimeLineExclusiveVisOptions
+        styles={stylesWithDisconnect}
+        onChange={mockOnChange}
+        useThresholdColor={false}
+        onUseThresholdColorChange={mockOnUseThresholdColorChange}
+      />
     );
 
     const connectButtons = screen.getByTestId('connectValuesGroupButton');
@@ -159,7 +199,14 @@ describe('StateTimeLineExclusiveVisOptions', () => {
       },
     };
 
-    render(<StateTimeLineExclusiveVisOptions styles={styles} onChange={mockOnChange} />);
+    render(
+      <StateTimeLineExclusiveVisOptions
+        styles={styles}
+        onChange={mockOnChange}
+        useThresholdColor={false}
+        onUseThresholdColorChange={mockOnUseThresholdColorChange}
+      />
+    );
 
     const thresholdInput = screen.getByTestId('connectValuesThreshold');
     fireEvent.change(thresholdInput, { target: { value: '3h' } });
@@ -175,7 +222,14 @@ describe('StateTimeLineExclusiveVisOptions', () => {
   });
 
   it('able to update row height', async () => {
-    render(<StateTimeLineExclusiveVisOptions styles={defaultStyles} onChange={mockOnChange} />);
+    render(
+      <StateTimeLineExclusiveVisOptions
+        styles={defaultStyles}
+        onChange={mockOnChange}
+        useThresholdColor={false}
+        onUseThresholdColorChange={mockOnUseThresholdColorChange}
+      />
+    );
     const rowHeightInput = screen.getByTestId('debouncedFieldNumber');
     fireEvent.change(rowHeightInput, { target: { value: 0.2 } });
     await waitFor(() => {
