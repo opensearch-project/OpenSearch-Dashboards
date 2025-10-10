@@ -21,6 +21,8 @@ import {
   EuiModalFooter,
   EuiOverlayMask,
   EuiBadge,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
 } from '@elastic/eui';
 import './trace_view.scss';
 import { TraceTopNavMenu } from './public/top_nav_buttons';
@@ -46,6 +48,7 @@ import { TraceLogsTab } from './public/logs/trace_logs_tab';
 import { Dataset } from '../../../../../../data/common';
 import { TraceDetailTab } from './constants/trace_detail_tabs';
 import { isSpanError } from './public/traces/ppl_resolve_helpers';
+import { buildTraceDetailsUrl } from '../../../../components/data_table/table_cell/trace_utils/trace_utils';
 
 /*
  * Trace:Details
@@ -397,245 +400,263 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     };
   }, [forceVisualizationResize, isEmbedded]);
 
-  // Set breadcrumb with service name from root span
-  useEffect(() => {
-    if (!isFlyout) {
-      chrome?.setBreadcrumbs([
-        {
-          text: getServiceInfo(rootSpan, traceId),
-        },
-      ]);
-    }
-  }, [chrome, rootSpan, traceId, isFlyout]);
+  const traceDetailsLink = buildTraceDetailsUrl(spanId, traceId, dataset);
 
-  return (
-    <>
-      {!isFlyout && (
-        <TraceTopNavMenu
-          payloadData={transformedHits}
-          setMenuMountPoint={setMenuMountPoint}
-          traceId={traceId}
-        />
-      )}
+  const TraceDetailsContent = () => {
+    return (
+      <>
+        {isLoading ? (
+          <EuiPanel paddingSize="l">
+            <div className="exploreTraceView__loadingContainer">
+              <EuiLoadingSpinner size="xl" />
+            </div>
+          </EuiPanel>
+        ) : (
+          <>
+            {transformedHits.length === 0 && <NoMatchMessage traceId={traceId} />}
 
-      {isLoading ? (
-        <EuiPanel paddingSize="l">
-          <div className="exploreTraceView__loadingContainer">
-            <EuiLoadingSpinner size="xl" />
-          </div>
-        </EuiPanel>
-      ) : (
-        <>
-          {transformedHits.length === 0 && <NoMatchMessage traceId={traceId} />}
-
-          {transformedHits.length > 0 && (
-            <>
-              <div className="exploreTraceView__tabsContainer">
-                <EuiPanel paddingSize="s">
-                  <TraceDetailTabs
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                    transformedHits={transformedHits}
-                    errorCount={errorCount}
-                    spanFilters={spanFilters}
-                    handleErrorFilterClick={handleErrorFilterClick}
-                    servicesInOrder={servicesInOrder}
-                    setIsServiceLegendOpen={setIsServiceLegendOpen}
-                    isServiceLegendOpen={isServiceLegendOpen}
-                    logDatasets={logDatasets}
-                    logsData={logsData}
-                    isLogsLoading={isLogsLoading}
-                  />
-                </EuiPanel>
-              </div>
-
-              {/* Filter badges section */}
-              {spanFilters.length > 0 && (
-                <div className="exploreTraceView__filtersContainer">
+            {transformedHits.length > 0 && (
+              <>
+                <div className="exploreTraceView__tabsContainer">
                   <EuiPanel paddingSize="s">
-                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                      <EuiFlexItem>
-                        <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-                          <EuiFlexItem grow={false}>
-                            <EuiText size="s" color="subdued">
-                              {i18n.translate('explore.traceView.filters.activeFilters', {
-                                defaultMessage: 'Active filters:',
-                              })}
-                            </EuiText>
-                          </EuiFlexItem>
-                          {spanFilters.map((filter, index) => (
-                            <EuiFlexItem grow={false} key={`filter-${index}`}>
-                              <EuiBadge
-                                color="primary"
-                                iconType="cross"
-                                iconSide="right"
-                                iconOnClick={() => removeFilter(filter)}
-                                iconOnClickAriaLabel={i18n.translate(
-                                  'explore.traceView.filters.removeFilter',
-                                  {
-                                    defaultMessage: 'Remove filter',
-                                  }
-                                )}
-                                data-test-subj={`filter-badge-${filter.field}-${filter.value}`}
-                              >
-                                {getFilterDisplayText(filter)}
-                              </EuiBadge>
-                            </EuiFlexItem>
-                          ))}
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          size="xs"
-                          onClick={clearAllFilters}
-                          data-test-subj="clear-all-filters-button"
-                        >
-                          {i18n.translate('explore.traceView.filters.clearAll', {
-                            defaultMessage: 'Clear all',
-                          })}
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <TraceDetailTabs
+                      activeTab={activeTab}
+                      setActiveTab={setActiveTab}
+                      transformedHits={transformedHits}
+                      errorCount={errorCount}
+                      spanFilters={spanFilters}
+                      handleErrorFilterClick={handleErrorFilterClick}
+                      servicesInOrder={servicesInOrder}
+                      setIsServiceLegendOpen={setIsServiceLegendOpen}
+                      isServiceLegendOpen={isServiceLegendOpen}
+                      logDatasets={logDatasets}
+                      logsData={logsData}
+                      isLogsLoading={isLogsLoading}
+                    />
                   </EuiPanel>
                 </div>
-              )}
 
-              {/* Resizable container underneath filter badges */}
-              <EuiResizableContainer
-                className="exploreTraceView__resizableContainer"
-                direction={isFlyout ? 'vertical' : 'horizontal'}
-              >
-                {(EuiResizablePanel, EuiResizableButton) => (
-                  <>
-                    <EuiResizablePanel
-                      initialSize={isFlyout ? 50 : 70}
-                      minSize={isFlyout ? '30%' : '50%'}
-                      wrapperPadding="none"
-                    >
-                      <div className="exploreTraceView__contentPanel">
-                        {/* Tab content */}
-                        <div ref={mainPanelRef} className="exploreTraceView__mainPanel">
-                          {activeTab === TraceDetailTab.SERVICE_MAP && (
-                            <div style={{ height: 'calc(100vh - 200px)', overflow: 'hidden' }}>
-                              <ServiceMap
-                                hits={transformedHits}
-                                colorMap={colorMap}
-                                paddingSize="none"
-                                hasShadow={false}
-                                selectedSpanId={spanId}
-                              />
-                            </div>
-                          )}
-
-                          {(activeTab === TraceDetailTab.TIMELINE ||
-                            activeTab === TraceDetailTab.SPAN_LIST ||
-                            activeTab === TraceDetailTab.TREE_VIEW) && (
-                            <SpanDetailPanel
-                              key={`span-panel-${visualizationKey}`}
-                              chrome={chrome}
-                              spanFilters={spanFilters}
-                              payloadData={JSON.stringify(transformedHits)}
-                              isGanttChartLoading={isBackgroundLoading}
-                              colorMap={colorMap}
-                              onSpanSelect={handleSpanSelect}
-                              selectedSpanId={spanId}
-                              activeView={activeTab}
-                            />
-                          )}
-
-                          {activeTab === TraceDetailTab.LOGS && (
-                            <TraceLogsTab
-                              traceId={traceId}
-                              logDatasets={logDatasets}
-                              logsData={logsData}
-                              isLoading={isLogsLoading}
-                              onSpanClick={handleSpanSelect}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    </EuiResizablePanel>
-
-                    <EuiResizableButton />
-
-                    <EuiResizablePanel
-                      initialSize={isFlyout ? 50 : 30}
-                      minSize={isFlyout ? '30%' : '300px'}
-                    >
-                      <div className="exploreTraceView__sidebarPanel">
-                        <SpanDetailTabs
-                          selectedSpan={selectedSpan}
-                          addSpanFilter={(field: string, value: string | number | boolean) => {
-                            const newFilters = [...spanFilters];
-                            const index = newFilters.findIndex(
-                              ({ field: filterField }) => field === filterField
-                            );
-                            if (index === -1) {
-                              newFilters.push({ field, value });
-                            } else {
-                              newFilters.splice(index, 1, { field, value });
-                            }
-                            setSpanFiltersWithStorage(newFilters);
-                          }}
-                          setCurrentSpan={handleSpanSelect}
-                          logDatasets={logDatasets}
-                          logsData={logsData}
-                          isLogsLoading={isLogsLoading}
-                        />
-                      </div>
-                    </EuiResizablePanel>
-                  </>
+                {/* Filter badges section */}
+                {spanFilters.length > 0 && (
+                  <div className="exploreTraceView__filtersContainer">
+                    <EuiPanel paddingSize="s">
+                      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                        <EuiFlexItem>
+                          <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+                            <EuiFlexItem grow={false}>
+                              <EuiText size="s" color="subdued">
+                                {i18n.translate('explore.traceView.filters.activeFilters', {
+                                  defaultMessage: 'Active filters:',
+                                })}
+                              </EuiText>
+                            </EuiFlexItem>
+                            {spanFilters.map((filter, index) => (
+                              <EuiFlexItem grow={false} key={`filter-${index}`}>
+                                <EuiBadge
+                                  color="primary"
+                                  iconType="cross"
+                                  iconSide="right"
+                                  iconOnClick={() => removeFilter(filter)}
+                                  iconOnClickAriaLabel={i18n.translate(
+                                    'explore.traceView.filters.removeFilter',
+                                    {
+                                      defaultMessage: 'Remove filter',
+                                    }
+                                  )}
+                                  data-test-subj={`filter-badge-${filter.field}-${filter.value}`}
+                                >
+                                  {getFilterDisplayText(filter)}
+                                </EuiBadge>
+                              </EuiFlexItem>
+                            ))}
+                          </EuiFlexGroup>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            size="xs"
+                            onClick={clearAllFilters}
+                            data-test-subj="clear-all-filters-button"
+                          >
+                            {i18n.translate('explore.traceView.filters.clearAll', {
+                              defaultMessage: 'Clear all',
+                            })}
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiPanel>
+                  </div>
                 )}
-              </EuiResizableContainer>
-            </>
-          )}
-        </>
-      )}
 
-      {/* Service Legend Modal */}
-      {isServiceLegendOpen && (
-        <EuiOverlayMask>
-          <EuiModal onClose={() => setIsServiceLegendOpen(false)}>
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>
-                {i18n.translate('explore.traceView.modal.serviceLegendTitle', {
-                  defaultMessage: 'Service legend',
-                })}
-              </EuiModalHeaderTitle>
-            </EuiModalHeader>
-            <EuiModalBody>
-              <EuiFlexGroup direction="column" gutterSize="s">
-                {servicesInOrder.map((service) => (
-                  <EuiFlexItem grow={false} key={`service-legend-${service}`}>
-                    <EuiFlexGroup gutterSize="xs" alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        <div
-                          className="exploreTraceView__serviceLegendColorIndicator"
-                          style={{
-                            backgroundColor: colorMap?.[service],
-                          }}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiText size="s">
-                          <span>{service}</span>
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiModalBody>
-            <EuiModalFooter>
-              <EuiButton onClick={() => setIsServiceLegendOpen(false)} fill>
-                {i18n.translate('explore.traceView.modal.closeButton', {
-                  defaultMessage: 'Close',
-                })}
-              </EuiButton>
-            </EuiModalFooter>
-          </EuiModal>
-        </EuiOverlayMask>
-      )}
+                {/* Resizable container underneath filter badges */}
+                <EuiResizableContainer
+                  className="exploreTraceView__resizableContainer"
+                  direction={isFlyout ? 'vertical' : 'horizontal'}
+                >
+                  {(EuiResizablePanel, EuiResizableButton) => (
+                    <>
+                      <EuiResizablePanel
+                        initialSize={isFlyout ? 50 : 70}
+                        minSize={isFlyout ? '30%' : '50%'}
+                        wrapperPadding="none"
+                      >
+                        <div className="exploreTraceView__contentPanel">
+                          {/* Tab content */}
+                          <div ref={mainPanelRef} className="exploreTraceView__mainPanel">
+                            {activeTab === TraceDetailTab.SERVICE_MAP && (
+                              <div style={{ height: 'calc(100vh - 200px)', overflow: 'hidden' }}>
+                                <ServiceMap
+                                  hits={transformedHits}
+                                  colorMap={colorMap}
+                                  paddingSize="none"
+                                  hasShadow={false}
+                                  selectedSpanId={spanId}
+                                />
+                              </div>
+                            )}
+
+                            {(activeTab === TraceDetailTab.TIMELINE ||
+                              activeTab === TraceDetailTab.SPAN_LIST) && (
+                              <SpanDetailPanel
+                                key={`span-panel-${visualizationKey}`}
+                                chrome={chrome}
+                                spanFilters={spanFilters}
+                                payloadData={JSON.stringify(transformedHits)}
+                                isGanttChartLoading={isBackgroundLoading}
+                                colorMap={colorMap}
+                                onSpanSelect={handleSpanSelect}
+                                selectedSpanId={spanId}
+                                activeView={activeTab}
+                              />
+                            )}
+
+                            {activeTab === TraceDetailTab.LOGS && (
+                              <TraceLogsTab
+                                traceId={traceId}
+                                logDatasets={logDatasets}
+                                logsData={logsData}
+                                isLoading={isLogsLoading}
+                                onSpanClick={handleSpanSelect}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      </EuiResizablePanel>
+
+                      <EuiResizableButton />
+
+                      <EuiResizablePanel
+                        initialSize={isFlyout ? 50 : 30}
+                        minSize={isFlyout ? '30%' : '300px'}
+                      >
+                        <div className="exploreTraceView__sidebarPanel">
+                          <SpanDetailTabs
+                            selectedSpan={selectedSpan}
+                            addSpanFilter={(field: string, value: string | number | boolean) => {
+                              const newFilters = [...spanFilters];
+                              const index = newFilters.findIndex(
+                                ({ field: filterField }) => field === filterField
+                              );
+                              if (index === -1) {
+                                newFilters.push({ field, value });
+                              } else {
+                                newFilters.splice(index, 1, { field, value });
+                              }
+                              setSpanFiltersWithStorage(newFilters);
+                            }}
+                            setCurrentSpan={handleSpanSelect}
+                            logDatasets={logDatasets}
+                            logsData={logsData}
+                            isLogsLoading={isLogsLoading}
+                          />
+                        </div>
+                      </EuiResizablePanel>
+                    </>
+                  )}
+                </EuiResizableContainer>
+              </>
+            )}
+          </>
+        )}
+
+        {/* Service Legend Modal */}
+        {isServiceLegendOpen && (
+          <EuiOverlayMask>
+            <EuiModal
+              onClose={() => setIsServiceLegendOpen(false)}
+              data-test-subj="serviceLegendModal"
+            >
+              <EuiModalHeader>
+                <EuiModalHeaderTitle>
+                  {i18n.translate('explore.traceView.modal.serviceLegendTitle', {
+                    defaultMessage: 'Service legend',
+                  })}
+                </EuiModalHeaderTitle>
+              </EuiModalHeader>
+              <EuiModalBody>
+                <EuiFlexGroup direction="column" gutterSize="s">
+                  {servicesInOrder.map((service) => (
+                    <EuiFlexItem grow={false} key={`service-legend-${service}`}>
+                      <EuiFlexGroup gutterSize="xs" alignItems="center">
+                        <EuiFlexItem grow={false}>
+                          <div
+                            className="exploreTraceView__serviceLegendColorIndicator"
+                            style={{
+                              backgroundColor: colorMap?.[service],
+                            }}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText size="s">
+                            <span>{service}</span>
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              </EuiModalBody>
+              <EuiModalFooter>
+                <EuiButton
+                  onClick={() => setIsServiceLegendOpen(false)}
+                  data-test-subj="closeServiceLegendModalButton"
+                  fill
+                >
+                  {i18n.translate('explore.traceView.modal.closeButton', {
+                    defaultMessage: 'Close',
+                  })}
+                </EuiButton>
+              </EuiModalFooter>
+            </EuiModal>
+          </EuiOverlayMask>
+        )}
+      </>
+    );
+  };
+
+  const TraceDetailsHeader: React.FC = () => (
+    <TraceTopNavMenu
+      payloadData={transformedHits}
+      setMenuMountPoint={setMenuMountPoint}
+      traceId={traceId}
+      isFlyout={isFlyout}
+      title={getServiceInfo(rootSpan, traceId)}
+      traceDetailsLink={traceDetailsLink}
+    />
+  );
+
+  return isFlyout ? (
+    <>
+      <EuiFlyoutHeader>
+        <TraceDetailsHeader />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <TraceDetailsContent />
+      </EuiFlyoutBody>
+    </>
+  ) : (
+    <>
+      <TraceDetailsHeader />
+      <TraceDetailsContent />
     </>
   );
 };

@@ -5,8 +5,8 @@
 
 import React from 'react';
 import { EuiToolTip, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { Span } from '../span_detail_table';
-import { TraceTimeRange } from '../../utils/span_timerange_utils';
+import { Span } from '../types';
+import { TraceTimeRange } from '../../../utils/span_timerange_utils';
 import { useTimelineBarColor, useTimelineBarRange } from './timeline_waterfall_bar_hooks';
 
 export interface TimelineWaterfallBarProps {

@@ -217,8 +217,8 @@ describe('trace_utils', () => {
       expect(extractFieldFromRowData(rowData, SPAN_ID_FIELDS)).toBe('');
     });
 
-    it('should return empty string if field exists but is not a string or number', () => {
-      const rowData = { traceId: { key: 'value' } } as any;
+    it('should return empty string if field exists but is not a string', () => {
+      const rowData = { traceId: 1234 } as any;
       expect(extractFieldFromRowData(rowData, TRACE_ID_FIELDS)).toBe('');
     });
 

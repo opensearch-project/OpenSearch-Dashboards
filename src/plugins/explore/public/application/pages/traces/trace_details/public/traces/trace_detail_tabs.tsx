@@ -75,12 +75,6 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
         </>
       ),
     },
-    {
-      id: TraceDetailTab.TREE_VIEW,
-      name: i18n.translate('explore.traceView.tab.treeView', {
-        defaultMessage: 'Tree view',
-      }),
-    },
   ];
 
   // Add logs tab if we have log datasets and logs data
