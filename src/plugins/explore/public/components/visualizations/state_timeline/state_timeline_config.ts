@@ -58,7 +58,7 @@ export const defaultStateTimeLineChartStyles: StateTimeLineChartStyle = {
   // exclusive
   exclusive: {
     showValues: false,
-    rowHeight: 1,
+    rowHeight: 0.8,
     disconnectValues: {
       disableMode: DisableMode.Never,
       threshold: '1h',

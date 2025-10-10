@@ -37,7 +37,7 @@ describe('createStateTimelineConfig', () => {
     expect(defaults.legendPosition).toBe(Positions.RIGHT);
     // Verify exclusive style
     expect(defaults.exclusive.showValues).toBe(false);
-    expect(defaults.exclusive.rowHeight).toBe(1);
+    expect(defaults.exclusive.rowHeight).toBe(0.8);
     expect(defaults.exclusive.disconnectValues).toEqual({
       disableMode: DisableMode.Never,
       threshold: '1h',
