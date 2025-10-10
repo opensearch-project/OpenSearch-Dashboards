@@ -84,10 +84,8 @@ function getColumnDisplayName(column: string): string {
       return 'Duration';
     case 'resource.attributes.service.name':
       return 'Service';
-    case 'attributes.service.name':
-      return 'Service.Name';
     case 'attributes.http.status_code':
-      return 'Status code';
+      return 'Status Code';
     case 'status.code':
       return 'Status';
     case 'spanId':

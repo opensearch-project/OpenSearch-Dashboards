@@ -199,7 +199,6 @@ describe('data_table_helper', () => {
         'name',
         'durationNano',
         'resource.attributes.service.name',
-        'attributes.service.name',
         'attributes.http.status_code',
         'status.code',
         'spanId',
@@ -210,10 +209,9 @@ describe('data_table_helper', () => {
       expect(result[0].displayName).toBe('Service Identifier');
       expect(result[1].displayName).toBe('Duration');
       expect(result[2].displayName).toBe('Service');
-      expect(result[3].displayName).toBe('Service.Name');
-      expect(result[4].displayName).toBe('Status code');
-      expect(result[5].displayName).toBe('Status');
-      expect(result[6].displayName).toBe('SpanID');
+      expect(result[3].displayName).toBe('Status Code');
+      expect(result[4].displayName).toBe('Status');
+      expect(result[5].displayName).toBe('SpanID');
     });
   });
 });
