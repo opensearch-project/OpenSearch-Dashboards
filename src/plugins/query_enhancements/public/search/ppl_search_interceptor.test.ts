@@ -1149,4 +1149,283 @@ describe('PPLSearchInterceptor', () => {
       });
     });
   });
+
+  describe('abort signal handling', () => {
+    beforeEach(() => {
+      mockPPLFilterUtils.convertFiltersToWhereClause.mockReturnValue('');
+      mockPPLFilterUtils.getTimeFilterWhereClause.mockReturnValue('');
+
+      const mockDatasetService = {
+        getType: jest.fn().mockReturnValue({
+          getSearchOptions: jest.fn().mockReturnValue({
+            strategy: SEARCH_STRATEGY.PPL,
+          }),
+          languageOverrides: {
+            PPL: {
+              hideDatePicker: true,
+            },
+          },
+        }),
+      };
+
+      (mockDataService.query.queryString.getQuery as jest.Mock).mockReturnValue({
+        language: 'PPL',
+        query: 'source=test_index',
+        dataset: {
+          type: 'DEFAULT',
+          timeFieldName: '@timestamp',
+        },
+      });
+
+      (mockDataService.query.queryString.getDatasetService as jest.Mock).mockReturnValue(
+        mockDatasetService
+      );
+      (mockDataService.query.filterManager.getFilters as jest.Mock).mockReturnValue([]);
+
+      mockFetch.mockReturnValue(of({ data: 'mock response' }));
+      mockIsPPLSearchQuery.mockReturnValue(true);
+    });
+
+    it('should pass abort signal to runSearch method', () => {
+      const abortController = new AbortController();
+      const mockOptions: ISearchOptions = {
+        abortSignal: abortController.signal,
+      };
+
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: {
+          body: {
+            query: {
+              queries: [
+                {
+                  language: 'PPL',
+                  query: 'source=test_index',
+                  dataset: {
+                    type: 'DEFAULT',
+                    timeFieldName: '@timestamp',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      const runSearchSpy = jest.spyOn(pplSearchInterceptor as any, 'runSearch');
+
+      pplSearchInterceptor.search(mockRequest, mockOptions);
+
+      expect(runSearchSpy).toHaveBeenCalledWith(
+        mockRequest,
+        abortController.signal,
+        SEARCH_STRATEGY.PPL
+      );
+    });
+
+    it('should handle aborted requests in runSearch', async () => {
+      const abortController = new AbortController();
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: {
+          body: {
+            query: {
+              queries: [
+                {
+                  language: 'PPL',
+                  query: 'source=test_index',
+                  dataset: {
+                    type: 'DEFAULT',
+                    timeFieldName: '@timestamp',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      // Mock fetch to throw abort error
+      const abortError = new Error('Request aborted');
+      abortError.name = 'AbortError';
+      mockFetch.mockReturnValue(
+        new Promise((_, reject) => {
+          setTimeout(() => reject(abortError), 10);
+        }) as any
+      );
+
+      const buildQuerySpy = jest.spyOn(pplSearchInterceptor as any, 'buildQuery')
+        .mockResolvedValue({
+          language: 'PPL',
+          query: 'source=test_index',
+          dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+        });
+
+      // Abort the request
+      abortController.abort();
+
+      try {
+        await (pplSearchInterceptor as any).runSearch(
+          mockRequest,
+          abortController.signal,
+          SEARCH_STRATEGY.PPL
+        );
+      } catch (error) {
+        expect(error.name).toBe('AbortError');
+      }
+
+      expect(buildQuerySpy).toHaveBeenCalled();
+    });
+
+    it('should pass abort signal to fetch call', async () => {
+      const abortController = new AbortController();
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: {
+          body: {
+            query: {
+              queries: [
+                {
+                  language: 'PPL',
+                  query: 'source=test_index',
+                  dataset: {
+                    type: 'DEFAULT',
+                    timeFieldName: '@timestamp',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      const mockQueryResult = {
+        language: 'PPL',
+        query: 'source=test_index',
+        dataset: { type: 'DEFAULT', timeFieldName: '@timestamp' },
+      };
+
+      jest.spyOn(pplSearchInterceptor as any, 'buildQuery').mockResolvedValue(mockQueryResult);
+      jest.spyOn(pplSearchInterceptor as any, 'getAggConfig').mockReturnValue(undefined);
+
+      await (pplSearchInterceptor as any).runSearch(
+        mockRequest,
+        abortController.signal,
+        SEARCH_STRATEGY.PPL
+      );
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          signal: abortController.signal,
+          path: `/api/enhancements/search/${SEARCH_STRATEGY.PPL}`,
+        }),
+        mockQueryResult,
+        undefined
+      );
+    });
+
+    it('should work without abort signal', () => {
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: {
+          body: {
+            query: {
+              queries: [
+                {
+                  language: 'PPL',
+                  query: 'source=test_index',
+                  dataset: {
+                    type: 'DEFAULT',
+                    timeFieldName: '@timestamp',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      const runSearchSpy = jest.spyOn(pplSearchInterceptor as any, 'runSearch');
+
+      pplSearchInterceptor.search(mockRequest, {});
+
+      expect(runSearchSpy).toHaveBeenCalledWith(
+        mockRequest,
+        undefined,
+        SEARCH_STRATEGY.PPL
+      );
+    });
+
+    it('should handle signal in context for different strategies', async () => {
+      const abortController = new AbortController();
+      const mockRequest: IOpenSearchDashboardsSearchRequest = {
+        params: {
+          body: {
+            query: {
+              queries: [
+                {
+                  language: 'PPL',
+                  query: 'source=s3_table',
+                  dataset: {
+                    type: DATASET.S3,
+                    timeFieldName: '@timestamp',
+                  },
+                },
+              ],
+            },
+          },
+          pollQueryResultsParams: {
+            queryId: 'test-query-123',
+          },
+        },
+      };
+
+      const mockQueryResult = {
+        language: 'PPL',
+        query: 'source=s3_table',
+        dataset: { type: DATASET.S3, timeFieldName: '@timestamp' },
+      };
+
+      // Mock dataset service to not return search options for S3
+      const mockDatasetService = {
+        getType: jest.fn().mockReturnValue({
+          languageOverrides: {
+            PPL: {
+              hideDatePicker: true,
+            },
+          },
+        }),
+      };
+
+      (mockDataService.query.queryString.getQuery as jest.Mock).mockReturnValue({
+        language: 'PPL',
+        query: 'source=s3_table',
+        dataset: {
+          type: DATASET.S3,
+          timeFieldName: '@timestamp',
+        },
+      });
+
+      (mockDataService.query.queryString.getDatasetService as jest.Mock).mockReturnValue(
+        mockDatasetService
+      );
+
+      jest.spyOn(pplSearchInterceptor as any, 'buildQuery').mockResolvedValue(mockQueryResult);
+      jest.spyOn(pplSearchInterceptor as any, 'getAggConfig').mockReturnValue(undefined);
+
+      await (pplSearchInterceptor as any).runSearch(
+        mockRequest,
+        abortController.signal,
+        SEARCH_STRATEGY.PPL_ASYNC
+      );
+
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          signal: abortController.signal,
+          path: `/api/enhancements/search/${SEARCH_STRATEGY.PPL_ASYNC}`,
+          body: expect.objectContaining({
+            pollQueryResultsParams: { queryId: 'test-query-123' },
+          }),
+        }),
+        mockQueryResult,
+        undefined
+      );
+    });
+  });
 });

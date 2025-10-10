@@ -114,17 +114,20 @@ export const pplAsyncSearchStrategyProvider = (
       }
     },
 
-    // Implement backend query cancellation for PPL with data source detection
-    cancel: async (context, queryId: string, dataSourceType?: string) => {
+    // Implement backend query cancellation with data source detection
+    cancel: async (context, queryId: string) => {
       try {
-        logger.info(`pplAsyncSearchStrategy: Cancelling backend query ${queryId} for data source ${dataSourceType || 'default'}`);
+        logger.info(`pplAsyncSearchStrategy: Cancelling backend query ${queryId}`);
 
         // Use the helper function to cancel based on data source type
-        await cancelQueryByDataSource(queryId, dataSourceType, client, logger, 'PPL');
+        // For now, we'll use undefined data source type which defaults to the standard API
+        await cancelQueryByDataSource(queryId, undefined, client, logger, 'PPL');
 
         logger.info(`pplAsyncSearchStrategy: Successfully cancelled backend query ${queryId}`);
       } catch (error) {
-        logger.error(`pplAsyncSearchStrategy: Failed to cancel backend query ${queryId}: ${error.message}`);
+        logger.error(
+          `pplAsyncSearchStrategy: Failed to cancel backend query ${queryId}: ${error.message}`
+        );
         throw error;
       }
     },

@@ -120,16 +120,13 @@ export const sqlAsyncSearchStrategyProvider = (
     },
 
     // Implement backend query cancellation with data source detection
-    cancel: async (context, queryId: string, dataSourceType?: string) => {
+    cancel: async (context, queryId: string) => {
       try {
-        logger.info(
-          `sqlAsyncSearchStrategy: Cancelling backend query ${queryId} for data source ${
-            dataSourceType || 'default'
-          }`
-        );
+        logger.info(`sqlAsyncSearchStrategy: Cancelling backend query ${queryId}`);
 
         // Use the helper function to cancel based on data source type
-        await cancelQueryByDataSource(queryId, dataSourceType, client, logger, 'SQL');
+        // For now, we'll use undefined data source type which defaults to the standard API
+        await cancelQueryByDataSource(queryId, undefined, client, logger, 'SQL');
 
         logger.info(`sqlAsyncSearchStrategy: Successfully cancelled backend query ${queryId}`);
       } catch (error) {
