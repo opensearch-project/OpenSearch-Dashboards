@@ -19,6 +19,7 @@ export interface HistogramConfig {
   histogramConfigs: AggConfigs | undefined;
   aggs: Record<string, any> | undefined;
   effectiveInterval: string;
+  finalInterval: string;
   fromDate: string;
   toDate: string;
   timeFieldName: string;
@@ -49,8 +50,8 @@ export function fillMissingTimestamps(
     return seriesMap;
   }
 
-  const startTime = moment(fromDate, 'YYYY-MM-DD HH:mm:ss.SSS');
-  const endTime = moment(toDate, 'YYYY-MM-DD HH:mm:ss.SSS');
+  const startTime = moment.utc(fromDate, 'YYYY-MM-DD HH:mm:ss.SSS');
+  const endTime = moment.utc(toDate, 'YYYY-MM-DD HH:mm:ss.SSS');
 
   // generate complete timestamp array (inclusive of start and end)
   const allTimestamps: number[] = [];
@@ -82,25 +83,12 @@ export function fillMissingTimestamps(
   return filledSeriesMap;
 }
 
-export const buildPPLHistogramQuery = (
-  query: string,
-  histogramConfig: HistogramConfig,
-  services: ExploreServices
-): string => {
-  const { aggs, fromDate, toDate, timeFieldName, breakdownField } = histogramConfig;
+export const buildPPLHistogramQuery = (query: string, histogramConfig: HistogramConfig): string => {
+  const { aggs, finalInterval, timeFieldName, breakdownField } = histogramConfig;
 
-  if (!aggs || !timeFieldName) {
+  if (!aggs || !timeFieldName || !finalInterval) {
     return query;
   }
-
-  const finalInterval =
-    aggs[2].date_histogram.fixed_interval ??
-    aggs[2].date_histogram.calendar_interval ??
-    services.data.search.aggs.calculateAutoTimeExpression({
-      from: fromDate,
-      to: toDate,
-      mode: 'absolute',
-    });
 
   if (breakdownField) {
     return `${query} | timechart span=${finalInterval} limit=4 count() by ${breakdownField}`;
@@ -177,15 +165,7 @@ export const processRawResultsForHistogram = (
       seriesMap.get(breakdownValue)!.push([timestamp, count]);
     });
 
-    // fill in missing timestamps with zeros
-    const filledSeriesMap = fillMissingTimestamps(
-      seriesMap,
-      histogramConfig.effectiveInterval,
-      histogramConfig.fromDate,
-      histogramConfig.toDate
-    );
-
-    const series = Array.from(filledSeriesMap.entries()).map(([breakdownValue, dataPoints]) => ({
+    const series = Array.from(seriesMap.entries()).map(([breakdownValue, dataPoints]) => ({
       breakdownValue,
       dataPoints,
     }));
@@ -281,10 +261,20 @@ export const createHistogramConfigWithInterval = (
     'YYYY-MM-DD HH:mm:ss.SSS'
   );
 
+  const finalInterval =
+    aggs[2].date_histogram.fixed_interval ??
+    aggs[2].date_histogram.calendar_interval ??
+    services.data.search.aggs.calculateAutoTimeExpression({
+      from: fromDate,
+      to: toDate,
+      mode: 'absolute',
+    });
+
   return {
     histogramConfigs,
     aggs,
     effectiveInterval,
+    finalInterval,
     fromDate,
     toDate,
     timeFieldName: dataView.timeFieldName,
