@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiComboBox, EuiFlexItem, EuiText, EuiIconTip } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
@@ -30,15 +30,23 @@ export const BreakdownFieldSelector: React.FC<BreakdownFieldSelectorProps> = ({ 
   const dispatch = useDispatch();
   const { dataset, isLoading } = useDatasetContext();
 
-  // Read breakdown field from Redux state
   const breakdownField = useSelector((state: RootState) => state.queryEditor.breakdownField);
   const query = useSelector((state: RootState) => state.query);
   const interval = useSelector((state: RootState) => state.legacy.interval);
-  const [error, setError] = useState<string | undefined>(undefined);
+  const queryStatusMap = useSelector((state: RootState) => state.queryEditor.queryStatusMap);
 
-  // Get available fields from the dataset
+  const breakdownCacheKey = breakdownField ? prepareHistogramCacheKey(query, true) : undefined;
+  const standardCacheKey = prepareHistogramCacheKey(query, false);
+  const breakdownQueryStatus = breakdownCacheKey ? queryStatusMap[breakdownCacheKey] : undefined;
+  const standardQueryStatus = queryStatusMap[standardCacheKey];
+
+  // Breakdown error: breakdown has error AND standard histogram exists without error
+  const error =
+    breakdownQueryStatus?.error && !standardQueryStatus?.error
+      ? breakdownQueryStatus.error.message.details || 'Breakdown query failed'
+      : undefined;
+
   const availableFields = ((dataset?.fields?.getAll() || []) as unknown) as DataViewField[];
-
   const stringFields = availableFields.filter(
     (field) =>
       field.type === 'string' &&
@@ -60,13 +68,17 @@ export const BreakdownFieldSelector: React.FC<BreakdownFieldSelectorProps> = ({ 
     const newField = selected.length > 0 && selected[0].value ? selected[0].value : undefined;
     dispatch(setBreakdownField(newField));
 
-    // Clear cache and trigger new histogram query with the breakdown field
-    const histogramCacheKey = prepareHistogramCacheKey(query);
+    const histogramCacheKey = prepareHistogramCacheKey(query, !!newField);
     const queryString = defaultPrepareQueryString(query);
     dispatch(clearResultsByKey(histogramCacheKey));
     dispatch(clearQueryStatusMapByKey(histogramCacheKey));
     dispatch(
-      executeHistogramQuery({ services, cacheKey: histogramCacheKey, queryString, interval })
+      executeHistogramQuery({
+        services,
+        cacheKey: histogramCacheKey,
+        queryString,
+        interval,
+      })
     );
   };
 

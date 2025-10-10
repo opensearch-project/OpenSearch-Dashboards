@@ -72,10 +72,11 @@ export const defaultPrepareQueryString = (query: Query): string => {
 };
 
 /**
- * Prepare cache key for data table queries (no aggregations)
+ * Prepare cache key for histogram queries (with optional breakdown flag)
  */
-export const prepareHistogramCacheKey = (query: Query): string => {
-  return `histogram:${defaultPrepareQueryString(query)}`;
+export const prepareHistogramCacheKey = (query: Query, hasBreakdown?: boolean): string => {
+  const baseKey = `histogram:${defaultPrepareQueryString(query)}`;
+  return hasBreakdown ? `${baseKey}:breakdown` : baseKey;
 };
 
 /**
@@ -225,7 +226,8 @@ export const executeQueries = createAsyncThunk<
   const defaultCacheKey = defaultPrepareQueryString(query);
   // Use separate cache keys for data table and histogram
   const dataTableCacheKey = defaultCacheKey;
-  const histogramCacheKey = prepareHistogramCacheKey(query);
+  const breakdownField = state.queryEditor.breakdownField;
+  const histogramCacheKey = prepareHistogramCacheKey(query, !!breakdownField);
 
   // Check what needs execution for core queries
   const needsDataTableQuery = !results[dataTableCacheKey];
@@ -415,7 +417,7 @@ const executeQueryBase = async (
       dataset,
       query:
         isHistogramQuery && histogramConfig
-          ? buildPPLHistogramQuery(queryString, histogramConfig, services)
+          ? buildPPLHistogramQuery(queryString, histogramConfig)
           : queryString,
     };
 
