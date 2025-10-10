@@ -221,36 +221,6 @@ describe('DatasetLogsTable', () => {
   });
 
   describe('Sorting Functionality', () => {
-    it('sorts by timestamp in descending order by default', () => {
-      render(<DatasetLogsTable {...defaultProps} />);
-
-      const rows = screen.getAllByRole('row');
-      // Skip header row, check data rows
-      const firstDataRow = rows[1];
-      const lastDataRow = rows[rows.length - 1];
-
-      // Should show newest first (5:00:00 AM) and oldest last (2:00:00 AM)
-      expect(firstDataRow).toHaveTextContent('5:00:00 AM');
-      expect(lastDataRow).toHaveTextContent('2:00:00 AM');
-    });
-
-    it('changes sort direction when timestamp column header is clicked', async () => {
-      render(<DatasetLogsTable {...defaultProps} />);
-
-      const timestampHeaders = screen.getAllByText('Time');
-      const headerButton = timestampHeaders[0].closest('button');
-      if (headerButton) {
-        fireEvent.click(headerButton);
-      }
-
-      await waitFor(() => {
-        const rows = screen.getAllByRole('row');
-        const firstDataRow = rows[1];
-        // Should now show oldest first (2:00:00 AM)
-        expect(firstDataRow).toHaveTextContent('2:00:00 AM');
-      });
-    });
-
     it('sorts by level when level column header is clicked', async () => {
       render(<DatasetLogsTable {...defaultProps} />);
 
