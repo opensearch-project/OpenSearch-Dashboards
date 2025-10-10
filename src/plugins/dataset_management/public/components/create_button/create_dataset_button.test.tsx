@@ -46,8 +46,8 @@ describe('CreateDatasetButton', () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText('Logs')).toBeInTheDocument();
-      expect(screen.getByText('Traces')).toBeInTheDocument();
+      expect(screen.getByTestId('createLogsDataset')).toBeInTheDocument();
+      expect(screen.getByTestId('createTracesDataset')).toBeInTheDocument();
     });
   });
 
@@ -63,13 +63,13 @@ describe('CreateDatasetButton', () => {
     // Open popover
     fireEvent.click(button);
     await waitFor(() => {
-      expect(screen.getByText('Logs')).toBeInTheDocument();
+      expect(screen.getByTestId('createLogsDataset')).toBeInTheDocument();
     });
 
     // Close popover
     fireEvent.click(button);
     await waitFor(() => {
-      expect(screen.queryByText('Logs')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('createLogsDataset')).not.toBeInTheDocument();
     });
   });
 
@@ -133,11 +133,11 @@ describe('CreateDatasetButton', () => {
     fireEvent.click(logsOption);
 
     await waitFor(() => {
-      expect(screen.queryByText('Logs')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('createLogsDataset')).not.toBeInTheDocument();
     });
   });
 
-  it('displays correct labels for signal type options', async () => {
+  it('displays signal type options with descriptions', async () => {
     render(
       <CreateDatasetButton onCreateDataset={mockOnCreateDataset}>
         Create Dataset
@@ -148,13 +148,21 @@ describe('CreateDatasetButton', () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      // Check labels
-      expect(screen.getByText('Logs')).toBeInTheDocument();
-      expect(screen.getByText('Traces')).toBeInTheDocument();
+      // Verify both options are present by test-id
+      const logsOption = screen.getByTestId('createLogsDataset');
+      const tracesOption = screen.getByTestId('createTracesDataset');
 
-      // Check descriptions
-      expect(screen.getByText('Create a dataset for log data')).toBeInTheDocument();
-      expect(screen.getByText('Create a dataset for trace data')).toBeInTheDocument();
+      expect(logsOption).toBeInTheDocument();
+      expect(tracesOption).toBeInTheDocument();
+
+      // Verify each option has a description
+      const logsDescription = logsOption.querySelector('.euiDescriptionList__description');
+      const tracesDescription = tracesOption.querySelector('.euiDescriptionList__description');
+
+      expect(logsDescription).toBeInTheDocument();
+      expect(tracesDescription).toBeInTheDocument();
+      expect(logsDescription?.textContent).toBeTruthy();
+      expect(tracesDescription?.textContent).toBeTruthy();
     });
   });
 

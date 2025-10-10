@@ -176,21 +176,28 @@ Cypress.Commands.add(
   }
 );
 
-Cypress.Commands.add('setIndexPatternAsDataset', (indexPattern, dataSourceName) => {
-  cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
-  cy.get(`[title="${dataSourceName}::${indexPattern}"]`).should('be.visible').click();
+Cypress.Commands.add(
+  'setIndexPatternAsDataset',
+  (indexPattern, dataSourceName, datasetEnabled = false) => {
+    cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
+    if (datasetEnabled) {
+      cy.get(`[title="${indexPattern}"]`).should('be.visible').click();
+    } else {
+      cy.get(`[title="${dataSourceName}::${indexPattern}"]`).should('be.visible').click();
+    }
 
-  // verify that it has been selected
-  cy.getElementByTestId('datasetSelectorButton').should(
-    'contain.text',
-    `${dataSourceName}::${indexPattern}`
-  );
-});
+    // verify that it has been selected
+    cy.getElementByTestId('datasetSelectorButton').should(
+      'contain.text',
+      `${dataSourceName}::${indexPattern}`
+    );
+  }
+);
 
-Cypress.Commands.add('setDataset', (dataset, dataSourceName, type) => {
+Cypress.Commands.add('setDataset', (dataset, dataSourceName, type, datasetEnabled = false) => {
   switch (type) {
     case 'INDEX_PATTERN':
-      cy.setIndexPatternAsDataset(dataset, dataSourceName);
+      cy.setIndexPatternAsDataset(dataset, dataSourceName, datasetEnabled);
       break;
     case 'INDEXES':
       cy.setIndexAsDataset(dataset, dataSourceName);

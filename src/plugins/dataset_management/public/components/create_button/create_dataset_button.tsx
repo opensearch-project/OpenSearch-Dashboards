@@ -53,7 +53,7 @@ export const CreateDatasetButton: React.FC<CreateDatasetButtonProps> = ({
         defaultMessage: 'Traces',
       }),
       description: i18n.translate('datasetManagement.createDatasetButton.tracesDescription', {
-        defaultMessage: 'Create a dataset for application monitoring and trace explorations',
+        defaultMessage: 'Create dataset for application\nmonitoring and trace analysis',
       }),
       testSubj: 'createTracesDataset',
       signalType: CORE_SIGNAL_TYPES.TRACES,
@@ -94,9 +94,13 @@ export const CreateDatasetButton: React.FC<CreateDatasetButtonProps> = ({
               }}
               data-test-subj={option.testSubj}
             >
-              <EuiDescriptionList style={{ whiteSpace: 'nowrap' }} compressed={true}>
-                <EuiDescriptionListTitle>{option.text}</EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>{option.description}</EuiDescriptionListDescription>
+              <EuiDescriptionList compressed={true}>
+                <EuiDescriptionListTitle style={{ whiteSpace: 'nowrap' }}>
+                  {option.text}
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription style={{ whiteSpace: 'pre-line' }}>
+                  {option.description}
+                </EuiDescriptionListDescription>
               </EuiDescriptionList>
             </EuiContextMenuItem>
           );

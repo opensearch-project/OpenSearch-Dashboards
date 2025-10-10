@@ -362,46 +362,6 @@ cy.explore.add('setDataset', (dataset, dataSourceName, type) => {
 });
 
 cy.explore.add(
-  'setIndexPatternFromAdvancedSelector',
-  (indexPattern, dataSourceName, language, finalAction = 'submit') => {
-    cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
-      req.continue((res) => {
-        if (res.statusCode === 404) {
-          res.send(200, { status: 'ok', data: {} });
-        }
-      });
-    }).as('agentConfigRequest');
-    cy.getElementByTestId('datasetSelectButton')
-      .should('be.visible')
-      .should('not.be.disabled')
-      .click();
-    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
-    cy.get(`[title="Index Patterns"]`).click();
-
-    cy.getElementByTestId('datasetExplorerWindow')
-      .find(`[title="${dataSourceName}::${indexPattern}"]`)
-      .should('be.visible')
-      .click({ force: true });
-    cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
-
-    if (language) {
-      cy.getElementByTestId('advancedSelectorLanguageSelect').should('be.visible').select(language);
-    }
-
-    if (finalAction === 'submit') {
-      cy.getElementByTestId('advancedSelectorConfirmButton').should('be.visible').click();
-
-      // verify that it has been selected
-      cy.getElementByTestId('datasetSelectButton').should('contain.text', `${indexPattern}`);
-    } else {
-      cy.get('[type="button"]').contains('Cancel').click();
-    }
-
-    cy.wait(3000);
-  }
-);
-
-cy.explore.add(
   'setIndexAsDataset',
   (index, dataSourceName, language, timeFieldName = 'timestamp', finalAction = 'submit') => {
     cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
@@ -468,7 +428,7 @@ cy.explore.add('setIndexPatternAsDataset', (indexPattern) => {
 
 cy.explore.add(
   'setIndexPatternFromAdvancedSelector',
-  (indexPattern, dataSourceName, language, finalAction = 'submit') => {
+  (indexPattern, language, finalAction = 'submit') => {
     cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
       req.continue((res) => {
         if (res.statusCode === 404) {
@@ -485,7 +445,7 @@ cy.explore.add(
     cy.get(`[title="Index Patterns"]`).click();
 
     cy.getElementByTestId('datasetExplorerWindow')
-      .find(`[title="${dataSourceName}::${indexPattern}"]`)
+      .find(`[title="${indexPattern}"]`)
       .should('be.visible')
       .click({ force: true });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
