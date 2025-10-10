@@ -27,6 +27,25 @@ export interface HistogramConfig {
 }
 
 /**
+ * Converts a timestamp string to Unix epoch time in milliseconds.
+ * Handles both ISO 8601 timestamps with timezone info and timestamps without timezone.
+ * If no timezone information is present, assumes UTC by appending 'Z'.
+ *
+ * @param timestampStr - Timestamp string to convert
+ * @returns Unix epoch time in milliseconds
+ */
+function parseTimestampToMs(timestampStr: string): number {
+  const hasTimezoneInfo =
+    timestampStr.includes('Z') ||
+    timestampStr.includes('+') ||
+    (timestampStr.includes('-') && timestampStr.lastIndexOf('-') > 10);
+
+  return hasTimezoneInfo
+    ? new Date(timestampStr).getTime()
+    : new Date(timestampStr + 'Z').getTime();
+}
+
+/**
  * Fills in missing timestamps in a time series map with zero values
  *
  * @param seriesMap - Map of series names to arrays of [timestamp, count] tuples
@@ -148,13 +167,7 @@ export const processRawResultsForHistogram = (
       const breakdownValue = String(sourceValues[breakdownIdx]);
       const count = Number(sourceValues[countIdx]) || 0;
 
-      // TODO: redundant logic, put this out in a function
-      const timestamp =
-        timestampStr.includes('Z') ||
-        timestampStr.includes('+') ||
-        (timestampStr.includes('-') && timestampStr.lastIndexOf('-') > 10)
-          ? new Date(timestampStr).getTime()
-          : new Date(timestampStr + 'Z').getTime();
+      const timestamp = parseTimestampToMs(timestampStr);
 
       totalHits += count;
 
@@ -209,12 +222,7 @@ export const processRawResultsForHistogram = (
         const buckets = value as Array<{ key: string; value: number }>;
         tempResult.aggregations[id] = {
           buckets: buckets.map((bucket) => {
-            const timestamp =
-              bucket.key.includes('Z') ||
-              bucket.key.includes('+') ||
-              (bucket.key.includes('-') && bucket.key.lastIndexOf('-') > 10)
-                ? new Date(bucket.key).getTime()
-                : new Date(bucket.key + 'Z').getTime();
+            const timestamp = parseTimestampToMs(bucket.key);
             totalHits += bucket.value;
             return {
               key_as_string: bucket.key,
