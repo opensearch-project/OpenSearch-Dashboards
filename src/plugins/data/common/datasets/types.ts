@@ -117,6 +117,8 @@ export interface DataStructure {
   title: string;
   /** The type of the data structure */
   type: string;
+  /** Optional description of the data structure */
+  description?: string;
   /** Optional reference to the parent data structure */
   parent?: DataStructure;
   /** Optional array of child data structures */
