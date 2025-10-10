@@ -5,12 +5,12 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useTimelineBarColor, useTimelineBarRange } from './timeline_waterfall_bar_hooks';
-import { calculateSpanTimeRange } from '../../utils/span_timerange_utils';
-import { resolveServiceNameFromSpan } from '../ppl_resolve_helpers';
-import { Span } from '../span_detail_table';
+import { calculateSpanTimeRange } from '../../../utils/span_timerange_utils';
+import { resolveServiceNameFromSpan } from '../../ppl_resolve_helpers';
+import { Span } from '../types';
 
-jest.mock('../../utils/span_timerange_utils');
-jest.mock('../ppl_resolve_helpers');
+jest.mock('../../../utils/span_timerange_utils');
+jest.mock('../../ppl_resolve_helpers');
 
 const mockCalculateSpanTimeRange = calculateSpanTimeRange as jest.MockedFunction<
   typeof calculateSpanTimeRange

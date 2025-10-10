@@ -39,7 +39,6 @@ describe('TraceDetailTabs', () => {
     // Service map tab is currently disabled
     expect(screen.queryByText('Service map')).not.toBeInTheDocument();
     expect(screen.getByText('Span list')).toBeInTheDocument();
-    expect(screen.getByText('Tree view')).toBeInTheDocument();
   });
 
   it('shows span count badge in span list tab', () => {
@@ -55,15 +54,6 @@ describe('TraceDetailTabs', () => {
 
     const spanListTab = screen.getByText('Span list').closest('button');
     expect(spanListTab).toHaveAttribute('aria-selected', 'true');
-  });
-
-  it('calls setActiveTab when a tab is clicked', () => {
-    render(<TraceDetailTabs {...defaultProps} />);
-
-    const treeViewTab = screen.getByText('Tree view');
-    fireEvent.click(treeViewTab);
-
-    expect(mockSetActiveTab).toHaveBeenCalledWith(TraceDetailTab.TREE_VIEW);
   });
 
   it('shows error filter button when there are errors and no error filter applied', () => {
