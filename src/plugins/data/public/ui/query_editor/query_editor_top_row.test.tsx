@@ -420,7 +420,7 @@ describe('QueryEditorTopRow', () => {
 
       const cancelButton = getByTestId('queryCancelButton');
       expect(cancelButton).toBeInTheDocument();
-      expect(cancelButton).toHaveTextContent('Cancel');
+      expect(cancelButton).toHaveAttribute('aria-label', 'Cancel');
     });
 
     it('Should have correct styles for cancel button', async () => {

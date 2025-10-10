@@ -10,7 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
-  EuiButton,
+  EuiButtonIcon,
   OnRefreshProps,
   prettyDuration,
 } from '@elastic/eui';
@@ -325,19 +325,20 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       />
     );
 
-    const cancelButton = props.showCancelButton && props.isQueryRunning ? (
-      <EuiButton
-        size="s"
-        color="danger"
-        onClick={props.onCancel}
-        data-test-subj="queryCancelButton"
-        isLoading={false}
-      >
-        {i18n.translate('data.query.queryBar.queryCancelButtonLabel', {
-          defaultMessage: 'Cancel',
-        })}
-      </EuiButton>
-    ) : null;
+    const cancelButton =
+      props.showCancelButton && props.isQueryRunning ? (
+        <EuiButtonIcon
+          size="s"
+          color="danger"
+          onClick={props.onCancel}
+          data-test-subj="queryCancelButton"
+          aria-label={i18n.translate('data.query.queryBar.queryCancelButtonLabel', {
+            defaultMessage: 'Cancel',
+          })}
+          iconType="cross"
+          className="osdQueryEditor__cancelButton"
+        />
+      ) : null;
 
     const buttonGroup = (
       <EuiFlexGroup gutterSize="s" responsive={false}>
