@@ -405,23 +405,23 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
           <>
             {transformedHits.length === 0 && <NoMatchMessage traceId={traceId} />}
 
-          {transformedHits.length > 0 && (
-            <>
-              <div className="exploreTraceView__tabsContainer">
-                <EuiPanel paddingSize="s">
-                  <TraceDetailTabs
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                    transformedHits={transformedHits}
-                    errorCount={errorCount}
-                    spanFilters={spanFilters}
-                    handleErrorFilterClick={handleErrorFilterClick}
-                    logDatasets={logDatasets}
-                    logsData={logsData}
-                    isLogsLoading={isLogsLoading}
-                  />
-                </EuiPanel>
-              </div>
+            {transformedHits.length > 0 && (
+              <>
+                <div className="exploreTraceView__tabsContainer">
+                  <EuiPanel paddingSize="s">
+                    <TraceDetailTabs
+                      activeTab={activeTab}
+                      setActiveTab={setActiveTab}
+                      transformedHits={transformedHits}
+                      errorCount={errorCount}
+                      spanFilters={spanFilters}
+                      handleErrorFilterClick={handleErrorFilterClick}
+                      logDatasets={logDatasets}
+                      logsData={logsData}
+                      isLogsLoading={isLogsLoading}
+                    />
+                  </EuiPanel>
+                </div>
 
                 {/* Filter badges section */}
                 {spanFilters.length > 0 && (
@@ -501,21 +501,21 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                               </div>
                             )}
 
-                          {(activeTab === TraceDetailTab.TIMELINE ||
-                            activeTab === TraceDetailTab.SPAN_LIST) && (
-                            <SpanDetailPanel
-                              key={`span-panel-${visualizationKey}`}
-                              chrome={chrome}
-                              spanFilters={spanFilters}
-                              payloadData={JSON.stringify(transformedHits)}
-                              isGanttChartLoading={isBackgroundLoading}
-                              colorMap={colorMap}
-                              onSpanSelect={handleSpanSelect}
-                              selectedSpanId={spanId}
-                              activeView={activeTab}
-                              servicesInOrder={servicesInOrder}
-                            />
-                          )}
+                            {(activeTab === TraceDetailTab.TIMELINE ||
+                              activeTab === TraceDetailTab.SPAN_LIST) && (
+                              <SpanDetailPanel
+                                key={`span-panel-${visualizationKey}`}
+                                chrome={chrome}
+                                spanFilters={spanFilters}
+                                payloadData={JSON.stringify(transformedHits)}
+                                isGanttChartLoading={isBackgroundLoading}
+                                colorMap={colorMap}
+                                onSpanSelect={handleSpanSelect}
+                                selectedSpanId={spanId}
+                                activeView={activeTab}
+                                servicesInOrder={servicesInOrder}
+                              />
+                            )}
 
                             {activeTab === TraceDetailTab.LOGS && (
                               <TraceLogsTab
@@ -532,42 +532,42 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
                       <EuiResizableButton />
 
-                    <EuiResizablePanel
-                      initialSize={isFlyout ? 50 : 30}
-                      minSize={isFlyout ? '30%' : '300px'}
-                    >
-                      <div className="exploreTraceView__sidebarPanel">
-                        <SpanDetailTabs
-                          selectedSpan={selectedSpan}
-                          addSpanFilter={(field: string, value: string | number | boolean) => {
-                            const newFilters = [...spanFilters];
-                            const index = newFilters.findIndex(
-                              ({ field: filterField }) => field === filterField
-                            );
-                            if (index === -1) {
-                              newFilters.push({ field, value });
-                            } else {
-                              newFilters.splice(index, 1, { field, value });
-                            }
-                            setSpanFiltersWithStorage(newFilters);
-                          }}
-                          setCurrentSpan={handleSpanSelect}
-                          logDatasets={logDatasets}
-                          logsData={logsData}
-                          isLogsLoading={isLogsLoading}
-                        />
-                      </div>
-                    </EuiResizablePanel>
-                  </>
-                )}
-              </EuiResizableContainer>
-            </>
-          )}
-        </>
-      )}
-    </>
-  );
-};
+                      <EuiResizablePanel
+                        initialSize={isFlyout ? 50 : 30}
+                        minSize={isFlyout ? '30%' : '300px'}
+                      >
+                        <div className="exploreTraceView__sidebarPanel">
+                          <SpanDetailTabs
+                            selectedSpan={selectedSpan}
+                            addSpanFilter={(field: string, value: string | number | boolean) => {
+                              const newFilters = [...spanFilters];
+                              const index = newFilters.findIndex(
+                                ({ field: filterField }) => field === filterField
+                              );
+                              if (index === -1) {
+                                newFilters.push({ field, value });
+                              } else {
+                                newFilters.splice(index, 1, { field, value });
+                              }
+                              setSpanFiltersWithStorage(newFilters);
+                            }}
+                            setCurrentSpan={handleSpanSelect}
+                            logDatasets={logDatasets}
+                            logsData={logsData}
+                            isLogsLoading={isLogsLoading}
+                          />
+                        </div>
+                      </EuiResizablePanel>
+                    </>
+                  )}
+                </EuiResizableContainer>
+              </>
+            )}
+          </>
+        )}
+      </>
+    );
+  };
 
   const TraceDetailsHeader: React.FC = () => (
     <TraceTopNavMenu
