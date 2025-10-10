@@ -8,6 +8,18 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TraceTopNavMenu } from './top_nav_buttons';
 
+const mockSetBreadcrumbs = jest.fn();
+
+jest.mock('../../../../../../../opensearch_dashboards_react/public', () => ({
+  useOpenSearchDashboards: () => ({
+    services: {
+      chrome: {
+        setBreadcrumbs: mockSetBreadcrumbs,
+      },
+    },
+  }),
+}));
+
 Object.assign(navigator, {
   clipboard: {
     writeText: jest.fn(),
@@ -18,6 +30,9 @@ describe('TraceTopNavMenu', () => {
   const defaultProps = {
     payloadData: [{ test: 'data' }],
     traceId: 'test-trace-id',
+    title: 'test-title',
+    isFlyout: false,
+    traceDetailsLink: 'trace-details-link',
   };
 
   let mockElements: HTMLElement[] = [];
@@ -130,6 +145,38 @@ describe('TraceTopNavMenu', () => {
     }).not.toThrow();
   });
 
+  it('sets breadcrumb with the page title', () => {
+    render(<TraceTopNavMenu {...defaultProps} />);
+    expect(mockSetBreadcrumbs).toHaveBeenCalledWith([{ text: 'test-title' }]);
+
+    // Should not display the title directly
+    expect(screen.queryByText('test-title')).not.toBeInTheDocument();
+  });
+
+  it('does not render trace details link on traces page', () => {
+    render(<TraceTopNavMenu {...defaultProps} />);
+    expect(screen.queryByTestId('traceDetailsLink')).not.toBeInTheDocument();
+  });
+
+  it('handles flyout case', () => {
+    const mockSetMenuMountPoint = jest.fn();
+    render(
+      <TraceTopNavMenu
+        {...defaultProps}
+        isFlyout={true}
+        setMenuMountPoint={mockSetMenuMountPoint}
+      />
+    );
+
+    expect(screen.getByTestId('traceDetailsLink')).toBeInTheDocument();
+    expect(screen.getByTestId('viewRawDataBtn')).toBeInTheDocument();
+    expect(screen.getByTestId('traceIdBadge')).toBeInTheDocument();
+    expect(screen.getByTestId('traceDetailsTitle')).toHaveTextContent('test-title');
+
+    expect(mockSetBreadcrumbs).not.toHaveBeenCalled();
+    expect(mockSetMenuMountPoint).not.toHaveBeenCalled();
+  });
+
   describe('Trace ID Badge', () => {
     it('displays trace ID badge with correct format when traceId is provided', () => {
       const mockSetMenuMountPoint = jest.fn();
@@ -177,6 +224,9 @@ describe('TraceTopNavMenu', () => {
 
       const propsWithoutTraceId = {
         payloadData: [{ test: 'data' }],
+        isFlyout: false,
+        title: 'test-title',
+        traceDetailsLink: 'trace-details-link',
       };
 
       render(
