@@ -104,12 +104,8 @@ export const DatasetLogsTable: React.FC<DatasetLogsTableProps> = ({
         name: i18n.translate('explore.datasetLogsTable.column.message', {
           defaultMessage: 'Message',
         }),
+        truncateText: true,
         sortable: false,
-        render: (message: string) => (
-          <EuiText size="xs" style={{ wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
-            {message || 'N/A'}
-          </EuiText>
-        ),
       },
       {
         field: 'spanId',
@@ -240,7 +236,7 @@ export const DatasetLogsTable: React.FC<DatasetLogsTableProps> = ({
     isExpandable: true,
     columns,
     loading: isLoading,
-    tableLayout: 'auto' as const,
+    tableLayout: 'fixed' as const,
     'data-test-subj': 'dataset-logs-table',
     ...(compactMode
       ? {}

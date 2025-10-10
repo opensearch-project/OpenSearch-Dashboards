@@ -123,14 +123,6 @@ describe('DatasetLogsTable', () => {
       expect(warnBadge).toBeInTheDocument();
     });
 
-    it('handles missing or empty data gracefully', () => {
-      render(<DatasetLogsTable {...defaultProps} />);
-
-      // Check for empty level and message handling
-      expect(screen.getAllByText('-')).toHaveLength(2); // One for empty level, one for empty spanId
-      expect(screen.getAllByText('N/A')).toHaveLength(1); // For empty message
-    });
-
     it('renders span IDs as clickable when onSpanClick is provided', () => {
       const mockOnSpanClick = jest.fn();
       render(<DatasetLogsTable {...defaultProps} onSpanClick={mockOnSpanClick} />);
@@ -292,25 +284,6 @@ describe('DatasetLogsTable', () => {
 
       expect(screen.getByTestId('dataset-logs-table')).toBeInTheDocument();
       expect(screen.getByText('Time')).toBeInTheDocument();
-    });
-
-    it('handles logs with missing fields', () => {
-      const logsWithMissingFields: LogHit[] = [
-        {
-          _id: 'log1',
-          _source: {},
-          timestamp: '2023-10-01T10:00:00Z',
-          traceId: 'trace1',
-          level: undefined as any,
-          message: undefined as any,
-          spanId: undefined as any,
-        },
-      ];
-
-      render(<DatasetLogsTable logs={logsWithMissingFields} />);
-
-      expect(screen.getAllByText('-')).toHaveLength(2); // For missing level and spanId
-      expect(screen.getAllByText('N/A')).toHaveLength(1); // For missing message
     });
 
     it('handles invalid timestamp gracefully', () => {
