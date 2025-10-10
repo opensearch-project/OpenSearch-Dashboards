@@ -162,36 +162,6 @@ export const convertResult = ({
     });
   }
 
-  // Preserve breakdownSeries for timechart responses
-  if ((data as any).breakdownSeries) {
-    const breakdownSeries = (data as any).breakdownSeries;
-
-    // Parse string timestamps to numbers and calculate hits.total
-    const parsedSeries = breakdownSeries.series.map((series: any) => ({
-      breakdownValue: series.breakdownValue,
-      dataPoints: series.dataPoints.map((dataPoint: [string, number]) => {
-        const timestampStr = dataPoint[0];
-        const count = dataPoint[1];
-
-        // Apply same timezone-aware parsing as standard aggregations (lines 143-149)
-        const timestamp =
-          timestampStr.includes('Z') ||
-          timestampStr.includes('+') ||
-          (timestampStr.includes('-') && timestampStr.lastIndexOf('-') > 10)
-            ? new Date(timestampStr).getTime()
-            : new Date(timestampStr + 'Z').getTime();
-
-        searchResponse.hits.total += count;
-        return [timestamp, count];
-      }),
-    }));
-
-    (searchResponse as any).breakdownSeries = {
-      breakdownField: breakdownSeries.breakdownField,
-      series: parsedSeries,
-    };
-  }
-
   return searchResponse;
 };
 
