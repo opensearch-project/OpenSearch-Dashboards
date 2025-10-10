@@ -124,9 +124,8 @@ export const processRawResultsForHistogram = (
     }
   });
 
-  const isTimechart = breakdownField; // TODO: find some way of checking the RESULTS to see if its a timechart response
-
-  if (isTimechart) {
+  // breakdownField from the histogramConfig will be definitive for knowing if we sent out timechart
+  if (breakdownField) {
     const seriesMap = new Map<string, Array<[number, number]>>();
     const fieldSchema = rawResults.fieldSchema;
 
@@ -134,7 +133,7 @@ export const processRawResultsForHistogram = (
       return rawResults;
     }
 
-    const timestampIdx = 0; // TODO: pull from fieldSchema that matches the timestamp
+    const timestampIdx = fieldSchema.findIndex((col: any) => col.name === '@timestamp');
     const breakdownIdx = fieldSchema.findIndex((col: any) => col.name === breakdownField);
     const countIdx = fieldSchema.findIndex((col: any) => col.name === 'count');
 

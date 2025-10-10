@@ -67,8 +67,9 @@ export const ExploreLogsChart = ({
   }, [from, to]);
   const { interval } = useSelector((state: RootState) => state.legacy);
   const query = useSelector((state: RootState) => state.query);
+  const breakdownField = useSelector((state: RootState) => state.queryEditor.breakdownField);
   const dispatch = useDispatch();
-  const cacheKey = prepareHistogramCacheKey(query);
+  const cacheKey = prepareHistogramCacheKey(query, !!breakdownField);
   const onChangeInterval = (newInterval: string) => {
     dispatch(setInterval(newInterval));
     dispatch(clearResultsByKey(cacheKey));

@@ -75,8 +75,9 @@ export const defaultPrepareQueryString = (query: Query): string => {
  * Prepare cache key for histogram queries (with optional breakdown flag)
  */
 export const prepareHistogramCacheKey = (query: Query, hasBreakdown?: boolean): string => {
-  const baseKey = `histogram:${defaultPrepareQueryString(query)}`;
-  return hasBreakdown ? `${baseKey}:breakdown` : baseKey;
+  return hasBreakdown
+    ? `histogram:breakdown:${defaultPrepareQueryString(query)}`
+    : `histogram:${defaultPrepareQueryString(query)}`;
 };
 
 /**
