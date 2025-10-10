@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiComboBox, EuiFlexItem, EuiText, EuiIconTip } from '@elastic/eui';
+import { EuiComboBox, EuiFlexItem, EuiText, EuiIconTip, EuiFlexGroup } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@osd/i18n';
 import { DataViewField } from '../../../../data/common';
@@ -106,13 +106,14 @@ export const BreakdownFieldSelector: React.FC<BreakdownFieldSelectorProps> = ({ 
         data-test-subj="histogramBreakdownFieldSelector"
         append={
           error ? (
-            <EuiIconTip
-              id="breakdownFieldError"
-              content={error}
-              color="danger"
-              size="s"
-              type="alert"
-            />
+            <EuiFlexGroup
+              gutterSize="none"
+              className="exploreChart__TimechartHeader__breakdown__errorIcon"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiIconTip id="breakdownFieldError" content={error} color="danger" type="alert" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           ) : undefined
         }
       />
