@@ -129,7 +129,7 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({
         </EuiFlexItem>
       )}
 
-      {!hasTopValues && !hasNumericSummary && !hasDateRange && hasExamples && (
+      {hasExamples && (
         <EuiFlexItem>
           <EuiPanel paddingSize="s">
             <EuiTitle size="xs">
