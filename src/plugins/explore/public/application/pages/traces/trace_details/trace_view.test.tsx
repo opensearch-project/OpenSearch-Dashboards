@@ -761,28 +761,6 @@ describe('TraceDetails', () => {
     expect(errorCountElement).toHaveTextContent('1');
   });
 
-  it('handles service legend modal', async () => {
-    const history = createMemoryHistory();
-
-    render(
-      <Router history={history}>
-        <TraceDetails />
-      </Router>
-    );
-
-    await waitFor(() => {
-      expect(document.querySelector('[data-testid="trace-detail-tabs"]')).toBeInTheDocument();
-    });
-
-    const serviceLegendButton = screen.getByTestId('openServiceLegendModalButton');
-    fireEvent.click(serviceLegendButton);
-    expect(screen.getByTestId('serviceLegendModal')).toBeInTheDocument();
-
-    const closeButton = screen.getByTestId('closeServiceLegendModalButton');
-    fireEvent.click(closeButton);
-    expect(screen.queryByTestId('serviceLegendModal')).not.toBeInTheDocument();
-  });
-
   it('handles filter operations', async () => {
     const history = createMemoryHistory();
 

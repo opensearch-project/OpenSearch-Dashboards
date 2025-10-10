@@ -27,6 +27,9 @@ export interface SpanTableProps {
   }>;
   selectedSpanId?: string;
   colorMap?: Record<string, string>;
+  servicesInOrder?: string[];
+  setIsServiceLegendOpen?: (isOpen: boolean) => void;
+  isServiceLegendOpen?: boolean;
 }
 
 export interface SpanSearchParams {

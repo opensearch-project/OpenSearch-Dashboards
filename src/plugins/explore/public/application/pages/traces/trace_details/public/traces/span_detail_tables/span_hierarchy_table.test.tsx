@@ -23,6 +23,12 @@ jest.mock('./span_cell', () => ({
   SpanCell: jest.fn(() => <div data-test-subj="span-cell">SpanCell</div>),
 }));
 
+jest.mock('./service_legend_button', () => ({
+  ServiceLegendButton: jest.fn(() => (
+    <div data-test-subj="service-legend-button">ServiceLegendButton</div>
+  )),
+}));
+
 jest.mock('../ppl_resolve_helpers');
 jest.mock('./utils');
 jest.mock('../../utils/span_timerange_utils');
@@ -114,6 +120,14 @@ describe('SpanHierarchyTable', () => {
 
     const toolbar = getByTestId('toolbar');
     expect(toolbar).toBeInTheDocument();
+  });
+
+  it('passes ServiceLegendButton to secondaryToolbar', () => {
+    render(<SpanHierarchyTable {...defaultProps} />);
+
+    const mockCall = mockRenderCustomDataGrid.mock.calls[0]?.[0];
+    expect(mockCall?.secondaryToolbar).toHaveLength(1);
+    expect(mockCall?.secondaryToolbar![0]).toBeDefined();
   });
 
   it('filters by error status', () => {
