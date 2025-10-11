@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
   DatasetSelector,
@@ -78,8 +78,34 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const datePickerRef = useRef<EuiSuperDatePicker | null>(null);
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
+  const [shouldShowCancelButton, setShouldShowCancelButton] = useState(false);
+  const cancelButtonTimerRef = useRef<NodeJS.Timeout | null>(null);
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName, data, keyboardShortcut } = opensearchDashboards.services;
+
+  // Handle delayed cancel button visibility
+  useEffect(() => {
+    if (props.isQueryRunning && props.showCancelButton) {
+      // Start timer to show cancel button after 500ms
+      cancelButtonTimerRef.current = setTimeout(() => {
+        setShouldShowCancelButton(true);
+      }, 500);
+    } else {
+      // Clear timer and hide button immediately when query stops
+      if (cancelButtonTimerRef.current) {
+        clearTimeout(cancelButtonTimerRef.current);
+        cancelButtonTimerRef.current = null;
+      }
+      setShouldShowCancelButton(false);
+    }
+
+    // Cleanup timer on unmount
+    return () => {
+      if (cancelButtonTimerRef.current) {
+        clearTimeout(cancelButtonTimerRef.current);
+      }
+    };
+  }, [props.isQueryRunning, props.showCancelButton]);
 
   const handleOpenDatePicker = useCallback(() => {
     if (datePickerRef.current) {
@@ -325,20 +351,19 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       />
     );
 
-    const cancelButton =
-      props.showCancelButton && props.isQueryRunning ? (
-        <EuiButtonIcon
-          size="s"
-          color="danger"
-          onClick={props.onCancel}
-          data-test-subj="queryCancelButton"
-          aria-label={i18n.translate('data.query.queryBar.queryCancelButtonLabel', {
-            defaultMessage: 'Cancel',
-          })}
-          iconType="cross"
-          className="osdQueryEditor__cancelButton"
-        />
-      ) : null;
+    const cancelButton = shouldShowCancelButton ? (
+      <EuiButtonIcon
+        size="s"
+        color="danger"
+        onClick={props.onCancel}
+        data-test-subj="queryCancelButton"
+        aria-label={i18n.translate('data.query.queryBar.queryCancelButtonLabel', {
+          defaultMessage: 'Cancel',
+        })}
+        iconType="cross"
+        className="osdQueryEditor__cancelButton"
+      />
+    ) : null;
 
     const buttonGroup = (
       <EuiFlexGroup gutterSize="s" responsive={false}>

@@ -90,6 +90,12 @@
   :first-child {
     min-width: 0 !important;
   }
+
+  .osdQueryEditor__cancelButton {
+    border: 1px solid #BD271E !important;
+    border-radius: 4px !important;
+    background-color: transparent !important;
+  }
 }
 
 .osdQueryEditor__datasetSelectorWrapper {
@@ -263,9 +269,4 @@
 
 .euiFormControlLayout--group .osdQuerEditor__singleLine .euiButtonEmpty {
   border-right: 0;
-}
-
-.osdQueryEditor__cancelButton {
-  border: 1px solid #BD271E;
-  border-radius: 4px;
 }
