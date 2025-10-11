@@ -299,12 +299,10 @@ export class VisualizationBuilder {
     if (!currentVisConfig) {
       return;
     }
-    if (currentVisConfig.styles) {
-      this.visConfig$.next({
-        ...currentVisConfig,
-        styles: { ...currentVisConfig.styles, ...styles },
-      });
-    }
+    this.visConfig$.next({
+      ...currentVisConfig,
+      styles: { ...currentVisConfig.styles, ...styles },
+    });
   }
 
   setVisConfig(config?: ChartConfig) {
