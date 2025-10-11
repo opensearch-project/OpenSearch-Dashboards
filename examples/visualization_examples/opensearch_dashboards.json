@@ -1,0 +1,8 @@
+{
+  "id": "visualizationExamples",
+  "version": "1.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["developerExamples", "expressions", "explore"]
+}

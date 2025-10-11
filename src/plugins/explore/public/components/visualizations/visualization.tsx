@@ -5,7 +5,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { VisualizationBuilder } from './visualization_builder';
-import { ChartStyleControlMap, ChartType } from './utils/use_visualization_types';
+import { StyleOptionsMapping, ChartType } from './utils/use_visualization_types';
 import { getExpressions } from '../../services/services';
 import { AxisRole } from './types';
 import { ChartConfig } from './visualization_builder.types';
@@ -14,7 +14,7 @@ interface Props<T extends ChartType> extends React.HTMLAttributes<HTMLDivElement
   data: Array<Record<string, any>>;
   type: T;
   fields?: Array<{ name: string; role: AxisRole }>;
-  options?: ChartStyleControlMap[T];
+  options?: StyleOptionsMapping[T];
 }
 
 export const Visualization = <T extends ChartType>({
