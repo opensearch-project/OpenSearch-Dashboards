@@ -222,9 +222,9 @@ export class CorrelationService {
     data: DataPublicPluginStart,
     traceId: string,
     size?: number
-  ): Promise<{ logDatasets: Dataset[]; logs: LogHit[] }> {
+  ): Promise<{ logDatasets: Dataset[]; logs: LogHit[]; datasetLogs: Record<string, LogHit[]> }> {
     if (!dataset?.id || !data || !traceId) {
-      return { logDatasets: [], logs: [] };
+      return { logDatasets: [], logs: [], datasetLogs: {} };
     }
 
     try {
@@ -232,24 +232,30 @@ export class CorrelationService {
 
       if (logDatasets.length > 0) {
         const sampleSize = size || this.uiSettings.get(SAMPLE_SIZE_SETTING);
+        const datasetLogs: Record<string, LogHit[]> = {};
+        let allLogs: LogHit[] = [];
 
-        // Fetch logs for the trace using the first log dataset
-        const logsResponse = await fetchTraceLogsByTraceId(data, {
-          traceId,
-          dataset: logDatasets[0], // Use first log dataset
-          limit: sampleSize,
-        });
+        // Fetch logs for all datasets
+        for (const logDataset of logDatasets) {
+          const logsResponse = await fetchTraceLogsByTraceId(data, {
+            traceId,
+            dataset: logDataset,
+            limit: sampleSize,
+          });
 
-        const logs = transformLogsResponseToHits(logsResponse);
+          const logs = transformLogsResponseToHits(logsResponse);
+          datasetLogs[logDataset.id] = logs;
+          allLogs = allLogs.concat(logs);
+        }
 
-        return { logDatasets, logs };
+        return { logDatasets, logs: allLogs, datasetLogs };
       }
 
-      return { logDatasets, logs: [] };
+      return { logDatasets, logs: [], datasetLogs: {} };
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error in checkCorrelationsAndFetchLogs:', error);
-      return { logDatasets: [], logs: [] };
+      return { logDatasets: [], logs: [], datasetLogs: {} };
     }
   }
 }

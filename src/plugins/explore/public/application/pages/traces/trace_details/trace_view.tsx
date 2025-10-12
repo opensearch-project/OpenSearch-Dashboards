@@ -125,6 +125,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const [isServiceLegendOpen, setIsServiceLegendOpen] = useState(false);
   const [logsData, setLogsData] = useState<LogHit[]>([]);
   const [logDatasets, setLogDatasets] = useState<Dataset[]>([]);
+  const [datasetLogs, setDatasetLogs] = useState<Record<string, LogHit[]>>({});
   const [isLogsLoading, setIsLogsLoading] = useState<boolean>(false);
 
   // Create PPL service instance
@@ -166,6 +167,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
         .then((result) => {
           setLogDatasets(result.logDatasets);
           setLogsData(result.logs);
+          setDatasetLogs(result.datasetLogs);
         })
         .catch((error) => {
           // eslint-disable-next-line no-console
@@ -534,6 +536,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                                 traceId={traceId}
                                 logDatasets={logDatasets}
                                 logsData={logsData}
+                                datasetLogs={datasetLogs}
                                 isLoading={isLogsLoading}
                                 onSpanClick={handleSpanSelect}
                               />
