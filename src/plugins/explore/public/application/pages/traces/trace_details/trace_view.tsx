@@ -11,15 +11,8 @@ import {
   EuiResizableContainer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiButtonEmpty,
   EuiText,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiOverlayMask,
   EuiBadge,
   EuiFlyoutHeader,
   EuiFlyoutBody,
@@ -122,7 +115,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const mainPanelRef = useRef<HTMLDivElement | null>(null);
   const [visualizationKey, setVisualizationKey] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<string>(TraceDetailTab.TIMELINE);
-  const [isServiceLegendOpen, setIsServiceLegendOpen] = useState(false);
   const [logsData, setLogsData] = useState<LogHit[]>([]);
   const [logDatasets, setLogDatasets] = useState<Dataset[]>([]);
   const [isLogsLoading, setIsLogsLoading] = useState<boolean>(false);
@@ -426,9 +418,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                       errorCount={errorCount}
                       spanFilters={spanFilters}
                       handleErrorFilterClick={handleErrorFilterClick}
-                      servicesInOrder={servicesInOrder}
-                      setIsServiceLegendOpen={setIsServiceLegendOpen}
-                      isServiceLegendOpen={isServiceLegendOpen}
                       logDatasets={logDatasets}
                       logsData={logsData}
                       isLogsLoading={isLogsLoading}
@@ -526,6 +515,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                                 onSpanSelect={handleSpanSelect}
                                 selectedSpanId={spanId}
                                 activeView={activeTab}
+                                servicesInOrder={servicesInOrder}
                               />
                             )}
 
@@ -576,58 +566,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
               </>
             )}
           </>
-        )}
-
-        {/* Service Legend Modal */}
-        {isServiceLegendOpen && (
-          <EuiOverlayMask>
-            <EuiModal
-              onClose={() => setIsServiceLegendOpen(false)}
-              data-test-subj="serviceLegendModal"
-            >
-              <EuiModalHeader>
-                <EuiModalHeaderTitle>
-                  {i18n.translate('explore.traceView.modal.serviceLegendTitle', {
-                    defaultMessage: 'Service legend',
-                  })}
-                </EuiModalHeaderTitle>
-              </EuiModalHeader>
-              <EuiModalBody>
-                <EuiFlexGroup direction="column" gutterSize="s">
-                  {servicesInOrder.map((service) => (
-                    <EuiFlexItem grow={false} key={`service-legend-${service}`}>
-                      <EuiFlexGroup gutterSize="xs" alignItems="center">
-                        <EuiFlexItem grow={false}>
-                          <div
-                            className="exploreTraceView__serviceLegendColorIndicator"
-                            style={{
-                              backgroundColor: colorMap?.[service],
-                            }}
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText size="s">
-                            <span>{service}</span>
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  ))}
-                </EuiFlexGroup>
-              </EuiModalBody>
-              <EuiModalFooter>
-                <EuiButton
-                  onClick={() => setIsServiceLegendOpen(false)}
-                  data-test-subj="closeServiceLegendModalButton"
-                  fill
-                >
-                  {i18n.translate('explore.traceView.modal.closeButton', {
-                    defaultMessage: 'Close',
-                  })}
-                </EuiButton>
-              </EuiModalFooter>
-            </EuiModal>
-          </EuiOverlayMask>
         )}
       </>
     );
