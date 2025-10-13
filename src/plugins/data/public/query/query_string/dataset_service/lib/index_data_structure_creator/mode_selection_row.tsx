@@ -63,6 +63,7 @@ export const ModeSelectionRow: React.FC<ModeSelectionRowProps> = ({
           })}
         >
           <EuiComboBox
+            data-test-subj="index-scope-selector"
             options={modeOptions}
             selectedOptions={selectedModeOption ? [selectedModeOption] : []}
             onChange={onModeChange}

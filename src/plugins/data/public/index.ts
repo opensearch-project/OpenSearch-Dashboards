@@ -71,6 +71,7 @@ export {
   DatasetSelector,
   DatasetSelectorAppearance,
   DetailedDataset,
+  AdvancedSelector,
 } from './ui';
 
 import {

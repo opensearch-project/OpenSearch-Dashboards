@@ -213,6 +213,13 @@ export class DatasetService {
         await services.data?.dataViews.createAndSave(spec, undefined, asyncType);
       }
     } catch (error) {
+      // Re-throw DuplicateDataViewError without wrapping to preserve error type
+      if (
+        error?.name === 'DuplicateDataViewError' ||
+        error?.message?.includes('Duplicate data view')
+      ) {
+        throw error;
+      }
       throw new Error(`Failed to save dataset: ${dataset?.id}`);
     }
   }
