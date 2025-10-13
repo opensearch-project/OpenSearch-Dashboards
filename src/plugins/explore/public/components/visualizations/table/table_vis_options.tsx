@@ -5,24 +5,22 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@osd/i18n';
-import {
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSelect,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 import { StyleControlsProps } from '../utils/use_visualization_types';
-import { TableChartStyleControls } from './table_vis_config';
-import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { TableFooterOptions } from './table_vis_footer_options';
 import { CellAlignment, Threshold } from '../types';
 import { ThresholdCustomValues } from '../style_panel/threshold/threshold_custom_values';
 import { TableCellTypeOptions } from './table_cell_type_options';
+import {
+  defaultTableChartStyles,
+  TableChartStyle,
+  TableChartStyleOptions,
+} from './table_vis_config';
+import { DebouncedFieldNumber } from '../style_panel/utils';
+import { DataLinkOptions } from './data_link_options';
 
-export type TableVisStyleControlsProps = StyleControlsProps<TableChartStyleControls>;
+export type TableVisStyleControlsProps = StyleControlsProps<TableChartStyle>;
 
 const alignmentOptions = [
   { value: 'auto', text: 'Auto' },
@@ -41,14 +39,14 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
   updateVisualization,
 }) => {
   const updateStyleOption = useCallback(
-    <K extends keyof TableChartStyleControls>(key: K, value: TableChartStyleControls[K]) => {
+    <K extends keyof TableChartStyleOptions>(key: K, value: TableChartStyleOptions[K]) => {
       onStyleChange({ [key]: value });
     },
     [onStyleChange]
   );
 
   const onPageSizeChange = useCallback(
-    (value: number) => {
+    (value?: number) => {
       updateStyleOption('pageSize', value);
     },
     [updateStyleOption]
@@ -82,11 +80,6 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
     [updateStyleOption]
   );
 
-  const [localPageSize, handlePageSizeChange] = useDebouncedNumericValue(
-    styleOptions.pageSize,
-    onPageSizeChange
-  );
-
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -103,10 +96,14 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
               defaultMessage: 'Max rows per page',
             })}
           >
-            <EuiFieldNumber
+            <DebouncedFieldNumber
               compressed
-              value={localPageSize}
-              onChange={(e) => handlePageSizeChange(e.target.value)}
+              placeholder={i18n.translate('explore.stylePanel.table.pageSize.placeholder', {
+                defaultMessage: 'Default {value}',
+                values: { value: defaultTableChartStyles.pageSize },
+              })}
+              value={styleOptions.pageSize}
+              onChange={(val) => onPageSizeChange(val)}
               data-test-subj="visTablePageSizeInput"
               min={1}
             />
@@ -174,6 +171,17 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
           dateColumns={dateColumns}
           axisColumnMappings={axisColumnMappings}
           updateVisualization={updateVisualization}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <DataLinkOptions
+          styleOptions={styleOptions}
+          onStyleChange={onStyleChange}
+          axisColumnMappings={axisColumnMappings}
+          updateVisualization={updateVisualization}
+          numericalColumns={numericalColumns}
+          categoricalColumns={categoricalColumns}
+          dateColumns={dateColumns}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

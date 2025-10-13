@@ -6,7 +6,7 @@
 import { from } from 'rxjs';
 import { distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
 import { CodeCompletionCore } from 'antlr4-c3';
-import { Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
+import { Lexer as LexerType, ParserRuleContext, Parser as ParserType } from 'antlr4ng';
 import { monaco } from '@osd/monaco';
 import { HttpSetup } from 'opensearch-dashboards/public';
 import { QueryStringContract } from '../../query';
@@ -298,7 +298,7 @@ const singleParseQuery = <
 
   parser.removeErrorListeners();
   parser.addErrorListener(errorListener);
-  getParseTree(parser);
+  const parseTree = getParseTree(parser);
 
   const core = new CodeCompletionCore(parser);
   core.ignoredTokens = ignoredTokens;
@@ -311,17 +311,20 @@ const singleParseQuery = <
   }
 
   const suggestKeywords: KeywordSuggestion[] = [];
-  const { tokens, rules } = core.collectCandidates(cursorTokenIndex, context);
-  tokens.forEach((_, tokenType) => {
+
+  const { tokens, rules } = core.collectCandidates(
+    cursorTokenIndex,
+    (parseTree as unknown) as ParserRuleContext
+  );
+
+  tokens.forEach((producerRules, tokenType) => {
     // Literal keyword names are quoted
     const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');
     let symbolicName;
     if (!skipSymbolicKeywords) {
       symbolicName = parser.vocabulary.getSymbolicName(tokenType);
     }
-    if (!literalName && skipSymbolicKeywords) {
-      return;
-    }
+    if (!literalName && skipSymbolicKeywords) return;
 
     suggestKeywords.push({
       value: literalName || '',
@@ -353,7 +356,7 @@ export const parseQuery = <
   query,
   cursor,
   context,
-  skipSymbolicKeywords = true, // Set it to False to include Keywords(are defined as regex patterns) which don't have a literalName but have a SymbolicName
+  skipSymbolicKeywords = true,
 }: ParsingSubject<A, L, P>): AutocompleteResultBase => {
   const result = singleParseQuery({
     Lexer,
@@ -369,14 +372,12 @@ export const parseQuery = <
     skipSymbolicKeywords,
   });
 
-  if (!result.rerunWithoutRules) {
-    return result;
-  }
+  let rerunWithoutRules = result.rerunWithoutRules;
 
-  // go through each rule in list and run a singleParseQuery without it, combining results
-  result.rerunWithoutRules.forEach((rule) => {
+  while (rerunWithoutRules && rerunWithoutRules.length > 0) {
+    // Remove all unvisited rules from rulesToVisit at once
     const modifiedRulesToVisit = new Set(rulesToVisit);
-    modifiedRulesToVisit.delete(rule);
+    rerunWithoutRules.forEach((rule) => modifiedRulesToVisit.delete(rule));
 
     const nextResult = singleParseQuery({
       Lexer,
@@ -392,19 +393,9 @@ export const parseQuery = <
       skipSymbolicKeywords,
     });
 
-    // combine results from result and nextResult
-    // the combination logic is as follows:
-    // Array: it will combine the results of the array
-    // Boolean: we're operating under the assumption that it is a flag, so it needs to
-    //    be kept 'on' in the combined result
-    // Undefined: we're looking at the type in the initial result, so we default to the
-    //    latter result
-    // Any other type: we know this field isn't undefined, but the combination behavior
-    //    is not significant yet, so we default to the initial result. More types could
-    //    be added later if needed, but this is kept unobtrusive.
+    // merge logic
     for (const [field, value] of Object.entries(result)) {
       if (field === 'suggestColumns') {
-        // combine tables inside of suggestColumns
         if (result.suggestColumns || nextResult.suggestColumns) {
           result.suggestColumns = {
             tables: [
@@ -417,59 +408,46 @@ export const parseQuery = <
       }
 
       if (field === 'suggestKeywords') {
-        // combine suggestKeywords arrays with smarter deduplication
         const currentKeywords = result.suggestKeywords ?? [];
         const nextKeywords = nextResult.suggestKeywords ?? [];
-
-        // Create a Map to handle deduplication by id, preferring existing entries
         const keywordMap = new Map<number, KeywordSuggestion>();
-
-        // Add current keywords first (they take precedence)
-        currentKeywords.forEach((keyword) => {
-          if (keyword?.id !== undefined) {
-            keywordMap.set(keyword.id, keyword);
+        currentKeywords.forEach((kw) => {
+          if (kw?.id !== undefined) keywordMap.set(kw.id, kw);
+        });
+        nextKeywords.forEach((kw) => {
+          if (kw?.id !== undefined && !keywordMap.has(kw.id)) {
+            keywordMap.set(kw.id, kw);
           }
         });
-
-        // Add next keywords only if they don't already exist
-        nextKeywords.forEach((keyword) => {
-          if (keyword?.id !== undefined && !keywordMap.has(keyword.id)) {
-            keywordMap.set(keyword.id, keyword);
-          }
-        });
-
         result.suggestKeywords = Array.from(keywordMap.values());
         continue;
       }
 
       switch (typeof value) {
         case 'boolean':
-          // if a boolean is true, keep overall result true
           result[field as keyof A] ||= nextResult[field as keyof A];
           break;
         case 'undefined':
-          // use the latter result
           result[field as keyof A] = nextResult[field as keyof A];
           break;
         case 'object':
           if (Array.isArray(value)) {
-            // combine arrays
             const combined = [
               ...(((result[field as keyof A] as unknown) as any[]) ?? []),
               ...(((nextResult[field as keyof A] as unknown) as any[]) ?? []),
             ];
-            // ES6 magic to filter out duplicate objects based on id field
             ((result[field as keyof A] as unknown) as any[]) = combined.filter(
               (item, index, self) => index === self.findIndex((other) => other.id === item.id)
             );
-            break;
           }
+          break;
         default:
-          // use the initial result
           break;
       }
     }
-  });
+
+    rerunWithoutRules = nextResult.rerunWithoutRules;
+  }
 
   return result;
 };

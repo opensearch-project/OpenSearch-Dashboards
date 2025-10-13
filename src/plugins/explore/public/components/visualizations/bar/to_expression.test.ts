@@ -12,13 +12,13 @@ import {
   createNumericalHistogramBarChart,
   createSingleBarChart,
 } from './to_expression';
-import { defaultBarChartStyles, BarChartStyleControls } from './bar_vis_config';
+import { defaultBarChartStyles, BarChartStyle } from './bar_vis_config';
 import {
   VisColumn,
   VisFieldType,
   VEGASCHEMA,
   AxisRole,
-  ThresholdLineStyle,
+  ThresholdMode,
   AggregationType,
 } from '../types';
 
@@ -159,7 +159,7 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'manual',
         barWidth: 0.5,
@@ -192,7 +192,7 @@ describe('bar to_expression', () => {
     });
 
     test('does not apply size and spacing when barSizeMode is auto', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'auto',
         barWidth: 0.5,
@@ -227,17 +227,11 @@ describe('bar to_expression', () => {
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#00FF00',
-            show: true,
-            style: ThresholdLineStyle.Full,
-            value: 15,
-            width: 2,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const mockAxisColumnMappings = {
@@ -259,7 +253,7 @@ describe('bar to_expression', () => {
       const thresholdLayer = spec.layer[1];
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
-      expect(thresholdLayer.mark.strokeWidth).toBe(2);
+      expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 
@@ -398,17 +392,11 @@ describe('bar to_expression', () => {
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#00FF00',
-            show: true,
-            style: ThresholdLineStyle.Full,
-            value: 15,
-            width: 2,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const spec = createStackedBarSpec(
@@ -430,7 +418,7 @@ describe('bar to_expression', () => {
       const thresholdLayer = spec.layer[1];
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
-      expect(thresholdLayer.mark.strokeWidth).toBe(2);
+      expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
   });
@@ -527,7 +515,7 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'manual',
         barWidth: 0.5,
@@ -561,17 +549,11 @@ describe('bar to_expression', () => {
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#00FF00',
-            show: true,
-            style: ThresholdLineStyle.Full,
-            value: 15,
-            width: 2,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const mockAxisColumnMappings = {
@@ -592,7 +574,7 @@ describe('bar to_expression', () => {
       const thresholdLayer = spec.layer[1];
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
-      expect(thresholdLayer.mark.strokeWidth).toBe(2);
+      expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 
@@ -735,7 +717,7 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'manual',
         barWidth: 0.5,
@@ -771,17 +753,11 @@ describe('bar to_expression', () => {
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#00FF00',
-            show: true,
-            style: ThresholdLineStyle.Full,
-            value: 15,
-            width: 2,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const mockAxisColumnMappings = {
@@ -805,7 +781,7 @@ describe('bar to_expression', () => {
       const thresholdLayer = spec.layer[1];
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
-      expect(thresholdLayer.mark.strokeWidth).toBe(2);
+      expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 
@@ -948,7 +924,7 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'manual',
         barWidth: 0.5,
@@ -985,17 +961,11 @@ describe('bar to_expression', () => {
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#00FF00',
-            show: true,
-            style: ThresholdLineStyle.Full,
-            value: 15,
-            width: 2,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const mockAxisColumnMappings = {
@@ -1019,7 +989,7 @@ describe('bar to_expression', () => {
       const thresholdLayer = spec.spec.layer[1];
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
-      expect(thresholdLayer.mark.strokeWidth).toBe(2);
+      expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 

@@ -32,6 +32,23 @@ export interface DataSourceMeta {
   supportsTimeFilter?: boolean;
 }
 
+export interface DataStructureCreatorProps<FetchOptions = unknown> {
+  /** list of selected data structures */
+  path: DataStructure[];
+  /** update list of selected data structures */
+  setPath: (newPath: DataStructure[]) => void;
+  /** level of current data structure */
+  index: number;
+  /** select the next data structure or dataset */
+  selectDataStructure: (item: DataStructure | undefined, newPath: DataStructure[]) => Promise<void>;
+  /** fetch data structure using fetch in type config */
+  fetchDataStructure: (
+    path: DataStructure[],
+    dataType: string,
+    options?: FetchOptions
+  ) => Promise<DataStructure>;
+}
+
 /**
  * Represents the hierarchical structure of data within a data source.
  *
@@ -125,7 +142,12 @@ export interface DataStructure {
   children?: DataStructure[];
   hasNext?: boolean;
   paginationToken?: string;
+  /** Whether data structure supports multi-selecting children. The selected
+   * children will be combined using {@link DatasetTypeConfig['combineDataStructures']} */
   multiSelect?: boolean;
+  /** Custom component to select children and create next data structure or
+   * dataset. multiSelect will be ignored if using custom component */
+  DataStructureCreator?: React.ComponentType<DataStructureCreatorProps>;
   columnHeader?: string;
   /** Optional metadata for the data structure */
   meta?: DataStructureMeta;
@@ -259,6 +281,8 @@ export interface Dataset extends BaseDataset {
   };
   /** Optional parameter to indicate if the dataset is from a remote cluster(Cross Cluster search) */
   isRemoteDataset?: boolean;
+  displayName?: string;
+  description?: string;
 }
 
 export interface DatasetField {

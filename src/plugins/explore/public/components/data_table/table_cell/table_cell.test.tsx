@@ -7,10 +7,14 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TableCell, ITableCellProps } from './table_cell';
 import { useDatasetContext } from '../../../application/context';
+import { useTraceFlyoutContext } from '../../../application/pages/traces/trace_flyout/trace_flyout_context';
+import { isOnTracesPage } from './trace_utils/trace_utils';
 
 jest.mock('../../../application/context', () => ({
   useDatasetContext: jest.fn(),
 }));
+
+jest.mock('../../../application/pages/traces/trace_flyout/trace_flyout_context');
 
 describe('TableCell', () => {
   const mockOnFilter = jest.fn();
@@ -140,12 +144,11 @@ describe('TableCell', () => {
         traceId: 'test-trace-id-456',
         spanId: 'test-span-id-123',
       },
+      isOnTracesPage: true,
     };
 
     it('renders span ID as clickable link when on traces page', () => {
-      (window as any).location.pathname = '/app/explore/traces';
-
-      render(<TableCell {...spanIdProps} />);
+      render(<TableCell {...spanIdProps} isOnTracesPage={true} />);
 
       const spanIdLink = screen.getByTestId('spanIdLink');
       expect(spanIdLink).toBeInTheDocument();
@@ -156,9 +159,7 @@ describe('TableCell', () => {
     });
 
     it('renders regular cell content when not on traces page', () => {
-      (window as any).location.pathname = '/app/explore/logs';
-
-      render(<TableCell {...spanIdProps} />);
+      render(<TableCell {...spanIdProps} isOnTracesPage={false} />);
 
       const cellContent = screen.getByTestId('osdDocTableCellDataField');
       expect(cellContent).toBeInTheDocument();
@@ -214,8 +215,6 @@ describe('TableCell', () => {
     });
 
     it('extracts trace ID from different row data structures', () => {
-      (window as any).location.pathname = '/app/explore/traces';
-
       // Test with _source.traceId
       const propsWithSourceTraceId = {
         ...spanIdProps,
@@ -236,8 +235,6 @@ describe('TableCell', () => {
     });
 
     it('handles missing trace ID gracefully', () => {
-      (window as any).location.pathname = '/app/explore/traces';
-
       const propsWithoutTraceId = {
         ...spanIdProps,
         rowData: {
@@ -268,12 +265,68 @@ describe('TableCell', () => {
     });
 
     it('shows tooltip on span ID link hover', () => {
-      (window as any).location.pathname = '/app/explore/traces';
-
       render(<TableCell {...spanIdProps} />);
 
       const spanIdLink = screen.getByTestId('spanIdLink');
       expect(spanIdLink.closest('.euiToolTipAnchor')).toBeTruthy();
+    });
+  });
+
+  describe('Span flyout button functionality', () => {
+    const mockUseTraceFlyoutContext = useTraceFlyoutContext as jest.MockedFunction<
+      typeof useTraceFlyoutContext
+    >;
+    const mockOpenTraceFlyout = jest.fn();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockUseTraceFlyoutContext.mockReturnValue({
+        openTraceFlyout: mockOpenTraceFlyout,
+        closeTraceFlyout: jest.fn(),
+        isFlyoutOpen: false,
+        flyoutData: undefined,
+      });
+    });
+
+    const spanFlyoutProps: ITableCellProps = {
+      columnId: 'endTimeUnixNano',
+      sanitizedCellValue: '<span>Sep 20, 2025 @ 01:00:00.000000000</span>',
+      onFilter: mockOnFilter,
+      fieldMapping: { value: 'test' },
+      isTimeField: true,
+      rowData: {
+        traceId: 'test-trace-id-456',
+        spanId: 'test-span-id-123',
+      },
+    };
+
+    it('opens data table flyout when clicked on traces page', () => {
+      (window as any).location.pathname = '/app/explore/traces';
+
+      render(<TableCell {...spanFlyoutProps} isOnTracesPage={true} />);
+
+      const traceFlyoutButton = screen.getByTestId('traceFlyoutButton');
+      expect(traceFlyoutButton).toBeInTheDocument();
+      expect(traceFlyoutButton).toHaveTextContent('Sep 20, 2025 @ 01:00:00.000000000');
+
+      fireEvent.click(traceFlyoutButton);
+
+      expect(mockOpenTraceFlyout).toHaveBeenCalledWith({
+        spanId: 'test-span-id-123',
+        traceId: 'test-trace-id-456',
+        dataset: mockDataset,
+        rowData: spanFlyoutProps.rowData,
+      });
+    });
+
+    it('renders regular cell content when not on traces page', () => {
+      render(<TableCell {...spanFlyoutProps} isOnTracesPage={false} />);
+
+      const cellContent = screen.getByTestId('osdDocTableCellDataField');
+      expect(cellContent).toBeInTheDocument();
+      expect(cellContent.innerHTML).toBe('<span>Sep 20, 2025 @ 01:00:00.000000000</span>');
+
+      expect(screen.queryByTestId('traceFlyoutButton')).not.toBeInTheDocument();
     });
   });
 });

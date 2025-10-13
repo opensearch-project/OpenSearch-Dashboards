@@ -226,46 +226,57 @@ export const DiscoverField = ({
       <EuiFlexItem grow>
         <EuiText size="xs">{fieldName}</EuiText>
       </EuiFlexItem>
-      {!isSourceField && showSummary && (
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            ownFocus
-            display="block"
-            isOpen={infoIsOpen}
-            closePopover={() => setOpen(false)}
-            anchorPosition="rightUp"
-            panelPaddingSize="s"
-            button={
-              <EuiButtonIcon
-                iconType="inspect"
-                size="xs"
-                onClick={() => setOpen((state) => !state)}
-                aria-label={infoLabelAria}
-                data-test-subj={`field-${field.name}-showDetails`}
-                className="exploreSidebarField__actionButton"
-              />
-            }
-            panelClassName="exploreSidebarItem__fieldPopoverPanel"
-          >
-            <EuiPopoverTitle tabIndex={0}>
-              {' '}
-              {i18n.translate('explore.discover.fieldChooser.discoverField.fieldTopValuesLabel', {
-                defaultMessage: 'Top 5 values',
-              })}
-            </EuiPopoverTitle>
-            {infoIsOpen && (
-              <DiscoverFieldDetails
-                columns={columns}
-                details={getDetails(field)}
-                field={field}
-                dataSet={dataSet}
-                onAddFilter={onAddFilter}
-              />
-            )}
-          </EuiPopover>
-        </EuiFlexItem>
+      {!isSourceField && (
+        <div className="exploreSidebarField__actionButtons">
+          {showSummary && (
+            <EuiPopover
+              ownFocus
+              display="block"
+              isOpen={infoIsOpen}
+              closePopover={() => setOpen(false)}
+              anchorPosition="rightUp"
+              panelPaddingSize="s"
+              button={
+                <EuiToolTip
+                  delay="long"
+                  content={i18n.translate(
+                    'explore.discover.fieldChooser.discoverField.detailsTooltip',
+                    {
+                      defaultMessage: 'Show details',
+                    }
+                  )}
+                >
+                  <EuiButtonIcon
+                    iconType="inspect"
+                    size="xs"
+                    onClick={() => setOpen((state) => !state)}
+                    aria-label={infoLabelAria}
+                    data-test-subj={`field-${field.name}-showDetails`}
+                    className="exploreSidebarField__actionButton"
+                  />
+                </EuiToolTip>
+              }
+              panelClassName="exploreSidebarItem__fieldPopoverPanel"
+            >
+              <EuiPopoverTitle tabIndex={0}>
+                {i18n.translate('explore.discover.fieldChooser.discoverField.fieldTopValuesLabel', {
+                  defaultMessage: 'Top 5 values',
+                })}
+              </EuiPopoverTitle>
+              {infoIsOpen && (
+                <DiscoverFieldDetails
+                  columns={columns}
+                  details={getDetails(field)}
+                  field={field}
+                  dataSet={dataSet}
+                  onAddFilter={onAddFilter}
+                />
+              )}
+            </EuiPopover>
+          )}
+          {actionButton}
+        </div>
       )}
-      {!isSourceField && <EuiFlexItem grow={false}>{actionButton}</EuiFlexItem>}
     </EuiFlexGroup>
   );
 };

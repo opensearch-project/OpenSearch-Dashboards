@@ -2,18 +2,10 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import {
-  createLabelLayer,
-  getDataBound,
-  addTransform,
-  setRange,
-  enhanceStyle,
-} from './heatmap_chart_utils';
-import * as utils from './heatmap_chart_utils';
+import { createLabelLayer, getDataBound, addTransform, enhanceStyle } from './heatmap_chart_utils';
 import { AggregationType, VisFieldType, ColorSchemas, ScaleType, VisColumn } from '../types';
-
-import { defaultHeatmapChartStyles, HeatmapLabels } from './heatmap_vis_config';
-import * as colorUtil from '../utils/utils';
+import { DEFAULT_GREY } from '../theme/default_colors';
+import { defaultHeatmapChartStyles, HeatmapLabels, HeatmapChartStyle } from './heatmap_vis_config';
 
 describe('createLabelLayer', () => {
   const xAxis: VisColumn = {
@@ -155,6 +147,7 @@ describe('getDataBound', () => {
 
 describe('addTransform', () => {
   const styles = {
+    ...defaultHeatmapChartStyles,
     exclusive: {
       percentageMode: true,
       colorSchema: ColorSchemas.BLUES,
@@ -162,7 +155,6 @@ describe('addTransform', () => {
       colorScaleType: ScaleType.LINEAR,
       scaleToDataBounds: false,
       maxNumberOfColors: 4,
-      useCustomRanges: false,
       customRanges: [],
       label: {} as HeatmapLabels,
     },
@@ -183,6 +175,7 @@ describe('addTransform', () => {
   it('should return empty array when percentageMode is false', () => {
     const result = addTransform(
       {
+        ...defaultHeatmapChartStyles,
         exclusive: {
           ...styles.exclusive,
           percentageMode: false,
@@ -192,57 +185,6 @@ describe('addTransform', () => {
     );
 
     expect(result).toEqual([]);
-  });
-});
-
-describe('setRange', () => {
-  afterEach(() => {
-    jest.restoreAllMocks();
-  });
-
-  it('returns correct range of colors based on customRanges and schema', () => {
-    const mockColors = ['#111', '#222', '#333'];
-    jest.spyOn(colorUtil, 'generateColorBySchema').mockReturnValue(mockColors);
-
-    const styles = {
-      exclusive: {
-        customRanges: [
-          { min: 1, max: 5 },
-          { min: 6, max: 10 },
-        ],
-        colorSchema: ColorSchemas.GREENS,
-        percentageMode: true,
-        reverseSchema: false,
-        colorScaleType: ScaleType.LINEAR,
-        scaleToDataBounds: false,
-        maxNumberOfColors: 4,
-        useCustomRanges: true,
-        label: {} as HeatmapLabels,
-      },
-    };
-
-    const result = setRange(styles);
-    expect(colorUtil.generateColorBySchema).toHaveBeenCalledWith(3, ColorSchemas.GREENS);
-    expect(result).toEqual(mockColors);
-  });
-
-  it('returns one color if no customRanges are defined but user turns on useCustomRanges', () => {
-    const styles = {
-      exclusive: {
-        customRanges: [],
-        useCustomRanges: true,
-        colorSchema: ColorSchemas.GREENS,
-        percentageMode: true,
-        reverseSchema: false,
-        colorScaleType: ScaleType.LINEAR,
-        scaleToDataBounds: false,
-        maxNumberOfColors: 4,
-        label: {} as HeatmapLabels,
-      },
-    };
-
-    const result = setRange(styles);
-    expect(result).toEqual(['#ccffcc']);
   });
 });
 
@@ -266,9 +208,9 @@ describe('enhanceStyle', () => {
 
   it('applies percentageMode settings if enabled and addLegend is true', () => {
     const styles = {
+      ...defaultHeatmapChartStyles,
       exclusive: {
         customRanges: [],
-        useCustomRanges: true,
         colorSchema: ColorSchemas.GREENS,
         percentageMode: true,
         reverseSchema: false,
@@ -277,6 +219,7 @@ describe('enhanceStyle', () => {
         maxNumberOfColors: 4,
         label: {} as HeatmapLabels,
       },
+      useThresholdColor: false,
       addLegend: true,
     };
 
@@ -289,9 +232,9 @@ describe('enhanceStyle', () => {
 
   it('applies scaleToDataBounds if enabled', () => {
     const styles = {
+      ...defaultHeatmapChartStyles,
       exclusive: {
         customRanges: [],
-        useCustomRanges: true,
         colorSchema: ColorSchemas.GREENS,
         percentageMode: true,
         reverseSchema: false,
@@ -300,6 +243,7 @@ describe('enhanceStyle', () => {
         maxNumberOfColors: 4,
         label: {} as HeatmapLabels,
       },
+      useThresholdColor: false,
     };
 
     const markLayer = JSON.parse(JSON.stringify(baseMarkLayer));
@@ -308,11 +252,9 @@ describe('enhanceStyle', () => {
     expect(markLayer.encoding.color.scale.domain).toEqual([5, 15]);
   });
 
-  it('applies customRanges if enabled and sets correct scale and range', () => {
-    const mockRange = ['#ccffcc', '#669966', '#003300'];
-    jest.spyOn(utils, 'setRange').mockReturnValue(mockRange);
-
+  it('applies thresholds if enabled useThresholdColor', () => {
     const styles = {
+      ...defaultHeatmapChartStyles,
       exclusive: {
         colorSchema: ColorSchemas.GREENS,
         percentageMode: true,
@@ -320,11 +262,14 @@ describe('enhanceStyle', () => {
         colorScaleType: ScaleType.LINEAR,
         scaleToDataBounds: true,
         maxNumberOfColors: 4,
-        useCustomRanges: true,
         label: {} as HeatmapLabels,
-        customRanges: [
-          { min: 0, max: 5 },
-          { min: 6, max: 10 },
+      },
+      useThresholdColor: true,
+      thresholdOptions: {
+        baseColor: '#00BD6B',
+        thresholds: [
+          { value: 2, color: '#00FF00' },
+          { value: 8, color: '#0000FF' },
         ],
       },
     };
@@ -332,39 +277,53 @@ describe('enhanceStyle', () => {
     const markLayer = JSON.parse(JSON.stringify(baseMarkLayer));
     enhanceStyle(markLayer, styles, transformedData, colorField);
 
-    expect(markLayer.encoding.color.scale.type).toBe('quantize');
-    expect(markLayer.encoding.color.scale.domain).toEqual([0, 10]);
-    expect(markLayer.encoding.color.scale.range).toEqual(mockRange);
+    expect(markLayer.encoding.color.scale.type).toBe('threshold');
+    expect(markLayer.encoding.color.scale.domain).toEqual([0, 2, 8]);
+    expect(markLayer.encoding.color.scale.range).toEqual([
+      DEFAULT_GREY,
+      '#00BD6B',
+      '#00FF00',
+      '#0000FF',
+    ]);
   });
 
-  it('prefers customRanges over scaleToDataBounds when both are enabled', () => {
-    const mockRange = ['#ccffcc', '#003300'];
-    jest.spyOn(utils, 'setRange').mockReturnValue(mockRange);
-
+  it('prefers thresholds over scaleToDataBounds when both are enabled', () => {
     const styles = {
+      ...defaultHeatmapChartStyles,
       exclusive: {
         colorSchema: ColorSchemas.GREENS,
         percentageMode: true,
         reverseSchema: false,
         colorScaleType: ScaleType.LINEAR,
         maxNumberOfColors: 4,
-        useCustomRanges: true,
-        customRanges: [{ min: 2, max: 8 }],
         scaleToDataBounds: true,
         label: {} as HeatmapLabels,
+      },
+      useThresholdColor: true,
+      thresholdOptions: {
+        baseColor: '#00BD6B',
+        thresholds: [
+          { value: 2, color: '#00FF00' },
+          { value: 8, color: '#0000FF' },
+        ],
       },
     };
 
     const markLayer = JSON.parse(JSON.stringify(baseMarkLayer));
     enhanceStyle(markLayer, styles, transformedData, colorField);
 
-    expect(markLayer.encoding.color.scale.domain).toEqual([2, 8]);
-    expect(markLayer.encoding.color.scale.range).toEqual(mockRange);
+    expect(markLayer.encoding.color.scale.domain).toEqual([0, 2, 8]);
+    expect(markLayer.encoding.color.scale.range).toEqual([
+      DEFAULT_GREY,
+      '#00BD6B',
+      '#00FF00',
+      '#0000FF',
+    ]);
   });
 
   it('does nothing if no matching flags are set', () => {
     const markLayer = JSON.parse(JSON.stringify(baseMarkLayer));
-    enhanceStyle(markLayer, {}, transformedData, colorField);
+    enhanceStyle(markLayer, ({} as unknown) as HeatmapChartStyle, transformedData, colorField);
 
     expect(markLayer).toEqual(baseMarkLayer);
   });

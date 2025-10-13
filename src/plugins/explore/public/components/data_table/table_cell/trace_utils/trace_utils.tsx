@@ -4,12 +4,13 @@
  */
 
 import React from 'react';
-import { EuiToolTip, EuiLink, EuiIcon } from '@elastic/eui';
+import { EuiToolTip, EuiLink, EuiIcon, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { SPAN_ID_FIELD_PATHS, TRACE_ID_FIELD_PATHS } from '../../../../utils/trace_field_constants';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { DataView as Dataset } from '../../../../../../data/common';
 import './trace_utils.scss';
+import { useTraceFlyoutContext } from '../../../../application/pages/traces/trace_flyout/trace_flyout_context';
 
 export const isOnTracesPage = (): boolean => {
   return (
@@ -48,7 +49,7 @@ export const extractFieldFromRowData = (
 };
 
 export const buildTraceDetailsUrl = (
-  spanIdValue: string,
+  spanIdValue: string = '',
   traceIdValue: string,
   dataset: Dataset
 ): string => {
@@ -84,6 +85,32 @@ export const buildTraceDetailsUrl = (
   const urlParamsWithTrace = traceIdValue ? `${urlParams},traceId:'${traceIdValue}'` : urlParams;
 
   return `${origin}${basePath}/app/explore/traces/traceDetails#/?_a=(${urlParamsWithTrace})`;
+};
+
+export const getTraceDetailsUrlParams = (
+  spanIdValue: string,
+  traceIdValue: string,
+  dataset: Dataset
+) => {
+  const dataSourceInfo = (dataset as any)?.dataSource || (dataset as any)?.dataSourceRef;
+
+  return {
+    spanId: spanIdValue,
+    ...(traceIdValue && { traceId: traceIdValue }),
+    dataset: {
+      id: dataset?.id || 'default-dataset-id',
+      title: dataset?.title || 'otel-v1-apm-span-*',
+      type: dataset?.type || 'INDEX_PATTERN',
+      timeFieldName: dataset?.timeFieldName || 'timestamp',
+      ...(dataSourceInfo && {
+        dataSource: {
+          id: dataSourceInfo.id,
+          title: dataSourceInfo.title || dataSourceInfo.name,
+          type: dataSourceInfo.type,
+        },
+      }),
+    },
+  };
 };
 
 export const handleSpanIdNavigation = (
@@ -130,6 +157,42 @@ export const SpanIdLink: React.FC<SpanIdLinkProps> = ({ sanitizedCellValue, rowD
   );
 };
 
+export interface TraceFlyoutButtonProps {
+  sanitizedCellValue: string;
+  rowData: OpenSearchSearchHit<Record<string, unknown>>;
+  dataset: Dataset;
+}
+
+export const TraceFlyoutButton: React.FC<TraceFlyoutButtonProps> = ({
+  sanitizedCellValue,
+  rowData,
+  dataset,
+}) => {
+  const { openTraceFlyout } = useTraceFlyoutContext();
+  const handleSpanFlyoutClick = () => {
+    const spanIdValue = extractFieldFromRowData(rowData, SPAN_ID_FIELD_PATHS);
+    const traceIdValue = extractFieldFromRowData(rowData, TRACE_ID_FIELD_PATHS);
+
+    openTraceFlyout({
+      spanId: spanIdValue,
+      traceId: traceIdValue,
+      dataset,
+      rowData,
+    });
+  };
+
+  return (
+    <EuiButtonEmpty
+      onClick={handleSpanFlyoutClick}
+      data-test-subj="traceFlyoutButton"
+      size="xs"
+      flush="left"
+    >
+      {sanitizedCellValue.replace(/<[^>]*>/g, '').trim()}
+    </EuiButtonEmpty>
+  );
+};
+
 export interface TraceNavigationContext {
   traceId: string;
   spanId: string;
@@ -139,4 +202,14 @@ export interface TraceNavigationContext {
 export const navigateToTraceDetailsWithSpan = (context: TraceNavigationContext): void => {
   const url = buildTraceDetailsUrl(context.spanId, context.traceId, context.dataset);
   window.open(url, '_blank');
+};
+
+export const getStatusCodeColor = (statusCode: number | undefined): string => {
+  if (!statusCode) return 'default';
+
+  if (statusCode >= 200 && statusCode < 300) return 'success';
+  if (statusCode >= 300 && statusCode < 400) return 'primary';
+  if (statusCode >= 400 && statusCode < 500) return 'warning';
+  if (statusCode >= 500 && statusCode < 600) return 'danger';
+  return 'default';
 };

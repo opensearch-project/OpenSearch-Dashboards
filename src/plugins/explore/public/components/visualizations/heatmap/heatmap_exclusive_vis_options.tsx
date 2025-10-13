@@ -4,43 +4,36 @@
  */
 
 import { i18n } from '@osd/i18n';
-import {
-  EuiSwitch,
-  EuiButtonGroup,
-  EuiFieldNumber,
-  EuiColorPicker,
-  EuiFormRow,
-  EuiSelect,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiSwitch, EuiButtonGroup, EuiColorPicker, EuiFormRow, EuiSelect } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { HeatmapChartStyleControls } from './heatmap_vis_config';
-import { ColorSchemas, ScaleType, RangeValue, AggregationType } from '../types';
-import { getColorSchemas, getAggregationType } from '../utils/collections';
-import { CustomRange } from '../style_panel/custom_ranges';
-import { useDebouncedNumericValue, useDebouncedValue } from '../utils/use_debounced_value';
+import { defaultHeatmapChartStyles, HeatmapChartStyle } from './heatmap_vis_config';
+import { ColorSchemas, ScaleType } from '../types';
+import { getColorSchemas } from '../utils/collections';
+import { useDebouncedValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
+import { DebouncedFieldNumber } from '../style_panel/utils';
 
 interface HeatmapVisOptionsProps {
-  styles: HeatmapChartStyleControls['exclusive'];
-  onChange: (styles: HeatmapChartStyleControls['exclusive']) => void;
-  shouldShowType: boolean;
+  styles: HeatmapChartStyle['exclusive'];
+  useThresholdColor?: boolean;
+  onChange: (styles: HeatmapChartStyle['exclusive']) => void;
+  onUseThresholdColorChange: (useThresholdColor: boolean) => void;
 }
 
 interface HeatmapLabelVisOptionsProps {
-  shouldShowType: boolean;
-  styles: HeatmapChartStyleControls['exclusive']['label'];
-  onChange: (styles: HeatmapChartStyleControls['exclusive']['label']) => void;
+  styles: HeatmapChartStyle['exclusive']['label'];
+  onChange: (styles: HeatmapChartStyle['exclusive']['label']) => void;
 }
 
 export const HeatmapExclusiveVisOptions = ({
   styles,
+  useThresholdColor,
   onChange,
-  shouldShowType,
+  onUseThresholdColorChange,
 }: HeatmapVisOptionsProps) => {
-  const updateExclusiveOption = <K extends keyof HeatmapChartStyleControls['exclusive']>(
+  const updateExclusiveOption = <K extends keyof HeatmapChartStyle['exclusive']>(
     key: K,
-    value: HeatmapChartStyleControls['exclusive'][K]
+    value: HeatmapChartStyle['exclusive'][K]
   ) => {
     onChange({
       ...styles,
@@ -48,16 +41,6 @@ export const HeatmapExclusiveVisOptions = ({
     });
   };
   const colorSchemas = useMemo(() => getColorSchemas(), []);
-
-  const [maxNumberOfColors, handleMaxNumberOfColors] = useDebouncedNumericValue(
-    styles.maxNumberOfColors,
-    (val) => onChange({ ...styles, maxNumberOfColors: val }),
-    {
-      min: 2,
-      max: 20,
-      defaultValue: 4,
-    }
-  );
 
   return (
     <StyleAccordion
@@ -68,6 +51,17 @@ export const HeatmapExclusiveVisOptions = ({
       initialIsOpen={true}
       data-test-subj="heatmapExclusivePanel"
     >
+      <EuiFormRow>
+        <EuiSwitch
+          compressed
+          label={i18n.translate('explore.vis.heatmap.useThresholdColor', {
+            defaultMessage: 'Use threshold colors',
+          })}
+          data-test-subj="useThresholdColorButton"
+          checked={useThresholdColor ?? false}
+          onChange={(e) => onUseThresholdColorChange(e.target.checked)}
+        />
+      </EuiFormRow>
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.heatmap.exclusive.colorSchema', {
           defaultMessage: 'Color schema',
@@ -78,6 +72,7 @@ export const HeatmapExclusiveVisOptions = ({
           options={colorSchemas}
           value={styles.colorSchema}
           onChange={(e) => updateExclusiveOption('colorSchema', e.target.value as ColorSchemas)}
+          onMouseUp={(e) => e.stopPropagation()}
         />
       </EuiFormRow>
 
@@ -139,7 +134,7 @@ export const HeatmapExclusiveVisOptions = ({
             defaultMessage: 'Scale to data bounds',
           })}
           checked={styles.scaleToDataBounds}
-          disabled={styles.percentageMode || styles.useCustomRanges}
+          disabled={styles.percentageMode || useThresholdColor}
           onChange={(e) => updateExclusiveOption('scaleToDataBounds', e.target.checked)}
         />
       </EuiFormRow>
@@ -151,7 +146,7 @@ export const HeatmapExclusiveVisOptions = ({
           label={i18n.translate('explore.stylePanel.heatmap.exclusive.percentageMode', {
             defaultMessage: 'Percentage mode',
           })}
-          disabled={styles.useCustomRanges || styles.scaleToDataBounds}
+          disabled={useThresholdColor || styles.scaleToDataBounds}
           checked={styles.percentageMode}
           onChange={(e) => updateExclusiveOption('percentageMode', e.target.checked)}
         />
@@ -162,13 +157,20 @@ export const HeatmapExclusiveVisOptions = ({
           defaultMessage: 'Max number of colors',
         })}
       >
-        <EuiFieldNumber
+        <DebouncedFieldNumber
+          data-test-subj="visHeatmapMaxNumberOfColors"
           compressed
           min={2}
-          disabled={styles.useCustomRanges}
-          placeholder="Max number of colors"
-          value={maxNumberOfColors}
-          onChange={(e) => handleMaxNumberOfColors(e.target.value)}
+          max={20}
+          disabled={useThresholdColor}
+          value={styles.maxNumberOfColors}
+          defaultValue={defaultHeatmapChartStyles.exclusive.maxNumberOfColors}
+          onChange={(value) =>
+            onChange({
+              ...styles,
+              maxNumberOfColors: value ?? defaultHeatmapChartStyles.exclusive.maxNumberOfColors,
+            })
+          }
         />
       </EuiFormRow>
 
@@ -177,45 +179,15 @@ export const HeatmapExclusiveVisOptions = ({
         onChange={(changes) => {
           updateExclusiveOption('label', changes);
         }}
-        shouldShowType={shouldShowType}
       />
-
-      <EuiFormRow>
-        <EuiSwitch
-          compressed
-          label={i18n.translate('explore.stylePanel.heatmap.exclusive.useCustomRanges', {
-            defaultMessage: 'Use custom ranges',
-          })}
-          disabled={styles.percentageMode || styles.scaleToDataBounds}
-          checked={styles.useCustomRanges}
-          onChange={(e) => updateExclusiveOption('useCustomRanges', e.target.checked)}
-        />
-      </EuiFormRow>
-
-      {styles.useCustomRanges && (
-        <>
-          <EuiSpacer size="s" />
-
-          <CustomRange
-            customRanges={styles.customRanges}
-            onCustomRangesChange={(ranges: RangeValue[]) => {
-              updateExclusiveOption('customRanges', ranges);
-            }}
-          />
-        </>
-      )}
     </StyleAccordion>
   );
 };
 
-export const HeatmapLabelVisOptions = ({
-  styles,
-  onChange,
-  shouldShowType,
-}: HeatmapLabelVisOptionsProps) => {
-  const updateLabelOption = <K extends keyof HeatmapChartStyleControls['exclusive']['label']>(
+export const HeatmapLabelVisOptions = ({ styles, onChange }: HeatmapLabelVisOptionsProps) => {
+  const updateLabelOption = <K extends keyof HeatmapChartStyle['exclusive']['label']>(
     key: K,
-    value: HeatmapChartStyleControls['exclusive']['label'][K]
+    value: HeatmapChartStyle['exclusive']['label'][K]
   ) => {
     onChange({
       ...styles,
@@ -229,7 +201,6 @@ export const HeatmapLabelVisOptions = ({
     300
   );
 
-  const labelType = useMemo(() => getAggregationType(), []);
   return (
     <>
       <EuiFormRow>
@@ -276,21 +247,6 @@ export const HeatmapLabelVisOptions = ({
               })}
             >
               <EuiColorPicker compressed onChange={setDebouncedColor} color={color} />
-            </EuiFormRow>
-          )}
-
-          {shouldShowType && (
-            <EuiFormRow
-              label={i18n.translate('explore.stylePanel.heatmap.label.type', {
-                defaultMessage: 'Type',
-              })}
-            >
-              <EuiSelect
-                compressed
-                value={styles.type}
-                onChange={(e) => updateLabelOption('type', e.target.value as AggregationType)}
-                options={labelType}
-              />
             </EuiFormRow>
           )}
         </>

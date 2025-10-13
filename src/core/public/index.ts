@@ -122,6 +122,7 @@ export {
   OBSERVABILITY_USE_CASE_ID,
   SECURITY_ANALYTICS_USE_CASE_ID,
   ENABLE_AI_FEATURES,
+  UseCaseId,
 } from '../utils';
 export {
   AppCategory,
@@ -348,7 +349,7 @@ export interface CoreStart {
   /** {@link WorkspacesStart} */
   workspaces: WorkspacesStart;
   /** {@link KeyboardShortcutStart} */
-  keyboardShortcut: KeyboardShortcutStart;
+  keyboardShortcut?: KeyboardShortcutStart;
 }
 
 export {

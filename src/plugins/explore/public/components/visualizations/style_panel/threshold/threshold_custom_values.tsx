@@ -4,6 +4,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@osd/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,8 +15,9 @@ import {
   EuiColorPicker,
 } from '@elastic/eui';
 import { Threshold } from '../../types';
-import { useDebouncedValue, useDebouncedNumericValue } from '../../utils/use_debounced_value';
+import { useDebouncedValue } from '../../utils/use_debounced_value';
 import { getColors } from '../../theme/default_colors';
+import { DebouncedFieldNumber } from '../utils';
 
 export interface RangeProps {
   id: number;
@@ -34,10 +36,6 @@ const THRESHOLD_COLORS = [
 ];
 
 export const Range: React.FC<RangeProps> = ({ id, value, onChange, onDelete }) => {
-  const [thresholdValue, setThresholdValue] = useDebouncedNumericValue(value.value, (val) =>
-    onChange(id, { ...value, value: val })
-  );
-
   const [color, setDebouncedColor] = useDebouncedValue<string>(
     value.color,
     (val) => onChange(id, { ...value, color: val }),
@@ -65,11 +63,12 @@ export const Range: React.FC<RangeProps> = ({ id, value, onChange, onDelete }) =
       </EuiFlexItem>
 
       <EuiFlexItem grow={true}>
-        <EuiFieldNumber
+        <DebouncedFieldNumber
           compressed
           min={0}
-          value={thresholdValue}
-          onChange={(e) => setThresholdValue((e.target as HTMLInputElement).value)}
+          value={value.value}
+          defaultValue={0}
+          onChange={(val) => onChange(id, { ...value, value: val ?? 0 })}
           placeholder="Value"
           data-test-subj={`exploreVisThresholdValue-${id}`}
         />
@@ -114,7 +113,7 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
 
   const handleAddRange = () => {
     const curRangeLength = ranges.length;
-    const newDefaultValue = curRangeLength > 0 ? Number(ranges[curRangeLength - 1].value) + 10 : 0;
+    const newDefaultValue = curRangeLength > 0 ? Number(ranges[curRangeLength - 1].value) + 100 : 0;
     const newRange = { value: newDefaultValue, color: getNextColor(curRangeLength + 1) };
 
     const updated = [...ranges, newRange];
@@ -143,8 +142,15 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiButton onClick={handleAddRange} fullWidth size="s">
-        + Add threshold
+      <EuiButton
+        data-test-subj="exploreVisAddThreshold"
+        onClick={handleAddRange}
+        fullWidth
+        size="s"
+      >
+        {i18n.translate('explore.stylePanel.thresholdPanel.addThresholdButton', {
+          defaultMessage: '+ Add threshold',
+        })}
       </EuiButton>
       <EuiSpacer size="s" />
       {/*  placeholder for base threshold */}
@@ -181,7 +187,7 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
       {ranges.map((range, index) => {
         return (
           <Range
-            key={index}
+            key={`${range.color}-${range.value}-${index}`}
             id={index}
             value={range}
             onChange={handleRangeChange}

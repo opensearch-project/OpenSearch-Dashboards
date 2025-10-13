@@ -3,23 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { GaugeChartStyleControls, defaultGaugeChartStyles } from './gauge_vis_config';
+import { GaugeChartStyle } from './gauge_vis_config';
 import { VisColumn, AxisRole, AxisColumnMappings, VEGASCHEMA } from '../types';
+import { generateArcExpression } from './gauge_chart_utils';
+import { calculateValue } from '../utils/calculation';
 import {
   locateThreshold,
   generateRanges,
-  generateArcExpression,
   mergeThresholdsWithBase,
-} from './gauge_chart_utils';
-import { calculateValue } from '../utils/calculation';
-import { getColors } from '../theme/default_colors';
+  getMaxAndMinBase,
+} from '../style_panel/threshold/threshold_utils';
+import { getColors, DEFAULT_GREY } from '../theme/default_colors';
+import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 
 export const createGauge = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<GaugeChartStyleControls>,
+  styleOptions: GaugeChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {
   const colors = getColors();
@@ -31,27 +33,34 @@ export const createGauge = (
   let numericalValues: number[] = [];
   let maxNumber: number = 0;
   if (numericField) {
-    numericalValues = transformedData
-      .map((d) => Number(d[numericField]))
-      .filter((n) => !Number.isNaN(n));
-
+    numericalValues = transformedData.map((d) => d[numericField]);
     maxNumber = Math.max(...numericalValues);
   }
 
-  const styleOptions = { ...defaultGaugeChartStyles, ...styles };
-
   const calculatedValue = calculateValue(numericalValues, styleOptions.valueCalculation);
+
+  const isValidNumber =
+    calculatedValue !== undefined && typeof calculatedValue === 'number' && !isNaN(calculatedValue);
 
   const targetValue = calculatedValue || 0;
 
-  const minBase = styleOptions?.min || 0;
-  const maxBase = styleOptions?.max || maxNumber;
+  const selectedUnit = getUnitById(styleOptions?.unitId);
+
+  const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
+
+  const { minBase, maxBase } = getMaxAndMinBase(
+    maxNumber,
+    styleOptions?.min,
+    styleOptions?.max,
+    calculatedValue
+  );
 
   const mergedThresholds = mergeThresholdsWithBase(
     minBase,
     maxBase,
-    styleOptions.baseColor || colors.statusBlue,
-    styleOptions.thresholds
+    // TODO: update to use the color from color palette
+    styleOptions?.thresholdOptions?.baseColor || colors.statusBlue,
+    styleOptions?.thresholdOptions?.thresholds
   );
 
   // Locate which threshold the target value falls into
@@ -59,8 +68,8 @@ export const createGauge = (
 
   // if threshold is not found or minBase > targetValue or minBase >= maxBase, use default gray color
   const fillColor =
-    !targetThreshold || minBase > targetValue || minBase >= maxBase
-      ? '#cbd1d6'
+    !targetThreshold || minBase > targetValue || minBase >= maxBase || !isValidNumber
+      ? DEFAULT_GREY
       : targetThreshold.color;
 
   const ranges = generateRanges(mergedThresholds, maxBase);
@@ -69,7 +78,7 @@ export const createGauge = (
     { name: 'centerX', expr: 'width/2' },
     { name: 'centerY', expr: 'height/2 + outerRadius/4' },
     { name: 'radiusRef', expr: 'min(width/2, height/2)' },
-    { name: 'outerRadius', expr: 'radiusRef * 0.9' },
+    { name: 'outerRadius', expr: 'radiusRef * 1.1' },
     { name: 'innerRadius', expr: 'outerRadius - outerRadius * 0.25' },
 
     { name: 'backgroundColor', value: '#cbd1d6' },
@@ -80,6 +89,7 @@ export const createGauge = (
     { name: 'fontColor', value: colors.text },
 
     { name: 'mainValue', value: targetValue },
+    { name: 'displayValue', value: displayValue },
     {
       name: 'usedValue',
       expr: 'min(max(minValue, mainValue), maxValue)',
@@ -147,11 +157,17 @@ export const createGauge = (
         align: 'center',
         y: { expr: 'centerY' },
         x: { expr: 'centerX' },
-        dy: { expr: '-fontFactor*30' },
-        fontSize: { expr: 'fontFactor * 30' },
-        fill: { expr: 'fillColor' },
+        dy: { expr: `-fontFactor*30 * ${selectedUnit?.fontScale ?? 1}` },
+        fontSize: { expr: `fontFactor * 25 * ${selectedUnit?.fontScale ?? 1}` },
+        fill: {
+          expr: `${styleOptions?.useThresholdColor ?? false} ? fillColor : fontColor`,
+        },
       },
-      encoding: { text: { value: { expr: "format(mainValue, '.1f')" } } },
+      encoding: {
+        text: {
+          value: { expr: 'displayValue' },
+        },
+      },
     },
     ...titleLayer,
   ];

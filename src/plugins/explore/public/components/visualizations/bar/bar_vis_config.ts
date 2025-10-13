@@ -9,7 +9,7 @@ import { VisualizationType } from '../utils/use_visualization_types';
 import {
   Positions,
   ThresholdLines,
-  ThresholdLineStyle,
+  ThresholdMode,
   TooltipOptions,
   VisFieldType,
   AxisRole,
@@ -18,38 +18,50 @@ import {
   AggregationType,
   BucketOptions,
   TimeUnit,
+  ThresholdOptions,
 } from '../types';
-import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
+import { BarVisStyleControls } from './bar_vis_options';
+import { AXIS_LABEL_MAX_LENGTH } from '../constants';
+import { getColors } from '../theme/default_colors';
 
-export interface BarChartStyleControls {
+export interface BarChartStyleOptions {
   // Basic controls
-  addLegend: boolean;
-  legendPosition: Positions;
+  addLegend?: boolean;
+  legendPosition?: Positions;
   legendShape?: 'circle' | 'square';
-  tooltipOptions: TooltipOptions;
+  tooltipOptions?: TooltipOptions;
 
   // Bar specific controls
-  barSizeMode: 'auto' | 'manual';
-  barWidth: number;
-  barPadding: number;
-  showBarBorder: boolean;
-  barBorderWidth: number;
-  barBorderColor: string;
+  barSizeMode?: 'auto' | 'manual';
+  barWidth?: number;
+  barPadding?: number;
+  showBarBorder?: boolean;
+  barBorderWidth?: number;
+  barBorderColor?: string;
 
-  // Threshold and grid
-  thresholdLines: ThresholdLines;
+  /**
+   * @deprecated - use thresholdOptions instead
+   */
+  thresholdLines?: ThresholdLines;
   // Axes configuration
-  standardAxes: StandardAxes[];
+  standardAxes?: StandardAxes[];
 
-  switchAxes: boolean;
+  switchAxes?: boolean;
 
-  titleOptions: TitleOptions;
+  titleOptions?: TitleOptions;
 
   // histogram bucket config
   bucket?: BucketOptions;
+
+  thresholdOptions?: ThresholdOptions;
+
+  useThresholdColor?: boolean;
 }
 
-export const defaultBarChartStyles: BarChartStyleControls = {
+export type BarChartStyle = Required<Omit<BarChartStyleOptions, 'legendShape' | 'thresholdLines'>> &
+  Pick<BarChartStyleOptions, 'legendShape'>;
+
+export const defaultBarChartStyles: BarChartStyle = {
   // Basic controls
   switchAxes: false,
   addLegend: true,
@@ -66,19 +78,13 @@ export const defaultBarChartStyles: BarChartStyleControls = {
   barBorderWidth: 1,
   barBorderColor: '#000000',
 
-  // Threshold and grid
-  thresholdLines: [
-    {
-      id: '1',
-      color: '#E7664C',
-      show: false,
-      style: ThresholdLineStyle.Full,
-      value: 10,
-      width: 1,
-      name: '',
-    },
-  ],
-
+  // Threshold options
+  thresholdOptions: {
+    baseColor: getColors().statusGreen,
+    thresholds: [],
+    thresholdStyle: ThresholdMode.Off,
+  },
+  useThresholdColor: false,
   standardAxes: [
     {
       id: 'Axis-1',
@@ -89,7 +95,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
         show: true,
         rotate: 0,
         filter: false,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       title: {
         text: '',
@@ -108,7 +114,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
         show: true,
         rotate: 0,
         filter: false,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       title: {
         text: '',
@@ -135,8 +141,7 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
   ui: {
     style: {
       defaults: defaultBarChartStyles,
-      render: (props) =>
-        React.createElement(BarVisStyleControls, props as BarVisStyleControlsProps),
+      render: (props) => React.createElement(BarVisStyleControls, props),
     },
     availableMappings: [
       {

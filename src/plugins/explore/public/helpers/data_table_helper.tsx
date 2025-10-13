@@ -75,6 +75,28 @@ export function getTimeColumn(
     colRightIdx: -1,
   };
 }
+
+function getColumnDisplayName(column: string): string {
+  switch (column) {
+    case 'name':
+      return 'Service Identifier';
+    case 'durationNano':
+      return 'Duration';
+    case 'resource.attributes.service.name':
+      return 'Service';
+    case 'attributes.http.status_code':
+      return 'Status Code';
+    case 'status.code':
+      return 'Status';
+    case 'spanId':
+      return 'SpanID';
+    case 'kind':
+      return 'Service Kind';
+    default:
+      return column;
+  }
+}
+
 /**
  * A given array of column names returns an array of properties
  * necessary to display the columns. If the given indexPattern
@@ -93,13 +115,15 @@ export function getLegacyDisplayedColumns(
   if (!Array.isArray(columns) || !indexPattern || !indexPattern.getFieldByName) {
     return [];
   }
+
   // TODO: Remove overrides once we support PPL/SQL sorting
   const osdFieldOverrides = getOsdFieldOverrides();
   const columnProps = columns.map((column, idx) => {
     const field = indexPattern.getFieldByName(column);
+    const columnDisplayName = getColumnDisplayName(column);
     return {
       name: column,
-      displayName: isShortDots ? shortenDottedString(column) : column,
+      displayName: isShortDots ? shortenDottedString(columnDisplayName) : columnDisplayName,
       isSortable: osdFieldOverrides.sortable ?? !!field?.sortable,
       isRemoveable: column !== '_source' || columns.length > 1,
       colLeftIdx: idx - 1 < 0 ? -1 : idx - 1,

@@ -4,13 +4,13 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 import { TraceDetails } from './trace_view';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
+import { getServiceInfo, NoMatchMessage } from './public/utils/helper_functions';
 
 const mockChrome = {
-  setBreadcrumbs: jest.fn(),
   getIsNavDrawerLocked$: () => ({
     subscribe: jest.fn(),
   }),
@@ -88,15 +88,27 @@ jest.mock('./public/traces/span_detail_panel', () => ({
 }));
 
 jest.mock('./public/traces/span_detail_tabs', () => ({
-  SpanDetailTabs: ({ selectedSpan }: any) => (
+  SpanDetailTabs: ({ selectedSpan, addSpanFilter }: any) => (
     <div data-testid="span-detail-sidebar">
       <div>Span: {selectedSpan?.spanId || 'none'}</div>
+      <button
+        onClick={() => addSpanFilter('spanId', selectedSpan.spanId)}
+        data-test-subj="addSpanFilterButton"
+      >
+        Add span filter
+      </button>
     </div>
   ),
 }));
 
 jest.mock('./public/traces/trace_detail_tabs', () => ({
-  TraceDetailTabs: ({ activeTab, setActiveTab, transformedHits, errorCount }: any) => (
+  TraceDetailTabs: ({
+    activeTab,
+    setActiveTab,
+    transformedHits,
+    errorCount,
+    setIsServiceLegendOpen,
+  }: any) => (
     <div data-testid="trace-detail-tabs">
       <div data-testid="active-tab">{activeTab}</div>
       <div data-testid="hits-count">{transformedHits?.length || 0}</div>
@@ -105,13 +117,20 @@ jest.mock('./public/traces/trace_detail_tabs', () => ({
       <button onClick={() => setActiveTab && setActiveTab('span_list')}>Span list</button>
       <button onClick={() => setActiveTab && setActiveTab('tree_view')}>Tree view</button>
       <button onClick={() => setActiveTab && setActiveTab('service_map')}>Service map</button>
+      <button
+        data-test-subj="openServiceLegendModalButton"
+        onClick={() => setIsServiceLegendOpen(true)}
+      >
+        Open service legend
+      </button>
     </div>
   ),
 }));
 
 jest.mock('./public/top_nav_buttons', () => ({
-  TraceTopNavMenu: ({ traceId }: any) => (
+  TraceTopNavMenu: ({ traceId, title }: any) => (
     <div data-testid="trace-top-nav">
+      <div data-test-subj="trace-details-title">{title}</div>
       <span data-testid="trace-id">{traceId || 'no-trace-id'}</span>
     </div>
   ),
@@ -147,28 +166,7 @@ jest.mock('./public/traces/generate_color_map', () => ({
   })),
 }));
 
-jest.mock('./public/utils/helper_functions', () => ({
-  NoMatchMessage: ({ traceId }: any) => (
-    <div data-testid="no-match-message">No data for trace: {traceId}</div>
-  ),
-  isEmpty: (value: any) => {
-    return (
-      value === undefined ||
-      value === null ||
-      (typeof value === 'object' && Object.keys(value).length === 0) ||
-      (typeof value === 'string' && value.trim().length === 0) ||
-      (Array.isArray(value) && value.length === 0)
-    );
-  },
-  nanoToMilliSec: (nano: number) => {
-    if (typeof nano !== 'number' || isNaN(nano)) return 0;
-    return nano / 1000000;
-  },
-  round: (value: number, precision: number = 0) => {
-    const multiplier = Math.pow(10, precision);
-    return Math.round(value * multiplier) / multiplier;
-  },
-}));
+// Use the actual helper functions instead of mocking them
 
 describe('TraceDetails', () => {
   const mockTraceData = [
@@ -179,6 +177,8 @@ describe('TraceDetails', () => {
       name: 'operation-1',
       startTime: '2023-01-01T00:00:00Z',
       endTime: '2023-01-01T00:00:01Z',
+      startTimeUnixNano: '2023-01-01T00:00:00.000000000Z',
+      endTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
       durationInNanos: 1000000000,
     },
     {
@@ -188,6 +188,8 @@ describe('TraceDetails', () => {
       name: 'operation-2',
       startTime: '2023-01-01T00:00:01Z',
       endTime: '2023-01-01T00:00:02Z',
+      startTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
+      endTimeUnixNano: '2023-01-01T00:00:02.000000000Z',
       durationInNanos: 1000000000,
     },
   ];
@@ -299,7 +301,7 @@ describe('TraceDetails', () => {
     );
 
     await waitFor(() => {
-      expect(document.querySelector('[data-testid="no-match-message"]')).toBeInTheDocument();
+      expect(document.querySelector('.euiCallOut')).toBeInTheDocument();
     });
   });
 
@@ -324,7 +326,7 @@ describe('TraceDetails', () => {
     consoleSpy.mockRestore();
   });
 
-  it('sets breadcrumbs correctly', async () => {
+  it('sets page title correctly', async () => {
     const history = createMemoryHistory();
 
     render(
@@ -334,21 +336,80 @@ describe('TraceDetails', () => {
     );
 
     await waitFor(() => {
-      expect(mockChrome.setBreadcrumbs).toHaveBeenCalledWith([
-        {
-          text: 'Trace: test-trace-id',
-        },
-      ]);
+      expect(document.querySelector('[data-testid="trace-top-nav"]')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('trace-details-title')).toHaveTextContent('service-a: operation-1');
   });
 
-  it('sets breadcrumb for unknown trace', async () => {
-    // Mock state container to return empty traceId
+  it('getServiceInfo function works correctly with span data', () => {
+    const mockSpan = {
+      serviceName: 'test-service',
+      name: 'test-operation',
+    };
+
+    const result = getServiceInfo(mockSpan, 'test-trace-id');
+    expect(result).toBe('test-service: test-operation');
+  });
+
+  it('getServiceInfo function uses span name as service fallback', () => {
+    const mockSpan = {
+      name: 'test-operation',
+    };
+
+    const result = getServiceInfo(mockSpan, 'test-trace-id');
+    expect(result).toBe('test-operation: test-operation');
+  });
+
+  it('getServiceInfo function handles completely empty span', () => {
+    const mockSpan = {};
+
+    const result = getServiceInfo(mockSpan, 'test-trace-id');
+    expect(result).toBe('Unknown Service: Unknown Operation');
+  });
+
+  it('getServiceInfo function handles missing operation name', () => {
+    const mockSpan = {
+      serviceName: 'test-service',
+    };
+
+    const result = getServiceInfo(mockSpan, 'test-trace-id');
+    expect(result).toBe('test-service: Unknown Operation');
+  });
+
+  it('getServiceInfo function returns Unknown Trace when no span but has traceId', () => {
+    const result = getServiceInfo(null, 'test-trace-id');
+    expect(result).toBe('Unknown Trace');
+  });
+
+  it('getServiceInfo function returns empty string when no span and no traceId', () => {
+    const result = getServiceInfo(null);
+    expect(result).toBe('');
+  });
+
+  it('NoMatchMessage component renders correctly', () => {
+    const testTraceId = 'test-trace-123';
+    const { container } = render(<NoMatchMessage traceId={testTraceId} />);
+
+    // Check that the actual NoMatchMessage component renders with EuiCallOut
+    const callOut = container.querySelector('.euiCallOut');
+    expect(callOut).toBeInTheDocument();
+
+    // Check for the error styling
+    expect(callOut).toHaveClass('euiCallOut--danger');
+
+    // Check for the expected text content with trace ID
+    expect(callOut).toHaveTextContent(`Error loading Trace Id: ${testTraceId}`);
+    expect(callOut).toHaveTextContent('The Trace Id is invalid or could not be found');
+  });
+
+  it('sets page title for unknown trace', async () => {
+    // Mock state container to return empty traceId and no data
     const mockCreateTraceAppState = jest.requireMock('./state/trace_app_state').createTraceAppState;
     mockCreateTraceAppState.mockReturnValueOnce({
       stateContainer: {
         get: () => ({
-          traceId: '', // Empty trace ID
+          traceId: 'no-trace-id', // Non-empty trace ID but no data
           dataset: {
             id: 'test-dataset-id',
             title: 'test-index-*',
@@ -370,6 +431,9 @@ describe('TraceDetails', () => {
       stopStateSync: jest.fn(),
     });
 
+    // Mock empty data response
+    mockTransformPPLDataToTraceHits.mockImplementation(() => []);
+
     const history = createMemoryHistory();
 
     render(
@@ -379,12 +443,10 @@ describe('TraceDetails', () => {
     );
 
     await waitFor(() => {
-      expect(mockChrome.setBreadcrumbs).toHaveBeenCalledWith([
-        {
-          text: 'Unknown Trace',
-        },
-      ]);
+      expect(document.querySelector('[data-testid="trace-top-nav"]')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('trace-details-title')).toHaveTextContent('Unknown Trace');
   });
 
   it('handles span filter updates', async () => {
@@ -403,6 +465,14 @@ describe('TraceDetails', () => {
     // Simulate filter update through SpanDetailSidebar
     const sidebar = document.querySelector('[data-testid="span-detail-sidebar"]');
     expect(sidebar).toBeInTheDocument();
+
+    // Add filter
+    fireEvent.click(screen.getByTestId('addSpanFilterButton'));
+    expect(screen.getByText('spanId: span-1')).toBeInTheDocument();
+
+    // Remove filter
+    fireEvent.click(screen.getByLabelText('Remove filter'));
+    expect(screen.queryByText('spanId: span-1')).not.toBeInTheDocument();
   });
 
   it('handles span filtering when no filters applied', async () => {
@@ -430,6 +500,8 @@ describe('TraceDetails', () => {
         name: 'operation-1',
         startTime: '2023-01-01T00:00:02Z', // Later start time
         parentSpanId: 'parent-1', // Has parent
+        startTimeUnixNano: '2023-01-01T00:00:02.000000000Z',
+        endTimeUnixNano: '2023-01-01T00:00:03.000000000Z',
       },
       {
         spanId: 'span-2',
@@ -438,6 +510,8 @@ describe('TraceDetails', () => {
         name: 'operation-2',
         startTime: '2023-01-01T00:00:01Z', // Earlier start time
         parentSpanId: 'parent-2', // Has parent
+        startTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
+        endTimeUnixNano: '2023-01-01T00:00:02.000000000Z',
       },
     ];
 
@@ -453,6 +527,45 @@ describe('TraceDetails', () => {
 
     await waitFor(() => {
       expect(document.querySelector('[data-testid="span-detail-sidebar"]')).toBeInTheDocument();
+    });
+  });
+
+  it('filters spans without timestamp fields', async () => {
+    const mockDataWithoutTimestamps = [
+      {
+        spanId: 'span-1',
+        traceId: 'test-trace-id',
+        serviceName: 'service-a',
+        name: 'operation-1',
+        startTime: '2023-01-01T00:00:00Z',
+        endTime: null,
+        startTimeUnixNano: '2023-01-01T00:00:00.000000000Z',
+        endTimeUnixNano: null,
+      },
+      {
+        spanId: 'span-2',
+        traceId: 'test-trace-id',
+        serviceName: 'service-b',
+        name: 'operation-2',
+        startTime: null,
+        endTime: '2023-01-01T00:00:02Z',
+        startTimeUnixNano: null,
+        endTimeUnixNano: '2023-01-01T00:00:02.000000000Z',
+      },
+    ];
+
+    mockTransformPPLDataToTraceHits.mockImplementation(() => mockDataWithoutTimestamps);
+
+    const history = createMemoryHistory();
+
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(document.querySelector('.euiCallOut')).toBeInTheDocument();
     });
   });
 
@@ -616,6 +729,8 @@ describe('TraceDetails', () => {
         serviceName: 'service-a',
         name: 'operation-1',
         status: { code: 2 }, // Error
+        startTimeUnixNano: '2023-01-01T00:00:00.000000000Z',
+        endTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
       },
       {
         spanId: 'span-2',
@@ -623,6 +738,8 @@ describe('TraceDetails', () => {
         serviceName: 'service-b',
         name: 'operation-2',
         status: { code: 0 }, // No error
+        startTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
+        endTimeUnixNano: '2023-01-01T00:00:02.000000000Z',
       },
     ];
 
@@ -642,23 +759,6 @@ describe('TraceDetails', () => {
 
     const errorCountElement = document.querySelector('[data-testid="error-count"]');
     expect(errorCountElement).toHaveTextContent('1');
-  });
-
-  it('handles service legend modal', async () => {
-    const history = createMemoryHistory();
-
-    render(
-      <Router history={history}>
-        <TraceDetails />
-      </Router>
-    );
-
-    await waitFor(() => {
-      expect(document.querySelector('[data-testid="trace-detail-tabs"]')).toBeInTheDocument();
-    });
-
-    const traceDetailTabs = document.querySelector('[data-testid="trace-detail-tabs"]');
-    expect(traceDetailTabs).toBeInTheDocument();
   });
 
   it('handles filter operations', async () => {
@@ -815,5 +915,23 @@ describe('TraceDetails', () => {
 
     // Should not call fetchTraceSpans when required params are missing
     expect(mockPplService.fetchTraceSpans).not.toHaveBeenCalled();
+  });
+
+  it('handles flyout case', async () => {
+    const history = createMemoryHistory();
+
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="span-detail-panel"]')).toBeInTheDocument();
+      expect(document.querySelector('[data-testid="span-detail-sidebar"]')).toBeInTheDocument();
+    });
+
+    const resizableContainer = document.querySelector('.euiResizableContainer');
+    expect(resizableContainer).toBeInTheDocument();
   });
 });

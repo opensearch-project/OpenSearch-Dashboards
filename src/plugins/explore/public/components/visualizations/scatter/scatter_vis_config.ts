@@ -14,7 +14,11 @@ import {
   TooltipOptions,
   VisFieldType,
   TitleOptions,
+  ThresholdMode,
+  ThresholdOptions,
 } from '../types';
+import { AXIS_LABEL_MAX_LENGTH } from '../constants';
+import { getColors } from '../theme/default_colors';
 
 export interface ExclusiveScatterConfig {
   pointShape: PointShape;
@@ -22,21 +26,26 @@ export interface ExclusiveScatterConfig {
   filled: boolean;
 }
 // Complete line chart style controls interface
-export interface ScatterChartStyleControls {
+export interface ScatterChartStyleOptions {
   // Basic controls
-  tooltipOptions: TooltipOptions;
-  addLegend: boolean;
-  legendPosition: Positions;
+  tooltipOptions?: TooltipOptions;
+  addLegend?: boolean;
+  legendPosition?: Positions;
   // Axes configuration
-  standardAxes: StandardAxes[];
+  standardAxes?: StandardAxes[];
 
-  exclusive: ExclusiveScatterConfig;
-  switchAxes: boolean;
+  exclusive?: ExclusiveScatterConfig;
+  switchAxes?: boolean;
 
-  titleOptions: TitleOptions;
+  titleOptions?: TitleOptions;
+
+  useThresholdColor?: boolean;
+  thresholdOptions?: ThresholdOptions;
 }
 
-export const defaultScatterChartStyles: ScatterChartStyleControls = {
+export type ScatterChartStyle = Required<ScatterChartStyleOptions>;
+
+export const defaultScatterChartStyles: ScatterChartStyle = {
   // Basic controls
   tooltipOptions: {
     mode: 'all',
@@ -50,6 +59,14 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
     angle: 0,
     filled: true,
   },
+
+  useThresholdColor: false,
+  // Threshold options
+  thresholdOptions: {
+    baseColor: getColors().statusGreen,
+    thresholds: [],
+    thresholdStyle: ThresholdMode.Off,
+  },
   // Standard axes
   standardAxes: [
     {
@@ -61,7 +78,7 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
         show: true,
         rotate: 0,
         filter: false,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       title: {
         text: '',
@@ -80,7 +97,7 @@ export const defaultScatterChartStyles: ScatterChartStyleControls = {
         show: true,
         rotate: 0,
         filter: false,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       title: {
         text: '',

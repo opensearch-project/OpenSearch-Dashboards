@@ -28,6 +28,7 @@ export interface TableRowContentProps {
   isShortDots: boolean;
   isExpanded: boolean;
   onToggleExpand: () => void;
+  isOnTracesPage: boolean;
 }
 
 // Helper functions
@@ -59,25 +60,29 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
   isShortDots,
   isExpanded,
   onToggleExpand,
+  isOnTracesPage,
 }) => {
   const flattened = dataset.flattenHit(row);
-
   return (
     <tr key={row._id} className={row.isAnchor ? 'exploreDocTable__row--highlight' : ''}>
-      <td
-        data-test-subj="docTableExpandToggleColumn"
-        className="exploreDocTableCell__toggleDetails"
-      >
-        <EuiSmallButtonIcon
-          color="text"
-          onClick={onToggleExpand}
-          iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-          aria-label={i18n.translate('explore.defaultTable.docTableExpandToggleColumnLabel', {
-            defaultMessage: `Toggle row details`,
-          })}
+      {isOnTracesPage ? (
+        <td />
+      ) : (
+        <td
           data-test-subj="docTableExpandToggleColumn"
-        />
-      </td>
+          className="exploreDocTableCell__toggleDetails"
+        >
+          <EuiSmallButtonIcon
+            color="text"
+            onClick={onToggleExpand}
+            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            aria-label={i18n.translate('explore.defaultTable.docTableExpandToggleColumnLabel', {
+              defaultMessage: `Toggle row details`,
+            })}
+            data-test-subj="docTableExpandToggleColumn"
+          />
+        </td>
+      )}
       {columns.map((colName) => {
         const fieldInfo = dataset.fields.getByName(colName);
         const fieldMapping = flattened[colName];
@@ -124,6 +129,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
             fieldMapping={fieldMapping}
             sanitizedCellValue={sanitizedCellValue}
             rowData={row}
+            isOnTracesPage={isOnTracesPage}
           />
         );
       })}

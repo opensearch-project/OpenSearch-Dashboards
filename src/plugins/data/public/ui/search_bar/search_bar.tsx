@@ -52,7 +52,6 @@ import { QueryEditorTopRow } from '../query_editor';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { FilterOptions } from '../filter_bar/filter_options';
-
 interface SearchBarInjectedDeps {
   opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
@@ -584,7 +583,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         {queryBar}
         {queryEditor}
         {!isEnhancementsEnabledOverride && filterBar}
-
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
             formUiType="Modal"

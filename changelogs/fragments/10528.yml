@@ -1,0 +1,2 @@
+fix:
+- Make global setting nullable when getting / updating workspace scope settings ([#10528](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10528))

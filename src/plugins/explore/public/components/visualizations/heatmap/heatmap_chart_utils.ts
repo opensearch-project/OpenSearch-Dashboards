@@ -4,13 +4,14 @@
  */
 
 import type { Encoding } from 'vega-lite/build/src/encoding';
-import { AggregationType, ColorSchemas, VisColumn } from '../types';
-import { HeatmapChartStyleControls } from './heatmap_vis_config';
-import { generateColorBySchema } from '../utils/utils';
+import { AggregationType, VisColumn } from '../types';
+import { HeatmapChartStyle } from './heatmap_vis_config';
+
+import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 
 // isRegular=== true refers to 2 dimension and 1 metric heatmap.
 export const createLabelLayer = (
-  styles: Partial<HeatmapChartStyleControls>,
+  styles: HeatmapChartStyle,
   isRegular: boolean,
   colorField: string,
   xAxis?: VisColumn,
@@ -66,7 +67,7 @@ export const getDataBound = (
   return values.length > 0 ? [Math.min(...values), Math.max(...values)] : [];
 };
 
-export const addTransform = (styles: Partial<HeatmapChartStyleControls>, numericFields: string) => {
+export const addTransform = (styles: HeatmapChartStyle, numericFields: string) => {
   if (styles?.exclusive?.percentageMode) {
     return [
       {
@@ -81,20 +82,9 @@ export const addTransform = (styles: Partial<HeatmapChartStyleControls>, numeric
   return [];
 };
 
-export const setRange = (styles: Partial<HeatmapChartStyleControls>) => {
-  const ranges = styles?.exclusive?.customRanges ?? [];
-  // we only consider the case when user actually adds a range
-  // in such case, we can ensure range length >=2 to interpolate color
-  const colors = generateColorBySchema(
-    ranges.length + 1,
-    styles?.exclusive?.colorSchema ?? ColorSchemas.BLUES
-  );
-  return colors;
-};
-
 export const enhanceStyle = (
   markLayer: any,
-  styles: Partial<HeatmapChartStyleControls>,
+  styles: HeatmapChartStyle,
   transformedData: Array<Record<string, any>>,
   colorField: string
 ) => {
@@ -109,24 +99,21 @@ export const enhanceStyle = (
     markLayer.encoding.color.scale.domain = getDataBound(transformedData, colorField);
   }
 
-  if (
-    styles.exclusive?.useCustomRanges &&
-    styles.exclusive?.customRanges?.length &&
-    styles.exclusive?.customRanges?.length >= 1
-  ) {
-    const customRanges = styles.exclusive?.customRanges;
+  if (styles?.useThresholdColor && styles.thresholdOptions?.thresholds) {
+    const newThreshold = styles?.thresholdOptions?.thresholds ?? [];
 
-    const [min, max] = getDataBound(transformedData, colorField);
+    const thresholdWithBase = [
+      { value: 0, color: styles?.thresholdOptions?.baseColor ?? getColors().statusGreen },
+      ...newThreshold,
+    ];
 
-    // identify min and max to set domain
-    const domainMin = Math.min(...customRanges.map((r) => r.min ?? min));
-    const domainMax = Math.max(...customRanges?.map((r) => r.max ?? max));
+    const colorDomain = thresholdWithBase.map<number>((val) => val.value);
+    const colorRange = thresholdWithBase.map<string>((val) => val.color);
+
     // overwrite color scale type to quantize to map continuous domains to discrete output ranges
-    markLayer.encoding.color.scale.type = 'quantize';
-    markLayer.encoding.color.scale.domain = [domainMin, domainMax];
-
-    const range = setRange(styles);
-
-    markLayer.encoding.color.scale.range = range;
+    markLayer.encoding.color.scale.type = 'threshold';
+    markLayer.encoding.color.scale.domain = colorDomain;
+    // require one more color for values below the first threshold(base)
+    markLayer.encoding.color.scale.range = [DEFAULT_GREY, ...colorRange];
   }
 };

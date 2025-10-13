@@ -12,16 +12,16 @@ import {
   EuiFormRow,
   EuiSelect,
 } from '@elastic/eui';
-import { CellTypeConfig, TableChartStyleControls } from './table_vis_config';
+import { CellTypeConfig, TableChartStyle } from './table_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { ColorMode, VisColumn } from '../types';
 
 export interface TableCellTypeOptionsProps {
-  styleOptions: TableChartStyleControls;
-  onStyleChange: (newStyle: Partial<TableChartStyleControls>) => void;
+  styleOptions: TableChartStyle;
+  onStyleChange: (newStyle: Partial<TableChartStyle>) => void;
   numericalColumns?: VisColumn[];
-  axisColumnMappings?: StyleControlsProps<TableChartStyleControls>['axisColumnMappings'];
-  updateVisualization?: StyleControlsProps<TableChartStyleControls>['updateVisualization'];
+  axisColumnMappings?: StyleControlsProps<TableChartStyle>['axisColumnMappings'];
+  updateVisualization?: StyleControlsProps<TableChartStyle>['updateVisualization'];
 }
 
 const cellTypeOptions = [
@@ -112,6 +112,7 @@ export const TableCellTypeOptions: React.FC<TableCellTypeOptionsProps> = ({
                 options={getFieldOptions(ct, index)}
                 value={ct.field}
                 onChange={(e) => handleCellTypeFieldChange(index, e.target.value)}
+                onMouseUp={(e) => e.stopPropagation()}
                 data-test-subj={`visTableCellTypeField${index}`}
               />
             </EuiFlexItem>

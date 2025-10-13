@@ -5,22 +5,20 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { PatternItem, PatternsTable } from './patterns_table';
 import { COUNT_FIELD, PATTERNS_FIELD, SAMPLE_FIELD } from './utils/constants';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
-import { defaultPrepareQueryString } from '../../application/utils/state_management/actions/query_actions';
 import { highlightLogUsingPattern } from './utils/utils';
 import { PatternsSettingsPopoverContent } from '../tabs/action_bar/patterns_settings/patterns_settings_popover_content';
-import {
-  selectQuery,
-  selectResults,
-  selectUsingRegexPatterns,
-} from '../../application/utils/state_management/selectors';
+import { selectUsingRegexPatterns } from '../../application/utils/state_management/selectors';
 import { PatternsTableFlyout } from './patterns_table_flyout/patterns_table_flyout';
 import {
   PatternsFlyoutProvider,
   usePatternsFlyoutContext,
 } from './patterns_table_flyout/patterns_flyout_context';
+import { useHistogramResults } from '../../application/utils/hooks/use_histogram_results';
 
 const PatternsContainerContent = () => {
   const { isFlyoutOpen } = usePatternsFlyoutContext();
@@ -29,17 +27,12 @@ const PatternsContainerContent = () => {
    * Fetching the hits from the patterns query, and processing them for the table
    */
   const { results: patternResults } = useTabResults();
+  const { results: histogramResults } = useHistogramResults();
 
-  const querySelector = useSelector(selectQuery);
-  const resultsSelector = useSelector(selectResults);
   const usingRegexPatterns = useSelector(selectUsingRegexPatterns);
 
   try {
-    // the default prepare query is the one for logs, so it uses the user's query and generates the log cache key
-    const logsCacheKey = defaultPrepareQueryString(querySelector);
-
-    const logsResults = resultsSelector[logsCacheKey];
-    const logsTotal = logsResults?.hits?.total; // uses the logs total to calc the event ratio
+    const logsTotal = histogramResults?.hits.total || 0; // uses the logs total to calc the event ratio
 
     const hits = patternResults?.hits?.hits || [];
 
@@ -53,7 +46,11 @@ const PatternsContainerContent = () => {
     const hasAllRequiredFields = requiredFields.every((field) => field in hit._source);
 
     if (!hasAllRequiredFields) {
-      return <></>;
+      // doesn't match normal fields or calcite fields
+      const title = i18n.translate('explore.patterns.schemaUnexpected', {
+        defaultMessage: 'Expected schema not found',
+      });
+      return <EuiCallOut title={title} color="danger" iconType="alert" />;
     }
 
     // Convert rows to pattern items or use default if rows is undefined

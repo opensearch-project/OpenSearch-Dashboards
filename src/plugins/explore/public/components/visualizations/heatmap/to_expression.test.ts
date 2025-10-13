@@ -5,7 +5,7 @@
 
 import { createHeatmapWithBin, createRegularHeatmap } from './to_expression';
 import { VisFieldType, VisColumn, TooltipOptions, Positions } from '../types';
-import { HeatmapChartStyleControls } from './heatmap_vis_config';
+import { HeatmapChartStyle } from './heatmap_vis_config';
 
 jest.mock('./heatmap_chart_utils', () => ({
   enhanceStyle: jest.fn(),
@@ -70,7 +70,6 @@ const baseStyles = {
     mode: 'all',
   } as TooltipOptions,
   exclusive: {
-    useCustomRanges: false,
     maxNumberOfColors: 7,
     colorSchema: 'blues',
     colorScaleType: 'linear',
@@ -78,7 +77,7 @@ const baseStyles = {
   },
   addLegend: true,
   legendPosition: Positions.RIGHT,
-} as HeatmapChartStyleControls;
+} as HeatmapChartStyle;
 
 describe('createHeatmapWithBin', () => {
   it('should create a heatmap with binned axes', () => {
@@ -151,13 +150,14 @@ describe('createHeatmapWithBin', () => {
     expect(customTitleResult.title).toBe('Custom Binned Heatmap');
   });
 
-  it('should disable binning when useCustomRanges is true', () => {
+  it('should disable binning when useThresholdColor is true', () => {
     const styles = {
       ...baseStyles,
       exclusive: {
         ...baseStyles.exclusive,
-        useCustomRanges: true,
       },
+      useThresholdColor: true,
+      thresholdOptions: {},
     };
 
     const spec = createHeatmapWithBin(mockData, mockNumericColumns, styles, mockAxisMappings);
@@ -258,7 +258,7 @@ describe('createRegularHeatmap', () => {
         colorSchema: 'reds',
         reverseSchema: true,
       },
-    } as HeatmapChartStyleControls;
+    } as HeatmapChartStyle;
 
     const spec = createRegularHeatmap(mockData, mockNumericColumns, styles, regularAxisMappings);
     expect(spec.layer[0].encoding.color.scale).toEqual({
@@ -268,13 +268,14 @@ describe('createRegularHeatmap', () => {
     });
   });
 
-  it('should disable binning for color when useCustomRanges is true', () => {
+  it('should disable binning for color when useThresholdColor is true', () => {
     const styles = {
       ...baseStyles,
       exclusive: {
         ...baseStyles.exclusive,
-        useCustomRanges: true,
       },
+      useThresholdColor: true,
+      thresholdOptions: {},
     };
 
     const spec = createRegularHeatmap(mockData, mockNumericColumns, styles, regularAxisMappings);

@@ -105,6 +105,7 @@ export interface OpenSearchPplAutocompleteResult extends AutocompleteResultBase 
   suggestFieldsInAggregateFunction?: boolean;
   isInBackQuote?: boolean;
   isInQuote?: boolean;
+  suggestSingleQuotes?: boolean;
 }
 
 export enum TableOrViewSuggestion {

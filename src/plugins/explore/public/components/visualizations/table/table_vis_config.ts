@@ -8,6 +8,7 @@ import { VisualizationType } from '../utils/use_visualization_types';
 import { TableVisStyleControls } from './table_vis_options';
 import { CellAlignment, ColorMode, Threshold } from '../types';
 import { CalculationMethod } from '../utils/calculation';
+import { DataLink } from './data_link_options';
 
 export interface CellTypeConfig {
   field: string;
@@ -19,8 +20,8 @@ export interface Calc {
   calculation: CalculationMethod;
 }
 
-export interface TableChartStyleControls {
-  pageSize: number;
+export interface TableChartStyleOptions {
+  pageSize?: number;
   globalAlignment?: CellAlignment;
   showColumnFilter?: boolean;
   showFooter?: boolean;
@@ -28,9 +29,12 @@ export interface TableChartStyleControls {
   cellTypes?: CellTypeConfig[];
   thresholds?: Threshold[];
   baseColor?: string;
+  dataLinks?: DataLink[];
 }
 
-const defaultTableChartStyles: Required<TableChartStyleControls> = {
+export type TableChartStyle = Required<TableChartStyleOptions>;
+
+export const defaultTableChartStyles: TableChartStyle = {
   pageSize: 10,
   globalAlignment: 'auto',
   showColumnFilter: false,
@@ -39,6 +43,7 @@ const defaultTableChartStyles: Required<TableChartStyleControls> = {
   cellTypes: [],
   thresholds: [],
   baseColor: '#000000',
+  dataLinks: [],
 };
 
 export const createTableConfig = (): VisualizationType<'table'> => ({

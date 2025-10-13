@@ -21,7 +21,7 @@ import {
   DataViewFieldSpec,
   DataViewFieldMap,
 } from '../types';
-import { FieldFormatMap, SignalType } from '../../index_patterns/types';
+import { FieldFormatMap } from '../../index_patterns/types';
 import { FieldFormatsStartCommon } from '../../field_formats';
 import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/common';
 import { DataViewMissingIndices } from '../lib';
@@ -379,6 +379,7 @@ export class DataViewsService {
         title,
         displayName,
         description,
+        signalType,
         timeFieldName,
         intervalName,
         fields,
@@ -386,7 +387,6 @@ export class DataViewsService {
         fieldFormatMap,
         typeMeta,
         type,
-        signalType,
       },
       references,
     } = savedObject;
@@ -404,6 +404,7 @@ export class DataViewsService {
       title,
       displayName,
       description,
+      signalType,
       intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
@@ -411,7 +412,6 @@ export class DataViewsService {
       typeMeta: parsedTypeMeta,
       type,
       dataSourceRef,
-      signalType: signalType as SignalType,
     };
   };
 
@@ -616,13 +616,27 @@ export class DataViewsService {
     const body = dataView.getAsSavedObjectBody();
     const references = dataView.getSaveObjectReference();
 
-    const response = await this.savedObjectsClient.create(savedObjectType, body, {
-      id: dataView.id,
-      references,
-    });
-    dataView.id = response.id;
-    this.patterns.saveToCache(dataView.id, dataView);
-    return dataView;
+    try {
+      const response = await this.savedObjectsClient.create(savedObjectType, body, {
+        id: dataView.id,
+        references,
+      });
+      dataView.id = response.id;
+      this.patterns.saveToCache(dataView.id, dataView);
+      return dataView;
+    } catch (err) {
+      // Handle 409 conflict errors (document already exists) as duplicate data view errors
+      if (
+        (err.statusCode === 409 || err.status === 409 || err.body?.statusCode === 409) &&
+        (err.message?.includes('document already exists') ||
+          err.message?.includes('version conflict') ||
+          err.body?.message?.includes('document already exists') ||
+          err.body?.message?.includes('version conflict'))
+      ) {
+        throw new DuplicateDataViewError(`Duplicate data view: ${dataView.title}`);
+      }
+      throw err;
+    }
   }
 
   /**
@@ -733,6 +747,8 @@ export class DataViewsService {
       title: dataView.title,
       type: dataView.type || DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       timeFieldName: dataView.timeFieldName,
+      displayName: dataView.displayName,
+      description: dataView.description,
       ...(dataView.dataSourceRef?.id && {
         dataSource: {
           id: dataView.dataSourceRef.id,

@@ -29,7 +29,7 @@ export function FlyoutListItem(props: FlyoutListItemProps) {
       <EuiFlexGroup gutterSize="none">
         <EuiFlexItem>
           <EuiText size="s" className="exploreFlyoutListItem__descriptionText">
-            <b>{props.description}</b>
+            {props.description}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -47,7 +47,7 @@ export function FlyoutListItem(props: FlyoutListItemProps) {
       </EuiFlexGroup>
     ) : (
       <EuiText size="s" className="exploreFlyoutListItem__descriptionText">
-        <b>{props.description}</b>
+        {props.description}
       </EuiText>
     );
   return (
@@ -63,14 +63,14 @@ export function FlyoutListItem(props: FlyoutListItemProps) {
             {
               title: (
                 <EuiText size="s" color="default" className="exploreFlyoutListItem__titleText">
-                  {props.title}
+                  <b>{props.title}</b>
                 </EuiText>
               ),
               description: descriptionComponent,
             },
           ]}
           type="column"
-          align="center"
+          align="left"
           compressed
         />
       </div>

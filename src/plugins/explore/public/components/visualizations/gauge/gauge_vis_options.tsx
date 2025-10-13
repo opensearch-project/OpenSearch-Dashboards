@@ -6,25 +6,19 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSwitch,
-  EuiSplitPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import { GaugeChartStyleControls } from './gauge_vis_config';
-import { Threshold, AxisRole } from '../types';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSwitch, EuiSpacer } from '@elastic/eui';
+import { GaugeChartStyle } from './gauge_vis_config';
+import { AxisRole } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
-import { DebouncedText } from '../style_panel/utils';
+import { DebouncedFieldText } from '../style_panel/utils';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
+import { UnitPanel } from '../style_panel/unit/unit_panel';
+import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
 
-export type GaugeVisStyleControlsProps = StyleControlsProps<GaugeChartStyleControls>;
+export type GaugeVisStyleControlsProps = StyleControlsProps<GaugeChartStyle>;
 
 export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
   styleOptions,
@@ -37,9 +31,9 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof GaugeChartStyleControls>(
+  const updateStyleOption = <K extends keyof GaugeChartStyle>(
     key: K,
-    value: GaugeChartStyleControls[K]
+    value: GaugeChartStyle[K]
   ) => {
     onStyleChange({ [key]: value });
   };
@@ -82,21 +76,28 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
               </EuiFormRow>
             </StyleAccordion>
           </EuiFlexItem>
-
+          <EuiFlexItem>
+            <UnitPanel
+              unit={styleOptions.unitId}
+              onUnitChange={(value) => updateStyleOption('unitId', value)}
+            />
+          </EuiFlexItem>
           <EuiFlexItem>
             <ThresholdPanel
-              thresholds={styleOptions.thresholds}
-              baseColor={styleOptions.baseColor}
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <StandardOptionsPanel
               min={styleOptions.min}
               max={styleOptions.max}
-              onThresholdValuesChange={(ranges: Threshold[]) => {
-                updateStyleOption('thresholds', ranges);
-              }}
-              onBaseColorChange={(color: string) => updateStyleOption('baseColor', color)}
               onMinChange={(value) => updateStyleOption('min', value)}
               onMaxChange={(value) => updateStyleOption('max', value)}
             />
           </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <StyleAccordion
               id="gaugeSection"
@@ -105,36 +106,42 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
               })}
               initialIsOpen={true}
             >
-              <EuiSplitPanel.Inner paddingSize="s" color="subdued">
-                <EuiText size="s" style={{ fontWeight: 600 }}>
-                  {i18n.translate('explore.stylePanel.gauge.threshold.title.splitPanel', {
-                    defaultMessage: 'Title',
+              <EuiFormRow>
+                <EuiSwitch
+                  compressed
+                  label={i18n.translate('explore.vis.gauge.useThresholdColor', {
+                    defaultMessage: 'Use threshold colors',
                   })}
-                </EuiText>
-                <EuiSpacer size="s" />
+                  data-test-subj="useThresholdColorButton"
+                  checked={styleOptions?.useThresholdColor ?? false}
+                  onChange={(e) => updateStyleOption('useThresholdColor', e.target.checked)}
+                />
+              </EuiFormRow>
+
+              <EuiSpacer size="s" />
+
+              <EuiFormRow>
+                <EuiSwitch
+                  compressed
+                  label={i18n.translate('explore.stylePanel.gauge.title', {
+                    defaultMessage: 'Show title',
+                  })}
+                  checked={styleOptions.showTitle}
+                  onChange={(e) => updateStyleOption('showTitle', e.target.checked)}
+                  data-test-subj="showTitleSwitch"
+                />
+              </EuiFormRow>
+              {styleOptions.showTitle && (
                 <EuiFormRow>
-                  <EuiSwitch
-                    compressed
-                    label={i18n.translate('explore.stylePanel.gauge.title', {
-                      defaultMessage: 'Show title',
+                  <DebouncedFieldText
+                    value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
+                    placeholder={i18n.translate('explore.vis.gauge.title', {
+                      defaultMessage: 'Title',
                     })}
-                    checked={styleOptions.showTitle}
-                    onChange={(e) => updateStyleOption('showTitle', e.target.checked)}
-                    data-test-subj="showTitleSwitch"
+                    onChange={(text) => updateStyleOption('title', text)}
                   />
                 </EuiFormRow>
-                {styleOptions.showTitle && (
-                  <EuiFormRow>
-                    <DebouncedText
-                      value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
-                      placeholder={i18n.translate('explore.vis.gauge.title', {
-                        defaultMessage: 'Title',
-                      })}
-                      onChange={(text) => updateStyleOption('title', text)}
-                    />
-                  </EuiFormRow>
-                )}
-              </EuiSplitPanel.Inner>
+              )}
             </StyleAccordion>
           </EuiFlexItem>
         </>

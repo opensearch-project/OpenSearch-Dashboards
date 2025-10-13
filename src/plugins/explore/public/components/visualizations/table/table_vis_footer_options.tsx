@@ -19,12 +19,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { StyleControlsProps } from '../utils/use_visualization_types';
-import { TableChartStyleControls } from './table_vis_config';
+import { TableChartStyle } from './table_vis_config';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { VisColumn } from '../types';
 import { CalculationMethod } from '../utils/calculation';
 
-export type TableFooterStyleControlsProps = StyleControlsProps<TableChartStyleControls> & {
+export type TableFooterStyleControlsProps = StyleControlsProps<TableChartStyle> & {
   numericalColumns?: VisColumn[];
 };
 
@@ -51,7 +51,7 @@ export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
   const [popoverIndex, setPopoverIndex] = useState<number | null>(null);
 
   const updateStyleOption = useCallback(
-    <K extends keyof TableChartStyleControls>(key: K, value: TableChartStyleControls[K]) => {
+    <K extends keyof TableChartStyle>(key: K, value: TableChartStyle[K]) => {
       onStyleChange({ [key]: value });
     },
     [onStyleChange]
@@ -208,6 +208,7 @@ export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
                           onChange={(e) =>
                             onCalculationChange(index, e.target.value as CalculationMethod)
                           }
+                          onMouseUp={(e) => e.stopPropagation()}
                           data-test-subj={`visTableFooterCalculation-${index}`}
                         />
                       </EuiFlexItem>

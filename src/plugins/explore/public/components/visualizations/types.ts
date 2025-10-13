@@ -3,10 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ChartStyleControlMap } from '../visualizations/utils/use_visualization_types';
+import {
+  ChartStylesMapping,
+  ChartStyles,
+  ChartType,
+} from '../visualizations/utils/use_visualization_types';
+import { ChartConfig } from './visualization_builder.types';
 
 type AxisSupportedChartTypes = 'bar' | 'scatter' | 'heatmap';
-export type AxisSupportedStyles = ChartStyleControlMap[AxisSupportedChartTypes];
+export type AxisSupportedStyles = ChartStylesMapping[AxisSupportedChartTypes];
 
 export enum Positions {
   RIGHT = 'right',
@@ -48,8 +53,8 @@ export interface VisualizationRule {
     numericalColumns: VisColumn[],
     categoricalColumns: VisColumn[],
     dateColumns: VisColumn[],
-    styleOptions: any,
-    chartType?: string,
+    styleOptions: ChartStylesMapping[ChartType],
+    chartType?: ChartType,
     axisColumnMappings?: AxisColumnMappings
   ) => any;
 }
@@ -69,16 +74,17 @@ export enum VisFieldType {
   Unknown = 'unknown',
 }
 
-export enum ThresholdLineStyle {
-  Full = 'full',
+export enum ThresholdMode {
+  Solid = 'solid',
   Dashed = 'dashed',
   DotDashed = 'dot-dashed',
+  Off = 'off',
 }
 
 export interface ThresholdLine {
   color: string;
   show: boolean;
-  style: ThresholdLineStyle;
+  style: ThresholdMode;
   value: number;
   width: number;
 }
@@ -86,7 +92,7 @@ export interface ThresholdLine {
 export interface ThresholdLine {
   color: string;
   show: boolean;
-  style: ThresholdLineStyle;
+  style: ThresholdMode;
   value: number;
   width: number;
   name?: string;
@@ -116,6 +122,7 @@ export interface AxisLabels {
   show: boolean;
   filter: boolean;
   rotate: number;
+  // TODO: make `truncate` optional
   truncate: number;
 }
 
@@ -243,6 +250,31 @@ export enum TimeUnit {
   SECOND = 'yearmonthdatehoursminutesseconds',
 }
 
+export interface AxisConfig {
+  grid: boolean;
+  gridColor?: string;
+  gridOpacity?: number;
+  labelSeparation?: number;
+  orient?: Positions;
+  title?: string | null;
+  labels?: boolean;
+  labelAngle?: number;
+  labelLimit?: number;
+  labelOverlap?: string;
+  labelFlush?: boolean;
+  ticks?: boolean;
+  domain?: boolean;
+  format?: {
+    seconds?: string;
+    milliseconds?: string;
+  };
+}
+export interface ThresholdOptions {
+  thresholds?: Threshold[];
+  baseColor?: string;
+  thresholdStyle?: ThresholdMode;
+}
+
 export const VEGASCHEMA = 'https://vega.github.io/schema/vega-lite/v5.json';
 
 export type PercentageColor = 'standard' | 'inverted';
@@ -261,3 +293,19 @@ export enum FilterOperator {
 export type ColorMode = 'auto' | 'colored_text' | 'colored_background';
 
 export type CellAlignment = 'auto' | 'left' | 'center' | 'right';
+export interface UnitItem {
+  id: string;
+  name: string;
+  symbol?: string;
+  display?: (value: number, symbol?: string) => any;
+  fontScale?: number;
+}
+
+export interface Unit {
+  name: string;
+  units: UnitItem[];
+}
+
+export interface RenderChartConfig extends ChartConfig {
+  styles: ChartStyles;
+}

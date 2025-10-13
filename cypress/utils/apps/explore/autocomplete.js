@@ -36,7 +36,19 @@ export const typeAndVerifySuggestion = (input, expectedSuggestion) => {
   cy.get('.suggest-widget')
     .should('be.visible')
     .within(() => {
-      cy.get('.monaco-list-row').should('exist').contains(expectedSuggestion);
+      cy.get('.monaco-list-row')
+        .should('exist')
+        .then(($rows) => {
+          const matchFound = $rows.toArray().some((row) => {
+            const extractedSuggestion = Cypress.$(row)
+              .find('.monaco-icon-label-container .label-name')
+              .text();
+            return (
+              extractedSuggestion.trim().toLowerCase() === expectedSuggestion.trim().toLowerCase()
+            );
+          });
+          expect(matchFound).to.be.true;
+        });
     });
 };
 
@@ -51,7 +63,10 @@ export const selectSpecificSuggestion = (suggestionText) => {
       cy.get('.monaco-list-row.focused').then(() => {
         cy.get('.monaco-list-row').then(($rows) => {
           const exactMatch = $rows.filter((_, row) => {
-            return Cypress.$(row).text().includes(suggestionText);
+            const extractedSuggestion = Cypress.$(row)
+              .find('.monaco-icon-label-container .label-name')
+              .text();
+            return extractedSuggestion.trim().toLowerCase() === suggestionText.trim().toLowerCase();
           });
 
           if (exactMatch.length > 0) {
@@ -203,9 +218,23 @@ export const selectSuggestion = (suggestionText, useKeyboard = false) => {
         .some((row) => Cypress.$(row).text().includes(suggestionText));
 
       if (isVisible) {
+        const getMatchingSuggestion = ($rows) => {
+          return $rows.toArray().find((row) => {
+            const $row = Cypress.$(row);
+            const extractedSuggestion = $row
+              .find('.monaco-icon-label-container .label-name')
+              .text();
+            return extractedSuggestion.trim().toLowerCase() === suggestionText.trim().toLowerCase();
+          });
+        };
+
         if (useKeyboard) {
-          const highlightedRow = $rows.filter('.focused').text();
-          if (highlightedRow.includes(suggestionText)) {
+          const highlightedRow = $rows.filter('.focused');
+          const extractedSuggestion = highlightedRow
+            .find('.monaco-icon-label-container .label-name')
+            .text();
+          cy.log('Pikachu says:', extractedSuggestion);
+          if (extractedSuggestion.trim().toLowerCase() === suggestionText.trim().toLowerCase()) {
             return cy.get('.inputarea').trigger('keydown', {
               key: 'Tab',
               keyCode: 9,
@@ -214,7 +243,10 @@ export const selectSuggestion = (suggestionText, useKeyboard = false) => {
             });
           }
         } else {
-          return cy.get('.monaco-list-row').contains(suggestionText).click({ force: true });
+          const matchingRow = getMatchingSuggestion($rows);
+          if (matchingRow) {
+            return cy.wrap(matchingRow).click({ force: true });
+          }
         }
       }
       return cy
@@ -244,6 +276,7 @@ export const showSuggestionAndHint = (maxAttempts = 3) => {
 
   const attemptShow = () => {
     attempts++;
+    cy.get('.inputarea').clear();
     cy.get('.inputarea').type('source ', { force: true });
 
     return cy.get('.suggest-widget.visible').then(($widget) => {

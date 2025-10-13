@@ -14,6 +14,16 @@ jest.mock('@osd/i18n', () => ({
   },
 }));
 
+jest.mock('../style_panel/unit/unit_panel', () => ({
+  UnitPanel: jest.fn(({ unitId, onUnitChange }) => (
+    <div data-test-subj="mockMetricUnitPanel">
+      <select data-test-subj="changeUnit" onClick={() => onUnitChange('number')}>
+        <option value="number">Number</option>
+      </select>
+    </div>
+  )),
+}));
+
 describe('MetricVisStyleControls', () => {
   const mockProps: MetricVisStyleControlsProps = {
     axisColumnMappings: {
@@ -95,32 +105,7 @@ describe('MetricVisStyleControls', () => {
   it('renders use color switch', () => {
     render(<MetricVisStyleControls {...mockProps} />);
 
-    expect(screen.getByText('Value color')).toBeInTheDocument();
-  });
-
-  it('calls onStyleChange when use color switch is toggled', () => {
-    render(<MetricVisStyleControls {...mockProps} />);
-    const switches = screen.getAllByRole('switch');
-    const colorSwitch = switches.find((sw) => sw.getAttribute('aria-checked') === 'false');
-    fireEvent.click(colorSwitch!);
-
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ useColor: true });
-  });
-
-  it('renders color schema select when useColor is true', () => {
-    const propsWithColor = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, useColor: true },
-    };
-    render(<MetricVisStyleControls {...propsWithColor} />);
-
-    expect(screen.getByText('Color Schema')).toBeInTheDocument();
-  });
-
-  it('does not render color schema when useColor is false', () => {
-    render(<MetricVisStyleControls {...mockProps} />);
-
-    expect(screen.queryByText('Color Schema')).not.toBeInTheDocument();
+    expect(screen.getByText('Use threshold colors')).toBeInTheDocument();
   });
 
   it('does not render style options when no axis mapping is selected', () => {
@@ -149,29 +134,6 @@ describe('MetricVisStyleControls', () => {
     await waitFor(() => {
       expect(mockProps.onStyleChange).toHaveBeenCalledWith({ fontSize: 80 });
     });
-  });
-
-  it('calls onStyleChange when color schema is changed', () => {
-    const propsWithColor = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, useColor: true },
-    };
-    render(<MetricVisStyleControls {...propsWithColor} />);
-    const colorSchemaSelect = screen.getByTestId('colorSchemaSelect');
-    fireEvent.change(colorSchemaSelect, { target: { value: 'greens' } });
-
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ colorSchema: 'greens' });
-  });
-
-  it('renders custom ranges when useColor is true', () => {
-    const propsWithColor = {
-      ...mockProps,
-      styleOptions: { ...defaultMetricChartStyles, useColor: true },
-    };
-    render(<MetricVisStyleControls {...propsWithColor} />);
-
-    // CustomRange component should be rendered
-    expect(screen.getByText('Color Schema')).toBeInTheDocument();
   });
 
   it('calls onStyleChange when title text is changed', async () => {
@@ -209,5 +171,17 @@ describe('MetricVisStyleControls', () => {
     const titleInput = screen.getByPlaceholderText('Title');
 
     expect(titleInput).toHaveValue('');
+  });
+
+  it('renders unit panel', () => {
+    render(<MetricVisStyleControls {...mockProps} />);
+    expect(screen.getByTestId('mockMetricUnitPanel')).toBeInTheDocument();
+  });
+
+  it('calls onStyleChange when unit is changed', () => {
+    render(<MetricVisStyleControls {...mockProps} />);
+    const unitSelect = screen.getByTestId('changeUnit');
+    fireEvent.click(unitSelect);
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({ unitId: 'number' });
   });
 });

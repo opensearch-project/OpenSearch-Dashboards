@@ -6,10 +6,9 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { BarChartStyleControls } from './bar_vis_config';
+import { BarChartStyle, BarChartStyleOptions } from './bar_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsPanel } from '../style_panel/legend/legend';
-import { ThresholdOptions } from '../style_panel/threshold_lines/threshold';
 import { BarExclusiveVisOptions } from './bar_exclusive_vis_options';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
@@ -17,8 +16,9 @@ import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole, VisFieldType } from '../types';
 import { BucketOptionsPanel } from './bucket_options';
+import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 
-export type BarVisStyleControlsProps = StyleControlsProps<BarChartStyleControls>;
+export type BarVisStyleControlsProps = StyleControlsProps<BarChartStyle>;
 
 export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
   styleOptions,
@@ -31,17 +31,12 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof BarChartStyleControls>(
+  const updateStyleOption = <K extends keyof BarChartStyleOptions>(
     key: K,
-    value: BarChartStyleControls[K]
+    value: BarChartStyleOptions[K]
   ) => {
     onStyleChange({ [key]: value });
   };
-
-  // Determine if the legend should be shown based on the registration of a COLOR or FACET field
-  const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
-  const hasFacetMapping = !!axisColumnMappings?.[AxisRole.FACET];
-  const shouldShowLegend = hasColorMapping || hasFacetMapping;
 
   const bucketType =
     axisColumnMappings[AxisRole.X]?.schema === VisFieldType.Numerical
@@ -55,7 +50,7 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
-
+  const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -80,6 +75,13 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
             />
           </EuiFlexItem>
 
+          <EuiFlexItem>
+            <ThresholdPanel
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+              showThresholdStyle={true}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AllAxesOptions
               axisColumnMappings={axisColumnMappings}
@@ -98,6 +100,7 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
               showBarBorder={styleOptions.showBarBorder}
               barBorderWidth={styleOptions.barBorderWidth}
               barBorderColor={styleOptions.barBorderColor}
+              useThresholdColor={styleOptions?.useThresholdColor}
               onBarSizeModeChange={(barSizeMode) => updateStyleOption('barSizeMode', barSizeMode)}
               onBarWidthChange={(barWidth) => updateStyleOption('barWidth', barWidth)}
               onBarPaddingChange={(barPadding) => updateStyleOption('barPadding', barPadding)}
@@ -110,35 +113,29 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
               onBarBorderColorChange={(barBorderColor) =>
                 updateStyleOption('barBorderColor', barBorderColor)
               }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ThresholdOptions
-              thresholdLines={styleOptions.thresholdLines}
-              onThresholdLinesChange={(thresholdLines) =>
-                updateStyleOption('thresholdLines', thresholdLines)
+              onUseThresholdColorChange={(useThresholdColor) =>
+                updateStyleOption('useThresholdColor', useThresholdColor)
               }
+              shouldDisableUseThresholdColor={hasColorMapping}
             />
           </EuiFlexItem>
 
-          {shouldShowLegend && (
-            <EuiFlexItem grow={false}>
-              <LegendOptionsPanel
-                legendOptions={{
-                  show: styleOptions.addLegend,
-                  position: styleOptions.legendPosition,
-                }}
-                onLegendOptionsChange={(legendOptions) => {
-                  if (legendOptions.show !== undefined) {
-                    updateStyleOption('addLegend', legendOptions.show);
-                  }
-                  if (legendOptions.position !== undefined) {
-                    updateStyleOption('legendPosition', legendOptions.position);
-                  }
-                }}
-              />
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <LegendOptionsPanel
+              legendOptions={{
+                show: styleOptions.addLegend,
+                position: styleOptions.legendPosition,
+              }}
+              onLegendOptionsChange={(legendOptions) => {
+                if (legendOptions.show !== undefined) {
+                  updateStyleOption('addLegend', legendOptions.show);
+                }
+                if (legendOptions.position !== undefined) {
+                  updateStyleOption('legendPosition', legendOptions.position);
+                }
+              }}
+            />
+          </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel

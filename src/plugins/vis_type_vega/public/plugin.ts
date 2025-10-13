@@ -103,6 +103,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
   ) {
     setInjectedVars({
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
+      exposeDebugObjectToWindow: this.initializerContext.config.get().exposeDebugObjectToWindow,
       emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
     });
     setUISettings(core.uiSettings);

@@ -255,7 +255,8 @@ function transformFieldsFormat(responseData: any): TraceHit[] {
         traceGroupFields: {
           endTime: traceGroupFields.endTime || resolvedEndTime,
           durationInNanos: traceGroupFields.durationInNanos || resolvedDuration,
-          statusCode: traceGroupFields.statusCode || 0,
+          statusCode:
+            traceGroupFields.statusCode || extractStatusCode(fieldMap.get('status')?.[i]) || 0,
         },
         traceGroup: fieldMap.get('traceGroup')?.[i] || '',
         serviceName: resolvedServiceName,

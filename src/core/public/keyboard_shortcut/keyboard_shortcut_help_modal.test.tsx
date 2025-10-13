@@ -277,7 +277,7 @@ describe('KeyboardShortcutHelpModal', () => {
         id: 'show_help',
         pluginId: 'core',
         name: 'Show this help',
-        category: 'navigation',
+        category: 'Navigation',
         keys: 'shift+/',
         execute: expect.any(Function),
       });

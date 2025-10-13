@@ -24,17 +24,14 @@ const store = mockStore({
 
 // Mock the debounced components
 jest.mock('../../style_panel/utils', () => ({
-  DebouncedTruncateField: ({
+  DebouncedFieldNumber: ({
     value,
     onChange,
-    label,
   }: {
     value: number;
     onChange: (val: number) => void;
-    label: string;
   }) => (
     <div>
-      <label htmlFor="truncate-field">{label}</label>
       <input
         id="truncate-field"
         type="number"
@@ -44,19 +41,16 @@ jest.mock('../../style_panel/utils', () => ({
       />
     </div>
   ),
-  DebouncedText: ({
+  DebouncedFieldText: ({
     value,
     onChange,
-    label,
     placeholder,
   }: {
     value: string;
     onChange: (val: string) => void;
-    label: string;
     placeholder?: string;
   }) => (
     <div>
-      <label htmlFor="text-field">{label}</label>
       <input
         id="text-field"
         type="text"
@@ -309,5 +303,27 @@ describe('AllAxesOptions', () => {
         ])
       );
     });
+  });
+
+  it('calls stopPropagation on mouseUp for alignment select', () => {
+    render(
+      <Provider store={store}>
+        <AllAxesOptions {...defaultProps} />
+      </Provider>
+    );
+
+    const alignmentSelect = screen.getAllByRole('combobox')[0];
+    expect(alignmentSelect).toBeInTheDocument(); // Verify element exists
+
+    const stopPropagation = jest.fn();
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent, 'stopPropagation', { value: stopPropagation });
+
+    alignmentSelect.dispatchEvent(mouseUpEvent);
+
+    expect(stopPropagation).toHaveBeenCalled();
   });
 });

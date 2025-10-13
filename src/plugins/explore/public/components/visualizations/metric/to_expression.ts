@@ -3,34 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  DefaultMetricChartStyleControls,
-  defaultMetricChartStyles,
-  MetricChartStyleControls,
-} from './metric_vis_config';
-import {
-  VisColumn,
-  RangeValue,
-  ColorSchemas,
-  VEGASCHEMA,
-  AxisRole,
-  AxisColumnMappings,
-} from '../types';
-import { generateColorBySchema, getTooltipFormat } from '../utils/utils';
+import { MetricChartStyle } from './metric_vis_config';
+import { VisColumn, VEGASCHEMA, AxisRole, AxisColumnMappings, Threshold } from '../types';
+import { getTooltipFormat } from '../utils/utils';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
 import { DEFAULT_OPACITY } from '../constants';
+import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
+import {
+  mergeThresholdsWithBase,
+  locateThreshold,
+  getMaxAndMinBase,
+} from '../style_panel/threshold/threshold_utils';
 
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions: Partial<MetricChartStyleControls>,
+  styles: MetricChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {
   const colorPalette = getColors();
-  const styles: DefaultMetricChartStyleControls = { ...defaultMetricChartStyles, ...styleOptions };
+  // const styles: MetricChartStyle = { ...defaultMetricChartStyles, ...styleOptions };
   // Only contains one and the only one value
   const valueColumn = axisColumnMappings?.[AxisRole.Value];
   const numericField = valueColumn?.column;
@@ -45,39 +40,60 @@ export const createSingleMetric = (
   const percentageSize = styles.percentageSize;
 
   let numericalValues: number[] = [];
+  let maxNumber: number = 0;
   if (numericField) {
     numericalValues = transformedData.map((d) => d[numericField]);
+    maxNumber = Math.max(...numericalValues);
   }
 
   const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
   const isValidNumber =
     calculatedValue !== undefined && typeof calculatedValue === 'number' && !isNaN(calculatedValue);
 
-  function generateColorConditions(field: string, ranges: RangeValue[], color: ColorSchemas) {
-    const colors = generateColorBySchema(ranges.length + 1, color);
-    const conditions = [];
+  const selectedUnit = getUnitById(styles?.unitId);
 
-    for (let i = 0; i < ranges.length; i++) {
-      const r = ranges[i];
+  const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
 
-      const minTest = `datum["${field}"] >= ${r.min}`;
-      const maxTest = r.max !== undefined ? ` && datum["${field}"] < ${r.max}` : '';
+  const { minBase, maxBase } = getMaxAndMinBase(
+    maxNumber,
+    styles?.min,
+    styles?.max,
+    calculatedValue
+  );
 
-      conditions.push({
-        test: minTest + maxTest,
-        value: colors[i] || colors[colors.length - 1], // fallback color if not enough
-      });
-    }
-    const last = ranges[ranges.length - 1];
-    if (last.max) {
-      conditions.push({
-        test: `datum["${field}"] >= ${last.max}`,
-        value: colors[colors.length - 1],
-      });
-    }
+  const targetValue = calculatedValue || 0;
 
-    return conditions;
+  function targetFillColor(
+    useThresholdColor: boolean,
+    threshold?: Threshold[],
+    baseColor?: string
+  ) {
+    const newThreshold = threshold ?? [];
+
+    const newBaseColor = baseColor ?? getColors().statusGreen;
+
+    const mergedThresholds = mergeThresholdsWithBase(minBase, maxBase, newBaseColor, newThreshold);
+
+    // Locate which threshold the target value falls into
+    const targetThreshold = locateThreshold(mergedThresholds, targetValue);
+
+    const fillColor =
+      targetThreshold &&
+      minBase <= targetValue &&
+      minBase < maxBase &&
+      isValidNumber &&
+      useThresholdColor
+        ? targetThreshold.color
+        : colorPalette.text;
+
+    return fillColor;
   }
+
+  const fillColor = targetFillColor(
+    styles?.useThresholdColor ?? false,
+    styles?.thresholdOptions?.thresholds,
+    styles?.thresholdOptions?.baseColor
+  );
 
   const layer = [];
   if (dateField) {
@@ -118,39 +134,28 @@ export const createSingleMetric = (
 
   const markLayer: any = {
     data: {
-      values: [{ value: calculatedValue ?? '-' }],
+      values: [{ value: displayValue ?? '-' }],
     },
-    transform: [
-      {
-        calculate: "format(datum.value, '.2f')",
-        as: 'formattedValue',
-      },
-    ],
     mark: {
       type: 'text',
       align: 'center',
       baseline: 'middle',
-      fontSize: valueFontSize ? valueFontSize : { expr: '8*textSize' },
-      dy: valueFontSize ? -valueFontSize / 8 : { expr: '-textSize' },
-      color: colorPalette.text,
+      fontSize: valueFontSize
+        ? valueFontSize
+        : { expr: `5*textSize * ${selectedUnit?.fontScale ?? 1}` },
+      dy: valueFontSize
+        ? -valueFontSize / 8
+        : { expr: `-textSize* ${selectedUnit?.fontScale ?? 1}` },
+      color: fillColor,
     },
     encoding: {
       text: {
-        field: isValidNumber ? 'formattedValue' : 'value',
-        type: isValidNumber ? 'quantitative' : 'nominal',
+        field: 'value',
+        type: 'nominal',
       },
     },
   };
   layer.push(markLayer);
-
-  if (styles.useColor && styles.customRanges && styles.customRanges.length > 0) {
-    markLayer.encoding.color = {};
-    markLayer.encoding.color.condition = generateColorConditions(
-      'formattedValue',
-      styles.customRanges,
-      styles.colorSchema
-    );
-  }
 
   if (styles.showTitle) {
     const titleLayer = {
@@ -179,18 +184,18 @@ export const createSingleMetric = (
 
     let color = colorPalette.text;
     if (percentage !== undefined && percentage > 0) {
-      if (styleOptions.percentageColor === 'standard') {
+      if (styles.percentageColor === 'standard') {
         color = colorPalette.statusGreen;
-      } else if (styleOptions.percentageColor === 'inverted') {
+      } else if (styles.percentageColor === 'inverted') {
         color = colorPalette.statusRed;
       } else {
         color = colorPalette.statusGreen;
       }
     }
     if (percentage !== undefined && percentage < 0) {
-      if (styleOptions.percentageColor === 'standard') {
+      if (styles.percentageColor === 'standard') {
         color = colorPalette.statusRed;
-      } else if (styleOptions.percentageColor === 'inverted') {
+      } else if (styles.percentageColor === 'inverted') {
         color = colorPalette.statusGreen;
       } else {
         color = colorPalette.statusRed;

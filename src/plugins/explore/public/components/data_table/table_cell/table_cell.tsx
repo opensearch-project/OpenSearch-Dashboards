@@ -10,7 +10,7 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { useDatasetContext } from '../../../application/context';
-import { isOnTracesPage, isSpanIdColumn, SpanIdLink } from './trace_utils/trace_utils';
+import { isSpanIdColumn, TraceFlyoutButton, SpanIdLink } from './trace_utils/trace_utils';
 
 export interface ITableCellProps {
   columnId: string;
@@ -19,6 +19,7 @@ export interface ITableCellProps {
   fieldMapping?: any;
   sanitizedCellValue: string;
   rowData?: OpenSearchSearchHit<Record<string, unknown>>;
+  isOnTracesPage: boolean;
 }
 
 // TODO: Move to a better cell component design that not rely on rowData
@@ -29,12 +30,19 @@ export const TableCellUI = ({
   fieldMapping,
   sanitizedCellValue,
   rowData,
+  isOnTracesPage,
 }: ITableCellProps) => {
   const { dataset } = useDatasetContext();
 
   const dataFieldContent =
-    isSpanIdColumn(columnId) && isOnTracesPage() && rowData && dataset ? (
+    isSpanIdColumn(columnId) && isOnTracesPage && rowData && dataset ? (
       <SpanIdLink sanitizedCellValue={sanitizedCellValue} rowData={rowData} dataset={dataset} />
+    ) : isTimeField && isOnTracesPage && rowData && dataset ? (
+      <TraceFlyoutButton
+        sanitizedCellValue={sanitizedCellValue}
+        rowData={rowData}
+        dataset={dataset}
+      />
     ) : (
       <span
         className="exploreDocTableCell__dataField"
@@ -56,7 +64,7 @@ export const TableCellUI = ({
           <EuiButtonIcon
             size="xs"
             onClick={() => onFilter?.(columnId, fieldMapping, '+')}
-            iconType="plusInCircle"
+            iconType="magnifyWithPlus"
             aria-label={i18n.translate('explore.filterForValue', {
               defaultMessage: 'Filter for value',
             })}
@@ -72,7 +80,7 @@ export const TableCellUI = ({
           <EuiButtonIcon
             size="xs"
             onClick={() => onFilter?.(columnId, fieldMapping, '-')}
-            iconType="minusInCircle"
+            iconType="magnifyWithMinus"
             aria-label={i18n.translate('explore.filterOutValue', {
               defaultMessage: 'Filter out value',
             })}

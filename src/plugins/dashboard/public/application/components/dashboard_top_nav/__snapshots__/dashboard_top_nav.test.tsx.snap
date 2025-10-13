@@ -307,6 +307,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               },
               "dataViews": Object {
                 "clearCache": [MockFunction],
+                "convertToDataset": [MockFunction],
                 "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
@@ -314,6 +315,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "find": [MockFunction],
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
+                "getIds": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
               },
@@ -884,12 +886,6 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "getBranding": [MockFunction],
               "getInjectedVar": [MockFunction],
             },
-            "keyboardShortcut": Object {
-              "getAllShortcuts": [MockFunction],
-              "register": [MockFunction],
-              "unregister": [MockFunction],
-              "useKeyboardShortcut": [MockFunction],
-            },
             "navigation": Object {
               "ui": Object {
                 "HeaderControl": [Function],
@@ -993,8 +989,22 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -1466,6 +1476,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               },
               "dataViews": Object {
                 "clearCache": [MockFunction],
+                "convertToDataset": [MockFunction],
                 "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
@@ -1473,6 +1484,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "find": [MockFunction],
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
+                "getIds": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
               },
@@ -2043,12 +2055,6 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "getBranding": [MockFunction],
               "getInjectedVar": [MockFunction],
             },
-            "keyboardShortcut": Object {
-              "getAllShortcuts": [MockFunction],
-              "register": [MockFunction],
-              "unregister": [MockFunction],
-              "useKeyboardShortcut": [MockFunction],
-            },
             "navigation": Object {
               "ui": Object {
                 "HeaderControl": [Function],
@@ -2152,8 +2158,22 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -2625,6 +2645,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               },
               "dataViews": Object {
                 "clearCache": [MockFunction],
+                "convertToDataset": [MockFunction],
                 "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
@@ -2632,6 +2653,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "find": [MockFunction],
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
+                "getIds": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
               },
@@ -3202,12 +3224,6 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "getBranding": [MockFunction],
               "getInjectedVar": [MockFunction],
             },
-            "keyboardShortcut": Object {
-              "getAllShortcuts": [MockFunction],
-              "register": [MockFunction],
-              "unregister": [MockFunction],
-              "useKeyboardShortcut": [MockFunction],
-            },
             "navigation": Object {
               "ui": Object {
                 "HeaderControl": [Function],
@@ -3311,8 +3327,22 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -3784,6 +3814,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               },
               "dataViews": Object {
                 "clearCache": [MockFunction],
+                "convertToDataset": [MockFunction],
                 "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
@@ -3791,6 +3822,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "find": [MockFunction],
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
+                "getIds": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
               },
@@ -4361,12 +4393,6 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "getBranding": [MockFunction],
               "getInjectedVar": [MockFunction],
             },
-            "keyboardShortcut": Object {
-              "getAllShortcuts": [MockFunction],
-              "register": [MockFunction],
-              "unregister": [MockFunction],
-              "useKeyboardShortcut": [MockFunction],
-            },
             "navigation": Object {
               "ui": Object {
                 "HeaderControl": [Function],
@@ -4470,8 +4496,22 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -4943,6 +4983,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               },
               "dataViews": Object {
                 "clearCache": [MockFunction],
+                "convertToDataset": [MockFunction],
                 "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
@@ -4950,6 +4991,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "find": [MockFunction],
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
+                "getIds": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
               },
@@ -5520,12 +5562,6 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "getBranding": [MockFunction],
               "getInjectedVar": [MockFunction],
             },
-            "keyboardShortcut": Object {
-              "getAllShortcuts": [MockFunction],
-              "register": [MockFunction],
-              "unregister": [MockFunction],
-              "useKeyboardShortcut": [MockFunction],
-            },
             "navigation": Object {
               "ui": Object {
                 "HeaderControl": [Function],
@@ -5629,8 +5665,22 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
@@ -6102,6 +6152,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               },
               "dataViews": Object {
                 "clearCache": [MockFunction],
+                "convertToDataset": [MockFunction],
                 "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
@@ -6109,6 +6160,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "find": [MockFunction],
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
+                "getIds": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
               },
@@ -6679,12 +6731,6 @@ exports[`Dashboard top nav render with all components 1`] = `
               "getBranding": [MockFunction],
               "getInjectedVar": [MockFunction],
             },
-            "keyboardShortcut": Object {
-              "getAllShortcuts": [MockFunction],
-              "register": [MockFunction],
-              "unregister": [MockFunction],
-              "useKeyboardShortcut": [MockFunction],
-            },
             "navigation": Object {
               "ui": Object {
                 "HeaderControl": [Function],
@@ -6788,8 +6834,22 @@ exports[`Dashboard top nav render with all components 1`] = `
                   Array [
                     "home:useNewHomePage",
                   ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
+                  Array [
+                    "home:useNewHomePage",
+                  ],
                 ],
                 "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
                   Object {
                     "type": "return",
                     "value": undefined,
