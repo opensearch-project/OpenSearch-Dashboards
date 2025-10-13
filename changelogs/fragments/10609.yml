@@ -1,0 +1,2 @@
+fix:
+- Update discover traces column names ([#10609](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10609))

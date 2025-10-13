@@ -31,14 +31,14 @@ export const runSimpleDatasetSelectorTests = () => {
         INDEX_WITH_TIME_1,
         INDEX_WITHOUT_TIME_1,
       ]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
         timefieldName: 'timestamp',
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_NO_TIME.replace('*', ''),
         timefieldName: '',
@@ -109,7 +109,7 @@ export const runSimpleDatasetSelectorTests = () => {
       ]);
 
       for (let i = 1; i <= noIndexPatterns; i++) {
-        cy.createWorkspaceIndexPatterns({
+        cy.explore.createWorkspaceDataSets({
           workspaceName: workspaceName,
           indexPattern: INDEX_PATTERN_WITH_TIME.slice(0, i),
           timefieldName: 'timestamp',

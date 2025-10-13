@@ -372,7 +372,7 @@ export class ExplorePlugin
     );
     core.application.register(createExploreApp());
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+    const navLinks = [
       {
         id: PLUGIN_ID,
         category: undefined,
@@ -384,21 +384,29 @@ export class ExplorePlugin
         order: 300,
         parentNavLinkId: PLUGIN_ID,
       },
-      {
+    ];
+
+    // Only add Traces nav link if the discoverTraces feature is enabled
+    if (this.config.discoverTraces?.enabled) {
+      navLinks.push({
         id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
-      },
-      // uncomment when metrics is ready for launch
-      /*
-      {
-        id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
-        category: undefined,
-        order: 300,
-        parentNavLinkId: PLUGIN_ID,
-      }, */
-    ]);
+      });
+    }
+
+    // uncomment when metrics is ready for launch
+    /*
+    navLinks.push({
+      id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
+      category: undefined,
+      order: 300,
+      parentNavLinkId: PLUGIN_ID,
+    });
+    */
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks);
     this.registerEmbeddable(core, setupDeps);
 
     setupDeps.urlForwarding.forwardApp('doc', PLUGIN_ID, (path) => {

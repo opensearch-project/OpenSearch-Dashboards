@@ -71,6 +71,7 @@ import {
   setUiService,
   setUiSettings,
   setDataViews,
+  setSavedObjects,
 } from './services';
 import { opensearchaggs } from './search/expressions';
 import {
@@ -228,6 +229,7 @@ export class DataPublicPlugin
     setOverlays(overlays);
     setUiSettings(uiSettings);
     setApplication(application);
+    setSavedObjects(savedObjects);
 
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);

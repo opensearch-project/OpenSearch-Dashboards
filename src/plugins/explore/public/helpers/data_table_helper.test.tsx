@@ -193,5 +193,25 @@ describe('data_table_helper', () => {
       expect(result[0].isRemoveable).toBe(true); // _source is removeable when there are other columns
       expect(result[1].isRemoveable).toBe(true);
     });
+
+    it('should have human readable column names', () => {
+      const columns = [
+        'name',
+        'durationNano',
+        'resource.attributes.service.name',
+        'attributes.http.status_code',
+        'status.code',
+        'spanId',
+      ];
+
+      const result = getLegacyDisplayedColumns(columns, mockIndexPattern, true, false);
+
+      expect(result[0].displayName).toBe('Service Identifier');
+      expect(result[1].displayName).toBe('Duration');
+      expect(result[2].displayName).toBe('Service');
+      expect(result[3].displayName).toBe('Status Code');
+      expect(result[4].displayName).toBe('Status');
+      expect(result[5].displayName).toBe('SpanID');
+    });
   });
 });

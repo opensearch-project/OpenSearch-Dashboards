@@ -4,6 +4,7 @@
     "apmOss": "plugins/apm_oss",
     "banner": "plugins/banner",
     "charts": "plugins/charts",
+    "chat": "plugins/chat",
     "common.ui": "legacy/ui",
     "console": "plugins/console",
     "contentManagement": "plugins/content_management",

@@ -1,0 +1,2 @@
+fix:
+- Column Value Caching for Autocomplete ([#10621](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10621))

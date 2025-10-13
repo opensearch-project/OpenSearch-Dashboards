@@ -53,6 +53,13 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
         defaultMessage: 'Timeline',
       }),
     },
+    // Disabled: Service Map tab
+    // {
+    //   id: TraceDetailTab.SERVICE_MAP,
+    //   name: i18n.translate('explore.traceView.tab.serviceMap', {
+    //     defaultMessage: 'Service map',
+    //   }),
+    // },
     {
       id: TraceDetailTab.SPAN_LIST,
       name: (
@@ -68,19 +75,6 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
         </>
       ),
     },
-    {
-      id: TraceDetailTab.TREE_VIEW,
-      name: i18n.translate('explore.traceView.tab.treeView', {
-        defaultMessage: 'Tree view',
-      }),
-    },
-    // Disabled Service Map tab
-    // {
-    //   id: TraceDetailTab.SERVICE_MAP,
-    //   name: i18n.translate('explore.traceView.tab.serviceMap', {
-    //     defaultMessage: 'Service map',
-    //   }),
-    // },
   ];
 
   // Add logs tab if we have log datasets and logs data

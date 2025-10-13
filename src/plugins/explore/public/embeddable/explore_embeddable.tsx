@@ -296,7 +296,18 @@ export class ExploreEmbeddable
     if (needFetch) {
       this.prevState = { filters, query, timeRange };
       this.searchProps = searchProps;
-      await this.fetch();
+      try {
+        await this.fetch();
+      } catch (error: any) {
+        this.updateOutput({
+          loading: false,
+          error: {
+            name: error?.body?.error,
+            message: error?.body?.message,
+          },
+        });
+        throw error;
+      }
     } else if (searchProps) {
       this.searchProps = searchProps;
     }

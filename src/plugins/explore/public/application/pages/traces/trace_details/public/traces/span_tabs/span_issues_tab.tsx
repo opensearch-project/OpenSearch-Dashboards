@@ -38,7 +38,6 @@ export const SpanIssuesTab: React.FC<SpanIssuesTabProps> = ({ selectedSpan }) =>
                 language="json"
                 paddingSize="s"
                 isCopyable
-                whiteSpace="pre-wrap"
                 className="exploreSpanTabs__codeBlock"
               >
                 {JSON.stringify(issue.details, null, 2)}

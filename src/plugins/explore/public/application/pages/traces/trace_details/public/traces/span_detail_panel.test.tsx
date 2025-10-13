@@ -9,32 +9,22 @@ import { SpanDetailPanel } from './span_detail_panel';
 import { TraceDetailTab } from '../../constants/trace_detail_tabs';
 import { ChromeStart } from 'opensearch-dashboards/public';
 
-// Mock the GanttChart component
-jest.mock('../gantt_chart_vega/gantt_chart_vega', () => ({
-  GanttChart: ({ data, onSpanClick }: any) => (
-    <div data-testid="gantt-chart">
-      <div data-testid="gantt-chart-data-length">{data.length}</div>
-      <button onClick={() => onSpanClick && onSpanClick('test-span-id')}>Click Span</button>
-    </div>
-  ),
-}));
-
-// Mock the SpanDetailTable components
-jest.mock('./span_detail_table', () => ({
-  SpanDetailTable: ({ openFlyout, payloadData }: any) => {
+// Mock the SpanDetailTables components
+jest.mock('./span_detail_tables', () => ({
+  SpanListTable: ({ openFlyout, payloadData }: any) => {
     const data = JSON.parse(payloadData);
     return (
-      <div data-testid="span-detail-table">
+      <div data-testid="span-list-table">
         <div>Span List View</div>
         <div data-testid="span-table-data-length">{data.length}</div>
         <button onClick={() => openFlyout && openFlyout('test-span-id')}>Open Flyout</button>
       </div>
     );
   },
-  SpanDetailTableHierarchy: ({ openFlyout, payloadData }: any) => {
+  SpanHierarchyTable: ({ openFlyout, payloadData }: any) => {
     const data = JSON.parse(payloadData);
     return (
-      <div data-testid="span-detail-table-hierarchy">
+      <div data-testid="span-hierarchy-table">
         <div>Tree View</div>
         <div data-testid="span-hierarchy-data-length">{data.length}</div>
         <button onClick={() => openFlyout && openFlyout('test-span-id')}>Open Flyout</button>
@@ -82,7 +72,6 @@ describe('SpanDetailPanel', () => {
     chrome: mockChrome,
     spanFilters: [],
     payloadData: JSON.stringify(mockSpanData),
-    isGanttChartLoading: false,
     colorMap: {
       'service-a': '#FF0000',
       'service-b': '#00FF00',
@@ -96,29 +85,14 @@ describe('SpanDetailPanel', () => {
     jest.clearAllMocks();
   });
 
-  it('renders loading state when isGanttChartLoading is true', () => {
-    const propsWithLoading = {
-      ...defaultProps,
-      isGanttChartLoading: true,
-    };
-
-    render(<SpanDetailPanel {...propsWithLoading} />);
-
-    expect(document.querySelector('.euiLoadingChart')).toBeInTheDocument();
-    expect(screen.queryByTestId('gantt-chart')).not.toBeInTheDocument();
-  });
-
-  it('renders gantt chart by default (timeline view)', () => {
+  it('renders hierarchy table by default (timeline view)', () => {
     render(<SpanDetailPanel {...defaultProps} />);
 
-    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
-    expect(document.querySelector('[data-testid="gantt-chart-data-length"]')).toHaveTextContent(
+    expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-hierarchy-data-length"]')).toHaveTextContent(
       '2'
     );
-    expect(document.querySelector('[data-testid="span-detail-table"]')).not.toBeInTheDocument();
-    expect(
-      document.querySelector('[data-testid="span-detail-table-hierarchy"]')
-    ).not.toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-list-table"]')).not.toBeInTheDocument();
   });
 
   it('renders span list view when activeView is span_list', () => {
@@ -129,10 +103,10 @@ describe('SpanDetailPanel', () => {
 
     render(<SpanDetailPanel {...propsWithSpanList} />);
 
-    expect(document.querySelector('[data-testid="span-detail-table"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-list-table"]')).toBeInTheDocument();
     expect(screen.getByText('Span List View')).toBeInTheDocument();
     expect(document.querySelector('[data-testid="span-table-data-length"]')).toHaveTextContent('2');
-    expect(document.querySelector('[data-testid="gantt-chart"]')).not.toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-hierarchy-table"]')).not.toBeInTheDocument();
   });
 
   it('renders tree view when activeView is tree_view', () => {
@@ -143,21 +117,19 @@ describe('SpanDetailPanel', () => {
 
     render(<SpanDetailPanel {...propsWithTreeView} />);
 
-    expect(
-      document.querySelector('[data-testid="span-detail-table-hierarchy"]')
-    ).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
     expect(screen.getByText('Tree View')).toBeInTheDocument();
     expect(document.querySelector('[data-testid="span-hierarchy-data-length"]')).toHaveTextContent(
       '2'
     );
-    expect(document.querySelector('[data-testid="gantt-chart"]')).not.toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-list-table"]')).not.toBeInTheDocument();
   });
 
-  it('calls onSpanSelect when span is clicked in gantt chart', () => {
+  it('calls onSpanSelect when span is clicked in hierarchy table', () => {
     render(<SpanDetailPanel {...defaultProps} />);
 
-    const spanButton = screen.getByText('Click Span');
-    fireEvent.click(spanButton);
+    const flyoutButton = screen.getByText('Open Flyout');
+    fireEvent.click(flyoutButton);
 
     expect(defaultProps.onSpanSelect).toHaveBeenCalledWith('test-span-id');
   });
@@ -190,25 +162,6 @@ describe('SpanDetailPanel', () => {
     expect(defaultProps.onSpanSelect).toHaveBeenCalledWith('test-span-id');
   });
 
-  it('handles invalid JSON payload data gracefully', () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-    const propsWithInvalidData = {
-      ...defaultProps,
-      payloadData: 'invalid-json',
-    };
-
-    render(<SpanDetailPanel {...propsWithInvalidData} />);
-
-    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
-    expect(document.querySelector('[data-testid="gantt-chart-data-length"]')).toHaveTextContent(
-      '0'
-    );
-    expect(consoleSpy).toHaveBeenCalledWith('Error parsing payload data:', expect.any(Error));
-
-    consoleSpy.mockRestore();
-  });
-
   it('handles missing onSpanSelect prop gracefully', () => {
     const propsWithoutOnSpanSelect = {
       ...defaultProps,
@@ -217,11 +170,11 @@ describe('SpanDetailPanel', () => {
 
     render(<SpanDetailPanel {...propsWithoutOnSpanSelect} />);
 
-    const spanButton = screen.getByText('Click Span');
-    fireEvent.click(spanButton);
+    const flyoutButton = screen.getByText('Open Flyout');
+    fireEvent.click(flyoutButton);
 
     // Should not throw an error
-    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
   });
 
   it('does not render service legend when no colorMap is provided', () => {
@@ -251,7 +204,7 @@ describe('SpanDetailPanel', () => {
   it('renders correct panel structure', () => {
     render(<SpanDetailPanel {...defaultProps} />);
 
-    const panel = screen.getByTestId('span-gantt-chart-panel');
+    const panel = screen.getByTestId('span-detail-panel');
     expect(panel).toBeInTheDocument();
     expect(panel).toHaveClass('euiPanel');
   });
@@ -264,12 +217,9 @@ describe('SpanDetailPanel', () => {
 
     render(<SpanDetailPanel {...propsWithUnknownView} />);
 
-    // Should fall back to gantt chart (timeline view)
-    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
-    expect(document.querySelector('[data-testid="span-detail-table"]')).not.toBeInTheDocument();
-    expect(
-      document.querySelector('[data-testid="span-detail-table-hierarchy"]')
-    ).not.toBeInTheDocument();
+    // Should fall back to hierarchy table (timeline view)
+    expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-list-table"]')).not.toBeInTheDocument();
   });
 
   it('handles window resize events', () => {
@@ -293,10 +243,10 @@ describe('SpanDetailPanel', () => {
       value: originalInnerWidth,
     });
 
-    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
   });
 
-  it('calculates gantt height correctly for different span counts', () => {
+  it('renders table correctly for different span counts', () => {
     // Test with 0 spans
     const propsWithNoSpans = {
       ...defaultProps,
@@ -304,26 +254,26 @@ describe('SpanDetailPanel', () => {
     };
 
     render(<SpanDetailPanel {...propsWithNoSpans} />);
-    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
-    expect(document.querySelector('[data-testid="gantt-chart-data-length"]')).toHaveTextContent(
+    expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-hierarchy-data-length"]')).toHaveTextContent(
       '0'
     );
   });
 
-  it('calculates gantt height correctly for single span', () => {
+  it('renders table correctly for single span', () => {
     const propsWithSingleSpan = {
       ...defaultProps,
       payloadData: JSON.stringify([mockSpanData[0]]),
     };
 
     render(<SpanDetailPanel {...propsWithSingleSpan} />);
-    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
-    expect(document.querySelector('[data-testid="gantt-chart-data-length"]')).toHaveTextContent(
+    expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-hierarchy-data-length"]')).toHaveTextContent(
       '1'
     );
   });
 
-  it('calculates gantt height correctly for multiple spans', () => {
+  it('renders table correctly for multiple spans', () => {
     const multipleSpans = Array.from({ length: 5 }, (_, i) => ({
       ...mockSpanData[0],
       spanId: `span-${i + 1}`,
@@ -335,8 +285,8 @@ describe('SpanDetailPanel', () => {
     };
 
     render(<SpanDetailPanel {...propsWithMultipleSpans} />);
-    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
-    expect(document.querySelector('[data-testid="gantt-chart-data-length"]')).toHaveTextContent(
+    expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-hierarchy-data-length"]')).toHaveTextContent(
       '5'
     );
   });
@@ -368,7 +318,7 @@ describe('SpanDetailPanel', () => {
     // Restore original createElement
     document.createElement = originalCreateElement;
 
-    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
   });
 
   it('handles locked navigation drawer state', () => {
@@ -377,7 +327,7 @@ describe('SpanDetailPanel', () => {
 
     render(<SpanDetailPanel {...defaultProps} />);
 
-    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
 
     // Reset mock
     useObservableMock.mockReturnValue(false);
@@ -390,10 +340,10 @@ describe('SpanDetailPanel', () => {
 
     render(<SpanDetailPanel {...defaultProps} />);
 
-    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
   });
 
-  it('passes correct props to SpanDetailTable', () => {
+  it('passes correct props to SpanListTable', () => {
     const propsWithSpanList = {
       ...defaultProps,
       activeView: TraceDetailTab.SPAN_LIST,
@@ -402,12 +352,12 @@ describe('SpanDetailPanel', () => {
 
     render(<SpanDetailPanel {...propsWithSpanList} />);
 
-    const spanTable = document.querySelector('[data-testid="span-detail-table"]');
+    const spanTable = document.querySelector('[data-testid="span-list-table"]');
     expect(spanTable).toBeInTheDocument();
     expect(spanTable).toHaveTextContent('Span List View');
   });
 
-  it('passes correct props to SpanDetailTableHierarchy', () => {
+  it('passes correct props to SpanHierarchyTable', () => {
     const propsWithTreeView = {
       ...defaultProps,
       activeView: TraceDetailTab.TREE_VIEW,
@@ -416,19 +366,9 @@ describe('SpanDetailPanel', () => {
 
     render(<SpanDetailPanel {...propsWithTreeView} />);
 
-    const hierarchyTable = document.querySelector('[data-testid="span-detail-table-hierarchy"]');
+    const hierarchyTable = document.querySelector('[data-testid="span-hierarchy-table"]');
     expect(hierarchyTable).toBeInTheDocument();
     expect(hierarchyTable).toHaveTextContent('Tree View');
-  });
-
-  it('passes correct props to GanttChart', () => {
-    render(<SpanDetailPanel {...defaultProps} />);
-
-    const ganttChart = document.querySelector('[data-testid="gantt-chart"]');
-    expect(ganttChart).toBeInTheDocument();
-    expect(document.querySelector('[data-testid="gantt-chart-data-length"]')).toHaveTextContent(
-      '2'
-    );
   });
 
   it('handles empty colorMap gracefully', () => {
@@ -439,7 +379,7 @@ describe('SpanDetailPanel', () => {
 
     render(<SpanDetailPanel {...propsWithEmptyColorMap} />);
 
-    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
   });
 
   it('handles undefined colorMap gracefully', () => {
@@ -450,7 +390,7 @@ describe('SpanDetailPanel', () => {
 
     render(<SpanDetailPanel {...propsWithUndefinedColorMap} />);
 
-    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
   });
 
   it('renders with default activeView when not provided', () => {
@@ -461,11 +401,8 @@ describe('SpanDetailPanel', () => {
 
     render(<SpanDetailPanel {...propsWithoutActiveView} />);
 
-    // Should default to timeline view (gantt chart)
-    expect(document.querySelector('[data-testid="gantt-chart"]')).toBeInTheDocument();
-    expect(document.querySelector('[data-testid="span-detail-table"]')).not.toBeInTheDocument();
-    expect(
-      document.querySelector('[data-testid="span-detail-table-hierarchy"]')
-    ).not.toBeInTheDocument();
+    // Should default to timeline view (hierarchy table)
+    expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="span-list-table"]')).not.toBeInTheDocument();
   });
 });
