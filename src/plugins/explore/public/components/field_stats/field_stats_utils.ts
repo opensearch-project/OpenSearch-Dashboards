@@ -60,8 +60,6 @@ export function transformFieldStatsResult(
   fieldType: string,
   result: any
 ): FieldStatsItem {
-  // Extract results from response
-  // PPL stats queries return results in hits.hits[0]._source
   const hits = result?.hits?.hits || [];
   const firstHit = hits[0]?._source || {};
 

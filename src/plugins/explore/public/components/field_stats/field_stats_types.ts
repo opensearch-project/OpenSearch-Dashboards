@@ -26,7 +26,6 @@ export interface FieldDetails {
 export interface TopValue {
   value: string | number;
   count: number;
-  percentage: number;
 }
 
 export interface NumericSummary {

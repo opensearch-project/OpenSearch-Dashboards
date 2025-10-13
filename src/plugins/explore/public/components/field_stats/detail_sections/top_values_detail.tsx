@@ -25,18 +25,46 @@ interface TopValuesSectionProps {
 }
 
 const TopValuesSection: React.FC<TopValuesSectionProps> = ({ data, field }) => {
+  const totalDocCount = field.docCount || 0;
+  const itemsWithPercentages = data.map((item) => ({
+    ...item,
+    percentage: totalDocCount > 0 ? (item.count / totalDocCount) * 100 : 0,
+  }));
+
   const columns: Array<EuiBasicTableColumn<TopValue>> = [
     {
-      field: 'values',
+      field: 'value',
       name: i18n.translate('explore.fieldStats.topValues.valueColumnLabel', {
-        defaultMessage: 'Values',
+        defaultMessage: 'Value',
       }),
+      width: '60%',
       render: (value: string | number) => String(value),
+    },
+    {
+      field: 'count',
+      name: i18n.translate('explore.fieldStats.topValues.countColumnLabel', {
+        defaultMessage: 'Count',
+      }),
+      width: '20%',
+      render: (count: number) => count.toLocaleString(),
+    },
+    {
+      field: 'percentage',
+      name: i18n.translate('explore.fieldStats.topValues.percentageColumnLabel', {
+        defaultMessage: 'Percentage',
+      }),
+      width: '20%',
+      render: (percentage: number) => `${percentage.toFixed(1)}%`,
     },
   ];
 
   return (
-    <EuiBasicTable items={data} columns={columns} compressed data-test-subj="topValuesSection" />
+    <EuiBasicTable
+      items={itemsWithPercentages}
+      columns={columns}
+      compressed
+      data-test-subj="topValuesSection"
+    />
   );
 };
 
@@ -61,7 +89,6 @@ export const topValuesDetailConfig: DetailSectionConfig<TopValue[]> = {
       return {
         value: source[fieldName],
         count: source.count || 0,
-        percentage: source.percentage || 0,
       };
     });
   },
