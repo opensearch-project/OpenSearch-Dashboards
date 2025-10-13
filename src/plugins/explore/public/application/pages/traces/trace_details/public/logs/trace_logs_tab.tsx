@@ -116,16 +116,27 @@ export const TraceLogsTab: React.FC<TraceLogsTabProps> = ({
                 buttonContent={
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                     <EuiFlexItem>
-                      <EuiFlexGroup gutterSize="s" alignItems="center">
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="s" style={{ fontWeight: 'bold' }}>
-                            {i18n.translate('explore.traceLogsTab.dataset', {
-                              defaultMessage: 'Dataset: ',
-                            })}
-                          </EuiText>
+                      <EuiFlexGroup direction="column" gutterSize="xs">
+                        <EuiFlexItem>
+                          <EuiFlexGroup gutterSize="s" alignItems="center">
+                            <EuiFlexItem grow={false}>
+                              <EuiText size="s" style={{ fontWeight: 'bold' }}>
+                                {i18n.translate('explore.traceLogsTab.dataset', {
+                                  defaultMessage: 'Dataset: ',
+                                })}
+                              </EuiText>
+                            </EuiFlexItem>
+                            <EuiFlexItem>
+                              <EuiText size="s">{dataset.title}</EuiText>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiText size="s">{dataset.title}</EuiText>
+                          <EuiText size="xs" color="subdued">
+                            {i18n.translate('explore.traceLogsTab.recentResults', {
+                              defaultMessage: '10 recent results',
+                            })}
+                          </EuiText>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
