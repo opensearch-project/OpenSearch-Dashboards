@@ -14,15 +14,12 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { FieldStatsItem } from './field_stats_types';
-import { TopValuesSection } from './detail_sections/top_values_section';
-import { NumericSummarySection } from './detail_sections/numeric_summary_section';
-import { DateRangeSection } from './detail_sections/date_range_section';
-import { ExamplesSection } from './detail_sections/examples_section';
+import { FieldStatsItem, FieldDetails } from './field_stats_types';
+import { getApplicableSections } from './field_stats_utils';
 
 interface FieldStatsRowDetailsProps {
   field?: FieldStatsItem;
-  details: any;
+  details: FieldDetails;
   isLoading?: boolean;
 }
 
@@ -69,11 +66,43 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({
     );
   }
 
-  // Determine which sections to show based on what data is available
-  const hasTopValues = details?.topValues && details.topValues.length > 0;
-  const hasNumericSummary = details?.numericSummary;
-  const hasDateRange = details?.dateRange;
-  const hasExamples = details?.examples && details.examples.length > 0;
+  // Get applicable sections for this field type
+  const fieldType = field.type.toLowerCase();
+  const applicableSections = getApplicableSections(fieldType);
+
+  if (applicableSections.length === 0) {
+    return (
+      <EuiCallOut
+        title={i18n.translate('explore.fieldStats.rowDetails.noApplicableSections', {
+          defaultMessage: 'No details available for this field type',
+        })}
+        iconType="iInCircle"
+      />
+    );
+  }
+
+  // Check if we have any data to display
+  const hasAnyData = applicableSections.some((section) => {
+    const sectionData = (details as any)[section.id];
+    return (
+      sectionData && !sectionData.error && (!Array.isArray(sectionData) || sectionData.length > 0)
+    );
+  });
+
+  if (!hasAnyData) {
+    return (
+      <EuiCallOut
+        title={i18n.translate('explore.fieldStats.rowDetails.noDetailsAvailable', {
+          defaultMessage: 'No details available',
+        })}
+        iconType="iInCircle"
+      >
+        {i18n.translate('explore.fieldStats.rowDetails.noDetailsAvailableDescription', {
+          defaultMessage: 'Details could not be retrieved for this field.',
+        })}
+      </EuiCallOut>
+    );
+  }
 
   return (
     <EuiFlexGroup
@@ -81,84 +110,33 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({
       gutterSize="m"
       data-test-subj={`fieldStatsRowDetails-${field.name}`}
     >
-      {hasTopValues && (
-        <EuiFlexItem>
-          <EuiPanel paddingSize="s">
-            <EuiTitle size="xs">
-              <h4>
-                {i18n.translate('explore.fieldStats.rowDetails.topValuesTitle', {
-                  defaultMessage: 'Top Values',
-                })}
-              </h4>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <TopValuesSection data={details.topValues} field={field} />
-          </EuiPanel>
-        </EuiFlexItem>
-      )}
+      {applicableSections.map((section) => {
+        const sectionData = (details as any)[section.id];
 
-      {hasNumericSummary && (
-        <EuiFlexItem>
-          <EuiPanel paddingSize="s">
-            <EuiTitle size="xs">
-              <h4>
-                {i18n.translate('explore.fieldStats.rowDetails.summaryStatisticsTitle', {
-                  defaultMessage: 'Summary Statistics',
-                })}
-              </h4>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <NumericSummarySection data={details.numericSummary} field={field} />
-          </EuiPanel>
-        </EuiFlexItem>
-      )}
+        // Skip if no data or error
+        if (!sectionData || sectionData.error) {
+          return null;
+        }
 
-      {hasDateRange && (
-        <EuiFlexItem>
-          <EuiPanel paddingSize="s">
-            <EuiTitle size="xs">
-              <h4>
-                {i18n.translate('explore.fieldStats.rowDetails.dateRangeTitle', {
-                  defaultMessage: 'Date Range',
-                })}
-              </h4>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <DateRangeSection data={details.dateRange} field={field} />
-          </EuiPanel>
-        </EuiFlexItem>
-      )}
+        // Skip empty arrays
+        if (Array.isArray(sectionData) && sectionData.length === 0) {
+          return null;
+        }
 
-      {hasExamples && (
-        <EuiFlexItem>
-          <EuiPanel paddingSize="s">
-            <EuiTitle size="xs">
-              <h4>
-                {i18n.translate('explore.fieldStats.rowDetails.examplesTitle', {
-                  defaultMessage: 'Examples',
-                })}
-              </h4>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <ExamplesSection data={details.examples} field={field} />
-          </EuiPanel>
-        </EuiFlexItem>
-      )}
+        const SectionComponent = section.component;
 
-      {!hasTopValues && !hasNumericSummary && !hasDateRange && !hasExamples && (
-        <EuiFlexItem>
-          <EuiCallOut
-            title={i18n.translate('explore.fieldStats.rowDetails.noDetailsAvailable', {
-              defaultMessage: 'No details available',
-            })}
-            iconType="iInCircle"
-          >
-            {i18n.translate('explore.fieldStats.rowDetails.noDetailsAvailableDescription', {
-              defaultMessage: 'Details could not be retrieved for this field.',
-            })}
-          </EuiCallOut>
-        </EuiFlexItem>
-      )}
+        return (
+          <EuiFlexItem key={section.id}>
+            <EuiPanel paddingSize="s">
+              <EuiTitle size="xs">
+                <h4>{section.title}</h4>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <SectionComponent data={sectionData} field={field} />
+            </EuiPanel>
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 };

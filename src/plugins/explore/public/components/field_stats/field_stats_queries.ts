@@ -18,48 +18,13 @@ export const getFieldStatsQuery = (index: string, fieldName: string): string => 
 };
 
 /**
- * Get top values for a field
- */
-export const getFieldTopValuesQuery = (
-  index: string,
-  fieldName: string,
-  limit: number = 10
-): string => {
-  return `source = ${index} | top ${limit} \`${fieldName}\``;
-};
-
-/**
- * Get summary statistics for numeric fields
- */
-export const getFieldSummaryQuery = (index: string, fieldName: string): string => {
-  return `source = ${index}
-    | stats min(\`${fieldName}\`) as min,
-            percentile(\`${fieldName}\`, 50) as median,
-            avg(\`${fieldName}\`) as avg,
-            max(\`${fieldName}\`) as max`;
-};
-
-/**
- * Get date range for timestamp fields
- */
-export const getFieldDateRangeQuery = (index: string, fieldName: string): string => {
-  return `source = ${index}
-    | stats min(\`${fieldName}\`) as earliest,
-            max(\`${fieldName}\`) as latest`;
-};
-
-/**
- * Get example values for other field types
- */
-export const getFieldExamplesQuery = (index: string, fieldName: string): string => {
-  return `source = ${index}
-    | head 10
-    | fields \`${fieldName}\`
-    | where isnotnull(\`${fieldName}\`)`;
-};
-
-/**
  * Execute a PPL query and return the results
+ * @param services OpenSearch Dashboards services containing data plugin
+ * @param queryString The PPL query string to execute
+ * @param datasetId The dataset ID (index pattern ID)
+ * @param datasetType The type of dataset (default: 'INDEX_PATTERN')
+ * @returns Promise resolving to the query results
+ * @throws Error if query execution fails
  */
 export const executeFieldStatsQuery = async (
   services: ExploreServices,
@@ -98,6 +63,6 @@ export const executeFieldStatsQuery = async (
 
     return results;
   } catch (error) {
-    // TODO: put in a UI error state that covers the field row or extended row panel
+    throw error;
   }
 };

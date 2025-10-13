@@ -13,14 +13,14 @@ import {
   Direction,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { FieldStatsItem } from './field_stats_types';
+import { FieldStatsItem, FieldDetails } from './field_stats_types';
 import { FieldStatsRowDetails } from './field_stats_row_details';
 import { getFieldStatsColumns } from './field_stats_table_columns';
 
 interface FieldStatsTableProps {
   items: FieldStatsItem[];
   expandedRows: Set<string>;
-  fieldDetails: Record<string, any>;
+  fieldDetails: Record<string, FieldDetails>;
   onRowExpand: (fieldName: string) => void;
   isLoading: boolean;
   detailsLoading: Set<string>;
