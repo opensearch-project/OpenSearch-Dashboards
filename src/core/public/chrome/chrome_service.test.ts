@@ -41,9 +41,10 @@ import { notificationServiceMock } from '../notifications/notifications_service.
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
-import { overlayServiceMock, workspacesServiceMock } from '../mocks';
+import { coreMock, overlayServiceMock, workspacesServiceMock } from '../mocks';
 import { HeaderVariant } from './constants';
 import { keyboardShortcutServiceMock } from '../keyboard_shortcut/keyboard_shortcut_service.mock';
+import { HttpSetup } from '../http';
 
 class FakeApp implements App {
   public title: string;
@@ -106,7 +107,7 @@ async function start({
 }: { options?: any; cspConfigMock?: any; startDeps?: ReturnType<typeof defaultStartDeps> } = {}) {
   const service = new ChromeService(options);
 
-  service.setup({ uiSettings: startDeps.uiSettings });
+  service.setup({ uiSettings: startDeps.uiSettings, http: startDeps.http });
 
   if (cspConfigMock) {
     startDeps.injectedMetadata.getCspConfig.mockReturnValue(cspConfigMock);
@@ -129,6 +130,12 @@ afterAll(() => {
 });
 
 describe('setup', () => {
+  let http: HttpSetup;
+
+  beforeEach(() => {
+    const coreSetup = coreMock.createSetup();
+    http = coreSetup.http;
+  });
   afterEach(() => {
     jest.restoreAllMocks();
   });
@@ -139,7 +146,7 @@ describe('setup', () => {
     const chrome = new ChromeService({ browserSupportsCsp: true });
     const uiSettings = uiSettingsServiceMock.createSetupContract();
 
-    const chromeSetup = chrome.setup({ uiSettings });
+    const chromeSetup = chrome.setup({ uiSettings, http });
     chromeSetup.registerCollapsibleNavHeader(renderMock);
 
     const chromeStart = await chrome.start(defaultStartDeps());
@@ -155,8 +162,7 @@ describe('setup', () => {
     const renderMock = jest.fn().mockReturnValue(customHeaderMock);
     const chrome = new ChromeService({ browserSupportsCsp: true });
     const uiSettings = uiSettingsServiceMock.createSetupContract();
-
-    const chromeSetup = chrome.setup({ uiSettings });
+    const chromeSetup = chrome.setup({ uiSettings, http });
     // call 1st time
     chromeSetup.registerCollapsibleNavHeader(renderMock);
     // call 2nd time
@@ -176,7 +182,7 @@ describe('setup', () => {
       registerSearchCommand: registerSearchCommandSpy,
     });
 
-    chrome.setup({ uiSettings });
+    chrome.setup({ uiSettings, http });
 
     expect(registerSearchCommandSpy).toHaveBeenCalledWith({
       id: 'pagesSearch',

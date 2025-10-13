@@ -4,6 +4,8 @@
  */
 
 import { schema } from '@osd/config-schema';
+import { readFile } from 'fs/promises';
+import * as path from 'path';
 import {
   IRouter,
   Logger,
@@ -22,6 +24,7 @@ import { registerDuplicateRoute } from './duplicate';
 import { transferCurrentUserInPermissions, translatePermissionsToRole } from '../utils';
 import { validateWorkspaceColor } from '../../common/utils';
 import { getUseCaseFeatureConfig } from '../../../../core/server';
+import { Document, SparseSearch } from '../sparse_search';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -112,6 +115,13 @@ const updateWorkspaceAttributesSchema = schema.object({
   features: schema.maybe(featuresSchema),
   ...workspaceOptionalAttributesSchema,
 });
+
+let jsonData: {
+  documents: Document[];
+  vocab: Record<string, number>;
+  idf: number[];
+  special_tokens: number[];
+};
 
 export function registerRoutes({
   client,
@@ -341,6 +351,51 @@ export function registerRoutes({
       );
       return res.ok({ body: result });
     })
+  );
+
+  router.post(
+    {
+      path: `${WORKSPACES_API_BASE_URL}/_semantic_search`,
+      validate: {
+        body: schema.object({
+          query: schema.string(),
+          links: schema.arrayOf(
+            schema.object({
+              id: schema.string(),
+              title: schema.string(),
+              description: schema.maybe(schema.string()),
+            })
+          ),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      try {
+        const { query } = req.body;
+
+        if (!jsonData) {
+          const filePath = path.join(__dirname, 'doc_vectors.json');
+          const data = await readFile(filePath, 'utf8');
+          jsonData = JSON.parse(data);
+        }
+        const searcher = new SparseSearch(jsonData);
+        console.time('SearchQueryTime');
+        const results = searcher.search(query);
+        console.timeEnd('SearchQueryTime');
+
+        console.log(`---------- Neural Sparse Search: ${query} -----------`);
+        results.forEach((result) => {
+          console.log(`Score: ${result.score.toFixed(2)} | ${result.text}`);
+        });
+
+        return res.ok({ body: results });
+      } catch (error) {
+        console.error('Error during sparse semantic search:', error);
+        return res.badRequest({
+          body: { message: 'Failed to perform sparse semantic search' },
+        });
+      }
+    }
   );
 
   // duplicate saved objects among workspaces

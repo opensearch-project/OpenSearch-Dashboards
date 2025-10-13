@@ -16,8 +16,9 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { ReactNode, useCallback, useRef, useState } from 'react';
+import React, { ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { debounce } from 'lodash';
 import {
   GlobalSearchCommand,
   SearchCommandKeyTypes,
@@ -136,7 +137,7 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
       </EuiText>
     );
 
-  const onSearch = useCallback(
+  const search = useCallback(
     async (value: string) => {
       const filteredCommands = globalSearchCommands.filter((command) => {
         const alias = SearchCommandTypes[command.type].alias;
@@ -196,11 +197,15 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
     [globalSearchCommands, onSearchResultClick]
   );
 
+  const debouncedSearch = useMemo(() => {
+    return debounce(search, 500); // 300ms delay, adjust as needed
+  }, [search]);
+
   const searchBar = (
     <EuiFieldSearch
       compressed
       incremental
-      onSearch={onSearch}
+      onSearch={debouncedSearch}
       fullWidth
       placeholder={i18n.translate('core.globalSearch.input.placeholder', {
         defaultMessage: 'Search the menu',
