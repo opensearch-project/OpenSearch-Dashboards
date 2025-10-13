@@ -27,28 +27,11 @@ interface TopValuesSectionProps {
 const TopValuesSection: React.FC<TopValuesSectionProps> = ({ data, field }) => {
   const columns: Array<EuiBasicTableColumn<TopValue>> = [
     {
-      field: 'value',
+      field: 'values',
       name: i18n.translate('explore.fieldStats.topValues.valueColumnLabel', {
-        defaultMessage: 'Value',
+        defaultMessage: 'Values',
       }),
-      width: '60%',
       render: (value: string | number) => String(value),
-    },
-    {
-      field: 'count',
-      name: i18n.translate('explore.fieldStats.topValues.countColumnLabel', {
-        defaultMessage: 'Count',
-      }),
-      width: '20%',
-      render: (count: number) => count.toLocaleString(),
-    },
-    {
-      field: 'percentage',
-      name: i18n.translate('explore.fieldStats.topValues.percentageColumnLabel', {
-        defaultMessage: 'Percentage',
-      }),
-      width: '20%',
-      render: (percentage: number) => `${percentage.toFixed(1)}%`,
     },
   ];
 
