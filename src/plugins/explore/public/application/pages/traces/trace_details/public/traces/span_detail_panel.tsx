@@ -26,6 +26,7 @@ export function SpanDetailPanel(props: {
   selectedSpanId?: string;
   activeView?: string;
   isEmbedded?: boolean;
+  servicesInOrder?: string[];
 }) {
   const { chrome, spanFilters, payloadData, onSpanSelect, colorMap } = props;
 
@@ -110,10 +111,19 @@ export function SpanDetailPanel(props: {
           filters={spanFilters}
           selectedSpanId={props.selectedSpanId}
           colorMap={colorMap}
+          servicesInOrder={props.servicesInOrder}
         />
       </div>
     ),
-    [onSpanSelect, payloadData, spanFilters, availableWidth, props.selectedSpanId, colorMap]
+    [
+      onSpanSelect,
+      payloadData,
+      spanFilters,
+      availableWidth,
+      props.selectedSpanId,
+      colorMap,
+      props.servicesInOrder,
+    ]
   );
 
   // In embedded mode, render with minimal containers
