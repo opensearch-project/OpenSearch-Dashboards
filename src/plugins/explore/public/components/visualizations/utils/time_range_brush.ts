@@ -5,10 +5,12 @@
 
 import { getColors } from '../theme/default_colors';
 
+const TIME_RANGE_BRUSH_NAME = 'timeRangeBrush';
+
 export const createTimeRangeBrush = (options: { timeAxis: 'x' | 'y' }) => {
   const colors = getColors();
   return {
-    name: 'timeRangeBrush',
+    name: TIME_RANGE_BRUSH_NAME,
     select: {
       type: 'interval',
       encodings: [options.timeAxis],
@@ -24,7 +26,7 @@ export const createTimeRangeUpdater = () => {
     on: [
       {
         events: 'pointerup',
-        update: `timeRangeBrush ? opensearchDashboardsSelectTimeRange(timeRangeBrush) : null`,
+        update: `${TIME_RANGE_BRUSH_NAME} ? opensearchDashboardsSelectTimeRange(${TIME_RANGE_BRUSH_NAME}) : null`,
       },
     ],
   };
