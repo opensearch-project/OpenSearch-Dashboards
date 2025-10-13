@@ -4,3 +4,4 @@
  */
 
 export { CreateButton } from './create_button';
+export { CreateDatasetButton } from './create_dataset_button';

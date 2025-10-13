@@ -616,13 +616,27 @@ export class DataViewsService {
     const body = dataView.getAsSavedObjectBody();
     const references = dataView.getSaveObjectReference();
 
-    const response = await this.savedObjectsClient.create(savedObjectType, body, {
-      id: dataView.id,
-      references,
-    });
-    dataView.id = response.id;
-    this.patterns.saveToCache(dataView.id, dataView);
-    return dataView;
+    try {
+      const response = await this.savedObjectsClient.create(savedObjectType, body, {
+        id: dataView.id,
+        references,
+      });
+      dataView.id = response.id;
+      this.patterns.saveToCache(dataView.id, dataView);
+      return dataView;
+    } catch (err) {
+      // Handle 409 conflict errors (document already exists) as duplicate data view errors
+      if (
+        (err.statusCode === 409 || err.status === 409 || err.body?.statusCode === 409) &&
+        (err.message?.includes('document already exists') ||
+          err.message?.includes('version conflict') ||
+          err.body?.message?.includes('document already exists') ||
+          err.body?.message?.includes('version conflict'))
+      ) {
+        throw new DuplicateDataViewError(`Duplicate data view: ${dataView.title}`);
+      }
+      throw err;
+    }
   }
 
   /**

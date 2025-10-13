@@ -12,6 +12,7 @@ import { indexPatternTypeConfig } from './lib';
 import { dataPluginMock } from '../../../mocks';
 import { IndexPatternsContract } from '../../..';
 import { waitFor } from '@testing-library/dom';
+import { DuplicateDataViewError } from '../../../../common/data_views/errors/duplicate_data_view';
 
 describe('DatasetService', () => {
   let service: DatasetService;
@@ -368,6 +369,121 @@ describe('DatasetService', () => {
 
     await waitFor(() => {
       expect(service.getDefault()?.dataSource).toBe(undefined);
+    });
+  });
+
+  describe('saveDataset error handling', () => {
+    test('re-throws DuplicateDataViewError without wrapping by error name', async () => {
+      const mockDataset = {
+        id: 'test-dataset',
+        title: 'Test Dataset',
+        type: mockType.id,
+      } as Dataset;
+
+      const duplicateError = new DuplicateDataViewError('Duplicate data view: Test Dataset');
+
+      const mockDataViews = {
+        createAndSave: jest.fn().mockRejectedValue(duplicateError),
+      };
+
+      const servicesWithDataViews = {
+        ...mockDataPluginServices,
+        data: {
+          ...dataPluginMock.createStartContract(),
+          dataViews: mockDataViews as any,
+        },
+      };
+
+      service.registerType(mockType);
+
+      await expect(service.saveDataset(mockDataset, servicesWithDataViews)).rejects.toThrow(
+        DuplicateDataViewError
+      );
+      await expect(service.saveDataset(mockDataset, servicesWithDataViews)).rejects.toThrow(
+        'Duplicate data view: Test Dataset'
+      );
+    });
+
+    test('re-throws DuplicateDataViewError without wrapping by message pattern', async () => {
+      const mockDataset = {
+        id: 'test-dataset',
+        title: 'Test Dataset',
+        type: mockType.id,
+      } as Dataset;
+
+      const duplicateError = new Error('Duplicate data view: Test Dataset');
+
+      const mockDataViews = {
+        createAndSave: jest.fn().mockRejectedValue(duplicateError),
+      };
+
+      const servicesWithDataViews = {
+        ...mockDataPluginServices,
+        data: {
+          ...dataPluginMock.createStartContract(),
+          dataViews: mockDataViews as any,
+        },
+      };
+
+      service.registerType(mockType);
+
+      await expect(service.saveDataset(mockDataset, servicesWithDataViews)).rejects.toThrow(
+        'Duplicate data view: Test Dataset'
+      );
+    });
+
+    test('wraps other errors in "Failed to save dataset" error', async () => {
+      const mockDataset = {
+        id: 'test-dataset',
+        title: 'Test Dataset',
+        type: mockType.id,
+      } as Dataset;
+
+      const networkError = new Error('Network connection failed');
+
+      const mockDataViews = {
+        createAndSave: jest.fn().mockRejectedValue(networkError),
+      };
+
+      const servicesWithDataViews = {
+        ...mockDataPluginServices,
+        data: {
+          ...dataPluginMock.createStartContract(),
+          dataViews: mockDataViews as any,
+        },
+      };
+
+      service.registerType(mockType);
+
+      await expect(service.saveDataset(mockDataset, servicesWithDataViews)).rejects.toThrow(
+        'Failed to save dataset: test-dataset'
+      );
+    });
+
+    test('throws "Failed to save dataset" when createAndSave throws generic error', async () => {
+      const mockDataset = {
+        id: 'test-dataset',
+        title: 'Test Dataset',
+        type: mockType.id,
+      } as Dataset;
+
+      const mockDataViews = {
+        createAndSave: jest.fn().mockRejectedValue(new Error('Unknown error')),
+      };
+
+      const servicesWithDataViews = {
+        ...mockDataPluginServices,
+        data: {
+          ...dataPluginMock.createStartContract(),
+          dataViews: mockDataViews as any,
+        },
+      };
+
+      service.registerType(mockType);
+
+      await expect(service.saveDataset(mockDataset, servicesWithDataViews)).rejects.toThrow(
+        'Failed to save dataset'
+      );
     });
   });
 });
