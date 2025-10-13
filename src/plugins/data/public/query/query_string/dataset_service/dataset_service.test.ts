@@ -188,11 +188,12 @@ describe('DatasetService', () => {
     expect(indexPatterns.saveToCache).toHaveBeenCalledTimes(0);
   });
 
-  test('cacheDataset passes signalType to index pattern spec', async () => {
+  test('cacheDataset passes signalType and schemaMappings to index pattern spec', async () => {
     const mockDataset = {
       id: 'test-dataset',
       title: 'Test Dataset',
       type: mockType.id,
+      schemaMappings: { otelLogs: { traceId: 'trace.id' } },
     } as Dataset;
     service.registerType(mockType);
 
@@ -200,6 +201,7 @@ describe('DatasetService', () => {
     expect(indexPatterns.create).toHaveBeenCalledWith(
       expect.objectContaining({
         signalType: 'logs',
+        schemaMappings: { otelLogs: { traceId: 'trace.id' } },
       }),
       true
     );
@@ -213,6 +215,7 @@ describe('DatasetService', () => {
       description: 'Test description',
       type: mockType.id,
       timeFieldName: 'timestamp',
+      schemaMappings: { otelLogs: { spanId: 'span.id' } },
     } as Dataset;
 
     const mockDataViews = {
@@ -238,6 +241,7 @@ describe('DatasetService', () => {
         description: 'Test description',
         timeFieldName: 'timestamp',
         signalType: 'metrics',
+        schemaMappings: { otelLogs: { spanId: 'span.id' } },
       }),
       undefined,
       false

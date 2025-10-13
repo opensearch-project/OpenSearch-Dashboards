@@ -422,6 +422,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
                   toMountPoint(
                     <AdvancedSelector
                       useConfiguratorV2
+                      signalType={signalType || undefined}
                       services={services}
                       onSelect={async (query: Partial<Query>, saveDataset) => {
                         overlay?.close();
