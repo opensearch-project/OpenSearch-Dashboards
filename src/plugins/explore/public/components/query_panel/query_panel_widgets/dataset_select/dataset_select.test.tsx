@@ -36,7 +36,7 @@ jest.doMock('react-redux', () => {
   };
 });
 
-let capturedOnFilter: ((dataset: any) => boolean) | undefined;
+let capturedSignalType: string | null | undefined;
 
 jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: () => ({
@@ -59,12 +59,12 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
         ui: {
           DatasetSelect: ({
             onSelect,
-            onFilter,
+            signalType,
           }: {
             onSelect: (dataset: any) => void;
-            onFilter?: (dataset: any) => boolean;
+            signalType: string | null;
           }) => {
-            capturedOnFilter = onFilter;
+            capturedSignalType = signalType;
             return (
               <div data-test-subj="dataset-select">
                 <button
@@ -73,8 +73,8 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
                 >
                   Select Dataset
                 </button>
-                <div data-test-subj="dataset-filter-prop">
-                  {onFilter ? 'Filter provided' : 'No filter'}
+                <div data-test-subj="dataset-singaltype-prop">
+                  {signalType !== undefined ? `Signal type: ${signalType}` : 'No signal type'}
                 </div>
               </div>
             );
@@ -227,58 +227,43 @@ describe('DatasetSelectWidget', () => {
     });
   });
 
-  it('provides onFilter prop to DatasetSelect', () => {
+  it('provides signalType prop to DatasetSelect', () => {
+    mockUseFlavorId.mockReturnValue('traces');
     renderWithStore();
-    expect(screen.getByTestId('dataset-filter-prop')).toHaveTextContent('Filter provided');
+    expect(screen.getByTestId('dataset-singaltype-prop')).toHaveTextContent('Signal type: traces');
   });
 
-  describe('onFilter functionality', () => {
+  describe('signalType functionality', () => {
     beforeEach(() => {
-      capturedOnFilter = undefined;
+      capturedSignalType = undefined;
     });
 
-    it('accepts Traces datasets for Traces flavor', () => {
+    it('passes traces signal type for Traces flavor', () => {
       mockUseFlavorId.mockReturnValue('traces');
       renderWithStore();
 
-      // Mock a detailed dataset with Traces signal type
-      const tracesDataset = { signalType: 'traces' };
-
-      expect(capturedOnFilter).toBeDefined();
-      expect(capturedOnFilter!(tracesDataset)).toBe(true);
+      expect(capturedSignalType).toBe('traces');
     });
 
-    it('rejects non-Traces datasets for Traces flavor', () => {
-      mockUseFlavorId.mockReturnValue('traces');
-      renderWithStore();
-
-      // Mock a detailed dataset with Logs signal type
-      const logsDataset = { signalType: 'logs' };
-
-      expect(capturedOnFilter).toBeDefined();
-      expect(capturedOnFilter!(logsDataset)).toBe(false);
-    });
-
-    it('accepts non-Traces datasets for non-Traces flavor', () => {
+    it('passes logs signal type for Logs flavor', () => {
       mockUseFlavorId.mockReturnValue('logs');
       renderWithStore();
 
-      // Mock a detailed dataset with Logs signal type
-      const logsDataset = { signalType: 'logs' };
-
-      expect(capturedOnFilter).toBeDefined();
-      expect(capturedOnFilter!(logsDataset)).toBe(true);
+      expect(capturedSignalType).toBe('logs');
     });
 
-    it('rejects Traces datasets for non-Traces flavor', () => {
-      mockUseFlavorId.mockReturnValue('logs');
+    it('passes metrics signal type for Metrics flavor', () => {
+      mockUseFlavorId.mockReturnValue('metrics');
       renderWithStore();
 
-      // Mock a detailed dataset with Traces signal type
-      const tracesDataset = { signalType: 'traces' };
+      expect(capturedSignalType).toBe('metrics');
+    });
 
-      expect(capturedOnFilter).toBeDefined();
-      expect(capturedOnFilter!(tracesDataset)).toBe(false);
+    it('passes null when flavor is null', () => {
+      mockUseFlavorId.mockReturnValue(null);
+      renderWithStore();
+
+      expect(capturedSignalType).toBe(null);
     });
   });
 });

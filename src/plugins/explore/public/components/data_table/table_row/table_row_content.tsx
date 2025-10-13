@@ -19,7 +19,6 @@ import { EmptyTableCell } from '../table_cell/empty_table_cell';
 import { SourceFieldTableCell } from '../table_cell/source_field_table_cell';
 import { NonFilterableTableCell } from '../table_cell/non_filterable_table_cell';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
-import { isOnTracesPage } from '../table_cell/trace_utils/trace_utils';
 
 export interface TableRowContentProps {
   row: OpenSearchSearchHit<Record<string, unknown>>;
@@ -29,6 +28,7 @@ export interface TableRowContentProps {
   isShortDots: boolean;
   isExpanded: boolean;
   onToggleExpand: () => void;
+  isOnTracesPage: boolean;
 }
 
 // Helper functions
@@ -60,13 +60,12 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
   isShortDots,
   isExpanded,
   onToggleExpand,
+  isOnTracesPage,
 }) => {
   const flattened = dataset.flattenHit(row);
-  const isOnTraces = isOnTracesPage();
-
   return (
     <tr key={row._id} className={row.isAnchor ? 'exploreDocTable__row--highlight' : ''}>
-      {isOnTraces ? (
+      {isOnTracesPage ? (
         <td />
       ) : (
         <td
@@ -130,6 +129,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
             fieldMapping={fieldMapping}
             sanitizedCellValue={sanitizedCellValue}
             rowData={row}
+            isOnTracesPage={isOnTracesPage}
           />
         );
       })}

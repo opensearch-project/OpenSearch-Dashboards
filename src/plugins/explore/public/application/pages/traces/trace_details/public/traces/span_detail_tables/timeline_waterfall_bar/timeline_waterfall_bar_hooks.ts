@@ -4,10 +4,10 @@
  */
 
 import { useMemo } from 'react';
-import { Span } from '../span_detail_table';
-import { resolveServiceNameFromSpan } from '../ppl_resolve_helpers';
-import { calculateSpanTimeRange, TraceTimeRange } from '../../utils/span_timerange_utils';
-import { round } from '../../utils/helper_functions';
+import { Span } from '../types';
+import { resolveServiceNameFromSpan } from '../../ppl_resolve_helpers';
+import { calculateSpanTimeRange, TraceTimeRange } from '../../../utils/span_timerange_utils';
+import { round } from '../../../utils/helper_functions';
 
 interface TimelineBarRange {
   timelineBarOffsetPercent: number;

@@ -12,7 +12,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButton,
-  EuiButtonEmpty,
   EuiToolTip,
 } from '@elastic/eui';
 import { TraceDetailTab } from '../../constants/trace_detail_tabs';
@@ -24,9 +23,6 @@ export interface TraceDetailTabsProps {
   errorCount: number;
   spanFilters: any[];
   handleErrorFilterClick: () => void;
-  servicesInOrder: string[];
-  setIsServiceLegendOpen: (isOpen: boolean) => void;
-  isServiceLegendOpen: boolean;
   logDatasets?: any[];
   logsData?: any[];
   isLogsLoading?: boolean;
@@ -39,9 +35,6 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
   errorCount,
   spanFilters,
   handleErrorFilterClick,
-  servicesInOrder,
-  setIsServiceLegendOpen,
-  isServiceLegendOpen,
   logDatasets = [],
   logsData = [],
   isLogsLoading = false,
@@ -74,12 +67,6 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
           })}
         </>
       ),
-    },
-    {
-      id: TraceDetailTab.TREE_VIEW,
-      name: i18n.translate('explore.traceView.tab.treeView', {
-        defaultMessage: 'Tree view',
-      }),
     },
   ];
 
@@ -141,21 +128,6 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
                 </EuiToolTip>
               </EuiFlexItem>
             )}
-          {servicesInOrder.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                onClick={() => setIsServiceLegendOpen(!isServiceLegendOpen)}
-                iconType="inspect"
-                data-test-subj="service-legend-toggle"
-                isSelected={isServiceLegendOpen}
-              >
-                {i18n.translate('explore.traceView.button.serviceLegend', {
-                  defaultMessage: 'Service legend',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

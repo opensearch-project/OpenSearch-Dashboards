@@ -281,6 +281,8 @@ export interface Dataset extends BaseDataset {
   };
   /** Optional parameter to indicate if the dataset is from a remote cluster(Cross Cluster search) */
   isRemoteDataset?: boolean;
+  displayName?: string;
+  description?: string;
 }
 
 export interface DatasetField {

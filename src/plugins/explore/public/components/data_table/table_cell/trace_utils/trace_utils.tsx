@@ -40,8 +40,8 @@ export const extractFieldFromRowData = (
   for (const field of fields) {
     const value = getNestedValue(rowData, field);
 
-    if (value && (typeof value === 'string' || typeof value === 'number')) {
-      return String(value);
+    if (value && typeof value === 'string') {
+      return value;
     }
   }
 
@@ -49,7 +49,7 @@ export const extractFieldFromRowData = (
 };
 
 export const buildTraceDetailsUrl = (
-  spanIdValue: string,
+  spanIdValue: string = '',
   traceIdValue: string,
   dataset: Dataset
 ): string => {
