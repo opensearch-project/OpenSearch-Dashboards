@@ -8,7 +8,6 @@ import { merge, Subscription } from 'rxjs';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@osd/i18n';
-import moment from 'moment';
 import { RequestAdapter, Adapters } from '../../../inspector/public';
 import {
   opensearchFilters,
