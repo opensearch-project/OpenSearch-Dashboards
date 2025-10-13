@@ -10,8 +10,8 @@ import { LogHit } from '../../server/ppl_request_logs';
 import { Dataset } from '../../../../../../../../data/common';
 import * as urlBuilder from './url_builder';
 
-jest.mock('./logs_data_table', () => ({
-  LogsDataTable: ({ logs, onSpanClick, isLoading }: any) => (
+jest.mock('./dataset_logs_table', () => ({
+  DatasetLogsTable: ({ logs, onSpanClick, isLoading }: any) => (
     <div data-test-subj="logs-data-table">
       <div data-test-subj="logs-count">{logs?.length || 0}</div>
       <div data-test-subj="loading-state">{isLoading ? 'loading' : 'loaded'}</div>
@@ -144,12 +144,10 @@ describe('TraceLogsTab', () => {
       expect(window.location.href).toBe('https://example.com/logs');
     });
 
-    it('should handle button click when no log datasets are available', () => {
+    it('should not show button when no log datasets are available', () => {
       render(<TraceLogsTab {...defaultProps} logDatasets={[]} />);
 
-      const viewInLogsButton = screen.getByText('View in Discover Logs');
-      fireEvent.click(viewInLogsButton);
-
+      expect(screen.queryByText('View in Discover Logs')).not.toBeInTheDocument();
       expect(urlBuilder.buildExploreLogsUrl).not.toHaveBeenCalled();
     });
 

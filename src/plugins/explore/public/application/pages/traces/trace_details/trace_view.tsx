@@ -69,6 +69,8 @@ export interface TraceDetailsProps {
   isEmbedded?: boolean;
   isFlyout?: boolean;
 }
+// Displaying only 10 logs in the tab
+export const LOGS_DATA = 10;
 
 export const TraceDetails: React.FC<TraceDetailsProps> = ({
   setMenuMountPoint,
@@ -160,7 +162,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     if (dataset?.id && correlationService && data && traceId) {
       setIsLogsLoading(true);
       correlationService
-        .checkCorrelationsAndFetchLogs(dataset, data, traceId)
+        .checkCorrelationsAndFetchLogs(dataset, data, traceId, LOGS_DATA)
         .then((result) => {
           setLogDatasets(result.logDatasets);
           setLogsData(result.logs);
