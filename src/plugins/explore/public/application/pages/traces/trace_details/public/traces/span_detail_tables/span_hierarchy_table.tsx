@@ -16,8 +16,12 @@ import { Span, SpanTableProps } from './types';
 import { HierarchySpanCell } from './hierarchy_span_cell';
 import { SpanCell } from './span_cell';
 import { parseHits } from './utils';
+import { ServiceLegendButton } from './service_legend_button';
 
-const getHierarchyTableColumns = (traceTimeRange: TraceTimeRange): EuiDataGridColumn[] => {
+const getHierarchyTableColumns = (
+  traceTimeRange: TraceTimeRange,
+  availableWidth?: number
+): EuiDataGridColumn[] => {
   return [
     {
       id: 'span',
@@ -30,7 +34,7 @@ const getHierarchyTableColumns = (traceTimeRange: TraceTimeRange): EuiDataGridCo
     {
       id: 'timeline',
       display: <TimelineHeader traceTimeRange={traceTimeRange} />,
-      initialWidth: 700,
+      initialWidth: availableWidth ? Math.floor(availableWidth / 2) : 600,
       isExpandable: false,
       isResizable: true,
     },
@@ -46,7 +50,7 @@ const getHierarchyTableColumns = (traceTimeRange: TraceTimeRange): EuiDataGridCo
 };
 
 export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
-  const { hiddenColumns, availableWidth, openFlyout, colorMap } = props;
+  const { hiddenColumns, availableWidth, openFlyout, colorMap, servicesInOrder = [] } = props;
   const [items, setItems] = useState<Span[]>([]);
   const [allSpans, setAllSpans] = useState<Span[]>([]);
   const [_total, setTotal] = useState(0);
@@ -139,7 +143,10 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
 
   const flattenedItems = useMemo(() => flattenHierarchy(items), [items, expandedRows]);
 
-  const columns = useMemo(() => getHierarchyTableColumns(traceTimeRange), [traceTimeRange]);
+  const columns = useMemo(() => getHierarchyTableColumns(traceTimeRange, availableWidth), [
+    traceTimeRange,
+    availableWidth,
+  ]);
   const visibleColumns = useMemo(
     () => columns.filter(({ id }) => !hiddenColumns.includes(id)).map(({ id }) => id),
     [columns, hiddenColumns]
@@ -215,6 +222,14 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     </EuiButtonEmpty>,
   ];
 
+  const secondaryToolbar = [
+    <ServiceLegendButton
+      key="serviceLegend"
+      servicesInOrder={servicesInOrder}
+      colorMap={colorMap || {}}
+    />,
+  ].filter(Boolean);
+
   return (
     <div data-test-subj="span-hierarchy-table">
       {RenderCustomDataGrid({
@@ -222,6 +237,7 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
         renderCellValue,
         rowCount: flattenedItems.length,
         toolbarButtons,
+        secondaryToolbar,
         fullScreen: false,
         availableWidth,
         visibleColumns,

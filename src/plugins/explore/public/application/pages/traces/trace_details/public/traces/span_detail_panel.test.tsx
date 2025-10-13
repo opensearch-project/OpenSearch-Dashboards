@@ -109,22 +109,6 @@ describe('SpanDetailPanel', () => {
     expect(document.querySelector('[data-testid="span-hierarchy-table"]')).not.toBeInTheDocument();
   });
 
-  it('renders tree view when activeView is tree_view', () => {
-    const propsWithTreeView = {
-      ...defaultProps,
-      activeView: TraceDetailTab.TREE_VIEW,
-    };
-
-    render(<SpanDetailPanel {...propsWithTreeView} />);
-
-    expect(document.querySelector('[data-testid="span-hierarchy-table"]')).toBeInTheDocument();
-    expect(screen.getByText('Tree View')).toBeInTheDocument();
-    expect(document.querySelector('[data-testid="span-hierarchy-data-length"]')).toHaveTextContent(
-      '2'
-    );
-    expect(document.querySelector('[data-testid="span-list-table"]')).not.toBeInTheDocument();
-  });
-
   it('calls onSpanSelect when span is clicked in hierarchy table', () => {
     render(<SpanDetailPanel {...defaultProps} />);
 
@@ -141,20 +125,6 @@ describe('SpanDetailPanel', () => {
     };
 
     render(<SpanDetailPanel {...propsWithSpanList} />);
-
-    const flyoutButton = screen.getByText('Open Flyout');
-    fireEvent.click(flyoutButton);
-
-    expect(defaultProps.onSpanSelect).toHaveBeenCalledWith('test-span-id');
-  });
-
-  it('calls onSpanSelect when span is clicked in tree view', () => {
-    const propsWithTreeView = {
-      ...defaultProps,
-      activeView: TraceDetailTab.TREE_VIEW,
-    };
-
-    render(<SpanDetailPanel {...propsWithTreeView} />);
 
     const flyoutButton = screen.getByText('Open Flyout');
     fireEvent.click(flyoutButton);
@@ -360,7 +330,7 @@ describe('SpanDetailPanel', () => {
   it('passes correct props to SpanHierarchyTable', () => {
     const propsWithTreeView = {
       ...defaultProps,
-      activeView: TraceDetailTab.TREE_VIEW,
+      activeView: TraceDetailTab.TIMELINE,
       spanFilters: [{ field: 'serviceName', value: 'test-service' }],
     };
 
