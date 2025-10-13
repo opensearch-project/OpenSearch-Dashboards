@@ -12,7 +12,7 @@ import { ExploreServices } from '../../types';
 export const getFieldStatsQuery = (index: string, fieldName: string): string => {
   return `source = ${index}
     | stats count(\`${fieldName}\`) as count,
-            dc(\`${fieldName}\`) as dc,
+            distinct_count_approx(\`${fieldName}\`) as dc,
             count() as total_count
     | eval percentage_total = (count * 100.0) / total_count`;
 };
