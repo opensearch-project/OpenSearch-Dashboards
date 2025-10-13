@@ -79,7 +79,7 @@ const mergeRecords = (
 };
 
 const mergeNumercialRecord = (
-  records: Array<Record<string, any>>,
+  records: Record<string, any>,
   timestampField: string,
   nextData?: string,
   range?: RangeValue
@@ -123,6 +123,7 @@ export const mergeCategoricalData = (
   const sorted = [...data].sort(
     (a, b) => new Date(a[timestampField]).getTime() - new Date(b[timestampField]).getTime()
   );
+
   // Collect all possible values from the secondary categorical field
   const allPossibleOptions = Object.keys(groupBy(sorted, (item) => item[groupField2]));
 
@@ -140,7 +141,7 @@ export const mergeCategoricalData = (
     return lastNotNull[groupField2] === value;
   };
 
-  const findValue = (value: string) => validValues?.find((v) => v.value === value)?.value;
+  const findValue = (value: string) => validValues?.find((v) => v.value === `${value}`)?.value;
 
   const merged = mergeByGroup<string>({
     sorted,
@@ -184,7 +185,7 @@ export const mergeSingleCategoricalData = (
     return [fallbackForSingleCategorical(sorted, timestampField, groupField1), []];
   }
 
-  const isEqual = (value: string, lastNotNull: Record<string, any>) => {
+  const isEqual = (value: string | undefined, lastNotNull: Record<string, any>) => {
     return lastNotNull[groupField1] === value;
   };
 
@@ -194,7 +195,7 @@ export const mergeSingleCategoricalData = (
 
   const buffer: Array<Record<string, any>> = [];
   let currentValue: string | undefined;
-  let firstInvalidValueTime;
+  let firstNullValueTime;
 
   const storeState = { buffer, currentValue };
 
@@ -206,7 +207,7 @@ export const mergeSingleCategoricalData = (
     connectThreshold,
     merged,
     storeState,
-    firstInvalidValueTime,
+    firstNullValueTime,
     findTarget: findValue,
     mergeFn: mergeRecords,
     isEqual,
@@ -242,16 +243,12 @@ export const mergeNumericalData = (
   // Filter ranges to only include those within data bounds
   const validRanges = mappings?.filter((r) => {
     if (!r.range) return false;
-    if (r?.range?.min === undefined || r?.range?.max === undefined) return false;
-    // if (r.range.max > max) return false;
+    if (r?.range?.min === undefined) return false;
 
     return sorted.some((s) => {
       const value = Number(s[rangeField]);
       return (
-        r.range?.min !== undefined &&
-        r.range?.max !== undefined &&
-        value >= r.range.min &&
-        value < r.range.max
+        r.range?.min !== undefined && value >= r.range.min && value < (r.range.max ?? Infinity)
       );
     });
   });
@@ -266,15 +263,15 @@ export const mergeNumericalData = (
     return validRanges?.find(
       (r) =>
         r?.range?.min !== undefined &&
-        r?.range?.max !== undefined &&
         r.range.min <= numberValue &&
-        r.range.max > numberValue
+        (r.range.max ?? Infinity) > numberValue
     )?.range;
   };
 
   const isEqual = (range: RangeValue, lastNotNull: Record<string, any>) => {
     return lastNotNull.mergedLabel === `[${range?.min},${range?.max})`;
   };
+
   const merged = mergeByGroup<RangeValue>({
     sorted,
     groupField,
@@ -285,6 +282,7 @@ export const mergeNumericalData = (
     findTarget: findRange,
     mergeFn: mergeNumercialRecord,
     isEqual,
+    // createMergedLabel,
   });
 
   return [merged, validRanges];
@@ -409,6 +407,7 @@ interface MergeOptions<T extends string | RangeValue> {
   findTarget: (value: string) => T | undefined;
   mergeFn: MergeFn<T>;
   isEqual: (value: T, lastNotNull: Record<string, any>) => boolean;
+  createMergedLabel?: (mapping: T | undefined) => string;
 }
 const mergeByGroup = <T extends string | RangeValue>({
   sorted,
@@ -420,6 +419,7 @@ const mergeByGroup = <T extends string | RangeValue>({
   findTarget,
   mergeFn,
   isEqual,
+  createMergedLabel,
 }: MergeOptions<T>) => {
   const groups = groupBy(sorted, (item) => item[groupField]);
   const merged: Array<Record<string, any>> = [];
@@ -427,6 +427,7 @@ const mergeByGroup = <T extends string | RangeValue>({
   for (const g1 of Object.values(groups)) {
     const buffer: Array<Record<string, any>> = [];
     let currentValue: T | undefined;
+    let firstNullValueTime;
     let firstInvalidValueTime;
 
     const storeState = { buffer, currentValue };
@@ -438,18 +439,23 @@ const mergeByGroup = <T extends string | RangeValue>({
       disableThreshold,
       connectThreshold,
       merged,
-      firstInvalidValueTime,
+      firstNullValueTime,
+      // firstInvalidValueTime,
       storeState,
       findTarget,
       mergeFn,
       isEqual,
     });
 
+    // console.log('g1', merged);
     // Merge any remaining buffered entries, no need to pass nextTime
     if (storeState.buffer.length > 0) {
       const rec = mergeFn(buffer, timestampField, undefined, storeState.currentValue);
       merged.push(rec);
     }
+
+    // console.log('buffer', ...storeState.buffer);
+    // merged.push(...storeState.buffer);
   }
 
   return merged;
@@ -462,7 +468,9 @@ interface MergeInAGroupOptions<T extends string | RangeValue> {
   disableThreshold?: string;
   connectThreshold?: string;
   merged: Array<Record<string, any>>;
-  firstInvalidValueTime: string | undefined;
+  firstNullValueTime: string | undefined;
+  // firstInvalidValueTime: string | undefined;
+  // lastValidIndex: number | undefined;
   storeState: {
     buffer: Array<Record<string, any>>;
     currentValue: T | undefined;
@@ -470,6 +478,7 @@ interface MergeInAGroupOptions<T extends string | RangeValue> {
   findTarget: (value: string) => T | undefined;
   mergeFn: MergeFn<T>;
   isEqual: (value: T, lastNotNull: Record<string, any>) => boolean;
+  createMergedLabel?: (mapping: T | undefined) => string;
 }
 
 export const mergeInAGroup = <T extends string | RangeValue>({
@@ -479,77 +488,208 @@ export const mergeInAGroup = <T extends string | RangeValue>({
   disableThreshold,
   connectThreshold,
   merged,
-  firstInvalidValueTime,
+  firstNullValueTime,
+  // firstInvalidValueTime,
+  // lastValidIndex,
   storeState,
   findTarget,
   mergeFn,
   isEqual,
+  createMergedLabel,
 }: MergeInAGroupOptions<T>) => {
-  for (let i = 0; i < sorted.length; i++) {
-    const curr = sorted[i];
+  // for (let i = 0; i < sorted.length; i++) {
+  //   const curr = sorted[i];
+  // const prev = storeState.buffer.pop();
+  // const currentMapping = findTarget(curr[valueField]);
+  // const prevMapping = prev ? findTarget(prev[valueField]) : undefined;
 
-    const target = findTarget(curr[valueField]);
+  // if (!prev) {
+  //   if (createMergedLabel && currentMapping) {
+  //     curr.mergedCount = 1;
+  //     curr.end = curr[timestampField];
+  //     curr.mergedLabel = createMergedLabel(currentMapping);
+  //   }
+  //   storeState.buffer.push(curr);
+  //   continue;
+  // }
 
-    // If the current data point does not belong to any defined values or ranges
-    if (!target) {
-      if (storeState.buffer.length > 0) {
-        firstInvalidValueTime ??= curr[timestampField];
+  // if (!curr[valueField]) {
+  //   if (prevMapping) {
+  //     lastValidIndex = i - 1;
+  //     const next = disconnectValues(curr[timestampField], prev[timestampField], disableThreshold);
+  //     prev.end = next;
+  //     storeState.buffer.push(prev);
+  //   }
+  //   storeState.buffer.push(curr);
+  //   continue;
+  // }
 
-        const next = disconnectValues(
-          curr[timestampField],
-          storeState.buffer[storeState.buffer.length - 1][timestampField],
-          disableThreshold
-        );
-        const rec = mergeFn(storeState.buffer, timestampField, next, storeState.currentValue);
-        merged.push(rec);
-        // clear buffer, but keep the reference
-        storeState.buffer.length = 0;
-        storeState.currentValue = undefined;
-      }
+  // if (connectThreshold && lastValidIndex !== undefined) {
+  //   const lastValidEntry = storeState.buffer[lastValidIndex];
+  //   const t = findTarget(lastValidEntry[valueField]);
+  //   console.log('t', t, currentMapping, prevMapping);
+  //   if (t === currentMapping) {
+  //     const newTime = connectNullValue(
+  //       curr[timestampField],
+  //       lastValidEntry.end,
+  //       connectThreshold
+  //     );
+  //     lastValidEntry.end = newTime;
+  //     lastValidEntry.mergedCount += 1;
+  //   }
 
+  //   continue;
+  // }
+
+  // if (currentMapping === prevMapping) {
+  //   prev.end = curr[timestampField];
+  //   prev.mergedCount += 1;
+  //   storeState.buffer.push(prev);
+  // } else {
+  //   if (prevMapping) {
+  //     const next = disconnectValues(curr[timestampField], prev[timestampField], disableThreshold);
+  //     prev.end = next;
+  //     storeState.buffer.push(prev);
+  //   }
+  //   if (createMergedLabel && currentMapping) {
+  //     curr.mergedCount = 1;
+  //     curr.end = curr[timestampField];
+  //     curr.mergedLabel = createMergedLabel ? createMergedLabel(currentMapping) : '';
+  //   }
+  //   storeState.buffer.push(curr);
+  // }
+  // lastValidIndex = undefined;
+  // firstNullValueTime = undefined;
+
+  //   const currentMapping = findTarget(curr[valueField]);
+
+  //   // if current value is null/undefined, record the first null time
+  //   if (!curr[valueField]) {
+  //     firstNullValueTime ??= curr[timestampField];
+  //     if (storeState.buffer.length > 0) {
+  //       const next = disconnectValues(
+  //         curr[timestampField],
+  //         storeState.buffer[storeState.buffer.length - 1][timestampField],
+  //         disableThreshold
+  //       );
+  //       const rec = mergeFn(storeState.buffer, timestampField, next, storeState.currentValue);
+  //       merged.push(rec);
+  //       // clear buffer
+  //       storeState.buffer.length = 0;
+  //       storeState.currentValue = undefined;
+  //     }
+  //     continue;
+  //   }
+
+  //   // If the current data point does not belong to any defined values or ranges
+  //   if (!currentMapping) {
+  //     // won't connect values if invalid value appears
+  //     firstNullValueTime = undefined;
+  //     if (storeState.buffer.length > 0) {
+  //       const next = disconnectValues(
+  //         curr[timestampField],
+  //         storeState.buffer[storeState.buffer.length - 1][timestampField],
+  //         disableThreshold
+  //       );
+  //       const rec = mergeFn(storeState.buffer, timestampField, next, storeState.currentValue);
+  //       merged.push(rec);
+  //       // clear buffer
+  //       storeState.buffer.length = 0;
+  //       storeState.currentValue = undefined;
+  //     }
+
+  //     continue;
+  //   }
+
+  //   // first valid record after a lists of null records
+  //   if (currentMapping && merged.length > 0 && firstNullValueTime && connectThreshold) {
+  //     const lastNotNull = merged[merged.length - 1];
+
+  //     if (isEqual(currentMapping, lastNotNull)) {
+  //       const newTime = connectNullValue(curr[timestampField], lastNotNull.end, connectThreshold);
+
+  //       merged[merged.length - 1] = {
+  //         ...lastNotNull,
+  //         end: newTime,
+  //       };
+  //     }
+
+  //     firstNullValueTime = undefined;
+  //   }
+
+  //   // If same range as previous or first entry, add to buffer
+  //   if (storeState.currentValue === currentMapping || storeState.currentValue === undefined) {
+  //     storeState.buffer.push(curr);
+  //     storeState.currentValue = currentMapping;
+  //   } else {
+  //     // Range changed - merge buffered entries and start new buffer
+  //     if (storeState.buffer.length > 0) {
+  //       const next = disconnectValues(
+  //         curr[timestampField],
+  //         storeState.buffer[storeState.buffer.length - 1][timestampField],
+  //         disableThreshold
+  //       );
+  //       const rec = mergeFn(storeState.buffer, timestampField, next, storeState.currentValue);
+  //       merged.push(rec);
+  //     }
+
+  //     storeState.buffer.length = 0;
+  //     storeState.buffer.push(curr);
+  //     storeState.currentValue = currentMapping;
+  //   }
+  // }
+
+  const flushBuffer = (nextTimestamp: string) => {
+    if (storeState.buffer.length === 0) return;
+
+    const next = disconnectValues(
+      nextTimestamp,
+      storeState.buffer[storeState.buffer.length - 1][timestampField],
+      disableThreshold
+    );
+
+    const rec = mergeFn(storeState.buffer, timestampField, next, storeState.currentValue);
+    merged.push(rec);
+    storeState.buffer.length = 0;
+    storeState.currentValue = undefined;
+  };
+
+  for (const curr of sorted) {
+    const currentMapping = findTarget(curr[valueField]);
+
+    // Handle null/undefined values
+    if (!curr[valueField]) {
+      firstNullValueTime ??= curr[timestampField];
+      flushBuffer(curr[timestampField]);
       continue;
     }
 
-    // first valid record after a lists of invalid records
-    if (
-      !storeState.currentValue &&
-      merged.length > 0 &&
-      firstInvalidValueTime &&
-      connectThreshold
-    ) {
-      const lastNotNull = merged[merged.length - 1];
-
-      if (isEqual(target, lastNotNull)) {
-        const newTime = connectNullValue(curr[timestampField], lastNotNull.end, connectThreshold);
-
-        merged[merged.length - 1] = {
-          ...lastNotNull,
-          end: newTime,
-        };
-      }
-
-      firstInvalidValueTime = undefined;
+    // Handle invalid mappings
+    if (!currentMapping) {
+      // For case: null invalid null, should not connect
+      firstNullValueTime = undefined;
+      flushBuffer(curr[timestampField]);
+      continue;
     }
 
-    // If same range as previous or first entry, add to buffer
-    if (storeState.currentValue === target || storeState.currentValue === undefined) {
-      storeState.buffer.push(curr);
-      storeState.currentValue = target;
-    } else {
-      // Range changed - merge buffered entries and start new buffer
-      if (storeState.buffer.length > 0) {
-        const next = disconnectValues(
-          curr[timestampField],
-          storeState.buffer[storeState.buffer.length - 1][timestampField],
-          disableThreshold
-        );
-        const rec = mergeFn(storeState.buffer, timestampField, next, storeState.currentValue);
-        merged.push(rec);
+    // Try to connect after null values
+    if (merged.length > 0 && firstNullValueTime && connectThreshold) {
+      const lastNotNull = merged[merged.length - 1];
+      if (isEqual(currentMapping, lastNotNull)) {
+        const newTime = connectNullValue(curr[timestampField], lastNotNull.end, connectThreshold);
+        merged[merged.length - 1] = { ...lastNotNull, end: newTime };
       }
+      firstNullValueTime = undefined;
+    }
 
-      storeState.buffer.length = 0;
+    // Add to buffer or flush and start new
+    if (storeState.currentValue === currentMapping || storeState.currentValue === undefined) {
       storeState.buffer.push(curr);
-      storeState.currentValue = target;
+      storeState.currentValue = currentMapping;
+    } else {
+      flushBuffer(curr[timestampField]);
+      storeState.buffer.push(curr);
+      storeState.currentValue = currentMapping;
     }
   }
 };

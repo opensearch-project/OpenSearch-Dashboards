@@ -310,6 +310,7 @@ export interface RenderChartConfig extends ChartConfig {
   styles: ChartStyles;
 }
 export interface ValueMapping {
+  id?: string;
   type: 'range' | 'value';
   value?: string;
   range?: RangeValue;

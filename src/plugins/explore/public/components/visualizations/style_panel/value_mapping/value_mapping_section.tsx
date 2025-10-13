@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
+import uuid from 'uuid';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -51,7 +52,7 @@ export const ValueMappingSection = ({ valueMappings, onChange }: ValueMappingPro
               <EuiText textAlign="center">{mapping.value}</EuiText>
             ) : (
               <EuiText textAlign="center">
-                {`[${mapping.range?.min}, ${mapping.range?.max}]`}
+                {`[${mapping.range?.min}, ${mapping.range?.max ?? '∞'})`}
               </EuiText>
             )}
           </EuiFlexItem>
@@ -112,6 +113,7 @@ export const EditValueMappingsModel = ({
 
   const handleAddMapping = (type: 'value' | 'range') => {
     const newMapping: ValueMapping = {
+      id: uuid.v4(),
       type,
       displayText: '',
       ...(type === 'value' ? { value: undefined } : { range: { min: undefined, max: undefined } }),
@@ -151,7 +153,7 @@ export const EditValueMappingsModel = ({
       // Skip invalid ranges
       if (mapping.type === 'range' && mapping.range) {
         const { min, max } = mapping.range;
-        if (min === undefined || max === undefined || min >= max) return false;
+        if (min === undefined || (max && min >= max)) return false;
       }
 
       return true;
@@ -176,7 +178,7 @@ export const EditValueMappingsModel = ({
         {mappings?.map((mapping, index) => {
           return (
             <ValueMappingItem
-              key={`${mapping.type}-${mapping.displayText}-${index}`}
+              key={mapping.id}
               id={index}
               mapping={mapping}
               onDelete={handleDeleteMapping}
