@@ -282,6 +282,20 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             },
           },
         },
+        {
+          test: /\.js$/,
+          include: [
+            /[\/\\]node_modules[\/\\]onnxruntime-web[\/\\]/, // ONLY include onnxruntime-web
+          ],
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              envName: worker.dist ? 'production' : 'development',
+              presets: [BABEL_PRESET_PATH],
+            },
+          },
+        },
       ],
     },
 

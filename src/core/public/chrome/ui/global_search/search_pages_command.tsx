@@ -13,28 +13,31 @@ import {
   DEFAULT_NAV_GROUPS,
   renderNavGroupElement,
   NavGroupType,
+  HttpStart,
 } from '../../../../../core/public';
 
 export const searchPages = async (
   query: string,
   navGroup?: ChromeNavGroupServiceStartContract,
   application?: InternalApplicationStart,
-  callback?: () => void
+  callback?: () => void,
+  http?: HttpStart
 ): Promise<ReactNode[]> => {
   if (navGroup && application) {
     const navGroupMap = await navGroup.getNavGroupsMap$().pipe(first()).toPromise();
 
-    const searchResult = searchNavigationLinks(
+    const searchResult = await searchNavigationLinks(
       [
         DEFAULT_NAV_GROUPS.all.id,
         DEFAULT_NAV_GROUPS.dataAdministration.id,
         DEFAULT_NAV_GROUPS.settingsAndSetup.id,
       ],
       navGroupMap,
-      query
+      query,
+      http
     );
 
-    const pages = searchResult.slice(0, 10).map((link) => {
+    const pages = searchResult.slice(0, 10).map((link: any) => {
       return (
         <GlobalSearchPageItem
           link={link}
