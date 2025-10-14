@@ -11,7 +11,6 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiAccordion,
-  EuiLoadingContent,
   EuiTitle,
   EuiText,
 } from '@elastic/eui';
