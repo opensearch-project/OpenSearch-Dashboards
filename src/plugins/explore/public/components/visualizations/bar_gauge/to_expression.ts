@@ -3,17 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { groupBy, max } from 'lodash';
+import { groupBy } from 'lodash';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { VisColumn, AxisColumnMappings, VEGASCHEMA, Threshold } from '../types';
 import { calculateValue } from '../utils/calculation';
-import { darkenColor, DEFAULT_GREY, getUnfilledArea, getColors } from '../theme/default_colors';
+import { DEFAULT_GREY, getColors } from '../theme/default_colors';
 import { getSchemaByAxis } from '../utils/utils';
 import {
   getBarOrientation,
   thresholdsToGradient,
   symbolOpposite,
   getDisplayMode,
+  darkenColor,
+  getUnfilledArea,
 } from './bar_gauge_utils';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 
@@ -33,6 +35,8 @@ export const createBarGaugeSpec = (
   const numericalMapping = xAxis?.schema === 'numerical' ? xAxis : yAxis;
   const numericField = numericalMapping?.column;
   const catField = xAxis?.schema === 'numerical' ? yAxis?.column : xAxis?.column;
+  const catCounts =
+    xAxis?.schema === 'numerical' ? yAxis?.uniqueValuesCount : xAxis?.uniqueValuesCount;
 
   const groups = catField ? groupBy(transformedData, (item) => item[catField]) : [];
 
@@ -88,8 +92,6 @@ export const createBarGaugeSpec = (
   ];
 
   const params = [
-    { name: 'fontRef', expr: 'min(width/2, height/2)' },
-    { name: 'fontFactor', expr: '(fontRef/5)/25' },
     { name: 'fontColor', value: getColors().text },
     {
       name: 'maxBase',
@@ -99,11 +101,16 @@ export const createBarGaugeSpec = (
       name: 'minBase',
       value: styleOptions?.min ?? 0,
     },
+    {
+      name: 'fontFactor',
+      expr:
+        styleOptions.exclusive.orientation !== 'horizontal'
+          ? `width/2/${catCounts}/4/25`
+          : 'height/2/10/25',
+    },
   ];
 
   const transformLayer = [
-    { joinaggregate: [{ op: 'max', field: numericField, as: 'maxNumber' }] },
-
     {
       calculate: 'maxBase',
       as: 'maxVal',
@@ -113,17 +120,6 @@ export const createBarGaugeSpec = (
       as: 'minVal',
     },
     ...thresholdsToGradient(completeThreshold),
-    { calculate: 'toString(datum.displayValue).length * 30', as: 'textWidth' },
-    { joinaggregate: [{ op: 'max', field: 'textWidth', as: 'maxTextWidth' }] },
-    {
-      calculate: 'minBase + (maxBase - minBase) * (width - datum.maxTextWidth)/width',
-      as: 'maxProjected',
-    },
-
-    {
-      calculate: `datum.maxProjected * (min(datum['${numericField}'], datum.maxVal)/ datum.maxVal)`,
-      as: 'valueProjected',
-    },
   ];
 
   const encodingLayer = {
@@ -131,11 +127,27 @@ export const createBarGaugeSpec = (
       field: yAxis?.column,
       type: getSchemaByAxis(yAxis),
       ...yAxisStyle,
+      ...(styleOptions.exclusive.orientation !== 'horizontal'
+        ? {
+            scale: {
+              domainMin: { expr: 'minBase' },
+              domainMax: { expr: 'maxBase' },
+            },
+          }
+        : {}),
     },
     x: {
       field: xAxis?.column,
       type: getSchemaByAxis(xAxis),
       ...xAxisStyle,
+      ...(styleOptions.exclusive.orientation === 'horizontal'
+        ? {
+            scale: {
+              domainMin: { expr: 'minBase' },
+              domainMax: { expr: 'maxBase' },
+            },
+          }
+        : {}),
     },
     ...(styleOptions.exclusive.displayMode === 'basic'
       ? {
@@ -144,8 +156,9 @@ export const createBarGaugeSpec = (
             type: 'quantitative',
             scale: {
               type: 'threshold',
-              domain: completeThreshold.map((t) => t.value),
-              range: [DEFAULT_GREY, ...completeThreshold.map((t) => t.color)],
+              //  last threshold which is just for max value capping in gradient mode
+              domain: completeThreshold.map((t) => t.value).slice(0, -1),
+              range: [DEFAULT_GREY, ...completeThreshold.map((t) => t.color)].slice(0, -1),
             },
             legend: null,
           },
@@ -180,10 +193,7 @@ export const createBarGaugeSpec = (
       encoding: {
         [`${symbolOpposite(styleOptions.exclusive.orientation, 'y')}`]: {
           type: 'quantitative',
-          field: 'maxProjected',
-          scale: {
-            domainMin: { expr: 'minBase' },
-          },
+          field: 'maxVal',
         },
       },
     });
@@ -225,11 +235,10 @@ export const createBarGaugeSpec = (
             [`${symbolOpposite(styleOptions.exclusive.orientation, 'y')}`]: {
               type: 'quantitative',
               field: 'gradEnd',
-              scale: {
-                domainMin: styleOptions?.min ?? 0,
-              },
             },
-            [`${symbolOpposite(styleOptions.exclusive.orientation, 'y')}2`]: { field: 'gradStart' },
+            [`${symbolOpposite(styleOptions.exclusive.orientation, 'y')}2`]: {
+              field: 'gradStart',
+            },
           },
         },
 
@@ -249,9 +258,6 @@ export const createBarGaugeSpec = (
             [`${symbolOpposite(styleOptions.exclusive.orientation, 'y')}`]: {
               type: 'quantitative',
               field: 'gradEnd',
-              scale: {
-                domainMin: styleOptions?.min ?? 0,
-              },
             },
             [`${symbolOpposite(styleOptions.exclusive.orientation, 'y')}2`]: { field: 'gradStart' },
           },
@@ -266,15 +272,20 @@ export const createBarGaugeSpec = (
     const nameLayer = {
       transform: [
         {
-          calculate: ` datum.valueProjected < datum.minVal ? datum.minVal: (datum.valueProjected > datum.maxVal ? datum.maxVal : datum.valueProjected)`,
+          calculate: `datum.minVal >= datum.maxVal ? datum.minVal : datum['${numericField}'] < datum.minVal ? datum.minVal : datum.maxVal`,
           as: 'textY',
         },
       ],
       mark: {
         type: 'text',
-        align: 'center',
-        baseline: 'middle',
-        dx: styleOptions.exclusive.orientation === 'horizontal' ? { expr: 'fontFactor*100' } : 0,
+
+        ...(styleOptions.exclusive.orientation === 'horizontal'
+          ? {
+              align: 'left',
+            }
+          : {}),
+        baseline: 'bottom',
+        dx: styleOptions.exclusive.orientation === 'horizontal' ? { expr: 'fontFactor*5' } : 0,
         dy: styleOptions.exclusive.orientation === 'horizontal' ? 0 : { expr: '-fontFactor*5' },
         fontSize: { expr: 'fontFactor * 10' },
         ...(styleOptions.exclusive?.valueDisplay === 'textColor'
@@ -285,9 +296,6 @@ export const createBarGaugeSpec = (
         [`${symbolOpposite(styleOptions.exclusive.orientation, 'y')}`]: {
           type: 'quantitative',
           field: 'textY',
-          scale: {
-            domainMin: styleOptions?.min ?? 0,
-          },
         },
         text: {
           field: 'displayValue',
@@ -297,8 +305,8 @@ export const createBarGaugeSpec = (
           type: 'quantitative',
           scale: {
             type: 'threshold',
-            domain: completeThreshold.map((t) => t.value),
-            range: [DEFAULT_GREY, ...completeThreshold.map((t) => t.color)],
+            domain: completeThreshold.map((t) => t.value).slice(0, -1),
+            range: [DEFAULT_GREY, ...completeThreshold.map((t) => t.color)].slice(0, -1),
           },
           legend: null,
         },

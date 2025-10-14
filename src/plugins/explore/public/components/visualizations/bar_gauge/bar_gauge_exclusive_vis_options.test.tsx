@@ -19,7 +19,6 @@ describe('BarGaugeExclusiveVisOptions', () => {
     orientation: 'vertical',
     displayMode: 'gradient',
     valueDisplay: 'valueColor',
-    namePlacement: 'auto',
     showUnfilledArea: true,
   };
 
@@ -68,19 +67,6 @@ describe('BarGaugeExclusiveVisOptions', () => {
     });
   });
 
-  it('should call onChange when name placement is changed', () => {
-    const { getByText } = render(
-      <BarGaugeExclusiveVisOptions styles={defaultStyles} onChange={mockOnChange} />
-    );
-
-    fireEvent.click(getByText('Hidden'));
-
-    expect(mockOnChange).toHaveBeenCalledWith({
-      ...defaultStyles,
-      namePlacement: 'hidden',
-    });
-  });
-
   it('should call onChange when unfilled area switch is toggled', () => {
     const { getByRole } = render(
       <BarGaugeExclusiveVisOptions styles={defaultStyles} onChange={mockOnChange} />
@@ -112,7 +98,6 @@ describe('BarGaugeExclusiveVisOptions', () => {
       orientation: 'horizontal',
       displayMode: 'basic',
       valueDisplay: 'textColor',
-      namePlacement: 'hidden',
       showUnfilledArea: false,
     };
 

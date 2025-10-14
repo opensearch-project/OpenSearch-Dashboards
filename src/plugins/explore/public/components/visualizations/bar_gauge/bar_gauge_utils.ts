@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { darkMode } from '@osd/ui-shared-deps/theme';
 import { AxisColumnMappings, Threshold } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 
@@ -91,4 +92,29 @@ export const getDisplayMode = (
       },
     };
   if (displayMode === 'stack') return { color: threshold.color };
+};
+
+export const getUnfilledArea = () => {
+  if (darkMode) return '#27252C';
+  return '#f1f1f1ff';
+};
+
+export const darkenColor = (hex: string, degree = 1) => {
+  // degree: 1 = 10%, 2 = 20%, etc.
+  const factor = 1 - degree * 0.1;
+
+  if (hex.length === 4) {
+    hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+  }
+
+  let r = parseInt(hex.slice(1, 3), 16);
+  let g = parseInt(hex.slice(3, 5), 16);
+  let b = parseInt(hex.slice(5, 7), 16);
+
+  r = Math.max(Math.floor(r * factor), 0);
+  g = Math.max(Math.floor(g * factor), 0);
+  b = Math.max(Math.floor(b * factor), 0);
+
+  const toHex = (n: number) => n.toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 };

@@ -56,7 +56,6 @@ describe('createBarGaugeSpec', () => {
       orientation: 'vertical',
       displayMode: 'gradient',
       valueDisplay: 'valueColor',
-      namePlacement: 'auto',
       showUnfilledArea: true,
     },
     thresholdOptions: {
@@ -169,7 +168,7 @@ describe('createBarGaugeSpec', () => {
     expect(spec.layer[0]).toMatchObject({
       mark: {
         type: 'bar',
-        fill: 'grey',
+        fill: '#f1f1f1ff',
       },
       encoding: {
         y: {
