@@ -122,7 +122,7 @@ jest.mock('../style_panel/legend/legend', () => {
   // Import Positions inside the mock to avoid reference error
   const { Positions: PositionsEnum } = jest.requireActual('../types');
   return {
-    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, hasTwoLegends }) => (
+    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, hasSizeLegend }) => (
       <div data-test-subj="mockLegendOptionsPanel">
         <button
           data-test-subj="mockLegendShow"
@@ -141,11 +141,11 @@ jest.mock('../style_panel/legend/legend', () => {
           placeholder="Legend Title"
           onChange={(e) => onLegendOptionsChange({ title: e.target.value })}
         />
-        {hasTwoLegends && (
+        {hasSizeLegend && (
           <input
-            data-test-subj="mockLegendTitle2"
+            data-test-subj="mockLegendTitleForSize"
             placeholder="Size Legend Title"
-            onChange={(e) => onLegendOptionsChange({ title2: e.target.value })}
+            onChange={(e) => onLegendOptionsChange({ titleForSize: e.target.value })}
           />
         )}
       </div>
@@ -326,11 +326,11 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     );
 
     // Test second legend title change
-    const legendTitle2Input = screen.getByTestId('mockLegendTitle2');
-    await userEvent.type(legendTitle2Input, 'New Size Legend Title');
+    const legendTitleForSizeInput = screen.getByTestId('mockLegendTitleForSize');
+    await userEvent.type(legendTitleForSizeInput, 'New Size Legend Title');
 
     expect(propsWithCategoryColorAndSize.onStyleChange).toHaveBeenCalledWith({
-      legendTitle2: 'New Size Legend Title',
+      legendTitleForSize: 'New Size Legend Title',
     });
   });
 

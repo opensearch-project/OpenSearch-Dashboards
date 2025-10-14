@@ -14,19 +14,19 @@ export interface LegendOptions {
   show: boolean;
   position: Positions;
   title?: string;
-  title2?: string;
+  titleForSize?: string;
 }
 
 export interface LegendOptionsProps {
   legendOptions: LegendOptions;
   onLegendOptionsChange: (legendOptions: Partial<LegendOptions>) => void;
-  hasTwoLegends?: boolean;
+  hasSizeLegend?: boolean;
 }
 
 export const LegendOptionsPanel = ({
   legendOptions,
   onLegendOptionsChange,
-  hasTwoLegends = false,
+  hasSizeLegend = false,
 }: LegendOptionsProps) => {
   if (!legendOptions || !onLegendOptionsChange) {
     return null;
@@ -97,7 +97,7 @@ export const LegendOptionsPanel = ({
           <EuiSpacer size="s" />
           <EuiFormRow
             label={
-              hasTwoLegends
+              hasSizeLegend
                 ? i18n.translate('explore.stylePanel.legend.colorTitle', {
                     defaultMessage: 'Color legend title',
                   })
@@ -111,7 +111,7 @@ export const LegendOptionsPanel = ({
               onChange={(value: string) => onLegendOptionsChange({ title: value })}
               data-test-subj="legendTitleInput"
               placeholder={
-                hasTwoLegends
+                hasSizeLegend
                   ? i18n.translate('explore.stylePanel.legend.colorTitle.placeholder', {
                       defaultMessage: 'Color legend name',
                     })
@@ -121,17 +121,17 @@ export const LegendOptionsPanel = ({
               }
             />
           </EuiFormRow>
-          {hasTwoLegends && (
+          {hasSizeLegend && (
             <EuiFormRow
-              label={i18n.translate('explore.stylePanel.legend.title2', {
+              label={i18n.translate('explore.stylePanel.legend.titleForSize', {
                 defaultMessage: 'Size legend title',
               })}
             >
               <DebouncedFieldText
-                value={legendOptions.title2 || ''}
-                onChange={(value: string) => onLegendOptionsChange({ title2: value })}
-                data-test-subj="legendTitle2Input"
-                placeholder={i18n.translate('explore.stylePanel.legend.title2.placeholder', {
+                value={legendOptions.titleForSize || ''}
+                onChange={(value: string) => onLegendOptionsChange({ titleForSize: value })}
+                data-test-subj="legendTitleForSizeInput"
+                placeholder={i18n.translate('explore.stylePanel.legend.titleForSize.placeholder', {
                   defaultMessage: 'Size legend name',
                 })}
               />

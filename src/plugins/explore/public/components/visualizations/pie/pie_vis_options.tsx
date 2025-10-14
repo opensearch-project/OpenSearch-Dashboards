@@ -10,7 +10,7 @@ import { PieChartStyle, PieChartStyleOptions } from './pie_vis_config';
 import { PieExclusiveVisOptions } from './pie_exclusive_vis_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
-import { LegendOptionsPanel } from '../style_panel/legend/legend';
+import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
 
@@ -58,25 +58,11 @@ export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
               onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <LegendOptionsPanel
-              legendOptions={{
-                show: styleOptions.addLegend,
-                position: styleOptions.legendPosition,
-              }}
-              onLegendOptionsChange={(legendOptions) => {
-                if (legendOptions.show !== undefined) {
-                  updateStyleOption('addLegend', legendOptions.show);
-                }
-                if (legendOptions.position !== undefined) {
-                  updateStyleOption('legendPosition', legendOptions.position);
-                }
-                if (legendOptions.title !== undefined) {
-                  updateStyleOption('legendTitle', legendOptions.title);
-                }
-              }}
-            />
-          </EuiFlexItem>
+          <LegendOptionsWrapper
+            styleOptions={styleOptions}
+            updateStyleOption={updateStyleOption}
+            shouldShow={hasMappingSelected}
+          />
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel
               titleOptions={styleOptions.titleOptions}

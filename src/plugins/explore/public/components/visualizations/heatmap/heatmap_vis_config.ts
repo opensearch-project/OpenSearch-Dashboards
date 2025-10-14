@@ -65,7 +65,8 @@ export interface HeatmapChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
 }
 
-export type HeatmapChartStyle = Required<HeatmapChartStyleOptions>;
+export type HeatmapChartStyle = Required<Omit<HeatmapChartStyleOptions, 'legendTitle'>> &
+  Pick<HeatmapChartStyleOptions, 'legendTitle'>;
 
 export const defaultHeatmapChartStyles: HeatmapChartStyle = {
   switchAxes: false,
@@ -75,7 +76,6 @@ export const defaultHeatmapChartStyles: HeatmapChartStyle = {
   },
   addLegend: true,
   legendPosition: Positions.RIGHT,
-  legendTitle: '',
 
   // exclusive
   exclusive: {

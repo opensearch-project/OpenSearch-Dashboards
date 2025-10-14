@@ -35,7 +35,7 @@ describe('LegendOptionsPanel', () => {
     show: true,
     position: Positions.BOTTOM,
     title: 'Legend Title',
-    title2: 'Size Legend Title',
+    titleForSize: 'Size Legend Title',
   };
 
   const mockOnLegendChange = jest.fn();
@@ -58,22 +58,22 @@ describe('LegendOptionsPanel', () => {
     expect(legendTitleInput).toBeInTheDocument();
   });
 
-  it('renders second legend title input when hasTwoLegends is true', () => {
+  it('renders second legend title input when hasSizeLegend is true', () => {
     render(
       <LegendOptionsPanel
         legendOptions={mockLegend}
         onLegendOptionsChange={mockOnLegendChange}
-        hasTwoLegends={true}
+        hasSizeLegend={true}
       />
     );
 
     const legendTitleInput = screen.getByTestId('legendTitleInput');
-    const legendTitle2Input = screen.getByTestId('legendTitle2Input');
+    const legendTitleForSizeInput = screen.getByTestId('legendTitleForSizeInput');
 
     expect(legendTitleInput).toBeInTheDocument();
-    expect(legendTitle2Input).toBeInTheDocument();
+    expect(legendTitleForSizeInput).toBeInTheDocument();
     expect(legendTitleInput).toHaveAttribute('placeholder', 'Color legend name');
-    expect(legendTitle2Input).toHaveAttribute('placeholder', 'Size legend name');
+    expect(legendTitleForSizeInput).toHaveAttribute('placeholder', 'Size legend name');
   });
 
   it('updates legend mode correctly', () => {
@@ -115,20 +115,20 @@ describe('LegendOptionsPanel', () => {
     });
   });
 
-  it('updates second legend title correctly when hasTwoLegends is true', () => {
+  it('updates second legend title correctly when hasSizeLegend is true', () => {
     render(
       <LegendOptionsPanel
         legendOptions={mockLegend}
         onLegendOptionsChange={mockOnLegendChange}
-        hasTwoLegends={true}
+        hasSizeLegend={true}
       />
     );
 
-    const legendTitle2Input = screen.getByTestId('legendTitle2Input');
+    const legendTitleForSizeInput = screen.getByTestId('legendTitleForSizeInput');
 
-    fireEvent.change(legendTitle2Input, { target: { value: 'New Size Legend Title' } });
+    fireEvent.change(legendTitleForSizeInput, { target: { value: 'New Size Legend Title' } });
     expect(mockOnLegendChange).toHaveBeenLastCalledWith({
-      title2: 'New Size Legend Title',
+      titleForSize: 'New Size Legend Title',
     });
   });
 

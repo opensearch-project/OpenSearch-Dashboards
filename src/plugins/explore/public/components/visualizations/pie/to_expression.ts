@@ -34,7 +34,7 @@ export const createPieSpec = (
       type: 'nominal',
       legend: styleOptions.addLegend
         ? {
-            title: styleOptions.legendTitle || numericName,
+            title: styleOptions.legendTitle,
             orient: styleOptions.legendPosition,
             symbolLimit: 10,
           }

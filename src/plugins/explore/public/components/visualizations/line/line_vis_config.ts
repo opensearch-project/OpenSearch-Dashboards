@@ -49,12 +49,14 @@ export interface LineChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
 }
 
-export type LineChartStyle = Required<Omit<LineChartStyleOptions, 'thresholdLines'>>;
+export type LineChartStyle = Required<
+  Omit<LineChartStyleOptions, 'thresholdLines' | 'legendTitle'>
+> &
+  Pick<LineChartStyleOptions, 'legendTitle'>;
 
 export const defaultLineChartStyles: LineChartStyle = {
   addLegend: true,
   legendPosition: Positions.RIGHT,
-  legendTitle: '',
   addTimeMarker: false,
 
   lineStyle: 'both',

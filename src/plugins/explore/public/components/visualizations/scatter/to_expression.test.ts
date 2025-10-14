@@ -74,6 +74,8 @@ describe('Scatter Chart to_expression', () => {
     ...defaultScatterChartStyles,
     addLegend: true,
     legendPosition: Positions.RIGHT,
+    legendTitle: 'Category', // Added to fix legend title for color
+    legendTitleForSize: 'Size', // Added to fix legend title for size
     tooltipOptions: {
       mode: 'all',
     },

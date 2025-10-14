@@ -8,7 +8,7 @@ import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { HeatmapChartStyle, HeatmapChartStyleOptions } from './heatmap_vis_config';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
-import { LegendOptionsPanel } from '../style_panel/legend/legend';
+import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
 import { HeatmapExclusiveVisOptions } from './heatmap_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
@@ -89,27 +89,11 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
             />
           </EuiFlexItem>
 
-          {shouldShowLegend && (
-            <EuiFlexItem grow={false}>
-              <LegendOptionsPanel
-                legendOptions={{
-                  show: styleOptions.addLegend,
-                  position: styleOptions.legendPosition,
-                }}
-                onLegendOptionsChange={(legendOptions) => {
-                  if (legendOptions.show !== undefined) {
-                    updateStyleOption('addLegend', legendOptions.show);
-                  }
-                  if (legendOptions.position !== undefined) {
-                    updateStyleOption('legendPosition', legendOptions.position);
-                  }
-                  if (legendOptions.title !== undefined) {
-                    updateStyleOption('legendTitle', legendOptions.title);
-                  }
-                }}
-              />
-            </EuiFlexItem>
-          )}
+          <LegendOptionsWrapper
+            styleOptions={styleOptions}
+            updateStyleOption={updateStyleOption}
+            shouldShow={shouldShowLegend}
+          />
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel

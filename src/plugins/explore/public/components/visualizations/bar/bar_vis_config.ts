@@ -59,15 +59,16 @@ export interface BarChartStyleOptions {
   useThresholdColor?: boolean;
 }
 
-export type BarChartStyle = Required<Omit<BarChartStyleOptions, 'legendShape' | 'thresholdLines'>> &
-  Pick<BarChartStyleOptions, 'legendShape'>;
+export type BarChartStyle = Required<
+  Omit<BarChartStyleOptions, 'legendShape' | 'thresholdLines' | 'legendTitle'>
+> &
+  Pick<BarChartStyleOptions, 'legendShape' | 'legendTitle'>;
 
 export const defaultBarChartStyles: BarChartStyle = {
   // Basic controls
   switchAxes: false,
   addLegend: true,
   legendPosition: Positions.RIGHT,
-  legendTitle: '',
   tooltipOptions: {
     mode: 'all',
   },

@@ -195,7 +195,7 @@ export const createLineBarChart = (
         datum: metric1Name,
         legend: styles.addLegend
           ? {
-              title: styles.legendTitle || 'Metrics',
+              title: styles.legendTitle,
               orient: styles.legendPosition,
             }
           : null,
@@ -246,7 +246,7 @@ export const createLineBarChart = (
         datum: metric2Name,
         legend: styles.addLegend
           ? {
-              title: styles.legendTitle || 'Metrics',
+              title: styles.legendTitle,
               orient: styles.legendPosition,
             }
           : null,
@@ -384,7 +384,7 @@ export const createMultiLineChart = (
         legend:
           styles?.addLegend !== false
             ? {
-                title: styles.legendTitle || categoryName,
+                title: styles.legendTitle,
                 orient: styles?.legendPosition || Positions.RIGHT,
               }
             : null,
@@ -542,7 +542,7 @@ export const createFacetedMultiLineChart = (
               legend:
                 styles?.addLegend !== false
                   ? {
-                      title: styles.legendTitle || category1Name,
+                      title: styles.legendTitle,
                       orient: styles?.legendPosition || Positions.RIGHT,
                     }
                   : null,
