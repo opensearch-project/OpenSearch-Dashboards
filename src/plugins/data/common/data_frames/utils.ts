@@ -99,7 +99,7 @@ export const convertResult = ({
       const processField = (field: any, value: any): any => {
         if (options && options.formatter) {
           // Handle date fields
-          if (field.type === 'date') {
+          if (field.type === 'date' || field.type === 'timestamp') {
             return options.formatter(value, OSD_FIELD_TYPES.DATE);
           }
           // Handle nested objects with potential date fields
