@@ -63,18 +63,9 @@ const valueDisplayOption = [
       defaultMessage: 'Text Color',
     }),
   },
-];
-
-const namePlacementOption = [
-  {
-    id: 'auto',
-    label: i18n.translate('explore.vis.barGauge.namePlacement.auto', {
-      defaultMessage: 'Auto',
-    }),
-  },
   {
     id: 'hidden',
-    label: i18n.translate('explore.vis.barGauge.namePlacement.hidden', {
+    label: i18n.translate('explore.vis.barGauge.valueDisplay.hidden', {
       defaultMessage: 'Hidden',
     }),
   },
@@ -153,25 +144,6 @@ export const BarGaugeExclusiveVisOptions = ({ styles, onChange }: BarGaugeVisOpt
           }}
           type="single"
           idSelected={styles?.valueDisplay ?? 'valueColor'}
-          buttonSize="compressed"
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.barGauge.exclusive.namePlacement', {
-          defaultMessage: 'Name placement',
-        })}
-      >
-        <EuiButtonGroup
-          legend={i18n.translate('explore.stylePanel.barGauge.exclusive.namePlacement', {
-            defaultMessage: 'Name placement',
-          })}
-          isFullWidth
-          options={namePlacementOption}
-          onChange={(optionId) => {
-            updateExclusiveOption('namePlacement', optionId);
-          }}
-          type="single"
-          idSelected={styles?.namePlacement ?? 'auto'}
           buttonSize="compressed"
         />
       </EuiFormRow>
