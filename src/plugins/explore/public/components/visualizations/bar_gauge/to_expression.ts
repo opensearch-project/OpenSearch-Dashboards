@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { groupBy } from 'lodash';
+import { groupBy, max } from 'lodash';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { VisColumn, AxisColumnMappings, VEGASCHEMA, Threshold } from '../types';
 import { calculateValue } from '../utils/calculation';
@@ -42,6 +42,7 @@ export const createBarGaugeSpec = (
 
   const newRecord = [];
   let maxNumber: number = 0;
+  let maxTextLength: number = 0;
 
   const selectedUnit = getUnitById(styleOptions?.unitId);
 
@@ -59,6 +60,7 @@ export const createBarGaugeSpec = (
         calculate !== undefined && typeof calculate === 'number' && !isNaN(calculate);
 
       const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculate);
+      maxTextLength = Math.max(maxTextLength, String(displayValue).length);
       newRecord.push({
         ...g1[0],
         [numericField]: calculate,
@@ -105,8 +107,8 @@ export const createBarGaugeSpec = (
       name: 'fontFactor',
       expr:
         styleOptions.exclusive.orientation !== 'horizontal'
-          ? `width/2/${catCounts}/4/25`
-          : 'height/2/10/25',
+          ? `width/${catCounts}/${maxTextLength}/9`
+          : `height/${maxTextLength}/18`,
     },
   ];
 
@@ -285,8 +287,8 @@ export const createBarGaugeSpec = (
             }
           : {}),
         baseline: 'bottom',
-        dx: styleOptions.exclusive.orientation === 'horizontal' ? { expr: 'fontFactor*5' } : 0,
-        dy: styleOptions.exclusive.orientation === 'horizontal' ? 0 : { expr: '-fontFactor*5' },
+        dx: styleOptions.exclusive.orientation === 'horizontal' ? { expr: 'fontFactor*3' } : 0,
+        dy: styleOptions.exclusive.orientation === 'horizontal' ? 0 : { expr: '-fontFactor*3' },
         fontSize: { expr: 'fontFactor * 10' },
         ...(styleOptions.exclusive?.valueDisplay === 'textColor'
           ? { fill: { expr: 'fontColor' } }
