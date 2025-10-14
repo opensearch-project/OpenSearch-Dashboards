@@ -73,3 +73,24 @@ export const mockQueryResult = (source: any = {}) => ({
 export const mockEmptyQueryResult = () => ({
   hits: { hits: [] },
 });
+
+export const mockUndefinedQueryResult = () => ({});
+
+export const mockQueryResultWithHits = (hits: any[]) => ({
+  hits: {
+    hits: hits.map((source) => ({ _source: source })),
+  },
+});
+
+export const expectValidDetailConfig = (
+  config: DetailSectionConfig,
+  expectedId: string,
+  expectedTitle: string,
+  expectedTypes: string[]
+) => {
+  expect(config.id).toBe(expectedId);
+  expect(config.title).toBe(expectedTitle);
+  expect(config.applicableToTypes).toEqual(expectedTypes);
+  expect(config.component).toBeDefined();
+  expect(config.fetchData).toBeDefined();
+};
