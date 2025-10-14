@@ -1,0 +1,4 @@
+feat:
+- Added support for multiple log dataset instead of just one ([#10715](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10715))
+- Made the component render for multiple datasets with accordion ([#10715](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10715))
+- Added the sub text for 10 recent results ([#10715](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10715))
