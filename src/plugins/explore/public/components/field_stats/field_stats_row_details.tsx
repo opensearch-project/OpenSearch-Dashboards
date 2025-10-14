@@ -66,7 +66,6 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({
     );
   }
 
-  // Get applicable sections for this field type
   const fieldType = field.type.toLowerCase();
   const applicableSections = getApplicableSections(fieldType);
 
@@ -81,7 +80,6 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({
     );
   }
 
-  // Check if we have any data to display
   const hasAnyData = applicableSections.some((section) => {
     const sectionData = (details as any)[section.id];
     return (
@@ -113,12 +111,12 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({
       {applicableSections.map((section) => {
         const sectionData = (details as any)[section.id];
 
-        // Skip if no data or error
+        // skip if no data or error
         if (!sectionData || sectionData.error) {
           return null;
         }
 
-        // Skip empty arrays
+        // skip empty arrays
         if (Array.isArray(sectionData) && sectionData.length === 0) {
           return null;
         }
