@@ -3,11 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AppCategory } from 'opensearch-dashboards/public';
+import { AppCategory, HttpStart } from 'opensearch-dashboards/public';
 import { ChromeNavLink } from './nav_links';
 import { ChromeRegistrationNavLink, NavGroupItemInMap } from './nav_group';
 import { NavGroupStatus } from '../../../core/types';
-
 type KeyOf<T> = keyof T;
 
 export const sortBy = <T>(key: KeyOf<T>) => {
@@ -240,12 +239,13 @@ export function setIsCategoryOpen(id: string, isOpen: boolean, storage: Storage)
   storage.setItem(getCategoryLocalStorageKey(id), `${isOpen}`);
 }
 
-export function searchNavigationLinks(
+export async function searchNavigationLinks(
   allAvailableCaseId: string[],
   navGroupMap: Record<string, NavGroupItemInMap>,
-  query: string
+  query: string,
+  http?: HttpStart
 ) {
-  return allAvailableCaseId.flatMap((useCaseId) => {
+  const allSearchAbleLinks = allAvailableCaseId.flatMap((useCaseId) => {
     const navGroup = navGroupMap[useCaseId];
     if (!navGroup) return [];
 
@@ -255,7 +255,9 @@ export function searchNavigationLinks(
 
     return links
       .filter((link) => {
-        const title = link.title;
+        return !link.hidden && !link.disabled && !parentNavLinkIds.includes(link.id);
+      })
+      .map((link) => {
         let parentNavLinkTitle;
         // parent title also taken into consideration for search its sub items
         if (link.parentNavLinkId) {
@@ -263,19 +265,49 @@ export function searchNavigationLinks(
             (navLink) => navLink.id === link.parentNavLinkId
           )?.title;
         }
-        const titleMatch = title && title.toLowerCase().includes(query.toLowerCase());
-        const parentTitleMatch =
-          parentNavLinkTitle && parentNavLinkTitle.toLowerCase().includes(query.toLowerCase());
-        return (
-          !link.hidden &&
-          !link.disabled &&
-          (titleMatch || parentTitleMatch) &&
-          !parentNavLinkIds.includes(link.id)
-        );
-      })
-      .map((link) => ({
-        ...link,
-        navGroup,
-      }));
+        return {
+          ...link,
+          parentNavLinkTitle,
+          navGroup,
+        };
+      });
   });
+
+  try {
+    const linksContext = allSearchAbleLinks.map((link) => ({
+      id: link.id,
+      title: link.title,
+      description: link.description ?? link.title,
+    }));
+    const semanticSearchResult = await http?.post('/api/workspaces/_semantic_search', {
+      body: JSON.stringify({
+        query: query,
+        links: linksContext,
+      }),
+    });
+
+    // Handle case when semanticSearchResult is undefined (http not provided)
+    if (!semanticSearchResult) {
+      // Fallback to simple string matching if semantic search isn't available
+      return allSearchAbleLinks.filter(
+        (link) =>
+          link.title.toLowerCase().includes(query.toLowerCase()) ||
+          (link.parentNavLinkTitle &&
+            link.parentNavLinkTitle.toLowerCase().includes(query.toLowerCase()))
+      );
+    }
+
+    const finalResult = semanticSearchResult
+      .map((link: any) => {
+        const originalFullLink = allSearchAbleLinks.find((fullLink) => fullLink.id === link.id);
+        return originalFullLink || null;
+      })
+      .filter(Boolean) as Array<ChromeRegistrationNavLink & ChromeNavLink>;
+
+    console.log('Final Semantic Search Result (from backend): ', finalResult);
+    return finalResult;
+  } catch (error) {
+    console.error('Frontend API call error for semantic search:', error);
+    throw error;
+  }
 }

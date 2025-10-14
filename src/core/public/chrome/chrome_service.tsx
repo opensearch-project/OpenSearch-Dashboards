@@ -46,7 +46,7 @@ import { EuiLink } from '@elastic/eui';
 import { mountReactNode } from '../utils/mount';
 import { InternalApplicationStart } from '../application';
 import { DocLinksStart } from '../doc_links';
-import { HttpStart } from '../http';
+import { HttpSetup, HttpStart } from '../http';
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
 import { IUiSettingsClient } from '../ui_settings';
@@ -124,6 +124,7 @@ interface ConstructorParams {
 
 export interface SetupDeps {
   uiSettings: IUiSettingsClient;
+  http: HttpSetup;
 }
 
 export interface StartDeps {
@@ -222,7 +223,7 @@ export class ChromeService {
     );
   }
 
-  public setup({ uiSettings }: SetupDeps): ChromeSetup {
+  public setup({ uiSettings, http }: SetupDeps): ChromeSetup {
     const navGroup = this.navGroup.setup({ uiSettings });
     const globalSearch = this.globalSearch.setup();
 
@@ -230,7 +231,7 @@ export class ChromeService {
       id: 'pagesSearch',
       type: 'PAGES',
       run: async (query: string, callback: () => void) =>
-        searchPages(query, this.navGroupStart, this.applicationStart, callback),
+        searchPages(query, this.navGroupStart, this.applicationStart, callback, http),
     });
 
     return {

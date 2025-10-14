@@ -371,6 +371,8 @@ export class DashboardPlugin
     const app: App = {
       id: DashboardConstants.DASHBOARDS_ID,
       title: 'Dashboards',
+      description:
+        'Combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place.',
       order: 2500,
       workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       euiIconType: 'inputOutput',

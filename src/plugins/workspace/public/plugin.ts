@@ -345,6 +345,8 @@ export class WorkspacePlugin
       title: i18n.translate('workspace.settings.workspaceDetail', {
         defaultMessage: 'Workspace Detail',
       }),
+      description:
+        "Define and manage a workspace's details, including its name, description, use case, icon color, and privacy settings.",
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,
@@ -362,6 +364,7 @@ export class WorkspacePlugin
       title: i18n.translate('workspace.settings.workspaceCollaborators', {
         defaultMessage: 'Collaborators',
       }),
+      description: 'Manage workspace access and permissions.',
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,

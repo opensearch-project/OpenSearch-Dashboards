@@ -196,9 +196,9 @@ describe('searchNavigationLinks', () => {
 
   const allAvailableCaseId = ['test-group'];
 
-  it('should return matching visible and enabled links', () => {
+  it('should return matching visible and enabled links', async () => {
     const query = 'child';
-    const result = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+    const result = await searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
 
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual(
@@ -210,9 +210,9 @@ describe('searchNavigationLinks', () => {
     );
   });
 
-  it('should return child links when searching by parent title', () => {
+  it('should return child links when searching by parent title', async () => {
     const query = 'parent';
-    const result = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+    const result = await searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
 
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual(
@@ -224,23 +224,23 @@ describe('searchNavigationLinks', () => {
     );
   });
 
-  it('should not return hidden links', () => {
+  it('should not return hidden links', async () => {
     const query = 'hidden';
-    const result = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+    const result = await searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
 
     expect(result).toHaveLength(0);
   });
 
-  it('should not return disabled links', () => {
+  it('should not return disabled links', async () => {
     const query = 'disabled';
-    const result = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+    const result = await searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
 
     expect(result).toHaveLength(0);
   });
 
-  it('should not return parent links', () => {
+  it('should not return parent links', async () => {
     const query = 'Parent';
-    const result = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+    const result = await searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
 
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual(
@@ -251,9 +251,9 @@ describe('searchNavigationLinks', () => {
     );
   });
 
-  it('should handle case-insensitive search', () => {
+  it('should handle case-insensitive search', async () => {
     const query = 'CHILD';
-    const result = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+    const result = await searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
 
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual(
@@ -264,15 +264,15 @@ describe('searchNavigationLinks', () => {
     );
   });
 
-  it('should handle non-existent nav group', () => {
-    const result = searchNavigationLinks(['non-existent'], navGroupMap, 'test');
+  it('should handle non-existent nav group', async () => {
+    const result = await searchNavigationLinks(['non-existent'], navGroupMap, 'test');
 
     expect(result).toHaveLength(0);
   });
 
-  it('should return empty array for empty query', () => {
+  it('should return empty array for empty query', async () => {
     const query = '';
-    const result = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+    const result = await searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
 
     expect(result).toHaveLength(1);
   });
