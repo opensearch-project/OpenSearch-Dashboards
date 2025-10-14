@@ -47,7 +47,7 @@ import { CliArgs, Env } from '../server/config';
 import { Root } from '../server/root';
 import OsdServer from '../../legacy/server/osd_server';
 
-export type HttpMethod = 'delete' | 'get' | 'head' | 'post' | 'put';
+export type HttpMethod = 'delete' | 'get' | 'head' | 'patch' | 'post' | 'put';
 
 const DEFAULTS_SETTINGS = {
   server: {
@@ -156,6 +156,7 @@ export const request: Record<
   delete: (root, path) => getSupertest(root, 'delete', path),
   get: (root, path) => getSupertest(root, 'get', path),
   head: (root, path) => getSupertest(root, 'head', path),
+  patch: (root, path) => getSupertest(root, 'patch', path),
   post: (root, path) => getSupertest(root, 'post', path),
   put: (root, path) => getSupertest(root, 'put', path),
 };
