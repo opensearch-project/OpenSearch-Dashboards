@@ -46,7 +46,7 @@ import { EuiLink } from '@elastic/eui';
 import { mountReactNode } from '../utils/mount';
 import { InternalApplicationStart } from '../application';
 import { DocLinksStart } from '../doc_links';
-import { HttpStart } from '../http';
+import { HttpSetup, HttpStart } from '../http';
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
 import { IUiSettingsClient } from '../ui_settings';
@@ -124,7 +124,7 @@ interface ConstructorParams {
 
 export interface SetupDeps {
   uiSettings: IUiSettingsClient;
-  http: HttpStart;
+  http: HttpSetup;
 }
 
 export interface StartDeps {
