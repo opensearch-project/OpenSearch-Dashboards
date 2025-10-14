@@ -4,9 +4,11 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { resolveServiceNameFromSpan } from '../traces/ppl_resolve_helpers';
+import { Dataset } from '../../../../../../../../data/common';
+import { getMissingFieldsDescription } from '../../../../../../utils/trace_field_validation';
 
 export function microToMilliSec(micro: number) {
   if (typeof micro !== 'number' || isNaN(micro)) return 0;
@@ -85,5 +87,71 @@ export function NoMatchMessage({ traceId }: NoMatchMessageProps) {
         })}
       </p>
     </EuiCallOut>
+  );
+}
+
+interface MissingFieldsEmptyStateProps {
+  missingFields: string[];
+  dataset?: Dataset;
+  workspaceId?: string;
+}
+
+export function MissingFieldsEmptyState({
+  missingFields,
+  dataset,
+  workspaceId,
+}: MissingFieldsEmptyStateProps) {
+  return (
+    <div style={{ padding: '24px' }}>
+      <EuiCallOut
+        title={i18n.translate('explore.traceDetails.missingFields.title', {
+          defaultMessage: 'Trace visualization requires additional field mapping',
+        })}
+        color="warning"
+        iconType="iInCircle"
+      >
+        <EuiText size="s">
+          <p>
+            {i18n.translate('explore.traceDetails.missingFields.description', {
+              defaultMessage: 'The trace detail view requires fields that follow the ',
+            })}
+            <EuiLink
+              href="https://github.com/opensearch-project/data-prepper/blob/main/data-prepper-plugins/opensearch/src/main/resources/index-template/otel-v1-apm-span-index-standard-template.json"
+              target="_blank"
+              external
+            >
+              {i18n.translate('explore.traceDetails.missingFields.schemaLink', {
+                defaultMessage: 'Data-Prepper schema',
+              })}
+            </EuiLink>
+            {i18n.translate('explore.traceDetails.missingFields.descriptionContinued', {
+              defaultMessage: '. The following fields are missing or not properly mapped:',
+            })}
+          </p>
+        </EuiText>
+
+        <EuiSpacer size="m" />
+
+        <EuiText size="s">
+          <div>
+            {getMissingFieldsDescription(missingFields).map((field, index) => (
+              <div key={index} style={{ marginBottom: '8px' }}>
+                <strong>{field.name}</strong> - {field.description}
+              </div>
+            ))}
+          </div>
+        </EuiText>
+
+        <EuiSpacer size="l" />
+
+        <EuiText size="s">
+          <p>
+            {i18n.translate('explore.traceDetails.missingFields.instruction', {
+              defaultMessage: 'Please update your data ingestion to include these required fields.',
+            })}
+          </p>
+        </EuiText>
+      </EuiCallOut>
+    </div>
   );
 }

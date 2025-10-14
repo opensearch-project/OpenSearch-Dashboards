@@ -4,13 +4,14 @@
  */
 
 import React from 'react';
-import { EuiToolTip, EuiLink, EuiIcon, EuiButtonEmpty } from '@elastic/eui';
+import { EuiToolTip, EuiLink, EuiIcon, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { SPAN_ID_FIELD_PATHS, TRACE_ID_FIELD_PATHS } from '../../../../utils/trace_field_constants';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { DataView as Dataset } from '../../../../../../data/common';
 import './trace_utils.scss';
 import { useTraceFlyoutContext } from '../../../../application/pages/traces/trace_flyout/trace_flyout_context';
+import { validateRequiredTraceFields } from '../../../../utils/trace_field_validation';
 
 export const isOnTracesPage = (): boolean => {
   return (
@@ -135,9 +136,33 @@ export interface SpanIdLinkProps {
 }
 
 export const SpanIdLink: React.FC<SpanIdLinkProps> = ({ sanitizedCellValue, rowData, dataset }) => {
+  // Validate required fields before allowing navigation
+  const validationResult = validateRequiredTraceFields(rowData as any);
+  const isValid = validationResult.isValid;
+
   const handleSpanIdClick = () => {
-    handleSpanIdNavigation(rowData, dataset);
+    if (isValid) {
+      handleSpanIdNavigation(rowData, dataset);
+    }
   };
+
+  const displayValue = sanitizedCellValue.replace(/<[^>]*>/g, '').trim();
+
+  if (!isValid) {
+    // Return non-clickable text when required fields are missing
+    return (
+      <EuiToolTip
+        content={i18n.translate('explore.spanIdLink.missingFieldsTooltip', {
+          defaultMessage:
+            'Required trace fields are missing. Please update your data ingestion to include all required fields.',
+        })}
+      >
+        <EuiText size="s" color="subdued">
+          {displayValue}
+        </EuiText>
+      </EuiToolTip>
+    );
+  }
 
   return (
     <EuiToolTip
@@ -150,7 +175,7 @@ export const SpanIdLink: React.FC<SpanIdLinkProps> = ({ sanitizedCellValue, rowD
         data-test-subj="spanIdLink"
         className="exploreSpanIdLink"
       >
-        {sanitizedCellValue.replace(/<[^>]*>/g, '').trim()}
+        {displayValue}
         <EuiIcon type="popout" size="s" />
       </EuiLink>
     </EuiToolTip>
