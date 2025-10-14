@@ -40,4 +40,22 @@
       font-weight: 600;
     }
   }
+
+  &__breakdown {
+    min-width: $euiSize * 15;
+
+    &__prependText {
+      font-weight: 600;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+    }
+
+    &__errorIcon {
+      // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+      .euiToolTipAnchor > .euiIcon {
+        height: 30px !important;
+      }
+    }
+  }
 }

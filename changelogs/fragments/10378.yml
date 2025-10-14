@@ -1,2 +1,0 @@
-security:
-- [CVE-2025-6545][CVE-2025-7783] Bump pbkdf2 from 3.1.2 to 3.1.3 and set form-data to 4.0.4 ([#10378](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10378))

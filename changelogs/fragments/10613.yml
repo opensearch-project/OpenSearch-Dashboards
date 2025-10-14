@@ -1,2 +1,0 @@
-fix:
-- Fix CI/CD failure: Cannot find module @osd/optimizer/target/cli ([#10613](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10613))
