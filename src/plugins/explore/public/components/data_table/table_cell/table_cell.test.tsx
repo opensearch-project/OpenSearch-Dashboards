@@ -29,6 +29,7 @@ describe('TableCell', () => {
   const defaultProps: ITableCellProps = {
     columnId: 'test-column',
     sanitizedCellValue: '<strong>test value</strong>',
+    setIsRowSelected: jest.fn(),
     onFilter: mockOnFilter,
     fieldMapping: { value: 'test' },
     isTimeField: false,
@@ -145,6 +146,7 @@ describe('TableCell', () => {
         spanId: 'test-span-id-123',
       },
       isOnTracesPage: true,
+      setIsRowSelected: jest.fn(),
     };
 
     it('renders span ID as clickable link when on traces page', () => {
@@ -294,6 +296,7 @@ describe('TableCell', () => {
       onFilter: mockOnFilter,
       fieldMapping: { value: 'test' },
       isTimeField: true,
+      setIsRowSelected: jest.fn(),
       rowData: {
         traceId: 'test-trace-id-456',
         spanId: 'test-span-id-123',
