@@ -101,6 +101,7 @@ export const ExploreTracesChart = ({
         options={search.aggs.intervalOptions}
         onChangeInterval={onChangeInterval}
         stateInterval={interval || ''}
+        services={services}
       />
     </div>
   );
