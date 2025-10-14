@@ -25,6 +25,7 @@ import {
   injectMetaToDataStructures,
 } from './utils';
 import { DataSourceEngineType } from '../../../../../../../plugins/data_source/common/data_sources';
+import { IndexDataStructureCreator } from './index_data_structure_creator/index_data_structure_creator';
 
 export const DELIMITER = '::';
 
@@ -68,6 +69,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
           ...dataStructure,
           hasNext: false,
           columnHeader: 'Indexes',
+          DataStructureCreator: IndexDataStructureCreator,
           children: indices.map((index) => ({
             id: `${dataStructure.id}::${index.name}`,
             title: index.name,

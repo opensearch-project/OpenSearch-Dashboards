@@ -1,2 +1,0 @@
-chore:
-- Change exposeDebugObjectToWindow default value to true ([#10590](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10590))

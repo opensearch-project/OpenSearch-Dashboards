@@ -24,7 +24,7 @@ const queriesTestSuite = () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
       // Create and select index pattern for ${INDEX_WITH_TIME_1}*
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspace,
         indexPattern: INDEX_WITH_TIME_1,
         timefieldName: 'timestamp',

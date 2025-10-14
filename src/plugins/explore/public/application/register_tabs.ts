@@ -109,6 +109,7 @@ export const registerBuiltInTabs = (
           executeTabQuery({
             services,
             cacheKey: regexPatternQuery(preparedQuery.query, patternsField),
+            queryString: query.query,
           })
         );
 

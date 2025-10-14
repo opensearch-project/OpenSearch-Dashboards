@@ -14,6 +14,10 @@ import {
 import { ChatPluginSetup, ChatPluginStart } from './types';
 import { defineRoutes } from './routes';
 
+/**
+ * @experimental
+ * Chat plugin for AI-powered interactions. This plugin is experimental and will change in future releases.
+ */
 export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private readonly logger: Logger;
 

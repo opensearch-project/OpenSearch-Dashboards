@@ -32,7 +32,7 @@ const runRecentQueryTests = () => {
     const index = INDEX_PATTERN_WITH_TIME.replace('*', '');
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspace,
         indexPattern: index,
         timefieldName: 'timestamp',

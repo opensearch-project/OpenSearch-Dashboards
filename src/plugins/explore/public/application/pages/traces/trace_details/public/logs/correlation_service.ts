@@ -220,7 +220,8 @@ export class CorrelationService {
   async checkCorrelationsAndFetchLogs(
     dataset: Dataset,
     data: DataPublicPluginStart,
-    traceId: string
+    traceId: string,
+    size?: number
   ): Promise<{ logDatasets: Dataset[]; logs: LogHit[] }> {
     if (!dataset?.id || !data || !traceId) {
       return { logDatasets: [], logs: [] };
@@ -230,7 +231,7 @@ export class CorrelationService {
       const logDatasets = await this.checkCorrelationsForLogs(dataset);
 
       if (logDatasets.length > 0) {
-        const sampleSize = this.uiSettings.get(SAMPLE_SIZE_SETTING);
+        const sampleSize = size || this.uiSettings.get(SAMPLE_SIZE_SETTING);
 
         // Fetch logs for the trace using the first log dataset
         const logsResponse = await fetchTraceLogsByTraceId(data, {

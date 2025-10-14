@@ -97,7 +97,8 @@ export class DatasetService {
   public async cacheDataset(
     dataset: Dataset,
     services: Partial<IDataPluginServices>,
-    defaultCache: boolean = true
+    defaultCache: boolean = true,
+    signalType?: string
   ): Promise<void> {
     const type = this.getType(dataset?.type);
     try {
@@ -112,6 +113,8 @@ export class DatasetService {
           timeFieldName: dataset.timeFieldName,
           fields: fetchedFields,
           fieldsLoading: asyncType,
+          signalType,
+          schemaMappings: dataset.schemaMappings,
           dataSourceRef: dataset.dataSource
             ? {
                 id: dataset.dataSource.id!,
@@ -168,6 +171,58 @@ export class DatasetService {
       }
     } catch (error) {
       throw new Error(`Failed to load dataset: ${dataset?.id}`);
+    }
+  }
+
+  public async saveDataset(
+    dataset: Dataset,
+    services: Partial<IDataPluginServices>,
+    signalType?: string
+  ): Promise<void> {
+    const type = this.getType(dataset?.type);
+    try {
+      const asyncType = type?.meta.isFieldLoadAsync ?? false;
+      if (dataset && dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
+        const fetchedFields = asyncType
+          ? ({} as IndexPatternFieldMap)
+          : await type?.fetchFields(dataset, services);
+        const spec = {
+          id: dataset.id,
+          displayName: dataset.displayName,
+          title: dataset.title,
+          timeFieldName: dataset.timeFieldName,
+          description: dataset.description,
+          signalType,
+          schemaMappings: dataset.schemaMappings,
+          fields: fetchedFields,
+          fieldsLoading: asyncType,
+          dataSourceRef: dataset.dataSource
+            ? {
+                id: dataset.dataSource.id!,
+                name: dataset.dataSource.title,
+                type: dataset.dataSource.type,
+              }
+            : undefined,
+        } as IndexPatternSpec;
+
+        // TODO: For async field loading (when asyncType is true), the data view is created
+        // with skipFetchFields=true, meaning fields will be empty initially. The fields will
+        // be loaded asynchronously when the data view is first accessed. However, this means
+        // the saved data view object won't have field metadata until it's loaded.
+        // Consider fetching fields after createAndSave and updating the saved object:
+        //   const dataView = await createAndSave(...);
+        //   if (asyncType) { await type.fetchFields(...); await dataViews.updateSavedObject(dataView); }
+        await services.data?.dataViews.createAndSave(spec, undefined, asyncType);
+      }
+    } catch (error) {
+      // Re-throw DuplicateDataViewError without wrapping to preserve error type
+      if (
+        error?.name === 'DuplicateDataViewError' ||
+        error?.message?.includes('Duplicate data view')
+      ) {
+        throw error;
+      }
+      throw new Error(`Failed to save dataset: ${dataset?.id}`);
     }
   }
 

@@ -13,7 +13,7 @@ import {
   convertNavGroupToWorkspaceUseCase,
   isEqualWorkspaceUseCase,
   prependWorkspaceToBreadcrumbs,
-  getIsOnlyAllowEssentialUseCase,
+  areAllDataSourcesOpenSearchServerless,
   mergeDataSourcesWithConnections,
   fetchDataSourceConnections,
   getUseCaseUrl,
@@ -507,7 +507,7 @@ describe('workspace utils: getIsOnlyAllowEssentialUseCase', () => {
         },
       ],
     });
-    expect(await getIsOnlyAllowEssentialUseCase(mockedSavedObjectClient)).toBe(true);
+    expect(await areAllDataSourcesOpenSearchServerless(mockedSavedObjectClient)).toBe(true);
   });
 
   it('should return false when not all data sources are serverless', async () => {
@@ -535,7 +535,7 @@ describe('workspace utils: getIsOnlyAllowEssentialUseCase', () => {
         },
       ],
     });
-    expect(await getIsOnlyAllowEssentialUseCase(mockedSavedObjectClient)).toBe(false);
+    expect(await areAllDataSourcesOpenSearchServerless(mockedSavedObjectClient)).toBe(false);
   });
 });
 

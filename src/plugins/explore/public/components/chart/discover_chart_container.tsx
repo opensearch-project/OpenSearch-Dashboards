@@ -13,7 +13,7 @@ import { ExploreLogsChart } from './explore_logs_chart';
 import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
 import {
   histogramResultsProcessor,
-  defaultPrepareQueryString,
+  prepareHistogramCacheKey,
 } from '../../application/utils/state_management/actions/query_actions';
 import { RootState } from '../../application/utils/state_management/store';
 import { selectShowHistogram } from '../../application/utils/state_management/selectors';
@@ -35,12 +35,32 @@ export const DiscoverChartContainer = () => {
   const { interval } = useSelector((state: RootState) => state.legacy);
   const query = useSelector((state: RootState) => state.query);
   const results = useSelector((state: RootState) => state.results);
+  const breakdownField = useSelector((state: RootState) => state.queryEditor.breakdownField);
+  const queryStatusMap = useSelector((state: RootState) => state.queryEditor.queryStatusMap);
   const showHistogram = useSelector(selectShowHistogram);
 
-  // Use default cache key computation for histogram data
-  const cacheKey = useMemo(() => {
-    return defaultPrepareQueryString(query);
+  const breakdownCacheKey = useMemo(() => {
+    return breakdownField ? prepareHistogramCacheKey(query, true) : undefined;
+  }, [query, breakdownField]);
+
+  const standardCacheKey = useMemo(() => {
+    return prepareHistogramCacheKey(query, false);
   }, [query]);
+
+  const hasBreakdownError = useMemo(() => {
+    if (!breakdownCacheKey) return false;
+    const breakdownStatus = queryStatusMap[breakdownCacheKey];
+    const standardStatus = queryStatusMap[standardCacheKey];
+
+    return breakdownStatus?.error && !standardStatus?.error;
+  }, [breakdownCacheKey, standardCacheKey, queryStatusMap]);
+
+  const cacheKey = useMemo(() => {
+    if (hasBreakdownError || !breakdownCacheKey) {
+      return standardCacheKey;
+    }
+    return breakdownCacheKey;
+  }, [hasBreakdownError, breakdownCacheKey, standardCacheKey]);
 
   const rawResults = cacheKey ? results[cacheKey] : null;
 
