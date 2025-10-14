@@ -33,32 +33,24 @@ export const executeFieldStatsQuery = async (
   datasetType: string = 'INDEX_PATTERN'
 ): Promise<any> => {
   try {
-    // Create searchSource
     const searchSource = await services.data.search.searchSource.create();
-
-    // Get the dataView from the dataset
     const dataView = await services.data.dataViews.get(datasetId, datasetType !== 'INDEX_PATTERN');
-
-    // Get filters and settings
     const filters = services.data.query.filterManager.getFilters();
 
-    // Create query object with PPL query string
     const queryObject: Query = {
       query: queryString,
       language: 'PPL',
     };
 
-    // Set searchSource fields
     searchSource.setFields({
       index: dataView,
-      size: 0, // We only need aggregation results, not hits
+      size: 0, // only need aggregation results, no hits
       query: queryObject,
       highlightAll: false,
       version: true,
       filter: filters,
     });
 
-    // Execute the query
     const results = await searchSource.fetch();
 
     return results;
