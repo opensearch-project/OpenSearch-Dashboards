@@ -24,23 +24,9 @@ export function filterDatasetFields(dataset: any): IndexPatternField[] {
     return [];
   }
 
-  // Get the list of meta fields from the dataset configuration
   const metaFieldsSet = new Set(dataset.metaFields || []);
-
   return dataset.fields.getAll().filter((field: IndexPatternField) => {
-    // Filter out meta/internal fields that are in the metaFields configuration
-    // This programmatically identifies system fields based on DataView settings
-    if (metaFieldsSet.has(field.name)) {
-      return false;
-    }
-
-    // Filter out multi-fields (like .keyword) using OpenSearch metadata
-    if (field.subType?.multi?.parent) {
-      return false;
-    }
-
-    // Filter out scripted fields
-    if (field.scripted) {
+    if (metaFieldsSet.has(field.name) || field.subType?.multi?.parent || field.scripted) {
       return false;
     }
 
@@ -107,7 +93,7 @@ export async function fetchFieldDetails(
 
   const applicableSections = getApplicableSections(fieldType);
 
-  // Fetch all applicable sections in parallel
+  // fetch all applicable sections in parallel
   const results = await Promise.allSettled(
     applicableSections.map(async (section) => {
       try {
@@ -120,31 +106,20 @@ export async function fetchFieldDetails(
     })
   );
 
-  // Collect results into a single object
   const details: FieldDetails = {};
   results.forEach((result) => {
     if (result.status === 'fulfilled' && result.value) {
       const { id, data, error } = result.value;
       if (error) {
-        // Store error flag for this section
+        // store error flag for this section
         (details as any)[id] = { error: true };
       } else {
-        // Store the data
         (details as any)[id] = data;
       }
     }
   });
 
   return details;
-}
-
-/**
- * Sanitize a field name for use in PPL queries by wrapping it in backticks
- * @param fieldName The field name to sanitize
- * @returns The sanitized field name wrapped in backticks
- */
-export function sanitizeFieldName(fieldName: string): string {
-  return `\`${fieldName}\``;
 }
 
 /**
@@ -174,7 +149,7 @@ export function createRowExpandHandler(
   return async (fieldName: string) => {
     const newExpanded = new Set(expandedRows);
 
-    // Toggle expansion
+    // toggle expansion
     if (newExpanded.has(fieldName)) {
       newExpanded.delete(fieldName);
       setExpandedRows(newExpanded);
@@ -187,7 +162,7 @@ export function createRowExpandHandler(
     const field = fieldStats[fieldName];
     if (!field || !dataset) return;
 
-    // Don't fetch if already fetched
+    // don't fetch if already fetched
     if (fieldDetails[fieldName]) return;
 
     setDetailsLoading((prev) => new Set(prev).add(fieldName));
