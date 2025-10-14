@@ -64,10 +64,16 @@ export const VisualizationRender = (props: Props) => {
       return;
     }
 
+    const vis = visualizationRegistry.getVisualizationConfig(visConfig.type);
+    if (!vis) {
+      return;
+    }
+
     const rule = visualizationRegistry.findRuleByAxesMapping(visConfig?.axesMapping ?? {}, columns);
     if (!rule || !rule.toSpec) {
       return;
     }
+
     const axisColumnMappings = convertStringsToMappings(visConfig?.axesMapping ?? {}, columns);
     return rule.toSpec(
       visualizationData.transformedData,

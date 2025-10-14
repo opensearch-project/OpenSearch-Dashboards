@@ -53,6 +53,7 @@ import {
   QueryPanelActionsRegistryService,
   QueryPanelActionsRegistryServiceSetup,
 } from './services/query_panel_actions_registry';
+import { Visualization } from './components/visualizations/visualization';
 
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
@@ -66,6 +67,9 @@ export interface ExplorePluginSetup {
   };
   docViewsLinks: {
     addDocViewLink: (docViewLinkSpec: unknown) => void;
+  };
+  ui: {
+    Visualization: typeof Visualization;
   };
 }
 

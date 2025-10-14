@@ -41,12 +41,12 @@ describe('to_expression', () => {
     jest.clearAllMocks();
   });
 
-  it('should return an empty string if searchContext is not provided', async () => {
+  it('should still return an expression string if searchContext is not provided', async () => {
     const result = toExpression(undefined as any, {});
 
-    expect(result).toBe('');
-    expect(expressionsPublic.buildExpressionFunction).not.toHaveBeenCalled();
-    expect(expressionsPublic.buildExpression).not.toHaveBeenCalled();
+    expect(result).toBe('mocked_expression_string');
+    expect(expressionsPublic.buildExpressionFunction).toHaveBeenCalled();
+    expect(expressionsPublic.buildExpression).toHaveBeenCalled();
   });
 
   it('should build and return an expression string when all required parameters are provided', async () => {

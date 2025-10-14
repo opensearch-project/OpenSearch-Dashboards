@@ -52,6 +52,18 @@ export type StyleOptions =
   | TableChartStyleOptions
   | GaugeChartStyleOptions;
 
+export interface StyleOptionsMapping {
+  line: LineChartStyleOptions;
+  pie: PieChartStyleOptions;
+  metric: MetricChartStyleOptions;
+  heatmap: HeatmapChartStyleOptions;
+  scatter: ScatterChartStyleOptions;
+  bar: BarChartStyleOptions;
+  area: AreaChartStyleOptions;
+  table: TableChartStyleOptions;
+  gauge: GaugeChartStyleOptions;
+}
+
 export type ChartStyles = ChartStylesMapping[ChartType];
 
 export interface StyleControlsProps<T extends ChartStyles> {

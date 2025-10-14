@@ -145,6 +145,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
       extensions: ['.scss'],
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/core_app/images'),
+        'opensearch-dashboards/public': resolve(REPO_ROOT, 'src/core/public'),
       },
     },
     stats,

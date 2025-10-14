@@ -7,11 +7,11 @@ import './visualization_container.scss';
 import { EuiPanel } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 
-import './visualization_container.scss';
 import { AxisColumnMappings } from './types';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { useSearchContext } from '../query_panel/utils/use_search_context';
 import { getVisualizationBuilder } from './visualization_builder';
+import { normalizeSearchHits, normalizeSearchHitsSchema } from './utils/normalize_result_rows';
 
 export interface UpdateVisualizationProps {
   mappings: AxisColumnMappings;
@@ -42,7 +42,9 @@ export const VisualizationContainer = () => {
   const visualizationBuilder = getVisualizationBuilder();
 
   useEffect(() => {
-    visualizationBuilder.handleData(rows, fieldSchema);
+    const data = normalizeSearchHits(rows, fieldSchema);
+    const typeHints = normalizeSearchHitsSchema(fieldSchema);
+    visualizationBuilder.handleData(data, typeHints);
   }, [rows, fieldSchema, visualizationBuilder]);
 
   useEffect(() => {

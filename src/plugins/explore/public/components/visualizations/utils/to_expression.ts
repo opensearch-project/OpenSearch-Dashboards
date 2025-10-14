@@ -22,7 +22,7 @@ export const toExpression = (
   spec: Record<string, any>
 ) => {
   if (!searchContext) {
-    return '';
+    searchContext = {};
   }
 
   spec.config = {

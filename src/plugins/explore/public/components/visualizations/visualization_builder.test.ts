@@ -456,13 +456,10 @@ describe('VisualizationBuilder', () => {
     const builder = new VisualizationBuilder({
       getExpressions: () => expressionsPluginMock.createStartContract(),
     });
-    builder.handleData(
-      [{ _id: '_id', _index: '_index', _score: 10, _source: { age: 10, name: 'name' } }],
-      [
-        { type: 'int', name: 'age' },
-        { type: 'text', name: 'name' },
-      ]
-    );
+    builder.handleData([{ age: 10, name: 'name' }], {
+      name: VisFieldType.Categorical,
+      age: VisFieldType.Numerical,
+    });
     expect(builder.data$.value).toEqual({
       categoricalColumns: [
         {
@@ -556,13 +553,10 @@ describe('VisualizationBuilder', () => {
       styles: { addLegend: true } as any,
       axesMapping: { x: 'name', y: 'age' },
     });
-    builder.handleData(
-      [{ _id: '_id', _index: '_index', _score: 10, _source: { age: 10, name: 'name' } }],
-      [
-        { type: 'int', name: 'age' },
-        { type: 'text', name: 'name' },
-      ]
-    );
+    builder.handleData([{ age: 10, name: 'name' }], {
+      name: VisFieldType.Numerical,
+      age: VisFieldType.Categorical,
+    });
     expect(builder.data$.value).not.toBe(undefined);
     expect(builder.visConfig$.value).not.toBe(undefined);
 
