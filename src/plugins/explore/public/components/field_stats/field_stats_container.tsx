@@ -40,7 +40,6 @@ export const FieldStatsContainer = () => {
     return filterDatasetFields(dataset);
   }, [dataset]);
 
-  // Fetch top-level field row statistics
   useEffect(() => {
     if (!fields.length || !dataset) return;
 
@@ -48,7 +47,6 @@ export const FieldStatsContainer = () => {
       setIsLoading(true);
 
       try {
-        // Fetch stats for each field in parallel
         const results = await Promise.allSettled(
           fields.map(async (field) => {
             try {
@@ -81,7 +79,6 @@ export const FieldStatsContainer = () => {
           })
         );
 
-        // Collect all results into a single object
         const allFieldStats: Record<string, FieldStatsItem> = {};
         results.forEach((result) => {
           if (result.status === 'fulfilled' && result.value) {
@@ -89,7 +86,6 @@ export const FieldStatsContainer = () => {
           }
         });
 
-        // Update state once with all field statistics
         setFieldStats(allFieldStats);
       } finally {
         setIsLoading(false);
@@ -99,7 +95,6 @@ export const FieldStatsContainer = () => {
     fetchAllFieldStats();
   }, [fields, dataset, services]);
 
-  // Create row expansion handler
   const handleRowExpand = createRowExpandHandler(
     expandedRows,
     setExpandedRows,

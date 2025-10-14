@@ -4,7 +4,7 @@
  */
 
 import { getFieldStatsQuery, executeFieldStatsQuery } from './field_stats_queries';
-import { createMockServices } from './__test_utils__';
+import { createMockServices } from './utils/field_stats.stubs';
 
 describe('field_stats_queries', () => {
   describe('getFieldStatsQuery', () => {
