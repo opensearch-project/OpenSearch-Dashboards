@@ -13,8 +13,8 @@ import { getColors } from '../theme/default_colors';
 export interface ExclusiveBarGaugeConfig {
   orientation: 'vertical' | 'horizontal';
   displayMode: 'gradient' | 'stack' | 'basic';
-  valueDisplay: 'valueColor' | 'textColor';
-  namePlacement: 'auto' | 'hidden';
+  valueDisplay: 'valueColor' | 'textColor' | 'hidden';
+  // namePlacement: 'auto' | 'hidden';
   showUnfilledArea: boolean;
 }
 
@@ -26,10 +26,13 @@ export interface BarGaugeChartStyleOptions {
   titleOptions?: TitleOptions;
   min?: number;
   max?: number;
+  unitId?: string;
 }
 
-export type BarGaugeChartStyle = Required<Omit<BarGaugeChartStyleOptions, 'min' | 'max'>> &
-  Pick<BarGaugeChartStyleOptions, 'min' | 'max'>;
+export type BarGaugeChartStyle = Required<
+  Omit<BarGaugeChartStyleOptions, 'min' | 'max' | 'unitId'>
+> &
+  Pick<BarGaugeChartStyleOptions, 'min' | 'max' | 'unitId'>;
 
 export const defaultBarGaugeChartStyles: BarGaugeChartStyle = {
   tooltipOptions: {
@@ -39,7 +42,6 @@ export const defaultBarGaugeChartStyles: BarGaugeChartStyle = {
     orientation: 'vertical',
     displayMode: 'gradient',
     valueDisplay: 'valueColor',
-    namePlacement: 'auto',
     showUnfilledArea: true,
   },
   thresholdOptions: { thresholds: [], baseColor: getColors().statusGreen },

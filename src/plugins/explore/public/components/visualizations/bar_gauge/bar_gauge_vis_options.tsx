@@ -87,6 +87,8 @@ export const BarGaugeVisStyleControls: React.FC<BarGaugeVisStyleControlsProps> =
               max={styleOptions.max}
               onMinChange={(value) => updateStyleOption('min', value)}
               onMaxChange={(value) => updateStyleOption('max', value)}
+              unit={styleOptions.unitId}
+              onUnitChange={(value) => updateStyleOption('unitId', value)}
             />
           </EuiFlexItem>
 

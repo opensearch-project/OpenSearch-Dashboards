@@ -106,32 +106,29 @@ export const UnitPanel = ({ unit, onUnitChange }: UnitPanelProps) => {
   }, [handleChangeUnit]);
 
   return (
-    <StyleAccordion
-      id="unitPanelAccordion"
-      accordionLabel={i18n.translate('explore.stylePanel.tabs.units', {
+    <EuiFormRow
+      fullWidth={true}
+      label={i18n.translate('explore.stylePanel.unit.panel', {
         defaultMessage: 'Units',
       })}
-      initialIsOpen={false}
     >
-      <EuiFormRow fullWidth={true}>
-        <EuiPopover
-          display="block"
-          button={inputBoxButton}
-          isOpen={isPopoverOpen}
-          closePopover={() => setPopover(false)}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-          hasArrow={false}
-        >
-          <EuiContextMenu
-            data-test-subj="unitPanelContextMenu"
-            size="s"
-            initialPanelId={lastPanelId}
-            panels={panels}
-            className="visPanelUnitPopover"
-          />
-        </EuiPopover>
-      </EuiFormRow>
-    </StyleAccordion>
+      <EuiPopover
+        display="block"
+        button={inputBoxButton}
+        isOpen={isPopoverOpen}
+        closePopover={() => setPopover(false)}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+        hasArrow={false}
+      >
+        <EuiContextMenu
+          data-test-subj="unitPanelContextMenu"
+          size="s"
+          initialPanelId={lastPanelId}
+          panels={panels}
+          className="visPanelUnitPopover"
+        />
+      </EuiPopover>
+    </EuiFormRow>
   );
 };
