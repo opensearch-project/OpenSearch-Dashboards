@@ -11,6 +11,10 @@ import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { DataView as Dataset } from '../../../../../../data/common';
 import './trace_utils.scss';
 import { useTraceFlyoutContext } from '../../../../application/pages/traces/trace_flyout/trace_flyout_context';
+import {
+  round,
+  nanoToMilliSec,
+} from '../../../../application/pages/traces/trace_details/public/utils/helper_functions';
 
 export const isOnTracesPage = (): boolean => {
   return (
@@ -21,6 +25,10 @@ export const isOnTracesPage = (): boolean => {
 
 export const isSpanIdColumn = (columnId: string): boolean => {
   return columnId === 'spanId' || columnId === 'span_id' || columnId === 'spanID';
+};
+
+export const isDurationColumn = (columnId: string) => {
+  return columnId === 'durationNano';
 };
 
 export const extractFieldFromRowData = (
@@ -222,4 +230,23 @@ export const getStatusCodeColor = (statusCode: number | undefined): string => {
   if (statusCode >= 400 && statusCode < 500) return 'warning';
   if (statusCode >= 500 && statusCode < 600) return 'danger';
   return 'default';
+};
+
+interface DurationTableCellProps {
+  sanitizedCellValue: string;
+}
+
+export const DurationTableCell: React.FC<DurationTableCellProps> = ({ sanitizedCellValue }) => {
+  const duration = sanitizedCellValue
+    .replace(/<[^>]*>/g, '')
+    .replace(/,/g, '')
+    .trim();
+
+  const durationLabel = `${round(nanoToMilliSec(Math.max(0, Number(duration))), 2)} ms`;
+
+  return (
+    <span className="exploreDocTableCell__dataField" data-test-subj="osdDocTableCellDataField">
+      <span>{durationLabel}</span>
+    </span>
+  );
 };
