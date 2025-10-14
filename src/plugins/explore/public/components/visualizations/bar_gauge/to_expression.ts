@@ -284,9 +284,10 @@ export const createBarGaugeSpec = (
         ...(styleOptions.exclusive.orientation === 'horizontal'
           ? {
               align: 'left',
+              baseline: 'middle',
             }
-          : {}),
-        baseline: 'bottom',
+          : { baseline: 'bottom' }),
+
         dx: styleOptions.exclusive.orientation === 'horizontal' ? { expr: 'fontFactor*3' } : 0,
         dy: styleOptions.exclusive.orientation === 'horizontal' ? 0 : { expr: '-fontFactor*3' },
         fontSize: { expr: 'fontFactor * 10' },
