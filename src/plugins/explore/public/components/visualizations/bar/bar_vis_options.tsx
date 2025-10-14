@@ -38,14 +38,18 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
     onStyleChange({ [key]: value });
   };
 
-  const bucketType =
-    axisColumnMappings[AxisRole.X]?.schema === VisFieldType.Numerical
-      ? axisColumnMappings[AxisRole.Y] === undefined
-        ? 'single'
-        : 'num'
-      : axisColumnMappings[AxisRole.X]?.schema === VisFieldType.Date
-      ? 'time'
-      : 'cate';
+  const axes = [axisColumnMappings[AxisRole.X], axisColumnMappings[AxisRole.Y]];
+  const hasCategory = axes.some((axis) => axis?.schema === VisFieldType.Categorical);
+  const hasNum = axes.some((axis) => axis?.schema === VisFieldType.Numerical);
+  const hasDate = axes.some((axis) => axis?.schema === VisFieldType.Date);
+
+  const bucketType = hasDate
+    ? 'time'
+    : hasCategory
+    ? 'cate'
+    : hasNum && axisColumnMappings[AxisRole.Y] !== undefined
+    ? 'num'
+    : 'single';
 
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
