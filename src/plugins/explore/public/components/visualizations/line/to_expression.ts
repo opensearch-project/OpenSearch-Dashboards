@@ -14,6 +14,7 @@ import {
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
 import { getTooltipFormat } from '../utils/utils';
 import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
+import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
 
 /**
  * Rule 1: Create a simple line chart with one metric and one date
@@ -41,6 +42,7 @@ export const createSimpleLineChart = (
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   const mainLayer = {
+    params: [createTimeRangeBrush({ timeAxis: 'x' })],
     mark: buildMarkConfig(styles, 'line'),
     encoding: {
       x: {
@@ -86,7 +88,6 @@ export const createSimpleLineChart = (
   };
 
   layers.push(mainLayer);
-
   layers.push(
     ...createCrosshairLayers(
       {
@@ -120,6 +121,7 @@ export const createSimpleLineChart = (
 
   return {
     $schema: VEGASCHEMA,
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metricName} Over Time`
       : undefined,
@@ -157,6 +159,7 @@ export const createLineBarChart = (
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   const barLayer = {
+    params: [createTimeRangeBrush({ timeAxis: 'x' })],
     mark: buildMarkConfig(styles, 'bar'),
     encoding: {
       x: {
@@ -301,6 +304,7 @@ export const createLineBarChart = (
 
   return {
     $schema: VEGASCHEMA,
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metric1Name} (Bar) and ${metric2Name} (Line) Over Time`
       : undefined,
@@ -343,6 +347,7 @@ export const createMultiLineChart = (
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   const mainLayer = {
+    params: [createTimeRangeBrush({ timeAxis: 'x' })],
     mark: buildMarkConfig(styles, 'line'),
     encoding: {
       x: {
@@ -438,6 +443,7 @@ export const createMultiLineChart = (
 
   return {
     $schema: VEGASCHEMA,
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metricName} Over Time by ${categoryName}`
       : undefined,
@@ -485,6 +491,7 @@ export const createFacetedMultiLineChart = (
 
   return {
     $schema: VEGASCHEMA,
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName ||
         `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`
@@ -499,6 +506,7 @@ export const createFacetedMultiLineChart = (
       layer: [
         {
           mark: facetMarkConfig,
+          params: [createTimeRangeBrush({ timeAxis: 'x' })],
           encoding: {
             x: {
               field: dateField,
