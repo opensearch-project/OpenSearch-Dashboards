@@ -6,7 +6,14 @@ import { Dictionary, countBy, defaults, uniq } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { DataView, IndexPatternField } from '../../../../../../plugins/data/public';
 import { DatasetManagementStart } from '../../../../../../plugins/dataset_management/public';
-import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
+import {
+  TAB_CORRELATED_DATASETS,
+  TAB_CORRELATED_TRACES,
+  TAB_INDEXED_FIELDS,
+  TAB_SCRIPTED_FIELDS,
+  TAB_SOURCE_FILTERS,
+} from '../constants';
+import { CORE_SIGNAL_TYPES } from '../../../../../data/common';
 
 function filterByName(items: IndexPatternField[], filter: string) {
   const lowercaseFilter = (filter || '').toLowerCase();
@@ -55,6 +62,16 @@ function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: D
         defaultMessage: 'Source filters',
       });
       break;
+    case 'correlatedDatasets':
+      title = i18n.translate('datasetManagement.editDataset.tabs.correlatedDatasetsHeader', {
+        defaultMessage: 'Correlated datasets',
+      });
+      break;
+    case 'correlatedTraces':
+      title = i18n.translate('datasetManagement.editDataset.tabs.correlatedTracesHeader', {
+        defaultMessage: 'Correlated traces',
+      });
+      break;
   }
   const count = ` (${
     filteredCount[type] === totalCount[type]
@@ -67,7 +84,8 @@ function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: D
 export function getTabs(
   dataset: DataView,
   fieldFilter: string,
-  datasetListProvider: DatasetManagementStart['list']
+  datasetListProvider: DatasetManagementStart['list'],
+  correlationCount: number = 0
 ) {
   const totalCount = getCounts(dataset.fields.getAll(), dataset.getSourceFiltering());
   const filteredCount = getCounts(
@@ -75,6 +93,12 @@ export function getTabs(
     dataset.getSourceFiltering(),
     fieldFilter
   );
+
+  // Add correlation counts
+  totalCount.correlatedDatasets = correlationCount;
+  totalCount.correlatedTraces = correlationCount;
+  filteredCount.correlatedDatasets = correlationCount;
+  filteredCount.correlatedTraces = correlationCount;
 
   const tabs = [];
 
@@ -97,6 +121,22 @@ export function getTabs(
     id: TAB_SOURCE_FILTERS,
     'data-test-subj': 'tab-sourceFilters',
   });
+
+  if (dataset.signalType === CORE_SIGNAL_TYPES.TRACES) {
+    tabs.push({
+      name: getTitle('correlatedDatasets', filteredCount, totalCount),
+      id: TAB_CORRELATED_DATASETS,
+      'data-test-subj': 'tab-correlatedDatasets',
+    });
+  }
+
+  if (dataset.signalType === CORE_SIGNAL_TYPES.LOGS) {
+    tabs.push({
+      name: getTitle('correlatedTraces', filteredCount, totalCount),
+      id: TAB_CORRELATED_TRACES,
+      'data-test-subj': 'tab-correlatedTraces',
+    });
+  }
 
   return tabs;
 }

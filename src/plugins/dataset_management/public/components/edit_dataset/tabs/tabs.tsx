@@ -26,11 +26,20 @@ import {
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DatasetManagmentContext } from '../../../types';
 import { createEditDatasetPageStateContainer } from '../edit_dataset_state_container';
-import { TAB_INDEXED_FIELDS, TAB_SCRIPTED_FIELDS, TAB_SOURCE_FILTERS } from '../constants';
+import {
+  TAB_INDEXED_FIELDS,
+  TAB_SCRIPTED_FIELDS,
+  TAB_SOURCE_FILTERS,
+  TAB_CORRELATED_DATASETS,
+  TAB_CORRELATED_TRACES,
+} from '../constants';
 import { SourceFiltersTable } from '../source_filters_table';
 import { IndexedFieldsTable } from '../indexed_fields_table';
 import { ScriptedFieldsTable } from '../scripted_fields_table';
 import { getTabs, getPath, convertToEuiSelectOption } from './utils';
+import { CorrelatedDatasetsTab } from './correlated_datasets_tab';
+import { CorrelatedTracesTab } from './correlated_traces_tab';
+import { useCorrelationCount } from '../../../hooks/use_correlations';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   dataset: DataView;
@@ -51,7 +60,7 @@ const filterPlaceholder = i18n.translate('datasetManagement.editDataset.fields.f
 });
 
 export function Tabs({ dataset, saveDataset, fields, history, location }: TabsProps) {
-  const { uiSettings, datasetManagementStart, docLinks } = useOpenSearchDashboards<
+  const { uiSettings, datasetManagementStart, docLinks, savedObjects } = useOpenSearchDashboards<
     DatasetManagmentContext
   >().services;
   const [fieldFilter, setFieldFilter] = useState<string>('');
@@ -62,6 +71,9 @@ export function Tabs({ dataset, saveDataset, fields, history, location }: TabsPr
   const [syncingStateFunc, setSyncingStateFunc] = useState<any>({
     getCurrentTab: () => TAB_INDEXED_FIELDS,
   });
+
+  // Fetch correlation count for this dataset
+  const { count: correlationCount } = useCorrelationCount(savedObjects.client, dataset.id);
 
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
@@ -212,6 +224,26 @@ export function Tabs({ dataset, saveDataset, fields, history, location }: TabsPr
               </Wrapper>
             </>
           );
+        case TAB_CORRELATED_DATASETS:
+          return (
+            <>
+              {useUpdatedUX && <EuiSpacer size="m" />}
+              <Wrapper {...(useUpdatedUX ? { paddingSize: 'm' } : {})}>
+                <EuiSpacer size="m" />
+                <CorrelatedDatasetsTab dataset={dataset} />
+              </Wrapper>
+            </>
+          );
+        case TAB_CORRELATED_TRACES:
+          return (
+            <>
+              {useUpdatedUX && <EuiSpacer size="m" />}
+              <Wrapper {...(useUpdatedUX ? { paddingSize: 'm' } : {})}>
+                <EuiSpacer size="m" />
+                <CorrelatedTracesTab dataset={dataset} />
+              </Wrapper>
+            </>
+          );
       }
     },
     [
@@ -233,7 +265,7 @@ export function Tabs({ dataset, saveDataset, fields, history, location }: TabsPr
 
   const euiTabs: EuiTabbedContentTab[] = useMemo(
     () =>
-      getTabs(dataset, fieldFilter, datasetManagementStart.list).map(
+      getTabs(dataset, fieldFilter, datasetManagementStart.list, correlationCount).map(
         (tab: Pick<EuiTabbedContentTab, 'name' | 'id'>) => {
           return {
             ...tab,
@@ -241,7 +273,7 @@ export function Tabs({ dataset, saveDataset, fields, history, location }: TabsPr
           };
         }
       ),
-    [fieldFilter, getContent, dataset, datasetManagementStart.list]
+    [fieldFilter, getContent, dataset, datasetManagementStart.list, correlationCount]
   );
 
   const [selectedTabId, setSelectedTabId] = useState(euiTabs[0].id);
@@ -262,17 +294,21 @@ export function Tabs({ dataset, saveDataset, fields, history, location }: TabsPr
       setCurrentTab,
       getCurrentTab,
     });
+
     setSelectedTabId(getCurrentTab());
 
     return () => {
       stopSyncingState();
     };
-  }, [uiSettings]);
+  }, [uiSettings, dataset.id]);
+
+  // Find the selected tab, or default to the first tab if not found
+  const selectedTab = euiTabs.find((tab) => tab.id === selectedTabId) || euiTabs[0];
 
   return (
     <EuiTabbedContent
       tabs={euiTabs}
-      selectedTab={euiTabs.find((tab) => tab.id === selectedTabId)}
+      selectedTab={selectedTab}
       onTabClick={(tab) => {
         setSelectedTabId(tab.id);
         syncingStateFunc.setCurrentTab(tab.id);
