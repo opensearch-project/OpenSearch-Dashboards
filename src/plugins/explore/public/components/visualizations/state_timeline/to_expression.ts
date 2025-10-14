@@ -50,12 +50,12 @@ export const createNumercialStateTimeline = (
   const transformedData = [
     {
       'field-0': '200',
-      'field-1': null,
+      'field-1': 1000,
       'field-2': '2025-10-10 13:00:25.215',
     },
     {
       'field-0': '200',
-      'field-1': 1200,
+      'field-1': 77,
       'field-2': '2025-10-10 13:09:58.196',
     },
     {
@@ -65,7 +65,12 @@ export const createNumercialStateTimeline = (
     },
     {
       'field-0': '200',
-      'field-1': 1888,
+      'field-1': 77,
+      'field-2': '2025-10-10 14:40:34.325',
+    },
+    {
+      'field-0': '200',
+      'field-1': 1777,
       'field-2': '2025-10-10 15:08:42.43',
     },
     {
