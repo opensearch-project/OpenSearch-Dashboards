@@ -114,6 +114,7 @@ export class DatasetService {
           fields: fetchedFields,
           fieldsLoading: asyncType,
           signalType,
+          schemaMappings: dataset.schemaMappings,
           dataSourceRef: dataset.dataSource
             ? {
                 id: dataset.dataSource.id!,
@@ -192,6 +193,7 @@ export class DatasetService {
           timeFieldName: dataset.timeFieldName,
           description: dataset.description,
           signalType,
+          schemaMappings: dataset.schemaMappings,
           fields: fetchedFields,
           fieldsLoading: asyncType,
           dataSourceRef: dataset.dataSource

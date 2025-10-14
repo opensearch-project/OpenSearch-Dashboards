@@ -24,6 +24,7 @@ export const AdvancedSelector = ({
   supportedTypes,
   useConfiguratorV2,
   alwaysShowDatasetFields,
+  signalType,
 }: {
   services: IDataPluginServices;
   onSelect: (query: Partial<Query>, saveDataset?: boolean) => void;
@@ -31,6 +32,7 @@ export const AdvancedSelector = ({
   supportedTypes?: string[];
   useConfiguratorV2?: boolean;
   alwaysShowDatasetFields?: boolean;
+  signalType?: string;
 }) => {
   const queryString = getQueryService().queryString;
 
@@ -73,6 +75,7 @@ export const AdvancedSelector = ({
       onCancel={onCancel}
       onPrevious={() => setSelectedDataset(undefined)}
       alwaysShowDatasetFields={alwaysShowDatasetFields}
+      signalType={signalType}
     />
   ) : (
     <DatasetExplorer

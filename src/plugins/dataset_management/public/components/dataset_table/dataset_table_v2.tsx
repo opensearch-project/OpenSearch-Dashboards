@@ -153,6 +153,7 @@ export const DatasetTableV2 = ({ canSave, history }: Props) => {
           <AdvancedSelector
             useConfiguratorV2
             alwaysShowDatasetFields
+            signalType={signalType}
             services={services}
             onSelect={async (query: Partial<Query>) => {
               overlay?.close();

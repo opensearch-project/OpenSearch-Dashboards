@@ -4,12 +4,25 @@
  */
 
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { IntlProvider } from 'react-intl';
 import { BaseDataset } from '../../../../common';
 import { setIndexPatterns, setQueryService } from '../../../services';
 import { ConfiguratorV2 } from './configurator_v2';
+
+const mockFetchFields = jest.fn().mockResolvedValue([{ name: 'timestamp', type: 'date' }]);
+
+const mockDatasetType = {
+  fetchFields: mockFetchFields,
+  supportedLanguages: () => ['PPL'],
+  meta: { isFieldLoadAsync: false, supportsTimeFilter: true },
+};
+
+const mockDatasetService = {
+  getType: jest.fn().mockReturnValue(mockDatasetType),
+  cacheDataset: jest.fn(),
+};
 
 const mockQueryService = {
   queryString: {
@@ -20,14 +33,7 @@ const mockQueryService = {
       getLanguage: (id: string) =>
         id === 'PPL' ? { id: 'PPL', title: 'PPL', supportedAppNames: ['explore'] } : undefined,
     }),
-    getDatasetService: () => ({
-      getType: jest.fn().mockReturnValue({
-        fetchFields: jest.fn().mockResolvedValue([{ name: 'timestamp', type: 'date' }]),
-        supportedLanguages: () => ['PPL'],
-        meta: { isFieldLoadAsync: false, supportsTimeFilter: true },
-      }),
-      cacheDataset: jest.fn(),
-    }),
+    getDatasetService: () => mockDatasetService,
   },
 };
 
@@ -54,28 +60,40 @@ const mockOnPrevious = jest.fn();
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockFetchFields.mockClear();
+  mockFetchFields.mockResolvedValue([{ name: 'timestamp', type: 'date' }]);
   setQueryService(mockServices.getQueryService() as any);
   setIndexPatterns(mockServices.getIndexPatterns());
 });
 
 describe('ConfiguratorV2', () => {
-  it('renders correctly', () => {
-    render(
-      <IntlProvider locale="en">
-        <ConfiguratorV2
-          services={mockServices as any}
-          baseDataset={mockBaseDataset}
-          onConfirm={mockOnConfirm}
-          onCancel={mockOnCancel}
-          onPrevious={mockOnPrevious}
-        />
-      </IntlProvider>
-    );
+  it('renders correctly', async () => {
+    await act(async () => {
+      render(
+        <IntlProvider locale="en">
+          <ConfiguratorV2
+            services={mockServices as any}
+            baseDataset={mockBaseDataset}
+            onConfirm={mockOnConfirm}
+            onCancel={mockOnCancel}
+            onPrevious={mockOnPrevious}
+          />
+        </IntlProvider>
+      );
+    });
 
     expect(screen.getByText('Step 2: Configure data')).toBeInTheDocument();
+
+    // Wait for async field fetching to complete
+    await waitFor(
+      () => {
+        expect(screen.getByTestId('advancedSelectorTimeFieldSelect')).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
   });
 
-  it('calls onCancel when cancel is clicked', () => {
+  it('calls onCancel when cancel is clicked', async () => {
     render(
       <IntlProvider locale="en">
         <ConfiguratorV2
@@ -90,9 +108,14 @@ describe('ConfiguratorV2', () => {
 
     fireEvent.click(screen.getByTestId('advancedSelectorCancelButton'));
     expect(mockOnCancel).toHaveBeenCalled();
+
+    // Wait for async operations to complete
+    await waitFor(() => {
+      expect(screen.getByTestId('advancedSelectorTimeFieldSelect')).toBeInTheDocument();
+    });
   });
 
-  it('calls onPrevious when back is clicked', () => {
+  it('calls onPrevious when back is clicked', async () => {
     render(
       <IntlProvider locale="en">
         <ConfiguratorV2
@@ -107,6 +130,11 @@ describe('ConfiguratorV2', () => {
 
     fireEvent.click(screen.getByText('Back'));
     expect(mockOnPrevious).toHaveBeenCalled();
+
+    // Wait for async operations to complete
+    await waitFor(() => {
+      expect(screen.getByTestId('advancedSelectorTimeFieldSelect')).toBeInTheDocument();
+    });
   });
 
   it('displays PPL language', async () => {
@@ -162,7 +190,7 @@ describe('ConfiguratorV2', () => {
     });
   });
 
-  it('shows save dataset checkbox', () => {
+  it('shows save dataset checkbox', async () => {
     render(
       <IntlProvider locale="en">
         <ConfiguratorV2
@@ -176,5 +204,10 @@ describe('ConfiguratorV2', () => {
     );
 
     expect(screen.getByTestId('saveAsDatasetCheckbox')).toBeInTheDocument();
+
+    // Wait for async operations to complete
+    await waitFor(() => {
+      expect(screen.getByTestId('advancedSelectorTimeFieldSelect')).toBeInTheDocument();
+    });
   });
 });
