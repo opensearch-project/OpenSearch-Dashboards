@@ -6,7 +6,7 @@
 import React from 'react';
 import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { FieldStatsItem } from './field_stats_types';
+import { FieldStatsItem } from './utils/field_stats_types';
 import { FieldIcon } from '../../../../opensearch_dashboards_react/public';
 
 interface GetFieldStatsColumnsParams {

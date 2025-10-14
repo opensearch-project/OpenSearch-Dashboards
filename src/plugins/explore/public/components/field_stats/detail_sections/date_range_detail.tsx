@@ -7,9 +7,9 @@ import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
-import { FieldStatsItem, DateRange, DetailSectionConfig } from '../field_stats_types';
+import { FieldStatsItem, DateRange, DetailSectionConfig } from '../utils/field_stats_types';
 import { executeFieldStatsQuery } from '../field_stats_queries';
-import { DEFAULT_DATE_FORMAT } from '../constants';
+import { DEFAULT_DATE_FORMAT } from '../utils/constants';
 
 /**
  * Query function to fetch date range

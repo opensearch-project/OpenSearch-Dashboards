@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ExploreServices } from '../../types';
+import { ExploreServices } from '../../../types';
 import {
   Dataset,
   DetailSectionConfig,
@@ -12,7 +12,7 @@ import {
   FieldStatsItem,
   IndexPatternField,
 } from './field_stats_types';
-import { DETAIL_SECTIONS } from './field_stats_detail_sections';
+import { DETAIL_SECTIONS } from '../field_stats_detail_sections';
 
 /**
  * Filter dataset fields to remove meta fields, multi-fields, and scripted fields

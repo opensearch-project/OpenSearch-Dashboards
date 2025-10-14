@@ -6,7 +6,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import { FieldStatsTable } from './field_stats_table';
-import { FieldStatsItem, FieldDetailsMap } from './field_stats_types';
+import { FieldStatsItem, FieldDetailsMap } from './utils/field_stats_types';
 import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
@@ -15,7 +15,7 @@ import {
   filterDatasetFields,
   transformFieldStatsResult,
   createRowExpandHandler,
-} from './field_stats_utils';
+} from './utils/field_stats_utils';
 
 /**
  * Container component for the Field Statistics feature.

@@ -14,8 +14,8 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { FieldStatsItem, FieldDetails } from './field_stats_types';
-import { getApplicableSections } from './field_stats_utils';
+import { FieldStatsItem, FieldDetails } from './utils/field_stats_types';
+import { getApplicableSections } from './utils/field_stats_utils';
 
 interface FieldStatsRowDetailsProps {
   field?: FieldStatsItem;

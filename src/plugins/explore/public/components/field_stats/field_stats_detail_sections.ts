@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DetailSectionConfig } from './field_stats_types';
+import { DetailSectionConfig } from './utils/field_stats_types';
 import { topValuesDetailConfig } from './detail_sections/top_values_detail';
 import { numericSummaryDetailConfig } from './detail_sections/numeric_summary_detail';
 import { dateRangeDetailConfig } from './detail_sections/date_range_detail';

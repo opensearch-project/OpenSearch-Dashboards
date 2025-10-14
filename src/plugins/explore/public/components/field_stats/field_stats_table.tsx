@@ -13,7 +13,7 @@ import {
   Direction,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { FieldStatsItem, FieldDetails } from './field_stats_types';
+import { FieldStatsItem, FieldDetails } from './utils/field_stats_types';
 import { FieldStatsRowDetails } from './field_stats_row_details';
 import { getFieldStatsColumns } from './field_stats_table_columns';
 

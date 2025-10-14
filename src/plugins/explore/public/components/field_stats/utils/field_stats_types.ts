@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { ExploreServices } from '../../types';
+import { ExploreServices } from '../../../types';
 
 export interface FieldStatsItem {
   name: string;

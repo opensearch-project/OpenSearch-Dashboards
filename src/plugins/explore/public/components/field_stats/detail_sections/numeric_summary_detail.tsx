@@ -6,7 +6,7 @@
 import React from 'react';
 import { EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { FieldStatsItem, NumericSummary, DetailSectionConfig } from '../field_stats_types';
+import { FieldStatsItem, NumericSummary, DetailSectionConfig } from '../utils/field_stats_types';
 import { executeFieldStatsQuery } from '../field_stats_queries';
 
 /**
