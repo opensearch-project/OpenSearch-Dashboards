@@ -274,7 +274,6 @@ export async function searchNavigationLinks(
   });
 
   try {
-    console.log('All links:', allSearchAbleLinks);
     const linksContext = allSearchAbleLinks.map((link) => ({
       id: link.id,
       title: link.title,
@@ -286,6 +285,17 @@ export async function searchNavigationLinks(
         links: linksContext,
       }),
     });
+
+    // Handle case when semanticSearchResult is undefined (http not provided)
+    if (!semanticSearchResult) {
+      // Fallback to simple string matching if semantic search isn't available
+      return allSearchAbleLinks.filter(
+        (link) =>
+          link.title.toLowerCase().includes(query.toLowerCase()) ||
+          (link.parentNavLinkTitle &&
+            link.parentNavLinkTitle.toLowerCase().includes(query.toLowerCase()))
+      );
+    }
 
     const finalResult = semanticSearchResult
       .map((link: any) => {
