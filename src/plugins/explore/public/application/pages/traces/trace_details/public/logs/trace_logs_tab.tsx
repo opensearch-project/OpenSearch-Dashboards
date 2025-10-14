@@ -159,7 +159,7 @@ export const TraceLogsTab: React.FC<TraceLogsTabProps> = ({
                   </EuiFlexGroup>
                 }
                 paddingSize="m"
-                initialIsOpen={index === 0} // Open first accordion by default
+                initialIsOpen={true}
                 data-test-subj={`dataset-accordion-${dataset.id}`}
               >
                 <div>
