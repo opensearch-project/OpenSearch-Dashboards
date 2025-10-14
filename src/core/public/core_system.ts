@@ -174,7 +174,7 @@ export class CoreSystem {
       });
       const application = this.application.setup({ context, http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
-      const chrome = this.chrome.setup({ uiSettings });
+      const chrome = this.chrome.setup({ uiSettings, http });
       const keyboardShortcut = this.keyboardShortcut.setup();
 
       const core: InternalCoreSetup = {

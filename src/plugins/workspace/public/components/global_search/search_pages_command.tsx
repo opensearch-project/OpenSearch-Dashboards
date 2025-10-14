@@ -38,7 +38,12 @@ export const workspaceSearchPages = async (
       getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features || []) || ''
     );
 
-    const searchResult = searchNavigationLinks(allAvailableCaseId, navGroupMap, query);
+    const searchResult = await searchNavigationLinks(
+      allAvailableCaseId,
+      navGroupMap,
+      query,
+      coreStart.http
+    );
 
     const handleCallback = (link: NavLink) => {
       callback?.();
@@ -57,7 +62,7 @@ export const workspaceSearchPages = async (
       coreStart.application.navigateToApp(link.id);
     };
 
-    const pages = searchResult.slice(0, 10).map((link) => {
+    const pages = searchResult.slice(0, 10).map((link: any) => {
       return (
         <WorkspaceGlobalSearchPageItem
           link={link}
