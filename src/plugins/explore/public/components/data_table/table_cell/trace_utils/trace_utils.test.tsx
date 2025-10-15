@@ -129,8 +129,9 @@ describe('trace_utils', () => {
   });
 
   describe('isDurationColumn', () => {
-    it('should return true for durationNano', () => {
+    it('should return true for duration columns', () => {
       expect(isDurationColumn('durationNano')).toBe(true);
+      expect(isDurationColumn('durationInNanos')).toBe(true);
     });
 
     it('should return false for other column names', () => {
@@ -144,7 +145,7 @@ describe('trace_utils', () => {
     it('should be case sensitive', () => {
       expect(isDurationColumn('durationnano')).toBe(false);
       expect(isDurationColumn('DURATIONNANO')).toBe(false);
-      expect(isDurationColumn('DurationNano')).toBe(false);
+      expect(isDurationColumn('DurationInNanos')).toBe(false);
     });
 
     it('should handle null and undefined', () => {

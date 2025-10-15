@@ -28,7 +28,7 @@ export const isSpanIdColumn = (columnId: string): boolean => {
 };
 
 export const isDurationColumn = (columnId: string) => {
-  return columnId === 'durationNano';
+  return columnId === 'durationNano' || columnId === 'durationInNanos';
 };
 
 export const extractFieldFromRowData = (

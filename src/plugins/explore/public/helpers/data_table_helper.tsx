@@ -81,6 +81,7 @@ function getColumnDisplayName(column: string): string {
     case 'name':
       return 'Service Identifier';
     case 'durationNano':
+    case 'durationInNanos':
       return 'Duration';
     case 'resource.attributes.service.name':
       return 'Service';
