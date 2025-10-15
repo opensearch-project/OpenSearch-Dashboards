@@ -12,6 +12,7 @@ import { DataView as Dataset } from '../../../../../../data/common';
 import './trace_utils.scss';
 import { useTraceFlyoutContext } from '../../../../application/pages/traces/trace_flyout/trace_flyout_context';
 import { validateRequiredTraceFields } from '../../../../utils/trace_field_validation';
+import { extractFieldFromRowData } from '../../../../utils/trace_field_validation';
 
 export const isOnTracesPage = (): boolean => {
   return (
@@ -22,31 +23,6 @@ export const isOnTracesPage = (): boolean => {
 
 export const isSpanIdColumn = (columnId: string): boolean => {
   return columnId === 'spanId' || columnId === 'span_id' || columnId === 'spanID';
-};
-
-export const extractFieldFromRowData = (
-  rowData: OpenSearchSearchHit<Record<string, unknown>>,
-  fields: readonly string[]
-): string => {
-  if (!rowData) return '';
-
-  const getNestedValue = (obj: unknown, path: string): unknown => {
-    return path.split('.').reduce((current: unknown, key: string) => {
-      return current && typeof current === 'object' && current !== null
-        ? (current as Record<string, unknown>)[key]
-        : undefined;
-    }, obj);
-  };
-
-  for (const field of fields) {
-    const value = getNestedValue(rowData, field);
-
-    if (value && typeof value === 'string') {
-      return value;
-    }
-  }
-
-  return '';
 };
 
 export const buildTraceDetailsUrl = (

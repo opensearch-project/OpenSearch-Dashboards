@@ -129,11 +129,10 @@ export const validateRequiredTraceFields = (
     missingFields.push('traceId');
   }
 
-  // parentSpanId can be an empty string for root spans, which is valid
-  // only consider it missing if the field doesn't exist at all
+  // For root spans, parentSpanId can be null or empty string
   const hasParentSpanIdField = PARENT_SPAN_ID_FIELD_PATHS.some((field) => {
     const value = getNestedValue(rowData, field);
-    return value !== undefined && value !== null;
+    return value !== undefined;
   });
 
   if (hasParentSpanIdField) {
@@ -174,7 +173,7 @@ export const validateRequiredTraceFields = (
   // only consider it missing if the field doesn't exist at all
   const hasStatusCodeField = STATUS_CODE_FIELD_PATHS.some((field) => {
     const value = getNestedValue(rowData, field);
-    return value !== undefined && value !== null;
+    return value !== undefined;
   });
 
   if (hasStatusCodeField) {

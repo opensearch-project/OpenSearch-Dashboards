@@ -172,7 +172,8 @@ describe('trace_field_validation', () => {
 
       expect(result.isValid).toBe(false);
       expect(result.missingFields).toContain('spanId');
-      expect(result.missingFields).toContain('parentSpanId');
+      // parentSpanId can be null for root spans, so it should not be considered missing
+      expect(result.missingFields).not.toContain('parentSpanId');
     });
 
     it('should validate real OpenTelemetry trace data with empty parentSpanId for root span', () => {

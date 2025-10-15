@@ -8,7 +8,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import {
   isOnTracesPage,
   isSpanIdColumn,
-  extractFieldFromRowData,
   buildTraceDetailsUrl,
   getTraceDetailsUrlParams,
   handleSpanIdNavigation,
@@ -17,6 +16,7 @@ import {
   navigateToTraceDetailsWithSpan,
   getStatusCodeColor,
 } from './trace_utils';
+import { extractFieldFromRowData } from '../../../../utils/trace_field_validation';
 
 const mockLocation = {
   pathname: '',
@@ -217,9 +217,9 @@ describe('trace_utils', () => {
       expect(extractFieldFromRowData(rowData, SPAN_ID_FIELDS)).toBe('');
     });
 
-    it('should return empty string if field exists but is not a string', () => {
+    it('should convert number fields to strings', () => {
       const rowData = { traceId: 1234 } as any;
-      expect(extractFieldFromRowData(rowData, TRACE_ID_FIELDS)).toBe('');
+      expect(extractFieldFromRowData(rowData, TRACE_ID_FIELDS)).toBe('1234');
     });
 
     it('should return empty string if field is empty string', () => {
