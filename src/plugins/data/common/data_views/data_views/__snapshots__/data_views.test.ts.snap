@@ -8,6 +8,7 @@ Object {
   "fields": Object {},
   "id": "id",
   "intervalName": undefined,
+  "schemaMappings": undefined,
   "signalType": undefined,
   "sourceFilters": Array [
     Object {
@@ -37,6 +38,7 @@ Object {
   "fields": Object {},
   "id": "id",
   "intervalName": undefined,
+  "schemaMappings": undefined,
   "signalType": undefined,
   "sourceFilters": Array [
     Object {

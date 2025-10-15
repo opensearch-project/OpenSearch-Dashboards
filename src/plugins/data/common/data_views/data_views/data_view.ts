@@ -40,13 +40,12 @@ export class DataView extends IndexPattern implements IDataView {
     });
 
     this.savedObjectsClient = savedObjectsClient;
-    this.initializeDataSourceRef();
   }
 
   public async initializeDataSourceRef(): Promise<void> {
     if (!this.dataSourceRef?.id) return;
     const dataSourceSavedObject = await this.savedObjectsClient.get(
-      this.dataSourceRef.type,
+      'data-source',
       this.dataSourceRef.id
     );
     const attributes = dataSourceSavedObject.attributes as any;
@@ -76,7 +75,7 @@ export class DataView extends IndexPattern implements IDataView {
         );
         const attributes = dataSourceSavedObject.attributes as any;
 
-        if (dataSourceReference.name) {
+        if (dataSourceReference.name && dataSourceReference.name !== 'dataSource') {
           const extractedType = extractDatasetTypeFromUri(dataSourceReference.name);
           if (extractedType) {
             datasetType = extractedType;
@@ -85,15 +84,18 @@ export class DataView extends IndexPattern implements IDataView {
 
         dataSource = {
           id: dataSourceReference.id,
-          title: attributes.title || dataSourceReference.name || dataSourceReference.id,
+          title: attributes.title || dataSourceReference.id,
           type: attributes.dataSourceEngineType || 'OpenSearch',
         };
       } catch (error) {
         // If we can't fetch the data source, create a minimal version
         dataSource = {
           id: dataSourceReference.id,
-          title: dataSourceReference.name || dataSourceReference.id,
-          type: dataSourceReference.type || 'OpenSearch',
+          title:
+            dataSourceReference.name && dataSourceReference.name !== 'dataSource'
+              ? dataSourceReference.name
+              : dataSourceReference.id,
+          type: 'OpenSearch',
         };
       }
     }
@@ -103,6 +105,9 @@ export class DataView extends IndexPattern implements IDataView {
       title: this.title,
       type: datasetType,
       timeFieldName: this.timeFieldName,
+      displayName: this.displayName,
+      description: this.description,
+      schemaMappings: this.schemaMappings,
       dataSource,
     };
   }
