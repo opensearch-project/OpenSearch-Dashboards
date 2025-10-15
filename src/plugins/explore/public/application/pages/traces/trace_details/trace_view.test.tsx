@@ -330,6 +330,41 @@ describe('TraceDetails', () => {
     consoleSpy.mockRestore();
   });
 
+  it('handles default dataset', async () => {
+    const mockCreateTraceAppState = jest.requireMock('./state/trace_app_state').createTraceAppState;
+
+    mockCreateTraceAppState.mockImplementationOnce(({ stateDefaults }: any) => ({
+      stateContainer: {
+        get: () => ({ ...stateDefaults, traceId: 'test-trace-id' }),
+        state$: {
+          subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
+        },
+      },
+      stopStateSync: jest.fn(),
+    }));
+
+    const defaultDataset = {
+      id: 'default-dataset-id',
+      title: 'otel-v1-apm-span-*',
+      type: 'INDEX_PATTERN',
+      timeFieldName: 'endTime',
+    };
+
+    const history = createMemoryHistory();
+    render(
+      <Router history={history}>
+        <TraceDetails defaultDataset={defaultDataset} />
+      </Router>
+    );
+
+    expect(mockPplService.fetchTraceSpans).toHaveBeenCalledWith({
+      traceId: 'test-trace-id',
+      dataset: defaultDataset,
+      filters: [],
+      limit: 100,
+    });
+  });
+
   it('sets page title correctly', async () => {
     const history = createMemoryHistory();
 
