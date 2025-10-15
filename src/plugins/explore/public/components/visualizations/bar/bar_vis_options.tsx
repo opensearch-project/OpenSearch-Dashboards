@@ -43,6 +43,11 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
   const hasNum = axes.some((axis) => axis?.schema === VisFieldType.Numerical);
   const hasDate = axes.some((axis) => axis?.schema === VisFieldType.Date);
 
+  // 4 bucket types for bar chart:
+  // 1. time-numerical(Regular histogram): requires one axis to be date type, bucket options: time interval + aggregationType
+  // 2. categorical-numerical: requires one axis to be categorical type, bucket options: aggregationType only
+  // 3. numerical-numerical: both x and y axes are numerical, bucket options: bucket size + bucket count + aggregationType
+  // 4. single-numerical: only x-axis mapped (numerical), y-axis displays count of records, bucket options: bucket size + bucket count
   const bucketType = hasDate
     ? 'time'
     : hasCategory
