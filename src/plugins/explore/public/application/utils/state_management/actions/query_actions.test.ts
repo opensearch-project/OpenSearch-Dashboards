@@ -25,6 +25,22 @@ jest.mock('moment-timezone', () => {
   return moment;
 });
 
+jest.mock('./utils', () => ({
+  buildPPLHistogramQuery: jest.fn((queryString) => queryString),
+  processRawResultsForHistogram: jest.fn((_queryString, rawResults) => rawResults),
+  createHistogramConfigWithInterval: jest.fn(() => ({
+    toDsl: jest.fn().mockReturnValue({}),
+    aggs: [
+      {},
+      {
+        buckets: {
+          getInterval: jest.fn(() => ({ interval: '1h', scale: 1 })),
+        },
+      },
+    ],
+  })),
+}));
+
 import { configureStore } from '@reduxjs/toolkit';
 import {
   abortAllActiveQueries,
@@ -1203,6 +1219,81 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       expect(mockServices.data.dataViews.get).toHaveBeenCalled();
       expect(mockSearchSource.fetch).toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            cacheKey: 'test-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.READY,
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should execute histogram query with formatter in language config', async () => {
+      const mockFormatter = jest.fn();
+      (mockServices.data.query.queryString.getLanguageService as jest.Mock).mockReturnValue({
+        getLanguage: jest.fn().mockReturnValue({
+          fields: {
+            formatter: mockFormatter,
+          },
+        }),
+      });
+
+      const params = {
+        services: mockServices,
+        cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
+        interval: '5m',
+      };
+
+      const thunk = executeHistogramQuery(params);
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockServices.data.dataViews.get).toHaveBeenCalled();
+      expect(mockSearchSource.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          abortSignal: expect.any(Object),
+          formatter: mockFormatter,
+        })
+      );
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            cacheKey: 'test-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.READY,
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should execute histogram query without formatter in language config', async () => {
+      (mockServices.data.query.queryString.getLanguageService as jest.Mock).mockReturnValue({
+        getLanguage: jest.fn().mockReturnValue({}),
+      });
+
+      const params = {
+        services: mockServices,
+        cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
+        interval: '5m',
+      };
+
+      const thunk = executeHistogramQuery(params);
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockServices.data.dataViews.get).toHaveBeenCalled();
+      expect(mockSearchSource.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          abortSignal: expect.any(Object),
+          withLongNumeralsSupport: false,
+        })
+      );
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'queryEditor/setIndividualQueryStatus',
