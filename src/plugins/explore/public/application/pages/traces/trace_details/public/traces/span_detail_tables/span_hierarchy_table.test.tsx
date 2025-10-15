@@ -168,15 +168,6 @@ describe('SpanHierarchyTable', () => {
     consoleSpy.mockRestore();
   });
 
-  it('shows all hierarchy columns by default', () => {
-    const { getByTestId } = render(<SpanHierarchyTable {...defaultProps} />);
-
-    const visibleColumns = JSON.parse(getByTestId('visible-columns').textContent || '[]');
-    expect(visibleColumns).toContain('span');
-    expect(visibleColumns).toContain('timeline');
-    expect(visibleColumns).toContain('durationInNanos');
-  });
-
   it('passes availableWidth to RenderCustomDataGrid', () => {
     const propsWithWidth = {
       ...defaultProps,
@@ -190,18 +181,6 @@ describe('SpanHierarchyTable', () => {
         availableWidth: 800,
       })
     );
-  });
-
-  it('includes expected hierarchy columns', () => {
-    render(<SpanHierarchyTable {...defaultProps} />);
-
-    const mockCall = mockRenderCustomDataGrid.mock.calls[0]?.[0];
-    expect(mockCall).toBeDefined();
-    const columnIds = mockCall!.columns.map((col: any) => col.id);
-
-    expect(columnIds).toContain('span');
-    expect(columnIds).toContain('timeline');
-    expect(columnIds).toContain('durationInNanos');
   });
 
   it('renders HierarchySpanCell for span column', () => {

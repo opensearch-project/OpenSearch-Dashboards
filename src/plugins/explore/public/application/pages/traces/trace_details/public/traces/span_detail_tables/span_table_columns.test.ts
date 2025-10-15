@@ -26,18 +26,21 @@ describe('getSpanHierarchyTableColumns', () => {
       display: 'Span',
       isExpandable: false,
       isResizable: true,
+      actions: false,
     });
     expect(columns[1]).toMatchObject({
       id: 'timeline',
       initialWidth: 600,
       isExpandable: false,
       isResizable: true,
+      actions: false,
     });
     expect(columns[2]).toEqual({
       id: 'durationInNanos',
       display: 'Duration',
       initialWidth: 100,
       isExpandable: false,
+      actions: false,
     });
   });
 
