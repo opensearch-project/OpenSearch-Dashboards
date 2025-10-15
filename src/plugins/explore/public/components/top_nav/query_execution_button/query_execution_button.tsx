@@ -40,7 +40,6 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
   onCancel,
   isQueryRunning,
 }) => {
-  console.log('QueryExecutionButton rendering');
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
   const dateRange = useSelector(selectDateRange);
@@ -57,7 +56,7 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
       // Start timer to show cancel button after 100ms
       cancelButtonTimerRef.current = setTimeout(() => {
         setShouldShowCancelButton(true);
-      }, 100);
+      }, 500);
     } else {
       // Clear timer and hide button immediately when query stops
       if (cancelButtonTimerRef.current) {
