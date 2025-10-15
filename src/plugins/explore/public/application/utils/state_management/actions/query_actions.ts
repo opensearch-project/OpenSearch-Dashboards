@@ -23,8 +23,10 @@ import {
 } from '../../../../../../data/public';
 import {
   buildPointSeriesData,
+  buildChartFromBreakdownSeries,
   createHistogramConfigs,
   getDimensions,
+  Dimensions,
 } from '../../../../components/chart/utils';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 import { RootState } from '../store';
@@ -70,10 +72,12 @@ export const defaultPrepareQueryString = (query: Query): string => {
 };
 
 /**
- * Prepare cache key for data table queries (no aggregations)
+ * Prepare cache key for histogram queries (with optional breakdown flag)
  */
-export const prepareHistogramCacheKey = (query: Query): string => {
-  return `histogram:${defaultPrepareQueryString(query)}`;
+export const prepareHistogramCacheKey = (query: Query, hasBreakdown?: boolean): string => {
+  return hasBreakdown
+    ? `histogram:breakdown:${defaultPrepareQueryString(query)}`
+    : `histogram:${defaultPrepareQueryString(query)}`;
 };
 
 /**
@@ -187,8 +191,17 @@ export const histogramResultsProcessor: HistogramDataProcessor = (
     const dimensions = getDimensions(histogramConfigs, data);
 
     result.bucketInterval = bucketAggConfig.buckets?.getInterval();
-    // @ts-ignore tabifiedData is compatible but due to the way it is typed typescript complains
-    result.chartData = buildPointSeriesData(tabifiedData, dimensions);
+
+    // Check if we have a breakdown series response
+    if ((rawResults as any).breakdownSeries && dimensions) {
+      result.chartData = buildChartFromBreakdownSeries(
+        (rawResults as any).breakdownSeries,
+        dimensions as Dimensions
+      ) as ChartData;
+    } else if (dimensions) {
+      // @ts-ignore tabifiedData is compatible but due to the way it is typed typescript complains
+      result.chartData = buildPointSeriesData(tabifiedData, dimensions);
+    }
   }
 
   return result;
@@ -214,7 +227,8 @@ export const executeQueries = createAsyncThunk<
   const defaultCacheKey = defaultPrepareQueryString(query);
   // Use separate cache keys for data table and histogram
   const dataTableCacheKey = defaultCacheKey;
-  const histogramCacheKey = prepareHistogramCacheKey(query);
+  const breakdownField = state.queryEditor.breakdownField;
+  const histogramCacheKey = prepareHistogramCacheKey(query, !!breakdownField);
 
   // Check what needs execution for core queries
   const needsDataTableQuery = !results[dataTableCacheKey];
@@ -404,7 +418,7 @@ const executeQueryBase = async (
       dataset,
       query:
         isHistogramQuery && histogramConfig
-          ? buildPPLHistogramQuery(queryString, histogramConfig, services)
+          ? buildPPLHistogramQuery(queryString, histogramConfig)
           : queryString,
     };
 

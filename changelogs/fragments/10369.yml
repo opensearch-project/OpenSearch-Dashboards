@@ -1,2 +1,0 @@
-fix:
-- [Explore] Resolve ScopedHistory navigation scope error in explore plugin ([#10369](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10369))

@@ -1,2 +1,0 @@
-fix:
-- Make the advanced dataset selector respect the language config ([#10368](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10368))

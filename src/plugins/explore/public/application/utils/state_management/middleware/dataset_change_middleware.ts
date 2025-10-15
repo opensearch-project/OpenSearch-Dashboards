@@ -18,7 +18,7 @@ import {
   setPatternsField,
   setUsingRegexPatterns,
 } from '../slices';
-import { clearQueryStatusMap } from '../slices/query_editor/query_editor_slice';
+import { clearQueryStatusMap, setBreakdownField } from '../slices/query_editor/query_editor_slice';
 import { executeQueries } from '../actions/query_actions';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
@@ -59,6 +59,7 @@ export const createDatasetChangeMiddleware = (
       store.dispatch(clearLastExecutedData());
       store.dispatch(setPatternsField(''));
       store.dispatch(setUsingRegexPatterns(false));
+      store.dispatch(setBreakdownField(undefined));
       store.dispatch((resetLegacyStateActionCreator(services) as unknown) as AnyAction);
 
       const [newPromptModeIsAvailable, newSummaryAgentIsAvailable] = await Promise.allSettled([
