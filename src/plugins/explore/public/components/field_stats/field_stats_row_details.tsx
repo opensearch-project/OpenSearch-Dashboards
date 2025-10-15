@@ -82,9 +82,6 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({
 
   const hasAnyData = applicableSections.some((section) => {
     const sectionData = (details as any)[section.id];
-    // Consider it as having data if:
-    // 1. Section has data (even if it's an error, we want to show the error)
-    // 2. OR section has non-empty array data
     return sectionData && (!Array.isArray(sectionData) || sectionData.length > 0);
   });
 

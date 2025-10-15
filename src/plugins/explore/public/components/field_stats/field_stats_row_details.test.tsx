@@ -142,9 +142,9 @@ describe('FieldStatsRowDetails', () => {
     component = mountWithIntl(
       <FieldStatsRowDetails field={mockField} details={detailsWithError} />
     );
-    // Should not render the mock component
+
     expect(component.find('.mock-section').exists()).toBe(false);
-    // Should render an error callout instead
+
     const callOut = component.find(EuiCallOut);
     expect(callOut.exists()).toBe(true);
     expect(callOut.prop('color')).toBe('warning');
