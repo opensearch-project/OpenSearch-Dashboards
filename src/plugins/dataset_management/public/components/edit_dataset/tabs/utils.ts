@@ -66,7 +66,8 @@ function getTitle(type: string, filteredCount: Dictionary<number>, totalCount: D
       title = i18n.translate('datasetManagement.editDataset.tabs.correlatedDatasetsHeader', {
         defaultMessage: 'Correlated datasets',
       });
-      break;
+      // Don't add count for correlated datasets tab
+      return title;
     case 'correlatedTraces':
       title = i18n.translate('datasetManagement.editDataset.tabs.correlatedTracesHeader', {
         defaultMessage: 'Correlated traces',

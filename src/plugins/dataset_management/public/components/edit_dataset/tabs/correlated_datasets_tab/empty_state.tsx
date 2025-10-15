@@ -25,8 +25,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ onCreateClick }) => {
       body={
         <p>
           {i18n.translate('datasetManagement.correlatedDatasets.emptyState.description', {
-            defaultMessage:
-              'Create a correlation to link this trace dataset with log datasets for better observability.',
+            defaultMessage: 'Create a correlation to link this trace dataset with log datasets.',
           })}
         </p>
       }

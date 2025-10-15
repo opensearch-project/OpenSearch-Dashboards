@@ -36,6 +36,7 @@ interface DatasetFieldMappings {
 interface FieldMappingEditorProps {
   dataService: DataPublicPluginStart;
   datasetIds: string[];
+  datasets: any[]; // Pre-fetched DataView objects with schemaMappings
   missingMappings: Array<{
     datasetId: string;
     datasetTitle: string;
@@ -110,6 +111,7 @@ FieldSelector.displayName = 'FieldSelector';
 export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
   dataService,
   datasetIds,
+  datasets,
   missingMappings,
   onMappingsChange,
 }) => {
@@ -117,43 +119,96 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
   const [loading, setLoading] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
-  // Load dataset fields
+  // Process pre-fetched datasets to extract field mappings
   useEffect(() => {
-    const loadDatasetFields = async () => {
+    const processDatasets = async () => {
       setLoading(true);
       try {
         const mappings: DatasetFieldMappings[] = [];
 
-        for (const { datasetId, datasetTitle, missingFields } of missingMappings) {
+        for (const dataView of datasets) {
           try {
-            const dataView = await dataService.dataViews.get(datasetId);
             const fields = dataView.fields.getAll();
 
+            // Get dataset title from saved object to get displayName
+            let datasetTitle = dataView.title;
+            try {
+              const savedObject = await dataService.indexPatterns.savedObjectsClient.get(
+                'index-pattern',
+                dataView.id
+              );
+              const attributes = savedObject.attributes as any;
+              datasetTitle = attributes.displayName || attributes.title || dataView.title;
+            } catch (err) {
+              // If fetch fails, use dataView.title
+            }
+
+            // Extract existing schemaMappings.otelLogs if available
+            let existingMappings: FieldMappings = {};
+            try {
+              // eslint-disable-next-line no-console
+              console.log(`[FieldMappingEditor] Processing dataset ${dataView.id}`, {
+                schemaMappings: dataView.schemaMappings,
+                type: typeof dataView.schemaMappings,
+              });
+
+              // DataView.schemaMappings can be either a string (from saved object) or object (already parsed)
+              const schemaMappings =
+                typeof dataView.schemaMappings === 'string'
+                  ? JSON.parse(dataView.schemaMappings)
+                  : dataView.schemaMappings;
+
+              if (schemaMappings && schemaMappings.otelLogs) {
+                const otelLogs = schemaMappings.otelLogs;
+                existingMappings = {
+                  traceId: otelLogs.traceId || undefined,
+                  spanId: otelLogs.spanId || undefined,
+                  serviceName: otelLogs.serviceName || undefined,
+                  timestamp: otelLogs.timestamp || undefined,
+                };
+
+                // eslint-disable-next-line no-console
+                console.log(
+                  `[FieldMappingEditor] Extracted mappings for ${dataView.id}:`,
+                  existingMappings
+                );
+              } else {
+                // eslint-disable-next-line no-console
+                console.log(`[FieldMappingEditor] No otelLogs mappings found for ${dataView.id}`);
+              }
+            } catch (parseErr) {
+              // If parsing fails, use empty mappings
+              // eslint-disable-next-line no-console
+              console.error(`Failed to parse schemaMappings for dataset ${dataView.id}:`, parseErr);
+            }
+
             mappings.push({
-              datasetId,
+              datasetId: dataView.id || '',
               datasetTitle,
-              mappings: {},
+              mappings: existingMappings,
               fields,
             });
           } catch (err) {
             // eslint-disable-next-line no-console
-            console.warn(`Failed to fetch fields for dataset ${datasetId}:`, err);
+            console.error(`Failed to process dataset ${dataView.id}:`, err);
           }
         }
 
         setDatasetFieldMappings(mappings);
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.error('Failed to load dataset fields:', err);
+        console.error('Failed to process datasets:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    if (missingMappings.length > 0) {
-      loadDatasetFields();
+    if (datasets.length > 0) {
+      processDatasets();
+    } else {
+      setDatasetFieldMappings([]);
     }
-  }, [dataService, missingMappings]);
+  }, [datasets, dataService]);
 
   const handleFieldChange = useCallback(
     (datasetId: string, fieldName: keyof FieldMappings, value: string | undefined) => {
@@ -199,9 +254,19 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
     };
   }, []);
 
-  if (missingMappings.length === 0) {
+  if (datasets.length === 0) {
     return null;
   }
+
+  // Build table rows from loaded datasets
+  const tableRows: TableRow[] = datasetFieldMappings.map((ds) => {
+    const missingForDataset = missingMappings.find((m) => m.datasetId === ds.datasetId);
+    return {
+      datasetId: ds.datasetId,
+      datasetTitle: ds.datasetTitle,
+      hasError: missingForDataset ? missingForDataset.missingFields.length > 0 : false,
+    };
+  });
 
   const columns: Array<EuiBasicTableColumn<TableRow>> = [
     {
@@ -226,13 +291,6 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
         const dataset = datasetFieldMappings.find((ds) => ds.datasetId === row.datasetId);
         if (!dataset) return null;
 
-        const missing = missingMappings.find((m) => m.datasetId === row.datasetId);
-        const isRequired = missing?.missingFields.includes('timestamp');
-
-        if (!isRequired && dataset.mappings.timestamp) {
-          return <span>{dataset.mappings.timestamp}</span>;
-        }
-
         return (
           <FieldSelector
             datasetId={row.datasetId}
@@ -252,13 +310,6 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
       render: (_: any, row: TableRow) => {
         const dataset = datasetFieldMappings.find((ds) => ds.datasetId === row.datasetId);
         if (!dataset) return null;
-
-        const missing = missingMappings.find((m) => m.datasetId === row.datasetId);
-        const isRequired = missing?.missingFields.includes('traceId');
-
-        if (!isRequired && dataset.mappings.traceId) {
-          return <span>{dataset.mappings.traceId}</span>;
-        }
 
         return (
           <FieldSelector
@@ -280,13 +331,6 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
         const dataset = datasetFieldMappings.find((ds) => ds.datasetId === row.datasetId);
         if (!dataset) return null;
 
-        const missing = missingMappings.find((m) => m.datasetId === row.datasetId);
-        const isRequired = missing?.missingFields.includes('spanId');
-
-        if (!isRequired && dataset.mappings.spanId) {
-          return <span>{dataset.mappings.spanId}</span>;
-        }
-
         return (
           <FieldSelector
             datasetId={row.datasetId}
@@ -307,13 +351,6 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
         const dataset = datasetFieldMappings.find((ds) => ds.datasetId === row.datasetId);
         if (!dataset) return null;
 
-        const missing = missingMappings.find((m) => m.datasetId === row.datasetId);
-        const isRequired = missing?.missingFields.includes('serviceName');
-
-        if (!isRequired && dataset.mappings.serviceName) {
-          return <span>{dataset.mappings.serviceName}</span>;
-        }
-
         return (
           <FieldSelector
             datasetId={row.datasetId}
@@ -327,11 +364,7 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
     },
   ];
 
-  const tableRows: TableRow[] = missingMappings.map((missing) => ({
-    datasetId: missing.datasetId,
-    datasetTitle: missing.datasetTitle,
-    hasError: missing.missingFields.length > 0,
-  }));
+  const hasErrors = tableRows.some((row) => row.hasError);
 
   return (
     <>
@@ -348,30 +381,41 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
         data-test-subj="manageFieldMappingsAccordion"
       >
         <EuiSpacer size="s" />
-        <EuiCallOut
-          title={i18n.translate('datasetManagement.correlatedDatasets.fieldMapping.calloutTitle', {
-            defaultMessage: 'Missing field mappings in Logs datasets',
-          })}
-          color="danger"
-          iconType="alert"
-          size="s"
-        >
-          <p>
-            {i18n.translate('datasetManagement.correlatedDatasets.fieldMapping.calloutMessage', {
-              defaultMessage:
-                'The following datasets are missing fields to correlate with trace data. Ensure the logs dataset contain primary fields:',
-            })}
-          </p>
-          <ul>
-            {missingMappings.map((missing) => (
-              <li key={missing.datasetId}>
-                <strong>{missing.datasetTitle}</strong>
-              </li>
-            ))}
-          </ul>
-        </EuiCallOut>
 
-        <EuiSpacer size="m" />
+        {/* Show error callout only when there are missing mappings */}
+        {hasErrors && missingMappings.length > 0 && (
+          <>
+            <EuiCallOut
+              title={i18n.translate(
+                'datasetManagement.correlatedDatasets.fieldMapping.calloutTitle',
+                {
+                  defaultMessage: 'Missing field mappings in Logs datasets',
+                }
+              )}
+              color="danger"
+              iconType="alert"
+              size="s"
+            >
+              <p>
+                {i18n.translate(
+                  'datasetManagement.correlatedDatasets.fieldMapping.calloutMessage',
+                  {
+                    defaultMessage:
+                      'The following datasets are missing fields to correlate with trace data. Ensure the logs dataset contain primary fields:',
+                  }
+                )}
+              </p>
+              <ul>
+                {missingMappings.map((missing) => (
+                  <li key={missing.datasetId}>
+                    <strong>{missing.datasetTitle}</strong>
+                  </li>
+                ))}
+              </ul>
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        )}
 
         <EuiBasicTable
           items={tableRows}

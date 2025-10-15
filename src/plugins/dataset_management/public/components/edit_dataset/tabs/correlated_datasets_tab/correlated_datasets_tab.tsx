@@ -25,9 +25,13 @@ import { ConfigureCorrelationModal } from './configure_correlation_modal';
 
 interface CorrelatedDatasetsTabProps {
   dataset: DataView;
+  onCountChange?: () => Promise<void>;
 }
 
-export const CorrelatedDatasetsTab: React.FC<CorrelatedDatasetsTabProps> = ({ dataset }) => {
+export const CorrelatedDatasetsTab: React.FC<CorrelatedDatasetsTabProps> = ({
+  dataset,
+  onCountChange,
+}) => {
   const { savedObjects, notifications } = useOpenSearchDashboards<
     DatasetManagmentContext
   >().services;
@@ -59,6 +63,9 @@ export const CorrelatedDatasetsTab: React.FC<CorrelatedDatasetsTabProps> = ({ da
     setIsModalOpen(false);
     setEditingCorrelation(null);
     await refetch();
+    if (onCountChange) {
+      await onCountChange();
+    }
 
     notifications.toasts.addSuccess({
       title: i18n.translate('datasetManagement.correlatedDatasets.saveSuccess', {
@@ -69,7 +76,7 @@ export const CorrelatedDatasetsTab: React.FC<CorrelatedDatasetsTabProps> = ({ da
       }),
       'data-test-subj': 'correlationSaveSuccessToast',
     });
-  }, [editingCorrelation, refetch, notifications]);
+  }, [editingCorrelation, refetch, onCountChange, notifications]);
 
   const handleDelete = useCallback(
     async (correlationId: string) => {
@@ -83,6 +90,9 @@ export const CorrelatedDatasetsTab: React.FC<CorrelatedDatasetsTabProps> = ({ da
           'data-test-subj': 'correlationDeleteSuccessToast',
         });
         await refetch();
+        if (onCountChange) {
+          await onCountChange();
+        }
       } else {
         notifications.toasts.addDanger({
           title: i18n.translate('datasetManagement.correlatedDatasets.deleteError', {
@@ -92,7 +102,7 @@ export const CorrelatedDatasetsTab: React.FC<CorrelatedDatasetsTabProps> = ({ da
         });
       }
     },
-    [deleteCorrelation, refetch, notifications]
+    [deleteCorrelation, refetch, onCountChange, notifications]
   );
 
   if (loading) {
@@ -127,18 +137,13 @@ export const CorrelatedDatasetsTab: React.FC<CorrelatedDatasetsTabProps> = ({ da
 
   return (
     <>
-      {!hasCorrelation ? (
-        <EmptyState onCreateClick={handleCreateClick} />
-      ) : (
-        <>
-          <CorrelatedDatasetsTable
-            correlations={correlations}
-            onEdit={handleEditClick}
-            onDelete={handleDelete}
-            loading={deleting}
-          />
-        </>
-      )}
+      <CorrelatedDatasetsTable
+        correlations={correlations}
+        onEdit={handleEditClick}
+        onDelete={handleDelete}
+        loading={deleting}
+        message={!hasCorrelation ? <EmptyState onCreateClick={handleCreateClick} /> : undefined}
+      />
 
       {isModalOpen && (
         <ConfigureCorrelationModal

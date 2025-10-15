@@ -10,6 +10,7 @@ import { validateFieldMappings } from '../utils/correlation_validation';
 
 interface UseValidateFieldMappingsResult {
   validationResult: CorrelationValidationResult | null;
+  datasets: DataView[]; // Return the fetched datasets so they can be reused
   loading: boolean;
   error: Error | null;
 }
@@ -25,12 +26,14 @@ export function useValidateFieldMappings(
   const [validationResult, setValidationResult] = useState<CorrelationValidationResult | null>(
     null
   );
+  const [datasets, setDatasets] = useState<DataView[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     if (logDatasetIds.length === 0) {
       setValidationResult({ isValid: true, errors: [] });
+      setDatasets([]);
       setLoading(false);
       return;
     }
@@ -40,28 +43,61 @@ export function useValidateFieldMappings(
       setError(null);
 
       try {
-        const datasets: DataView[] = [];
+        const fetchedDatasets: DataView[] = [];
 
-        // Fetch each dataset
+        // Fetch each dataset with schemaMappings from saved object
         for (const datasetId of logDatasetIds) {
           try {
+            // Fetch DataView for fields and structure
             const dataset = await dataService.dataViews.get(datasetId);
-            datasets.push(dataset);
+
+            // IMPORTANT: Fetch saved object directly to ensure we get schemaMappings
+            // dataViews.get() may return cached version without complete attributes
+            try {
+              const savedObject = await dataService.indexPatterns.savedObjectsClient.get(
+                'index-pattern',
+                datasetId
+              );
+              const attributes = savedObject.attributes as any;
+
+              // eslint-disable-next-line no-console
+              console.log('[useValidateFieldMappings] Fetched saved object for', datasetId, {
+                hasSchemaMappings: !!attributes.schemaMappings,
+                schemaMappingsType: typeof attributes.schemaMappings,
+                schemaMappings: attributes.schemaMappings,
+              });
+
+              // Ensure schemaMappings is populated on the DataView
+              if (attributes.schemaMappings) {
+                // Parse if it's a string, otherwise use as-is
+                dataset.schemaMappings =
+                  typeof attributes.schemaMappings === 'string'
+                    ? JSON.parse(attributes.schemaMappings)
+                    : attributes.schemaMappings;
+              }
+            } catch (soErr) {
+              // eslint-disable-next-line no-console
+              console.error(`Failed to fetch saved object for dataset ${datasetId}:`, soErr);
+            }
+
+            fetchedDatasets.push(dataset);
           } catch (err) {
             // If dataset not found or error, skip it but log
             // eslint-disable-next-line no-console
-            console.warn(`Failed to fetch dataset ${datasetId}:`, err);
+            console.error(`Failed to fetch dataset ${datasetId}:`, err);
           }
         }
 
         // Validate field mappings
-        const result = validateFieldMappings(datasets);
+        const result = validateFieldMappings(fetchedDatasets);
         setValidationResult(result);
+        setDatasets(fetchedDatasets);
       } catch (err) {
         const errorObj =
           err instanceof Error ? err : new Error('Failed to validate field mappings');
         setError(errorObj);
         setValidationResult(null);
+        setDatasets([]);
       } finally {
         setLoading(false);
       }
@@ -72,6 +108,7 @@ export function useValidateFieldMappings(
 
   return {
     validationResult,
+    datasets,
     loading,
     error,
   };

@@ -28,6 +28,7 @@ interface CorrelatedTracesTableProps {
   onView: (correlation: CorrelationSavedObject) => void;
   onNavigateToTraceDataset: (traceDatasetId: string) => void;
   loading?: boolean;
+  message?: React.ReactNode;
 }
 
 export const CorrelatedTracesTable: React.FC<CorrelatedTracesTableProps> = ({
@@ -36,6 +37,7 @@ export const CorrelatedTracesTable: React.FC<CorrelatedTracesTableProps> = ({
   onView,
   onNavigateToTraceDataset,
   loading = false,
+  message,
 }) => {
   const { data, uiSettings, savedObjects } = useOpenSearchDashboards<
     DatasetManagmentContext
@@ -131,33 +133,23 @@ export const CorrelatedTracesTable: React.FC<CorrelatedTracesTableProps> = ({
           correlation.references
         );
 
-        return (
-          <EuiFlexGroup gutterSize="xs" wrap>
-            {logDatasetIds.map((datasetId) => {
-              const title = datasetTitles[datasetId] || datasetId;
-              const isCurrentDataset = datasetId === currentDatasetId;
+        const names = logDatasetIds.map((datasetId) => datasetTitles[datasetId] || datasetId);
+        const displayText = names.join(', ');
 
-              return (
-                <EuiFlexItem key={datasetId} grow={false}>
-                  <EuiToolTip content={title}>
-                    <span
-                      style={{
-                        maxWidth: '150px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        display: 'inline-block',
-                        fontWeight: isCurrentDataset ? 'bold' : 'normal',
-                      }}
-                    >
-                      {title}
-                      {isCurrentDataset && ' (current)'}
-                    </span>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
+        return (
+          <EuiToolTip content={displayText}>
+            <span
+              style={{
+                maxWidth: '300px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                display: 'inline-block',
+              }}
+            >
+              {displayText}
+            </span>
+          </EuiToolTip>
         );
       },
     },
@@ -195,18 +187,10 @@ export const CorrelatedTracesTable: React.FC<CorrelatedTracesTableProps> = ({
     },
   ];
 
-  const search = {
-    box: {
-      incremental: true,
-      schema: true,
-    },
-  };
-
   return (
     <EuiInMemoryTable
       items={correlations}
       columns={columns}
-      search={search}
       pagination={{
         pageSizeOptions: [10, 25, 50],
         initialPageSize: 10,
@@ -218,6 +202,7 @@ export const CorrelatedTracesTable: React.FC<CorrelatedTracesTableProps> = ({
         },
       }}
       loading={loading}
+      message={message}
       data-test-subj="correlatedTracesTable"
     />
   );

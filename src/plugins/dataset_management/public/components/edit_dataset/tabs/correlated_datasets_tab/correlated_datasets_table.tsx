@@ -27,6 +27,7 @@ interface CorrelatedDatasetsTableProps {
   onEdit: (correlation: CorrelationSavedObject) => void;
   onDelete: (correlationId: string) => void;
   loading?: boolean;
+  message?: React.ReactNode;
 }
 
 export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = ({
@@ -34,6 +35,7 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
   onEdit,
   onDelete,
   loading = false,
+  message,
 }) => {
   const { data, uiSettings, savedObjects } = useOpenSearchDashboards<
     DatasetManagmentContext
@@ -129,29 +131,23 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
           correlation.references
         );
 
+        const names = logDatasetIds.map((datasetId) => datasetTitles[datasetId] || datasetId);
+        const displayText = names.join(', ');
+
         return (
-          <EuiFlexGroup gutterSize="xs" wrap>
-            {logDatasetIds.map((datasetId) => {
-              const title = datasetTitles[datasetId] || datasetId;
-              return (
-                <EuiFlexItem key={datasetId} grow={false}>
-                  <EuiToolTip content={title}>
-                    <span
-                      style={{
-                        maxWidth: '150px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        display: 'inline-block',
-                      }}
-                    >
-                      {title}
-                    </span>
-                  </EuiToolTip>
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
+          <EuiToolTip content={displayText}>
+            <span
+              style={{
+                maxWidth: '300px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                display: 'inline-block',
+              }}
+            >
+              {displayText}
+            </span>
+          </EuiToolTip>
         );
       },
     },
@@ -163,7 +159,6 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
       render: (updatedAt: string) => {
         return moment(updatedAt).format(dateFormat);
       },
-      sortable: true,
     },
     {
       name: i18n.translate('datasetManagement.correlatedDatasets.table.actions', {
@@ -210,13 +205,8 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
       <EuiInMemoryTable
         items={correlations}
         columns={columns}
-        sorting={{
-          sort: {
-            field: 'updated_at',
-            direction: 'desc',
-          },
-        }}
         loading={loading}
+        message={message}
         data-test-subj="correlatedDatasetsTable"
       />
 

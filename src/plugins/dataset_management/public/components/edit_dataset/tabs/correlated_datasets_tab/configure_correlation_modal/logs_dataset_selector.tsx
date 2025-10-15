@@ -47,7 +47,7 @@ export const LogsDatasetSelector: React.FC<LogsDatasetSelectorProps> = ({
           } catch (err) {
             // Skip datasets that can't be fetched
             // eslint-disable-next-line no-console
-            console.warn(`Failed to fetch dataset ${id}:`, err);
+            console.error(`Failed to fetch dataset ${id}:`, err);
           }
         }
 

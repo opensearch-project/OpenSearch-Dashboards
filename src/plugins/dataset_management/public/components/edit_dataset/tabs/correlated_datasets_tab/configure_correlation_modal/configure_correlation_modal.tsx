@@ -65,7 +65,7 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
   const { createCorrelation, loading: creating } = useCreateCorrelation(savedObjects.client);
   const { updateCorrelation, loading: updating } = useUpdateCorrelation(savedObjects.client);
 
-  const { validationResult, loading: validating } = useValidateFieldMappings(
+  const { validationResult, datasets, loading: validating } = useValidateFieldMappings(
     selectedLogDatasetIds,
     data
   );
@@ -268,32 +268,19 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
 
         <EuiSpacer size="m" />
 
-        {/* Field Mapping Editor - shown when datasets have missing mappings */}
-        {missingMappings.length > 0 && (
+        {/* Field Mapping Editor - shown for all selected datasets */}
+        {selectedLogDatasetIds.length > 0 && !validating && datasets.length > 0 && (
           <>
             <FieldMappingEditor
               dataService={data}
               datasetIds={selectedLogDatasetIds}
+              datasets={datasets}
               missingMappings={missingMappings}
               onMappingsChange={handleFieldMappingsChange}
             />
             <EuiSpacer size="m" />
           </>
         )}
-
-        {/* Field Mappings Accordion - shown when all datasets have valid mappings */}
-        {selectedLogDatasetIds.length > 0 &&
-          validationResult &&
-          validationResult.isValid &&
-          missingMappings.length === 0 && (
-            <>
-              <FieldMappingsAccordion
-                errors={validationResult.errors}
-                isValid={validationResult.isValid}
-              />
-              <EuiSpacer size="m" />
-            </>
-          )}
 
         {/* Loading Indicator */}
         {isLoading && (

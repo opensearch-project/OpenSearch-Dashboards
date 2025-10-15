@@ -37,12 +37,23 @@ export const CorrelatedTracesTab: React.FC<CorrelatedTracesTabProps> = ({ datase
     setViewingCorrelation(null);
   }, []);
 
-  const handleNavigateToTraceDataset = useCallback(
+  const handleNavigateToTraceDatasetSamePage = useCallback(
     (traceDatasetId: string) => {
-      // Navigate to the trace dataset's correlated datasets tab
+      // Navigate to the trace dataset's correlated datasets tab in same page
       application.navigateToApp('datasets', {
         path: `/patterns/${traceDatasetId}#/?_a=(tab:correlatedDatasets)`,
       });
+    },
+    [application]
+  );
+
+  const handleNavigateToTraceDatasetNewTab = useCallback(
+    (traceDatasetId: string) => {
+      // Navigate to the trace dataset's correlated datasets tab in a new tab
+      const url = application.getUrlForApp('datasets', {
+        path: `/patterns/${traceDatasetId}#/?_a=(tab:correlatedDatasets)`,
+      });
+      window.open(url, '_blank', 'noopener,noreferrer');
     },
     [application]
   );
@@ -76,26 +87,21 @@ export const CorrelatedTracesTab: React.FC<CorrelatedTracesTabProps> = ({ datase
 
   return (
     <>
-      {correlations.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <>
-          <EuiSpacer size="m" />
-          <CorrelatedTracesTable
-            correlations={correlations}
-            currentDatasetId={dataset.id || ''}
-            onView={handleView}
-            onNavigateToTraceDataset={handleNavigateToTraceDataset}
-          />
-        </>
-      )}
+      <EuiSpacer size="m" />
+      <CorrelatedTracesTable
+        correlations={correlations}
+        currentDatasetId={dataset.id || ''}
+        onView={handleView}
+        onNavigateToTraceDataset={handleNavigateToTraceDatasetSamePage}
+        message={correlations.length === 0 ? <EmptyState /> : undefined}
+      />
 
       {viewingCorrelation && (
         <ViewCorrelationModal
           correlation={viewingCorrelation}
           currentDatasetId={dataset.id || ''}
           onClose={handleCloseModal}
-          onEditInTraceDataset={handleNavigateToTraceDataset}
+          onEditInTraceDataset={handleNavigateToTraceDatasetNewTab}
         />
       )}
     </>

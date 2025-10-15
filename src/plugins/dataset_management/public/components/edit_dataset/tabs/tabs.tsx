@@ -73,7 +73,10 @@ export function Tabs({ dataset, saveDataset, fields, history, location }: TabsPr
   });
 
   // Fetch correlation count for this dataset
-  const { count: correlationCount } = useCorrelationCount(savedObjects.client, dataset.id);
+  const { count: correlationCount, refetch: refetchCorrelationCount } = useCorrelationCount(
+    savedObjects.client,
+    dataset.id
+  );
 
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
@@ -230,7 +233,7 @@ export function Tabs({ dataset, saveDataset, fields, history, location }: TabsPr
               {useUpdatedUX && <EuiSpacer size="m" />}
               <Wrapper {...(useUpdatedUX ? { paddingSize: 'm' } : {})}>
                 <EuiSpacer size="m" />
-                <CorrelatedDatasetsTab dataset={dataset} />
+                <CorrelatedDatasetsTab dataset={dataset} onCountChange={refetchCorrelationCount} />
               </Wrapper>
             </>
           );
@@ -260,6 +263,7 @@ export function Tabs({ dataset, saveDataset, fields, history, location }: TabsPr
       scriptedFieldLanguageFilter,
       saveDataset,
       useUpdatedUX,
+      refetchCorrelationCount,
     ]
   );
 

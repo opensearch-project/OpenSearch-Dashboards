@@ -58,6 +58,7 @@ interface UseCorrelationCountResult {
   count: number;
   loading: boolean;
   error: Error | null;
+  refetch: () => Promise<void>;
 }
 
 /**
@@ -71,33 +72,33 @@ export function useCorrelationCount(
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
+  const fetchCount = useCallback(async () => {
     if (!datasetId) {
       setCount(0);
       setLoading(false);
       return;
     }
 
-    const fetchCount = async () => {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      try {
-        const client = new CorrelationsClient(savedObjectsClient);
-        const correlations = await client.find({ datasetId, perPage: 1000 });
-        setCount(correlations.length);
-      } catch (err) {
-        setError(err instanceof Error ? err : new Error('Failed to fetch correlation count'));
-        setCount(0);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCount();
+    try {
+      const client = new CorrelationsClient(savedObjectsClient);
+      const correlations = await client.find({ datasetId, perPage: 1000 });
+      setCount(correlations.length);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to fetch correlation count'));
+      setCount(0);
+    } finally {
+      setLoading(false);
+    }
   }, [savedObjectsClient, datasetId]);
 
-  return { count, loading, error };
+  useEffect(() => {
+    fetchCount();
+  }, [fetchCount]);
+
+  return { count, loading, error, refetch: fetchCount };
 }
 
 interface UseSingleCorrelationResult {
