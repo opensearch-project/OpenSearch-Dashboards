@@ -63,7 +63,7 @@ export const FieldStatsContainer = () => {
                 stats: transformFieldStatsResult(field.name, field.type, result),
               };
             } catch (error) {
-              const errorMessage = error instanceof Error ? error.message : String(error);
+              const errorMessage = error?.body?.message || String(error);
               return {
                 name: field.name,
                 stats: {

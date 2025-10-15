@@ -100,7 +100,7 @@ export async function fetchFieldDetails(
         const data = await section.fetchData(fieldName, safeDataset, services);
         return { id: section.id, data };
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorMessage = error?.body?.message || String(error);
         return { id: section.id, errorMessage };
       }
     })
@@ -171,7 +171,7 @@ export function createRowExpandHandler(
       const details = await fetchFieldDetails(fieldName, field.type, dataset, services);
       setFieldDetails((prev) => ({ ...prev, [fieldName]: details }));
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage = error?.body?.message || String(error);
       setFieldDetails((prev) => ({ ...prev, [fieldName]: { errorMessage } }));
     } finally {
       setDetailsLoading((prev) => {
