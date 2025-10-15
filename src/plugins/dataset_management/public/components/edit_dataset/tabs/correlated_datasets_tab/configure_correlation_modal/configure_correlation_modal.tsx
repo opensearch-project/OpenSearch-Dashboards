@@ -61,13 +61,18 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
   const [fieldMappings, setFieldMappings] = useState<
     Array<{ datasetId: string; mappings: Record<string, string> }>
   >([]);
+  const [allDatasetsReady, setAllDatasetsReady] = useState(false);
+  const [validationKey, setValidationKey] = useState(0);
+  const [logsSelectorTouched, setLogsSelectorTouched] = useState(false);
+  const [isAnyDatasetEditing, setIsAnyDatasetEditing] = useState(false);
 
   const { createCorrelation, loading: creating } = useCreateCorrelation(savedObjects.client);
   const { updateCorrelation, loading: updating } = useUpdateCorrelation(savedObjects.client);
 
   const { validationResult, datasets, loading: validating } = useValidateFieldMappings(
     selectedLogDatasetIds,
-    data
+    data,
+    validationKey
   );
 
   // Initialize form with existing correlation data if editing
@@ -79,6 +84,7 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
         existingCorrelation.references
       );
       setSelectedLogDatasetIds(logDatasetIds);
+      setLogsSelectorTouched(true); // Mark as touched since we have existing data
     }
   }, [existingCorrelation]);
 
@@ -90,6 +96,7 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
 
   const handleLogDatasetsChange = useCallback((datasetIds: string[]) => {
     setSelectedLogDatasetIds(datasetIds);
+    setLogsSelectorTouched(true);
   }, []);
 
   const handleFieldMappingsChange = useCallback(
@@ -98,6 +105,10 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
     },
     []
   );
+
+  const handleDatasetSaved = useCallback(() => {
+    setValidationKey((prev) => prev + 1);
+  }, []);
 
   const handleSave = useCallback(async () => {
     if (!traceDataset.id) {
@@ -110,48 +121,8 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
     }
 
     try {
-      // Save field mappings for datasets that need them
-      if (fieldMappings.length > 0) {
-        for (const { datasetId, mappings } of fieldMappings) {
-          try {
-            const dataView = await data.dataViews.get(datasetId);
-
-            // Update the dataset's schemaMappings.otelLogs
-            dataView.schemaMappings = {
-              ...dataView.schemaMappings,
-              otelLogs: {
-                ...dataView.schemaMappings?.otelLogs,
-                ...mappings,
-              },
-            };
-
-            // Save the updated dataset
-            await data.dataViews.updateSavedObject(dataView);
-          } catch (err) {
-            notifications.toasts.addDanger({
-              title: i18n.translate(
-                'datasetManagement.correlatedDatasets.modal.fieldMappingSaveError',
-                {
-                  defaultMessage: 'Failed to save field mappings for dataset {datasetId}',
-                  values: { datasetId },
-                }
-              ),
-              text: err instanceof Error ? err.message : 'Unknown error',
-            });
-            return;
-          }
-        }
-
-        // Show success toast for field mappings update
-        notifications.toasts.addSuccess({
-          title: i18n.translate(
-            'datasetManagement.correlatedDatasets.modal.fieldMappingSaveSuccess',
-            {
-              defaultMessage: 'Field mappings saved successfully',
-            }
-          ),
-        });
-      }
+      // Schema mappings are already saved individually per dataset
+      // Only create/update correlation here
 
       if (existingCorrelation) {
         // Update existing correlation
@@ -183,8 +154,6 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
     traceDataset.id,
     existingCorrelation,
     selectedLogDatasetIds,
-    fieldMappings,
-    data,
     createCorrelation,
     updateCorrelation,
     onSave,
@@ -222,7 +191,8 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
     !isLoading &&
     selectedLogDatasetIds.length > 0 &&
     !maxDatasetsError &&
-    allRequiredMappingsFilled;
+    allDatasetsReady &&
+    !isAnyDatasetEditing;
 
   return (
     <EuiModal
@@ -262,8 +232,8 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
           dataService={data}
           selectedDatasetIds={selectedLogDatasetIds}
           onChange={handleLogDatasetsChange}
-          isInvalid={!!maxDatasetsError}
-          error={maxDatasetsError}
+          isInvalid={logsSelectorTouched && !!maxDatasetsError}
+          error={logsSelectorTouched ? maxDatasetsError : ''}
         />
 
         <EuiSpacer size="m" />
@@ -277,6 +247,10 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
               datasets={datasets}
               missingMappings={missingMappings}
               onMappingsChange={handleFieldMappingsChange}
+              notifications={notifications}
+              onAllDatasetsReady={setAllDatasetsReady}
+              onDatasetSaved={handleDatasetSaved}
+              onEditingStateChange={setIsAnyDatasetEditing}
             />
             <EuiSpacer size="m" />
           </>

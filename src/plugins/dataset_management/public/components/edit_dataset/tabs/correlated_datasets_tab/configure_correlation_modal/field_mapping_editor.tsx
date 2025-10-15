@@ -15,9 +15,11 @@ import {
   EuiIcon,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataPublicPluginStart, IndexPatternField } from '../../../../../../../data/public';
+import { NotificationsStart } from '../../../../../../../../core/public';
 
 interface FieldMappings {
   traceId?: string;
@@ -45,12 +47,17 @@ interface FieldMappingEditorProps {
   onMappingsChange: (
     datasetMappings: Array<{ datasetId: string; mappings: FieldMappings }>
   ) => void;
+  notifications: NotificationsStart;
+  onAllDatasetsReady?: (ready: boolean) => void;
+  onDatasetSaved?: () => void;
+  onEditingStateChange?: (isEditing: boolean) => void;
 }
 
 interface TableRow {
   datasetId: string;
   datasetTitle: string;
   hasError: boolean;
+  isComplete: boolean;
 }
 
 const TIME_FIELD_TYPES = ['date', 'date_nanos'];
@@ -69,7 +76,8 @@ const FieldSelector: React.FC<{
   fields: IndexPatternField[];
   selectedValue: string | undefined;
   onChange: (datasetId: string, fieldName: keyof FieldMappings, value: string | undefined) => void;
-}> = React.memo(({ datasetId, fieldName, fields, selectedValue, onChange }) => {
+  isInvalid?: boolean;
+}> = React.memo(({ datasetId, fieldName, fields, selectedValue, onChange, isInvalid }) => {
   const isTimestamp = fieldName === 'timestamp';
   const filteredFields = isTimestamp
     ? fields.filter((field) => TIME_FIELD_TYPES.includes(field.type))
@@ -101,6 +109,7 @@ const FieldSelector: React.FC<{
       onChange={handleChange}
       isClearable={true}
       fullWidth
+      isInvalid={isInvalid}
       data-test-subj={`fieldSelector-${fieldName}-${datasetId}`}
     />
   );
@@ -114,10 +123,35 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
   datasets,
   missingMappings,
   onMappingsChange,
+  notifications,
+  onAllDatasetsReady,
+  onDatasetSaved,
+  onEditingStateChange,
 }) => {
   const [datasetFieldMappings, setDatasetFieldMappings] = useState<DatasetFieldMappings[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+  const [editingDatasetId, setEditingDatasetId] = useState<string | null>(null);
+  const [originalMappings, setOriginalMappings] = useState<Record<string, FieldMappings>>({});
+  const [savingDatasetId, setSavingDatasetId] = useState<string | null>(null);
+  const [completedDatasets, setCompletedDatasets] = useState<Set<string>>(new Set());
+  const [invalidFields, setInvalidFields] = useState<Record<string, Set<keyof FieldMappings>>>({});
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const hasInitialized = useRef(false);
+  const originalMappingsInitialized = useRef(false);
+
+  // Helper function to check if dataset is complete
+  const isDatasetComplete = useCallback(
+    (datasetId: string) => {
+      const dataset = datasetFieldMappings.find((ds) => ds.datasetId === datasetId);
+      if (!dataset) return false;
+
+      return REQUIRED_FIELDS.every(
+        (field) => dataset.mappings[field] && dataset.mappings[field].length > 0
+      );
+    },
+    [datasetFieldMappings]
+  );
 
   // Process pre-fetched datasets to extract field mappings
   useEffect(() => {
@@ -146,12 +180,6 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
             // Extract existing schemaMappings.otelLogs if available
             let existingMappings: FieldMappings = {};
             try {
-              // eslint-disable-next-line no-console
-              console.log(`[FieldMappingEditor] Processing dataset ${dataView.id}`, {
-                schemaMappings: dataView.schemaMappings,
-                type: typeof dataView.schemaMappings,
-              });
-
               // DataView.schemaMappings can be either a string (from saved object) or object (already parsed)
               const schemaMappings =
                 typeof dataView.schemaMappings === 'string'
@@ -166,15 +194,6 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
                   serviceName: otelLogs.serviceName || undefined,
                   timestamp: otelLogs.timestamp || undefined,
                 };
-
-                // eslint-disable-next-line no-console
-                console.log(
-                  `[FieldMappingEditor] Extracted mappings for ${dataView.id}:`,
-                  existingMappings
-                );
-              } else {
-                // eslint-disable-next-line no-console
-                console.log(`[FieldMappingEditor] No otelLogs mappings found for ${dataView.id}`);
               }
             } catch (parseErr) {
               // If parsing fails, use empty mappings
@@ -210,8 +229,49 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
     }
   }, [datasets, dataService]);
 
+  // Store original mappings ONLY on initial load (for cancel functionality)
+  useEffect(() => {
+    if (originalMappingsInitialized.current || datasetFieldMappings.length === 0) return;
+
+    const original: Record<string, FieldMappings> = {};
+    datasetFieldMappings.forEach((ds) => {
+      original[ds.datasetId] = { ...ds.mappings };
+    });
+    setOriginalMappings(original);
+    originalMappingsInitialized.current = true;
+  }, [datasetFieldMappings]);
+
+  // Track completed datasets ONLY on initial load from saved objects
+  useEffect(() => {
+    if (hasInitialized.current || datasetFieldMappings.length === 0) return;
+
+    const completed = new Set<string>();
+    datasetFieldMappings.forEach((ds) => {
+      if (isDatasetComplete(ds.datasetId)) {
+        completed.add(ds.datasetId);
+      }
+    });
+
+    setCompletedDatasets(completed);
+    hasInitialized.current = true;
+  }, [datasetFieldMappings, isDatasetComplete]);
+
   const handleFieldChange = useCallback(
     (datasetId: string, fieldName: keyof FieldMappings, value: string | undefined) => {
+      // Clear invalid state for this field when user changes it
+      setInvalidFields((prev) => {
+        if (prev[datasetId]) {
+          const newSet = new Set(prev[datasetId]);
+          newSet.delete(fieldName);
+          if (newSet.size === 0) {
+            const { [datasetId]: _, ...rest } = prev;
+            return rest;
+          }
+          return { ...prev, [datasetId]: newSet };
+        }
+        return prev;
+      });
+
       setDatasetFieldMappings((prev) => {
         const updated = prev.map((ds) => {
           if (ds.datasetId === datasetId) {
@@ -245,6 +305,140 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
     [onMappingsChange]
   );
 
+  // Handler to start editing a dataset
+  const handleStartEdit = useCallback((datasetId: string) => {
+    setEditingDatasetId(datasetId);
+  }, []);
+
+  // Handler to cancel editing and revert changes
+  const handleCancelEdit = useCallback(
+    (datasetId: string) => {
+      // Revert to original mappings
+      setDatasetFieldMappings((prev) =>
+        prev.map((ds) =>
+          ds.datasetId === datasetId ? { ...ds, mappings: { ...originalMappings[datasetId] } } : ds
+        )
+      );
+
+      // Clear invalid fields for this dataset
+      setInvalidFields((prev) => {
+        const { [datasetId]: _, ...rest } = prev;
+        return rest;
+      });
+
+      setEditingDatasetId(null);
+    },
+    [originalMappings]
+  );
+
+  // Handler to save dataset schema mappings
+  const handleSaveDataset = useCallback(
+    async (datasetId: string) => {
+      const dataset = datasetFieldMappings.find((ds) => ds.datasetId === datasetId);
+      if (!dataset) return;
+
+      // Validate that all required fields are filled
+      const missingFields = REQUIRED_FIELDS.filter(
+        (field) => !dataset.mappings[field] || dataset.mappings[field].trim() === ''
+      );
+
+      if (missingFields.length > 0) {
+        // Mark fields as invalid
+        setInvalidFields((prev) => ({
+          ...prev,
+          [datasetId]: new Set(missingFields),
+        }));
+
+        // Show error toast
+        notifications.toasts.addDanger({
+          title: i18n.translate(
+            'datasetManagement.correlatedDatasets.fieldMapping.validationErrorTitle',
+            {
+              defaultMessage: 'Missing required fields',
+            }
+          ),
+          text: i18n.translate(
+            'datasetManagement.correlatedDatasets.fieldMapping.validationErrorText',
+            {
+              defaultMessage: 'Please select values for all required fields: {fields}',
+              values: {
+                fields: missingFields.join(', '),
+              },
+            }
+          ),
+        });
+        return;
+      }
+
+      setSavingDatasetId(datasetId);
+      try {
+        const dataView = await dataService.dataViews.get(datasetId);
+
+        // Update schema mappings
+        dataView.schemaMappings = {
+          ...dataView.schemaMappings,
+          otelLogs: { ...dataset.mappings },
+        };
+
+        await dataService.dataViews.updateSavedObject(dataView);
+
+        // Update original mappings after successful save
+        setOriginalMappings((prev) => ({
+          ...prev,
+          [datasetId]: { ...dataset.mappings },
+        }));
+
+        // Update completed datasets if all fields are now filled
+        if (isDatasetComplete(datasetId)) {
+          setCompletedDatasets((prev) => new Set([...prev, datasetId]));
+        }
+
+        // Clear invalid fields after successful save
+        setInvalidFields((prev) => {
+          const { [datasetId]: _, ...rest } = prev;
+          return rest;
+        });
+
+        setEditingDatasetId(null);
+
+        // Show success toast
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'datasetManagement.correlatedDatasets.fieldMapping.saveSuccessTitle',
+            {
+              defaultMessage: 'Field mappings saved for {datasetTitle}',
+              values: { datasetTitle: dataset.datasetTitle },
+            }
+          ),
+        });
+
+        // Notify parent to re-check if all datasets are ready
+        onMappingsChange(
+          datasetFieldMappings.map((ds) => ({
+            datasetId: ds.datasetId,
+            mappings: ds.mappings,
+          }))
+        );
+
+        // Trigger re-validation in parent
+        onDatasetSaved?.();
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: i18n.translate(
+            'datasetManagement.correlatedDatasets.fieldMapping.saveErrorTitle',
+            {
+              defaultMessage: 'Failed to save field mappings',
+            }
+          ),
+          text: error instanceof Error ? error.message : 'Unknown error',
+        });
+      } finally {
+        setSavingDatasetId(null);
+      }
+    },
+    [datasetFieldMappings, dataService, isDatasetComplete, notifications, onMappingsChange] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
   // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
@@ -254,19 +448,43 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
     };
   }, []);
 
-  if (datasets.length === 0) {
-    return null;
-  }
-
   // Build table rows from loaded datasets
   const tableRows: TableRow[] = datasetFieldMappings.map((ds) => {
     const missingForDataset = missingMappings.find((m) => m.datasetId === ds.datasetId);
+    const isComplete = completedDatasets.has(ds.datasetId);
+
     return {
       datasetId: ds.datasetId,
       datasetTitle: ds.datasetTitle,
       hasError: missingForDataset ? missingForDataset.missingFields.length > 0 : false,
+      isComplete,
     };
   });
+
+  const hasErrors = tableRows.some((row) => row.hasError);
+
+  // Auto-open accordion when there are missing mappings
+  useEffect(() => {
+    if (hasErrors && missingMappings.length > 0) {
+      setIsAccordionOpen(true);
+    }
+  }, [hasErrors, missingMappings.length]);
+
+  // Track and emit readiness state
+  useEffect(() => {
+    const allReady =
+      datasetFieldMappings.length > 0 && completedDatasets.size === datasetFieldMappings.length;
+    onAllDatasetsReady?.(allReady);
+  }, [datasetFieldMappings, completedDatasets, onAllDatasetsReady]);
+
+  // Notify parent when editing state changes
+  useEffect(() => {
+    onEditingStateChange?.(editingDatasetId !== null);
+  }, [editingDatasetId, onEditingStateChange]);
+
+  if (datasets.length === 0) {
+    return null;
+  }
 
   const columns: Array<EuiBasicTableColumn<TableRow>> = [
     {
@@ -274,11 +492,46 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
       name: i18n.translate('datasetManagement.correlatedDatasets.fieldMapping.logsDatasetColumn', {
         defaultMessage: 'Logs dataset',
       }),
-      width: '200px',
+      width: '250px',
       render: (title: string, row: TableRow) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {row.hasError && <EuiIcon type="alert" color="danger" size="m" />}
-          <span>{title}</span>
+          {/* Status Icon */}
+          {row.isComplete ? (
+            <EuiIcon type="check" color="success" size="m" />
+          ) : (
+            <EuiIcon type="alert" color="danger" size="m" />
+          )}
+
+          {/* Dataset Name */}
+          <span style={{ flex: 1 }}>{title}</span>
+
+          {/* Action Icons */}
+          {editingDatasetId === row.datasetId ? (
+            <>
+              <EuiButtonIcon
+                iconType="cross"
+                onClick={() => handleCancelEdit(row.datasetId)}
+                aria-label="Cancel"
+                disabled={savingDatasetId === row.datasetId}
+                data-test-subj={`cancelEdit-${row.datasetId}`}
+              />
+              <EuiButtonIcon
+                iconType="check"
+                onClick={() => handleSaveDataset(row.datasetId)}
+                aria-label="Save"
+                isLoading={savingDatasetId === row.datasetId}
+                disabled={savingDatasetId === row.datasetId}
+                data-test-subj={`saveDataset-${row.datasetId}`}
+              />
+            </>
+          ) : (
+            <EuiButtonIcon
+              iconType="pencil"
+              onClick={() => handleStartEdit(row.datasetId)}
+              aria-label="Edit"
+              data-test-subj={`editDataset-${row.datasetId}`}
+            />
+          )}
         </div>
       ),
     },
@@ -291,15 +544,23 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
         const dataset = datasetFieldMappings.find((ds) => ds.datasetId === row.datasetId);
         if (!dataset) return null;
 
-        return (
-          <FieldSelector
-            datasetId={row.datasetId}
-            fieldName="timestamp"
-            fields={dataset.fields}
-            selectedValue={dataset.mappings.timestamp}
-            onChange={handleFieldChange}
-          />
-        );
+        // If in edit mode for this dataset, show selector
+        if (editingDatasetId === row.datasetId) {
+          const isInvalid = invalidFields[row.datasetId]?.has('timestamp') || false;
+          return (
+            <FieldSelector
+              datasetId={row.datasetId}
+              fieldName="timestamp"
+              fields={dataset.fields}
+              selectedValue={dataset.mappings.timestamp}
+              onChange={handleFieldChange}
+              isInvalid={isInvalid}
+            />
+          );
+        }
+
+        // Otherwise show read-only text
+        return <span>{dataset.mappings.timestamp || '—'}</span>;
       },
     },
     {
@@ -311,15 +572,23 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
         const dataset = datasetFieldMappings.find((ds) => ds.datasetId === row.datasetId);
         if (!dataset) return null;
 
-        return (
-          <FieldSelector
-            datasetId={row.datasetId}
-            fieldName="traceId"
-            fields={dataset.fields}
-            selectedValue={dataset.mappings.traceId}
-            onChange={handleFieldChange}
-          />
-        );
+        // If in edit mode for this dataset, show selector
+        if (editingDatasetId === row.datasetId) {
+          const isInvalid = invalidFields[row.datasetId]?.has('traceId') || false;
+          return (
+            <FieldSelector
+              datasetId={row.datasetId}
+              fieldName="traceId"
+              fields={dataset.fields}
+              selectedValue={dataset.mappings.traceId}
+              onChange={handleFieldChange}
+              isInvalid={isInvalid}
+            />
+          );
+        }
+
+        // Otherwise show read-only text
+        return <span>{dataset.mappings.traceId || '—'}</span>;
       },
     },
     {
@@ -331,15 +600,23 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
         const dataset = datasetFieldMappings.find((ds) => ds.datasetId === row.datasetId);
         if (!dataset) return null;
 
-        return (
-          <FieldSelector
-            datasetId={row.datasetId}
-            fieldName="spanId"
-            fields={dataset.fields}
-            selectedValue={dataset.mappings.spanId}
-            onChange={handleFieldChange}
-          />
-        );
+        // If in edit mode for this dataset, show selector
+        if (editingDatasetId === row.datasetId) {
+          const isInvalid = invalidFields[row.datasetId]?.has('spanId') || false;
+          return (
+            <FieldSelector
+              datasetId={row.datasetId}
+              fieldName="spanId"
+              fields={dataset.fields}
+              selectedValue={dataset.mappings.spanId}
+              onChange={handleFieldChange}
+              isInvalid={isInvalid}
+            />
+          );
+        }
+
+        // Otherwise show read-only text
+        return <span>{dataset.mappings.spanId || '—'}</span>;
       },
     },
     {
@@ -351,20 +628,26 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
         const dataset = datasetFieldMappings.find((ds) => ds.datasetId === row.datasetId);
         if (!dataset) return null;
 
-        return (
-          <FieldSelector
-            datasetId={row.datasetId}
-            fieldName="serviceName"
-            fields={dataset.fields}
-            selectedValue={dataset.mappings.serviceName}
-            onChange={handleFieldChange}
-          />
-        );
+        // If in edit mode for this dataset, show selector
+        if (editingDatasetId === row.datasetId) {
+          const isInvalid = invalidFields[row.datasetId]?.has('serviceName') || false;
+          return (
+            <FieldSelector
+              datasetId={row.datasetId}
+              fieldName="serviceName"
+              fields={dataset.fields}
+              selectedValue={dataset.mappings.serviceName}
+              onChange={handleFieldChange}
+              isInvalid={isInvalid}
+            />
+          );
+        }
+
+        // Otherwise show read-only text
+        return <span>{dataset.mappings.serviceName || '—'}</span>;
       },
     },
   ];
-
-  const hasErrors = tableRows.some((row) => row.hasError);
 
   return (
     <>
@@ -377,10 +660,32 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
           }
         )}
         paddingSize="none"
-        initialIsOpen={true}
+        initialIsOpen={false}
+        forceState={isAccordionOpen ? 'open' : 'closed'}
+        onToggle={(isOpen) => setIsAccordionOpen(isOpen)}
         data-test-subj="manageFieldMappingsAccordion"
       >
         <EuiSpacer size="s" />
+
+        {/* Show success banner when all datasets are ready */}
+        {!hasErrors &&
+          datasetFieldMappings.length > 0 &&
+          completedDatasets.size === datasetFieldMappings.length && (
+            <>
+              <EuiCallOut
+                title={i18n.translate(
+                  'datasetManagement.correlatedDatasets.fieldMapping.successTitle',
+                  {
+                    defaultMessage: 'All logs datasets are ready for correlation',
+                  }
+                )}
+                color="success"
+                iconType="check"
+                size="s"
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
 
         {/* Show error callout only when there are missing mappings */}
         {hasErrors && missingMappings.length > 0 && (
@@ -401,7 +706,7 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
                   'datasetManagement.correlatedDatasets.fieldMapping.calloutMessage',
                   {
                     defaultMessage:
-                      'The following datasets are missing fields to correlate with trace data. Ensure the logs dataset contain primary fields:',
+                      'The following datasets are missing fields to correlate with trace data. Click the pencil icon to configure field mappings:',
                   }
                 )}
               </p>

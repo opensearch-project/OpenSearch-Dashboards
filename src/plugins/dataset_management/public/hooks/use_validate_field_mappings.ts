@@ -21,7 +21,8 @@ interface UseValidateFieldMappingsResult {
  */
 export function useValidateFieldMappings(
   logDatasetIds: string[],
-  dataService: DataPublicPluginStart
+  dataService: DataPublicPluginStart,
+  validationKey?: number
 ): UseValidateFieldMappingsResult {
   const [validationResult, setValidationResult] = useState<CorrelationValidationResult | null>(
     null
@@ -60,13 +61,6 @@ export function useValidateFieldMappings(
               );
               const attributes = savedObject.attributes as any;
 
-              // eslint-disable-next-line no-console
-              console.log('[useValidateFieldMappings] Fetched saved object for', datasetId, {
-                hasSchemaMappings: !!attributes.schemaMappings,
-                schemaMappingsType: typeof attributes.schemaMappings,
-                schemaMappings: attributes.schemaMappings,
-              });
-
               // Ensure schemaMappings is populated on the DataView
               if (attributes.schemaMappings) {
                 // Parse if it's a string, otherwise use as-is
@@ -104,7 +98,7 @@ export function useValidateFieldMappings(
     };
 
     validateDatasets();
-  }, [JSON.stringify(logDatasetIds), dataService]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(logDatasetIds), dataService, validationKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
     validationResult,
