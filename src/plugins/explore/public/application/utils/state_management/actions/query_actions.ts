@@ -46,9 +46,7 @@ const activeQueryAbortControllers = new Map<string, AbortController>();
 export const abortAllActiveQueries = () => {
   activeQueryAbortControllers.forEach((controller, cacheKey) => {
     // This triggers the abort signal, which in turn:
-    // 1. Cancels frontend HTTP requests immediately
-    // 2. Triggers AbortSignal event listeners in search strategies
-    // 3. Search strategies then call their backend cancel APIs
+    // Cancels frontend HTTP requests immediately
     controller.abort();
   });
   activeQueryAbortControllers.clear();
