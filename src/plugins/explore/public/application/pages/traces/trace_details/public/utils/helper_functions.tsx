@@ -105,7 +105,7 @@ export function MissingFieldsEmptyState({
     <div style={{ padding: '24px' }}>
       <EuiCallOut
         title={i18n.translate('explore.traceDetails.missingFields.title', {
-          defaultMessage: 'Trace visualization requires additional field mapping',
+          defaultMessage: 'Unable to display trace detail',
         })}
         color="warning"
         iconType="iInCircle"
@@ -113,7 +113,8 @@ export function MissingFieldsEmptyState({
         <EuiText size="s">
           <p>
             {i18n.translate('explore.traceDetails.missingFields.description', {
-              defaultMessage: 'The trace detail view requires fields that follow the ',
+              defaultMessage:
+                'The trace detail page cannot be displayed due to missing fields from the ',
             })}
             <EuiLink
               href="https://github.com/opensearch-project/data-prepper/blob/main/data-prepper-plugins/opensearch/src/main/resources/index-template/otel-v1-apm-span-index-standard-template.json"
@@ -121,16 +122,29 @@ export function MissingFieldsEmptyState({
               external
             >
               {i18n.translate('explore.traceDetails.missingFields.schemaLink', {
-                defaultMessage: 'Data-Prepper schema',
+                defaultMessage: 'Data-Prepper OTel schema',
               })}
             </EuiLink>
             {i18n.translate('explore.traceDetails.missingFields.descriptionContinued', {
-              defaultMessage: '. The following fields are missing or not properly mapped:',
+              defaultMessage:
+                '. We recommend checking the source data or dataset for missing or improperly mapped fields.',
             })}
           </p>
         </EuiText>
 
         <EuiSpacer size="m" />
+
+        <EuiText size="s">
+          <p>
+            <strong>
+              {i18n.translate('explore.traceDetails.missingFields.missingFieldsLabel', {
+                defaultMessage: 'Missing fields:',
+              })}
+            </strong>
+          </p>
+        </EuiText>
+
+        <EuiSpacer size="s" />
 
         <EuiText size="s">
           <div>
@@ -140,16 +154,6 @@ export function MissingFieldsEmptyState({
               </div>
             ))}
           </div>
-        </EuiText>
-
-        <EuiSpacer size="l" />
-
-        <EuiText size="s">
-          <p>
-            {i18n.translate('explore.traceDetails.missingFields.instruction', {
-              defaultMessage: 'Please update your data ingestion to include these required fields.',
-            })}
-          </p>
         </EuiText>
       </EuiCallOut>
     </div>
