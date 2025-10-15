@@ -412,7 +412,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
             {transformedHits.length > 0 && (
               <>
                 <div className="exploreTraceView__tabsContainer">
-                  <EuiPanel paddingSize="s">
+                  <EuiPanel paddingSize="none" color="transparent" hasBorder={false}>
                     <TraceDetailTabs
                       activeTab={activeTab}
                       setActiveTab={setActiveTab}
@@ -430,7 +430,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                 {/* Filter badges section */}
                 {spanFilters.length > 0 && (
                   <div className="exploreTraceView__filtersContainer">
-                    <EuiPanel paddingSize="s">
+                    <EuiPanel paddingSize="none">
                       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
                         <EuiFlexItem>
                           <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
@@ -489,6 +489,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                         initialSize={isFlyout ? 50 : 70}
                         minSize={isFlyout ? '30%' : '50%'}
                         wrapperPadding="none"
+                        paddingSize="none"
+                        className="visStylePanelLeft"
                       >
                         <div className="exploreTraceView__contentPanel">
                           {/* Tab content */}
@@ -540,6 +542,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                       <EuiResizablePanel
                         initialSize={isFlyout ? 50 : 30}
                         minSize={isFlyout ? '30%' : '300px'}
+                        paddingSize="none"
+                        className="visStylePanelRight"
                       >
                         <div className="exploreTraceView__sidebarPanel">
                           <SpanDetailTabs
