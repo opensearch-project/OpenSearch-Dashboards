@@ -8,7 +8,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { TableCell, ITableCellProps } from './table_cell';
 import { useDatasetContext } from '../../../application/context';
 import { useTraceFlyoutContext } from '../../../application/pages/traces/trace_flyout/trace_flyout_context';
-import { isOnTracesPage } from './trace_utils/trace_utils';
 
 jest.mock('../../../application/context', () => ({
   useDatasetContext: jest.fn(),
@@ -32,6 +31,7 @@ describe('TableCell', () => {
     onFilter: mockOnFilter,
     fieldMapping: { value: 'test' },
     isTimeField: false,
+    isOnTracesPage: false,
   };
 
   beforeEach(() => {
@@ -141,8 +141,19 @@ describe('TableCell', () => {
       fieldMapping: { value: 'test' },
       isTimeField: false,
       rowData: {
-        traceId: 'test-trace-id-456',
-        spanId: 'test-span-id-123',
+        _index: 'test-index',
+        _id: 'test-id',
+        _score: 1,
+        _source: {
+          traceId: 'test-trace-id-456',
+          spanId: 'test-span-id-123',
+          parentSpanId: 'test-parent-span-id-789',
+          serviceName: 'test-service',
+          name: 'test-operation',
+          startTimeUnixNano: '1634567890000000000',
+          endTimeUnixNano: '1634567891000000000',
+          'status.code': '200',
+        },
       },
       isOnTracesPage: true,
     };
@@ -219,8 +230,19 @@ describe('TableCell', () => {
       const propsWithSourceTraceId = {
         ...spanIdProps,
         rowData: {
-          _source: { traceId: 'source-trace-id' },
+          _index: 'test-index',
+          _id: 'test-id',
+          _score: 1,
+          _source: {
+            traceId: 'source-trace-id',
+            serviceName: 'test-service',
+            name: 'test-operation',
+            startTimeUnixNano: '1634567890000000000',
+            endTimeUnixNano: '1634567891000000000',
+          },
           spanId: 'test-span-id-123',
+          parentSpanId: 'test-parent-span-id-789',
+          'status.code': '200',
         },
       };
 
@@ -234,24 +256,35 @@ describe('TableCell', () => {
       );
     });
 
-    it('handles missing trace ID gracefully', () => {
-      const propsWithoutTraceId = {
+    it('renders non-clickable text when required fields are missing', () => {
+      const propsWithMissingFields = {
         ...spanIdProps,
         rowData: {
-          spanId: 'test-span-id-123',
-          // No traceId
+          _index: 'test-index',
+          _id: 'test-id',
+          _score: 1,
+          _source: {
+            spanId: 'test-span-id-123',
+            parentSpanId: 'test-parent-span-id-789',
+            serviceName: 'test-service',
+            name: 'test-operation',
+            startTimeUnixNano: '1634567890000000000',
+            endTimeUnixNano: '1634567891000000000',
+            'status.code': '200',
+            // Missing traceId - validation should fail
+          },
         },
       };
 
-      render(<TableCell {...propsWithoutTraceId} />);
-      const spanIdLink = screen.getByTestId('spanIdLink');
-      fireEvent.click(spanIdLink);
+      render(<TableCell {...propsWithMissingFields} />);
 
-      expect(window.open).toHaveBeenCalledWith(
-        expect.stringContaining("spanId:'test-span-id-123'"),
-        '_blank'
-      );
-      expect(window.open).toHaveBeenCalledWith(expect.not.stringContaining('traceId:'), '_blank');
+      // Should not render clickable link when validation fails
+      expect(screen.queryByTestId('spanIdLink')).not.toBeInTheDocument();
+
+      // Should render non-clickable text with tooltip instead
+      const nonClickableText = screen.getByText('test-span-id-123');
+      expect(nonClickableText).toBeInTheDocument();
+      expect(nonClickableText.closest('.euiToolTipAnchor')).toBeTruthy();
     });
 
     it('works when traces page is detected via hash', () => {
@@ -294,9 +327,21 @@ describe('TableCell', () => {
       onFilter: mockOnFilter,
       fieldMapping: { value: 'test' },
       isTimeField: true,
+      isOnTracesPage: true,
       rowData: {
-        traceId: 'test-trace-id-456',
-        spanId: 'test-span-id-123',
+        _index: 'test-index',
+        _id: 'test-id',
+        _score: 1,
+        _source: {
+          traceId: 'test-trace-id-456',
+          spanId: 'test-span-id-123',
+          parentSpanId: 'test-parent-span-id-789',
+          serviceName: 'test-service',
+          name: 'test-operation',
+          startTimeUnixNano: '1634567890000000000',
+          endTimeUnixNano: '1634567891000000000',
+          'status.code': '200',
+        },
       },
     };
 
