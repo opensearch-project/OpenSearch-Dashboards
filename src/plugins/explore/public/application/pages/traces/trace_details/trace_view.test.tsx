@@ -180,6 +180,8 @@ describe('TraceDetails', () => {
       startTimeUnixNano: '2023-01-01T00:00:00.000000000Z',
       endTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
       durationInNanos: 1000000000,
+      parentSpanId: '',
+      status: { code: 0 },
     },
     {
       spanId: 'span-2',
@@ -191,6 +193,8 @@ describe('TraceDetails', () => {
       startTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
       endTimeUnixNano: '2023-01-01T00:00:02.000000000Z',
       durationInNanos: 1000000000,
+      parentSpanId: 'span-1',
+      status: { code: 0 },
     },
   ];
 
@@ -731,6 +735,7 @@ describe('TraceDetails', () => {
         status: { code: 2 }, // Error
         startTimeUnixNano: '2023-01-01T00:00:00.000000000Z',
         endTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
+        parentSpanId: '',
       },
       {
         spanId: 'span-2',
@@ -740,6 +745,7 @@ describe('TraceDetails', () => {
         status: { code: 0 }, // No error
         startTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
         endTimeUnixNano: '2023-01-01T00:00:02.000000000Z',
+        parentSpanId: 'span-1',
       },
     ];
 
