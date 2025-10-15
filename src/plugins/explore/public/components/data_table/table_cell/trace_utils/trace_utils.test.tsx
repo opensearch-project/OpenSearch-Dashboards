@@ -9,7 +9,6 @@ import {
   isOnTracesPage,
   isSpanIdColumn,
   isDurationColumn,
-  extractFieldFromRowData,
   buildTraceDetailsUrl,
   getTraceDetailsUrlParams,
   handleSpanIdNavigation,

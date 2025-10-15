@@ -29,6 +29,10 @@ export const isSpanIdColumn = (columnId: string): boolean => {
   return columnId === 'spanId' || columnId === 'span_id' || columnId === 'spanID';
 };
 
+export const isDurationColumn = (columnId: string) => {
+  return columnId === 'durationNano' || columnId === 'durationInNanos';
+};
+
 export const buildTraceDetailsUrl = (
   spanIdValue: string = '',
   traceIdValue: string,
