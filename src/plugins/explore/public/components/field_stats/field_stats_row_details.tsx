@@ -82,9 +82,10 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({
 
   const hasAnyData = applicableSections.some((section) => {
     const sectionData = (details as any)[section.id];
-    return (
-      sectionData && !sectionData.error && (!Array.isArray(sectionData) || sectionData.length > 0)
-    );
+    // Consider it as having data if:
+    // 1. Section has data (even if it's an error, we want to show the error)
+    // 2. OR section has non-empty array data
+    return sectionData && (!Array.isArray(sectionData) || sectionData.length > 0);
   });
 
   if (!hasAnyData) {
@@ -111,9 +112,28 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({
       {applicableSections.map((section) => {
         const sectionData = (details as any)[section.id];
 
-        // skip if no data or error
-        if (!sectionData || sectionData.error) {
+        // skip if no data at all
+        if (!sectionData) {
           return null;
+        }
+
+        // show error callout if section errored
+        if (sectionData.error) {
+          return (
+            <EuiFlexItem key={section.id}>
+              <EuiPanel paddingSize="s">
+                <EuiCallOut
+                  size="s"
+                  color="warning"
+                  iconType="alert"
+                  title={i18n.translate('explore.fieldStats.rowDetails.sectionLoadFailed', {
+                    defaultMessage: 'Failed to load {sectionTitle}',
+                    values: { sectionTitle: section.title },
+                  })}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          );
         }
 
         // skip empty arrays

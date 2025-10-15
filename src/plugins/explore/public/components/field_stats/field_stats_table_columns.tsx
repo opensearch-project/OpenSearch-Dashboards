@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiButtonIcon, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FieldStatsItem } from './utils/field_stats_types';
 import { FieldIcon } from '../../../../opensearch_dashboards_react/public';
@@ -66,6 +66,21 @@ export const getFieldStatsColumns = ({
       width: '200px',
       align: 'right',
       render: (docCount: number, item: FieldStatsItem) => {
+        if (item.error) {
+          return (
+            <EuiToolTip
+              content={i18n.translate('explore.fieldStats.table.failedToLoadStatistics', {
+                defaultMessage: 'Failed to load statistics',
+              })}
+            >
+              <EuiBadge>
+                {i18n.translate('explore.fieldStats.table.errorIndicator', {
+                  defaultMessage: 'Unsupported',
+                })}
+              </EuiBadge>
+            </EuiToolTip>
+          );
+        }
         return (
           <span>
             {docCount.toLocaleString()} ({item.docPercentage.toFixed(1)}%)
@@ -81,7 +96,22 @@ export const getFieldStatsColumns = ({
       sortable: true,
       width: '180px',
       align: 'right',
-      render: (count: number) => {
+      render: (count: number, item: FieldStatsItem) => {
+        if (item.error) {
+          return (
+            <EuiToolTip
+              content={i18n.translate('explore.fieldStats.table.failedToLoadStatistics', {
+                defaultMessage: 'Failed to load statistics',
+              })}
+            >
+              <EuiBadge>
+                {i18n.translate('explore.fieldStats.table.errorIndicator', {
+                  defaultMessage: 'Unsupported',
+                })}
+              </EuiBadge>
+            </EuiToolTip>
+          );
+        }
         return count?.toLocaleString() || '—';
       },
     },

@@ -121,7 +121,7 @@ describe('FieldStatsRowDetails', () => {
     expect(component.find('h4').text()).toBe('Top Values');
   });
 
-  it('skips sections with error data', () => {
+  it('shows error callout for sections with error data', () => {
     const MockComponent = ({ data }: any) => (
       <div className="mock-section">{data.length} items</div>
     );
@@ -142,7 +142,13 @@ describe('FieldStatsRowDetails', () => {
     component = mountWithIntl(
       <FieldStatsRowDetails field={mockField} details={detailsWithError} />
     );
+    // Should not render the mock component
     expect(component.find('.mock-section').exists()).toBe(false);
+    // Should render an error callout instead
+    const callOut = component.find(EuiCallOut);
+    expect(callOut.exists()).toBe(true);
+    expect(callOut.prop('color')).toBe('warning');
+    expect(callOut.prop('title')).toContain('Failed to load Top Values');
   });
 
   it('skips sections with empty array data', () => {
