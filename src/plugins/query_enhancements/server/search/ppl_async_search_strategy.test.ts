@@ -12,13 +12,10 @@ import {
 import { Observable, of } from 'rxjs';
 import { DATA_FRAME_TYPES, IOpenSearchDashboardsSearchRequest } from '../../../data/common';
 import { SearchUsage } from '../../../data/server';
-import { DATASET } from '../../common';
 import * as facet from '../utils/facet';
-import * as queryCancellation from '../utils/query_cancellation';
 import { pplAsyncSearchStrategyProvider } from './ppl_async_search_strategy';
 
 jest.mock('../utils/facet');
-jest.mock('../utils/query_cancellation');
 
 describe('pplAsyncSearchStrategyProvider', () => {
   let config$: Observable<SharedGlobalConfig>;
@@ -63,12 +60,10 @@ describe('pplAsyncSearchStrategyProvider', () => {
   });
 
   describe('search method', () => {
-    it('should return strategy with search and cancel methods', () => {
+    it('should return strategy with search method', () => {
       const strategy = pplAsyncSearchStrategyProvider(config$, logger, client, usage);
       expect(strategy).toHaveProperty('search');
-      expect(strategy).toHaveProperty('cancel');
       expect(typeof strategy.search).toBe('function');
-      expect(typeof strategy.cancel).toBe('function');
     });
 
     it('should initiate new query when no queryId is provided', async () => {
@@ -211,68 +206,6 @@ describe('pplAsyncSearchStrategyProvider', () => {
       });
     });
 
-    it('should set up abort signal listener when provided with queryId', async () => {
-      const mockStatusResponse = {
-        success: true,
-        data: { status: 'RUNNING' },
-      };
-      (mockJobsFacet.describeQuery as jest.Mock).mockResolvedValueOnce(mockStatusResponse);
-
-      const mockAbortSignal = {
-        addEventListener: jest.fn(),
-      } as any;
-
-      const mockCancellationHandler = jest.fn();
-      (queryCancellation.createQueryCancellationHandler as jest.Mock).mockReturnValueOnce(
-        mockCancellationHandler
-      );
-
-      const strategy = pplAsyncSearchStrategyProvider(config$, logger, client, usage);
-      await strategy.search(
-        emptyRequestHandlerContext,
-        ({
-          body: {
-            query: { query: 'source = table', dataset: { type: DATASET.S3 } },
-            pollQueryResultsParams: { queryId: 'running-query-123' },
-          },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
-        { abortSignal: mockAbortSignal }
-      );
-
-      expect(queryCancellation.createQueryCancellationHandler).toHaveBeenCalledWith(
-        'running-query-123',
-        expect.objectContaining({ query: 'source = table', dataset: { type: DATASET.S3 } }),
-        client,
-        logger,
-        'PPL'
-      );
-      expect(mockAbortSignal.addEventListener).toHaveBeenCalledWith('abort', mockCancellationHandler);
-    });
-
-    it('should not set up abort signal listener when no queryId is provided', async () => {
-      const mockResponse = {
-        success: true,
-        data: { queryId: 'new-query-123', status: 'RUNNING' },
-      };
-      (mockFacet.describeQuery as jest.Mock).mockResolvedValueOnce(mockResponse);
-
-      const mockAbortSignal = {
-        addEventListener: jest.fn(),
-      } as any;
-
-      const strategy = pplAsyncSearchStrategyProvider(config$, logger, client, usage);
-      await strategy.search(
-        emptyRequestHandlerContext,
-        ({
-          body: { query: { query: 'source = table', dataset: { id: 'test-dataset' } } },
-        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
-        { abortSignal: mockAbortSignal }
-      );
-
-      expect(queryCancellation.createQueryCancellationHandler).not.toHaveBeenCalled();
-      expect(mockAbortSignal.addEventListener).not.toHaveBeenCalled();
-    });
-
     it('should handle facet errors during query initiation', async () => {
       const mockResponse = {
         success: false,
@@ -313,53 +246,6 @@ describe('pplAsyncSearchStrategyProvider', () => {
 
       expect(logger.error).toHaveBeenCalledWith(`pplAsyncSearchStrategy: ${mockError.message}`);
       expect(usage?.trackError).toHaveBeenCalled();
-    });
-  });
-
-  describe('cancel method', () => {
-    it('should cancel query for S3 data source', async () => {
-      const mockCancelQuery = queryCancellation.cancelQueryByDataSource as jest.Mock;
-      mockCancelQuery.mockResolvedValueOnce(undefined);
-
-      const strategy = pplAsyncSearchStrategyProvider(config$, logger, client, usage);
-      await strategy.cancel!(emptyRequestHandlerContext, 'test-query-123');
-
-      expect(mockCancelQuery).toHaveBeenCalledWith('test-query-123', undefined, client, logger, 'PPL');
-      expect(logger.info).toHaveBeenCalledWith(
-        'pplAsyncSearchStrategy: Cancelling backend query test-query-123'
-      );
-      expect(logger.info).toHaveBeenCalledWith(
-        'pplAsyncSearchStrategy: Successfully cancelled backend query test-query-123'
-      );
-    });
-
-    it('should cancel query for default data source when type is undefined', async () => {
-      const mockCancelQuery = queryCancellation.cancelQueryByDataSource as jest.Mock;
-      mockCancelQuery.mockResolvedValueOnce(undefined);
-
-      const strategy = pplAsyncSearchStrategyProvider(config$, logger, client, usage);
-      await strategy.cancel!(emptyRequestHandlerContext, 'test-query-456');
-
-      expect(mockCancelQuery).toHaveBeenCalledWith('test-query-456', undefined, client, logger, 'PPL');
-      expect(logger.info).toHaveBeenCalledWith(
-        'pplAsyncSearchStrategy: Cancelling backend query test-query-456'
-      );
-    });
-
-    it('should handle cancellation errors', async () => {
-      const mockError = new Error('Cancellation failed');
-      const mockCancelQuery = queryCancellation.cancelQueryByDataSource as jest.Mock;
-      mockCancelQuery.mockRejectedValueOnce(mockError);
-
-      const strategy = pplAsyncSearchStrategyProvider(config$, logger, client, usage);
-
-      await expect(
-        strategy.cancel!(emptyRequestHandlerContext, 'test-query-789')
-      ).rejects.toThrow(mockError);
-
-      expect(logger.error).toHaveBeenCalledWith(
-        'pplAsyncSearchStrategy: Failed to cancel backend query test-query-789: Cancellation failed'
-      );
     });
   });
 });

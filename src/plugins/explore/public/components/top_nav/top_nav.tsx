@@ -27,7 +27,11 @@ import { getTopNavLinks } from './top_nav_links';
 import { getOpenButtonRun } from './top_nav_links/top_nav_open/top_nav_open';
 import { getSaveButtonRun } from './top_nav_links/top_nav_save/top_nav_save';
 import { SavedExplore } from '../../saved_explore';
-import { setDateRange, setHasUserInitiatedQuery, setOverallQueryStatus } from '../../application/utils/state_management/slices/query_editor/query_editor_slice';
+import {
+  setDateRange,
+  setHasUserInitiatedQuery,
+  setOverallQueryStatus,
+} from '../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { useClearEditors, useEditorRef } from '../../application/hooks';
 import { onEditorRunActionCreator } from '../../application/utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
 import { abortAllActiveQueries } from '../../application/utils/state_management/actions/query_actions';
@@ -170,12 +174,14 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
     abortAllActiveQueries();
     dispatch(setHasUserInitiatedQuery(false));
     // Reset overall query status to UNINITIALIZED to stop spinner immediately
-    dispatch(setOverallQueryStatus({
-      status: QueryExecutionStatus.UNINITIALIZED,
-      startTime: undefined,
-      elapsedMs: undefined,
-      error: undefined,
-    }));
+    dispatch(
+      setOverallQueryStatus({
+        status: QueryExecutionStatus.UNINITIALIZED,
+        startTime: undefined,
+        elapsedMs: undefined,
+        error: undefined,
+      })
+    );
   }, [dispatch]);
 
   const handleOpenShortcut = useCallback(() => {
@@ -256,8 +262,15 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   }, [handleQuerySubmit]);
 
   const customSubmitButton = useMemo(() => {
-    return <QueryExecutionButton onClick={handleCustomButtonClick} />;
-  }, [handleCustomButtonClick]);
+    return (
+      <QueryExecutionButton
+        onClick={handleCustomButtonClick}
+        showCancelButton={shouldShowCancelButton}
+        onCancel={handleQueryCancel}
+        isQueryRunning={isQueryRunning}
+      />
+    );
+  }, [handleCustomButtonClick, shouldShowCancelButton, handleQueryCancel, isQueryRunning]);
 
   return (
     <TopNavMenu

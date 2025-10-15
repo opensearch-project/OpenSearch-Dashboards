@@ -634,5 +634,78 @@ describe('QueryEditorTopRow', () => {
         expect(document.querySelector('[data-test-subj="queryCancelButton"]')).toBeFalsy();
       });
     });
+
+    describe('Custom Submit Button Integration', () => {
+      const MockCustomButton = ({ onClick }: { onClick?: () => void }) => (
+        <button data-test-subj="customSubmitButton" onClick={onClick}>
+          Custom Submit
+        </button>
+      );
+
+      it('Should render custom submit button when provided', async () => {
+        const { getByTestId } = render(
+          wrapQueryEditorTopRowInContext({
+            showQueryEditor: true,
+            customSubmitButton: <MockCustomButton />,
+          })
+        );
+
+        expect(getByTestId('customSubmitButton')).toBeInTheDocument();
+      });
+
+      it('Should enhance custom submit button with cancel functionality when query is running', async () => {
+        const mockOnCancel = jest.fn();
+        const { getByTestId, container } = render(
+          wrapQueryEditorTopRowInContext({
+            showQueryEditor: true,
+            customSubmitButton: <MockCustomButton />,
+            showCancelButton: true,
+            isQueryRunning: true,
+            onCancel: mockOnCancel,
+          })
+        );
+
+        // Custom button should be present
+        expect(getByTestId('customSubmitButton')).toBeInTheDocument();
+
+        // Cancel button should also be present alongside the custom button
+        expect(getByTestId('queryCancelButton')).toBeInTheDocument();
+
+        // Both should be in a flex group
+        const flexGroup = container.querySelector('.euiFlexGroup');
+        expect(flexGroup).toBeTruthy();
+      });
+
+      it('Should only show custom submit button when query is not running', async () => {
+        const { getByTestId, queryByTestId } = render(
+          wrapQueryEditorTopRowInContext({
+            showQueryEditor: true,
+            customSubmitButton: <MockCustomButton />,
+            showCancelButton: true,
+            isQueryRunning: false,
+          })
+        );
+
+        // Custom button should be present
+        expect(getByTestId('customSubmitButton')).toBeInTheDocument();
+
+        // Cancel button should not be present
+        expect(queryByTestId('queryCancelButton')).toBeFalsy();
+      });
+
+      it('Should call onSubmit when custom button is clicked', async () => {
+        const mockOnSubmit = jest.fn();
+        const { getByTestId } = render(
+          wrapQueryEditorTopRowInContext({
+            showQueryEditor: true,
+            customSubmitButton: <MockCustomButton />,
+            onSubmit: mockOnSubmit,
+          })
+        );
+
+        getByTestId('customSubmitButton').click();
+        expect(mockOnSubmit).toHaveBeenCalled();
+      });
+    });
   });
 });

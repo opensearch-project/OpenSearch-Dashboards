@@ -7,4 +7,3 @@ export { Facet, FacetProps } from './facet';
 export { OpenSearchEnhancements } from './plugins';
 export { shimStats } from './shim_stats';
 export { shimSchemaRow } from './shim_schema_row';
-export { cancelQueryByDataSource, createQueryCancellationHandler } from './query_cancellation';

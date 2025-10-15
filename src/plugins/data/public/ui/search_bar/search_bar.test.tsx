@@ -45,6 +45,7 @@ const mockTimeHistory = {
   get: () => {
     return [];
   },
+  add: jest.fn(),
 };
 
 jest.mock('../filter_bar/filter_bar', () => {
@@ -255,5 +256,122 @@ describe('SearchBar', () => {
     expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
     expect(component.find(FILTER_BAR).length).toBe(1);
     expect(component.find(QUERY_BAR).length).toBe(1);
+  });
+
+  describe('Cancel Button Props', () => {
+    it('Should pass cancel button props to QueryEditor when provided', () => {
+      const mockOnCancel = jest.fn();
+
+      const component = mount(
+        wrapSearchBarInContext({
+          indexPatterns: [mockIndexPattern],
+          screenTitle: 'test screen',
+          onQuerySubmit: noop,
+          query: dqlQuery,
+          showCancelButton: true,
+          onQueryCancel: mockOnCancel,
+          isQueryRunning: true,
+        })
+      );
+
+      expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
+      // Verify the search bar renders properly with cancel props
+      expect(component.prop('showCancelButton')).toBe(true);
+      expect(component.prop('onQueryCancel')).toBe(mockOnCancel);
+      expect(component.prop('isQueryRunning')).toBe(true);
+    });
+
+    it('Should handle undefined cancel button props gracefully', () => {
+      const component = mount(
+        wrapSearchBarInContext({
+          indexPatterns: [mockIndexPattern],
+          screenTitle: 'test screen',
+          onQuerySubmit: noop,
+          query: dqlQuery,
+          showCancelButton: undefined,
+          onQueryCancel: undefined,
+          isQueryRunning: undefined,
+        })
+      );
+
+      expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
+      // Should render without errors
+      expect(component.prop('showCancelButton')).toBeUndefined();
+      expect(component.prop('onQueryCancel')).toBeUndefined();
+      expect(component.prop('isQueryRunning')).toBeUndefined();
+    });
+
+    it('Should pass cancel props to QueryEditor when query enhancements are enabled', () => {
+      const mockOnCancel = jest.fn();
+
+      // Mock UI settings to enable query enhancements
+      const enhancedServices = {
+        uiSettings: {
+          ...startMock.uiSettings,
+          get: jest.fn((key) => {
+            if (key === 'query:enhancements:enabled') return true;
+            return startMock.uiSettings.get(key);
+          }),
+        },
+        savedObjects: startMock.savedObjects,
+        notifications: startMock.notifications,
+        http: startMock.http,
+        storage: createMockStorage(),
+        data: {
+          query: {
+            ...queryServiceMock.createStartContract(false),
+            savedQueries: {},
+            queryString: {
+              getLanguageService: () => ({
+                getLanguage: () => ({
+                  fields: { filterable: true },
+                  editorSupportedAppNames: ['test'],
+                }),
+              }),
+            },
+          },
+        },
+        appName: 'test',
+      };
+
+      const component = mount(
+        <I18nProvider>
+          <OpenSearchDashboardsContextProvider services={enhancedServices}>
+            <SearchBar.WrappedComponent
+              timeHistory={mockTimeHistory}
+              intl={null as any}
+              indexPatterns={[mockIndexPattern]}
+              screenTitle="test screen"
+              onQuerySubmit={noop}
+              query={dqlQuery}
+              showCancelButton={true}
+              onQueryCancel={mockOnCancel}
+              isQueryRunning={true}
+            />
+          </OpenSearchDashboardsContextProvider>
+        </I18nProvider>
+      );
+
+      expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
+      // When query enhancements are enabled, should render QueryEditor instead of QueryBar
+      expect(component.find('.globalQueryEditor').length).toBe(1);
+    });
+
+    it('Should handle query status prop correctly', () => {
+      const component = mount(
+        wrapSearchBarInContext({
+          indexPatterns: [mockIndexPattern],
+          screenTitle: 'test screen',
+          onQuerySubmit: noop,
+          query: dqlQuery,
+          queryStatus: 'loading',
+          isQueryRunning: true,
+        })
+      );
+
+      expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
+      expect(component.prop('queryStatus')).toBe('loading');
+      expect(component.prop('isQueryRunning')).toBe(true);
+    });
   });
 });

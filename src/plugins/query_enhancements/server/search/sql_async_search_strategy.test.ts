@@ -14,11 +14,9 @@ import { DATA_FRAME_TYPES, IOpenSearchDashboardsSearchRequest } from '../../../d
 import { SearchUsage } from '../../../data/server';
 import { DATASET } from '../../common';
 import * as facet from '../utils/facet';
-import * as queryCancellation from '../utils/query_cancellation';
 import { sqlAsyncSearchStrategyProvider } from './sql_async_search_strategy';
 
 jest.mock('../utils/facet');
-jest.mock('../utils/query_cancellation');
 
 describe('sqlAsyncSearchStrategyProvider', () => {
   let config$: Observable<SharedGlobalConfig>;
@@ -63,12 +61,10 @@ describe('sqlAsyncSearchStrategyProvider', () => {
   });
 
   describe('search method', () => {
-    it('should return strategy with search and cancel methods', () => {
+    it('should return strategy with search method', () => {
       const strategy = sqlAsyncSearchStrategyProvider(config$, logger, client, usage);
       expect(strategy).toHaveProperty('search');
-      expect(strategy).toHaveProperty('cancel');
       expect(typeof strategy.search).toBe('function');
-      expect(typeof strategy.cancel).toBe('function');
     });
 
     it('should initiate new query when no queryId is provided', async () => {

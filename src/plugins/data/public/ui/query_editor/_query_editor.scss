@@ -86,15 +86,16 @@
   max-width: 32px;
 }
 
+// Global cancel button styling - applies everywhere
+.osdQueryEditor__cancelButton {
+  border: 1px solid #BD271E !important;
+  border-radius: 4px !important;
+  background-color: transparent !important;
+}
+
 .osdQueryEditor--updateButtonWrapper {
   :first-child {
     min-width: 0 !important;
-  }
-
-  .osdQueryEditor__cancelButton {
-    border: 1px solid #BD271E !important;
-    border-radius: 4px !important;
-    background-color: transparent !important;
   }
 }
 

@@ -319,4 +319,5 @@ TopNavMenu.defaultProps = {
   showDatasetSelect: false,
   screenTitle: '',
   groupActions: false,
+  showCancelButton: false,
 };

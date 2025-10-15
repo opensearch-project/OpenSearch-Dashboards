@@ -326,6 +326,13 @@ const executeQueryBase = async (
       existingController.abort();
     }
 
+    // Abort ALL other active queries when starting a new one (auto-cancel on re-fire)
+    activeQueryAbortControllers.forEach((controller, key) => {
+      if (key !== cacheKey) {
+        controller.abort();
+      }
+    });
+
     // Create abort controller for this specific query
     const abortController = new AbortController();
 

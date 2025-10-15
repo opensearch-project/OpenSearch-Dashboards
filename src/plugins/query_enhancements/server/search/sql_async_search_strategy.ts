@@ -19,7 +19,7 @@ import {
   throwFacetError,
   SEARCH_STRATEGY,
 } from '../../common';
-import { Facet, cancelQueryByDataSource, createQueryCancellationHandler } from '../utils';
+import { Facet } from '../utils';
 
 export const sqlAsyncSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -46,17 +46,7 @@ export const sqlAsyncSearchStrategyProvider = (
         const pollQueryResultsParams = request.body.pollQueryResultsParams;
         const inProgressQueryId = pollQueryResultsParams?.queryId;
 
-        // Handle abort signal for backend query cancellation
-        if (options?.abortSignal && inProgressQueryId) {
-          const cancellationHandler = createQueryCancellationHandler(
-            inProgressQueryId,
-            query,
-            client,
-            logger,
-            'SQL'
-          );
-          options.abortSignal.addEventListener('abort', cancellationHandler);
-        }
+        // Note: Backend query cancellation is handled by individual data source implementations
 
         if (!inProgressQueryId) {
           request.body = { ...request.body, lang: SEARCH_STRATEGY.SQL };
@@ -116,24 +106,6 @@ export const sqlAsyncSearchStrategyProvider = (
         logger.error(`sqlAsyncSearchStrategy: ${e.message}`);
         if (usage) usage.trackError();
         throw e;
-      }
-    },
-
-    // Implement backend query cancellation with data source detection
-    cancel: async (context, queryId: string) => {
-      try {
-        logger.info(`sqlAsyncSearchStrategy: Cancelling backend query ${queryId}`);
-
-        // Use the helper function to cancel based on data source type
-        // For now, we'll use undefined data source type which defaults to the standard API
-        await cancelQueryByDataSource(queryId, undefined, client, logger, 'SQL');
-
-        logger.info(`sqlAsyncSearchStrategy: Successfully cancelled backend query ${queryId}`);
-      } catch (error) {
-        logger.error(
-          `sqlAsyncSearchStrategy: Failed to cancel backend query ${queryId}: ${error.message}`
-        );
-        throw error;
       }
     },
   };

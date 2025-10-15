@@ -236,4 +236,136 @@ describe('QueryExecutionButton', () => {
     // Verify the button has the primary color (blue) for consistent theming
     expect(button).toHaveClass('euiButton--primary');
   });
+
+  describe('Cancel Button Functionality', () => {
+    it('does not render cancel button when showCancelButton is false', () => {
+      renderWithProvider(
+        <QueryExecutionButton showCancelButton={false} isQueryRunning={true} />
+      );
+
+      expect(screen.queryByTestId('queryCancelButton')).not.toBeInTheDocument();
+    });
+
+    it('does not render cancel button when isQueryRunning is false', () => {
+      renderWithProvider(
+        <QueryExecutionButton showCancelButton={true} isQueryRunning={false} />
+      );
+
+      expect(screen.queryByTestId('queryCancelButton')).not.toBeInTheDocument();
+    });
+
+    it('renders cancel button when showCancelButton is true and query is running', () => {
+      renderWithProvider(
+        <QueryExecutionButton showCancelButton={true} isQueryRunning={true} />
+      );
+
+      expect(screen.getByTestId('queryCancelButton')).toBeInTheDocument();
+    });
+
+    it('calls onCancel when cancel button is clicked', () => {
+      const mockOnCancel = jest.fn();
+
+      renderWithProvider(
+        <QueryExecutionButton
+          showCancelButton={true}
+          isQueryRunning={true}
+          onCancel={mockOnCancel}
+        />
+      );
+
+      const cancelButton = screen.getByTestId('queryCancelButton');
+      cancelButton.click();
+
+      expect(mockOnCancel).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not throw error when cancel button is clicked without onCancel handler', () => {
+      renderWithProvider(
+        <QueryExecutionButton
+          showCancelButton={true}
+          isQueryRunning={true}
+        />
+      );
+
+      const cancelButton = screen.getByTestId('queryCancelButton');
+
+      expect(() => {
+        cancelButton.click();
+      }).not.toThrow();
+    });
+
+    it('renders both execution and cancel buttons when query is running', () => {
+      renderWithProvider(
+        <QueryExecutionButton
+          showCancelButton={true}
+          isQueryRunning={true}
+        />
+      );
+
+      // Both buttons should be present
+      expect(screen.getByTestId('exploreQueryExecutionButton')).toBeInTheDocument();
+      expect(screen.getByTestId('queryCancelButton')).toBeInTheDocument();
+
+      // Should be wrapped in a flex group
+      expect(screen.getByTestId('exploreQueryExecutionButton').closest('.euiFlexGroup')).toBeInTheDocument();
+    });
+
+    it('renders only execution button when query is not running', () => {
+      renderWithProvider(
+        <QueryExecutionButton
+          showCancelButton={true}
+          isQueryRunning={false}
+        />
+      );
+
+      expect(screen.getByTestId('exploreQueryExecutionButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('queryCancelButton')).not.toBeInTheDocument();
+    });
+
+    it('cancel button has correct accessibility attributes', () => {
+      renderWithProvider(
+        <QueryExecutionButton
+          showCancelButton={true}
+          isQueryRunning={true}
+        />
+      );
+
+      const cancelButton = screen.getByTestId('queryCancelButton');
+
+      expect(cancelButton.tagName).toBe('BUTTON');
+      expect(cancelButton).toHaveAttribute('type', 'button');
+      expect(cancelButton).toHaveAttribute('aria-label', 'Cancel');
+    });
+
+    it('cancel button has correct styling classes', () => {
+      renderWithProvider(
+        <QueryExecutionButton
+          showCancelButton={true}
+          isQueryRunning={true}
+        />
+      );
+
+      const cancelButton = screen.getByTestId('queryCancelButton');
+
+      expect(cancelButton).toHaveClass('euiButton');
+      expect(cancelButton).toHaveClass('osdQueryEditor__cancelButton');
+    });
+
+    it('executes onClick handler even when cancel functionality is present', () => {
+      const mockOnClick = jest.fn();
+
+      renderWithProvider(
+        <QueryExecutionButton
+          onClick={mockOnClick}
+          showCancelButton={true}
+          isQueryRunning={true}
+        />
+      );
+
+      const executionButton = screen.getByTestId('exploreQueryExecutionButton');
+      executionButton.click();
+
+      expect(mockOnClick).toHaveBeenCalledTimes(1);
+    });
+  });
 });

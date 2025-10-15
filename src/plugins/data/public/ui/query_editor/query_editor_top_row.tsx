@@ -335,42 +335,48 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function renderUpdateButton() {
-    const runButton = props.customSubmitButton ? (
-      React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
-    ) : (
-      <EuiSuperUpdateButton
-        needsUpdate={props.isDirty}
-        isDisabled={isDateRangeInvalid}
-        isLoading={props.isLoading}
-        onClick={onClickSubmitButton}
-        data-test-subj="querySubmitButton"
-        aria-label={i18n.translate('data.query.queryBar.querySubmitButtonLabel', {
-          defaultMessage: 'Submit query',
-        })}
-        compressed={true}
-      />
-    );
+    // If a custom submit button is provided, enhance it with cancel functionality
+    let buttonGroup;
+    if (props.customSubmitButton) {
+      buttonGroup = React.cloneElement(props.customSubmitButton, {
+        onClick: onClickSubmitButton,
+      });
+    } else {
+      // Default QueryEditor button with integrated cancel
+      const runButton = (
+        <EuiSuperUpdateButton
+          needsUpdate={props.isDirty}
+          isDisabled={isDateRangeInvalid}
+          isLoading={props.isLoading}
+          onClick={onClickSubmitButton}
+          data-test-subj="querySubmitButton"
+          aria-label={i18n.translate('data.query.queryBar.querySubmitButtonLabel', {
+            defaultMessage: 'Submit query',
+          })}
+          compressed={true}
+        />
+      );
 
-    const cancelButton = shouldShowCancelButton ? (
-      <EuiButtonIcon
-        size="s"
-        color="danger"
-        onClick={props.onCancel}
-        data-test-subj="queryCancelButton"
-        aria-label={i18n.translate('data.query.queryBar.queryCancelButtonLabel', {
-          defaultMessage: 'Cancel',
-        })}
-        iconType="cross"
-        className="osdQueryEditor__cancelButton"
-      />
-    ) : null;
-
-    const buttonGroup = (
-      <EuiFlexGroup gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>{runButton}</EuiFlexItem>
-        {cancelButton && <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>}
-      </EuiFlexGroup>
-    );
+      const cancelButton = shouldShowCancelButton ? (
+        <EuiButtonIcon
+          size="s"
+          color="danger"
+          onClick={props.onCancel}
+          data-test-subj="queryCancelButton"
+          aria-label={i18n.translate('data.query.queryBar.queryCancelButtonLabel', {
+            defaultMessage: 'Cancel',
+          })}
+          iconType="cross"
+          className="osdQueryEditor__cancelButton"
+        />
+      ) : null;
+      buttonGroup = (
+        <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>{runButton}</EuiFlexItem>
+          {cancelButton && <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>}
+        </EuiFlexGroup>
+      );
+    }
 
     if (!shouldRenderDatePicker()) {
       return buttonGroup;
