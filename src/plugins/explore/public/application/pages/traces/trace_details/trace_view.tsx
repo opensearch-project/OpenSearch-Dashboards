@@ -436,7 +436,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
   const traceDetailsLink = buildTraceDetailsUrl(spanId, traceId, dataset);
 
-  const TraceDetailsContent = () => {
+  const renderTraceDetailsContent = () => {
     return (
       <>
         {isLoading ? (
@@ -615,7 +615,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     );
   };
 
-  const TraceDetailsHeader: React.FC = () => (
+  const renderTraceDetailsHeader = () => (
     <TraceTopNavMenu
       payloadData={transformedHits}
       setMenuMountPoint={setMenuMountPoint}
@@ -628,17 +628,13 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
   return isFlyout ? (
     <>
-      <EuiFlyoutHeader>
-        <TraceDetailsHeader />
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <TraceDetailsContent />
-      </EuiFlyoutBody>
+      <EuiFlyoutHeader>{renderTraceDetailsHeader()}</EuiFlyoutHeader>
+      <EuiFlyoutBody>{renderTraceDetailsContent()}</EuiFlyoutBody>
     </>
   ) : (
     <>
-      <TraceDetailsHeader />
-      <TraceDetailsContent />
+      {renderTraceDetailsHeader()}
+      {renderTraceDetailsContent()}
     </>
   );
 };
