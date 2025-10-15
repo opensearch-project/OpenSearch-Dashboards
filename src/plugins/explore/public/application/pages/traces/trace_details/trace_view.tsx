@@ -122,6 +122,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const [activeTab, setActiveTab] = useState<string>(TraceDetailTab.TIMELINE);
   const [logsData, setLogsData] = useState<LogHit[]>([]);
   const [logDatasets, setLogDatasets] = useState<Dataset[]>([]);
+  const [datasetLogs, setDatasetLogs] = useState<Record<string, LogHit[]>>({});
   const [isLogsLoading, setIsLogsLoading] = useState<boolean>(false);
   const [fieldValidation, setFieldValidation] = useState<{
     isValid: boolean;
@@ -167,6 +168,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
         .then((result) => {
           setLogDatasets(result.logDatasets);
           setLogsData(result.logs);
+          setDatasetLogs(result.datasetLogs);
         })
         .catch((error) => {
           // eslint-disable-next-line no-console
@@ -501,15 +503,50 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                         onClick={clearAllFilters}
                         data-test-subj="clear-all-filters-button"
                       >
-                        {i18n.translate('explore.traceView.filters.clearAll', {
-                          defaultMessage: 'Clear all',
-                        })}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
-              </div>
-            )}
+                        <div className="exploreTraceView__contentPanel">
+                          {/* Tab content */}
+                          <div ref={mainPanelRef} className="exploreTraceView__mainPanel">
+                            {activeTab === TraceDetailTab.SERVICE_MAP && (
+                              <div style={{ height: 'calc(100vh - 200px)', overflow: 'hidden' }}>
+                                <ServiceMap
+                                  hits={transformedHits}
+                                  colorMap={colorMap}
+                                  paddingSize="none"
+                                  hasShadow={false}
+                                  selectedSpanId={spanId}
+                                />
+                              </div>
+                            )}
+
+                            {(activeTab === TraceDetailTab.TIMELINE ||
+                              activeTab === TraceDetailTab.SPAN_LIST) && (
+                              <SpanDetailPanel
+                                key={`span-panel-${visualizationKey}`}
+                                chrome={chrome}
+                                spanFilters={spanFilters}
+                                payloadData={JSON.stringify(transformedHits)}
+                                isGanttChartLoading={isBackgroundLoading}
+                                colorMap={colorMap}
+                                onSpanSelect={handleSpanSelect}
+                                selectedSpanId={spanId}
+                                activeView={activeTab}
+                                servicesInOrder={servicesInOrder}
+                              />
+                            )}
+
+                            {activeTab === TraceDetailTab.LOGS && (
+                              <TraceLogsTab
+                                traceId={traceId}
+                                logDatasets={logDatasets}
+                                logsData={logsData}
+                                datasetLogs={datasetLogs}
+                                isLoading={isLogsLoading}
+                                onSpanClick={handleSpanSelect}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      </EuiResizablePanel>
 
             {/* Resizable container underneath filter badges */}
             <EuiResizableContainer
