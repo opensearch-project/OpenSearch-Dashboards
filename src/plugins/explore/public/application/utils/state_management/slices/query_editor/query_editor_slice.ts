@@ -140,6 +140,7 @@ const queryEditorSlice = createSlice({
     },
     setHasUserInitiatedQuery: (state, action: PayloadAction<boolean>) => {
       state.hasUserInitiatedQuery = action.payload;
+    },
     setBreakdownField: (state, action: PayloadAction<string | undefined>) => {
       state.breakdownField = action.payload;
     },
