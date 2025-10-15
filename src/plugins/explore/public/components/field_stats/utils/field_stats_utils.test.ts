@@ -283,7 +283,7 @@ describe('field_stats_utils', () => {
 
       const details = await fetchFieldDetails('fieldName', 'string', mockDataset, mockServices);
 
-      expect((details as any).errorSection).toEqual({ errorMessage: 'Fetch failed' });
+      expect((details as any).errorSection).toEqual({ errorMessage: 'Error: Fetch failed' });
     });
 
     it('uses default type when dataset type is missing', async () => {
@@ -508,7 +508,7 @@ describe('field_stats_utils', () => {
       expect(setFieldDetails).toHaveBeenCalledWith(expect.any(Function));
       const call = setFieldDetails.mock.calls[0][0];
       const newDetails = call(fieldDetails);
-      expect(newDetails.field1.errorSection).toEqual({ errorMessage: 'Fetch failed' });
+      expect(newDetails.field1.errorSection).toEqual({ errorMessage: 'Error: Fetch failed' });
     });
 
     it('updates field details after successful fetch', async () => {

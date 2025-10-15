@@ -54,7 +54,7 @@ const TopValuesSection: React.FC<TopValuesSectionProps> = ({ data, field }) => {
         defaultMessage: 'Percentage',
       }),
       width: '20%',
-      render: (percentage: number) => `${percentage.toFixed(1)}%`,
+      render: (percentage: number) => (percentage === 0 ? '—' : `${percentage.toFixed(1)}%`),
     },
   ];
 
