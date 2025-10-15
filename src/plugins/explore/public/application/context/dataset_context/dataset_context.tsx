@@ -37,6 +37,7 @@ export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [dataset, setDataset] = useState<DataView | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const isFetchingRef = React.useRef(false);
 
   const datasetFromState = useSelector((state: RootState) => state.query?.dataset);
 
@@ -44,10 +45,15 @@ export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ child
     let isMounted = true;
 
     const fetchDataset = async () => {
+      // Prevent parallel executions
+      if (isFetchingRef.current) return;
+      isFetchingRef.current = true;
+
       if (!datasetFromState) {
         setDataset(undefined);
         setIsLoading(false);
         setError(null);
+        isFetchingRef.current = false;
         return;
       }
 
@@ -55,11 +61,11 @@ export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ child
       setError(null);
 
       try {
-        let dataView = await dataViews.get(
-          datasetFromState.id,
-          datasetFromState.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-        );
+        const onlyCheckCache = datasetFromState.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
+        let dataView = await dataViews.get(datasetFromState.id, onlyCheckCache);
+
         if (!dataView) {
+          // Cache the dataset
           await queryString.getDatasetService().cacheDataset(
             datasetFromState,
             {
@@ -72,10 +78,8 @@ export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ child
             false
           );
 
-          dataView = await dataViews.get(
-            datasetFromState.id,
-            datasetFromState.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-          );
+          // Try to get it again from cache
+          dataView = await dataViews.get(datasetFromState.id, onlyCheckCache);
         }
 
         if (!isMounted) return;
@@ -86,7 +90,10 @@ export const DatasetProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (!isMounted) return;
         setError(`Error fetching dataset: ${(err as Error).message}`);
       } finally {
-        if (isMounted) setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
+        isFetchingRef.current = false;
       }
     };
 

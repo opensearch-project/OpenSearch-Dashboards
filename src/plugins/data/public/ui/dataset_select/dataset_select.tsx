@@ -81,10 +81,14 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
         return;
       }
 
-      const dataView = await dataViews.get(
-        currentDataset.id,
-        currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-      );
+      const onlyCheckCache = currentDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
+      const dataView = await dataViews.get(currentDataset.id, onlyCheckCache);
+
+      // If dataView is not in cache (onlyCheckCache returns undefined), fallback to currentDataset
+      if (!dataView) {
+        setSelectedDataset(currentDataset as DetailedDataset);
+        return;
+      }
 
       const detailedDataset = {
         ...currentDataset,

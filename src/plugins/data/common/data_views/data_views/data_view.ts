@@ -44,16 +44,22 @@ export class DataView extends IndexPattern implements IDataView {
 
   public async initializeDataSourceRef(): Promise<void> {
     if (!this.dataSourceRef?.id) return;
-    const dataSourceSavedObject = await this.savedObjectsClient.get(
-      'data-source',
-      this.dataSourceRef.id
-    );
-    const attributes = dataSourceSavedObject.attributes as any;
-    this.dataSourceRef = {
-      id: this.dataSourceRef.id,
-      type: attributes.dataSourceEngineType || this.dataSourceRef.type,
-      name: attributes.title || this.dataSourceRef.name || this.dataSourceRef.id,
-    };
+
+    try {
+      const dataSourceSavedObject = await this.savedObjectsClient.get(
+        'data-source',
+        this.dataSourceRef.id
+      );
+      const attributes = dataSourceSavedObject.attributes as any;
+      this.dataSourceRef = {
+        id: this.dataSourceRef.id,
+        type: attributes.dataSourceEngineType || this.dataSourceRef.type,
+        name: attributes.title || this.dataSourceRef.name || this.dataSourceRef.id,
+      };
+    } catch (error) {
+      // If data source fetch fails, keep the existing dataSourceRef as-is
+      // This ensures the DataView can still be used even if the data source is unavailable
+    }
   }
 
   /**
