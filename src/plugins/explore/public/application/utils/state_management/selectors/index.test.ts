@@ -6,17 +6,21 @@
 import {
   selectUIState,
   selectTabState,
+  selectTabLogsState,
   selectQuery,
   selectQueryString,
   selectQueryLanguage,
   selectDataset,
   selectActiveTabId,
   selectShowHistogram,
+  selectPatternsField,
+  selectUsingRegexPatterns,
   selectActiveTab,
   selectResults,
-  selectColumns,
-  selectSort,
+  selectVisibleColumnNames,
   selectSavedSearch,
+  selectTabLogsExpandedRowsMap,
+  selectTabLogsSelectedRowsMap,
 } from './index';
 import { RootState } from '../store';
 
@@ -47,23 +51,22 @@ describe('selectors/index', () => {
         },
       },
       tab: {
-        activeTab: 'test-tab',
-        tabs: [],
-        visualizations: {
-          styleOptions: {
-            color: 'blue',
-            size: 'medium',
+        logs: {
+          expandedRowsMap: {
+            row1: true,
+            row3: true,
           },
-          chartType: 'bar',
-          axesMapping: {
-            x: 'field1',
-            y: 'field2',
+          selectedRowsMap: {
+            row2: true,
           },
+          visibleColumns: ['field1', 'field2', 'field3'],
+        },
+        patterns: {
+          patternsField: 'message',
+          usingRegexPatterns: true,
         },
       },
       legacy: {
-        columns: ['field1', 'field2', 'field3'],
-        sort: [['field1', 'asc']],
         savedSearch: {
           id: 'saved-search-1',
           title: 'Test Search',
@@ -86,6 +89,107 @@ describe('selectors/index', () => {
     it('should select tab state', () => {
       const result = selectTabState(mockState);
       expect(result).toBe(mockState.tab);
+    });
+
+    it('should select tab logs state', () => {
+      const result = selectTabLogsState(mockState);
+      expect(result).toBe(mockState.tab.logs);
+    });
+  });
+
+  describe('tab selectors', () => {
+    it('should select patterns field', () => {
+      const result = selectPatternsField(mockState);
+      expect(result).toBe('message');
+    });
+
+    it('should select using regex patterns', () => {
+      const result = selectUsingRegexPatterns(mockState);
+      expect(result).toBe(true);
+    });
+
+    it('should select tab logs expanded rows map', () => {
+      const result = selectTabLogsExpandedRowsMap(mockState);
+      expect(result).toEqual({
+        row1: true,
+        row3: true,
+      });
+    });
+
+    it('should select tab logs selected rows map', () => {
+      const result = selectTabLogsSelectedRowsMap(mockState);
+      expect(result).toEqual({
+        row2: true,
+      });
+    });
+
+    it('should handle undefined patterns field', () => {
+      const stateWithoutPatternsField = {
+        ...mockState,
+        tab: {
+          ...mockState.tab,
+          patterns: {
+            ...mockState.tab.patterns,
+            patternsField: undefined,
+          },
+        },
+      };
+
+      const result = selectPatternsField(stateWithoutPatternsField);
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle false using regex patterns', () => {
+      const stateWithFalseRegex = {
+        ...mockState,
+        tab: {
+          ...mockState.tab,
+          patterns: {
+            ...mockState.tab.patterns,
+            usingRegexPatterns: false,
+          },
+        },
+      };
+
+      const result = selectUsingRegexPatterns(stateWithFalseRegex);
+      expect(result).toBe(false);
+    });
+
+    it('should handle empty expanded rows map', () => {
+      const stateWithEmptyExpandedRows = {
+        ...mockState,
+        tab: {
+          ...mockState.tab,
+          logs: {
+            ...mockState.tab.logs,
+            expandedRowsMap: {},
+          },
+        },
+      };
+
+      const result = selectTabLogsExpandedRowsMap(stateWithEmptyExpandedRows);
+      expect(result).toEqual({});
+    });
+
+    it('should handle empty selected rows map', () => {
+      const stateWithEmptySelectedRows = {
+        ...mockState,
+        tab: {
+          ...mockState.tab,
+          logs: {
+            ...mockState.tab.logs,
+            selectedRowsMap: {},
+          },
+        },
+      };
+
+      const result = selectTabLogsSelectedRowsMap(stateWithEmptySelectedRows);
+      expect(result).toEqual({});
+    });
+
+    it('should select visible columns', () => {
+      const result = selectVisibleColumnNames(mockState);
+      expect(result).toEqual(['field1', 'field2', 'field3']);
     });
   });
 
@@ -190,16 +294,6 @@ describe('selectors/index', () => {
   });
 
   describe('legacy selectors', () => {
-    it('should select columns', () => {
-      const result = selectColumns(mockState);
-      expect(result).toEqual(['field1', 'field2', 'field3']);
-    });
-
-    it('should select sort', () => {
-      const result = selectSort(mockState);
-      expect(result).toEqual([['field1', 'asc']]);
-    });
-
     it('should select saved search', () => {
       const result = selectSavedSearch(mockState);
       expect(result).toEqual({
@@ -219,8 +313,6 @@ describe('selectors/index', () => {
         },
       } as any;
 
-      expect(selectColumns(stateWithoutLegacyProps)).toBeUndefined();
-      expect(selectSort(stateWithoutLegacyProps)).toBeUndefined();
       expect(selectSavedSearch(stateWithoutLegacyProps)).toBeUndefined();
     });
   });

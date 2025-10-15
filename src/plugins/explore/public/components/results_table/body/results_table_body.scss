@@ -1,0 +1,37 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@import "../utils";
+
+.exploreResultsTableBody {
+  display: grid;
+  position: relative;
+
+  &__tr {
+    display: flex;
+    position: absolute;
+    width: 100%;
+
+    &--row {
+      border: 1px solid transparent;
+
+      &:hover {
+        background-color: $euiColorLightestShade;
+      }
+    }
+
+    &--doc {
+      border-bottom: $ouiBorderThin;
+    }
+  }
+
+  &__td {
+    display: flex;
+
+    &--row {
+      @include border-on-hover;
+    }
+  }
+}

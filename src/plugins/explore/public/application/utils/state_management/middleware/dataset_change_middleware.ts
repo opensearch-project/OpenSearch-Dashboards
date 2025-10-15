@@ -17,13 +17,18 @@ import {
   setSummaryAgentIsAvailable,
   setPatternsField,
   setUsingRegexPatterns,
+  resetEphemeralLogsState,
+  setDefaultColumnNames,
+  clearQueryStatusMap,
+  setBreakdownField,
 } from '../slices';
-import { clearQueryStatusMap, setBreakdownField } from '../slices/query_editor/query_editor_slice';
 import { executeQueries } from '../actions/query_actions';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { detectAndSetOptimalTab } from '../actions/detect_optimal_tab';
 import { resetLegacyStateActionCreator } from '../actions/reset_legacy_state';
+import { getDefaultColumnNames } from '../utils/get_default_columns';
+import { reconcileVisibleColumnsWithDataset } from '../actions/columns';
 
 /**
  * Middleware to handle dataset changes and trigger necessary side effects
@@ -61,6 +66,14 @@ export const createDatasetChangeMiddleware = (
       store.dispatch(setUsingRegexPatterns(false));
       store.dispatch(setBreakdownField(undefined));
       store.dispatch((resetLegacyStateActionCreator(services) as unknown) as AnyAction);
+
+      const defaultColumnNames = await getDefaultColumnNames(services, dataset);
+
+      store.dispatch(resetEphemeralLogsState());
+      store.dispatch(setDefaultColumnNames(defaultColumnNames));
+      store.dispatch(
+        (reconcileVisibleColumnsWithDataset(services, dataset) as unknown) as AnyAction
+      );
 
       const [newPromptModeIsAvailable, newSummaryAgentIsAvailable] = await Promise.allSettled([
         getPromptModeIsAvailable(services),

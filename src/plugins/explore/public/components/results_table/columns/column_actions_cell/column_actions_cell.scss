@@ -1,0 +1,17 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreResultsTableColumnActionsCell {
+  display: flex;
+  gap: $euiSizeS;
+  padding-left: $euiSizeS;
+  padding-right: $euiSizeS;
+
+  &__toggle {
+    border-radius: 0;
+    height: $euiSize;
+    width: $euiSize;
+  }
+}
