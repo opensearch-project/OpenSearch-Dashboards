@@ -92,14 +92,14 @@ export const TraceLogsTab: React.FC<TraceLogsTabProps> = ({
       <EuiPanel>
         <EuiTitle size="s">
           <h3>
-            {i18n.translate('explore.traceLogsTab.title', {
-              defaultMessage: 'Logs',
+            {i18n.translate('explore.traceRelatedLogsTab.title', {
+              defaultMessage: 'Related logs',
             })}
           </h3>
         </EuiTitle>
         <EuiText size="s" color="subdued">
           {i18n.translate('explore.traceLogsTab.description', {
-            defaultMessage: 'View logs associated with this trace',
+            defaultMessage: 'View logs related with this trace',
           })}
         </EuiText>
         <EuiSpacer size="m" />

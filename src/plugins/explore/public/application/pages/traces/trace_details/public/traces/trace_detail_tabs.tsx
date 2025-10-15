@@ -78,7 +78,7 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
         <>
           <EuiBadge color="default">{logsData.length}</EuiBadge>{' '}
           {i18n.translate('explore.traceView.tab.logs', {
-            defaultMessage: 'Logs',
+            defaultMessage: 'Related logs',
           })}
         </>
       ),
