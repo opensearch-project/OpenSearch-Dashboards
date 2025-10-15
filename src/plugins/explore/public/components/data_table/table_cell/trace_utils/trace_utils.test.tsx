@@ -527,10 +527,21 @@ describe('trace_utils', () => {
       mockLocation.pathname = '/app/explore/traces';
     });
 
+    const validRowData = {
+      spanId: 'span-123',
+      traceId: 'trace-456',
+      parentSpanId: 'parent-span-123',
+      serviceName: 'test-service',
+      name: 'test-operation',
+      startTime: '2023-01-01T00:00:00.000Z',
+      endTime: '2023-01-01T00:01:00.000Z',
+      status: { code: 0 },
+    };
+
     it('should render span ID link with correct text', () => {
       const props = {
         sanitizedCellValue: 'span-123',
-        rowData: { spanId: 'span-123', traceId: 'trace-456' } as any,
+        rowData: validRowData as any,
         dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' } as any,
       };
 
@@ -543,7 +554,7 @@ describe('trace_utils', () => {
     it('should strip HTML tags from sanitized cell value in display', () => {
       const props = {
         sanitizedCellValue: '<span>span-123</span>',
-        rowData: { spanId: 'span-123', traceId: 'trace-456' } as any,
+        rowData: validRowData as any,
         dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' } as any,
       };
 
@@ -556,7 +567,7 @@ describe('trace_utils', () => {
     it('should call handleSpanIdNavigation when clicked', () => {
       const props = {
         sanitizedCellValue: 'span-123',
-        rowData: { spanId: 'span-123', traceId: 'trace-456' } as any,
+        rowData: validRowData as any,
         dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' } as any,
       };
 
@@ -574,7 +585,7 @@ describe('trace_utils', () => {
     it('should display popout icon', () => {
       const props = {
         sanitizedCellValue: 'span-123',
-        rowData: { spanId: 'span-123', traceId: 'trace-456' } as any,
+        rowData: validRowData as any,
         dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' } as any,
       };
 
@@ -588,7 +599,7 @@ describe('trace_utils', () => {
     it('should handle whitespace in sanitized cell value', () => {
       const props = {
         sanitizedCellValue: '  span-123  ',
-        rowData: { spanId: 'span-123', traceId: 'trace-456' } as any,
+        rowData: validRowData as any,
         dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' } as any,
       };
 
@@ -606,19 +617,15 @@ describe('trace_utils', () => {
 
       render(<SpanIdLink {...props} />);
 
-      const link = screen.getByTestId('spanIdLink');
-      fireEvent.click(link);
-
-      expect(mockOpen).toHaveBeenCalledWith(
-        "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN'),spanId:'')",
-        '_blank'
-      );
+      // With null row data, validation fails, so no spanIdLink should be rendered
+      expect(screen.queryByTestId('spanIdLink')).not.toBeInTheDocument();
+      expect(screen.getByText('span-123')).toBeInTheDocument();
     });
 
     it('should work with null dataset', () => {
       const props = {
         sanitizedCellValue: 'span-123',
-        rowData: { spanId: 'span-123', traceId: 'trace-456' } as any,
+        rowData: validRowData as any,
         dataset: null as any,
       };
 
@@ -636,7 +643,7 @@ describe('trace_utils', () => {
     it('should have correct tooltip text', () => {
       const props = {
         sanitizedCellValue: 'span-123',
-        rowData: { spanId: 'span-123', traceId: 'trace-456' } as any,
+        rowData: validRowData as any,
         dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' } as any,
       };
 
