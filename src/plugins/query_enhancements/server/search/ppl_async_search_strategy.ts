@@ -41,8 +41,6 @@ export const pplAsyncSearchStrategyProvider = (
         const pollQueryResultsParams = request.body.pollQueryResultsParams;
         const inProgressQueryId = pollQueryResultsParams?.queryId;
 
-        // Note: Backend query cancellation is handled by individual data source implementations
-
         if (!inProgressQueryId) {
           request.body = { ...request.body, lang: SEARCH_STRATEGY.PPL };
           const rawResponse: any = await pplAsyncFacet.describeQuery(context, request);
