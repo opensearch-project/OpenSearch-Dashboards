@@ -5,28 +5,43 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { act } from 'react-dom/test-utils';
-import { SavedObjectsClientContract } from '../../../../core/public';
+import { savedObjectsServiceMock } from '../../../../core/public/mocks';
 import { useCorrelations, useCorrelationCount, useSingleCorrelation } from './use_correlations';
 import { CorrelationSavedObject } from '../types/correlations';
 
-// Mock the CorrelationsClient
-jest.mock('../services/correlations_client');
+// Create mock functions for CorrelationsClient methods
+const mockFind = jest.fn();
+const mockGet = jest.fn();
+const mockCreate = jest.fn();
+const mockUpdate = jest.fn();
+const mockDelete = jest.fn();
+const mockGetCorrelationsForDataset = jest.fn();
+const mockCountForDataset = jest.fn();
+const mockIsTraceDatasetCorrelated = jest.fn();
+const mockGetCorrelationByTraceDataset = jest.fn();
+
+// Mock the CorrelationsClient module
+jest.mock('../services/correlations_client', () => ({
+  CorrelationsClient: jest.fn().mockImplementation(() => ({
+    find: mockFind,
+    get: mockGet,
+    create: mockCreate,
+    update: mockUpdate,
+    delete: mockDelete,
+    getCorrelationsForDataset: mockGetCorrelationsForDataset,
+    countForDataset: mockCountForDataset,
+    isTraceDatasetCorrelated: mockIsTraceDatasetCorrelated,
+    getCorrelationByTraceDataset: mockGetCorrelationByTraceDataset,
+  })),
+}));
 
 describe('useCorrelations', () => {
-  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockSavedObjectsClient: ReturnType<
+    typeof savedObjectsServiceMock.createStartContract
+  >['client'];
 
   beforeEach(() => {
-    mockSavedObjectsClient = {
-      find: jest.fn(),
-      get: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      bulkGet: jest.fn(),
-      bulkCreate: jest.fn(),
-      bulkUpdate: jest.fn(),
-    } as any;
-
+    mockSavedObjectsClient = savedObjectsServiceMock.createStartContract().client;
     jest.clearAllMocks();
   });
 
@@ -44,7 +59,7 @@ describe('useCorrelations', () => {
       },
     ];
 
-    mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: mockCorrelations });
+    mockFind.mockResolvedValue(mockCorrelations);
 
     const { result, waitForNextUpdate } = renderHook(() => useCorrelations(mockSavedObjectsClient));
 
@@ -74,7 +89,7 @@ describe('useCorrelations', () => {
       },
     ];
 
-    mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: mockCorrelations });
+    mockFind.mockResolvedValue(mockCorrelations);
 
     const { result, waitForNextUpdate } = renderHook(() =>
       useCorrelations(mockSavedObjectsClient, { datasetId: 'dataset-123' })
@@ -82,12 +97,9 @@ describe('useCorrelations', () => {
 
     await waitForNextUpdate();
 
-    expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+    expect(mockFind).toHaveBeenCalledWith(
       expect.objectContaining({
-        hasReference: {
-          type: 'index-pattern',
-          id: 'dataset-123',
-        },
+        datasetId: 'dataset-123',
       })
     );
     expect(result.current.correlations).toEqual(mockCorrelations);
@@ -95,7 +107,7 @@ describe('useCorrelations', () => {
 
   it('should handle fetch errors', async () => {
     const error = new Error('Failed to fetch');
-    mockSavedObjectsClient.find.mockRejectedValue(error);
+    mockFind.mockRejectedValue(error);
 
     const { result, waitForNextUpdate } = renderHook(() => useCorrelations(mockSavedObjectsClient));
 
@@ -106,7 +118,7 @@ describe('useCorrelations', () => {
   });
 
   it('should handle non-Error exceptions', async () => {
-    mockSavedObjectsClient.find.mockRejectedValue('String error');
+    mockFind.mockRejectedValue('String error');
 
     const { result, waitForNextUpdate } = renderHook(() => useCorrelations(mockSavedObjectsClient));
 
@@ -130,13 +142,13 @@ describe('useCorrelations', () => {
       },
     ];
 
-    mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: mockCorrelations });
+    mockFind.mockResolvedValue(mockCorrelations);
 
     const { result, waitForNextUpdate } = renderHook(() => useCorrelations(mockSavedObjectsClient));
 
     await waitForNextUpdate();
 
-    expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(mockFind).toHaveBeenCalledTimes(1);
 
     // Refetch
     act(() => {
@@ -145,11 +157,11 @@ describe('useCorrelations', () => {
 
     await waitForNextUpdate();
 
-    expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+    expect(mockFind).toHaveBeenCalledTimes(2);
   });
 
   it('should refetch when options change', async () => {
-    mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [] });
+    mockFind.mockResolvedValue([]);
 
     const { rerender, waitForNextUpdate } = renderHook(
       ({ datasetId }) => useCorrelations(mockSavedObjectsClient, { datasetId }),
@@ -160,39 +172,29 @@ describe('useCorrelations', () => {
 
     await waitForNextUpdate();
 
-    expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(mockFind).toHaveBeenCalledTimes(1);
 
     // Change options
     rerender({ datasetId: 'dataset-2' });
 
     await waitForNextUpdate();
 
-    expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(2);
-    expect(mockSavedObjectsClient.find).toHaveBeenLastCalledWith(
+    expect(mockFind).toHaveBeenCalledTimes(2);
+    expect(mockFind).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        hasReference: expect.objectContaining({
-          id: 'dataset-2',
-        }),
+        datasetId: 'dataset-2',
       })
     );
   });
 });
 
 describe('useCorrelationCount', () => {
-  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockSavedObjectsClient: ReturnType<
+    typeof savedObjectsServiceMock.createStartContract
+  >['client'];
 
   beforeEach(() => {
-    mockSavedObjectsClient = {
-      find: jest.fn(),
-      get: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      bulkGet: jest.fn(),
-      bulkCreate: jest.fn(),
-      bulkUpdate: jest.fn(),
-    } as any;
-
+    mockSavedObjectsClient = savedObjectsServiceMock.createStartContract().client;
     jest.clearAllMocks();
   });
 
@@ -203,7 +205,7 @@ describe('useCorrelationCount', () => {
       { id: 'correlation-3' },
     ] as any;
 
-    mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: mockCorrelations });
+    mockFind.mockResolvedValue(mockCorrelations);
 
     const { result, waitForNextUpdate } = renderHook(() =>
       useCorrelationCount(mockSavedObjectsClient, 'dataset-123')
@@ -223,11 +225,11 @@ describe('useCorrelationCount', () => {
     await waitFor(() => result.current.loading === false);
 
     expect(result.current.count).toBe(0);
-    expect(mockSavedObjectsClient.find).not.toHaveBeenCalled();
+    expect(mockFind).not.toHaveBeenCalled();
   });
 
   it('should return 0 when no correlations found', async () => {
-    mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [] });
+    mockFind.mockResolvedValue([]);
 
     const { result, waitForNextUpdate } = renderHook(() =>
       useCorrelationCount(mockSavedObjectsClient, 'dataset-123')
@@ -240,7 +242,7 @@ describe('useCorrelationCount', () => {
 
   it('should handle fetch errors', async () => {
     const error = new Error('Failed to fetch');
-    mockSavedObjectsClient.find.mockRejectedValue(error);
+    mockFind.mockRejectedValue(error);
 
     const { result, waitForNextUpdate } = renderHook(() =>
       useCorrelationCount(mockSavedObjectsClient, 'dataset-123')
@@ -253,7 +255,7 @@ describe('useCorrelationCount', () => {
   });
 
   it('should support refetch functionality', async () => {
-    mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [{ id: '1' }] as any });
+    mockFind.mockResolvedValue([{ id: '1' }] as any);
 
     const { result, waitForNextUpdate } = renderHook(() =>
       useCorrelationCount(mockSavedObjectsClient, 'dataset-123')
@@ -261,7 +263,7 @@ describe('useCorrelationCount', () => {
 
     await waitForNextUpdate();
 
-    expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(mockFind).toHaveBeenCalledTimes(1);
 
     // Refetch
     act(() => {
@@ -270,15 +272,15 @@ describe('useCorrelationCount', () => {
 
     await waitForNextUpdate();
 
-    expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+    expect(mockFind).toHaveBeenCalledTimes(2);
   });
 
   it('should use perPage: 1000 for count query', async () => {
-    mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [] });
+    mockFind.mockResolvedValue([]);
 
     renderHook(() => useCorrelationCount(mockSavedObjectsClient, 'dataset-123'));
 
-    expect(mockSavedObjectsClient.find).toHaveBeenCalledWith(
+    expect(mockFind).toHaveBeenCalledWith(
       expect.objectContaining({
         perPage: 1000,
       })
@@ -286,7 +288,7 @@ describe('useCorrelationCount', () => {
   });
 
   it('should refetch when datasetId changes', async () => {
-    mockSavedObjectsClient.find.mockResolvedValue({ savedObjects: [] });
+    mockFind.mockResolvedValue([]);
 
     const { rerender, waitForNextUpdate } = renderHook(
       ({ datasetId }) => useCorrelationCount(mockSavedObjectsClient, datasetId),
@@ -297,32 +299,24 @@ describe('useCorrelationCount', () => {
 
     await waitForNextUpdate();
 
-    expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(1);
+    expect(mockFind).toHaveBeenCalledTimes(1);
 
     // Change datasetId
     rerender({ datasetId: 'dataset-2' });
 
     await waitForNextUpdate();
 
-    expect(mockSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+    expect(mockFind).toHaveBeenCalledTimes(2);
   });
 });
 
 describe('useSingleCorrelation', () => {
-  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockSavedObjectsClient: ReturnType<
+    typeof savedObjectsServiceMock.createStartContract
+  >['client'];
 
   beforeEach(() => {
-    mockSavedObjectsClient = {
-      find: jest.fn(),
-      get: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
-      bulkGet: jest.fn(),
-      bulkCreate: jest.fn(),
-      bulkUpdate: jest.fn(),
-    } as any;
-
+    mockSavedObjectsClient = savedObjectsServiceMock.createStartContract().client;
     jest.clearAllMocks();
   });
 
@@ -338,7 +332,7 @@ describe('useSingleCorrelation', () => {
       references: [],
     };
 
-    mockSavedObjectsClient.get.mockResolvedValue(mockCorrelation);
+    mockGet.mockResolvedValue(mockCorrelation);
 
     const { result, waitForNextUpdate } = renderHook(() =>
       useSingleCorrelation(mockSavedObjectsClient, 'correlation-1')
@@ -348,7 +342,7 @@ describe('useSingleCorrelation', () => {
 
     expect(result.current.correlation).toEqual(mockCorrelation);
     expect(result.current.error).toBeNull();
-    expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('correlations', 'correlation-1');
+    expect(mockGet).toHaveBeenCalledWith('correlation-1');
   });
 
   it('should return null when no correlation ID provided', async () => {
@@ -359,12 +353,12 @@ describe('useSingleCorrelation', () => {
     await waitFor(() => result.current.loading === false);
 
     expect(result.current.correlation).toBeNull();
-    expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(mockGet).not.toHaveBeenCalled();
   });
 
   it('should handle fetch errors', async () => {
     const error = new Error('Not found');
-    mockSavedObjectsClient.get.mockRejectedValue(error);
+    mockGet.mockRejectedValue(error);
 
     const { result, waitForNextUpdate } = renderHook(() =>
       useSingleCorrelation(mockSavedObjectsClient, 'correlation-1')
@@ -377,7 +371,7 @@ describe('useSingleCorrelation', () => {
   });
 
   it('should handle non-Error exceptions', async () => {
-    mockSavedObjectsClient.get.mockRejectedValue('String error');
+    mockGet.mockRejectedValue('String error');
 
     const { result, waitForNextUpdate } = renderHook(() =>
       useSingleCorrelation(mockSavedObjectsClient, 'correlation-1')
@@ -401,7 +395,7 @@ describe('useSingleCorrelation', () => {
       references: [],
     };
 
-    mockSavedObjectsClient.get.mockResolvedValue(mockCorrelation);
+    mockGet.mockResolvedValue(mockCorrelation);
 
     const { rerender, waitForNextUpdate } = renderHook(
       ({ correlationId }) => useSingleCorrelation(mockSavedObjectsClient, correlationId),
@@ -412,15 +406,15 @@ describe('useSingleCorrelation', () => {
 
     await waitForNextUpdate();
 
-    expect(mockSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(mockGet).toHaveBeenCalledTimes(1);
 
     // Change ID
     rerender({ correlationId: 'correlation-2' });
 
     await waitForNextUpdate();
 
-    expect(mockSavedObjectsClient.get).toHaveBeenCalledTimes(2);
-    expect(mockSavedObjectsClient.get).toHaveBeenLastCalledWith('correlations', 'correlation-2');
+    expect(mockGet).toHaveBeenCalledTimes(2);
+    expect(mockGet).toHaveBeenLastCalledWith('correlation-2');
   });
 
   it('should clear correlation when ID changes to undefined', async () => {
@@ -435,7 +429,7 @@ describe('useSingleCorrelation', () => {
       references: [],
     };
 
-    mockSavedObjectsClient.get.mockResolvedValue(mockCorrelation);
+    mockGet.mockResolvedValue(mockCorrelation);
 
     const { result, rerender, waitForNextUpdate, waitFor } = renderHook(
       ({ correlationId }) => useSingleCorrelation(mockSavedObjectsClient, correlationId),
