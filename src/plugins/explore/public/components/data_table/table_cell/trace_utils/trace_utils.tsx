@@ -186,18 +186,28 @@ export interface TraceFlyoutButtonProps {
   sanitizedCellValue: string;
   rowData: OpenSearchSearchHit<Record<string, unknown>>;
   dataset: Dataset;
+  setIsRowSelected: (isSelected: boolean) => void;
 }
 
 export const TraceFlyoutButton: React.FC<TraceFlyoutButtonProps> = ({
   sanitizedCellValue,
   rowData,
   dataset,
+  setIsRowSelected,
 }) => {
-  const { openTraceFlyout } = useTraceFlyoutContext();
-  const handleSpanFlyoutClick = () => {
-    const spanIdValue = extractFieldFromRowData(rowData, SPAN_ID_FIELD_PATHS);
-    const traceIdValue = extractFieldFromRowData(rowData, TRACE_ID_FIELD_PATHS);
+  const { openTraceFlyout, isFlyoutOpen, flyoutData } = useTraceFlyoutContext();
+  const spanIdValue = extractFieldFromRowData(rowData, SPAN_ID_FIELD_PATHS);
+  const traceIdValue = extractFieldFromRowData(rowData, TRACE_ID_FIELD_PATHS);
 
+  useEffect(() => {
+    if (isFlyoutOpen && flyoutData && flyoutData.spanId === spanIdValue) {
+      setIsRowSelected(true);
+    } else {
+      setIsRowSelected(false);
+    }
+  }, [isFlyoutOpen, setIsRowSelected, flyoutData, spanIdValue]);
+
+  const handleSpanFlyoutClick = () => {
     openTraceFlyout({
       spanId: spanIdValue,
       traceId: traceIdValue,
