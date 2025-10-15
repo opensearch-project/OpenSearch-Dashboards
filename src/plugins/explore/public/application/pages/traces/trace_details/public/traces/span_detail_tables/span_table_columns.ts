@@ -88,6 +88,7 @@ export const getSpanHierarchyTableColumns = (
       }),
       isExpandable: false,
       isResizable: true,
+      actions: false,
     },
     {
       id: 'timeline',
@@ -95,6 +96,7 @@ export const getSpanHierarchyTableColumns = (
       initialWidth: availableWidth ? Math.floor(availableWidth / 2) : 600,
       isExpandable: false,
       isResizable: true,
+      actions: false,
     },
     {
       id: 'durationInNanos',
@@ -103,6 +105,7 @@ export const getSpanHierarchyTableColumns = (
       }),
       initialWidth: 100,
       isExpandable: false,
+      actions: false,
     },
   ];
 };
