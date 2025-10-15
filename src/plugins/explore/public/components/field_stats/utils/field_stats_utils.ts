@@ -98,10 +98,10 @@ export async function fetchFieldDetails(
     applicableSections.map(async (section) => {
       try {
         const data = await section.fetchData(fieldName, safeDataset, services);
-        return { id: section.id, data, error: false };
+        return { id: section.id, data };
       } catch (error) {
-        // TODO: put in a UI error within the expanded row panel
-        return { id: section.id, data: null, error: true };
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return { id: section.id, errorMessage };
       }
     })
   );
@@ -109,10 +109,10 @@ export async function fetchFieldDetails(
   const details: FieldDetails = {};
   results.forEach((result) => {
     if (result.status === 'fulfilled' && result.value) {
-      const { id, data, error } = result.value;
-      if (error) {
-        // store error flag for this section
-        (details as any)[id] = { error: true };
+      const { id, data, errorMessage } = result.value as any;
+      if (errorMessage) {
+        // store error message for this section
+        (details as any)[id] = { errorMessage };
       } else {
         (details as any)[id] = data;
       }
@@ -171,7 +171,8 @@ export function createRowExpandHandler(
       const details = await fetchFieldDetails(fieldName, field.type, dataset, services);
       setFieldDetails((prev) => ({ ...prev, [fieldName]: details }));
     } catch (error) {
-      setFieldDetails((prev) => ({ ...prev, [fieldName]: { error: true } }));
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setFieldDetails((prev) => ({ ...prev, [fieldName]: { errorMessage } }));
     } finally {
       setDetailsLoading((prev) => {
         const next = new Set(prev);

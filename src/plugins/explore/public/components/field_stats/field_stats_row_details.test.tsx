@@ -64,7 +64,7 @@ describe('FieldStatsRowDetails', () => {
   });
 
   it('displays error state when details has error', () => {
-    const errorDetails: FieldDetails = { error: true };
+    const errorDetails: FieldDetails = { errorMessage: 'Failed to load' };
     component = mountWithIntl(<FieldStatsRowDetails field={mockField} details={errorDetails} />);
     const callOut = component.find(EuiCallOut);
     expect(callOut.exists()).toBe(true);
@@ -137,7 +137,7 @@ describe('FieldStatsRowDetails', () => {
     (getApplicableSections as jest.Mock).mockReturnValue(mockSections);
 
     const detailsWithError: FieldDetails = {
-      topValues: { error: true } as any,
+      topValues: { errorMessage: 'Failed to load top values' } as any,
     };
     component = mountWithIntl(
       <FieldStatsRowDetails field={mockField} details={detailsWithError} />

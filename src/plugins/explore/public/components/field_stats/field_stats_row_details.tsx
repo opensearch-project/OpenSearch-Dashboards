@@ -55,14 +55,16 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({
     );
   }
 
-  if (details?.error) {
+  if (details?.errorMessage) {
     return (
       <EuiCallOut
         color="danger"
         title={i18n.translate('explore.fieldStats.rowDetails.failedToLoadDetails', {
           defaultMessage: 'Failed to load details',
         })}
-      />
+      >
+        <p>{details.errorMessage}</p>
+      </EuiCallOut>
     );
   }
 
@@ -115,7 +117,7 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({
         }
 
         // show error callout if section errored
-        if (sectionData.error) {
+        if ('errorMessage' in sectionData && sectionData.errorMessage) {
           return (
             <EuiFlexItem key={section.id}>
               <EuiPanel paddingSize="s">
@@ -127,7 +129,9 @@ export const FieldStatsRowDetails: React.FC<FieldStatsRowDetailsProps> = ({
                     defaultMessage: 'Failed to load {sectionTitle}',
                     values: { sectionTitle: section.title },
                   })}
-                />
+                >
+                  <p>{sectionData.errorMessage}</p>
+                </EuiCallOut>
               </EuiPanel>
             </EuiFlexItem>
           );

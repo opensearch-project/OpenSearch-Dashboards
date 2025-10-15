@@ -63,7 +63,7 @@ export const FieldStatsContainer = () => {
                 stats: transformFieldStatsResult(field.name, field.type, result),
               };
             } catch (error) {
-              // TODO: put in a UI error state that covers the field row or extended row panel
+              const errorMessage = error instanceof Error ? error.message : String(error);
               return {
                 name: field.name,
                 stats: {
@@ -72,7 +72,7 @@ export const FieldStatsContainer = () => {
                   docCount: 0,
                   distinctCount: 0,
                   docPercentage: 0,
-                  error: true,
+                  errorMessage,
                 },
               };
             }

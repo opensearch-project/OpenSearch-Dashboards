@@ -17,15 +17,18 @@ interface GetFieldStatsColumnsParams {
 /**
  * Renders an error badge with tooltip for fields that failed to load statistics
  */
-const renderErrorBadge = () => (
+const renderErrorBadge = (errorMessage?: string) => (
   <EuiToolTip
-    content={i18n.translate('explore.fieldStats.table.failedToLoadStatistics', {
-      defaultMessage: 'Failed to load statistics',
-    })}
+    content={
+      errorMessage ||
+      i18n.translate('explore.fieldStats.table.failedToLoadStatistics', {
+        defaultMessage: 'Failed to load statistics',
+      })
+    }
   >
-    <EuiBadge>
+    <EuiBadge color="danger">
       {i18n.translate('explore.fieldStats.table.errorIndicator', {
-        defaultMessage: 'Unsupported',
+        defaultMessage: 'Error',
       })}
     </EuiBadge>
   </EuiToolTip>
@@ -83,8 +86,8 @@ export const getFieldStatsColumns = ({
       width: '200px',
       align: 'right',
       render: (docCount: number, item: FieldStatsItem) => {
-        if (item.error) {
-          return renderErrorBadge();
+        if (item.errorMessage) {
+          return renderErrorBadge(item.errorMessage);
         }
         return (
           <span>
@@ -102,8 +105,8 @@ export const getFieldStatsColumns = ({
       width: '180px',
       align: 'right',
       render: (count: number, item: FieldStatsItem) => {
-        if (item.error) {
-          return renderErrorBadge();
+        if (item.errorMessage) {
+          return renderErrorBadge(item.errorMessage);
         }
         return count?.toLocaleString() || '—';
       },

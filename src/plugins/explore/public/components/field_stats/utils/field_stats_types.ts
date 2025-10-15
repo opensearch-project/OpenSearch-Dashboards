@@ -12,15 +12,19 @@ export interface FieldStatsItem {
   docCount: number;
   distinctCount: number;
   docPercentage: number;
-  error?: boolean;
+  errorMessage?: string;
+}
+
+export interface SectionError {
+  errorMessage: string;
 }
 
 export interface FieldDetails {
-  topValues?: TopValue[];
-  numericSummary?: NumericSummary;
-  dateRange?: DateRange;
-  examples?: ExampleValue[];
-  error?: boolean;
+  topValues?: TopValue[] | SectionError;
+  numericSummary?: NumericSummary | SectionError;
+  dateRange?: DateRange | SectionError;
+  examples?: ExampleValue[] | SectionError;
+  errorMessage?: string;
 }
 
 export interface TopValue {

@@ -34,7 +34,7 @@ describe('getFieldStatsColumns', () => {
       docCount: 0,
       distinctCount: 0,
       docPercentage: 0,
-      error: true,
+      errorMessage: 'Failed to load',
     };
 
     const columns = getFieldStatsColumns({ expandedRows, onRowExpand: onRowExpandMock });
