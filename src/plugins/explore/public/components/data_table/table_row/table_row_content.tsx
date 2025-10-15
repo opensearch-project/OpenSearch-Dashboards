@@ -12,7 +12,7 @@
 import { EuiSmallButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import dompurify from 'dompurify';
-import React from 'react';
+import React, { useState } from 'react';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
 import { TableCell } from '../table_cell/table_cell';
 import { EmptyTableCell } from '../table_cell/empty_table_cell';
@@ -62,9 +62,14 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
   onToggleExpand,
   isOnTracesPage,
 }) => {
+  const [isRowSelected, setIsRowSelected] = useState(false);
+
   const flattened = dataset.flattenHit(row);
   return (
-    <tr key={row._id} className={row.isAnchor ? 'exploreDocTable__row--highlight' : ''}>
+    <tr
+      key={row._id}
+      className={row.isAnchor || isRowSelected ? 'exploreDocTable__row--highlight' : ''}
+    >
       {isOnTracesPage ? (
         <td />
       ) : (
@@ -130,6 +135,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
             sanitizedCellValue={sanitizedCellValue}
             rowData={row}
             isOnTracesPage={isOnTracesPage}
+            setIsRowSelected={setIsRowSelected}
           />
         );
       })}

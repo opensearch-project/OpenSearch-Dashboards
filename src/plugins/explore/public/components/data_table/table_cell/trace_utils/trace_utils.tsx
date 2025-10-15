@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiToolTip, EuiLink, EuiIcon, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { SPAN_ID_FIELD_PATHS, TRACE_ID_FIELD_PATHS } from '../../../../utils/trace_field_constants';
@@ -11,6 +11,10 @@ import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { DataView as Dataset } from '../../../../../../data/common';
 import './trace_utils.scss';
 import { useTraceFlyoutContext } from '../../../../application/pages/traces/trace_flyout/trace_flyout_context';
+import {
+  round,
+  nanoToMilliSec,
+} from '../../../../application/pages/traces/trace_details/public/utils/helper_functions';
 
 export const isOnTracesPage = (): boolean => {
   return (
@@ -21,6 +25,10 @@ export const isOnTracesPage = (): boolean => {
 
 export const isSpanIdColumn = (columnId: string): boolean => {
   return columnId === 'spanId' || columnId === 'span_id' || columnId === 'spanID';
+};
+
+export const isDurationColumn = (columnId: string) => {
+  return columnId === 'durationNano' || columnId === 'durationInNanos';
 };
 
 export const extractFieldFromRowData = (
@@ -161,18 +169,28 @@ export interface TraceFlyoutButtonProps {
   sanitizedCellValue: string;
   rowData: OpenSearchSearchHit<Record<string, unknown>>;
   dataset: Dataset;
+  setIsRowSelected: (isSelected: boolean) => void;
 }
 
 export const TraceFlyoutButton: React.FC<TraceFlyoutButtonProps> = ({
   sanitizedCellValue,
   rowData,
   dataset,
+  setIsRowSelected,
 }) => {
-  const { openTraceFlyout } = useTraceFlyoutContext();
-  const handleSpanFlyoutClick = () => {
-    const spanIdValue = extractFieldFromRowData(rowData, SPAN_ID_FIELD_PATHS);
-    const traceIdValue = extractFieldFromRowData(rowData, TRACE_ID_FIELD_PATHS);
+  const { openTraceFlyout, isFlyoutOpen, flyoutData } = useTraceFlyoutContext();
+  const spanIdValue = extractFieldFromRowData(rowData, SPAN_ID_FIELD_PATHS);
+  const traceIdValue = extractFieldFromRowData(rowData, TRACE_ID_FIELD_PATHS);
 
+  useEffect(() => {
+    if (isFlyoutOpen && flyoutData && flyoutData.spanId === spanIdValue) {
+      setIsRowSelected(true);
+    } else {
+      setIsRowSelected(false);
+    }
+  }, [isFlyoutOpen, setIsRowSelected, flyoutData, spanIdValue]);
+
+  const handleSpanFlyoutClick = () => {
     openTraceFlyout({
       spanId: spanIdValue,
       traceId: traceIdValue,
@@ -212,4 +230,23 @@ export const getStatusCodeColor = (statusCode: number | undefined): string => {
   if (statusCode >= 400 && statusCode < 500) return 'warning';
   if (statusCode >= 500 && statusCode < 600) return 'danger';
   return 'default';
+};
+
+interface DurationTableCellProps {
+  sanitizedCellValue: string;
+}
+
+export const DurationTableCell: React.FC<DurationTableCellProps> = ({ sanitizedCellValue }) => {
+  const duration = sanitizedCellValue
+    .replace(/<[^>]*>/g, '')
+    .replace(/,/g, '')
+    .trim();
+
+  const durationLabel = `${round(nanoToMilliSec(Math.max(0, Number(duration))), 2)} ms`;
+
+  return (
+    <span className="exploreDocTableCell__dataField" data-test-subj="osdDocTableCellDataField">
+      <span>{durationLabel}</span>
+    </span>
+  );
 };

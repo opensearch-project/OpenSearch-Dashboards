@@ -82,6 +82,9 @@ describe('TraceLogsTab', () => {
     traceId: 'trace-1',
     logDatasets: mockLogDatasets,
     logsData: mockLogs,
+    datasetLogs: {
+      'logs-dataset-id': mockLogs,
+    },
     isLoading: false,
     onSpanClick: jest.fn(),
   };
@@ -113,15 +116,15 @@ describe('TraceLogsTab', () => {
     it('should handle empty log datasets', () => {
       render(<TraceLogsTab {...defaultProps} logDatasets={[]} />);
 
-      expect(screen.getByTestId('logs-data-table')).toBeInTheDocument();
-      expect(screen.getByTestId('logs-count')).toHaveTextContent('2');
+      expect(screen.getByText('No log datasets found for this trace')).toBeInTheDocument();
+      expect(screen.queryByTestId('logs-data-table')).not.toBeInTheDocument();
     });
 
     it('should handle empty logs data', () => {
-      render(<TraceLogsTab {...defaultProps} logsData={[]} />);
+      render(<TraceLogsTab {...defaultProps} logsData={[]} datasetLogs={{}} />);
 
-      expect(screen.getByTestId('logs-data-table')).toBeInTheDocument();
-      expect(screen.getByTestId('logs-count')).toHaveTextContent('0');
+      expect(screen.getByText('No logs found for this dataset')).toBeInTheDocument();
+      expect(screen.queryByTestId('logs-data-table')).not.toBeInTheDocument();
     });
   });
 

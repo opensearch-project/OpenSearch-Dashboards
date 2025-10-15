@@ -10,7 +10,13 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { useDatasetContext } from '../../../application/context';
-import { isSpanIdColumn, TraceFlyoutButton, SpanIdLink } from './trace_utils/trace_utils';
+import {
+  isSpanIdColumn,
+  TraceFlyoutButton,
+  SpanIdLink,
+  DurationTableCell,
+  isDurationColumn,
+} from './trace_utils/trace_utils';
 
 export interface ITableCellProps {
   columnId: string;
@@ -20,6 +26,7 @@ export interface ITableCellProps {
   sanitizedCellValue: string;
   rowData?: OpenSearchSearchHit<Record<string, unknown>>;
   isOnTracesPage: boolean;
+  setIsRowSelected: (isRowSelected: boolean) => void;
 }
 
 // TODO: Move to a better cell component design that not rely on rowData
@@ -31,6 +38,7 @@ export const TableCellUI = ({
   sanitizedCellValue,
   rowData,
   isOnTracesPage,
+  setIsRowSelected,
 }: ITableCellProps) => {
   const { dataset } = useDatasetContext();
 
@@ -42,7 +50,10 @@ export const TableCellUI = ({
         sanitizedCellValue={sanitizedCellValue}
         rowData={rowData}
         dataset={dataset}
+        setIsRowSelected={setIsRowSelected}
       />
+    ) : isOnTracesPage && isDurationColumn(columnId) ? (
+      <DurationTableCell sanitizedCellValue={sanitizedCellValue} />
     ) : (
       <span
         className="exploreDocTableCell__dataField"

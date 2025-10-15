@@ -8,7 +8,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { TableCell, ITableCellProps } from './table_cell';
 import { useDatasetContext } from '../../../application/context';
 import { useTraceFlyoutContext } from '../../../application/pages/traces/trace_flyout/trace_flyout_context';
-import { isOnTracesPage } from './trace_utils/trace_utils';
 
 jest.mock('../../../application/context', () => ({
   useDatasetContext: jest.fn(),
@@ -29,9 +28,11 @@ describe('TableCell', () => {
   const defaultProps: ITableCellProps = {
     columnId: 'test-column',
     sanitizedCellValue: '<strong>test value</strong>',
+    setIsRowSelected: jest.fn(),
     onFilter: mockOnFilter,
     fieldMapping: { value: 'test' },
     isTimeField: false,
+    isOnTracesPage: false,
   };
 
   beforeEach(() => {
@@ -132,6 +133,37 @@ describe('TableCell', () => {
     expect(screen.getByTestId('osdDocTableCellDataField')).toBeInTheDocument();
   });
 
+  describe('Duration cell functionality', () => {
+    it('renders duration in milliseconds on traces page', () => {
+      render(
+        <TableCell
+          {...defaultProps}
+          columnId="durationNano"
+          sanitizedCellValue="<span>2,000,000</span>"
+          isOnTracesPage={true}
+        />
+      );
+
+      const cellContent = screen.getByTestId('osdDocTableCellDataField');
+      expect(cellContent).toBeInTheDocument();
+      expect(cellContent.innerHTML).toBe('<span>2 ms</span>');
+    });
+
+    it('renders regular cell content when not on traces page', () => {
+      render(
+        <TableCell
+          {...defaultProps}
+          columnId="durationNano"
+          sanitizedCellValue="<span>2,000,000</span>"
+        />
+      );
+
+      const cellContent = screen.getByTestId('osdDocTableCellDataField');
+      expect(cellContent).toBeInTheDocument();
+      expect(cellContent.innerHTML).toBe('<span>2,000,000</span>');
+    });
+  });
+
   // Tests for trace timeline functionality
   describe('Span ID link functionality', () => {
     const spanIdProps: ITableCellProps = {
@@ -145,6 +177,7 @@ describe('TableCell', () => {
         spanId: 'test-span-id-123',
       },
       isOnTracesPage: true,
+      setIsRowSelected: jest.fn(),
     };
 
     it('renders span ID as clickable link when on traces page', () => {
@@ -294,6 +327,7 @@ describe('TableCell', () => {
       onFilter: mockOnFilter,
       fieldMapping: { value: 'test' },
       isTimeField: true,
+      setIsRowSelected: jest.fn(),
       rowData: {
         traceId: 'test-trace-id-456',
         spanId: 'test-span-id-123',

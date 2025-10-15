@@ -8,6 +8,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import {
   isOnTracesPage,
   isSpanIdColumn,
+  isDurationColumn,
   extractFieldFromRowData,
   buildTraceDetailsUrl,
   getTraceDetailsUrlParams,
@@ -16,6 +17,7 @@ import {
   TraceFlyoutButton,
   navigateToTraceDetailsWithSpan,
   getStatusCodeColor,
+  DurationTableCell,
 } from './trace_utils';
 
 const mockLocation = {
@@ -123,6 +125,32 @@ describe('trace_utils', () => {
     it('should handle null and undefined', () => {
       expect(isSpanIdColumn(null as any)).toBe(false);
       expect(isSpanIdColumn(undefined as any)).toBe(false);
+    });
+  });
+
+  describe('isDurationColumn', () => {
+    it('should return true for duration columns', () => {
+      expect(isDurationColumn('durationNano')).toBe(true);
+      expect(isDurationColumn('durationInNanos')).toBe(true);
+    });
+
+    it('should return false for other column names', () => {
+      expect(isDurationColumn('duration')).toBe(false);
+      expect(isDurationColumn('durationMs')).toBe(false);
+      expect(isDurationColumn('spanId')).toBe(false);
+      expect(isDurationColumn('traceId')).toBe(false);
+      expect(isDurationColumn('')).toBe(false);
+    });
+
+    it('should be case sensitive', () => {
+      expect(isDurationColumn('durationnano')).toBe(false);
+      expect(isDurationColumn('DURATIONNANO')).toBe(false);
+      expect(isDurationColumn('DurationInNanos')).toBe(false);
+    });
+
+    it('should handle null and undefined', () => {
+      expect(isDurationColumn(null as any)).toBe(false);
+      expect(isDurationColumn(undefined as any)).toBe(false);
     });
   });
 
@@ -267,6 +295,18 @@ describe('trace_utils', () => {
       expect(extractFieldFromRowData(rowData, ['level1.level2.level3.spanId'])).toBe(
         'deep-span-123'
       );
+    });
+  });
+
+  describe('DurationTableCell', () => {
+    it('should render duration in milliseconds', () => {
+      render(<DurationTableCell sanitizedCellValue="<span>2,000,000</span>" />);
+      expect(screen.getByText('2 ms')).toBeInTheDocument();
+    });
+
+    it('should handle negative values', () => {
+      render(<DurationTableCell sanitizedCellValue="-1000000" />);
+      expect(screen.getByText('0 ms')).toBeInTheDocument();
     });
   });
 
@@ -649,11 +689,18 @@ describe('trace_utils', () => {
   });
 
   describe('TraceFlyoutButton', () => {
+    const mockSetIsRowSelected = jest.fn();
+
     const defaultProps = {
       sanitizedCellValue: 'test-value',
       rowData: { spanId: 'span-123', traceId: 'trace-456' } as any,
       dataset: { id: 'test', title: 'test', type: 'INDEX_PATTERN' } as any,
+      setIsRowSelected: mockSetIsRowSelected,
     };
+
+    beforeEach(() => {
+      mockSetIsRowSelected.mockClear();
+    });
 
     it('should render button with sanitized text', () => {
       render(<TraceFlyoutButton {...defaultProps} />);
@@ -673,6 +720,57 @@ describe('trace_utils', () => {
         dataset: defaultProps.dataset,
         rowData: defaultProps.rowData,
       });
+    });
+
+    it('should call setIsRowSelected(true) when flyout is open with matching spanId', () => {
+      useTraceFlyoutContext.mockReturnValue({
+        openTraceFlyout: mockOpenTraceFlyout,
+        closeTraceFlyout: jest.fn(),
+        isFlyoutOpen: true,
+        flyoutData: { spanId: 'span-123' },
+      });
+
+      render(<TraceFlyoutButton {...defaultProps} sanitizedCellValue="span-123" />);
+      expect(mockSetIsRowSelected).toHaveBeenCalledWith(true);
+    });
+
+    it('should call setIsRowSelected(false) when flyout is open with different spanId', () => {
+      useTraceFlyoutContext.mockReturnValue({
+        openTraceFlyout: mockOpenTraceFlyout,
+        closeTraceFlyout: jest.fn(),
+        isFlyoutOpen: true,
+        flyoutData: { spanId: 'different-span-id' },
+      });
+
+      render(<TraceFlyoutButton {...defaultProps} />);
+
+      expect(mockSetIsRowSelected).toHaveBeenCalledWith(false);
+    });
+
+    it('should call setIsRowSelected(false) when flyout is closed', () => {
+      useTraceFlyoutContext.mockReturnValue({
+        openTraceFlyout: mockOpenTraceFlyout,
+        closeTraceFlyout: jest.fn(),
+        isFlyoutOpen: false,
+        flyoutData: undefined,
+      });
+
+      render(<TraceFlyoutButton {...defaultProps} />);
+
+      expect(mockSetIsRowSelected).toHaveBeenCalledWith(false);
+    });
+
+    it('should call setIsRowSelected(false) when flyoutData is undefined', () => {
+      useTraceFlyoutContext.mockReturnValue({
+        openTraceFlyout: mockOpenTraceFlyout,
+        closeTraceFlyout: jest.fn(),
+        isFlyoutOpen: true,
+        flyoutData: undefined,
+      });
+
+      render(<TraceFlyoutButton {...defaultProps} />);
+
+      expect(mockSetIsRowSelected).toHaveBeenCalledWith(false);
     });
   });
 
