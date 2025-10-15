@@ -45,7 +45,6 @@ export const sqlAsyncSearchStrategyProvider = (
         const query: Query = request.body.query;
         const pollQueryResultsParams = request.body.pollQueryResultsParams;
         const inProgressQueryId = pollQueryResultsParams?.queryId;
-        
         if (!inProgressQueryId) {
           request.body = { ...request.body, lang: SEARCH_STRATEGY.SQL };
           const rawResponse: any = await sqlAsyncFacet.describeQuery(context, request);
