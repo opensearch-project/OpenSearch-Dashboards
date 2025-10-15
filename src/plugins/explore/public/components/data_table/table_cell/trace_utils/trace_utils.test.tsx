@@ -8,6 +8,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import {
   isOnTracesPage,
   isSpanIdColumn,
+  isDurationColumn,
+  extractFieldFromRowData,
   buildTraceDetailsUrl,
   getTraceDetailsUrlParams,
   handleSpanIdNavigation,
@@ -15,6 +17,7 @@ import {
   TraceFlyoutButton,
   navigateToTraceDetailsWithSpan,
   getStatusCodeColor,
+  DurationTableCell,
 } from './trace_utils';
 import { extractFieldFromRowData } from '../../../../utils/trace_field_validation';
 
@@ -123,6 +126,32 @@ describe('trace_utils', () => {
     it('should handle null and undefined', () => {
       expect(isSpanIdColumn(null as any)).toBe(false);
       expect(isSpanIdColumn(undefined as any)).toBe(false);
+    });
+  });
+
+  describe('isDurationColumn', () => {
+    it('should return true for duration columns', () => {
+      expect(isDurationColumn('durationNano')).toBe(true);
+      expect(isDurationColumn('durationInNanos')).toBe(true);
+    });
+
+    it('should return false for other column names', () => {
+      expect(isDurationColumn('duration')).toBe(false);
+      expect(isDurationColumn('durationMs')).toBe(false);
+      expect(isDurationColumn('spanId')).toBe(false);
+      expect(isDurationColumn('traceId')).toBe(false);
+      expect(isDurationColumn('')).toBe(false);
+    });
+
+    it('should be case sensitive', () => {
+      expect(isDurationColumn('durationnano')).toBe(false);
+      expect(isDurationColumn('DURATIONNANO')).toBe(false);
+      expect(isDurationColumn('DurationInNanos')).toBe(false);
+    });
+
+    it('should handle null and undefined', () => {
+      expect(isDurationColumn(null as any)).toBe(false);
+      expect(isDurationColumn(undefined as any)).toBe(false);
     });
   });
 
@@ -267,6 +296,18 @@ describe('trace_utils', () => {
       expect(extractFieldFromRowData(rowData, ['level1.level2.level3.spanId'])).toBe(
         'deep-span-123'
       );
+    });
+  });
+
+  describe('DurationTableCell', () => {
+    it('should render duration in milliseconds', () => {
+      render(<DurationTableCell sanitizedCellValue="<span>2,000,000</span>" />);
+      expect(screen.getByText('2 ms')).toBeInTheDocument();
+    });
+
+    it('should handle negative values', () => {
+      render(<DurationTableCell sanitizedCellValue="-1000000" />);
+      expect(screen.getByText('0 ms')).toBeInTheDocument();
     });
   });
 

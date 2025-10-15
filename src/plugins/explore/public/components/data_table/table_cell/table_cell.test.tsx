@@ -133,6 +133,37 @@ describe('TableCell', () => {
     expect(screen.getByTestId('osdDocTableCellDataField')).toBeInTheDocument();
   });
 
+  describe('Duration cell functionality', () => {
+    it('renders duration in milliseconds on traces page', () => {
+      render(
+        <TableCell
+          {...defaultProps}
+          columnId="durationNano"
+          sanitizedCellValue="<span>2,000,000</span>"
+          isOnTracesPage={true}
+        />
+      );
+
+      const cellContent = screen.getByTestId('osdDocTableCellDataField');
+      expect(cellContent).toBeInTheDocument();
+      expect(cellContent.innerHTML).toBe('<span>2 ms</span>');
+    });
+
+    it('renders regular cell content when not on traces page', () => {
+      render(
+        <TableCell
+          {...defaultProps}
+          columnId="durationNano"
+          sanitizedCellValue="<span>2,000,000</span>"
+        />
+      );
+
+      const cellContent = screen.getByTestId('osdDocTableCellDataField');
+      expect(cellContent).toBeInTheDocument();
+      expect(cellContent.innerHTML).toBe('<span>2,000,000</span>');
+    });
+  });
+
   // Tests for trace timeline functionality
   describe('Span ID link functionality', () => {
     const spanIdProps: ITableCellProps = {
