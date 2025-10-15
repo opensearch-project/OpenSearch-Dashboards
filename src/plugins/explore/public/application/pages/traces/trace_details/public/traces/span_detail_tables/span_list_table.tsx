@@ -4,82 +4,13 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiDataGridColumn } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import './span_detail_table.scss';
 import { RenderCustomDataGrid } from '../../utils/custom_datagrid';
-import { isSpanError } from '../ppl_resolve_helpers';
-import { ParsedHit, Span, SpanTableProps } from './types';
+import { Span, SpanTableProps } from './types';
 import { SpanCell } from './span_cell';
-import { parseHits } from './utils';
-
-const getListColumns = (): EuiDataGridColumn[] => {
-  return [
-    {
-      id: 'serviceName',
-      display: i18n.translate('explore.spanDetailTable.column.service', {
-        defaultMessage: 'Service',
-      }),
-    },
-    {
-      id: 'name',
-      display: i18n.translate('explore.spanDetailTable.column.operation', {
-        defaultMessage: 'Operation',
-      }),
-    },
-    {
-      id: 'spanId',
-      display: i18n.translate('explore.spanDetailTable.column.spanId', {
-        defaultMessage: 'Span Id',
-      }),
-    },
-    {
-      id: 'parentSpanId',
-      display: i18n.translate('explore.spanDetailTable.column.parentSpanId', {
-        defaultMessage: 'Parent span Id',
-      }),
-    },
-    {
-      id: 'traceId',
-      display: i18n.translate('explore.spanDetailTable.column.traceId', {
-        defaultMessage: 'Trace Id',
-      }),
-    },
-    {
-      id: 'traceGroup',
-      display: i18n.translate('explore.spanDetailTable.column.traceGroup', {
-        defaultMessage: 'Trace group',
-      }),
-    },
-    {
-      id: 'status.code',
-      display: i18n.translate('explore.spanDetailTable.column.errors', {
-        defaultMessage: 'Errors',
-      }),
-      initialWidth: 80,
-    },
-    {
-      id: 'durationInNanos',
-      display: i18n.translate('explore.spanDetailTable.column.duration', {
-        defaultMessage: 'Duration',
-      }),
-      initialWidth: 100,
-    },
-    {
-      id: 'startTime',
-      display: i18n.translate('explore.spanDetailTable.column.startTime', {
-        defaultMessage: 'Start time',
-      }),
-    },
-    {
-      id: 'endTime',
-      display: i18n.translate('explore.spanDetailTable.column.endTime', {
-        defaultMessage: 'End time',
-      }),
-    },
-  ];
-};
+import { parseHits, applySpanFilters } from './utils';
+import { getSpanListTableColumns } from './span_table_columns';
 
 export const SpanListTable: React.FC<SpanTableProps> = (props) => {
   const [tableParams, setTableParams] = useState({
@@ -104,18 +35,7 @@ export const SpanListTable: React.FC<SpanTableProps> = (props) => {
     }
     try {
       let spans = parseHits(props.payloadData);
-
-      // Apply filters passed as a prop.
-      if (props.filters.length > 0) {
-        spans = spans.filter((span: ParsedHit) => {
-          return props.filters.every(({ field, value }) => {
-            if (field === 'isError' && value === true) {
-              return isSpanError(span);
-            }
-            return span[field] === value;
-          });
-        });
-      }
+      spans = applySpanFilters(spans, props.filters);
 
       if (tableParams.sortingColumns.length > 0) {
         spans = applySorting(spans);
@@ -160,7 +80,7 @@ export const SpanListTable: React.FC<SpanTableProps> = (props) => {
     setTableParams((prev) => ({ ...prev, size, page: 0 }));
   };
 
-  const columns = useMemo(() => getListColumns(), []);
+  const columns = useMemo(() => getSpanListTableColumns(), []);
   const renderCellValue = useCallback(
     ({ rowIndex, columnId, disableInteractions, setCellProps }) => (
       <SpanCell
@@ -178,10 +98,10 @@ export const SpanListTable: React.FC<SpanTableProps> = (props) => {
 
   const visibleColumns = useMemo(
     () =>
-      getListColumns()
-        .filter(({ id }) => !props.hiddenColumns.includes(id))
+      getSpanListTableColumns()
+        .filter(({ id }) => !props.hiddenColumns?.includes(id))
         .map(({ id }) => id),
-    []
+    [props.hiddenColumns]
   );
 
   return RenderCustomDataGrid({

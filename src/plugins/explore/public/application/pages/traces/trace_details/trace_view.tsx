@@ -227,8 +227,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     if (traceId && dataset && pplService) {
       fetchData(spanFilters);
     }
+    // Including transformedHits.length causes duplicate ppl query calls
+    // Including spanFilters causes double re-renders when changing filters
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [traceId, dataset, pplService, spanFilters]);
+  }, [traceId, dataset, pplService]);
 
   useEffect(() => {
     if (!pplQueryData) return;
