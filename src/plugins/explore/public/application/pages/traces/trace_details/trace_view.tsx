@@ -503,50 +503,15 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                         onClick={clearAllFilters}
                         data-test-subj="clear-all-filters-button"
                       >
-                        <div className="exploreTraceView__contentPanel">
-                          {/* Tab content */}
-                          <div ref={mainPanelRef} className="exploreTraceView__mainPanel">
-                            {activeTab === TraceDetailTab.SERVICE_MAP && (
-                              <div style={{ height: 'calc(100vh - 200px)', overflow: 'hidden' }}>
-                                <ServiceMap
-                                  hits={transformedHits}
-                                  colorMap={colorMap}
-                                  paddingSize="none"
-                                  hasShadow={false}
-                                  selectedSpanId={spanId}
-                                />
-                              </div>
-                            )}
-
-                            {(activeTab === TraceDetailTab.TIMELINE ||
-                              activeTab === TraceDetailTab.SPAN_LIST) && (
-                              <SpanDetailPanel
-                                key={`span-panel-${visualizationKey}`}
-                                chrome={chrome}
-                                spanFilters={spanFilters}
-                                payloadData={JSON.stringify(transformedHits)}
-                                isGanttChartLoading={isBackgroundLoading}
-                                colorMap={colorMap}
-                                onSpanSelect={handleSpanSelect}
-                                selectedSpanId={spanId}
-                                activeView={activeTab}
-                                servicesInOrder={servicesInOrder}
-                              />
-                            )}
-
-                            {activeTab === TraceDetailTab.LOGS && (
-                              <TraceLogsTab
-                                traceId={traceId}
-                                logDatasets={logDatasets}
-                                logsData={logsData}
-                                datasetLogs={datasetLogs}
-                                isLoading={isLogsLoading}
-                                onSpanClick={handleSpanSelect}
-                              />
-                            )}
-                          </div>
-                        </div>
-                      </EuiResizablePanel>
+                        {i18n.translate('explore.traceView.filters.clearAll', {
+                          defaultMessage: 'Clear all',
+                        })}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
+              </div>
+            )}
 
             {/* Resizable container underneath filter badges */}
             <EuiResizableContainer
@@ -596,6 +561,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                             traceId={traceId}
                             logDatasets={logDatasets}
                             logsData={logsData}
+                            datasetLogs={datasetLogs}
                             isLoading={isLogsLoading}
                             onSpanClick={handleSpanSelect}
                           />
