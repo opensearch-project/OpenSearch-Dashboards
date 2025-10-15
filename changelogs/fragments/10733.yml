@@ -1,0 +1,3 @@
+fix:
+- Trace view padding to match Log/Trace view ([#10733](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10733))
+- Tabs panel to not have a background and border ([#10733](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10733))
