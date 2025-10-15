@@ -84,7 +84,7 @@ export interface UpdateCorrelationData {
  * Constants for correlation types
  */
 export const CORRELATION_TYPES = {
-  TRACES_LOGS: 'Trace-to-logs',
+  TRACES_LOGS: 'APM-Correlation',
 } as const;
 
 /**

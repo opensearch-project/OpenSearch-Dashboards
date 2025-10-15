@@ -11,7 +11,6 @@ import { SavedObjectReference } from '../../../../core/public';
 export function getCorrelationTypeDisplay(correlationType: string): string {
   const displayMapping: Record<string, string> = {
     'APM-Correlation': 'Trace-to-logs',
-    'Trace-to-logs': 'Trace-to-logs',
   };
 
   return displayMapping[correlationType] || correlationType;
