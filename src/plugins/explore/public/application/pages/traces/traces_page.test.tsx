@@ -8,7 +8,6 @@ import { render, screen } from '@testing-library/react';
 import React, { FC } from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
-import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { discoverPluginMock } from '../../legacy/discover/mocks';
@@ -80,6 +79,16 @@ jest.mock('../../../components/top_nav/top_nav', () => ({
       {setHeaderActionMenu && <button onClick={setHeaderActionMenu}>Set Header</button>}
     </div>
   ),
+}));
+
+jest.mock('./trace_flyout/trace_flyout_context', () => ({
+  TraceFlyoutProvider: ({ children }: { children: React.ReactNode }) => (
+    <div data-test-subj="trace-flyout-provider">{children}</div>
+  ),
+}));
+
+jest.mock('./trace_flyout/trace_flyout', () => ({
+  TraceFlyout: () => <div data-test-subj="trace-flyout">Trace Flyout</div>,
 }));
 
 jest.mock('../../utils/hooks/use_initial_query_execution', () => ({
@@ -233,6 +242,18 @@ describe('TracesPage', () => {
 
     expect(screen.getByTestId('query-panel')).toBeInTheDocument();
     expect(screen.getByTestId('top-nav')).toBeInTheDocument();
+  });
+
+  it('renders data table flyout components', () => {
+    const store = createTestStore();
+    render(
+      <TestHarness store={store}>
+        <TracesPage />
+      </TestHarness>
+    );
+
+    expect(screen.getByTestId('trace-flyout-provider')).toBeInTheDocument();
+    expect(screen.getByTestId('trace-flyout')).toBeInTheDocument();
   });
 
   describe('Keyboard Shortcuts', () => {

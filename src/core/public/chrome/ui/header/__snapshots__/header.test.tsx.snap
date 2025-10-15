@@ -3511,7 +3511,7 @@ exports[`Header handles visibility and lock changes 1`] = `
         }
         style={
           Object {
-            "paddingRight": 640,
+            "paddingRight": 648,
           }
         }
         theme="dark"
@@ -3520,7 +3520,7 @@ exports[`Header handles visibility and lock changes 1`] = `
           className="euiHeader euiHeader--dark euiHeader--fixed expandedHeader"
           style={
             Object {
-              "paddingRight": 640,
+              "paddingRight": 648,
             }
           }
         >
@@ -4094,7 +4094,7 @@ exports[`Header handles visibility and lock changes 1`] = `
         position="fixed"
         style={
           Object {
-            "paddingRight": 640,
+            "paddingRight": 648,
           }
         }
       >
@@ -4102,7 +4102,7 @@ exports[`Header handles visibility and lock changes 1`] = `
           className="euiHeader euiHeader--default euiHeader--fixed primaryHeader"
           style={
             Object {
-              "paddingRight": 640,
+              "paddingRight": 648,
             }
           }
         >
@@ -10181,7 +10181,7 @@ exports[`Header renders application header without title 1`] = `
           className="primaryApplicationHeader newTopNavHeader"
           style={
             Object {
-              "paddingRight": 640,
+              "paddingRight": 648,
             }
           }
         >
@@ -10189,7 +10189,7 @@ exports[`Header renders application header without title 1`] = `
             className="euiHeader euiHeader--default euiHeader--static primaryApplicationHeader newTopNavHeader"
             style={
               Object {
-                "paddingRight": 640,
+                "paddingRight": 648,
               }
             }
           >
@@ -14488,7 +14488,7 @@ exports[`Header renders condensed header 1`] = `
         position="fixed"
         style={
           Object {
-            "paddingRight": 640,
+            "paddingRight": 648,
           }
         }
       >
@@ -14496,7 +14496,7 @@ exports[`Header renders condensed header 1`] = `
           className="euiHeader euiHeader--default euiHeader--fixed primaryHeader"
           style={
             Object {
-              "paddingRight": 640,
+              "paddingRight": 648,
             }
           }
         >
@@ -20029,7 +20029,7 @@ exports[`Header renders page header with application title 1`] = `
       <div
         style={
           Object {
-            "paddingRight": 640,
+            "paddingRight": 648,
           }
         }
       >
@@ -24535,7 +24535,7 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
         position="fixed"
         style={
           Object {
-            "paddingRight": 640,
+            "paddingRight": 648,
           }
         }
       >
@@ -24543,7 +24543,7 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
           className="euiHeader euiHeader--default euiHeader--fixed primaryHeader"
           style={
             Object {
-              "paddingRight": 640,
+              "paddingRight": 648,
             }
           }
         >

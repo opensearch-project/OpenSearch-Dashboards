@@ -163,7 +163,7 @@ export class SidecarService {
         if (this.activeSidecar) {
           setSidecarConfig({ paddingSize: 0 });
           this.activeSidecar.close();
-          this.cleanupDom();
+          this.cleanupDom(sidecarConfig$);
         }
 
         const sidecar = new SidecarRef();
@@ -172,7 +172,7 @@ export class SidecarService {
         // If a sidecar gets closed through it's SidecarRef, remove it from the dom
         sidecar.onClose.then(() => {
           if (this.activeSidecar === sidecar) {
-            this.cleanupDom();
+            this.cleanupDom(sidecarConfig$);
           }
         });
 
@@ -206,11 +206,15 @@ export class SidecarService {
    * or their children. To avoid potential subtle bugs in child components that rely on
    * unmounting for cleanup behavior, this function ensures proper cleanup of the DOM.
    */
-  private cleanupDom(): void {
+  private cleanupDom(sidecarConfig$?: BehaviorSubject<ISidecarConfig | undefined>): void {
     if (this.targetDomElement != null) {
       unmountComponentAtNode(this.targetDomElement);
       this.targetDomElement.innerHTML = '';
     }
     this.activeSidecar = null;
+    // Reset the sidecar configuration to remove any padding from the main window
+    if (sidecarConfig$) {
+      sidecarConfig$.next(undefined);
+    }
   }
 }

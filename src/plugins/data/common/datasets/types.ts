@@ -281,6 +281,10 @@ export interface Dataset extends BaseDataset {
   };
   /** Optional parameter to indicate if the dataset is from a remote cluster(Cross Cluster search) */
   isRemoteDataset?: boolean;
+  displayName?: string;
+  description?: string;
+  /** Optional schema mappings that map schema concepts to field names */
+  schemaMappings?: Record<string, Record<string, string>>;
 }
 
 export interface DatasetField {

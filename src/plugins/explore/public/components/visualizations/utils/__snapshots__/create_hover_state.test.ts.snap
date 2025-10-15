@@ -1,0 +1,2208 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`create_hover_state createCrosshairLayers should create layers with color field 1`] = `
+Array [
+  Object {
+    "encoding": Object {
+      "opacity": Object {
+        "condition": Object {
+          "empty": false,
+          "param": "hover",
+          "value": 0,
+        },
+        "value": 0,
+      },
+      "tooltip": Array [
+        Object {
+          "field": "timestamp",
+          "title": undefined,
+          "type": "temporal",
+        },
+      ],
+      "x": Object {
+        "field": "timestamp",
+        "type": "temporal",
+      },
+    },
+    "mark": Object {
+      "color": "#000000",
+      "type": "bar",
+    },
+    "params": Array [
+      Object {
+        "name": "hover",
+        "select": Object {
+          "clear": "mouseout",
+          "encodings": Array [
+            "x",
+          ],
+          "nearest": true,
+          "on": "mouseover",
+          "type": "point",
+        },
+      },
+    ],
+    "transform": Array [
+      Object {
+        "groupby": Array [
+          "timestamp",
+        ],
+        "pivot": "category",
+        "value": "count",
+      },
+    ],
+  },
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+        },
+        "mark": Object {
+          "color": "#000000",
+          "strokeDash": Array [
+            3,
+            3,
+          ],
+          "type": "rule",
+        },
+      },
+    ],
+  },
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "color": Object {
+            "field": "category",
+            "type": "nominal",
+          },
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "filled": true,
+          "shape": "circle",
+          "size": 60,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": Object {
+            "field": "category",
+            "type": "nominal",
+          },
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 60,
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": Object {
+            "field": "category",
+            "type": "nominal",
+          },
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 90,
+          "strokeOpacity": 0.5,
+          "strokeWidth": 3,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+    ],
+  },
+]
+`;
+
+exports[`create_hover_state createCrosshairLayers should create layers with multiple y fields 1`] = `
+Array [
+  Object {
+    "encoding": Object {
+      "opacity": Object {
+        "condition": Object {
+          "empty": false,
+          "param": "hover",
+          "value": 0,
+        },
+        "value": 0,
+      },
+      "tooltip": Array [
+        Object {
+          "field": "timestamp",
+          "title": undefined,
+          "type": "temporal",
+        },
+        Object {
+          "field": "count",
+          "title": undefined,
+          "type": "quantitative",
+        },
+        Object {
+          "field": "sum",
+          "title": undefined,
+          "type": "quantitative",
+        },
+      ],
+      "x": Object {
+        "field": "timestamp",
+        "type": "temporal",
+      },
+    },
+    "mark": Object {
+      "color": "#000000",
+      "type": "bar",
+    },
+    "params": Array [
+      Object {
+        "name": "hover",
+        "select": Object {
+          "clear": "mouseout",
+          "encodings": Array [
+            "x",
+          ],
+          "nearest": true,
+          "on": "mouseover",
+          "type": "point",
+        },
+      },
+    ],
+    "transform": Array [],
+  },
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+        },
+        "mark": Object {
+          "color": "#000000",
+          "strokeDash": Array [
+            3,
+            3,
+          ],
+          "type": "rule",
+        },
+      },
+    ],
+  },
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "color": Object {
+            "field": "key",
+            "type": "nominal",
+          },
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "value",
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "filled": true,
+          "shape": "circle",
+          "size": 60,
+          "type": "point",
+        },
+        "transform": Array [
+          Object {
+            "as": Array [
+              "key",
+              "value",
+            ],
+            "fold": Array [
+              "count",
+              "sum",
+            ],
+          },
+        ],
+      },
+      Object {
+        "encoding": Object {
+          "color": Object {
+            "field": "key",
+            "type": "nominal",
+          },
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "value",
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 60,
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "type": "point",
+        },
+        "transform": Array [
+          Object {
+            "as": Array [
+              "key",
+              "value",
+            ],
+            "fold": Array [
+              "count",
+              "sum",
+            ],
+          },
+        ],
+      },
+      Object {
+        "encoding": Object {
+          "color": Object {
+            "field": "key",
+            "type": "nominal",
+          },
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "value",
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 90,
+          "strokeOpacity": 0.5,
+          "strokeWidth": 3,
+          "type": "point",
+        },
+        "transform": Array [
+          Object {
+            "as": Array [
+              "key",
+              "value",
+            ],
+            "fold": Array [
+              "count",
+              "sum",
+            ],
+          },
+        ],
+      },
+    ],
+  },
+]
+`;
+
+exports[`create_hover_state createCrosshairLayers should create layers with nominal x field 1`] = `
+Array [
+  Object {
+    "encoding": Object {
+      "opacity": Object {
+        "condition": Object {
+          "empty": false,
+          "param": "hover",
+          "value": 0,
+        },
+        "value": 0,
+      },
+      "tooltip": Array [
+        Object {
+          "field": "timestamp",
+          "title": undefined,
+          "type": "nominal",
+        },
+        Object {
+          "field": "count",
+          "title": undefined,
+          "type": "quantitative",
+        },
+      ],
+      "x": Object {
+        "field": "timestamp",
+        "type": "nominal",
+      },
+    },
+    "mark": Object {
+      "color": "#000000",
+      "type": "bar",
+    },
+    "params": Array [
+      Object {
+        "name": "hover",
+        "select": Object {
+          "clear": "mouseout",
+          "encodings": Array [
+            "x",
+          ],
+          "nearest": false,
+          "on": "mouseover",
+          "type": "point",
+        },
+      },
+    ],
+    "transform": Array [],
+  },
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "nominal",
+          },
+        },
+        "mark": Object {
+          "color": "#000000",
+          "strokeDash": Array [
+            3,
+            3,
+          ],
+          "type": "rule",
+        },
+      },
+      Object {
+        "encoding": Object {
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "y": Object {
+            "field": "count",
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "color": "#000000",
+          "strokeDash": Array [
+            3,
+            3,
+          ],
+          "type": "rule",
+        },
+      },
+    ],
+  },
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "nominal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "filled": true,
+          "shape": "circle",
+          "size": 60,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "nominal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 60,
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "nominal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 90,
+          "strokeOpacity": 0.5,
+          "strokeWidth": 3,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+    ],
+  },
+]
+`;
+
+exports[`create_hover_state createCrosshairLayers should create layers with showTooltip=false 1`] = `
+Array [
+  Object {
+    "encoding": Object {
+      "opacity": Object {
+        "condition": Object {
+          "empty": false,
+          "param": "hover",
+          "value": 0,
+        },
+        "value": 0,
+      },
+      "tooltip": null,
+      "x": Object {
+        "field": "timestamp",
+        "type": "temporal",
+      },
+    },
+    "mark": Object {
+      "color": "#000000",
+      "type": "bar",
+    },
+    "params": Array [
+      Object {
+        "name": "hover",
+        "select": Object {
+          "clear": "mouseout",
+          "encodings": Array [
+            "x",
+          ],
+          "nearest": true,
+          "on": "mouseover",
+          "type": "point",
+        },
+      },
+    ],
+    "transform": Array [],
+  },
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+        },
+        "mark": Object {
+          "color": "#000000",
+          "strokeDash": Array [
+            3,
+            3,
+          ],
+          "type": "rule",
+        },
+      },
+      Object {
+        "encoding": Object {
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "y": Object {
+            "field": "count",
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "color": "#000000",
+          "strokeDash": Array [
+            3,
+            3,
+          ],
+          "type": "rule",
+        },
+      },
+    ],
+  },
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "filled": true,
+          "shape": "circle",
+          "size": 60,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 60,
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 90,
+          "strokeOpacity": 0.5,
+          "strokeWidth": 3,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+    ],
+  },
+]
+`;
+
+exports[`create_hover_state createCrosshairLayers should create layers with single y field 1`] = `
+Array [
+  Object {
+    "encoding": Object {
+      "opacity": Object {
+        "condition": Object {
+          "empty": false,
+          "param": "hover",
+          "value": 0,
+        },
+        "value": 0,
+      },
+      "tooltip": Array [
+        Object {
+          "field": "timestamp",
+          "title": undefined,
+          "type": "temporal",
+        },
+        Object {
+          "field": "count",
+          "title": undefined,
+          "type": "quantitative",
+        },
+      ],
+      "x": Object {
+        "field": "timestamp",
+        "type": "temporal",
+      },
+    },
+    "mark": Object {
+      "color": "#000000",
+      "type": "bar",
+    },
+    "params": Array [
+      Object {
+        "name": "hover",
+        "select": Object {
+          "clear": "mouseout",
+          "encodings": Array [
+            "x",
+          ],
+          "nearest": true,
+          "on": "mouseover",
+          "type": "point",
+        },
+      },
+    ],
+    "transform": Array [],
+  },
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+        },
+        "mark": Object {
+          "color": "#000000",
+          "strokeDash": Array [
+            3,
+            3,
+          ],
+          "type": "rule",
+        },
+      },
+      Object {
+        "encoding": Object {
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "y": Object {
+            "field": "count",
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "color": "#000000",
+          "strokeDash": Array [
+            3,
+            3,
+          ],
+          "type": "rule",
+        },
+      },
+    ],
+  },
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "filled": true,
+          "shape": "circle",
+          "size": 60,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 60,
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 90,
+          "strokeOpacity": 0.5,
+          "strokeWidth": 3,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+    ],
+  },
+]
+`;
+
+exports[`create_hover_state createCrosshairLayers should create layers with y1 field 1`] = `
+Array [
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "average",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "filled": true,
+          "shape": "circle",
+          "size": 60,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "average",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 60,
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "average",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 90,
+          "strokeOpacity": 0.5,
+          "strokeWidth": 3,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+    ],
+  },
+  Object {
+    "encoding": Object {
+      "opacity": Object {
+        "condition": Object {
+          "empty": false,
+          "param": "hover",
+          "value": 0,
+        },
+        "value": 0,
+      },
+      "tooltip": Array [
+        Object {
+          "field": "timestamp",
+          "title": undefined,
+          "type": "temporal",
+        },
+        Object {
+          "field": "count",
+          "title": undefined,
+          "type": "quantitative",
+        },
+        Object {
+          "field": "average",
+          "title": undefined,
+          "type": "quantitative",
+        },
+      ],
+      "x": Object {
+        "field": "timestamp",
+        "type": "temporal",
+      },
+    },
+    "mark": Object {
+      "color": "#000000",
+      "type": "bar",
+    },
+    "params": Array [
+      Object {
+        "name": "hover",
+        "select": Object {
+          "clear": "mouseout",
+          "encodings": Array [
+            "x",
+          ],
+          "nearest": true,
+          "on": "mouseover",
+          "type": "point",
+        },
+      },
+    ],
+    "transform": Array [],
+  },
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+        },
+        "mark": Object {
+          "color": "#000000",
+          "strokeDash": Array [
+            3,
+            3,
+          ],
+          "type": "rule",
+        },
+      },
+      Object {
+        "encoding": Object {
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "y": Object {
+            "field": "count",
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "color": "#000000",
+          "strokeDash": Array [
+            3,
+            3,
+          ],
+          "type": "rule",
+        },
+      },
+    ],
+  },
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "filled": true,
+          "shape": "circle",
+          "size": 60,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 60,
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 90,
+          "strokeOpacity": 0.5,
+          "strokeWidth": 3,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+    ],
+  },
+]
+`;
+
+exports[`create_hover_state createHighlightBarLayers should create layers with color field and data 1`] = `
+Array [
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "color": Object {
+            "field": "category",
+            "type": "nominal",
+          },
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "filled": true,
+          "shape": "circle",
+          "size": 60,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": Object {
+            "field": "category",
+            "type": "nominal",
+          },
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 60,
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": Object {
+            "field": "category",
+            "type": "nominal",
+          },
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 90,
+          "strokeOpacity": 0.5,
+          "strokeWidth": 3,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+    ],
+  },
+  Object {
+    "encoding": Object {
+      "opacity": Object {
+        "condition": Object {
+          "empty": false,
+          "param": "hover",
+          "value": 0.1,
+        },
+        "value": 0,
+      },
+      "tooltip": Array [
+        Object {
+          "field": "timestamp",
+          "title": undefined,
+          "type": "temporal",
+        },
+        Object {
+          "field": "A",
+          "title": undefined,
+          "type": "quantitative",
+        },
+        Object {
+          "field": "B",
+          "title": undefined,
+          "type": "quantitative",
+        },
+      ],
+      "x": Object {
+        "field": "timestamp",
+        "type": "temporal",
+      },
+    },
+    "mark": Object {
+      "color": "#000000",
+      "type": "bar",
+    },
+    "params": Array [
+      Object {
+        "name": "hover",
+        "select": Object {
+          "clear": "mouseout",
+          "encodings": Array [
+            "x",
+          ],
+          "nearest": true,
+          "on": "mouseover",
+          "type": "point",
+        },
+      },
+    ],
+    "transform": Array [
+      Object {
+        "groupby": Array [
+          "timestamp",
+        ],
+        "pivot": "category",
+        "value": "count",
+      },
+    ],
+  },
+]
+`;
+
+exports[`create_hover_state createHighlightBarLayers should create layers with multiple y fields 1`] = `
+Array [
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "color": Object {
+            "field": "key",
+            "type": "nominal",
+          },
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "value",
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "filled": true,
+          "shape": "circle",
+          "size": 60,
+          "type": "point",
+        },
+        "transform": Array [
+          Object {
+            "as": Array [
+              "key",
+              "value",
+            ],
+            "fold": Array [
+              "count",
+              "sum",
+            ],
+          },
+        ],
+      },
+      Object {
+        "encoding": Object {
+          "color": Object {
+            "field": "key",
+            "type": "nominal",
+          },
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "value",
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 60,
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "type": "point",
+        },
+        "transform": Array [
+          Object {
+            "as": Array [
+              "key",
+              "value",
+            ],
+            "fold": Array [
+              "count",
+              "sum",
+            ],
+          },
+        ],
+      },
+      Object {
+        "encoding": Object {
+          "color": Object {
+            "field": "key",
+            "type": "nominal",
+          },
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "value",
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 90,
+          "strokeOpacity": 0.5,
+          "strokeWidth": 3,
+          "type": "point",
+        },
+        "transform": Array [
+          Object {
+            "as": Array [
+              "key",
+              "value",
+            ],
+            "fold": Array [
+              "count",
+              "sum",
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  Object {
+    "encoding": Object {
+      "opacity": Object {
+        "condition": Object {
+          "empty": false,
+          "param": "hover",
+          "value": 0.1,
+        },
+        "value": 0,
+      },
+      "tooltip": Array [
+        Object {
+          "field": "timestamp",
+          "title": undefined,
+          "type": "temporal",
+        },
+        Object {
+          "field": "count",
+          "title": undefined,
+          "type": "quantitative",
+        },
+        Object {
+          "field": "sum",
+          "title": undefined,
+          "type": "quantitative",
+        },
+      ],
+      "x": Object {
+        "field": "timestamp",
+        "type": "temporal",
+      },
+    },
+    "mark": Object {
+      "color": "#000000",
+      "type": "bar",
+    },
+    "params": Array [
+      Object {
+        "name": "hover",
+        "select": Object {
+          "clear": "mouseout",
+          "encodings": Array [
+            "x",
+          ],
+          "nearest": true,
+          "on": "mouseover",
+          "type": "point",
+        },
+      },
+    ],
+    "transform": Array [],
+  },
+]
+`;
+
+exports[`create_hover_state createHighlightBarLayers should create layers with showTooltip=false 1`] = `
+Array [
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "filled": true,
+          "shape": "circle",
+          "size": 60,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 60,
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 90,
+          "strokeOpacity": 0.5,
+          "strokeWidth": 3,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+    ],
+  },
+  Object {
+    "encoding": Object {
+      "opacity": Object {
+        "condition": Object {
+          "empty": false,
+          "param": "hover",
+          "value": 0.1,
+        },
+        "value": 0,
+      },
+      "tooltip": null,
+      "x": Object {
+        "field": "timestamp",
+        "type": "temporal",
+      },
+    },
+    "mark": Object {
+      "color": "#000000",
+      "type": "bar",
+    },
+    "params": Array [
+      Object {
+        "name": "hover",
+        "select": Object {
+          "clear": "mouseout",
+          "encodings": Array [
+            "x",
+          ],
+          "nearest": true,
+          "on": "mouseover",
+          "type": "point",
+        },
+      },
+    ],
+    "transform": Array [],
+  },
+]
+`;
+
+exports[`create_hover_state createHighlightBarLayers should create layers with single y field 1`] = `
+Array [
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "filled": true,
+          "shape": "circle",
+          "size": 60,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 60,
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 90,
+          "strokeOpacity": 0.5,
+          "strokeWidth": 3,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+    ],
+  },
+  Object {
+    "encoding": Object {
+      "opacity": Object {
+        "condition": Object {
+          "empty": false,
+          "param": "hover",
+          "value": 0.1,
+        },
+        "value": 0,
+      },
+      "tooltip": Array [
+        Object {
+          "field": "timestamp",
+          "title": undefined,
+          "type": "temporal",
+        },
+        Object {
+          "field": "count",
+          "title": undefined,
+          "type": "quantitative",
+        },
+      ],
+      "x": Object {
+        "field": "timestamp",
+        "type": "temporal",
+      },
+    },
+    "mark": Object {
+      "color": "#000000",
+      "type": "bar",
+    },
+    "params": Array [
+      Object {
+        "name": "hover",
+        "select": Object {
+          "clear": "mouseout",
+          "encodings": Array [
+            "x",
+          ],
+          "nearest": true,
+          "on": "mouseover",
+          "type": "point",
+        },
+      },
+    ],
+    "transform": Array [],
+  },
+]
+`;
+
+exports[`create_hover_state createHighlightBarLayers should create layers with y1 field 1`] = `
+Array [
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "filled": true,
+          "shape": "circle",
+          "size": 60,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 60,
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "count",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 90,
+          "strokeOpacity": 0.5,
+          "strokeWidth": 3,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+    ],
+  },
+  Object {
+    "layer": Array [
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "average",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "filled": true,
+          "shape": "circle",
+          "size": 60,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "average",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 60,
+          "stroke": "#fff",
+          "strokeWidth": 1,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+      Object {
+        "encoding": Object {
+          "color": null,
+          "opacity": Object {
+            "condition": Object {
+              "empty": false,
+              "param": "hover",
+              "value": 1,
+            },
+            "value": 0,
+          },
+          "x": Object {
+            "field": "timestamp",
+            "type": "temporal",
+          },
+          "y": Object {
+            "field": "average",
+            "stack": undefined,
+            "type": "quantitative",
+          },
+        },
+        "mark": Object {
+          "fill": "",
+          "filled": false,
+          "shape": "circle",
+          "size": 90,
+          "strokeOpacity": 0.5,
+          "strokeWidth": 3,
+          "type": "point",
+        },
+        "transform": Array [],
+      },
+    ],
+  },
+  Object {
+    "encoding": Object {
+      "opacity": Object {
+        "condition": Object {
+          "empty": false,
+          "param": "hover",
+          "value": 0.1,
+        },
+        "value": 0,
+      },
+      "tooltip": Array [
+        Object {
+          "field": "timestamp",
+          "title": undefined,
+          "type": "temporal",
+        },
+        Object {
+          "field": "count",
+          "title": undefined,
+          "type": "quantitative",
+        },
+        Object {
+          "field": "average",
+          "title": undefined,
+          "type": "quantitative",
+        },
+      ],
+      "x": Object {
+        "field": "timestamp",
+        "type": "temporal",
+      },
+    },
+    "mark": Object {
+      "color": "#000000",
+      "type": "bar",
+    },
+    "params": Array [
+      Object {
+        "name": "hover",
+        "select": Object {
+          "clear": "mouseout",
+          "encodings": Array [
+            "x",
+          ],
+          "nearest": true,
+          "on": "mouseover",
+          "type": "point",
+        },
+      },
+    ],
+    "transform": Array [],
+  },
+]
+`;

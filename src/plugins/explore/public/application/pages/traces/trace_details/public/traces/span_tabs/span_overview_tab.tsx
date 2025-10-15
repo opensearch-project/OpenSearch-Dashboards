@@ -22,6 +22,7 @@ import { nanoToMilliSec, isEmpty, round } from '../../utils/helper_functions';
 import { extractSpanDuration, extractHttpStatusCode } from '../../utils/span_data_utils';
 import { isSpanError, resolveServiceNameFromSpan } from '../ppl_resolve_helpers';
 import './span_tabs.scss';
+import { getStatusCodeColor } from '../../../../../../../components/data_table/table_cell/trace_utils/trace_utils';
 
 export interface SpanOverviewTabProps {
   selectedSpan?: any;
@@ -79,16 +80,6 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
   selectedSpan,
   onSwitchToErrorsTab,
 }) => {
-  const getStatusCodeColor = (statusCode: number | undefined): string => {
-    if (!statusCode) return 'default';
-
-    if (statusCode >= 200 && statusCode < 300) return 'success';
-    if (statusCode >= 300 && statusCode < 400) return 'primary';
-    if (statusCode >= 400 && statusCode < 500) return 'warning';
-    if (statusCode >= 500 && statusCode < 600) return 'danger';
-    return 'default';
-  };
-
   const spanData = useMemo(() => {
     if (!selectedSpan || isEmpty(selectedSpan)) {
       return null;

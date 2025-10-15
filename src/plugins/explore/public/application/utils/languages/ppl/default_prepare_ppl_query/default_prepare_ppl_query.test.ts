@@ -22,7 +22,7 @@ describe('defaultPreparePplQuery', () => {
 
   it('should handle query that already has source', () => {
     const query: Query = {
-      query: 'source=`existing-index` | where level="error" | stats count by host',
+      query: 'source=existing-index | where level="error" | stats count by host',
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
@@ -74,7 +74,7 @@ describe('defaultPreparePplQuery', () => {
 
   it('should handle search source queries with stats', () => {
     const query: Query = {
-      query: 'search source=`logs-*` | where @timestamp > now()-1d | stats count by level',
+      query: 'search source=logs-* | where @timestamp > now()-1d | stats count by level',
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
@@ -87,7 +87,7 @@ describe('defaultPreparePplQuery', () => {
 
   it('should preserve case in source queries when stripping stats', () => {
     const query: Query = {
-      query: 'SOURCE=`LOGS-*` | WHERE level="ERROR" | STATS count by host',
+      query: 'SOURCE=LOGS-* | WHERE level="ERROR" | STATS count by host',
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };

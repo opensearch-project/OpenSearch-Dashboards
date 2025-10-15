@@ -1,0 +1,31 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+@import "../../../../../../../../../../../node_modules/@elastic/eui/src/components/table/variables";
+
+.exploreSpanDetailTable {
+  &__hierarchyCell {
+    display: flex;
+    align-items: center;
+  }
+
+  &__expandIcon {
+    cursor: pointer;
+    margin-right: 5px;
+  }
+
+  &__hiddenIcon {
+    visibility: hidden;
+    margin-right: 5px;
+  }
+
+  &__selectedRow {
+    background-color: $ouiTableHoverSelectedColor !important;
+  }
+
+  &__flyoutButton {
+    width: 100%;
+    text-align: left;
+  }
+}

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Observable } from 'rxjs';
 import { useObservable } from 'react-use';
 import { VisData } from './visualization_builder.types';
@@ -12,10 +12,11 @@ import { defaultTableChartStyles, TableChartStyle } from './table/table_vis_conf
 import { convertStringsToMappings } from './visualization_builder_utils';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { toExpression } from './utils/to_expression';
-import { ExpressionsStart } from '../../../../expressions/public';
+import { ExpressionRendererEvent, ExpressionsStart } from '../../../../expressions/public';
 import { VisualizationEmptyState } from './visualization_empty_state';
 import { visualizationRegistry } from './visualization_registry';
 import { RenderChartConfig } from './types';
+import { opensearchFilters, TimeRange } from '../../../../data/public';
 
 interface Props {
   data$: Observable<VisData | undefined>;
@@ -23,6 +24,7 @@ interface Props {
   showRawTable$: Observable<boolean>;
   searchContext?: ExecutionContextSearch;
   ExpressionRenderer?: ExpressionsStart['ReactExpressionRenderer'];
+  onSelectTimeRange?: (timeRange?: TimeRange) => void;
 }
 
 const defaultStyleOptions: TableChartStyle = {
@@ -35,10 +37,17 @@ const defaultStyleOptions: TableChartStyle = {
 
 const PAGE_SIZE_OPTIONS = [10, 50, 100];
 
-export const VisualizationRender = (props: Props) => {
-  const visualizationData = useObservable(props.data$);
-  const visConfig = useObservable(props.config$);
-  const showRawTable = useObservable(props.showRawTable$);
+export const VisualizationRender = ({
+  data$,
+  config$,
+  showRawTable$,
+  searchContext,
+  ExpressionRenderer,
+  onSelectTimeRange,
+}: Props) => {
+  const visualizationData = useObservable(data$);
+  const visConfig = useObservable(config$);
+  const showRawTable = useObservable(showRawTable$);
   const rows = useMemo(() => {
     return visualizationData?.transformedData ?? [];
   }, [visualizationData?.transformedData]);
@@ -80,6 +89,24 @@ export const VisualizationRender = (props: Props) => {
     );
   }, [columns, visConfig, visualizationData]);
 
+  const onExpressionEvent = useCallback(
+    async (e: ExpressionRendererEvent) => {
+      if (!onSelectTimeRange) {
+        return;
+      }
+      if (e.name === 'applyFilter') {
+        if (e.data && e.data.filters) {
+          const { timeRange } = opensearchFilters.extractTimeRange(
+            e.data.filters,
+            e.data.timeFieldName
+          );
+          onSelectTimeRange(timeRange);
+        }
+      }
+    },
+    [onSelectTimeRange]
+  );
+
   if (!visualizationData) {
     return null;
   }
@@ -111,15 +138,16 @@ export const VisualizationRender = (props: Props) => {
 
   const hasSelectionMapping = Object.keys(visConfig?.axesMapping ?? {}).length !== 0;
   if (hasSelectionMapping) {
-    if (!props.ExpressionRenderer) {
+    if (!ExpressionRenderer) {
       return null;
     }
-    const expression = toExpression(props.searchContext, spec);
+    const expression = toExpression(searchContext, spec);
     return (
-      <props.ExpressionRenderer
-        key={JSON.stringify(props.searchContext) + expression}
+      <ExpressionRenderer
+        key={JSON.stringify(searchContext) + expression}
         expression={expression}
-        searchContext={props.searchContext}
+        searchContext={searchContext}
+        onEvent={onExpressionEvent}
       />
     );
   }

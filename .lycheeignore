@@ -56,7 +56,15 @@ http://www.creedthoughts.gov
 http://not-your-opensearch-dashboards.com/
 my(other)?domain\.com
 
-
+# Test mock URLs that should be ignored by link checker
+//custom-server:
+//remote-server:
+//test-server:
+//other\.com/\$
+http://custom-server:
+https://remote-server:
+http://test-server:
+http://other\.com/\$
 
 # External urls
 adobe.com

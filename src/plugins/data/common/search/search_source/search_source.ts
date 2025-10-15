@@ -640,7 +640,7 @@ export class SearchSource {
     const { body, index, fields, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
 
-    const computedFields = index ? index.getComputedFields() : {};
+    const computedFields = index && index.getComputedFields ? index.getComputedFields() : {};
 
     body.stored_fields = computedFields.storedFields;
     body.script_fields = body.script_fields || {};
@@ -654,7 +654,7 @@ export class SearchSource {
       : [];
     body.docvalue_fields = body.docvalue_fields || defaultDocValueFields;
 
-    if (!body.hasOwnProperty('_source') && index) {
+    if (!body.hasOwnProperty('_source') && index && index.getSourceFiltering) {
       body._source = index.getSourceFiltering();
     }
 

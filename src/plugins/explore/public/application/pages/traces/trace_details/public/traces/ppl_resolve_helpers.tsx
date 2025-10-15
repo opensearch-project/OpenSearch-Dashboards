@@ -15,11 +15,23 @@ export function convertTimestampToNanos(timestamp: string | number): number {
       if (numericMatch) {
         time = parseInt(timestamp, 10);
       } else {
-        // Handle ISO string format
-        time = new Date(timestamp).getTime();
+        let dateString = timestamp;
+
+        // Convert "YYYY-MM-DD HH:mm:ss.SSS" format to ISO format for better parsing
+        if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(\.\d+)?$/.test(timestamp)) {
+          dateString = timestamp.replace(' ', 'T') + 'Z';
+        }
+
+        time = new Date(dateString).getTime();
         // Check if the date is invalid (NaN)
         if (isNaN(time)) {
-          return 0;
+          // Try parsing as a direct timestamp if ISO parsing fails
+          const directParse = Date.parse(timestamp);
+          if (!isNaN(directParse)) {
+            time = directParse;
+          } else {
+            return 0;
+          }
         }
       }
     } else {

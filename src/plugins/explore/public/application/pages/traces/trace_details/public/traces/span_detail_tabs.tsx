@@ -182,7 +182,8 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
           )}
         </EuiFlexGroup>
 
-        <EuiTabs size="s">
+        <EuiSpacer size="s" />
+        <EuiTabs size="l">
           {tabs.map((tab) => (
             <EuiTab
               key={tab.id}

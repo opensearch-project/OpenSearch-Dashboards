@@ -35,7 +35,7 @@ export const runDatasetSelectorTests = () => {
         INDEX_WITH_TIME_1,
         INDEX_WITH_TIME_2,
       ]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
         timefieldName: 'timestamp',
@@ -60,11 +60,7 @@ export const runDatasetSelectorTests = () => {
         });
 
         if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
-          cy.explore.setIndexPatternFromAdvancedSelector(
-            config.dataset,
-            DATASOURCE_NAME,
-            config.language
-          );
+          cy.explore.setIndexPatternFromAdvancedSelector(config.dataset, config.language);
         } else {
           cy.explore.setIndexAsDataset(config.dataset, DATASOURCE_NAME, config.language);
         }
@@ -96,12 +92,7 @@ export const runDatasetSelectorTests = () => {
 
         // Try setting the dataset-language combination but click on cancel
         if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
-          cy.explore.setIndexPatternFromAdvancedSelector(
-            config.dataset,
-            DATASOURCE_NAME,
-            config.language,
-            'cancel'
-          );
+          cy.explore.setIndexPatternFromAdvancedSelector(config.dataset, config.language, 'cancel');
         } else {
           cy.explore.setIndexAsDataset(
             config.dataset,
