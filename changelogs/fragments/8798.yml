@@ -1,0 +1,2 @@
+fix:
+- Added UTs for Saved queries new UI ([#8798](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8798))
