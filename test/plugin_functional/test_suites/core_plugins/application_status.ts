@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import {
   AppNavLinkStatus,
   AppStatus,
@@ -81,14 +81,14 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         navLinkStatus: AppNavLinkStatus.disabled,
       });
       let link = await appsMenu.getLink('App Status');
-      expect(link).not.to.eql(undefined);
-      expect(link!.disabled).to.eql(true);
+      expect(link).not.toEqual(undefined);
+      expect(link!.disabled).toEqual(true);
 
       await setAppStatus({
         navLinkStatus: AppNavLinkStatus.hidden,
       });
       link = await appsMenu.getLink('App Status');
-      expect(link).to.eql(undefined);
+      expect(link).toEqual(undefined);
     });
 
     it('shows an error when navigating to an inaccessible app', async () => {
@@ -98,8 +98,8 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       await navigateToApp('app_status');
 
-      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
-      expect(await testSubjects.exists('appStatusApp')).to.eql(false);
+      expect(await testSubjects.exists('appNotFoundPageContent')).toEqual(true);
+      expect(await testSubjects.exists('appStatusApp')).toEqual(false);
     });
 
     it('allows to navigate to an accessible app', async () => {
@@ -109,13 +109,13 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       await navigateToApp('app_status');
 
-      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(false);
-      expect(await testSubjects.exists('appStatusApp')).to.eql(true);
+      expect(await testSubjects.exists('appNotFoundPageContent')).toEqual(false);
+      expect(await testSubjects.exists('appStatusApp')).toEqual(true);
     });
 
     it('allows to change the defaultPath of an application', async () => {
       const link = await appsMenu.getLink('App Status');
-      expect(link!.href).to.eql(getOpenSearchDashboardsUrl('/app/app_status'));
+      expect(link!.href).toEqual(getOpenSearchDashboardsUrl('/app/app_status'));
 
       await setAppStatus({
         defaultPath: '/arbitrary/path',
@@ -127,9 +127,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       await navigateToApp('app_status');
-      expect(await testSubjects.exists('appStatusApp')).to.eql(true);
+      expect(await testSubjects.exists('appStatusApp')).toEqual(true);
       const currentUrl = await browser.getCurrentUrl();
-      expect(new URL('', currentUrl).pathname).to.eql('/app/app_status/arbitrary/path');
+      expect(new URL('', currentUrl).pathname).toEqual('/app/app_status/arbitrary/path');
     });
 
     it('can change the state of the currently mounted app', async () => {
@@ -139,22 +139,22 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
       await navigateToApp('app_status');
 
-      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(false);
-      expect(await testSubjects.exists('appStatusApp')).to.eql(true);
+      expect(await testSubjects.exists('appNotFoundPageContent')).toEqual(false);
+      expect(await testSubjects.exists('appStatusApp')).toEqual(true);
 
       await setAppStatus({
         status: AppStatus.inaccessible,
       });
 
-      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(true);
-      expect(await testSubjects.exists('appStatusApp')).to.eql(false);
+      expect(await testSubjects.exists('appNotFoundPageContent')).toEqual(true);
+      expect(await testSubjects.exists('appStatusApp')).toEqual(false);
 
       await setAppStatus({
         status: AppStatus.accessible,
       });
 
-      expect(await testSubjects.exists('appNotFoundPageContent')).to.eql(false);
-      expect(await testSubjects.exists('appStatusApp')).to.eql(true);
+      expect(await testSubjects.exists('appNotFoundPageContent')).toEqual(false);
+      expect(await testSubjects.exists('appStatusApp')).toEqual(true);
     });
   });
 }

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }) {
           return row;
         });
 
-        expect(roundedValues).to.eql(expected);
+        expect(roundedValues).toEqual(expected);
       }
 
       describe('tile map chart', function indexPatternCreation() {
@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }) {
         it('should not be able to zoom out beyond 0', async function () {
           await PageObjects.tileMap.zoomAllTheWayOut();
           const enabled = await PageObjects.tileMap.getMapZoomOutEnabled();
-          expect(enabled).to.be(false);
+          expect(enabled).toBe(false);
         });
 
         it('Fit data bounds should zoom to level 3', async function () {
@@ -208,8 +208,8 @@ export default function ({ getService, getPageObjects }) {
           // For some reason the values are slightly different, so we can't check that they are equal. But we did
           // have a bug where after the save, there were _no_ map bounds. So this checks for the later case, but
           // until we figure out how to make sure the map center is always the exact same, we can't comparison check.
-          expect(mapBounds).to.not.be(undefined);
-          expect(afterSaveMapBounds).to.not.be(undefined);
+          expect(mapBounds).not.toBe(undefined);
+          expect(afterSaveMapBounds).not.toBe(undefined);
         });
       });
 

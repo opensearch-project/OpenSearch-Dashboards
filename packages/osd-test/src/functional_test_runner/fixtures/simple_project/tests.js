@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default () => {
   describe('app one', () => {
@@ -37,7 +37,7 @@ export default () => {
     });
 
     it('$TESTNAME$', () => {
-      expect(1).to.be(1);
+      expect(1).toBe(1);
       console.log('$INTEST$');
     });
 

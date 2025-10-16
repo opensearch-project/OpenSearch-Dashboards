@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function PieChartProvider({ getService }: FtrProviderContext) {
@@ -124,7 +124,7 @@ export function PieChartProvider({ getService }: FtrProviderContext) {
       log.debug(`PieChart.expectPieSliceCount(${expectedCount})`);
       await retry.try(async () => {
         const slicesCount = await this.getPieSliceCount();
-        expect(slicesCount).to.be(expectedCount);
+        expect(slicesCount).toBe(expectedCount);
       });
     }
 
@@ -132,7 +132,7 @@ export function PieChartProvider({ getService }: FtrProviderContext) {
       log.debug(`PieChart.expectPieChartLabels(${expectedLabels.join(',')})`);
       await retry.try(async () => {
         const pieData = await this.getPieChartLabels();
-        expect(pieData).to.eql(expectedLabels);
+        expect(pieData).toEqual(expectedLabels);
       });
     }
   })();

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService }: PluginFunctionalProviderContext) {
@@ -65,10 +65,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
           .expect(200)
           .expect(({ body }) => {
             const searchSourceJSON = JSON.parse(body.searchSourceJSON);
-            expect(Object.keys(body)).to.eql(['searchSourceJSON', 'references']);
-            expect(searchSourceJSON.query).to.eql(searchSourceFields.query);
-            expect(body.references[0].type).to.equal('index-pattern');
-            expect(searchSourceJSON.indexRefName).to.equal(body.references[0].name);
+            expect(Object.keys(body)).toEqual(['searchSourceJSON', 'references']);
+            expect(searchSourceJSON.query).toEqual(searchSourceFields.query);
+            expect(body.references[0].type).toEqual('index-pattern');
+            expect(searchSourceJSON.indexRefName).toEqual(body.references[0].name);
           });
       });
     });

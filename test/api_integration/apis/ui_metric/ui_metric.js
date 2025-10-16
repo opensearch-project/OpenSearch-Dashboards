@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { ReportManager, METRIC_TYPE } from '@osd/analytics';
 
 export default function ({ getService }) {
@@ -66,7 +66,7 @@ export default function ({ getService }) {
         q: 'type:ui-metric',
       });
       const ids = response.hits.hits.map(({ _id }) => _id);
-      expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
+      expect(ids.includes('ui-metric:myApp:myEvent')).toEqual(true);
     });
 
     it('supports multiple events', async () => {
@@ -94,11 +94,11 @@ export default function ({ getService }) {
         q: 'type:ui-metric',
       });
       const ids = response.hits.hits.map(({ _id }) => _id);
-      expect(ids.includes('ui-metric:myApp:myEvent')).to.eql(true);
-      expect(ids.includes(`ui-metric:myApp:${uniqueEventName}`)).to.eql(true);
+      expect(ids.includes('ui-metric:myApp:myEvent')).toEqual(true);
+      expect(ids.includes(`ui-metric:myApp:${uniqueEventName}`)).toEqual(true);
       expect(
         ids.includes(`ui-metric:opensearch-dashboards-user_agent:${userAgentMetric.userAgent}`)
-      ).to.eql(true);
+      ).toEqual(true);
     });
   });
 }

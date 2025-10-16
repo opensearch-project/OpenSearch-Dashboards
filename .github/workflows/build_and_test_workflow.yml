@@ -111,12 +111,6 @@ jobs:
         id: unit-tests
         run: yarn test:jest:ci:coverage  --ci-group=${{ matrix.group }}
 
-      - name: Run mocha tests with coverage
-        # ciGroup 1 of unit-tests is shorter
-        if: matrix.group == 1
-        id: mocha-tests
-        run: yarn test:mocha:coverage
-
       - name: Upload Code Coverage
         id: upload-code-coverage
         uses: codecov/codecov-action@v4

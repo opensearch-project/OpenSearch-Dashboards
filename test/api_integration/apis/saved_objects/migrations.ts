@@ -34,7 +34,7 @@
 
 import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { OpenSearchClient, SavedObjectMigrationMap, SavedObjectsType } from 'src/core/server';
 import { SearchResponse } from '../../../../src/core/server/opensearch/client';
 import {
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
       const migrationATemplate = await opensearchClient.indices.existsTemplate({
         name: 'migration_a_template',
       });
-      expect(migrationATemplate.body).to.be.ok();
+      expect(migrationATemplate.body).toBeTruthy();
 
       const result = await migrateIndex({
         opensearchClient,
@@ -138,20 +138,20 @@ export default ({ getService }: FtrProviderContext) => {
         name: 'migration_a_template',
       });
 
-      expect(migrationATemplateAfter.body).not.to.be.ok();
+      expect(migrationATemplateAfter.body).not.toBeTruthy();
       const migrationTestATemplateAfter = await opensearchClient.indices.existsTemplate({
         name: 'migration_test_a_template',
       });
 
-      expect(migrationTestATemplateAfter.body).to.be.ok();
-      expect(_.omit(result, 'elapsedMs')).to.eql({
+      expect(migrationTestATemplateAfter.body).toBeTruthy();
+      expect(_.omit(result, 'elapsedMs')).toEqual({
         destIndex: '.migration-a_2',
         sourceIndex: '.migration-a_1',
         status: 'migrated',
       });
 
       // The docs in the original index are unchanged
-      expect(await fetchDocs(opensearchClient, `${index}_1`)).to.eql([
+      expect(await fetchDocs(opensearchClient, `${index}_1`)).toEqual([
         { id: 'bar:i', type: 'bar', bar: { nomnom: 33 } },
         { id: 'bar:o', type: 'bar', bar: { nomnom: 2 } },
         { id: 'baz:u', type: 'baz', baz: { title: 'Terrific!' } },
@@ -160,7 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
 
       // The docs in the alias have been migrated
-      expect(await fetchDocs(opensearchClient, index)).to.eql([
+      expect(await fetchDocs(opensearchClient, index)).toEqual([
         {
           id: 'bar:i',
           type: 'bar',
@@ -231,7 +231,7 @@ export default ({ getService }: FtrProviderContext) => {
       await migrateIndex({ opensearchClient, index, migrations, mappingProperties });
 
       // The index for the initial migration has not been destroyed...
-      expect(await fetchDocs(opensearchClient, `${index}_2`)).to.eql([
+      expect(await fetchDocs(opensearchClient, `${index}_2`)).toEqual([
         {
           id: 'bar:i',
           type: 'bar',
@@ -263,7 +263,7 @@ export default ({ getService }: FtrProviderContext) => {
       ]);
 
       // The docs were migrated again...
-      expect(await fetchDocs(opensearchClient, index)).to.eql([
+      expect(await fetchDocs(opensearchClient, index)).toEqual([
         {
           id: 'bar:i',
           type: 'bar',
@@ -324,7 +324,7 @@ export default ({ getService }: FtrProviderContext) => {
           // @ts-expect-error destIndex exists only on MigrationResult status: 'migrated';
           .map(({ status, destIndex }) => ({ status, destIndex }))
           .sort((a) => (a.destIndex ? 0 : 1))
-      ).to.eql([
+      ).toEqual([
         { status: 'migrated', destIndex: '.migration-c_2' },
         { status: 'skipped', destIndex: undefined },
       ]);
@@ -334,15 +334,15 @@ export default ({ getService }: FtrProviderContext) => {
         format: 'json',
       });
       // It only created the original and the dest
-      expect(_.map(body, 'index').sort()).to.eql(['.migration-c_1', '.migration-c_2']);
+      expect(_.map(body, 'index').sort()).toEqual(['.migration-c_1', '.migration-c_2']);
 
       // The docs in the original index are unchanged
-      expect(await fetchDocs(opensearchClient, `${index}_1`)).to.eql([
+      expect(await fetchDocs(opensearchClient, `${index}_1`)).toEqual([
         { id: 'foo:lotr', type: 'foo', foo: { name: 'Lord of the Rings' } },
       ]);
 
       // The docs in the alias have been migrated
-      expect(await fetchDocs(opensearchClient, index)).to.eql([
+      expect(await fetchDocs(opensearchClient, index)).toEqual([
         {
           id: 'foo:lotr',
           type: 'foo',

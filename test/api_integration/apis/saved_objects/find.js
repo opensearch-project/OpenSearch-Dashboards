@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -45,7 +45,7 @@ export default function ({ getService }) {
           .get('/api/saved_objects/_find?type=visualization&fields=title')
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               page: 1,
               per_page: 20,
               total: 1,
@@ -71,7 +71,7 @@ export default function ({ getService }) {
                 },
               ],
             });
-            expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
+            expect(resp.body.saved_objects[0].migrationVersion).toBeTruthy();
           }));
 
       describe('unknown type', () => {
@@ -80,7 +80,7 @@ export default function ({ getService }) {
             .get('/api/saved_objects/_find?type=wigwags')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 page: 1,
                 per_page: 20,
                 total: 0,
@@ -95,7 +95,7 @@ export default function ({ getService }) {
             .get('/api/saved_objects/_find?type=visualization&page=100&per_page=100')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 page: 100,
                 per_page: 100,
                 total: 1,
@@ -110,7 +110,7 @@ export default function ({ getService }) {
             .get('/api/saved_objects/_find?type=url&search_fields=a')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 page: 1,
                 per_page: 20,
                 total: 0,
@@ -125,7 +125,7 @@ export default function ({ getService }) {
             .get('/api/saved_objects/_find?type=visualization&namespaces=foo')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 page: 1,
                 per_page: 20,
                 total: 0,
@@ -140,7 +140,7 @@ export default function ({ getService }) {
             .get('/api/saved_objects/_find?type=visualization&fields=title&namespaces=default')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 page: 1,
                 per_page: 20,
                 total: 1,
@@ -166,7 +166,7 @@ export default function ({ getService }) {
                   },
                 ],
               });
-              expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
+              expect(resp.body.saved_objects[0].migrationVersion).toBeTruthy();
             }));
       });
 
@@ -176,7 +176,7 @@ export default function ({ getService }) {
             .get('/api/saved_objects/_find?type=visualization&fields=title&namespaces=*')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 page: 1,
                 per_page: 20,
                 total: 1,
@@ -202,7 +202,7 @@ export default function ({ getService }) {
                   },
                 ],
               });
-              expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
+              expect(resp.body.saved_objects[0].migrationVersion).toBeTruthy();
             }));
       });
 
@@ -214,7 +214,7 @@ export default function ({ getService }) {
             )
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 page: 1,
                 per_page: 20,
                 total: 1,
@@ -259,7 +259,7 @@ export default function ({ getService }) {
             .expect(400)
             .then((resp) => {
               console.log('body', JSON.stringify(resp.body));
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 error: 'Bad Request',
                 message: 'This type dashboard is not allowed: Bad Request',
                 statusCode: 400,
@@ -274,7 +274,7 @@ export default function ({ getService }) {
             .expect(400)
             .then((resp) => {
               console.log('body', JSON.stringify(resp.body));
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 error: 'Bad Request',
                 message:
                   'DQLSyntaxError: Expected AND, OR, end of input, ' +
@@ -301,7 +301,7 @@ export default function ({ getService }) {
           .expect(200)
           .then((resp) => {
             const savedObjects = resp.body.saved_objects;
-            expect(savedObjects.map((so) => so.attributes.title)).to.eql(['my-visualization']);
+            expect(savedObjects.map((so) => so.attributes.title)).toEqual(['my-visualization']);
           }));
 
       it('can search with the prefix search character just after a special one', async () =>
@@ -315,7 +315,7 @@ export default function ({ getService }) {
           .expect(200)
           .then((resp) => {
             const savedObjects = resp.body.saved_objects;
-            expect(savedObjects.map((so) => so.attributes.title)).to.eql(['my-visualization']);
+            expect(savedObjects.map((so) => so.attributes.title)).toEqual(['my-visualization']);
           }));
 
       it('can search for objects with asterisk', async () =>
@@ -329,7 +329,7 @@ export default function ({ getService }) {
           .expect(200)
           .then((resp) => {
             const savedObjects = resp.body.saved_objects;
-            expect(savedObjects.map((so) => so.attributes.title)).to.eql(['some*visualization']);
+            expect(savedObjects.map((so) => so.attributes.title)).toEqual(['some*visualization']);
           }));
 
       it('can still search tokens by prefix', async () =>
@@ -343,7 +343,7 @@ export default function ({ getService }) {
           .expect(200)
           .then((resp) => {
             const savedObjects = resp.body.saved_objects;
-            expect(savedObjects.map((so) => so.attributes.title)).to.eql([
+            expect(savedObjects.map((so) => so.attributes.title)).toEqual([
               'my-visualization',
               'some*visualization',
             ]);
@@ -365,7 +365,7 @@ export default function ({ getService }) {
           .get('/api/saved_objects/_find?type=visualization')
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               page: 1,
               per_page: 20,
               total: 0,
@@ -379,7 +379,7 @@ export default function ({ getService }) {
             .get('/api/saved_objects/_find?type=wigwags')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 page: 1,
                 per_page: 20,
                 total: 0,
@@ -394,7 +394,7 @@ export default function ({ getService }) {
             .get('/api/saved_objects/_find')
             .expect(400)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 error: 'Bad Request',
                 message:
                   '[request query.type]: expected at least one defined value but got [undefined]',
@@ -409,7 +409,7 @@ export default function ({ getService }) {
             .get('/api/saved_objects/_find?type=visualization&page=100&per_page=100')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 page: 100,
                 per_page: 100,
                 total: 0,
@@ -424,7 +424,7 @@ export default function ({ getService }) {
             .get('/api/saved_objects/_find?type=url&search_fields=a')
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 page: 1,
                 per_page: 20,
                 total: 0,
@@ -441,7 +441,7 @@ export default function ({ getService }) {
             )
             .expect(200)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 page: 1,
                 per_page: 20,
                 total: 0,
@@ -457,7 +457,7 @@ export default function ({ getService }) {
             .expect(400)
             .then((resp) => {
               console.log('body', JSON.stringify(resp.body));
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 error: 'Bad Request',
                 message: 'This type dashboard is not allowed: Bad Request',
                 statusCode: 400,

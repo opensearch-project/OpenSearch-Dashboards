@@ -28,40 +28,40 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 const assertStatsAndMetrics = (body) => {
-  expect(body.opensearchDashboards.name).to.be.a('string');
-  expect(body.opensearchDashboards.uuid).to.be.a('string');
-  expect(body.opensearchDashboards.host).to.be.a('string');
-  expect(body.opensearchDashboards.transport_address).to.be.a('string');
-  expect(body.opensearchDashboards.version).to.be.a('string');
-  expect(body.opensearchDashboards.snapshot).to.be.a('boolean');
-  expect(body.opensearchDashboards.status).to.be('green');
+  expect(typeof body.opensearchDashboards.name).toBe('string');
+  expect(typeof body.opensearchDashboards.uuid).toBe('string');
+  expect(typeof body.opensearchDashboards.host).toBe('string');
+  expect(typeof body.opensearchDashboards.transport_address).toBe('string');
+  expect(typeof body.opensearchDashboards.version).toBe('string');
+  expect(typeof body.opensearchDashboards.snapshot).toBe('boolean');
+  expect(typeof body.opensearchDashboards.status).toBe('green');
 
-  expect(body.process.memory.heap.total_bytes).to.be.a('number');
-  expect(body.process.memory.heap.used_bytes).to.be.a('number');
-  expect(body.process.memory.heap.size_limit).to.be.a('number');
-  expect(body.process.memory.resident_set_size_bytes).to.be.a('number');
-  expect(body.process.pid).to.be.a('number');
-  expect(body.process.uptime_ms).to.be.a('number');
-  expect(body.process.event_loop_delay).to.be.a('number');
+  expect(typeof body.process.memory.heap.total_bytes).toBe('number');
+  expect(typeof body.process.memory.heap.used_bytes).toBe('number');
+  expect(typeof body.process.memory.heap.size_limit).toBe('number');
+  expect(typeof body.process.memory.resident_set_size_bytes).toBe('number');
+  expect(typeof body.process.pid).toBe('number');
+  expect(typeof body.process.uptime_ms).toBe('number');
+  expect(typeof body.process.event_loop_delay).toBe('number');
 
-  expect(body.os.memory.free_bytes).to.be.a('number');
-  expect(body.os.memory.total_bytes).to.be.a('number');
-  expect(body.os.uptime_ms).to.be.a('number');
+  expect(typeof body.os.memory.free_bytes).toBe('number');
+  expect(typeof body.os.memory.total_bytes).toBe('number');
+  expect(typeof body.os.uptime_ms).toBe('number');
 
-  expect(body.os.load['1m']).to.be.a('number');
-  expect(body.os.load['5m']).to.be.a('number');
-  expect(body.os.load['15m']).to.be.a('number');
+  expect(typeof body.os.load['1m']).toBe('number');
+  expect(typeof body.os.load['5m']).toBe('number');
+  expect(typeof body.os.load['15m']).toBe('number');
 
-  expect(body.response_times.avg_ms).not.to.be(null); // ok if is undefined
-  expect(body.response_times.max_ms).not.to.be(null); // ok if is undefined
+  expect(typeof body.response_times.avg_ms).not.toBe(null); // ok if is undefined
+  expect(typeof body.response_times.max_ms).not.toBe(null); // ok if is undefined
 
-  expect(body.requests.total).to.be.a('number');
-  expect(body.requests.disconnects).to.be.a('number');
+  expect(typeof body.requests.total).toBe('number');
+  expect(typeof body.requests.disconnects).toBe('number');
 
-  expect(body.concurrent_connections).to.be.a('number');
+  expect(typeof body.concurrent_connections).toBe('number');
 };
 
 export default function ({ getService }) {
@@ -81,7 +81,7 @@ export default function ({ getService }) {
           .expect('Content-Type', /json/)
           .expect(200)
           .then(({ body }) => {
-            expect(body.cluster_uuid).to.be(undefined);
+            expect(body.cluster_uuid).toBe(undefined);
             assertStatsAndMetrics(body);
           });
       });
@@ -91,7 +91,7 @@ export default function ({ getService }) {
           .expect('Content-Type', /json/)
           .expect(200)
           .then(({ body }) => {
-            expect(body.cluster_uuid).to.be(undefined);
+            expect(body.cluster_uuid).toBe(undefined);
             assertStatsAndMetrics(body);
           });
       });
@@ -105,8 +105,8 @@ export default function ({ getService }) {
           .expect('Content-Type', /json/)
           .expect(200)
           .then(({ body }) => {
-            expect(body.cluster_uuid).to.be.a('string');
-            expect(body.usage).to.be.an('object'); // no usage collectors have been registered so usage is an empty object
+            expect(typeof body.cluster_uuid).toBe('string');
+            expect(typeof body.usage).toBe('object'); // no usage collectors have been registered so usage is an empty object
             assertStatsAndMetrics(body);
           });
       });
@@ -117,8 +117,8 @@ export default function ({ getService }) {
           .expect('Content-Type', /json/)
           .expect(200)
           .then(({ body }) => {
-            expect(body.cluster_uuid).to.be.a('string');
-            expect(body.usage).to.be.an('object');
+            expect(typeof body.cluster_uuid).toBe('string');
+            expect(typeof body.usage).toBe('object');
             assertStatsAndMetrics(body);
           });
       });
@@ -130,8 +130,8 @@ export default function ({ getService }) {
             .expect('Content-Type', /json/)
             .expect(200)
             .then(({ body }) => {
-              expect(body.clusterUuid).to.be.a('string');
-              expect(body.usage).to.be.an('object'); // no usage collectors have been registered so usage is an empty object
+              expect(typeof body.clusterUuid).toBe('string');
+              expect(typeof body.usage).toBe('object'); // no usage collectors have been registered so usage is an empty object
               assertStatsAndMetrics(body, true);
             });
         });
@@ -144,8 +144,8 @@ export default function ({ getService }) {
             .expect('Content-Type', /json/)
             .expect(200)
             .then(({ body }) => {
-              expect(body).to.have.property('usage');
-              expect(body.usage).to.eql({});
+              expect(body).toHaveProperty('usage');
+              expect(body.usage).toEqual({});
             });
         });
 
@@ -155,8 +155,8 @@ export default function ({ getService }) {
             .expect('Content-Type', /json/)
             .expect(200)
             .then(({ body }) => {
-              expect(body).to.have.property('usage');
-              expect(body.usage).to.eql({});
+              expect(body).toHaveProperty('usage');
+              expect(body.usage).toEqual({});
             });
         });
       });

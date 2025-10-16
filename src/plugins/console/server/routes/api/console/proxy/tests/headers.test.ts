@@ -39,7 +39,6 @@ import {
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../../../../core/server/http/router/request';
 import { getProxyRouteHandlerDeps } from './mocks';
-import expect from '@osd/expect';
 import { createHandler } from '../create_handler';
 import { coreMock } from '../../../../../../../../core/server/mocks';
 
@@ -89,14 +88,14 @@ describe('Console Proxy Route', () => {
         [, opts],
       ] = opensearchClient.asCurrentUserWithLongNumeralsSupport.transport.request.mock.calls;
       const headers = opts?.headers;
-      expect(headers).to.have.property('x-forwarded-for');
-      expect(headers!['x-forwarded-for']).to.be('0.0.0.0');
-      expect(headers).to.have.property('x-forwarded-port');
-      expect(headers!['x-forwarded-port']).to.be('1234');
-      expect(headers).to.have.property('x-forwarded-proto');
-      expect(headers!['x-forwarded-proto']).to.be('http');
-      expect(headers).to.have.property('x-forwarded-host');
-      expect(headers!['x-forwarded-host']).to.be('test');
+      expect(headers).toHaveProperty('x-forwarded-for');
+      expect(headers!['x-forwarded-for']).toBe('0.0.0.0');
+      expect(headers).toHaveProperty('x-forwarded-port');
+      expect(headers!['x-forwarded-port']).toBe('1234');
+      expect(headers).toHaveProperty('x-forwarded-proto');
+      expect(headers!['x-forwarded-proto']).toBe('http');
+      expect(headers).toHaveProperty('x-forwarded-host');
+      expect(headers!['x-forwarded-host']).toBe('test');
     });
   });
 });

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
@@ -66,13 +66,13 @@ export default function ({ getService, getPageObjects }) {
       it('should show on an empty dashboard', async function () {
         await PageObjects.dashboard.clickNewDashboard();
         const hasAddFilter = await testSubjects.exists('addFilter');
-        expect(hasAddFilter).to.be(true);
+        expect(hasAddFilter).toBe(true);
       });
 
       it('should continue to show for visualizations with no search source', async () => {
         await dashboardAddPanel.addVisualization('Rendering-Test:-input-control');
         const hasAddFilter = await testSubjects.exists('addFilter');
-        expect(hasAddFilter).to.be(true);
+        expect(hasAddFilter).toBe(true);
       });
     });
 
@@ -118,7 +118,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('are not selected by default', async function () {
         const filterCount = await filterBar.getFilterCount();
-        expect(filterCount).to.equal(0);
+        expect(filterCount).toEqual(0);
       });
 
       it('are added when a pie chart slice is clicked', async function () {
@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.waitForRenderComplete();
         await pieChart.filterOnPieSlice('4,886');
         const filterCount = await filterBar.getFilterCount();
-        expect(filterCount).to.equal(1);
+        expect(filterCount).toEqual(1);
 
         await pieChart.expectPieSliceCount(1);
       });
@@ -136,7 +136,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const filterCount = await filterBar.getFilterCount();
-        expect(filterCount).to.equal(1);
+        expect(filterCount).toEqual(1);
 
         await pieChart.expectPieSliceCount(1);
       });
@@ -147,7 +147,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const filterCount = await filterBar.getFilterCount();
-        expect(filterCount).to.equal(1);
+        expect(filterCount).toEqual(1);
         await pieChart.expectPieSliceCount(1);
       });
 
@@ -167,7 +167,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.saveDashboard('saved with pinned filters', {
           saveAsNew: true,
         });
-        expect(await filterBar.isFilterPinned(filterKey)).to.be(true);
+        expect(await filterBar.isFilterPinned(filterKey)).toBe(true);
         await pieChart.expectPieSliceCount(1);
       });
 
@@ -176,7 +176,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.loadSavedDashboard('with filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        expect(await filterBar.isFilterPinned('bytes')).to.be(true);
+        expect(await filterBar.isFilterPinned('bytes')).toBe(true);
         await pieChart.expectPieSliceCount(1);
       });
 
@@ -185,7 +185,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.loadSavedDashboard('saved with pinned filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        expect(await filterBar.getFilterCount()).to.be(0);
+        expect(await filterBar.getFilterCount()).toBe(0);
         await pieChart.expectPieSliceCount(5);
       });
     });
@@ -217,7 +217,7 @@ export default function ({ getService, getPageObjects }) {
         );
 
         const filterCount = await filterBar.getFilterCount();
-        expect(filterCount).to.equal(1);
+        expect(filterCount).toEqual(1);
       });
     });
 
@@ -230,12 +230,12 @@ export default function ({ getService, getPageObjects }) {
 
       it('filter with non-existent index pattern renders in error mode', async function () {
         const hasBadFieldFilter = await filterBar.hasFilter('name', 'error', false);
-        expect(hasBadFieldFilter).to.be(true);
+        expect(hasBadFieldFilter).toBe(true);
       });
 
       it('filter with non-existent field renders in error mode', async function () {
         const hasBadFieldFilter = await filterBar.hasFilter('baad-field', 'error', false);
-        expect(hasBadFieldFilter).to.be(true);
+        expect(hasBadFieldFilter).toBe(true);
       });
 
       it('filter from unrelated index pattern is still applicable if field name is found', async function () {
@@ -244,17 +244,17 @@ export default function ({ getService, getPageObjects }) {
           '123',
           true
         );
-        expect(hasUnrelatedIndexPatternFilterPhrase).to.be(true);
+        expect(hasUnrelatedIndexPatternFilterPhrase).toBe(true);
       });
 
       it('filter from unrelated index pattern is rendred as a warning if field name is not found', async function () {
         const hasWarningFieldFilter = await filterBar.hasFilter('extension', 'warn', true);
-        expect(hasWarningFieldFilter).to.be(true);
+        expect(hasWarningFieldFilter).toBe(true);
       });
 
       it('filter without an index pattern is rendred as a warning, if the dashboard has an index pattern', async function () {
         const noIndexPatternFilter = await filterBar.hasFilter('banana', 'warn', true);
-        expect(noIndexPatternFilter).to.be(true);
+        expect(noIndexPatternFilter).toBe(true);
       });
     });
   });

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
@@ -50,18 +50,18 @@ export default function ({ getService, getPageObjects }) {
 
     it('should disable child control when parent control is not set', async () => {
       const parentControlMenu = await comboBox.getOptionsList('listControlSelect0');
-      expect(parentControlMenu.trim().split('\n').join()).to.equal('BD,BR,CN,ID,IN,JP,NG,PK,RU');
+      expect(parentControlMenu.trim().split('\n').join()).toEqual('BD,BR,CN,ID,IN,JP,NG,PK,RU');
 
       const childControlInput = await find.byCssSelector('[data-test-subj="inputControl1"] input');
       const isDisabled = await childControlInput.getAttribute('disabled');
-      expect(isDisabled).to.equal('true');
+      expect(isDisabled).toEqual('true');
     });
 
     it('should filter child control options by parent control value', async () => {
       await comboBox.set('listControlSelect0', 'BR');
 
       const childControlMenu = await comboBox.getOptionsList('listControlSelect1');
-      expect(childControlMenu.trim().split('\n').join()).to.equal(
+      expect(childControlMenu.trim().split('\n').join()).toEqual(
         '14.61.182.136,3.174.21.181,6.183.121.70,71.241.97.89,9.69.255.135'
       );
     });
@@ -72,10 +72,10 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visEditor.inputControlSubmit();
 
       const hasParentControlFilter = await filterBar.hasFilter('geo.src', 'BR');
-      expect(hasParentControlFilter).to.equal(true);
+      expect(hasParentControlFilter).toEqual(true);
 
       const hasChildControlFilter = await filterBar.hasFilter('clientip', '14.61.182.136');
-      expect(hasChildControlFilter).to.equal(true);
+      expect(hasChildControlFilter).toEqual(true);
     });
 
     it('should clear child control dropdown when parent control value is removed', async () => {
@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }) {
 
       const childControlInput = await find.byCssSelector('[data-test-subj="inputControl1"] input');
       const isDisabled = await childControlInput.getAttribute('disabled');
-      expect(isDisabled).to.equal('true');
+      expect(isDisabled).toEqual('true');
 
       await testSubjects.click('inputControlCancelBtn');
     });
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.sleep(500); // give time for filter to be removed and event handlers to fire
 
       const hasValue = await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0');
-      expect(hasValue).to.equal(false);
+      expect(hasValue).toEqual(false);
     });
   });
 }
