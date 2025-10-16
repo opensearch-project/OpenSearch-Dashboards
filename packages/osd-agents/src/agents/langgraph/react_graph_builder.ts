@@ -8,7 +8,7 @@ import { Logger } from '../../utils/logger';
 import { ReactAgentState } from './react_agent';
 
 // Configuration constants
-const REACT_MAX_ITERATIONS = 10; // Maximum tool execution cycles before forcing final response
+const REACT_MAX_ITERATIONS = 100; // Maximum tool execution cycles before forcing final response
 
 // Define state annotation for LangGraph
 const ReactStateAnnotation = Annotation.Root({
