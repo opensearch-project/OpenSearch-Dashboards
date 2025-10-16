@@ -107,11 +107,11 @@ export const VisualizationRender = ({
       }
       if (e.name === 'applyFilter') {
         if (e.data && e.data.filters) {
-          const { timeRange } = opensearchFilters.extractTimeRange(
+          const { timeRange: extractedTimeRange } = opensearchFilters.extractTimeRange(
             e.data.filters,
             e.data.timeFieldName
           );
-          onSelectTimeRange(timeRange);
+          onSelectTimeRange(extractedTimeRange);
         }
       }
     },

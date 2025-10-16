@@ -677,12 +677,11 @@ describe('bar to_expression', () => {
       );
 
       expect(Utils.buildTimeRangeLayer).toHaveBeenCalledWith(
+        expect.any(Object), // mainLayerEncoding
         axisMappings,
         timeRange,
         styles.switchAxes
       );
-      const lastLayer = spec.layer[spec.layer.length - 1];
-      expect(lastLayer).toEqual(expect.objectContaining({ data: { name: 'domainLayer' } }));
     });
   });
 
@@ -926,12 +925,11 @@ describe('bar to_expression', () => {
       );
 
       expect(Utils.buildTimeRangeLayer).toHaveBeenCalledWith(
+        expect.any(Object), // mainLayerEncoding
         axisMappings,
         timeRange,
         styles.switchAxes
       );
-      const lastLayer = spec.layer[spec.layer.length - 1];
-      expect(lastLayer).toEqual(expect.objectContaining({ data: { name: 'domainLayer' } }));
     });
   });
 
@@ -1177,13 +1175,11 @@ describe('bar to_expression', () => {
         timeRange
       );
       expect(Utils.buildTimeRangeLayer).toHaveBeenCalledWith(
+        expect.any(Object), // mainLayerEncoding
         axisMappings,
         timeRange,
         styles.switchAxes
       );
-      const layers = spec.spec.layer;
-      const lastLayer = layers[layers.length - 1];
-      expect(lastLayer).toEqual(expect.objectContaining({ data: { name: 'domainLayer' } }));
     });
   });
 

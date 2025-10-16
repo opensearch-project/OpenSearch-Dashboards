@@ -840,8 +840,8 @@ describe('Area Chart to_expression', () => {
         mockAxisColumnMappings
       );
 
-      // Verify time marker layer is not added due to non-temporal axis
-      expect(result.layer.length).toBe(1); // Only main layer should be present
+      // Verify that two layers are present (main layer and highlight bar layer)
+      expect(result.layer.length).toBe(2); // Main layer + highlight bar layer
       const timeMarkerLayer = result.layer.find(
         (layer: any) => layer.mark?.type === 'rule' && layer.encoding?.x?.datum
       );
@@ -987,11 +987,12 @@ describe('Area Chart to_expression', () => {
         mockAxisColumnMappings
       );
 
-      // Verify that the chart does not use layers when time marker is enabled for non-temporal axis
-      expect(result.layer).toBeUndefined();
-      expect(result.encoding).toBeDefined();
-      // Verify that no time marker layer is added
-      expect(result).not.toHaveProperty('layer');
+      // Verify that two layers are present (main layer and highlight bar layer)
+      expect(result.layer.length).toBe(2); // Main layer + highlight bar layer
+      const timeMarkerLayer = result.layer.find(
+        (layer: any) => layer.mark?.type === 'rule' && layer.encoding?.x?.datum
+      );
+      expect(timeMarkerLayer).toBeUndefined();
     });
 
     it('should add threshold layer when enabled', () => {
@@ -1030,6 +1031,25 @@ describe('Area Chart to_expression', () => {
       expect(mainLayer).toHaveProperty('encoding.x.field', 'category');
       expect(mainLayer).toHaveProperty('encoding.y.field', 'value');
       expect(mainLayer).toHaveProperty('encoding.color.field', 'category2');
+
+      // Verify threshold layer exists
+      // Search within nested layer arrays, as createThresholdLayer may return an object with a 'layer' property
+      let thresholdLayer;
+      for (const layer of result.layer) {
+        if (layer.layer) {
+          thresholdLayer = layer.layer.find(
+            (sublayer: any) => sublayer.mark?.type === 'rule' && sublayer.encoding?.y?.datum === 15
+          );
+          if (thresholdLayer) break;
+        } else if (layer.mark?.type === 'rule' && layer.encoding?.y?.datum === 15) {
+          thresholdLayer = layer;
+          break;
+        }
+      }
+      expect(thresholdLayer).toBeDefined();
+      expect(thresholdLayer).toHaveProperty('mark.color', '#E7664C');
+      expect(thresholdLayer).toHaveProperty('mark.strokeWidth', 1);
+      expect(thresholdLayer).toHaveProperty('mark.strokeDash');
     });
 
     it('should throw an error when required columns are missing', () => {

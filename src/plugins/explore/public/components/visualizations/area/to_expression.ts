@@ -121,10 +121,9 @@ export const createSimpleAreaChart = (
     layers.push(timeMarkerLayer);
   }
 
-  const domainLayer = styles.showFullTimeRange
-    ? buildTimeRangeLayer(axisColumnMappings, timeRange)
-    : null;
-  if (domainLayer) layers.push(domainLayer);
+  if (styles.showFullTimeRange) {
+    buildTimeRangeLayer(mainLayer.encoding, axisColumnMappings, timeRange);
+  }
 
   return {
     $schema: VEGASCHEMA,
@@ -275,10 +274,9 @@ export const createMultiAreaChart = (
     layers.push(timeMarkerLayer);
   }
 
-  const domainLayer = styles.showFullTimeRange
-    ? buildTimeRangeLayer(axisColumnMappings, timeRange)
-    : null;
-  if (domainLayer) layers.push(domainLayer);
+  if (styles.showFullTimeRange) {
+    buildTimeRangeLayer(mainLayer.encoding, axisColumnMappings, timeRange);
+  }
 
   return {
     $schema: VEGASCHEMA,
@@ -325,10 +323,65 @@ export const createFacetedMultiAreaChart = (
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
-  const domainLayer =
-    styles.showFullTimeRange && timeRange
-      ? buildTimeRangeLayer(axisColumnMappings, timeRange)
-      : null;
+
+  const mainLayerEncoding = {
+    x: {
+      field: dateField,
+      type: 'temporal',
+      axis: applyAxisStyling(
+        {
+          title: dateName,
+          labelAngle: -45,
+          labelSeparation: 8,
+        },
+        styles,
+        'category',
+        numericalColumns,
+        categoricalColumns,
+        dateColumns
+      ),
+    },
+    y: {
+      field: metricField,
+      type: 'quantitative',
+      axis: applyAxisStyling(
+        { title: metricName },
+        styles,
+        'value',
+        numericalColumns,
+        categoricalColumns,
+        dateColumns
+      ),
+    },
+    color: {
+      field: category1Field,
+      type: 'nominal',
+      legend: styles.addLegend
+        ? {
+            title: category1Name,
+            orient: styles.legendPosition?.toLowerCase() || 'right',
+          }
+        : null,
+    },
+    // Optional: Add tooltip with all information if tooltip mode is not hidden
+    ...(showTooltip && {
+      tooltip: [
+        {
+          field: dateField,
+          type: 'temporal',
+          title: dateName,
+          format: getTooltipFormat(transformedData, dateField),
+        },
+        { field: category1Field, type: 'nominal', title: category1Name },
+        { field: metricField, type: 'quantitative', title: metricName },
+      ],
+    }),
+  };
+
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange && timeRange) {
+    buildTimeRangeLayer(mainLayerEncoding, axisColumnMappings, timeRange);
+  }
 
   return {
     $schema: VEGASCHEMA,
@@ -353,59 +406,7 @@ export const createFacetedMultiAreaChart = (
             opacity: styles.areaOpacity || DEFAULT_OPACITY,
             tooltip: styles.tooltipOptions?.mode !== 'hidden',
           },
-          encoding: {
-            x: {
-              field: dateField,
-              type: 'temporal',
-              axis: applyAxisStyling(
-                {
-                  title: dateName,
-                  labelAngle: -45,
-                  labelSeparation: 8,
-                },
-                styles,
-                'category',
-                numericalColumns,
-                categoricalColumns,
-                dateColumns
-              ),
-            },
-            y: {
-              field: metricField,
-              type: 'quantitative',
-              axis: applyAxisStyling(
-                { title: metricName },
-                styles,
-                'value',
-                numericalColumns,
-                categoricalColumns,
-                dateColumns
-              ),
-            },
-            color: {
-              field: category1Field,
-              type: 'nominal',
-              legend: styles.addLegend
-                ? {
-                    title: category1Name,
-                    orient: styles.legendPosition?.toLowerCase() || 'right',
-                  }
-                : null,
-            },
-            // Optional: Add tooltip with all information if tooltip mode is not hidden
-            ...(showTooltip && {
-              tooltip: [
-                {
-                  field: dateField,
-                  type: 'temporal',
-                  title: dateName,
-                  format: getTooltipFormat(transformedData, dateField),
-                },
-                { field: category1Field, type: 'nominal', title: category1Name },
-                { field: metricField, type: 'quantitative', title: metricName },
-              ],
-            }),
-          },
+          encoding: mainLayerEncoding,
         },
         {
           layer: createCrosshairLayers(
@@ -458,7 +459,6 @@ export const createFacetedMultiAreaChart = (
               },
             ]
           : []),
-        ...(domainLayer ? [domainLayer] : []),
       ],
     },
   };

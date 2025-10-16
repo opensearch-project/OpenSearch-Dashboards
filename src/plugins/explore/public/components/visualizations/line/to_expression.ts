@@ -120,10 +120,10 @@ export const createSimpleLineChart = (
     layers.push(timeMarkerLayer);
   }
 
-  const domainLayer = styles.showFullTimeRange
-    ? buildTimeRangeLayer(axisColumnMappings, timeRange)
-    : null;
-  if (domainLayer) layers.push(domainLayer);
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange) {
+    buildTimeRangeLayer(mainLayer.encoding, axisColumnMappings, timeRange);
+  }
 
   return {
     $schema: VEGASCHEMA,
@@ -309,10 +309,10 @@ export const createLineBarChart = (
     layers.push(timeMarkerLayer);
   }
 
-  const domainLayer = styles.showFullTimeRange
-    ? buildTimeRangeLayer(axisColumnMappings, timeRange)
-    : null;
-  if (domainLayer) layers.push(domainLayer);
+  // Apply time range to bar layer's scale if enabled
+  if (styles.showFullTimeRange) {
+    buildTimeRangeLayer(barLayer.encoding, axisColumnMappings, timeRange);
+  }
 
   return {
     $schema: VEGASCHEMA,
@@ -454,10 +454,10 @@ export const createMultiLineChart = (
     layers.push(timeMarkerLayer);
   }
 
-  const domainLayer = styles.showFullTimeRange
-    ? buildTimeRangeLayer(axisColumnMappings, timeRange)
-    : null;
-  if (domainLayer) layers.push(domainLayer);
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange) {
+    buildTimeRangeLayer(mainLayer.encoding, axisColumnMappings, timeRange);
+  }
 
   return {
     $schema: VEGASCHEMA,
@@ -507,10 +507,65 @@ export const createFacetedMultiLineChart = (
   const facetMarkConfig = buildMarkConfig(styles, 'line');
 
   const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
-  const domainLayer =
-    styles.showFullTimeRange && timeRange
-      ? buildTimeRangeLayer(axisColumnMappings, timeRange)
-      : null;
+
+  const mainLayerEncoding = {
+    x: {
+      field: dateField,
+      type: 'temporal',
+      axis: applyAxisStyling(
+        {
+          title: dateName,
+          labelAngle: -45,
+          labelSeparation: 8,
+        },
+        styles,
+        'category',
+        numericalColumns,
+        categoricalColumns,
+        dateColumns
+      ),
+    },
+    y: {
+      field: metricField,
+      type: 'quantitative',
+      axis: applyAxisStyling(
+        { title: metricName },
+        styles,
+        'value',
+        numericalColumns,
+        categoricalColumns,
+        dateColumns
+      ),
+    },
+    color: {
+      field: category1Field,
+      type: 'nominal',
+      legend:
+        styles?.addLegend !== false
+          ? {
+              title: category1Name,
+              orient: styles?.legendPosition || Positions.RIGHT,
+            }
+          : null,
+    },
+    ...(showTooltip && {
+      tooltip: [
+        {
+          field: dateField,
+          type: 'temporal',
+          title: dateName,
+          format: getTooltipFormat(transformedData, dateField),
+        },
+        { field: metricField, type: 'quantitative', title: metricName },
+        { field: category1Field, type: 'nominal', title: category1Name },
+      ],
+    }),
+  };
+
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange && timeRange) {
+    buildTimeRangeLayer(mainLayerEncoding, axisColumnMappings, timeRange);
+  }
 
   return {
     $schema: VEGASCHEMA,
@@ -530,59 +585,7 @@ export const createFacetedMultiLineChart = (
         {
           mark: facetMarkConfig,
           params: [createTimeRangeBrush({ timeAxis: 'x' })],
-          encoding: {
-            x: {
-              field: dateField,
-              type: 'temporal',
-              axis: applyAxisStyling(
-                {
-                  title: dateName,
-                  labelAngle: -45,
-                  labelSeparation: 8,
-                },
-                styles,
-                'category',
-                numericalColumns,
-                categoricalColumns,
-                dateColumns
-              ),
-            },
-            y: {
-              field: metricField,
-              type: 'quantitative',
-              axis: applyAxisStyling(
-                { title: metricName },
-                styles,
-                'value',
-                numericalColumns,
-                categoricalColumns,
-                dateColumns
-              ),
-            },
-            color: {
-              field: category1Field,
-              type: 'nominal',
-              legend:
-                styles?.addLegend !== false
-                  ? {
-                      title: category1Name,
-                      orient: styles?.legendPosition || Positions.RIGHT,
-                    }
-                  : null,
-            },
-            ...(showTooltip && {
-              tooltip: [
-                {
-                  field: dateField,
-                  type: 'temporal',
-                  title: dateName,
-                  format: getTooltipFormat(transformedData, dateField),
-                },
-                { field: metricField, type: 'quantitative', title: metricName },
-                { field: category1Field, type: 'nominal', title: category1Name },
-              ],
-            }),
-          },
+          encoding: mainLayerEncoding,
         },
         ...createCrosshairLayers(
           {
@@ -632,7 +635,6 @@ export const createFacetedMultiLineChart = (
               },
             ]
           : []),
-        ...(domainLayer ? [domainLayer] : []),
       ],
     },
   };
