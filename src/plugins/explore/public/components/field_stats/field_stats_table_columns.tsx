@@ -89,9 +89,15 @@ export const getFieldStatsColumns = ({
         if (item.errorMessage) {
           return renderErrorBadge(item.errorMessage);
         }
+
+        // Show emdash ONLY when percentage couldn't be calculated (total count fetch failed)
+        // 0% is a valid percentage and should be displayed
+        const percentageDisplay =
+          item.docPercentage !== undefined ? `${item.docPercentage.toFixed(1)}%` : '—';
+
         return (
           <span>
-            {docCount.toLocaleString()} ({item.docPercentage.toFixed(1)}%)
+            {docCount.toLocaleString()} ({percentageDisplay})
           </span>
         );
       },

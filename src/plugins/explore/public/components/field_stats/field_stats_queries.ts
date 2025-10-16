@@ -7,14 +7,17 @@ import { Query } from 'src/plugins/data/common';
 import { ExploreServices } from '../../types';
 
 /**
- * Get basic field statistics (document count, distinct count, percentage)
+ * Get total document count for an index
+ */
+export const getTotalDocCountQuery = (index: string): string => {
+  return `source = ${index} | stats count() as total_count`;
+};
+
+/**
+ * Get basic field statistics (document count, distinct count)
  */
 export const getFieldStatsQuery = (index: string, fieldName: string): string => {
-  return `source = ${index}
-    | stats count(\`${fieldName}\`) as count,
-            distinct_count_approx(\`${fieldName}\`) as dc,
-            count() as total_count
-    | eval percentage_total = (count * 100.0) / total_count`;
+  return `source = ${index} | where isnotnull(\`${fieldName}\`) | stats count() as field_count, distinct_count(\`${fieldName}\`) as distinct_count`;
 };
 
 /**

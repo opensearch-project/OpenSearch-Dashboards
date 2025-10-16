@@ -106,33 +106,32 @@ describe('field_stats_utils', () => {
   });
 
   describe('transformFieldStatsResult', () => {
-    it('transforms result with valid data', () => {
+    it('transforms result with valid data and totalDocCount', () => {
       const result = {
         hits: {
           hits: [
             {
               _source: {
-                count: 100,
-                dc: 25,
-                percentage_total: 75.5,
+                field_count: 100,
+                distinct_count: 25,
               },
             },
           ],
         },
       };
-      const transformed = transformFieldStatsResult('fieldName', 'string', result);
+      const transformed = transformFieldStatsResult('fieldName', 'string', result, 1000);
       expect(transformed).toEqual({
         name: 'fieldName',
         type: 'string',
         docCount: 100,
         distinctCount: 25,
-        docPercentage: 75.5,
+        docPercentage: 10,
       });
     });
 
-    it('handles missing hits', () => {
+    it('handles missing hits with known total count', () => {
       const result = {};
-      const transformed = transformFieldStatsResult('fieldName', 'number', result);
+      const transformed = transformFieldStatsResult('fieldName', 'number', result, 1000);
       expect(transformed).toEqual({
         name: 'fieldName',
         type: 'number',
@@ -142,9 +141,9 @@ describe('field_stats_utils', () => {
       });
     });
 
-    it('handles empty hits array', () => {
+    it('handles empty hits array with known total count', () => {
       const result = { hits: { hits: [] } };
-      const transformed = transformFieldStatsResult('fieldName', 'date', result);
+      const transformed = transformFieldStatsResult('fieldName', 'date', result, 1000);
       expect(transformed).toEqual({
         name: 'fieldName',
         type: 'date',
@@ -154,13 +153,59 @@ describe('field_stats_utils', () => {
       });
     });
 
-    it('handles missing fields in source', () => {
+    it('handles missing fields in source with known total count', () => {
       const result = {
         hits: {
           hits: [{ _source: {} }],
         },
       };
-      const transformed = transformFieldStatsResult('fieldName', 'string', result);
+      const transformed = transformFieldStatsResult('fieldName', 'string', result, 1000);
+      expect(transformed).toEqual({
+        name: 'fieldName',
+        type: 'string',
+        docCount: 0,
+        distinctCount: 0,
+        docPercentage: 0,
+      });
+    });
+
+    it('returns undefined percentage when total count is undefined', () => {
+      const result = {
+        hits: {
+          hits: [
+            {
+              _source: {
+                field_count: 100,
+                distinct_count: 25,
+              },
+            },
+          ],
+        },
+      };
+      const transformed = transformFieldStatsResult('fieldName', 'string', result, undefined);
+      expect(transformed).toEqual({
+        name: 'fieldName',
+        type: 'string',
+        docCount: 100,
+        distinctCount: 25,
+        docPercentage: undefined,
+      });
+    });
+
+    it('returns 0 percentage when total count is 0', () => {
+      const result = {
+        hits: {
+          hits: [
+            {
+              _source: {
+                field_count: 0,
+                distinct_count: 0,
+              },
+            },
+          ],
+        },
+      };
+      const transformed = transformFieldStatsResult('fieldName', 'string', result, 0);
       expect(transformed).toEqual({
         name: 'fieldName',
         type: 'string',

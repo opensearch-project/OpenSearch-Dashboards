@@ -44,4 +44,22 @@ describe('getFieldStatsColumns', () => {
 
     expect(wrapper.find(EuiBadge).exists()).toBe(true);
   });
+
+  it('renders emdash when percentage is undefined (total count fetch failed)', () => {
+    const item: FieldStatsItem = {
+      name: 'field1',
+      type: 'string',
+      docCount: 100,
+      distinctCount: 50,
+      docPercentage: undefined,
+    };
+
+    const columns = getFieldStatsColumns({ expandedRows, onRowExpand: onRowExpandMock });
+    const docCountColumn = columns.find((col) => 'field' in col && col.field === 'docCount') as any;
+    const rendered = docCountColumn.render(item.docCount, item);
+    const wrapper = shallow(<div>{rendered}</div>);
+
+    expect(wrapper.text()).toContain('—');
+    expect(wrapper.text()).not.toContain('%');
+  });
 });

@@ -39,22 +39,35 @@ export function filterDatasetFields(dataset: any): IndexPatternField[] {
  * @param fieldName The field name
  * @param fieldType The field type
  * @param result The raw query result
+ * @param totalDocCount The total document count (undefined if fetch failed)
  * @returns Transformed field stats item
  */
 export function transformFieldStatsResult(
   fieldName: string,
   fieldType: string,
-  result: any
+  result: any,
+  totalDocCount: number | undefined
 ): FieldStatsItem {
   const hits = result?.hits?.hits || [];
   const firstHit = hits[0]?._source || {};
+  const fieldCount = firstHit.field_count || 0;
+  const distinctCount = firstHit.distinct_count || 0;
+
+  // Calculate percentage only if totalDocCount is available
+  // If undefined, leave docPercentage as undefined (will display as emdash)
+  const docPercentage =
+    totalDocCount !== undefined
+      ? totalDocCount > 0
+        ? (fieldCount / totalDocCount) * 100
+        : 0
+      : undefined;
 
   return {
     name: fieldName,
     type: fieldType,
-    docCount: firstHit.count || 0,
-    distinctCount: firstHit.dc || 0,
-    docPercentage: firstHit.percentage_total || 0,
+    docCount: fieldCount,
+    distinctCount,
+    docPercentage,
   };
 }
 

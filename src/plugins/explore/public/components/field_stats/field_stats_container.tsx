@@ -10,7 +10,11 @@ import { FieldStatsItem, FieldDetailsMap } from './utils/field_stats_types';
 import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
-import { getFieldStatsQuery, executeFieldStatsQuery } from './field_stats_queries';
+import {
+  getTotalDocCountQuery,
+  getFieldStatsQuery,
+  executeFieldStatsQuery,
+} from './field_stats_queries';
 import {
   filterDatasetFields,
   transformFieldStatsResult,
@@ -47,6 +51,25 @@ export const FieldStatsContainer = () => {
       setIsLoading(true);
 
       try {
+        // Step 1: fetch total document count
+        const totalDocCount = await (async () => {
+          try {
+            const totalCountQuery = getTotalDocCountQuery(dataset.title);
+            const totalCountResult = await executeFieldStatsQuery(
+              services,
+              totalCountQuery,
+              dataset.id || '',
+              dataset.type
+            );
+            const totalHits = totalCountResult?.hits?.hits || [];
+            const totalFirstHit = totalHits[0]?._source || {};
+            return totalFirstHit.total_count || 0;
+          } catch (error) {
+            return undefined;
+          }
+        })();
+
+        // Step 2: fetch field stats per row
         const results = await Promise.allSettled(
           fields.map(async (field) => {
             try {
@@ -60,7 +83,7 @@ export const FieldStatsContainer = () => {
 
               return {
                 name: field.name,
-                stats: transformFieldStatsResult(field.name, field.type, result),
+                stats: transformFieldStatsResult(field.name, field.type, result, totalDocCount),
               };
             } catch (error) {
               const errorMessage = error?.body?.message || String(error);
@@ -71,7 +94,7 @@ export const FieldStatsContainer = () => {
                   type: field.type,
                   docCount: 0,
                   distinctCount: 0,
-                  docPercentage: 0,
+                  docPercentage: undefined,
                   errorMessage,
                 },
               };

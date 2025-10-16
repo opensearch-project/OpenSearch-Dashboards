@@ -11,7 +11,7 @@ export interface FieldStatsItem {
   type: string;
   docCount: number;
   distinctCount: number;
-  docPercentage: number;
+  docPercentage?: number;
   errorMessage?: string;
 }
 

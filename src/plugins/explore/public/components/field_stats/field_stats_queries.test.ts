@@ -3,14 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getFieldStatsQuery, executeFieldStatsQuery } from './field_stats_queries';
+import {
+  getTotalDocCountQuery,
+  getFieldStatsQuery,
+  executeFieldStatsQuery,
+} from './field_stats_queries';
 import { createMockServices } from './utils/field_stats.stubs';
 
 describe('field_stats_queries', () => {
-  describe('getFieldStatsQuery', () => {
+  describe('getTotalDocCountQuery', () => {
     it('generates correct query string', () => {
+      const result = getTotalDocCountQuery('my-index');
+      expect(result).toBe('source = my-index | stats count() as total_count');
+    });
+
+    it('handles index patterns', () => {
+      const result = getTotalDocCountQuery('logs-*');
+      expect(result).toContain('source = logs-*');
+      expect(result).toContain('total_count');
+    });
+  });
+
+  describe('getFieldStatsQuery', () => {
+    it('generates correct query string with where clause', () => {
       const result = getFieldStatsQuery('my-index', 'status');
       expect(result).toContain('source = my-index');
+      expect(result).toContain('where isnotnull(`status`)');
+      expect(result).toContain('field_count');
+      expect(result).toContain('distinct_count');
     });
 
     it('handles special characters in field names', () => {

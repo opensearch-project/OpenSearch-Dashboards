@@ -13,7 +13,11 @@ import {
   transformFieldStatsResult,
   createRowExpandHandler,
 } from './utils/field_stats_utils';
-import { getFieldStatsQuery, executeFieldStatsQuery } from './field_stats_queries';
+import {
+  getTotalDocCountQuery,
+  getFieldStatsQuery,
+  executeFieldStatsQuery,
+} from './field_stats_queries';
 import { FieldStatsTable } from './field_stats_table';
 import {
   createMockServices,
@@ -42,6 +46,9 @@ const mockTransformFieldStatsResult = transformFieldStatsResult as jest.MockedFu
 const mockCreateRowExpandHandler = createRowExpandHandler as jest.MockedFunction<
   typeof createRowExpandHandler
 >;
+const mockGetTotalDocCountQuery = getTotalDocCountQuery as jest.MockedFunction<
+  typeof getTotalDocCountQuery
+>;
 const mockGetFieldStatsQuery = getFieldStatsQuery as jest.MockedFunction<typeof getFieldStatsQuery>;
 const mockExecuteFieldStatsQuery = executeFieldStatsQuery as jest.MockedFunction<
   typeof executeFieldStatsQuery
@@ -69,20 +76,41 @@ describe('FieldStatsContainer', () => {
 
     mockFilterDatasetFields.mockReturnValue(mockFields);
     mockTransformFieldStatsResult.mockReturnValue(mockFieldStatsItem);
-    mockGetFieldStatsQuery.mockReturnValue('source = test-index | stats count()');
-    mockExecuteFieldStatsQuery.mockResolvedValue({
-      hits: {
-        hits: [
-          {
-            _source: {
-              count: 100,
-              dc: 50,
-              percentage_total: 75,
-            },
+    mockGetTotalDocCountQuery.mockReturnValue('source = test-index | stats count() as total_count');
+    mockGetFieldStatsQuery.mockReturnValue(
+      'source = test-index | where isnotnull(`field`) | stats count() as field_count, distinct_count(`field`) as distinct_count'
+    );
+
+    mockExecuteFieldStatsQuery.mockImplementation((services, query) => {
+      if (query.includes('total_count')) {
+        return Promise.resolve({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  total_count: 1000,
+                },
+              },
+            ],
           },
-        ],
-      },
+        });
+      } else {
+        // Field stats query
+        return Promise.resolve({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  field_count: 100,
+                  distinct_count: 50,
+                },
+              },
+            ],
+          },
+        });
+      }
     });
+
     mockCreateRowExpandHandler.mockReturnValue(jest.fn());
   });
 
@@ -133,17 +161,17 @@ describe('FieldStatsContainer', () => {
     render(<FieldStatsContainer />);
 
     await waitFor(() => {
+      expect(mockGetTotalDocCountQuery).toHaveBeenCalledWith('test-index');
+    });
+
+    await waitFor(() => {
       expect(mockGetFieldStatsQuery).toHaveBeenCalledWith('test-index', 'field1');
       expect(mockGetFieldStatsQuery).toHaveBeenCalledWith('test-index', 'field2');
     });
 
     await waitFor(() => {
-      expect(mockExecuteFieldStatsQuery).toHaveBeenCalledWith(
-        mockServices,
-        'source = test-index | stats count()',
-        'test-dataset-id',
-        'INDEX_PATTERN'
-      );
+      expect(mockExecuteFieldStatsQuery).toHaveBeenCalled();
+      expect(mockExecuteFieldStatsQuery.mock.calls[0][1]).toContain('total_count');
     });
   });
 
@@ -231,5 +259,50 @@ describe('FieldStatsContainer', () => {
 
     expect(mockGetFieldStatsQuery).not.toHaveBeenCalled();
     expect(mockExecuteFieldStatsQuery).not.toHaveBeenCalled();
+  });
+
+  it('handles failed total count query gracefully', async () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: mockDataset,
+    } as any);
+
+    mockExecuteFieldStatsQuery.mockImplementation((services, query) => {
+      if (query.includes('total_count')) {
+        return Promise.reject(new Error('Total count query failed'));
+      } else {
+        return Promise.resolve({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  field_count: 100,
+                  distinct_count: 50,
+                },
+              },
+            ],
+          },
+        });
+      }
+    });
+
+    render(<FieldStatsContainer />);
+
+    await waitFor(() => {
+      expect(mockGetTotalDocCountQuery).toHaveBeenCalled();
+    });
+
+    await waitFor(() => {
+      expect(mockGetFieldStatsQuery).toHaveBeenCalledWith('test-index', 'field1');
+      expect(mockGetFieldStatsQuery).toHaveBeenCalledWith('test-index', 'field2');
+    });
+
+    await waitFor(() => {
+      expect(mockTransformFieldStatsResult).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(String),
+        expect.any(Object),
+        undefined
+      );
+    });
   });
 });
