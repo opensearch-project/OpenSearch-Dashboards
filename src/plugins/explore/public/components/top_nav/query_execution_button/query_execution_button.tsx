@@ -17,6 +17,7 @@ import {
 import {
   selectDateRange,
   selectIsQueryEditorDirty,
+  selectShouldShowCancelButton,
 } from '../../../application/utils/state_management/selectors';
 import { isTimeRangeInvalid } from '../utils/validate_time_range';
 
@@ -46,33 +47,54 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
   const timefilter = services?.data?.query?.timefilter?.timefilter;
   const isQueryEditorDirty = useSelector(selectIsQueryEditorDirty);
 
-  // Cancel button state management
+  // Get Redux state for cancel button logic
+  const reduxShouldShowCancelButton = useSelector(selectShouldShowCancelButton);
+
+  // Local state for managing button visibility with timing
   const [shouldShowCancelButton, setShouldShowCancelButton] = useState(false);
   const cancelButtonTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const minimumDisplayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Handle delayed cancel button visibility
   useEffect(() => {
-    if (isQueryRunning && showCancelButton) {
-      // Start timer to show cancel button after 100ms
+    if (reduxShouldShowCancelButton) {
+      // Clear any existing minimum display timer
+      if (minimumDisplayTimerRef.current) {
+        clearTimeout(minimumDisplayTimerRef.current);
+        minimumDisplayTimerRef.current = null;
+      }
+
+      // Start timer to show cancel button after 50ms
       cancelButtonTimerRef.current = setTimeout(() => {
         setShouldShowCancelButton(true);
-      }, 500);
+      }, 50);
     } else {
-      // Clear timer and hide button immediately when query stops
+      // Clear the show timer
       if (cancelButtonTimerRef.current) {
         clearTimeout(cancelButtonTimerRef.current);
         cancelButtonTimerRef.current = null;
       }
-      setShouldShowCancelButton(false);
+
+      // If button is currently visible, keep it visible for minimum 200ms
+      if (shouldShowCancelButton) {
+        minimumDisplayTimerRef.current = setTimeout(() => {
+          setShouldShowCancelButton(false);
+        }, 200);
+      } else {
+        setShouldShowCancelButton(false);
+      }
     }
 
-    // Cleanup timer on unmount
+    // Cleanup timers on unmount
     return () => {
       if (cancelButtonTimerRef.current) {
         clearTimeout(cancelButtonTimerRef.current);
       }
+      if (minimumDisplayTimerRef.current) {
+        clearTimeout(minimumDisplayTimerRef.current);
+      }
     };
-  }, [isQueryRunning, showCancelButton]);
+  }, [reduxShouldShowCancelButton, shouldShowCancelButton]);
 
   const determineButtonStatus = useCallback((): QueryExecutionButtonStatus => {
     if (dateRange && isTimeRangeInvalid(dateRange)) {

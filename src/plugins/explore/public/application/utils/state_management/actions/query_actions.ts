@@ -52,7 +52,7 @@ const activeQueryAbortControllers = new Map<string, AbortController>();
 // Helper function to abort all active queries
 // Backend cancellation is handled automatically via AbortSignal in search strategies
 export const abortAllActiveQueries = () => {
-  activeQueryAbortControllers.forEach((controller, cacheKey) => {
+  activeQueryAbortControllers.forEach((controller) => {
     // This triggers the abort signal, which in turn:
     // Cancels frontend HTTP requests immediately
     controller.abort();
@@ -142,7 +142,7 @@ const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
     try {
       const result = getFieldValueCounts({
         hits,
-        field,
+        field: field as any,
         dataSet: dataset, // DataView extends IndexPattern
         count: 5,
         grouped: false,
@@ -384,12 +384,8 @@ const executeQueryBase = async (
       existingController.abort();
     }
 
-    // Abort ALL other active queries when starting a new one (auto-cancel on re-fire)
-    activeQueryAbortControllers.forEach((controller, key) => {
-      if (key !== cacheKey) {
-        controller.abort();
-      }
-    });
+    // Don't auto-abort other queries - let them complete unless explicitly cancelled
+    // This prevents data loading issues when multiple queries are running concurrently
 
     // Create abort controller for this specific query
     const abortController = new AbortController();

@@ -80,29 +80,47 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
   const [shouldShowCancelButton, setShouldShowCancelButton] = useState(false);
   const cancelButtonTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const minimumDisplayTimerRef = useRef<NodeJS.Timeout | null>(null);
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName, data, keyboardShortcut } = opensearchDashboards.services;
 
   // Handle delayed cancel button visibility
   useEffect(() => {
     if (props.isQueryRunning && props.showCancelButton) {
-      // Start timer to show cancel button after 500ms
+      // Clear any existing minimum display timer
+      if (minimumDisplayTimerRef.current) {
+        clearTimeout(minimumDisplayTimerRef.current);
+        minimumDisplayTimerRef.current = null;
+      }
+
+      // Start timer to show cancel button after 50ms
       cancelButtonTimerRef.current = setTimeout(() => {
         setShouldShowCancelButton(true);
-      }, 500);
+      }, 50);
     } else {
-      // Clear timer and hide button immediately when query stops
+      // Clear the show timer
       if (cancelButtonTimerRef.current) {
         clearTimeout(cancelButtonTimerRef.current);
         cancelButtonTimerRef.current = null;
       }
-      setShouldShowCancelButton(false);
+
+      // If button is currently visible, keep it visible for minimum 200ms
+      if (shouldShowCancelButton) {
+        minimumDisplayTimerRef.current = setTimeout(() => {
+          setShouldShowCancelButton(false);
+        }, 200);
+      } else {
+        setShouldShowCancelButton(false);
+      }
     }
 
-    // Cleanup timer on unmount
+    // Cleanup timers on unmount
     return () => {
       if (cancelButtonTimerRef.current) {
         clearTimeout(cancelButtonTimerRef.current);
+      }
+      if (minimumDisplayTimerRef.current) {
+        clearTimeout(minimumDisplayTimerRef.current);
       }
     };
   }, [props.isQueryRunning, props.showCancelButton]);
