@@ -65,6 +65,10 @@ export const createBarGaugeConfig = (): VisualizationType<'bar_gauge'> => ({
         [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
         [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
       },
+      {
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
+      },
     ],
   },
 });

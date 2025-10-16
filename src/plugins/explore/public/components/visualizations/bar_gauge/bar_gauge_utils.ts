@@ -4,7 +4,7 @@
  */
 
 import { darkMode } from '@osd/ui-shared-deps/theme';
-import { AxisColumnMappings, Threshold } from '../types';
+import { AxisColumnMappings, Threshold, VisFieldType } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 
 export const getBarOrientation = (
@@ -13,21 +13,28 @@ export const getBarOrientation = (
 ) => {
   const xAxis = axisColumnMappings?.x;
   const yAxis = axisColumnMappings?.y;
+  const isHorizontal = styles?.exclusive.orientation === 'horizontal';
+  const isXNumerical = xAxis?.schema === VisFieldType.Numerical;
 
-  if (styles?.exclusive.orientation === 'horizontal') {
+  const axisStyle = { axis: { tickOpacity: 0, grid: false, title: null, labelAngle: 0 } };
+  const nullStyle = { axis: null };
+
+  const shouldSwapAxes = (isXNumerical && isHorizontal) || (!isXNumerical && isHorizontal);
+
+  if (shouldSwapAxes) {
     return {
       xAxis: yAxis,
-      xAxisStyle: { axis: null },
+      xAxisStyle: isXNumerical ? axisStyle : nullStyle,
       yAxis: xAxis,
-      yAxisStyle: { axis: { tickOpacity: 0, grid: false, title: null, labelAngle: 0 } },
+      yAxisStyle: isXNumerical ? nullStyle : axisStyle,
     };
   }
 
   return {
     xAxis,
-    xAxisStyle: { axis: { tickOpacity: 0, grid: false, title: null, labelAngle: 0 } },
+    xAxisStyle: isXNumerical ? nullStyle : axisStyle,
     yAxis,
-    yAxisStyle: { axis: null },
+    yAxisStyle: isXNumerical ? axisStyle : nullStyle,
   };
 };
 
@@ -51,9 +58,13 @@ export const getDisplayMode = (
   orientationMode: string,
   displayMode: string,
   threshold: Threshold,
-  nextColor: string
+  nextColor: string,
+  isXaxisNumerical: boolean
 ) => {
-  if (orientationMode === 'horizontal') {
+  if (
+    (!isXaxisNumerical && orientationMode === 'horizontal') ||
+    (isXaxisNumerical && orientationMode !== 'horizontal')
+  ) {
     if (displayMode === 'gradient')
       return {
         color: {
@@ -92,11 +103,6 @@ export const getDisplayMode = (
       },
     };
   if (displayMode === 'stack') return { color: threshold.color };
-};
-
-export const getUnfilledArea = () => {
-  if (darkMode) return '#27252C';
-  return '#f1f1f1ff';
 };
 
 export const darkenColor = (hex: string, degree = 1) => {

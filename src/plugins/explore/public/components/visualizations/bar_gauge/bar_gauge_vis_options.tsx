@@ -17,6 +17,7 @@ import { BarGaugeExclusiveVisOptions } from './bar_gauge_exclusive_vis_options';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
+import { AxisRole, VisFieldType } from '../types';
 
 export type BarGaugeVisStyleControlsProps = StyleControlsProps<BarGaugeChartStyle>;
 
@@ -39,6 +40,8 @@ export const BarGaugeVisStyleControls: React.FC<BarGaugeVisStyleControlsProps> =
   };
 
   const hasMappingSelected = !isEmpty(axisColumnMappings);
+  const isXaxisNumerical = axisColumnMappings[AxisRole.X]?.schema === VisFieldType.Numerical;
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -96,6 +99,7 @@ export const BarGaugeVisStyleControls: React.FC<BarGaugeVisStyleControlsProps> =
             <BarGaugeExclusiveVisOptions
               styles={styleOptions.exclusive}
               onChange={(options) => updateStyleOption('exclusive', options)}
+              isXaxisNumerical={isXaxisNumerical}
             />
           </EuiFlexItem>
 
