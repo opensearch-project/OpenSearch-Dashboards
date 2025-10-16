@@ -62,7 +62,12 @@ export const applyAxisStyling = (
   }
 
   if (axis?.schema === VisFieldType.Date) {
-    fullAxisConfig.format = { seconds: '%I:%M:%S', milliseconds: '%I:%M:%S.%L' };
+    fullAxisConfig.format = {
+      hours: '%H:%M',
+      minutes: '%H:%M',
+      seconds: '%H:%M:%S',
+      milliseconds: '%H:%M:%S.%L',
+    };
   }
 
   return fullAxisConfig;
@@ -328,3 +333,67 @@ export const mergeStyles = (dest: ChartStyles, source: StyleOptions | undefined)
 
   return mergeWith(copiedDest, source, customMerge);
 };
+
+export function buildTimeRangeLayer(
+  mainLayerEncoding?: any,
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string },
+  switchAxes: boolean = false
+) {
+  if (!axisColumnMappings || !timeRange?.from || !timeRange?.to) return null;
+
+  const timeAxisEntry = Object.entries(axisColumnMappings).find(
+    ([, col]) => getSchemaByAxis(col) === 'temporal'
+  );
+
+  if (!timeAxisEntry) return null;
+
+  const [axisRole] = timeAxisEntry as [AxisRole, VisColumn];
+  const targetRole = axisRole === AxisRole.X ? (switchAxes ? 'y' : 'x') : switchAxes ? 'x' : 'y';
+
+  // Check if the time field has timezone information or is UTC format
+  const hasTimezoneInfo = (timeString: string) => {
+    return (
+      timeString.includes('T') &&
+      (timeString.endsWith('Z') || timeString.includes('+') || timeString.includes('-'))
+    );
+  };
+
+  // Smart time processing: preserve UTC fields as strings, convert timezone-aware fields to UTC objects
+  const processTimeValue = (iso: string) => {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso; // fallback: let Vega-Lite parse string
+
+    // For UTC fields (format: "2025-09-25 18:19:02.49"), keep as string to let Vega-Lite handle naturally
+    if (!hasTimezoneInfo(iso)) {
+      return iso;
+    }
+
+    return {
+      year: d.getUTCFullYear(),
+      month: d.getUTCMonth() + 1,
+      date: d.getUTCDate(),
+      hours: d.getUTCHours(),
+      minutes: d.getUTCMinutes(),
+      seconds: d.getUTCSeconds(),
+      milliseconds: d.getUTCMilliseconds(),
+      utc: true,
+    };
+  };
+
+  const scaleConfig = {
+    domain: [processTimeValue(timeRange.from), processTimeValue(timeRange.to)],
+  };
+
+  if (mainLayerEncoding && mainLayerEncoding[targetRole]) {
+    mainLayerEncoding[targetRole].scale = {
+      ...(mainLayerEncoding[targetRole].scale || {}),
+      ...scaleConfig,
+    };
+    return null;
+  }
+
+  return {
+    scale: scaleConfig,
+  };
+}

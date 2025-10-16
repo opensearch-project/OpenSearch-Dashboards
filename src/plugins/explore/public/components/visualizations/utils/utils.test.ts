@@ -13,6 +13,7 @@ import {
   inferTimeUnitFromTimestamps,
   getTooltipFormat,
   mergeStyles,
+  buildTimeRangeLayer,
 } from './utils';
 import { AxisRole, Positions, ColorSchemas, VisFieldType, StandardAxes } from '../types';
 import { ChartStyles, StyleOptions } from './use_visualization_types';
@@ -418,155 +419,248 @@ describe('mergeStyles', () => {
     });
   });
 
-  it('should replace arrays instead of merging them', () => {
-    const dest = ({
-      colors: ['red', 'green', 'blue'],
-    } as unknown) as ChartStyles;
+  describe('buildTimeRangeLayer', () => {
+    const baseAxis = {
+      id: 1,
+      name: 'Test Axis',
+      column: 'test',
+      validValuesCount: 10,
+      uniqueValuesCount: 10,
+    };
 
-    const source = ({
-      colors: ['yellow', 'purple'],
-    } as unknown) as StyleOptions;
+    const timeRange = { from: '2023-01-01', to: '2023-12-31' };
 
-    const result = mergeStyles(dest, source);
-
-    // Arrays should be replaced, not merged
-    expect(result).toEqual({
-      colors: ['yellow', 'purple'],
+    it('returns null when axisColumnMappings is undefined', () => {
+      expect(buildTimeRangeLayer(undefined, undefined, timeRange)).toBeNull();
     });
-  });
 
-  it('should handle complex nested structures', () => {
-    const dest = ({
-      title: 'Chart',
-      axes: {
-        x: {
-          title: 'X Axis',
-          labels: {
-            show: true,
-            rotate: 0,
-          },
-        },
-        y: {
-          title: 'Y Axis',
-          labels: {
-            show: true,
-            rotate: 0,
-          },
-        },
-      },
-      legend: {
-        show: true,
-        position: 'right',
-      },
-    } as unknown) as ChartStyles;
-
-    const source = ({
-      title: 'Updated Chart',
-      axes: {
-        x: {
-          labels: {
-            rotate: 45,
-          },
-        },
-        y: {
-          title: 'Updated Y Axis',
-        },
-      },
-      legend: {
-        position: 'bottom',
-      },
-    } as unknown) as StyleOptions;
-
-    const result = mergeStyles(dest, source);
-
-    expect(result).toEqual({
-      title: 'Updated Chart',
-      axes: {
-        x: {
-          title: 'X Axis',
-          labels: {
-            show: true,
-            rotate: 45,
-          },
-        },
-        y: {
-          title: 'Updated Y Axis',
-          labels: {
-            show: true,
-            rotate: 0,
-          },
-        },
-      },
-      legend: {
-        show: true,
-        position: 'bottom',
-      },
+    it('returns null when timeRange is undefined', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Date },
+      };
+      expect(buildTimeRangeLayer(undefined, axisColumnMappings, undefined)).toBeNull();
     });
-  });
 
-  it('should handle null values', () => {
-    const dest = ({
-      title: 'Chart',
-      subtitle: 'Subtitle',
-    } as unknown) as ChartStyles;
-
-    const source = ({
-      title: null,
-      description: 'Description',
-    } as unknown) as StyleOptions;
-
-    const result = mergeStyles(dest, source);
-
-    expect(result).toEqual({
-      title: null,
-      subtitle: 'Subtitle',
-      description: 'Description',
+    it('returns null when no temporal axis is found', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Numerical },
+        y: { ...baseAxis, schema: VisFieldType.Categorical },
+      };
+      expect(buildTimeRangeLayer(undefined, axisColumnMappings, timeRange)).toBeNull();
     });
-  });
 
-  it('should handle empty objects', () => {
-    const dest = ({
-      title: 'Chart',
-      config: {
-        showGrid: true,
-        showLabels: true,
-      },
-    } as unknown) as ChartStyles;
-
-    const source = ({
-      config: {},
-    } as unknown) as StyleOptions;
-
-    const result = mergeStyles(dest, source);
-
-    // Empty object should not override properties
-    expect(result).toEqual({
-      title: 'Chart',
-      config: {
-        showGrid: true,
-        showLabels: true,
-      },
+    it('returns scale config when no mainLayerEncoding is provided', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Date, column: 'date_x' },
+        y: { ...baseAxis, schema: VisFieldType.Numerical },
+      };
+      const result = buildTimeRangeLayer(undefined, axisColumnMappings, timeRange, false);
+      expect(result).toEqual({
+        scale: {
+          domain: ['2023-01-01', '2023-12-31'],
+        },
+      });
     });
-  });
 
-  it('should not override with undefined values in source', () => {
-    const dest = ({
-      title: 'Chart',
-      subtitle: 'Subtitle',
-    } as unknown) as ChartStyles;
+    it('should replace arrays instead of merging them', () => {
+      const dest = ({
+        colors: ['red', 'green', 'blue'],
+      } as unknown) as ChartStyles;
 
-    const source = ({
-      title: undefined,
-      description: 'Description',
-    } as unknown) as StyleOptions;
+      const source = ({
+        colors: ['yellow', 'purple'],
+      } as unknown) as StyleOptions;
 
-    const result = mergeStyles(dest, source);
+      const result = mergeStyles(dest, source);
 
-    // Undefined values should not override
-    expect(result).toEqual({
-      title: 'Chart',
-      subtitle: 'Subtitle',
-      description: 'Description',
+      // Arrays should be replaced, not merged
+      expect(result).toEqual({
+        colors: ['yellow', 'purple'],
+      });
+    });
+
+    it('should handle complex nested structures', () => {
+      const dest = ({
+        title: 'Chart',
+        axes: {
+          x: {
+            title: 'X Axis',
+            labels: {
+              show: true,
+              rotate: 0,
+            },
+          },
+          y: {
+            title: 'Y Axis',
+            labels: {
+              show: true,
+              rotate: 0,
+            },
+          },
+        },
+        legend: {
+          show: true,
+          position: 'right',
+        },
+      } as unknown) as ChartStyles;
+
+      const source = ({
+        title: 'Updated Chart',
+        axes: {
+          x: {
+            labels: {
+              rotate: 45,
+            },
+          },
+          y: {
+            title: 'Updated Y Axis',
+          },
+        },
+        legend: {
+          position: 'bottom',
+        },
+      } as unknown) as StyleOptions;
+
+      const result = mergeStyles(dest, source);
+
+      expect(result).toEqual({
+        title: 'Updated Chart',
+        axes: {
+          x: {
+            title: 'X Axis',
+            labels: {
+              show: true,
+              rotate: 45,
+            },
+          },
+          y: {
+            title: 'Updated Y Axis',
+            labels: {
+              show: true,
+              rotate: 0,
+            },
+          },
+        },
+        legend: {
+          show: true,
+          position: 'bottom',
+        },
+      });
+    });
+    it('applies scale to mainLayerEncoding when provided', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Date, column: 'date_x' },
+        y: { ...baseAxis, schema: VisFieldType.Numerical },
+      };
+      const mainLayerEncoding: any = {
+        x: { field: 'date_x', type: 'temporal' },
+        y: { field: 'value', type: 'quantitative' },
+      };
+      const result = buildTimeRangeLayer(mainLayerEncoding, axisColumnMappings, timeRange, false);
+
+      expect(result).toBeNull(); // Function returns null when modifying encoding directly
+      expect(mainLayerEncoding.x.scale).toEqual({
+        domain: ['2023-01-01', '2023-12-31'],
+      });
+    });
+
+    it('should handle null values', () => {
+      const dest = ({
+        title: 'Chart',
+        subtitle: 'Subtitle',
+      } as unknown) as ChartStyles;
+
+      const source = ({
+        title: null,
+        description: 'Description',
+      } as unknown) as StyleOptions;
+
+      const result = mergeStyles(dest, source);
+
+      expect(result).toEqual({
+        title: null,
+        subtitle: 'Subtitle',
+        description: 'Description',
+      });
+    });
+
+    it('should handle empty objects', () => {
+      const dest = ({
+        title: 'Chart',
+        config: {
+          showGrid: true,
+          showLabels: true,
+        },
+      } as unknown) as ChartStyles;
+
+      const source = ({
+        config: {},
+      } as unknown) as StyleOptions;
+
+      const result = mergeStyles(dest, source);
+
+      // Empty object should not override properties
+      expect(result).toEqual({
+        title: 'Chart',
+        config: {
+          showGrid: true,
+          showLabels: true,
+        },
+      });
+    });
+    it('applies scale to y axis when temporal axis is on Y', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Numerical },
+        y: { ...baseAxis, schema: VisFieldType.Date, column: 'date_y' },
+      };
+      const mainLayerEncoding: any = {
+        x: { field: 'value', type: 'quantitative' },
+        y: { field: 'date_y', type: 'temporal' },
+      };
+      const result = buildTimeRangeLayer(mainLayerEncoding, axisColumnMappings, timeRange, false);
+
+      expect(result).toBeNull();
+      expect(mainLayerEncoding.y.scale).toEqual({
+        domain: ['2023-01-01', '2023-12-31'],
+      });
+    });
+
+    it('should not override with undefined values in source', () => {
+      const dest = ({
+        title: 'Chart',
+        subtitle: 'Subtitle',
+      } as unknown) as ChartStyles;
+
+      const source = ({
+        title: undefined,
+        description: 'Description',
+      } as unknown) as StyleOptions;
+
+      const result = mergeStyles(dest, source);
+
+      // Undefined values should not override
+      expect(result).toEqual({
+        title: 'Chart',
+        subtitle: 'Subtitle',
+        description: 'Description',
+      });
+    });
+    it('applies scale with switchAxes correctly', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Numerical },
+        y: { ...baseAxis, schema: VisFieldType.Date, column: 'date_y' },
+      };
+      const mainLayerEncoding: any = {
+        x: { field: 'value', type: 'quantitative' },
+        y: { field: 'date_y', type: 'temporal' },
+      };
+      const result = buildTimeRangeLayer(mainLayerEncoding, axisColumnMappings, timeRange, true);
+
+      expect(result).toBeNull();
+      // When switchAxes is true, Y temporal axis should apply scale to x encoding
+      expect(mainLayerEncoding.x.scale).toEqual({
+        domain: ['2023-01-01', '2023-12-31'],
+      });
     });
   });
 });

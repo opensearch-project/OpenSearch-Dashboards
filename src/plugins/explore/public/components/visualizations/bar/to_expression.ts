@@ -14,7 +14,12 @@ import {
 } from '../types';
 import { BarChartStyle, defaultBarChartStyles } from './bar_vis_config';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
-import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
+import {
+  applyAxisStyling,
+  getSwappedAxisRole,
+  getSchemaByAxis,
+  buildTimeRangeLayer,
+} from '../utils/utils';
 
 import {
   inferTimeIntervals,
@@ -143,7 +148,8 @@ export const createTimeBarChart = (
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styleOptions: BarChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length === 0 || dateColumns.length === 0) {
@@ -220,6 +226,11 @@ export const createTimeBarChart = (
     layers.push(...thresholdLayer.layer);
   }
 
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange) {
+    buildTimeRangeLayer(mainLayer.encoding, axisColumnMappings, timeRange, styles.switchAxes);
+  }
+
   return {
     $schema: VEGASCHEMA,
     params: [...(timeAxis ? [createTimeRangeUpdater()] : [])],
@@ -246,7 +257,8 @@ export const createGroupedTimeBarChart = (
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styleOptions: BarChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   // Check if we have the required columns
   if (
@@ -341,6 +353,11 @@ export const createGroupedTimeBarChart = (
     layer.push(...thresholdLayer.layer);
   }
 
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange) {
+    buildTimeRangeLayer(barLayer.encoding, axisColumnMappings, timeRange, styles.switchAxes);
+  }
+
   const spec: any = {
     $schema: VEGASCHEMA,
     params: [...(timeAxis ? [createTimeRangeUpdater()] : [])],
@@ -369,7 +386,8 @@ export const createFacetedTimeBarChart = (
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
   styleOptions: BarChartStyle,
-  axisColumnMappings?: AxisColumnMappings
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length === 0 || categoricalColumns.length < 2 || dateColumns.length === 0) {
@@ -416,6 +434,47 @@ export const createFacetedTimeBarChart = (
 
   const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
 
+  // Create the main layer encoding first
+  const mainLayerEncoding = {
+    x: {
+      ...buildEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
+    },
+    y: {
+      ...buildEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
+    },
+    color: {
+      field: category1Field,
+      type: getSchemaByAxis(colorMapping),
+      legend: styles.addLegend
+        ? {
+            title: category1Name,
+            orient: styles.legendPosition?.toLowerCase() || 'right',
+            symbolType: styles.legendShape ?? 'circle',
+          }
+        : null,
+    },
+    ...(styles.tooltipOptions?.mode !== 'hidden' && {
+      tooltip: [
+        {
+          ...buildTooltipEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
+        },
+        {
+          ...buildTooltipEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
+        },
+        { field: category1Field, type: 'nominal', title: category1Name },
+      ],
+    }),
+    fillOpacity: {
+      condition: { param: 'highlight', value: 1, empty: false },
+      value: DEFAULT_OPACITY,
+    },
+  };
+
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange && timeRange) {
+    buildTimeRangeLayer(mainLayerEncoding, axisColumnMappings, timeRange, styles.switchAxes);
+  }
+
   return {
     $schema: VEGASCHEMA,
     params: [...(timeAxis ? [createTimeRangeUpdater()] : [])],
@@ -437,50 +496,7 @@ export const createFacetedTimeBarChart = (
             createTimeRangeBrush({ timeAxis: styles.switchAxes ? 'y' : 'x' }),
           ],
           mark: barMark,
-          encoding: {
-            x: {
-              ...buildEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
-            },
-            y: {
-              ...buildEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
-            },
-            color: {
-              field: category1Field,
-              type: getSchemaByAxis(colorMapping),
-              legend: styles.addLegend
-                ? {
-                    title: category1Name,
-                    orient: styles.legendPosition?.toLowerCase() || 'right',
-                    symbolType: styles.legendShape ?? 'circle',
-                  }
-                : null,
-            },
-            ...(styles.tooltipOptions?.mode !== 'hidden' && {
-              tooltip: [
-                {
-                  ...buildTooltipEncoding(
-                    xAxis,
-                    xAxisStyle,
-                    interval,
-                    styles?.bucket?.aggregationType
-                  ),
-                },
-                {
-                  ...buildTooltipEncoding(
-                    yAxis,
-                    yAxisStyle,
-                    interval,
-                    styles?.bucket?.aggregationType
-                  ),
-                },
-                { field: category1Field, type: 'nominal', title: category1Name },
-              ],
-            }),
-            fillOpacity: {
-              condition: { param: 'highlight', value: 1, empty: false },
-              value: DEFAULT_OPACITY,
-            },
-          },
+          encoding: mainLayerEncoding,
         },
 
         // Add threshold layer to each facet if enabled
