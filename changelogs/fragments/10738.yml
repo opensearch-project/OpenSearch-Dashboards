@@ -1,0 +1,2 @@
+feat:
+- Made tab persistent across different span selection ([#10738](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10738))
