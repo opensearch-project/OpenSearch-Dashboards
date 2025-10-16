@@ -31,8 +31,7 @@ export const createOverallStatusMiddleware = (): Middleware => {
       const incomingStatus = action.payload.status;
 
       // If incoming status is ERROR, set it as overall status
-      if (incomingStatus.status === QueryExecutionStatus.ERROR)
-      {
+      if (incomingStatus.status === QueryExecutionStatus.ERROR) {
         store.dispatch(setOverallQueryStatus(incomingStatus));
         store.dispatch(setHasUserInitiatedQuery(false));
         return result;
