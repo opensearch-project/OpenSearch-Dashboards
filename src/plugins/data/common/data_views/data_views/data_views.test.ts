@@ -10,6 +10,7 @@ import { stubbedSavedObjectIndexPattern } from '../../../../../fixtures/stubbed_
 import { DataViewUiSettingsCommon, DataViewSavedObjectsClientCommon, SavedObject } from '../types';
 import { UI_SETTINGS } from '../../constants';
 import { IndexPatternsService } from '../../index_patterns';
+import { DuplicateDataViewError } from '../errors/duplicate_data_view';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
   getFieldsForWildcard: jest.fn().mockImplementation(() => {
@@ -249,5 +250,107 @@ describe('DataViews', () => {
       Promise.resolve(key === UI_SETTINGS.DATA_WITH_LONG_NUMERALS ? true : undefined)
     );
     expect(await dataViews.isLongNumeralsSupported()).toBe(true);
+  });
+
+  describe('createSavedObject error handling', () => {
+    test('throws DuplicateDataViewError on 409 conflict with statusCode', async () => {
+      const title = 'test-pattern-*';
+      // Mock findByTitle to return nothing (no dupe check)
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      // Mock create to throw 409 error
+      savedObjectsClient.create = jest.fn().mockRejectedValue({
+        statusCode: 409,
+        message: 'document already exists',
+      });
+
+      const dataView = await dataViews.create({ title }, true);
+
+      await expect(dataViews.createSavedObject(dataView)).rejects.toThrow(DuplicateDataViewError);
+      await expect(dataViews.createSavedObject(dataView)).rejects.toThrow(
+        `Duplicate data view: ${title}`
+      );
+    });
+
+    test('throws DuplicateDataViewError on 409 conflict with status', async () => {
+      const title = 'test-pattern-*';
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      savedObjectsClient.create = jest.fn().mockRejectedValue({
+        status: 409,
+        message: 'version conflict',
+      });
+
+      const dataView = await dataViews.create({ title }, true);
+
+      await expect(dataViews.createSavedObject(dataView)).rejects.toThrow(DuplicateDataViewError);
+    });
+
+    test('throws DuplicateDataViewError on 409 conflict with body.statusCode', async () => {
+      const title = 'test-pattern-*';
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      savedObjectsClient.create = jest.fn().mockRejectedValue({
+        body: {
+          statusCode: 409,
+          message: 'document already exists',
+        },
+      });
+
+      const dataView = await dataViews.create({ title }, true);
+
+      await expect(dataViews.createSavedObject(dataView)).rejects.toThrow(DuplicateDataViewError);
+    });
+
+    test('throws DuplicateDataViewError on 409 conflict with body.message', async () => {
+      const title = 'test-pattern-*';
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      savedObjectsClient.create = jest.fn().mockRejectedValue({
+        statusCode: 409,
+        body: {
+          message: 'version conflict, required seqNo',
+        },
+      });
+
+      const dataView = await dataViews.create({ title }, true);
+
+      await expect(dataViews.createSavedObject(dataView)).rejects.toThrow(DuplicateDataViewError);
+    });
+
+    test('re-throws other errors without wrapping', async () => {
+      const title = 'test-pattern-*';
+      const originalError = new Error('Network error');
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      savedObjectsClient.create = jest.fn().mockRejectedValue(originalError);
+
+      const dataView = await dataViews.create({ title }, true);
+
+      await expect(dataViews.createSavedObject(dataView)).rejects.toThrow('Network error');
+      await expect(dataViews.createSavedObject(dataView)).rejects.not.toThrow(
+        DuplicateDataViewError
+      );
+    });
+
+    test('re-throws 409 errors that are not duplicate-related', async () => {
+      const title = 'test-pattern-*';
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      const error409 = { statusCode: 409, message: 'some other conflict' };
+      savedObjectsClient.create = jest.fn().mockRejectedValue(error409);
+
+      const dataView = await dataViews.create({ title }, true);
+
+      // Should throw the original error, not a DuplicateDataViewError
+      await expect(dataViews.createSavedObject(dataView)).rejects.toEqual(error409);
+    });
+
+    test('successfully creates saved object when no conflict', async () => {
+      const title = 'test-pattern-*';
+      const mockResponse = { id: 'test-id' };
+      savedObjectsClient.find = jest.fn().mockResolvedValue([]);
+      savedObjectsClient.create = jest.fn().mockResolvedValue(mockResponse);
+
+      const dataView = await dataViews.create({ title }, true);
+      const result = await dataViews.createSavedObject(dataView);
+
+      expect(result).toBe(dataView);
+      expect(result.id).toBe('test-id');
+    });
   });
 });

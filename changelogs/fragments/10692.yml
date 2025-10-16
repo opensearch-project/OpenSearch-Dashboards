@@ -1,0 +1,2 @@
+fix:
+- Restrict patterns tab to default datasets ([#10692](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10692))

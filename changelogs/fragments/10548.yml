@@ -1,2 +1,0 @@
-refactor:
-- Add a flag to config discover vis theme from localStorage for development ([#10548](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10548))

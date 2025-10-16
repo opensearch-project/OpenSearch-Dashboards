@@ -9,15 +9,12 @@ import { renderHook } from '@testing-library/react-hooks';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import { usePPLExecuteQueryAction } from './ppl_execute_query_action';
-import { useAssistantAction } from '../../../../../context_provider/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { loadQueryActionCreator } from '../../../application/utils/state_management/actions/query_editor/load_query';
 import { useDispatch } from 'react-redux';
 
 // Mock dependencies
-jest.mock('../../../../../context_provider/public', () => ({
-  useAssistantAction: jest.fn(),
-}));
+const mockUseAssistantAction = jest.fn();
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
@@ -36,22 +33,25 @@ describe('usePPLExecuteQueryAction', () => {
   let mockSetEditorTextWithQuery: jest.Mock;
   let mockServices: any;
   let store: any;
-  let mockUseAssistantAction: jest.Mock;
   let mockUseOpenSearchDashboards: jest.Mock;
   let mockLoadQueryActionCreator: jest.Mock;
   let mockUseDispatch: jest.Mock;
 
   beforeEach(() => {
     // Get the mocked functions
-    mockUseAssistantAction = useAssistantAction as jest.Mock;
     mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.Mock;
     mockLoadQueryActionCreator = loadQueryActionCreator as jest.Mock;
     mockUseDispatch = useDispatch as jest.Mock;
 
-    // Mock services
+    // Mock services with contextProvider dependency injection
     mockServices = {
       data: { query: { queryString: { getQuery: jest.fn() } } },
       notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+      contextProvider: {
+        hooks: {
+          useAssistantAction: mockUseAssistantAction,
+        },
+      },
     };
 
     // Setup mocks

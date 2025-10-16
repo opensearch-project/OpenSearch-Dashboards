@@ -88,13 +88,18 @@ const mockUseFlavorId = useFlavorId as jest.MockedFunction<typeof useFlavorId>;
 
 describe('BottomRightContainer', () => {
   const createMockStore = (status: QueryExecutionStatus = QueryExecutionStatus.UNINITIALIZED) => {
+    const queryStatusMap =
+      status === QueryExecutionStatus.LOADING
+        ? { 'mock-query-string': { status: QueryExecutionStatus.LOADING } }
+        : {};
+
     return configureStore({
       reducer: {
         legacy: (state = {}) => state,
         ui: (state = {}) => state,
         queryEditor: (
           state = {
-            queryStatusMap: {},
+            queryStatusMap,
             overallQueryStatus: {
               status,
               elapsedMs: undefined,

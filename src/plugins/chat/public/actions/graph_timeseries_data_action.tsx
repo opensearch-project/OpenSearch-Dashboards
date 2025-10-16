@@ -101,8 +101,6 @@ export function useGraphTimeseriesDataAction() {
     },
     handler: async (args) => {
       try {
-        // Handler called with args
-
         // Check if data is Prometheus format
         const isPrometheusData = (data: any): data is PrometheusData => {
           return data && Array.isArray(data.result);
@@ -155,7 +153,6 @@ export function useGraphTimeseriesDataAction() {
           graphData: args, // Pass the full args to the render function
         };
 
-        // Returning processed result
         return result;
       } catch (error) {
         return {
@@ -166,10 +163,7 @@ export function useGraphTimeseriesDataAction() {
       }
     },
     render: ({ status, args, result }) => {
-      // Render called with status, args, and result
-
       if (!args) {
-        // No args provided to render
         return null;
       }
 
@@ -208,6 +202,18 @@ export function useGraphTimeseriesDataAction() {
               <EuiText size="s">
                 <strong>Title:</strong> {args.title}
               </EuiText>
+            </>
+          )}
+
+          {args.query && (
+            <>
+              <EuiSpacer size="xs" />
+              <EuiText size="xs">
+                <strong>Query:</strong>
+              </EuiText>
+              <EuiCode language="promql" fontSize="xs" paddingSize="xs">
+                {args.query}
+              </EuiCode>
             </>
           )}
 

@@ -8,7 +8,8 @@ import { DataPublicPluginStart, DataView as Dataset } from '../../../../../data/
 export function createHistogramConfigs(
   dataset: Dataset,
   histogramInterval: string,
-  data: DataPublicPluginStart
+  data: DataPublicPluginStart,
+  breakdownField?: string
 ) {
   const visStateAggs = [
     {
@@ -22,6 +23,7 @@ export function createHistogramConfigs(
         field: dataset.timeFieldName!,
         interval: histogramInterval,
         timeRange: data.query.timefilter.timefilter.getTime(),
+        breakdownField,
       },
     },
   ];

@@ -28,8 +28,8 @@ import {
 } from '../../application/utils/state_management/selectors';
 import { RootState } from '../../application/utils/state_management/store';
 import {
-  defaultPrepareQueryString,
   defaultResultsProcessor,
+  defaultPrepareQueryString,
 } from '../../application/utils/state_management/actions/query_actions';
 import { useChangeQueryEditor } from '../../application/hooks';
 import { useDatasetContext } from '../../application/context';
@@ -44,13 +44,10 @@ const ExploreDataTableComponent = () => {
   const columns = useSelector(selectColumns);
   const { dataset } = useDatasetContext();
 
-  const results = useSelector((state: RootState) => state.results);
-
-  // Use default cache key computation for this component
   const query = useSelector((state: RootState) => state.query);
   const cacheKey = useMemo(() => defaultPrepareQueryString(query), [query]);
-
-  const rawResults = cacheKey ? results[cacheKey] : null;
+  const results = useSelector((state: RootState) => state.results);
+  const rawResults = results[cacheKey];
   const rows = rawResults?.hits?.hits || [];
 
   // Process raw results to get field counts and rows

@@ -22,7 +22,7 @@ const runSavedSearchTests = () => {
   describe('saved search', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_WITH_TIME_1,
         timefieldName: 'timestamp',
@@ -55,7 +55,7 @@ const runSavedSearchTests = () => {
           cy.visit(`/w/${workspaceId}/app/data-explorer/discover`);
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType, true);
         cy.osd.grabIdsFromDiscoverPageUrl();
 
         // using a POST request to create a saved search to load

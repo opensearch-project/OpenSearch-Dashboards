@@ -26,7 +26,14 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
 
   public start(core: CoreStart, deps: AppPluginStartDependencies): ChatPluginStart {
     // Get configuration
-    const config = this.initializerContext.config.get<{ agUiUrl: string }>();
+    const config = this.initializerContext.config.get<{ enabled: boolean; agUiUrl?: string }>();
+
+    // Check if chat plugin is enabled and has required agUiUrl
+    if (!config.enabled || !config.agUiUrl) {
+      return {
+        chatService: undefined,
+      };
+    }
 
     // Initialize chat service with configured AG-UI URL
     this.chatService = new ChatService(config.agUiUrl);

@@ -145,9 +145,10 @@ describe('to_expression', () => {
       expect(result.layer).toHaveLength(6); // Main layer + threshold + time marker + hover state layers
 
       // Verify the main layer
-      expect(result.layer[0]).toHaveProperty('mark');
-      expect(result.layer[0]).toHaveProperty('encoding.x.field', 'field-0');
-      expect(result.layer[0]).toHaveProperty('encoding.y.field', 'field-1');
+      const mainLayer = result.layer[0];
+      expect(mainLayer).toHaveProperty('mark');
+      expect(mainLayer).toHaveProperty('encoding.x.field', 'field-0');
+      expect(mainLayer).toHaveProperty('encoding.y.field', 'field-1');
 
       // Verify utility functions were called
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
@@ -156,6 +157,14 @@ describe('to_expression', () => {
         styleOptions?.thresholdOptions
       );
       expect(lineChartUtils.createTimeMarkerLayer).toHaveBeenCalledWith(styleOptions);
+
+      // select time range params
+      expect(result.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     it('should handle different title display options', () => {
@@ -262,9 +271,10 @@ describe('to_expression', () => {
       expect(result.layer).toHaveLength(5); // Bar layer + line layer (no threshold or time marker in this test) + hover state layers
 
       // Verify the bar layer
-      expect(result.layer[0].layer[0]).toHaveProperty('encoding.x.field', 'field-0');
-      expect(result.layer[0].layer[0]).toHaveProperty('encoding.y.field', 'field-1');
-      expect(result.layer[0].layer[0]).toHaveProperty('encoding.color.datum', 'value1');
+      const barLayer = result.layer[0].layer[0];
+      expect(barLayer).toHaveProperty('encoding.x.field', 'field-0');
+      expect(barLayer).toHaveProperty('encoding.y.field', 'field-1');
+      expect(barLayer).toHaveProperty('encoding.color.datum', 'value1');
 
       // Verify the line layer
       expect(result.layer[1]).toHaveProperty('encoding.x.field', 'field-0');
@@ -278,6 +288,14 @@ describe('to_expression', () => {
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'bar');
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(3);
+
+      // select time range params
+      expect(result.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(barLayer.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     it('should handle different title display options', () => {
@@ -390,13 +408,22 @@ describe('to_expression', () => {
       expect(result.layer).toHaveLength(4); // Main layer only (no threshold or time marker in this test) + hover state layers
 
       // Verify the main layer
-      expect(result.layer[0]).toHaveProperty('encoding.x.field', 'field-0');
-      expect(result.layer[0]).toHaveProperty('encoding.y.field', 'field-1');
-      expect(result.layer[0]).toHaveProperty('encoding.color.field', 'field-2');
+      const mainLayer = result.layer[0];
+      expect(mainLayer).toHaveProperty('encoding.x.field', 'field-0');
+      expect(mainLayer).toHaveProperty('encoding.y.field', 'field-1');
+      expect(mainLayer).toHaveProperty('encoding.color.field', 'field-2');
 
       // Verify utility functions were called
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
+
+      // select time range params
+      expect(result.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     it('should handle different title display options', () => {
@@ -525,9 +552,10 @@ describe('to_expression', () => {
       expect(result.spec.layer).toHaveLength(6); // Main layer + threshold + time marker + hover state layers
 
       // Verify the main layer
-      expect(result.spec.layer[0]).toHaveProperty('encoding.x.field', 'field-0');
-      expect(result.spec.layer[0]).toHaveProperty('encoding.y.field', 'field-1');
-      expect(result.spec.layer[0]).toHaveProperty('encoding.color.field', 'field-2');
+      const mainLayer = result.spec.layer[0];
+      expect(mainLayer).toHaveProperty('encoding.x.field', 'field-0');
+      expect(mainLayer).toHaveProperty('encoding.y.field', 'field-1');
+      expect(mainLayer).toHaveProperty('encoding.color.field', 'field-2');
 
       // Verify the threshold layer
       expect(result.spec.layer[4]).toHaveProperty('mark.type', 'rule');
@@ -540,6 +568,14 @@ describe('to_expression', () => {
       // Verify utility functions were called
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
+
+      // select time range params
+      expect(result.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     it('should handle different title display options', () => {
@@ -658,17 +694,26 @@ describe('to_expression', () => {
       expect(result.layer).toHaveLength(4); // Main layer + threshold + hover layers
 
       // Verify the main layer
-      expect(result.layer[0]).toHaveProperty('mark');
-      expect(result.layer[0]).toHaveProperty('encoding.x.field', 'field-2');
-      expect(result.layer[0]).toHaveProperty('encoding.x.type', 'nominal');
-      expect(result.layer[0]).toHaveProperty('encoding.y.field', 'field-1');
-      expect(result.layer[0]).toHaveProperty('encoding.y.type', 'quantitative');
+      const mainLayer = result.layer[0];
+      expect(mainLayer).toHaveProperty('mark');
+      expect(mainLayer).toHaveProperty('encoding.x.field', 'field-2');
+      expect(mainLayer).toHaveProperty('encoding.x.type', 'nominal');
+      expect(mainLayer).toHaveProperty('encoding.y.field', 'field-1');
+      expect(mainLayer).toHaveProperty('encoding.y.type', 'quantitative');
 
       // Verify utility functions were called
       expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
       expect(thresholdUtils.createThresholdLayer).toHaveBeenCalledWith(
         styleOptions?.thresholdOptions
+      );
+
+      // select time range params
+      expect(result.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
       );
     });
 

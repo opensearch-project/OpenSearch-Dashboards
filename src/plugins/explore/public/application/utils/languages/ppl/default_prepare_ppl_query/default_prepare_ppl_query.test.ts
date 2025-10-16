@@ -16,7 +16,7 @@ describe('defaultPreparePplQuery', () => {
     const result = defaultPreparePplQuery(query);
     expect(result).toEqual({
       ...query,
-      query: 'source = test-dataset level="error"',
+      query: 'source = `test-dataset` level="error"',
     });
   });
 
@@ -29,7 +29,7 @@ describe('defaultPreparePplQuery', () => {
     const result = defaultPreparePplQuery(query);
     expect(result).toEqual({
       ...query,
-      query: 'source=existing-index | where level="error"',
+      query: 'source=`existing-index` | where level="error"',
     });
   });
 
@@ -42,7 +42,7 @@ describe('defaultPreparePplQuery', () => {
     const result = defaultPreparePplQuery(query);
     expect(result).toEqual({
       ...query,
-      query: 'source = test-dataset',
+      query: 'source = `test-dataset`',
     });
   });
 
@@ -55,7 +55,7 @@ describe('defaultPreparePplQuery', () => {
     const result = defaultPreparePplQuery(query);
     expect(result).toEqual({
       ...query,
-      query: 'source = test-dataset',
+      query: 'source = `test-dataset`',
     });
   });
 
@@ -68,7 +68,7 @@ describe('defaultPreparePplQuery', () => {
     const result = defaultPreparePplQuery(query);
     expect(result).toEqual({
       ...query,
-      query: 'source = test-dataset | where level="error"',
+      query: 'source = `test-dataset` | where level="error"',
     });
   });
 
@@ -81,7 +81,7 @@ describe('defaultPreparePplQuery', () => {
     const result = defaultPreparePplQuery(query);
     expect(result).toEqual({
       ...query,
-      query: 'search source=logs-* | where @timestamp > now()-1d',
+      query: 'search source=`logs-*` | where @timestamp > now()-1d',
     });
   });
 
@@ -94,7 +94,7 @@ describe('defaultPreparePplQuery', () => {
     const result = defaultPreparePplQuery(query);
     expect(result).toEqual({
       ...query,
-      query: 'SOURCE=LOGS-* | WHERE level="ERROR"',
+      query: 'SOURCE=`LOGS-*` | WHERE level="ERROR"',
     });
   });
 });

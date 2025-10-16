@@ -1,2 +1,0 @@
-fix:
-- Value options sum in gauge and metric panels are not working ([#10579](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10579))

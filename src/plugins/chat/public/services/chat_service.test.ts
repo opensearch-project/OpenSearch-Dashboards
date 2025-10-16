@@ -24,6 +24,7 @@ describe('ChatService', () => {
     mockAgent = {
       runAgent: jest.fn(),
       abort: jest.fn(),
+      resetConnection: jest.fn(),
     } as any;
 
     // Mock AgUiAgent constructor
@@ -91,25 +92,6 @@ describe('ChatService', () => {
 
       expect(reqId1).toMatch(/^chat-req-\d+-1$/);
       expect(reqId2).toMatch(/^chat-req-\d+-2$/);
-    });
-  });
-
-  describe('request tracking', () => {
-    it('should track active requests', () => {
-      expect((chatService as any).isRequestActive()).toBe(false);
-
-      (chatService as any).addActiveRequest('test-req-1');
-      expect((chatService as any).isRequestActive()).toBe(true);
-
-      (chatService as any).addActiveRequest('test-req-2');
-      expect((chatService as any).activeRequests.size).toBe(2);
-
-      (chatService as any).removeActiveRequest('test-req-1');
-      expect((chatService as any).activeRequests.size).toBe(1);
-      expect((chatService as any).isRequestActive()).toBe(true);
-
-      (chatService as any).removeActiveRequest('test-req-2');
-      expect((chatService as any).isRequestActive()).toBe(false);
     });
   });
 
@@ -280,6 +262,40 @@ describe('ChatService', () => {
     it('should call agent abort method', () => {
       chatService.abort();
       expect(mockAgent.abort).toHaveBeenCalled();
+    });
+  });
+
+  describe('resetConnection', () => {
+    it('should call agent resetConnection method', () => {
+      chatService.resetConnection();
+      expect(mockAgent.resetConnection).toHaveBeenCalled();
+    });
+
+    it('should reset connection state after multiple calls', () => {
+      // Call multiple times to ensure it works consistently
+      chatService.resetConnection();
+      chatService.resetConnection();
+      chatService.resetConnection();
+
+      expect(mockAgent.resetConnection).toHaveBeenCalledTimes(3);
+    });
+
+    it('should be callable independently of other methods', () => {
+      // Test that resetConnection can be called without other method calls
+      const newService = new ChatService();
+      newService.resetConnection();
+
+      // Get the mock agent from the new service
+      const newMockAgent = (AgUiAgent as jest.MockedClass<typeof AgUiAgent>).mock.results[1]?.value;
+      expect(newMockAgent.resetConnection).toHaveBeenCalled();
+    });
+
+    it('should work in combination with abort', () => {
+      chatService.abort();
+      chatService.resetConnection();
+
+      expect(mockAgent.abort).toHaveBeenCalled();
+      expect(mockAgent.resetConnection).toHaveBeenCalled();
     });
   });
 

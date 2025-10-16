@@ -49,6 +49,7 @@ export const HTTP_STATUS_CODE_FIELD_PATHS = [
   'fields.attributes.http.status_code',
   'fields.http.status_code',
   'span.attributes.http@status_code',
+  '_source.attributes.http.response.status_code',
 ] as const;
 
 export const SERVICE_NAME_FIELD_PATHS = [
@@ -80,6 +81,7 @@ export const DURATION_FIELD_PATHS = [
   'duration_in_nanos',
   'duration',
   'durationNanos',
+  '_source.durationNano',
   '_source.durationInNanos',
   '_source.duration_in_nanos',
   '_source.duration',

@@ -11,16 +11,11 @@ import {
   EuiResizableContainer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiButtonEmpty,
   EuiText,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiOverlayMask,
   EuiBadge,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
 } from '@elastic/eui';
 import './trace_view.scss';
 import { TraceTopNavMenu } from './public/top_nav_buttons';
@@ -36,7 +31,11 @@ import { DataExplorerServices } from '../../../../../../data_explorer/public';
 import { generateColorMap } from './public/traces/generate_color_map';
 import { SpanDetailPanel } from './public/traces/span_detail_panel';
 import { ServiceMap } from './public/services/service_map';
-import { NoMatchMessage } from './public/utils/helper_functions';
+import {
+  NoMatchMessage,
+  getServiceInfo,
+  MissingFieldsEmptyState,
+} from './public/utils/helper_functions';
 import { createTraceAppState } from './state/trace_app_state';
 import { SpanDetailTabs } from './public/traces/span_detail_tabs';
 import { TraceDetailTabs } from './public/traces/trace_detail_tabs';
@@ -46,6 +45,8 @@ import { TraceLogsTab } from './public/logs/trace_logs_tab';
 import { Dataset } from '../../../../../../data/common';
 import { TraceDetailTab } from './constants/trace_detail_tabs';
 import { isSpanError } from './public/traces/ppl_resolve_helpers';
+import { buildTraceDetailsUrl } from '../../../../components/data_table/table_cell/trace_utils/trace_utils';
+import { validateRequiredTraceFields } from '../../../../utils/trace_field_validation';
 
 /*
  * Trace:Details
@@ -64,11 +65,17 @@ interface ResizeObserverTarget extends Element {
 export interface TraceDetailsProps {
   setMenuMountPoint?: (mount: MountPoint | undefined) => void;
   isEmbedded?: boolean;
+  isFlyout?: boolean;
+  defaultDataset?: Dataset;
 }
+// Displaying only 10 logs in the tab
+export const LOGS_DATA = 10;
 
 export const TraceDetails: React.FC<TraceDetailsProps> = ({
   setMenuMountPoint,
   isEmbedded = false,
+  isFlyout = false,
+  defaultDataset,
 }) => {
   const {
     services: { chrome, data, osdUrlStateStorage, savedObjects, uiSettings },
@@ -79,7 +86,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     return createTraceAppState({
       stateDefaults: {
         traceId: '',
-        dataset: {
+        dataset: defaultDataset ?? {
           id: 'default-dataset-id',
           title: 'otel-v1-apm-span-*',
           type: 'INDEX_PATTERN',
@@ -89,6 +96,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
       },
       osdUrlStateStorage: osdUrlStateStorage!,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [osdUrlStateStorage]);
 
   // Get current state values and subscribe to changes
@@ -109,16 +117,20 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const [transformedHits, setTransformedHits] = useState<TraceHit[]>([]);
   const [spanFilters, setSpanFilters] = useState<SpanFilter[]>([]);
   const [pplQueryData, setPplQueryData] = useState<PPLResponse | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isBackgroundLoading, setIsBackgroundLoading] = useState<boolean>(false);
   const [unfilteredHits, setUnfilteredHits] = useState<TraceHit[]>([]);
   const mainPanelRef = useRef<HTMLDivElement | null>(null);
   const [visualizationKey, setVisualizationKey] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<string>(TraceDetailTab.TIMELINE);
-  const [isServiceLegendOpen, setIsServiceLegendOpen] = useState(false);
   const [logsData, setLogsData] = useState<LogHit[]>([]);
   const [logDatasets, setLogDatasets] = useState<Dataset[]>([]);
+  const [datasetLogs, setDatasetLogs] = useState<Record<string, LogHit[]>>({});
   const [isLogsLoading, setIsLogsLoading] = useState<boolean>(false);
+  const [fieldValidation, setFieldValidation] = useState<{
+    isValid: boolean;
+    missingFields: string[];
+  } | null>(null);
+  const [prevTraceId, setPrevTraceId] = useState<string | undefined>(undefined);
 
   // Create PPL service instance
   const pplService = useMemo(() => (data ? new TracePPLService(data) : undefined), [data]);
@@ -150,30 +162,16 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     setSpanFilters(newFilters);
   };
 
-  useEffect(() => {
-    chrome?.setBreadcrumbs([
-      {
-        text: traceId
-          ? i18n.translate('explore.traceDetails.breadcrumb.traceTitle', {
-              defaultMessage: 'Trace: {traceId}',
-              values: { traceId },
-            })
-          : i18n.translate('explore.traceDetails.breadcrumb.unknownTrace', {
-              defaultMessage: 'Unknown Trace',
-            }),
-      },
-    ]);
-  }, [chrome, traceId]);
-
   // Check for correlations and fetch logs data
   useEffect(() => {
     if (dataset?.id && correlationService && data && traceId) {
       setIsLogsLoading(true);
       correlationService
-        .checkCorrelationsAndFetchLogs(dataset, data, traceId)
+        .checkCorrelationsAndFetchLogs(dataset, data, traceId, LOGS_DATA)
         .then((result) => {
           setLogDatasets(result.logDatasets);
           setLogsData(result.logs);
+          setDatasetLogs(result.datasetLogs);
         })
         .catch((error) => {
           // eslint-disable-next-line no-console
@@ -185,13 +183,15 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     }
   }, [dataset, correlationService, data, traceId]);
 
+  const isLoading = prevTraceId !== traceId;
+
   useEffect(() => {
     const fetchData = async (filters: SpanFilter[] = []) => {
       if (!pplService || !traceId || !dataset) return;
 
-      // Only show full loading spinner on initial load
-      if (transformedHits.length === 0) {
-        setIsLoading(true);
+      if (isLoading) {
+        setTransformedHits([]);
+        setUnfilteredHits([]);
       } else {
         // Use background loading for filter updates
         setIsBackgroundLoading(true);
@@ -212,15 +212,23 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
         // eslint-disable-next-line no-console
         console.error('Failed to fetch trace data:', err);
       } finally {
-        setIsLoading(false);
         setIsBackgroundLoading(false);
+        setPrevTraceId(traceId);
       }
     };
+
+    // Handle the case where traceId is null/missing - validate as missing field
+    if (!traceId) {
+      const validation = validateRequiredTraceFields({ traceId: null } as any);
+      setFieldValidation(validation);
+      return;
+    }
 
     if (traceId && dataset && pplService) {
       fetchData(spanFilters);
     }
-  }, [traceId, dataset, pplService, spanFilters, transformedHits.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [traceId, dataset, pplService, spanFilters]);
 
   useEffect(() => {
     if (!pplQueryData) return;
@@ -248,6 +256,22 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     if (spanFilters.length === 0) {
       setUnfilteredHits(hits);
     }
+
+    // Validate fields from either hits or raw PPL data
+    if (hits.length > 0) {
+      const validation = validateRequiredTraceFields(hits[0] as any);
+      setFieldValidation(validation);
+    } else if (pplQueryData.datarows && pplQueryData.datarows.length > 0 && pplQueryData.schema) {
+      // If we have raw data but no processed hits, validate the raw data
+      const rawDataObject: any = {};
+      pplQueryData.schema.forEach((field, index) => {
+        rawDataObject[field.name] = pplQueryData.datarows![0][index];
+      });
+      const validation = validateRequiredTraceFields(rawDataObject);
+      setFieldValidation(validation);
+    } else {
+      setFieldValidation(null);
+    }
   }, [pplQueryData, spanFilters]);
 
   // Cleanup state sync on unmount
@@ -257,17 +281,11 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     };
   }, [stopStateSync]);
 
-  // Find selected span, with fallback to root span logic
-  const selectedSpan = useMemo((): TraceHit | undefined => {
-    if (transformedHits.length === 0) return undefined;
+  // Find root span for breadcrumb (always shows root span info)
+  const rootSpan = useMemo((): TraceHit | undefined => {
+    if (isLoading || transformedHits.length === 0) return undefined;
 
-    // If we have a specific spanId, try to find it first
-    if (spanId) {
-      const found = transformedHits.find((span) => span.spanId === spanId);
-      if (found) return found;
-    }
-
-    // Fallback to root span logic if no specific span selected or found
+    // Find span without parent first
     const spanWithoutParent = transformedHits.find((span) => !span.parentSpanId);
     if (spanWithoutParent) return spanWithoutParent;
 
@@ -278,7 +296,21 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
       const currentTime = new Date(current.startTime || 0).getTime();
       return currentTime < earliestTime ? current : earliest;
     }, undefined);
-  }, [spanId, transformedHits]);
+  }, [transformedHits, isLoading]);
+
+  // Find selected span, with fallback to root span logic
+  const selectedSpan = useMemo((): TraceHit | undefined => {
+    if (isLoading || transformedHits.length === 0) return undefined;
+
+    // If we have a specific spanId, try to find it first
+    if (spanId) {
+      const found = transformedHits.find((span) => span.spanId === spanId);
+      if (found) return found;
+    }
+
+    // Fallback to root span if no specific span selected or found
+    return rootSpan;
+  }, [spanId, transformedHits, rootSpan, isLoading]);
 
   // Update URL state when fallback span selection occurs
   useEffect(() => {
@@ -400,221 +432,211 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     };
   }, [forceVisualizationResize, isEmbedded]);
 
-  return (
-    <>
-      <TraceTopNavMenu payloadData={transformedHits} setMenuMountPoint={setMenuMountPoint} />
+  const traceDetailsLink = buildTraceDetailsUrl(spanId, traceId, dataset);
 
-      {isLoading ? (
-        <EuiPanel paddingSize="l">
-          <div className="exploreTraceView__loadingContainer">
-            <EuiLoadingSpinner size="xl" />
-          </div>
-        </EuiPanel>
-      ) : (
-        <>
-          {transformedHits.length === 0 && <NoMatchMessage traceId={traceId} />}
+  const TraceDetailsContent = () => {
+    return (
+      <>
+        {isLoading ? (
+          <EuiPanel paddingSize="l">
+            <div className="exploreTraceView__loadingContainer">
+              <EuiLoadingSpinner size="xl" />
+            </div>
+          </EuiPanel>
+        ) : fieldValidation && !fieldValidation.isValid ? (
+          <MissingFieldsEmptyState
+            missingFields={fieldValidation.missingFields}
+            dataset={dataset as any}
+          />
+        ) : transformedHits.length === 0 ? (
+          <NoMatchMessage traceId={traceId} />
+        ) : (
+          <>
+            <div className="exploreTraceView__tabsContainer">
+              <EuiPanel paddingSize="s">
+                <TraceDetailTabs
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                  transformedHits={transformedHits}
+                  errorCount={errorCount}
+                  spanFilters={spanFilters}
+                  handleErrorFilterClick={handleErrorFilterClick}
+                  logDatasets={logDatasets}
+                  logsData={logsData}
+                  isLogsLoading={isLogsLoading}
+                />
+              </EuiPanel>
+            </div>
 
-          {transformedHits.length > 0 && (
-            <>
-              <div className="exploreTraceView__tabsContainer">
+            {/* Filter badges section */}
+            {spanFilters.length > 0 && (
+              <div className="exploreTraceView__filtersContainer">
                 <EuiPanel paddingSize="s">
-                  <TraceDetailTabs
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                    transformedHits={transformedHits}
-                    errorCount={errorCount}
-                    spanFilters={spanFilters}
-                    handleErrorFilterClick={handleErrorFilterClick}
-                    servicesInOrder={servicesInOrder}
-                    setIsServiceLegendOpen={setIsServiceLegendOpen}
-                    isServiceLegendOpen={isServiceLegendOpen}
-                    logDatasets={logDatasets}
-                    logsData={logsData}
-                    isLogsLoading={isLogsLoading}
-                  />
+                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                    <EuiFlexItem>
+                      <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s" color="subdued">
+                            {i18n.translate('explore.traceView.filters.activeFilters', {
+                              defaultMessage: 'Active filters:',
+                            })}
+                          </EuiText>
+                        </EuiFlexItem>
+                        {spanFilters.map((filter, index) => (
+                          <EuiFlexItem grow={false} key={`filter-${index}`}>
+                            <EuiBadge
+                              color="primary"
+                              iconType="cross"
+                              iconSide="right"
+                              iconOnClick={() => removeFilter(filter)}
+                              iconOnClickAriaLabel={i18n.translate(
+                                'explore.traceView.filters.removeFilter',
+                                {
+                                  defaultMessage: 'Remove filter',
+                                }
+                              )}
+                              data-test-subj={`filter-badge-${filter.field}-${filter.value}`}
+                            >
+                              {getFilterDisplayText(filter)}
+                            </EuiBadge>
+                          </EuiFlexItem>
+                        ))}
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="xs"
+                        onClick={clearAllFilters}
+                        data-test-subj="clear-all-filters-button"
+                      >
+                        {i18n.translate('explore.traceView.filters.clearAll', {
+                          defaultMessage: 'Clear all',
+                        })}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiPanel>
               </div>
+            )}
 
-              {/* Filter badges section */}
-              {spanFilters.length > 0 && (
-                <div className="exploreTraceView__filtersContainer">
-                  <EuiPanel paddingSize="s">
-                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                      <EuiFlexItem>
-                        <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
-                          <EuiFlexItem grow={false}>
-                            <EuiText size="s" color="subdued">
-                              {i18n.translate('explore.traceView.filters.activeFilters', {
-                                defaultMessage: 'Active filters:',
-                              })}
-                            </EuiText>
-                          </EuiFlexItem>
-                          {spanFilters.map((filter, index) => (
-                            <EuiFlexItem grow={false} key={`filter-${index}`}>
-                              <EuiBadge
-                                color="primary"
-                                iconType="cross"
-                                iconSide="right"
-                                iconOnClick={() => removeFilter(filter)}
-                                iconOnClickAriaLabel={i18n.translate(
-                                  'explore.traceView.filters.removeFilter',
-                                  {
-                                    defaultMessage: 'Remove filter',
-                                  }
-                                )}
-                                data-test-subj={`filter-badge-${filter.field}-${filter.value}`}
-                              >
-                                {getFilterDisplayText(filter)}
-                              </EuiBadge>
-                            </EuiFlexItem>
-                          ))}
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty
-                          size="xs"
-                          onClick={clearAllFilters}
-                          data-test-subj="clear-all-filters-button"
-                        >
-                          {i18n.translate('explore.traceView.filters.clearAll', {
-                            defaultMessage: 'Clear all',
-                          })}
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiPanel>
-                </div>
-              )}
-
-              {/* Resizable container underneath filter badges */}
-              <EuiResizableContainer
-                direction="horizontal"
-                className="exploreTraceView__resizableContainer"
-              >
-                {(EuiResizablePanel, EuiResizableButton) => (
-                  <>
-                    <EuiResizablePanel initialSize={70} minSize="50%" wrapperPadding="none">
-                      <EuiPanel paddingSize="s" className="exploreTraceView__contentPanel">
-                        {/* Tab content */}
-                        <div ref={mainPanelRef} className="exploreTraceView__mainPanel">
-                          {activeTab === TraceDetailTab.SERVICE_MAP && (
-                            <div style={{ height: 'calc(100vh - 200px)', overflow: 'hidden' }}>
-                              <ServiceMap
-                                hits={transformedHits}
-                                colorMap={colorMap}
-                                paddingSize="none"
-                                hasShadow={false}
-                                selectedSpanId={spanId}
-                              />
-                            </div>
-                          )}
-
-                          {(activeTab === TraceDetailTab.TIMELINE ||
-                            activeTab === TraceDetailTab.SPAN_LIST ||
-                            activeTab === TraceDetailTab.TREE_VIEW) && (
-                            <SpanDetailPanel
-                              key={`span-panel-${visualizationKey}`}
-                              chrome={chrome}
-                              spanFilters={spanFilters}
-                              payloadData={JSON.stringify(transformedHits)}
-                              isGanttChartLoading={isBackgroundLoading}
+            {/* Resizable container underneath filter badges */}
+            <EuiResizableContainer
+              className="exploreTraceView__resizableContainer"
+              direction={isFlyout ? 'vertical' : 'horizontal'}
+            >
+              {(EuiResizablePanel, EuiResizableButton) => (
+                <>
+                  <EuiResizablePanel
+                    initialSize={isFlyout ? 50 : 70}
+                    minSize={isFlyout ? '30%' : '50%'}
+                    wrapperPadding="none"
+                  >
+                    <div className="exploreTraceView__contentPanel">
+                      {/* Tab content */}
+                      <div ref={mainPanelRef} className="exploreTraceView__mainPanel">
+                        {activeTab === TraceDetailTab.SERVICE_MAP && (
+                          <div style={{ height: 'calc(100vh - 200px)', overflow: 'hidden' }}>
+                            <ServiceMap
+                              hits={transformedHits}
                               colorMap={colorMap}
-                              onSpanSelect={handleSpanSelect}
+                              paddingSize="none"
+                              hasShadow={false}
                               selectedSpanId={spanId}
-                              activeView={activeTab}
                             />
-                          )}
+                          </div>
+                        )}
 
-                          {activeTab === TraceDetailTab.LOGS && (
-                            <TraceLogsTab
-                              traceId={traceId}
-                              logDatasets={logDatasets}
-                              logsData={logsData}
-                              isLoading={isLogsLoading}
-                              onSpanClick={handleSpanSelect}
-                            />
-                          )}
-                        </div>
-                      </EuiPanel>
-                    </EuiResizablePanel>
+                        {(activeTab === TraceDetailTab.TIMELINE ||
+                          activeTab === TraceDetailTab.SPAN_LIST) && (
+                          <SpanDetailPanel
+                            key={`span-panel-${visualizationKey}`}
+                            chrome={chrome}
+                            spanFilters={spanFilters}
+                            payloadData={JSON.stringify(transformedHits)}
+                            isGanttChartLoading={isBackgroundLoading}
+                            colorMap={colorMap}
+                            onSpanSelect={handleSpanSelect}
+                            selectedSpanId={spanId}
+                            activeView={activeTab}
+                            servicesInOrder={servicesInOrder}
+                          />
+                        )}
 
-                    <EuiResizableButton />
+                        {activeTab === TraceDetailTab.LOGS && (
+                          <TraceLogsTab
+                            traceId={traceId}
+                            logDatasets={logDatasets}
+                            logsData={logsData}
+                            datasetLogs={datasetLogs}
+                            isLoading={isLogsLoading}
+                            onSpanClick={handleSpanSelect}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </EuiResizablePanel>
 
-                    <EuiResizablePanel initialSize={30} minSize="300px">
-                      <EuiPanel paddingSize="s" className="exploreTraceView__sidebarPanel">
-                        <SpanDetailTabs
-                          selectedSpan={selectedSpan}
-                          addSpanFilter={(field: string, value: string | number | boolean) => {
-                            const newFilters = [...spanFilters];
-                            const index = newFilters.findIndex(
-                              ({ field: filterField }) => field === filterField
-                            );
-                            if (index === -1) {
-                              newFilters.push({ field, value });
-                            } else {
-                              newFilters.splice(index, 1, { field, value });
-                            }
-                            setSpanFiltersWithStorage(newFilters);
-                          }}
-                          setCurrentSpan={handleSpanSelect}
-                          logDatasets={logDatasets}
-                          logsData={logsData}
-                          isLogsLoading={isLogsLoading}
-                        />
-                      </EuiPanel>
-                    </EuiResizablePanel>
-                  </>
-                )}
-              </EuiResizableContainer>
-            </>
-          )}
-        </>
-      )}
+                  <EuiResizableButton />
 
-      {/* Service Legend Modal */}
-      {isServiceLegendOpen && (
-        <EuiOverlayMask>
-          <EuiModal onClose={() => setIsServiceLegendOpen(false)}>
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>
-                {i18n.translate('explore.traceView.modal.serviceLegendTitle', {
-                  defaultMessage: 'Service legend',
-                })}
-              </EuiModalHeaderTitle>
-            </EuiModalHeader>
-            <EuiModalBody>
-              <EuiFlexGroup direction="column" gutterSize="s">
-                {servicesInOrder.map((service) => (
-                  <EuiFlexItem grow={false} key={`service-legend-${service}`}>
-                    <EuiFlexGroup gutterSize="xs" alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        <div
-                          className="exploreTraceView__serviceLegendColorIndicator"
-                          style={{
-                            backgroundColor: colorMap?.[service],
-                          }}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiText size="s">
-                          <span>{service}</span>
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiModalBody>
-            <EuiModalFooter>
-              <EuiButton onClick={() => setIsServiceLegendOpen(false)} fill>
-                {i18n.translate('explore.traceView.modal.closeButton', {
-                  defaultMessage: 'Close',
-                })}
-              </EuiButton>
-            </EuiModalFooter>
-          </EuiModal>
-        </EuiOverlayMask>
-      )}
+                  <EuiResizablePanel
+                    initialSize={isFlyout ? 50 : 30}
+                    minSize={isFlyout ? '30%' : '300px'}
+                  >
+                    <div className="exploreTraceView__sidebarPanel">
+                      <SpanDetailTabs
+                        selectedSpan={selectedSpan}
+                        addSpanFilter={(field: string, value: string | number | boolean) => {
+                          const newFilters = [...spanFilters];
+                          const index = newFilters.findIndex(
+                            ({ field: filterField }) => field === filterField
+                          );
+                          if (index === -1) {
+                            newFilters.push({ field, value });
+                          } else {
+                            newFilters.splice(index, 1, { field, value });
+                          }
+                          setSpanFiltersWithStorage(newFilters);
+                        }}
+                        setCurrentSpan={handleSpanSelect}
+                        logDatasets={logDatasets}
+                        logsData={logsData}
+                        isLogsLoading={isLogsLoading}
+                      />
+                    </div>
+                  </EuiResizablePanel>
+                </>
+              )}
+            </EuiResizableContainer>
+          </>
+        )}
+      </>
+    );
+  };
+
+  const TraceDetailsHeader: React.FC = () => (
+    <TraceTopNavMenu
+      payloadData={transformedHits}
+      setMenuMountPoint={setMenuMountPoint}
+      traceId={traceId}
+      isFlyout={isFlyout}
+      title={getServiceInfo(rootSpan, traceId)}
+      traceDetailsLink={traceDetailsLink}
+    />
+  );
+
+  return isFlyout ? (
+    <>
+      <EuiFlyoutHeader>
+        <TraceDetailsHeader />
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <TraceDetailsContent />
+      </EuiFlyoutBody>
+    </>
+  ) : (
+    <>
+      <TraceDetailsHeader />
+      <TraceDetailsContent />
     </>
   );
 };

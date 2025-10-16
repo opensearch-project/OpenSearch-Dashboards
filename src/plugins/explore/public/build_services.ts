@@ -63,6 +63,7 @@ export function buildServices(
     },
     navigation: plugins.navigation,
     share: plugins.share,
+    contextProvider: plugins.contextProvider,
     opensearchDashboardsLegacy: plugins.opensearchDashboardsLegacy,
     urlForwarding: plugins.urlForwarding,
     timefilter: plugins.data.query.timefilter.timefilter,

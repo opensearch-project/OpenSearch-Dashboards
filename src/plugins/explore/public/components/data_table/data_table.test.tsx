@@ -10,7 +10,7 @@ import { act, render, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DataTable } from './data_table';
 import { DocViewsRegistry, OpenSearchSearchHit } from '../../types/doc_views_types';
-import { indexPatternMock } from '../../../../discover/public';
+import { indexPatternMock } from '../../__mock__/index_pattern_mock';
 import { mockColumns, mockRows } from './data_table.mocks';
 import { DocViewTable } from '../doc_viewer/doc_viewer_table/table';
 import { JsonCodeBlock } from '../doc_viewer/json_code_block/json_code_block';

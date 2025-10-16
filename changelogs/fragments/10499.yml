@@ -1,2 +1,0 @@
-fix:
-- Add sanitization for axis label and name ([#10499](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10499))

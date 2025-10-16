@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AssistantAction } from './hooks/use_assistant_action';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextProviderSetupDeps {}
 
@@ -35,4 +37,9 @@ export interface AssistantContextStore {
 
 export interface ContextProviderStart {
   getAssistantContextStore(): AssistantContextStore;
+  hooks: {
+    usePageContext: (options?: any) => string;
+    useDynamicContext: (contextOptions: any) => string;
+    useAssistantAction: <T = any>(action: AssistantAction<T>) => void;
+  };
 }

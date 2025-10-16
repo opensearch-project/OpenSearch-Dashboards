@@ -143,7 +143,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
     response
       .then(() => {
         toasts.addSuccess(`Data source ${name} created`);
-        history.push('/manage');
+        history.push('/');
       })
       .catch((err) => {
         const formattedError = formatError(err.name, err.message, err.body.message);

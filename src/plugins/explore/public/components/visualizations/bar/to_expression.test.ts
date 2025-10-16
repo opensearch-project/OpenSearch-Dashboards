@@ -289,11 +289,20 @@ describe('bar to_expression', () => {
       expect(spec.$schema).toBe(VEGASCHEMA);
       expect(spec.data.values).toBe(mockData);
 
-      const encoding = spec.layer[0].encoding;
+      const mainLayer = spec.layer[0];
+      const encoding = mainLayer.encoding;
       // Check encoding
       expect(encoding.x.field).toBe('category');
       expect(encoding.y.field).toBe('count');
       expect(encoding.color.field).toBe('category2');
+
+      // select time range params
+      expect(spec.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     test('handles different title display options', () => {
@@ -451,6 +460,14 @@ describe('bar to_expression', () => {
       expect(mainLayer.encoding.x.type).toBe('temporal');
       expect(mainLayer.encoding.y.field).toBe('count');
       expect(mainLayer.encoding.y.type).toBe('quantitative');
+
+      // select time range params
+      expect(spec.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     test('handles different title display options', () => {
@@ -642,13 +659,22 @@ describe('bar to_expression', () => {
       expect(spec.$schema).toBe(VEGASCHEMA);
       expect(spec.data.values).toBe(mockData);
 
-      const encoding = spec.layer[0].encoding;
+      const mainLayer = spec.layer[0];
+      const encoding = mainLayer.encoding;
       // Check encoding
       expect(encoding.x.field).toBe('date');
       expect(encoding.x.type).toBe('temporal');
       expect(encoding.y.field).toBe('count');
       expect(encoding.y.type).toBe('quantitative');
       expect(encoding.color.field).toBe('category');
+
+      // select time range params
+      expect(spec.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     test('handles different title display options', () => {
@@ -851,10 +877,19 @@ describe('bar to_expression', () => {
       expect(spec.facet).toBeDefined();
       expect(spec.facet.field).toBe('category2');
 
+      const mainLayer = spec.spec.layer[0];
       // Check encoding in the spec
-      expect(spec.spec.layer[0].encoding.x.field).toBe('date');
-      expect(spec.spec.layer[0].encoding.y.field).toBe('count');
-      expect(spec.spec.layer[0].encoding.color.field).toBe('category');
+      expect(mainLayer.encoding.x.field).toBe('date');
+      expect(mainLayer.encoding.y.field).toBe('count');
+      expect(mainLayer.encoding.color.field).toBe('category');
+
+      // select time range params
+      expect(spec.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     test('handles different title display options', () => {
@@ -1069,6 +1104,14 @@ describe('bar to_expression', () => {
       expect(mainLayer.encoding.y.field).toBe('sum');
       expect(mainLayer.encoding.y.aggregate).toBe('sum');
       expect(mainLayer.encoding.y.type).toBe('quantitative');
+
+      // select time range params
+      expect(spec.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     test('applies bucket options correctly', () => {
@@ -1114,6 +1157,14 @@ describe('bar to_expression', () => {
       expect(mainLayer.encoding.x.field).toBe('count');
       expect(mainLayer.encoding.x.type).toBe('quantitative');
       expect(spec.layer[0].encoding.y.aggregate).toBe('count');
+
+      // select time range params
+      expect(spec.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     test('applies bucket options correctly, single bar aggregation should only be count', () => {

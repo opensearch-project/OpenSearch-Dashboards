@@ -11,6 +11,7 @@ import { selectSavedSearch } from '../../../application/utils/state_management/s
 import { useDatasetContext } from '../../../application/context';
 import { ExploreFlavor } from '../../../../common';
 import { useTabResults } from '../../../application/utils/hooks/use_tab_results';
+import { useHistogramResults } from '../../../application/utils/hooks/use_histogram_results';
 
 /**
  * Logs tab component for displaying log entries
@@ -20,6 +21,7 @@ const ActionBarComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { dataset } = useDatasetContext();
   const { results } = useTabResults();
+  const { results: histogramResults } = useHistogramResults();
   const { core, inspector, inspectorAdapters } = services;
   const savedSearch = useSelector(selectSavedSearch);
 
@@ -32,7 +34,7 @@ const ActionBarComponent = () => {
   };
 
   const rows = results?.hits?.hits || [];
-  const totalHits = (results?.hits?.total as any)?.value || results?.hits?.total || 0;
+  const totalHits = histogramResults?.hits.total;
   const elapsedMs = results?.elapsedMs;
 
   return (

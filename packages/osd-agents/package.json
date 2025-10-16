@@ -10,8 +10,8 @@
     "dev:ag-ui": "ts-node --watch src/main_ag_ui.ts",
     "build": "tsc",
     "clean": "find . -name '*.js' -not -path './node_modules/*' -delete",
-    "opensearch:ingest": "ts-node src/opensearch-ingestion.ts",
-    "opensearch:watch": "ts-node src/opensearch-ingestion.ts --watch"
+    "opensearch:ingest": "ts-node src/opensearch_ingestion.ts",
+    "opensearch:watch": "ts-node src/opensearch_ingestion.ts --watch"
   },
   "dependencies": {
     "@ag-ui/client": "^0.0.39",

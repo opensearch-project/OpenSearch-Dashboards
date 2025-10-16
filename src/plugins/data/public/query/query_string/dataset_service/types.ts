@@ -64,6 +64,8 @@ export interface DatasetTypeConfig {
     isFieldLoadAsync?: boolean;
     /** Optional cacheOptions determines if the data structure is cacheable. Defaults to false */
     cacheOptions?: boolean;
+    /** Optional list of supported apps. If undefined, it will show up in all apps */
+    supportedAppNames?: string[];
   };
   /**
    * Converts a DataStructure to a Dataset.

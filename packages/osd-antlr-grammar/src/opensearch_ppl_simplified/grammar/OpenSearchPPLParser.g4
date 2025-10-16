@@ -1363,6 +1363,7 @@ ident
    | BACKTICK ident BACKTICK
    | BQUOTA_STRING
    | keywordsCanBeId
+   | STAR // Temporary fix for https://github.com/opensearch-project/sql/issues/4444
    ;
 
 tableIdent

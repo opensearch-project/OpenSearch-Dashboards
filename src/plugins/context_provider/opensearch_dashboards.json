@@ -2,9 +2,10 @@
   "id": "contextProvider",
   "version": "1.0.0",
   "opensearchDashboardsVersion": "opensearchDashboards",
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredPlugins": [],
   "optionalPlugins": [],
-  "requiredBundles": ["opensearchDashboardsUtils"]
+  "requiredBundles": ["opensearchDashboardsUtils"],
+  "configPath": ["contextProvider"]
 }

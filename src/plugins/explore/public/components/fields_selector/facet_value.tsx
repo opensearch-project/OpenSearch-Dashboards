@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './facet_value.scss';
-
 import React from 'react';
 import { EuiButtonIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -12,6 +10,7 @@ import { Bucket } from './types';
 import { DataViewField } from '../../../../data/public';
 import { shortenDottedString } from '../../application/legacy/discover/application/helpers';
 import './discover_field.scss';
+import './facet_value.scss';
 
 function wrapOnDot(str?: string) {
   // u200B is a non-width white-space character, which allows
@@ -60,7 +59,7 @@ export const FacetValue = ({ field, bucket, onAddFilter, useShortDots }: FacetVa
     <EuiToolTip delay="long" content={bucket.display}>
       <span
         data-test-subj={`field-${bucket.display}`}
-        className="exploreSidebarFacetValue__name eui-textBreakWord"
+        className="exploreSidebarField__name eui-textBreakWord"
       >
         {useShortDots ? wrapOnDot(shortenDottedString(bucket.display)) : wrapOnDot(bucket.display)}
       </span>
@@ -72,13 +71,18 @@ export const FacetValue = ({ field, bucket, onAddFilter, useShortDots }: FacetVa
       gutterSize="s"
       alignItems="center"
       responsive={false}
-      className="exploreSidebarFacetValue"
+      className="exploreSidebarFacetValue exploreSidebarField"
       data-test-subj="exploreSidebarFacetValue"
     >
       <EuiFlexItem grow>
         <EuiText size="xs">{displayValue}</EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} className="exploreSidebarFacetValue__actionButtons">
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" className="exploreSidebarFacetValue__count">
+          {bucket.count}
+        </EuiText>
+      </EuiFlexItem>
+      <div className="exploreSidebarField__actionButtons">
         <EuiToolTip
           delay="long"
           content={i18n.translate('explore.discover.fieldChooser.discoverField.filterForTooltip', {
@@ -91,7 +95,7 @@ export const FacetValue = ({ field, bucket, onAddFilter, useShortDots }: FacetVa
             size="xs"
             data-test-subj={`fieldToggle-${bucket.display}`}
             aria-label={filterForLabelAria}
-            className="exploreSidebarFacetValue__actionButton"
+            className="exploreSidebarField__actionButton"
           />
         </EuiToolTip>
         <EuiToolTip
@@ -106,13 +110,10 @@ export const FacetValue = ({ field, bucket, onAddFilter, useShortDots }: FacetVa
             size="xs"
             data-test-subj={`fieldToggle-${bucket.display}`}
             aria-label={filterOutLabelAria}
-            className="exploreSidebarFacetValue__actionButton"
+            className="exploreSidebarField__actionButton"
           />
         </EuiToolTip>
-        <EuiText size="xs" className="exploreSidebarFacetValue__count">
-          {bucket.count}
-        </EuiText>
-      </EuiFlexItem>
+      </div>
     </EuiFlexGroup>
   );
 };

@@ -1,0 +1,2 @@
+fix:
+- Remove service.name column from traces table ([#10698](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10698))

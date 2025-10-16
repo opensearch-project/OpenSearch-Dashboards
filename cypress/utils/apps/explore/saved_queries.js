@@ -180,11 +180,6 @@ export const verifyAlternateDiscoverPageState = ({
       `filter filter-enabled filter-key-${ALTERNATE_APPLIED_FILTERS.field} filter-value-${ALTERNATE_APPLIED_FILTERS.value} filter-unpinned filter-negated`
     ).should('exist');
   }
-
-  if (startTime && endTime) {
-    cy.getElementByTestId('discoverIntervalDateRange').contains(startTime).should('exist');
-    cy.getElementByTestId('discoverIntervalDateRange').contains(endTime).should('exist');
-  }
 };
 
 /**

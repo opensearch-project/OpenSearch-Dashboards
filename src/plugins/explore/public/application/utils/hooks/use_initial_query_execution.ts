@@ -12,6 +12,7 @@ import { clearResults, clearQueryStatusMap, setIsInitialized } from '../state_ma
 import { detectAndSetOptimalTab } from '../state_management/actions/detect_optimal_tab';
 import { selectActiveTabId } from '../state_management/selectors';
 import { useCurrentExploreId } from './use_current_explore_id';
+import { useDatasetContext } from '../../context';
 
 /**
  * Hook to handle initial query execution on page load
@@ -23,6 +24,7 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
   const queryState = useSelector((state: RootState) => state.query);
   const activeTabId = useSelector(selectActiveTabId);
   const exploreId = useCurrentExploreId();
+  const { dataset: datasetFromContext, isLoading: datasetLoading } = useDatasetContext();
 
   const shouldSearchOnPageLoad = useMemo(() => {
     return services?.uiSettings?.get('discover:searchOnPageLoad', true) ?? true;
@@ -35,7 +37,9 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
         queryState.dataset &&
         shouldSearchOnPageLoad &&
         services &&
-        !exploreId // saved search loading and execution is handled by useInitPage()
+        !exploreId && // saved search loading and execution is handled by useInitPage()
+        datasetFromContext && // Wait for dataset to be loaded by DatasetProvider
+        datasetLoading === false // Wait for DatasetProvider to finish loading
       ) {
         // Add initial default query to history
         const timefilter = services?.data?.query?.timefilter?.timefilter;
@@ -62,6 +66,8 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
     dispatch,
     services,
     exploreId,
+    datasetFromContext,
+    datasetLoading,
   ]);
 
   return { isInitialized };

@@ -116,6 +116,10 @@ export class ChatEventHandler {
     this.onStreamingStateChange(false);
     // Clear any remaining active messages (cleanup)
     this.activeAssistantMessages.clear();
+    // Reset the connection state to allow new chats
+    if (this.chatService && (this.chatService as any).resetConnection) {
+      (this.chatService as any).resetConnection();
+    }
   }
 
   /**
@@ -290,6 +294,7 @@ export class ChatEventHandler {
         // Don't send result back immediately, wait for TOOL_CALL_RESULT event
       } else {
         // Tool was executed locally
+
         this.assistantActionService.updateToolCallState(toolCallId, {
           status: 'complete',
           result: result.data,

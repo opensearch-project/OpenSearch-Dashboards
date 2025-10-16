@@ -1,5 +1,0 @@
-feat:
-- Custom patterns error page ([#10540](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10540))
-
-fix:
-- Prevent general query error from hiding tabs ([#10540](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10540))

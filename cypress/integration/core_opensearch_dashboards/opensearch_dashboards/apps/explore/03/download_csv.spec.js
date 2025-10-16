@@ -32,14 +32,14 @@ const runDownloadCsvTests = () => {
         INDEX_WITH_TIME_1,
         INDEX_WITHOUT_TIME_1,
       ]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_WITH_TIME_1,
         timefieldName: 'timestamp',
         dataSource: DATASOURCE_NAME,
         isEnhancement: true,
       });
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_WITHOUT_TIME_1,
         timefieldName: '',

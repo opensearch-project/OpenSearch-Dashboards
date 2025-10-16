@@ -6,7 +6,7 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { indexPatternMock } from '../../../../discover/public';
+import { indexPatternMock } from '../../__mock__/index_pattern_mock';
 import { DataTable, DataTableProps } from './data_table';
 import { mockColumns, mockRows } from './data_table.mocks';
 import { DocViewsRegistry } from '../../types/doc_views_types';

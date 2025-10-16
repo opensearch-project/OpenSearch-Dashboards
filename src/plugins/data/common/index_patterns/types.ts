@@ -54,6 +54,7 @@ export interface IIndexPattern {
   timeFieldName?: string;
   intervalName?: string | null;
   signalType?: string;
+  schemaMappings?: Record<string, Record<string, string>>;
   getTimeField?(): IFieldType | undefined;
   fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
   getFormatterForField?: (
@@ -73,6 +74,7 @@ export interface IndexPatternAttributes {
   intervalName?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
+  schemaMappings?: string;
 }
 
 export type OnNotification = (toastInputFields: ToastInputFields) => void;
@@ -227,6 +229,7 @@ export interface IndexPatternSpec {
   type?: string;
   dataSourceRef?: SavedObjectReference;
   fieldsLoading?: boolean;
+  schemaMappings?: Record<string, Record<string, string>>;
 }
 
 export interface SourceFilter {

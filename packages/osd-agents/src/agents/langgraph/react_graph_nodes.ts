@@ -106,12 +106,12 @@ export class ReactGraphNodes {
         Array.isArray(msg.content) && msg.content.some((c: any) => c.toolResult !== undefined)
     );
 
-    // Only disable tools if we're at max iterations to force a final response
-    // Let the model decide if it needs more tools based on the conversation context
+    // Check if we're at max iterations
     const atMaxIterations = iterations >= state.maxIterations - 1;
-    const shouldDisableTools = atMaxIterations;
 
-    const toolConfig = shouldDisableTools ? undefined : this.toolExecutor.prepareToolConfig(tools);
+    // Always provide toolConfig when tools exist to satisfy Bedrock API requirements
+    // Even at max iterations, we need toolConfig if message history contains tool blocks
+    const toolConfig = tools.length > 0 ? this.toolExecutor.prepareToolConfig(tools) : undefined;
 
     // Build enhanced system prompt with all client data
     const enhancedSystemPrompt = this.promptManager.injectClientDataIntoPrompt(
@@ -120,6 +120,14 @@ export class ReactGraphNodes {
       clientTools
     );
 
+    // If at max iterations, append strong instruction to avoid tools and provide final answer
+    let finalSystemPrompt = enhancedSystemPrompt;
+    if (atMaxIterations) {
+      finalSystemPrompt =
+        enhancedSystemPrompt +
+        '\n\n**CRITICAL: This is your FINAL response turn. You MUST provide a complete answer to the user WITHOUT calling any tools. Synthesize all previous tool results and provide a comprehensive final answer.**';
+    }
+
     // Resolve model ID using priority: request -> default -> hardcoded
     const resolvedModelId = ModelConfigManager.resolveModelId(modelId);
 
@@ -127,7 +135,7 @@ export class ReactGraphNodes {
     const request: BedrockRequest = {
       modelId: resolvedModelId,
       messages: bedrockMessages,
-      systemPrompt: enhancedSystemPrompt,
+      systemPrompt: finalSystemPrompt,
       toolConfig,
       inferenceConfig: {
         maxTokens: 4096,
@@ -312,6 +320,41 @@ export class ReactGraphNodes {
       threadId,
       runId,
     } = state;
+
+    // Safety check: reject tool execution at max iterations
+    // This is a defensive check in case the model ignores the system prompt instruction
+    const atMaxIterations = state.iterations >= state.maxIterations - 1;
+    if (atMaxIterations && toolCalls.length > 0) {
+      // Filter out client tools from the check
+      const nonClientToolCalls = toolCalls.filter((tc) => !tc.toolName.startsWith('ag_ui__'));
+
+      if (nonClientToolCalls.length > 0) {
+        this.logger.warn('Tool calls attempted at max iterations - rejecting', {
+          iterations: state.iterations,
+          maxIterations: state.maxIterations,
+          toolCalls: nonClientToolCalls.map((tc) => tc.toolName),
+        });
+
+        // Emit metric for rejected tool calls at max iterations
+        const metricsEmitter = getPrometheusMetricsEmitter();
+        metricsEmitter.emitCounter('react_agent_rejected_tools_at_max_iterations_total', 1, {
+          agent_type: 'react',
+        });
+
+        // Return error message forcing final response
+        streamingCallbacks?.onError?.(
+          'Maximum iterations reached. The model attempted to use tools but must provide a final answer.'
+        );
+
+        return {
+          toolResults: {},
+          toolCalls: [],
+          currentStep: 'executeTools',
+          shouldContinue: false,
+          iterations: state.iterations, // Don't increment
+        };
+      }
+    }
 
     const result = await this.toolExecutor.executeToolCalls(
       toolCalls,

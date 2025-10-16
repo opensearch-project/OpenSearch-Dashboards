@@ -1,2 +1,0 @@
-fix:
-- Persist banner dismissal across session reloads using sessionStorage ([#10325](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10325))

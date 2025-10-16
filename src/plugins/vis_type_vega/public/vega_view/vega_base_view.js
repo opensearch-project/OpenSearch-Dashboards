@@ -52,6 +52,7 @@ const vegaFunctions = {
   opensearchDashboardsRemoveAllFilters: 'removeAllFiltersHandler',
   opensearchDashboardsSetTimeFilter: 'setTimeFilterHandler',
   opensearchDashboardsVisEventTriggered: 'triggerExternalActionHandler',
+  opensearchDashboardsSelectTimeRange: 'selectTimeRange',
 };
 
 for (const funcName of Object.keys(vegaFunctions)) {
@@ -412,6 +413,15 @@ export class VegaBaseView {
         },
       ],
     });
+  }
+
+  selectTimeRange(selection) {
+    if (selection) {
+      const range = Object.values(selection)[0];
+      if (range && Object.values(range).length === 2) {
+        this.setTimeFilterHandler(range[0], range[1]);
+      }
+    }
   }
 
   /**

@@ -5,13 +5,24 @@
 
 import './visualization_container.scss';
 import { EuiPanel } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import moment from 'moment';
+import { useDispatch } from 'react-redux';
 
 import './visualization_container.scss';
 import { AxisColumnMappings } from './types';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { useSearchContext } from '../query_panel/utils/use_search_context';
 import { getVisualizationBuilder } from './visualization_builder';
+import { TimeRange } from '../../../../data/common';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { ExploreServices } from '../../types';
+import {
+  clearQueryStatusMap,
+  clearResults,
+  setDateRange,
+} from '../../application/utils/state_management/slices';
+import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 
 export interface UpdateVisualizationProps {
   mappings: AxisColumnMappings;
@@ -33,8 +44,10 @@ export interface UpdateVisualizationProps {
 // };
 
 export const VisualizationContainer = () => {
+  const { services } = useOpenSearchDashboards<ExploreServices>();
   const { results } = useTabResults();
   const searchContext = useSearchContext();
+  const dispatch = useDispatch();
 
   const rows = useMemo(() => results?.hits?.hits || [], [results]);
   const fieldSchema = useMemo(() => results?.fieldSchema || [], [results]);
@@ -53,6 +66,23 @@ export const VisualizationContainer = () => {
     };
   }, [visualizationBuilder]);
 
+  const onSelectTimeRange = useCallback(
+    (timeRange?: TimeRange) => {
+      if (timeRange) {
+        dispatch(
+          setDateRange({
+            from: moment(timeRange.from).toISOString(),
+            to: moment(timeRange.to).toISOString(),
+          })
+        );
+        dispatch(clearResults());
+        dispatch(clearQueryStatusMap());
+        dispatch(executeQueries({ services }));
+      }
+    },
+    [services, dispatch]
+  );
+
   return (
     <div className="exploreVisContainer">
       <EuiPanel
@@ -63,7 +93,7 @@ export const VisualizationContainer = () => {
         paddingSize="none"
       >
         <div className="exploreVisPanel__inner">
-          {visualizationBuilder.renderVisualization({ searchContext })}
+          {visualizationBuilder.renderVisualization({ searchContext, onSelectTimeRange })}
         </div>
       </EuiPanel>
     </div>

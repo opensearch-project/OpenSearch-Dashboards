@@ -1,0 +1,2 @@
+fix:
+- Format duration in ms for discover traces table ([#10719](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10719))

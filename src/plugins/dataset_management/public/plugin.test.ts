@@ -25,7 +25,7 @@ describe('DiscoverPlugin', () => {
         management: managementPluginMock.createSetupContract(),
       })
     ).not.toThrow();
-    expect(setupMock.application.register).toBeCalledTimes(1);
+    expect(setupMock.application.register).toBeCalledTimes(2);
     waitFor(() => {
       expect(setupMock.chrome.navGroup.addNavLinksToGroup).toBeCalledTimes(1);
     });

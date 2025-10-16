@@ -150,6 +150,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     };
   }
 
+  // PPL aggregations are not in use for the histogram anymore
   private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {
     const { aggs } = request.params.body;
     if (!aggs || !query.dataset || !query.dataset.timeFieldName) return;

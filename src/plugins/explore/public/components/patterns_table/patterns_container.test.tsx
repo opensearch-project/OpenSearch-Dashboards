@@ -72,6 +72,7 @@ jest.mock('react-redux', () => ({
 
 jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
   defaultPrepareQueryString: jest.fn().mockReturnValue('default-query'),
+  prepareHistogramCacheKey: jest.fn().mockReturnValue('histogram:default-query'),
 }));
 
 jest.mock('./utils/utils', () => ({

@@ -8,7 +8,7 @@ import React from 'react';
 import type { ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
-import { indexPatternMock } from '../../../../discover/public';
+import { indexPatternMock } from '../../__mock__/index_pattern_mock';
 import { DocViewer } from './doc_viewer';
 import { DocViewRenderProps, DocViewsRegistry } from '../../types/doc_views_types';
 import { DocViewTable } from './doc_viewer_table/table';

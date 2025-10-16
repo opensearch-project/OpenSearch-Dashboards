@@ -63,6 +63,7 @@ describe('TableRowContent', () => {
     isShortDots: false,
     isExpanded: false,
     onToggleExpand: mockOnToggleExpand,
+    isOnTracesPage: false,
   };
 
   beforeEach(() => {
@@ -145,5 +146,16 @@ describe('TableRowContent', () => {
 
     expect(screen.getByTestId('table-cell-field1')).toBeInTheDocument();
     expect(screen.getByTestId('table-cell-field2')).toBeInTheDocument();
+  });
+
+  it('hides expand toggle when on traces page', () => {
+    render(
+      <table>
+        <tbody>
+          <TableRowContent {...(defaultProps as any)} isOnTracesPage={true} />
+        </tbody>
+      </table>
+    );
+    expect(screen.queryByTestId('docTableExpandToggleColumn')).not.toBeInTheDocument();
   });
 });

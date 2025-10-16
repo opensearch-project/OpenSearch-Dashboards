@@ -20,7 +20,7 @@ const traceTestSuite = () => {
 
   before(() => {
     cy.explore.setupWorkspaceAndDataSourceWithTraces(workspaceName, [TRACE_INDEX]);
-    cy.createWorkspaceIndexPatterns({
+    cy.explore.createWorkspaceDataSets({
       workspaceName: workspaceName,
       indexPattern: TRACE_INDEX_PATTERN.replace('*', ''),
       timefieldName: TRACE_TIME_FIELD,
@@ -89,35 +89,31 @@ const traceTestSuite = () => {
       cy.osd.verifyResultsCount(2);
     });
 
-    it('Expanding a span entry shows the correct info', () => {
+    it('Clicking a span entry opens the trace flyout', () => {
       cy.explore.setQueryEditor("| WHERE spanId = '58f52f0436530c7c'");
       cy.osd.verifyResultsCount(1);
-      cy.getElementByTestId('docTableExpandToggleColumn').first().click();
-      cy.getElementByTestId('osdDocViewer').should('be.visible');
-      // Test that timeline is selected as default
-      cy.get('#osd_doc_viewer_tab_0.euiTab-isSelected > .euiTab__content').contains('Timeline');
-      cy.get('#osd_doc_viewer_tab_1 > .euiTab__content').contains('Table');
-      cy.get('#osd_doc_viewer_tab_2 > .euiTab__content').contains('JSON');
+      cy.getElementByTestId('traceFlyoutButton').first().click();
 
-      // Intercept window.open to capture URL and navigate in same tab
-      cy.window().then((win) => {
-        cy.stub(win, 'open').as('windowOpen');
+      // Verify flyout header
+      cy.getElementByTestId('traceFlyout').should(
+        'include.text',
+        'pet-clinic-frontend-java: GET /api/payments/owners/{ownerId}/pets/{petId}'
+      );
+
+      cy.getElementByTestId('traceFlyout').within(() => {
+        // Verify Timeline tab is active by default
+        cy.get('button[role="tab"][aria-selected="true"]').should('contain', 'Timeline');
+
+        // Check for span hierarchy table
+        cy.getElementByTestId('span-hierarchy-table').should('be.visible');
       });
 
-      // Click within gantt chart
-      cy.get('[aria-label="Trace spans Gantt chart"]').find('path[stroke-width="3"]').click();
-
-      cy.get('@windowOpen')
-        .should('have.been.called')
-        .then((stub) => {
-          traceUrl = stub.args[0][0];
-          cy.log(`Captured trace URL: ${traceUrl}`);
-          cy.visit(traceUrl);
-        });
-      // verify that we are on the Trace Details page
-      cy.getElementByTestId('headerApplicationTitle').contains(
-        'Trace: 68b0ad76fc05c5a5f5e3738d42b8a735'
-      );
+      // Get Trace Details link
+      cy.getElementByTestId('traceDetailsLink').should('have.prop', 'href');
+      cy.getElementByTestId('traceDetailsLink').then(function ($a) {
+        traceUrl = $a.prop('href');
+        cy.log(`Captured trace URL: ${traceUrl}`);
+      });
     });
   });
 
@@ -129,20 +125,23 @@ const traceTestSuite = () => {
 
     describe('Page Load and Structure', () => {
       it('should load trace details page with correct structure', () => {
-        // Verify page loads with trace ID in title
+        // Wait for page to load
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+        // Verify page loads with trace ID in badge
         cy.url().should('include', 'traceDetails');
-        cy.getElementByTestId('headerApplicationTitle').contains(
-          'Trace: 68b0ad76fc05c5a5f5e3738d42b8a735'
-        );
+        cy.get('.euiBadge')
+          .contains('Trace ID: 68b0ad76fc05c5a5f5e3738d42b8a735')
+          .should('be.visible');
 
         // Verify Timeline tab is active by default
         cy.get('button[role="tab"][aria-selected="true"]').should('contain', 'Timeline');
 
         // Verify main panels are visible
-        cy.getElementByTestId('span-gantt-chart-panel').should('be.visible');
+        cy.getElementByTestId('span-detail-panel').should('be.visible');
 
-        // Check for gantt chart container
-        cy.get('.exploreGanttChart__container').should('be.visible');
+        // Check for span hierarchy table
+        cy.getElementByTestId('span-hierarchy-table').should('be.visible');
 
         // Verify right panel span information is visible
         cy.contains('Service identifier').should('be.visible');
@@ -150,76 +149,88 @@ const traceTestSuite = () => {
       });
 
       it('should display correct trace information in breadcrumb', () => {
-        // verify that we are on the Trace Details page
-        cy.getElementByTestId('headerApplicationTitle').contains(
-          'Trace: 68b0ad76fc05c5a5f5e3738d42b8a735'
-        );
+        // Wait for page to load
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+        // verify that we are on the Trace Details page by checking the trace ID badge
+        cy.get('.euiBadge')
+          .contains('Trace ID: 68b0ad76fc05c5a5f5e3738d42b8a735')
+          .should('be.visible');
       });
     });
 
-    describe('Gantt Chart Interactions', () => {
-      it('should display gantt chart with span bars', () => {
-        // Wait for the main gantt chart panel to be visible first
-        cy.getElementByTestId('span-gantt-chart-panel', { timeout: 15000 }).should('be.visible');
+    describe('Span Hierarchy Table Interactions', () => {
+      it('should display span hierarchy table with span rows', () => {
+        // Wait for the main span detail panel to be visible first
+        cy.getElementByTestId('span-detail-panel', { timeout: 15000 }).should('be.visible');
 
-        // Wait for gantt chart container to load
-        cy.get('.exploreGanttChart__container', { timeout: 15000 }).should('be.visible');
-        cy.get('.exploreGanttChart__container svg', { timeout: 10000 }).should('be.visible');
-        // Look for Vega span bars - they are path elements with class mark-rect
-        cy.get('.exploreGanttChart__container svg .mark-rect path').should(
-          'have.length.greaterThan',
-          0
-        );
+        // Wait for span hierarchy table to load
+        cy.getElementByTestId('span-hierarchy-table', { timeout: 15000 }).should('be.visible');
+        cy.getElementByTestId('custom-data-grid', { timeout: 10000 }).should('be.visible');
 
-        // Verify the gantt chart has the expected structure from the SVG
-        cy.getElementByTestId('span-gantt-chart-panel')
-          .find('svg')
-          .within(() => {
-            // Check for X-axis title with "Time (ms)"
-            cy.get('.mark-text.role-axis-title').should('contain.text', 'Time (ms)');
+        // Look for span rows in the data grid
+        cy.getElementByTestId('custom-data-grid')
+          .find('[data-test-subj="dataGridRowCell"]')
+          .should('have.length.greaterThan', 0);
 
-            // Check for span bars (rectangles rendered as paths)
-            cy.get('.mark-rect path').should('have.length.greaterThan', 0);
+        // Verify the table has the expected structure
+        cy.getElementByTestId('span-hierarchy-table').within(() => {
+          // Check for span column header
+          cy.get('[data-test-subj="dataGridHeaderCell-span"]').should('contain.text', 'Span');
 
-            // Check for service labels on the left
-            cy.get('.mark-text').should('contain.text', 'customers-service-java');
-            cy.get('.mark-text').should('contain.text', 'pet-clinic-frontend-java');
+          // Check for timeline column header
+          cy.get('[data-test-subj="dataGridHeaderCell-timeline"]').should('be.visible');
 
-            // Check for duration labels in the chart
-            cy.get('.mark-text').should('contain.text', 'ms');
-          });
+          // Check for duration column header
+          cy.get('[data-test-subj="dataGridHeaderCell-durationInNanos"]').should(
+            'contain.text',
+            'Duration'
+          );
+
+          // Check for service names in span cells (first column)
+          cy.get('.euiDataGridRowCell--firstColumn').should(
+            'contain.text',
+            'customers-service-java'
+          );
+          cy.get('.euiDataGridRowCell--firstColumn').should(
+            'contain.text',
+            'pet-clinic-frontend-java'
+          );
+        });
       });
 
-      it('should show tooltips when hovering over spans', () => {
-        // Wait for the main gantt chart panel
-        cy.getElementByTestId('span-gantt-chart-panel', { timeout: 15000 }).should('be.visible');
+      it('should show expand/collapse functionality for span hierarchy', () => {
+        // Wait for the main span detail panel
+        cy.getElementByTestId('span-detail-panel', { timeout: 15000 }).should('be.visible');
 
-        // Find the gantt chart SVG
-        cy.get('.exploreGanttChart__container svg', { timeout: 15000 }).should('be.visible');
+        // Find the span hierarchy table
+        cy.getElementByTestId('span-hierarchy-table', { timeout: 15000 }).should('be.visible');
 
-        // Get the first span bar - first click to activate tooltip functionality
-        cy.get('.exploreGanttChart__container svg .mark-rect path').first().click({ force: true });
+        // Check for expand all button
+        cy.getElementByTestId('treeExpandAll').should('be.visible');
 
-        // Wait a moment for the click to register
+        // Check for collapse all button
+        cy.getElementByTestId('treeCollapseAll').should('be.visible');
+
+        // Test collapse all functionality
+        cy.getElementByTestId('treeCollapseAll').click();
+
+        // Wait a moment for the collapse to take effect
         cy.wait(500);
 
-        // Now hover over the span to trigger tooltip
-        cy.get('.exploreGanttChart__container svg .mark-rect path')
-          .first()
-          .trigger('mouseover', { force: true });
+        // Test expand all functionality
+        cy.getElementByTestId('treeExpandAll').click();
 
-        // Tooltip should exist and be visible
-        cy.get('.vg-tooltip').should('exist').and('not.be.empty');
+        // Wait a moment for the expand to take effect
+        cy.wait(500);
 
-        // Trigger mouseout to clean up
-        cy.get('.exploreGanttChart__container svg .mark-rect path')
-          .first()
-          .trigger('mouseout', { force: true });
+        // Verify expand arrows are present for parent spans
+        cy.getElementByTestId('treeViewExpandArrow').should('exist');
       });
 
-      it('should handle span clicking and update right panel', () => {
-        // Wait for the main gantt chart panel
-        cy.getElementByTestId('span-gantt-chart-panel', { timeout: 15000 }).should('be.visible');
+      it('should handle span row clicking and update right panel', () => {
+        // Wait for the main span detail panel
+        cy.getElementByTestId('span-detail-panel', { timeout: 15000 }).should('be.visible');
 
         // Store initial URL to compare later
         let initialUrl;
@@ -227,34 +238,36 @@ const traceTestSuite = () => {
           initialUrl = url;
         });
 
-        // Find and click on a different span bar
-        cy.get('.exploreGanttChart__container svg .mark-rect path')
-          .eq(1)
-          .then(($path) => {
-            cy.wrap($path).trigger('mousedown', { force: true });
+        // Find and click on a span row
+        cy.getElementByTestId('span-hierarchy-table')
+          .find('[data-test-subj^="span-hierarchy-row-"]')
+          .first()
+          .click({ force: true });
 
-            // Wait for URL to update (indicating span selection changed)
-            cy.url().should('not.equal', initialUrl);
+        // Wait for URL to update (indicating span selection changed)
+        cy.url().should('not.equal', initialUrl);
 
-            // Verify URL contains spanId parameter
-            cy.url().should('include', 'spanId');
-          });
+        // Verify URL contains spanId parameter
+        cy.url().should('include', 'spanId');
       });
 
-      it('should highlight selected span in gantt chart', () => {
-        // Wait for the main gantt chart panel
-        cy.getElementByTestId('span-gantt-chart-panel', { timeout: 15000 }).should('be.visible');
+      it('should highlight selected span in hierarchy table', () => {
+        // Wait for the main span detail panel
+        cy.getElementByTestId('span-detail-panel', { timeout: 15000 }).should('be.visible');
 
-        // Find and click on a span
-        cy.get('.exploreGanttChart__container svg .mark-rect path')
-          .eq(2)
-          .trigger('mousedown', { force: true });
+        // Find and click on a span row
+        cy.getElementByTestId('span-hierarchy-table')
+          .find('[data-test-subj^="span-hierarchy-row-"]')
+          .eq(1)
+          .click({ force: true });
 
         // Verify URL updates (indicating span selection)
         cy.url().should('include', 'spanId');
 
-        // The selected span should have different styling (this depends on Vega spec implementation)
-        // We can verify by checking if the URL parameter matches what we expect
+        // The selected span row should have different styling
+        cy.get('.exploreSpanDetailTable__selectedRow').should('exist');
+
+        // Verify the URL parameter matches what we expect
         cy.url().then((url) => {
           const spanIdMatch = url.match(/spanId:([^,)]+)/);
           expect(spanIdMatch).to.not.be.null;
@@ -264,8 +277,8 @@ const traceTestSuite = () => {
 
     describe('Right Panel Updates', () => {
       it('should update span details when different spans are clicked', () => {
-        // Wait for the main gantt chart panel
-        cy.getElementByTestId('span-gantt-chart-panel', { timeout: 15000 }).should('be.visible');
+        // Wait for the main span detail panel
+        cy.getElementByTestId('span-detail-panel', { timeout: 15000 }).should('be.visible');
 
         // Store initial URL
         let firstUrl;
@@ -273,22 +286,25 @@ const traceTestSuite = () => {
           firstUrl = url;
         });
 
-        cy.get('.exploreGanttChart__container svg .mark-rect path')
+        // Click first span row
+        cy.getElementByTestId('span-hierarchy-table')
+          .find('[data-test-subj^="span-hierarchy-row-"]')
           .first()
-          .trigger('mousedown', { force: true });
+          .click({ force: true });
 
-        // Click second span and verify URL changes (indicating different span selected)
-        cy.get('.exploreGanttChart__container svg .mark-rect path')
+        // Click second span row and verify URL changes (indicating different span selected)
+        cy.getElementByTestId('span-hierarchy-table')
+          .find('[data-test-subj^="span-hierarchy-row-"]')
           .eq(1)
-          .trigger('mousedown', { force: true });
+          .click({ force: true });
 
         cy.url().should('not.equal', firstUrl);
         cy.url().should('include', 'spanId');
       });
 
       it('should display span information in right panel', () => {
-        // Wait for the main gantt chart panel and right panel to load
-        cy.getElementByTestId('span-gantt-chart-panel', { timeout: 15000 }).should('be.visible');
+        // Wait for the main span detail panel and right panel to load
+        cy.getElementByTestId('span-detail-panel', { timeout: 15000 }).should('be.visible');
 
         // Verify the key span information fields are visible
         cy.contains('Service identifier').should('be.visible');
@@ -298,8 +314,8 @@ const traceTestSuite = () => {
       });
 
       it('should show span status information', () => {
-        // Wait for the main gantt chart panel
-        cy.getElementByTestId('span-gantt-chart-panel', { timeout: 15000 }).should('be.visible');
+        // Wait for the main span detail panel
+        cy.getElementByTestId('span-detail-panel', { timeout: 15000 }).should('be.visible');
 
         // Verify span status is displayed and shows OK, Fault, or Error
         cy.contains('Span status').should('be.visible');
@@ -315,8 +331,8 @@ const traceTestSuite = () => {
       });
 
       it('should update span tabs when different spans are selected', () => {
-        // Wait for the main gantt chart panel
-        cy.getElementByTestId('span-gantt-chart-panel', { timeout: 15000 }).should('be.visible');
+        // Wait for the main span detail panel
+        cy.getElementByTestId('span-detail-panel', { timeout: 15000 }).should('be.visible');
 
         // Verify span detail tabs are present
         cy.get('button[role="tab"]').contains('Overview').should('be.visible');
@@ -324,9 +340,10 @@ const traceTestSuite = () => {
         cy.get('button[role="tab"]').contains('Metadata').should('be.visible');
 
         // Click different span and verify tabs still work
-        cy.get('.exploreGanttChart__container svg .mark-rect path')
+        cy.getElementByTestId('span-hierarchy-table')
+          .find('[data-test-subj^="span-hierarchy-row-"]')
           .eq(1)
-          .trigger('mousedown', { force: true });
+          .click({ force: true });
 
         // Click on Metadata tab
         cy.get('button[role="tab"]').contains('Metadata').click();
@@ -350,7 +367,7 @@ const traceTestSuite = () => {
     });
 
     describe('Tab Navigation', () => {
-      it('should switch between Timeline, Span list, and Tree view tabs', () => {
+      it('should switch between Timeline and Span list tabs', () => {
         // Verify Timeline tab is active by default
         cy.get('button[role="tab"]:contains("Timeline")').should(
           'have.attr',
@@ -358,8 +375,8 @@ const traceTestSuite = () => {
           'true'
         );
 
-        // Check if gantt chart container exists
-        cy.get('.exploreGanttChart__container').should('be.visible');
+        // Check if span hierarchy table exists in Timeline view
+        cy.getElementByTestId('span-hierarchy-table').should('be.visible');
 
         // Switch to Span list tab
         cy.get('button[role="tab"]').contains('Span list').click();
@@ -369,19 +386,8 @@ const traceTestSuite = () => {
           'true'
         );
 
-        // Verify gantt chart is hidden and table is shown
-        cy.get('.exploreGanttChart__container').should('not.exist');
-        cy.get('.euiDataGrid').should('be.visible');
-
-        // Switch to Tree view tab
-        cy.get('button[role="tab"]').contains('Tree view').click();
-        cy.get('button[role="tab"]:contains("Tree view")').should(
-          'have.attr',
-          'aria-selected',
-          'true'
-        );
-
-        // Verify tree view content is shown
+        // Verify span hierarchy table is hidden and span list table is shown
+        cy.getElementByTestId('span-hierarchy-table').should('not.exist');
         cy.get('.euiDataGrid').should('be.visible');
 
         // Switch back to Timeline
@@ -392,13 +398,13 @@ const traceTestSuite = () => {
           'true'
         );
 
-        // Verify gantt chart is visible again
-        cy.get('.exploreGanttChart__container').should('be.visible');
+        // Verify span hierarchy table is visible again in Timeline view
+        cy.getElementByTestId('span-hierarchy-table').should('be.visible');
       });
 
       it('should maintain span selection across tab switches', () => {
-        // Wait for the main gantt chart panel and select a span
-        cy.getElementByTestId('span-gantt-chart-panel', { timeout: 15000 }).should('be.visible');
+        // Wait for the main span detail panel and select a span
+        cy.getElementByTestId('span-detail-panel', { timeout: 15000 }).should('be.visible');
 
         // Store initial URL to compare against
         let initialUrl;
@@ -407,7 +413,10 @@ const traceTestSuite = () => {
         });
 
         // Click on a different span to change selection
-        cy.get('.exploreGanttChart__container svg .mark-rect path').eq(3).click({ force: true });
+        cy.getElementByTestId('span-hierarchy-table')
+          .find('[data-test-subj^="span-hierarchy-row-"]')
+          .eq(2)
+          .click({ force: true });
 
         // Wait for URL to update after span selection
         cy.url().should('not.equal', initialUrl);
@@ -491,9 +500,9 @@ const traceTestSuite = () => {
     });
 
     describe('Performance and Reliability', () => {
-      it('should handle page resize without breaking gantt chart', () => {
-        // Wait for the main gantt chart panel
-        cy.getElementByTestId('span-gantt-chart-panel', { timeout: 15000 }).should('be.visible');
+      it('should handle page resize without breaking span hierarchy table', () => {
+        // Wait for the main span detail panel
+        cy.getElementByTestId('span-detail-panel', { timeout: 15000 }).should('be.visible');
 
         // Resize viewport
         cy.viewport(1200, 800);
@@ -501,17 +510,17 @@ const traceTestSuite = () => {
         // Wait a moment for resize to take effect
         cy.wait(1000);
 
-        // Verify gantt chart is still functional
-        cy.get('.exploreGanttChart__container svg').should('be.visible');
-        cy.get('.exploreGanttChart__container svg .mark-rect path').should(
-          'have.length.greaterThan',
-          0
-        );
+        // Verify span hierarchy table is still functional
+        cy.getElementByTestId('span-hierarchy-table').should('be.visible');
+        cy.getElementByTestId('custom-data-grid')
+          .find('[data-test-subj="dataGridRowCell"]')
+          .should('have.length.greaterThan', 0);
 
         // Verify interactions still work
-        cy.get('.exploreGanttChart__container svg .mark-rect path')
+        cy.getElementByTestId('span-hierarchy-table')
+          .find('[data-test-subj^="span-hierarchy-row-"]')
           .first()
-          .trigger('mousedown', { force: true });
+          .click({ force: true });
         cy.url().should('include', 'spanId');
 
         // Reset viewport
@@ -520,14 +529,13 @@ const traceTestSuite = () => {
 
       it('should load trace data within reasonable time', () => {
         // Verify page loads quickly
-        cy.getElementByTestId('span-gantt-chart-panel', { timeout: 15000 }).should('be.visible');
+        cy.getElementByTestId('span-detail-panel', { timeout: 15000 }).should('be.visible');
 
-        // Verify gantt chart and span data is loaded
-        cy.get('.exploreGanttChart__container svg', { timeout: 15000 }).should('be.visible');
-        cy.get('.exploreGanttChart__container svg .mark-rect path').should(
-          'have.length.greaterThan',
-          0
-        );
+        // Verify span hierarchy table and span data is loaded
+        cy.getElementByTestId('span-hierarchy-table', { timeout: 15000 }).should('be.visible');
+        cy.getElementByTestId('custom-data-grid')
+          .find('[data-test-subj="dataGridRowCell"]')
+          .should('have.length.greaterThan', 0);
 
         // Verify right panel has span data
         cy.contains('Service identifier').should('be.visible');
