@@ -168,7 +168,7 @@ describe('createBarGaugeSpec', () => {
     expect(spec.layer[0]).toMatchObject({
       mark: {
         type: 'bar',
-        fill: '#f1f1f1ff',
+        fill: 'grey',
       },
       encoding: {
         y: {

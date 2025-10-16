@@ -71,3 +71,8 @@ export const getColors = () => {
 };
 
 export const DEFAULT_GREY = '#d3d3d3';
+
+export const getUnfilledArea = () => {
+  if (darkMode) return '#27252C';
+  return '#f1f1f1ff';
+};

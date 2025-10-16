@@ -7,7 +7,7 @@ import { groupBy } from 'lodash';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { VisColumn, AxisColumnMappings, VEGASCHEMA, Threshold } from '../types';
 import { calculateValue } from '../utils/calculation';
-import { DEFAULT_GREY, getColors } from '../theme/default_colors';
+import { DEFAULT_GREY, getColors, getUnfilledArea } from '../theme/default_colors';
 import { getSchemaByAxis } from '../utils/utils';
 import {
   getBarOrientation,
@@ -15,7 +15,6 @@ import {
   symbolOpposite,
   getDisplayMode,
   darkenColor,
-  getUnfilledArea,
 } from './bar_gauge_utils';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 
@@ -31,6 +30,15 @@ export const createBarGaugeSpec = (
     styleOptions,
     axisColumnMappings
   );
+
+  const isXaxisNumerical = axisColumnMappings?.x?.schema === 'numerical';
+  const adjustEncoding =
+    (!isXaxisNumerical && styleOptions?.exclusive?.orientation === 'horizontal') ||
+    (isXaxisNumerical && styleOptions?.exclusive?.orientation !== 'horizontal');
+
+  const processedSymbol = [
+    `${symbolOpposite(styleOptions.exclusive.orientation, `${isXaxisNumerical ? 'x' : 'y'}`)}`,
+  ];
 
   const numericalMapping = xAxis?.schema === 'numerical' ? xAxis : yAxis;
   const numericField = numericalMapping?.column;
@@ -105,10 +113,7 @@ export const createBarGaugeSpec = (
     },
     {
       name: 'fontFactor',
-      expr:
-        styleOptions.exclusive.orientation !== 'horizontal'
-          ? `width/${catCounts}/${maxTextLength}/9`
-          : `height/${maxTextLength}/18`,
+      expr: adjustEncoding ? `width/${catCounts}/${maxTextLength}/9` : `height/${maxTextLength}/18`,
     },
   ];
 
@@ -129,7 +134,7 @@ export const createBarGaugeSpec = (
       field: yAxis?.column,
       type: getSchemaByAxis(yAxis),
       ...yAxisStyle,
-      ...(styleOptions.exclusive.orientation !== 'horizontal'
+      ...(!adjustEncoding
         ? {
             scale: {
               domainMin: { expr: 'minBase' },
@@ -142,7 +147,7 @@ export const createBarGaugeSpec = (
       field: xAxis?.column,
       type: getSchemaByAxis(xAxis),
       ...xAxisStyle,
-      ...(styleOptions.exclusive.orientation === 'horizontal'
+      ...(adjustEncoding
         ? {
             scale: {
               domainMin: { expr: 'minBase' },
@@ -192,7 +197,7 @@ export const createBarGaugeSpec = (
         fill: getUnfilledArea(),
       },
       encoding: {
-        [`${symbolOpposite(styleOptions.exclusive.orientation, 'y')}`]: {
+        [`${processedSymbol}`]: {
           type: 'quantitative',
           field: 'maxVal',
         },
@@ -204,7 +209,7 @@ export const createBarGaugeSpec = (
   const bars = completeThreshold.slice(0, -1)?.map((threshold, index) => {
     return {
       transform: [
-        { calculate: `datum.threshold${index}* 0.99`, as: 'gradStart' },
+        { calculate: `datum.threshold${index}*0.99`, as: 'gradStart' },
         { calculate: `datum.threshold${index + 1}`, as: 'gradEndTemp' },
         {
           calculate: `datum['${numericField}'] < datum.gradEndTemp ? datum['${numericField}']: datum.gradEndTemp`,
@@ -229,15 +234,16 @@ export const createBarGaugeSpec = (
               styleOptions.exclusive.orientation,
               styleOptions.exclusive.displayMode,
               threshold,
-              completeThreshold[index + 1].color
+              completeThreshold[index + 1].color,
+              isXaxisNumerical
             ),
           },
           encoding: {
-            [`${symbolOpposite(styleOptions.exclusive.orientation, 'y')}`]: {
+            [`${processedSymbol}`]: {
               type: 'quantitative',
               field: 'gradEnd',
             },
-            [`${symbolOpposite(styleOptions.exclusive.orientation, 'y')}2`]: {
+            [`${processedSymbol}2`]: {
               field: 'gradStart',
             },
           },
@@ -251,16 +257,19 @@ export const createBarGaugeSpec = (
               styleOptions.exclusive.orientation,
               styleOptions.exclusive.displayMode,
               threshold,
-              darkenColor(threshold.color ?? DEFAULT_GREY, 2)
+              darkenColor(threshold.color ?? DEFAULT_GREY, 2),
+              isXaxisNumerical
             ),
             fillOpacity: { expr: `datum.useSolidColor ? 1 : 0` },
           },
           encoding: {
-            [`${symbolOpposite(styleOptions.exclusive.orientation, 'y')}`]: {
+            [`${processedSymbol}`]: {
               type: 'quantitative',
               field: 'gradEnd',
             },
-            [`${symbolOpposite(styleOptions.exclusive.orientation, 'y')}2`]: { field: 'gradStart' },
+            [`${processedSymbol}2`]: {
+              field: 'gradStart',
+            },
           },
         },
       ],
@@ -280,22 +289,22 @@ export const createBarGaugeSpec = (
       mark: {
         type: 'text',
 
-        ...(styleOptions.exclusive.orientation === 'horizontal'
+        ...(adjustEncoding
           ? {
               align: 'left',
               baseline: 'middle',
             }
           : { baseline: 'bottom' }),
 
-        dx: styleOptions.exclusive.orientation === 'horizontal' ? { expr: 'fontFactor*3' } : 0,
-        dy: styleOptions.exclusive.orientation === 'horizontal' ? 0 : { expr: '-fontFactor*3' },
+        dx: adjustEncoding ? { expr: 'fontFactor*3' } : 0,
+        dy: adjustEncoding ? 0 : { expr: '-fontFactor*3' },
         fontSize: { expr: 'fontFactor * 10' },
         ...(styleOptions.exclusive?.valueDisplay === 'textColor'
           ? { fill: { expr: 'fontColor' } }
           : {}),
       },
       encoding: {
-        [`${symbolOpposite(styleOptions.exclusive.orientation, 'y')}`]: {
+        [`${processedSymbol}`]: {
           type: 'quantitative',
           field: 'textY',
         },

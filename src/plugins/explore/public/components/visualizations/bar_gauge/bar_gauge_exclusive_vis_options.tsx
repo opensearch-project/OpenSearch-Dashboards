@@ -12,22 +12,8 @@ import { StyleAccordion } from '../style_panel/style_accordion';
 interface BarGaugeVisOptionsProps {
   styles: BarGaugeChartStyle['exclusive'];
   onChange: (styles: BarGaugeChartStyle['exclusive']) => void;
+  isXaxisNumerical: boolean;
 }
-
-const orientationOption = [
-  {
-    id: 'vertical',
-    label: i18n.translate('explore.vis.barGauge.orientation.vertical', {
-      defaultMessage: 'Vertical',
-    }),
-  },
-  {
-    id: 'horizontal',
-    label: i18n.translate('explore.vis.barGauge.orientation.threshold', {
-      defaultMessage: 'Horizontal',
-    }),
-  },
-];
 
 const displayModeOption = [
   {
@@ -71,7 +57,43 @@ const valueDisplayOption = [
   },
 ];
 
-export const BarGaugeExclusiveVisOptions = ({ styles, onChange }: BarGaugeVisOptionsProps) => {
+export const BarGaugeExclusiveVisOptions = ({
+  styles,
+  onChange,
+  isXaxisNumerical,
+}: BarGaugeVisOptionsProps) => {
+  const orientationOption = [
+    isXaxisNumerical
+      ? {
+          id: 'vertical',
+          label: i18n.translate('explore.vis.barGauge.orientation.vertical.isXaxisNumerical', {
+            defaultMessage: 'Horizontal',
+          }),
+        }
+      : {
+          id: 'vertical',
+          label: i18n.translate('explore.vis.barGauge.orientation.vertical', {
+            defaultMessage: 'Vertical',
+          }),
+        },
+    isXaxisNumerical
+      ? {
+          id: 'horizontal',
+          label: i18n.translate(
+            'explore.vis.barGauge.orientation.threshold.horizontal.isXaxisNumerical',
+            {
+              defaultMessage: 'Vertical',
+            }
+          ),
+        }
+      : {
+          id: 'horizontal',
+          label: i18n.translate('explore.vis.barGauge.orientation.threshold.horizontal', {
+            defaultMessage: 'Horizontal',
+          }),
+        },
+  ];
+
   const updateExclusiveOption = (key: keyof BarGaugeChartStyle['exclusive'], value: any) => {
     onChange({
       ...styles,
