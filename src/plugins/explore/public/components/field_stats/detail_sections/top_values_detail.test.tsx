@@ -48,6 +48,22 @@ describe('TopValuesSection Component', () => {
     expect(items[2].percentage).toBe(20);
     component.unmount();
   });
+
+  it('renders emdash for undefined count values', () => {
+    const mockTopValues = [
+      { value: 'success', count: undefined },
+      { value: 'error', count: 300 },
+    ];
+    const component = mountWithIntl(<TopValuesSection data={mockTopValues} field={mockField} />);
+    const table = component.find(EuiBasicTable);
+
+    expect(table.prop('items')).toHaveLength(2);
+    const columns = table.prop('columns') as any[];
+    const countColumn = columns.find((col) => col.field === 'count');
+    expect(countColumn.render(undefined)).toBe('—');
+    expect(countColumn.render(300)).toBe('300');
+    component.unmount();
+  });
 });
 
 describe('topValuesDetailConfig', () => {

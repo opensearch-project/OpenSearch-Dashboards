@@ -29,7 +29,7 @@ export interface FieldDetails {
 
 export interface TopValue {
   value: string | number;
-  count: number;
+  count?: number;
 }
 
 export interface NumericSummary {
