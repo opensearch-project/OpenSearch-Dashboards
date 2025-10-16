@@ -123,7 +123,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
         clearTimeout(minimumDisplayTimerRef.current);
       }
     };
-  }, [props.isQueryRunning, props.showCancelButton]);
+  }, [props.isQueryRunning, props.showCancelButton, shouldShowCancelButton]);
 
   const handleOpenDatePicker = useCallback(() => {
     if (datePickerRef.current) {
