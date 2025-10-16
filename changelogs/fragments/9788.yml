@@ -1,0 +1,2 @@
+fix:
+- Default extending numeric precision to off ([#9788](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9788))
