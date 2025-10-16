@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Query } from 'src/plugins/data/common';
+import { indexPatterns as indexPatternUtils } from '../../../../data/public';
 import { ExploreServices } from '../../types';
 
 /**
@@ -36,19 +36,31 @@ export const executeFieldStatsQuery = async (
   datasetType: string = 'INDEX_PATTERN'
 ): Promise<any> => {
   try {
-    const searchSource = await services.data.search.searchSource.create();
     const dataView = await services.data.dataViews.get(datasetId, datasetType !== 'INDEX_PATTERN');
     const filters = services.data.query.filterManager.getFilters();
 
-    const queryObject: Query = {
+    const searchSource = await services.data.search.searchSource.create();
+
+    const timeRangeSearchSource = await services.data.search.searchSource.create();
+    const { isDefault } = indexPatternUtils;
+    if (isDefault(dataView)) {
+      const timefilter = services.data.query.timefilter.timefilter;
+      timeRangeSearchSource.setField('filter', () => {
+        return timefilter.createFilter(dataView);
+      });
+    }
+
+    searchSource.setParent(timeRangeSearchSource);
+
+    const queryStringWithExecutedQuery = {
+      ...services.data.query.queryString.getQuery(),
       query: queryString,
-      language: 'PPL',
     };
 
     searchSource.setFields({
       index: dataView,
       size: 0, // only need aggregation results, no hits
-      query: queryObject,
+      query: queryStringWithExecutedQuery,
       highlightAll: false,
       version: true,
       filter: filters,
