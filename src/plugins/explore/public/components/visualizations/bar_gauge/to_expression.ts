@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { groupBy, max } from 'lodash';
+import { groupBy } from 'lodash';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { VisColumn, AxisColumnMappings, VEGASCHEMA, Threshold } from '../types';
 import { calculateValue } from '../utils/calculation';
@@ -190,7 +190,6 @@ export const createBarGaugeSpec = (
         type: 'bar',
         clip: true,
         fill: getUnfilledArea(),
-        fillOpacity: { expr: `datum['${numericField}'] <= datum.minVal ? 0 : 1` },
       },
       encoding: {
         [`${symbolOpposite(styleOptions.exclusive.orientation, 'y')}`]: {
@@ -205,7 +204,7 @@ export const createBarGaugeSpec = (
   const bars = completeThreshold.slice(0, -1)?.map((threshold, index) => {
     return {
       transform: [
-        { calculate: `datum.threshold${index}*0.99`, as: 'gradStart' },
+        { calculate: `datum.threshold${index}* 0.99`, as: 'gradStart' },
         { calculate: `datum.threshold${index + 1}`, as: 'gradEndTemp' },
         {
           calculate: `datum['${numericField}'] < datum.gradEndTemp ? datum['${numericField}']: datum.gradEndTemp`,
@@ -274,7 +273,7 @@ export const createBarGaugeSpec = (
     const nameLayer = {
       transform: [
         {
-          calculate: `datum.minVal >= datum.maxVal ? datum.minVal : datum['${numericField}'] < datum.minVal ? datum.minVal : datum.maxVal`,
+          calculate: `datum.minVal >= datum.maxVal ? datum.minVal : datum.maxVal`,
           as: 'textY',
         },
       ],
