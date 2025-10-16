@@ -34,7 +34,7 @@ import http from 'http';
 
 import sinon from 'sinon';
 import nock from 'nock';
-import glob from 'glob-all';
+import glob from 'glob';
 import del from 'del';
 
 import { Logger } from '../lib/logger';
