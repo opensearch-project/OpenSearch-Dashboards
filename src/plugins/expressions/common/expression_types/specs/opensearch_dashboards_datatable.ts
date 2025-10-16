@@ -55,6 +55,11 @@ export interface OpenSearchDashboardsDatatable {
   type: typeof name;
   columns: OpenSearchDashboardsDatatableColumn[];
   rows: OpenSearchDashboardsDatatableRow[];
+  /**
+   * Optional metadata describing the whole datatable. Producers may attach
+   * arbitrary information such as total hits, partial results flags, etc.
+   */
+  meta?: Record<string, unknown>;
 }
 
 export const opensearchDashboardsDatatable = {

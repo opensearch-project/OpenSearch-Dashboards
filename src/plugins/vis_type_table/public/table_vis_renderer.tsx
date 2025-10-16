@@ -17,13 +17,19 @@ export const getTableVisRenderer: (
   name: 'table_vis',
   displayName: 'table visualization',
   reuseDomNode: true,
-  render: async (domNode, { visData, visConfig }, handlers) => {
+  render: async (domNode, { visData, visConfig, meta }, handlers) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
 
     render(
-      <TableVisApp services={core} visData={visData} visConfig={visConfig} handlers={handlers} />,
+      <TableVisApp
+        services={core}
+        visData={visData}
+        visConfig={visConfig}
+        handlers={handlers}
+        meta={meta}
+      />,
       domNode
     );
   },
