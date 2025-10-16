@@ -292,21 +292,21 @@ describe('CorrelationService', () => {
         mockDataService,
         'trace-id'
       );
-      expect(result1).toEqual({ logDatasets: [], logs: [] });
+      expect(result1).toEqual({ logDatasets: [], logs: [], datasetLogs: {} });
 
       const result2 = await correlationService.checkCorrelationsAndFetchLogs(
         { id: 'dataset-id' } as Dataset,
         null as any,
         'trace-id'
       );
-      expect(result2).toEqual({ logDatasets: [], logs: [] });
+      expect(result2).toEqual({ logDatasets: [], logs: [], datasetLogs: {} });
 
       const result3 = await correlationService.checkCorrelationsAndFetchLogs(
         { id: 'dataset-id' } as Dataset,
         mockDataService,
         ''
       );
-      expect(result3).toEqual({ logDatasets: [], logs: [] });
+      expect(result3).toEqual({ logDatasets: [], logs: [], datasetLogs: {} });
     });
 
     it('should fetch logs when correlations are found', async () => {
@@ -441,7 +441,7 @@ describe('CorrelationService', () => {
         traceId
       );
 
-      expect(result).toEqual({ logDatasets: [], logs: [] });
+      expect(result).toEqual({ logDatasets: [], logs: [], datasetLogs: {} });
       expect(mockFetchTraceLogsByTraceId).not.toHaveBeenCalled();
     });
 
@@ -460,7 +460,7 @@ describe('CorrelationService', () => {
         traceId
       );
 
-      expect(result).toEqual({ logDatasets: [], logs: [] });
+      expect(result).toEqual({ logDatasets: [], logs: [], datasetLogs: {} });
       expect(consoleSpy).toHaveBeenCalledWith('Error in checkCorrelationsAndFetchLogs:', error);
 
       consoleSpy.mockRestore();
