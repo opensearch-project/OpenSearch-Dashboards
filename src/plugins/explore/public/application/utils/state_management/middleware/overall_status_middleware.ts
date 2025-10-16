@@ -6,10 +6,11 @@
 import { Middleware } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { QueryExecutionStatus, QueryResultStatus } from '../types';
-import { QueryStatusMap,
-        setOverallQueryStatus,
-        setHasUserInitiatedQuery }
-from '../slices/query_editor/query_editor_slice';
+import {
+  QueryStatusMap,
+  setOverallQueryStatus,
+  setHasUserInitiatedQuery,
+} from '../slices/query_editor/query_editor_slice';
 
 /**
  * Middleware that automatically computes overall status from individual query statuses
