@@ -50,6 +50,11 @@ const OverviewField: React.FC<OverviewFieldProps> = ({
     {copyable && copyValue ? (
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
+          <EuiText size="s" color="default">
+            {value}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiCopy textToCopy={copyValue}>
             {(copy) => (
               <EuiSmallButtonIcon
@@ -61,11 +66,6 @@ const OverviewField: React.FC<OverviewFieldProps> = ({
               />
             )}
           </EuiCopy>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s" color="default">
-            {value}
-          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ) : (
