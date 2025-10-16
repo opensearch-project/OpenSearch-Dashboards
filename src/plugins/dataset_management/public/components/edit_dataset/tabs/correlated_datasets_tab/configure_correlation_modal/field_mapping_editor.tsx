@@ -306,9 +306,31 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
   );
 
   // Handler to start editing a dataset
-  const handleStartEdit = useCallback((datasetId: string) => {
-    setEditingDatasetId(datasetId);
-  }, []);
+  const handleStartEdit = useCallback(
+    (datasetId: string) => {
+      // If there's already a dataset being edited, revert its changes first
+      if (editingDatasetId !== null && editingDatasetId !== datasetId) {
+        // Revert previous dataset to original mappings
+        setDatasetFieldMappings((prev) =>
+          prev.map((ds) =>
+            ds.datasetId === editingDatasetId
+              ? { ...ds, mappings: { ...originalMappings[editingDatasetId] } }
+              : ds
+          )
+        );
+
+        // Clear invalid fields for previous dataset
+        setInvalidFields((prev) => {
+          const { [editingDatasetId]: _, ...rest } = prev;
+          return rest;
+        });
+      }
+
+      // Now switch to the new dataset
+      setEditingDatasetId(datasetId);
+    },
+    [editingDatasetId, originalMappings]
+  );
 
   // Handler to cancel editing and revert changes
   const handleCancelEdit = useCallback(
@@ -516,7 +538,7 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
                 data-test-subj={`cancelEdit-${row.datasetId}`}
               />
               <EuiButtonIcon
-                iconType="check"
+                iconType="save"
                 onClick={() => handleSaveDataset(row.datasetId)}
                 aria-label="Save"
                 isLoading={savingDatasetId === row.datasetId}
