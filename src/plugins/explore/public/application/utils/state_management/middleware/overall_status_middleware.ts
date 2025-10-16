@@ -43,9 +43,10 @@ export const createOverallStatusMiddleware = (): Middleware => {
       store.dispatch(setOverallQueryStatus(newOverallStatus));
 
       // Reset hasUserInitiatedQuery flag when queries complete (READY, NO_RESULTS, or ERROR)
-      if (newOverallStatus.status !== QueryExecutionStatus.LOADING &&
-          newOverallStatus.status !== QueryExecutionStatus.UNINITIALIZED)
-      {
+      if (
+        newOverallStatus.status !== QueryExecutionStatus.LOADING &&
+        newOverallStatus.status !== QueryExecutionStatus.UNINITIALIZED
+      ) {
         store.dispatch(setHasUserInitiatedQuery(false));
       }
     }
