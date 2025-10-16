@@ -13,6 +13,8 @@ export const createMockServices = (): ExploreServices =>
         searchSource: {
           create: jest.fn().mockResolvedValue({
             setFields: jest.fn(),
+            setField: jest.fn(),
+            setParent: jest.fn(),
             fetch: jest.fn(),
           }),
         },
@@ -26,6 +28,17 @@ export const createMockServices = (): ExploreServices =>
       query: {
         filterManager: {
           getFilters: jest.fn().mockReturnValue([]),
+        },
+        timefilter: {
+          timefilter: {
+            createFilter: jest.fn().mockReturnValue({}),
+          },
+        },
+        queryString: {
+          getQuery: jest.fn().mockReturnValue({
+            query: '',
+            language: 'PPL',
+          }),
         },
       },
     },

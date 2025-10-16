@@ -5,6 +5,22 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+
+// Mock the data plugin before any imports that use it
+jest.mock('../../../../data/public', () => ({
+  indexPatterns: {
+    isDefault: jest.fn(() => true),
+  },
+}));
+
+jest.mock('../../application/context/dataset_context/dataset_context');
+jest.mock('../../../../opensearch_dashboards_react/public');
+jest.mock('./utils/field_stats_utils');
+jest.mock('./field_stats_queries');
+jest.mock('./field_stats_table', () => ({
+  FieldStatsTable: jest.fn(() => <div data-test-subj="field-stats-table">Mocked Table</div>),
+}));
+
 import { FieldStatsContainer } from './field_stats_container';
 import { useDatasetContext } from '../../application/context/dataset_context/dataset_context';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -24,14 +40,6 @@ import {
   createMockDataset,
   createMockFieldStatsItem,
 } from './utils/field_stats.stubs';
-
-jest.mock('../../application/context/dataset_context/dataset_context');
-jest.mock('../../../../opensearch_dashboards_react/public');
-jest.mock('./utils/field_stats_utils');
-jest.mock('./field_stats_queries');
-jest.mock('./field_stats_table', () => ({
-  FieldStatsTable: jest.fn(() => <div data-test-subj="field-stats-table">Mocked Table</div>),
-}));
 
 const mockUseDatasetContext = useDatasetContext as jest.MockedFunction<typeof useDatasetContext>;
 const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFunction<

@@ -41,21 +41,28 @@ describe('field_stats_queries', () => {
 
   describe('executeFieldStatsQuery', () => {
     const mockServices = createMockServices();
-    const mockSearchSource = {
-      setFields: jest.fn(),
-      fetch: jest.fn(),
-    };
 
     beforeEach(() => {
       jest.clearAllMocks();
-      (mockServices.data.search.searchSource.create as jest.Mock).mockResolvedValue(
-        mockSearchSource
-      );
+      (mockServices.data.search.searchSource.create as jest.Mock).mockResolvedValue({
+        setFields: jest.fn(),
+        setField: jest.fn(),
+        setParent: jest.fn(),
+        fetch: jest.fn().mockResolvedValue({}),
+      });
     });
 
     it('executes query successfully', async () => {
       const mockResults = { hits: { total: 100 } };
-      mockSearchSource.fetch.mockResolvedValue(mockResults);
+      const mockSearchSource = {
+        setFields: jest.fn(),
+        setField: jest.fn(),
+        setParent: jest.fn(),
+        fetch: jest.fn().mockResolvedValue(mockResults),
+      };
+      (mockServices.data.search.searchSource.create as jest.Mock).mockResolvedValue(
+        mockSearchSource
+      );
 
       const result = await executeFieldStatsQuery(
         mockServices,
@@ -69,7 +76,15 @@ describe('field_stats_queries', () => {
     });
 
     it('sets correct searchSource fields', async () => {
-      mockSearchSource.fetch.mockResolvedValue({});
+      const mockSearchSource = {
+        setFields: jest.fn(),
+        setField: jest.fn(),
+        setParent: jest.fn(),
+        fetch: jest.fn().mockResolvedValue({}),
+      };
+      (mockServices.data.search.searchSource.create as jest.Mock).mockResolvedValue(
+        mockSearchSource
+      );
 
       await executeFieldStatsQuery(mockServices, 'source = test | stats count()', 'test-id');
 
@@ -87,8 +102,6 @@ describe('field_stats_queries', () => {
     });
 
     it('handles INDEX_PATTERN vs other dataset types', async () => {
-      mockSearchSource.fetch.mockResolvedValue({});
-
       await executeFieldStatsQuery(
         mockServices,
         'source = test | stats count()',
@@ -108,7 +121,15 @@ describe('field_stats_queries', () => {
 
     it('propagates errors', async () => {
       const error = new Error('Query failed');
-      mockSearchSource.fetch.mockRejectedValue(error);
+      const mockSearchSource = {
+        setFields: jest.fn(),
+        setField: jest.fn(),
+        setParent: jest.fn(),
+        fetch: jest.fn().mockRejectedValue(error),
+      };
+      (mockServices.data.search.searchSource.create as jest.Mock).mockResolvedValue(
+        mockSearchSource
+      );
 
       await expect(
         executeFieldStatsQuery(mockServices, 'source = test | stats count()', 'test-id')
