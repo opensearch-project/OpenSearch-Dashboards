@@ -66,6 +66,7 @@ export interface TraceDetailsProps {
   setMenuMountPoint?: (mount: MountPoint | undefined) => void;
   isEmbedded?: boolean;
   isFlyout?: boolean;
+  defaultDataset?: Dataset;
 }
 // Displaying only 10 logs in the tab
 export const LOGS_DATA = 10;
@@ -74,6 +75,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   setMenuMountPoint,
   isEmbedded = false,
   isFlyout = false,
+  defaultDataset,
 }) => {
   const {
     services: { chrome, data, osdUrlStateStorage, savedObjects, uiSettings },
@@ -84,7 +86,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     return createTraceAppState({
       stateDefaults: {
         traceId: '',
-        dataset: {
+        dataset: defaultDataset ?? {
           id: 'default-dataset-id',
           title: 'otel-v1-apm-span-*',
           type: 'INDEX_PATTERN',
@@ -94,6 +96,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
       },
       osdUrlStateStorage: osdUrlStateStorage!,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [osdUrlStateStorage]);
 
   // Get current state values and subscribe to changes
@@ -114,7 +117,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const [transformedHits, setTransformedHits] = useState<TraceHit[]>([]);
   const [spanFilters, setSpanFilters] = useState<SpanFilter[]>([]);
   const [pplQueryData, setPplQueryData] = useState<PPLResponse | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isBackgroundLoading, setIsBackgroundLoading] = useState<boolean>(false);
   const [unfilteredHits, setUnfilteredHits] = useState<TraceHit[]>([]);
   const mainPanelRef = useRef<HTMLDivElement | null>(null);
@@ -128,6 +130,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     isValid: boolean;
     missingFields: string[];
   } | null>(null);
+  const [prevTraceId, setPrevTraceId] = useState<string | undefined>(undefined);
 
   // Create PPL service instance
   const pplService = useMemo(() => (data ? new TracePPLService(data) : undefined), [data]);
@@ -180,13 +183,15 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     }
   }, [dataset, correlationService, data, traceId]);
 
+  const isLoading = prevTraceId !== traceId;
+
   useEffect(() => {
     const fetchData = async (filters: SpanFilter[] = []) => {
       if (!pplService || !traceId || !dataset) return;
 
-      // Only show full loading spinner on initial load
-      if (transformedHits.length === 0) {
-        setIsLoading(true);
+      if (isLoading) {
+        setTransformedHits([]);
+        setUnfilteredHits([]);
       } else {
         // Use background loading for filter updates
         setIsBackgroundLoading(true);
@@ -207,8 +212,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
         // eslint-disable-next-line no-console
         console.error('Failed to fetch trace data:', err);
       } finally {
-        setIsLoading(false);
         setIsBackgroundLoading(false);
+        setPrevTraceId(traceId);
       }
     };
 
@@ -222,7 +227,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     if (traceId && dataset && pplService) {
       fetchData(spanFilters);
     }
-  }, [traceId, dataset, pplService, spanFilters, transformedHits.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [traceId, dataset, pplService, spanFilters]);
 
   useEffect(() => {
     if (!pplQueryData) return;
@@ -277,7 +283,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
   // Find root span for breadcrumb (always shows root span info)
   const rootSpan = useMemo((): TraceHit | undefined => {
-    if (transformedHits.length === 0) return undefined;
+    if (isLoading || transformedHits.length === 0) return undefined;
 
     // Find span without parent first
     const spanWithoutParent = transformedHits.find((span) => !span.parentSpanId);
@@ -290,11 +296,11 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
       const currentTime = new Date(current.startTime || 0).getTime();
       return currentTime < earliestTime ? current : earliest;
     }, undefined);
-  }, [transformedHits]);
+  }, [transformedHits, isLoading]);
 
   // Find selected span, with fallback to root span logic
   const selectedSpan = useMemo((): TraceHit | undefined => {
-    if (transformedHits.length === 0) return undefined;
+    if (isLoading || transformedHits.length === 0) return undefined;
 
     // If we have a specific spanId, try to find it first
     if (spanId) {
@@ -304,7 +310,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
     // Fallback to root span if no specific span selected or found
     return rootSpan;
-  }, [spanId, transformedHits, rootSpan]);
+  }, [spanId, transformedHits, rootSpan, isLoading]);
 
   // Update URL state when fallback span selection occurs
   useEffect(() => {
