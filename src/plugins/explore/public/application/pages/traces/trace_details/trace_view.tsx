@@ -122,6 +122,21 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const mainPanelRef = useRef<HTMLDivElement | null>(null);
   const [visualizationKey, setVisualizationKey] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<string>(TraceDetailTab.TIMELINE);
+  const [spanDetailActiveTab, setSpanDetailActiveTab] = useState<string>('overview');
+
+  // Preserve tab state across span changes by using a ref to track if we should reset
+  const shouldResetTabRef = useRef<boolean>(false);
+  const prevSpanIdRef = useRef<string | undefined>(spanId);
+
+  // Only reset tab to overview when explicitly needed (e.g., when logs tab becomes unavailable)
+  useEffect(() => {
+    // Don't reset tab just because span changed
+    if (prevSpanIdRef.current !== spanId) {
+      prevSpanIdRef.current = spanId;
+      // Only reset if we explicitly need to (this will be handled by the child component)
+      shouldResetTabRef.current = false;
+    }
+  }, [spanId]);
   const [logsData, setLogsData] = useState<LogHit[]>([]);
   const [logDatasets, setLogDatasets] = useState<Dataset[]>([]);
   const [datasetLogs, setDatasetLogs] = useState<Record<string, LogHit[]>>({});
@@ -586,6 +601,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                         logDatasets={logDatasets}
                         logsData={logsData}
                         isLogsLoading={isLogsLoading}
+                        activeTab={spanDetailActiveTab as any}
+                        onTabChange={(tabId) => setSpanDetailActiveTab(tabId)}
                       />
                     </div>
                   </EuiResizablePanel>
