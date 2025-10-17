@@ -15,7 +15,6 @@ import { StyleAccordion } from '../style_panel/style_accordion';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
 import { PercentageSelector } from '../style_panel/percentage/percentage_selector';
-import { UnitPanel } from '../style_panel/unit/unit_panel';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
 
@@ -80,12 +79,6 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
             </StyleAccordion>
           </EuiFlexItem>
           <EuiFlexItem>
-            <UnitPanel
-              unit={styleOptions.unitId}
-              onUnitChange={(value) => updateStyleOption('unitId', value)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
             <ThresholdPanel
               thresholdsOptions={styleOptions.thresholdOptions}
               onChange={(options) => updateStyleOption('thresholdOptions', options)}
@@ -97,6 +90,8 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               max={styleOptions.max}
               onMinChange={(value) => updateStyleOption('min', value)}
               onMaxChange={(value) => updateStyleOption('max', value)}
+              unit={styleOptions.unitId}
+              onUnitChange={(value) => updateStyleOption('unitId', value)}
             />
           </EuiFlexItem>
           <EuiFlexItem>

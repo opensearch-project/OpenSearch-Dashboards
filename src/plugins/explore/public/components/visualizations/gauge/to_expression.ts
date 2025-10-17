@@ -13,7 +13,7 @@ import {
   mergeThresholdsWithBase,
   getMaxAndMinBase,
 } from '../style_panel/threshold/threshold_utils';
-import { getColors, DEFAULT_GREY } from '../theme/default_colors';
+import { getColors, getGrey } from '../theme/default_colors';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 
 export const createGauge = (
@@ -69,7 +69,7 @@ export const createGauge = (
   // if threshold is not found or minBase > targetValue or minBase >= maxBase, use default gray color
   const fillColor =
     !targetThreshold || minBase > targetValue || minBase >= maxBase || !isValidNumber
-      ? DEFAULT_GREY
+      ? getGrey()
       : targetThreshold.color;
 
   const ranges = generateRanges(mergedThresholds, maxBase);
