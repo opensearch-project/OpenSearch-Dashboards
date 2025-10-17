@@ -1,0 +1,2 @@
+infra:
+- Bump OpenSearch version to 3.3 in Cypress workflows ([#10750](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10750))
