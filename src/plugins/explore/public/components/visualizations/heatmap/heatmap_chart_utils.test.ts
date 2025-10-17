@@ -4,7 +4,7 @@
  */
 import { createLabelLayer, getDataBound, addTransform, enhanceStyle } from './heatmap_chart_utils';
 import { AggregationType, VisFieldType, ColorSchemas, ScaleType, VisColumn } from '../types';
-import { DEFAULT_GREY } from '../theme/default_colors';
+import { getGrey } from '../theme/default_colors';
 import { defaultHeatmapChartStyles, HeatmapLabels, HeatmapChartStyle } from './heatmap_vis_config';
 
 describe('createLabelLayer', () => {
@@ -280,7 +280,7 @@ describe('enhanceStyle', () => {
     expect(markLayer.encoding.color.scale.type).toBe('threshold');
     expect(markLayer.encoding.color.scale.domain).toEqual([0, 2, 8]);
     expect(markLayer.encoding.color.scale.range).toEqual([
-      DEFAULT_GREY,
+      getGrey(),
       '#00BD6B',
       '#00FF00',
       '#0000FF',
@@ -314,7 +314,7 @@ describe('enhanceStyle', () => {
 
     expect(markLayer.encoding.color.scale.domain).toEqual([0, 2, 8]);
     expect(markLayer.encoding.color.scale.range).toEqual([
-      DEFAULT_GREY,
+      getGrey(),
       '#00BD6B',
       '#00FF00',
       '#0000FF',

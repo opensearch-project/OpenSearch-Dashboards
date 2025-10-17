@@ -7,7 +7,7 @@ import { groupBy } from 'lodash';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { VisColumn, AxisColumnMappings, VEGASCHEMA, Threshold } from '../types';
 import { calculateValue } from '../utils/calculation';
-import { DEFAULT_GREY, getColors, getUnfilledArea } from '../theme/default_colors';
+import { getGrey, getColors, getUnfilledArea } from '../theme/default_colors';
 import { getSchemaByAxis } from '../utils/utils';
 import {
   getBarOrientation,
@@ -297,7 +297,7 @@ export const createBarGaugeSpec = (
             type: 'threshold',
             //  last threshold which is just for max value capping in gradient mode
             domain: processedThresholds.map((t) => t.value).slice(0, -1),
-            range: [DEFAULT_GREY, ...processedThresholds.map((t) => t.color)].slice(0, -1),
+            range: [getGrey(), ...processedThresholds.map((t) => t.color)].slice(0, -1),
           },
           legend: null,
         },
@@ -338,7 +338,7 @@ export const createBarGaugeSpec = (
           scale: {
             type: 'threshold',
             domain: processedThresholds.map((t) => t.value).slice(0, -1),
-            range: [DEFAULT_GREY, ...processedThresholds.map((t) => t.color)].slice(0, -1),
+            range: [getGrey(), ...processedThresholds.map((t) => t.color)].slice(0, -1),
           },
           legend: null,
         },
