@@ -1,0 +1,2 @@
+feat:
+- Pass top 5 rows as default context and improve system prompt for ppl accuracy ([#10743](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10743))
