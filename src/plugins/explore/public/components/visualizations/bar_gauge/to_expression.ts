@@ -13,8 +13,9 @@ import {
   getBarOrientation,
   thresholdsToGradient,
   symbolOpposite,
-  getDisplayMode,
   darkenColor,
+  processThresholds,
+  generateParams,
 } from './bar_gauge_utils';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 
@@ -101,11 +102,18 @@ export const createBarGaugeSpec = (
         ]),
   ];
 
+  const processedThresholds = processThresholds(completeThreshold);
+
+  const gradientParams = generateParams(processedThresholds, styleOptions, isXaxisNumerical);
+
+  const maxBase = styleOptions?.max ?? maxNumber;
+  const minBase = styleOptions?.min ?? 0;
+
   const params = [
     { name: 'fontColor', value: getColors().text },
     {
       name: 'maxBase',
-      value: styleOptions?.max ?? maxNumber,
+      value: Math.max(minBase, maxBase),
     },
     {
       name: 'minBase',
@@ -115,6 +123,7 @@ export const createBarGaugeSpec = (
       name: 'fontFactor',
       expr: adjustEncoding ? `width/${catCounts}/${maxTextLength}/9` : `height/${maxTextLength}/18`,
     },
+    ...gradientParams,
   ];
 
   const transformLayer = [
@@ -126,7 +135,7 @@ export const createBarGaugeSpec = (
       calculate: 'minBase',
       as: 'minVal',
     },
-    ...thresholdsToGradient(completeThreshold),
+    ...thresholdsToGradient(processedThresholds),
   ];
 
   const encodingLayer = {
@@ -136,10 +145,7 @@ export const createBarGaugeSpec = (
       ...yAxisStyle,
       ...(!adjustEncoding
         ? {
-            scale: {
-              domainMin: { expr: 'minBase' },
-              domainMax: { expr: 'maxBase' },
-            },
+            domain: { expr: '[minBase,maxBase]' },
           }
         : {}),
     },
@@ -149,28 +155,10 @@ export const createBarGaugeSpec = (
       ...xAxisStyle,
       ...(adjustEncoding
         ? {
-            scale: {
-              domainMin: { expr: 'minBase' },
-              domainMax: { expr: 'maxBase' },
-            },
+            domain: { expr: '[minBase,maxBase]' },
           }
         : {}),
     },
-    ...(styleOptions.exclusive.displayMode === 'basic'
-      ? {
-          color: {
-            field: numericField,
-            type: 'quantitative',
-            scale: {
-              type: 'threshold',
-              //  last threshold which is just for max value capping in gradient mode
-              domain: completeThreshold.map((t) => t.value).slice(0, -1),
-              range: [DEFAULT_GREY, ...completeThreshold.map((t) => t.color)].slice(0, -1),
-            },
-            legend: null,
-          },
-        }
-      : {}),
     ...(styleOptions.tooltipOptions?.mode !== 'hidden' && {
       tooltip: [
         {
@@ -205,78 +193,95 @@ export const createBarGaugeSpec = (
     });
   }
 
-  // dispose the last threshold
-  const bars = completeThreshold.slice(0, -1)?.map((threshold, index) => {
-    return {
-      transform: [
-        { calculate: `datum.threshold${index}*0.99`, as: 'gradStart' },
-        { calculate: `datum.threshold${index + 1}`, as: 'gradEndTemp' },
-        {
-          calculate: `datum['${numericField}'] < datum.gradEndTemp ? datum['${numericField}']: datum.gradEndTemp`,
-          as: 'gradEnd',
-        },
-        {
-          calculate: `datum['${numericField}'] < datum.gradEndTemp`,
-          as: 'useSolidColor',
-        },
-        { filter: `datum['${numericField}'] >= datum.threshold${index}` },
-      ],
-      // Vega-Lite doesn't support dynamically changing the color of gradient steps directly.
-      // As a workaround, add an extra layer on top of the gradient bar.
-      // This ensures that the end of the color bar reflects the threshold color accurately not the in-between gradient color
+  const generateTrans = (thresholds: Threshold[]) => {
+    let expression = '';
 
-      layer: [
-        {
-          mark: {
-            type: 'bar',
-            clip: true,
-            ...getDisplayMode(
-              styleOptions.exclusive.orientation,
-              styleOptions.exclusive.displayMode,
-              threshold,
-              completeThreshold[index + 1].color,
-              isXaxisNumerical
-            ),
-          },
-          encoding: {
-            [`${processedSymbol}`]: {
-              type: 'quantitative',
-              field: 'gradEnd',
-            },
-            [`${processedSymbol}2`]: {
-              field: 'gradStart',
-            },
-          },
-        },
+    for (let i = thresholds.length - 1; i >= 1; i--) {
+      expression += `datum['${numericField}'] >= datum.threshold${i} ? test${i} : `;
+    }
 
-        {
-          mark: {
-            type: 'bar',
-            clip: true,
-            ...getDisplayMode(
-              styleOptions.exclusive.orientation,
-              styleOptions.exclusive.displayMode,
-              threshold,
-              darkenColor(threshold.color ?? DEFAULT_GREY, 2),
-              isXaxisNumerical
-            ),
-            fillOpacity: { expr: `datum.useSolidColor ? 1 : 0` },
-          },
-          encoding: {
-            [`${processedSymbol}`]: {
-              type: 'quantitative',
-              field: 'gradEnd',
-            },
-            [`${processedSymbol}2`]: {
-              field: 'gradStart',
-            },
+    expression += `test0`;
+
+    return expression;
+  };
+
+  if (styleOptions.exclusive.displayMode === 'gradient') {
+    const gradientBar = {
+      mark: { type: 'bar' },
+      transform: [{ filter: `datum['${numericField}'] >= datum.minVal` }],
+      encoding: {
+        color: {
+          value: {
+            expr: generateTrans(processedThresholds),
           },
         },
-      ],
+      },
     };
-  });
+    layers.push(gradientBar);
+  }
 
-  layers.push(...bars);
+  if (styleOptions.exclusive.displayMode === 'stack') {
+    // dispose the last threshold
+    const bars = processedThresholds.slice(0, -1)?.map((threshold, index) => {
+      return {
+        transform: [
+          { calculate: `datum.threshold${index}`, as: 'gradStart' },
+          { calculate: `datum.threshold${index + 1}`, as: 'gradEndTemp' },
+          {
+            calculate: `datum['${numericField}'] < datum.gradEndTemp ? datum['${numericField}']: datum.gradEndTemp`,
+            as: 'gradEnd',
+          },
+          {
+            calculate: `datum['${numericField}'] < datum.gradEndTemp`,
+            as: 'useSolidColor',
+          },
+          { filter: `datum['${numericField}'] >= datum.threshold${index}` },
+        ],
+        layer: [
+          {
+            mark: {
+              type: 'bar',
+              clip: true,
+              color: threshold.color,
+            },
+            encoding: {
+              [`${processedSymbol}`]: {
+                type: 'quantitative',
+                field: 'gradEnd',
+              },
+
+              [`${processedSymbol}2`]: {
+                field: 'gradStart',
+              },
+            },
+          },
+        ],
+      };
+    });
+
+    layers.push(...bars);
+  }
+
+  if (styleOptions.exclusive.displayMode === 'basic') {
+    const gradientBar = {
+      mark: { type: 'bar' },
+      transform: [{ filter: `datum['${numericField}'] >= datum.minVal` }],
+      encoding: {
+        color: {
+          field: numericField,
+          type: 'quantitative',
+          scale: {
+            type: 'threshold',
+            //  last threshold which is just for max value capping in gradient mode
+            domain: processedThresholds.map((t) => t.value).slice(0, -1),
+            range: [DEFAULT_GREY, ...processedThresholds.map((t) => t.color)].slice(0, -1),
+          },
+          legend: null,
+        },
+      },
+    };
+    layers.push(gradientBar);
+  }
 
   if (styleOptions.exclusive.valueDisplay !== 'hidden') {
     const nameLayer = {
@@ -316,8 +321,8 @@ export const createBarGaugeSpec = (
           type: 'quantitative',
           scale: {
             type: 'threshold',
-            domain: completeThreshold.map((t) => t.value).slice(0, -1),
-            range: [DEFAULT_GREY, ...completeThreshold.map((t) => t.color)].slice(0, -1),
+            domain: processedThresholds.map((t) => t.value).slice(0, -1),
+            range: [DEFAULT_GREY, ...processedThresholds.map((t) => t.color)].slice(0, -1),
           },
           legend: null,
         },
@@ -328,11 +333,11 @@ export const createBarGaugeSpec = (
 
   const baseSpec = {
     $schema: VEGASCHEMA,
-    params,
     title: styleOptions.titleOptions?.show
       ? styleOptions.titleOptions?.titleName || `${yAxis?.name} by ${xAxis?.name}`
       : undefined,
     data: { values: newRecord },
+    params,
     transform: transformLayer,
     encoding: encodingLayer,
     layer: layers,
