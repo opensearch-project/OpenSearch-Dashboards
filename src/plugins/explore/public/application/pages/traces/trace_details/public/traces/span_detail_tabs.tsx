@@ -32,7 +32,7 @@ export interface SpanDetailTabsProps {
   serviceName?: string;
   setCurrentSpan?: (spanId: string) => void;
   logDatasets?: any[];
-  logsData?: any[];
+  datasetLogs?: Record<string, any[]>;
   isLogsLoading?: boolean;
 }
 
@@ -50,7 +50,7 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
   serviceName,
   setCurrentSpan,
   logDatasets = [],
-  logsData = [],
+  datasetLogs = {},
   isLogsLoading = false,
 }) => {
   const [activeTab, setActiveTab] = useState<TabId>(SpanDetailTab.OVERVIEW);
@@ -60,11 +60,14 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
     return selectedSpan ? getSpanIssueCount(selectedSpan) : 0;
   }, [selectedSpan]);
 
-  // Filter logs for the selected span
+  // Filter logs for the selected span from datasetLogs
   const spanLogs = useMemo(() => {
-    if (!selectedSpan?.spanId || !logsData.length) return [];
-    return filterLogsBySpanId(logsData, selectedSpan.spanId);
-  }, [logsData, selectedSpan?.spanId]);
+    if (!selectedSpan?.spanId || Object.keys(datasetLogs).length === 0) return [];
+
+    // Combine all logs from all datasets and filter by span ID
+    const allLogs = Object.values(datasetLogs).flat();
+    return filterLogsBySpanId(allLogs, selectedSpan.spanId);
+  }, [datasetLogs, selectedSpan?.spanId]);
 
   const tabs = useMemo((): TabItem[] => {
     const tabList: TabItem[] = [
@@ -112,7 +115,7 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
             traceId={selectedSpan?.traceId || ''}
             spanId={selectedSpan?.spanId}
             logDatasets={logDatasets}
-            logsData={logsData}
+            datasetLogs={datasetLogs}
             isLoading={isLogsLoading}
           />
         ),
@@ -137,7 +140,7 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
     );
 
     return tabList;
-  }, [selectedSpan, addSpanFilter, issueCount, logDatasets, logsData, spanLogs, isLogsLoading]);
+  }, [selectedSpan, addSpanFilter, issueCount, logDatasets, spanLogs, isLogsLoading, datasetLogs]);
 
   // Auto-fallback to 'overview' tab when the current active tab is no longer available
   useEffect(() => {

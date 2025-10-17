@@ -26,10 +26,6 @@ export interface CorrelatedFields {
 export interface LogEntity {
   id: string;
   name: string;
-  type: string;
-  meta: {
-    correlatedFields: CorrelatedFields;
-  };
 }
 
 export interface SavedObjectReference {
@@ -69,6 +65,7 @@ export interface IndexPatternAttributes {
   title: string;
   timeFieldName?: string;
   type?: string;
+  schemaMappings?: string;
 }
 
 export interface DataSourceAttributes {
@@ -79,7 +76,8 @@ export interface DataSourceAttributes {
 export class CorrelationService {
   constructor(
     private savedObjectsClient: SavedObjectsClientContract,
-    private uiSettings: IUiSettingsClient
+    private uiSettings: IUiSettingsClient,
+    private dataPlugin?: DataPublicPluginStart
   ) {}
 
   /**
@@ -116,6 +114,21 @@ export class CorrelationService {
 
   async fetchLogDataset(logDatasetId: string): Promise<Dataset> {
     try {
+      // Use dataviews API if available, fallback to saved objects client
+      if (this.dataPlugin?.dataViews) {
+        try {
+          const dataView = await this.dataPlugin.dataViews.get(logDatasetId);
+          return await this.dataPlugin.dataViews.convertToDataset(dataView);
+        } catch (dataViewError) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            'Failed to fetch dataset using dataviews API, falling back to saved objects:',
+            dataViewError
+          );
+        }
+      }
+
+      // Fallback to original saved objects approach
       const indexPattern = await this.savedObjectsClient.get('index-pattern', logDatasetId);
 
       // Format the dataset object using the actual fields from the response
@@ -125,6 +138,9 @@ export class CorrelationService {
         timeFieldName: attributes?.timeFieldName || 'time',
         title: attributes?.title || 'Unknown Title',
         type: attributes?.type || 'INDEX_PATTERN',
+        schemaMappings: attributes?.schemaMappings
+          ? JSON.parse(attributes.schemaMappings)
+          : undefined,
       };
 
       // Extract datasource information from the log dataset's references if it exists
@@ -169,46 +185,36 @@ export class CorrelationService {
    */
   async checkCorrelationsForLogs(dataset: Dataset): Promise<Dataset[]> {
     if (!dataset?.id) return [];
-
     try {
       // Find correlations that reference the current dataset
       const correlationsResponse = await this.findCorrelationsByDataset(dataset.id);
       const logDatasets: Dataset[] = [];
-
       if (correlationsResponse.savedObjects && correlationsResponse.savedObjects.length > 0) {
         for (const correlation of correlationsResponse.savedObjects) {
           // Parse the correlation structure - it's stored in entities array
           const correlationAttrs = correlation.attributes as CorrelationAttributes;
           const entities = correlationAttrs?.entities;
-
-          if (Array.isArray(entities)) {
-            // Find the traces dataset (should match our current dataset)
-            const tracesDatasetIndex = entities.findIndex(
-              (item: CorrelationEntity) =>
-                item.tracesDataset && correlation.references?.[0]?.id === dataset.id
-            );
-
-            if (tracesDatasetIndex !== -1) {
-              // Look for logs dataset in the entities array
-              const logsDatasetIndex = entities.findIndex(
-                (item: CorrelationEntity) => item.logsDataset
-              );
-
-              if (logsDatasetIndex !== -1) {
-                const logsDatasetItem = entities[logsDatasetIndex];
-                const logsDatasetId = correlation.references?.[logsDatasetIndex]?.id;
-
-                if (logsDatasetId && logsDatasetItem.logsDataset?.meta) {
-                  // Fetch the actual log dataset (index pattern) details
-                  const logDataset = await this.fetchLogDataset(logsDatasetId);
+          if (Array.isArray(entities) && correlation.references) {
+            // Check if this correlation contains both traces and logs datasets
+            const hasTracesDataset = entities.some((item: CorrelationEntity) => item.tracesDataset);
+            const hasLogsDataset = entities.some((item: CorrelationEntity) => item.logsDataset);
+            if (hasTracesDataset && hasLogsDataset) {
+              // Find references that are not the current dataset (traces dataset)
+              // These should be the log datasets
+              const logDatasetRefs = correlation.references.filter((ref) => ref.id !== dataset.id);
+              for (const logDatasetRef of logDatasetRefs) {
+                try {
+                  const logDataset = await this.fetchLogDataset(logDatasetRef.id);
                   logDatasets.push(logDataset);
+                } catch (fetchError) {
+                  // eslint-disable-next-line no-console
+                  console.warn('Failed to fetch log dataset:', logDatasetRef.id, fetchError);
                 }
               }
             }
           }
         }
       }
-
       return logDatasets;
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -222,19 +228,20 @@ export class CorrelationService {
     data: DataPublicPluginStart,
     traceId: string,
     size?: number
-  ): Promise<{ logDatasets: Dataset[]; logs: LogHit[]; datasetLogs: Record<string, LogHit[]> }> {
+  ): Promise<{
+    logDatasets: Dataset[];
+    datasetLogs: Record<string, LogHit[]>;
+    logHitCount: number;
+  }> {
     if (!dataset?.id || !data || !traceId) {
-      return { logDatasets: [], logs: [], datasetLogs: {} };
+      return { logDatasets: [], datasetLogs: {}, logHitCount: 0 };
     }
-
+    let logHitCount = 0;
+    const datasetLogs: Record<string, LogHit[]> = {};
     try {
       const logDatasets = await this.checkCorrelationsForLogs(dataset);
-
       if (logDatasets.length > 0) {
         const sampleSize = size || this.uiSettings.get(SAMPLE_SIZE_SETTING);
-        const datasetLogs: Record<string, LogHit[]> = {};
-        let allLogs: LogHit[] = [];
-
         // Fetch logs for all datasets
         for (const logDataset of logDatasets) {
           const logsResponse = await fetchTraceLogsByTraceId(data, {
@@ -242,20 +249,16 @@ export class CorrelationService {
             dataset: logDataset,
             limit: sampleSize,
           });
-
           const logs = transformLogsResponseToHits(logsResponse);
+          logHitCount += logs.length;
           datasetLogs[logDataset.id] = logs;
-          allLogs = allLogs.concat(logs);
         }
-
-        return { logDatasets, logs: allLogs, datasetLogs };
       }
-
-      return { logDatasets, logs: [], datasetLogs: {} };
+      return { logDatasets, datasetLogs, logHitCount };
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error in checkCorrelationsAndFetchLogs:', error);
-      return { logDatasets: [], logs: [], datasetLogs: {} };
+      return { logDatasets: [], datasetLogs: {}, logHitCount: 0 };
     }
   }
 }

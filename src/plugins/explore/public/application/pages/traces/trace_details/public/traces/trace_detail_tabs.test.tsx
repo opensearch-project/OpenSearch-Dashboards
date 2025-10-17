@@ -21,6 +21,7 @@ describe('TraceDetailTabs', () => {
     errorCount: 0,
     spanFilters: [],
     handleErrorFilterClick: mockHandleErrorFilterClick,
+    logCount: 2,
   };
 
   beforeEach(() => {
