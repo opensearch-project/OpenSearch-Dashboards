@@ -47,59 +47,6 @@ export const createNumercialStateTimeline = (
     (mapping) => mapping?.type === 'value'
   );
 
-  // const transformedData = [
-  //   {
-  //     'field-0': '200',
-  //     'field-1': 1000,
-  //     'field-2': '2025-10-10 13:00:25.215',
-  //   },
-  //   {
-  //     'field-0': '200',
-  //     'field-1': 1177,
-  //     'field-2': '2025-10-10 14:01:34.325',
-  //   },
-  //   {
-  //     'field-0': '200',
-  //     'field-1': 88,
-  //     'field-2': '2025-10-10 14:02:34.325',
-  //   },
-  //   {
-  //     'field-0': '200',
-  //     'field-1': null,
-  //     'field-2': '2025-10-10 14:12:34.325',
-  //   },
-  //   {
-  //     'field-0': '200',
-  //     'field-1': 1200,
-  //     'field-2': '2025-10-10 14:22:34.325',
-  //   },
-  //   {
-  //     'field-0': '200',
-  //     'field-1': null,
-  //     'field-2': '2025-10-10 15:15:42.43',
-  //   },
-  //   {
-  //     'field-0': '200',
-  //     'field-1': 77,
-  //     'field-2': '2025-10-10 16:19:22.088',
-  //   },
-  //   {
-  //     'field-0': '200',
-  //     'field-1': 1177,
-  //     'field-2': '2025-10-10 16:20:22.088',
-  //   },
-  //   {
-  //     'field-0': '500',
-  //     'field-1': 6977,
-  //     'field-2': '2025-10-10 15:26:51.127',
-  //   },
-  //   {
-  //     'field-0': '500',
-  //     'field-1': 3636,
-  //     'field-2': '2025-10-11 03:17:31.634',
-  //   },
-  // ];
-
   if (valueMappings?.length && valueMappings?.length > 0 && !rangeMappings?.length) {
     return createCategoricalStateTimeline(
       transformedData,
@@ -267,7 +214,7 @@ export const createNumercialStateTimeline = (
 };
 
 export const createCategoricalStateTimeline = (
-  transfor1medData: Array<Record<string, any>>,
+  transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
@@ -298,63 +245,6 @@ export const createCategoricalStateTimeline = (
     (mapping) => mapping?.type === 'value'
   );
 
-  const transformedData = [
-    {
-      'field-0': '200',
-      'field-1': 'Mozilla/5.0/linux',
-      'field-2': '2025-10-13 06:07:51.142',
-    },
-    {
-      'field-0': '200',
-      'field-1': null,
-      'field-2': '2025-10-13 06:22:51.218',
-    },
-    {
-      'field-0': '200',
-      'field-1': 'Mozilla/4.0',
-      'field-2': '2025-10-13 06:42:02.36',
-    },
-    {
-      'field-0': '200',
-      'field-1': 'Mozilla/5.0/apple',
-      'field-2': '2025-10-13 06:46:00.335',
-    },
-    {
-      'field-0': '200',
-      'field-1': null,
-      'field-2': '2025-10-13 06:54:47.407',
-    },
-    {
-      'field-0': '200',
-      'field-1': 'Mozilla/4.0',
-      'field-2': '2025-10-13 06:56:47.123',
-    },
-    {
-      'field-0': '200',
-      'field-1': 'Mozilla/5.0/linux',
-      'field-2': '2025-10-13 06:59:59.032',
-    },
-    {
-      'field-0': '200',
-      'field-1': 'Mozilla/4.0',
-      'field-2': '2025-10-13 07:06:17.789',
-    },
-    {
-      'field-0': '200',
-      'field-1': 'Mozilla/5.0/linux',
-      'field-2': '2025-10-13 07:16:27.553',
-    },
-    {
-      'field-0': '200',
-      'field-1': 'Mozilla/4.0',
-      'field-2': '2025-10-13 07:23:45.991',
-    },
-    {
-      'field-0': '200',
-      'field-1': 'Mozilla/5.0/linux',
-      'field-2': '2025-10-13 08:28:18.219',
-    },
-  ];
   const [processedData, validValues] = mergeCategoricalData(
     transformedData,
     xAxis?.column,

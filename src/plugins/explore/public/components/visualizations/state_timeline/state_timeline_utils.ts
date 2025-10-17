@@ -199,10 +199,6 @@ export const mergeSingleCategoricalData = (
     return [fallbackForSingleCategorical(sorted, timestampField, groupField1), []];
   }
 
-  const isEqual = (value: string | undefined, lastNotNull: Record<string, any>) => {
-    return lastNotNull[groupField1] === value;
-  };
-
   const findValue = (value: string) => validValues?.find((v) => v.value === value)?.value;
 
   const merged: Array<Record<string, any>> = [];
@@ -250,34 +246,6 @@ export const mergeNumericalData = (
   const sorted = [...data].sort(
     (a, b) => new Date(a[timestampField]).getTime() - new Date(b[timestampField]).getTime()
   );
-
-  // const sorted = [
-  //   {
-  //     'field-0': '200',
-  //     'field-1': 109,
-  //     'field-2': '2025-10-16 17:05:26.359',
-  //   },
-  //   {
-  //     'field-0': '200',
-  //     'field-1': null,
-  //     'field-2': '2025-10-16 17:09:01.268',
-  //   },
-  //   {
-  //     'field-0': '200',
-  //     'field-1': 8801,
-  //     'field-2': '2025-10-16 17:19:57.561',
-  //   },
-  //   {
-  //     'field-0': '200',
-  //     'field-1': 7044,
-  //     'field-2': '2025-10-16 17:21:47.719',
-  //   },
-  //   {
-  //     'field-0': '404',
-  //     'field-1': 2188,
-  //     'field-2': '2025-10-16 17:36:12.827',
-  //   },
-  // ];
 
   // Filter ranges to only include those within data bounds
   const validRanges = mappings?.filter((r) => {

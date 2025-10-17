@@ -144,7 +144,7 @@ describe('state_timeline_utils', () => {
     it('able to connect null values between same entries by threhsold', () => {
       const data = [
         { timestamp: '2023-01-01T10:00:00Z', category: 'A', status: 'active', value: 5 },
-        { timestamp: '2023-01-01T11:00:00Z', category: 'A', status: 'active', value: 15 },
+        { timestamp: '2023-01-01T11:00:00Z', category: 'A', status: null, value: 15 },
         { timestamp: '2023-01-01T12:00:00Z', category: 'A', status: 'inactive', value: 15 },
         { timestamp: '2023-01-01T12:30:00Z', category: 'A', status: 'active', value: 15 },
         { timestamp: '2023-01-01T12:00:00Z', category: 'B', status: 'inactive', value: 25 },
@@ -168,7 +168,7 @@ describe('state_timeline_utils', () => {
         {
           timestamp: '2023-01-01T10:00:00Z',
           start: '2023-01-01T10:00:00Z',
-          end: '2023-01-01T12:30:00Z',
+          end: '2023-01-01T12:00:00Z',
           category: 'A',
           status: 'active',
           value: 5,
