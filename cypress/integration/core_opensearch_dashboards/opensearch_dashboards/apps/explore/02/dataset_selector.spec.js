@@ -60,11 +60,7 @@ export const runDatasetSelectorTests = () => {
         });
 
         if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
-          cy.explore.setIndexPatternFromAdvancedSelector(
-            config.dataset,
-            DATASOURCE_NAME,
-            config.language
-          );
+          cy.explore.setIndexPatternFromAdvancedSelector(config.dataset, config.language);
         } else {
           cy.explore.setIndexAsDataset(config.dataset, DATASOURCE_NAME, config.language);
         }
@@ -96,12 +92,7 @@ export const runDatasetSelectorTests = () => {
 
         // Try setting the dataset-language combination but click on cancel
         if (config.datasetType === DatasetTypes.INDEX_PATTERN.name) {
-          cy.explore.setIndexPatternFromAdvancedSelector(
-            config.dataset,
-            DATASOURCE_NAME,
-            config.language,
-            'cancel'
-          );
+          cy.explore.setIndexPatternFromAdvancedSelector(config.dataset, config.language, 'cancel');
         } else {
           cy.explore.setIndexAsDataset(
             config.dataset,

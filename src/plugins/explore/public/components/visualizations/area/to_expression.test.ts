@@ -126,6 +126,14 @@ describe('Area Chart to_expression', () => {
       // Verify legend configuration
       expect(result).toHaveProperty('legend');
       expect(result.legend).toHaveProperty('orient', 'right');
+
+      // select time range params
+      expect(result.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     it('should handle different title display options', () => {
@@ -306,6 +314,14 @@ describe('Area Chart to_expression', () => {
       expect(mainLayer.encoding).toHaveProperty('tooltip');
       expect(Array.isArray(mainLayer.encoding.tooltip)).toBe(true);
       expect(mainLayer.encoding.tooltip).toHaveLength(3);
+
+      // select time range params
+      expect(result.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     it('should handle different title display options', () => {
@@ -432,6 +448,14 @@ describe('Area Chart to_expression', () => {
       expect(mainLayer).toHaveProperty('encoding.x.field', 'date');
       expect(mainLayer).toHaveProperty('encoding.y.field', 'value');
       expect(mainLayer).toHaveProperty('encoding.color.field', 'category');
+
+      // select time range params
+      expect(result.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     it('should handle different title display options', () => {
@@ -595,6 +619,14 @@ describe('Area Chart to_expression', () => {
       expect(mainLayer.encoding).toHaveProperty('tooltip');
       expect(Array.isArray(mainLayer.encoding.tooltip)).toBe(true);
       expect(mainLayer.encoding.tooltip).toHaveLength(2);
+
+      // select time range params
+      expect(result.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     it('should handle different title display options', () => {
@@ -694,15 +726,24 @@ describe('Area Chart to_expression', () => {
       expect(result).toHaveProperty('data.values', mockTransformedData);
 
       // Verify encoding
-      expect(result.layer[0]).toHaveProperty('encoding.x.field', 'category');
-      expect(result.layer[0]).toHaveProperty('encoding.y.field', 'value');
-      expect(result.layer[0]).toHaveProperty('encoding.y.stack', 'normalize');
-      expect(result.layer[0]).toHaveProperty('encoding.color.field', 'category2');
+      const mainLayer = result.layer[0];
+      expect(mainLayer).toHaveProperty('encoding.x.field', 'category');
+      expect(mainLayer).toHaveProperty('encoding.y.field', 'value');
+      expect(mainLayer).toHaveProperty('encoding.y.stack', 'normalize');
+      expect(mainLayer).toHaveProperty('encoding.color.field', 'category2');
 
       // Verify tooltip configuration
-      expect(result.layer[0].encoding).toHaveProperty('tooltip');
-      expect(Array.isArray(result.layer[0].encoding.tooltip)).toBe(true);
-      expect(result.layer[0].encoding.tooltip).toHaveLength(3);
+      expect(mainLayer.encoding).toHaveProperty('tooltip');
+      expect(Array.isArray(mainLayer.encoding.tooltip)).toBe(true);
+      expect(mainLayer.encoding.tooltip).toHaveLength(3);
+
+      // select time range params
+      expect(result.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     it('should handle different title display options', () => {

@@ -283,6 +283,8 @@ export interface Dataset extends BaseDataset {
   isRemoteDataset?: boolean;
   displayName?: string;
   description?: string;
+  /** Optional schema mappings that map schema concepts to field names */
+  schemaMappings?: Record<string, Record<string, string>>;
 }
 
 export interface DatasetField {

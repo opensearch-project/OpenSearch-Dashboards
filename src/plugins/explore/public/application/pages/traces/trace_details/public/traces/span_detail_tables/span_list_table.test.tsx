@@ -22,13 +22,14 @@ jest.mock('./utils');
 
 import { RenderCustomDataGrid } from '../../utils/custom_datagrid';
 import { isSpanError } from '../ppl_resolve_helpers';
-import { parseHits } from './utils';
+import { parseHits, applySpanFilters } from './utils';
 
 const mockRenderCustomDataGrid = RenderCustomDataGrid as jest.MockedFunction<
   typeof RenderCustomDataGrid
 >;
 const mockIsSpanError = isSpanError as jest.MockedFunction<typeof isSpanError>;
 const mockParseHits = parseHits as jest.MockedFunction<typeof parseHits>;
+const mockApplySpanFilters = applySpanFilters as jest.MockedFunction<typeof applySpanFilters>;
 
 describe('SpanListTable', () => {
   const mockOpenFlyout = jest.fn();
@@ -76,6 +77,7 @@ describe('SpanListTable', () => {
       </div>
     ));
     mockParseHits.mockReturnValue(mockSpans);
+    mockApplySpanFilters.mockReturnValue(mockSpans);
     mockIsSpanError.mockImplementation((span) => span?.['status.code'] === 2);
   });
 
@@ -99,44 +101,18 @@ describe('SpanListTable', () => {
     expect(getByTestId('page-size')).toHaveTextContent('10');
   });
 
-  it('filters by error status', () => {
-    const propsWithErrorFilter = {
-      ...defaultProps,
-      filters: [{ field: 'isError', value: true }],
-    };
+  it('displays only spans returned by applySpanFilters', () => {
+    const filteredSpans = [mockSpans[0]];
+    mockApplySpanFilters.mockReturnValue(filteredSpans);
 
-    const { getByTestId } = render(<SpanListTable {...propsWithErrorFilter} />);
-
-    expect(getByTestId('row-count')).toHaveTextContent('1');
-  });
-
-  it('filters by field value', () => {
-    const propsWithServiceFilter = {
-      ...defaultProps,
-      filters: [{ field: 'serviceName', value: 'service-1' }],
-    };
-
-    const { getByTestId } = render(<SpanListTable {...propsWithServiceFilter} />);
-
-    expect(getByTestId('row-count')).toHaveTextContent('1');
-  });
-
-  it('applies multiple filters', () => {
-    const propsWithMultipleFilters = {
-      ...defaultProps,
-      filters: [
-        { field: 'serviceName', value: 'service-2' },
-        { field: 'isError', value: true },
-      ],
-    };
-
-    const { getByTestId } = render(<SpanListTable {...propsWithMultipleFilters} />);
+    const { getByTestId } = render(<SpanListTable {...defaultProps} />);
 
     expect(getByTestId('row-count')).toHaveTextContent('1');
   });
 
   it('handles empty payload data', () => {
     mockParseHits.mockReturnValue([]);
+    mockApplySpanFilters.mockReturnValue([]);
 
     const { getByTestId } = render(<SpanListTable {...defaultProps} />);
 
@@ -201,14 +177,16 @@ describe('SpanListTable', () => {
   });
 
   it('handles hits.hits format payload', () => {
-    mockParseHits.mockReturnValue([
+    const singleSpan = [
       {
         spanId: 'span-3',
         serviceName: 'service-3',
         name: 'operation-3',
         children: [],
       },
-    ]);
+    ];
+    mockParseHits.mockReturnValue(singleSpan);
+    mockApplySpanFilters.mockReturnValue(singleSpan);
 
     const { getByTestId } = render(<SpanListTable {...defaultProps} />);
 

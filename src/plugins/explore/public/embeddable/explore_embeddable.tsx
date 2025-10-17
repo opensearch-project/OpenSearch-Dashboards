@@ -34,7 +34,7 @@ import { SavedExplore } from '../saved_explore';
 import { SAMPLE_SIZE_SETTING } from '../../common/legacy/discover';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
-import { ExpressionRenderError } from '../../../expressions/public';
+import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
 import { VisColumn } from '../components/visualizations/types';
 import { toExpression } from '../components/visualizations/utils/to_expression';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../common';
@@ -80,6 +80,7 @@ export interface SearchProps {
   onMoveColumn?: (column: string, index: number) => void;
   onSetColumns?: (columns: string[]) => void;
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
+  onExpressionEvent?: (e: ExpressionRendererEvent) => void;
   tableData?: {
     rows: Array<Record<string, any>>;
     columns: VisColumn[];
@@ -264,6 +265,15 @@ export class ExploreEmbeddable
         embeddable: this,
         filters,
       });
+    };
+
+    searchProps.onExpressionEvent = async (e: ExpressionRendererEvent) => {
+      if (e.name === 'applyFilter') {
+        await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+          embeddable: this,
+          ...e.data,
+        });
+      }
     };
 
     this.updateHandler(searchProps);

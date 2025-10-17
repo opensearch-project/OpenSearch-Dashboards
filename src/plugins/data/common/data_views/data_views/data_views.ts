@@ -387,6 +387,7 @@ export class DataViewsService {
         fieldFormatMap,
         typeMeta,
         type,
+        schemaMappings,
       },
       references,
     } = savedObject;
@@ -395,6 +396,7 @@ export class DataViewsService {
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: DataViewFieldSpec[] = fields ? JSON.parse(fields) : [];
+    const parsedSchemaMappings = schemaMappings ? JSON.parse(schemaMappings) : undefined;
     const dataSourceRef = Array.isArray(references) ? references[0] : undefined;
 
     this.addFormatsToFields(parsedFields, parsedFieldFormatMap);
@@ -412,6 +414,7 @@ export class DataViewsService {
       typeMeta: parsedTypeMeta,
       type,
       dataSourceRef,
+      schemaMappings: parsedSchemaMappings,
     };
   };
 
@@ -559,6 +562,9 @@ export class DataViewsService {
       metaFields,
     });
 
+    // Initialize data source ref to fetch the actual data source title
+    await dataView.initializeDataSourceRef();
+
     if (!skipFetchFields) {
       await this.refreshFields(dataView);
     }
@@ -616,13 +622,27 @@ export class DataViewsService {
     const body = dataView.getAsSavedObjectBody();
     const references = dataView.getSaveObjectReference();
 
-    const response = await this.savedObjectsClient.create(savedObjectType, body, {
-      id: dataView.id,
-      references,
-    });
-    dataView.id = response.id;
-    this.patterns.saveToCache(dataView.id, dataView);
-    return dataView;
+    try {
+      const response = await this.savedObjectsClient.create(savedObjectType, body, {
+        id: dataView.id,
+        references,
+      });
+      dataView.id = response.id;
+      this.patterns.saveToCache(dataView.id, dataView);
+      return dataView;
+    } catch (err) {
+      // Handle 409 conflict errors (document already exists) as duplicate data view errors
+      if (
+        (err.statusCode === 409 || err.status === 409 || err.body?.statusCode === 409) &&
+        (err.message?.includes('document already exists') ||
+          err.message?.includes('version conflict') ||
+          err.body?.message?.includes('document already exists') ||
+          err.body?.message?.includes('version conflict'))
+      ) {
+        throw new DuplicateDataViewError(`Duplicate data view: ${dataView.title}`);
+      }
+      throw err;
+    }
   }
 
   /**

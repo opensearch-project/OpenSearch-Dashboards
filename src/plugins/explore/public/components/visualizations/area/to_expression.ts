@@ -10,6 +10,7 @@ import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
 import { getTooltipFormat } from '../utils/utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
+import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
 
 /**
  * Create a simple area chart with one metric and one date
@@ -37,6 +38,7 @@ export const createSimpleAreaChart = (
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   const mainLayer = {
+    params: [createTimeRangeBrush({ timeAxis: 'x' })],
     mark: {
       ...buildMarkConfig(styles, 'area'),
       type: 'area',
@@ -120,6 +122,7 @@ export const createSimpleAreaChart = (
 
   return {
     $schema: VEGASCHEMA,
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metricName} Over Time`
       : undefined,
@@ -165,6 +168,7 @@ export const createMultiAreaChart = (
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   const mainLayer = {
+    params: [createTimeRangeBrush({ timeAxis: 'x' })],
     mark: {
       ...buildMarkConfig(styles, 'area'),
       type: 'area',
@@ -266,6 +270,7 @@ export const createMultiAreaChart = (
 
   return {
     $schema: VEGASCHEMA,
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metricName} Over Time by ${categoryName}`
       : undefined,
@@ -309,6 +314,7 @@ export const createFacetedMultiAreaChart = (
   const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   return {
     $schema: VEGASCHEMA,
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName ||
         `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`
@@ -322,6 +328,7 @@ export const createFacetedMultiAreaChart = (
     spec: {
       layer: [
         {
+          params: [createTimeRangeBrush({ timeAxis: 'x' })],
           mark: {
             ...buildMarkConfig(styles, 'area'),
             type: 'area',

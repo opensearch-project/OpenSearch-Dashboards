@@ -69,6 +69,7 @@ interface SavedObjectBody {
   fieldFormatMap?: string;
   typeMeta?: string;
   type?: string;
+  schemaMappings?: string;
 }
 
 type FormatFieldFn = (
@@ -102,6 +103,7 @@ export class IndexPattern implements IIndexPattern {
   public sourceFilters?: SourceFilter[];
   public dataSourceRef?: SavedObjectReference;
   public fieldsLoading?: boolean;
+  public schemaMappings?: Record<string, Record<string, string>>;
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
@@ -140,6 +142,7 @@ export class IndexPattern implements IIndexPattern {
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
     this.signalType = spec.signalType;
+    this.schemaMappings = spec.schemaMappings;
 
     this.fields.replaceAll(Object.values(spec.fields || {}));
     this.type = spec.type;
@@ -247,6 +250,7 @@ export class IndexPattern implements IIndexPattern {
       typeMeta: this.typeMeta,
       type: this.type,
       dataSourceRef: this.dataSourceRef,
+      schemaMappings: this.schemaMappings,
     };
   }
 
@@ -388,6 +392,7 @@ export class IndexPattern implements IIndexPattern {
       fieldFormatMap,
       type: this.type,
       typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
+      schemaMappings: this.schemaMappings ? JSON.stringify(this.schemaMappings) : undefined,
     };
   }
 

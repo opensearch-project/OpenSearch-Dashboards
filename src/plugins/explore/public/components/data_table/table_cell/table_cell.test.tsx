@@ -8,7 +8,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { TableCell, ITableCellProps } from './table_cell';
 import { useDatasetContext } from '../../../application/context';
 import { useTraceFlyoutContext } from '../../../application/pages/traces/trace_flyout/trace_flyout_context';
-import { isOnTracesPage } from './trace_utils/trace_utils';
 
 jest.mock('../../../application/context', () => ({
   useDatasetContext: jest.fn(),
@@ -29,9 +28,11 @@ describe('TableCell', () => {
   const defaultProps: ITableCellProps = {
     columnId: 'test-column',
     sanitizedCellValue: '<strong>test value</strong>',
+    setIsRowSelected: jest.fn(),
     onFilter: mockOnFilter,
     fieldMapping: { value: 'test' },
     isTimeField: false,
+    isOnTracesPage: false,
   };
 
   beforeEach(() => {
@@ -132,6 +133,37 @@ describe('TableCell', () => {
     expect(screen.getByTestId('osdDocTableCellDataField')).toBeInTheDocument();
   });
 
+  describe('Duration cell functionality', () => {
+    it('renders duration in milliseconds on traces page', () => {
+      render(
+        <TableCell
+          {...defaultProps}
+          columnId="durationNano"
+          sanitizedCellValue="<span>2,000,000</span>"
+          isOnTracesPage={true}
+        />
+      );
+
+      const cellContent = screen.getByTestId('osdDocTableCellDataField');
+      expect(cellContent).toBeInTheDocument();
+      expect(cellContent.innerHTML).toBe('<span>2 ms</span>');
+    });
+
+    it('renders regular cell content when not on traces page', () => {
+      render(
+        <TableCell
+          {...defaultProps}
+          columnId="durationNano"
+          sanitizedCellValue="<span>2,000,000</span>"
+        />
+      );
+
+      const cellContent = screen.getByTestId('osdDocTableCellDataField');
+      expect(cellContent).toBeInTheDocument();
+      expect(cellContent.innerHTML).toBe('<span>2,000,000</span>');
+    });
+  });
+
   // Tests for trace timeline functionality
   describe('Span ID link functionality', () => {
     const spanIdProps: ITableCellProps = {
@@ -141,10 +173,22 @@ describe('TableCell', () => {
       fieldMapping: { value: 'test' },
       isTimeField: false,
       rowData: {
-        traceId: 'test-trace-id-456',
-        spanId: 'test-span-id-123',
+        _index: 'test-index',
+        _id: 'test-id',
+        _score: 1,
+        _source: {
+          traceId: 'test-trace-id-456',
+          spanId: 'test-span-id-123',
+          parentSpanId: 'test-parent-span-id-789',
+          serviceName: 'test-service',
+          name: 'test-operation',
+          startTimeUnixNano: '1634567890000000000',
+          endTimeUnixNano: '1634567891000000000',
+          'status.code': '200',
+        },
       },
       isOnTracesPage: true,
+      setIsRowSelected: jest.fn(),
     };
 
     it('renders span ID as clickable link when on traces page', () => {
@@ -219,8 +263,19 @@ describe('TableCell', () => {
       const propsWithSourceTraceId = {
         ...spanIdProps,
         rowData: {
-          _source: { traceId: 'source-trace-id' },
+          _index: 'test-index',
+          _id: 'test-id',
+          _score: 1,
+          _source: {
+            traceId: 'source-trace-id',
+            serviceName: 'test-service',
+            name: 'test-operation',
+            startTimeUnixNano: '1634567890000000000',
+            endTimeUnixNano: '1634567891000000000',
+          },
           spanId: 'test-span-id-123',
+          parentSpanId: 'test-parent-span-id-789',
+          'status.code': '200',
         },
       };
 
@@ -234,24 +289,35 @@ describe('TableCell', () => {
       );
     });
 
-    it('handles missing trace ID gracefully', () => {
-      const propsWithoutTraceId = {
+    it('renders non-clickable text when required fields are missing', () => {
+      const propsWithMissingFields = {
         ...spanIdProps,
         rowData: {
-          spanId: 'test-span-id-123',
-          // No traceId
+          _index: 'test-index',
+          _id: 'test-id',
+          _score: 1,
+          _source: {
+            spanId: 'test-span-id-123',
+            parentSpanId: 'test-parent-span-id-789',
+            serviceName: 'test-service',
+            name: 'test-operation',
+            startTimeUnixNano: '1634567890000000000',
+            endTimeUnixNano: '1634567891000000000',
+            'status.code': '200',
+            // Missing traceId - validation should fail
+          },
         },
       };
 
-      render(<TableCell {...propsWithoutTraceId} />);
-      const spanIdLink = screen.getByTestId('spanIdLink');
-      fireEvent.click(spanIdLink);
+      render(<TableCell {...propsWithMissingFields} />);
 
-      expect(window.open).toHaveBeenCalledWith(
-        expect.stringContaining("spanId:'test-span-id-123'"),
-        '_blank'
-      );
-      expect(window.open).toHaveBeenCalledWith(expect.not.stringContaining('traceId:'), '_blank');
+      // Should not render clickable link when validation fails
+      expect(screen.queryByTestId('spanIdLink')).not.toBeInTheDocument();
+
+      // Should render non-clickable text with tooltip instead
+      const nonClickableText = screen.getByText('test-span-id-123');
+      expect(nonClickableText).toBeInTheDocument();
+      expect(nonClickableText.closest('.euiToolTipAnchor')).toBeTruthy();
     });
 
     it('works when traces page is detected via hash', () => {
@@ -294,9 +360,22 @@ describe('TableCell', () => {
       onFilter: mockOnFilter,
       fieldMapping: { value: 'test' },
       isTimeField: true,
+      isOnTracesPage: true,
+      setIsRowSelected: jest.fn(),
       rowData: {
-        traceId: 'test-trace-id-456',
-        spanId: 'test-span-id-123',
+        _index: 'test-index',
+        _id: 'test-id',
+        _score: 1,
+        _source: {
+          traceId: 'test-trace-id-456',
+          spanId: 'test-span-id-123',
+          parentSpanId: 'test-parent-span-id-789',
+          serviceName: 'test-service',
+          name: 'test-operation',
+          startTimeUnixNano: '1634567890000000000',
+          endTimeUnixNano: '1634567891000000000',
+          'status.code': '200',
+        },
       },
     };
 

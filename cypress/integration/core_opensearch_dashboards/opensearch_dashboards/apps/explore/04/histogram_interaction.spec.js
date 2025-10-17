@@ -70,7 +70,6 @@ const runHistogramInteractionTests = () => {
           config.langPermutation.forEach((lang) => {
             if (lang === QueryLanguages.SQL.name) return; // SQL doesn't have a histogram
             cy.getElementByTestId('discoverIntervalSelect').should('have.value', interval);
-            cy.getElementByTestId('discoverIntervalDateRange').should('be.visible');
           });
         });
         cy.getElementByTestId('discoverIntervalSelect').select('auto');
@@ -83,9 +82,6 @@ const runHistogramInteractionTests = () => {
         const START_DATE = `Jan 1, 2021 @ ${TIME}`;
         const END_DATE = `Oct 1, 2021 @ ${TIME}`;
         const checkIntervals = () => {
-          cy.getElementByTestId('discoverIntervalDateRange')
-            .should('be.visible')
-            .and('have.text', `${START_DATE} - ${END_DATE} per`);
           cy.getElementByTestId('docTableExpandToggleColumn')
             .eq(0)
             .find('button')

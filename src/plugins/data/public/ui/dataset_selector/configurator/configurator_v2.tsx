@@ -6,7 +6,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCheckbox,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -17,14 +16,18 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../../../common';
-import { getIndexPatterns, getQueryService } from '../../../services';
+import React, { useCallback, useMemo, useState } from 'react';
+import { BaseDataset, DEFAULT_DATA, Dataset, Query } from '../../../../common';
+import { getQueryService } from '../../../services';
 import { IDataPluginServices } from '../../../types';
+import { SchemaMappings } from './schema_mappings';
+import { getSchemaConfigs } from './schema_config';
+import { SaveAsDatasetOption } from './save_as_dataset_option';
+import { DatasetMetadataFields } from './dataset_metadata_fields';
+import { useDatasetFields } from './use_dataset_fields';
 
 export const ConfiguratorV2 = ({
   services,
@@ -33,6 +36,7 @@ export const ConfiguratorV2 = ({
   onCancel,
   onPrevious,
   alwaysShowDatasetFields,
+  signalType,
 }: {
   services: IDataPluginServices;
   baseDataset: BaseDataset;
@@ -40,18 +44,24 @@ export const ConfiguratorV2 = ({
   onCancel: () => void;
   onPrevious: () => void;
   alwaysShowDatasetFields?: boolean;
+  signalType?: string;
 }) => {
+  // Services
   const queryService = getQueryService();
   const queryString = queryService.queryString;
-  const languageService = queryService.queryString.getLanguageService();
-  const indexPatternsService = getIndexPatterns();
-  const type = queryString.getDatasetService().getType(baseDataset.type);
-  const supportedLanguages = type?.supportedLanguages(baseDataset) || [];
+  const languageService = queryString.getLanguageService();
+  const datasetService = queryString.getDatasetService();
+  const datasetType = datasetService.getType(baseDataset.type);
+
+  // Derived values
+  const supportedLanguages = datasetType?.supportedLanguages(baseDataset) || [];
   const languages = supportedLanguages.filter(
     (langId) =>
       !services.appName ||
       languageService.getLanguage(langId)?.supportedAppNames?.includes(services.appName)
   );
+  const isAsyncType = datasetType?.meta.isFieldLoadAsync ?? false;
+  const supportsTimeFilter = datasetType?.meta?.supportsTimeFilter ?? true;
 
   const [language, setLanguage] = useState<string>(() => {
     const currentLanguage = queryString.getQuery().language;
@@ -61,71 +71,60 @@ export const ConfiguratorV2 = ({
     return languages[0];
   });
 
+  // State
   const [dataset, setDataset] = useState<Dataset>(baseDataset);
-  const [timeFields, setTimeFields] = useState<DatasetField[]>([]);
   const [timeFieldName, setTimeFieldName] = useState<string | undefined>(dataset.timeFieldName);
+  const [saveAsDataset, setSaveAsDataset] = useState(false);
+  const [schemaMappings, setSchemaMappings] = useState<Record<string, Record<string, string>>>(
+    dataset.schemaMappings || {}
+  );
+
+  // Fetch fields using custom hook
+  const { allFields, dateFields, loading: timeFieldsLoading } = useDatasetFields(
+    baseDataset,
+    datasetType,
+    supportsTimeFilter
+  );
+
+  // Constants
   const noTimeFilter = i18n.translate(
     'data.explorer.datasetSelector.advancedSelector.configurator.timeField.noTimeFieldOptionLabel',
     {
       defaultMessage: "I don't want to use the time filter",
     }
   );
-  const [timeFieldsLoading, setTimeFieldsLoading] = useState(false);
-  const [saveAsDataset, setSaveAsDataset] = useState(false);
 
-  const isAsyncType = useMemo(() => {
-    const datasetType = queryString.getDatasetService().getType(dataset.type);
-    return datasetType?.meta.isFieldLoadAsync ?? false;
-  }, [dataset.type, queryString]);
+  // Memoized values
+  const filteredSchemas = useMemo(() => {
+    if (!signalType) return [];
+    const schemaConfigs = getSchemaConfigs();
+    return Object.entries(schemaConfigs).filter(([_, config]) => config.signalType === signalType);
+  }, [signalType]);
 
   const submitDisabled = useMemo(() => {
     return (
       timeFieldsLoading ||
       (timeFieldName === undefined &&
-        !(dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) &&
-        timeFields &&
-        timeFields.length > 0) ||
+        dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN &&
+        dateFields.length > 0) ||
       (alwaysShowDatasetFields && isAsyncType)
     );
-  }, [dataset, timeFieldName, timeFields, timeFieldsLoading, alwaysShowDatasetFields, isAsyncType]);
+  }, [
+    dataset.type,
+    timeFieldName,
+    dateFields,
+    timeFieldsLoading,
+    alwaysShowDatasetFields,
+    isAsyncType,
+  ]);
 
-  const saveAsDatasetDisabled = useMemo(() => {
-    return isAsyncType || dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
-  }, [dataset, isAsyncType]);
+  const saveAsDatasetDisabled =
+    isAsyncType || dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN;
 
-  useEffect(() => {
-    const fetchFields = async () => {
-      const datasetType = queryString.getDatasetService().getType(baseDataset.type);
-      if (!datasetType) {
-        setTimeFields([]);
-        return;
-      }
-
-      setTimeFieldsLoading(true);
-      const datasetFields = await datasetType
-        .fetchFields(baseDataset)
-        .finally(() => setTimeFieldsLoading(false));
-      const dateFields = datasetFields?.filter((field) => field.type === 'date');
-      setTimeFields(dateFields || []);
-    };
-
-    if (baseDataset?.dataSource?.meta?.supportsTimeFilter === false && timeFields.length > 0) {
-      setTimeFields([]);
-      return;
-    }
-
-    fetchFields();
-  }, [baseDataset, indexPatternsService, queryString, timeFields.length]);
-
-  const shouldRenderDatePickerField = useCallback(() => {
-    const datasetType = queryString.getDatasetService().getType(dataset.type);
-
-    const supportsTimeField = datasetType?.meta?.supportsTimeFilter;
-    if (supportsTimeField !== undefined) {
-      return Boolean(supportsTimeField);
-    }
-    return true;
-  }, [dataset.type, queryString]);
+  // Handlers
+  const handleDatasetChange = useCallback((updates: Partial<Dataset>) => {
+    setDataset((prev) => ({ ...prev, ...updates }));
+  }, []);
 
   return (
     <>
@@ -175,12 +174,12 @@ export const ConfiguratorV2 = ({
               value={language}
               onChange={(e) => {
                 setLanguage(e.target.value);
-                setDataset({ ...dataset, language: e.target.value });
+                handleDatasetChange({ language: e.target.value });
               }}
               data-test-subj="advancedSelectorLanguageSelect"
             />
           </EuiFormRow>
-          {shouldRenderDatePickerField() &&
+          {supportsTimeFilter &&
             (dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN ? (
               <EuiFormRow
                 label={i18n.translate(
@@ -203,7 +202,7 @@ export const ConfiguratorV2 = ({
               >
                 <EuiSelect
                   options={[
-                    ...timeFields.map((field) => ({
+                    ...dateFields.map((field) => ({
                       text: field.displayName || field.name,
                       value: field.name,
                     })),
@@ -214,92 +213,40 @@ export const ConfiguratorV2 = ({
                   onChange={(e) => {
                     const value = e.target.value === noTimeFilter ? undefined : e.target.value;
                     setTimeFieldName(e.target.value);
-                    setDataset({ ...dataset, timeFieldName: value });
+                    handleDatasetChange({ timeFieldName: value });
                   }}
                   hasNoInitialSelection
                   data-test-subj="advancedSelectorTimeFieldSelect"
                 />
               </EuiFormRow>
             ))}
-          {!alwaysShowDatasetFields && (
+          {filteredSchemas.length > 0 && (
             <>
-              <EuiSpacer size="s" />
-              <EuiCheckbox
-                id="saveAsDatasetCheckbox"
-                label={i18n.translate(
-                  'data.explorer.datasetSelector.advancedSelector.configurator.saveAsDatasetLabel',
-                  {
-                    defaultMessage: 'Save as dataset',
-                  }
-                )}
-                checked={saveAsDataset}
-                onChange={(e) => setSaveAsDataset(e.target.checked)}
-                disabled={saveAsDatasetDisabled}
-                data-test-subj="saveAsDatasetCheckbox"
+              <EuiSpacer size="m" />
+              <SchemaMappings
+                availableFields={allFields}
+                schemaMappings={schemaMappings}
+                onChange={setSchemaMappings}
+                schemas={filteredSchemas}
               />
-              {saveAsDatasetDisabled && (
-                <>
-                  <EuiSpacer size="xs" />
-                  <EuiText size="xs" color="warning">
-                    <p>
-                      <FormattedMessage
-                        id="data.explorer.datasetSelector.advancedSelector.configurator.asyncTypeWarning"
-                        defaultMessage="This data type does not support saving as a dataset."
-                      />
-                    </p>
-                  </EuiText>
-                </>
-              )}
             </>
           )}
+          <EuiSpacer size="m" />
+          {!alwaysShowDatasetFields && (
+            <SaveAsDatasetOption
+              checked={saveAsDataset}
+              onChange={setSaveAsDataset}
+              disabled={saveAsDatasetDisabled}
+            />
+          )}
           {(alwaysShowDatasetFields || saveAsDataset) && (
-            <>
-              <EuiFormRow
-                label={i18n.translate(
-                  'data.explorer.datasetSelector.advancedSelector.configurator.datasetNameLabel',
-                  {
-                    defaultMessage: 'Dataset name',
-                  }
-                )}
-              >
-                <EuiFieldText
-                  value={dataset.displayName || ''}
-                  onChange={(e) => {
-                    setDataset({ ...dataset, displayName: e.target.value });
-                  }}
-                  data-test-subj="datasetNameInput"
-                />
-              </EuiFormRow>
-              <EuiFormRow
-                label={i18n.translate(
-                  'data.explorer.datasetSelector.advancedSelector.configurator.datasetDescriptionLabel',
-                  {
-                    defaultMessage: 'Dataset description',
-                  }
-                )}
-              >
-                <EuiTextArea
-                  value={dataset.description || ''}
-                  onChange={(e) => {
-                    setDataset({ ...dataset, description: e.target.value });
-                  }}
-                  data-test-subj="datasetDescriptionInput"
-                />
-              </EuiFormRow>
-              {alwaysShowDatasetFields && isAsyncType && (
-                <>
-                  <EuiSpacer size="s" />
-                  <EuiText size="xs" color="warning">
-                    <p>
-                      <FormattedMessage
-                        id="data.explorer.datasetSelector.advancedSelector.configurator.asyncTypeSaveWarning"
-                        defaultMessage="This data type does not support saving as a dataset."
-                      />
-                    </p>
-                  </EuiText>
-                </>
-              )}
-            </>
+            <DatasetMetadataFields
+              displayName={dataset.displayName}
+              description={dataset.description}
+              onDisplayNameChange={(value) => handleDatasetChange({ displayName: value })}
+              onDescriptionChange={(value) => handleDatasetChange({ description: value })}
+              showAsyncWarning={alwaysShowDatasetFields && isAsyncType}
+            />
           )}
         </EuiForm>
       </EuiModalBody>
@@ -319,8 +266,9 @@ export const ConfiguratorV2 = ({
         <EuiButton
           onClick={async () => {
             const shouldSaveDataset = alwaysShowDatasetFields || saveAsDataset;
-            await queryString.getDatasetService().cacheDataset(dataset, services);
-            onConfirm({ dataset, language }, shouldSaveDataset || undefined);
+            const updatedDataset = { ...dataset, schemaMappings };
+            await datasetService.cacheDataset(updatedDataset, services);
+            onConfirm({ dataset: updatedDataset, language }, shouldSaveDataset || undefined);
           }}
           fill
           disabled={submitDisabled}

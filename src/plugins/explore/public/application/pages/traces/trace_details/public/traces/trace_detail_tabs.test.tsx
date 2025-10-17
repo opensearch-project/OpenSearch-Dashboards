@@ -11,8 +11,6 @@ import { TraceDetailTab } from '../../constants/trace_detail_tabs';
 describe('TraceDetailTabs', () => {
   const mockSetActiveTab = jest.fn();
   const mockHandleErrorFilterClick = jest.fn();
-  const mockSetIsServiceLegendOpen = jest.fn();
-
   const defaultProps = {
     activeTab: TraceDetailTab.TIMELINE,
     setActiveTab: mockSetActiveTab,
@@ -23,9 +21,6 @@ describe('TraceDetailTabs', () => {
     errorCount: 0,
     spanFilters: [],
     handleErrorFilterClick: mockHandleErrorFilterClick,
-    servicesInOrder: ['service-a', 'service-b'],
-    setIsServiceLegendOpen: mockSetIsServiceLegendOpen,
-    isServiceLegendOpen: false,
   };
 
   beforeEach(() => {
@@ -95,44 +90,11 @@ describe('TraceDetailTabs', () => {
     expect(mockHandleErrorFilterClick).toHaveBeenCalledTimes(1);
   });
 
-  it('shows service legend button when there are services', () => {
+  it('does not show service legend button', () => {
     render(<TraceDetailTabs {...defaultProps} />);
 
-    const legendButton = screen.getByTestId('service-legend-toggle');
-    expect(legendButton).toBeInTheDocument();
-    expect(legendButton).toHaveTextContent('Service legend');
-  });
-
-  it('hides service legend button when there are no services', () => {
-    const propsWithoutServices = {
-      ...defaultProps,
-      servicesInOrder: [],
-    };
-
-    render(<TraceDetailTabs {...propsWithoutServices} />);
-
+    expect(screen.queryByTestId('service-legend-toggle')).not.toBeInTheDocument();
     expect(screen.queryByText('Service legend')).not.toBeInTheDocument();
-  });
-
-  it('calls setIsServiceLegendOpen when service legend button is clicked', () => {
-    render(<TraceDetailTabs {...defaultProps} />);
-
-    const legendButton = screen.getByText('Service legend');
-    fireEvent.click(legendButton);
-
-    expect(mockSetIsServiceLegendOpen).toHaveBeenCalledWith(true);
-  });
-
-  it('shows service legend button as selected when legend is open', () => {
-    const propsWithOpenLegend = {
-      ...defaultProps,
-      isServiceLegendOpen: true,
-    };
-
-    render(<TraceDetailTabs {...propsWithOpenLegend} />);
-
-    const legendButton = screen.getByText('Service legend').closest('button');
-    expect(legendButton).toHaveClass('euiButtonEmpty--primary');
   });
 
   it('handles empty transformed hits gracefully', () => {

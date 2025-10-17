@@ -22,6 +22,7 @@ import { ManagementAppMountParams } from '../../management/public';
 import { DatasetManagementStart } from './index';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
 import { DataSourceTableItem } from './components/create_dataset_wizard/types';
+import { DataStorage } from '../../data/common';
 
 export interface DatasetManagmentContext {
   chrome: ChromeStart;
@@ -40,6 +41,8 @@ export interface DatasetManagmentContext {
   dataSourceEnabled: boolean;
   hideLocalCluster: boolean;
   workspaces: WorkspacesStart;
+  appName: string;
+  storage: DataStorage;
 }
 
 export type DatasetManagmentContextValue = OpenSearchDashboardsReactContextValue<

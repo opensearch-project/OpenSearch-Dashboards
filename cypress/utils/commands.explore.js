@@ -362,46 +362,6 @@ cy.explore.add('setDataset', (dataset, dataSourceName, type) => {
 });
 
 cy.explore.add(
-  'setIndexPatternFromAdvancedSelector',
-  (indexPattern, dataSourceName, language, finalAction = 'submit') => {
-    cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
-      req.continue((res) => {
-        if (res.statusCode === 404) {
-          res.send(200, { status: 'ok', data: {} });
-        }
-      });
-    }).as('agentConfigRequest');
-    cy.getElementByTestId('datasetSelectButton')
-      .should('be.visible')
-      .should('not.be.disabled')
-      .click();
-    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
-    cy.get(`[title="Index Patterns"]`).click();
-
-    cy.getElementByTestId('datasetExplorerWindow')
-      .find(`[title="${dataSourceName}::${indexPattern}"]`)
-      .should('be.visible')
-      .click({ force: true });
-    cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
-
-    if (language) {
-      cy.getElementByTestId('advancedSelectorLanguageSelect').should('be.visible').select(language);
-    }
-
-    if (finalAction === 'submit') {
-      cy.getElementByTestId('advancedSelectorConfirmButton').should('be.visible').click();
-
-      // verify that it has been selected
-      cy.getElementByTestId('datasetSelectButton').should('contain.text', `${indexPattern}`);
-    } else {
-      cy.get('[type="button"]').contains('Cancel').click();
-    }
-
-    cy.wait(3000);
-  }
-);
-
-cy.explore.add(
   'setIndexAsDataset',
   (index, dataSourceName, language, timeFieldName = 'timestamp', finalAction = 'submit') => {
     cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
@@ -468,7 +428,7 @@ cy.explore.add('setIndexPatternAsDataset', (indexPattern) => {
 
 cy.explore.add(
   'setIndexPatternFromAdvancedSelector',
-  (indexPattern, dataSourceName, language, finalAction = 'submit') => {
+  (indexPattern, language, finalAction = 'submit') => {
     cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
       req.continue((res) => {
         if (res.statusCode === 404) {
@@ -485,7 +445,7 @@ cy.explore.add(
     cy.get(`[title="Index Patterns"]`).click();
 
     cy.getElementByTestId('datasetExplorerWindow')
-      .find(`[title="${dataSourceName}::${indexPattern}"]`)
+      .find(`[title="${indexPattern}"]`)
       .should('be.visible')
       .click({ force: true });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
@@ -593,15 +553,10 @@ cy.explore.add(
       dataSource,
       isEnhancement = false,
       signalType = 'logs',
+      language = null, // Optional language parameter
     } = opts;
 
-    // TODO: use the UI creation flow to add signalType once we have it
-    cy.intercept('POST', '/w/*/api/saved_objects/index-pattern', (req) => {
-      req.body.attributes = { ...req.body.attributes, signalType };
-      req.continue();
-    }).as('createDatasetInterception');
-
-    // Navigate to Workspace Specific IndexPattern Page
+    // Step 1 - Navigate to datasets page
     cy.osd.navigateToWorkSpaceSpecificPage({
       workspaceName,
       page: 'datasets',
@@ -622,70 +577,96 @@ cy.explore.add(
         isEnhancement,
       });
 
-      // adding a wait here as sometimes the button doesn't click below
+      // Adding a wait here as sometimes the button doesn't click below
       cy.wait(2000);
 
-      // adding a force as sometimes the button is hidden behind a popup
+      // Step 2 - Click create dataset button
+      cy.getElementByTestId('createDatasetButton').should('exist').should('be.visible');
       cy.getElementByTestId('createDatasetButton').click({ force: true });
-    }
 
-    cy.osd.waitForLoader(isEnhancement);
-
-    const disableLocalCluster = !!Cypress.env('DISABLE_LOCAL_CLUSTER');
-
-    if (dataSource) {
-      if (!disableLocalCluster) {
-        // When data source is provided, we automatically switch to external data source
-        // First select "Use external data source connection" radio button
-        // Ensure the radio is enabled and need to force click it
-        // This is due to data-test-subj="createIndexPatternStepDataSourceUseDataSourceRadio") is on the parent div, not on the actual radio input element
-        cy.get('input#useDataSource').should('not.be.disabled').click({ force: true });
+      // Step 3 - Select signal type (logs or traces)
+      if (signalType === 'logs') {
+        cy.getElementByTestId('createLogsDataset').should('be.visible').click({ force: true });
       }
 
-      if (disableLocalCluster) {
-        // When local cluster is disabled, directly select from the list
-        cy.get('.euiSelectableListItem')
-          .filter((_, el) => {
-            return Cypress.$(el).find('.euiSelectableListItem__text').text().trim() === dataSource;
-          })
-          .first()
-          .click();
-      } else {
-        // When local cluster is enabled, use the type="data-source" selector
-        cy.get('[type="data-source"]')
-          .filter((_, el) => {
-            return Cypress.$(el).text().trim() === dataSource;
-          })
-          .first()
-          .click();
+      if (signalType === 'traces') {
+        cy.getElementByTestId('createTracesDataset').should('be.visible').click({ force: true });
       }
     }
 
-    cy.getElementByTestId('createDatasetStepDataSourceNextStepButton').click();
+    // Step 4 - Select Indexes
+    cy.get(`[title="Indexes"]`).should('be.visible');
+    cy.get(`[title="Indexes"]`).click();
 
-    cy.getElementByTestId('createDatasetNameInput').should('be.visible').clear().type(indexPattern);
-    cy.getElementByTestId('createDatasetGoToStep2Button').click();
+    // Step 5 - Select data source
+    cy.get(`[title="${dataSource}"]`).should('be.visible');
+    cy.get(`[title="${dataSource}"]`).click();
 
-    // wait for the select input if it exists
+    // Step 6 - Select index scope (Index wildcard)
+    cy.getElementByTestId('index-scope-selector')
+      .should('be.visible')
+      .find('[data-test-subj="comboBoxInput"]')
+      .click();
+
+    cy.get(`[title="Index wildcard"]`).should('be.visible').click({ force: true });
+
+    // Step 7 - Enter index pattern
+    cy.getElementByTestId('dataset-prefix-selector')
+      .should('be.visible')
+      .find('[data-test-subj="comboBoxInput"]')
+      .click();
+
+    cy.getElementByTestId('dataset-prefix-selector')
+      .should('be.visible')
+      .find('[data-test-subj="comboBoxSearchInput"]')
+      .clear()
+      .type(`${indexPattern}*{enter}`);
+
+    // Step 8 - Click Next button
+    cy.getElementByTestId('datasetSelectorNext')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click();
+
+    // Step 9 - Select language (if provided)
+    if (language) {
+      cy.getElementByTestId('advancedSelectorLanguageSelect').should('be.visible').select(language);
+    }
+
+    // Step 10 - Wait for time field selector if needed
     if (indexPatternHasTimefield || timefieldName) {
-      cy.getElementByTestId('createDatasetTimeFieldSelect').should('be.visible');
+      cy.getElementByTestId('advancedSelectorTimeFieldSelect').should('be.visible');
     }
 
+    // Step 11 - Select time field
     if (indexPatternHasTimefield && !!timefieldName) {
-      cy.getElementByTestId('createDatasetTimeFieldSelect').select(timefieldName);
+      cy.getElementByTestId('advancedSelectorTimeFieldSelect')
+        .should('be.visible')
+        .select(timefieldName);
     } else if (indexPatternHasTimefield && !timefieldName) {
-      cy.getElementByTestId('createDatasetTimeFieldSelect').select(
+      cy.getElementByTestId('advancedSelectorTimeFieldSelect').select(
         "I don't want to use the time filter"
       );
     }
 
-    cy.getElementByTestId('createDatasetButton').should('be.visible').click();
+    // Step 12 - Set up intercept to capture dataset creation response
+    cy.intercept('POST', '**/api/saved_objects/index-pattern/**').as('createDatasetInterception');
 
-    cy.wait('@createDatasetInterception').then((interception) => {
-      // save the created index pattern ID as an alias
+    // Step 13 - Click Confirm button
+    cy.getElementByTestId('advancedSelectorConfirmButton')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click();
+
+    // Step 14 - Wait for dataset creation request and save ID
+    cy.wait('@createDatasetInterception', { timeout: 15000 }).then((interception) => {
+      // Save the created index pattern ID as an alias
       cy.wrap(interception.response.body.id).as('INDEX_PATTERN_ID');
     });
 
-    cy.getElementByTestId('headerApplicationTitle').contains(indexPattern);
+    cy.wait(3000);
+
+    // Step 15 - Verify page title contains the index pattern
+    cy.getElementByTestId('headerApplicationTitle').should('contain', indexPattern);
   }
 );

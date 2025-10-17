@@ -22,6 +22,8 @@ import {
 } from '../components';
 import { DatasetManagementStartDependencies, DatasetManagementStart } from '../plugin';
 import { DatasetManagmentContext, MlCardState } from '../types';
+import { createStorage } from '../../../data/common';
+import { DatasetTableV2WithRouter } from '../components/dataset_table/dataset_table_v2';
 
 const readOnlyBadge = {
   text: i18n.translate('datasetManagement.indexPatterns.badge.readOnly.text', {
@@ -79,6 +81,8 @@ export async function mountManagementSection(
     dataSourceEnabled,
     hideLocalCluster,
     workspaces,
+    appName: 'dataset_management',
+    storage: createStorage({ engine: window.localStorage, prefix: 'opensearchDashboards.' }),
   };
 
   const showActionsInHeader = uiSettings.get('home:useNewHomePage');
@@ -96,7 +100,7 @@ export async function mountManagementSection(
           <EditDatasetContainer />
         </Route>
         <Route path={['/']}>
-          <DatasetTableWithRouter canSave={canSave} />
+          <DatasetTableV2WithRouter canSave={canSave} />
         </Route>
       </Switch>
     </Router>

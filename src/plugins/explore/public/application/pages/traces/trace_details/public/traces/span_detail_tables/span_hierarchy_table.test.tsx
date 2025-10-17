@@ -23,13 +23,19 @@ jest.mock('./span_cell', () => ({
   SpanCell: jest.fn(() => <div data-test-subj="span-cell">SpanCell</div>),
 }));
 
+jest.mock('./service_legend_button', () => ({
+  ServiceLegendButton: jest.fn(() => (
+    <div data-test-subj="service-legend-button">ServiceLegendButton</div>
+  )),
+}));
+
 jest.mock('../ppl_resolve_helpers');
 jest.mock('./utils');
 jest.mock('../../utils/span_timerange_utils');
 
 import { RenderCustomDataGrid } from '../../utils/custom_datagrid';
 import { isSpanError } from '../ppl_resolve_helpers';
-import { parseHits } from './utils';
+import { parseHits, applySpanFilters } from './utils';
 import { calculateTraceTimeRange } from '../../utils/span_timerange_utils';
 
 const mockRenderCustomDataGrid = RenderCustomDataGrid as jest.MockedFunction<
@@ -37,6 +43,7 @@ const mockRenderCustomDataGrid = RenderCustomDataGrid as jest.MockedFunction<
 >;
 const mockIsSpanError = isSpanError as jest.MockedFunction<typeof isSpanError>;
 const mockParseHits = parseHits as jest.MockedFunction<typeof parseHits>;
+const mockApplySpanFilters = applySpanFilters as jest.MockedFunction<typeof applySpanFilters>;
 const mockCalculateTraceTimeRange = calculateTraceTimeRange as jest.MockedFunction<
   typeof calculateTraceTimeRange
 >;
@@ -91,6 +98,7 @@ describe('SpanHierarchyTable', () => {
       </div>
     ));
     mockParseHits.mockReturnValue(mockSpans);
+    mockApplySpanFilters.mockReturnValue(mockSpans);
     mockIsSpanError.mockImplementation((span) => span?.['status.code'] === 2);
     mockCalculateTraceTimeRange.mockReturnValue(mockTraceTimeRange);
   });
@@ -116,45 +124,26 @@ describe('SpanHierarchyTable', () => {
     expect(toolbar).toBeInTheDocument();
   });
 
-  it('filters by error status', () => {
-    const errorSpans = [
-      ...mockSpans,
-      {
-        spanId: 'error-span',
-        serviceName: 'error-service',
-        name: 'error-operation',
-        durationInNanos: 500000000,
-        'status.code': 2,
-        startTime: '2023-01-01T00:00:01.000Z',
-        endTime: '2023-01-01T00:00:01.500Z',
-        children: [],
-      },
-    ];
-    mockParseHits.mockReturnValue(errorSpans);
+  it('passes ServiceLegendButton to secondaryToolbar', () => {
+    render(<SpanHierarchyTable {...defaultProps} />);
 
-    const propsWithErrorFilter = {
-      ...defaultProps,
-      filters: [{ field: 'isError', value: true }],
-    };
-
-    const { getByTestId } = render(<SpanHierarchyTable {...propsWithErrorFilter} />);
-
-    expect(getByTestId('row-count')).toHaveTextContent('1');
+    const mockCall = mockRenderCustomDataGrid.mock.calls[0]?.[0];
+    expect(mockCall?.secondaryToolbar).toHaveLength(1);
+    expect(mockCall?.secondaryToolbar![0]).toBeDefined();
   });
 
-  it('filters by field value', () => {
-    const propsWithServiceFilter = {
-      ...defaultProps,
-      filters: [{ field: 'serviceName', value: 'service-1' }],
-    };
+  it('displays only spans returned by applySpanFilters', () => {
+    const filteredSpans = [mockSpans[0]];
+    mockApplySpanFilters.mockReturnValue(filteredSpans);
 
-    const { getByTestId } = render(<SpanHierarchyTable {...propsWithServiceFilter} />);
+    const { getByTestId } = render(<SpanHierarchyTable {...defaultProps} />);
 
     expect(getByTestId('row-count')).toHaveTextContent('1');
   });
 
   it('handles empty payload data', () => {
     mockParseHits.mockReturnValue([]);
+    mockApplySpanFilters.mockReturnValue([]);
 
     const { getByTestId } = render(<SpanHierarchyTable {...defaultProps} />);
 
@@ -166,6 +155,7 @@ describe('SpanHierarchyTable', () => {
     mockParseHits.mockImplementation(() => {
       throw new Error('Invalid JSON');
     });
+    mockApplySpanFilters.mockReturnValue([]);
 
     const { getByTestId } = render(<SpanHierarchyTable {...defaultProps} />);
 
@@ -176,19 +166,6 @@ describe('SpanHierarchyTable', () => {
     );
 
     consoleSpy.mockRestore();
-  });
-
-  it('respects hidden columns', () => {
-    const propsWithHiddenColumns = {
-      ...defaultProps,
-      hiddenColumns: ['timeline'],
-    };
-
-    const { getByTestId } = render(<SpanHierarchyTable {...propsWithHiddenColumns} />);
-
-    const visibleColumns = JSON.parse(getByTestId('visible-columns').textContent || '[]');
-    expect(visibleColumns).not.toContain('timeline');
-    expect(visibleColumns).toContain('span');
   });
 
   it('passes availableWidth to RenderCustomDataGrid', () => {
@@ -204,18 +181,6 @@ describe('SpanHierarchyTable', () => {
         availableWidth: 800,
       })
     );
-  });
-
-  it('includes expected hierarchy columns', () => {
-    render(<SpanHierarchyTable {...defaultProps} />);
-
-    const mockCall = mockRenderCustomDataGrid.mock.calls[0]?.[0];
-    expect(mockCall).toBeDefined();
-    const columnIds = mockCall!.columns.map((col: any) => col.id);
-
-    expect(columnIds).toContain('span');
-    expect(columnIds).toContain('timeline');
-    expect(columnIds).toContain('durationInNanos');
   });
 
   it('renders HierarchySpanCell for span column', () => {
@@ -261,5 +226,12 @@ describe('SpanHierarchyTable', () => {
     const { getByTestId } = render(<SpanHierarchyTable {...propsWithUndefinedData} />);
 
     expect(getByTestId('row-count')).toHaveTextContent('0');
+  });
+
+  it('uses auto height for small number of items', () => {
+    render(<SpanHierarchyTable {...defaultProps} />);
+
+    const mockCall = mockRenderCustomDataGrid.mock.calls[0]?.[0];
+    expect(mockCall?.defaultHeight).toBe('auto');
   });
 });

@@ -8,6 +8,11 @@ Object {
   "fields": Object {},
   "id": "id",
   "intervalName": undefined,
+  "schemaMappings": Object {
+    "otelLogs": Object {
+      "traceId": "trace.id",
+    },
+  },
   "signalType": undefined,
   "sourceFilters": Array [
     Object {
@@ -37,6 +42,11 @@ Object {
   "fields": Object {},
   "id": "id",
   "intervalName": undefined,
+  "schemaMappings": Object {
+    "otelLogs": Object {
+      "spanId": "span.id",
+    },
+  },
   "signalType": undefined,
   "sourceFilters": Array [
     Object {

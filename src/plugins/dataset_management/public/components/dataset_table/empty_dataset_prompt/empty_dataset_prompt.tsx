@@ -13,16 +13,53 @@ import { EuiDescriptionListTitle } from '@elastic/eui';
 import { EuiDescriptionListDescription, EuiDescriptionList } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { DatasetCreationOption } from '../../types';
-import { CreateButton } from '../../create_button';
+import { CreateButton, CreateDatasetButton } from '../../create_button';
 import { Illustration } from './assets/dataset_illustration';
 
 interface Props {
   canSave: boolean;
-  creationOptions: DatasetCreationOption[];
+  creationOptions?: DatasetCreationOption[];
+  onCreateDataset?: (signalType: string) => void;
   docLinksDatasetIntro: string;
 }
 
-export const EmptyDatasetPrompt = ({ canSave, creationOptions, docLinksDatasetIntro }: Props) => {
+export const EmptyDatasetPrompt = ({
+  canSave,
+  creationOptions,
+  onCreateDataset,
+  docLinksDatasetIntro,
+}: Props) => {
+  // Render the appropriate button based on which props are provided
+  const renderCreateButton = () => {
+    if (!canSave) return null;
+
+    // If onCreateDataset is provided, use the new CreateDatasetButton
+    if (onCreateDataset) {
+      return (
+        <CreateDatasetButton onCreateDataset={onCreateDataset}>
+          <FormattedMessage
+            id="datasetManagement.datasetTable.createButton"
+            defaultMessage="Create dataset"
+          />
+        </CreateDatasetButton>
+      );
+    }
+
+    // Otherwise, fall back to the old CreateButton with creationOptions
+    if (creationOptions) {
+      return (
+        <CreateButton options={creationOptions}>
+          <FormattedMessage
+            id="datasetManagement.datasetTable.createBtn"
+            defaultMessage="Create index pattern"
+          />
+        </CreateButton>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <EuiPageContent
       data-test-subj="emptyDatasetPrompt"
@@ -55,14 +92,7 @@ export const EmptyDatasetPrompt = ({ canSave, creationOptions, docLinksDatasetIn
                 yesterday, or all indices that contain your log data."
               />
             </p>
-            {canSave && (
-              <CreateButton options={creationOptions}>
-                <FormattedMessage
-                  id="datasetManagement.datasetTable.createBtn"
-                  defaultMessage="Create index pattern"
-                />
-              </CreateButton>
-            )}
+            {renderCreateButton()}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
