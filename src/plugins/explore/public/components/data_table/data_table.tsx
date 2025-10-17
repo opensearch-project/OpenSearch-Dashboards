@@ -506,6 +506,43 @@ const DataTableUI = ({
     return () => cancelAnimationFrame(tableLayoutRequestFrameRef.current);
   }, [columns, tableElement, indexOfRenderedData, timeFromFirstRow]);
 
+  // Auto-capture visible rows for chat context (only when no rows are expanded)
+  useEffect(() => {
+    const contextStore = (window as any).assistantContextStore;
+
+    if (!contextStore) {
+      // DataTable: assistantContextStore not available yet
+      return;
+    }
+
+    // Check if any rows are currently expanded by looking at context store
+    const allContexts = contextStore.getAllContexts();
+    const hasExpandedRows = allContexts.some(
+      (ctx: any) =>
+        ctx.description.startsWith('Expanded row ') && ctx.categories?.includes('dynamic')
+    );
+
+    const shouldRegisterContext = rows.length > 0 && !hasExpandedRows;
+
+    if (shouldRegisterContext) {
+      // Get top 5 visible rows based on rendering mode
+      const visibleRows = showPagination
+        ? displayedRows.slice(0, 5)
+        : rows.slice(0, Math.min(5, renderedRowCount));
+
+      contextStore.addContext({
+        id: 'data-table-visible-rows',
+        description: 'Top 5 visible rows from data table',
+        value: visibleRows.map((row) => row._source),
+        label: 'Visible Rows',
+        categories: ['explore', 'chat', 'dynamic'],
+      });
+    } else {
+      // Remove context if conditions not met (expanded rows exist or no data)
+      contextStore.removeContextById('data-table-visible-rows');
+    }
+  }, [rows, displayedRows, renderedRowCount, showPagination]);
+
   return (
     <div className="explore-table-container">
       {showPagination ? (
