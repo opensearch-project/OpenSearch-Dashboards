@@ -113,11 +113,11 @@ export const createBarGaugeSpec = (
     { name: 'fontColor', value: getColors().text },
     {
       name: 'maxBase',
-      value: Math.max(minBase, maxBase),
+      value: maxBase,
     },
     {
       name: 'minBase',
-      value: styleOptions?.min ?? 0,
+      value: minBase,
     },
     {
       name: 'fontFactor',
@@ -282,12 +282,6 @@ export const createBarGaugeSpec = (
 
   if (styleOptions.exclusive.valueDisplay !== 'hidden') {
     const nameLayer = {
-      transform: [
-        {
-          calculate: `datum.maxVal`,
-          as: 'textY',
-        },
-      ],
       mark: {
         type: 'text',
 
@@ -308,7 +302,7 @@ export const createBarGaugeSpec = (
       encoding: {
         [`${processedSymbol}`]: {
           type: 'quantitative',
-          field: 'textY',
+          field: 'maxVal',
         },
         text: {
           field: 'displayValue',
