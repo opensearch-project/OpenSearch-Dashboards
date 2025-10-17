@@ -52,6 +52,7 @@ export const ValueMappingSection = ({ valueMappings, onChange }: ValueMappingPro
               <EuiText textAlign="center">{mapping.value}</EuiText>
             ) : (
               <EuiText textAlign="center">
+                {/* {`[${mapping.range?.min}, ${mapping.range?.max})`} */}
                 {`[${mapping.range?.min}, ${mapping.range?.max ?? '∞'})`}
               </EuiText>
             )}
