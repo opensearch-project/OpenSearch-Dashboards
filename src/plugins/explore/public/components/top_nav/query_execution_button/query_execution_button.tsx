@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
-import { EuiSuperUpdateButton } from '@elastic/eui';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
+import { EuiSuperUpdateButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -17,11 +17,15 @@ import {
 import {
   selectDateRange,
   selectIsQueryEditorDirty,
+  selectShouldShowCancelButton,
 } from '../../../application/utils/state_management/selectors';
 import { isTimeRangeInvalid } from '../utils/validate_time_range';
 
 export interface QueryExecutionButtonProps {
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  showCancelButton?: boolean;
+  onCancel?: () => void;
+  isQueryRunning?: boolean;
 }
 
 /**
@@ -31,12 +35,66 @@ export interface QueryExecutionButtonProps {
  * - "Refresh" when status is 'REFRESH' (no changes, just re-run)
  * - Disabled when status is 'DISABLED' (validation errors)
  */
-export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({ onClick }) => {
+export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({
+  onClick,
+  showCancelButton,
+  onCancel,
+  isQueryRunning,
+}) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const dispatch = useDispatch();
   const dateRange = useSelector(selectDateRange);
   const timefilter = services?.data?.query?.timefilter?.timefilter;
   const isQueryEditorDirty = useSelector(selectIsQueryEditorDirty);
+
+  // Get Redux state for cancel button logic
+  const reduxShouldShowCancelButton = useSelector(selectShouldShowCancelButton);
+
+  // Local state for managing button visibility with timing
+  const [shouldShowCancelButton, setShouldShowCancelButton] = useState(false);
+  const cancelButtonTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const minimumDisplayTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Handle delayed cancel button visibility
+  useEffect(() => {
+    if (reduxShouldShowCancelButton) {
+      // Clear any existing minimum display timer
+      if (minimumDisplayTimerRef.current) {
+        clearTimeout(minimumDisplayTimerRef.current);
+        minimumDisplayTimerRef.current = null;
+      }
+
+      // Start timer to show cancel button after 50ms
+      cancelButtonTimerRef.current = setTimeout(() => {
+        setShouldShowCancelButton(true);
+      }, 50);
+    } else {
+      // Clear the show timer
+      if (cancelButtonTimerRef.current) {
+        clearTimeout(cancelButtonTimerRef.current);
+        cancelButtonTimerRef.current = null;
+      }
+
+      // If button is currently visible, keep it visible for minimum 200ms
+      if (shouldShowCancelButton) {
+        minimumDisplayTimerRef.current = setTimeout(() => {
+          setShouldShowCancelButton(false);
+        }, 200);
+      } else {
+        setShouldShowCancelButton(false);
+      }
+    }
+
+    // Cleanup timers on unmount
+    return () => {
+      if (cancelButtonTimerRef.current) {
+        clearTimeout(cancelButtonTimerRef.current);
+      }
+      if (minimumDisplayTimerRef.current) {
+        clearTimeout(minimumDisplayTimerRef.current);
+      }
+    };
+  }, [reduxShouldShowCancelButton, shouldShowCancelButton]);
 
   const determineButtonStatus = useCallback((): QueryExecutionButtonStatus => {
     if (dateRange && isTimeRangeInvalid(dateRange)) {
@@ -67,7 +125,7 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({ onCl
         defaultMessage: 'Refresh',
       });
 
-  return (
+  const runButton = (
     <EuiSuperUpdateButton
       needsUpdate={needsUpdate}
       isDisabled={isDisabled}
@@ -82,5 +140,26 @@ export const QueryExecutionButton: React.FC<QueryExecutionButtonProps> = ({ onCl
     >
       {buttonText}
     </EuiSuperUpdateButton>
+  );
+
+  const cancelButton = shouldShowCancelButton ? (
+    <EuiButtonIcon
+      size="s"
+      color="danger"
+      onClick={onCancel}
+      data-test-subj="exploreQueryCancelButton"
+      aria-label={i18n.translate('explore.topNav.queryExecutionButton.cancelAriaLabel', {
+        defaultMessage: 'Cancel query',
+      })}
+      iconType="cross"
+      className="osdQueryEditor__cancelButton"
+    />
+  ) : null;
+
+  return (
+    <EuiFlexGroup gutterSize="s" responsive={false} style={{ justifyContent: 'end' }}>
+      <EuiFlexItem grow={false}>{runButton}</EuiFlexItem>
+      {cancelButton && <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>}
+    </EuiFlexGroup>
   );
 };
