@@ -164,7 +164,7 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
           try {
             const fields = dataView.fields.getAll();
 
-            // Get dataset title from saved object to get displayName
+            // Get dataset title from saved object
             let datasetTitle = dataView.title;
             try {
               const savedObject = await dataService.indexPatterns.savedObjectsClient.get(
@@ -172,7 +172,7 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
                 dataView.id
               );
               const attributes = savedObject.attributes as any;
-              datasetTitle = attributes.displayName || attributes.title || dataView.title;
+              datasetTitle = attributes.title || dataView.title;
             } catch (err) {
               // If fetch fails, use dataView.title
             }

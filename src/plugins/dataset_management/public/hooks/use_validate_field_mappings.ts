@@ -97,7 +97,13 @@ export function useValidateFieldMappings(
       }
     };
 
-    validateDatasets();
+    // Debounce validation to prevent excessive API calls when datasets are added rapidly
+    const timeoutId = setTimeout(() => {
+      validateDatasets();
+    }, 300); // Wait 300ms after last change before validating
+
+    // Cleanup timeout on unmount or when dependencies change
+    return () => clearTimeout(timeoutId);
   }, [JSON.stringify(logDatasetIds), dataService, validationKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return {
