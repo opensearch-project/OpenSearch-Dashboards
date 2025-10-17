@@ -7,7 +7,7 @@ import {
   getBarOrientation,
   thresholdsToGradient,
   symbolOpposite,
-  getDisplayMode,
+  getGradientConfig,
 } from './bar_gauge_utils';
 import { AxisColumnMappings, Threshold, VisFieldType } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
@@ -97,58 +97,29 @@ describe('bar_gauge_utils', () => {
     });
   });
 
-  describe('getDisplayMode', () => {
-    const mockThreshold: Threshold = { value: 50, color: '#ff0000' };
-
-    it('should return horizontal gradient for horizontal orientation and gradient mode', () => {
-      const result = getDisplayMode('horizontal', 'gradient', mockThreshold, '#00ff00');
-
-      expect(result).toEqual({
-        color: {
-          x1: 0,
-          y1: 0,
-          x2: 1,
-          y2: 0,
-          gradient: 'linear',
-          stops: [
-            { offset: 0, color: '#ff0000' },
-            { offset: 1, color: '#00ff00' },
-          ],
-        },
-      });
+  describe('getGradientConfig', () => {
+    it('returns horizontal gradient for non-numerical x-axis with horizontal orientation', () => {
+      const result = getGradientConfig('horizontal', 'gradient', false);
+      expect(result).toEqual({ x1: 0, y1: 0, x2: 1, y2: 0 });
     });
 
-    it('should return vertical gradient for vertical orientation and gradient mode', () => {
-      const result = getDisplayMode('vertical', 'gradient', mockThreshold, '#00ff00');
-
-      expect(result).toEqual({
-        color: {
-          x1: 1,
-          y1: 1,
-          x2: 1,
-          y2: 0,
-          gradient: 'linear',
-          stops: [
-            { offset: 0, color: '#ff0000' },
-            { offset: 1, color: '#00ff00' },
-          ],
-        },
-      });
+    it('returns horizontal gradient for numerical x-axis with non-horizontal orientation', () => {
+      const result = getGradientConfig('vertical', 'gradient', true);
+      expect(result).toEqual({ x1: 0, y1: 0, x2: 1, y2: 0 });
     });
 
-    it('should return solid color for stack mode', () => {
-      const result = getDisplayMode(
-        'horizontal',
-        'stack',
-        mockThreshold,
-
-        '#00ff00'
-      );
-      expect(result).toEqual({ color: '#ff0000' });
+    it('returns vertical gradient for numerical x-axis with horizontal orientation', () => {
+      const result = getGradientConfig('horizontal', 'gradient', true);
+      expect(result).toEqual({ x1: 1, y1: 1, x2: 1, y2: 0 });
     });
 
-    it('should return undefined for unsupported display mode', () => {
-      const result = getDisplayMode('horizontal', 'basic', mockThreshold, '#00ff00');
+    it('returns vertical gradient for non-numerical x-axis with non-horizontal orientation', () => {
+      const result = getGradientConfig('vertical', 'gradient', false);
+      expect(result).toEqual({ x1: 1, y1: 1, x2: 1, y2: 0 });
+    });
+
+    it('returns undefined for non-gradient display mode', () => {
+      const result = getGradientConfig('horizontal', 'basic', false);
       expect(result).toBeUndefined();
     });
   });

@@ -114,24 +114,6 @@ describe('createBarGaugeSpec', () => {
     expect(spec.encoding.x.field).toBe('value');
   });
 
-  it('should handle basic display mode', () => {
-    const basicStyle = {
-      ...mockStyleOptions,
-      exclusive: { ...mockStyleOptions.exclusive, displayMode: 'basic' as any },
-    };
-
-    const spec = createBarGaugeSpec(
-      mockTransformedData,
-      [mockNumericalColumn],
-      [mockCategoricalColumn],
-      [],
-      basicStyle,
-      mockAxisColumnMappings
-    );
-
-    expect(spec.encoding.color.scale).toBeDefined();
-  });
-
   it('should handle hidden tooltips', () => {
     const noTooltipStyle = {
       ...mockStyleOptions,
