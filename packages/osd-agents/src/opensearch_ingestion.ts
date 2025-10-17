@@ -48,6 +48,17 @@ class OpenSearchIngestor {
   private filePositions: Map<string, number> = new Map(); // Track byte position for each file
   private stateFile: string;
 
+  /**
+   * Check if OpenSearch credentials are configured in environment
+   */
+  static areCredentialsConfigured(): boolean {
+    const opensearchUrl = process.env.EXTERNAL_OPENSEARCH_URL;
+    const username = process.env.EXTERNAL_OPENSEARCH_USERNAME;
+    const password = process.env.EXTERNAL_OPENSEARCH_PASSWORD;
+
+    return !!(opensearchUrl && username && password);
+  }
+
   constructor(options?: { batchSize?: number; batchDelay?: number }) {
     const opensearchUrl = process.env.EXTERNAL_OPENSEARCH_URL;
     const username = process.env.EXTERNAL_OPENSEARCH_USERNAME;

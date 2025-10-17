@@ -10,6 +10,7 @@ import { join } from 'path';
 import { MCPServerConfig } from '../types/mcp_types';
 import { Logger } from '../utils/logger';
 import { BaseAGUIConfig } from '../ag_ui/base_ag_ui_adapter';
+import { OpenSearchIngestor } from '../opensearch_ingestion';
 
 export class ConfigLoader {
   private static logger = new Logger();
@@ -56,6 +57,18 @@ export class ConfigLoader {
   }
 
   static loadServerConfig(): BaseAGUIConfig {
+    const enableRealtimeLogIngestion = process.env.ENABLE_REALTIME_LOG_INGESTION === 'true';
+    // Log warning if real-time ingestion is enabled but credentials are missing
+    if (enableRealtimeLogIngestion) {
+      if (!OpenSearchIngestor.areCredentialsConfigured()) {
+        this.logger.warn(
+          'ENABLE_REALTIME_LOG_INGESTION is enabled but OpenSearch credentials are not configured. ' +
+            'Real-time ingestion will be skipped. Please configure EXTERNAL_OPENSEARCH_URL, ' +
+            'EXTERNAL_OPENSEARCH_USERNAME, and EXTERNAL_OPENSEARCH_PASSWORD in .env file.'
+        );
+      }
+    }
+
     return {
       port: parseInt(process.env.AG_UI_PORT || '3001', 10),
       host: process.env.AG_UI_HOST || 'localhost',
@@ -63,6 +76,7 @@ export class ConfigLoader {
         origins: process.env.AG_UI_CORS_ORIGINS?.split(',') || ['*'],
         credentials: process.env.AG_UI_CORS_CREDENTIALS === 'true',
       },
+      enableRealtimeLogIngestion,
     };
   }
 }
