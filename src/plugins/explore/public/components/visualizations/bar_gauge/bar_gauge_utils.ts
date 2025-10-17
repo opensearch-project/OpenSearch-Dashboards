@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { darkMode } from '@osd/ui-shared-deps/theme';
 import { AxisColumnMappings, Threshold, VisFieldType } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 
@@ -54,11 +53,9 @@ export const symbolOpposite = (orientationMode: string, symbol: string) => {
   return symbol;
 };
 
-export const getDisplayMode = (
+export const getGradientConfig = (
   orientationMode: string,
   displayMode: string,
-  threshold: Threshold,
-  nextColor: string,
   isXaxisNumerical: boolean
 ) => {
   if (
@@ -67,42 +64,20 @@ export const getDisplayMode = (
   ) {
     if (displayMode === 'gradient')
       return {
-        color: {
-          x1: 0,
-          y1: 0,
-          x2: 1,
-          y2: 0,
-          gradient: 'linear',
-          stops: [
-            { offset: 0, color: `${threshold.color}` },
-            {
-              offset: 1,
-              color: nextColor,
-            },
-          ],
-        },
+        x1: 0,
+        y1: 0,
+        x2: 1,
+        y2: 0,
       };
-    if (displayMode === 'stack') return { color: threshold.color };
   }
 
   if (displayMode === 'gradient')
     return {
-      color: {
-        x1: 1,
-        y1: 1,
-        x2: 1,
-        y2: 0,
-        gradient: 'linear',
-        stops: [
-          { offset: 0, color: `${threshold.color}` },
-          {
-            offset: 1,
-            color: nextColor,
-          },
-        ],
-      },
+      x1: 1,
+      y1: 1,
+      x2: 1,
+      y2: 0,
     };
-  if (displayMode === 'stack') return { color: threshold.color };
 };
 
 export const darkenColor = (hex: string, degree = 1) => {
@@ -123,4 +98,82 @@ export const darkenColor = (hex: string, degree = 1) => {
 
   const toHex = (n: number) => n.toString(16).padStart(2, '0');
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+};
+
+export const processThresholds = (thresholds: Threshold[]) => {
+  const result: Threshold[] = [];
+
+  for (let i = 0; i < thresholds.length; i++) {
+    const current = thresholds[i];
+    const next = thresholds[i + 1];
+
+    // if the next threshold has the same value, use next
+    if (next && next.value === current.value) continue;
+
+    result.push(current);
+  }
+
+  return result;
+};
+
+export const NormalizeData = (data: number, start: number, end: number) => {
+  // normalize data value between start and end into 0–1 range
+  return (data - start) / (end - start);
+};
+
+export const generateParams = (
+  thresholds: Threshold[],
+  styleOptions: BarGaugeChartStyle,
+  isXaxisNumerical: boolean
+) => {
+  const result: any[] = [];
+
+  for (let i = 0; i < thresholds.length; i++) {
+    const start = thresholds[0].value;
+
+    const end = thresholds[i].value;
+
+    if (i === 0) {
+      result.push({
+        name: `test${i}`,
+        value: {
+          gradient: 'linear',
+          ...getGradientConfig(
+            styleOptions.exclusive.orientation,
+            styleOptions.exclusive.displayMode,
+            isXaxisNumerical
+          ),
+          stops: [
+            { offset: 0, color: thresholds[0].color },
+            {
+              offset: 1,
+              color: darkenColor(thresholds[0]?.color, 2),
+            },
+          ],
+        },
+      });
+      continue;
+    }
+
+    // collect stops up to current threshold
+    const stops = thresholds.slice(0, i + 1).map((threshold) => {
+      const offset = NormalizeData(threshold.value, start, end);
+      return { offset, color: threshold.color };
+    });
+
+    result.push({
+      name: `test${i}`,
+      value: {
+        gradient: 'linear',
+        ...getGradientConfig(
+          styleOptions.exclusive.orientation,
+          styleOptions.exclusive.displayMode,
+          isXaxisNumerical
+        ),
+        stops,
+      },
+    });
+  }
+
+  return result;
 };
