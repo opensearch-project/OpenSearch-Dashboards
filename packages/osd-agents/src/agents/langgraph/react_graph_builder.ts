@@ -72,6 +72,14 @@ const ReactStateAnnotation = Annotation.Root({
     reducer: (x, y) => y || x,
     default: () => undefined,
   }),
+  duplicateCallCount: Annotation<number>({
+    reducer: (x, y) => y,
+    default: () => 0,
+  }),
+  recentToolSignatures: Annotation<string[]>({
+    reducer: (x, y) => y || x,
+    default: () => [],
+  }),
 });
 
 // Type for the state inferred from annotation

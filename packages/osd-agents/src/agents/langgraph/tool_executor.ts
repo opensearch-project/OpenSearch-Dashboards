@@ -85,6 +85,53 @@ export class ToolExecutor {
   }
 
   /**
+   * Generate a stable signature for a tool call based on its name and parameters
+   * Used for semantic duplicate detection
+   */
+  private generateToolCallSignature(toolName: string, input: any): string {
+    try {
+      // Create a stable string representation by sorting keys
+      const sortedInput = JSON.stringify(input, Object.keys(input || {}).sort());
+      return `${toolName}::${sortedInput}`;
+    } catch (error) {
+      this.logger.error('Failed to generate tool call signature', {
+        error: error instanceof Error ? error.message : String(error),
+        toolName,
+      });
+      // Fallback to basic signature
+      return `${toolName}::${JSON.stringify(input)}`;
+    }
+  }
+
+  /**
+   * Check if a tool call is a duplicate of recent calls
+   * Returns the count of consecutive duplicates (0 if not a duplicate)
+   */
+  private checkForDuplicate(
+    toolCall: any,
+    recentSignatures: string[]
+  ): { isDuplicate: boolean; consecutiveCount: number } {
+    const newSignature = this.generateToolCallSignature(toolCall.toolName, toolCall.input);
+
+    // Check if the most recent signature matches (consecutive duplicate)
+    if (recentSignatures.length > 0 && recentSignatures[0] === newSignature) {
+      // Count how many times this same signature appears consecutively
+      let consecutiveCount = 0;
+      for (const sig of recentSignatures) {
+        if (sig === newSignature) {
+          consecutiveCount++;
+        } else {
+          break; // Stop at first non-matching signature
+        }
+      }
+
+      return { isDuplicate: true, consecutiveCount };
+    }
+
+    return { isDuplicate: false, consecutiveCount: 0 };
+  }
+
+  /**
    * Parse tool calls from XML format (fallback for when Bedrock doesn't recognize tools)
    */
   parseToolCallsFromXML(content: string): any[] {
@@ -153,20 +200,119 @@ export class ToolExecutor {
       context?: any[];
       threadId?: string;
       runId?: string;
-    }
+    },
+    recentToolSignatures?: string[]
   ): Promise<{
     toolResults: Record<string, any>;
     toolResultMessage?: any;
     shouldContinue: boolean;
     isClientTools: boolean;
+    updatedSignatures?: string[];
+    duplicateDetected?: boolean;
   }> {
     const toolResults: Record<string, any> = {};
+    const signatures = recentToolSignatures || [];
 
     this.logger.info('Executing tools', {
       toolCallsCount: toolCalls.length,
       toolNames: toolCalls.map((tc) => tc.toolName),
       toolIds: toolCalls.map((tc) => tc.toolUseId),
+      recentSignaturesCount: signatures.length,
     });
+
+    // Check for duplicates in the first tool call
+    // Only check the first one since that's what matters for the loop detection
+    if (toolCalls.length > 0 && signatures.length > 0) {
+      const firstToolCall = toolCalls[0];
+      const duplicateCheck = this.checkForDuplicate(firstToolCall, signatures);
+
+      if (duplicateCheck.isDuplicate) {
+        const duplicateCount = duplicateCheck.consecutiveCount + 1; // +1 for this call
+        this.logger.warn('Duplicate tool call detected', {
+          toolName: firstToolCall.toolName,
+          consecutiveCount: duplicateCount,
+          toolUseId: firstToolCall.toolUseId,
+        });
+
+        // If we've hit the threshold (3 consecutive duplicates), warn the LLM
+        if (duplicateCount >= 3) {
+          this.logger.warn('Duplicate threshold reached - injecting warning to LLM', {
+            duplicateCount,
+            toolName: firstToolCall.toolName,
+          });
+
+          // Emit Prometheus metric
+          const metricsEmitter = getPrometheusMetricsEmitter();
+          metricsEmitter.emitCounter('react_agent_duplicate_tool_calls_total', 1, {
+            agent_type: 'react',
+            tool_name: firstToolCall.toolName,
+          });
+
+          // Create a warning message for the LLM
+          const warningResult = {
+            duplicate_detected: true,
+            consecutive_count: duplicateCount,
+            message: `⚠️ You have called the tool "${firstToolCall.toolName}" with identical parameters ${duplicateCount} times in a row. The results are not changing.`,
+            suggestion:
+              'Please synthesize the information from your previous tool calls to provide a final answer, or try using different parameters if you need additional information.',
+            note:
+              'Repeatedly calling the same tool with the same parameters will not yield different results.',
+          };
+
+          toolResults[firstToolCall.toolUseId] = warningResult;
+
+          // Still create the tool result message for proper conversation flow
+          const toolResultMessage = {
+            role: 'user' as const,
+            content: [
+              {
+                toolResult: {
+                  toolUseId: firstToolCall.toolUseId,
+                  content: [{ text: JSON.stringify(warningResult, null, 2) }],
+                },
+              },
+            ],
+          };
+
+          // Update signatures with this duplicate
+          const newSignature = this.generateToolCallSignature(
+            firstToolCall.toolName,
+            firstToolCall.input
+          );
+          const updatedSignatures = [newSignature, ...signatures].slice(0, 10); // Keep last 10
+
+          // Emergency stop if we've hit 10 consecutive duplicates
+          if (duplicateCount >= 10) {
+            this.logger.error('Emergency stop: 10+ consecutive duplicate tool calls', {
+              toolName: firstToolCall.toolName,
+            });
+
+            streamingCallbacks?.onError?.(
+              'The agent appears stuck in a loop. Ending conversation for safety.'
+            );
+
+            return {
+              toolResults,
+              toolResultMessage,
+              shouldContinue: false, // Force stop
+              isClientTools: false,
+              updatedSignatures,
+              duplicateDetected: true,
+            };
+          }
+
+          // Return with warning but keep conversation alive
+          return {
+            toolResults,
+            toolResultMessage,
+            shouldContinue: true, // Let LLM handle it
+            isClientTools: false,
+            updatedSignatures,
+            duplicateDetected: true,
+          };
+        }
+      }
+    }
 
     // Check if we've already executed these exact tool calls to prevent duplicates
     const toolCallSignatures = toolCalls.map((tc) => tc.toolUseId);
@@ -198,6 +344,8 @@ export class ToolExecutor {
         toolResults: {},
         shouldContinue: false,
         isClientTools: false,
+        updatedSignatures: signatures,
+        duplicateDetected: false,
       };
     }
 
@@ -223,10 +371,19 @@ export class ToolExecutor {
 
       // For client tools, we need to return an empty tool result message
       // This signals the completion of this request, client will send results in next request
+
+      // Update signatures even for client tools
+      const newSignatures = clientToolCalls.map((tc) =>
+        this.generateToolCallSignature(tc.toolName, tc.input)
+      );
+      const updatedSignatures = [...newSignatures, ...signatures].slice(0, 10);
+
       return {
         toolResults: {},
         shouldContinue: false, // Stop here for client execution
         isClientTools: true,
+        updatedSignatures,
+        duplicateDetected: false,
       };
     }
 
@@ -324,6 +481,8 @@ export class ToolExecutor {
         toolResults: {},
         shouldContinue: false,
         isClientTools: false,
+        updatedSignatures: signatures,
+        duplicateDetected: false,
       };
     }
 
@@ -332,11 +491,19 @@ export class ToolExecutor {
       content: toolResultContent,
     };
 
+    // Update signatures with executed tool calls
+    const newSignatures = mcpToolCalls.map((tc) =>
+      this.generateToolCallSignature(tc.toolName, tc.input)
+    );
+    const updatedSignatures = [...newSignatures, ...signatures].slice(0, 10); // Keep last 10
+
     return {
       toolResults,
       toolResultMessage,
       shouldContinue: true,
       isClientTools: false,
+      updatedSignatures,
+      duplicateDetected: false,
     };
   }
 
