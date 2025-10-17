@@ -426,6 +426,11 @@ describe('TraceDetails', () => {
     expect(result).toBe('');
   });
 
+  it('getServiceInfo function returns loading message when isLoading is true', () => {
+    const result = getServiceInfo(null, undefined, true);
+    expect(result).toBe('Loading trace...');
+  });
+
   it('NoMatchMessage component renders correctly', () => {
     const testTraceId = 'test-trace-123';
     const { container } = render(<NoMatchMessage traceId={testTraceId} />);

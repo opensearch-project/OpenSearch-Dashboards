@@ -45,7 +45,13 @@ export function round(value: number, precision: number = 0): number {
   return Math.round(value * multiplier) / multiplier;
 }
 
-export function getServiceInfo(selectedSpan: any, traceId?: string): string {
+export function getServiceInfo(selectedSpan: any, traceId?: string, isLoading?: boolean): string {
+  if (isLoading) {
+    return i18n.translate('explore.traceDetails.header.loading', {
+      defaultMessage: 'Loading trace...',
+    });
+  }
+
   if (selectedSpan) {
     const serviceName =
       resolveServiceNameFromSpan(selectedSpan) ||
