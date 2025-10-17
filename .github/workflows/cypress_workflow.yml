@@ -283,15 +283,12 @@ jobs:
           rm -f opensearch-*.tar.gz
         shell: bash
 
-      - name: Remove anomaly detection plugin
+      - name: Remove security plugin and plugins that depend on security
         if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
         run: |
+          /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-skills"
+          /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-ml"
           /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-anomaly-detection"
-        shell: bash
-
-      - name: Remove security plugin
-        if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
-        run: |
           /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-security"
         shell: bash
 
