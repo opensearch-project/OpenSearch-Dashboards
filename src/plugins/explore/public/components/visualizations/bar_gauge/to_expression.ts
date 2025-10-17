@@ -234,10 +234,16 @@ export const createBarGaugeSpec = (
               [`${processedSymbol}`]: {
                 type: 'quantitative',
                 field: 'gradEnd',
+                scale: {
+                  domainMin: { expr: 'minBase' },
+                },
               },
 
               [`${processedSymbol}2`]: {
                 field: 'gradStart',
+                scale: {
+                  domainMin: { expr: 'minBase' },
+                },
               },
             },
           },
@@ -249,8 +255,18 @@ export const createBarGaugeSpec = (
   } else if (styleOptions.exclusive.displayMode === 'gradient') {
     const gradientBar = {
       mark: { type: 'bar' },
-      transform: [{ filter: `datum['${numericField}'] >= datum.minVal` }],
+      transform: [
+        {
+          calculate: `datum['${numericField}']>=datum.maxVal?datum.maxVal:datum['${numericField}']`,
+          as: 'barEnd',
+        },
+        { filter: `datum['${numericField}'] >= datum.minVal` },
+      ],
       encoding: {
+        [`${processedSymbol}`]: {
+          type: 'quantitative',
+          field: 'barEnd',
+        },
         color: {
           value: {
             expr: generateTrans(processedThresholds),
@@ -262,8 +278,18 @@ export const createBarGaugeSpec = (
   } else if (styleOptions.exclusive.displayMode === 'basic') {
     const gradientBar = {
       mark: { type: 'bar' },
-      transform: [{ filter: `datum['${numericField}'] >= datum.minVal` }],
+      transform: [
+        {
+          calculate: `datum['${numericField}']>=datum.maxVal?datum.maxVal:datum['${numericField}']`,
+          as: 'barEnd',
+        },
+        { filter: `datum['${numericField}'] >= datum.minVal` },
+      ],
       encoding: {
+        [`${processedSymbol}`]: {
+          type: 'quantitative',
+          field: 'barEnd',
+        },
         color: {
           field: numericField,
           type: 'quantitative',
@@ -284,7 +310,6 @@ export const createBarGaugeSpec = (
     const nameLayer = {
       mark: {
         type: 'text',
-
         ...(adjustEncoding
           ? {
               align: 'left',
