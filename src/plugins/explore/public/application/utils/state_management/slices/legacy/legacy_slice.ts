@@ -4,7 +4,6 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { SortOrder } from '../../../../../types/saved_explore_types';
 
 /**
  * Legacy state interface
@@ -16,12 +15,6 @@ export interface LegacyState {
 
   // Saved query ID (matches discover/vis_builder format)
   savedQuery?: string;
-
-  // Column configuration
-  columns: string[];
-
-  // Sort configuration - using SortOrder format to match Discover
-  sort: SortOrder[];
 
   // Interval configuration
   interval: string;
@@ -36,8 +29,6 @@ export interface LegacyState {
 const initialState: LegacyState = {
   savedSearch: undefined,
   savedQuery: undefined,
-  columns: [],
-  sort: [],
   interval: 'auto',
   isDirty: false,
   lineCount: undefined,
@@ -65,28 +56,6 @@ const legacySlice = createSlice({
         };
       }
     },
-    setColumns: (state, action: PayloadAction<string[]>) => {
-      state.columns = action.payload;
-    },
-    addColumn: (state, action: PayloadAction<{ column: string }>) => {
-      if (!state.columns.includes(action.payload.column)) {
-        state.columns.push(action.payload.column);
-      }
-    },
-    removeColumn: (state, action: PayloadAction<string>) => {
-      state.columns = state.columns.filter((col) => col !== action.payload);
-    },
-    moveColumn: (state, action: PayloadAction<{ columnName: string; destination: number }>) => {
-      const { columnName, destination } = action.payload;
-      const index = state.columns.indexOf(columnName);
-      if (index !== -1 && destination >= 0 && destination < state.columns.length) {
-        state.columns.splice(index, 1);
-        state.columns.splice(destination, 0, columnName);
-      }
-    },
-    setSort: (state, action: PayloadAction<SortOrder[]>) => {
-      state.sort = action.payload;
-    },
     setInterval: (state, action: PayloadAction<string>) => {
       state.interval = action.payload;
     },
@@ -103,11 +72,6 @@ export const {
   setLegacyState,
   setSavedSearch,
   setSavedQuery,
-  setColumns,
-  addColumn,
-  removeColumn,
-  moveColumn,
-  setSort,
   setInterval,
   setIsDirty,
   setLineCount,

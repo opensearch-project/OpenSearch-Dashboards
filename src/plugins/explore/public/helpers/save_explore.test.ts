@@ -33,7 +33,6 @@ const createMockServices = () => ({
     getState: jest.fn(() => ({
       legacy: {
         columns: ['column1', 'column2'],
-        sort: [['column1', 'asc']],
       },
     })),
     dispatch: jest.fn(),

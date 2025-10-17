@@ -95,7 +95,6 @@ export const getLegacyPropertiesFromSavedObject = (savedExplore: SavedExplore) =
   if (!savedExplore.legacyState) {
     return {
       columns: [],
-      sort: [],
     };
   }
 
@@ -103,7 +102,7 @@ export const getLegacyPropertiesFromSavedObject = (savedExplore: SavedExplore) =
     const legacyState = JSON.parse(savedExplore.legacyState) as LegacyState;
     return {
       columns: legacyState.columns || [],
-      sort: legacyState.sort || [],
+      sort: [],
     };
   } catch (error) {
     return {

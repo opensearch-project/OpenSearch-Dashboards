@@ -8,6 +8,7 @@ import { RootState } from '../store';
 import { AppState, QueryExecutionStatus } from '../types';
 import { ExploreServices } from '../../../../types';
 import {
+  initialLogsState,
   LegacyState,
   QueryEditorSliceState,
   QueryState,
@@ -22,14 +23,37 @@ import {
   CORE_SIGNAL_TYPES,
 } from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
-import {
-  DEFAULT_TRACE_COLUMNS_SETTING,
-  ExploreFlavor,
-  EXPLORE_DEFAULT_LANGUAGE,
-} from '../../../../../common';
+import { ExploreFlavor, EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
 import { getPromptModeIsAvailable } from '../../get_prompt_mode_is_available';
 import { getSummaryAgentIsAvailable } from '../../get_summary_agent_is_available';
 import { DEFAULT_EDITOR_MODE } from '../constants';
+import { QueryWithQueryAsString } from '../../languages';
+import { getDefaultColumnNames } from './get_default_columns';
+
+export const filterTabsStateToPersist = (
+  tabState: TabState
+): Omit<TabState, 'logs'> & { logs: Pick<TabState['logs'], 'visibleColumnNames'> } => {
+  return {
+    patterns: tabState.patterns,
+    logs: {
+      visibleColumnNames: tabState.logs.visibleColumnNames,
+    },
+  };
+};
+
+export const mergeTabState = (preloadedState: TabState, appTabState: Record<string, any>) => {
+  return {
+    patterns: {
+      ...preloadedState.patterns,
+      ...appTabState?.patterns,
+    },
+    logs: {
+      ...preloadedState.logs,
+      visibleColumnNames:
+        appTabState?.logs?.visibleColumnNames || preloadedState.logs.visibleColumnNames,
+    },
+  };
+};
 
 /**
  * Persists Redux state to URL
@@ -45,7 +69,7 @@ export const persistReduxState = (state: RootState, services: ExploreServices) =
       '_a',
       {
         ui: state.ui,
-        tab: state.tab,
+        tab: filterTabsStateToPersist(state.tab),
         legacy: state.legacy,
       },
       { replace: true }
@@ -101,7 +125,10 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     // Only run preload functions for missing sections
     const finalUIState = appState?.ui || getPreloadedUIState(services);
     const finalResultsState = appState?.results || getPreloadedResultsState(services);
-    const finalTabState = appState?.tab || getPreloadedTabState(services);
+    const finalTabState = mergeTabState(
+      await getPreloadedTabState(services, finalQueryState),
+      appState?.tab || {}
+    );
     const finalLegacyState = appState?.legacy || (await getPreloadedLegacyState(services));
     const finalQueryEditorState = await getPreloadedQueryEditorState(services, finalQueryState);
     const finalMetaState = appState?.meta || getPreloadedMetaState(services);
@@ -127,7 +154,7 @@ export const getPreloadedState = async (services: ExploreServices): Promise<Root
   const queryState = await getPreloadedQueryState(services);
   const uiState = getPreloadedUIState(services);
   const resultsState = getPreloadedResultsState(services);
-  const tabState = getPreloadedTabState(services);
+  const tabState = await getPreloadedTabState(services, queryState);
   const legacyState = await getPreloadedLegacyState(services);
   const queryEditorState = await getPreloadedQueryEditorState(services, queryState);
   const metaState = getPreloadedMetaState(services);
@@ -364,9 +391,18 @@ const getPreloadedResultsState = (services: ExploreServices): ResultsState => {
 /**
  * Get preloaded tab state
  */
-const getPreloadedTabState = (services: ExploreServices): TabState => {
+const getPreloadedTabState = async (
+  services: ExploreServices,
+  queryState: QueryWithQueryAsString
+): Promise<TabState> => {
+  const defaultColumns = await getDefaultColumnNames(services, queryState.dataset);
+
   return {
-    logs: {},
+    logs: {
+      ...initialLogsState,
+      visibleColumnNames: defaultColumns,
+      defaultColumnNames: defaultColumns,
+    },
     patterns: {
       patternsField: undefined,
       usingRegexPatterns: false,
@@ -378,21 +414,10 @@ const getPreloadedTabState = (services: ExploreServices): TabState => {
  * Get preloaded legacy state (vis_builder approach - defaults only, no saved object loading)
  */
 export const getPreloadedLegacyState = async (services: ExploreServices): Promise<LegacyState> => {
-  // Only return defaults - NO saved object loading (like vis_builder)
-  const currentAppId = await getCurrentAppId(services);
-  const flavorFromAppId = getFlavorFromAppId(currentAppId);
-
-  const defaultColumns =
-    flavorFromAppId === ExploreFlavor.Traces
-      ? services.uiSettings?.get(DEFAULT_TRACE_COLUMNS_SETTING)
-      : services.uiSettings?.get('defaultColumns');
-
   return {
     // Fields that exist in data_explorer + discover
     // TODO: load saved explore by id
     savedSearch: undefined, // Matches discover format - string ID, not object
-    columns: defaultColumns || ['_source'],
-    sort: [],
     isDirty: false,
     savedQuery: undefined,
     lineCount: undefined, // Flattened from metadata.lineCount

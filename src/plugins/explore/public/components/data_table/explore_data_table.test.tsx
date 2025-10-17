@@ -13,6 +13,7 @@ import {
   uiReducer,
   queryReducer,
   resultsReducer,
+  tabReducer,
 } from '../../application/utils/state_management/slices';
 
 // Mock the hooks and services
@@ -98,13 +99,12 @@ describe('ExploreDataTable', () => {
         ui: uiReducer,
         query: queryReducer,
         results: resultsReducer,
+        tab: tabReducer,
       },
       preloadedState: {
         legacy: {
           savedSearch: 'test-search',
           savedQuery: undefined,
-          columns: ['@timestamp', 'message'],
-          sort: [],
           interval: '1h',
           isDirty: false,
           lineCount: undefined,
@@ -121,6 +121,14 @@ describe('ExploreDataTable', () => {
             title: 'test-dataset',
             type: 'INDEX_PATTERN',
           },
+        },
+        tab: {
+          logs: {
+            expandedRowsMap: {},
+            selectedRowsMap: {},
+            visibleColumns: ['@timestamp', 'message'],
+          },
+          patterns: { patternsField: 'pattern', usingRegexPatterns: false },
         },
         results: hasResults
           ? {

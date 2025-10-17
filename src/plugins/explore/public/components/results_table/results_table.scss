@@ -1,0 +1,17 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.exploreResultsTable {
+  display: grid;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+
+  &__container {
+    overflow: auto;
+    position: relative;
+    max-width: 100%;
+  }
+}

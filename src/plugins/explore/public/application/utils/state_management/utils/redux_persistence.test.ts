@@ -11,6 +11,7 @@ import { ColorSchemas } from '../../../../components/visualizations/types';
 import { EditorMode, QueryExecutionStatus } from '../types';
 import { CORE_SIGNAL_TYPES } from '../../../../../../data/common';
 import { of } from 'rxjs';
+import { SOURCE_COLUMN_ID_AND_NAME } from '../../../../components/results_table/table_constants';
 
 jest.mock('../../../../components/visualizations/metric/metric_vis_config', () => ({
   defaultMetricChartStyles: {
@@ -67,6 +68,7 @@ describe('redux_persistence', () => {
               id: 'test-dataset',
               title: 'test-dataset',
               signalType: CORE_SIGNAL_TYPES.LOGS,
+              fields: { getAll: () => [] },
             })
           ),
         },
@@ -98,15 +100,18 @@ describe('redux_persistence', () => {
         },
         results: {},
         tab: {
-          logs: {},
+          logs: {
+            expandedRowsMap: {},
+            selectedRowsMap: {},
+            visibleColumnNames: [SOURCE_COLUMN_ID_AND_NAME],
+            defaultColumnNames: [SOURCE_COLUMN_ID_AND_NAME],
+          },
           patterns: {
             patternsField: undefined,
             usingRegexPatterns: false,
           },
         },
         legacy: {
-          columns: ['_source'],
-          sort: [],
           isDirty: false,
           interval: 'auto',
           savedSearch: undefined,
@@ -144,7 +149,10 @@ describe('redux_persistence', () => {
         '_a',
         {
           ui: mockState.ui,
-          tab: mockState.tab,
+          tab: {
+            patterns: mockState.tab.patterns,
+            logs: { visibleColumnNames: [SOURCE_COLUMN_ID_AND_NAME] },
+          },
           legacy: mockState.legacy,
         },
         { replace: true }
@@ -220,9 +228,27 @@ describe('redux_persistence', () => {
 
       const result = await loadReduxState(mockServices);
 
-      expect(result.query).toEqual(mockQueryState);
+      expect(result.query).toEqual({
+        ...mockQueryState,
+        dataset: {
+          id: 'test-dataset',
+          title: 'test-dataset',
+          type: 'INDEX_PATTERN',
+          timeFieldName: undefined,
+          dataSource: undefined,
+        },
+      });
       expect(result.ui).toEqual(mockAppState.ui);
-      expect(mockServices.data.query.queryString.setQuery).toHaveBeenCalledWith(mockQueryState);
+      expect(mockServices.data.query.queryString.setQuery).toHaveBeenCalledWith({
+        ...mockQueryState,
+        dataset: {
+          id: 'test-dataset',
+          title: 'test-dataset',
+          type: 'INDEX_PATTERN',
+          timeFieldName: undefined,
+          dataSource: undefined,
+        },
+      });
     });
 
     it('should fallback to preloaded state when URL storage is not available', async () => {
@@ -248,7 +274,11 @@ describe('redux_persistence', () => {
 
       const result = await loadReduxState(mockServices);
 
-      expect(result.query).toEqual(mockQueryState);
+      expect(result.query).toEqual({
+        dataset: undefined,
+        language: 'PPL',
+        query: '',
+      });
       expect(result.ui.activeTabId).toBe(''); // Should use preloaded UI state
     });
 
@@ -285,8 +315,9 @@ describe('redux_persistence', () => {
       expect(result.query.language).toBe(EXPLORE_DEFAULT_LANGUAGE);
       expect(result.query.query).toBe(''); // Should be empty string
       expect(result.results).toEqual({});
-      expect(result.tab.logs).toEqual({});
-      expect(result.legacy.columns).toEqual(['_source']);
+      expect(result.tab.logs.selectedRowsMap).toEqual({});
+      expect(result.tab.logs.expandedRowsMap).toEqual({});
+      expect(result.tab.logs.visibleColumnNames).toEqual([SOURCE_COLUMN_ID_AND_NAME]);
       expect(result.queryEditor.promptModeIsAvailable).toBe(false);
       expect(result.queryEditor.queryStatusMap).toEqual({});
       expect(result.queryEditor.overallQueryStatus).toEqual({
@@ -317,6 +348,14 @@ describe('redux_persistence', () => {
         })),
       });
 
+      // Update the dataViews mock for this test to include proper dataset
+      (mockServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
+        id: 'test-dataset',
+        title: 'test-dataset',
+        signalType: CORE_SIGNAL_TYPES.LOGS,
+        fields: { getAll: () => [{ name: '_source' }] },
+      });
+
       const result = await getPreloadedState(mockServices);
 
       expect(result.query.dataset).toEqual(mockDataset);
@@ -340,6 +379,28 @@ describe('redux_persistence', () => {
 
     it('should use default columns from uiSettings', async () => {
       const customColumns = ['field1', 'field2'];
+      const mockDataset = { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' };
+
+      // Mock dataset service to return a dataset
+      (mockServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn(() => ({
+          fetch: jest.fn(() =>
+            Promise.resolve({
+              children: [{ id: 'pattern1', title: 'Pattern 1' }],
+            })
+          ),
+          toDataset: jest.fn(() => mockDataset),
+        })),
+      });
+
+      // Mock dataViews to return fields that match the custom columns
+      (mockServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
+        id: 'test-dataset',
+        title: 'test-dataset',
+        signalType: CORE_SIGNAL_TYPES.LOGS,
+        fields: { getAll: () => [{ name: 'field1' }, { name: 'field2' }, { name: '_source' }] },
+      });
+
       (mockServices.uiSettings!.get as jest.Mock).mockImplementation((key) => {
         if (key === 'defaultColumns') return customColumns;
         return undefined;
@@ -347,7 +408,10 @@ describe('redux_persistence', () => {
 
       const result = await getPreloadedState(mockServices);
 
-      expect(result.legacy.columns).toEqual(customColumns);
+      expect(result.tab.logs.visibleColumnNames).toEqual([
+        ...customColumns,
+        SOURCE_COLUMN_ID_AND_NAME,
+      ]);
     });
 
     it('should fallback to default columns when uiSettings is not available', async () => {
@@ -360,7 +424,7 @@ describe('redux_persistence', () => {
 
       const result = await getPreloadedState(servicesWithoutUiSettings);
 
-      expect(result.legacy.columns).toEqual(['_source']);
+      expect(result.tab.logs.visibleColumnNames).toEqual([SOURCE_COLUMN_ID_AND_NAME]);
     });
 
     it('should set correct editor mode from DEFAULT_EDITOR_MODE', async () => {
@@ -497,7 +561,12 @@ describe('redux_persistence', () => {
         data: {
           ...mockServices.data,
           dataViews: {
-            get: jest.fn(() => Promise.resolve({ signalType: CORE_SIGNAL_TYPES.TRACES })),
+            get: jest.fn(() =>
+              Promise.resolve({
+                signalType: CORE_SIGNAL_TYPES.TRACES,
+                fields: { getAll: () => [] },
+              })
+            ),
           },
         },
       } as any;
@@ -620,6 +689,10 @@ describe('redux_persistence', () => {
       const tracesServices = {
         ...mockServices,
         core: { application: { currentAppId$: of('explore/traces') } },
+        data: {
+          ...mockServices.data,
+          dataViews: mockServices.data.dataViews,
+        },
       } as any;
 
       const mockQueryState = {
@@ -677,6 +750,10 @@ describe('redux_persistence', () => {
       const logsServices = {
         ...mockServices,
         core: { application: { currentAppId$: of('explore/logs') } },
+        data: {
+          ...mockServices.data,
+          dataViews: mockServices.data.dataViews,
+        },
       } as any;
 
       const mockQueryState = {

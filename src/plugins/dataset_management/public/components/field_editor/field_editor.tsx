@@ -25,6 +25,7 @@ import {
   EuiSpacer,
   EuiText,
   EUI_MODAL_CONFIRM_BUTTON,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';

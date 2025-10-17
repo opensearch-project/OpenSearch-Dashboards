@@ -10,7 +10,7 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { ExploreServices } from '../../../types';
 import { RootState } from '../../utils/state_management/store';
 
-interface DatasetContextValue {
+export interface DatasetContextValue {
   dataset: DataView | undefined;
   isLoading: boolean | null;
   error: string | null;

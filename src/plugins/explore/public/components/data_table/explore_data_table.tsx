@@ -23,7 +23,7 @@ import { getLegacyDisplayedColumns } from '../../helpers/data_table_helper';
 import { getDocViewsRegistry } from '../../application/legacy/discover/opensearch_dashboards_services';
 import { ExploreServices } from '../../types';
 import {
-  selectColumns,
+  selectVisibleColumnNames,
   selectSavedSearch,
 } from '../../application/utils/state_management/selectors';
 import { RootState } from '../../application/utils/state_management/store';
@@ -33,7 +33,10 @@ import {
 } from '../../application/utils/state_management/actions/query_actions';
 import { useChangeQueryEditor } from '../../application/hooks';
 import { useDatasetContext } from '../../application/context';
-import { addColumn, removeColumn } from '../../application/utils/state_management/slices';
+import {
+  addVisibleColumnName,
+  removeVisibleColumnName,
+} from '../../application/utils/state_management/actions/columns';
 
 const ExploreDataTableComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -41,7 +44,7 @@ const ExploreDataTableComponent = () => {
 
   const { onAddFilter } = useChangeQueryEditor();
   const savedSearch = useSelector(selectSavedSearch);
-  const columns = useSelector(selectColumns);
+  const columns = useSelector(selectVisibleColumnNames);
   const { dataset } = useDatasetContext();
 
   const query = useSelector((state: RootState) => state.query);
@@ -102,14 +105,14 @@ const ExploreDataTableComponent = () => {
   const dispatch = useDispatch();
   const onAddColumn = useCallback(
     (col: string) => {
-      dispatch(addColumn({ column: col }));
+      dispatch(addVisibleColumnName(col));
     },
     [dispatch]
   );
 
   const onRemoveColumn = useCallback(
     (col: string) => {
-      dispatch(removeColumn(col));
+      dispatch(removeVisibleColumnName(col));
     },
     [dispatch]
   );

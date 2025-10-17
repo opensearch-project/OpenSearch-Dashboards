@@ -125,6 +125,7 @@ export const DiscoverField = ({
     }
   );
   const isSourceField = field.name === '_source';
+  const isTimeField = field.name === dataSet.timeFieldName;
 
   const [infoIsOpen, setOpen] = useState(false);
 
@@ -155,7 +156,7 @@ export const DiscoverField = ({
   );
 
   let actionButton;
-  if (!isSourceField && !selected) {
+  if (!isSourceField && !isTimeField && !selected) {
     actionButton = (
       <EuiToolTip
         delay="long"
@@ -180,7 +181,7 @@ export const DiscoverField = ({
         />
       </EuiToolTip>
     );
-  } else if (!isSourceField && selected) {
+  } else if (!isSourceField && !isTimeField && selected) {
     actionButton = (
       <EuiToolTip
         delay="long"
@@ -226,7 +227,7 @@ export const DiscoverField = ({
       <EuiFlexItem grow>
         <EuiText size="xs">{fieldName}</EuiText>
       </EuiFlexItem>
-      {!isSourceField && (
+      {!isSourceField && !isTimeField && (
         <div className="exploreSidebarField__actionButtons">
           {showSummary && (
             <EuiPopover

@@ -46,7 +46,7 @@ jest.mock('../../application/utils/state_management/slices', () => ({
 }));
 
 jest.mock('../../application/utils/state_management/selectors', () => ({
-  selectColumns: jest.fn(() => []),
+  selectVisibleColumns: jest.fn(() => []),
   selectQuery: jest.fn(() => ({})),
 }));
 
