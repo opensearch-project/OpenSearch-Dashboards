@@ -32,7 +32,7 @@ export interface SpanDetailTabsProps {
   serviceName?: string;
   setCurrentSpan?: (spanId: string) => void;
   logDatasets?: any[];
-  logsData?: any[];
+  datasetLogs?: Record<string, any[]>;
   isLogsLoading?: boolean;
   activeTab?: TabId;
   onTabChange?: (tabId: TabId) => void;
@@ -52,7 +52,7 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
   serviceName,
   setCurrentSpan,
   logDatasets = [],
-  logsData = [],
+  datasetLogs = {},
   isLogsLoading = false,
   activeTab: externalActiveTab,
   onTabChange,
@@ -78,11 +78,25 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
     return selectedSpan ? getSpanIssueCount(selectedSpan) : 0;
   }, [selectedSpan]);
 
-  // Filter logs for the selected span
+  // Filter logs for the selected span from datasetLogs
   const spanLogs = useMemo(() => {
-    if (!selectedSpan?.spanId || !logsData.length) return [];
-    return filterLogsBySpanId(logsData, selectedSpan.spanId);
-  }, [logsData, selectedSpan?.spanId]);
+    if (!selectedSpan?.spanId || Object.keys(datasetLogs).length === 0) return [];
+
+    // Combine all logs from all datasets and filter by span ID
+    const allLogs: any[] = [];
+    Object.keys(datasetLogs).forEach((datasetId) => {
+      const dataset = logDatasets.find((ds) => ds.id === datasetId);
+      if (dataset) {
+        const filteredLogs = filterLogsBySpanId(
+          datasetLogs[datasetId],
+          selectedSpan.spanId,
+          dataset
+        );
+        allLogs.push(...filteredLogs);
+      }
+    });
+    return allLogs;
+  }, [datasetLogs, selectedSpan?.spanId, logDatasets]);
 
   const tabs = useMemo((): TabItem[] => {
     const tabList: TabItem[] = [
@@ -130,7 +144,7 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
             traceId={selectedSpan?.traceId || ''}
             spanId={selectedSpan?.spanId}
             logDatasets={logDatasets}
-            logsData={logsData}
+            datasetLogs={datasetLogs}
             isLoading={isLogsLoading}
           />
         ),
@@ -160,9 +174,9 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
     addSpanFilter,
     issueCount,
     logDatasets,
-    logsData,
     spanLogs,
     isLogsLoading,
+    datasetLogs,
     handleTabChange,
   ]);
 

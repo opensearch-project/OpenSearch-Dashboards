@@ -42,7 +42,7 @@ import { TraceDetailTabs } from './public/traces/trace_detail_tabs';
 import { CorrelationService } from './public/logs/correlation_service';
 import { LogHit } from './server/ppl_request_logs';
 import { TraceLogsTab } from './public/logs/trace_logs_tab';
-import { Dataset } from '../../../../../../data/common';
+import { DataView, Dataset } from '../../../../../../data/common';
 import { TraceDetailTab } from './constants/trace_detail_tabs';
 import { isSpanError } from './public/traces/ppl_resolve_helpers';
 import { buildTraceDetailsUrl } from '../../../../components/data_table/table_cell/trace_utils/trace_utils';
@@ -66,7 +66,7 @@ export interface TraceDetailsProps {
   setMenuMountPoint?: (mount: MountPoint | undefined) => void;
   isEmbedded?: boolean;
   isFlyout?: boolean;
-  defaultDataset?: Dataset;
+  defaultDataset?: DataView;
 }
 // Displaying only 10 logs in the tab
 export const LOGS_DATA = 10;
@@ -83,15 +83,34 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
   // Initialize URL state management
   const { stateContainer, stopStateSync } = useMemo(() => {
+    // Convert DataView to Dataset format if needed
+    const getDatasetFromDataView = (dataView: DataView): Dataset => {
+      return {
+        id: dataView.id || 'default-dataset-id',
+        title: dataView.title,
+        type: dataView.type || 'INDEX_PATTERN',
+        timeFieldName: dataView.timeFieldName,
+        dataSource: dataView.dataSourceRef
+          ? {
+              id: dataView.dataSourceRef.id,
+              title: dataView.dataSourceRef.name || dataView.dataSourceRef.id,
+              type: dataView.dataSourceRef.type || 'OpenSearch',
+            }
+          : undefined,
+      };
+    };
+
     return createTraceAppState({
       stateDefaults: {
         traceId: '',
-        dataset: defaultDataset ?? {
-          id: 'default-dataset-id',
-          title: 'otel-v1-apm-span-*',
-          type: 'INDEX_PATTERN',
-          timeFieldName: 'endTime',
-        },
+        dataset: defaultDataset
+          ? getDatasetFromDataView(defaultDataset)
+          : {
+              id: 'default-dataset-id',
+              title: 'otel-v1-apm-span-*',
+              type: 'INDEX_PATTERN',
+              timeFieldName: 'endTime',
+            },
         spanId: undefined,
       },
       osdUrlStateStorage: osdUrlStateStorage!,
@@ -137,9 +156,9 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
       shouldResetTabRef.current = false;
     }
   }, [spanId]);
-  const [logsData, setLogsData] = useState<LogHit[]>([]);
   const [logDatasets, setLogDatasets] = useState<Dataset[]>([]);
   const [datasetLogs, setDatasetLogs] = useState<Record<string, LogHit[]>>({});
+  const [logHitCount, setLogHitCount] = useState<number>(0);
   const [isLogsLoading, setIsLogsLoading] = useState<boolean>(false);
   const [fieldValidation, setFieldValidation] = useState<{
     isValid: boolean;
@@ -148,15 +167,15 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const [prevTraceId, setPrevTraceId] = useState<string | undefined>(undefined);
 
   // Create PPL service instance
-  const pplService = useMemo(() => (data ? new TracePPLService(data) : undefined), [data]);
+  const pplService = useMemo(() => new TracePPLService(data), [data]);
 
   // Create correlation service instance
   const correlationService = useMemo(
     () =>
       savedObjects?.client && uiSettings
-        ? new CorrelationService(savedObjects.client, uiSettings)
+        ? new CorrelationService(savedObjects.client, uiSettings, data)
         : undefined,
-    [savedObjects?.client, uiSettings]
+    [savedObjects?.client, uiSettings, data]
   );
 
   // Generate dynamic color map based on unfiltered hits
@@ -185,8 +204,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
         .checkCorrelationsAndFetchLogs(dataset, data, traceId, LOGS_DATA)
         .then((result) => {
           setLogDatasets(result.logDatasets);
-          setLogsData(result.logs);
           setDatasetLogs(result.datasetLogs);
+          setLogHitCount(result.logHitCount);
         })
         .catch((error) => {
           // eslint-disable-next-line no-console
@@ -461,7 +480,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                   setActiveTab={setActiveTab}
                   transformedHits={transformedHits}
                   logDatasets={logDatasets}
-                  logsData={logsData}
+                  logCount={logHitCount}
                   isLogsLoading={isLogsLoading}
                 />
               </EuiPanel>
@@ -568,7 +587,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                           <TraceLogsTab
                             traceId={traceId}
                             logDatasets={logDatasets}
-                            logsData={logsData}
                             datasetLogs={datasetLogs}
                             isLoading={isLogsLoading}
                             onSpanClick={handleSpanSelect}
@@ -603,7 +621,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                         }}
                         setCurrentSpan={handleSpanSelect}
                         logDatasets={logDatasets}
-                        logsData={logsData}
+                        datasetLogs={datasetLogs}
                         isLogsLoading={isLogsLoading}
                         activeTab={spanDetailActiveTab as any}
                         onTabChange={(tabId) => setSpanDetailActiveTab(tabId)}

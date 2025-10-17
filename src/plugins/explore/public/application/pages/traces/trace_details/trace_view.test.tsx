@@ -35,6 +35,15 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
         flush: jest.fn(),
         cancel: jest.fn(),
       },
+      savedObjects: {
+        client: {
+          find: jest.fn(),
+          get: jest.fn(),
+        },
+      },
+      uiSettings: {
+        get: jest.fn(),
+      },
     },
   }),
 }));
@@ -108,15 +117,24 @@ jest.mock('./public/traces/trace_detail_tabs', () => ({
     transformedHits,
     errorCount,
     setIsServiceLegendOpen,
+    logDatasets,
+    logCount,
+    isLogsLoading,
   }: any) => (
     <div data-testid="trace-detail-tabs">
       <div data-testid="active-tab">{activeTab}</div>
       <div data-testid="hits-count">{transformedHits?.length || 0}</div>
       <div data-testid="error-count">{errorCount || 0}</div>
+      <div data-testid="log-count">{logCount || 0}</div>
+      <div data-testid="log-datasets-count">{logDatasets?.length || 0}</div>
+      <div data-testid="logs-loading">{isLogsLoading ? 'true' : 'false'}</div>
       <button onClick={() => setActiveTab && setActiveTab('timeline')}>Timeline</button>
       <button onClick={() => setActiveTab && setActiveTab('span_list')}>Span list</button>
       <button onClick={() => setActiveTab && setActiveTab('tree_view')}>Tree view</button>
       <button onClick={() => setActiveTab && setActiveTab('service_map')}>Service map</button>
+      <button onClick={() => setActiveTab && setActiveTab('logs')} data-testid="logs-tab-button">
+        Logs
+      </button>
       <button
         data-test-subj="openServiceLegendModalButton"
         onClick={() => setIsServiceLegendOpen(true)}
@@ -164,6 +182,62 @@ jest.mock('./public/traces/generate_color_map', () => ({
     'service-a': '#ff0000',
     'service-b': '#00ff00',
   })),
+}));
+
+// Mock the correlation service
+const mockCorrelationService = {
+  checkCorrelationsAndFetchLogs: jest.fn().mockResolvedValue({
+    logDatasets: [
+      { id: 'log-dataset-1', title: 'app-logs-*', type: 'INDEX_PATTERN' },
+      { id: 'log-dataset-2', title: 'error-logs-*', type: 'INDEX_PATTERN' },
+    ],
+    datasetLogs: {
+      'log-dataset-1': [
+        {
+          _id: 'log1',
+          _source: { message: 'Test log message 1', timestamp: '2023-01-01T00:00:00Z' },
+        },
+        {
+          _id: 'log2',
+          _source: { message: 'Test log message 2', timestamp: '2023-01-01T00:00:01Z' },
+        },
+      ],
+      'log-dataset-2': [
+        {
+          _id: 'log3',
+          _source: { message: 'Error log message', timestamp: '2023-01-01T00:00:02Z' },
+        },
+      ],
+    },
+    logHitCount: 3,
+  }),
+};
+
+jest.mock('./public/logs/correlation_service', () => ({
+  CorrelationService: jest.fn().mockImplementation(() => mockCorrelationService),
+}));
+
+// Mock the TraceLogsTab component
+jest.mock('./public/logs/trace_logs_tab', () => ({
+  TraceLogsTab: ({ traceId, logDatasets, datasetLogs, isLoading, onSpanClick }: any) => (
+    <div data-testid="trace-logs-tab">
+      <div data-testid="logs-trace-id">{traceId}</div>
+      <div data-testid="logs-datasets-count">{logDatasets?.length || 0}</div>
+      <div data-testid="logs-total-logs">
+        {Object.values(datasetLogs || {}).reduce(
+          (total: number, logs: any) => total + logs.length,
+          0
+        )}
+      </div>
+      <div data-testid="logs-loading-state">{isLoading ? 'loading' : 'loaded'}</div>
+      <button
+        onClick={() => onSpanClick && onSpanClick('test-span-from-logs')}
+        data-testid="span-click-from-logs"
+      >
+        Click span from logs
+      </button>
+    </div>
+  ),
 }));
 
 // Use the actual helper functions instead of mocking them
@@ -932,5 +1006,75 @@ describe('TraceDetails', () => {
 
     const resizableContainer = document.querySelector('.euiResizableContainer');
     expect(resizableContainer).toBeInTheDocument();
+  });
+
+  it('renders logs tab with correlation service', async () => {
+    const history = createMemoryHistory();
+
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="trace-detail-tabs"]')).toBeInTheDocument();
+    });
+
+    // Wait for correlation service to be called and logs to be fetched
+    await waitFor(() => {
+      expect(mockCorrelationService.checkCorrelationsAndFetchLogs).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test-dataset-id',
+          title: 'test-index-*',
+          type: 'INDEX_PATTERN',
+          timeFieldName: 'endTime',
+        }),
+        mockData,
+        'test-trace-id',
+        10 // LOGS_DATA constant
+      );
+    });
+
+    // Verify that the trace detail tabs component receives the log data
+    const tabsComponent = document.querySelector('[data-testid="trace-detail-tabs"]');
+    expect(tabsComponent).toBeInTheDocument();
+
+    // Verify logs tab button is present
+    const logsTabButton = document.querySelector('[data-testid="logs-tab-button"]');
+    expect(logsTabButton).toBeInTheDocument();
+
+    // Verify log data is passed to the tabs component
+    expect(document.querySelector('[data-testid="log-count"]')).toHaveTextContent('3');
+    expect(document.querySelector('[data-testid="log-datasets-count"]')).toHaveTextContent('2');
+    expect(document.querySelector('[data-testid="logs-loading"]')).toHaveTextContent('false');
+
+    // Click the logs tab to switch to logs view
+    fireEvent.click(logsTabButton);
+
+    // Wait for the logs tab content to be rendered
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="trace-logs-tab"]')).toBeInTheDocument();
+    });
+
+    // Verify the TraceLogsTab component is rendered with correct data
+    const logsTab = document.querySelector('[data-testid="trace-logs-tab"]');
+    expect(logsTab).toBeInTheDocument();
+    expect(document.querySelector('[data-testid="logs-trace-id"]')).toHaveTextContent(
+      'test-trace-id'
+    );
+    expect(document.querySelector('[data-testid="logs-datasets-count"]')).toHaveTextContent('2');
+    expect(document.querySelector('[data-testid="logs-total-logs"]')).toHaveTextContent('3');
+    expect(document.querySelector('[data-testid="logs-loading-state"]')).toHaveTextContent(
+      'loaded'
+    );
+
+    // Test span click functionality from logs
+    const spanClickButton = document.querySelector('[data-testid="span-click-from-logs"]');
+    expect(spanClickButton).toBeInTheDocument();
+    fireEvent.click(spanClickButton);
+
+    // The logs functionality should be integrated into the component
+    expect(mockCorrelationService.checkCorrelationsAndFetchLogs).toHaveBeenCalled();
   });
 });
