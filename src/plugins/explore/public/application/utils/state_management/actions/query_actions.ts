@@ -455,10 +455,15 @@ const executeQueryBase = async (
       });
     }
 
+    const languageConfig = services.data.query.queryString
+      .getLanguageService()
+      .getLanguage(query.language);
+
     // Execute query
     const rawResults = await searchSource.fetch({
       abortSignal: abortController.signal,
       withLongNumeralsSupport: await services.uiSettings.get('data:withLongNumerals'),
+      ...(languageConfig?.fields?.formatter ? { formatter: languageConfig.fields.formatter } : {}),
     });
 
     // Add response stats to inspector
