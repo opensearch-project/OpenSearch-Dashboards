@@ -16,6 +16,7 @@ import { TabRegistryService } from './services/tab_registry/tab_registry_service
 import { VisualizationRegistryService } from './services/visualization_registry_service';
 import { AppStore } from './application/utils/state_management/store';
 import { QueryPanelActionsRegistryService } from './services/query_panel_actions_registry';
+import { SlotRegistryService } from './services/slot_registry';
 
 export function buildServices(
   core: CoreStart,
@@ -23,7 +24,8 @@ export function buildServices(
   context: PluginInitializerContext,
   tabRegistry: TabRegistryService,
   visualizationRegistry: VisualizationRegistryService,
-  queryPanelActionsRegistry: QueryPanelActionsRegistryService
+  queryPanelActionsRegistry: QueryPanelActionsRegistryService,
+  slotRegistry: SlotRegistryService
 ): ExploreServices {
   const config = context.config.get<ConfigSchema>();
   const supportedTypes = config.supportedTypes;
@@ -90,6 +92,7 @@ export function buildServices(
     tabRegistry,
     visualizationRegistry,
     queryPanelActionsRegistry,
+    slotRegistry,
     expressions: plugins.expressions,
 
     dashboard: plugins.dashboard,

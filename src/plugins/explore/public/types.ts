@@ -53,6 +53,7 @@ import {
   QueryPanelActionsRegistryService,
   QueryPanelActionsRegistryServiceSetup,
 } from './services/query_panel_actions_registry';
+import { SlotRegistryService, SlotRegistryServiceSetup } from './services/slot_registry';
 
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
@@ -61,6 +62,7 @@ import {
 export interface ExplorePluginSetup {
   visualizationRegistry: VisualizationRegistryServiceSetup;
   queryPanelActionsRegistry: QueryPanelActionsRegistryServiceSetup;
+  slotRegistry: SlotRegistryServiceSetup;
   docViews: {
     addDocView: (docViewSpec: unknown) => void;
   };
@@ -176,6 +178,7 @@ export interface ExploreServices {
   tabRegistry: TabRegistryService;
   visualizationRegistry: VisualizationRegistryService;
   queryPanelActionsRegistry: QueryPanelActionsRegistryService;
+  slotRegistry: SlotRegistryService;
   expressions: ExpressionsStart;
   contextProvider?: ContextProviderStart;
 
