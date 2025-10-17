@@ -205,22 +205,8 @@ export const createBarGaugeSpec = (
     return expression;
   };
 
-  if (styleOptions.exclusive.displayMode === 'gradient') {
-    const gradientBar = {
-      mark: { type: 'bar' },
-      transform: [{ filter: `datum['${numericField}'] >= datum.minVal` }],
-      encoding: {
-        color: {
-          value: {
-            expr: generateTrans(processedThresholds),
-          },
-        },
-      },
-    };
-    layers.push(gradientBar);
-  }
-
-  if (styleOptions.exclusive.displayMode === 'stack') {
+  // Handle invalid domain cases (minBase >= maxBase or minBase > maxNumber) by using stack logic
+  if (styleOptions.exclusive.displayMode === 'stack' || minBase >= maxBase || minBase > maxNumber) {
     // dispose the last threshold
     const bars = processedThresholds.slice(0, -1)?.map((threshold, index) => {
       return {
@@ -260,9 +246,20 @@ export const createBarGaugeSpec = (
     });
 
     layers.push(...bars);
-  }
-
-  if (styleOptions.exclusive.displayMode === 'basic') {
+  } else if (styleOptions.exclusive.displayMode === 'gradient') {
+    const gradientBar = {
+      mark: { type: 'bar' },
+      transform: [{ filter: `datum['${numericField}'] >= datum.minVal` }],
+      encoding: {
+        color: {
+          value: {
+            expr: generateTrans(processedThresholds),
+          },
+        },
+      },
+    };
+    layers.push(gradientBar);
+  } else if (styleOptions.exclusive.displayMode === 'basic') {
     const gradientBar = {
       mark: { type: 'bar' },
       transform: [{ filter: `datum['${numericField}'] >= datum.minVal` }],
@@ -287,7 +284,7 @@ export const createBarGaugeSpec = (
     const nameLayer = {
       transform: [
         {
-          calculate: `datum.minVal >= datum.maxVal ? datum.minVal : datum.maxVal`,
+          calculate: `datum.maxVal`,
           as: 'textY',
         },
       ],
