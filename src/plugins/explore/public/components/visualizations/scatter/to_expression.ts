@@ -61,12 +61,12 @@ export const createTwoMetricScatter = (
       x: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        axis: applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle }),
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
       },
       ...hoverStateEncoding,
       color: styles?.useThresholdColor ? colorEncodingLayer : [],
@@ -128,12 +128,12 @@ export const createTwoMetricOneCateScatter = (
       x: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        axis: applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle }),
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
       },
       color: {
         field: categoryFields,
@@ -209,12 +209,12 @@ export const createThreeMetricOneCateScatter = (
       x: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        axis: applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle }),
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
       },
       color: {
         field: categoryFields,

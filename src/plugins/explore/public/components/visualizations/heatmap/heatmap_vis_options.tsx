@@ -61,6 +61,17 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
       </EuiFlexItem>
       {hasMappingSelected && (
         <>
+          <EuiFlexItem grow={false}>
+            <HeatmapExclusiveVisOptions
+              useThresholdColor={styleOptions?.useThresholdColor ?? false}
+              styles={styleOptions.exclusive}
+              onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
+              onUseThresholdColorChange={(useThresholdColor) =>
+                updateStyleOption('useThresholdColor', useThresholdColor)
+              }
+            />
+          </EuiFlexItem>
+
           <EuiFlexItem>
             <ThresholdPanel
               thresholdsOptions={styleOptions.thresholdOptions}
@@ -76,16 +87,6 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
                 updateStyleOption('standardAxes', standardAxes)
               }
               switchAxes={styleOptions.switchAxes}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <HeatmapExclusiveVisOptions
-              useThresholdColor={styleOptions?.useThresholdColor ?? false}
-              styles={styleOptions.exclusive}
-              onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
-              onUseThresholdColorChange={(useThresholdColor) =>
-                updateStyleOption('useThresholdColor', useThresholdColor)
-              }
             />
           </EuiFlexItem>
 

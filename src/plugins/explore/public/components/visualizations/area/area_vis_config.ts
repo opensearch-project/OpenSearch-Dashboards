@@ -53,7 +53,7 @@ export type AreaChartStyle = Required<
 const defaultAreaChartStyles: AreaChartStyle = {
   // Basic controls
   addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legendPosition: Positions.BOTTOM,
   addTimeMarker: false,
   tooltipOptions: {
     mode: 'all',

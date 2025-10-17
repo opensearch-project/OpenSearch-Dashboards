@@ -143,7 +143,7 @@ export const createTimeBarChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions: BarChartStyle,
+  styles: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
@@ -151,15 +151,13 @@ export const createTimeBarChart = (
     throw new Error('Time bar chart requires at least one numerical column and one date column');
   }
 
-  const styles = { ...defaultBarChartStyles, ...styleOptions };
-
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const timeAxis = xAxis?.schema === VisFieldType.Date ? xAxis : yAxis;
   // Determine the numerical axis for the title
   const numericalAxis = xAxis?.schema === VisFieldType.Date ? yAxis : xAxis;
 
-  const colorEncodingLayer = buildThresholdColorEncoding(numericalAxis, styleOptions);
+  const colorEncodingLayer = buildThresholdColorEncoding(numericalAxis, styles);
 
   const interval =
     styles?.bucket?.bucketTimeUnit === TimeUnit.AUTO
@@ -194,7 +192,7 @@ export const createTimeBarChart = (
       y: {
         ...buildEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
       },
-      color: styleOptions?.useThresholdColor ? colorEncodingLayer : [],
+      color: styles?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -635,13 +633,13 @@ export const createNumericalHistogramBarChart = (
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
         bin: adjustBucketBins(styles?.bucket, transformedData, xAxis?.column),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        axis: applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle }),
       },
       y: {
         field: yAxis?.column,
         aggregate: styles?.bucket?.aggregationType,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
       },
       color: styleOptions?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
@@ -721,12 +719,12 @@ export const createSingleBarChart = (
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
         bin: adjustBucketBins(styles?.bucket, transformedData, xAxis?.column),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        axis: applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle }),
       },
       y: {
         aggregate: AggregationType.COUNT,
         type: 'quantitative',
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
       },
       color: styleOptions?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
