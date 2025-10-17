@@ -117,6 +117,11 @@ jest.mock('../style_panel/legend/legend', () => ({
       >
         Change Both
       </button>
+      <input
+        data-test-subj="mockLegendTitle"
+        placeholder="Legend Title"
+        onChange={(e) => onLegendOptionsChange({ title: e.target.value })}
+      />
     </div>
   )),
 }));
@@ -285,7 +290,7 @@ describe('BarVisStyleControls', () => {
     expect(screen.getByTestId('mockAxesSelectPanel')).toBeInTheDocument();
     expect(screen.getByTestId('allAxesOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockLegendOptionsPanel')).not.toBeInTheDocument();
     expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockBarExclusiveVisOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
@@ -322,6 +327,14 @@ describe('BarVisStyleControls', () => {
       ...defaultProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
+        [AxisRole.COLOR]: {
+          id: 5,
+          name: 'Color Category',
+          schema: VisFieldType.Categorical,
+          column: 'color',
+          validValuesCount: 10,
+          uniqueValuesCount: 5,
+        },
         [AxisRole.FACET]: {
           id: 6,
           name: 'Facet Category',
@@ -369,6 +382,11 @@ describe('BarVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('mockLegendPosition'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: 'bottom' });
+
+    await userEvent.type(screen.getByTestId('mockLegendTitle'), 'New Legend Title');
+    await waitFor(() => {
+      expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendTitle: 'New Legend Title' });
+    });
 
     jest.clearAllMocks();
     await userEvent.click(screen.getByTestId('mockLegendBoth'));

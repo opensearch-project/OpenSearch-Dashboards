@@ -77,6 +77,7 @@ const baseStyles = {
   },
   addLegend: true,
   legendPosition: Positions.RIGHT,
+  legendTitle: 'value1',
 } as HeatmapChartStyle;
 
 describe('createHeatmapWithBin', () => {
@@ -93,7 +94,7 @@ describe('createHeatmapWithBin', () => {
       scheme: 'blues',
       reverse: false,
     });
-    expect(layer.encoding.color.legend.title).toBe('value2'); // <-- FIXED
+    expect(layer.encoding.color.legend.title).toBe('value1');
     expect(layer.encoding.color.legend.orient).toBe('right');
   });
 
