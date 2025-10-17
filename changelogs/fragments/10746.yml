@@ -1,0 +1,2 @@
+feat:
+- Enable agent log ingestion via agent server using env variable ENABLE_REALTIME_LOG_INGESTION ([#10746](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10746))
