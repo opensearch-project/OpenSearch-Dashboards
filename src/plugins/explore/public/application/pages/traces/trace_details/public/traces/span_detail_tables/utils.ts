@@ -4,6 +4,7 @@
  */
 
 import { ParsedHit } from './types';
+import { isSpanError } from '../ppl_resolve_helpers';
 
 export const parseHits = (payloadData: string): ParsedHit[] => {
   try {
@@ -22,4 +23,23 @@ export const parseHits = (payloadData: string): ParsedHit[] => {
     console.error('Error processing payloadData:', error);
     return [];
   }
+};
+
+export const applySpanFilters = (
+  spans: ParsedHit[],
+  filters: Array<{ field: string; value: any }>
+): ParsedHit[] => {
+  if (filters.length === 0) return spans;
+
+  return spans.filter((span) => {
+    return filters.every(({ field, value }) => {
+      if (field === 'isError' && value === true) {
+        return isSpanError(span);
+      }
+      const spanValue = field.includes('.')
+        ? field.split('.').reduce((obj, key) => obj?.[key], span)
+        : span[field];
+      return spanValue === value;
+    });
+  });
 };

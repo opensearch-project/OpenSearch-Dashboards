@@ -100,7 +100,6 @@ export function SpanDetailPanel(props: {
     () => (
       <div className="exploreSpanDetailPanel__tableContainer">
         <SpanHierarchyTable
-          hiddenColumns={['traceId', 'traceGroup', 'startTime', 'endTime', 'parentSpanId']}
           openFlyout={(spanId: string) => {
             if (onSpanSelect) {
               onSpanSelect(spanId);

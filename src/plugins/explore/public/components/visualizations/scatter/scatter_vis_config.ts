@@ -31,6 +31,8 @@ export interface ScatterChartStyleOptions {
   tooltipOptions?: TooltipOptions;
   addLegend?: boolean;
   legendPosition?: Positions;
+  legendTitle?: string;
+  legendTitleForSize?: string;
   // Axes configuration
   standardAxes?: StandardAxes[];
 
@@ -43,7 +45,10 @@ export interface ScatterChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
 }
 
-export type ScatterChartStyle = Required<ScatterChartStyleOptions>;
+export type ScatterChartStyle = Required<
+  Omit<ScatterChartStyleOptions, 'legendTitle' | 'legendTitleForSize'>
+> &
+  Pick<ScatterChartStyleOptions, 'legendTitle' | 'legendTitleForSize'>;
 
 export const defaultScatterChartStyles: ScatterChartStyle = {
   // Basic controls

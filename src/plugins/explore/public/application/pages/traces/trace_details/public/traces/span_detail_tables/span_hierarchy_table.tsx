@@ -4,53 +4,21 @@
  */
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { EuiButtonEmpty, EuiDataGridColumn } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import './span_detail_table.scss';
 import { RenderCustomDataGrid } from '../../utils/custom_datagrid';
-import { isSpanError } from '../ppl_resolve_helpers';
-import { TimelineHeader } from './timeline_waterfall_bar';
-import { calculateTraceTimeRange, TraceTimeRange } from '../../utils/span_timerange_utils';
+import { calculateTraceTimeRange } from '../../utils/span_timerange_utils';
 import { Span, SpanTableProps } from './types';
 import { HierarchySpanCell } from './hierarchy_span_cell';
 import { SpanCell } from './span_cell';
-import { parseHits } from './utils';
+import { parseHits, applySpanFilters } from './utils';
 import { ServiceLegendButton } from './service_legend_button';
-
-const getHierarchyTableColumns = (
-  traceTimeRange: TraceTimeRange,
-  availableWidth?: number
-): EuiDataGridColumn[] => {
-  return [
-    {
-      id: 'span',
-      display: i18n.translate('explore.spanDetailTable.column.span', {
-        defaultMessage: 'Span',
-      }),
-      isExpandable: false,
-      isResizable: true,
-    },
-    {
-      id: 'timeline',
-      display: <TimelineHeader traceTimeRange={traceTimeRange} />,
-      initialWidth: availableWidth ? Math.floor(availableWidth / 2) : 600,
-      isExpandable: false,
-      isResizable: true,
-    },
-    {
-      id: 'durationInNanos',
-      display: i18n.translate('explore.spanDetailTable.column.duration', {
-        defaultMessage: 'Duration',
-      }),
-      initialWidth: 100,
-      isExpandable: false,
-    },
-  ];
-};
+import { getSpanHierarchyTableColumns } from './span_table_columns';
 
 export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
-  const { hiddenColumns, availableWidth, openFlyout, colorMap, servicesInOrder = [] } = props;
+  const { availableWidth, openFlyout, colorMap, servicesInOrder = [] } = props;
   const [items, setItems] = useState<Span[]>([]);
   const [allSpans, setAllSpans] = useState<Span[]>([]);
   const [_total, setTotal] = useState(0);
@@ -62,22 +30,9 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
   useEffect(() => {
     if (!props.payloadData) return;
     try {
-      const hitsArray = parseHits(props.payloadData);
-      setAllSpans(hitsArray);
-
-      // Use hits directly since they're already flattened
-      let spans = hitsArray;
-
-      if (props.filters.length > 0) {
-        spans = spans.filter((span: any) => {
-          return props.filters.every(({ field, value }: { field: string; value: any }) => {
-            if (field === 'isError' && value === true) {
-              return isSpanError(span);
-            }
-            return span[field] === value;
-          });
-        });
-      }
+      const hits = parseHits(props.payloadData);
+      setAllSpans(hits);
+      const spans = applySpanFilters(hits, props.filters);
 
       const hierarchy = buildHierarchy(spans);
       setItems(hierarchy);
@@ -143,14 +98,11 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
 
   const flattenedItems = useMemo(() => flattenHierarchy(items), [items, expandedRows]);
 
-  const columns = useMemo(() => getHierarchyTableColumns(traceTimeRange, availableWidth), [
+  const columns = useMemo(() => getSpanHierarchyTableColumns(traceTimeRange, availableWidth), [
     traceTimeRange,
     availableWidth,
   ]);
-  const visibleColumns = useMemo(
-    () => columns.filter(({ id }) => !hiddenColumns.includes(id)).map(({ id }) => id),
-    [columns, hiddenColumns]
-  );
+  const visibleColumns = useMemo(() => columns.map(({ id }) => id), [columns]);
 
   const gatherAllSpanIds = (spans: Span[]): Set<string> => {
     const allSpanIds = new Set<string>();
@@ -230,18 +182,27 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     />,
   ].filter(Boolean);
 
+  // Temporary solution for variable table height based on window size.
+  //  More complex availableHeight calculations needed for table height to not only auto-scale with number of rows,
+  //  but also be constrained by available height within container or page due to other elements.
+  const tableHeight = useMemo(() => (flattenedItems.length > 10 ? '70vh' : 'auto'), [
+    flattenedItems.length,
+  ]);
+
   return (
     <div data-test-subj="span-hierarchy-table">
       {RenderCustomDataGrid({
         columns,
         renderCellValue,
         rowCount: flattenedItems.length,
+        showColumnSelector: false,
         toolbarButtons,
         secondaryToolbar,
         fullScreen: false,
         availableWidth,
         visibleColumns,
         isTableDataLoading: isSpansTableDataLoading,
+        defaultHeight: tableHeight,
       })}
     </div>
   );

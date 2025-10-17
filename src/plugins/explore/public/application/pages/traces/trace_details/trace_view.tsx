@@ -227,8 +227,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     if (traceId && dataset && pplService) {
       fetchData(spanFilters);
     }
+    // Including transformedHits.length causes duplicate ppl query calls
+    // Including spanFilters causes double re-renders when changing filters
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [traceId, dataset, pplService, spanFilters]);
+  }, [traceId, dataset, pplService]);
 
   useEffect(() => {
     if (!pplQueryData) return;
@@ -434,7 +436,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
   const traceDetailsLink = buildTraceDetailsUrl(spanId, traceId, dataset);
 
-  const TraceDetailsContent = () => {
+  const renderTraceDetailsContent = () => {
     return (
       <>
         {isLoading ? (
@@ -613,7 +615,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     );
   };
 
-  const TraceDetailsHeader: React.FC = () => (
+  const renderTraceDetailsHeader = () => (
     <TraceTopNavMenu
       payloadData={transformedHits}
       setMenuMountPoint={setMenuMountPoint}
@@ -626,17 +628,13 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
   return isFlyout ? (
     <>
-      <EuiFlyoutHeader>
-        <TraceDetailsHeader />
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <TraceDetailsContent />
-      </EuiFlyoutBody>
+      <EuiFlyoutHeader>{renderTraceDetailsHeader()}</EuiFlyoutHeader>
+      <EuiFlyoutBody>{renderTraceDetailsContent()}</EuiFlyoutBody>
     </>
   ) : (
     <>
-      <TraceDetailsHeader />
-      <TraceDetailsContent />
+      {renderTraceDetailsHeader()}
+      {renderTraceDetailsContent()}
     </>
   );
 };

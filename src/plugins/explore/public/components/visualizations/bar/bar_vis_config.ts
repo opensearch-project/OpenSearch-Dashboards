@@ -28,6 +28,7 @@ export interface BarChartStyleOptions {
   // Basic controls
   addLegend?: boolean;
   legendPosition?: Positions;
+  legendTitle?: string;
   legendShape?: 'circle' | 'square';
   tooltipOptions?: TooltipOptions;
 
@@ -58,8 +59,10 @@ export interface BarChartStyleOptions {
   useThresholdColor?: boolean;
 }
 
-export type BarChartStyle = Required<Omit<BarChartStyleOptions, 'legendShape' | 'thresholdLines'>> &
-  Pick<BarChartStyleOptions, 'legendShape'>;
+export type BarChartStyle = Required<
+  Omit<BarChartStyleOptions, 'legendShape' | 'thresholdLines' | 'legendTitle'>
+> &
+  Pick<BarChartStyleOptions, 'legendShape' | 'legendTitle'>;
 
 export const defaultBarChartStyles: BarChartStyle = {
   // Basic controls

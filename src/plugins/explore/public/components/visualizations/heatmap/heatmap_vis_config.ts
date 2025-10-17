@@ -52,6 +52,7 @@ export interface HeatmapChartStyleOptions {
   tooltipOptions?: TooltipOptions;
   addLegend?: boolean;
   legendPosition?: Positions;
+  legendTitle?: string;
 
   // Axes configuration
   standardAxes?: StandardAxes[];
@@ -64,7 +65,8 @@ export interface HeatmapChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
 }
 
-export type HeatmapChartStyle = Required<HeatmapChartStyleOptions>;
+export type HeatmapChartStyle = Required<Omit<HeatmapChartStyleOptions, 'legendTitle'>> &
+  Pick<HeatmapChartStyleOptions, 'legendTitle'>;
 
 export const defaultHeatmapChartStyles: HeatmapChartStyle = {
   switchAxes: false,
