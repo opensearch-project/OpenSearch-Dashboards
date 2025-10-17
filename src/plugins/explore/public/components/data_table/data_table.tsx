@@ -276,6 +276,17 @@ const DataTableUI = ({
     startRow: 0,
     endRow: rows.length < PAGINATED_PAGE_SIZE ? rows.length : PAGINATED_PAGE_SIZE,
   });
+  // Track count of expanded rows
+  const [expandedRowCount, setExpandedRowCount] = useState(0);
+
+  // Callbacks for row expansion state
+  const handleRowExpand = useCallback(() => {
+    setExpandedRowCount((prev) => prev + 1);
+  }, []);
+
+  const handleRowCollapse = useCallback(() => {
+    setExpandedRowCount((prev) => prev - 1);
+  }, []);
 
   const observerRef = useRef<IntersectionObserver | null>(null);
   // `sentinelElement` is attached to the bottom of the table to observe when the table is scrolled all the way.
@@ -515,12 +526,8 @@ const DataTableUI = ({
       return;
     }
 
-    // Check if any rows are currently expanded by looking at context store
-    const allContexts = contextStore.getAllContexts();
-    const hasExpandedRows = allContexts.some(
-      (ctx: any) =>
-        ctx.description.startsWith('Expanded row ') && ctx.categories?.includes('dynamic')
-    );
+    // Check if any rows are currently expanded using state
+    const hasExpandedRows = expandedRowCount > 0;
 
     const shouldRegisterContext = rows.length > 0 && !hasExpandedRows;
 
@@ -541,7 +548,7 @@ const DataTableUI = ({
       // Remove context if conditions not met (expanded rows exist or no data)
       contextStore.removeContextById('data-table-visible-rows');
     }
-  }, [rows, displayedRows, renderedRowCount, showPagination]);
+  }, [rows, displayedRows, renderedRowCount, showPagination, expandedRowCount]);
 
   return (
     <div className="explore-table-container">
@@ -576,6 +583,8 @@ const DataTableUI = ({
                   onClose={onClose}
                   isShortDots={isShortDots}
                   docViewsRegistry={docViewsRegistry}
+                  onRowExpand={handleRowExpand}
+                  onRowCollapse={handleRowCollapse}
                 />
               );
             }
