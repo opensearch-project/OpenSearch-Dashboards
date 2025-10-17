@@ -6,19 +6,13 @@
 
 Built on the Discover interface and new in 3.3, Discover Traces provides a centralized interface for querying and exploring traces across large distributed systems. It includes a click-to-filter interface, allowing construction of complex PPL queries without having to write them manually. When a trace requires deeper investigation, a new trace details page reveals individual trace journeys, displaying complete metadata, attributes, and execution context for that specific operation. To activate this functionality, please refer to the step-by-step guide below.
 
-![PPL Clicks](img/ppl_clicks.gif)
-
 ### Explore interactive node-based visualizations with React Flow
 
 3.3 adds the React Flow library to OpenSearch Dashboards core as an experimental feature, providing a standardized framework for interactive node-based visualizations. This integration eliminates version conflicts that occurred when individual plugins bundled copies of the library, providing a consistent user experience. The library is currently being used with the Discover: Traces feature to render service maps that visualize trace spans and service dependencies. Unlike traditional charting libraries, React Flow specializes in workflow and network diagrams, offering drag-and-drop interactions, custom node components, and efficient rendering of thousands of nodes while maintaining accessibility compliance.
 
-![React Flow](img/react_flow.gif)
-
 ### Trace to Log correlation
 
 When both trace and log index patterns are configured with proper correlation objects, OpenSearch Dashboards 3.3 enables seamless navigation between traces and their associated logs. This powerful feature allows developers and operators to quickly jump from a trace span to related log entries, providing complete context for debugging and troubleshooting distributed systems. The correlation is established through common identifiers like trace IDs and span IDs, creating a unified observability experience that bridges the gap between structured traces and detailed log messages.
-
-![Log Correlation](img/log_correlation.gif)
 
 ## For OpenSearch Dashboards 3.3 Docker and Binary Releases
 
