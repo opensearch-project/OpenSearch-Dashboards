@@ -123,7 +123,6 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
 
   const {
     spanId,
-    serviceName,
     operation,
     duration,
     startTime,
@@ -142,9 +141,9 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
             label={i18n.translate('explore.spanOverviewTab.serviceIdentifier', {
               defaultMessage: 'Service identifier',
             })}
-            value={serviceName || '-'}
-            copyable={!!serviceName}
-            copyValue={serviceName}
+            value={operation || '-'}
+            copyable={!!operation}
+            copyValue={operation}
           />
         </EuiFlexItem>
         <EuiFlexItem>
