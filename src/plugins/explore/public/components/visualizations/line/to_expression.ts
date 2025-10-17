@@ -50,7 +50,7 @@ export const createSimpleLineChart = (
         type: 'temporal',
         axis: applyAxisStyling(
           {
-            title: dateName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
@@ -167,7 +167,7 @@ export const createLineBarChart = (
         type: 'temporal',
         axis: applyAxisStyling(
           {
-            title: dateName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
@@ -355,7 +355,7 @@ export const createMultiLineChart = (
         type: 'temporal',
         axis: applyAxisStyling(
           {
-            title: dateName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
@@ -513,7 +513,7 @@ export const createFacetedMultiLineChart = (
               type: 'temporal',
               axis: applyAxisStyling(
                 {
-                  title: dateName,
+                  title: '',
                   labelAngle: -45,
                   labelSeparation: 8,
                 },

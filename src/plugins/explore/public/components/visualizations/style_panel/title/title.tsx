@@ -13,11 +13,13 @@ import { DebouncedFieldText } from '../utils';
 export interface TitleOptionsPanelProps {
   titleOptions: TitleOptions;
   onShowTitleChange: (show: Partial<TitleOptions>) => void;
+  initialIsOpen?: boolean;
 }
 
 export const TitleOptionsPanel: React.FC<TitleOptionsPanelProps> = ({
   titleOptions,
   onShowTitleChange,
+  initialIsOpen = false,
 }) => {
   return (
     <StyleAccordion
@@ -25,7 +27,7 @@ export const TitleOptionsPanel: React.FC<TitleOptionsPanelProps> = ({
       accordionLabel={i18n.translate('explore.stylePanel.tabs.title', {
         defaultMessage: 'Title',
       })}
-      initialIsOpen={true}
+      initialIsOpen={initialIsOpen}
     >
       <EuiFormRow>
         <EuiSwitch
