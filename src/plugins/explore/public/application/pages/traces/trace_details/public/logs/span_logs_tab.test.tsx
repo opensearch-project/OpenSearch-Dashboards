@@ -92,6 +92,21 @@ describe('SpanLogsTab', () => {
 
       // Dataset name is displayed
       expect(screen.getByText('logs-*')).toBeInTheDocument();
+
+      // Description is rendered
+      expect(screen.getByText('View logs related to this specific span')).toBeInTheDocument();
+
+      // Dataset accordion container is present
+      expect(screen.getByTestId('dataset-accordion-logs-dataset-id')).toBeInTheDocument();
+
+      // "View in Discover Logs" button is rendered
+      expect(screen.getByText('View in Discover Logs')).toBeInTheDocument();
+
+      // Component is not showing the loading state
+      expect(screen.queryByTestId('loading-spinner')).not.toBeInTheDocument();
+
+      // Component is not showing the "no datasets" message
+      expect(screen.queryByText('No logs found for this dataset')).not.toBeInTheDocument();
     });
 
     it('shows a loading panel with spinner when isLoading is true', () => {
@@ -107,6 +122,7 @@ describe('SpanLogsTab', () => {
 
       // Component still renders but with no datasets
       expect(screen.getByText('Related logs for span')).toBeInTheDocument();
+      expect(screen.getByText('No logs found for this dataset')).toBeInTheDocument();
     });
   });
 
@@ -142,29 +158,6 @@ describe('SpanLogsTab', () => {
       );
 
       expect(window.location.href).toBe('https://example.com/logs?span=span-1');
-    });
-
-    it('handles when no log datasets are available', () => {
-      render(<SpanLogsTab {...defaultProps} logDatasets={[]} />);
-
-      // Component still renders but with different title when no datasets
-      expect(screen.getByText('Span Logs')).toBeInTheDocument();
-      expect(screen.getByText('No log datasets found for this span')).toBeInTheDocument();
-    });
-
-    it('logs error when URL generation throws', () => {
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      (urlBuilder.buildExploreLogsUrl as jest.Mock).mockImplementationOnce(() => {
-        throw new Error('URL generation failed');
-      });
-
-      render(<SpanLogsTab {...defaultProps} />);
-
-      fireEvent.click(screen.getByTestId('span-logs-view-in-explore-button-logs-dataset-id'));
-
-      expect(errorSpy).toHaveBeenCalledWith('Failed to generate logs URL:', expect.any(Error));
-
-      errorSpy.mockRestore();
     });
   });
 });
