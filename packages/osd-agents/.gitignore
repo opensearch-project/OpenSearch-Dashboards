@@ -22,3 +22,6 @@ opensearch-config.yml
 ehthumbs.db
 Thumbs.db
 
+.opensearch-ingest-state.json
+failed-indexing*
+

@@ -36,6 +36,8 @@ export interface TableRowProps {
   onClose?: () => void;
   isShortDots: boolean;
   docViewsRegistry: DocViewsRegistry;
+  onRowExpand?: () => void;
+  onRowCollapse?: () => void;
 }
 
 export const TableRowUI = ({
@@ -49,12 +51,23 @@ export const TableRowUI = ({
   onClose,
   isShortDots,
   docViewsRegistry,
+  onRowExpand,
+  onRowCollapse,
 }: TableRowProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const [isExpanded, setIsExpanded] = useState(false);
-  const handleExpanding = useCallback(() => setIsExpanded((prevState) => !prevState), [
-    setIsExpanded,
-  ]);
+  const handleExpanding = useCallback(() => {
+    setIsExpanded((prevState) => {
+      const nextState = !prevState;
+      // Notify parent about expansion state change
+      if (nextState) {
+        onRowExpand?.();
+      } else {
+        onRowCollapse?.();
+      }
+      return nextState;
+    });
+  }, [onRowExpand, onRowCollapse]);
 
   const expandedContext = useMemo(() => {
     if (!isExpanded) return null;
