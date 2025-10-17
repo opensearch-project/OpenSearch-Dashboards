@@ -25,6 +25,7 @@ export interface SpanTableProps {
     field: string;
     value: any;
   }>;
+  setSpanFiltersWithStorage?: (filters: Array<{ field: string; value: any }>) => void;
   selectedSpanId?: string;
   colorMap?: Record<string, string>;
   servicesInOrder?: string[];

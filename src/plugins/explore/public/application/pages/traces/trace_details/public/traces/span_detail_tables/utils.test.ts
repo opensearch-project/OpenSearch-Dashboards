@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { parseHits, applySpanFilters } from './utils';
+import { parseHits, applySpanFilters, isStatusMatch } from './utils';
 import { ParsedHit } from './types';
 import * as pplResolveHelpers from '../ppl_resolve_helpers';
 
@@ -174,5 +174,81 @@ describe('applySpanFilters', () => {
     const filters = [{ field: 'serviceName', value: 'test' }];
     const result = applySpanFilters([], filters);
     expect(result).toEqual([]);
+  });
+});
+
+describe('isStatusMatch', () => {
+  const mockSpan: ParsedHit = {
+    spanId: 'test-span',
+    children: [],
+    status: { code: 1 },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return true for isError filter when span is error', () => {
+    jest.spyOn(pplResolveHelpers, 'isSpanError').mockReturnValue(true);
+
+    const result = isStatusMatch(mockSpan, 'isError', true);
+
+    expect(result).toBe(true);
+    expect(pplResolveHelpers.isSpanError).toHaveBeenCalledWith(mockSpan);
+  });
+
+  it('should return false for isError filter when span is not error', () => {
+    jest.spyOn(pplResolveHelpers, 'isSpanError').mockReturnValue(false);
+
+    const result = isStatusMatch(mockSpan, 'isError', true);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return true for status.code 2 when span is error', () => {
+    jest.spyOn(pplResolveHelpers, 'isSpanError').mockReturnValue(true);
+
+    const result = isStatusMatch(mockSpan, 'status.code', 2);
+
+    expect(result).toBe(true);
+    expect(pplResolveHelpers.isSpanError).toHaveBeenCalledWith(mockSpan);
+  });
+
+  it('should return true for status.code 1 when span is OK', () => {
+    jest.spyOn(pplResolveHelpers, 'isSpanOk').mockReturnValue(true);
+
+    const result = isStatusMatch(mockSpan, 'status.code', 1);
+
+    expect(result).toBe(true);
+    expect(pplResolveHelpers.isSpanOk).toHaveBeenCalledWith(mockSpan);
+  });
+
+  it('should return true for status.code 0 when extractStatusCode returns 0', () => {
+    jest.spyOn(pplResolveHelpers, 'extractStatusCode').mockReturnValue(0);
+
+    const result = isStatusMatch(mockSpan, 'status.code', 0);
+
+    expect(result).toBe(true);
+    expect(pplResolveHelpers.extractStatusCode).toHaveBeenCalledWith(mockSpan.status);
+  });
+
+  it('should return false for status.code 0 when extractStatusCode returns non-zero', () => {
+    jest.spyOn(pplResolveHelpers, 'extractStatusCode').mockReturnValue(1);
+
+    const result = isStatusMatch(mockSpan, 'status.code', 0);
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false for unknown field', () => {
+    const result = isStatusMatch(mockSpan, 'unknown.field', 'value');
+
+    expect(result).toBe(false);
+  });
+
+  it('should return false for unknown status.code value', () => {
+    const result = isStatusMatch(mockSpan, 'status.code', 99);
+
+    expect(result).toBe(false);
   });
 });

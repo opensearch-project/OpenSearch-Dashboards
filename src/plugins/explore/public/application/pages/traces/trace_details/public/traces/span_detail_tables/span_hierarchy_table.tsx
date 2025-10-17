@@ -16,6 +16,7 @@ import { SpanCell } from './span_cell';
 import { parseHits, applySpanFilters } from './utils';
 import { ServiceLegendButton } from './service_legend_button';
 import { getSpanHierarchyTableColumns } from './span_table_columns';
+import { SpanStatusFilter } from './span_status_filter';
 
 export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
   const { availableWidth, openFlyout, colorMap, servicesInOrder = [] } = props;
@@ -175,6 +176,10 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
   ];
 
   const secondaryToolbar = [
+    SpanStatusFilter({
+      spanFilters: props.filters,
+      setSpanFiltersWithStorage: props.setSpanFiltersWithStorage || (() => {}),
+    }),
     <ServiceLegendButton
       key="serviceLegend"
       servicesInOrder={servicesInOrder}

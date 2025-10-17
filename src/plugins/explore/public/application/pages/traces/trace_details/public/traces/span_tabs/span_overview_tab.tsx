@@ -50,6 +50,11 @@ const OverviewField: React.FC<OverviewFieldProps> = ({
     {copyable && copyValue ? (
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
+          <EuiText size="s" color="default">
+            {value}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiCopy textToCopy={copyValue}>
             {(copy) => (
               <EuiSmallButtonIcon
@@ -61,11 +66,6 @@ const OverviewField: React.FC<OverviewFieldProps> = ({
               />
             )}
           </EuiCopy>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s" color="default">
-            {value}
-          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ) : (
@@ -123,7 +123,6 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
 
   const {
     spanId,
-    serviceName,
     operation,
     duration,
     startTime,
@@ -142,9 +141,9 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
             label={i18n.translate('explore.spanOverviewTab.serviceIdentifier', {
               defaultMessage: 'Service identifier',
             })}
-            value={serviceName || '-'}
-            copyable={!!serviceName}
-            copyValue={serviceName}
+            value={operation || '-'}
+            copyable={!!operation}
+            copyValue={operation}
           />
         </EuiFlexItem>
         <EuiFlexItem>

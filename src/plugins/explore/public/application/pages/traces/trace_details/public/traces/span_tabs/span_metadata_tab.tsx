@@ -167,11 +167,13 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
 
   if (!selectedSpan || isEmpty(selectedSpan)) {
     return (
-      <EuiText color="subdued" textAlign="center">
-        {i18n.translate('explore.spanMetadataTab.noSpanSelected', {
-          defaultMessage: 'No span selected',
-        })}
-      </EuiText>
+      <div data-test-subj="span-metadata-tab">
+        <EuiText color="subdued" textAlign="center">
+          {i18n.translate('explore.spanMetadataTab.noSpanSelected', {
+            defaultMessage: 'No span selected',
+          })}
+        </EuiText>
+      </div>
     );
   }
 
@@ -180,16 +182,18 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
     Object.values(categorizedAttributes).every((attrs) => attrs.length === 0)
   ) {
     return (
-      <EuiText color="subdued" textAlign="center">
-        {i18n.translate('explore.spanMetadataTab.noAttributes', {
-          defaultMessage: 'No metadata attributes found for this span',
-        })}
-      </EuiText>
+      <div data-test-subj="span-metadata-tab">
+        <EuiText color="subdued" textAlign="center">
+          {i18n.translate('explore.spanMetadataTab.noAttributes', {
+            defaultMessage: 'No metadata attributes found for this span',
+          })}
+        </EuiText>
+      </div>
     );
   }
 
   return (
-    <>
+    <div data-test-subj="span-metadata-tab">
       {renderSection(
         i18n.translate('explore.spanMetadataTab.section.http', {
           defaultMessage: 'HTTP',
@@ -217,6 +221,6 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
         }),
         categorizedAttributes.general
       )}
-    </>
+    </div>
   );
 };

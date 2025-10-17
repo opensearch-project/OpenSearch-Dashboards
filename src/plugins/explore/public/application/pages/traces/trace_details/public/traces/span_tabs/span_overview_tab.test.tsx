@@ -95,14 +95,14 @@ describe('SpanOverviewTab', () => {
       expect(screen.getByText('Span ID')).toBeInTheDocument();
 
       // Check values
-      expect(screen.getByText('user-service')).toBeInTheDocument();
+      expect(screen.getByText('getUserData')).toBeInTheDocument();
       expect(screen.getByText('test-span-123')).toBeInTheDocument();
     });
 
-    it('renders dash when service name or span ID is missing', () => {
+    it('renders dash when operation or span ID is missing', () => {
       const span = {
-        // Missing spanId and serviceName
-        name: 'operation',
+        // Missing spanId and name (operation)
+        serviceName: 'test-service',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
         'status.code': 1,
@@ -118,7 +118,7 @@ describe('SpanOverviewTab', () => {
     it('renders copyable service identifier and span ID', () => {
       const span = {
         spanId: 'copyable-span-123',
-        serviceName: 'copyable-service',
+        serviceName: 'copyable-operation',
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
@@ -352,7 +352,9 @@ describe('SpanOverviewTab', () => {
       );
 
       expect(screen.getByText('Request method')).toBeInTheDocument();
-      expect(screen.getByText('getUserData')).toBeInTheDocument();
+      // Operation name appears in both Service identifier and Request method, so check both exist
+      const userDataElements = screen.getAllByText('getUserData');
+      expect(userDataElements).toHaveLength(2);
     });
   });
 
@@ -538,7 +540,9 @@ describe('SpanOverviewTab', () => {
       // Should still render HTTP section
       expect(screen.getByText('Request')).toBeInTheDocument();
       expect(screen.getByText('https://api.example.com/test')).toBeInTheDocument();
-      expect(screen.getByText('operation')).toBeInTheDocument(); // Falls back to operation name
+      // Operation name appears in both Service identifier and Request method
+      const operationElements = screen.getAllByText('operation');
+      expect(operationElements).toHaveLength(2);
     });
 
     it('handles span with only HTTP method but no URL', () => {
