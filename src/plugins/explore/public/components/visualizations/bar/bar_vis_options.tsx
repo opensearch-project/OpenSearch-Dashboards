@@ -38,14 +38,23 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
     onStyleChange({ [key]: value });
   };
 
-  const bucketType =
-    axisColumnMappings[AxisRole.X]?.schema === VisFieldType.Numerical
-      ? axisColumnMappings[AxisRole.Y] === undefined
-        ? 'single'
-        : 'num'
-      : axisColumnMappings[AxisRole.X]?.schema === VisFieldType.Date
-      ? 'time'
-      : 'cate';
+  const axes = [axisColumnMappings[AxisRole.X], axisColumnMappings[AxisRole.Y]];
+  const hasCategory = axes.some((axis) => axis?.schema === VisFieldType.Categorical);
+  const hasNum = axes.some((axis) => axis?.schema === VisFieldType.Numerical);
+  const hasDate = axes.some((axis) => axis?.schema === VisFieldType.Date);
+
+  // 4 bucket types for bar chart:
+  // 1. time-numerical(Regular histogram): requires one axis to be date type, bucket options: time interval + aggregationType
+  // 2. categorical-numerical: requires one axis to be categorical type, bucket options: aggregationType only
+  // 3. numerical-numerical: both x and y axes are numerical, bucket options: bucket size + bucket count + aggregationType
+  // 4. single-numerical: only x-axis mapped (numerical), y-axis displays count of records, bucket options: bucket size + bucket count
+  const bucketType = hasDate
+    ? 'time'
+    : hasCategory
+    ? 'cate'
+    : hasNum && axisColumnMappings[AxisRole.Y] !== undefined
+    ? 'num'
+    : 'single';
 
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
