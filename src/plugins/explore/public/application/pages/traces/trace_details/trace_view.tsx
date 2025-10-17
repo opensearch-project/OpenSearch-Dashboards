@@ -332,11 +332,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     setVisualizationKey((prev) => prev + 1);
   }, []);
 
-  // Calculate error count based on unfiltered hits to show total errors in trace
-  const errorCount = useMemo(() => {
-    return unfilteredHits.filter((span: TraceHit) => isSpanError(span)).length;
-  }, [unfilteredHits]);
-
   // Extract services in the order they appear in the data
   const servicesInOrder = useMemo(() => {
     if (!colorMap) return [];
@@ -349,22 +344,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     });
     return Array.from(serviceSet);
   }, [transformedHits, colorMap]);
-
-  const handleErrorFilterClick = () => {
-    const newFilters = [...spanFilters];
-
-    // Remove any existing error-related filters
-    const filteredFilters = newFilters.filter(
-      (filter) =>
-        !(filter.field === 'status.code' && filter.value === 2) &&
-        !(filter.field === 'isError' && filter.value === true)
-    );
-
-    // Add a comprehensive error filter that matches the isSpanError logic
-    filteredFilters.push({ field: 'isError', value: true });
-
-    setSpanFiltersWithStorage(filteredFilters);
-  };
 
   // Function to remove a specific filter
   const removeFilter = (filterToRemove: SpanFilter) => {
@@ -386,6 +365,12 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     }
     if (filter.field === 'isError' && filter.value === true) {
       return 'Error';
+    }
+    if (filter.field === 'status.code' && filter.value === 1) {
+      return 'OK';
+    }
+    if (filter.field === 'status.code' && filter.value === 0) {
+      return 'Unset';
     }
     return `${filter.field}: ${filter.value}`;
   };
@@ -450,7 +435,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
             missingFields={fieldValidation.missingFields}
             dataset={dataset as any}
           />
-        ) : transformedHits.length === 0 ? (
+        ) : unfilteredHits.length === 0 ? (
           <NoMatchMessage traceId={traceId} />
         ) : (
           <>
@@ -460,9 +445,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                   activeTab={activeTab}
                   setActiveTab={setActiveTab}
                   transformedHits={transformedHits}
-                  errorCount={errorCount}
-                  spanFilters={spanFilters}
-                  handleErrorFilterClick={handleErrorFilterClick}
                   logDatasets={logDatasets}
                   logsData={logsData}
                   isLogsLoading={isLogsLoading}
@@ -551,9 +533,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                         {(activeTab === TraceDetailTab.TIMELINE ||
                           activeTab === TraceDetailTab.SPAN_LIST) && (
                           <SpanDetailPanel
-                            key={`span-panel-${visualizationKey}`}
+                            key={`span-panel-${visualizationKey}-${spanFilters.length}-${transformedHits.length}`}
                             chrome={chrome}
                             spanFilters={spanFilters}
+                            setSpanFiltersWithStorage={setSpanFiltersWithStorage}
                             payloadData={JSON.stringify(transformedHits)}
                             isGanttChartLoading={isBackgroundLoading}
                             colorMap={colorMap}
