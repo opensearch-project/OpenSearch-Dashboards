@@ -7,22 +7,23 @@ import React, { useMemo } from 'react';
 import {
   EuiPanel,
   EuiSpacer,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { LogHit } from '../../server/ppl_request_logs';
 import { Dataset } from '../../../../../../../../data/common';
 import { buildExploreLogsUrl, getTimeRangeFromTraceData, filterLogsBySpanId } from './url_builder';
-import { LogsDataTable } from './logs_data_table';
+import { DatasetAccordionList } from './dataset_accordion_list';
 
 export interface SpanLogsTabProps {
   traceId: string;
   spanId: string;
   logDatasets: Dataset[];
-  logsData: LogHit[];
+  datasetLogs: Record<string, LogHit[]>;
   isLoading: boolean;
 }
 
@@ -30,23 +31,25 @@ export const SpanLogsTab: React.FC<SpanLogsTabProps> = ({
   traceId,
   spanId,
   logDatasets,
-  logsData,
+  datasetLogs,
   isLoading,
 }) => {
-  const spanLogs = useMemo(() => {
-    return filterLogsBySpanId(logsData, spanId);
-  }, [logsData, spanId]);
-
-  const handleViewInExplore = () => {
-    if (logDatasets.length === 0) {
-      return;
+  // Filter dataset logs to only include logs for this specific span
+  const spanFilteredDatasetLogs = useMemo(() => {
+    if (!datasetLogs || typeof datasetLogs !== 'object') {
+      return {};
     }
 
-    try {
-      // Use the first available log dataset
-      const logDataset = logDatasets[0];
+    const filtered: Record<string, LogHit[]> = {};
+    Object.keys(datasetLogs).forEach((datasetId) => {
+      filtered[datasetId] = filterLogsBySpanId(datasetLogs[datasetId], spanId);
+    });
+    return filtered;
+  }, [datasetLogs, spanId]);
 
-      const timeRange = getTimeRangeFromTraceData(logsData);
+  const handleViewInExplore = (logDataset: Dataset, logs: LogHit[]) => {
+    try {
+      const timeRange = getTimeRangeFromTraceData(logs);
 
       const url = buildExploreLogsUrl({
         traceId,
@@ -67,33 +70,57 @@ export const SpanLogsTab: React.FC<SpanLogsTabProps> = ({
       <EuiPanel>
         <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l" />
+            <EuiLoadingSpinner size="l" data-test-subj="loading-spinner" />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
     );
   }
 
-  return (
-    <EuiPanel paddingSize="s">
-      <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            iconType="popout"
-            onClick={handleViewInExplore}
-            data-test-subj="span-logs-view-in-explore-button"
-          >
-            {i18n.translate('explore.spanLogsTab.viewInDiscoverLogs', {
-              defaultMessage: 'View in Discover Logs',
+  if (logDatasets.length === 0) {
+    return (
+      <EuiPanel>
+        <EuiTitle size="s">
+          <h3>
+            {i18n.translate('explore.spanLogsTab.title', {
+              defaultMessage: 'Span Logs',
             })}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiText size="s" color="subdued">
+          {i18n.translate('explore.spanLogsTab.noDatasets', {
+            defaultMessage: 'No log datasets found for this span',
+          })}
+        </EuiText>
+      </EuiPanel>
+    );
+  }
 
-      <EuiSpacer size="s" />
+  return (
+    <div>
+      <EuiPanel>
+        <EuiTitle size="s">
+          <h3>
+            {i18n.translate('explore.spanLogsTab.relatedLogs', {
+              defaultMessage: 'Related logs for span',
+            })}
+          </h3>
+        </EuiTitle>
+        <EuiText size="s" color="subdued">
+          {i18n.translate('explore.spanLogsTab.description', {
+            defaultMessage: 'View logs related to this specific span',
+          })}
+        </EuiText>
+        <EuiSpacer size="m" />
 
-      <LogsDataTable logs={spanLogs} isLoading={isLoading} compactMode={true} />
-    </EuiPanel>
+        <DatasetAccordionList
+          logDatasets={logDatasets}
+          datasetLogs={spanFilteredDatasetLogs}
+          onViewInExplore={handleViewInExplore}
+          testSubjPrefix="span-logs"
+        />
+      </EuiPanel>
+    </div>
   );
 };
