@@ -145,7 +145,7 @@ export const getDefaultSuggestions = async ({
 
     if (suggestions.suggestSourcesOrTables) {
       finalSuggestions.push({
-        text: indexPattern.title,
+        text: indexPattern.getDisplayName(),
         type: monaco.languages.CompletionItemKind.Struct,
         insertText: `${indexPattern.title} `,
         detail: SuggestionItemDetailsTags.Table,
@@ -268,7 +268,7 @@ export const getSimplifiedPPLSuggestions = async ({
 
     if (suggestions.suggestSourcesOrTables) {
       finalSuggestions.push({
-        text: indexPattern.title,
+        text: indexPattern.getDisplayName(),
         type: monaco.languages.CompletionItemKind.Struct,
         insertText: getInsertText(indexPattern.title, 'table', isInQuotes),
         detail: SuggestionItemDetailsTags.Table,
