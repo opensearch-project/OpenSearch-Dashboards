@@ -21,6 +21,7 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataView } from '../../../../../../../data/public';
@@ -187,6 +188,30 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
       );
     });
 
+  // Compute tooltip message for disabled save button
+  const disabledReason = useMemo(() => {
+    if (isLoading) return '';
+    if (selectedLogDatasetIds.length === 0) {
+      return i18n.translate('datasetManagement.correlatedDatasets.modal.noLogDatasetsTooltip', {
+        defaultMessage: 'Please select at least one log dataset',
+      });
+    }
+    if (maxDatasetsError) {
+      return maxDatasetsError;
+    }
+    if (isAnyDatasetEditing) {
+      return i18n.translate('datasetManagement.correlatedDatasets.modal.datasetEditingTooltip', {
+        defaultMessage: 'Please save or cancel schema mapping changes',
+      });
+    }
+    if (!allDatasetsReady) {
+      return i18n.translate('datasetManagement.correlatedDatasets.modal.validatingTooltip', {
+        defaultMessage: 'Waiting for datasets to be validated',
+      });
+    }
+    return '';
+  }, [isLoading, selectedLogDatasetIds, maxDatasetsError, isAnyDatasetEditing, allDatasetsReady]);
+
   const canSave =
     !isLoading &&
     selectedLogDatasetIds.length > 0 &&
@@ -273,17 +298,19 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
           })}
         </EuiButtonEmpty>
 
-        <EuiButton
-          onClick={handleSave}
-          fill
-          disabled={!canSave}
-          isLoading={isLoading}
-          data-test-subj="saveCorrelationButton"
-        >
-          {i18n.translate('datasetManagement.correlatedDatasets.modal.saveButton', {
-            defaultMessage: 'Save',
-          })}
-        </EuiButton>
+        <EuiToolTip content={disabledReason} position="top">
+          <EuiButton
+            onClick={handleSave}
+            fill
+            disabled={!canSave}
+            isLoading={isLoading}
+            data-test-subj="saveCorrelationButton"
+          >
+            {i18n.translate('datasetManagement.correlatedDatasets.modal.saveButton', {
+              defaultMessage: 'Save',
+            })}
+          </EuiButton>
+        </EuiToolTip>
       </EuiModalFooter>
     </EuiModal>
   );

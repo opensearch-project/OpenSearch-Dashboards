@@ -34,7 +34,15 @@ export function useCorrelations(
 
     try {
       const results = await client.find(options);
-      setCorrelations(results);
+
+      // Client-side filtering: only include correlations where datasetId appears in references
+      const filtered = options.datasetId
+        ? results.filter((correlation) =>
+            correlation.references.some((ref) => ref.id === options.datasetId)
+          )
+        : results;
+
+      setCorrelations(filtered);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch correlations'));
     } finally {
@@ -85,7 +93,13 @@ export function useCorrelationCount(
     try {
       const client = new CorrelationsClient(savedObjectsClient);
       const correlations = await client.find({ datasetId, perPage: 1000 });
-      setCount(correlations.length);
+
+      // Client-side filtering: only count correlations where datasetId appears in references
+      const filtered = correlations.filter((correlation) =>
+        correlation.references.some((ref) => ref.id === datasetId)
+      );
+
+      setCount(filtered.length);
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to fetch correlation count'));
       setCount(0);
