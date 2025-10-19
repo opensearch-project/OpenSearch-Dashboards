@@ -18,7 +18,7 @@ import {
   applyAxisStyling,
   getSwappedAxisRole,
   getSchemaByAxis,
-  buildTimeRangeLayer,
+  applyTimeRangeToEncoding,
 } from '../utils/utils';
 
 import {
@@ -227,10 +227,10 @@ export const createTimeBarChart = (
     layers.push(...thresholdLayer.layer);
   }
 
-  const domainLayer = styles.showFullTimeRange
-    ? buildTimeRangeLayer(axisColumnMappings, timeRange, styles.switchAxes)
-    : null;
-  if (domainLayer) layers.push(domainLayer);
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange) {
+    applyTimeRangeToEncoding(mainLayer.encoding, axisColumnMappings, timeRange, styles.switchAxes);
+  }
 
   return {
     $schema: VEGASCHEMA,
@@ -354,10 +354,10 @@ export const createGroupedTimeBarChart = (
     layer.push(...thresholdLayer.layer);
   }
 
-  const domainLayer = styles.showFullTimeRange
-    ? buildTimeRangeLayer(axisColumnMappings, timeRange, styles.switchAxes)
-    : null;
-  if (domainLayer) layer.push(domainLayer);
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange) {
+    applyTimeRangeToEncoding(barLayer.encoding, axisColumnMappings, timeRange, styles.switchAxes);
+  }
 
   const spec: any = {
     $schema: VEGASCHEMA,
@@ -435,9 +435,46 @@ export const createFacetedTimeBarChart = (
 
   const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
 
-  const domainLayer = styles.showFullTimeRange
-    ? buildTimeRangeLayer(axisColumnMappings, timeRange, styles.switchAxes)
-    : null;
+  // Create the main layer encoding first
+  const mainLayerEncoding = {
+    x: {
+      ...buildEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
+    },
+    y: {
+      ...buildEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
+    },
+    color: {
+      field: category1Field,
+      type: getSchemaByAxis(colorMapping),
+      legend: styles.addLegend
+        ? {
+            title: styles.legendTitle,
+            orient: styles.legendPosition?.toLowerCase() || 'right',
+            symbolType: styles.legendShape ?? 'circle',
+          }
+        : null,
+    },
+    ...(styles.tooltipOptions?.mode !== 'hidden' && {
+      tooltip: [
+        {
+          ...buildTooltipEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
+        },
+        {
+          ...buildTooltipEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
+        },
+        { field: category1Field, type: 'nominal', title: category1Name },
+      ],
+    }),
+    fillOpacity: {
+      condition: { param: 'highlight', value: 1, empty: false },
+      value: DEFAULT_OPACITY,
+    },
+  };
+
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange && timeRange) {
+    applyTimeRangeToEncoding(mainLayerEncoding, axisColumnMappings, timeRange, styles.switchAxes);
+  }
 
   return {
     $schema: VEGASCHEMA,
@@ -460,56 +497,11 @@ export const createFacetedTimeBarChart = (
             createTimeRangeBrush({ timeAxis: styles.switchAxes ? 'y' : 'x' }),
           ],
           mark: barMark,
-          encoding: {
-            x: {
-              ...buildEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
-            },
-            y: {
-              ...buildEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
-            },
-            color: {
-              field: category1Field,
-              type: getSchemaByAxis(colorMapping),
-              legend: styles.addLegend
-                ? {
-                    title: styles.legendTitle,
-                    orient: styles.legendPosition?.toLowerCase() || 'right',
-                    symbolType: styles.legendShape ?? 'circle',
-                  }
-                : null,
-            },
-            ...(styles.tooltipOptions?.mode !== 'hidden' && {
-              tooltip: [
-                {
-                  ...buildTooltipEncoding(
-                    xAxis,
-                    xAxisStyle,
-                    interval,
-                    styles?.bucket?.aggregationType
-                  ),
-                },
-                {
-                  ...buildTooltipEncoding(
-                    yAxis,
-                    yAxisStyle,
-                    interval,
-                    styles?.bucket?.aggregationType
-                  ),
-                },
-                { field: category1Field, type: 'nominal', title: category1Name },
-              ],
-            }),
-            fillOpacity: {
-              condition: { param: 'highlight', value: 1, empty: false },
-              value: DEFAULT_OPACITY,
-            },
-          },
+          encoding: mainLayerEncoding,
         },
 
         // Add threshold layer to each facet if enabled
         ...(thresholdLayer?.layer ?? []),
-
-        ...(domainLayer ? [domainLayer] : []),
       ],
     },
   };

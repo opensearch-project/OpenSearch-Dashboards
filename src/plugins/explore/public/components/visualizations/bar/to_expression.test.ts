@@ -27,7 +27,7 @@ jest.mock('../utils/utils', () => {
   const actual = jest.requireActual('../utils/utils');
   return {
     ...actual,
-    buildTimeRangeLayer: jest.fn(() => ({
+    applyTimeRangeToEncoding: jest.fn(() => ({
       mark: { type: 'rule' },
       data: { name: 'domainLayer' },
       encoding: {},
@@ -676,13 +676,12 @@ describe('bar to_expression', () => {
         timeRange
       );
 
-      expect(Utils.buildTimeRangeLayer).toHaveBeenCalledWith(
+      expect(Utils.applyTimeRangeToEncoding).toHaveBeenCalledWith(
+        expect.any(Object), // mainLayerEncoding
         axisMappings,
         timeRange,
         styles.switchAxes
       );
-      const lastLayer = spec.layer[spec.layer.length - 1];
-      expect(lastLayer).toEqual(expect.objectContaining({ data: { name: 'domainLayer' } }));
     });
   });
 
@@ -925,13 +924,12 @@ describe('bar to_expression', () => {
         timeRange
       );
 
-      expect(Utils.buildTimeRangeLayer).toHaveBeenCalledWith(
+      expect(Utils.applyTimeRangeToEncoding).toHaveBeenCalledWith(
+        expect.any(Object), // mainLayerEncoding
         axisMappings,
         timeRange,
         styles.switchAxes
       );
-      const lastLayer = spec.layer[spec.layer.length - 1];
-      expect(lastLayer).toEqual(expect.objectContaining({ data: { name: 'domainLayer' } }));
     });
   });
 
@@ -1176,14 +1174,12 @@ describe('bar to_expression', () => {
         axisMappings,
         timeRange
       );
-      expect(Utils.buildTimeRangeLayer).toHaveBeenCalledWith(
+      expect(Utils.applyTimeRangeToEncoding).toHaveBeenCalledWith(
+        expect.any(Object), // mainLayerEncoding
         axisMappings,
         timeRange,
         styles.switchAxes
       );
-      const layers = spec.spec.layer;
-      const lastLayer = layers[layers.length - 1];
-      expect(lastLayer).toEqual(expect.objectContaining({ data: { name: 'domainLayer' } }));
     });
   });
 

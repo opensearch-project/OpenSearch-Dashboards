@@ -13,7 +13,7 @@ import {
   inferTimeUnitFromTimestamps,
   getTooltipFormat,
   mergeStyles,
-  buildTimeRangeLayer,
+  applyTimeRangeToEncoding,
 } from './utils';
 import { AxisRole, Positions, ColorSchemas, VisFieldType, StandardAxes } from '../types';
 import { ChartStyles, StyleOptions } from './use_visualization_types';
@@ -419,7 +419,7 @@ describe('mergeStyles', () => {
     });
   });
 
-  describe('buildTimeRangeLayer', () => {
+  describe('applyTimeRangeToEncoding', () => {
     const baseAxis = {
       id: 1,
       name: 'Test Axis',
@@ -431,14 +431,14 @@ describe('mergeStyles', () => {
     const timeRange = { from: '2023-01-01', to: '2023-12-31' };
 
     it('returns null when axisColumnMappings is undefined', () => {
-      expect(buildTimeRangeLayer(undefined, timeRange)).toBeNull();
+      expect(applyTimeRangeToEncoding(undefined, undefined, timeRange)).toBeNull();
     });
 
     it('returns null when timeRange is undefined', () => {
       const axisColumnMappings = {
         x: { ...baseAxis, schema: VisFieldType.Date },
       };
-      expect(buildTimeRangeLayer(axisColumnMappings, undefined)).toBeNull();
+      expect(applyTimeRangeToEncoding(undefined, axisColumnMappings, undefined)).toBeNull();
     });
 
     it('returns null when no temporal axis is found', () => {
@@ -446,22 +446,18 @@ describe('mergeStyles', () => {
         x: { ...baseAxis, schema: VisFieldType.Numerical },
         y: { ...baseAxis, schema: VisFieldType.Categorical },
       };
-      expect(buildTimeRangeLayer(axisColumnMappings, timeRange)).toBeNull();
+      expect(applyTimeRangeToEncoding(undefined, axisColumnMappings, timeRange)).toBeNull();
     });
 
-    it('builds layer with x encoding when temporal axis is on X and switchAxes is false', () => {
+    it('returns scale config when no mainLayerEncoding is provided', () => {
       const axisColumnMappings = {
         x: { ...baseAxis, schema: VisFieldType.Date, column: 'date_x' },
         y: { ...baseAxis, schema: VisFieldType.Numerical },
       };
-      const layer = buildTimeRangeLayer(axisColumnMappings, timeRange, false);
-      expect(layer).toEqual({
-        data: {
-          values: [{ date_x: '2023-01-01' }, { date_x: '2023-12-31' }],
-        },
-        mark: { type: 'point', opacity: 0 },
-        encoding: {
-          x: { field: 'date_x', type: 'temporal' },
+      const result = applyTimeRangeToEncoding(undefined, axisColumnMappings, timeRange, false);
+      expect(result).toEqual({
+        scale: {
+          domain: ['2023-01-01', '2023-12-31'],
         },
       });
     });
@@ -551,20 +547,25 @@ describe('mergeStyles', () => {
         },
       });
     });
-    it('builds layer with y encoding when temporal axis is on X and switchAxes is true', () => {
+    it('applies scale to mainLayerEncoding when provided', () => {
       const axisColumnMappings = {
         x: { ...baseAxis, schema: VisFieldType.Date, column: 'date_x' },
         y: { ...baseAxis, schema: VisFieldType.Numerical },
       };
-      const layer = buildTimeRangeLayer(axisColumnMappings, timeRange, true);
-      expect(layer).toEqual({
-        data: {
-          values: [{ date_x: '2023-01-01' }, { date_x: '2023-12-31' }],
-        },
-        mark: { type: 'point', opacity: 0 },
-        encoding: {
-          y: { field: 'date_x', type: 'temporal' },
-        },
+      const mainLayerEncoding: any = {
+        x: { field: 'date_x', type: 'temporal' },
+        y: { field: 'value', type: 'quantitative' },
+      };
+      const result = applyTimeRangeToEncoding(
+        mainLayerEncoding,
+        axisColumnMappings,
+        timeRange,
+        false
+      );
+
+      expect(result).toBeNull(); // Function returns null when modifying encoding directly
+      expect(mainLayerEncoding.x.scale).toEqual({
+        domain: ['2023-01-01', '2023-12-31'],
       });
     });
 
@@ -612,20 +613,25 @@ describe('mergeStyles', () => {
         },
       });
     });
-    it('builds layer with y encoding when temporal axis is on Y and switchAxes is false', () => {
+    it('applies scale to y axis when temporal axis is on Y', () => {
       const axisColumnMappings = {
         x: { ...baseAxis, schema: VisFieldType.Numerical },
         y: { ...baseAxis, schema: VisFieldType.Date, column: 'date_y' },
       };
-      const layer = buildTimeRangeLayer(axisColumnMappings, timeRange, false);
-      expect(layer).toEqual({
-        data: {
-          values: [{ date_y: '2023-01-01' }, { date_y: '2023-12-31' }],
-        },
-        mark: { type: 'point', opacity: 0 },
-        encoding: {
-          y: { field: 'date_y', type: 'temporal' },
-        },
+      const mainLayerEncoding: any = {
+        x: { field: 'value', type: 'quantitative' },
+        y: { field: 'date_y', type: 'temporal' },
+      };
+      const result = applyTimeRangeToEncoding(
+        mainLayerEncoding,
+        axisColumnMappings,
+        timeRange,
+        false
+      );
+
+      expect(result).toBeNull();
+      expect(mainLayerEncoding.y.scale).toEqual({
+        domain: ['2023-01-01', '2023-12-31'],
       });
     });
 
@@ -649,20 +655,26 @@ describe('mergeStyles', () => {
         description: 'Description',
       });
     });
-    it('builds layer with x encoding when temporal axis is on Y and switchAxes is true', () => {
+    it('applies scale with switchAxes correctly', () => {
       const axisColumnMappings = {
         x: { ...baseAxis, schema: VisFieldType.Numerical },
         y: { ...baseAxis, schema: VisFieldType.Date, column: 'date_y' },
       };
-      const layer = buildTimeRangeLayer(axisColumnMappings, timeRange, true);
-      expect(layer).toEqual({
-        data: {
-          values: [{ date_y: '2023-01-01' }, { date_y: '2023-12-31' }],
-        },
-        mark: { type: 'point', opacity: 0 },
-        encoding: {
-          x: { field: 'date_y', type: 'temporal' },
-        },
+      const mainLayerEncoding: any = {
+        x: { field: 'value', type: 'quantitative' },
+        y: { field: 'date_y', type: 'temporal' },
+      };
+      const result = applyTimeRangeToEncoding(
+        mainLayerEncoding,
+        axisColumnMappings,
+        timeRange,
+        true
+      );
+
+      expect(result).toBeNull();
+      // When switchAxes is true, Y temporal axis should apply scale to x encoding
+      expect(mainLayerEncoding.x.scale).toEqual({
+        domain: ['2023-01-01', '2023-12-31'],
       });
     });
   });

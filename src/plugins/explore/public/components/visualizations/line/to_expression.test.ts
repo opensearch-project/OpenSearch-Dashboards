@@ -42,7 +42,7 @@ jest.mock('../style_panel/threshold/threshold_utils', () => ({
 
 // Mock the utils module
 jest.mock('../utils/utils', () => ({
-  buildTimeRangeLayer: jest.fn().mockReturnValue({ mark: { type: 'rule' } }),
+  applyTimeRangeToEncoding: jest.fn().mockReturnValue({ mark: { type: 'rule' } }),
   getTooltipFormat: jest.fn().mockReturnValue('%b %d, %Y %H:%M:%S'),
 }));
 
@@ -128,18 +128,19 @@ describe('to_expression', () => {
         [AxisRole.Y]: numericColumn1,
         [AxisRole.X]: dateColumn,
       };
+      const modifiedStyles = { ...styleOptions, addTimeMarker: true };
       const result = createSimpleLineChart(
         transformedData,
         [numericColumn1],
         [dateColumn],
-        { ...styleOptions, addTimeMarker: true },
+        modifiedStyles,
         mockAxisColumnMappings
       );
       expect(result).toHaveProperty('$schema');
       expect(result).toHaveProperty('title', 'value1 Over Time');
       expect(result).toHaveProperty('data.values', transformedData);
       expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(6); // Main layer + threshold + time marker + hover state layers
+      expect(result.layer).toHaveLength(6); // Main layer + 3 hover state layers + threshold + time marker
 
       // Verify the main layer
       const mainLayer = result.layer[0];
@@ -148,12 +149,12 @@ describe('to_expression', () => {
       expect(mainLayer).toHaveProperty('encoding.y.field', 'field-1');
 
       // Verify utility functions were called
-      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
+      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(modifiedStyles, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
       expect(thresholdUtils.createThresholdLayer).toHaveBeenCalledWith(
         styleOptions.thresholdOptions
       );
-      expect(lineChartUtils.createTimeMarkerLayer).toHaveBeenCalledWith(styleOptions);
+      expect(lineChartUtils.createTimeMarkerLayer).toHaveBeenCalledWith(modifiedStyles);
 
       // select time range params
       expect(result.params).toEqual(
@@ -170,22 +171,26 @@ describe('to_expression', () => {
       const mockDomainLayer = { mark: { type: 'rule' } };
       (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
       (lineChartUtils.createTimeMarkerLayer as jest.Mock).mockReturnValueOnce(mockTimeMarkerLayer);
-      (utils.buildTimeRangeLayer as jest.Mock).mockReturnValueOnce(mockDomainLayer);
+      (utils.applyTimeRangeToEncoding as jest.Mock).mockReturnValueOnce(mockDomainLayer);
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: numericColumn1,
         [AxisRole.X]: dateColumn,
       };
+      const modifiedStyles = { ...styleOptions, addTimeMarker: true, showFullTimeRange: true };
       const result = createSimpleLineChart(
         transformedData,
         [numericColumn1],
         [dateColumn],
-        { ...styleOptions, addTimeMarker: true, showFullTimeRange: true },
+        modifiedStyles,
         mockAxisColumnMappings,
         timeRange
       );
-      expect(result.layer).toHaveLength(4); // Main + threshold + time marker + domain
-      expect(result.layer[3]).toBe(mockDomainLayer);
-      expect(utils.buildTimeRangeLayer).toHaveBeenCalledWith(mockAxisColumnMappings, timeRange);
+      expect(result.layer).toHaveLength(6); // Main + 3 hover state layers + threshold + time marker
+      expect(utils.applyTimeRangeToEncoding).toHaveBeenCalledWith(
+        expect.any(Object),
+        mockAxisColumnMappings,
+        timeRange
+      );
     });
 
     it('should handle different title display options', () => {
@@ -261,18 +266,19 @@ describe('to_expression', () => {
         [AxisRole.X]: dateColumn,
         [AxisRole.Y_SECOND]: numericColumn2,
       };
+      const modifiedStyles = { ...styleOptions, addTimeMarker: true };
       const result = createLineBarChart(
         transformedData,
         [numericColumn1, numericColumn2],
         [dateColumn],
-        { ...styleOptions, addTimeMarker: true },
+        modifiedStyles,
         mockAxisColumnMappings
       );
       expect(result).toHaveProperty('$schema');
       expect(result).toHaveProperty('title', 'value1 (Bar) and value2 (Line) Over Time');
       expect(result).toHaveProperty('data.values', transformedData);
       expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(5); // Bar layer + line layer (no threshold or time marker in this test) + hover state layers
+      expect(result.layer).toHaveLength(6); // Bar layer (with threshold) + line layer + 3 hover state layers + time marker
 
       // Verify the bar layer
       const barLayer = result.layer[0].layer[0];
@@ -285,14 +291,8 @@ describe('to_expression', () => {
       expect(result.layer[1]).toHaveProperty('encoding.y.field', 'field-2');
       expect(result.layer[1]).toHaveProperty('encoding.color.datum', 'value2');
       expect(result).toHaveProperty('resolve.scale.y', 'independent');
-      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(
-        { ...styleOptions, addTimeMarker: true },
-        'bar'
-      );
-      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(
-        { ...styleOptions, addTimeMarker: true },
-        'line'
-      );
+      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(modifiedStyles, 'bar');
+      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(modifiedStyles, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(3);
 
       // select time range params
@@ -310,23 +310,27 @@ describe('to_expression', () => {
       const mockDomainLayer = { mark: { type: 'rule' } };
       (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
       (lineChartUtils.createTimeMarkerLayer as jest.Mock).mockReturnValueOnce(mockTimeMarkerLayer);
-      (utils.buildTimeRangeLayer as jest.Mock).mockReturnValueOnce(mockDomainLayer);
+      (utils.applyTimeRangeToEncoding as jest.Mock).mockReturnValueOnce(mockDomainLayer);
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: numericColumn1,
         [AxisRole.X]: dateColumn,
         [AxisRole.Y_SECOND]: numericColumn2,
       };
+      const modifiedStyles = { ...styleOptions, addTimeMarker: true, showFullTimeRange: true };
       const result = createLineBarChart(
         transformedData,
         [numericColumn1, numericColumn2],
         [dateColumn],
-        { ...styleOptions, addTimeMarker: true, showFullTimeRange: true },
+        modifiedStyles,
         mockAxisColumnMappings,
         timeRange
       );
-      expect(result.layer).toHaveLength(4); // Bar + line + time marker + domain
-      expect(result.layer[3]).toBe(mockDomainLayer);
-      expect(utils.buildTimeRangeLayer).toHaveBeenCalledWith(mockAxisColumnMappings, timeRange);
+      expect(result.layer).toHaveLength(6); // Bar layer (with threshold) + line layer + 3 hover state layers + time marker
+      expect(utils.applyTimeRangeToEncoding).toHaveBeenCalledWith(
+        expect.any(Object),
+        mockAxisColumnMappings,
+        timeRange
+      );
     });
 
     it('should handle different title display options', () => {
@@ -406,19 +410,20 @@ describe('to_expression', () => {
         [AxisRole.X]: dateColumn,
         [AxisRole.COLOR]: categoricalColumn1,
       };
+      const modifiedStyles = { ...styleOptions, addTimeMarker: true };
       const result = createMultiLineChart(
         transformedData,
         [numericColumn1],
         [categoricalColumn1],
         [dateColumn],
-        { ...styleOptions, addTimeMarker: true },
+        modifiedStyles,
         mockAxisColumnMappings
       );
       expect(result).toHaveProperty('$schema');
       expect(result).toHaveProperty('title', 'value1 Over Time by category1');
       expect(result).toHaveProperty('data.values', transformedData);
       expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(4); // Main layer only (no threshold or time marker in this test) + hover state layers
+      expect(result.layer).toHaveLength(6); // Main layer + 3 hover state layers + threshold + time marker
 
       // Verify the main layer
       const mainLayer = result.layer[0];
@@ -427,7 +432,7 @@ describe('to_expression', () => {
       expect(mainLayer).toHaveProperty('encoding.color.field', 'field-2');
 
       // Verify utility functions were called
-      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
+      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(modifiedStyles, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
 
       // select time range params
@@ -445,24 +450,28 @@ describe('to_expression', () => {
       const mockDomainLayer = { mark: { type: 'rule' } };
       (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
       (lineChartUtils.createTimeMarkerLayer as jest.Mock).mockReturnValueOnce(mockTimeMarkerLayer);
-      (utils.buildTimeRangeLayer as jest.Mock).mockReturnValueOnce(mockDomainLayer);
+      (utils.applyTimeRangeToEncoding as jest.Mock).mockReturnValueOnce(mockDomainLayer);
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: numericColumn1,
         [AxisRole.X]: dateColumn,
         [AxisRole.COLOR]: categoricalColumn1,
       };
+      const modifiedStyles = { ...styleOptions, addTimeMarker: true, showFullTimeRange: true };
       const result = createMultiLineChart(
         transformedData,
         [numericColumn1],
         [categoricalColumn1],
         [dateColumn],
-        { ...styleOptions, addTimeMarker: true, showFullTimeRange: true },
+        modifiedStyles,
         mockAxisColumnMappings,
         timeRange
       );
-      expect(result.layer).toHaveLength(4); // Main + threshold + time marker + domain
-      expect(result.layer[3]).toBe(mockDomainLayer);
-      expect(utils.buildTimeRangeLayer).toHaveBeenCalledWith(mockAxisColumnMappings, timeRange);
+      expect(result.layer).toHaveLength(6); // Main + 3 hover state layers + threshold + time marker
+      expect(utils.applyTimeRangeToEncoding).toHaveBeenCalledWith(
+        expect.any(Object),
+        mockAxisColumnMappings,
+        timeRange
+      );
     });
 
     it('should handle different title display options', () => {
@@ -547,19 +556,20 @@ describe('to_expression', () => {
         [AxisRole.COLOR]: categoricalColumn1,
         [AxisRole.FACET]: categoricalColumn2,
       };
+      const modifiedStyles = {
+        ...styleOptions,
+        addTimeMarker: true,
+        thresholdOptions: {
+          ...styleOptions.thresholdOptions,
+          thresholdStyle: ThresholdMode.Solid,
+        },
+      };
       const result = createFacetedMultiLineChart(
         transformedData,
         [numericColumn1],
         [categoricalColumn1, categoricalColumn2],
         [dateColumn],
-        {
-          ...styleOptions,
-          addTimeMarker: true,
-          thresholdOptions: {
-            ...styleOptions.thresholdOptions,
-            thresholdStyle: ThresholdMode.Solid,
-          },
-        },
+        modifiedStyles,
         mockAxisColumnMappings
       );
       expect(result).toHaveProperty('$schema');
@@ -570,7 +580,7 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('data.values', transformedData);
       expect(result).toHaveProperty('facet.field', 'field-3');
       expect(result).toHaveProperty('spec.layer');
-      expect(result.spec.layer).toHaveLength(6); // Main layer + threshold + time marker + hover state layers
+      expect(result.spec.layer).toHaveLength(6); // Main layer + 3 hover state layers + threshold + time marker
 
       // Verify the main layer
       const mainLayer = result.spec.layer[0];
@@ -587,7 +597,7 @@ describe('to_expression', () => {
       expect(result.spec.layer[5]).toHaveProperty('encoding.x.datum');
 
       // Verify utility functions were called
-      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
+      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(modifiedStyles, 'line');
       expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
 
       // select time range params
@@ -607,33 +617,37 @@ describe('to_expression', () => {
       const mockDomainLayer = { mark: { type: 'rule' } };
       (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
       (lineChartUtils.createTimeMarkerLayer as jest.Mock).mockReturnValueOnce(mockTimeMarkerLayer);
-      (utils.buildTimeRangeLayer as jest.Mock).mockReturnValueOnce(mockDomainLayer);
+      (utils.applyTimeRangeToEncoding as jest.Mock).mockReturnValueOnce(mockDomainLayer);
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: numericColumn1,
         [AxisRole.X]: dateColumn,
         [AxisRole.COLOR]: categoricalColumn1,
         [AxisRole.FACET]: categoricalColumn2,
       };
+      const modifiedStyles = {
+        ...styleOptions,
+        addTimeMarker: true,
+        showFullTimeRange: true,
+        thresholdOptions: {
+          ...styleOptions.thresholdOptions,
+          thresholdStyle: ThresholdMode.Solid,
+        },
+      };
       const result = createFacetedMultiLineChart(
         transformedData,
         [numericColumn1],
         [categoricalColumn1, categoricalColumn2],
         [dateColumn],
-        {
-          ...styleOptions,
-          addTimeMarker: true,
-          showFullTimeRange: true,
-          thresholdOptions: {
-            ...styleOptions.thresholdOptions,
-            thresholdStyle: ThresholdMode.Solid,
-          },
-        },
+        modifiedStyles,
         mockAxisColumnMappings,
         timeRange
       );
-      expect(result.spec.layer).toHaveLength(4); // Main + threshold + time marker + domain
-      expect(result.spec.layer[3]).toBe(mockDomainLayer);
-      expect(utils.buildTimeRangeLayer).toHaveBeenCalledWith(mockAxisColumnMappings, timeRange);
+      expect(result.spec.layer).toHaveLength(6); // Main + 3 hover state layers + threshold + time marker
+      expect(utils.applyTimeRangeToEncoding).toHaveBeenCalledWith(
+        expect.any(Object),
+        mockAxisColumnMappings,
+        timeRange
+      );
     });
 
     it('should handle different title display options', () => {
