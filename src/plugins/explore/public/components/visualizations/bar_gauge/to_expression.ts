@@ -107,6 +107,15 @@ export const createBarGaugeSpec = (
   const maxBase = styleOptions?.max ?? maxNumber;
   const minBase = styleOptions?.min ?? 0;
 
+  const scaleType =
+    styleOptions.exclusive.displayMode === 'stack'
+      ? {
+          scale: {
+            domainMin: { expr: 'minBase' },
+          },
+        }
+      : { domain: { expr: '[minBase,maxBase]' } };
+
   const params = [
     { name: 'fontColor', value: getColors().text },
     {
@@ -143,21 +152,13 @@ export const createBarGaugeSpec = (
       field: yAxis?.column,
       type: getSchemaByAxis(yAxis),
       ...yAxisStyle,
-      ...(!adjustEncoding
-        ? {
-            domain: { expr: '[minBase,maxBase]' },
-          }
-        : {}),
+      ...(!adjustEncoding ? scaleType : {}),
     },
     x: {
       field: xAxis?.column,
       type: getSchemaByAxis(xAxis),
       ...xAxisStyle,
-      ...(adjustEncoding
-        ? {
-            domain: { expr: '[minBase,maxBase]' },
-          }
-        : {}),
+      ...(adjustEncoding ? scaleType : {}),
     },
     ...(styleOptions.tooltipOptions?.mode !== 'hidden' && {
       tooltip: [
@@ -239,16 +240,10 @@ export const createBarGaugeSpec = (
               [`${processedSymbol}`]: {
                 type: 'quantitative',
                 field: 'gradEnd',
-                scale: {
-                  domainMin: { expr: 'minBase' },
-                },
               },
 
               [`${processedSymbol}2`]: {
                 field: 'gradStart',
-                scale: {
-                  domainMin: { expr: 'minBase' },
-                },
               },
             },
           },
