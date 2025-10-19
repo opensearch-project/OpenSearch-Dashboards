@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiDataGrid, EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
 import { VisColumn, VisFieldType } from '../types';
 import { defaultTableChartStyles, CellTypeConfig, TableChartStyle } from './table_vis_config';
@@ -27,6 +27,7 @@ export const TableVis = React.memo(
   ({ rows, columns, styleOptions, pageSizeOptions, showStyleSelector }: TableVisProps) => {
     const pageSize = styleOptions?.pageSize ?? defaultTableChartStyles.pageSize;
     const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ column }) => column));
+    const prevFieldNamesRef = useRef<string[]>(columns.map(({ name }) => name));
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize });
     const [filters, setFilters] = useState<Record<string, FilterConfig>>({});
     const [popoverOpenColumnId, setPopoverOpenColumnId] = useState<string | null>(null);
@@ -99,6 +100,30 @@ export const TableVis = React.memo(
         setFilters({});
       }
     }, [styleOptions?.showColumnFilter]);
+
+    useEffect(() => {
+      const currentFieldNames = columns.map(({ name }) => name);
+      const prevFieldNames = prevFieldNamesRef.current;
+      const newColumnIds = columns.map(({ column }) => column);
+
+      const hasCommonFields = currentFieldNames.some((name) => prevFieldNames.includes(name));
+
+      if (!hasCommonFields || prevFieldNames.length === 0) {
+        setVisibleColumns(newColumnIds);
+      } else {
+        setVisibleColumns((prevVisibleColumns) => {
+          const existingVisibleColumns = prevVisibleColumns.filter((colId) =>
+            newColumnIds.includes(colId)
+          );
+          const newColumns = newColumnIds.filter((colId) => !prevVisibleColumns.includes(colId));
+          const result = [...existingVisibleColumns, ...newColumns];
+
+          return result;
+        });
+      }
+
+      prevFieldNamesRef.current = currentFieldNames;
+    }, [columns]);
 
     const filteredRows = useMemo(() => {
       return rows.filter((row) =>

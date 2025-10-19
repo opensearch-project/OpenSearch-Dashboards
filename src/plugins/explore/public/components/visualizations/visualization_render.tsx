@@ -53,11 +53,13 @@ export const VisualizationRender = ({
   }, [visualizationData?.transformedData]);
 
   const columns = useMemo(() => {
-    return [
+    const allColumns = [
       ...(visualizationData?.numericalColumns ?? []),
       ...(visualizationData?.categoricalColumns ?? []),
       ...(visualizationData?.dateColumns ?? []),
     ];
+
+    return allColumns.sort((a, b) => a.id - b.id);
   }, [
     visualizationData?.numericalColumns,
     visualizationData?.categoricalColumns,
