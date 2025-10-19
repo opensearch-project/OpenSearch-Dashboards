@@ -5,9 +5,9 @@
 
 import { groupBy } from 'lodash';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
-import { VisColumn, AxisColumnMappings, VEGASCHEMA, Threshold } from '../types';
+import { VisColumn, AxisColumnMappings, VEGASCHEMA, Threshold, VisFieldType } from '../types';
 import { calculateValue } from '../utils/calculation';
-import { DEFAULT_GREY, getColors, getUnfilledArea } from '../theme/default_colors';
+import { getColors } from '../theme/default_colors';
 import { getSchemaByAxis } from '../utils/utils';
 import {
   getBarOrientation,
@@ -33,9 +33,7 @@ export const createBarGaugeSpec = (
   );
 
   const isXaxisNumerical = axisColumnMappings?.x?.schema === 'numerical';
-  const adjustEncoding =
-    (!isXaxisNumerical && styleOptions?.exclusive?.orientation === 'horizontal') ||
-    (isXaxisNumerical && styleOptions?.exclusive?.orientation !== 'horizontal');
+  const adjustEncoding = xAxis?.schema === VisFieldType.Numerical;
 
   const processedSymbol = [
     `${symbolOpposite(styleOptions.exclusive.orientation, `${isXaxisNumerical ? 'x' : 'y'}`)}`,
@@ -121,7 +119,9 @@ export const createBarGaugeSpec = (
     },
     {
       name: 'fontFactor',
-      expr: adjustEncoding ? `width/${catCounts}/${maxTextLength}/9` : `height/${maxTextLength}/18`,
+      expr: !adjustEncoding
+        ? `width/${catCounts}/${maxTextLength}/8`
+        : `height/${catCounts}/${maxTextLength}/10`,
     },
     ...gradientParams,
   ];
@@ -182,7 +182,7 @@ export const createBarGaugeSpec = (
       mark: {
         type: 'bar',
         clip: true,
-        fill: getUnfilledArea(),
+        fill: getColors().backgroundShade,
       },
       encoding: {
         [`${processedSymbol}`]: {
@@ -205,10 +205,15 @@ export const createBarGaugeSpec = (
     return expression;
   };
 
-  // Handle invalid domain cases (minBase >= maxBase or minBase > maxNumber) by using stack logic
-  if (styleOptions.exclusive.displayMode === 'stack' || minBase >= maxBase || minBase > maxNumber) {
+  let bars = [] as any;
+
+  // Handle invalid domain cases (minBase >= maxBase or minBase > maxNumber)
+  // valid cases will not add the layer .
+  if (minBase >= maxBase || minBase > maxNumber) {
+    bars = [];
+  } else if (styleOptions.exclusive.displayMode === 'stack') {
     // dispose the last threshold
-    const bars = processedThresholds.slice(0, -1)?.map((threshold, index) => {
+    bars = processedThresholds.slice(0, -1)?.map((threshold, index) => {
       return {
         transform: [
           { calculate: `datum.threshold${index}`, as: 'gradStart' },
@@ -250,61 +255,66 @@ export const createBarGaugeSpec = (
         ],
       };
     });
-
-    layers.push(...bars);
   } else if (styleOptions.exclusive.displayMode === 'gradient') {
-    const gradientBar = {
-      mark: { type: 'bar' },
-      transform: [
-        {
-          calculate: `datum['${numericField}']>=datum.maxVal?datum.maxVal:datum['${numericField}']`,
-          as: 'barEnd',
-        },
-        { filter: `datum['${numericField}'] >= datum.minVal` },
-      ],
-      encoding: {
-        [`${processedSymbol}`]: {
-          type: 'quantitative',
-          field: 'barEnd',
-        },
-        color: {
-          value: {
-            expr: generateTrans(processedThresholds),
+    bars = [
+      {
+        mark: { type: 'bar' },
+        transform: [
+          {
+            calculate: `datum['${numericField}']>=datum.maxVal?datum.maxVal:datum['${numericField}']`,
+            as: 'barEnd',
+          },
+          { filter: `datum['${numericField}'] >= datum.minVal` },
+        ],
+        encoding: {
+          [`${processedSymbol}`]: {
+            type: 'quantitative',
+            field: 'barEnd',
+          },
+          color: {
+            value: {
+              expr: generateTrans(processedThresholds),
+            },
           },
         },
       },
-    };
-    layers.push(gradientBar);
+    ];
   } else if (styleOptions.exclusive.displayMode === 'basic') {
-    const gradientBar = {
-      mark: { type: 'bar' },
-      transform: [
-        {
-          calculate: `datum['${numericField}']>=datum.maxVal?datum.maxVal:datum['${numericField}']`,
-          as: 'barEnd',
-        },
-        { filter: `datum['${numericField}'] >= datum.minVal` },
-      ],
-      encoding: {
-        [`${processedSymbol}`]: {
-          type: 'quantitative',
-          field: 'barEnd',
-        },
-        color: {
-          field: numericField,
-          type: 'quantitative',
-          scale: {
-            type: 'threshold',
-            //  last threshold which is just for max value capping in gradient mode
-            domain: processedThresholds.map((t) => t.value).slice(0, -1),
-            range: [DEFAULT_GREY, ...processedThresholds.map((t) => t.color)].slice(0, -1),
+    bars = [
+      {
+        mark: { type: 'bar' },
+        transform: [
+          {
+            calculate: `datum['${numericField}']>=datum.maxVal?datum.maxVal:datum['${numericField}']`,
+            as: 'barEnd',
           },
-          legend: null,
+          { filter: `datum['${numericField}'] >= datum.minVal` },
+        ],
+        encoding: {
+          [`${processedSymbol}`]: {
+            type: 'quantitative',
+            field: 'barEnd',
+          },
+          color: {
+            field: numericField,
+            type: 'quantitative',
+            scale: {
+              type: 'threshold',
+              //  last threshold which is just for max value capping in gradient mode
+              domain: processedThresholds.map((t) => t.value).slice(0, -1),
+              range: [
+                getColors().backgroundShade,
+                ...processedThresholds.map((t) => t.color),
+              ].slice(0, -1),
+            },
+            legend: null,
+          },
         },
       },
-    };
-    layers.push(gradientBar);
+    ];
   }
+
+  layers.push(...bars);
 
   if (styleOptions.exclusive.valueDisplay !== 'hidden') {
     const nameLayer = {
@@ -338,7 +348,10 @@ export const createBarGaugeSpec = (
           scale: {
             type: 'threshold',
             domain: processedThresholds.map((t) => t.value).slice(0, -1),
-            range: [DEFAULT_GREY, ...processedThresholds.map((t) => t.color)].slice(0, -1),
+            range: [getColors().backgroundShade, ...processedThresholds.map((t) => t.color)].slice(
+              0,
+              -1
+            ),
           },
           legend: null,
         },

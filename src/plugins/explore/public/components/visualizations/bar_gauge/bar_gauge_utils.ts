@@ -15,7 +15,9 @@ export const getBarOrientation = (
   const isHorizontal = styles?.exclusive.orientation === 'horizontal';
   const isXNumerical = xAxis?.schema === VisFieldType.Numerical;
 
-  const axisStyle = { axis: { tickOpacity: 0, grid: false, title: null, labelAngle: 0 } };
+  const axisStyle = {
+    axis: { tickOpacity: 0, grid: false, title: null, labelAngle: 0, labelOverlap: 'greedy' },
+  };
   const nullStyle = { axis: null };
 
   const shouldSwapAxes = (isXNumerical && isHorizontal) || (!isXNumerical && isHorizontal);

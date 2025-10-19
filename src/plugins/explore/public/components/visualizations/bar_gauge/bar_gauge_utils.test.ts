@@ -41,7 +41,7 @@ describe('bar_gauge_utils', () => {
       expect(result.xAxis).toBe(mockAxisColumnMappings.y);
       expect(result.yAxis).toBe(mockAxisColumnMappings.x);
       expect(result.yAxisStyle).toEqual({
-        axis: { tickOpacity: 0, grid: false, title: null, labelAngle: 0 },
+        axis: { tickOpacity: 0, grid: false, title: null, labelAngle: 0, labelOverlap: 'greedy' },
       });
       expect(result.xAxisStyle).toEqual({
         axis: null,
@@ -56,7 +56,7 @@ describe('bar_gauge_utils', () => {
       expect(result.xAxis).toBe(mockAxisColumnMappings.x);
       expect(result.yAxis).toBe(mockAxisColumnMappings.y);
       expect(result.xAxisStyle).toEqual({
-        axis: { tickOpacity: 0, grid: false, title: null, labelAngle: 0 },
+        axis: { tickOpacity: 0, grid: false, title: null, labelAngle: 0, labelOverlap: 'greedy' },
       });
       expect(result.yAxisStyle).toEqual({ axis: null });
     });
