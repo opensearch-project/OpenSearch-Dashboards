@@ -1,0 +1,2 @@
+fix:
+- Fix fields order issue ([#10754](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10754))
