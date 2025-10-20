@@ -43,12 +43,12 @@ import { getEnableExternalUrls, getData, getExposeDebugObjectToWindow } from '..
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 
 const newSchemeColor = {
-  purplesA669: '#A669E2',
-  orangesFF4B: '#FF4B14',
-  yellowsF90: '#ff9900',
-  blues006C: darkMode ? '#006CE0' : '#003B8F',
-  greens0085: darkMode ? '#008559' : '#005237',
-  redsEB003B: '#EB003B',
+  purples: '#A669E2',
+  oranges: '#FF4B14',
+  yellows: '#ff9900',
+  blues: darkMode ? '#006CE0' : '#003B8F',
+  greens: darkMode ? '#008559' : '#005237',
+  reds: '#EB003B',
 };
 
 function generateSchemeList(targetHex, n = 11, step = 20) {

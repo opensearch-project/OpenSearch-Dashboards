@@ -205,12 +205,12 @@ export enum PointShape {
 }
 
 export enum ColorSchemas {
-  BLUES = 'blues006C',
-  PURPLES = 'purplesA669',
-  ORANGES = 'orangesFF4B',
-  YELLOWS = 'yellowsF90',
-  GREENS = 'greens0085',
-  REDS = 'redsEB003B',
+  BLUES = 'blues',
+  PURPLES = 'purples',
+  ORANGES = 'oranges',
+  YELLOWS = 'yellows',
+  GREENS = 'greens',
+  REDS = 'reds',
   GREYS = 'greys',
   YELLOWORANGE = 'yelloworangered',
   GREENBLUE = 'greenblue',

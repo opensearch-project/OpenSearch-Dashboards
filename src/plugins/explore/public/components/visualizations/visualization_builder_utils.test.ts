@@ -32,7 +32,7 @@ jest.mock('./rule_repository', () => ({
 
 jest.mock('./style_panel/threshold/threshold_utils', () => ({
   Colors: {
-    ['blues006C']: {
+    ['blues']: {
       baseColor: '#9ecae1',
       colors: [
         '#c6dbef',
