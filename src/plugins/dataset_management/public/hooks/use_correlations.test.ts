@@ -85,7 +85,7 @@ describe('useCorrelations', () => {
           version: '1.0.0',
           entities: [],
         },
-        references: [],
+        references: [{ type: 'index-pattern', id: 'dataset-123', name: 'entities[0].index' }],
       },
     ];
 
@@ -200,9 +200,18 @@ describe('useCorrelationCount', () => {
 
   it('should return count of correlations', async () => {
     const mockCorrelations = [
-      { id: 'correlation-1' },
-      { id: 'correlation-2' },
-      { id: 'correlation-3' },
+      {
+        id: 'correlation-1',
+        references: [{ type: 'index-pattern', id: 'dataset-123', name: 'entities[0].index' }],
+      },
+      {
+        id: 'correlation-2',
+        references: [{ type: 'index-pattern', id: 'dataset-123', name: 'entities[0].index' }],
+      },
+      {
+        id: 'correlation-3',
+        references: [{ type: 'index-pattern', id: 'dataset-123', name: 'entities[0].index' }],
+      },
     ] as any;
 
     mockFind.mockResolvedValue(mockCorrelations);
