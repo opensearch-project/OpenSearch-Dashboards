@@ -1,0 +1,2 @@
+feat:
+- Use schemamapping from logs dataset, improve multiple log correlation support ([#10762](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10762))
