@@ -4,6 +4,26 @@
  */
 
 import React, { useState } from 'react';
+
+/**
+ * AdvancedSelector component for dataset selection and configuration.
+ *
+ * This component provides a two-step interface:
+ * 1. DatasetExplorer - Browse and select datasets
+ * 2. ConfiguratorV2 - Configure the selected dataset (language, time field, schema mappings, etc.)
+ *
+ * Usage with modals:
+ * When rendering this component inside a modal, apply the className 'datasetSelector__advancedModal'
+ * to the modal container for consistent sizing (1200px × 800px) and layout.
+ *
+ * Example:
+ * ```tsx
+ * overlays.openModal(
+ *   toMountPoint(<AdvancedSelector {...props} />),
+ *   { maxWidth: false, className: 'datasetSelector__advancedModal' }
+ * );
+ * ```
+ */
 import {
   BaseDataset,
   DATA_STRUCTURE_META_TYPES,

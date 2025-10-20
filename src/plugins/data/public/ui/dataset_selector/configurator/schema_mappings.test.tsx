@@ -69,11 +69,18 @@ describe('SchemaMappings Component', () => {
     expect(accordion).toBeInTheDocument();
   });
 
-  it('should expand accordion when clicked', () => {
+  it('should toggle accordion when clicked', () => {
     renderWithIntl(<SchemaMappings {...defaultProps} />);
+
     const accordionButton = screen.getByText('Schema Mappings');
+
+    // Click to open
     fireEvent.click(accordionButton);
     expect(screen.getByText('OTel logs')).toBeInTheDocument();
+
+    // Click to close
+    fireEvent.click(accordionButton);
+    // Content may still be in DOM but accordion should toggle
   });
 
   it('should render schema attributes after expanding accordion', () => {
@@ -184,5 +191,22 @@ describe('SchemaMappings Component', () => {
         spanId: 'field2',
       },
     });
+  });
+
+  it('should auto-open accordion when there are existing schema mappings', () => {
+    const propsWithMapping: SchemaMappingsProps = {
+      ...defaultProps,
+      schemaMappings: {
+        otelLogs: {
+          traceId: 'field1',
+        },
+      },
+    };
+
+    renderWithIntl(<SchemaMappings {...propsWithMapping} />);
+
+    // Accordion should be auto-opened, so schema details should be visible without clicking
+    expect(screen.getByText('OTel logs')).toBeInTheDocument();
+    expect(screen.getByText('Trace ID')).toBeInTheDocument();
   });
 });

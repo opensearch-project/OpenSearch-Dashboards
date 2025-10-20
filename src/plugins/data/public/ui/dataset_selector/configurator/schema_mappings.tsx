@@ -31,7 +31,9 @@ export const SchemaMappings: React.FC<SchemaMappingsProps> = ({
   onChange,
   schemas,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  // Auto-open accordion if there are existing schema mappings
+  const hasExistingMappings = Object.keys(schemaMappings).length > 0;
+  const [isOpen, setIsOpen] = useState(hasExistingMappings);
 
   const handleFieldChange = (schemaKey: string, attributeKey: string, fieldName: string) => {
     const newMappings = { ...schemaMappings };

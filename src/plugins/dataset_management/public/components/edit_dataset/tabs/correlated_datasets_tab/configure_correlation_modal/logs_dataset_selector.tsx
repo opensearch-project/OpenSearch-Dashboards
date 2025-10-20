@@ -31,7 +31,7 @@ export const LogsDatasetSelector: React.FC<LogsDatasetSelectorProps> = ({
     const fetchLogsDatasets = async () => {
       setIsLoading(true);
       try {
-        const allDataViews = await dataService.dataViews.getIdsWithTitle();
+        const allDataViews = await dataService.dataViews.getIdsWithTitle(true);
         const logsDatasetOptions: Array<EuiComboBoxOptionOption<string>> = [];
 
         // Filter for logs datasets only

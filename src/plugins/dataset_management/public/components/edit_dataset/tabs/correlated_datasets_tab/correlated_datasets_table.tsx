@@ -65,8 +65,8 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
           try {
             const savedObject = await savedObjects.client.get('index-pattern', id);
             const attributes = savedObject.attributes as any;
-            // Use displayName if available, otherwise fall back to title
-            titles[id] = attributes.displayName || attributes.title || id;
+            // Use title field only
+            titles[id] = attributes.title || id;
           } catch (err) {
             titles[id] = id; // Fallback to ID if fetch fails
           }

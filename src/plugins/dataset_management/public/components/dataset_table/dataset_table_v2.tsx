@@ -212,7 +212,7 @@ export const DatasetTableV2 = ({ canSave, history }: Props) => {
         ),
         {
           maxWidth: false,
-          className: 'datasetSelectModal',
+          className: 'datasetSelector__advancedModal',
         }
       );
     },

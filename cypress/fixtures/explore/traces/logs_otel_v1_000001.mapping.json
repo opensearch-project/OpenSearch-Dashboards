@@ -1,0 +1,171 @@
+{
+  "mappings": {
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "observedTimestamp": {
+        "type": "date"
+      },
+      "time": {
+        "type": "date"
+      },
+      "body": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "severityText": {
+        "type": "keyword"
+      },
+      "severityNumber": {
+        "type": "integer"
+      },
+      "traceId": {
+        "type": "keyword"
+      },
+      "spanId": {
+        "type": "keyword"
+      },
+      "flags": {
+        "type": "integer"
+      },
+      "attributes": {
+        "type": "object",
+        "properties": {
+          "otelServiceName": {
+            "type": "keyword"
+          },
+          "otelTraceID": {
+            "type": "keyword"
+          },
+          "otelSpanID": {
+            "type": "keyword"
+          },
+          "otelTraceSampled": {
+            "type": "boolean"
+          },
+          "thread.name": {
+            "type": "keyword"
+          },
+          "thread.id": {
+            "type": "long"
+          },
+          "exception": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "keyword"
+              },
+              "message": {
+                "type": "text"
+              },
+              "stacktrace": {
+                "type": "text"
+              }
+            }
+          },
+          "http.url": {
+            "type": "keyword"
+          },
+          "http.method": {
+            "type": "keyword"
+          },
+          "http.route": {
+            "type": "keyword"
+          },
+          "http.target": {
+            "type": "keyword"
+          },
+          "http.user_agent": {
+            "type": "text"
+          },
+          "db.system": {
+            "type": "keyword"
+          },
+          "db.operation": {
+            "type": "keyword"
+          },
+          "code.namespace": {
+            "type": "keyword"
+          },
+          "code.function": {
+            "type": "keyword"
+          },
+          "client.address": {
+            "type": "ip"
+          },
+          "owner.id": {
+            "type": "integer"
+          },
+          "pet.id": {
+            "type": "integer"
+          },
+          "hibernate.entity": {
+            "type": "keyword"
+          }
+        }
+      },
+      "resource": {
+        "type": "object",
+        "properties": {
+          "attributes": {
+            "type": "object",
+            "properties": {
+              "service.name": {
+                "type": "keyword"
+              },
+              "service.instance.id": {
+                "type": "keyword"
+              },
+              "service.version": {
+                "type": "keyword"
+              },
+              "telemetry.sdk.name": {
+                "type": "keyword"
+              },
+              "telemetry.sdk.language": {
+                "type": "keyword"
+              },
+              "telemetry.sdk.version": {
+                "type": "keyword"
+              },
+              "k8s.namespace.name": {
+                "type": "keyword"
+              },
+              "k8s.pod.name": {
+                "type": "keyword"
+              },
+              "k8s.container.name": {
+                "type": "keyword"
+              },
+              "host.name": {
+                "type": "keyword"
+              },
+              "cloud.provider": {
+                "type": "keyword"
+              },
+              "cloud.region": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      },
+      "instrumentationScope": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "keyword"
+          },
+          "version": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  }
+}
