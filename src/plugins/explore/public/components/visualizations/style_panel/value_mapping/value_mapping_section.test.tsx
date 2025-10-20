@@ -36,7 +36,7 @@ describe('ValueMappingSection', () => {
   it('renders value mappings', () => {
     render(<ValueMappingSection valueMappings={valueMappings} onChange={mockOnChange} />);
     expect(screen.getByText('test')).toBeInTheDocument();
-    expect(screen.getByText('[1, 10]')).toBeInTheDocument();
+    expect(screen.getByText('[1, 10)')).toBeInTheDocument();
   });
 
   it('opens modal when edit button is clicked', () => {
