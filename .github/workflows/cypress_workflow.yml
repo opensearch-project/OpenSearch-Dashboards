@@ -156,8 +156,8 @@ jobs:
         ${{ (matrix.config == 'query_enhanced' || matrix.config == 'explore') &&
         '/bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"' ||
         matrix.config == 'dashboard' &&
-        'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none' ||
-        'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none' }}
+        'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none -E action.auto_create_index=true' ||
+        'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false -E search.concurrent_segment_search.mode=none -E action.auto_create_index=true' }}
       # prevents extra Cypress installation progress messages
       CI: 1
       # avoid warnings like "tput: No value for $TERM and no -T specified"
@@ -287,6 +287,13 @@ jobs:
         if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
         run: |
           /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-security"
+        shell: bash
+
+      - name: Configure OpenSearch for index creation
+        if: matrix.config == 'query_enhanced' || matrix.config == 'explore'
+        run: |
+          echo "action.auto_create_index: true" >> ./opensearch-${{ env.LATEST_VERSION }}/config/opensearch.yml
+          echo "cluster.routing.allocation.disk.threshold_enabled: false" >> ./opensearch-${{ env.LATEST_VERSION }}/config/opensearch.yml
         shell: bash
 
       - name: Run OpenSearch
