@@ -98,7 +98,6 @@ function generateSchemeList(targetHex, n = 11, step = 20) {
       })
     );
   }
-  console.log('colors', colors);
   return colors;
 }
 
