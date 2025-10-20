@@ -77,9 +77,9 @@ describe('to_expression', () => {
       expect(result.layer).toHaveLength(3); // Main layer + label layer (no value layer) + hover state layer
 
       // Verify the main layer (arc mark)
-      expect(result.layer[1]).toHaveProperty('mark.type', 'arc');
-      expect(result.layer[1]).toHaveProperty('mark.innerRadius', 0); // Not a donut
-      expect(result.layer[1]).toHaveProperty('mark.tooltip', true);
+      expect(result.layer[0]).toHaveProperty('mark.type', 'arc');
+      expect(result.layer[0]).toHaveProperty('mark.innerRadius', 0); // Not a donut
+      expect(result.layer[0]).toHaveProperty('mark.tooltip', true);
 
       // Verify the label layer
       expect(result.layer[2]).toHaveProperty('mark.type', 'text');
@@ -179,8 +179,8 @@ describe('to_expression', () => {
       );
 
       // Verify the donut configuration
-      expect(result.layer[1]).toHaveProperty('mark.innerRadius', { expr: '7*stepSize' });
-      expect(result.layer[1]).toHaveProperty('mark.radius', { expr: '9*stepSize' });
+      expect(result.layer[0]).toHaveProperty('mark.innerRadius', { expr: '7*stepSize' });
+      expect(result.layer[0]).toHaveProperty('mark.radius', { expr: '9*stepSize' });
     });
 
     it('should include value layer when showValues is true', () => {
@@ -267,7 +267,7 @@ describe('to_expression', () => {
       );
 
       // Verify tooltip is disabled
-      expect(result.layer[1]).toHaveProperty('mark.tooltip', false);
+      expect(result.layer[0]).toHaveProperty('mark.tooltip', false);
     });
 
     it('should apply custom truncate value for labels', () => {
