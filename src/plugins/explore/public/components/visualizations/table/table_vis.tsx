@@ -101,6 +101,9 @@ export const TableVis = React.memo(
       }
     }, [styleOptions?.showColumnFilter]);
 
+    // Handle column visibility when columns change
+    // If there are no common fields between old and new columns, show all new columns
+    // If there are common fields, preserve existing visible columns and add any new ones
     useEffect(() => {
       const currentFieldNames = columns.map(({ name }) => name);
       const prevFieldNames = prevFieldNamesRef.current;
