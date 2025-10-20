@@ -49,7 +49,7 @@ import { ScatterChartStyle } from './scatter/scatter_vis_config';
 import { HeatmapChartStyle } from './heatmap/heatmap_vis_config';
 import { StateTimeLineChartStyle } from './state_timeline/state_timeline_config';
 import {
-  createNumercialStateTimeline,
+  createNumericalStateTimeline,
   createCategoricalStateTimeline,
   createSingleCategoricalStateTimeline,
 } from './state_timeline/to_expression';
@@ -245,7 +245,7 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
           axisColumnMappings
         );
       case 'state_timeline':
-        return createNumercialStateTimeline(
+        return createNumericalStateTimeline(
           transformedData,
           numericalColumns,
           categoricalColumns,

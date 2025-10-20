@@ -23,7 +23,7 @@ import { DEFAULT_OPACITY } from '../constants';
 import { getCategoryNextColor } from '../theme/default_colors';
 import { resolveColor } from '../theme/default_colors';
 
-export const createNumercialStateTimeline = (
+export const createNumericalStateTimeline = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
@@ -47,7 +47,12 @@ export const createNumercialStateTimeline = (
     (mapping) => mapping?.type === 'value'
   );
 
-  if (valueMappings?.length && valueMappings?.length > 0 && !rangeMappings?.length) {
+  if (
+    valueMappings?.length &&
+    valueMappings?.length > 0 &&
+    !rangeMappings?.length &&
+    !styleOptions?.useThresholdColor
+  ) {
     return createCategoricalStateTimeline(
       transformedData,
       numericalColumns,
@@ -179,7 +184,7 @@ export const createNumercialStateTimeline = (
   };
 
   const textLayer =
-    canUseValueMapping && styleOptions?.exclusive?.showValues
+    canUseValueMapping && styleOptions?.exclusive?.showValues && !styleOptions?.useThresholdColor
       ? {
           mark: { type: 'text', align: 'center', baseline: 'middle' },
           transform: [

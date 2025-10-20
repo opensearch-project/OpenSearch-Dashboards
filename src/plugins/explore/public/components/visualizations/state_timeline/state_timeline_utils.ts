@@ -492,7 +492,10 @@ export const mergeInAGroup = <T extends string | RangeValue>({
   for (const curr of sorted) {
     const currentMapping = findTarget(curr[valueField]);
 
-    if (!curr[valueField] && storeState.buffer.length > 0) {
+    if (
+      (curr[valueField] === undefined || curr[valueField] === null) &&
+      storeState.buffer.length > 0
+    ) {
       firstNullValueTime ??= curr[timestampField];
       firstNullIndex ??= storeState.buffer.length;
 

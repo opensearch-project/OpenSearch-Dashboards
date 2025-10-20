@@ -4,7 +4,7 @@
  */
 
 import {
-  createNumercialStateTimeline,
+  createNumericalStateTimeline,
   createCategoricalStateTimeline,
   createSingleCategoricalStateTimeline,
 } from './to_expression';
@@ -117,7 +117,7 @@ const mockTimeColumns: VisColumn[] = [
 const mockStyleOptions = defaultStateTimeLineChartStyles;
 
 describe('to_expression', () => {
-  describe('createNumercialStateTimeline', () => {
+  describe('createNumericalStateTimeline', () => {
     it('should create a state timeline chart with one date one cate and one metric', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.COLOR]: mockNumericalColumns[0],
@@ -125,7 +125,7 @@ describe('to_expression', () => {
         [AxisRole.X]: mockTimeColumns[0],
       };
 
-      const result = createNumercialStateTimeline(
+      const result = createNumericalStateTimeline(
         mockData,
         mockNumericalColumns,
         mockCateColumns,
@@ -170,7 +170,7 @@ describe('to_expression', () => {
         exclusive: { ...mockStyleOptions.exclusive, showValues: true },
       };
 
-      const result = createNumercialStateTimeline(mockData, [], [], [], styleWithText);
+      const result = createNumericalStateTimeline(mockData, [], [], [], styleWithText);
       expect(result.layer).toHaveLength(2);
     });
   });
