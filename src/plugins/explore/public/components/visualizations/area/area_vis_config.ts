@@ -26,6 +26,7 @@ export interface AreaChartStyleOptions {
   // Basic controls
   addLegend?: boolean;
   legendPosition?: Positions;
+  legendTitle?: string;
   addTimeMarker?: boolean;
   areaOpacity?: number;
   tooltipOptions?: TooltipOptions;
@@ -45,9 +46,9 @@ export interface AreaChartStyleOptions {
 }
 
 export type AreaChartStyle = Required<
-  Omit<AreaChartStyleOptions, 'areaOpacity' | 'thresholdLines'>
+  Omit<AreaChartStyleOptions, 'areaOpacity' | 'thresholdLines' | 'legendTitle'>
 > &
-  Pick<AreaChartStyleOptions, 'areaOpacity'>;
+  Pick<AreaChartStyleOptions, 'areaOpacity' | 'legendTitle'>;
 
 const defaultAreaChartStyles: AreaChartStyle = {
   // Basic controls

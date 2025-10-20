@@ -18,14 +18,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { DataView, IndexPatternField } from '../../../../data/public';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { DataView, IndexPatternField, ConfiguratorV2 } from '../../../../data/public';
+import {
+  useOpenSearchDashboards,
+  toMountPoint,
+} from '../../../../opensearch_dashboards_react/public';
 import { DatasetManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
+import { DatasetInfoPanel } from './dataset_info_panel';
 import { DatasetTableItem } from '../types';
 import { getDatasets } from '../utils';
 import { TopNavControlDescriptionData } from '../../../../navigation/public';
+import { Query, DEFAULT_DATA } from '../../../../data/common';
 
 export interface EditDatasetProps extends RouteComponentProps {
   dataset: DataView;
@@ -68,6 +73,7 @@ const confirmModalOptionsDelete = {
 };
 
 export const EditDataset = withRouter(({ dataset, history, location }: EditDatasetProps) => {
+  const services = useOpenSearchDashboards<DatasetManagmentContext>().services;
   const {
     uiSettings,
     datasetManagementStart,
@@ -78,7 +84,8 @@ export const EditDataset = withRouter(({ dataset, history, location }: EditDatas
     docLinks,
     navigationUI: { HeaderControl },
     application,
-  } = useOpenSearchDashboards<DatasetManagmentContext>().services;
+    notifications,
+  } = services;
   const [fields, setFields] = useState<IndexPatternField[]>(dataset.getNonScriptedFields());
   const [conflictedFields, setConflictedFields] = useState<IndexPatternField[]>(
     dataset.fields.getAll().filter((field) => field.type === 'conflict')
@@ -147,6 +154,75 @@ export const EditDataset = withRouter(({ dataset, history, location }: EditDatas
       }
     });
   };
+
+  const openDatasetEditor = useCallback(async () => {
+    // Convert DataView to Dataset format
+    const baseDataset = await dataset.toDataset();
+
+    const overlay = overlays?.openModal(
+      toMountPoint(
+        <ConfiguratorV2
+          services={services}
+          baseDataset={baseDataset}
+          onConfirm={async (query: Partial<Query>) => {
+            overlay?.close();
+            if (query?.dataset) {
+              try {
+                // Update dataset properties
+                if (query.dataset.timeFieldName !== undefined) {
+                  dataset.timeFieldName = query.dataset.timeFieldName;
+                }
+                if (query.dataset.displayName !== undefined) {
+                  dataset.displayName = query.dataset.displayName;
+                }
+                if (query.dataset.description !== undefined) {
+                  dataset.description = query.dataset.description;
+                }
+                if (query.dataset.schemaMappings !== undefined) {
+                  dataset.schemaMappings = query.dataset.schemaMappings;
+                }
+
+                // Save changes to the data view
+                await data.dataViews.updateSavedObject(dataset);
+                data.dataViews.clearCache();
+
+                // Refresh fields to reflect any changes
+                await data.dataViews.refreshFields(dataset);
+
+                // Update local state
+                setFields(dataset.getNonScriptedFields());
+                setConflictedFields(
+                  dataset.fields.getAll().filter((field) => field.type === 'conflict')
+                );
+
+                notifications?.toasts.addSuccess({
+                  title: i18n.translate('datasetManagement.editDataset.updateDatasetSuccessTitle', {
+                    defaultMessage: 'Dataset "{title}" updated successfully',
+                    values: { title: dataset.title },
+                  }),
+                });
+              } catch (error) {
+                notifications?.toasts.addDanger({
+                  title: i18n.translate('datasetManagement.editDataset.updateDatasetErrorTitle', {
+                    defaultMessage: 'Failed to update dataset',
+                  }),
+                  text: (error as Error).message,
+                });
+              }
+            }
+          }}
+          onCancel={() => overlay?.close()}
+          onPrevious={() => overlay?.close()}
+          alwaysShowDatasetFields={true}
+          signalType={dataset.signalType}
+        />
+      ),
+      {
+        maxWidth: false,
+        className: 'datasetSelector__advancedModal',
+      }
+    );
+  }, [dataset, data, overlays, services, notifications]);
 
   const typeHeader = i18n.translate('datasetManagement.editDataset.typeHeader', {
     defaultMessage: "Type: '{type}'",
@@ -261,6 +337,13 @@ export const EditDataset = withRouter(({ dataset, history, location }: EditDatas
       />
       {showTagsSection && renderBadges()}
       {renderDescription()}
+      <EuiSpacer />
+      <DatasetInfoPanel
+        dataset={dataset}
+        editConfiguration={
+          dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN ? openDatasetEditor : undefined
+        }
+      />
       {conflictedFields.length > 0 && (
         <>
           <EuiSpacer />
@@ -291,6 +374,13 @@ export const EditDataset = withRouter(({ dataset, history, location }: EditDatas
         {showTagsSection && renderBadges()}
         <EuiSpacer size="m" />
         {renderDescription()}
+        <EuiSpacer />
+        <DatasetInfoPanel
+          dataset={dataset}
+          editConfiguration={
+            dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN ? openDatasetEditor : undefined
+          }
+        />
         {conflictedFields.length > 0 && (
           <>
             <EuiSpacer />

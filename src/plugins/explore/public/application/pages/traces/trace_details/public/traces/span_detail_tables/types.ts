@@ -15,7 +15,7 @@ export interface Span {
 }
 
 export interface SpanTableProps {
-  hiddenColumns: string[];
+  hiddenColumns?: string[];
   openFlyout: (spanId: string) => void;
   DSL?: any;
   setTotal?: (total: number) => void;
