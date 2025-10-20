@@ -122,6 +122,21 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const mainPanelRef = useRef<HTMLDivElement | null>(null);
   const [visualizationKey, setVisualizationKey] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<string>(TraceDetailTab.TIMELINE);
+  const [spanDetailActiveTab, setSpanDetailActiveTab] = useState<string>('overview');
+
+  // Preserve tab state across span changes by using a ref to track if we should reset
+  const shouldResetTabRef = useRef<boolean>(false);
+  const prevSpanIdRef = useRef<string | undefined>(spanId);
+
+  // Only reset tab to overview when explicitly needed (e.g., when logs tab becomes unavailable)
+  useEffect(() => {
+    // Don't reset tab just because span changed
+    if (prevSpanIdRef.current !== spanId) {
+      prevSpanIdRef.current = spanId;
+      // Only reset if we explicitly need to (this will be handled by the child component)
+      shouldResetTabRef.current = false;
+    }
+  }, [spanId]);
   const [logsData, setLogsData] = useState<LogHit[]>([]);
   const [logDatasets, setLogDatasets] = useState<Dataset[]>([]);
   const [datasetLogs, setDatasetLogs] = useState<Record<string, LogHit[]>>({});
@@ -332,11 +347,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     setVisualizationKey((prev) => prev + 1);
   }, []);
 
-  // Calculate error count based on unfiltered hits to show total errors in trace
-  const errorCount = useMemo(() => {
-    return unfilteredHits.filter((span: TraceHit) => isSpanError(span)).length;
-  }, [unfilteredHits]);
-
   // Extract services in the order they appear in the data
   const servicesInOrder = useMemo(() => {
     if (!colorMap) return [];
@@ -349,22 +359,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     });
     return Array.from(serviceSet);
   }, [transformedHits, colorMap]);
-
-  const handleErrorFilterClick = () => {
-    const newFilters = [...spanFilters];
-
-    // Remove any existing error-related filters
-    const filteredFilters = newFilters.filter(
-      (filter) =>
-        !(filter.field === 'status.code' && filter.value === 2) &&
-        !(filter.field === 'isError' && filter.value === true)
-    );
-
-    // Add a comprehensive error filter that matches the isSpanError logic
-    filteredFilters.push({ field: 'isError', value: true });
-
-    setSpanFiltersWithStorage(filteredFilters);
-  };
 
   // Function to remove a specific filter
   const removeFilter = (filterToRemove: SpanFilter) => {
@@ -386,6 +380,12 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     }
     if (filter.field === 'isError' && filter.value === true) {
       return 'Error';
+    }
+    if (filter.field === 'status.code' && filter.value === 1) {
+      return 'OK';
+    }
+    if (filter.field === 'status.code' && filter.value === 0) {
+      return 'Unset';
     }
     return `${filter.field}: ${filter.value}`;
   };
@@ -450,19 +450,16 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
             missingFields={fieldValidation.missingFields}
             dataset={dataset as any}
           />
-        ) : transformedHits.length === 0 ? (
+        ) : unfilteredHits.length === 0 ? (
           <NoMatchMessage traceId={traceId} />
         ) : (
           <>
             <div className="exploreTraceView__tabsContainer">
-              <EuiPanel paddingSize="s">
+              <EuiPanel paddingSize="none" color="transparent" hasBorder={false}>
                 <TraceDetailTabs
                   activeTab={activeTab}
                   setActiveTab={setActiveTab}
                   transformedHits={transformedHits}
-                  errorCount={errorCount}
-                  spanFilters={spanFilters}
-                  handleErrorFilterClick={handleErrorFilterClick}
                   logDatasets={logDatasets}
                   logsData={logsData}
                   isLogsLoading={isLogsLoading}
@@ -532,6 +529,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                     initialSize={isFlyout ? 50 : 70}
                     minSize={isFlyout ? '30%' : '50%'}
                     wrapperPadding="none"
+                    paddingSize="none"
+                    className="visStylePanelLeft"
                   >
                     <div className="exploreTraceView__contentPanel">
                       {/* Tab content */}
@@ -551,9 +550,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                         {(activeTab === TraceDetailTab.TIMELINE ||
                           activeTab === TraceDetailTab.SPAN_LIST) && (
                           <SpanDetailPanel
-                            key={`span-panel-${visualizationKey}`}
+                            key={`span-panel-${visualizationKey}-${spanFilters.length}-${transformedHits.length}`}
                             chrome={chrome}
                             spanFilters={spanFilters}
+                            setSpanFiltersWithStorage={setSpanFiltersWithStorage}
                             payloadData={JSON.stringify(transformedHits)}
                             isGanttChartLoading={isBackgroundLoading}
                             colorMap={colorMap}
@@ -583,6 +583,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                   <EuiResizablePanel
                     initialSize={isFlyout ? 50 : 30}
                     minSize={isFlyout ? '30%' : '300px'}
+                    paddingSize="none"
+                    className="visStylePanelRight"
                   >
                     <div className="exploreTraceView__sidebarPanel">
                       <SpanDetailTabs
@@ -603,6 +605,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                         logDatasets={logDatasets}
                         logsData={logsData}
                         isLogsLoading={isLogsLoading}
+                        activeTab={spanDetailActiveTab as any}
+                        onTabChange={(tabId) => setSpanDetailActiveTab(tabId)}
                       />
                     </div>
                   </EuiResizablePanel>
