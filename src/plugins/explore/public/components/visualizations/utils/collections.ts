@@ -55,16 +55,34 @@ export const getColorSchemas = () => [
     value: ColorSchemas.GREENS,
   },
   {
-    text: i18n.translate('explore.vis.colorSchemas.greys', {
-      defaultMessage: 'Greys',
+    text: i18n.translate('explore.vis.colorSchemas.purples', {
+      defaultMessage: 'Purples',
     }),
-    value: ColorSchemas.GREYS,
+    value: ColorSchemas.PURPLES,
   },
   {
     text: i18n.translate('explore.vis.colorSchemas.reds', {
       defaultMessage: 'Reds',
     }),
     value: ColorSchemas.REDS,
+  },
+  {
+    text: i18n.translate('explore.vis.colorSchemas.greys', {
+      defaultMessage: 'Greys',
+    }),
+    value: ColorSchemas.GREYS,
+  },
+  {
+    text: i18n.translate('explore.vis.colorSchemas.yellows', {
+      defaultMessage: 'Yellows',
+    }),
+    value: ColorSchemas.YELLOWS,
+  },
+  {
+    text: i18n.translate('explore.vis.colorSchemas.oranges', {
+      defaultMessage: 'Oranges',
+    }),
+    value: ColorSchemas.ORANGES,
   },
   {
     text: i18n.translate('explore.vis.colorSchemas.greenToBlue', {

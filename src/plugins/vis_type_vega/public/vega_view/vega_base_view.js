@@ -34,12 +34,77 @@ import dateMath from '@elastic/datemath';
 import { vega, vegaLite, vegaExpressionInterpreter } from '../lib/vega';
 import { Utils } from '../data_model/utils';
 import { euiPaletteColorBlind } from '@elastic/eui';
+import { darkMode } from '@osd/ui-shared-deps/theme';
 import { i18n } from '@osd/i18n';
 import { TooltipHandler } from './vega_tooltip';
 import { opensearchFilters } from '../../../data/public';
 
 import { getEnableExternalUrls, getData, getExposeDebugObjectToWindow } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+
+const newSchemeColor = {
+  purplesA669: '#A669E2',
+  orangesFF4B: '#FF4B14',
+  yellowsF90: '#ff9900',
+  blues006C: darkMode ? '#006CE0' : '#003B8F',
+  greens0085: darkMode ? '#008559' : '#005237',
+  redsEB003B: '#EB003B',
+};
+
+function generateSchemeList(targetHex, n = 11, step = 20) {
+  function hexToRgb(hex) {
+    hex = hex.replace('#', '');
+    return {
+      r: parseInt(hex.slice(0, 2), 16),
+      g: parseInt(hex.slice(2, 4), 16),
+      b: parseInt(hex.slice(4, 6), 16),
+    };
+  }
+
+  function rgbToHex({ r, g, b }) {
+    return (
+      '#' +
+      r.toString(16).padStart(2, '0') +
+      g.toString(16).padStart(2, '0') +
+      b.toString(16).padStart(2, '0')
+    );
+  }
+
+  const half = Math.floor(n / 2);
+  const target = hexToRgb(targetHex);
+  const colors = [];
+
+  // Left side (lighter)
+  for (let i = half; i > 0; i--) {
+    colors.push(
+      rgbToHex({
+        r: Math.min(255, target.r + i * step),
+        g: Math.min(255, target.g + i * step),
+        b: Math.min(255, target.b + i * step),
+      })
+    );
+  }
+
+  // Center
+  colors.push(rgbToHex(target));
+
+  // Right side (darker)
+  for (let i = 1; i <= half; i++) {
+    colors.push(
+      rgbToHex({
+        r: Math.max(0, target.r - i * step),
+        g: Math.max(0, target.g - i * step),
+        b: Math.max(0, target.b - i * step),
+      })
+    );
+  }
+  console.log('colors', colors);
+  return colors;
+}
+
+for (const [key, value] of Object.entries(newSchemeColor)) {
+  vega.scheme(key, generateSchemeList(value));
+}
 
 vega.scheme('euiPaletteColorBlind', euiPaletteColorBlind());
 
@@ -70,7 +135,6 @@ export function bypassExternalUrlCheck(url) {
   // processed in the  loader.sanitize  below
   return { url, bypassToken };
 }
-
 export class VegaBaseView {
   constructor(opts) {
     this._$parentEl = $(opts.parentEl);
