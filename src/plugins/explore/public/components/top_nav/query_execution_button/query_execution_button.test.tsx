@@ -25,7 +25,9 @@ jest.mock('../../../../../data/public/ui/hooks/use_cancel_button_timing', () => 
 }));
 
 const mockIsTimeRangeInvalid = isTimeRangeInvalid as jest.MockedFunction<typeof isTimeRangeInvalid>;
-const mockUseCancelButtonTiming = useCancelButtonTiming as jest.MockedFunction<typeof useCancelButtonTiming>;
+const mockUseCancelButtonTiming = useCancelButtonTiming as jest.MockedFunction<
+  typeof useCancelButtonTiming
+>;
 
 describe('QueryExecutionButton', () => {
   const mockTimefilter = {
