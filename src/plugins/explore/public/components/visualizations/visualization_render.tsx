@@ -111,13 +111,11 @@ export const VisualizationRender = ({
     return null;
   }
 
+  console.log('rerender');
+
   if (visConfig?.type === 'table') {
     return (
-      <TableVis
-        styleOptions={visConfig.styles as TableChartStyle}
-        rows={visualizationData.transformedData ?? []}
-        columns={columns}
-      />
+      <TableVis styleOptions={visConfig.styles as TableChartStyle} rows={rows} columns={columns} />
     );
   }
 
