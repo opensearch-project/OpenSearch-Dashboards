@@ -97,7 +97,7 @@ export const BucketOptionsPanel = ({ styles, onChange, bucketType }: BucketOptio
               compressed
               value={styles?.bucketCount}
               onChange={(value) => updateBucketOption('bucketCount', value)}
-              placeholder="Default 30"
+              placeholder="30"
             />
           </EuiFormRow>
         </>
