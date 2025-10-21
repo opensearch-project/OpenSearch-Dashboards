@@ -107,7 +107,7 @@ export const VisualizationRender = ({
     [onSelectTimeRange]
   );
 
-  if (!visualizationData) {
+  if (!visualizationData || columns.length === 0) {
     return null;
   }
 
