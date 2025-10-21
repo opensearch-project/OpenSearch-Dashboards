@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { PatternItem, PatternsTable } from './patterns_table';
 import { COUNT_FIELD, PATTERNS_FIELD, SAMPLE_FIELD } from './utils/constants';
@@ -32,7 +32,29 @@ const PatternsContainerContent = () => {
   const usingRegexPatterns = useSelector(selectUsingRegexPatterns);
 
   if (status?.status === QueryExecutionStatus.LOADING) {
-    return <EuiLoadingSpinner size="xl" />;
+    return (
+      <EuiFlexGroup
+        justifyContent="center"
+        alignItems="center"
+        style={{ minHeight: '400px' }}
+        data-test-subj="patternsLoading"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="column" alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="xl" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText>
+                {i18n.translate('explore.patterns.table.searchingInProgress', {
+                  defaultMessage: 'Searching in progress...',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 
   try {
