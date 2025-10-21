@@ -172,8 +172,6 @@ export const ExploreVisualization: React.FC<ExploreVisualizationProps> = ({
         $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
         title: data.title || 'Time Series Chart',
         data: { values: chartData },
-        width: 'container',
-        height: 400,
         autosize: {
           type: 'fit',
           contains: 'padding',
