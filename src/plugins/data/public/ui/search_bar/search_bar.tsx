@@ -540,6 +540,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
           datePickerRef={this.props.datePickerRef}
+          showCancelButton={this.props.showCancelButton}
+          onCancel={this.props.onQueryCancel}
+          isQueryRunning={this.props.isQueryRunning}
         />
       );
     }

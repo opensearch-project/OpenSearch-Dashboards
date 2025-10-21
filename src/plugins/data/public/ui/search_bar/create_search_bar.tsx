@@ -212,6 +212,9 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           datasetSelectorRef={props.datasetSelectorRef}
           datePickerRef={props.datePickerRef}
           isFilterBarPortable={props.isFilterBarPortable}
+          showCancelButton={props.showCancelButton}
+          onQueryCancel={props.onQueryCancel}
+          isQueryRunning={props.isQueryRunning}
           {...overrideDefaultBehaviors(props)}
         />
       </OpenSearchDashboardsContextProvider>

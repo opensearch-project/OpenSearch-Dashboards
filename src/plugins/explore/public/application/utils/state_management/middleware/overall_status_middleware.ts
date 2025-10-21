@@ -6,10 +6,11 @@
 import { Middleware } from '@reduxjs/toolkit';
 import { RootState } from '../store';
 import { QueryExecutionStatus, QueryResultStatus } from '../types';
-import { QueryStatusMap,
-        setOverallQueryStatus,
-        setHasUserInitiatedQuery }
-from '../slices/query_editor/query_editor_slice';
+import {
+  QueryStatusMap,
+  setOverallQueryStatus,
+  setHasUserInitiatedQuery,
+} from '../slices/query_editor/query_editor_slice';
 
 /**
  * Middleware that automatically computes overall status from individual query statuses
@@ -30,8 +31,7 @@ export const createOverallStatusMiddleware = (): Middleware => {
       const incomingStatus = action.payload.status;
 
       // If incoming status is ERROR, set it as overall status
-      if (incomingStatus.status === QueryExecutionStatus.ERROR)
-      {
+      if (incomingStatus.status === QueryExecutionStatus.ERROR) {
         store.dispatch(setOverallQueryStatus(incomingStatus));
         store.dispatch(setHasUserInitiatedQuery(false));
         return result;
@@ -43,9 +43,10 @@ export const createOverallStatusMiddleware = (): Middleware => {
       store.dispatch(setOverallQueryStatus(newOverallStatus));
 
       // Reset hasUserInitiatedQuery flag when queries complete (READY, NO_RESULTS, or ERROR)
-      if (newOverallStatus.status !== QueryExecutionStatus.LOADING &&
-          newOverallStatus.status !== QueryExecutionStatus.UNINITIALIZED)
-      {
+      if (
+        newOverallStatus.status !== QueryExecutionStatus.LOADING &&
+        newOverallStatus.status !== QueryExecutionStatus.UNINITIALIZED
+      ) {
         store.dispatch(setHasUserInitiatedQuery(false));
       }
     }

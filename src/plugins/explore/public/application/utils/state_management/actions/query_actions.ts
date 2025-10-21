@@ -52,12 +52,15 @@ const activeQueryAbortControllers = new Map<string, AbortController>();
 // Helper function to abort all active queries
 // Backend cancellation is handled automatically via AbortSignal in search strategies
 export const abortAllActiveQueries = () => {
-  activeQueryAbortControllers.forEach((controller) => {
+  console.log('🚫 abortAllActiveQueries called, active controllers:', activeQueryAbortControllers.size);
+  activeQueryAbortControllers.forEach((controller, cacheKey) => {
+    console.log(`🚫 Aborting controller for cacheKey: ${cacheKey}`);
     // This triggers the abort signal, which in turn:
     // Cancels frontend HTTP requests immediately
     controller.abort();
   });
   activeQueryAbortControllers.clear();
+  console.log('🚫 All controllers cleared');
 };
 
 /**
@@ -392,6 +395,7 @@ const executeQueryBase = async (
 
     // Store controller by cacheKey for individual query abort
     activeQueryAbortControllers.set(cacheKey, abortController);
+    console.log(`🔄 Query started - stored abort controller for cacheKey: ${cacheKey}, total active: ${activeQueryAbortControllers.size}`);
 
     services.inspectorAdapters.requests.reset();
 
