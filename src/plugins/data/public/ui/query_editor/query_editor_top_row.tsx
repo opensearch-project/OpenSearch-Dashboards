@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   DatasetSelector,
@@ -35,6 +35,7 @@ import { UI_SETTINGS } from '../../../common';
 import { getQueryLog, PersistedLog, QueryStatus } from '../../query';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
+import { useCancelButtonTiming } from '../hooks';
 
 const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 
@@ -78,52 +79,11 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const datePickerRef = useRef<EuiSuperDatePicker | null>(null);
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
-  const [shouldShowCancelButton, setShouldShowCancelButton] = useState(false);
-  const cancelButtonTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const minimumDisplayTimerRef = useRef<NodeJS.Timeout | null>(null);
+  // Use custom hook for cancel button timing logic
+  const shouldShowCancelButton = useCancelButtonTiming(Boolean(props.isQueryRunning && props.showCancelButton));
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName, data, keyboardShortcut } = opensearchDashboards.services;
 
-  // Handle delayed cancel button visibility
-  useEffect(() => {
-    if (props.isQueryRunning && props.showCancelButton) {
-      // Clear any existing minimum display timer
-      if (minimumDisplayTimerRef.current) {
-        clearTimeout(minimumDisplayTimerRef.current);
-        minimumDisplayTimerRef.current = null;
-      }
-
-      // Start timer to show cancel button after 50ms
-      cancelButtonTimerRef.current = setTimeout(() => {
-        setShouldShowCancelButton(true);
-      }, 50);
-    } else {
-      // Clear the show timer
-      if (cancelButtonTimerRef.current) {
-        clearTimeout(cancelButtonTimerRef.current);
-        cancelButtonTimerRef.current = null;
-      }
-
-      // If button is currently visible, keep it visible for minimum 200ms
-      if (shouldShowCancelButton) {
-        minimumDisplayTimerRef.current = setTimeout(() => {
-          setShouldShowCancelButton(false);
-        }, 200);
-      } else {
-        setShouldShowCancelButton(false);
-      }
-    }
-
-    // Cleanup timers on unmount
-    return () => {
-      if (cancelButtonTimerRef.current) {
-        clearTimeout(cancelButtonTimerRef.current);
-      }
-      if (minimumDisplayTimerRef.current) {
-        clearTimeout(minimumDisplayTimerRef.current);
-      }
-    };
-  }, [props.isQueryRunning, props.showCancelButton, shouldShowCancelButton]);
 
   const handleOpenDatePicker = useCallback(() => {
     if (datePickerRef.current) {

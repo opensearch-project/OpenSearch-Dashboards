@@ -520,6 +520,7 @@ export {
   IUiStart as DataPublicPluginStartUi,
   useQueryStringManager,
   getEffectiveLanguageForAutoComplete,
+  useCancelButtonTiming,
 } from './ui';
 
 /**
