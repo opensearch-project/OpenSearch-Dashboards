@@ -1,0 +1,2 @@
+feat:
+- Add resultsActionBar and resultsFirstColumnCell slots to explore and discover plugin ([#10773](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10773))
