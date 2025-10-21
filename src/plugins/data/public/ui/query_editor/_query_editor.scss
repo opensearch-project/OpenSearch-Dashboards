@@ -4,7 +4,7 @@
  */
 
 .osdQueryEditor__banner {
-  & > * {
+  &>* {
     margin-bottom: $ouiSizeXS;
   }
 }
@@ -72,7 +72,7 @@
 
 // TODO: ths is a temporary fix to make sure the height is set to auto
 // Can remove this once, height issue is fixed for combo box append in Oui
-.dataExplorerDSSelect .euiFormControlLayout.euiFormControlLayout--group > .euiToolTipAnchor {
+.dataExplorerDSSelect .euiFormControlLayout.euiFormControlLayout--group>.euiToolTipAnchor {
   height: auto;
 }
 
@@ -88,8 +88,8 @@
 
 // Global cancel button styling - applies everywhere
 .osdQueryEditor__cancelButton {
-  border: 1px solid #BD271E !important;
-  border-radius: 4px !important;
+  border: 1px solid $euiColorDanger !important;
+  border-radius: $euiSizeXS !important;
   background-color: transparent !important;
 }
 
@@ -157,7 +157,7 @@
   display: flex;
   align-items: center;
 
-  > * {
+  >* {
     flex: 0 1 auto;
     min-width: 0;
   }

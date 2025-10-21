@@ -238,7 +238,7 @@ describe('QueryExecutionButton', () => {
     expect(button).toHaveClass('euiButton--primary');
   });
 
-    describe('Cancel Button Functionality', () => {
+  describe('Cancel Button Functionality', () => {
     it('does not render cancel button when not loading and no user initiated query', () => {
       renderWithProvider(<QueryExecutionButton />, {
         overallQueryStatus: {
