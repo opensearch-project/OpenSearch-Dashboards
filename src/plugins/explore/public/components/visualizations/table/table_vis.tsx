@@ -25,8 +25,12 @@ interface TableVisProps {
 
 export const TableVis = React.memo(
   ({ rows, columns, styleOptions, pageSizeOptions, showStyleSelector }: TableVisProps) => {
+    const sortedColumns = useMemo(() => columns.sort((a, b) => a.id - b.id), [columns]);
+    const [visibleColumns, setVisibleColumns] = useState(() =>
+      sortedColumns.map(({ column }) => column)
+    );
+
     const pageSize = styleOptions?.pageSize ?? defaultTableChartStyles.pageSize;
-    const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ column }) => column));
     const prevFieldNamesRef = useRef<string[]>(columns.map(({ name }) => name));
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize });
     const [filters, setFilters] = useState<Record<string, FilterConfig>>({});
@@ -38,9 +42,9 @@ export const TableVis = React.memo(
 
     const columnUniques = useMemo(() => {
       const uniques: Record<string, Set<any>> = {};
-      columns.forEach((col) => (uniques[col.column] = new Set()));
+      sortedColumns.forEach((col) => (uniques[col.column] = new Set()));
       rows.forEach((row) => {
-        columns.forEach((col) => {
+        sortedColumns.forEach((col) => {
           const value = row[col.column];
           if (row.hasOwnProperty(col.column) && value != null && value !== '') {
             uniques[col.column].add(row[col.column]);
@@ -52,18 +56,18 @@ export const TableVis = React.memo(
           .map(([key, set]) => [key, Array.from(set).sort()])
           .filter(([, arr]) => arr.length > 0)
       );
-    }, [columns, rows]);
+    }, [sortedColumns, rows]);
 
     const columnTypes = useMemo(() => {
       const types: Record<string, VisFieldType> = {};
-      columns.forEach((col) => {
+      sortedColumns.forEach((col) => {
         types[col.column] = col.schema;
       });
       return types;
-    }, [columns]);
+    }, [sortedColumns]);
 
     const dataGridColumns: EuiDataGridColumn[] = useMemo(() => {
-      return columns.map((col) => ({
+      return sortedColumns.map((col) => ({
         id: col.column,
         displayAsText: col.name,
         display: (
@@ -79,7 +83,7 @@ export const TableVis = React.memo(
         ),
       }));
     }, [
-      columns,
+      sortedColumns,
       styleOptions?.showColumnFilter,
       popoverOpenColumnId,
       filters,
@@ -105,9 +109,9 @@ export const TableVis = React.memo(
     // If there are no common fields between old and new columns, show all new columns
     // If there are common fields, preserve existing visible columns and add any new ones
     useEffect(() => {
-      const currentFieldNames = columns.map(({ name }) => name);
+      const currentFieldNames = sortedColumns.map(({ name }) => name);
       const prevFieldNames = prevFieldNamesRef.current;
-      const newColumnIds = columns.map(({ column }) => column);
+      const newColumnIds = sortedColumns.map(({ column }) => column);
 
       const hasCommonFields = currentFieldNames.some((name) => prevFieldNames.includes(name));
 
@@ -126,7 +130,7 @@ export const TableVis = React.memo(
       }
 
       prevFieldNamesRef.current = currentFieldNames;
-    }, [columns]);
+    }, [sortedColumns]);
 
     const filteredRows = useMemo(() => {
       return rows.filter((row) =>
