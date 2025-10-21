@@ -643,7 +643,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
       setMenuMountPoint={setMenuMountPoint}
       traceId={traceId}
       isFlyout={isFlyout}
-      title={getServiceInfo(rootSpan, traceId)}
+      title={getServiceInfo(rootSpan, traceId, isLoading)}
       traceDetailsLink={traceDetailsLink}
     />
   );
