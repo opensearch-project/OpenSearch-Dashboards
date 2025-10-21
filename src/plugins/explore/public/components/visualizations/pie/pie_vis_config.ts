@@ -23,6 +23,7 @@ export interface PieChartStyleOptions {
   addTooltip?: boolean;
   addLegend?: boolean;
   legendPosition?: Positions;
+  legendTitle?: string;
   tooltipOptions?: TooltipOptions;
 
   // Exclusive controls
@@ -31,7 +32,8 @@ export interface PieChartStyleOptions {
   titleOptions?: TitleOptions;
 }
 
-export type PieChartStyle = Required<PieChartStyleOptions>;
+export type PieChartStyle = Required<Omit<PieChartStyleOptions, 'legendTitle'>> &
+  Pick<PieChartStyleOptions, 'legendTitle'>;
 
 export const defaultPieChartStyles: PieChartStyle = {
   // Basic controls

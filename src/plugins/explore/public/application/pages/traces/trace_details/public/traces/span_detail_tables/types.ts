@@ -15,7 +15,7 @@ export interface Span {
 }
 
 export interface SpanTableProps {
-  hiddenColumns: string[];
+  hiddenColumns?: string[];
   openFlyout: (spanId: string) => void;
   DSL?: any;
   setTotal?: (total: number) => void;
@@ -25,6 +25,7 @@ export interface SpanTableProps {
     field: string;
     value: any;
   }>;
+  setSpanFiltersWithStorage?: (filters: Array<{ field: string; value: any }>) => void;
   selectedSpanId?: string;
   colorMap?: Record<string, string>;
   servicesInOrder?: string[];

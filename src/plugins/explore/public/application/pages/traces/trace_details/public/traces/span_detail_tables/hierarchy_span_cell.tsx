@@ -119,7 +119,7 @@ export const HierarchySpanCell = ({
   ) : (
     <button
       onClick={() => props.openFlyout(item.spanId)}
-      style={{ width: '100%', textAlign: 'left', border: 'none', background: 'none', padding: 0 }}
+      className="exploreSpanDetailTable__flyoutButton"
       data-test-subj={`span-hierarchy-row-${item.spanId}`}
     >
       {cellContent}

@@ -69,6 +69,7 @@ interface RenderCustomDataGridParams {
   rowCount: number;
   sorting?: EuiDataGridSorting;
   pagination?: PaginationParams;
+  showColumnSelector?: boolean;
   toolbarButtons?: React.ReactNode[];
   secondaryToolbar?: React.ReactNode[];
   fullScreen?: boolean;
@@ -84,6 +85,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   rowCount,
   sorting,
   pagination,
+  showColumnSelector = true,
   toolbarButtons = [],
   secondaryToolbar = [],
   fullScreen = false,
@@ -182,7 +184,7 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
               }
               sorting={sorting}
               toolbarVisibility={{
-                showColumnSelector: true,
+                showColumnSelector,
                 showSortSelector: !!sorting,
                 showFullScreenSelector: false,
                 additionalControls: toolbarControls,

@@ -41,7 +41,10 @@ export const TimelineWaterfallBar: React.FC<TimelineWaterfallBarProps> = ({
       <EuiFlexItem
         grow={false}
         style={{
-          width: `${timelineBarWidthPercent}%`,
+          width: `${Math.min(
+            timelineBarWidthPercent,
+            100 - paddingPercent * 2 - timelineBarOffsetPercent
+          )}%`,
           backgroundColor: timelineBarColor,
           cursor: 'pointer',
         }}

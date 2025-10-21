@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { ChromeStart } from 'opensearch-dashboards/public';
@@ -19,6 +19,7 @@ export interface TraceFilter {
 export function SpanDetailPanel(props: {
   chrome: ChromeStart;
   spanFilters: TraceFilter[];
+  setSpanFiltersWithStorage: (filters: TraceFilter[]) => void;
   payloadData: string;
   isGanttChartLoading?: boolean;
   colorMap?: Record<string, string>;
@@ -28,7 +29,14 @@ export function SpanDetailPanel(props: {
   isEmbedded?: boolean;
   servicesInOrder?: string[];
 }) {
-  const { chrome, spanFilters, payloadData, onSpanSelect, colorMap } = props;
+  const {
+    chrome,
+    spanFilters,
+    setSpanFiltersWithStorage,
+    payloadData,
+    onSpanSelect,
+    colorMap,
+  } = props;
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [availableWidth, setAvailableWidth] = useState<number>(
@@ -100,7 +108,6 @@ export function SpanDetailPanel(props: {
     () => (
       <div className="exploreSpanDetailPanel__tableContainer">
         <SpanHierarchyTable
-          hiddenColumns={['traceId', 'traceGroup', 'startTime', 'endTime', 'parentSpanId']}
           openFlyout={(spanId: string) => {
             if (onSpanSelect) {
               onSpanSelect(spanId);
@@ -109,6 +116,7 @@ export function SpanDetailPanel(props: {
           availableWidth={availableWidth}
           payloadData={payloadData}
           filters={spanFilters}
+          setSpanFiltersWithStorage={setSpanFiltersWithStorage}
           selectedSpanId={props.selectedSpanId}
           colorMap={colorMap}
           servicesInOrder={props.servicesInOrder}
@@ -119,6 +127,7 @@ export function SpanDetailPanel(props: {
       onSpanSelect,
       payloadData,
       spanFilters,
+      setSpanFiltersWithStorage,
       availableWidth,
       props.selectedSpanId,
       colorMap,
@@ -140,7 +149,6 @@ export function SpanDetailPanel(props: {
     <div ref={containerRef}>
       <EuiPanel data-test-subj="span-detail-panel">
         <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiHorizontalRule margin="m" />
           <EuiFlexItem className="exploreSpanDetailPanel__contentContainer">
             {currentView === 'span_list' ? spanListTable : spanHierarchyTable}
           </EuiFlexItem>

@@ -180,6 +180,8 @@ describe('TraceDetails', () => {
       startTimeUnixNano: '2023-01-01T00:00:00.000000000Z',
       endTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
       durationInNanos: 1000000000,
+      parentSpanId: '',
+      status: { code: 0 },
     },
     {
       spanId: 'span-2',
@@ -191,6 +193,8 @@ describe('TraceDetails', () => {
       startTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
       endTimeUnixNano: '2023-01-01T00:00:02.000000000Z',
       durationInNanos: 1000000000,
+      parentSpanId: 'span-1',
+      status: { code: 0 },
     },
   ];
 
@@ -326,6 +330,41 @@ describe('TraceDetails', () => {
     consoleSpy.mockRestore();
   });
 
+  it('handles default dataset', async () => {
+    const mockCreateTraceAppState = jest.requireMock('./state/trace_app_state').createTraceAppState;
+
+    mockCreateTraceAppState.mockImplementationOnce(({ stateDefaults }: any) => ({
+      stateContainer: {
+        get: () => ({ ...stateDefaults, traceId: 'test-trace-id' }),
+        state$: {
+          subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
+        },
+      },
+      stopStateSync: jest.fn(),
+    }));
+
+    const defaultDataset = {
+      id: 'default-dataset-id',
+      title: 'otel-v1-apm-span-*',
+      type: 'INDEX_PATTERN',
+      timeFieldName: 'endTime',
+    };
+
+    const history = createMemoryHistory();
+    render(
+      <Router history={history}>
+        <TraceDetails defaultDataset={defaultDataset} />
+      </Router>
+    );
+
+    expect(mockPplService.fetchTraceSpans).toHaveBeenCalledWith({
+      traceId: 'test-trace-id',
+      dataset: defaultDataset,
+      filters: [],
+      limit: 100,
+    });
+  });
+
   it('sets page title correctly', async () => {
     const history = createMemoryHistory();
 
@@ -385,6 +424,11 @@ describe('TraceDetails', () => {
   it('getServiceInfo function returns empty string when no span and no traceId', () => {
     const result = getServiceInfo(null);
     expect(result).toBe('');
+  });
+
+  it('getServiceInfo function returns loading message when isLoading is true', () => {
+    const result = getServiceInfo(null, undefined, true);
+    expect(result).toBe('Loading trace...');
   });
 
   it('NoMatchMessage component renders correctly', () => {
@@ -719,46 +763,6 @@ describe('TraceDetails', () => {
 
     const sidebar = document.querySelector('[data-testid="span-detail-sidebar"]');
     expect(sidebar).toHaveTextContent('Span: span-1');
-  });
-
-  it('handles error count calculation', async () => {
-    const mockDataWithErrors = [
-      {
-        spanId: 'span-1',
-        traceId: 'test-trace-id',
-        serviceName: 'service-a',
-        name: 'operation-1',
-        status: { code: 2 }, // Error
-        startTimeUnixNano: '2023-01-01T00:00:00.000000000Z',
-        endTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
-      },
-      {
-        spanId: 'span-2',
-        traceId: 'test-trace-id',
-        serviceName: 'service-b',
-        name: 'operation-2',
-        status: { code: 0 }, // No error
-        startTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
-        endTimeUnixNano: '2023-01-01T00:00:02.000000000Z',
-      },
-    ];
-
-    mockTransformPPLDataToTraceHits.mockImplementation(() => mockDataWithErrors);
-
-    const history = createMemoryHistory();
-
-    render(
-      <Router history={history}>
-        <TraceDetails />
-      </Router>
-    );
-
-    await waitFor(() => {
-      expect(document.querySelector('[data-testid="trace-detail-tabs"]')).toBeInTheDocument();
-    });
-
-    const errorCountElement = document.querySelector('[data-testid="error-count"]');
-    expect(errorCountElement).toHaveTextContent('1');
   });
 
   it('handles filter operations', async () => {

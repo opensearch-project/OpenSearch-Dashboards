@@ -387,6 +387,7 @@ export class DataViewsService {
         fieldFormatMap,
         typeMeta,
         type,
+        schemaMappings,
       },
       references,
     } = savedObject;
@@ -395,6 +396,7 @@ export class DataViewsService {
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: DataViewFieldSpec[] = fields ? JSON.parse(fields) : [];
+    const parsedSchemaMappings = schemaMappings ? JSON.parse(schemaMappings) : undefined;
     const dataSourceRef = Array.isArray(references) ? references[0] : undefined;
 
     this.addFormatsToFields(parsedFields, parsedFieldFormatMap);
@@ -412,6 +414,7 @@ export class DataViewsService {
       typeMeta: parsedTypeMeta,
       type,
       dataSourceRef,
+      schemaMappings: parsedSchemaMappings,
     };
   };
 
@@ -558,6 +561,9 @@ export class DataViewsService {
       shortDotsEnable,
       metaFields,
     });
+
+    // Initialize data source ref to fetch the actual data source title
+    await dataView.initializeDataSourceRef();
 
     if (!skipFetchFields) {
       await this.refreshFields(dataView);

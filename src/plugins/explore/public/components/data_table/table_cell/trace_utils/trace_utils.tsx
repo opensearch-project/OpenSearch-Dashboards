@@ -4,13 +4,19 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiToolTip, EuiLink, EuiIcon, EuiButtonEmpty } from '@elastic/eui';
+import { EuiToolTip, EuiLink, EuiIcon, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { SPAN_ID_FIELD_PATHS, TRACE_ID_FIELD_PATHS } from '../../../../utils/trace_field_constants';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { DataView as Dataset } from '../../../../../../data/common';
 import './trace_utils.scss';
 import { useTraceFlyoutContext } from '../../../../application/pages/traces/trace_flyout/trace_flyout_context';
+import { validateRequiredTraceFields } from '../../../../utils/trace_field_validation';
+import { extractFieldFromRowData } from '../../../../utils/trace_field_validation';
+import {
+  round,
+  nanoToMilliSec,
+} from '../../../../application/pages/traces/trace_details/public/utils/helper_functions';
 
 export const isOnTracesPage = (): boolean => {
   return (
@@ -23,29 +29,8 @@ export const isSpanIdColumn = (columnId: string): boolean => {
   return columnId === 'spanId' || columnId === 'span_id' || columnId === 'spanID';
 };
 
-export const extractFieldFromRowData = (
-  rowData: OpenSearchSearchHit<Record<string, unknown>>,
-  fields: readonly string[]
-): string => {
-  if (!rowData) return '';
-
-  const getNestedValue = (obj: unknown, path: string): unknown => {
-    return path.split('.').reduce((current: unknown, key: string) => {
-      return current && typeof current === 'object' && current !== null
-        ? (current as Record<string, unknown>)[key]
-        : undefined;
-    }, obj);
-  };
-
-  for (const field of fields) {
-    const value = getNestedValue(rowData, field);
-
-    if (value && typeof value === 'string') {
-      return value;
-    }
-  }
-
-  return '';
+export const isDurationColumn = (columnId: string) => {
+  return columnId === 'durationNano' || columnId === 'durationInNanos';
 };
 
 export const buildTraceDetailsUrl = (
@@ -135,9 +120,33 @@ export interface SpanIdLinkProps {
 }
 
 export const SpanIdLink: React.FC<SpanIdLinkProps> = ({ sanitizedCellValue, rowData, dataset }) => {
+  // Validate required fields before allowing navigation
+  const validationResult = validateRequiredTraceFields(rowData as any);
+  const isValid = validationResult.isValid;
+
   const handleSpanIdClick = () => {
-    handleSpanIdNavigation(rowData, dataset);
+    if (isValid) {
+      handleSpanIdNavigation(rowData, dataset);
+    }
   };
+
+  const displayValue = sanitizedCellValue.replace(/<[^>]*>/g, '').trim();
+
+  if (!isValid) {
+    // Return non-clickable text when required fields are missing
+    return (
+      <EuiToolTip
+        content={i18n.translate('explore.spanIdLink.missingFieldsTooltip', {
+          defaultMessage:
+            'Required trace fields are missing. Please update your data ingestion to include all required fields.',
+        })}
+      >
+        <EuiText size="s" color="subdued">
+          {displayValue}
+        </EuiText>
+      </EuiToolTip>
+    );
+  }
 
   return (
     <EuiToolTip
@@ -150,7 +159,7 @@ export const SpanIdLink: React.FC<SpanIdLinkProps> = ({ sanitizedCellValue, rowD
         data-test-subj="spanIdLink"
         className="exploreSpanIdLink"
       >
-        {sanitizedCellValue.replace(/<[^>]*>/g, '').trim()}
+        {displayValue}
         <EuiIcon type="popout" size="s" />
       </EuiLink>
     </EuiToolTip>
@@ -222,4 +231,23 @@ export const getStatusCodeColor = (statusCode: number | undefined): string => {
   if (statusCode >= 400 && statusCode < 500) return 'warning';
   if (statusCode >= 500 && statusCode < 600) return 'danger';
   return 'default';
+};
+
+interface DurationTableCellProps {
+  sanitizedCellValue: string;
+}
+
+export const DurationTableCell: React.FC<DurationTableCellProps> = ({ sanitizedCellValue }) => {
+  const duration = sanitizedCellValue
+    .replace(/<[^>]*>/g, '')
+    .replace(/,/g, '')
+    .trim();
+
+  const durationLabel = `${round(nanoToMilliSec(Math.max(0, Number(duration))), 2)} ms`;
+
+  return (
+    <span className="exploreDocTableCell__dataField" data-test-subj="osdDocTableCellDataField">
+      <span>{durationLabel}</span>
+    </span>
+  );
 };

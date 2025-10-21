@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -34,6 +34,8 @@ export interface SpanDetailTabsProps {
   logDatasets?: any[];
   logsData?: any[];
   isLogsLoading?: boolean;
+  activeTab?: TabId;
+  onTabChange?: (tabId: TabId) => void;
 }
 
 type TabId = SpanDetailTab;
@@ -52,8 +54,24 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
   logDatasets = [],
   logsData = [],
   isLogsLoading = false,
+  activeTab: externalActiveTab,
+  onTabChange,
 }) => {
-  const [activeTab, setActiveTab] = useState<TabId>(SpanDetailTab.OVERVIEW);
+  const [internalActiveTab, setInternalActiveTab] = useState<TabId>(SpanDetailTab.OVERVIEW);
+
+  // Use external tab state if provided, otherwise use internal state
+  const activeTab = externalActiveTab !== undefined ? externalActiveTab : internalActiveTab;
+
+  const handleTabChange = useCallback(
+    (tabId: TabId) => {
+      if (onTabChange) {
+        onTabChange(tabId);
+      } else {
+        setInternalActiveTab(tabId);
+      }
+    },
+    [onTabChange]
+  );
 
   // Calculate counts for badges
   const issueCount = useMemo(() => {
@@ -76,7 +94,7 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
         content: (
           <SpanOverviewTab
             selectedSpan={selectedSpan}
-            onSwitchToErrorsTab={() => setActiveTab(SpanDetailTab.ERRORS)}
+            onSwitchToErrorsTab={() => handleTabChange(SpanDetailTab.ERRORS)}
           />
         ),
       },
@@ -137,15 +155,33 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
     );
 
     return tabList;
-  }, [selectedSpan, addSpanFilter, issueCount, logDatasets, logsData, spanLogs, isLogsLoading]);
+  }, [
+    selectedSpan,
+    addSpanFilter,
+    issueCount,
+    logDatasets,
+    logsData,
+    spanLogs,
+    isLogsLoading,
+    handleTabChange,
+  ]);
 
   // Auto-fallback to 'overview' tab when the current active tab is no longer available
   useEffect(() => {
     const availableTabIds = tabs.map((tab) => tab.id);
     if (!availableTabIds.includes(activeTab)) {
-      setActiveTab(SpanDetailTab.OVERVIEW);
+      handleTabChange(SpanDetailTab.OVERVIEW);
     }
-  }, [tabs, activeTab]);
+  }, [tabs, activeTab, handleTabChange]);
+
+  // Preserve the current tab when span changes, only reset if the tab becomes unavailable
+  const prevSelectedSpanRef = React.useRef(selectedSpan?.spanId);
+  useEffect(() => {
+    if (prevSelectedSpanRef.current !== selectedSpan?.spanId) {
+      prevSelectedSpanRef.current = selectedSpan?.spanId;
+      // Don't reset the tab when span changes - let the fallback logic above handle unavailable tabs
+    }
+  }, [selectedSpan?.spanId]);
 
   const activeTabContent = useMemo(() => {
     const tab = tabs.find((t) => t.id === activeTab);
@@ -188,7 +224,7 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
             <EuiTab
               key={tab.id}
               isSelected={activeTab === tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
             >
               {tab.name}
             </EuiTab>

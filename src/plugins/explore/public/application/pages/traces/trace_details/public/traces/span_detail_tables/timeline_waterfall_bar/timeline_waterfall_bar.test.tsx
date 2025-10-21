@@ -71,6 +71,29 @@ describe('TimelineWaterfallBar', () => {
     });
   });
 
+  it('should constrain timeline-bar width when it would exceed available space', () => {
+    mockUseTimelineBarRange.mockReturnValue({
+      timelineBarOffsetPercent: 80,
+      timelineBarWidthPercent: 50, // This would exceed available space
+      durationMs: 1500,
+      relativeStart: 1000,
+      relativeEnd: 2500,
+    });
+
+    const { getByTestId } = render(
+      <TimelineWaterfallBar
+        span={mockSpan}
+        traceTimeRange={mockTraceTimeRange}
+        paddingPercent={2}
+      />
+    );
+
+    const barElement = getByTestId('timeline-bar');
+    // Available space: 100 - (2 * 2) - 80 = 16%
+    // Math.min(50, 16) = 16%
+    expect(barElement).toHaveStyle({ width: '16%' });
+  });
+
   it('should render tooltip with correct Duration, Start, and End values on hover', async () => {
     const { getByTestId } = render(
       <TimelineWaterfallBar span={mockSpan} traceTimeRange={mockTraceTimeRange} />

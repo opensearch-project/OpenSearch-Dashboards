@@ -21,7 +21,7 @@ import {
 } from './service';
 
 import { ManagementSetup } from '../../management/public';
-import { AppStatus, DEFAULT_NAV_GROUPS } from '../../../core/public';
+import { AppStatus, AppNavLinkStatus, DEFAULT_NAV_GROUPS } from '../../../core/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { ConfigSchema } from '../common/config';
@@ -95,6 +95,32 @@ export class DatasetManagementPlugin
     urlForwarding.forwardApp(legacyPatternsPath, newAppPath, (path) => {
       const pathInApp = path.substr(legacyPatternsPath.length + 1);
       return pathInApp && `/patterns${pathInApp}`;
+    });
+
+    // Forward indexPatterns management page to datasets management page
+    urlForwarding.forwardApp('indexPatterns', DM_APP_ID, (path) => {
+      // Transform indexPatterns paths to datasets paths
+      // e.g., /indexPatterns/patterns/123 -> /patterns/123
+      const transformedPath = path.replace(/^\/indexPatterns/, '');
+      return transformedPath || '/';
+    });
+
+    // Register indexPatterns app as a redirect to datasets app (for direct app URLs)
+    core.application.register({
+      id: 'indexPatterns',
+      title: 'Index Patterns (Redirecting...)',
+      navLinkStatus: AppNavLinkStatus.hidden,
+      chromeless: true,
+      mount: async (params: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
+        const targetPath = params.history.location.pathname + params.history.location.search;
+        // Redirect to datasets app with the same path
+        coreStart.application.navigateToApp(DM_APP_ID, {
+          path: targetPath,
+          replace: true,
+        });
+        return () => {};
+      },
     });
 
     opensearchDashboardsSection.registerApp({

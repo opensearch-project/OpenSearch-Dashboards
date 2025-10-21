@@ -647,7 +647,6 @@ exports[`DataViewWithDataSource toSpec should match snapshot 1`] = `
 Object {
   "dataSourceRef": Object {
     "id": "id",
-    "name": "title",
     "type": "data-source",
   },
   "description": undefined,
