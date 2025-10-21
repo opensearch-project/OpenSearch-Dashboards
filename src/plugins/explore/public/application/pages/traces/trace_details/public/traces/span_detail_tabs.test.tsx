@@ -441,29 +441,121 @@ describe('SpanDetailTabs', () => {
 
     // Remove logs data to make logs tab unavailable, but keep activeTab as LOGS
     // This simulates the scenario where the parent hasn't updated the activeTab yet
-    rerender(
-      <SpanDetailTabs
-        {...propsWithLogs}
-        logDatasets={[]}
-        logsData={[]}
-        activeTab={SpanDetailTab.LOGS}
-      />
-    );
+    rerender(<SpanDetailTabs {...propsWithLogs} logDatasets={[]} activeTab={SpanDetailTab.LOGS} />);
 
     // Should call onTabChange to request fallback to overview tab
     expect(mockOnTabChange).toHaveBeenCalledWith(SpanDetailTab.OVERVIEW);
 
     // Now simulate the parent updating the activeTab prop in response to the callback
     rerender(
-      <SpanDetailTabs
-        {...propsWithLogs}
-        logDatasets={[]}
-        logsData={[]}
-        activeTab={SpanDetailTab.OVERVIEW}
-      />
+      <SpanDetailTabs {...propsWithLogs} logDatasets={[]} activeTab={SpanDetailTab.OVERVIEW} />
     );
 
     // Now the overview tab should be selected
     expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'true');
+  });
+  it('renders logs tab when logDatasets and datasetLogs are provided', () => {
+    const logDatasets = [
+      { id: 'log-dataset-1', title: 'app-logs-*', type: 'INDEX_PATTERN' },
+      { id: 'log-dataset-2', title: 'error-logs-*', type: 'INDEX_PATTERN' },
+    ];
+
+    const datasetLogs = {
+      'log-dataset-1': [
+        {
+          _id: 'log1',
+          _source: { message: 'Test log message 1' },
+          spanId: 'test-span-id',
+        },
+        {
+          _id: 'log2',
+          _source: { message: 'Test log message 2' },
+          spanId: 'test-span-id',
+        },
+      ],
+      'log-dataset-2': [
+        {
+          _id: 'log3',
+          _source: { message: 'Error log message' },
+          spanId: 'test-span-id',
+        },
+      ],
+    };
+
+    const propsWithLogs = {
+      ...defaultProps,
+      logDatasets,
+      datasetLogs,
+      isLogsLoading: false,
+    };
+
+    render(<SpanDetailTabs {...propsWithLogs} />);
+
+    // Check that logs tab is present
+    expect(screen.getByText('Logs')).toBeInTheDocument();
+
+    // Check that we now have 5 tabs instead of 4
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(5);
+    expect(tabs[0]).toHaveTextContent('Overview');
+    expect(tabs[1]).toHaveTextContent('Errors');
+    expect(tabs[2]).toHaveTextContent('Logs');
+    expect(tabs[3]).toHaveTextContent('Metadata');
+    expect(tabs[4]).toHaveTextContent('Raw span');
+
+    // Click on Logs tab to verify it works
+    const logsTab = screen.getByRole('tab', { name: 'Logs' });
+    fireEvent.click(logsTab);
+
+    // Check that logs tab is now selected
+    expect(logsTab).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('does not render logs tab when logDatasets is empty', () => {
+    const propsWithoutLogs = {
+      ...defaultProps,
+      logDatasets: [],
+      datasetLogs: {},
+      isLogsLoading: false,
+    };
+
+    render(<SpanDetailTabs {...propsWithoutLogs} />);
+
+    // Check that logs tab is not present
+    expect(screen.queryByText('Logs')).not.toBeInTheDocument();
+
+    // Should only have 4 tabs
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(4);
+  });
+
+  it('does not render logs tab when no logs match the span', () => {
+    const logDatasets = [{ id: 'log-dataset-1', title: 'app-logs-*', type: 'INDEX_PATTERN' }];
+
+    const datasetLogs = {
+      'log-dataset-1': [
+        {
+          _id: 'log1',
+          _source: { message: 'Test log message 1' },
+          spanId: 'different-span-id',
+        },
+      ],
+    };
+
+    const propsWithNonMatchingLogs = {
+      ...defaultProps,
+      logDatasets,
+      datasetLogs,
+      isLogsLoading: false,
+    };
+
+    render(<SpanDetailTabs {...propsWithNonMatchingLogs} />);
+
+    // Check that logs tab is not present since no logs match the span
+    expect(screen.queryByText('Logs')).not.toBeInTheDocument();
+
+    // Should only have 4 tabs
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(4);
   });
 });

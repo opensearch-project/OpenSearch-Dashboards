@@ -249,7 +249,7 @@ export const runCreateVisTests = () => {
       const datasetName = `${INDEX_WITH_TIME_1}*`;
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
 
-      const query = `source=${datasetName} | stats count() as count by span(timestamp, 1d) as timestamp, category`;
+      const query = `source=${datasetName} | stats count() as count by span(timestamp, 1d) as timestamp_span, category`;
       cy.explore.setQueryEditor(query, { submit: false });
       cy.explore.setTopNavDate(START_TIME, END_TIME, false);
 
@@ -267,14 +267,14 @@ export const runCreateVisTests = () => {
         .should('be.visible')
         .and('contain.text', 'Line');
 
-      cy.getElementByTestId('field-x').should('contain.text', 'timestamp');
+      cy.getElementByTestId('field-x').should('contain.text', 'timestamp_span');
       cy.getElementByTestId('field-y').should('contain.text', 'count');
       cy.getElementByTestId('field-color').should('contain.text', 'category');
 
       // Switch to table, the table should correctly render
       cy.getElementByTestId('exploreChartTypeSelector-table').click();
       cy.getElementByTestId('dataGridHeader').should('contain.text', 'count');
-      cy.getElementByTestId('dataGridHeader').should('contain.text', 'timestamp');
+      cy.getElementByTestId('dataGridHeader').should('contain.text', 'timestamp_span');
       cy.getElementByTestId('dataGridHeader').should('contain.text', 'category');
     });
 
@@ -284,7 +284,7 @@ export const runCreateVisTests = () => {
       const datasetName = `${INDEX_WITH_TIME_1}*`;
       cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
 
-      const query = `source=${datasetName} | stats count() as count by span(timestamp, 1d) as timestamp, category, unique_category`;
+      const query = `source=${datasetName} | stats count() as count by span(timestamp, 1d) as timestamp_span, category, unique_category`;
       cy.explore.setQueryEditor(query, { submit: false });
       cy.explore.setTopNavDate(START_TIME, END_TIME, false);
 
@@ -303,7 +303,7 @@ export const runCreateVisTests = () => {
         .and('contain.text', 'Line');
 
       // Axes should be correctly set
-      cy.getElementByTestId('field-x').should('contain.text', 'timestamp');
+      cy.getElementByTestId('field-x').should('contain.text', 'timestamp_span');
       cy.getElementByTestId('field-y').should('contain.text', 'count');
       cy.getElementByTestId('field-color').should('contain.text', 'category');
       cy.getElementByTestId('field-facet').should('contain.text', 'unique_category');
@@ -313,7 +313,7 @@ export const runCreateVisTests = () => {
       cy.getElementByTestId('dataGridHeader').should('contain.text', 'count');
       cy.getElementByTestId('dataGridHeader').should('contain.text', 'category');
       cy.getElementByTestId('dataGridHeader').should('contain.text', 'unique_category');
-      cy.getElementByTestId('dataGridHeader').should('contain.text', 'timestamp');
+      cy.getElementByTestId('dataGridHeader').should('contain.text', 'timestamp_span');
     });
 
     it('should create a line and bar visualization using a query with one metric and two categories', () => {
