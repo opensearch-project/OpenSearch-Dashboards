@@ -25,7 +25,7 @@ interface TableVisProps {
 
 export const TableVis = React.memo(
   ({ rows, columns, styleOptions, pageSizeOptions, showStyleSelector }: TableVisProps) => {
-    const sortedColumns = useMemo(() => columns.sort((a, b) => a.id - b.id), [columns]);
+    const sortedColumns = useMemo(() => [...columns].sort((a, b) => a.id - b.id), [columns]);
     const [visibleColumns, setVisibleColumns] = useState(() =>
       sortedColumns.map(({ column }) => column)
     );
