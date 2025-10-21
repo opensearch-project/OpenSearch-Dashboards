@@ -14,6 +14,8 @@ import { indexPatternMock } from '../../__mock__/index_pattern_mock';
 import { mockColumns, mockRows } from './data_table.mocks';
 import { DocViewTable } from '../doc_viewer/doc_viewer_table/table';
 import { JsonCodeBlock } from '../doc_viewer/json_code_block/json_code_block';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
+import { SlotRegistryService } from '../../services/slot_registry';
 
 describe('DefaultDiscoverTable', () => {
   const docViewsRegistry = new DocViewsRegistry();
@@ -38,20 +40,22 @@ describe('DefaultDiscoverTable', () => {
   ) => {
     const rows = rowsOverride ?? mockRows;
     return (
-      <IntlProvider locale="en">
-        <DataTable
-          columns={mockColumns}
-          rows={rows}
-          dataset={indexPatternMock}
-          sampleSize={rows.length}
-          isShortDots={false}
-          docViewsRegistry={docViewsRegistry}
-          showPagination={showPagination}
-          onRemoveColumn={jest.fn()}
-          onAddColumn={jest.fn()}
-          onFilter={jest.fn()}
-        />
-      </IntlProvider>
+      <OpenSearchDashboardsContextProvider services={{ slotRegistry: new SlotRegistryService() }}>
+        <IntlProvider locale="en">
+          <DataTable
+            columns={mockColumns}
+            rows={rows}
+            dataset={indexPatternMock}
+            sampleSize={rows.length}
+            isShortDots={false}
+            docViewsRegistry={docViewsRegistry}
+            showPagination={showPagination}
+            onRemoveColumn={jest.fn()}
+            onAddColumn={jest.fn()}
+            onFilter={jest.fn()}
+          />
+        </IntlProvider>
+      </OpenSearchDashboardsContextProvider>
     );
   };
 

@@ -10,6 +10,8 @@ import { DefaultDiscoverTable } from './default_discover_table';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { getStubIndexPattern } from '../../../../../data/public/test_utils';
+import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
+import { SlotRegistryService } from '../../../services/slot_registry';
 
 jest.mock('../../../opensearch_dashboards_services', () => ({
   getServices: jest.fn().mockReturnValue({
@@ -58,19 +60,21 @@ describe('DefaultDiscoverTable', () => {
   });
 
   const getDefaultDiscoverTable = (hitsOverride?: OpenSearchSearchHit[]) => (
-    <IntlProvider locale="en">
-      <DefaultDiscoverTable
-        columns={['textField', 'longField', '@timestamp']}
-        rows={(hitsOverride ?? hits) as OpenSearchSearchHit[]}
-        indexPattern={indexPattern}
-        sort={[]}
-        onSort={jest.fn()}
-        onRemoveColumn={jest.fn()}
-        onMoveColumn={jest.fn()}
-        onAddColumn={jest.fn()}
-        onFilter={jest.fn()}
-      />
-    </IntlProvider>
+    <OpenSearchDashboardsContextProvider services={{ slotRegistry: new SlotRegistryService() }}>
+      <IntlProvider locale="en">
+        <DefaultDiscoverTable
+          columns={['textField', 'longField', '@timestamp']}
+          rows={(hitsOverride ?? hits) as OpenSearchSearchHit[]}
+          indexPattern={indexPattern}
+          sort={[]}
+          onSort={jest.fn()}
+          onRemoveColumn={jest.fn()}
+          onMoveColumn={jest.fn()}
+          onAddColumn={jest.fn()}
+          onFilter={jest.fn()}
+        />
+      </IntlProvider>
+    </OpenSearchDashboardsContextProvider>
   );
 
   let intersectionObserverCallback: (entries: IntersectionObserverEntry[]) => void = (_) => {};
