@@ -124,12 +124,13 @@ describe('SpanHierarchyTable', () => {
     expect(toolbar).toBeInTheDocument();
   });
 
-  it('passes ServiceLegendButton to secondaryToolbar', () => {
+  it('passes ServiceLegendButton and SpanStatusFilter to secondaryToolbar', () => {
     render(<SpanHierarchyTable {...defaultProps} />);
 
     const mockCall = mockRenderCustomDataGrid.mock.calls[0]?.[0];
-    expect(mockCall?.secondaryToolbar).toHaveLength(1);
+    expect(mockCall?.secondaryToolbar).toHaveLength(2);
     expect(mockCall?.secondaryToolbar![0]).toBeDefined();
+    expect(mockCall?.secondaryToolbar![1]).toBeDefined();
   });
 
   it('displays only spans returned by applySpanFilters', () => {

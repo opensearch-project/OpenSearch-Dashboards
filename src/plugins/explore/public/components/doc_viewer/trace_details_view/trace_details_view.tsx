@@ -232,6 +232,7 @@ export function TraceDetailsView({ hit }: DocViewRenderProps) {
         <SpanDetailPanel
           chrome={chrome}
           spanFilters={[]}
+          setSpanFiltersWithStorage={() => {}}
           payloadData={JSON.stringify(transformedHits)}
           isGanttChartLoading={false}
           colorMap={colorMap}

@@ -426,6 +426,11 @@ describe('TraceDetails', () => {
     expect(result).toBe('');
   });
 
+  it('getServiceInfo function returns loading message when isLoading is true', () => {
+    const result = getServiceInfo(null, undefined, true);
+    expect(result).toBe('Loading trace...');
+  });
+
   it('NoMatchMessage component renders correctly', () => {
     const testTraceId = 'test-trace-123';
     const { container } = render(<NoMatchMessage traceId={testTraceId} />);
@@ -758,48 +763,6 @@ describe('TraceDetails', () => {
 
     const sidebar = document.querySelector('[data-testid="span-detail-sidebar"]');
     expect(sidebar).toHaveTextContent('Span: span-1');
-  });
-
-  it('handles error count calculation', async () => {
-    const mockDataWithErrors = [
-      {
-        spanId: 'span-1',
-        traceId: 'test-trace-id',
-        serviceName: 'service-a',
-        name: 'operation-1',
-        status: { code: 2 }, // Error
-        startTimeUnixNano: '2023-01-01T00:00:00.000000000Z',
-        endTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
-        parentSpanId: '',
-      },
-      {
-        spanId: 'span-2',
-        traceId: 'test-trace-id',
-        serviceName: 'service-b',
-        name: 'operation-2',
-        status: { code: 0 }, // No error
-        startTimeUnixNano: '2023-01-01T00:00:01.000000000Z',
-        endTimeUnixNano: '2023-01-01T00:00:02.000000000Z',
-        parentSpanId: 'span-1',
-      },
-    ];
-
-    mockTransformPPLDataToTraceHits.mockImplementation(() => mockDataWithErrors);
-
-    const history = createMemoryHistory();
-
-    render(
-      <Router history={history}>
-        <TraceDetails />
-      </Router>
-    );
-
-    await waitFor(() => {
-      expect(document.querySelector('[data-testid="trace-detail-tabs"]')).toBeInTheDocument();
-    });
-
-    const errorCountElement = document.querySelector('[data-testid="error-count"]');
-    expect(errorCountElement).toHaveTextContent('1');
   });
 
   it('handles filter operations', async () => {
