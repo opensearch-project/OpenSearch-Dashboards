@@ -4,7 +4,7 @@
  */
 
 .osdQueryEditor__banner {
-  &>* {
+  & > * {
     margin-bottom: $ouiSizeXS;
   }
 }
@@ -157,7 +157,7 @@
   display: flex;
   align-items: center;
 
-  >* {
+  > * {
     flex: 0 1 auto;
     min-width: 0;
   }
