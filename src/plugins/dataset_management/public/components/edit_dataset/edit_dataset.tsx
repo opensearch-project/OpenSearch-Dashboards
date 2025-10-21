@@ -254,11 +254,13 @@ export const EditDataset = withRouter(({ dataset, history, location }: EditDatas
   const useUpdatedUX = uiSettings.get('home:useNewHomePage');
 
   const renderDescription = () => {
-    const descriptionText = (
+    const descriptionText = dataset.description ? (
+      <EuiText>{dataset.description}</EuiText>
+    ) : (
       <FormattedMessage
         id="datasetManagement.editDataset.timeFilterLabel.timeFilterDetail"
         defaultMessage="This page lists every field in the {datasetTitle} index and the field's associated core type as recorded by OpenSearch. To change a field type, use the OpenSearch"
-        values={{ datasetTitle: <strong>{dataset.title}</strong> }}
+        values={{ datasetTitle: <strong>{dataset.displayName || dataset.title}</strong> }}
       />
     );
 
@@ -267,15 +269,17 @@ export const EditDataset = withRouter(({ dataset, history, location }: EditDatas
         controls={[
           {
             description: (descriptionText as unknown) as string,
-            links: [
-              {
-                href: docLinks.links.opensearch.indexTemplates.base,
-                controlType: 'link',
-                target: '_blank',
-                flush: 'both',
-                label: mappingAPILink,
-              },
-            ],
+            links: dataset.description
+              ? undefined
+              : [
+                  {
+                    href: docLinks.links.opensearch.indexTemplates.base,
+                    controlType: 'link',
+                    target: '_blank',
+                    flush: 'both',
+                    label: mappingAPILink,
+                  },
+                ],
           } as TopNavControlDescriptionData,
         ]}
         setMountPoint={application.setAppDescriptionControls}
@@ -284,9 +288,11 @@ export const EditDataset = withRouter(({ dataset, history, location }: EditDatas
       <EuiText size="s">
         <p>
           {descriptionText}{' '}
-          <EuiLink href={docLinks.links.opensearch.indexTemplates.base} target="_blank" external>
-            {mappingAPILink}
-          </EuiLink>
+          {!dataset.description && (
+            <EuiLink href={docLinks.links.opensearch.indexTemplates.base} target="_blank" external>
+              {mappingAPILink}
+            </EuiLink>
+          )}
         </p>
       </EuiText>
     );
