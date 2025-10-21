@@ -149,7 +149,7 @@ export const TableVis = React.memo(
       ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
         const cellTypes: CellTypeConfig[] = styleOptions?.cellTypes || [];
         const columnCellType = cellTypes.find((ct) => ct.field === columnId)?.type || 'auto';
-        const alignment = styleOptions?.globalAlignment || 'auto';
+        const alignment = styleOptions?.globalAlignment || 'left';
         const textAlign =
           alignment === 'auto'
             ? columnTypes[columnId] === 'numerical'
