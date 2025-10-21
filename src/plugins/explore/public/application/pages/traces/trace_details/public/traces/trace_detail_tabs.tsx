@@ -13,7 +13,7 @@ export interface TraceDetailTabsProps {
   setActiveTab: (tabId: string) => void;
   transformedHits: any[];
   logDatasets?: any[];
-  logsData?: any[];
+  logCount: number;
   isLogsLoading?: boolean;
 }
 
@@ -22,7 +22,7 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
   setActiveTab,
   transformedHits,
   logDatasets = [],
-  logsData = [],
+  logCount = 0,
   isLogsLoading = false,
 }) => {
   const tabs = [
@@ -57,12 +57,16 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
   ];
 
   // Add logs tab if we have log datasets and logs data
-  if (logDatasets.length > 0 && logsData.length > 0) {
+  if (logDatasets.length > 0) {
     tabs.push({
       id: TraceDetailTab.LOGS,
       name: (
         <>
-          <EuiBadge color="default">{logsData.length}</EuiBadge>{' '}
+          {!isLogsLoading && (
+            <>
+              <EuiBadge color="default">{logCount}</EuiBadge>{' '}
+            </>
+          )}
           {i18n.translate('explore.traceView.tab.logs', {
             defaultMessage: 'Related logs',
           })}
