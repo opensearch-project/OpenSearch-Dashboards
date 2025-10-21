@@ -215,7 +215,6 @@ const TopNav = ({
         // Get the search interceptor and abort its controller
         const searchInterceptor = services.data?.search?.getDefaultSearchInterceptor?.();
         if (searchInterceptor && (searchInterceptor as any).abortController) {
-          console.log('🚫 Aborting search interceptor controller');
           (searchInterceptor as any).abortController.abort();
         }
       } catch (error) {
@@ -224,7 +223,6 @@ const TopNav = ({
 
       // Cancel individual panel queries directly - use immediate approach
       const panels = currentContainer.getChildIds();
-      console.log(`🔍 Dashboard cancel: Found ${panels.length} panels`);
       let cancelledCount = 0;
 
       panels.forEach((panelId) => {
@@ -235,7 +233,6 @@ const TopNav = ({
             if (abortController && typeof abortController.abort === 'function') {
               console.log(`🚫 Aborting panel ${panelId}, signal.aborted before:`, abortController.signal.aborted);
               abortController.abort();
-              console.log(`🚫 Panel ${panelId} signal.aborted after:`, abortController.signal.aborted);
               cancelledCount++;
             }
           } catch (error) {
