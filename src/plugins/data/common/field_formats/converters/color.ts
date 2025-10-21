@@ -29,14 +29,12 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { findLast, cloneDeep, template, escape } from 'lodash';
+import { findLast, cloneDeep, escape } from 'lodash';
 import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
 import { FieldFormat } from '../field_format';
 import { HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString } from '../utils';
 import { DEFAULT_CONVERTER_COLOR } from '../constants/color_default';
-
-const convertTemplate = template('<span style="<%- style %>"><%- val %></span>');
 
 export class ColorFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.COLOR;
@@ -78,6 +76,6 @@ export class ColorFormat extends FieldFormat {
     let style = '';
     if (color.text) style += `color: ${color.text};`;
     if (color.background) style += `background-color: ${color.background};`;
-    return convertTemplate({ val, style });
+    return `<span style="${style}">${escape(asPrettyString(val))}</span>`;
   };
 }
