@@ -72,7 +72,7 @@
 
 // TODO: ths is a temporary fix to make sure the height is set to auto
 // Can remove this once, height issue is fixed for combo box append in Oui
-.dataExplorerDSSelect .euiFormControlLayout.euiFormControlLayout--group>.euiToolTipAnchor {
+.dataExplorerDSSelect .euiFormControlLayout.euiFormControlLayout--group > .euiToolTipAnchor {
   height: auto;
 }
 
