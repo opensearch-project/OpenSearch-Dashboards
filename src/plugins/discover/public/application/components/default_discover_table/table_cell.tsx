@@ -23,6 +23,7 @@ export interface TableCellProps {
   filterable?: boolean;
   fieldMapping?: any;
   sanitizedCellValue: string;
+  extraContent?: React.ReactNode;
 }
 
 const TableCellUI = ({
@@ -31,6 +32,7 @@ const TableCellUI = ({
   onFilter,
   fieldMapping,
   sanitizedCellValue,
+  extraContent,
 }: TableCellProps) => {
   const content = (
     <>
@@ -74,6 +76,7 @@ const TableCellUI = ({
           />
         </EuiToolTip>
       </span>
+      {extraContent}
     </>
   );
 

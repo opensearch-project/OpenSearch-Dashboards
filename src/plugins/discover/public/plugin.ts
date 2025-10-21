@@ -79,6 +79,7 @@ declare module '../../share/public' {
 }
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { ExplorePluginSetup } from '../../explore/public';
+import { SlotRegistryService, SlotRegistryServiceSetup } from './services/slot_registry';
 
 /**
  * @public
@@ -95,6 +96,8 @@ export interface DiscoverSetup {
   docViewsLinks: {
     addDocViewLink(docViewLinkRaw: DocViewLink): void;
   };
+
+  slotRegistry: SlotRegistryServiceSetup;
 }
 
 export interface DiscoverStart {
@@ -167,6 +170,7 @@ export class DiscoverPlugin
   private servicesInitialized: boolean = false;
   private urlGenerator?: DiscoverStart['urlGenerator'];
   private initializeServices?: () => { core: CoreStart; plugins: DiscoverStartPlugins };
+  private slotRegistry = new SlotRegistryService();
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
@@ -412,6 +416,7 @@ export class DiscoverPlugin
       docViewsLinks: {
         addDocViewLink: this.docViewsLinksRegistry.addDocViewLink.bind(this.docViewsLinksRegistry),
       },
+      slotRegistry: this.slotRegistry.setup(),
     };
   }
 
@@ -421,7 +426,9 @@ export class DiscoverPlugin
       if (this.servicesInitialized) {
         return { core, plugins };
       }
-      const services = buildServices(core, plugins, this.initializerContext);
+      const services = buildServices(core, plugins, this.initializerContext, {
+        slotRegistry: this.slotRegistry,
+      });
       setServices(services);
       this.servicesInitialized = true;
 
