@@ -416,3 +416,11 @@
 # @experimental Set the value to true to enable context provider
 # contextProvider:
 #   enabled: true
+
+csp.rules:
+  - "script-src 'unsafe-eval' 'unsafe-inline' 'self' https://cdn.jsdelivr.net/npm/vega@6 https://cdn.jsdelivr.net/npm/vega-lite@6 https://cdn.jsdelivr.net/npm/vega-embed@7"
+  - "worker-src blob: 'self'"
+  - "style-src 'unsafe-inline' 'self'"
+  - "frame-src 'self' data:"
+  - "connect-src 'self' https://vega.github.io https://cdn.jsdelivr.net"
+  - "img-src 'self' data: blob:"

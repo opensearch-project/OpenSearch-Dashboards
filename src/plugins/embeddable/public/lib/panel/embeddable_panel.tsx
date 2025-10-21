@@ -32,6 +32,7 @@ import { EuiContextMenuPanelDescriptor, EuiPanel, htmlIdGenerator } from '@elast
 import classNames from 'classnames';
 import React from 'react';
 import { Subscription } from 'rxjs';
+import hjson from 'hjson';
 import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
 import { CoreStart, OverlayStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
@@ -62,6 +63,7 @@ import { CustomizePanelModal } from './panel_header/panel_actions/customize_titl
 import { EmbeddableStart } from '../../plugin';
 import { EmbeddableErrorLabel } from './embeddable_error_label';
 import { EmbeddableStateTransfer, ErrorEmbeddable } from '..';
+import { VizIframe } from './viz_iframe';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -240,6 +242,9 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
     const title = this.props.embeddable.getTitle();
     const headerId = this.generateId();
+
+    const embeddableOutput = this.props.embeddable.getOutput();
+
     return (
       <EuiPanel
         className={classes}
@@ -266,7 +271,16 @@ export class EmbeddablePanel extends React.Component<Props, State> {
           />
         )}
         <EmbeddableErrorLabel error={this.state.error} />
-        <div className="embPanel__content" ref={this.embeddableRoot} {...contentAttrs} />
+        {(embeddableOutput as any)?.visTypeName === 'vega' ? (
+          <VizIframe
+            spec={hjson.parse((this.props.embeddable as any).vis.params.spec, {
+              legacyRoot: false,
+              keepWsc: true,
+            })}
+          />
+        ) : (
+          <div className="embPanel__content" ref={this.embeddableRoot} {...contentAttrs} />
+        )}
       </EuiPanel>
     );
   }
