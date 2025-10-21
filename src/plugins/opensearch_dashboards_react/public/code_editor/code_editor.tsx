@@ -166,6 +166,16 @@ export class CodeEditor extends React.Component<Props, {}> {
         editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
       });
     }
+
+    editor.onMouseDown((e) => {
+      if (e.target.position) {
+        e.event.preventDefault(); // Prevent Monaco's default focus handling
+        editor.setPosition(e.target.position!);
+        editor.revealPosition(e.target.position!);
+        editor.focus();
+      }
+    });
+
     // Show the documentation panel by default
     const suggestController = editor.getContribution('editor.contrib.suggestController') as any;
     suggestController.widget.value._setDetailsVisible(true);

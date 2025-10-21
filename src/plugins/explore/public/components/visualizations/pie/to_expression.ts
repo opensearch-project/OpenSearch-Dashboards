@@ -115,8 +115,8 @@ export const createPieSpec = (
     params: [{ name: 'stepSize', expr: 'min(width, height) / 20' }],
     data: { values: transformedData },
     layer: [
-      hoverStateLayer,
       markLayer,
+      hoverStateLayer,
       styleOptions.exclusive?.showLabels ? labelLayer : null,
       styleOptions.exclusive?.showValues ? valueLayer : null,
     ].filter(Boolean),

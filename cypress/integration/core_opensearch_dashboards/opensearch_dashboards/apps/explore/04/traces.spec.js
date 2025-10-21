@@ -481,9 +481,15 @@ const traceTestSuite = () => {
     });
 
     describe('Filter Functionality', () => {
-      it('should show error filter and handle filtering', () => {
-        // Error filter button should exist
-        cy.getElementByTestId('error-count-button').should('be.visible').click();
+      it('should show status filter and handle error filtering', () => {
+        // Status filter button should exist - click to open popover
+        cy.getElementByTestId('span-status-filter-button').should('be.visible').click();
+
+        // Click the Error filter option in the popover
+        cy.getElementByTestId('status-filter-selectable')
+          .find('.euiSelectableList')
+          .contains('Error')
+          .click();
 
         // Verify filter badge appears
         cy.get('[data-test-subj^="filter-badge-"]').should('be.visible');
