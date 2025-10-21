@@ -13,13 +13,16 @@ import { useState, useEffect, useRef } from 'react';
 
 /**
  * Custom hook for managing cancel button visibility with proper timing
- * - Shows cancel button after 50ms delay (prevents flickering for quick queries)
+ * - Shows cancel button initially on page load if showInitially=true (for initial queries)
+ * - Hides button when initial query completes
+ * - Shows cancel button after 50ms delay when shouldShow becomes true (prevents flickering for quick queries)
  * - Keeps button visible for minimum 200ms (smooth UX)
  */
-export const useCancelButtonTiming = (shouldShow: boolean) => {
-  const [shouldShowCancelButton, setShouldShowCancelButton] = useState(false);
+export const useCancelButtonTiming = (shouldShow: boolean, showInitially: boolean = true) => {
+  const [shouldShowCancelButton, setShouldShowCancelButton] = useState(showInitially);
   const cancelButtonTimerRef = useRef<NodeJS.Timeout | null>(null);
   const minimumDisplayTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const hasCompletedInitialQueryRef = useRef(false); // Track if initial query has completed
 
   useEffect(() => {
     if (shouldShow) {
@@ -29,7 +32,7 @@ export const useCancelButtonTiming = (shouldShow: boolean) => {
         minimumDisplayTimerRef.current = null;
       }
 
-      // Start timer to show cancel button after 50ms
+      // Start timer to show cancel button after 50ms (existing logic)
       cancelButtonTimerRef.current = setTimeout(() => {
         setShouldShowCancelButton(true);
       }, 50);
@@ -38,6 +41,11 @@ export const useCancelButtonTiming = (shouldShow: boolean) => {
       if (cancelButtonTimerRef.current) {
         clearTimeout(cancelButtonTimerRef.current);
         cancelButtonTimerRef.current = null;
+      }
+
+      // Mark that initial query has completed (if we were showing initially)
+      if (showInitially && !hasCompletedInitialQueryRef.current) {
+        hasCompletedInitialQueryRef.current = true;
       }
 
       // If button is currently visible, keep it visible for minimum 200ms
@@ -59,7 +67,7 @@ export const useCancelButtonTiming = (shouldShow: boolean) => {
         clearTimeout(minimumDisplayTimerRef.current);
       }
     };
-  }, [shouldShow, shouldShowCancelButton]);
+  }, [shouldShow, shouldShowCancelButton, showInitially]);
 
   return shouldShowCancelButton;
 };
