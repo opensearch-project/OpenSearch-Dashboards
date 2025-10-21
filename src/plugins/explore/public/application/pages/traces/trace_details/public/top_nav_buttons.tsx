@@ -94,7 +94,9 @@ export const TraceTopNavMenu: React.FC<TraceTopNavMenuProps> = ({
                       <EuiIcon
                         type="copy"
                         size="s"
-                        style={{ marginLeft: '4px' }}
+                        style={{
+                          marginLeft: '4px',
+                        }}
                         aria-label="Copy Trace ID"
                       />
                     </EuiFlexItem>

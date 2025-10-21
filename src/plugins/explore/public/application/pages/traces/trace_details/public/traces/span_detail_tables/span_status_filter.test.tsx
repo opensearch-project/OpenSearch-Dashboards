@@ -52,24 +52,12 @@ describe('SpanStatusFilter', () => {
       ]);
     });
 
-    it('shows correct count badge for active status filters', () => {
-      // Single filter
+    it('shows correct count badge for active status filter', () => {
+      // Status filter
       const { rerender } = render(
         <SpanStatusFilter {...createDefaultProps([{ field: 'isError', value: true }])} />
       );
       expect(screen.getByText('1')).toBeInTheDocument();
-
-      // Multiple filters
-      rerender(
-        <SpanStatusFilter
-          {...createDefaultProps([
-            { field: 'isError', value: true },
-            { field: 'status.code', value: 1 },
-            { field: 'status.code', value: 0 },
-          ])}
-        />
-      );
-      expect(screen.getByText('3')).toBeInTheDocument();
 
       // Non-status filters ignored
       rerender(
@@ -85,7 +73,7 @@ describe('SpanStatusFilter', () => {
   });
 
   describe('filter selection', () => {
-    it('adds correct filters when options are selected', () => {
+    it('adds correct filter when option is selected', () => {
       component = shallow(<SpanStatusFilter {...createDefaultProps()} />);
       const onChange = component.find(EuiSelectable).prop('onChange')!;
 
@@ -118,17 +106,6 @@ describe('SpanStatusFilter', () => {
       expect(mockSetSpanFiltersWithStorage).toHaveBeenCalledWith([
         { field: 'status.code', value: 0 },
       ]);
-
-      // Multiple options
-      onChange([
-        { label: 'Error', key: 'error', checked: 'on' },
-        { label: 'OK', key: 'ok', checked: 'on' },
-        { label: 'Unset', key: 'unset' },
-      ]);
-      expect(mockSetSpanFiltersWithStorage).toHaveBeenCalledWith([
-        { field: 'isError', value: true },
-        { field: 'status.code', value: 1 },
-      ]);
     });
 
     it('preserves non-status filters when updating', () => {
@@ -149,7 +126,7 @@ describe('SpanStatusFilter', () => {
         { field: 'serviceName', value: 'test' },
       ]);
 
-      // Add new filter
+      // Select different filter
       onChange([
         { label: 'Error', key: 'error' },
         { label: 'OK', key: 'ok', checked: 'on' },

@@ -580,6 +580,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                             selectedSpanId={spanId}
                             activeView={activeTab}
                             servicesInOrder={servicesInOrder}
+                            isFlyoutPanel={isFlyout}
                           />
                         )}
 

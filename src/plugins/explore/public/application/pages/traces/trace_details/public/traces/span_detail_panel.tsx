@@ -28,6 +28,7 @@ export function SpanDetailPanel(props: {
   activeView?: string;
   isEmbedded?: boolean;
   servicesInOrder?: string[];
+  isFlyoutPanel?: boolean;
 }) {
   const {
     chrome,
@@ -120,6 +121,7 @@ export function SpanDetailPanel(props: {
           selectedSpanId={props.selectedSpanId}
           colorMap={colorMap}
           servicesInOrder={props.servicesInOrder}
+          isFlyoutPanel={props.isFlyoutPanel}
         />
       </div>
     ),
@@ -132,6 +134,7 @@ export function SpanDetailPanel(props: {
       props.selectedSpanId,
       colorMap,
       props.servicesInOrder,
+      props.isFlyoutPanel,
     ]
   );
 
