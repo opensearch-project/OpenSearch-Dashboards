@@ -80,10 +80,11 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
   // Use custom hook for cancel button timing logic
-  const shouldShowCancelButton = useCancelButtonTiming(Boolean(props.isQueryRunning && props.showCancelButton));
+  const shouldShowCancelButton = useCancelButtonTiming(
+    Boolean(props.isQueryRunning && props.showCancelButton)
+  );
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName, data, keyboardShortcut } = opensearchDashboards.services;
-
 
   const handleOpenDatePicker = useCallback(() => {
     if (datePickerRef.current) {
