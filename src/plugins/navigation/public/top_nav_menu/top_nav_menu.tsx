@@ -90,6 +90,9 @@ export type TopNavMenuProps = Omit<StatefulSearchBarProps, 'showDatePicker'> &
      */
     setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
     queryStatus?: QueryStatus;
+    showCancelButton?: boolean;
+    onQueryCancel?: () => void;
+    isQueryRunning?: boolean;
   };
 
 /*
@@ -111,6 +114,9 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     dataSourceMenuConfig,
     groupActions,
     screenTitle,
+    showCancelButton,
+    onQueryCancel,
+    isQueryRunning,
     ...searchBarProps
   } = props;
 
@@ -186,10 +192,20 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   function renderSearchBar(overrides: Partial<SearchBarProps> = {}): ReactElement | null {
     // Validate presence of all required fields
     if (!showSearchBar || !props.data) return null;
+
     const { SearchBar } = props.data.ui;
+
+    // Ensure cancel button props are included
+    const searchBarPropsWithCancel = {
+      ...searchBarProps,
+      showCancelButton,
+      onQueryCancel,
+      isQueryRunning,
+    };
+
     return (
       <SearchBar
-        {...searchBarProps}
+        {...searchBarPropsWithCancel}
         showDatePicker={![TopNavMenuItemRenderType.OMITTED, false].includes(showDatePicker!)}
         {...overrides}
         queryStatus={props.queryStatus}
@@ -319,4 +335,6 @@ TopNavMenu.defaultProps = {
   showDatasetSelect: false,
   screenTitle: '',
   groupActions: false,
+  showCancelButton: false,
+  isQueryRunning: false,
 };

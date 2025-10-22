@@ -10,12 +10,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
+  EuiButtonIcon,
   OnRefreshProps,
   prettyDuration,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import {
   DatasetSelector,
@@ -66,6 +67,9 @@ export interface QueryEditorTopRowProps {
   datePickerRef?: React.RefObject<HTMLDivElement>;
   savedQueryManagement?: any;
   queryStatus?: QueryStatus;
+  showCancelButton?: boolean;
+  onCancel?: () => void;
+  isQueryRunning?: boolean;
 }
 
 // Needed for React.lazy
@@ -74,8 +78,52 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const datePickerRef = useRef<EuiSuperDatePicker | null>(null);
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
+  const [shouldShowCancelButton, setShouldShowCancelButton] = useState(false);
+  const cancelButtonTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const minimumDisplayTimerRef = useRef<NodeJS.Timeout | null>(null);
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName, data, keyboardShortcut } = opensearchDashboards.services;
+
+  // Handle delayed cancel button visibility
+  useEffect(() => {
+    if (props.isQueryRunning && props.showCancelButton) {
+      // Clear any existing minimum display timer
+      if (minimumDisplayTimerRef.current) {
+        clearTimeout(minimumDisplayTimerRef.current);
+        minimumDisplayTimerRef.current = null;
+      }
+
+      // Start timer to show cancel button after 50ms
+      cancelButtonTimerRef.current = setTimeout(() => {
+        setShouldShowCancelButton(true);
+      }, 50);
+    } else {
+      // Clear the show timer
+      if (cancelButtonTimerRef.current) {
+        clearTimeout(cancelButtonTimerRef.current);
+        cancelButtonTimerRef.current = null;
+      }
+
+      // If button is currently visible, keep it visible for minimum 200ms
+      if (shouldShowCancelButton) {
+        minimumDisplayTimerRef.current = setTimeout(() => {
+          setShouldShowCancelButton(false);
+        }, 200);
+      } else {
+        setShouldShowCancelButton(false);
+      }
+    }
+
+    // Cleanup timers on unmount
+    return () => {
+      if (cancelButtonTimerRef.current) {
+        clearTimeout(cancelButtonTimerRef.current);
+      }
+      if (minimumDisplayTimerRef.current) {
+        clearTimeout(minimumDisplayTimerRef.current);
+      }
+    };
+  }, [props.isQueryRunning, props.showCancelButton]);
 
   const handleOpenDatePicker = useCallback(() => {
     if (datePickerRef.current) {
@@ -305,31 +353,58 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function renderUpdateButton() {
-    const button = props.customSubmitButton ? (
-      React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
-    ) : (
-      <EuiSuperUpdateButton
-        needsUpdate={props.isDirty}
-        isDisabled={isDateRangeInvalid}
-        isLoading={props.isLoading}
-        onClick={onClickSubmitButton}
-        data-test-subj="querySubmitButton"
-        aria-label={i18n.translate('data.query.queryBar.querySubmitButtonLabel', {
-          defaultMessage: 'Submit query',
-        })}
-        compressed={true}
-      />
-    );
+    // If a custom submit button is provided, enhance it with cancel functionality
+    let buttonGroup;
+    if (props.customSubmitButton) {
+      buttonGroup = React.cloneElement(props.customSubmitButton, {
+        onClick: onClickSubmitButton,
+      });
+    } else {
+      // Default QueryEditor button with integrated cancel
+      const runButton = (
+        <EuiSuperUpdateButton
+          needsUpdate={props.isDirty}
+          isDisabled={isDateRangeInvalid}
+          isLoading={props.isLoading}
+          onClick={onClickSubmitButton}
+          data-test-subj="querySubmitButton"
+          aria-label={i18n.translate('data.query.queryBar.querySubmitButtonLabel', {
+            defaultMessage: 'Submit query',
+          })}
+          compressed={true}
+        />
+      );
+
+      const cancelButton = shouldShowCancelButton ? (
+        <EuiButtonIcon
+          size="s"
+          color="danger"
+          onClick={props.onCancel}
+          data-test-subj="queryCancelButton"
+          aria-label={i18n.translate('data.query.queryBar.queryCancelButtonLabel', {
+            defaultMessage: 'Cancel',
+          })}
+          iconType="cross"
+          className="osdQueryEditor__cancelButton"
+        />
+      ) : null;
+      buttonGroup = (
+        <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>{runButton}</EuiFlexItem>
+          {cancelButton && <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>}
+        </EuiFlexGroup>
+      );
+    }
 
     if (!shouldRenderDatePicker()) {
-      return button;
+      return buttonGroup;
     }
 
     return (
       <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
         <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
           {renderDatePicker()}
-          <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{buttonGroup}</EuiFlexItem>
         </EuiFlexGroup>
       </NoDataPopover>
     );

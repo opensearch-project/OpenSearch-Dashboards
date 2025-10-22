@@ -100,6 +100,10 @@ export interface SearchBarOwnProps {
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
   queryStatus?: QueryStatus;
+  // Cancel query functionality
+  showCancelButton?: boolean;
+  onQueryCancel?: () => void;
+  isQueryRunning?: boolean;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -536,6 +540,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
           datePickerRef={this.props.datePickerRef}
+          showCancelButton={this.props.showCancelButton}
+          onCancel={this.props.onQueryCancel}
+          isQueryRunning={this.props.isQueryRunning}
         />
       );
     }
@@ -572,6 +579,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           datePickerRef={this.props.datePickerRef}
           savedQueryManagement={searchBarMenu(false, true)}
           queryStatus={this.props.queryStatus}
+          showCancelButton={this.props.showCancelButton}
+          onCancel={this.props.onQueryCancel}
+          isQueryRunning={this.props.isQueryRunning}
         />
       );
     }

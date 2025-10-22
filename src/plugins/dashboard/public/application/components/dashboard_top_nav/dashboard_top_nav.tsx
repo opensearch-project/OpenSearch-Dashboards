@@ -53,6 +53,10 @@ const TopNav = ({
   const [topRightControls, setTopRightControls] = useState<TopNavControlData[]>([]);
   const [isFullScreenMode, setIsFullScreenMode] = useState<any>();
 
+  // State for cancel button functionality
+  const [isQueryRunning, setIsQueryRunning] = useState<boolean>(false);
+  const [showCancelButton, setShowCancelButton] = useState<boolean>(false);
+
   const { services } = useOpenSearchDashboards<DashboardServices>();
   const { TopNavMenu, HeaderControl } = services.navigation.ui;
   const { dashboardConfig, setHeaderActionMenu, keyboardShortcut } = services;
@@ -175,11 +179,75 @@ const TopNav = ({
   const handleRefresh = useCallback(
     (_payload: any, isUpdate?: boolean) => {
       if (!isUpdate && currentContainer) {
+        // Set query running state when starting refresh
+        setIsQueryRunning(true);
+        setShowCancelButton(true);
+
+        // Reload the dashboard container
         currentContainer.reload();
+
+        // Monitor container state to detect when queries complete
+        // Use a simple timeout for now - more sophisticated panel monitoring can be added later
+        const timeoutId = setTimeout(() => {
+          setIsQueryRunning(false);
+          setShowCancelButton(false);
+        }, 3000); // 3 second timeout for queries to complete
+
+        // Store timeout ID for potential cleanup in cancel handler
+        (currentContainer as any).__refreshTimeoutId = timeoutId;
       }
     },
     [currentContainer]
   );
+
+  // Handle query cancellation
+  const handleQueryCancel = useCallback(() => {
+    if (currentContainer) {
+      // Clear the timeout if it exists
+      const timeoutId = (currentContainer as any).__refreshTimeoutId;
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        delete (currentContainer as any).__refreshTimeoutId;
+      }
+
+      // Cancel search requests at the interceptor level (like Explore does)
+      try {
+        // Get the search interceptor and abort its controller
+        const searchInterceptor = services.data?.search?.getDefaultSearchInterceptor?.();
+        if (searchInterceptor && (searchInterceptor as any).abortController) {
+          (searchInterceptor as any).abortController.abort();
+        }
+      } catch (error) {
+        console.warn('Could not cancel through search interceptor:', error);
+      }
+
+      // Cancel individual panel queries directly - use immediate approach
+      const panels = currentContainer.getChildIds();
+      let cancelledCount = 0;
+
+      panels.forEach((panelId) => {
+        const panel = currentContainer.getChild(panelId);
+        if (panel && (panel as any).abortController) {
+          try {
+            const abortController = (panel as any).abortController;
+            if (abortController && typeof abortController.abort === 'function') {
+              console.log(`🚫 Aborting panel ${panelId}, signal.aborted before:`, abortController.signal.aborted);
+              abortController.abort();
+              cancelledCount++;
+            }
+          } catch (error) {
+            console.warn(`Error aborting panel ${panelId}:`, error);
+          }
+        }
+      });
+
+      console.log(`🔍 Successfully cancelled ${cancelledCount} panel queries`);
+
+      // Reset query state immediately
+      setIsQueryRunning(false);
+      setShowCancelButton(false);
+    }
+  }, [currentContainer, services]);
 
   const isEmbeddedExternally = Boolean(queryParameters.get('embed'));
 
@@ -278,6 +346,9 @@ const TopNav = ({
         onQuerySubmit={handleRefresh}
         setMenuMountPoint={isEmbeddedExternally ? undefined : setHeaderActionMenu}
         groupActions={showActionsInGroup}
+        showCancelButton={showCancelButton}
+        onQueryCancel={handleQueryCancel}
+        isQueryRunning={isQueryRunning}
       />
       <HeaderControl setMountPoint={setAppRightControls} controls={topRightControls} />
     </>

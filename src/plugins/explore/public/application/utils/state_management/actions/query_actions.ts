@@ -50,11 +50,17 @@ import {
 const activeQueryAbortControllers = new Map<string, AbortController>();
 
 // Helper function to abort all active queries
+// Backend cancellation is handled automatically via AbortSignal in search strategies
 export const abortAllActiveQueries = () => {
+  console.log('🚫 abortAllActiveQueries called, active controllers:', activeQueryAbortControllers.size);
   activeQueryAbortControllers.forEach((controller, cacheKey) => {
+    console.log(`🚫 Aborting controller for cacheKey: ${cacheKey}`);
+    // This triggers the abort signal, which in turn:
+    // Cancels frontend HTTP requests immediately
     controller.abort();
   });
   activeQueryAbortControllers.clear();
+  console.log('🚫 All controllers cleared');
 };
 
 /**
@@ -139,7 +145,7 @@ const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
     try {
       const result = getFieldValueCounts({
         hits,
-        field,
+        field: field as any,
         dataSet: dataset, // DataView extends IndexPattern
         count: 5,
         grouped: false,
@@ -381,11 +387,15 @@ const executeQueryBase = async (
       existingController.abort();
     }
 
+    // Don't auto-abort other queries - let them complete unless explicitly cancelled
+    // This prevents data loading issues when multiple queries are running concurrently
+
     // Create abort controller for this specific query
     const abortController = new AbortController();
 
     // Store controller by cacheKey for individual query abort
     activeQueryAbortControllers.set(cacheKey, abortController);
+    console.log(`🔄 Query started - stored abort controller for cacheKey: ${cacheKey}, total active: ${activeQueryAbortControllers.size}`);
 
     services.inspectorAdapters.requests.reset();
 
@@ -506,8 +516,19 @@ const executeQueryBase = async (
     // Clean up aborted/failed query from active controllers
     activeQueryAbortControllers.delete(cacheKey);
 
-    // Handle abort errors
+    // Handle abort errors - reset query status to initial state
     if (error instanceof Error && error.name === 'AbortError') {
+      dispatch(
+        setIndividualQueryStatus({
+          cacheKey,
+          status: {
+            status: QueryExecutionStatus.UNINITIALIZED,
+            startTime: undefined,
+            elapsedMs: undefined,
+            error: undefined,
+          },
+        })
+      );
       return;
     }
 
