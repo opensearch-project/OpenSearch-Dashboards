@@ -215,7 +215,7 @@ describe('useSearch', () => {
     expect(initialStartTime).toBeDefined();
 
     // Add a small delay to ensure startTime will be different
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
 
     act(() => {
       rerender();
