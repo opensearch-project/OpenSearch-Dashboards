@@ -42,7 +42,7 @@ jest.mock('../style_panel/threshold/threshold_utils', () => ({
 
 // Mock the utils module
 jest.mock('../utils/utils', () => ({
-  applyTimeRangeToEncoding: jest.fn().mockReturnValue({ mark: { type: 'rule' } }),
+  applyTimeRangeToEncoding: jest.fn().mockReturnValue(undefined),
   getTooltipFormat: jest.fn().mockReturnValue('%b %d, %Y %H:%M:%S'),
 }));
 

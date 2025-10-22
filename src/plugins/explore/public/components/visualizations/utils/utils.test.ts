@@ -113,7 +113,8 @@ describe('applyAxisStyling', () => {
 describe('getAxisByRole', () => {
   it('returns the axis with specified role', () => {
     const axes = [{ axisRole: AxisRole.X }, { axisRole: AxisRole.Y }];
-    expect(getAxisByRole(axes as any, AxisRole.X)?.axisRole).toBe(AxisRole.X);
+    const result = getAxisByRole(axes as any, AxisRole.X);
+    expect(result && result.axisRole).toBe(AxisRole.X);
   });
 
   it('returns undefined when no axis matches', () => {
@@ -430,36 +431,41 @@ describe('mergeStyles', () => {
 
     const timeRange = { from: '2023-01-01', to: '2023-12-31' };
 
-    it('returns null when axisColumnMappings is undefined', () => {
-      expect(applyTimeRangeToEncoding(undefined, undefined, timeRange)).toBeNull();
+    it('does nothing when axisColumnMappings is undefined', () => {
+      const encoding = { x: { field: 'test' } };
+      const result = applyTimeRangeToEncoding(encoding, undefined, timeRange);
+      expect(result).toBeUndefined();
+      expect(encoding).toEqual({ x: { field: 'test' } }); // unchanged
     });
 
-    it('returns null when timeRange is undefined', () => {
+    it('does nothing when timeRange is undefined', () => {
       const axisColumnMappings = {
         x: { ...baseAxis, schema: VisFieldType.Date },
       };
-      expect(applyTimeRangeToEncoding(undefined, axisColumnMappings, undefined)).toBeNull();
+      const encoding = { x: { field: 'test' } };
+      const result = applyTimeRangeToEncoding(encoding, axisColumnMappings, undefined);
+      expect(result).toBeUndefined();
+      expect(encoding).toEqual({ x: { field: 'test' } }); // unchanged
     });
 
-    it('returns null when no temporal axis is found', () => {
+    it('does nothing when no temporal axis is found', () => {
       const axisColumnMappings = {
         x: { ...baseAxis, schema: VisFieldType.Numerical },
         y: { ...baseAxis, schema: VisFieldType.Categorical },
       };
-      expect(applyTimeRangeToEncoding(undefined, axisColumnMappings, timeRange)).toBeNull();
+      const encoding = { x: { field: 'test' } };
+      const result = applyTimeRangeToEncoding(encoding, axisColumnMappings, timeRange);
+      expect(result).toBeUndefined();
+      expect(encoding).toEqual({ x: { field: 'test' } }); // unchanged
     });
 
-    it('returns scale config when no mainLayerEncoding is provided', () => {
+    it('does nothing when mainLayerEncoding is undefined', () => {
       const axisColumnMappings = {
         x: { ...baseAxis, schema: VisFieldType.Date, column: 'date_x' },
         y: { ...baseAxis, schema: VisFieldType.Numerical },
       };
       const result = applyTimeRangeToEncoding(undefined, axisColumnMappings, timeRange, false);
-      expect(result).toEqual({
-        scale: {
-          domain: ['2023-01-01', '2023-12-31'],
-        },
-      });
+      expect(result).toBeUndefined();
     });
 
     it('should replace arrays instead of merging them', () => {
@@ -563,7 +569,7 @@ describe('mergeStyles', () => {
         false
       );
 
-      expect(result).toBeNull(); // Function returns null when modifying encoding directly
+      expect(result).toBeUndefined(); // Function returns undefined when modifying encoding directly
       expect(mainLayerEncoding.x.scale).toEqual({
         domain: ['2023-01-01', '2023-12-31'],
       });
@@ -629,7 +635,7 @@ describe('mergeStyles', () => {
         false
       );
 
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
       expect(mainLayerEncoding.y.scale).toEqual({
         domain: ['2023-01-01', '2023-12-31'],
       });
@@ -671,7 +677,7 @@ describe('mergeStyles', () => {
         true
       );
 
-      expect(result).toBeNull();
+      expect(result).toBeUndefined();
       // When switchAxes is true, Y temporal axis should apply scale to x encoding
       expect(mainLayerEncoding.x.scale).toEqual({
         domain: ['2023-01-01', '2023-12-31'],

@@ -27,11 +27,7 @@ jest.mock('../utils/utils', () => {
   const actual = jest.requireActual('../utils/utils');
   return {
     ...actual,
-    applyTimeRangeToEncoding: jest.fn(() => ({
-      mark: { type: 'rule' },
-      data: { name: 'domainLayer' },
-      encoding: {},
-    })),
+    applyTimeRangeToEncoding: jest.fn(() => undefined),
   };
 });
 

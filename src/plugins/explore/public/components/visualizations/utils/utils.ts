@@ -61,7 +61,15 @@ export const applyAxisStyling = (
     }
   }
 
+  // Apply time formatting for date/time axes
   if (axis?.schema === VisFieldType.Date) {
+    // Configure time formats for different granularities using 24-hour format for better clarity.
+    // Each format corresponds to the appropriate time precision:
+    // - hours: Display hours and minutes (HH:MM)
+    // - minutes: Display hours and minutes (HH:MM)
+    // - seconds: Display full time with seconds (HH:MM:SS)
+    // - milliseconds: Display full time with milliseconds (HH:MM:SS.mmm)
+    // Using %H (24-hour) instead of %I (12-hour) provides clearer, unambiguous time representation
     fullAxisConfig.format = {
       hours: '%H:%M',
       minutes: '%H:%M',
@@ -339,14 +347,16 @@ export function applyTimeRangeToEncoding(
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string },
   switchAxes: boolean = false
-) {
-  if (!axisColumnMappings || !timeRange?.from || !timeRange?.to) return null;
+): void {
+  if (!axisColumnMappings || !timeRange?.from || !timeRange?.to || !mainLayerEncoding) {
+    return;
+  }
 
   const timeAxisEntry = Object.entries(axisColumnMappings).find(
     ([, col]) => getSchemaByAxis(col) === 'temporal'
   );
 
-  if (!timeAxisEntry) return null;
+  if (!timeAxisEntry) return;
 
   const [axisRole] = timeAxisEntry as [AxisRole, VisColumn];
   const targetRole = axisRole === AxisRole.X ? (switchAxes ? 'y' : 'x') : switchAxes ? 'x' : 'y';
@@ -385,15 +395,10 @@ export function applyTimeRangeToEncoding(
     domain: [processTimeValue(timeRange.from), processTimeValue(timeRange.to)],
   };
 
-  if (mainLayerEncoding && mainLayerEncoding[targetRole]) {
+  if (mainLayerEncoding[targetRole]) {
     mainLayerEncoding[targetRole].scale = {
       ...(mainLayerEncoding[targetRole].scale || {}),
       ...scaleConfig,
     };
-    return null;
   }
-
-  return {
-    scale: scaleConfig,
-  };
 }
