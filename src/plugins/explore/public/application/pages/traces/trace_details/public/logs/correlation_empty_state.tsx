@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiButton, EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { Dataset } from '../../../../../../../../data/common';
 
@@ -44,13 +44,13 @@ export const CorrelationEmptyState: React.FC<CorrelationEmptyStateProps> = ({ tr
       window.location.href = url;
     }
   };
-
-  const handleLearnMore = () => {
-    const url = generateDatasetUrl(traceDataset?.id || null);
-    if (url !== '#') {
-      window.open(url, '_blank');
-    }
-  };
+  // TODO: Update the link
+  // const handleLearnMore = () => {
+  //   const url = generateDatasetUrl(traceDataset?.id || null);
+  //   if (url !== '#') {
+  //     window.open(url, '_blank');
+  //   }
+  // };
 
   return (
     <EuiEmptyPrompt
@@ -76,7 +76,8 @@ export const CorrelationEmptyState: React.FC<CorrelationEmptyStateProps> = ({ tr
             })}
           </EuiButton>
           <EuiSpacer size="m" />
-          <EuiText size="s">
+          {/* TODO */}
+          {/* <EuiText size="s">
             {i18n.translate('explore.logs.emptyState.needHelp', {
               defaultMessage: 'Need help?',
             })}{' '}
@@ -85,7 +86,7 @@ export const CorrelationEmptyState: React.FC<CorrelationEmptyStateProps> = ({ tr
                 defaultMessage: 'Learn about data correlation',
               })}
             </EuiLink>
-          </EuiText>
+          </EuiText> */}
         </>
       }
     />

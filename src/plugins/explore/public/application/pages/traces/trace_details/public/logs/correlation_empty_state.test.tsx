@@ -63,7 +63,6 @@ describe('CorrelationEmptyState', () => {
       screen.getByText('To view related logs, create a trace correlation with log data.')
     ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Create from traces dataset' })).not.toBeDisabled();
-    expect(screen.getByText('Learn about data correlation')).toBeInTheDocument();
   });
 
   describe.each([
@@ -72,11 +71,10 @@ describe('CorrelationEmptyState', () => {
     { traceDataset: { id: null }, description: 'null id' },
     { traceDataset: { id: '' }, description: 'empty string id' },
   ])('Button disabled states', ({ traceDataset, description }) => {
-    it(`disables buttons when ${description}`, () => {
+    it(`disables button when ${description}`, () => {
       render(<CorrelationEmptyState traceDataset={traceDataset as any} />);
 
       expect(screen.getByRole('button', { name: 'Create from traces dataset' })).toBeDisabled();
-      expect(screen.getByText('Learn about data correlation').closest('button')).toBeDisabled();
     });
   });
 
@@ -103,17 +101,6 @@ describe('CorrelationEmptyState', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Create from traces dataset' }));
       expect(mockWindowLocation.href).toBe(expected);
     });
-  });
-
-  it('opens new tab when learn more is clicked', () => {
-    render(<CorrelationEmptyState {...defaultProps} />);
-
-    fireEvent.click(screen.getByText('Learn about data correlation'));
-
-    expect(mockWindowOpen).toHaveBeenCalledWith(
-      'https://localhost:5601/workspace/app/datasets/patterns/test-dataset-id#/?_a=(tab:correlatedDatasets)',
-      '_blank'
-    );
   });
 
   it('handles different protocol and host combinations', () => {

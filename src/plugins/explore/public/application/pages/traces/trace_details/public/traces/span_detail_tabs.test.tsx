@@ -475,6 +475,38 @@ describe('SpanDetailTabs', () => {
     expect(logsTab).toHaveAttribute('aria-selected', 'true');
   });
 
+  it('renders logs tab even when logDatasets is empty', () => {
+    const propsWithoutLogs = {
+      ...defaultProps,
+      logDatasets: [],
+      datasetLogs: {},
+      isLogsLoading: false,
+    };
+
+    render(<SpanDetailTabs {...propsWithoutLogs} />);
+
+    // Check that logs tab is present even when logDatasets is empty
+    expect(screen.getByText('Logs')).toBeInTheDocument();
+
+    // Should have 5 tabs
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(5);
+    expect(tabs[0]).toHaveTextContent('Overview');
+    expect(tabs[1]).toHaveTextContent('Errors');
+    expect(tabs[2]).toHaveTextContent('Logs');
+    expect(tabs[3]).toHaveTextContent('Metadata');
+    expect(tabs[4]).toHaveTextContent('Raw span');
+
+    // Click on Logs tab to verify it works
+    const logsTab = screen.getByRole('tab', { name: 'Logs' });
+    fireEvent.click(logsTab);
+    expect(logsTab).toHaveAttribute('aria-selected', 'true');
+
+    // Verify that the correct content is displayed when no log datasets are available
+    expect(screen.getByText('Span Logs')).toBeInTheDocument();
+    expect(screen.getByText('No log datasets found for this span')).toBeInTheDocument();
+  });
+
   it('render logs tab', () => {
     const logDatasets = [{ id: 'log-dataset-1', title: 'app-logs-*', type: 'INDEX_PATTERN' }];
 
