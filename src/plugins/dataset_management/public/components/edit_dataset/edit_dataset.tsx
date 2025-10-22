@@ -337,7 +337,6 @@ export const EditDataset = withRouter(({ dataset, history, location }: EditDatas
       />
       {showTagsSection && renderBadges()}
       {renderDescription()}
-      <EuiSpacer />
       <DatasetInfoPanel
         dataset={dataset}
         editConfiguration={
@@ -374,7 +373,6 @@ export const EditDataset = withRouter(({ dataset, history, location }: EditDatas
         {showTagsSection && renderBadges()}
         <EuiSpacer size="m" />
         {renderDescription()}
-        <EuiSpacer />
         <DatasetInfoPanel
           dataset={dataset}
           editConfiguration={
