@@ -60,7 +60,8 @@ interface TableRow {
   isComplete: boolean;
 }
 
-const TIME_FIELD_TYPES = ['date', 'date_nanos'];
+const TIME_FIELD_TYPES = ['date'];
+const STRING_FIELD_TYPES = ['string'];
 
 const REQUIRED_FIELDS: Array<keyof FieldMappings> = [
   'traceId',
@@ -79,8 +80,12 @@ const FieldSelector: React.FC<{
   isInvalid?: boolean;
 }> = React.memo(({ datasetId, fieldName, fields, selectedValue, onChange, isInvalid }) => {
   const isTimestamp = fieldName === 'timestamp';
+  const isStringField = ['traceId', 'spanId', 'serviceName'].includes(fieldName);
+
   const filteredFields = isTimestamp
     ? fields.filter((field) => TIME_FIELD_TYPES.includes(field.type))
+    : isStringField
+    ? fields.filter((field) => STRING_FIELD_TYPES.includes(field.type))
     : fields;
 
   const options: Array<EuiComboBoxOptionOption<string>> = filteredFields.map((field) => ({
