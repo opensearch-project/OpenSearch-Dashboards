@@ -554,6 +554,7 @@ cy.explore.add(
       isEnhancement = false,
       signalType = 'logs',
       language = null, // Optional language parameter
+      schemaMappings = null, // Optional schema mappings for correlation
     } = opts;
 
     // Step 1 - Navigate to datasets page
@@ -647,6 +648,44 @@ cy.explore.add(
       cy.getElementByTestId('advancedSelectorTimeFieldSelect').select(
         "I don't want to use the time filter"
       );
+    }
+
+    // Step 11.5 - Configure schema mappings for logs signal type with correlation
+    if (signalType === 'logs' && schemaMappings) {
+      cy.getElementByTestId('schemaMappingsAccordion').should('be.visible').click();
+
+      // Configure mappings based on provided schemaMappings object
+      if (schemaMappings.otelLogs) {
+        const mappings = schemaMappings.otelLogs;
+
+        // Configure traceId mapping
+        if (mappings.traceId) {
+          cy.getElementByTestId('schemaMappingSelect-otelLogs-traceId')
+            .should('be.visible')
+            .select(mappings.traceId);
+        }
+
+        // Configure spanId mapping
+        if (mappings.spanId) {
+          cy.getElementByTestId('schemaMappingSelect-otelLogs-spanId')
+            .should('be.visible')
+            .select(mappings.spanId);
+        }
+
+        // Configure serviceName mapping
+        if (mappings.serviceName) {
+          cy.getElementByTestId('schemaMappingSelect-otelLogs-serviceName')
+            .should('be.visible')
+            .select(mappings.serviceName);
+        }
+
+        // Configure timestamp mapping
+        if (mappings.timeField) {
+          cy.getElementByTestId('schemaMappingSelect-otelLogs-timestamp')
+            .should('be.visible')
+            .select(mappings.timeField);
+        }
+      }
     }
 
     // Step 12 - Set up intercept to capture dataset creation response
