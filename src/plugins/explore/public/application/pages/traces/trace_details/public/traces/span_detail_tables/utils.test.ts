@@ -214,13 +214,13 @@ describe('isStatusMatch', () => {
     expect(pplResolveHelpers.isSpanError).toHaveBeenCalledWith(mockSpan);
   });
 
-  it('should return true for status.code 1 when span is OK', () => {
-    jest.spyOn(pplResolveHelpers, 'isSpanOk').mockReturnValue(true);
+  it('should return true for status.code 1 when span is OK (not Error)', () => {
+    jest.spyOn(pplResolveHelpers, 'isSpanError').mockReturnValue(false);
 
     const result = isStatusMatch(mockSpan, 'status.code', 1);
 
     expect(result).toBe(true);
-    expect(pplResolveHelpers.isSpanOk).toHaveBeenCalledWith(mockSpan);
+    expect(pplResolveHelpers.isSpanError).toHaveBeenCalledWith(mockSpan);
   });
 
   it('should return true for status.code 0 when extractStatusCode returns 0', () => {

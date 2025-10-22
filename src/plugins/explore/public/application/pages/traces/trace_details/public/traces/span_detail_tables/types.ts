@@ -31,6 +31,7 @@ export interface SpanTableProps {
   servicesInOrder?: string[];
   setIsServiceLegendOpen?: (isOpen: boolean) => void;
   isServiceLegendOpen?: boolean;
+  isFlyoutPanel?: boolean;
 }
 
 export interface SpanSearchParams {

@@ -20,8 +20,9 @@ import { SpanStatusFilter } from './span_status_filter';
 
 export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
   const { availableWidth, openFlyout, colorMap, servicesInOrder = [] } = props;
-  const [items, setItems] = useState<Span[]>([]);
   const [allSpans, setAllSpans] = useState<Span[]>([]);
+  const [spans, setSpans] = useState<Span[]>([]);
+  const [items, setItems] = useState<Span[]>([]);
   const [_total, setTotal] = useState(0);
   const [expandedRows, setExpandedRows] = useState(new Set<string>());
   const [isSpansTableDataLoading, setIsSpansTableDataLoading] = useState(false);
@@ -33,14 +34,15 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     try {
       const hits = parseHits(props.payloadData);
       setAllSpans(hits);
-      const spans = applySpanFilters(hits, props.filters);
+      const filteredSpans = applySpanFilters(hits, props.filters);
+      setSpans(filteredSpans);
 
-      const hierarchy = buildHierarchy(spans);
+      const hierarchy = buildHierarchy(filteredSpans);
       setItems(hierarchy);
       setTotal(hierarchy.length);
 
       // Auto-expand all spans by default to show the complete tree structure
-      const allSpanIds = gatherAllSpanIds(hierarchy);
+      const allSpanIds = new Set(filteredSpans.map((span) => span.spanId));
       setExpandedRows(allSpanIds);
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -64,17 +66,17 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     }
   };
 
-  const buildHierarchy = (spans: Span[]): Span[] => {
+  const buildHierarchy = (spanList: Span[]): Span[] => {
     const spanMap: SpanMap = {};
 
-    spans.forEach((span) => {
+    spanList.forEach((span) => {
       spanMap[span.spanId] = { ...span, children: [] };
     });
 
     const rootSpans: Span[] = [];
     const alreadyAddedRootSpans: Set<string> = new Set();
 
-    spans.forEach((span) => {
+    spanList.forEach((span) => {
       // Data Prepper
       if (span.parentSpanId && spanMap[span.parentSpanId]) {
         spanMap[span.parentSpanId].children.push(spanMap[span.spanId]);
@@ -86,8 +88,8 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     return rootSpans;
   };
 
-  const flattenHierarchy = (spans: Span[], level = 0, isParentExpanded = true): Span[] => {
-    return spans.flatMap((span) => {
+  const flattenHierarchy = (spanList: Span[], level = 0, isParentExpanded = true): Span[] => {
+    return spanList.flatMap((span) => {
       const isExpanded = expandedRows.has(span.spanId);
       const shouldShow = level === 0 || isParentExpanded;
 
@@ -104,20 +106,6 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     availableWidth,
   ]);
   const visibleColumns = useMemo(() => columns.map(({ id }) => id), [columns]);
-
-  const gatherAllSpanIds = (spans: Span[]): Set<string> => {
-    const allSpanIds = new Set<string>();
-    const gather = (spanList: Span[]) => {
-      spanList.forEach((span) => {
-        allSpanIds.add(span.spanId);
-        if (span.children.length > 0) {
-          gather(span.children);
-        }
-      });
-    };
-    gather(spans);
-    return allSpanIds;
-  };
 
   const renderCellValue = useCallback(
     ({ rowIndex, columnId, disableInteractions, setCellProps }) => {
@@ -148,38 +136,40 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     [flattenedItems, expandedRows, openFlyout, traceTimeRange, colorMap]
   );
 
-  const toolbarButtons = [
-    <EuiButtonEmpty
-      size="xs"
-      onClick={() => setExpandedRows(gatherAllSpanIds(items))}
-      key="expandAll"
-      color="text"
-      iconType="expand"
-      data-test-subj="treeExpandAll"
-    >
-      {i18n.translate('explore.spanDetailTable.button.expandAll', {
-        defaultMessage: 'Expand all',
-      })}
-    </EuiButtonEmpty>,
-    <EuiButtonEmpty
-      size="xs"
-      onClick={() => setExpandedRows(new Set())}
-      key="collapseAll"
-      color="text"
-      iconType="minimize"
-      data-test-subj="treeCollapseAll"
-    >
-      {i18n.translate('explore.spanDetailTable.button.collapseAll', {
-        defaultMessage: 'Collapse all',
-      })}
-    </EuiButtonEmpty>,
-  ];
+  const toolbarButtons = useMemo(() => {
+    return [
+      <EuiButtonEmpty
+        size="xs"
+        onClick={() => setExpandedRows(new Set(spans.map((span) => span.spanId)))}
+        key="expandAll"
+        color="text"
+        iconType="expand"
+        data-test-subj="treeExpandAll"
+      >
+        {i18n.translate('explore.spanDetailTable.button.expandAll', {
+          defaultMessage: 'Expand all',
+        })}
+      </EuiButtonEmpty>,
+      <EuiButtonEmpty
+        size="xs"
+        onClick={() => setExpandedRows(new Set())}
+        key="collapseAll"
+        color="text"
+        iconType="minimize"
+        data-test-subj="treeCollapseAll"
+      >
+        {i18n.translate('explore.spanDetailTable.button.collapseAll', {
+          defaultMessage: 'Collapse all',
+        })}
+      </EuiButtonEmpty>,
+    ];
+  }, [spans]);
 
   const secondaryToolbar = [
-    SpanStatusFilter({
-      spanFilters: props.filters,
-      setSpanFiltersWithStorage: props.setSpanFiltersWithStorage || (() => {}),
-    }),
+    <SpanStatusFilter
+      spanFilters={props.filters}
+      setSpanFiltersWithStorage={props.setSpanFiltersWithStorage!}
+    />,
     <ServiceLegendButton
       key="serviceLegend"
       servicesInOrder={servicesInOrder}
@@ -190,9 +180,7 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
   // Temporary solution for variable table height based on window size.
   //  More complex availableHeight calculations needed for table height to not only auto-scale with number of rows,
   //  but also be constrained by available height within container or page due to other elements.
-  const tableHeight = useMemo(() => (flattenedItems.length > 10 ? '70vh' : 'auto'), [
-    flattenedItems.length,
-  ]);
+  const tableHeight = props.isFlyoutPanel ? '30vh' : '80vh';
 
   return (
     <div data-test-subj="span-hierarchy-table">

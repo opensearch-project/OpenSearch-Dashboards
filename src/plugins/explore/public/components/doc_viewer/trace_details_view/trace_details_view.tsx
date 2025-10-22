@@ -240,6 +240,7 @@ export function TraceDetailsView({ hit }: DocViewRenderProps) {
           selectedSpanId={selectedSpanId || traceInfo.spanId || undefined}
           activeView="timeline"
           isEmbedded={true}
+          isFlyoutPanel={true}
         />
       ) : (
         <div className="exploreTraceDetailsView__emptyState">
