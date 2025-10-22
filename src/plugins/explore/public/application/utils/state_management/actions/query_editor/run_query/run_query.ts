@@ -7,13 +7,10 @@ import { AppDispatch, RootState } from '../../../store';
 import {
   clearResults,
   setQueryStringWithHistory,
-  setActiveTab,
   setQueryExecutionButtonStatus,
-} from '../../../slices';
-import {
   clearQueryStatusMap,
   setIsQueryEditorDirty,
-} from '../../../slices/query_editor/query_editor_slice';
+} from '../../../slices';
 import { executeQueries } from '../../query_actions';
 import { ExploreServices } from '../../../../../../types';
 import { detectAndSetOptimalTab } from '../../detect_optimal_tab';

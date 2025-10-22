@@ -23,7 +23,7 @@ export interface SavedExplore
   > {
   searchSource: ISearchSource; // This is optional in SavedObject, but required for SavedSearch
   description?: string;
-  legacyState?: string; // Serialized legacy state (columns, sort, interval, etc.)
+  legacyState?: string; // Serialized legacy state (interval, etc.)
   uiState?: string; // Serialized UI state
   queryState?: string; // Serialized query state
   version?: number;

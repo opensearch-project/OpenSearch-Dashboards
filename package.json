@@ -234,6 +234,8 @@
     "@osd/ui-framework": "1.0.0",
     "@osd/ui-shared-deps": "1.0.0",
     "@reduxjs/toolkit": "^1.6.1",
+    "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.13.12",
     "@types/ndjson": "^2.0.4",
     "@types/yauzl": "^2.9.1",
     "@xyflow/react": "^12.8.2",

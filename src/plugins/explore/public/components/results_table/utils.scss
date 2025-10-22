@@ -1,0 +1,22 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@mixin border-on-hover {
+  $self: &;
+
+  border: 2px solid transparent;
+
+  &--__OSDINTERNAL__actions {
+    border-color: transparent !important;
+  }
+
+  &:hover:not(#{$self}--disableHover) {
+    border-color: $euiColorPrimary;
+  }
+
+  &--showBorder {
+    border-color: $euiColorPrimary;
+  }
+}

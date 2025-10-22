@@ -14,6 +14,7 @@ export const selectUIState = (state: RootState) => state.ui;
 const selectResultsState = (state: RootState) => state.results;
 const selectLegacyState = (state: RootState) => state.legacy;
 export const selectTabState = (state: RootState) => state.tab;
+export const selectTabLogsState = (state: RootState) => state.tab.logs;
 
 /**
  * Query selectors
@@ -65,16 +66,28 @@ export const selectResults = createSelector([selectResultsState], (resultsState)
 /**
  * Legacy selectors
  */
-export const selectColumns = createSelector(
-  [selectLegacyState],
-  (legacyState) => legacyState.columns
-);
-
-export const selectSort = createSelector([selectLegacyState], (legacyState) => legacyState.sort);
-
 export const selectSavedSearch = createSelector(
   [selectLegacyState],
   (legacyState) => legacyState.savedSearch
+);
+
+/**
+ * Tab selectors
+ */
+
+export const selectTabLogsExpandedRowsMap = createSelector(
+  [selectTabLogsState],
+  (logsState) => logsState.expandedRowsMap
+);
+
+export const selectTabLogsSelectedRowsMap = createSelector(
+  [selectTabLogsState],
+  (logsState) => logsState.selectedRowsMap
+);
+
+export const selectVisibleColumnNames = createSelector(
+  [selectTabLogsState],
+  (logsState) => logsState.visibleColumnNames
 );
 
 export * from './query_editor';
