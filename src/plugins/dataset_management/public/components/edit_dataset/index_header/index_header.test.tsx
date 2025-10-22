@@ -176,4 +176,75 @@ describe('IndexHeader at new home page', () => {
 
     expect(queryByText('Set as default index')).toBeNull();
   });
+
+  it('renders dataset title when no displayName exists', () => {
+    const mockHeaderControl = () => null;
+    const setDefault = jest.fn();
+    const refreshFields = jest.fn();
+    const deleteDatasetClick = jest.fn();
+    const { Provider } = createOpenSearchDashboardsReactContext({
+      ...mockCoreStart,
+      ...{
+        uiSettings: { ...mockCoreStart.uiSettings, get: jest.fn().mockReturnValue(false) },
+        navigationUI: {
+          HeaderControl: mockHeaderControl,
+        },
+      },
+    });
+
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <Provider>
+          <IndexHeader
+            setDefault={setDefault}
+            refreshFields={refreshFields}
+            deleteDatasetClick={deleteDatasetClick}
+            dataset={dataset}
+            defaultIndex="no-default-index"
+          />
+        </Provider>
+      </IntlProvider>
+    );
+
+    const titleElement = getByTestId('datasetTitle');
+    expect(titleElement).toHaveTextContent('Test Index Pattern');
+  });
+
+  it('renders dataset displayName when it exists', () => {
+    const datasetWithDisplayName = {
+      ...dataset,
+      displayName: 'Custom Display Name',
+    };
+
+    const mockHeaderControl = () => null;
+    const setDefault = jest.fn();
+    const refreshFields = jest.fn();
+    const deleteDatasetClick = jest.fn();
+    const { Provider } = createOpenSearchDashboardsReactContext({
+      ...mockCoreStart,
+      ...{
+        uiSettings: { ...mockCoreStart.uiSettings, get: jest.fn().mockReturnValue(false) },
+        navigationUI: {
+          HeaderControl: mockHeaderControl,
+        },
+      },
+    });
+
+    const { getByTestId } = render(
+      <IntlProvider locale="en">
+        <Provider>
+          <IndexHeader
+            setDefault={setDefault}
+            refreshFields={refreshFields}
+            deleteDatasetClick={deleteDatasetClick}
+            dataset={datasetWithDisplayName}
+            defaultIndex="no-default-index"
+          />
+        </Provider>
+      </IntlProvider>
+    );
+
+    const titleElement = getByTestId('datasetTitle');
+    expect(titleElement).toHaveTextContent('Custom Display Name');
+  });
 });

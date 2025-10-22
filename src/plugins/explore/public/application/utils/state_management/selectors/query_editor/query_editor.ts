@@ -28,10 +28,10 @@ export const selectExecutionStatus = createSelector(
   (overallStatus) => overallStatus.status
 );
 
-export const selectIsLoading = createSelector(
-  [selectOverallQueryStatus],
-  (overallStatus) => overallStatus.status === QueryExecutionStatus.LOADING
-);
+export const selectIsLoading = createSelector([selectOverallQueryStatus], (overallStatus) => {
+  const isLoading = overallStatus.status === QueryExecutionStatus.LOADING;
+  return isLoading;
+});
 
 export const selectPromptModeIsAvailable = createSelector(
   [selectState],
@@ -74,4 +74,18 @@ export const selectQueryExecutionButtonStatus = createSelector(
 export const selectIsQueryEditorDirty = createSelector(
   [selectState],
   (state) => state.isQueryEditorDirty
+);
+
+export const selectHasUserInitiatedQuery = createSelector([selectState], (state) => {
+  return state.hasUserInitiatedQuery;
+});
+
+export const selectShouldShowCancelButton = createSelector(
+  [selectIsLoading, selectHasUserInitiatedQuery, selectOverallQueryStatus],
+  (isLoading, hasUserInitiatedQuery, _overallQueryStatus) => {
+    // Check if query is loading
+
+    const shouldShow = isLoading && hasUserInitiatedQuery;
+    return shouldShow;
+  }
 );
