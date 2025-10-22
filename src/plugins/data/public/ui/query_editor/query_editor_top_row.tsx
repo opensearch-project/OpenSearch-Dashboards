@@ -81,7 +81,8 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
   // Use custom hook for cancel button timing logic
   const shouldShowCancelButton = useCancelButtonTiming(
-    Boolean(props.isQueryRunning && props.showCancelButton)
+    Boolean(props.isQueryRunning && props.showCancelButton),
+    Boolean(props.isQueryRunning && props.showCancelButton) // Only show initially if both conditions are true
   );
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName, data, keyboardShortcut } = opensearchDashboards.services;
