@@ -83,6 +83,7 @@ export const selectHasUserInitiatedQuery = createSelector([selectState], (state)
 export const selectShouldShowCancelButton = createSelector(
   [selectIsLoading, selectHasUserInitiatedQuery],
   (isLoading, hasUserInitiatedQuery) => {
+    // Show cancel button when query is actively loading and user has initiated a query
     const shouldShow = isLoading && hasUserInitiatedQuery;
     return shouldShow;
   }

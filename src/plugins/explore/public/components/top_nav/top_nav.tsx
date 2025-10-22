@@ -32,6 +32,7 @@ import {
   setHasUserInitiatedQuery,
   setOverallQueryStatus,
 } from '../../application/utils/state_management/slices/query_editor/query_editor_slice';
+import { clearResults } from '../../application/utils/state_management/slices';
 import { useClearEditors, useEditorRef } from '../../application/hooks';
 import { onEditorRunActionCreator } from '../../application/utils/state_management/actions/query_editor/on_editor_run/on_editor_run';
 import { abortAllActiveQueries } from '../../application/utils/state_management/actions/query_actions';
@@ -173,6 +174,8 @@ export const TopNav = ({ setHeaderActionMenu = () => {}, savedExplore }: TopNavP
   const handleQueryCancel = useCallback(() => {
     abortAllActiveQueries();
     dispatch(setHasUserInitiatedQuery(false));
+    // Clear all cached results to ensure refresh works properly after cancel
+    dispatch(clearResults());
     // Reset overall query status to UNINITIALIZED to stop spinner immediately
     dispatch(
       setOverallQueryStatus({

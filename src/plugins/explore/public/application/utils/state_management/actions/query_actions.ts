@@ -234,11 +234,18 @@ export const executeQueries = createAsyncThunk<
   const histogramCacheKey = prepareHistogramCacheKey(query, !!breakdownField);
 
   // Check what needs execution for core queries
-  const needsDataTableQuery = !results[dataTableCacheKey];
-  const needsHistogramQuery = !results[histogramCacheKey];
+  // If results exist but query status is UNINITIALIZED (after cancel), we need to re-execute
+  const dataTableQueryStatus = state.queryEditor.queryStatusMap[dataTableCacheKey];
+  const histogramQueryStatus = state.queryEditor.queryStatusMap[histogramCacheKey];
+
+  const needsDataTableQuery =
+    !results[dataTableCacheKey] ||
+    dataTableQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
+  const needsHistogramQuery =
+    !results[histogramCacheKey] ||
+    histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
 
   const promises = [];
-
   // Execute query without aggregations
   if (needsDataTableQuery) {
     promises.push(
