@@ -127,9 +127,8 @@ function wrapSearchBarInContext(testProps: any) {
       ...startMock.uiSettings,
       get: jest.fn((key) => {
         if (key === 'query:enhancements:enabled') return true;
-        if (key === 'timepicker:quickRanges') return [
-          { from: 'now-15m', to: 'now', display: 'Last 15 minutes' }
-        ];
+        if (key === 'timepicker:quickRanges')
+          return [{ from: 'now-15m', to: 'now', display: 'Last 15 minutes' }];
         return startMock.uiSettings.get(key);
       }),
     },
