@@ -9,7 +9,8 @@ import { AppDispatch, RootState } from '../../../store';
 import { EditorMode } from '../../../types';
 import { callAgentActionCreator } from './call_agent';
 import { runQueryActionCreator } from '../run_query';
-import { clearLastExecutedData, setHasUserInitiatedQuery } from '../../../slices';
+import { clearLastExecutedData } from '../../../slices';
+import { setHasUserInitiatedQuery } from '../../../slices/query_editor/query_editor_slice';
 
 // This is used when user submits a query or a prompt. This called runQueryActionCreator under the hood
 export const onEditorRunActionCreator = (services: ExploreServices, editorText: string) => (
