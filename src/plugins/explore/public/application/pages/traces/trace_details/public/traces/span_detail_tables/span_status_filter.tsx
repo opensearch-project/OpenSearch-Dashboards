@@ -21,8 +21,10 @@ export interface SpanStatusFilterProps {
   setSpanFiltersWithStorage: (filters: SpanFilter[]) => void;
 }
 
-export const SpanStatusFilter = (props: SpanStatusFilterProps) => {
-  const { spanFilters, setSpanFiltersWithStorage } = props;
+export const SpanStatusFilter: React.FC<SpanStatusFilterProps> = ({
+  spanFilters,
+  setSpanFiltersWithStorage,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const [options, setOptions] = useState<EuiSelectableOption[]>([
@@ -164,6 +166,7 @@ export const SpanStatusFilter = (props: SpanStatusFilterProps) => {
         options={options}
         onChange={handleChange}
         allowExclusions={false}
+        singleSelection={true}
         listProps={{
           onFocusBadge: false,
         }}

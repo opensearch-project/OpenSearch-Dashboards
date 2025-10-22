@@ -130,7 +130,9 @@ describe('Utils - Histogram Breakdown Support', () => {
       });
 
       const result = utils.buildPPLHistogramQuery(query, histogramConfig);
-      expect(result).toBe('source=logs | timechart span=1h limit=4 count() by status');
+      expect(result).toBe(
+        'source=logs | rename @timestamp as @timestamp | timechart span=1h limit=4 count() by status'
+      );
     });
 
     it('should build stats query without breakdown field', () => {

@@ -282,13 +282,6 @@ export function isSpanError(span: any): boolean {
   return false;
 }
 
-export function isSpanOk(span: any): boolean {
-  if (!span) return false;
-
-  // If it's an error, it's not OK
-  return !isSpanError(span);
-}
-
 function extractHttpStatusCode(span: any): number | undefined {
   if (!span) return undefined;
 

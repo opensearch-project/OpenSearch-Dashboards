@@ -110,7 +110,7 @@ export const buildPPLHistogramQuery = (query: string, histogramConfig: Histogram
   }
 
   if (breakdownField) {
-    return `${query} | timechart span=${finalInterval} limit=4 count() by ${breakdownField}`;
+    return `${query} | rename ${timeFieldName} as @timestamp | timechart span=${finalInterval} limit=4 count() by ${breakdownField}`;
   } else {
     return `${query} | stats count() by span(${timeFieldName}, ${finalInterval})`;
   }

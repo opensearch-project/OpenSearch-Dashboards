@@ -43,7 +43,7 @@ export interface UpdateVisualizationProps {
 //   }),
 // };
 
-export const VisualizationContainer = () => {
+export const VisualizationContainer = React.memo(() => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { results } = useTabResults();
   const searchContext = useSearchContext();
@@ -98,4 +98,4 @@ export const VisualizationContainer = () => {
       </EuiPanel>
     </div>
   );
-};
+});
