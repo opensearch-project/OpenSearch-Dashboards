@@ -12,13 +12,22 @@ import { QueryExecutionButton } from './query_execution_button';
 import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
 import { rootReducer } from '../../../application/utils/state_management/store';
 import { isTimeRangeInvalid } from '../utils/validate_time_range';
+import { useCancelButtonTiming } from '../../../../../data/public/ui/hooks/use_cancel_button_timing';
 
 // Mock the validation function
 jest.mock('../utils/validate_time_range', () => ({
   isTimeRangeInvalid: jest.fn(() => false),
 }));
 
+// Mock the cancel button timing hook
+jest.mock('../../../../../data/public/ui/hooks/use_cancel_button_timing', () => ({
+  useCancelButtonTiming: jest.fn((shouldShow: boolean) => shouldShow),
+}));
+
 const mockIsTimeRangeInvalid = isTimeRangeInvalid as jest.MockedFunction<typeof isTimeRangeInvalid>;
+const mockUseCancelButtonTiming = useCancelButtonTiming as jest.MockedFunction<
+  typeof useCancelButtonTiming
+>;
 
 describe('QueryExecutionButton', () => {
   const mockTimefilter = {
@@ -90,6 +99,7 @@ describe('QueryExecutionButton', () => {
           queryExecutionButtonStatus: 'REFRESH' as const,
           dateRange: undefined,
           isQueryEditorDirty: false,
+          hasUserInitiatedQuery: false,
           ...initialQueryEditorState,
         },
       },
@@ -109,6 +119,8 @@ describe('QueryExecutionButton', () => {
     jest.clearAllMocks();
     // Reset the mock validation function
     mockIsTimeRangeInvalid.mockReturnValue(false);
+    // Reset the mock hook to default behavior (immediate return)
+    mockUseCancelButtonTiming.mockImplementation((shouldShow: boolean) => shouldShow);
   });
 
   it('renders with correct props', () => {
@@ -235,5 +247,201 @@ describe('QueryExecutionButton', () => {
     expect(screen.getByText('Update')).toBeInTheDocument();
     // Verify the button has the primary color (blue) for consistent theming
     expect(button).toHaveClass('euiButton--primary');
+  });
+
+  describe('Cancel Button Functionality', () => {
+    it('does not render cancel button when not loading and no user initiated query', () => {
+      renderWithProvider(<QueryExecutionButton />, {
+        overallQueryStatus: {
+          status: QueryExecutionStatus.READY,
+          elapsedMs: 100,
+          startTime: Date.now() - 100,
+        },
+        hasUserInitiatedQuery: false,
+      });
+
+      expect(screen.queryByTestId('exploreQueryCancelButton')).not.toBeInTheDocument();
+    });
+
+    it('does not render cancel button when loading but no user initiated query', () => {
+      renderWithProvider(<QueryExecutionButton />, {
+        overallQueryStatus: {
+          status: QueryExecutionStatus.LOADING,
+          elapsedMs: undefined,
+          startTime: Date.now(),
+        },
+        hasUserInitiatedQuery: false,
+      });
+
+      expect(screen.queryByTestId('exploreQueryCancelButton')).not.toBeInTheDocument();
+    });
+
+    it('renders cancel button when loading and user initiated query', () => {
+      renderWithProvider(<QueryExecutionButton />, {
+        overallQueryStatus: {
+          status: QueryExecutionStatus.LOADING,
+          elapsedMs: undefined,
+          startTime: Date.now(),
+        },
+        hasUserInitiatedQuery: true,
+      });
+
+      expect(screen.getByTestId('exploreQueryCancelButton')).toBeInTheDocument();
+    });
+
+    it('calls onCancel when cancel button is clicked', () => {
+      const mockOnCancel = jest.fn();
+
+      renderWithProvider(<QueryExecutionButton onCancel={mockOnCancel} />, {
+        overallQueryStatus: {
+          status: QueryExecutionStatus.LOADING,
+          elapsedMs: undefined,
+          startTime: Date.now(),
+        },
+        hasUserInitiatedQuery: true,
+      });
+
+      const cancelButton = screen.getByTestId('exploreQueryCancelButton');
+      cancelButton.click();
+
+      expect(mockOnCancel).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not throw error when cancel button is clicked without onCancel handler', () => {
+      renderWithProvider(<QueryExecutionButton />, {
+        overallQueryStatus: {
+          status: QueryExecutionStatus.LOADING,
+          elapsedMs: undefined,
+          startTime: Date.now(),
+        },
+        hasUserInitiatedQuery: true,
+      });
+
+      const cancelButton = screen.getByTestId('exploreQueryCancelButton');
+
+      expect(() => {
+        cancelButton.click();
+      }).not.toThrow();
+    });
+
+    it('renders both execution and cancel buttons when query is loading and user initiated', () => {
+      renderWithProvider(<QueryExecutionButton />, {
+        overallQueryStatus: {
+          status: QueryExecutionStatus.LOADING,
+          elapsedMs: undefined,
+          startTime: Date.now(),
+        },
+        hasUserInitiatedQuery: true,
+      });
+
+      // Both buttons should be present
+      expect(screen.getByTestId('exploreQueryExecutionButton')).toBeInTheDocument();
+      expect(screen.getByTestId('exploreQueryCancelButton')).toBeInTheDocument();
+
+      // Should be wrapped in a flex group
+      expect(
+        screen.getByTestId('exploreQueryExecutionButton').closest('.euiFlexGroup')
+      ).toBeInTheDocument();
+    });
+
+    it('renders only execution button when query is not loading', () => {
+      renderWithProvider(<QueryExecutionButton />, {
+        overallQueryStatus: {
+          status: QueryExecutionStatus.READY,
+          elapsedMs: 100,
+          startTime: Date.now() - 100,
+        },
+        hasUserInitiatedQuery: true,
+      });
+
+      expect(screen.getByTestId('exploreQueryExecutionButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('exploreQueryCancelButton')).not.toBeInTheDocument();
+    });
+
+    it('cancel button has correct accessibility attributes', () => {
+      renderWithProvider(<QueryExecutionButton />, {
+        overallQueryStatus: {
+          status: QueryExecutionStatus.LOADING,
+          elapsedMs: undefined,
+          startTime: Date.now(),
+        },
+        hasUserInitiatedQuery: true,
+      });
+
+      const cancelButton = screen.getByTestId('exploreQueryCancelButton');
+
+      expect(cancelButton.tagName).toBe('BUTTON');
+      expect(cancelButton).toHaveAttribute('type', 'button');
+      expect(cancelButton).toHaveAttribute('aria-label', 'Cancel query');
+    });
+
+    it('cancel button has correct styling classes', () => {
+      renderWithProvider(<QueryExecutionButton />, {
+        overallQueryStatus: {
+          status: QueryExecutionStatus.LOADING,
+          elapsedMs: undefined,
+          startTime: Date.now(),
+        },
+        hasUserInitiatedQuery: true,
+      });
+
+      const cancelButton = screen.getByTestId('exploreQueryCancelButton');
+
+      expect(cancelButton).toHaveClass('euiButtonIcon');
+      expect(cancelButton).toHaveClass('osdQueryEditor__cancelButton');
+    });
+
+    it('executes onClick handler even when cancel functionality is present', () => {
+      const mockOnClick = jest.fn();
+
+      renderWithProvider(<QueryExecutionButton onClick={mockOnClick} />, {
+        overallQueryStatus: {
+          status: QueryExecutionStatus.LOADING,
+          elapsedMs: undefined,
+          startTime: Date.now(),
+        },
+        hasUserInitiatedQuery: true,
+      });
+
+      const executionButton = screen.getByTestId('exploreQueryExecutionButton');
+      executionButton.click();
+
+      expect(mockOnClick).toHaveBeenCalledTimes(1);
+    });
+
+    it('uses the cancel button timing hook correctly', () => {
+      // Mock the hook to return false initially (not loading)
+      mockUseCancelButtonTiming.mockReturnValue(false);
+
+      renderWithProvider(<QueryExecutionButton />, {
+        overallQueryStatus: {
+          status: QueryExecutionStatus.READY,
+          elapsedMs: 100,
+          startTime: Date.now() - 100,
+        },
+        hasUserInitiatedQuery: true,
+      });
+
+      // Should not show cancel button when hook returns false
+      expect(screen.queryByTestId('exploreQueryCancelButton')).not.toBeInTheDocument();
+
+      // Now mock the hook to return true (loading state)
+      mockUseCancelButtonTiming.mockReturnValue(true);
+
+      renderWithProvider(<QueryExecutionButton />, {
+        overallQueryStatus: {
+          status: QueryExecutionStatus.LOADING,
+          elapsedMs: undefined,
+          startTime: Date.now(),
+        },
+        hasUserInitiatedQuery: true,
+      });
+
+      // Should show cancel button when hook returns true
+      expect(screen.getByTestId('exploreQueryCancelButton')).toBeInTheDocument();
+
+      // Verify the hook was called with the correct shouldShow value
+      expect(mockUseCancelButtonTiming).toHaveBeenCalledWith(true);
+    });
   });
 });
