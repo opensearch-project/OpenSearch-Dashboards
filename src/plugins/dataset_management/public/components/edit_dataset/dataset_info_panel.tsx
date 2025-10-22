@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   EuiDescriptionList,
   EuiPanel,
@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataView, getSchemaConfigs } from '../../../../data/public';
+import { useDataSourceTitle } from '../hooks/use_data_source_title';
 import './dataset_info_panel.scss';
 
 interface DatasetInfoPanelProps {
@@ -26,29 +27,10 @@ export const DatasetInfoPanel: React.FC<DatasetInfoPanelProps> = ({
   dataset,
   editConfiguration,
 }) => {
-  const [dataSourceTitle, setDataSourceTitle] = useState<string>('');
-
-  useEffect(() => {
-    const fetchDataSourceTitle = async () => {
-      if (dataset.dataSourceRef?.id) {
-        try {
-          const dataSourceSavedObject = await dataset.savedObjectsClient.get(
-            'data-source',
-            dataset.dataSourceRef.id
-          );
-          const attributes = dataSourceSavedObject.attributes as any;
-          setDataSourceTitle(attributes.title || dataset.dataSourceRef.id);
-        } catch (error) {
-          // Fallback to ID if fetch fails
-          setDataSourceTitle(dataset.dataSourceRef.id);
-        }
-      } else {
-        setDataSourceTitle('N/A');
-      }
-    };
-
-    fetchDataSourceTitle();
-  }, [dataset.dataSourceRef?.id, dataset.savedObjectsClient]);
+  const { dataSourceTitle } = useDataSourceTitle(
+    dataset.savedObjectsClient,
+    dataset.dataSourceRef?.id
+  );
 
   // Get data source icon based on type
   const getDataSourceIcon = () => {
@@ -60,14 +42,16 @@ export const DatasetInfoPanel: React.FC<DatasetInfoPanelProps> = ({
   // Format data scope (data source + title on separate lines)
   const formatDataScope = () => {
     const iconType = getDataSourceIcon();
-    const dataSourceName = dataSourceTitle || 'Loading...';
+    const dataSourceName = dataSourceTitle || 'N/A';
 
     return (
       <>
-        <div>
-          <EuiIcon type={iconType} size="m" style={{ marginRight: '8px' }} />
-          {dataSourceName}
-        </div>
+        {dataset.dataSourceRef?.id && (
+          <div>
+            <EuiIcon type={iconType} size="m" style={{ marginRight: '8px' }} />
+            {dataSourceName}
+          </div>
+        )}
         <div>{dataset.title || 'N/A'}</div>
       </>
     );
