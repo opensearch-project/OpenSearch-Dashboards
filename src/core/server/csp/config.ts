@@ -43,7 +43,7 @@ export const config = {
     rules: schema.arrayOf(schema.string(), {
       defaultValue: [
         `script-src 'unsafe-eval' 'self'`,
-        `worker-src blob: 'self'`,
+        `worker-src 'self'`,
         `style-src 'unsafe-inline' 'self'`,
       ],
     }),
