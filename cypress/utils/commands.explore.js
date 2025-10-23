@@ -510,12 +510,14 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName) =
 });
 
 cy.explore.add('setupWorkspaceAndDataSourceWithTraces', (workspaceName, traceIndices) => {
-  // Load trace test data
-  cy.osd.setupTestData(
-    PATHS.SECONDARY_ENGINE,
-    traceIndices.map((index) => `cypress/fixtures/explore/traces/${index}.mapping.json`),
-    traceIndices.map((index) => `cypress/fixtures/explore/traces/${index}.data.ndjson`)
-  );
+  // Load trace test data for each index individually
+  traceIndices.forEach((index) => {
+    cy.osd.setupTestData(
+      PATHS.SECONDARY_ENGINE,
+      [`cypress/fixtures/explore/traces/${index}.mapping.json`],
+      [`cypress/fixtures/explore/traces/${index}.data.ndjson`]
+    );
+  });
 
   // Add data source
   cy.osd.addDataSource({
