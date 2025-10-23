@@ -16,14 +16,14 @@ describe('breadcrumbs', () => {
     it('returns breadcrumbs without workspace name', () => {
       const breadcrumbs = getListBreadcrumbs();
       expect(breadcrumbs).toHaveLength(1);
-      expect(breadcrumbs[0].text).toBe('Index patterns');
+      expect(breadcrumbs[0].text).toBe('Datasets');
       expect(breadcrumbs[0].href).toBe('/');
     });
 
     it('returns breadcrumbs with workspace name', () => {
       const breadcrumbs = getListBreadcrumbs('My Workspace');
       expect(breadcrumbs).toHaveLength(1);
-      expect(breadcrumbs[0].text).toBe('Workspace index patterns');
+      expect(breadcrumbs[0].text).toBe('Workspace datasets');
       expect(breadcrumbs[0].href).toBe('/');
     });
   });
@@ -50,7 +50,7 @@ describe('breadcrumbs', () => {
 
     it('includes list breadcrumbs as first item', () => {
       const breadcrumbs = getEditBreadcrumbs(mockDataset);
-      expect(breadcrumbs[0].text).toBe('Index patterns');
+      expect(breadcrumbs[0].text).toBe('Datasets');
       expect(breadcrumbs[0].href).toBe('/');
     });
   });
