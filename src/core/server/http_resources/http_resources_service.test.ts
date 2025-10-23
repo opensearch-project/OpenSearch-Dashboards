@@ -101,7 +101,7 @@ describe('HttpResources service', () => {
             headers: {
               'x-opensearch-dashboards': '42',
               'content-security-policy':
-                "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
             },
           });
         });
@@ -150,7 +150,7 @@ describe('HttpResources service', () => {
             headers: {
               'x-opensearch-dashboards': '42',
               'content-security-policy':
-                "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
             },
           });
         });
@@ -173,7 +173,7 @@ describe('HttpResources service', () => {
             headers: {
               'content-type': 'text/html',
               'content-security-policy':
-                "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
             },
           });
         });
@@ -205,7 +205,7 @@ describe('HttpResources service', () => {
               'content-type': 'text/html',
               'x-opensearch-dashboards': '42',
               'content-security-policy':
-                "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
             },
           });
         });
@@ -228,7 +228,7 @@ describe('HttpResources service', () => {
             headers: {
               'content-type': 'text/javascript',
               'content-security-policy':
-                "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
             },
           });
         });
@@ -260,7 +260,7 @@ describe('HttpResources service', () => {
               'content-type': 'text/javascript',
               'x-opensearch-dashboards': '42',
               'content-security-policy':
-                "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
             },
           });
         });
