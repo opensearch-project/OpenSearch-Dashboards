@@ -36,7 +36,11 @@ const addThresholdTime = (currentTime: string, threshold: string): number | unde
   return date.getTime() + offset;
 };
 
-const disconnectValues = (next: string, last: string, disconnectThreshold?: string): string => {
+const generatedDisconnectTimestamp = (
+  next: string,
+  last: string,
+  disconnectThreshold?: string
+): string => {
   // Determines a "disconnect point" between two timestamps based on an optional threshold.
   const nextTime = new Date(next).getTime();
   const lastTimeWithThreshold = disconnectThreshold
@@ -50,19 +54,6 @@ const disconnectValues = (next: string, last: string, disconnectThreshold?: stri
   }
 
   return next;
-};
-
-const connectNullValue = (curr: string, end: string, connectThreshold: string) => {
-  // try to extend lastNotNull's timestamp forward,
-  // if the gap between lastNotNull and curr fits within connectThreshold, use currentTime, or use firstNullTime
-
-  const lastNotNullTimeAddThreshold = addThresholdTime(end, connectThreshold);
-
-  if (lastNotNullTimeAddThreshold && new Date(curr).getTime() < lastNotNullTimeAddThreshold) {
-    return curr;
-  }
-
-  return end;
 };
 
 const formatDuration = (ms: number) => {
@@ -478,7 +469,7 @@ export const mergeInAGroup = <T extends string | RangeValue>({
 }: MergeInAGroupOptions<T>) => {
   const flushBuffer = (nextTimestamp: string) => {
     if (storeState.buffer.length === 0) return;
-    const next = disconnectValues(
+    const next = generatedDisconnectTimestamp(
       nextTimestamp,
       storeState.buffer[storeState.buffer.length - 1][timestampField],
       disconnectThreshold
