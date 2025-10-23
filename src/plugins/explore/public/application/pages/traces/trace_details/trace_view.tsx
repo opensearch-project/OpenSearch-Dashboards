@@ -16,6 +16,7 @@ import {
   EuiBadge,
   EuiFlyoutHeader,
   EuiFlyoutBody,
+  EuiSpacer,
 } from '@elastic/eui';
 import './trace_view.scss';
 import { TraceTopNavMenu } from './public/top_nav_buttons';
@@ -217,7 +218,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     }
   }, [dataset, correlationService, data, traceId]);
 
-  const isLoading = prevTraceId !== traceId;
+  const isLoading = prevTraceId !== traceId && traceId !== undefined;
 
   useEffect(() => {
     const fetchData = async (filters: SpanFilter[] = []) => {
@@ -458,7 +459,21 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const renderTraceDetailsContent = () => {
     return (
       <>
-        {isLoading ? (
+        {!traceId ? (
+          <EuiPanel paddingSize="l">
+            <EuiText textAlign="center">
+              {i18n.translate('explore.traceView.noSpanSelected', {
+                defaultMessage: 'No span selected',
+              })}
+            </EuiText>
+            <EuiSpacer size="s" />
+            <EuiText textAlign="center" color="subdued" size="s">
+              {i18n.translate('explore.traceView.selectSpanMessage', {
+                defaultMessage: 'Please select a span to view details',
+              })}
+            </EuiText>
+          </EuiPanel>
+        ) : isLoading ? (
           <EuiPanel paddingSize="l">
             <div className="exploreTraceView__loadingContainer">
               <EuiLoadingSpinner size="xl" />
