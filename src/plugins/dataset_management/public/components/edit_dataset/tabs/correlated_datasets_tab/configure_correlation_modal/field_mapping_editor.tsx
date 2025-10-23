@@ -177,7 +177,8 @@ export const FieldMappingEditor: React.FC<FieldMappingEditorProps> = ({
                 dataView.id
               );
               const attributes = savedObject.attributes as any;
-              datasetTitle = attributes.title || dataView.title;
+              // Use displayName if available, fallback to title
+              datasetTitle = attributes.displayName || attributes.title || dataView.title;
             } catch (err) {
               // If fetch fails, use dataView.title
             }
