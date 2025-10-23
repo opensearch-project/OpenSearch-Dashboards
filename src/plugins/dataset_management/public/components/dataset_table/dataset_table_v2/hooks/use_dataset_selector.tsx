@@ -54,7 +54,7 @@ export const useDatasetSelector = ({
                     ),
                   });
                   data.dataViews.clearCache();
-                  historyPush(`/patterns/${query.dataset.id}`);
+                  historyPush(`/patterns/${encodeURIComponent(query.dataset.id)}`);
                 } catch (error) {
                   if (error instanceof DuplicateDataViewError) {
                     const confirmMessage = i18n.translate(
@@ -75,7 +75,7 @@ export const useDatasetSelector = ({
                     });
 
                     if (isConfirmed) {
-                      historyPush(`/patterns/${query.dataset.id}`);
+                      historyPush(`/patterns/${encodeURIComponent(query.dataset.id)}`);
                     }
                     return;
                   }
