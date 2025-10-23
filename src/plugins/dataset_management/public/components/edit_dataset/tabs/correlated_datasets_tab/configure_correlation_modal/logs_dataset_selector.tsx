@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataPublicPluginStart, DataView } from '../../../../../../../data/public';
 import { MAX_LOG_DATASETS_PER_CORRELATION } from '../../../../../types/correlations';
@@ -17,6 +17,21 @@ interface LogsDatasetSelectorProps {
   error?: string;
 }
 
+interface DatasetOptionData {
+  id: string;
+  displayName?: string;
+  title: string;
+}
+
+// Custom option component for rendering dataset options (simple single-line layout)
+const DatasetOption: React.FC<{ option: EuiComboBoxOptionOption<DatasetOptionData> }> = ({
+  option,
+}) => {
+  const displayName = option.value?.displayName || option.value?.title || option.label;
+
+  return <EuiText size="s">{displayName}</EuiText>;
+};
+
 export const LogsDatasetSelector: React.FC<LogsDatasetSelectorProps> = ({
   dataService,
   selectedDatasetIds,
@@ -24,7 +39,7 @@ export const LogsDatasetSelector: React.FC<LogsDatasetSelectorProps> = ({
   isInvalid = false,
   error,
 }) => {
-  const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
+  const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<DatasetOptionData>>>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -32,16 +47,23 @@ export const LogsDatasetSelector: React.FC<LogsDatasetSelectorProps> = ({
       setIsLoading(true);
       try {
         const allDataViews = await dataService.dataViews.getIdsWithTitle(true);
-        const logsDatasetOptions: Array<EuiComboBoxOptionOption<string>> = [];
+        const logsDatasetOptions: Array<EuiComboBoxOptionOption<DatasetOptionData>> = [];
 
         // Filter for logs datasets only
         for (const { id, title } of allDataViews) {
           try {
             const dataView = await dataService.dataViews.get(id);
             if (dataView.signalType === 'logs') {
+              // Use getDisplayName() which returns displayName || title
+              const displayName = dataView.getDisplayName();
+
               logsDatasetOptions.push({
-                label: title,
-                value: id,
+                label: displayName,
+                value: {
+                  id,
+                  displayName,
+                  title,
+                },
               });
             }
           } catch (err) {
@@ -63,10 +85,10 @@ export const LogsDatasetSelector: React.FC<LogsDatasetSelectorProps> = ({
     fetchLogsDatasets();
   }, [dataService]);
 
-  const selectedOptions = options.filter((opt) => selectedDatasetIds.includes(opt.value as string));
+  const selectedOptions = options.filter((opt) => selectedDatasetIds.includes(opt.value?.id || ''));
 
-  const handleChange = (selectedOpts: Array<EuiComboBoxOptionOption<string>>) => {
-    const newIds = selectedOpts.map((opt) => opt.value as string);
+  const handleChange = (selectedOpts: Array<EuiComboBoxOptionOption<DatasetOptionData>>) => {
+    const newIds = selectedOpts.map((opt) => opt.value?.id || '').filter((id) => id);
     onChange(newIds);
   };
 
@@ -95,6 +117,7 @@ export const LogsDatasetSelector: React.FC<LogsDatasetSelectorProps> = ({
         options={options}
         selectedOptions={selectedOptions}
         onChange={handleChange}
+        renderOption={(option) => <DatasetOption option={option} />}
         isLoading={isLoading}
         fullWidth
         data-test-subj="logsDatasetSelector"

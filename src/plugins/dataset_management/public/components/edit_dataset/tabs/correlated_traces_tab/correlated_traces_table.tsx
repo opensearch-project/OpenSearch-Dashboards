@@ -97,6 +97,7 @@ export const CorrelatedTracesTable: React.FC<CorrelatedTracesTableProps> = ({
       name: i18n.translate('datasetManagement.correlatedTraces.table.traceDataset', {
         defaultMessage: 'Trace dataset',
       }),
+      truncateText: true,
       render: (_: string, correlation: CorrelationSavedObject) => {
         const { traceDatasetId } = extractDatasetIdsFromEntities(
           correlation.attributes.entities,
@@ -106,18 +107,7 @@ export const CorrelatedTracesTable: React.FC<CorrelatedTracesTableProps> = ({
 
         return (
           <EuiToolTip content={title}>
-            <EuiLink
-              onClick={() => onNavigateToTraceDataset(traceDatasetId)}
-              style={{
-                maxWidth: '200px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                display: 'inline-block',
-              }}
-            >
-              {title}
-            </EuiLink>
+            <EuiLink onClick={() => onNavigateToTraceDataset(traceDatasetId)}>{title}</EuiLink>
           </EuiToolTip>
         );
       },
@@ -127,6 +117,7 @@ export const CorrelatedTracesTable: React.FC<CorrelatedTracesTableProps> = ({
       name: i18n.translate('datasetManagement.correlatedTraces.table.logsDatasets', {
         defaultMessage: 'Logs datasets',
       }),
+      truncateText: true,
       render: (_: string, correlation: CorrelationSavedObject) => {
         const { logDatasetIds } = extractDatasetIdsFromEntities(
           correlation.attributes.entities,
@@ -138,17 +129,7 @@ export const CorrelatedTracesTable: React.FC<CorrelatedTracesTableProps> = ({
 
         return (
           <EuiToolTip content={displayText}>
-            <span
-              style={{
-                maxWidth: '300px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                display: 'inline-block',
-              }}
-            >
-              {displayText}
-            </span>
+            <span>{displayText}</span>
           </EuiToolTip>
         );
       },
