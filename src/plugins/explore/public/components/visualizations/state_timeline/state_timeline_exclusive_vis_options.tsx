@@ -66,7 +66,7 @@ export const StateTimeLineExclusiveVisOptions = ({
 
   return (
     <StyleAccordion
-      id="pieSection"
+      id="stateTimelineSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.stateTimeline', {
         defaultMessage: 'State Timeline',
       })}

@@ -62,7 +62,7 @@ export const createNumericalStateTimeline = (
       axisColumnMappings
     );
   }
-  const disableThreshold =
+  const disconnectThreshold =
     styleOptions?.exclusive?.disconnectValues?.disableMode === DisableMode.Threshold
       ? styleOptions?.exclusive?.disconnectValues?.threshold || '1h'
       : undefined;
@@ -88,7 +88,7 @@ export const createNumericalStateTimeline = (
     yAxis?.column,
     rangeField,
     styleOptions.useThresholdColor ? convertedThresholds : rangeMappings,
-    disableThreshold,
+    disconnectThreshold,
     connectThreshold
   );
 
@@ -236,7 +236,7 @@ export const createCategoricalStateTimeline = (
   const categoryField2 = colorMapping?.column;
   const categoryName2 = colorMapping?.name;
 
-  const disableThreshold =
+  const disconnectThreshold =
     styleOptions?.exclusive?.disconnectValues?.disableMode === DisableMode.Threshold
       ? styleOptions?.exclusive?.disconnectValues?.threshold || '1h'
       : undefined;
@@ -256,7 +256,7 @@ export const createCategoricalStateTimeline = (
     yAxis?.column,
     categoryField2,
     validMappings,
-    disableThreshold,
+    disconnectThreshold,
     connectThreshold
   );
 
@@ -424,7 +424,7 @@ export const createSingleCategoricalStateTimeline = (
   const categoryField = colorMapping?.column;
   const categoryName = colorMapping?.name;
 
-  const disableThreshold =
+  const disconnectThreshold =
     styleOptions?.exclusive?.disconnectValues?.disableMode === DisableMode.Threshold
       ? styleOptions?.exclusive?.disconnectValues?.threshold || '1h'
       : undefined;
@@ -439,7 +439,7 @@ export const createSingleCategoricalStateTimeline = (
     xAxis?.column,
     categoryField,
     rangeMappings,
-    disableThreshold,
+    disconnectThreshold,
     connectThreshold
   );
 
