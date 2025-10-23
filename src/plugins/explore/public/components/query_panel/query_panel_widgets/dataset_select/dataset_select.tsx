@@ -128,7 +128,10 @@ export const DatasetSelectWidget = () => {
             isDatasetManagementEnabled
           );
           if (convertedText !== currentNode.textContent) {
-            nodesToUpdate.push({ node: currentNode as Text, newText: convertedText });
+            nodesToUpdate.push({
+              node: currentNode as Text,
+              newText: convertedText,
+            });
           }
         }
       }
@@ -148,12 +151,12 @@ export const DatasetSelectWidget = () => {
 
     // Convert text in EUI portals (popovers, modals, etc.)
     const convertPortalContent = () => {
-      // Find all EUI portals and dataset-related elements
+      // Only target DatasetSelect-specific class names and test subjects
       const selectors = [
-        '.euiPopover__panel',
         '.datasetSelect__contextMenu',
-        '[data-test-subj*="dataset"]',
         '.datasetSelect__selectable',
+        '[data-test-subj="datasetSelectorPopover"]',
+        '[data-test-subj="datasetSelectorAdvanced"]',
       ];
 
       selectors.forEach((selector) => {
@@ -171,19 +174,26 @@ export const DatasetSelectWidget = () => {
       convertPortalContent();
     }, 100);
 
-    // Observe both the component and document body for portals
+    // Observe for DatasetSelect portal additions
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-          // Check if any added nodes are portals or dataset-related
           mutation.addedNodes.forEach((node) => {
             if (node instanceof HTMLElement) {
-              // Check if this is a portal or contains dataset select elements
-              if (
-                node.classList.contains('euiPopover__panel') ||
-                node.querySelector('.datasetSelect__contextMenu') ||
-                node.querySelector('.datasetSelect__selectable')
-              ) {
+              // Only match nodes with DatasetSelect-specific classes or test subjects
+              const hasDatasetSelectClass =
+                node.classList.contains('datasetSelect__contextMenu') ||
+                node.classList.contains('datasetSelect__selectable');
+
+              const hasDatasetSelectTestSubj =
+                node.getAttribute('data-test-subj') === 'datasetSelectorPopover' ||
+                node.getAttribute('data-test-subj') === 'datasetSelectorAdvanced';
+
+              const containsDatasetSelect =
+                !!node.querySelector('.datasetSelect__contextMenu') ||
+                !!node.querySelector('.datasetSelect__selectable');
+
+              if (hasDatasetSelectClass || hasDatasetSelectTestSubj || containsDatasetSelect) {
                 // Give the portal content time to render
                 setTimeout(() => convertTextNodes(node), 50);
               }
@@ -193,7 +203,7 @@ export const DatasetSelectWidget = () => {
       });
     });
 
-    // Watch both the container and document body for portals
+    // Only watch the container for changes (don't watch entire document.body)
     if (containerRef.current) {
       observer.observe(containerRef.current, {
         childList: true,
@@ -201,10 +211,11 @@ export const DatasetSelectWidget = () => {
       });
     }
 
-    // Watch document body for portal additions
+    // Watch document.body only for DatasetSelect portal elements
+    // (EUI portals are added directly to body, outside the component tree)
     observer.observe(document.body, {
       childList: true,
-      subtree: true,
+      subtree: false,
     });
 
     return () => {
