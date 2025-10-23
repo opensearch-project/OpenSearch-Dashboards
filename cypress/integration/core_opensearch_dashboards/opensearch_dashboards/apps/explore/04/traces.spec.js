@@ -491,18 +491,18 @@ const traceTestSuite = () => {
           'true'
         );
 
-        // Verify exactly 4 related logs are displayed
+        // Verify exactly 5 related logs are displayed
         cy.get('[data-test-subj="dataset-logs-table"]', { timeout: 10000 })
           .should('be.visible')
           .within(() => {
             // Count the table rows (excluding header)
-            cy.get('tbody tr').should('have.length', 4);
+            cy.get('tbody tr').should('have.length', 5);
           });
 
         // Verify logs table contains log data (the trace ID correlation happens behind the scenes)
         cy.get('[data-test-subj="dataset-logs-table"]').should('be.visible');
 
-        // Test "View in Explore" functionality - should always be available with 4 logs
+        // Test "View in Explore" functionality - should always be available with 5 logs
         cy.get('button:contains("View in Discover Logs")').should('be.visible');
 
         // Store current URL before navigation
