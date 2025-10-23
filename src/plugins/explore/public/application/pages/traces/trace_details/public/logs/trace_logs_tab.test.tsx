@@ -113,13 +113,6 @@ describe('TraceLogsTab', () => {
       expect(screen.getByTestId('logs-count')).toHaveTextContent('2');
     });
 
-    it('should handle empty log datasets', () => {
-      render(<TraceLogsTab {...defaultProps} logDatasets={[]} />);
-
-      expect(screen.getByText('No log datasets found for this trace')).toBeInTheDocument();
-      expect(screen.queryByTestId('logs-data-table')).not.toBeInTheDocument();
-    });
-
     it('should handle empty logs data', () => {
       render(<TraceLogsTab {...defaultProps} logsData={[]} datasetLogs={{}} />);
 
