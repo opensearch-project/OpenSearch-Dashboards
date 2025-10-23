@@ -14,7 +14,6 @@ export interface ExclusiveBarGaugeConfig {
   orientation: 'vertical' | 'horizontal';
   displayMode: 'gradient' | 'stack' | 'basic';
   valueDisplay: 'valueColor' | 'textColor' | 'hidden';
-  // namePlacement: 'auto' | 'hidden';
   showUnfilledArea: boolean;
 }
 

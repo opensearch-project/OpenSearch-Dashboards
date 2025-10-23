@@ -62,37 +62,25 @@ export const BarGaugeExclusiveVisOptions = ({
   onChange,
   isXaxisNumerical,
 }: BarGaugeVisOptionsProps) => {
-  const orientationOption = [
-    isXaxisNumerical
-      ? {
-          id: 'vertical',
-          label: i18n.translate('explore.vis.barGauge.orientation.vertical.isXaxisNumerical', {
-            defaultMessage: 'Horizontal',
-          }),
-        }
-      : {
-          id: 'vertical',
-          label: i18n.translate('explore.vis.barGauge.orientation.vertical', {
-            defaultMessage: 'Vertical',
-          }),
-        },
-    isXaxisNumerical
-      ? {
-          id: 'horizontal',
-          label: i18n.translate(
-            'explore.vis.barGauge.orientation.threshold.horizontal.isXaxisNumerical',
-            {
-              defaultMessage: 'Vertical',
-            }
-          ),
-        }
-      : {
-          id: 'horizontal',
-          label: i18n.translate('explore.vis.barGauge.orientation.threshold.horizontal', {
-            defaultMessage: 'Horizontal',
-          }),
-        },
-  ];
+  const getOrientationOptions = () => {
+    const horizontalLabel = i18n.translate('explore.vis.barGauge.orientation.horizontal', {
+      defaultMessage: 'Horizontal',
+    });
+    const verticalLabel = i18n.translate('explore.vis.barGauge.orientation.vertical', {
+      defaultMessage: 'Vertical',
+    });
+
+    // When X-axis is numerical, the labels are swapped
+    const verticalOptionLabel = isXaxisNumerical ? horizontalLabel : verticalLabel;
+    const horizontalOptionLabel = isXaxisNumerical ? verticalLabel : horizontalLabel;
+
+    return [
+      { id: 'vertical', label: verticalOptionLabel },
+      { id: 'horizontal', label: horizontalOptionLabel },
+    ];
+  };
+
+  const orientationOption = getOrientationOptions();
 
   const updateExclusiveOption = (key: keyof BarGaugeChartStyle['exclusive'], value: any) => {
     onChange({

@@ -20,9 +20,7 @@ export const getBarOrientation = (
   };
   const nullStyle = { axis: null };
 
-  const shouldSwapAxes = (isXNumerical && isHorizontal) || (!isXNumerical && isHorizontal);
-
-  if (shouldSwapAxes) {
+  if (isHorizontal) {
     return {
       xAxis: yAxis,
       xAxisStyle: isXNumerical ? axisStyle : nullStyle,
@@ -118,7 +116,8 @@ export const processThresholds = (thresholds: Threshold[]) => {
   return result;
 };
 
-export const NormalizeData = (data: number, start: number, end: number) => {
+export const normalizeData = (data: number, start: number, end: number) => {
+  if (start === end) return null;
   // normalize data value between start and end into 0–1 range
   return (data - start) / (end - start);
 };
@@ -159,7 +158,7 @@ export const generateParams = (
 
     // collect stops up to current threshold
     const stops = thresholds.slice(0, i + 1).map((threshold) => {
-      const offset = NormalizeData(threshold.value, start, end);
+      const offset = normalizeData(threshold.value, start, end);
       return { offset, color: threshold.color };
     });
 
