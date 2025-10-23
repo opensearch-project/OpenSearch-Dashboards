@@ -8,6 +8,9 @@ import {
   TRACE_INDEX_PATTERN,
   TRACE_TIME_FIELD,
   TRACE_INDEX,
+  LOG_INDEX_PATTERN,
+  LOG_TIME_FIELD,
+  LOG_INDEX,
 } from '../../../../../../utils/apps/explore/constants';
 import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
@@ -19,7 +22,29 @@ const traceTestSuite = () => {
   let traceUrl;
 
   before(() => {
-    cy.explore.setupWorkspaceAndDataSourceWithTraces(workspaceName, [TRACE_INDEX]);
+    // Setup workspace with both log and trace indices
+    cy.explore.setupWorkspaceAndDataSourceWithTraces(workspaceName, [LOG_INDEX, TRACE_INDEX]);
+
+    // Create log dataset first with schema mappings for correlation
+    cy.explore.createWorkspaceDataSets({
+      workspaceName: workspaceName,
+      indexPattern: LOG_INDEX_PATTERN.replace('*', ''),
+      timefieldName: LOG_TIME_FIELD,
+      indexPatternHasTimefield: true,
+      dataSource: DATASOURCE_NAME,
+      isEnhancement: true,
+      signalType: 'logs',
+      schemaMappings: {
+        otelLogs: {
+          timeField: '@timestamp',
+          traceId: 'traceId',
+          spanId: 'spanId',
+          serviceName: 'resource.attributes.service.name',
+        },
+      },
+    });
+
+    // Create trace dataset second
     cy.explore.createWorkspaceDataSets({
       workspaceName: workspaceName,
       indexPattern: TRACE_INDEX_PATTERN.replace('*', ''),
@@ -30,13 +55,25 @@ const traceTestSuite = () => {
       signalType: 'traces',
     });
 
+    // Navigate to correlated datasets tab
+    cy.getElementByTestId('tab-correlatedDatasets').click();
+    // Wait for tab to load
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+    cy.get('[data-test-subj="createCorrelationButton"]').click();
+    cy.get('[data-test-subj="comboBoxInput"]').click();
+    cy.get(`[title*="${LOG_INDEX_PATTERN}"]`).click();
+    cy.getElementByTestId('saveCorrelationButton').click();
+
+    cy.get('.euiTableCellContent').should('contain.text', 'Trace-to-logs');
+
     cy.window().then((win) => {
       win.localStorage.setItem('hasSeenInfoBox_PPL', true);
     });
   });
 
   after(() => {
-    cy.explore.cleanupWorkspaceAndDataSourceAndTraces(workspaceName, [TRACE_INDEX]);
+    cy.explore.cleanupWorkspaceAndDataSourceAndTraces(workspaceName, [TRACE_INDEX, LOG_INDEX]);
   });
 
   describe('Traces Test', () => {
@@ -54,7 +91,8 @@ const traceTestSuite = () => {
         page: 'explore/traces',
         isEnhancement: true,
       });
-      cy.wait(5000);
+      // Wait for page to load
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       cy.explore.setTopNavDate('Jan 1, 2024 @ 00:00:00.000', 'Dec 31, 2025 @ 00:00:00.000');
     });
 
@@ -106,6 +144,30 @@ const traceTestSuite = () => {
 
         // Check for span hierarchy table
         cy.getElementByTestId('span-hierarchy-table').should('be.visible');
+
+        // Wait for Related logs tab to appear (PPL request needs time to load)
+        cy.get('button[role="tab"]', { timeout: 10000 }).should('contain', 'Related logs');
+
+        // Verify Related logs tab shows up with badge count
+        cy.get('button[role="tab"]:contains("Related logs")')
+          .should('be.visible')
+          .within(() => {
+            // Check for badge with count (should show number of related logs)
+            cy.get('.euiBadge').should('be.visible');
+            cy.get('.euiBadge__text').should('exist');
+          });
+
+        cy.get('button[role="tab"]:contains("Related logs")').click();
+
+        cy.get('button[role="tab"]:contains("Related logs")').should(
+          'have.attr',
+          'aria-selected',
+          'true'
+        );
+
+        // Verify the correlated dataset information appears
+        cy.get('.euiFlexGroup').should('contain.text', 'Dataset:');
+        cy.get('.euiFlexGroup').should('contain.text', LOG_INDEX_PATTERN);
       });
 
       // Get Trace Details link
@@ -400,6 +462,83 @@ const traceTestSuite = () => {
 
         // Verify span hierarchy table is visible again in Timeline view
         cy.getElementByTestId('span-hierarchy-table').should('be.visible');
+      });
+
+      it('should display and interact with Logs tab', () => {
+        // Verify all expected tabs are present
+        cy.get('button[role="tab"]').contains('Timeline').should('be.visible');
+        cy.get('button[role="tab"]').contains('Span list').should('be.visible');
+
+        // Wait for Related logs tab to appear (PPL request needs time to load)
+        cy.get('button[role="tab"]', { timeout: 10000 }).should('contain', 'Related logs');
+
+        // Verify Related logs tab shows up with badge count
+        cy.get('button[role="tab"]:contains("Related logs")')
+          .should('be.visible')
+          .within(() => {
+            // Check for badge with count (should show number of related logs)
+            cy.get('.euiBadge').should('be.visible');
+            cy.get('.euiBadge__text').should('exist');
+          });
+
+        // Click on Related logs tab
+        cy.get('button[role="tab"]:contains("Related logs")').click();
+
+        // Wait for tab to be active
+        cy.get('button[role="tab"]:contains("Related logs")').should(
+          'have.attr',
+          'aria-selected',
+          'true'
+        );
+
+        // Verify exactly 5 related logs are displayed
+        cy.get('[data-test-subj="dataset-logs-table"]', { timeout: 10000 })
+          .should('be.visible')
+          .within(() => {
+            // Count the table rows (excluding header)
+            cy.get('tbody tr').should('have.length', 5);
+          });
+
+        // Verify logs table contains log data (the trace ID correlation happens behind the scenes)
+        cy.get('[data-test-subj="dataset-logs-table"]').should('be.visible');
+
+        // Test "View in Explore" functionality - should always be available with 5 logs
+        cy.get('button:contains("View in Discover Logs")').should('be.visible');
+
+        // Store current URL before navigation
+        let currentUrl;
+        cy.url().then((url) => {
+          currentUrl = url;
+        });
+
+        // Click "View in Discover Logs" button using data-test-subj
+        cy.get('[data-test-subj^="trace-logs-view-in-explore-button-"]').first().click();
+
+        // Verify navigation to explore logs page with correct URL pattern
+        cy.url().should('include', '/app/explore/logs/');
+        cy.url().should('not.equal', currentUrl);
+
+        // Wait for explore page to load
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+        // Verify results are showing on the explore page
+        cy.get('[data-test-subj="docTable"]', { timeout: 10000 }).should('be.visible');
+        cy.get('[data-test-subj="docTable"] tbody tr').should('have.length.greaterThan', 0);
+
+        // Verify trace ID filter is applied in the results
+        cy.get('body').should('contain.text', '68b0ad76fc05c5a5f5e3738d42b8a735');
+
+        // Navigate back to trace details for other tests
+        cy.visit(traceUrl);
+        cy.osd.waitForLoader(true);
+
+        // Switch back to Timeline tab to verify navigation works
+        cy.get('button[role="tab"]').contains('Timeline').click();
+        cy.get('button[role="tab"]:contains("Timeline")').should(
+          'have.attr',
+          'aria-selected',
+          'true'
+        );
       });
 
       it('should maintain span selection across tab switches', () => {
