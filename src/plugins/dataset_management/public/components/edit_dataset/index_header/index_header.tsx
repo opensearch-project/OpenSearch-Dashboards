@@ -116,7 +116,7 @@ export function IndexHeader({
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>
         <EuiText size="s">
-          <h1 data-test-subj="datasetTitle">{dataset.title}</h1>
+          <h1 data-test-subj="datasetTitle">{dataset.displayName || dataset.title}</h1>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
