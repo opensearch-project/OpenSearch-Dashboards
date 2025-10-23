@@ -42,7 +42,7 @@ import { TraceDetailTabs } from './public/traces/trace_detail_tabs';
 import { CorrelationService } from './public/logs/correlation_service';
 import { LogHit } from './server/ppl_request_logs';
 import { TraceLogsTab } from './public/logs/trace_logs_tab';
-import { Dataset } from '../../../../../../data/common';
+import { DataView, Dataset } from '../../../../../../data/common';
 import { TraceDetailTab } from './constants/trace_detail_tabs';
 import { isSpanError } from './public/traces/ppl_resolve_helpers';
 import { buildTraceDetailsUrl } from '../../../../components/data_table/table_cell/trace_utils/trace_utils';
@@ -66,7 +66,7 @@ export interface TraceDetailsProps {
   setMenuMountPoint?: (mount: MountPoint | undefined) => void;
   isEmbedded?: boolean;
   isFlyout?: boolean;
-  defaultDataset?: Dataset;
+  defaultDataset?: DataView;
 }
 // Displaying only 10 logs in the tab
 export const LOGS_DATA = 10;
@@ -83,15 +83,34 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
   // Initialize URL state management
   const { stateContainer, stopStateSync } = useMemo(() => {
+    // Convert DataView to Dataset format if needed
+    const getDatasetFromDataView = (dataView: DataView): Dataset => {
+      return {
+        id: dataView.id || 'default-dataset-id',
+        title: dataView.title,
+        type: dataView.type || 'INDEX_PATTERN',
+        timeFieldName: dataView.timeFieldName,
+        dataSource: dataView.dataSourceRef
+          ? {
+              id: dataView.dataSourceRef.id,
+              title: dataView.dataSourceRef.name || dataView.dataSourceRef.id,
+              type: dataView.dataSourceRef.type || 'OpenSearch',
+            }
+          : undefined,
+      };
+    };
+
     return createTraceAppState({
       stateDefaults: {
         traceId: '',
-        dataset: defaultDataset ?? {
-          id: 'default-dataset-id',
-          title: 'otel-v1-apm-span-*',
-          type: 'INDEX_PATTERN',
-          timeFieldName: 'endTime',
-        },
+        dataset: defaultDataset
+          ? getDatasetFromDataView(defaultDataset)
+          : {
+              id: 'default-dataset-id',
+              title: 'otel-v1-apm-span-*',
+              type: 'INDEX_PATTERN',
+              timeFieldName: 'endTime',
+            },
         spanId: undefined,
       },
       osdUrlStateStorage: osdUrlStateStorage!,
@@ -122,9 +141,24 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const mainPanelRef = useRef<HTMLDivElement | null>(null);
   const [visualizationKey, setVisualizationKey] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<string>(TraceDetailTab.TIMELINE);
-  const [logsData, setLogsData] = useState<LogHit[]>([]);
+  const [spanDetailActiveTab, setSpanDetailActiveTab] = useState<string>('overview');
+
+  // Preserve tab state across span changes by using a ref to track if we should reset
+  const shouldResetTabRef = useRef<boolean>(false);
+  const prevSpanIdRef = useRef<string | undefined>(spanId);
+
+  // Only reset tab to overview when explicitly needed (e.g., when logs tab becomes unavailable)
+  useEffect(() => {
+    // Don't reset tab just because span changed
+    if (prevSpanIdRef.current !== spanId) {
+      prevSpanIdRef.current = spanId;
+      // Only reset if we explicitly need to (this will be handled by the child component)
+      shouldResetTabRef.current = false;
+    }
+  }, [spanId]);
   const [logDatasets, setLogDatasets] = useState<Dataset[]>([]);
   const [datasetLogs, setDatasetLogs] = useState<Record<string, LogHit[]>>({});
+  const [logHitCount, setLogHitCount] = useState<number>(0);
   const [isLogsLoading, setIsLogsLoading] = useState<boolean>(false);
   const [fieldValidation, setFieldValidation] = useState<{
     isValid: boolean;
@@ -133,15 +167,15 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
   const [prevTraceId, setPrevTraceId] = useState<string | undefined>(undefined);
 
   // Create PPL service instance
-  const pplService = useMemo(() => (data ? new TracePPLService(data) : undefined), [data]);
+  const pplService = useMemo(() => new TracePPLService(data), [data]);
 
   // Create correlation service instance
   const correlationService = useMemo(
     () =>
       savedObjects?.client && uiSettings
-        ? new CorrelationService(savedObjects.client, uiSettings)
+        ? new CorrelationService(savedObjects.client, uiSettings, data)
         : undefined,
-    [savedObjects?.client, uiSettings]
+    [savedObjects?.client, uiSettings, data]
   );
 
   // Generate dynamic color map based on unfiltered hits
@@ -170,8 +204,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
         .checkCorrelationsAndFetchLogs(dataset, data, traceId, LOGS_DATA)
         .then((result) => {
           setLogDatasets(result.logDatasets);
-          setLogsData(result.logs);
           setDatasetLogs(result.datasetLogs);
+          setLogHitCount(result.logHitCount);
         })
         .catch((error) => {
           // eslint-disable-next-line no-console
@@ -332,11 +366,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     setVisualizationKey((prev) => prev + 1);
   }, []);
 
-  // Calculate error count based on unfiltered hits to show total errors in trace
-  const errorCount = useMemo(() => {
-    return unfilteredHits.filter((span: TraceHit) => isSpanError(span)).length;
-  }, [unfilteredHits]);
-
   // Extract services in the order they appear in the data
   const servicesInOrder = useMemo(() => {
     if (!colorMap) return [];
@@ -349,22 +378,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     });
     return Array.from(serviceSet);
   }, [transformedHits, colorMap]);
-
-  const handleErrorFilterClick = () => {
-    const newFilters = [...spanFilters];
-
-    // Remove any existing error-related filters
-    const filteredFilters = newFilters.filter(
-      (filter) =>
-        !(filter.field === 'status.code' && filter.value === 2) &&
-        !(filter.field === 'isError' && filter.value === true)
-    );
-
-    // Add a comprehensive error filter that matches the isSpanError logic
-    filteredFilters.push({ field: 'isError', value: true });
-
-    setSpanFiltersWithStorage(filteredFilters);
-  };
 
   // Function to remove a specific filter
   const removeFilter = (filterToRemove: SpanFilter) => {
@@ -386,6 +399,12 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     }
     if (filter.field === 'isError' && filter.value === true) {
       return 'Error';
+    }
+    if (filter.field === 'status.code' && filter.value === 1) {
+      return 'OK';
+    }
+    if (filter.field === 'status.code' && filter.value === 0) {
+      return 'Unset';
     }
     return `${filter.field}: ${filter.value}`;
   };
@@ -450,21 +469,18 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
             missingFields={fieldValidation.missingFields}
             dataset={dataset as any}
           />
-        ) : transformedHits.length === 0 ? (
+        ) : unfilteredHits.length === 0 ? (
           <NoMatchMessage traceId={traceId} />
         ) : (
           <>
             <div className="exploreTraceView__tabsContainer">
-              <EuiPanel paddingSize="s">
+              <EuiPanel paddingSize="none" color="transparent" hasBorder={false}>
                 <TraceDetailTabs
                   activeTab={activeTab}
                   setActiveTab={setActiveTab}
                   transformedHits={transformedHits}
-                  errorCount={errorCount}
-                  spanFilters={spanFilters}
-                  handleErrorFilterClick={handleErrorFilterClick}
                   logDatasets={logDatasets}
-                  logsData={logsData}
+                  logCount={logHitCount}
                   isLogsLoading={isLogsLoading}
                 />
               </EuiPanel>
@@ -532,6 +548,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                     initialSize={isFlyout ? 50 : 70}
                     minSize={isFlyout ? '30%' : '50%'}
                     wrapperPadding="none"
+                    paddingSize="none"
+                    className="visStylePanelLeft"
                   >
                     <div className="exploreTraceView__contentPanel">
                       {/* Tab content */}
@@ -551,9 +569,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                         {(activeTab === TraceDetailTab.TIMELINE ||
                           activeTab === TraceDetailTab.SPAN_LIST) && (
                           <SpanDetailPanel
-                            key={`span-panel-${visualizationKey}`}
+                            key={`span-panel-${visualizationKey}-${spanFilters.length}-${transformedHits.length}`}
                             chrome={chrome}
                             spanFilters={spanFilters}
+                            setSpanFiltersWithStorage={setSpanFiltersWithStorage}
                             payloadData={JSON.stringify(transformedHits)}
                             isGanttChartLoading={isBackgroundLoading}
                             colorMap={colorMap}
@@ -561,6 +580,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                             selectedSpanId={spanId}
                             activeView={activeTab}
                             servicesInOrder={servicesInOrder}
+                            isFlyoutPanel={isFlyout}
                           />
                         )}
 
@@ -568,7 +588,6 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                           <TraceLogsTab
                             traceId={traceId}
                             logDatasets={logDatasets}
-                            logsData={logsData}
                             datasetLogs={datasetLogs}
                             isLoading={isLogsLoading}
                             onSpanClick={handleSpanSelect}
@@ -583,6 +602,8 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                   <EuiResizablePanel
                     initialSize={isFlyout ? 50 : 30}
                     minSize={isFlyout ? '30%' : '300px'}
+                    paddingSize="none"
+                    className="visStylePanelRight"
                   >
                     <div className="exploreTraceView__sidebarPanel">
                       <SpanDetailTabs
@@ -601,8 +622,10 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                         }}
                         setCurrentSpan={handleSpanSelect}
                         logDatasets={logDatasets}
-                        logsData={logsData}
+                        datasetLogs={datasetLogs}
                         isLogsLoading={isLogsLoading}
+                        activeTab={spanDetailActiveTab as any}
+                        onTabChange={(tabId) => setSpanDetailActiveTab(tabId)}
                       />
                     </div>
                   </EuiResizablePanel>
@@ -621,7 +644,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
       setMenuMountPoint={setMenuMountPoint}
       traceId={traceId}
       isFlyout={isFlyout}
-      title={getServiceInfo(rootSpan, traceId)}
+      title={getServiceInfo(rootSpan, traceId, isLoading)}
       traceDetailsLink={traceDetailsLink}
     />
   );

@@ -232,6 +232,7 @@ export function TraceDetailsView({ hit }: DocViewRenderProps) {
         <SpanDetailPanel
           chrome={chrome}
           spanFilters={[]}
+          setSpanFiltersWithStorage={() => {}}
           payloadData={JSON.stringify(transformedHits)}
           isGanttChartLoading={false}
           colorMap={colorMap}
@@ -239,6 +240,7 @@ export function TraceDetailsView({ hit }: DocViewRenderProps) {
           selectedSpanId={selectedSpanId || traceInfo.spanId || undefined}
           activeView="timeline"
           isEmbedded={true}
+          isFlyoutPanel={true}
         />
       ) : (
         <div className="exploreTraceDetailsView__emptyState">

@@ -25,11 +25,13 @@ export interface SpanTableProps {
     field: string;
     value: any;
   }>;
+  setSpanFiltersWithStorage?: (filters: Array<{ field: string; value: any }>) => void;
   selectedSpanId?: string;
   colorMap?: Record<string, string>;
   servicesInOrder?: string[];
   setIsServiceLegendOpen?: (isOpen: boolean) => void;
   isServiceLegendOpen?: boolean;
+  isFlyoutPanel?: boolean;
 }
 
 export interface SpanSearchParams {

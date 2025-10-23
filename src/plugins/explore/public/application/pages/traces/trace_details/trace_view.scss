@@ -18,7 +18,7 @@
   }
 
   &__resizableContainer {
-    height: calc(100vh - 170px);
+    height: calc(100vh - 140px);
   }
 
   &__mainPanel {
@@ -30,11 +30,13 @@
   }
 
   &__tabsContainer {
-    padding: 8px 16px;
+    padding-left: $euiSizeS;
+    padding-right: $euiSizeS;
+    padding-bottom: $euiSizeS;
   }
 
   &__filtersContainer {
-    padding: 0 16px;
+    padding: 0 $euiSizeS;
   }
 
   &__serviceLegendColorIndicator {
@@ -42,4 +44,14 @@
     height: 16px;
     border-radius: 2px;
   }
+}
+
+.visStylePanelLeft {
+  padding-left: $euiSizeS;
+  padding-right: $euiSizeS;
+}
+
+.visStylePanelRight {
+  padding-left: $euiSizeS;
+  padding-right: $euiSizeS;
 }

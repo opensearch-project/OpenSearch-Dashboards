@@ -51,7 +51,7 @@ describe('table_vis_config', () => {
 
       expect(defaults).toEqual({
         pageSize: 10,
-        globalAlignment: 'auto',
+        globalAlignment: 'left',
         showColumnFilter: false,
         showFooter: false,
         footerCalculations: [],
