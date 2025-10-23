@@ -107,17 +107,13 @@ export const VisualizationRender = ({
     [onSelectTimeRange]
   );
 
-  if (!visualizationData) {
+  if (!visualizationData || columns.length === 0) {
     return null;
   }
 
   if (visConfig?.type === 'table') {
     return (
-      <TableVis
-        styleOptions={visConfig.styles as TableChartStyle}
-        rows={visualizationData.transformedData ?? []}
-        columns={columns}
-      />
+      <TableVis styleOptions={visConfig.styles as TableChartStyle} rows={rows} columns={columns} />
     );
   }
 

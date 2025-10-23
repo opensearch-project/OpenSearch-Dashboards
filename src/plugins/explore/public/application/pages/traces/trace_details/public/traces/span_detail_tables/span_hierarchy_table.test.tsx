@@ -124,12 +124,13 @@ describe('SpanHierarchyTable', () => {
     expect(toolbar).toBeInTheDocument();
   });
 
-  it('passes ServiceLegendButton to secondaryToolbar', () => {
+  it('passes ServiceLegendButton and SpanStatusFilter to secondaryToolbar', () => {
     render(<SpanHierarchyTable {...defaultProps} />);
 
     const mockCall = mockRenderCustomDataGrid.mock.calls[0]?.[0];
-    expect(mockCall?.secondaryToolbar).toHaveLength(1);
+    expect(mockCall?.secondaryToolbar).toHaveLength(2);
     expect(mockCall?.secondaryToolbar![0]).toBeDefined();
+    expect(mockCall?.secondaryToolbar![1]).toBeDefined();
   });
 
   it('displays only spans returned by applySpanFilters', () => {
@@ -228,10 +229,22 @@ describe('SpanHierarchyTable', () => {
     expect(getByTestId('row-count')).toHaveTextContent('0');
   });
 
-  it('uses auto height for small number of items', () => {
+  it('uses 80vh height when isFlyoutPanel is false', () => {
     render(<SpanHierarchyTable {...defaultProps} />);
 
     const mockCall = mockRenderCustomDataGrid.mock.calls[0]?.[0];
-    expect(mockCall?.defaultHeight).toBe('auto');
+    expect(mockCall?.defaultHeight).toBe('80vh');
+  });
+
+  it('uses 30vh height when isFlyoutPanel is true', () => {
+    const propsWithFlyout = {
+      ...defaultProps,
+      isFlyoutPanel: true,
+    };
+
+    render(<SpanHierarchyTable {...propsWithFlyout} />);
+
+    const mockCall = mockRenderCustomDataGrid.mock.calls[0]?.[0];
+    expect(mockCall?.defaultHeight).toBe('30vh');
   });
 });

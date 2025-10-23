@@ -35,8 +35,8 @@ export async function fetchTraceLogsByTraceId(
 
   try {
     const pplService = new PPLService(dataService);
-
-    const pplQuery = `source = ${dataset.title} | where traceId = "${traceId}" | head ${limit}`;
+    const traceIdFieldName = dataset.schemaMappings?.otelLogs?.traceId || 'traceId';
+    const pplQuery = `source = ${dataset.title} | where ${traceIdFieldName} = "${traceId}" | head ${limit}`;
 
     const datasetWithoutTime = {
       id: dataset.id,

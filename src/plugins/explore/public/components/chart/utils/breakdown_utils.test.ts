@@ -7,7 +7,7 @@ import { shouldShowBreakdownSelector } from './breakdown_utils';
 import { DataView } from '../../../../../data/common';
 
 describe('shouldShowBreakdownSelector', () => {
-  it('should return true only when dataView has @timestamp as time field', () => {
+  it('should return true only when dataView exists', () => {
     expect(shouldShowBreakdownSelector(undefined)).toBe(false);
 
     expect(
@@ -15,11 +15,5 @@ describe('shouldShowBreakdownSelector', () => {
         timeFieldName: '@timestamp',
       } as DataView)
     ).toBe(true);
-
-    expect(
-      shouldShowBreakdownSelector({
-        timeFieldName: 'custom_time_field',
-      } as DataView)
-    ).toBe(false);
   });
 });

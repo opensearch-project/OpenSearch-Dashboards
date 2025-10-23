@@ -4,13 +4,12 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { TraceDetailTabs } from './trace_detail_tabs';
 import { TraceDetailTab } from '../../constants/trace_detail_tabs';
 
 describe('TraceDetailTabs', () => {
   const mockSetActiveTab = jest.fn();
-  const mockHandleErrorFilterClick = jest.fn();
   const defaultProps = {
     activeTab: TraceDetailTab.TIMELINE,
     setActiveTab: mockSetActiveTab,
@@ -18,9 +17,7 @@ describe('TraceDetailTabs', () => {
       { spanId: 'span-1', serviceName: 'service-a' },
       { spanId: 'span-2', serviceName: 'service-b' },
     ],
-    errorCount: 0,
-    spanFilters: [],
-    handleErrorFilterClick: mockHandleErrorFilterClick,
+    logCount: 2,
   };
 
   beforeEach(() => {
@@ -51,52 +48,6 @@ describe('TraceDetailTabs', () => {
     expect(spanListTab).toHaveAttribute('aria-selected', 'true');
   });
 
-  it('shows error filter button when there are errors and no error filter applied', () => {
-    const propsWithErrors = {
-      ...defaultProps,
-      errorCount: 5,
-    };
-
-    render(<TraceDetailTabs {...propsWithErrors} />);
-
-    const errorButton = screen.getByTestId('error-count-button');
-    expect(errorButton).toBeInTheDocument();
-    expect(errorButton).toHaveTextContent('Filter errors (5)');
-  });
-
-  it('hides error filter button when error filter is already applied', () => {
-    const propsWithErrorFilter = {
-      ...defaultProps,
-      errorCount: 5,
-      spanFilters: [{ field: 'status.code', value: 2 }],
-    };
-
-    render(<TraceDetailTabs {...propsWithErrorFilter} />);
-
-    expect(screen.queryByText('Filter errors (5)')).not.toBeInTheDocument();
-  });
-
-  it('calls handleErrorFilterClick when error filter button is clicked', () => {
-    const propsWithErrors = {
-      ...defaultProps,
-      errorCount: 3,
-    };
-
-    render(<TraceDetailTabs {...propsWithErrors} />);
-
-    const errorButton = screen.getByText('Filter errors (3)');
-    fireEvent.click(errorButton);
-
-    expect(mockHandleErrorFilterClick).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not show service legend button', () => {
-    render(<TraceDetailTabs {...defaultProps} />);
-
-    expect(screen.queryByTestId('service-legend-toggle')).not.toBeInTheDocument();
-    expect(screen.queryByText('Service legend')).not.toBeInTheDocument();
-  });
-
   it('handles empty transformed hits gracefully', () => {
     const propsWithEmptyHits = {
       ...defaultProps,
@@ -110,47 +61,63 @@ describe('TraceDetailTabs', () => {
     expect(screen.queryByText('0')).not.toBeInTheDocument(); // No badge shown for empty hits
   });
 
-  it('renders tooltip for error filter button', () => {
-    const propsWithErrors = {
+  it('renders logs tab when logDatasets are provided', () => {
+    const propsWithLogs = {
       ...defaultProps,
-      errorCount: 2,
+      logDatasets: [{ id: 'log-dataset-1', title: 'app-logs-*', type: 'INDEX_PATTERN' }],
+      logCount: 5,
+      isLogsLoading: false,
     };
 
-    render(<TraceDetailTabs {...propsWithErrors} />);
+    render(<TraceDetailTabs {...propsWithLogs} />);
 
-    const errorButton = screen.getByText('Filter errors (2)');
-    const tooltip = errorButton.closest('[data-test-subj="error-count-button"]')?.parentElement;
-    expect(tooltip).toBeInTheDocument();
+    // Check that logs tab is present
+    expect(screen.getByText('Related logs')).toBeInTheDocument();
+
+    // Check that log count badge is displayed
+    expect(screen.getByText('5')).toBeInTheDocument();
+
+    // Verify we have 3 tabs now (Timeline, Span list, Related logs)
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(3);
   });
 
-  it('handles multiple span filters correctly', () => {
-    const propsWithMultipleFilters = {
+  it('does not render logs tab when logDatasets are not present', () => {
+    const propsWithoutLogs = {
       ...defaultProps,
-      errorCount: 5,
-      spanFilters: [
-        { field: 'serviceName', value: 'service-a' },
-        { field: 'status.code', value: 2 },
-      ],
+      logDatasets: [],
+      logCount: 5,
+      isLogsLoading: false,
     };
 
-    render(<TraceDetailTabs {...propsWithMultipleFilters} />);
+    render(<TraceDetailTabs {...propsWithoutLogs} />);
 
-    // Error button should be hidden because error filter is applied
-    expect(screen.queryByText('Filter errors (5)')).not.toBeInTheDocument();
+    // Check that logs tab is not present
+    expect(screen.queryByText('Related logs')).not.toBeInTheDocument();
+
+    // Verify we only have 2 tabs (Timeline, Span list)
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(2);
   });
 
-  it('shows error filter button when there are other filters but no error filter', () => {
-    const propsWithNonErrorFilters = {
+  it('does not render logCount badge when isLogsLoading is true', () => {
+    const propsWithLoadingLogs = {
       ...defaultProps,
-      errorCount: 3,
-      spanFilters: [
-        { field: 'serviceName', value: 'service-a' },
-        { field: 'operationName', value: 'GET /api' },
-      ],
+      logDatasets: [{ id: 'log-dataset-1', title: 'app-logs-*', type: 'INDEX_PATTERN' }],
+      logCount: 5,
+      isLogsLoading: true,
     };
 
-    render(<TraceDetailTabs {...propsWithNonErrorFilters} />);
+    render(<TraceDetailTabs {...propsWithLoadingLogs} />);
 
-    expect(screen.getByText('Filter errors (3)')).toBeInTheDocument();
+    // Check that logs tab is present
+    expect(screen.getByText('Related logs')).toBeInTheDocument();
+
+    // Check that log count badge is NOT displayed when loading
+    expect(screen.queryByText('5')).not.toBeInTheDocument();
+
+    // Verify we have 3 tabs (Timeline, Span list, Related logs)
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(3);
   });
 });

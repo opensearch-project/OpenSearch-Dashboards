@@ -37,7 +37,7 @@ export function getEditBreadcrumbs(dataset: DataView) {
   return [
     ...getListBreadcrumbs(),
     {
-      text: dataset.title,
+      text: dataset.displayName || dataset.title,
       href: `/patterns/${dataset.id}`,
     },
   ];

@@ -20,6 +20,8 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiLink,
+  EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 import type { MountPoint } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../../../../opensearch_dashboards_react/public';
@@ -79,10 +81,26 @@ export const TraceTopNavMenu: React.FC<TraceTopNavMenuProps> = ({
                   style={{ cursor: 'pointer' }}
                   data-test-subj="traceIdBadge"
                 >
-                  {i18n.translate('explore.traceDetails.topNav.traceIdLabel', {
-                    defaultMessage: 'Trace ID: {traceId}',
-                    values: { traceId },
-                  })}
+                  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiText size="s">
+                        {i18n.translate('explore.traceDetails.topNav.traceIdLabel', {
+                          defaultMessage: 'Trace ID: {traceId}',
+                          values: { traceId },
+                        })}
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiIcon
+                        type="copy"
+                        size="s"
+                        style={{
+                          marginLeft: '4px',
+                        }}
+                        aria-label="Copy Trace ID"
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiBadge>
               </EuiToolTip>
             </EuiFlexItem>

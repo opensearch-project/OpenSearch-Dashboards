@@ -1,0 +1,2 @@
+fix:
+- Update correlations save button tooltip ([#10751](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10751))

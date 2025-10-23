@@ -50,8 +50,11 @@ import {
 const activeQueryAbortControllers = new Map<string, AbortController>();
 
 // Helper function to abort all active queries
+// Backend cancellation is handled automatically via AbortSignal in search strategies
 export const abortAllActiveQueries = () => {
-  activeQueryAbortControllers.forEach((controller, cacheKey) => {
+  activeQueryAbortControllers.forEach((controller) => {
+    // This triggers the abort signal, which in turn:
+    // Cancels frontend HTTP requests immediately
     controller.abort();
   });
   activeQueryAbortControllers.clear();
@@ -139,7 +142,7 @@ const updateFieldTopQueryValues = (hits: any[], dataset: DataView): void => {
     try {
       const result = getFieldValueCounts({
         hits,
-        field,
+        field: field as any,
         dataSet: dataset, // DataView extends IndexPattern
         count: 5,
         grouped: false,
@@ -231,11 +234,18 @@ export const executeQueries = createAsyncThunk<
   const histogramCacheKey = prepareHistogramCacheKey(query, !!breakdownField);
 
   // Check what needs execution for core queries
-  const needsDataTableQuery = !results[dataTableCacheKey];
-  const needsHistogramQuery = !results[histogramCacheKey];
+  // If results exist but query status is UNINITIALIZED (after cancel), we need to re-execute
+  const dataTableQueryStatus = state.queryEditor.queryStatusMap[dataTableCacheKey];
+  const histogramQueryStatus = state.queryEditor.queryStatusMap[histogramCacheKey];
+
+  const needsDataTableQuery =
+    !results[dataTableCacheKey] ||
+    dataTableQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
+  const needsHistogramQuery =
+    !results[histogramCacheKey] ||
+    histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
 
   const promises = [];
-
   // Execute query without aggregations
   if (needsDataTableQuery) {
     promises.push(
@@ -381,6 +391,9 @@ const executeQueryBase = async (
       existingController.abort();
     }
 
+    // Don't auto-abort other queries - let them complete unless explicitly cancelled
+    // This prevents data loading issues when multiple queries are running concurrently
+
     // Create abort controller for this specific query
     const abortController = new AbortController();
 
@@ -511,8 +524,19 @@ const executeQueryBase = async (
     // Clean up aborted/failed query from active controllers
     activeQueryAbortControllers.delete(cacheKey);
 
-    // Handle abort errors
+    // Handle abort errors - reset query status to initial state
     if (error instanceof Error && error.name === 'AbortError') {
+      dispatch(
+        setIndividualQueryStatus({
+          cacheKey,
+          status: {
+            status: QueryExecutionStatus.UNINITIALIZED,
+            startTime: undefined,
+            elapsedMs: undefined,
+            error: undefined,
+          },
+        })
+      );
       return;
     }
 

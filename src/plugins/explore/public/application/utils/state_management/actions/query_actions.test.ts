@@ -1033,7 +1033,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         ui: { activeTabId: '' },
         results: {},
         legacy: { interval: '1h' },
-        queryEditor: { breakdownField: undefined },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       };
 
       mockGetState.mockReturnValue(mockState);
@@ -1055,7 +1055,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         ui: { activeTabId: '' },
         results: {},
         legacy: { interval: '1h' },
-        queryEditor: { breakdownField: undefined },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       };
 
       mockGetState.mockReturnValue(mockState);
@@ -1079,7 +1079,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           'source=test-dataset': { hits: { hits: [] } },
         },
         legacy: { interval: '1h' },
-        queryEditor: { breakdownField: undefined },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       };
 
       mockGetState.mockReturnValue(mockState);
@@ -1101,7 +1101,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         ui: { activeTabId: 'explore_visualization_tab' },
         results: {},
         legacy: { interval: '1h' },
-        queryEditor: { breakdownField: undefined },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       };
 
       mockGetState.mockReturnValue(mockState);
@@ -1124,7 +1124,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         ui: { activeTabId: '' },
         results: {},
         legacy: { interval: '1h' },
-        queryEditor: { breakdownField: undefined },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       };
 
       mockGetState.mockReturnValue(mockState);
@@ -1158,7 +1158,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         },
         legacy: { interval: '1h' },
         ui: { activeTabId: 'test-tab' },
-        queryEditor: { breakdownField: undefined },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       });
 
       const mockIndexPatterns = dataPublicModule.indexPatterns as any;
@@ -1861,7 +1861,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         ui: { activeTabId: '' },
         results: {},
         legacy: { interval: '1h' },
-        queryEditor: { breakdownField: undefined },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       };
 
       const mockGetState = jest.fn().mockReturnValue(mockState);
@@ -1903,7 +1903,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         },
         legacy: { interval: '1h' },
         ui: { activeTabId: 'test-tab' },
-        queryEditor: { breakdownField: undefined },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       });
       const mockDispatch = jest.fn();
 

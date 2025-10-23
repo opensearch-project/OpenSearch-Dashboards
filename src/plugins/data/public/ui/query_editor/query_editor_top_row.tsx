@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
+  EuiButtonIcon,
   OnRefreshProps,
   prettyDuration,
 } from '@elastic/eui';
@@ -34,6 +35,7 @@ import { UI_SETTINGS } from '../../../common';
 import { getQueryLog, PersistedLog, QueryStatus } from '../../query';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
+import { useCancelButtonTiming } from '../hooks';
 
 const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 
@@ -66,6 +68,9 @@ export interface QueryEditorTopRowProps {
   datePickerRef?: React.RefObject<HTMLDivElement>;
   savedQueryManagement?: any;
   queryStatus?: QueryStatus;
+  showCancelButton?: boolean;
+  onCancel?: () => void;
+  isQueryRunning?: boolean;
 }
 
 // Needed for React.lazy
@@ -74,6 +79,11 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const datePickerRef = useRef<EuiSuperDatePicker | null>(null);
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
+  // Use custom hook for cancel button timing logic
+  const shouldShowCancelButton = useCancelButtonTiming(
+    Boolean(props.isQueryRunning && props.showCancelButton),
+    Boolean(props.isQueryRunning && props.showCancelButton) // Only show initially if both conditions are true
+  );
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName, data, keyboardShortcut } = opensearchDashboards.services;
 
@@ -305,31 +315,58 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function renderUpdateButton() {
-    const button = props.customSubmitButton ? (
-      React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
-    ) : (
-      <EuiSuperUpdateButton
-        needsUpdate={props.isDirty}
-        isDisabled={isDateRangeInvalid}
-        isLoading={props.isLoading}
-        onClick={onClickSubmitButton}
-        data-test-subj="querySubmitButton"
-        aria-label={i18n.translate('data.query.queryBar.querySubmitButtonLabel', {
-          defaultMessage: 'Submit query',
-        })}
-        compressed={true}
-      />
-    );
+    // If a custom submit button is provided, enhance it with cancel functionality
+    let buttonGroup;
+    if (props.customSubmitButton) {
+      buttonGroup = React.cloneElement(props.customSubmitButton, {
+        onClick: onClickSubmitButton,
+      });
+    } else {
+      // Default QueryEditor button with integrated cancel
+      const runButton = (
+        <EuiSuperUpdateButton
+          needsUpdate={props.isDirty}
+          isDisabled={isDateRangeInvalid}
+          isLoading={props.isLoading}
+          onClick={onClickSubmitButton}
+          data-test-subj="querySubmitButton"
+          aria-label={i18n.translate('data.query.queryBar.querySubmitButtonLabel', {
+            defaultMessage: 'Submit query',
+          })}
+          compressed={true}
+        />
+      );
+
+      const cancelButton = shouldShowCancelButton ? (
+        <EuiButtonIcon
+          size="s"
+          color="danger"
+          onClick={props.onCancel}
+          data-test-subj="queryCancelButton"
+          aria-label={i18n.translate('data.query.queryBar.queryCancelButtonLabel', {
+            defaultMessage: 'Cancel',
+          })}
+          iconType="cross"
+          className="osdQueryEditor__cancelButton"
+        />
+      ) : null;
+      buttonGroup = (
+        <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>{runButton}</EuiFlexItem>
+          {cancelButton && <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>}
+        </EuiFlexGroup>
+      );
+    }
 
     if (!shouldRenderDatePicker()) {
-      return button;
+      return buttonGroup;
     }
 
     return (
       <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
         <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
           {renderDatePicker()}
-          <EuiFlexItem grow={false}>{button}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{buttonGroup}</EuiFlexItem>
         </EuiFlexGroup>
       </NoDataPopover>
     );

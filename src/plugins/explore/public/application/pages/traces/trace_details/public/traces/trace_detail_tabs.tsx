@@ -5,26 +5,15 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import {
-  EuiTabs,
-  EuiTab,
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiBadge } from '@elastic/eui';
 import { TraceDetailTab } from '../../constants/trace_detail_tabs';
 
 export interface TraceDetailTabsProps {
   activeTab: string;
   setActiveTab: (tabId: string) => void;
   transformedHits: any[];
-  errorCount: number;
-  spanFilters: any[];
-  handleErrorFilterClick: () => void;
   logDatasets?: any[];
-  logsData?: any[];
+  logCount: number;
   isLogsLoading?: boolean;
 }
 
@@ -32,11 +21,8 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
   activeTab,
   setActiveTab,
   transformedHits,
-  errorCount,
-  spanFilters,
-  handleErrorFilterClick,
   logDatasets = [],
-  logsData = [],
+  logCount = 0,
   isLogsLoading = false,
 }) => {
   const tabs = [
@@ -71,12 +57,16 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
   ];
 
   // Add logs tab if we have log datasets and logs data
-  if (logDatasets.length > 0 && logsData.length > 0) {
+  if (logDatasets.length > 0) {
     tabs.push({
       id: TraceDetailTab.LOGS,
       name: (
         <>
-          <EuiBadge color="default">{logsData.length}</EuiBadge>{' '}
+          {!isLogsLoading && (
+            <>
+              <EuiBadge color="default">{logCount}</EuiBadge>{' '}
+            </>
+          )}
           {i18n.translate('explore.traceView.tab.logs', {
             defaultMessage: 'Related logs',
           })}
@@ -86,50 +76,12 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
   }
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-      <EuiFlexItem>
-        <EuiTabs>
-          {tabs.map((tab) => (
-            <EuiTab
-              key={tab.id}
-              isSelected={activeTab === tab.id}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          {errorCount > 0 &&
-            !spanFilters.some(
-              (filter) =>
-                (filter.field === 'status.code' && filter.value === 2) ||
-                (filter.field === 'isError' && filter.value === true)
-            ) && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={i18n.translate('explore.traceView.tooltip.clickToApplyFilter', {
-                    defaultMessage: 'Click to apply filter',
-                  })}
-                >
-                  <EuiButton
-                    onClick={handleErrorFilterClick}
-                    data-test-subj="error-count-button"
-                    size="s"
-                    color="secondary"
-                  >
-                    {i18n.translate('explore.traceView.button.filterErrors', {
-                      defaultMessage: 'Filter errors ({errorCount})',
-                      values: { errorCount },
-                    })}
-                  </EuiButton>
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiTabs>
+      {tabs.map((tab) => (
+        <EuiTab key={tab.id} isSelected={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}>
+          {tab.name}
+        </EuiTab>
+      ))}
+    </EuiTabs>
   );
 };
