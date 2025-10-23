@@ -987,10 +987,6 @@ describe('TraceDetails', () => {
       </Router>
     );
 
-    await waitFor(() => {
-      expect(document.querySelector('[data-testid="trace-top-nav"]')).toBeInTheDocument();
-    });
-
     // Should not call fetchTraceSpans when required params are missing
     expect(mockPplService.fetchTraceSpans).not.toHaveBeenCalled();
   });
@@ -1119,13 +1115,12 @@ describe('TraceDetails', () => {
       </Router>
     );
 
-    await waitFor(() => {
-      expect(document.querySelector('[data-testid="trace-top-nav"]')).toBeInTheDocument();
-    });
-
-    // Verify the "No span selected" message is displayed
+    // Verify the "No span selected" message is displayed only in content (no header when no traceId)
     expect(screen.getByText('No span selected')).toBeInTheDocument();
     expect(screen.getByText('Please select a span to view details')).toBeInTheDocument();
+
+    // Verify no header is rendered when traceId is empty
+    expect(document.querySelector('[data-testid="trace-top-nav"]')).not.toBeInTheDocument();
 
     // Verify the message is in a panel
     const panel = document.querySelector('.euiPanel');

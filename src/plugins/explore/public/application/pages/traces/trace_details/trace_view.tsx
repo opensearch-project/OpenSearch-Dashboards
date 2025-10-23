@@ -668,12 +668,12 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
 
   return isFlyout ? (
     <>
-      <EuiFlyoutHeader>{renderTraceDetailsHeader()}</EuiFlyoutHeader>
+      {traceId && <EuiFlyoutHeader>{renderTraceDetailsHeader()}</EuiFlyoutHeader>}
       <EuiFlyoutBody>{renderTraceDetailsContent()}</EuiFlyoutBody>
     </>
   ) : (
     <>
-      {renderTraceDetailsHeader()}
+      {traceId && renderTraceDetailsHeader()}
       {renderTraceDetailsContent()}
     </>
   );
