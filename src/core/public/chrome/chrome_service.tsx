@@ -433,6 +433,7 @@ export class ChromeService {
           currentWorkspace$={workspaces.currentWorkspace$}
           useUpdatedHeader={this.useUpdatedHeader}
           globalSearchCommands={globalSearch.getAllSearchCommands()}
+          globalSearchSubmitCommands$={globalSearch.getSearchSubmitCommands$()}
           globalBanner$={this.globalBanner$.pipe(takeUntil(this.stop$))}
           keyboardShortcut={keyboardShortcut}
         />

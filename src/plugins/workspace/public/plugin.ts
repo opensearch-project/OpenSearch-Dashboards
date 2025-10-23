@@ -7,6 +7,7 @@ import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { map } from 'rxjs/operators';
+import { debounce } from 'lodash';
 import {
   Plugin,
   CoreStart,
@@ -73,6 +74,7 @@ import { registerDefaultCollaboratorTypes } from './register_default_collaborato
 import { WorkspaceValidationService } from './services/workspace_validation_service';
 import { workspaceSearchPages } from './components/global_search/search_pages_command';
 import { isNavGroupInFeatureConfigs } from '../../../core/public';
+import { searchAssets } from './components/global_search/search_assets_command';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -541,6 +543,33 @@ export class WorkspacePlugin
       type: 'PAGES',
       run: async (query: string, callback: () => void) =>
         workspaceSearchPages(query, this.registeredUseCases$, this.coreStart, callback),
+    });
+
+    let resolver: (payload: Awaited<ReturnType<typeof searchAssets>>) => void;
+    const debouncedSearchAssets = debounce((...args: Parameters<typeof searchAssets>) => {
+      searchAssets(...args).then(resolver);
+    }, 200);
+
+    core.chrome.globalSearch.registerSearchCommand({
+      id: 'assetsSearch',
+      type: 'SAVED_OBJECTS',
+      run: async (query: string, callback, abortSignal) => {
+        const [{ workspaces, http }] = await core.getStartServices();
+        const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
+        const visibleWorkspaceIds = workspaces.workspaceList$.getValue().map(({ id }) => id);
+
+        return new Promise((resolve) => {
+          resolver = resolve;
+          debouncedSearchAssets({
+            http,
+            query,
+            currentWorkspaceId,
+            abortSignal,
+            visibleWorkspaceIds,
+            onAssetClick: callback,
+          });
+        });
+      },
     });
 
     if (workspaceId) {

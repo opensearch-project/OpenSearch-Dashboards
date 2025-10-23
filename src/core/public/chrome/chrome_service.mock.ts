@@ -43,6 +43,7 @@ const createSetupContractMock = () => {
     },
     globalSearch: {
       registerSearchCommand: jest.fn(),
+      registerSearchSubmitCommand: jest.fn(),
     },
   };
 };
@@ -92,6 +93,8 @@ const createStartContractMock = () => {
     globalSearch: {
       getAllSearchCommands: jest.fn(() => []),
       unregisterSearchCommand: jest.fn(),
+      getSearchSubmitCommands$: jest.fn(() => new BehaviorSubject([])),
+      unregisterSearchSubmitCommand: jest.fn(),
     },
     setAppTitle: jest.fn(),
     setIsVisible: jest.fn(),
