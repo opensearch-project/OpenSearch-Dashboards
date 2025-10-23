@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DatasetAccordionList } from './dataset_accordion_list';
+import { CorrelationEmptyState } from './correlation_empty_state';
 import { LogHit } from '../../server/ppl_request_logs';
 import { Dataset } from '../../../../../../../../data/common';
 import { buildExploreLogsUrl, getTimeRangeFromTraceData } from './url_builder';
@@ -24,6 +25,7 @@ export interface TraceLogsTabProps {
   datasetLogs: Record<string, LogHit[]>;
   isLoading: boolean;
   onSpanClick?: (spanId: string) => void;
+  traceDataset?: Dataset;
 }
 
 export const TraceLogsTab: React.FC<TraceLogsTabProps> = ({
@@ -32,6 +34,7 @@ export const TraceLogsTab: React.FC<TraceLogsTabProps> = ({
   datasetLogs,
   isLoading,
   onSpanClick,
+  traceDataset,
 }) => {
   const handleViewInExplore = (logDataset: Dataset, logs: LogHit[]) => {
     try {
@@ -74,11 +77,7 @@ export const TraceLogsTab: React.FC<TraceLogsTabProps> = ({
           </h3>
         </EuiTitle>
         <EuiSpacer size="m" />
-        <EuiText size="s" color="subdued">
-          {i18n.translate('explore.traceLogsTab.noDatasets', {
-            defaultMessage: 'No log datasets found for this trace',
-          })}
-        </EuiText>
+        <CorrelationEmptyState traceDataset={traceDataset} />
       </EuiPanel>
     );
   }
@@ -106,6 +105,7 @@ export const TraceLogsTab: React.FC<TraceLogsTabProps> = ({
           onViewInExplore={handleViewInExplore}
           onSpanClick={onSpanClick}
           testSubjPrefix="trace-logs"
+          traceDataset={traceDataset}
         />
       </EuiPanel>
     </div>

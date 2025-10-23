@@ -68,7 +68,8 @@ export const AdvancedSelector = ({
           (type) =>
             (!supportedTypes?.length || supportedTypes.includes(type.id)) &&
             (type.meta.supportedAppNames === undefined ||
-              type.meta.supportedAppNames.includes(services.appName))
+              type.meta.supportedAppNames.includes(services.appName)) &&
+            (!useConfiguratorV2 || type.id === DEFAULT_DATA.SET_TYPES.INDEX)
         )
         .map((type) => {
           return {

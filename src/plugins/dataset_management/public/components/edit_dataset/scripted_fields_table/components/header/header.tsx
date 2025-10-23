@@ -43,7 +43,7 @@ export const Header = withRouter(({ datasetId, history, useUpdatedUX }: HeaderPr
       <EuiSmallButton
         {...(useUpdatedUX ? { iconType: 'plusInCircle' } : {})}
         data-test-subj="addScriptedFieldLink"
-        {...reactRouterNavigate(history, `patterns/${datasetId}/create-field/`)}
+        {...reactRouterNavigate(history, `patterns/${encodeURIComponent(datasetId)}/create-field/`)}
       >
         <FormattedMessage
           id="datasetManagement.editDataset.scripted.addFieldButton"

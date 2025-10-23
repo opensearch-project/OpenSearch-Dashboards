@@ -17,7 +17,7 @@ const EditDatasetCont: React.FC<RouteComponentProps<{ id: string }>> = ({ ...pro
   const [dataset, setDataset] = useState<DataView>();
 
   useEffect(() => {
-    data.dataViews.get(props.match.params.id).then((ip: DataView) => {
+    data.dataViews.get(decodeURIComponent(props.match.params.id)).then((ip: DataView) => {
       setDataset(ip);
       setBreadcrumbs(getEditBreadcrumbs(ip));
     });
