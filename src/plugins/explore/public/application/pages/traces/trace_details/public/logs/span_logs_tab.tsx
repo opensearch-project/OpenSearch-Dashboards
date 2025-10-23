@@ -25,6 +25,7 @@ export interface SpanLogsTabProps {
   logDatasets: Dataset[];
   datasetLogs: Record<string, LogHit[]>;
   isLoading: boolean;
+  traceDataset?: Dataset;
 }
 
 export const SpanLogsTab: React.FC<SpanLogsTabProps> = ({
@@ -33,6 +34,7 @@ export const SpanLogsTab: React.FC<SpanLogsTabProps> = ({
   logDatasets,
   datasetLogs,
   isLoading,
+  traceDataset,
 }) => {
   // Filter dataset logs to only include logs for this specific span
   const spanFilteredDatasetLogs = useMemo(() => {
@@ -123,6 +125,7 @@ export const SpanLogsTab: React.FC<SpanLogsTabProps> = ({
           datasetLogs={spanFilteredDatasetLogs}
           onViewInExplore={handleViewInExplore}
           testSubjPrefix="span-logs"
+          traceDataset={traceDataset}
         />
       </EuiPanel>
     </div>
