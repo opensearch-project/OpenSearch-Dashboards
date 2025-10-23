@@ -23,7 +23,8 @@ export function buildServices(
   context: PluginInitializerContext,
   tabRegistry: TabRegistryService,
   visualizationRegistry: VisualizationRegistryService,
-  queryPanelActionsRegistry: QueryPanelActionsRegistryService
+  queryPanelActionsRegistry: QueryPanelActionsRegistryService,
+  isDatasetManagementEnabled: boolean
 ): ExploreServices {
   const config = context.config.get<ConfigSchema>();
   const supportedTypes = config.supportedTypes;
@@ -97,5 +98,6 @@ export function buildServices(
 
     // Add supportedTypes from config
     supportedTypes,
+    isDatasetManagementEnabled,
   };
 }

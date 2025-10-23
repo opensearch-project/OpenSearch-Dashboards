@@ -3,15 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { Dataset, DEFAULT_DATA, EMPTY_QUERY } from '../../../../../../data/common';
+import { convertIndexPatternTerminology } from '../../../../../../opensearch_dashboards_utils/public';
 import { ExploreServices } from '../../../../types';
 import { setQueryWithHistory } from '../../../../application/utils/state_management/slices';
 import { selectQuery } from '../../../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import { useClearEditors } from '../../../../application/hooks';
+import './dataset_select_terminology.scss';
 
 export const DatasetSelectWidget = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -19,6 +21,7 @@ export const DatasetSelectWidget = () => {
   const dispatch = useDispatch();
   const currentQuery = useSelector(selectQuery);
   const clearEditors = useClearEditors();
+  const { isDatasetManagementEnabled } = services;
 
   const {
     data: {
@@ -106,11 +109,117 @@ export const DatasetSelectWidget = () => {
     );
   }, [services.supportedTypes]);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Apply terminology conversion to replace "Index pattern" with "Dataset"
+  useEffect(() => {
+    if (!isDatasetManagementEnabled) return;
+
+    const convertTextNodes = (element: HTMLElement) => {
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null);
+
+      const nodesToUpdate: Array<{ node: Text; newText: string }> = [];
+
+      let currentNode;
+      while ((currentNode = walker.nextNode())) {
+        if (currentNode.textContent) {
+          const convertedText = convertIndexPatternTerminology(
+            currentNode.textContent,
+            isDatasetManagementEnabled
+          );
+          if (convertedText !== currentNode.textContent) {
+            nodesToUpdate.push({ node: currentNode as Text, newText: convertedText });
+          }
+        }
+      }
+
+      // Apply updates after traversal to avoid modifying the tree while walking
+      nodesToUpdate.forEach(({ node, newText }) => {
+        node.textContent = newText;
+      });
+    };
+
+    // Convert text in the main component
+    const convertMainComponent = () => {
+      if (containerRef.current) {
+        convertTextNodes(containerRef.current);
+      }
+    };
+
+    // Convert text in EUI portals (popovers, modals, etc.)
+    const convertPortalContent = () => {
+      // Find all EUI portals and dataset-related elements
+      const selectors = [
+        '.euiPopover__panel',
+        '.datasetSelect__contextMenu',
+        '[data-test-subj*="dataset"]',
+        '.datasetSelect__selectable',
+      ];
+
+      selectors.forEach((selector) => {
+        document.querySelectorAll(selector).forEach((element) => {
+          if (element instanceof HTMLElement) {
+            convertTextNodes(element);
+          }
+        });
+      });
+    };
+
+    // Initial conversion with delay for DOM rendering
+    const timeoutId = setTimeout(() => {
+      convertMainComponent();
+      convertPortalContent();
+    }, 100);
+
+    // Observe both the component and document body for portals
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+          // Check if any added nodes are portals or dataset-related
+          mutation.addedNodes.forEach((node) => {
+            if (node instanceof HTMLElement) {
+              // Check if this is a portal or contains dataset select elements
+              if (
+                node.classList.contains('euiPopover__panel') ||
+                node.querySelector('.datasetSelect__contextMenu') ||
+                node.querySelector('.datasetSelect__selectable')
+              ) {
+                // Give the portal content time to render
+                setTimeout(() => convertTextNodes(node), 50);
+              }
+            }
+          });
+        }
+      });
+    });
+
+    // Watch both the container and document body for portals
+    if (containerRef.current) {
+      observer.observe(containerRef.current, {
+        childList: true,
+        subtree: true,
+      });
+    }
+
+    // Watch document body for portal additions
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => {
+      clearTimeout(timeoutId);
+      observer.disconnect();
+    };
+  }, [isDatasetManagementEnabled]);
+
   return (
-    <DatasetSelect
-      onSelect={handleDatasetSelect}
-      supportedTypes={supportedTypes}
-      signalType={flavorId}
-    />
+    <div ref={containerRef} className="exploreDatasetSelectWrapper">
+      <DatasetSelect
+        onSelect={handleDatasetSelect}
+        supportedTypes={supportedTypes}
+        signalType={flavorId}
+      />
+    </div>
   );
 };
