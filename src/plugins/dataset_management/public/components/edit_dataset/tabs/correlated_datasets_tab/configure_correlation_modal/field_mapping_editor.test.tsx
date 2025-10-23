@@ -125,6 +125,12 @@ describe('FieldMappingEditor - FieldSelector Field Type Filtering', () => {
       'serviceName',
       'message',
     ]);
+
+    // Verify traceId field specifically
+    const traceIdField = stringFields.find((f) => f.name === 'traceId');
+    expect(traceIdField).toBeDefined();
+    expect(traceIdField?.name).toBe('traceId');
+    expect(traceIdField?.type).toBe('string');
   });
 
   test('should filter fields by string type for spanId field', () => {
@@ -133,15 +139,23 @@ describe('FieldMappingEditor - FieldSelector Field Type Filtering', () => {
 
     // Verify string fields are correctly identified
     expect(stringFields.length).toBe(4);
-    expect(stringFields.some((f) => f.name === 'spanId')).toBe(true);
+
+    // Verify spanId field specifically
+    const spanIdField = stringFields.find((f) => f.name === 'spanId');
+    expect(spanIdField).toBeDefined();
+    expect(spanIdField?.name).toBe('spanId');
+    expect(spanIdField?.type).toBe('string');
   });
 
   test('should filter fields by string type for serviceName field', () => {
     const mockFields = createMockFields();
     const stringFields = mockFields.filter((f) => f.type === 'string');
 
-    // Verify string fields include serviceName
-    expect(stringFields.some((f) => f.name === 'serviceName')).toBe(true);
+    // Verify serviceName field specifically
+    const serviceNameField = stringFields.find((f) => f.name === 'serviceName');
+    expect(serviceNameField).toBeDefined();
+    expect(serviceNameField?.name).toBe('serviceName');
+    expect(serviceNameField?.type).toBe('string');
   });
 
   test('should have correct field type constants defined', () => {
