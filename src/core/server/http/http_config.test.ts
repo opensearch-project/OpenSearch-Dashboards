@@ -31,6 +31,7 @@
 import uuid from 'uuid';
 import { config, HttpConfig } from './http_config';
 import { CspConfig } from '../csp';
+import { CspReportOnlyConfig } from '../csp_report_only';
 
 const validHostnames = ['www.example.com', '8.8.8.8', '::1', 'localhost'];
 const invalidHostname = 'asdf$%^';
@@ -287,7 +288,7 @@ describe('HttpConfig', () => {
         },
       },
     });
-    const httpConfig = new HttpConfig(rawConfig, CspConfig.DEFAULT);
+    const httpConfig = new HttpConfig(rawConfig, CspConfig.DEFAULT, CspReportOnlyConfig.DEFAULT);
 
     expect(httpConfig.customResponseHeaders).toEqual({
       string: 'string',
