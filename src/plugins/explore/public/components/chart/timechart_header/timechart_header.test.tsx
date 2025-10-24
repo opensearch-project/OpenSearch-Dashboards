@@ -216,10 +216,7 @@ describe('timechart header', function () {
 
     it('should render BreakdownFieldSelector when shouldShowBreakdownSelector returns true and services is provided', () => {
       mockShouldShowBreakdownSelector.mockReturnValue(true);
-      const mockServices = {
-        data: {},
-        uiSettings: { get: jest.fn().mockReturnValue(true) },
-      };
+      const mockServices = { data: {} };
       const updatedProps = { ...props, services: mockServices };
 
       component = mountWithIntl(<TimechartHeader {...updatedProps} />);
@@ -246,10 +243,7 @@ describe('timechart header', function () {
 
     it('should render BreakdownFieldSelector when toggleIdSelected is histogram', () => {
       mockShouldShowBreakdownSelector.mockReturnValue(true);
-      const mockServices = {
-        data: {},
-        uiSettings: { get: jest.fn().mockReturnValue(true) },
-      };
+      const mockServices = { data: {} };
       const updatedProps = {
         ...props,
         services: mockServices,
@@ -271,7 +265,11 @@ describe('timechart header', function () {
       mockShouldShowBreakdownSelector.mockReturnValue(false);
       const mockServices = {
         data: {},
-        uiSettings: { get: jest.fn().mockReturnValue(true) },
+        uiSettings: {
+          get: jest.fn().mockImplementation((setting) => {
+            if (setting === 'explore:experimental') return true;
+          }),
+        },
       };
 
       component = mountWithIntl(<TimechartHeader {...props} services={mockServices} />);

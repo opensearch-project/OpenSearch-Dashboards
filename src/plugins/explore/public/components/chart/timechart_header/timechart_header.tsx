@@ -28,11 +28,10 @@
  * under the License.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSelect, EuiIconTip } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import moment from 'moment';
 import { DiscoverChartToggleId } from '../utils/use_persist_chart_state';
 import { BreakdownFieldSelector } from '../breakdown_field_selector';
 import { shouldShowBreakdownSelector } from '../utils/breakdown_utils';
