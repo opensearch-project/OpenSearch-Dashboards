@@ -44,7 +44,7 @@ describe('line_vis_config', () => {
 
       // Verify basic controls
       expect(defaults.addLegend).toBe(true);
-      expect(defaults.legendPosition).toBe(Positions.RIGHT);
+      expect(defaults.legendPosition).toBe(Positions.BOTTOM);
       expect(defaults.addTimeMarker).toBe(false);
 
       // Verify line style

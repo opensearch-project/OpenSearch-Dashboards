@@ -5,7 +5,7 @@
 
 import {
   inferTimeIntervals,
-  transformIntervelsToTickCount,
+  transformIntervalsToTickCount,
   inferBucketSize,
   adjustBucketBins,
   buildEncoding,
@@ -41,10 +41,10 @@ describe('bar_chart_utils', () => {
 
   describe('transformIntervelsToTickCount', () => {
     it('transforms time units correctly', () => {
-      expect(transformIntervelsToTickCount(TimeUnit.YEAR)).toBe('year');
-      expect(transformIntervelsToTickCount(TimeUnit.MONTH)).toBe('month');
-      expect(transformIntervelsToTickCount(TimeUnit.DATE)).toBe('day');
-      expect(transformIntervelsToTickCount(undefined)).toBe('day');
+      expect(transformIntervalsToTickCount(TimeUnit.YEAR)).toBe('year');
+      expect(transformIntervalsToTickCount(TimeUnit.MONTH)).toBe('month');
+      expect(transformIntervalsToTickCount(TimeUnit.DATE)).toBe('day');
+      expect(transformIntervalsToTickCount(undefined)).toBe('day');
     });
   });
 

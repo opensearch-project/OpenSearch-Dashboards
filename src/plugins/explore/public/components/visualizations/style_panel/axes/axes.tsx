@@ -28,6 +28,7 @@ interface AxesOptionsProps {
   categoricalColumns: VisColumn[];
   dateColumns: VisColumn[];
   axisColumnMappings: Partial<Record<AxisRole, VisColumn>>;
+  initialIsOpen?: boolean;
 }
 
 export const AxesOptions: React.FC<AxesOptionsProps> = ({
@@ -39,6 +40,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
   categoricalColumns,
   dateColumns,
   axisColumnMappings,
+  initialIsOpen = false,
 }) => {
   const updateCategoryAxis = (index: number, updates: Partial<CategoryAxis>) => {
     const updatedAxes = [...categoryAxes];
@@ -122,7 +124,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
       accordionLabel={i18n.translate('explore.stylePanel.tabs.axes', {
         defaultMessage: 'Axes',
       })}
-      initialIsOpen={true}
+      initialIsOpen={initialIsOpen}
     >
       {/* Category Axes */}
       {categoryAxes.map((axis, index) => (

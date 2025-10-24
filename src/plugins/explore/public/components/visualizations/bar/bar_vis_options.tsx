@@ -76,31 +76,6 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
       </EuiFlexItem>
       {hasMappingSelected && (
         <>
-          <EuiFlexItem>
-            <BucketOptionsPanel
-              styles={styleOptions?.bucket}
-              bucketType={bucketType}
-              onChange={(bucket) => updateStyleOption('bucket', bucket)}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <ThresholdPanel
-              thresholdsOptions={styleOptions.thresholdOptions}
-              onChange={(options) => updateStyleOption('thresholdOptions', options)}
-              showThresholdStyle={true}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AllAxesOptions
-              axisColumnMappings={axisColumnMappings}
-              standardAxes={styleOptions.standardAxes}
-              onStandardAxesChange={(standardAxes) =>
-                updateStyleOption('standardAxes', standardAxes)
-              }
-              switchAxes={styleOptions.switchAxes}
-            />
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <BarExclusiveVisOptions
               barSizeMode={styleOptions.barSizeMode}
@@ -126,6 +101,32 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
                 updateStyleOption('useThresholdColor', useThresholdColor)
               }
               shouldDisableUseThresholdColor={hasColorMapping}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <BucketOptionsPanel
+              styles={styleOptions?.bucket}
+              bucketType={bucketType}
+              onChange={(bucket) => updateStyleOption('bucket', bucket)}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <ThresholdPanel
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+              showThresholdStyle={true}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AllAxesOptions
+              axisColumnMappings={axisColumnMappings}
+              standardAxes={styleOptions.standardAxes}
+              onStandardAxesChange={(standardAxes) =>
+                updateStyleOption('standardAxes', standardAxes)
+              }
+              switchAxes={styleOptions.switchAxes}
             />
           </EuiFlexItem>
 

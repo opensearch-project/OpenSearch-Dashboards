@@ -13,6 +13,7 @@ export interface StandardOptionsPanelProps {
   max?: number;
   onMinChange: (min: number | undefined) => void;
   onMaxChange: (max: number | undefined) => void;
+  initialIsOpen?: boolean;
 }
 
 export const StandardOptionsPanel = ({
@@ -20,6 +21,7 @@ export const StandardOptionsPanel = ({
   max,
   onMaxChange,
   onMinChange,
+  initialIsOpen = false,
 }: StandardOptionsPanelProps) => {
   return (
     // TODO add unit panel to standardOptions panel
@@ -28,7 +30,7 @@ export const StandardOptionsPanel = ({
       accordionLabel={i18n.translate('explore.stylePanel.threshold', {
         defaultMessage: 'Standard options',
       })}
-      initialIsOpen={true}
+      initialIsOpen={initialIsOpen}
     >
       <MinMaxControls min={min} max={max} onMaxChange={onMaxChange} onMinChange={onMinChange} />
     </StyleAccordion>

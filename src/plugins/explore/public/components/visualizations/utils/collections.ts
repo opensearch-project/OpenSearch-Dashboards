@@ -183,8 +183,8 @@ export const getTimeUnits = () => [
     value: TimeUnit.MONTH,
   },
   {
-    text: i18n.translate('explore.vis.timeUnit.date', {
-      defaultMessage: 'Date',
+    text: i18n.translate('explore.vis.timeUnit.day', {
+      defaultMessage: 'Day',
     }),
     value: TimeUnit.DATE,
   },
