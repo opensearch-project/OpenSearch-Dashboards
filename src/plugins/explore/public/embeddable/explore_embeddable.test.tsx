@@ -489,4 +489,26 @@ describe('ExploreEmbeddable', () => {
       'Cannot load saved visualization "Test Explore" with id test-id'
     );
   });
+
+  test('fetch handles empty data by skipping visualization processing', async () => {
+    const mockNormalizeResultRows = require('../components/visualizations/utils/normalize_result_rows');
+    jest.spyOn(mockNormalizeResultRows, 'normalizeResultRows').mockReturnValueOnce({
+      transformedData: [],
+      numericalColumns: [],
+      categoricalColumns: [],
+      dateColumns: [],
+    });
+
+    mockSavedExplore.visualization = JSON.stringify({
+      chartType: 'line',
+      axesMapping: { x: 'field1', y: 'field2' },
+    });
+    mockSavedExplore.uiState = JSON.stringify({ activeTab: 'visualization' });
+
+    // @ts-ignore
+    await embeddable.fetch();
+
+    expect(embeddable.getOutput().error).toBeUndefined();
+    expect(embeddable.getOutput().loading).toBe(false);
+  });
 });

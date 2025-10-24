@@ -376,40 +376,44 @@ export class ExploreEmbeddable
         ...(categoricalColumns ?? []),
         ...(dateColumns ?? []),
       ];
-      if (selectedChartType === 'table') {
-        this.searchProps.tableData = {
-          columns: allColumns,
-          rows: visualizationData.transformedData ?? [],
-        };
-      } else {
-        const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
-        const matchedRule = visualizationRegistry.findRuleByAxesMapping(
-          visualization.axesMapping,
-          allColumns
-        );
-        if (!matchedRule || !matchedRule.toSpec) {
-          throw new Error(
-            `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
+      
+      // Check if there's data to visualize
+      if (visualizationData.transformedData && visualizationData.transformedData.length > 0) {
+        if (selectedChartType === 'table') {
+          this.searchProps.tableData = {
+            columns: allColumns,
+            rows: visualizationData.transformedData ?? [],
+          };
+        } else {
+          const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
+          const matchedRule = visualizationRegistry.findRuleByAxesMapping(
+            visualization.axesMapping,
+            allColumns
           );
+          if (!matchedRule || !matchedRule.toSpec) {
+            throw new Error(
+              `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
+            );
+          }
+          const searchContext = {
+            query: this.input.query,
+            filters: this.input.filters,
+            timeRange: this.input.timeRange,
+          };
+          this.searchProps.searchContext = searchContext;
+          const styleOptions = visualization.params;
+          const spec = matchedRule.toSpec(
+            visualizationData.transformedData,
+            numericalColumns,
+            categoricalColumns,
+            dateColumns,
+            styleOptions,
+            selectedChartType,
+            axesMapping
+          );
+          const exp = toExpression(searchContext, spec);
+          this.searchProps.expression = exp;
         }
-        const searchContext = {
-          query: this.input.query,
-          filters: this.input.filters,
-          timeRange: this.input.timeRange,
-        };
-        this.searchProps.searchContext = searchContext;
-        const styleOptions = visualization.params;
-        const spec = matchedRule.toSpec(
-          visualizationData.transformedData,
-          numericalColumns,
-          categoricalColumns,
-          dateColumns,
-          styleOptions,
-          selectedChartType,
-          axesMapping
-        );
-        const exp = toExpression(searchContext, spec);
-        this.searchProps.expression = exp;
       }
     }
     this.updateOutput({ loading: false, error: undefined });
