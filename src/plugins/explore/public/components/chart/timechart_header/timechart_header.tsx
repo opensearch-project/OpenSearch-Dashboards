@@ -29,14 +29,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiText,
-  EuiSelect,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSelect, EuiIconTip } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
@@ -115,20 +108,7 @@ export function TimechartHeader({
 }: TimechartHeaderProps) {
   const [interval, setInterval] = useState(stateInterval);
   const { dataset } = useDatasetContext();
-  const showBreakdownSelector = shouldShowBreakdownSelector(dataset);
-
-  const toMoment = useCallback(
-    (datetime: string) => {
-      if (!datetime) {
-        return '';
-      }
-      if (!dateFormat) {
-        return datetime;
-      }
-      return moment(datetime).format(dateFormat);
-    },
-    [dateFormat]
-  );
+  const showBreakdownSelector = shouldShowBreakdownSelector(dataset, services);
 
   useEffect(() => {
     setInterval(stateInterval);
