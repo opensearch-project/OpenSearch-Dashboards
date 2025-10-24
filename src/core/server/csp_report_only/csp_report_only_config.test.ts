@@ -36,7 +36,7 @@ describe('CspReportOnlyConfig', () => {
       expect(CspReportOnlyConfig.DEFAULT).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
           "cspReportOnlyHeader": "script-src 'self'; worker-src 'self'; style-src 'self'",
-          "endpointName": "csp-report",
+          "endpointName": "csp-endpoint",
           "isEmitting": false,
           "reportUri": undefined,
           "reportingEndpointsHeader": undefined,
@@ -53,7 +53,7 @@ describe('CspReportOnlyConfig', () => {
       expect(new CspReportOnlyConfig()).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
           "cspReportOnlyHeader": "script-src 'self'; worker-src 'self'; style-src 'self'",
-          "endpointName": "csp-report",
+          "endpointName": "csp-endpoint",
           "isEmitting": false,
           "reportUri": undefined,
           "reportingEndpointsHeader": undefined,
@@ -70,7 +70,7 @@ describe('CspReportOnlyConfig', () => {
       expect(new CspReportOnlyConfig({ isEmitting: true })).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
           "cspReportOnlyHeader": "script-src 'self'; worker-src 'self'; style-src 'self'",
-          "endpointName": "csp-report",
+          "endpointName": "csp-endpoint",
           "isEmitting": true,
           "reportUri": undefined,
           "reportingEndpointsHeader": undefined,
@@ -88,7 +88,7 @@ describe('CspReportOnlyConfig', () => {
       expect(cspConfig).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
           "cspReportOnlyHeader": "alpha; beta; gamma",
-          "endpointName": "csp-report",
+          "endpointName": "csp-endpoint",
           "isEmitting": false,
           "reportUri": undefined,
           "reportingEndpointsHeader": undefined,
@@ -103,7 +103,7 @@ describe('CspReportOnlyConfig', () => {
   });
 
   describe('when CSP_REPORT_ONLY_ENDPOINT is set to URL', () => {
-    const TEST_ENDPOINT = 'https://opensearch.org/csp-reports';
+    const TEST_ENDPOINT = 'https://opensearch.org/csp-endpoints';
     let CspReportOnlyConfig: any;
 
     beforeEach(() => {
@@ -113,11 +113,11 @@ describe('CspReportOnlyConfig', () => {
     test('DEFAULT with reporting endpoint', () => {
       expect(CspReportOnlyConfig.DEFAULT).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
-          "cspReportOnlyHeader": "script-src 'self'; worker-src 'self'; style-src 'self'report-uri https://opensearch.org/csp-reports; report-to csp-report",
-          "endpointName": "csp-report",
+          "cspReportOnlyHeader": "script-src 'self'; worker-src 'self'; style-src 'self'; report-uri https://opensearch.org/csp-endpoints; report-to csp-endpoint;",
+          "endpointName": "csp-endpoint",
           "isEmitting": false,
-          "reportUri": "https://opensearch.org/csp-reports",
-          "reportingEndpointsHeader": "csp-report=\\"https://opensearch.org/csp-reports\\"",
+          "reportUri": "https://opensearch.org/csp-endpoints",
+          "reportingEndpointsHeader": "csp-endpoint=\\"https://opensearch.org/csp-endpoints\\"",
           "rules": Array [
             "script-src 'self'",
             "worker-src 'self'",
@@ -130,11 +130,11 @@ describe('CspReportOnlyConfig', () => {
     test('defaults from config with reporting endpoint', () => {
       expect(new CspReportOnlyConfig()).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
-          "cspReportOnlyHeader": "script-src 'self'; worker-src 'self'; style-src 'self'report-uri https://opensearch.org/csp-reports; report-to csp-report",
-          "endpointName": "csp-report",
+          "cspReportOnlyHeader": "script-src 'self'; worker-src 'self'; style-src 'self'; report-uri https://opensearch.org/csp-endpoints; report-to csp-endpoint;",
+          "endpointName": "csp-endpoint",
           "isEmitting": false,
-          "reportUri": "https://opensearch.org/csp-reports",
-          "reportingEndpointsHeader": "csp-report=\\"https://opensearch.org/csp-reports\\"",
+          "reportUri": "https://opensearch.org/csp-endpoints",
+          "reportingEndpointsHeader": "csp-endpoint=\\"https://opensearch.org/csp-endpoints\\"",
           "rules": Array [
             "script-src 'self'",
             "worker-src 'self'",
@@ -147,11 +147,11 @@ describe('CspReportOnlyConfig', () => {
     test('creates from partial config with reporting endpoint', () => {
       expect(new CspReportOnlyConfig({ isEmitting: true })).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
-          "cspReportOnlyHeader": "script-src 'self'; worker-src 'self'; style-src 'self'report-uri https://opensearch.org/csp-reports; report-to csp-report",
-          "endpointName": "csp-report",
+          "cspReportOnlyHeader": "script-src 'self'; worker-src 'self'; style-src 'self'; report-uri https://opensearch.org/csp-endpoints; report-to csp-endpoint;",
+          "endpointName": "csp-endpoint",
           "isEmitting": true,
-          "reportUri": "https://opensearch.org/csp-reports",
-          "reportingEndpointsHeader": "csp-report=\\"https://opensearch.org/csp-reports\\"",
+          "reportUri": "https://opensearch.org/csp-endpoints",
+          "reportingEndpointsHeader": "csp-endpoint=\\"https://opensearch.org/csp-endpoints\\"",
           "rules": Array [
             "script-src 'self'",
             "worker-src 'self'",
@@ -165,11 +165,11 @@ describe('CspReportOnlyConfig', () => {
       const cspConfig = new CspReportOnlyConfig({ rules: ['alpha', 'beta', 'gamma'] });
       expect(cspConfig).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
-          "cspReportOnlyHeader": "alpha; beta; gammareport-uri https://opensearch.org/csp-reports; report-to csp-report",
-          "endpointName": "csp-report",
+          "cspReportOnlyHeader": "alpha; beta; gamma; report-uri https://opensearch.org/csp-endpoints; report-to csp-endpoint;",
+          "endpointName": "csp-endpoint",
           "isEmitting": false,
-          "reportUri": "https://opensearch.org/csp-reports",
-          "reportingEndpointsHeader": "csp-report=\\"https://opensearch.org/csp-reports\\"",
+          "reportUri": "https://opensearch.org/csp-endpoints",
+          "reportingEndpointsHeader": "csp-endpoint=\\"https://opensearch.org/csp-endpoints\\"",
           "rules": Array [
             "alpha",
             "beta",
@@ -185,11 +185,13 @@ describe('CspReportOnlyConfig', () => {
         isEmitting: true,
       });
 
-      expect(config.cspReportOnlyHeader).toContain('report-uri https://opensearch.org/csp-reports');
-      expect(config.cspReportOnlyHeader).toContain('report-to csp-report');
-      expect(config.reportUri).toBe('https://opensearch.org/csp-reports');
+      expect(config.cspReportOnlyHeader).toContain(
+        'report-uri https://opensearch.org/csp-endpoints'
+      );
+      expect(config.cspReportOnlyHeader).toContain('report-to csp-endpoint');
+      expect(config.reportUri).toBe('https://opensearch.org/csp-endpoints');
       expect(config.reportingEndpointsHeader).toBe(
-        'csp-report="https://opensearch.org/csp-reports"'
+        'csp-endpoint="https://opensearch.org/csp-endpoints"'
       );
     });
   });

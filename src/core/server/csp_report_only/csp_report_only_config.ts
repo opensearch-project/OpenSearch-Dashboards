@@ -52,7 +52,7 @@ export class CspReportOnlyConfig implements ICspReportOnlyConfig {
   public readonly cspReportOnlyHeader: string;
   public readonly reportingEndpointsHeader?: string;
   public readonly reportUri?: string;
-  private readonly endpointName = 'csp-report';
+  private readonly endpointName = 'csp-endpoint';
 
   /**
    * Returns the default CSP-Report-Only configuration when passed with no config
