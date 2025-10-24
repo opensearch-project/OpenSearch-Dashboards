@@ -317,7 +317,7 @@ describe('<HeaderSearchBar />', () => {
       });
     });
 
-    const fastSearchFn = jest.fn().mockResolvedValue([<EuiText>fast result</EuiText>]);
+    jest.fn().mockResolvedValue([<EuiText>fast result</EuiText>]);
 
     const commands: GlobalSearchCommand[] = [
       {
@@ -327,9 +327,7 @@ describe('<HeaderSearchBar />', () => {
       },
     ];
 
-    const { getByTestId, queryByText } = render(
-      <HeaderSearchBar globalSearchCommands={commands} panel />
-    );
+    const { getByTestId } = render(<HeaderSearchBar globalSearchCommands={commands} panel />);
 
     const searchInput = getByTestId('global-search-input');
 
