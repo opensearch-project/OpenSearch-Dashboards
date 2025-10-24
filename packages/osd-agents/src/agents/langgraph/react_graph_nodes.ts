@@ -319,6 +319,7 @@ export class ReactGraphNodes {
       clientContext,
       threadId,
       runId,
+      recentToolSignatures,
     } = state;
 
     // Safety check: reject tool execution at max iterations
@@ -365,7 +366,8 @@ export class ReactGraphNodes {
         context: clientContext,
         threadId,
         runId,
-      }
+      },
+      recentToolSignatures || []
     );
 
     if (result.isClientTools) {
@@ -377,6 +379,7 @@ export class ReactGraphNodes {
         currentStep: 'executeTools',
         shouldContinue: false, // Stop here for client execution
         iterations: state.iterations, // Don't increment for client tools
+        recentToolSignatures: result.updatedSignatures || recentToolSignatures || [],
       };
     }
 
@@ -385,6 +388,7 @@ export class ReactGraphNodes {
         toolCalls: [],
         currentStep: 'executeTools',
         shouldContinue: false,
+        recentToolSignatures: result.updatedSignatures || recentToolSignatures || [],
       };
     }
 
@@ -397,6 +401,17 @@ export class ReactGraphNodes {
       agent_type: 'react',
     });
 
+    // Emit metric if duplicate was detected
+    if (result.duplicateDetected) {
+      metricsEmitter.emitCounter('react_agent_duplicate_tool_calls_detected_total', 1, {
+        agent_type: 'react',
+      });
+      this.logger.warn('Duplicate tool call detected and handled', {
+        toolCalls: toolCalls.map((tc) => tc.toolName),
+        iterations: newIterations,
+      });
+    }
+
     // Note: The assistant message with toolUse blocks is already in messages from callModelNode
     // We only need to add the toolResult message
     return {
@@ -407,6 +422,7 @@ export class ReactGraphNodes {
       iterations: newIterations, // Set the new iterations count
       shouldContinue: true, // Keep this true to allow the graph to decide
       lastToolExecution: Date.now(), // Track when tools were last executed
+      recentToolSignatures: result.updatedSignatures || recentToolSignatures || [],
     };
   }
 

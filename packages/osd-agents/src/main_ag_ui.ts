@@ -29,6 +29,7 @@ import { Logger } from './utils/logger';
 import { AGUIAuditLogger } from './utils/ag_ui_audit_logger';
 import { ConfigLoader } from './config/config_loader';
 import { HTTPServer } from './server/http_server';
+import { OpenSearchIngestor } from './opensearch_ingestion';
 
 // Load environment variables
 dotenv.config();
@@ -40,6 +41,8 @@ class BaseAGUIServer {
   private config: BaseAGUIConfig;
   private httpServer: HTTPServer;
   private agentType: string;
+  private opensearchIngestor?: OpenSearchIngestor;
+  private ingestionWatcherActive: boolean = false;
 
   constructor(agentType: string, config: BaseAGUIConfig) {
     this.agentType = agentType;
@@ -56,7 +59,8 @@ class BaseAGUIServer {
     this.adapter = new BaseAGUIAdapter(agent, config, this.logger, this.auditLogger);
     this.logger.info(`Using BaseAGUIAdapter for ${agentType} agent`);
 
-    this.httpServer = new HTTPServer(config, this.adapter, this.logger, this.auditLogger);
+    // Pass 'this' to HTTPServer so it can access server status
+    this.httpServer = new HTTPServer(config, this.adapter, this.logger, this.auditLogger, this);
   }
 
   async initialize(mcpConfigs: Record<string, MCPServerConfig>): Promise<void> {
@@ -69,15 +73,83 @@ class BaseAGUIServer {
     this.httpServer.setupMiddleware();
     this.httpServer.setupRoutes();
 
+    // Initialize OpenSearch ingestion if enabled and credentials are configured
+    if (this.config.enableRealtimeLogIngestion && OpenSearchIngestor.areCredentialsConfigured()) {
+      try {
+        this.opensearchIngestor = new OpenSearchIngestor();
+        this.logger.info('OpenSearch real-time log ingestion initialized');
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        this.logger.error('Failed to initialize OpenSearch ingestion', { error: errorMessage });
+        this.logger.warn('Continuing without real-time log ingestion');
+      }
+    } else if (this.config.enableRealtimeLogIngestion) {
+      this.logger.warn(
+        'Real-time log ingestion is enabled but OpenSearch credentials are not configured'
+      );
+    }
+
     this.logger.info(`${this.agentType} AG UI Server initialized`);
   }
 
   async start(): Promise<void> {
     await this.httpServer.start();
+
+    // Start OpenSearch ingestion watcher in background if initialized
+    if (this.opensearchIngestor) {
+      this.startIngestionWatcher();
+    }
+  }
+
+  /**
+   * Start OpenSearch ingestion watcher in background
+   * This runs asynchronously without blocking the main server
+   */
+  private startIngestionWatcher(): void {
+    if (!this.opensearchIngestor) {
+      return;
+    }
+
+    this.logger.info('Starting OpenSearch log ingestion watcher in background');
+
+    // Run watcher asynchronously - don't await to prevent blocking
+    this.opensearchIngestor
+      .watchAndIngest()
+      .then(() => {
+        this.logger.info('OpenSearch ingestion watcher completed');
+        this.ingestionWatcherActive = false;
+      })
+      .catch((error) => {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        this.logger.error('OpenSearch ingestion watcher error', { error: errorMessage });
+        this.ingestionWatcherActive = false;
+      });
+
+    this.ingestionWatcherActive = true;
+    this.logger.info('OpenSearch ingestion watcher started successfully');
+  }
+
+  /**
+   * Check if ingestion watcher is running
+   */
+  isIngestionWatcherActive(): boolean {
+    return this.ingestionWatcherActive;
   }
 
   async stop(): Promise<void> {
+    this.logger.info('Stopping AG UI Server...');
+
+    // Stop HTTP server first
     await this.httpServer.stop();
+
+    // Log ingestion watcher status on shutdown
+    // Note: The ingestion watcher will be gracefully stopped via SIGINT handler
+    // which is already handled by the opensearch_ingestion watchAndIngest method
+    if (this.ingestionWatcherActive) {
+      this.logger.info('OpenSearch ingestion watcher will be stopped via SIGINT handler');
+    }
+
+    // Cleanup other resources
     this.adapter.cleanup();
     this.auditLogger.cleanup();
     this.logger.info(`${this.agentType} AG UI Server stopped`);
