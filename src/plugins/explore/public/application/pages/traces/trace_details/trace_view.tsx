@@ -591,6 +591,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                             datasetLogs={datasetLogs}
                             isLoading={isLogsLoading}
                             onSpanClick={handleSpanSelect}
+                            traceDataset={dataset}
                           />
                         )}
                       </div>
@@ -626,6 +627,7 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
                         isLogsLoading={isLogsLoading}
                         activeTab={spanDetailActiveTab as any}
                         onTabChange={(tabId) => setSpanDetailActiveTab(tabId)}
+                        traceDataset={dataset}
                       />
                     </div>
                   </EuiResizablePanel>

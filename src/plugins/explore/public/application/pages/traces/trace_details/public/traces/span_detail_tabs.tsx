@@ -25,6 +25,7 @@ import { SpanRawSpanTab } from './span_tabs/span_raw_span_tab';
 import { SpanLogsTab } from '../logs/span_logs_tab';
 import { filterLogsBySpanId } from '../logs/url_builder';
 import { SpanDetailTab } from '../../constants/span_detail_tabs';
+import { Dataset } from '../../../../../../../../data/common';
 
 export interface SpanDetailTabsProps {
   selectedSpan?: any;
@@ -36,6 +37,7 @@ export interface SpanDetailTabsProps {
   isLogsLoading?: boolean;
   activeTab?: TabId;
   onTabChange?: (tabId: TabId) => void;
+  traceDataset?: Dataset;
 }
 
 type TabId = SpanDetailTab;
@@ -56,6 +58,7 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
   isLogsLoading = false,
   activeTab: externalActiveTab,
   onTabChange,
+  traceDataset,
 }) => {
   const [internalActiveTab, setInternalActiveTab] = useState<TabId>(SpanDetailTab.OVERVIEW);
 
@@ -133,23 +136,22 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
       content: <SpanIssuesTab selectedSpan={selectedSpan} />,
     });
 
-    if (logDatasets.length > 0 && spanLogs.length > 0) {
-      tabList.push({
-        id: SpanDetailTab.LOGS,
-        name: i18n.translate('explore.spanDetailTabs.tab.logs', {
-          defaultMessage: 'Logs',
-        }),
-        content: (
-          <SpanLogsTab
-            traceId={selectedSpan?.traceId || ''}
-            spanId={selectedSpan?.spanId}
-            logDatasets={logDatasets}
-            datasetLogs={datasetLogs}
-            isLoading={isLogsLoading}
-          />
-        ),
-      });
-    }
+    tabList.push({
+      id: SpanDetailTab.LOGS,
+      name: i18n.translate('explore.spanDetailTabs.tab.logs', {
+        defaultMessage: 'Logs',
+      }),
+      content: (
+        <SpanLogsTab
+          traceId={selectedSpan?.traceId || ''}
+          spanId={selectedSpan?.spanId}
+          logDatasets={logDatasets}
+          datasetLogs={datasetLogs}
+          isLoading={isLogsLoading}
+          traceDataset={traceDataset}
+        />
+      ),
+    });
 
     tabList.push(
       {
@@ -174,10 +176,10 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
     addSpanFilter,
     issueCount,
     logDatasets,
-    spanLogs,
     isLogsLoading,
     datasetLogs,
     handleTabChange,
+    traceDataset,
   ]);
 
   // Auto-fallback to 'overview' tab when the current active tab is no longer available

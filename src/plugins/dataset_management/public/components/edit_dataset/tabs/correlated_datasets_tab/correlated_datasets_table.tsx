@@ -65,8 +65,8 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
           try {
             const savedObject = await savedObjects.client.get('index-pattern', id);
             const attributes = savedObject.attributes as any;
-            // Use title field only
-            titles[id] = attributes.title || id;
+            // Use displayName if available, fallback to title
+            titles[id] = attributes.displayName || attributes.title || id;
           } catch (err) {
             titles[id] = id; // Fallback to ID if fetch fails
           }
@@ -96,6 +96,7 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
       name: i18n.translate('datasetManagement.correlatedDatasets.table.traceDataset', {
         defaultMessage: 'Trace dataset',
       }),
+      truncateText: true,
       render: (_: string, correlation: CorrelationSavedObject) => {
         const { traceDatasetId } = extractDatasetIdsFromEntities(
           correlation.attributes.entities,
@@ -105,17 +106,7 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
 
         return (
           <EuiToolTip content={title}>
-            <span
-              style={{
-                maxWidth: '200px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                display: 'inline-block',
-              }}
-            >
-              {title}
-            </span>
+            <span>{title}</span>
           </EuiToolTip>
         );
       },
@@ -125,6 +116,7 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
       name: i18n.translate('datasetManagement.correlatedDatasets.table.logsDatasets', {
         defaultMessage: 'Logs datasets',
       }),
+      truncateText: true,
       render: (_: string, correlation: CorrelationSavedObject) => {
         const { logDatasetIds } = extractDatasetIdsFromEntities(
           correlation.attributes.entities,
@@ -136,17 +128,7 @@ export const CorrelatedDatasetsTable: React.FC<CorrelatedDatasetsTableProps> = (
 
         return (
           <EuiToolTip content={displayText}>
-            <span
-              style={{
-                maxWidth: '300px',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-                display: 'inline-block',
-              }}
-            >
-              {displayText}
-            </span>
+            <span>{displayText}</span>
           </EuiToolTip>
         );
       },

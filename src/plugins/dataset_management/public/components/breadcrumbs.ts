@@ -10,11 +10,11 @@ export function getListBreadcrumbs(currentWorkspaceName?: string) {
   return [
     {
       text: currentWorkspaceName
-        ? i18n.translate('datasetManagement.inWorkspace.indexPatterns.listBreadcrumb', {
-            defaultMessage: 'Workspace index patterns',
+        ? i18n.translate('datasetManagement.inWorkspace.datasets.listBreadcrumb', {
+            defaultMessage: 'Workspace datasets',
           })
-        : i18n.translate('datasetManagement.indexPatterns.listBreadcrumb', {
-            defaultMessage: 'Index patterns',
+        : i18n.translate('datasetManagement.datasets.listBreadcrumb', {
+            defaultMessage: 'Datasets',
           }),
       href: `/`,
     },
