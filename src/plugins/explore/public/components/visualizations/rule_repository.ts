@@ -47,6 +47,12 @@ import { MetricChartStyle } from './metric/metric_vis_config';
 import { PieChartStyle } from './pie/pie_vis_config';
 import { ScatterChartStyle } from './scatter/scatter_vis_config';
 import { HeatmapChartStyle } from './heatmap/heatmap_vis_config';
+import { StateTimeLineChartStyle } from './state_timeline/state_timeline_config';
+import {
+  createNumericalStateTimeline,
+  createCategoricalStateTimeline,
+  createSingleCategoricalStateTimeline,
+} from './state_timeline/to_expression';
 
 type RuleMatchIndex = [number, number, number];
 
@@ -198,6 +204,7 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
     { ...CHART_METADATA.line, priority: 100 },
     { ...CHART_METADATA.area, priority: 80 },
     { ...CHART_METADATA.bar, priority: 60 },
+    { ...CHART_METADATA.state_timeline, priority: 40 },
   ],
   toSpec: (
     transformedData,
@@ -235,6 +242,15 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
           categoricalColumns,
           dateColumns,
           styleOptions as BarChartStyle,
+          axisColumnMappings
+        );
+      case 'state_timeline':
+        return createNumericalStateTimeline(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions as StateTimeLineChartStyle,
           axisColumnMappings
         );
       default:
@@ -679,6 +695,60 @@ const threeMetricOneCateRule: VisualizationRule = {
   },
 };
 
+const twoCateOneDateRule: VisualizationRule = {
+  id: 'two-category-one-date',
+  name: 'two category and one date',
+  description: 'stateTimeLine for two category and one date',
+  matches: (numerical, categorical, date) =>
+    compare([0, 2, 1], [numerical.length, categorical.length, date.length]),
+  chartTypes: [{ ...CHART_METADATA.state_timeline, priority: 100 }],
+  toSpec: (
+    transformedData,
+    numericalColumns,
+    categoricalColumns,
+    dateColumns,
+    styleOptions,
+    chartType = 'scatter',
+    axisColumnMappings
+  ) => {
+    return createCategoricalStateTimeline(
+      transformedData,
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      styleOptions as StateTimeLineChartStyle,
+      axisColumnMappings
+    );
+  },
+};
+
+const oneCateOneDateRule: VisualizationRule = {
+  id: 'one-category-one-date',
+  name: 'two category and one date',
+  description: 'stateTimeLine for one category and one date',
+  matches: (numerical, categorical, date) =>
+    compare([0, 1, 1], [numerical.length, categorical.length, date.length]),
+  chartTypes: [{ ...CHART_METADATA.state_timeline, priority: 100 }],
+  toSpec: (
+    transformedData,
+    numericalColumns,
+    categoricalColumns,
+    dateColumns,
+    styleOptions,
+    chartType = 'scatter',
+    axisColumnMappings
+  ) => {
+    return createSingleCategoricalStateTimeline(
+      transformedData,
+      numericalColumns,
+      categoricalColumns,
+      dateColumns,
+      styleOptions as StateTimeLineChartStyle,
+      axisColumnMappings
+    );
+  },
+};
+
 // Export all rules
 export const ALL_VISUALIZATION_RULES: VisualizationRule[] = [
   oneMetricOneDateRule,
@@ -692,4 +762,6 @@ export const ALL_VISUALIZATION_RULES: VisualizationRule[] = [
   twoMetricOneCateRule,
   threeMetricOneCateRule,
   oneMetricRule,
+  twoCateOneDateRule,
+  oneCateOneDateRule,
 ];

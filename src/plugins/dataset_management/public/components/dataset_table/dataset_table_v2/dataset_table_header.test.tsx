@@ -47,10 +47,10 @@ describe('DatasetTableHeader', () => {
   it('should render title and description when not using updated UX', () => {
     renderWithIntl(<DatasetTableHeader {...defaultProps} />);
 
-    expect(screen.getByText('Index patterns')).toBeInTheDocument();
+    expect(screen.getByText('Datasets')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Create and manage the index patterns that help you retrieve your data from OpenSearch.'
+        'Create and manage the datasets that help you retrieve your data from OpenSearch.'
       )
     ).toBeInTheDocument();
   });
@@ -71,7 +71,7 @@ describe('DatasetTableHeader', () => {
     renderWithIntl(<DatasetTableHeader {...defaultProps} currentWorkspaceName="My Workspace" />);
 
     // Since i18n mock doesn't handle values interpolation, just check the component renders
-    expect(screen.getByText('Index patterns')).toBeInTheDocument();
+    expect(screen.getByText('Datasets')).toBeInTheDocument();
   });
 
   it('should use HeaderControl when useUpdatedUX is true and HeaderControl is provided', () => {
@@ -94,6 +94,6 @@ describe('DatasetTableHeader', () => {
     renderWithIntl(<DatasetTableHeader {...defaultProps} useUpdatedUX={false} />);
 
     // Should render regular title and description
-    expect(screen.getByText('Index patterns')).toBeInTheDocument();
+    expect(screen.getByText('Datasets')).toBeInTheDocument();
   });
 });

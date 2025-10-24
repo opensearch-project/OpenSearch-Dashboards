@@ -309,3 +309,31 @@ export interface Unit {
 export interface RenderChartConfig extends ChartConfig {
   styles: ChartStyles;
 }
+export interface ValueMapping {
+  id?: string;
+  type: 'range' | 'value';
+  value?: string;
+  range?: RangeValue;
+  displayText?: string;
+  color?: string;
+}
+
+export interface ValueMappingOptions {
+  valueMappings?: ValueMapping[];
+}
+
+// state timeline
+export enum DisableMode {
+  Never = 'never',
+  Threshold = 'threshold',
+}
+
+export interface DisconnectValuesOption {
+  disableMode: DisableMode;
+  threshold: string;
+}
+
+export interface ConnectNullValuesOption {
+  connectMode: DisableMode;
+  threshold: string;
+}

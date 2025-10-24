@@ -93,6 +93,7 @@ export class ExplorePlugin
   private servicesInitialized: boolean = false;
   private urlGenerator?: import('./types').ExplorePluginStart['urlGenerator'];
   private initializeServices?: () => { core: CoreStart; plugins: ExploreStartDependencies };
+  private isDatasetManagementEnabled: boolean = false;
 
   // Registries
   private tabRegistry: TabRegistryService = new TabRegistryService();
@@ -107,6 +108,9 @@ export class ExplorePlugin
     core: CoreSetup<ExploreStartDependencies, ExplorePluginStart>,
     setupDeps: ExploreSetupDependencies
   ): ExplorePluginSetup {
+    // Check if dataset management plugin is enabled
+    this.isDatasetManagementEnabled = !!setupDeps.datasetManagement;
+
     // Set usage collector
     setUsageCollector(setupDeps.usageCollection);
     this.registerExploreVisualization(core, setupDeps);
@@ -306,7 +310,8 @@ export class ExplorePlugin
           this.initializerContext,
           this.tabRegistry,
           this.visualizationRegistryService,
-          this.queryPanelActionsRegistryService
+          this.queryPanelActionsRegistryService,
+          this.isDatasetManagementEnabled
         );
 
         // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
@@ -468,7 +473,8 @@ export class ExplorePlugin
         this.initializerContext,
         this.tabRegistry,
         this.visualizationRegistryService,
-        this.queryPanelActionsRegistryService
+        this.queryPanelActionsRegistryService,
+        this.isDatasetManagementEnabled
       );
       setLegacyServices({
         ...services,

@@ -10,7 +10,6 @@ import { DatasetManagementPlugin } from './plugin';
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
     enabled: true,
-    aliasedAsIndexPattern: true,
   },
   schema: configSchema,
 };
