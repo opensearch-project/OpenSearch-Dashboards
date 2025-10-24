@@ -987,10 +987,6 @@ describe('TraceDetails', () => {
       </Router>
     );
 
-    await waitFor(() => {
-      expect(document.querySelector('[data-testid="trace-top-nav"]')).toBeInTheDocument();
-    });
-
     // Should not call fetchTraceSpans when required params are missing
     expect(mockPplService.fetchTraceSpans).not.toHaveBeenCalled();
   });
@@ -1081,5 +1077,60 @@ describe('TraceDetails', () => {
 
     // The logs functionality should be integrated into the component
     expect(mockCorrelationService.checkCorrelationsAndFetchLogs).toHaveBeenCalled();
+  });
+
+  it('displays "No span selected" message when traceId is undefined', async () => {
+    // Mock state container to return empty/undefined traceId
+    const mockCreateTraceAppState = jest.requireMock('./state/trace_app_state').createTraceAppState;
+    mockCreateTraceAppState.mockReturnValueOnce({
+      stateContainer: {
+        get: () => ({
+          traceId: '', // Empty traceId
+          dataset: {
+            id: 'test-dataset-id',
+            title: 'test-index-*',
+            type: 'INDEX_PATTERN',
+            timeFieldName: 'endTime',
+          },
+          spanId: undefined,
+        }),
+        set: jest.fn(),
+        state$: {
+          subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
+        },
+        transitions: {
+          setSpanId: jest.fn(),
+          setTraceId: jest.fn(),
+          setDataset: jest.fn(),
+        },
+      },
+      stopStateSync: jest.fn(),
+    });
+
+    const history = createMemoryHistory();
+
+    render(
+      <Router history={history}>
+        <TraceDetails />
+      </Router>
+    );
+
+    // Verify the "No span selected" message is displayed only in content (no header when no traceId)
+    expect(screen.getByText('No span selected')).toBeInTheDocument();
+    expect(screen.getByText('Please select a span to view details')).toBeInTheDocument();
+
+    // Verify no header is rendered when traceId is empty
+    expect(document.querySelector('[data-testid="trace-top-nav"]')).not.toBeInTheDocument();
+
+    // Verify the message is in a panel
+    const panel = document.querySelector('.euiPanel');
+    expect(panel).toBeInTheDocument();
+
+    // Verify that the PPL service is not called when traceId is empty
+    expect(mockPplService.fetchTraceSpans).not.toHaveBeenCalled();
+
+    // Verify that no other content (like span panels or tabs) is rendered
+    expect(document.querySelector('[data-testid="span-detail-panel"]')).not.toBeInTheDocument();
+    expect(document.querySelector('[data-testid="trace-detail-tabs"]')).not.toBeInTheDocument();
   });
 });
