@@ -55,3 +55,6 @@ export {
 } from './search_bar';
 export { SuggestionsComponent } from './typeahead';
 export { DatasetSelector, DatasetSelectorAppearance } from './dataset_selector';
+export { AdvancedSelector } from './dataset_selector/advanced_selector';
+export { ConfiguratorV2 } from './dataset_selector/configurator/configurator_v2';
+export { useCancelButtonTiming } from './hooks';

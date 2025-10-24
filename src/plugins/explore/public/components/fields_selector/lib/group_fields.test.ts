@@ -68,7 +68,7 @@ describe('group_fields', function () {
         displayName: 'Customer Birth Date',
       },
       {
-        name: 'serviceName',
+        name: 'resource.attributes.service.name',
         type: 'string',
         esTypes: ['keyword'],
         count: 1,
@@ -76,7 +76,7 @@ describe('group_fields', function () {
         searchable: true,
         aggregatable: true,
         readFromDocValues: true,
-        displayName: 'Service Name',
+        displayName: 'Service',
       },
     ];
 
@@ -84,7 +84,7 @@ describe('group_fields', function () {
     const fieldCounts = {
       category: 1,
       currency: 1,
-      serviceName: 1,
+      'resource.attributes.service.name': 1,
     };
 
     const fieldFilterState = getDefaultFieldFilter();
@@ -113,11 +113,11 @@ describe('group_fields', function () {
           Object {
             "aggregatable": true,
             "count": 1,
-            "displayName": "Service Name",
+            "displayName": "Service",
             "esTypes": Array [
               "keyword",
             ],
-            "name": "serviceName",
+            "name": "resource.attributes.service.name",
             "readFromDocValues": true,
             "scripted": false,
             "searchable": true,
@@ -141,11 +141,11 @@ describe('group_fields', function () {
           Object {
             "aggregatable": true,
             "count": 1,
-            "displayName": "Service Name",
+            "displayName": "Service",
             "esTypes": Array [
               "keyword",
             ],
-            "name": "serviceName",
+            "name": "resource.attributes.service.name",
             "readFromDocValues": true,
             "scripted": false,
             "searchable": true,
@@ -174,7 +174,7 @@ describe('group_fields', function () {
   it('should identify faceted fields correctly including invisible char removal', function () {
     const fields = [
       {
-        name: 'serviceName\u200b', // Contains invisible char
+        name: 'resource.attributes.service.name\u200b', // Contains invisible char
         type: 'string',
         esTypes: ['keyword'],
         count: 1,
@@ -182,7 +182,7 @@ describe('group_fields', function () {
         searchable: true,
         aggregatable: true,
         readFromDocValues: true,
-        displayName: 'Service Name',
+        displayName: 'Service',
       },
       {
         name: 'attributes.http.status_code',
@@ -221,7 +221,7 @@ describe('group_fields', function () {
 
     const columns: string[] = [];
     const fieldCounts = {
-      'serviceName\u200b': 1,
+      'resource.attributes.service.name\u200b': 1,
       'attributes.http.status_code': 1,
       'status.code': 1,
       regularField: 1,
@@ -233,7 +233,9 @@ describe('group_fields', function () {
     const actual = groupFields(fields as any, columns, fieldCounts, fieldFilterState, true);
 
     expect(actual.facetedFields).toHaveLength(3);
-    expect(actual.facetedFields.map((f) => f.name)).toContain('serviceName\u200b');
+    expect(actual.facetedFields.map((f) => f.name)).toContain(
+      'resource.attributes.service.name\u200b'
+    );
     expect(actual.facetedFields.map((f) => f.name)).toContain('attributes.http.status_code');
     expect(actual.facetedFields.map((f) => f.name)).toContain('status.code');
     expect(actual.queryFields.map((f) => f.name)).toContain('regularField');

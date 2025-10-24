@@ -37,6 +37,10 @@ This document contains a list of maintainers in this repo. See [Responsibilities
 | Daniel Rowe               | [d-buckner](https://github.com/d-buckner)           | Amazon      |
 | Tianyu Gao                | [raintygao](https://github.com/raintygao)           | Amazon      |
 | Shenoy Pratik             | [ps48](https://github.com/ps48)                     | Amazon      |
+| Adam Tackett              | [TackAdam](https://github.com/TackAdam)             | Amazon      |
+| Ruchi Sharma              | [ruchidh](https://github.com/ruchidh)               | Amazon      |
+| Sumukh Swamy              | [sumukhswamy](https://github.com/sumukhswamy)       | Amazon      |
+| Paul Sebastian            | [paulstn](https://github.com/paulstn)               | Amazon      |
 
 ## Emeritus
 

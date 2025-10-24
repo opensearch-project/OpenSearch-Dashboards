@@ -11,6 +11,7 @@ import {
   locateThreshold,
   generateRanges,
   mergeThresholdsWithBase,
+  getMaxAndMinBase,
 } from '../style_panel/threshold/threshold_utils';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
@@ -47,8 +48,12 @@ export const createGauge = (
 
   const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
 
-  const minBase = styleOptions?.min || 0;
-  const maxBase = styleOptions?.max || maxNumber;
+  const { minBase, maxBase } = getMaxAndMinBase(
+    maxNumber,
+    styleOptions?.min,
+    styleOptions?.max,
+    calculatedValue
+  );
 
   const mergedThresholds = mergeThresholdsWithBase(
     minBase,

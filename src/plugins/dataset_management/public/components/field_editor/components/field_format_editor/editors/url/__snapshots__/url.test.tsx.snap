@@ -1,0 +1,544 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UrlFormatEditor should render label template help 1`] = `
+<Fragment>
+  <LabelTemplateFlyout
+    isVisible={true}
+    onClose={[Function]}
+  />
+  <UrlTemplateFlyout
+    isVisible={false}
+    onClose={[Function]}
+  />
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Type"
+        id="datasetManagement.url.typeLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedSelect
+      data-test-subj="urlEditorType"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Link",
+            "value": "a",
+          },
+          Object {
+            "text": "Image",
+            "value": "img",
+          },
+          Object {
+            "text": "Audio",
+            "value": "audio",
+          },
+        ]
+      }
+    />
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiLink
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="URL template help"
+          id="datasetManagement.url.template.helpLinkText"
+          values={Object {}}
+        />
+      </EuiLink>
+    }
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="URL template"
+        id="datasetManagement.url.urlTemplateLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedFieldText
+      data-test-subj="urlEditorUrlTemplate"
+      onChange={[Function]}
+      value=""
+    />
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiLink
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Label template help"
+          id="datasetManagement.url.labelTemplateHelpText"
+          values={Object {}}
+        />
+      </EuiLink>
+    }
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Label template"
+        id="datasetManagement.url.labelTemplateLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedFieldText
+      data-test-subj="urlEditorLabelTemplate"
+      onChange={[Function]}
+      value=""
+    />
+  </EuiCompressedFormRow>
+  <FormatEditorSamples
+    sampleType="html"
+    samples={Array []}
+  />
+</Fragment>
+`;
+
+exports[`UrlFormatEditor should render normally 1`] = `
+<Fragment>
+  <LabelTemplateFlyout
+    isVisible={false}
+    onClose={[Function]}
+  />
+  <UrlTemplateFlyout
+    isVisible={false}
+    onClose={[Function]}
+  />
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Type"
+        id="datasetManagement.url.typeLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedSelect
+      data-test-subj="urlEditorType"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Link",
+            "value": "a",
+          },
+          Object {
+            "text": "Image",
+            "value": "img",
+          },
+          Object {
+            "text": "Audio",
+            "value": "audio",
+          },
+        ]
+      }
+    />
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiLink
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="URL template help"
+          id="datasetManagement.url.template.helpLinkText"
+          values={Object {}}
+        />
+      </EuiLink>
+    }
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="URL template"
+        id="datasetManagement.url.urlTemplateLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedFieldText
+      data-test-subj="urlEditorUrlTemplate"
+      onChange={[Function]}
+      value=""
+    />
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiLink
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Label template help"
+          id="datasetManagement.url.labelTemplateHelpText"
+          values={Object {}}
+        />
+      </EuiLink>
+    }
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Label template"
+        id="datasetManagement.url.labelTemplateLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedFieldText
+      data-test-subj="urlEditorLabelTemplate"
+      onChange={[Function]}
+      value=""
+    />
+  </EuiCompressedFormRow>
+  <FormatEditorSamples
+    sampleType="html"
+    samples={Array []}
+  />
+</Fragment>
+`;
+
+exports[`UrlFormatEditor should render url template help 1`] = `
+<Fragment>
+  <LabelTemplateFlyout
+    isVisible={false}
+    onClose={[Function]}
+  />
+  <UrlTemplateFlyout
+    isVisible={true}
+    onClose={[Function]}
+  />
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Type"
+        id="datasetManagement.url.typeLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedSelect
+      data-test-subj="urlEditorType"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Link",
+            "value": "a",
+          },
+          Object {
+            "text": "Image",
+            "value": "img",
+          },
+          Object {
+            "text": "Audio",
+            "value": "audio",
+          },
+        ]
+      }
+    />
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiLink
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="URL template help"
+          id="datasetManagement.url.template.helpLinkText"
+          values={Object {}}
+        />
+      </EuiLink>
+    }
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="URL template"
+        id="datasetManagement.url.urlTemplateLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedFieldText
+      data-test-subj="urlEditorUrlTemplate"
+      onChange={[Function]}
+      value=""
+    />
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiLink
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Label template help"
+          id="datasetManagement.url.labelTemplateHelpText"
+          values={Object {}}
+        />
+      </EuiLink>
+    }
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Label template"
+        id="datasetManagement.url.labelTemplateLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedFieldText
+      data-test-subj="urlEditorLabelTemplate"
+      onChange={[Function]}
+      value=""
+    />
+  </EuiCompressedFormRow>
+  <FormatEditorSamples
+    sampleType="html"
+    samples={Array []}
+  />
+</Fragment>
+`;
+
+exports[`UrlFormatEditor should render width and height fields if image 1`] = `
+<Fragment>
+  <LabelTemplateFlyout
+    isVisible={false}
+    onClose={[Function]}
+  />
+  <UrlTemplateFlyout
+    isVisible={false}
+    onClose={[Function]}
+  />
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Type"
+        id="datasetManagement.url.typeLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedSelect
+      data-test-subj="urlEditorType"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "text": "Link",
+            "value": "a",
+          },
+          Object {
+            "text": "Image",
+            "value": "img",
+          },
+          Object {
+            "text": "Audio",
+            "value": "audio",
+          },
+        ]
+      }
+      value="img"
+    />
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiLink
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="URL template help"
+          id="datasetManagement.url.template.helpLinkText"
+          values={Object {}}
+        />
+      </EuiLink>
+    }
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="URL template"
+        id="datasetManagement.url.urlTemplateLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedFieldText
+      data-test-subj="urlEditorUrlTemplate"
+      onChange={[Function]}
+      value=""
+    />
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <EuiLink
+        onClick={[Function]}
+      >
+        <FormattedMessage
+          defaultMessage="Label template help"
+          id="datasetManagement.url.labelTemplateHelpText"
+          values={Object {}}
+        />
+      </EuiLink>
+    }
+    isInvalid={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Label template"
+        id="datasetManagement.url.labelTemplateLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedFieldText
+      data-test-subj="urlEditorLabelTemplate"
+      onChange={[Function]}
+      value=""
+    />
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Width"
+        id="datasetManagement.url.widthLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedFieldNumber
+      data-test-subj="urlEditorWidth"
+      onChange={[Function]}
+      value=""
+    />
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
+    describedByIds={Array []}
+    display="rowCompressed"
+    fullWidth={false}
+    hasChildLabel={true}
+    hasEmptyLabelSpace={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Height"
+        id="datasetManagement.url.heightLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
+  >
+    <EuiCompressedFieldNumber
+      data-test-subj="urlEditorHeight"
+      onChange={[Function]}
+      value=""
+    />
+  </EuiCompressedFormRow>
+  <FormatEditorSamples
+    sampleType="html"
+    samples={
+      Array [
+        Object {
+          "input": "go",
+          "output": "converted url for go",
+        },
+        Object {
+          "input": "stop",
+          "output": "converted url for stop",
+        },
+        Object {
+          "input": Array [
+            "de",
+            "ne",
+            "us",
+            "ni",
+          ],
+          "output": "converted url for de,ne,us,ni",
+        },
+        Object {
+          "input": "cv",
+          "output": "converted url for cv",
+        },
+      ]
+    }
+  />
+</Fragment>
+`;

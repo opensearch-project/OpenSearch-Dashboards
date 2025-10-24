@@ -35,11 +35,11 @@ export type Body = TypeOf<typeof routeValidationConfig.body>;
 
 const acceptedHttpVerb = schema.string({
   validate: (method) => {
-    return ['HEAD', 'GET', 'POST', 'PUT', 'DELETE'].some(
+    return ['HEAD', 'GET', 'PATCH', 'POST', 'PUT', 'DELETE'].some(
       (verb) => verb.toLowerCase() === method.toLowerCase()
     )
       ? undefined
-      : `Method must be one of, case insensitive ['HEAD', 'GET', 'POST', 'PUT', 'DELETE']. Received '${method}'.`;
+      : `Method must be one of, case insensitive ['HEAD', 'GET', 'PATCH', 'POST', 'PUT', 'DELETE']. Received '${method}'.`;
   },
 });
 

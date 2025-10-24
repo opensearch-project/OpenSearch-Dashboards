@@ -19,3 +19,6 @@ export const PATHS = {
   INDEX_PATTERNS: BASE_PATH + '/app/management/opensearch-dashboards/indexPatterns',
   SAVED_OBJECTS: BASE_PATH + '/app/management/opensearch-dashboards/objects',
 };
+
+export const WAIT_MS = Cypress.env('WAIT_MS');
+export const WAIT_MS_LONG = Cypress.env('WAIT_MS_LONG');

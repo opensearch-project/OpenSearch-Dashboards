@@ -12,6 +12,7 @@ jest.mock('./gauge_chart_utils', () => ({
   locateThreshold: jest.fn(() => ({ value: 0, color: '#00BD6B' })),
   generateRanges: jest.fn(() => [{ min: 0, max: 100, color: '#00BD6B' }]),
   generateArcExpression: jest.fn(() => ({ mark: { type: 'arc' } })),
+  getMaxAndMinBase: jest.fn(() => ({ minBase: 10, maxBase: 200 })),
 }));
 
 jest.mock('../utils/calculation', () => ({

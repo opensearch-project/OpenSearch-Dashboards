@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+$paddingLeft: $euiSizeS;
+$hoverIconSize: $euiSizeXS * 2 + $euiSizeL;
+
 .explore_fieldSelector_list {
   gap: $euiSizeS;
 
@@ -52,7 +55,7 @@
     font-size: $euiFontSizeXS;
     font-weight: $euiFontWeightSemiBold;
     justify-content: flex-start;
-    padding-left: $euiSizeM + 2px;
+    padding-left: 0;
   }
 }
 
@@ -65,14 +68,12 @@
     font-size: $euiFontSizeXS;
     font-weight: $euiFontWeightSemiBold;
     justify-content: flex-start;
-    padding-left: $euiSizeM + 2px + $euiSizeM + $euiSizeS;
+    padding-left: $paddingLeft;
   }
 }
 
 .exploreSideBar__item {
-  // match fieldGroup condense indent(icon size + text margin)
-  padding-left: $euiSizeM + 2px + $euiSizeM + $euiSizeS;
-  padding-right: $euiSizeS;
+  padding-left: $paddingLeft;
   border-radius: $euiSizeXS;
 
   &:focus,
@@ -83,9 +84,8 @@
 
 /* extra indentation for faceted field */
 .exploreSideBar__facetValue {
-  // match fieldGroup condense indent(icon size * 2 + text margin)
-  padding-left: $euiSizeM + 2px + $euiSizeM + $euiSizeS + $euiSizeM + $euiSizeS;
-  padding-right: $euiSizeS;
+  // match fieldGroup condense indent(icon size + text margin)
+  padding-left: $paddingLeft + $euiSizeM + $euiSizeS;
   border-radius: $euiSizeXS;
 
   &:focus,

@@ -35,6 +35,7 @@ import { navigateToAppWithinWorkspace } from '../utils/workspace';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
 import { optionIdToWorkspacePermissionModesMap } from '../workspace_form/constants';
 import { getUseCaseFeatureConfig } from '../../../../../core/public';
+import { UseCaseService } from '../../services';
 
 export interface WorkspaceCreatorProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -51,20 +52,22 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
       savedObjects,
       dataSourceManagement,
       navigationUI: { HeaderControl },
+      useCaseService,
     },
   } = useOpenSearchDashboards<{
     workspaceClient: WorkspaceClient;
     dataSourceManagement?: DataSourceManagementPluginSetup;
     navigationUI: NavigationPublicPluginStart['ui'];
+    useCaseService: UseCaseService;
   }>();
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
   const [goToCollaborators, setGoToCollaborators] = useState(false);
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
-  const { isOnlyAllowEssential, availableUseCases } = useFormAvailableUseCases({
+  const { availableUseCases } = useFormAvailableUseCases({
     savedObjects,
     registeredUseCases$,
-    onlyAllowEssentialEnabled: true,
+    useCaseService,
   });
 
   const location = useLocation();
@@ -194,8 +197,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   const isFormReadyToRender =
     application &&
     savedObjects &&
-    // Default values only worked for component mount, should wait for isOnlyAllowEssential and availableUseCases loaded
-    isOnlyAllowEssential !== undefined &&
+    // Default values only worked for component mount, should wait for availableUseCases loaded
     availableUseCases !== undefined;
 
   return (

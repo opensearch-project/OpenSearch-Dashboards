@@ -255,6 +255,12 @@ export class Table extends PureComponent<TableProps, TableState> {
           if (this.props.useUpdatedUX && finalPath) {
             finalPath = finalPath.replace(/^\/app\/management\/opensearch-dashboards/, '/app');
           }
+          // Decode the path
+          try {
+            finalPath = decodeURIComponent(finalPath);
+          } catch (e) {
+            // If decoding fails, use the original path
+          }
           let inAppUrl = basePath.prepend(finalPath);
           if (object.workspaces?.length) {
             if (currentWorkspaceId) {

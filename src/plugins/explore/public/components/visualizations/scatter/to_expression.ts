@@ -9,6 +9,31 @@ import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
 import { buildThresholdColorEncoding } from '../bar/bar_chart_utils';
 
+const DEFAULT_POINTER_SIZE = 80;
+const DEFAULT_STROKE_OPACITY = 0.65;
+
+const hoverParams = [
+  {
+    name: 'hover',
+    select: { type: 'point', on: 'mouseover' },
+  },
+];
+
+const hoverStateEncoding = {
+  opacity: {
+    value: DEFAULT_STROKE_OPACITY,
+    condition: { param: 'hover', value: 1, empty: false },
+  },
+  stroke: {
+    value: null,
+    condition: { param: 'hover', value: 'white', empty: false },
+  },
+  strokeWidth: {
+    value: 0,
+    condition: { param: 'hover', value: 2, empty: false },
+  },
+};
+
 export const createTwoMetricScatter = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
@@ -22,12 +47,15 @@ export const createTwoMetricScatter = (
   const colorEncodingLayer = buildThresholdColorEncoding(yAxis, styles);
 
   const markLayer = {
+    params: hoverParams,
     mark: {
       type: 'point',
       tooltip: styles?.tooltipOptions?.mode !== 'hidden',
       shape: styles?.exclusive?.pointShape,
       angle: styles?.exclusive?.angle,
       filled: styles?.exclusive?.filled,
+      size: DEFAULT_POINTER_SIZE,
+      strokeOpacity: DEFAULT_STROKE_OPACITY,
     },
     encoding: {
       x: {
@@ -40,6 +68,7 @@ export const createTwoMetricScatter = (
         type: getSchemaByAxis(yAxis),
         axis: applyAxisStyling(yAxis, yAxisStyle),
       },
+      ...hoverStateEncoding,
       color: styles?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
@@ -85,12 +114,15 @@ export const createTwoMetricOneCateScatter = (
   const categoryNames = axisColumnMappings?.color?.name!;
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
   const markLayer = {
+    params: hoverParams,
     mark: {
       type: 'point',
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
       shape: styles.exclusive?.pointShape,
       angle: styles.exclusive?.angle,
       filled: styles.exclusive?.filled,
+      size: DEFAULT_POINTER_SIZE,
+      strokeOpacity: DEFAULT_STROKE_OPACITY,
     },
     encoding: {
       x: {
@@ -108,12 +140,13 @@ export const createTwoMetricOneCateScatter = (
         type: getSchemaByAxis(colorColumn),
         legend: styles?.addLegend
           ? {
-              title: categoryNames || 'Metrics',
+              title: styles?.legendTitle,
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
           : null,
       },
+      ...hoverStateEncoding,
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -162,12 +195,15 @@ export const createThreeMetricOneCateScatter = (
 
   const numericalSize = axisColumnMappings?.size;
   const markLayer = {
+    params: hoverParams,
     mark: {
       type: 'point',
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
       shape: styles.exclusive?.pointShape,
       angle: styles.exclusive?.angle,
       filled: styles.exclusive?.filled,
+      size: DEFAULT_POINTER_SIZE,
+      strokeOpacity: DEFAULT_STROKE_OPACITY,
     },
     encoding: {
       x: {
@@ -185,7 +221,7 @@ export const createThreeMetricOneCateScatter = (
         type: getSchemaByAxis(colorColumn),
         legend: styles?.addLegend
           ? {
-              title: categoryNames || 'Metrics',
+              title: styles?.legendTitle,
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
@@ -196,12 +232,13 @@ export const createThreeMetricOneCateScatter = (
         type: getSchemaByAxis(numericalSize),
         legend: styles?.addLegend
           ? {
-              title: numericalSize?.name || 'Metrics',
+              title: styles?.legendTitleForSize,
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
           : null,
       },
+      ...hoverStateEncoding,
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {

@@ -10,7 +10,7 @@ import { ScatterChartStyle, ScatterChartStyleOptions } from './scatter_vis_confi
 import { ScatterExclusiveVisOptions } from './scatter_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
-import { LegendOptionsPanel } from '../style_panel/legend/legend';
+import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
@@ -41,6 +41,8 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
   // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
   const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
+  const hasSizeMapping = !!axisColumnMappings?.[AxisRole.SIZE];
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -86,22 +88,12 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
             />
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <LegendOptionsPanel
-              legendOptions={{
-                show: styleOptions.addLegend,
-                position: styleOptions.legendPosition,
-              }}
-              onLegendOptionsChange={(legendOptions) => {
-                if (legendOptions.show !== undefined) {
-                  updateStyleOption('addLegend', legendOptions.show);
-                }
-                if (legendOptions.position !== undefined) {
-                  updateStyleOption('legendPosition', legendOptions.position);
-                }
-              }}
-            />
-          </EuiFlexItem>
+          <LegendOptionsWrapper
+            styleOptions={styleOptions}
+            updateStyleOption={updateStyleOption}
+            shouldShow={hasColorMapping}
+            hasSizeLegend={hasSizeMapping}
+          />
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel

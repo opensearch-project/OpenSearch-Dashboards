@@ -1,0 +1,2 @@
+fix:
+- Log Patterns error and loading states ([#10775](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10775))

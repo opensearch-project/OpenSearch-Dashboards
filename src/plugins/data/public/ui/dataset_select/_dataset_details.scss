@@ -7,41 +7,35 @@
   &__panel {
     width: 100%;
     max-width: 90vw;
+
+    [class*="datasetDetails__headerTitle"] {
+      > * {
+        color: $euiColorEmptyShade;
+      }
+    }
   }
 
   &__header {
-    > * {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-weight: $euiFontWeightSemiBold;
-      width: 100%;
-    }
+    width: 100%;
 
     > :first-child {
       text-align: left;
+      width: 100%;
     }
 
     > :nth-child(2) {
       text-align: right;
+      width: 100%;
     }
   }
 
-  &__list {
-    margin-top: 0;
+  &__itemList {
+    padding: $euiSizeS;
   }
 
-  &__title {
+  &__panel &__itemTitle {
     > * {
-      font-weight: $euiFontWeightSemiBold;
-    }
-  }
-
-  &__listTitle {
-    width: 100%;
-
-    > * {
-      font-weight: $euiFontWeightSemiBold;
+      color: $euiColorEmptyShade;
     }
   }
 
@@ -49,42 +43,11 @@
     background-color: $euiColorLightestShade;
     align-items: center;
     border-radius: $euiBorderRadius;
-  }
 
-  &__icon {
-    margin: $euiSizeXS $euiSizeXS 0 0;
-    height: 100%;
-    flex-shrink: 0;
-  }
-
-  &__description {
-    font-size: $euiFontSizeXS - 2px;
-  }
-
-  &__textTruncate {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  &__noWrap {
-    flex-wrap: nowrap;
-  }
-
-  &__minWidth {
-    min-width: 0;
-  }
-
-  &__footer {
-    padding: 0;
-  }
-
-  &__footerItem {
-    width: 100%;
-  }
-
-  &__viewButton {
-    width: 100%;
-    font-size: $euiFontSizeXS;
+    &__icon {
+      margin: $euiSizeXS $euiSizeXS 0 0;
+      height: 100%;
+      flex-shrink: 0;
+    }
   }
 }

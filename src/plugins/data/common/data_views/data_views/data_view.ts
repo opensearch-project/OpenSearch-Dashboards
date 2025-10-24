@@ -40,21 +40,49 @@ export class DataView extends IndexPattern implements IDataView {
     });
 
     this.savedObjectsClient = savedObjectsClient;
-    this.initializeDataSourceRef();
   }
 
   public async initializeDataSourceRef(): Promise<void> {
     if (!this.dataSourceRef?.id) return;
-    const dataSourceSavedObject = await this.savedObjectsClient.get(
-      this.dataSourceRef.type,
-      this.dataSourceRef.id
-    );
-    const attributes = dataSourceSavedObject.attributes as any;
-    this.dataSourceRef = {
-      id: this.dataSourceRef.id,
-      type: attributes.dataSourceEngineType || this.dataSourceRef.type,
-      name: attributes.title || this.dataSourceRef.name || this.dataSourceRef.id,
-    };
+
+    try {
+      // FIXME: dataSourceRef.type is overloaded with conflicting meanings:
+      // - For INDEX_PATTERN datasets: contains saved object type 'data-source' (correct)
+      // - For INDEX datasets: contains structure type 'DATA_SOURCE' (incorrect - should be 'data-source')
+      // - After initialization: contains engine type like 'OpenSearch', 'S3_GLUE' (metadata, not saved object type)
+      //
+      // The DataSource interface (src/plugins/data/common/datasets/types.ts:17) claims type is
+      // "The engine type of the data source", but actual usage violates this contract:
+      // - index_type.ts:56 sets type to DataStructure.type ('DATA_SOURCE')
+      // - index_pattern_type.ts:148 sets type to dataSourceEngineType ('OpenSearch', 'S3_GLUE')
+      // - SavedObjectReference.type expects saved object type ('data-source')
+      //
+      // This causes savedObjectsClient.get() to fail for INDEX datasets because 'DATA_SOURCE'
+      // is not a registered saved object type. Valid saved object types are:
+      // - 'data-source' (defined in src/plugins/data_source/server/saved_objects/data_source.ts:15)
+      // - 'data-connection' (defined in src/plugins/data_source/server/saved_objects/data_connection.ts:9)
+      //
+      // TEMPORARY FIX: Hardcoding 'data-source' instead of using this.dataSourceRef.type
+      // This works for INDEX_PATTERN datasets (already 'data-source') and fixes INDEX datasets
+      // (which incorrectly have 'DATA_SOURCE'), but assumes all data sources are 'data-source' type.
+      //
+      // TODO: Proper fix - Normalize structure types to saved object types before calling get():
+      //   const savedObjectType = this.dataSourceRef.type === 'DATA_SOURCE' ? 'data-source' : this.dataSourceRef.type;
+      //   await this.savedObjectsClient.get(savedObjectType, this.dataSourceRef.id);
+      const dataSourceSavedObject = await this.savedObjectsClient.get(
+        'data-source',
+        this.dataSourceRef.id
+      );
+      const attributes = dataSourceSavedObject.attributes as any;
+      this.dataSourceRef = {
+        id: this.dataSourceRef.id,
+        type: attributes.dataSourceEngineType || this.dataSourceRef.type,
+        name: attributes.title || this.dataSourceRef.name || this.dataSourceRef.id,
+      };
+    } catch (error) {
+      // If data source fetch fails, keep the existing dataSourceRef as-is
+      // This ensures the DataView can still be used even if the data source is unavailable
+    }
   }
 
   /**
@@ -76,7 +104,7 @@ export class DataView extends IndexPattern implements IDataView {
         );
         const attributes = dataSourceSavedObject.attributes as any;
 
-        if (dataSourceReference.name) {
+        if (dataSourceReference.name && dataSourceReference.name !== 'dataSource') {
           const extractedType = extractDatasetTypeFromUri(dataSourceReference.name);
           if (extractedType) {
             datasetType = extractedType;
@@ -85,15 +113,18 @@ export class DataView extends IndexPattern implements IDataView {
 
         dataSource = {
           id: dataSourceReference.id,
-          title: attributes.title || dataSourceReference.name || dataSourceReference.id,
+          title: attributes.title || dataSourceReference.id,
           type: attributes.dataSourceEngineType || 'OpenSearch',
         };
       } catch (error) {
         // If we can't fetch the data source, create a minimal version
         dataSource = {
           id: dataSourceReference.id,
-          title: dataSourceReference.name || dataSourceReference.id,
-          type: dataSourceReference.type || 'OpenSearch',
+          title:
+            dataSourceReference.name && dataSourceReference.name !== 'dataSource'
+              ? dataSourceReference.name
+              : dataSourceReference.id,
+          type: 'OpenSearch',
         };
       }
     }
@@ -103,6 +134,9 @@ export class DataView extends IndexPattern implements IDataView {
       title: this.title,
       type: datasetType,
       timeFieldName: this.timeFieldName,
+      displayName: this.displayName,
+      description: this.description,
+      schemaMappings: this.schemaMappings,
       dataSource,
     };
   }

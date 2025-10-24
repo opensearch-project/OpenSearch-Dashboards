@@ -6,11 +6,19 @@
 import { i18n } from '@osd/i18n';
 import { ChromeNavGroup, NavGroupType } from '../types';
 
-export const ALL_USE_CASE_ID = 'all';
-export const OBSERVABILITY_USE_CASE_ID = 'observability';
-export const SECURITY_ANALYTICS_USE_CASE_ID = 'security-analytics';
-export const ESSENTIAL_USE_CASE_ID = 'essentials';
-export const SEARCH_USE_CASE_ID = 'search';
+export enum UseCaseId {
+  ALL_USE_CASE_ID = 'all',
+  OBSERVABILITY_USE_CASE_ID = 'observability',
+  SECURITY_ANALYTICS_USE_CASE_ID = 'security-analytics',
+  ESSENTIAL_USE_CASE_ID = 'essentials',
+  SEARCH_USE_CASE_ID = 'search',
+}
+
+export const ALL_USE_CASE_ID = UseCaseId.ALL_USE_CASE_ID;
+export const OBSERVABILITY_USE_CASE_ID = UseCaseId.OBSERVABILITY_USE_CASE_ID;
+export const SECURITY_ANALYTICS_USE_CASE_ID = UseCaseId.SECURITY_ANALYTICS_USE_CASE_ID;
+export const ESSENTIAL_USE_CASE_ID = UseCaseId.ESSENTIAL_USE_CASE_ID;
+export const SEARCH_USE_CASE_ID = UseCaseId.SEARCH_USE_CASE_ID;
 
 const defaultNavGroups = {
   dataAdministration: {

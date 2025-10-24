@@ -530,6 +530,7 @@ const DataTableUI = ({
                 <TableRow
                   key={row._id}
                   row={row}
+                  index={index}
                   columns={columnNames}
                   dataset={dataset}
                   onAddColumn={onAddColumn}

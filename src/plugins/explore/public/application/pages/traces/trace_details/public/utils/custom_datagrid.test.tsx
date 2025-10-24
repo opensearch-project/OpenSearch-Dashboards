@@ -46,4 +46,23 @@ describe('RenderCustomDataGrid', () => {
     expect(spinner).toBeInTheDocument();
     expect(spinner).toHaveClass('euiLoadingSpinner');
   });
+
+  it('renders secondaryToolbar when provided', () => {
+    const secondaryToolbar = [
+      <button key="test-button" data-test-subj="secondary-button">
+        Secondary Button
+      </button>,
+    ];
+
+    render(<RenderCustomDataGrid {...defaultProps} secondaryToolbar={secondaryToolbar} />);
+
+    expect(screen.getByTestId('secondary-button')).toBeInTheDocument();
+    expect(screen.getByText('Secondary Button')).toBeInTheDocument();
+  });
+
+  it('does not render secondaryToolbar when not provided', () => {
+    render(<RenderCustomDataGrid {...defaultProps} />);
+
+    expect(screen.queryByTestId('secondary-button')).not.toBeInTheDocument();
+  });
 });

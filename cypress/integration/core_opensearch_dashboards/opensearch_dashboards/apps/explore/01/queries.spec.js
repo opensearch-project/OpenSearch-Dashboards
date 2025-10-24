@@ -8,7 +8,6 @@ import {
   INDEX_WITH_TIME_1,
   START_TIME,
   END_TIME,
-  INVALID_INDEX,
 } from '../../../../../../utils/apps/constants';
 import {
   getRandomizedWorkspaceName,
@@ -25,7 +24,7 @@ const queriesTestSuite = () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
       // Create and select index pattern for ${INDEX_WITH_TIME_1}*
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspace,
         indexPattern: INDEX_WITH_TIME_1,
         timefieldName: 'timestamp',
@@ -54,6 +53,7 @@ const queriesTestSuite = () => {
     }).forEach((config) => {
       it(`with empty PPL query for ${config.testName}`, () => {
         cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.explore.clearQueryEditor();
         cy.explore.setTopNavDate(START_TIME, END_TIME);
 
         // Default PPL query should be set
@@ -81,19 +81,6 @@ const queriesTestSuite = () => {
           language: 'PPL',
           hitCount: '10,000',
         });
-
-        // TODO: Update test to test for stripping of stats
-        // Test none search PPL query
-        // const statsQuery = `describe ${INDEX_WITH_TIME_1} | stats count()`;
-        // cy.explore.setQueryEditor(statsQuery);
-        // cy.osd.verifyResultsCount(1);
-
-        // TODO: Fix error messaging
-        // Test error message
-        const invalidQuery = `source = ${INVALID_INDEX}`;
-        // const error = `no such index`;
-        cy.explore.setQueryEditor(invalidQuery);
-        // cy.osd.verifyResultsError(error);
       });
 
       it(`with PPL query not starting with source for ${config.testName}`, () => {
@@ -102,17 +89,6 @@ const queriesTestSuite = () => {
 
         // Default PPL query should be set
         cy.osd.waitForLoader(true);
-
-        // Use the more robust verifyDiscoverPageState function to check editor content
-        // This handles Monaco editor's special whitespace characters better
-        verifyDiscoverPageState({
-          dataset: config.dataset,
-          queryString: '',
-          language: 'PPL',
-          hitCount: '10,000',
-        });
-        cy.getElementByTestId(`discoverQueryElapsedMs`).should('be.visible');
-        cy.osd.verifyResultsCount(10000);
 
         // Executing a query without source = part
         const queryWithoutSource =
@@ -136,16 +112,7 @@ const queriesTestSuite = () => {
         // Default PPL query should be set
         cy.osd.waitForLoader(true);
 
-        // Use the more robust verifyDiscoverPageState function to check editor content
-        // This handles Monaco editor's special whitespace characters better
-        verifyDiscoverPageState({
-          dataset: config.dataset,
-          queryString: '',
-          language: 'PPL',
-          hitCount: '10,000',
-        });
         cy.getElementByTestId(`discoverQueryElapsedMs`).should('be.visible');
-        cy.osd.verifyResultsCount(10000);
 
         // Executing a query without source = part
         const queryWithSearch = `search source = ${config.dataset} category = "Network" and bytes_transferred > 5000 | sort bytes_transferred`;

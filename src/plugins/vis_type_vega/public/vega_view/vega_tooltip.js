@@ -61,6 +61,7 @@ export class TooltipHandler {
     this.position = opts.position;
     this.padding = opts.padding;
     this.centerOnMark = opts.centerOnMark;
+    this.tooltipTimeout = null;
 
     view.tooltip(this.handler.bind(this));
   }
@@ -73,6 +74,19 @@ export class TooltipHandler {
     if (value == null || value === '') {
       this.hideTooltip();
       return;
+    }
+
+    window.clearTimeout(this.tooltipTimeout);
+
+    if (typeof value === 'object') {
+      const keys = Object.keys(value);
+      const newValue = {};
+      for (const key of keys) {
+        if (value[key] !== 'NaN') {
+          newValue[key] = value[key];
+        }
+      }
+      value = newValue;
     }
 
     let el = document.getElementById(tooltipId);
@@ -123,7 +137,9 @@ export class TooltipHandler {
   }
 
   hideTooltip() {
-    const el = document.getElementById(tooltipId);
-    if (el) el.remove();
+    this.tooltipTimeout = window.setTimeout(() => {
+      const el = document.getElementById(tooltipId);
+      if (el) el.remove();
+    }, 100);
   }
 }

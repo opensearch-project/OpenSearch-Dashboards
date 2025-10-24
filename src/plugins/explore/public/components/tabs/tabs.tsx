@@ -19,6 +19,8 @@ import { ExploreServices } from '../../types';
 import { RootState } from '../../application/utils/state_management/store';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { ErrorGuard } from './error_guard/error_guard';
+import { EXPLORE_PATTERNS_TAB_ID } from '../../../common';
+import { DEFAULT_DATA } from '../../../../data/common';
 
 /**
  * Rendering tabs with different views of 1 OpenSearch hit in Discover.
@@ -51,6 +53,7 @@ export const ExploreTabs = () => {
           executeTabQuery({
             services,
             cacheKey: newTabCacheKey,
+            queryString: newTabCacheKey,
           })
         );
       }
@@ -64,7 +67,18 @@ export const ExploreTabs = () => {
 
   // Display tabs that registered under current flavor
   const tabs: EuiTabbedContentTab[] = registryTabs
-    .filter((registryTab) => registryTab.flavor.includes(flavorId))
+    .filter((registryTab) => {
+      const registeredFlavor = registryTab.flavor.includes(flavorId);
+      const isPatternsTab = registryTab.id === EXPLORE_PATTERNS_TAB_ID;
+      const isDefaultDataset =
+        query?.dataset &&
+        (query.dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN ||
+          query.dataset.type === DEFAULT_DATA.SET_TYPES.INDEX);
+      if (isPatternsTab) {
+        return registeredFlavor && isDefaultDataset;
+      }
+      return registeredFlavor;
+    })
     .map((registryTab) => {
       return {
         id: registryTab.id,

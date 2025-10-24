@@ -307,6 +307,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               },
               "dataViews": Object {
                 "clearCache": [MockFunction],
+                "convertToDataset": [MockFunction],
                 "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
@@ -314,6 +315,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "find": [MockFunction],
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
+                "getIds": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
               },
@@ -1146,6 +1148,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
+            showCancelButton={false}
             showDataSourceMenu={false}
             showDatasetSelect={false}
             showDatePicker={false}
@@ -1474,6 +1477,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               },
               "dataViews": Object {
                 "clearCache": [MockFunction],
+                "convertToDataset": [MockFunction],
                 "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
@@ -1481,6 +1485,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "find": [MockFunction],
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
+                "getIds": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
               },
@@ -2313,6 +2318,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
+            showCancelButton={false}
             showDataSourceMenu={false}
             showDatasetSelect={false}
             showDatePicker={false}
@@ -2641,6 +2647,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               },
               "dataViews": Object {
                 "clearCache": [MockFunction],
+                "convertToDataset": [MockFunction],
                 "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
@@ -2648,6 +2655,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "find": [MockFunction],
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
+                "getIds": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
               },
@@ -3480,6 +3488,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
+            showCancelButton={false}
             showDataSourceMenu={false}
             showDatasetSelect={false}
             showDatePicker={false}
@@ -3808,6 +3817,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               },
               "dataViews": Object {
                 "clearCache": [MockFunction],
+                "convertToDataset": [MockFunction],
                 "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
@@ -3815,6 +3825,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "find": [MockFunction],
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
+                "getIds": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
               },
@@ -4647,6 +4658,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
+            showCancelButton={false}
             showDataSourceMenu={false}
             showDatasetSelect={false}
             showDatePicker={false}
@@ -4975,6 +4987,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               },
               "dataViews": Object {
                 "clearCache": [MockFunction],
+                "convertToDataset": [MockFunction],
                 "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
@@ -4982,6 +4995,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "find": [MockFunction],
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
+                "getIds": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
               },
@@ -5814,6 +5828,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
+            showCancelButton={false}
             showDataSourceMenu={false}
             showDatasetSelect={false}
             showDatePicker={false}
@@ -6142,6 +6157,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               },
               "dataViews": Object {
                 "clearCache": [MockFunction],
+                "convertToDataset": [MockFunction],
                 "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
@@ -6149,6 +6165,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "find": [MockFunction],
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
+                "getIds": [MockFunction],
                 "make": [Function],
                 "saveToCache": [MockFunction],
               },
@@ -6980,6 +6997,7 @@ exports[`Dashboard top nav render with all components 1`] = `
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
+            showCancelButton={false}
             showDataSourceMenu={false}
             showDatasetSelect={false}
             showDatePicker={false}

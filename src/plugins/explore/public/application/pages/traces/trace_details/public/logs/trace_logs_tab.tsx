@@ -6,13 +6,15 @@ import React from 'react';
 import {
   EuiPanel,
   EuiSpacer,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { LogsDataTable } from './logs_data_table';
+import { DatasetAccordionList } from './dataset_accordion_list';
+import { CorrelationEmptyState } from './correlation_empty_state';
 import { LogHit } from '../../server/ppl_request_logs';
 import { Dataset } from '../../../../../../../../data/common';
 import { buildExploreLogsUrl, getTimeRangeFromTraceData } from './url_builder';
@@ -20,28 +22,23 @@ import { buildExploreLogsUrl, getTimeRangeFromTraceData } from './url_builder';
 export interface TraceLogsTabProps {
   traceId: string;
   logDatasets: Dataset[];
-  logsData: LogHit[];
+  datasetLogs: Record<string, LogHit[]>;
   isLoading: boolean;
   onSpanClick?: (spanId: string) => void;
+  traceDataset?: Dataset;
 }
 
 export const TraceLogsTab: React.FC<TraceLogsTabProps> = ({
   traceId,
   logDatasets,
-  logsData,
+  datasetLogs,
   isLoading,
   onSpanClick,
+  traceDataset,
 }) => {
-  const handleViewInExplore = () => {
-    if (logDatasets.length === 0) {
-      return;
-    }
-
+  const handleViewInExplore = (logDataset: Dataset, logs: LogHit[]) => {
     try {
-      // Use the first available log dataset
-      const logDataset = logDatasets[0];
-
-      const timeRange = getTimeRangeFromTraceData(logsData);
+      const timeRange = getTimeRangeFromTraceData(logs);
 
       const url = buildExploreLogsUrl({
         traceId,
@@ -69,26 +66,48 @@ export const TraceLogsTab: React.FC<TraceLogsTabProps> = ({
     );
   }
 
-  return (
-    <EuiPanel>
-      <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            iconType="popout"
-            onClick={handleViewInExplore}
-            data-test-subj="trace-logs-view-in-explore-button"
-          >
-            {i18n.translate('explore.traceLogsTab.viewInDiscoverLogs', {
-              defaultMessage: 'View in Discover Logs',
+  if (logDatasets.length === 0) {
+    return (
+      <EuiPanel>
+        <EuiTitle size="s">
+          <h3>
+            {i18n.translate('explore.traceLogsTab.title', {
+              defaultMessage: 'Logs',
             })}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <CorrelationEmptyState traceDataset={traceDataset} />
+      </EuiPanel>
+    );
+  }
 
-      <EuiSpacer size="s" />
+  return (
+    <div>
+      <EuiPanel>
+        <EuiTitle size="s">
+          <h3>
+            {i18n.translate('explore.traceRelatedLogsTab.title', {
+              defaultMessage: 'Related logs',
+            })}
+          </h3>
+        </EuiTitle>
+        <EuiText size="s" color="subdued">
+          {i18n.translate('explore.traceLogsTab.description', {
+            defaultMessage: 'View logs related with this trace',
+          })}
+        </EuiText>
+        <EuiSpacer size="m" />
 
-      <LogsDataTable logs={logsData} isLoading={isLoading} onSpanClick={onSpanClick} />
-    </EuiPanel>
+        <DatasetAccordionList
+          logDatasets={logDatasets}
+          datasetLogs={datasetLogs}
+          onViewInExplore={handleViewInExplore}
+          onSpanClick={onSpanClick}
+          testSubjPrefix="trace-logs"
+          traceDataset={traceDataset}
+        />
+      </EuiPanel>
+    </div>
   );
 };

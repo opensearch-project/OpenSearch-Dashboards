@@ -8,20 +8,25 @@ import React from 'react';
 import { EuiFormRow, EuiSpacer, EuiSwitch, EuiSelect } from '@elastic/eui';
 import { Positions } from '../../types';
 import { StyleAccordion } from '../style_accordion';
+import { DebouncedFieldText } from '../utils';
 
 export interface LegendOptions {
   show: boolean;
   position: Positions;
+  title?: string;
+  titleForSize?: string;
 }
 
 export interface LegendOptionsProps {
   legendOptions: LegendOptions;
   onLegendOptionsChange: (legendOptions: Partial<LegendOptions>) => void;
+  hasSizeLegend?: boolean;
 }
 
 export const LegendOptionsPanel = ({
   legendOptions,
   onLegendOptionsChange,
+  hasSizeLegend = false,
 }: LegendOptionsProps) => {
   if (!legendOptions || !onLegendOptionsChange) {
     return null;
@@ -89,6 +94,49 @@ export const LegendOptionsPanel = ({
               data-test-subj="legendPositionSelect"
             />
           </EuiFormRow>
+          <EuiSpacer size="s" />
+          <EuiFormRow
+            label={
+              hasSizeLegend
+                ? i18n.translate('explore.stylePanel.legend.colorTitle', {
+                    defaultMessage: 'Color legend title',
+                  })
+                : i18n.translate('explore.stylePanel.legend.title', {
+                    defaultMessage: 'Legend title',
+                  })
+            }
+          >
+            <DebouncedFieldText
+              value={legendOptions.title || ''}
+              onChange={(value: string) => onLegendOptionsChange({ title: value })}
+              data-test-subj="legendTitleInput"
+              placeholder={
+                hasSizeLegend
+                  ? i18n.translate('explore.stylePanel.legend.colorTitle.placeholder', {
+                      defaultMessage: 'Color legend name',
+                    })
+                  : i18n.translate('explore.stylePanel.legend.title.placeholder', {
+                      defaultMessage: 'Legend name',
+                    })
+              }
+            />
+          </EuiFormRow>
+          {hasSizeLegend && (
+            <EuiFormRow
+              label={i18n.translate('explore.stylePanel.legend.titleForSize', {
+                defaultMessage: 'Size legend title',
+              })}
+            >
+              <DebouncedFieldText
+                value={legendOptions.titleForSize || ''}
+                onChange={(value: string) => onLegendOptionsChange({ titleForSize: value })}
+                data-test-subj="legendTitleForSizeInput"
+                placeholder={i18n.translate('explore.stylePanel.legend.titleForSize.placeholder', {
+                  defaultMessage: 'Size legend name',
+                })}
+              />
+            </EuiFormRow>
+          )}
         </>
       )}
     </StyleAccordion>

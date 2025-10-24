@@ -4,9 +4,10 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { PatternsContainer } from './patterns_container';
 import { mockPatternItems } from './utils/patterns_table.stubs';
+import { QueryExecutionStatus } from '../../application/utils/state_management/types';
 
 jest.mock('./patterns_table', () => ({
   PatternsTable: (props: any) => (
@@ -18,17 +19,32 @@ jest.mock('./patterns_table', () => ({
   ),
 }));
 
+const mockUseTabResults = jest.fn(() => ({
+  results: {
+    hits: {
+      hits: mockPatternItems.map((item) => ({
+        _source: {
+          sample_logs: [item.sample],
+          pattern_count: item.count,
+          patterns_field: 'test pattern',
+        },
+      })),
+      total: 2096,
+    },
+  },
+  status: {
+    status: QueryExecutionStatus.READY,
+  },
+}));
+
 jest.mock('../../application/utils/hooks/use_tab_results', () => ({
-  useTabResults: jest.fn(() => ({
+  useTabResults: () => mockUseTabResults(),
+}));
+
+jest.mock('../../application/utils/hooks/use_histogram_results', () => ({
+  useHistogramResults: jest.fn(() => ({
     results: {
       hits: {
-        hits: mockPatternItems.map((item) => ({
-          _source: {
-            sample_logs: [item.sample],
-            pattern_count: item.count,
-            patterns_field: 'test pattern',
-          },
-        })),
         total: 2096,
       },
     },
@@ -72,6 +88,7 @@ jest.mock('react-redux', () => ({
 
 jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
   defaultPrepareQueryString: jest.fn().mockReturnValue('default-query'),
+  prepareHistogramCacheKey: jest.fn().mockReturnValue('histogram:default-query'),
 }));
 
 jest.mock('./utils/utils', () => ({
@@ -79,11 +96,61 @@ jest.mock('./utils/utils', () => ({
   isValidFiniteNumber: jest.fn((val) => !isNaN(val) && isFinite(val)),
 }));
 
+jest.mock('./patterns_table_flyout/patterns_flyout_context', () => ({
+  PatternsFlyoutProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  usePatternsFlyoutContext: jest.fn(() => ({
+    isFlyoutOpen: false,
+  })),
+}));
+
 describe('PatternsContainer', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders without crashing', () => {
     const { getByTestId } = render(<PatternsContainer />);
 
     const patternsTable = getByTestId('mocked-patterns-table');
     expect(patternsTable).toBeInTheDocument();
+  });
+
+  it('shows loading UI when status is LOADING', () => {
+    mockUseTabResults.mockReturnValueOnce({
+      results: null,
+      status: {
+        status: QueryExecutionStatus.LOADING,
+      },
+    } as any);
+
+    render(<PatternsContainer />);
+
+    expect(screen.getByTestId('patternsLoading')).toBeInTheDocument();
+    expect(screen.getByText('Searching in progress...')).toBeInTheDocument();
+  });
+
+  it('does not show loading UI when status is READY', () => {
+    mockUseTabResults.mockReturnValueOnce({
+      results: {
+        hits: {
+          hits: mockPatternItems.map((item) => ({
+            _source: {
+              sample_logs: [item.sample],
+              pattern_count: item.count,
+              patterns_field: 'test pattern',
+            },
+          })),
+          total: 2096,
+        },
+      },
+      status: {
+        status: QueryExecutionStatus.READY,
+      },
+    });
+
+    render(<PatternsContainer />);
+
+    expect(screen.queryByTestId('patternsLoading')).not.toBeInTheDocument();
+    expect(screen.queryByText('Searching in progress...')).not.toBeInTheDocument();
   });
 });
