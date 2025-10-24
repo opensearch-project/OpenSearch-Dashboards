@@ -80,26 +80,6 @@ export const getGradientConfig = (
     };
 };
 
-export const darkenColor = (hex: string, degree = 1) => {
-  // degree: 1 = 10%, 2 = 20%, etc.
-  const factor = 1 - degree * 0.1;
-
-  if (hex.length === 4) {
-    hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
-  }
-
-  let r = parseInt(hex.slice(1, 3), 16);
-  let g = parseInt(hex.slice(3, 5), 16);
-  let b = parseInt(hex.slice(5, 7), 16);
-
-  r = Math.max(Math.floor(r * factor), 0);
-  g = Math.max(Math.floor(g * factor), 0);
-  b = Math.max(Math.floor(b * factor), 0);
-
-  const toHex = (n: number) => n.toString(16).padStart(2, '0');
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-};
-
 export const processThresholds = (thresholds: Threshold[]) => {
   const result: Threshold[] = [];
 
@@ -136,34 +116,33 @@ export const generateParams = (
 
     if (i === 0) {
       result.push({
-        name: `test${i}`,
-        value: {
-          gradient: 'linear',
-          ...getGradientConfig(
-            styleOptions.exclusive.orientation,
-            styleOptions.exclusive.displayMode,
-            isXaxisNumerical
-          ),
-          stops: [
-            { offset: 0, color: thresholds[0].color },
-            {
-              offset: 1,
-              color: darkenColor(thresholds[0]?.color, 2),
-            },
-          ],
-        },
+        name: `gradient${i}`,
+        value: thresholds[0]?.color,
       });
       continue;
     }
 
-    // collect stops up to current threshold
-    const stops = thresholds.slice(0, i + 1).map((threshold) => {
-      const offset = normalizeData(threshold.value, start, end);
-      return { offset, color: threshold.color };
-    });
+    const allStops = thresholds.slice(0, i + 1).map((t) => ({
+      offset: normalizeData(t.value, start, end),
+      color: t.color,
+    }));
+
+    const stops = [];
+    for (let j = 0; j < allStops.length; j++) {
+      const curr = allStops[j];
+      const prev = allStops[j - 1];
+
+      if (j === 0 || j === allStops.length - 1 || curr.color !== prev?.color) {
+        stops.push(curr);
+      }
+    }
+
+    if (stops.length > 2 && stops[stops.length - 1].color === stops[stops.length - 2].color) {
+      stops.splice(stops.length - 2, 1);
+    }
 
     result.push({
-      name: `test${i}`,
+      name: `gradient${i}`,
       value: {
         gradient: 'linear',
         ...getGradientConfig(

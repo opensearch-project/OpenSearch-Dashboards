@@ -13,7 +13,6 @@ import {
   getBarOrientation,
   thresholdsToGradient,
   symbolOpposite,
-  darkenColor,
   processThresholds,
   generateParams,
 } from './bar_gauge_utils';
@@ -76,29 +75,38 @@ export const createBarGaugeSpec = (
     }
   }
 
-  const validThresholds =
-    styleOptions.thresholdOptions.thresholds?.filter(
+  const validThresholds = [
+    { value: styleOptions?.min ?? 0, color: styleOptions.thresholdOptions.baseColor } as Threshold,
+    ...(styleOptions.thresholdOptions.thresholds?.filter(
       (t) =>
         t.value <= maxNumber &&
         t.value >= (styleOptions.min ?? 0) &&
         t.value <= (styleOptions.max ?? Infinity)
-    ) ?? [];
-  const lastThreshold = validThresholds[validThresholds.length - 1];
+    ) ?? []),
+  ] as Threshold[];
 
-  // invalid case: max <= min and min > maxNumber, only show the base threshold
+  // transfer value to threshold
+  const valueToThreshold = [];
+
+  for (const record of newRecord) {
+    for (let i = validThresholds.length - 1; i >= 0; i--) {
+      if (numericField && record[numericField] >= validThresholds[i].value) {
+        valueToThreshold.push({ value: record[numericField], color: validThresholds[i].color });
+        break;
+      }
+    }
+  }
+
+  // only use value-based thresholds in gradient mode
+  const finalThreshold = styleOptions?.exclusive.displayMode === 'gradient' ? valueToThreshold : [];
+
   const completeThreshold = [
-    { value: styleOptions?.min ?? 0, color: styleOptions.thresholdOptions.baseColor } as Threshold,
     ...validThresholds,
     ...((styleOptions?.max && styleOptions?.min && styleOptions.max <= styleOptions.min) ||
     (styleOptions?.min && styleOptions.min > maxNumber)
       ? []
-      : [
-          {
-            value: styleOptions.max ?? maxNumber,
-            color: darkenColor(lastThreshold?.color ?? styleOptions.thresholdOptions.baseColor, 2),
-          } as Threshold,
-        ]),
-  ];
+      : finalThreshold),
+  ].sort((a, b) => a.value - b.value);
 
   const processedThresholds = processThresholds(completeThreshold);
 
@@ -107,14 +115,15 @@ export const createBarGaugeSpec = (
   const maxBase = styleOptions?.max ?? maxNumber;
   const minBase = styleOptions?.min ?? 0;
 
-  const scaleType =
-    styleOptions.exclusive.displayMode === 'stack'
-      ? {
-          scale: {
-            domainMin: { expr: 'minBase' },
-          },
-        }
-      : { domain: { expr: '[minBase,maxBase]' } };
+  const invalidCase = minBase >= maxBase || minBase > maxNumber;
+
+  const scaleType = !invalidCase
+    ? {
+        scale: {
+          domainMin: { expr: 'minBase' },
+        },
+      }
+    : {};
 
   const params = [
     { name: 'fontColor', value: getColors().text },
@@ -198,10 +207,10 @@ export const createBarGaugeSpec = (
     let expression = '';
 
     for (let i = thresholds.length - 1; i >= 1; i--) {
-      expression += `datum['${numericField}'] >= datum.threshold${i} ? test${i} : `;
+      expression += `datum['${numericField}'] >= datum.threshold${i} ? gradient${i} : `;
     }
 
-    expression += `test0`;
+    expression += `gradient0`;
 
     return expression;
   };
@@ -209,23 +218,21 @@ export const createBarGaugeSpec = (
   let bars = [] as any;
 
   // Handle invalid domain cases (minBase >= maxBase or minBase > maxNumber)
-  // valid cases will not add the layer .
-  if (minBase >= maxBase || minBase > maxNumber) {
+  // invalid cases will not add the layer .
+  if (invalidCase) {
     bars = [];
   } else if (styleOptions.exclusive.displayMode === 'stack') {
-    // dispose the last threshold
-    bars = processedThresholds.slice(0, -1)?.map((threshold, index) => {
+    bars = processedThresholds.map((threshold, index) => {
       return {
         transform: [
           { calculate: `datum.threshold${index}`, as: 'gradStart' },
-          { calculate: `datum.threshold${index + 1}`, as: 'gradEndTemp' },
+          {
+            calculate: `datum.threshold${index + 1}|| maxBase`,
+            as: 'gradEndTemp',
+          },
           {
             calculate: `datum['${numericField}'] < datum.gradEndTemp ? datum['${numericField}']: datum.gradEndTemp`,
             as: 'gradEnd',
-          },
-          {
-            calculate: `datum['${numericField}'] < datum.gradEndTemp`,
-            as: 'useSolidColor',
           },
           { filter: `datum['${numericField}'] >= datum.threshold${index}` },
         ],
@@ -253,7 +260,7 @@ export const createBarGaugeSpec = (
   } else if (styleOptions.exclusive.displayMode === 'gradient') {
     bars = [
       {
-        mark: { type: 'bar' },
+        mark: { type: 'bar', clip: true },
         transform: [
           {
             calculate: `datum['${numericField}']>=datum.maxVal?datum.maxVal:datum['${numericField}']`,
@@ -277,7 +284,7 @@ export const createBarGaugeSpec = (
   } else if (styleOptions.exclusive.displayMode === 'basic') {
     bars = [
       {
-        mark: { type: 'bar' },
+        mark: { type: 'bar', clip: true },
         transform: [
           {
             calculate: `datum['${numericField}']>=datum.maxVal?datum.maxVal:datum['${numericField}']`,
@@ -296,11 +303,8 @@ export const createBarGaugeSpec = (
             scale: {
               type: 'threshold',
               //  last threshold which is just for max value capping in gradient mode
-              domain: processedThresholds.map((t) => t.value).slice(0, -1),
-              range: [
-                getColors().backgroundShade,
-                ...processedThresholds.map((t) => t.color),
-              ].slice(0, -1),
+              domain: processedThresholds.map((t) => t.value),
+              range: [getColors().backgroundShade, ...processedThresholds.map((t) => t.color)],
             },
             legend: null,
           },
@@ -342,11 +346,8 @@ export const createBarGaugeSpec = (
           type: 'quantitative',
           scale: {
             type: 'threshold',
-            domain: processedThresholds.map((t) => t.value).slice(0, -1),
-            range: [getColors().backgroundShade, ...processedThresholds.map((t) => t.color)].slice(
-              0,
-              -1
-            ),
+            domain: processedThresholds.map((t) => t.value),
+            range: [getColors().backgroundShade, ...processedThresholds.map((t) => t.color)],
           },
           legend: null,
         },
