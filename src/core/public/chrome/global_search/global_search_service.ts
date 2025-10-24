@@ -142,7 +142,7 @@ export class GlobalSearchService {
       getAllSearchCommands: () => this.searchCommands,
       getSearchSubmitCommands$: () => this.searchSubmitCommands$.asObservable(),
       unregisterSearchCommand: this.unregisterSearchCommand.bind(this),
-      unregisterSearchSubmitCommand: this.unregisterSearchSubmitCommand,
+      unregisterSearchSubmitCommand: this.unregisterSearchSubmitCommand.bind(this),
     };
   }
 }

@@ -235,4 +235,150 @@ describe('<HeaderSearchBar />', () => {
       expect(queryByText('saved objects')).toBeInTheDocument();
     });
   });
+
+  it('should display submit command hint when submit commands are available', async () => {
+    const submitCommandRun = jest.fn();
+    const globalSearchSubmitCommands = [
+      {
+        id: 'submit-command',
+        name: 'Submit Command',
+        run: submitCommandRun,
+      },
+    ];
+
+    const { getByTestId, queryByText } = render(
+      <HeaderSearchBar
+        globalSearchCommands={globalSearchCommands}
+        globalSearchSubmitCommands={globalSearchSubmitCommands}
+        panel
+      />
+    );
+
+    const searchInput = getByTestId('global-search-input');
+
+    // Verify placeholder includes submit command name
+    expect(searchInput).toHaveAttribute('placeholder', 'Search or Submit Command');
+
+    act(() => {
+      fireEvent.change(searchInput, {
+        target: { value: 'test query' },
+      });
+    });
+
+    // Verify submit command hint is displayed
+    await waitFor(() => {
+      expect(queryByText('Press Enter to Submit Command.')).toBeInTheDocument();
+    });
+  });
+
+  it('should call onSearchResultClick callback when provided', async () => {
+    const onSearchResultClick = jest.fn();
+    const mockSearchFn = jest.fn().mockImplementation((query, callback) => {
+      callback();
+      return Promise.resolve([<EuiText>result</EuiText>]);
+    });
+
+    const commands: GlobalSearchCommand[] = [
+      {
+        id: 'test',
+        type: 'PAGES',
+        run: mockSearchFn,
+      },
+    ];
+
+    const { getByTestId } = render(
+      <HeaderSearchBar
+        globalSearchCommands={commands}
+        onSearchResultClick={onSearchResultClick}
+        panel
+      />
+    );
+
+    act(() => {
+      fireEvent.change(getByTestId('global-search-input'), {
+        target: { value: 'test' },
+      });
+    });
+
+    await waitFor(() => {
+      expect(mockSearchFn).toHaveBeenCalled();
+      expect(onSearchResultClick).toHaveBeenCalled();
+    });
+  });
+
+  it('should abort previous search requests when new search is triggered', async () => {
+    const abortedSearchFn = jest.fn().mockImplementation((query, callback, signal) => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          if (!signal?.aborted) {
+            resolve([<EuiText>slow result</EuiText>]);
+          }
+        }, 100);
+      });
+    });
+
+    const fastSearchFn = jest.fn().mockResolvedValue([<EuiText>fast result</EuiText>]);
+
+    const commands: GlobalSearchCommand[] = [
+      {
+        id: 'slow',
+        type: 'PAGES',
+        run: abortedSearchFn,
+      },
+    ];
+
+    const { getByTestId, queryByText } = render(
+      <HeaderSearchBar globalSearchCommands={commands} panel />
+    );
+
+    const searchInput = getByTestId('global-search-input');
+
+    // Trigger first search
+    act(() => {
+      fireEvent.change(searchInput, {
+        target: { value: 'first' },
+      });
+    });
+
+    // Quickly trigger second search
+    act(() => {
+      fireEvent.change(searchInput, {
+        target: { value: 'second' },
+      });
+    });
+
+    await waitFor(() => {
+      expect(abortedSearchFn).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it('should clear results when search value is empty', async () => {
+    const { getByTestId, queryByText } = render(
+      <HeaderSearchBar globalSearchCommands={globalSearchCommands} panel />
+    );
+
+    searchFn.mockResolvedValue([<EuiText>test result</EuiText>]);
+
+    // First, perform a search
+    act(() => {
+      fireEvent.change(getByTestId('global-search-input'), {
+        target: { value: 'test' },
+      });
+    });
+
+    await waitFor(() => {
+      expect(queryByText('test result')).toBeInTheDocument();
+    });
+
+    // Clear the search
+    act(() => {
+      fireEvent.change(getByTestId('global-search-input'), {
+        target: { value: '' },
+      });
+    });
+
+    await waitFor(() => {
+      expect(queryByText('test result')).not.toBeInTheDocument();
+    });
+  });
 });
