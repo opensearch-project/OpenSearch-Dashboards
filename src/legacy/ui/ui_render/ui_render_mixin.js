@@ -320,7 +320,20 @@ export function uiRenderMixin(osdServer, server, config) {
       vars,
     });
 
-    return h.response(content).type('text/html').header('content-security-policy', http.csp.header);
+    const output = h
+      .response(content)
+      .type('text/html')
+      .header('content-security-policy', http.csp.header);
+
+    if (http.cspReportOnly.isEmitting) {
+      output.header('content-security-policy-report-only', http.cspReportOnly.cspReportOnlyHeader);
+
+      if (http.cspReportOnly.reportingEndpointsHeader) {
+        output.header('reporting-endpoints', http.cspReportOnly.reportingEndpointsHeader);
+      }
+    }
+
+    return output;
   }
 
   server.decorate('toolkit', 'renderApp', function () {
