@@ -4,7 +4,6 @@
  */
 
 import { config } from './config';
-import { CSP_REPORT_ONLY_ENDPOINT } from './constants';
 
 const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
 
@@ -37,7 +36,14 @@ export interface ICspReportOnlyConfig {
   /**
    * The endpoint of where the CSP-Report-Only data should be sent
    */
-  readonly reportUri?: string;
+  readonly endpoint?: string;
+
+  /**
+   * If this is set to true, we will only use the `report-uri` and not use the recommended `report-to` directive.
+   * If this is set to false, we will emit both directives.
+   * This is useful to set to true if the app is served through non-https as well as for dev purposes
+   */
+  readonly useDeprecatedReportUriOnly?: boolean;
 }
 
 /**
@@ -51,7 +57,8 @@ export class CspReportOnlyConfig implements ICspReportOnlyConfig {
   public readonly rules: string[];
   public readonly cspReportOnlyHeader: string;
   public readonly reportingEndpointsHeader?: string;
-  public readonly reportUri?: string;
+  public readonly endpoint?: string;
+  public readonly useDeprecatedReportUriOnly: boolean;
   private readonly endpointName = 'csp-endpoint';
 
   /**
@@ -60,20 +67,26 @@ export class CspReportOnlyConfig implements ICspReportOnlyConfig {
    */
   constructor(
     rawCspReportOnlyConfig: Partial<
-      Omit<ICspReportOnlyConfig, 'cspReportOnlyHeader' | 'reportingEndpointsHeader' | 'reportUri'>
+      Omit<ICspReportOnlyConfig, 'cspReportOnlyHeader' | 'reportingEndpointsHeader'>
     > = {}
   ) {
     const source = { ...DEFAULT_CONFIG, ...rawCspReportOnlyConfig };
 
     this.isEmitting = source.isEmitting;
     this.rules = source.rules;
+    this.useDeprecatedReportUriOnly = source.useDeprecatedReportUriOnly;
 
     let cspReportOnlyHeader = source.rules.join('; ');
 
-    if (CSP_REPORT_ONLY_ENDPOINT) {
-      this.reportUri = CSP_REPORT_ONLY_ENDPOINT;
-      this.reportingEndpointsHeader = `${this.endpointName}="${this.reportUri}"`;
-      cspReportOnlyHeader += `; report-uri ${this.reportUri}; report-to ${this.endpointName};`;
+    if (source.endpoint) {
+      this.endpoint = source.endpoint;
+
+      if (source.useDeprecatedReportUriOnly) {
+        cspReportOnlyHeader += `; report-uri ${this.endpoint};`;
+      } else {
+        this.reportingEndpointsHeader = `${this.endpointName}="${this.endpoint}"`;
+        cspReportOnlyHeader += `; report-uri ${this.endpoint}; report-to ${this.endpointName};`;
+      }
     }
 
     this.cspReportOnlyHeader = cspReportOnlyHeader;

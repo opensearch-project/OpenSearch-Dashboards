@@ -17,5 +17,7 @@ export const config = {
     rules: schema.arrayOf(schema.string(), {
       defaultValue: [`script-src 'self'`, `worker-src 'self'`, `style-src 'self'`],
     }),
+    endpoint: schema.maybe(schema.string()),
+    useDeprecatedReportUriOnly: schema.boolean({ defaultValue: false }),
   }),
 };
