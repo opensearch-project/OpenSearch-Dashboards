@@ -1,0 +1,2 @@
+fix:
+- [BUG][Chat] fix tool result messages not containing latest user question ([#10758](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10758))
