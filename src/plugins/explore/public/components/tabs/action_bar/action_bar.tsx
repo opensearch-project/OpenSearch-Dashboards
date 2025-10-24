@@ -2,7 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
+import { useObservable } from 'react-use';
 import { DiscoverResultsActionBar } from './results_action_bar/results_action_bar';
 import { ExploreServices } from '../../../types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -22,8 +23,13 @@ const ActionBarComponent = () => {
   const { dataset } = useDatasetContext();
   const { results } = useTabResults();
   const { results: histogramResults } = useHistogramResults();
-  const { core, inspector, inspectorAdapters } = services;
+  const { core, inspector, inspectorAdapters, slotRegistry } = services;
   const savedSearch = useSelector(selectSavedSearch);
+
+  const sortedSlotItems$ = useMemo(() => {
+    return slotRegistry.getSortedItems$('resultsActionBar');
+  }, [slotRegistry]);
+  const slotItems = useObservable(sortedSlotItems$, []);
 
   const openInspector = () => {
     if (inspector) {
@@ -50,6 +56,7 @@ const ActionBarComponent = () => {
       elapsedMs={elapsedMs}
       dataset={dataset}
       inspectionHanlder={openInspector}
+      extraActions={slotItems}
     />
   );
 };

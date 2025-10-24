@@ -19,6 +19,7 @@ import { EmptyTableCell } from '../table_cell/empty_table_cell';
 import { SourceFieldTableCell } from '../table_cell/source_field_table_cell';
 import { NonFilterableTableCell } from '../table_cell/non_filterable_table_cell';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
+import { SlotRegistryService } from '../../../services/slot_registry';
 
 export interface TableRowContentProps {
   row: OpenSearchSearchHit<Record<string, unknown>>;
@@ -29,6 +30,7 @@ export interface TableRowContentProps {
   isExpanded: boolean;
   onToggleExpand: () => void;
   isOnTracesPage: boolean;
+  slotRegistry: SlotRegistryService;
 }
 
 // Helper functions
@@ -61,6 +63,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
   isExpanded,
   onToggleExpand,
   isOnTracesPage,
+  slotRegistry,
 }) => {
   const [isRowSelected, setIsRowSelected] = useState(false);
 
@@ -88,7 +91,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
           />
         </td>
       )}
-      {columns.map((colName) => {
+      {columns.map((colName, columnIndex) => {
         const fieldInfo = dataset.fields.getByName(colName);
         const fieldMapping = flattened[colName];
 
@@ -136,6 +139,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
             rowData={row}
             isOnTracesPage={isOnTracesPage}
             setIsRowSelected={setIsRowSelected}
+            index={columnIndex}
           />
         );
       })}

@@ -45,6 +45,11 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
           },
         },
       },
+      slotRegistry: {
+        getSortedItems$: () => ({
+          subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
+        }),
+      },
     },
   }),
   withOpenSearchDashboards: jest.fn((component: any) => component),

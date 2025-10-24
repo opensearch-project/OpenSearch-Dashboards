@@ -60,6 +60,7 @@ import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { DataExplorerServices } from '../../data_explorer/public';
 import { Storage } from '../../opensearch_dashboards_utils/public';
+import { SlotRegistryService } from './services/slot_registry';
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -86,12 +87,16 @@ export interface DiscoverServices {
   visualizations: VisualizationsStart;
   storage: Storage;
   uiActions: UiActionsStart;
+  slotRegistry: SlotRegistryService;
 }
 
 export function buildServices(
   core: CoreStart,
   plugins: DiscoverStartPlugins,
-  context: PluginInitializerContext
+  context: PluginInitializerContext,
+  internalServices: {
+    slotRegistry: SlotRegistryService;
+  }
 ): DiscoverServices {
   const services: SavedObjectOpenSearchDashboardsServices = {
     savedObjectsClient: core.savedObjects.client,
@@ -130,6 +135,7 @@ export function buildServices(
     visualizations: plugins.visualizations,
     storage,
     uiActions: plugins.uiActions,
+    ...internalServices,
   };
 }
 

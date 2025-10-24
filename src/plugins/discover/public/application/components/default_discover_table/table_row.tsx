@@ -12,13 +12,16 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSmallButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import dompurify from 'dompurify';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { fetchSourceTypeDataCell } from '../data_grid/data_grid_table_cell_value';
 import { DocViewer } from '../doc_viewer/doc_viewer';
 import { DocViewerLinks } from '../doc_viewer_links/doc_viewer_links';
 import { TableCell } from './table_cell';
+import { DiscoverServices } from '../../../build_services';
+import { useOpenSearchDashboards } from '../../../../../../plugins/opensearch_dashboards_react/public';
+import { SlotItemConfig } from '../../../services/slot_registry';
 
 export interface TableRowProps {
   row: OpenSearchSearchHit;
@@ -41,11 +44,27 @@ const TableRowUI = ({
   onClose,
   isShortDots,
 }: TableRowProps) => {
+  const {
+    services: { slotRegistry },
+  } = useOpenSearchDashboards<DiscoverServices>();
   const flattened = indexPattern.flattenHit(row);
   const [isExpanded, setIsExpanded] = useState(false);
   const handleExpanding = useCallback(() => setIsExpanded((prevState) => !prevState), [
     setIsExpanded,
   ]);
+  const [slotItemConfigs, setSlotItemConfigs] = useState<SlotItemConfig[]>();
+  const firstColumnCellSlot = !!row._source && slotItemConfigs?.[0]?.render(row._source);
+
+  useEffect(() => {
+    const subscription = slotRegistry
+      .getSortedItems$('resultsFirstColumnCell')
+      .subscribe((itemConfigs) => {
+        setSlotItemConfigs(itemConfigs);
+      });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [slotRegistry]);
 
   const tableRow = (
     <tr key={row._id} className={row.isAnchor ? 'osdDocTable__row--highlight' : ''}>
@@ -60,7 +79,9 @@ const TableRowUI = ({
           data-test-subj="docTableExpandToggleColumn"
         />
       </td>
-      {columns.map((colName) => {
+      {columns.map((colName, colIndex) => {
+        const extraContent =
+          colIndex === 0 && !!firstColumnCellSlot ? <div>{firstColumnCellSlot}</div> : undefined;
         const fieldInfo = indexPattern.fields.getByName(colName);
         const fieldMapping = flattened[colName];
 
@@ -72,6 +93,7 @@ const TableRowUI = ({
               className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
             >
               <span>-</span>
+              {extraContent}
             </td>
           );
         }
@@ -86,6 +108,7 @@ const TableRowUI = ({
               <div className="truncate-by-height">
                 {fetchSourceTypeDataCell(indexPattern, row, colName, false, isShortDots)}
               </div>
+              {extraContent}
             </td>
           );
         }
@@ -100,6 +123,7 @@ const TableRowUI = ({
               className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
             >
               <span>-</span>
+              {extraContent}
             </td>
           );
         }
@@ -121,6 +145,7 @@ const TableRowUI = ({
                 {/* eslint-disable-next-line react/no-danger */}
                 <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
               </div>
+              {extraContent}
             </td>
           );
         }
@@ -133,6 +158,7 @@ const TableRowUI = ({
             isTimeField={indexPattern.timeFieldName === colName}
             fieldMapping={fieldMapping}
             sanitizedCellValue={sanitizedCellValue}
+            extraContent={firstColumnCellSlot}
           />
         );
       })}

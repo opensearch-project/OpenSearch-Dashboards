@@ -70,6 +70,7 @@ import { createAbortDataQueryAction } from './application/utils/state_management
 import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
 import { setServices } from './services/services';
+import { SlotRegistryService } from './services/slot_registry';
 
 export class ExplorePlugin
   implements
@@ -98,6 +99,7 @@ export class ExplorePlugin
   private tabRegistry: TabRegistryService = new TabRegistryService();
   private visualizationRegistryService = new VisualizationRegistryService();
   private queryPanelActionsRegistryService = new QueryPanelActionsRegistryService();
+  private slotRegistryService = new SlotRegistryService();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -306,7 +308,8 @@ export class ExplorePlugin
           this.initializerContext,
           this.tabRegistry,
           this.visualizationRegistryService,
-          this.queryPanelActionsRegistryService
+          this.queryPanelActionsRegistryService,
+          this.slotRegistryService
         );
 
         // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
@@ -445,6 +448,7 @@ export class ExplorePlugin
       },
       visualizationRegistry: visualizationRegistryService,
       queryPanelActionsRegistry: this.queryPanelActionsRegistryService.setup(),
+      slotRegistry: this.slotRegistryService.setup(),
     };
   }
 
@@ -468,7 +472,8 @@ export class ExplorePlugin
         this.initializerContext,
         this.tabRegistry,
         this.visualizationRegistryService,
-        this.queryPanelActionsRegistryService
+        this.queryPanelActionsRegistryService,
+        this.slotRegistryService
       );
       setLegacyServices({
         ...services,

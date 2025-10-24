@@ -12,6 +12,7 @@ import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { DiscoverDownloadCsv } from '../download_csv';
 import { IndexPattern } from '../../../../../data/common';
 import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../data/public';
+import { SlotItemsForType } from '../../../services/slot_registry';
 
 export interface DiscoverResultsActionBarProps {
   hits?: number;
@@ -19,6 +20,7 @@ export interface DiscoverResultsActionBarProps {
   resetQuery(): void;
   rows?: OpenSearchSearchHit[];
   indexPattern?: IndexPattern;
+  extraActions?: Array<SlotItemsForType<'resultsActionBar'>>;
 }
 
 export const DiscoverResultsActionBar = ({
@@ -27,6 +29,7 @@ export const DiscoverResultsActionBar = ({
   resetQuery,
   rows,
   indexPattern,
+  extraActions,
 }: DiscoverResultsActionBarProps) => {
   return (
     <EuiFlexGroup
@@ -56,6 +59,11 @@ export const DiscoverResultsActionBar = ({
               <DiscoverDownloadCsv indexPattern={indexPattern} rows={rows} hits={hits} />
             </EuiFlexItem>
           ) : null}
+          {extraActions?.map((item) => (
+            <EuiFlexItem grow={false} key={item.id}>
+              {item.render()}
+            </EuiFlexItem>
+          ))}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

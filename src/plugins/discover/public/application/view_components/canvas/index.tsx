@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { useObservable } from 'react-use';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
 import { DiscoverTable } from './discover_table';
@@ -34,9 +35,15 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
       chrome: { setHeaderVariant },
       data,
       core,
+      slotRegistry,
     },
   } = useOpenSearchDashboards<DiscoverViewServices>();
   const isEnhancementsEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
+
+  const sortedSlotItems$ = useMemo(() => {
+    return slotRegistry.getSortedItems$('resultsActionBar');
+  }, [slotRegistry]);
+  const slotItems = useObservable(sortedSlotItems$, []);
 
   const [fetchState, setFetchState] = useState<SearchData>({
     status: data$.getValue().status,
@@ -110,6 +117,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, optionalRef }: Vie
       }}
       rows={rows}
       indexPattern={indexPattern}
+      extraActions={slotItems}
     />
   );
 

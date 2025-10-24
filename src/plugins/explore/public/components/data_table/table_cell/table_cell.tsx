@@ -5,7 +5,7 @@
 
 import './table_cell.scss';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
@@ -17,8 +17,12 @@ import {
   DurationTableCell,
   isDurationColumn,
 } from './trace_utils/trace_utils';
+import { ExploreServices } from '../../../types';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { SlotItemConfig } from '../../../services/slot_registry';
 
 export interface ITableCellProps {
+  index?: number;
   columnId: string;
   isTimeField?: boolean;
   onFilter?: DocViewFilterFn;
@@ -31,6 +35,7 @@ export interface ITableCellProps {
 
 // TODO: Move to a better cell component design that not rely on rowData
 export const TableCellUI = ({
+  index,
   columnId,
   isTimeField,
   onFilter,
@@ -41,6 +46,10 @@ export const TableCellUI = ({
   setIsRowSelected,
 }: ITableCellProps) => {
   const { dataset } = useDatasetContext();
+  const {
+    services: { slotRegistry },
+  } = useOpenSearchDashboards<ExploreServices>();
+  const [slotItemConfigs, setSlotItemConfigs] = useState<SlotItemConfig[]>();
 
   const dataFieldContent =
     isSpanIdColumn(columnId) && isOnTracesPage && rowData && dataset ? (
@@ -62,6 +71,8 @@ export const TableCellUI = ({
         dangerouslySetInnerHTML={{ __html: sanitizedCellValue }}
       />
     );
+
+  const firstColumnCellSlot = rowData && slotItemConfigs?.[0]?.render(rowData._source);
 
   const content = (
     <>
@@ -100,8 +111,24 @@ export const TableCellUI = ({
           />
         </EuiToolTip>
       </span>
+      <div>{firstColumnCellSlot}</div>
     </>
   );
+
+  // useObservable is using useLayoutEffect will cause table infinite rendering, useEffect here instead.
+  useEffect(() => {
+    if (index !== 0) {
+      return;
+    }
+    const subscription = slotRegistry
+      .getSortedItems$('resultsFirstColumnCell')
+      .subscribe((itemConfigs) => {
+        setSlotItemConfigs(itemConfigs);
+      });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [slotRegistry, index]);
 
   return isTimeField ? (
     <td data-test-subj="docTableField" className="exploreDocTableCell eui-textNoWrap">
