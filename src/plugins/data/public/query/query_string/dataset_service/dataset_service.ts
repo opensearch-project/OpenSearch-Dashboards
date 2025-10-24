@@ -120,6 +120,7 @@ export class DatasetService {
                 id: dataset.dataSource.id!,
                 name: dataset.dataSource.title,
                 type: dataset.dataSource.type,
+                version: dataset.dataSource.version,
               }
             : undefined,
         } as IndexPatternSpec;
@@ -201,6 +202,7 @@ export class DatasetService {
                 id: dataset.dataSource.id!,
                 name: dataset.dataSource.title,
                 type: dataset.dataSource.type,
+                version: dataset.dataSource.version,
               }
             : undefined,
         } as IndexPatternSpec;

@@ -77,6 +77,7 @@ export class DataView extends IndexPattern implements IDataView {
       this.dataSourceRef = {
         id: this.dataSourceRef.id,
         type: attributes.dataSourceEngineType || this.dataSourceRef.type,
+        version: attributes.dataSourceVersion || this.dataSourceRef.version,
         name: attributes.title || this.dataSourceRef.name || this.dataSourceRef.id,
       };
     } catch (error) {
@@ -115,6 +116,7 @@ export class DataView extends IndexPattern implements IDataView {
           id: dataSourceReference.id,
           title: attributes.title || dataSourceReference.id,
           type: attributes.dataSourceEngineType || 'OpenSearch',
+          version: attributes.dataSourceVersion || '',
         };
       } catch (error) {
         // If we can't fetch the data source, create a minimal version
@@ -125,6 +127,7 @@ export class DataView extends IndexPattern implements IDataView {
               ? dataSourceReference.name
               : dataSourceReference.id,
           type: 'OpenSearch',
+          version: '',
         };
       }
     }
