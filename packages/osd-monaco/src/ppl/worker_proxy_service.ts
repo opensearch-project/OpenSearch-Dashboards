@@ -6,6 +6,40 @@
 import { PPLValidationResult, PPLToken } from './ppl_language_analyzer';
 import { ID } from './constants';
 
+// Helper function to get base path from current location
+function getBasePath(): string {
+  // Check if we're in a browser environment
+  if (typeof window === 'undefined') {
+    return '';
+  }
+
+  // Extract base path from the current page URL
+  // This handles cases where OpenSearch Dashboards is served from a subpath
+  const pathname = window.location.pathname;
+  const segments = pathname.split('/').filter(Boolean);
+
+  // Handle different deployment patterns:
+  // 1. Workspace URLs: /w/{workspaceId}/app/... → /w/{workspaceId}
+  // 2. Custom base path: /opensearch-dashboards/app/... → /opensearch-dashboards
+  // 3. Root deployment: /app/... → (empty)
+
+  if (segments.length >= 3 && segments[0] === 'w' && segments[2] === 'app') {
+    // Workspace pattern: /w/{workspaceId}/app/...
+    return `/${segments[0]}/${segments[1]}`;
+  } else if (segments.length >= 2 && segments[segments.length - 2] === 'app') {
+    // Find where 'app' appears and take everything before it as base path
+    const appIndex = segments.indexOf('app');
+    if (appIndex > 0) {
+      return '/' + segments.slice(0, appIndex).join('/');
+    }
+  } else if (segments.length > 0 && segments[0] !== 'app' && segments[0] !== 'ui') {
+    // Simple case: first segment is not 'app' or 'ui'
+    return `/${segments[0]}`;
+  }
+
+  return '';
+}
+
 /**
  * Simple worker proxy that communicates with PPL worker
  */
@@ -17,14 +51,23 @@ export class PPLWorkerProxyService {
   /**
    * Set up the worker
    */
-  public setup(workerSrc: string) {
+  public setup() {
     if (this.worker) {
       return; // Already set up
     }
 
-    // Create worker from source
-    const blob = new Blob([workerSrc], { type: 'application/javascript' });
-    this.worker = new Worker(URL.createObjectURL(blob));
+    // Create worker from static URL instead of blob
+    const basePath = getBasePath();
+    const workerUrl = basePath + '/ui/assets/monaco-workers/ppl.editor.worker.js';
+
+    // Debug logging to help troubleshoot worker loading
+    console.log('PPL Worker Proxy Setup:', {
+      pathname: window.location.pathname,
+      basePath,
+      workerUrl,
+    });
+
+    this.worker = new Worker(workerUrl);
 
     // Handle messages from worker
     this.worker.onmessage = (e: MessageEvent) => {
