@@ -61,8 +61,21 @@ export const applyAxisStyling = (
     }
   }
 
+  // Apply time formatting for date/time axes
   if (axis?.schema === VisFieldType.Date) {
-    fullAxisConfig.format = { seconds: '%I:%M:%S', milliseconds: '%I:%M:%S.%L' };
+    // Configure time formats for different granularities using 24-hour format for better clarity.
+    // Each format corresponds to the appropriate time precision:
+    // - hours: Display hours and minutes (HH:MM)
+    // - minutes: Display hours and minutes (HH:MM)
+    // - seconds: Display full time with seconds (HH:MM:SS)
+    // - milliseconds: Display full time with milliseconds (HH:MM:SS.mmm)
+    // Using %H (24-hour) instead of %I (12-hour) provides clearer, unambiguous time representation
+    fullAxisConfig.format = {
+      hours: '%H:%M',
+      minutes: '%H:%M',
+      seconds: '%H:%M:%S',
+      milliseconds: '%H:%M:%S.%L',
+    };
   }
 
   return fullAxisConfig;
@@ -328,3 +341,64 @@ export const mergeStyles = (dest: ChartStyles, source: StyleOptions | undefined)
 
   return mergeWith(copiedDest, source, customMerge);
 };
+
+export function applyTimeRangeToEncoding(
+  mainLayerEncoding?: any,
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string },
+  switchAxes: boolean = false
+): void {
+  if (!axisColumnMappings || !timeRange?.from || !timeRange?.to || !mainLayerEncoding) {
+    return;
+  }
+
+  const timeAxisEntry = Object.entries(axisColumnMappings).find(
+    ([, col]) => getSchemaByAxis(col) === 'temporal'
+  );
+
+  if (!timeAxisEntry) return;
+
+  const [axisRole] = timeAxisEntry as [AxisRole, VisColumn];
+  const targetRole = axisRole === AxisRole.X ? (switchAxes ? 'y' : 'x') : switchAxes ? 'x' : 'y';
+
+  // Check if the time field has timezone information or is UTC format
+  const hasTimezoneInfo = (timeString: string) => {
+    return (
+      timeString.includes('T') &&
+      (timeString.endsWith('Z') || timeString.includes('+') || timeString.includes('-'))
+    );
+  };
+
+  // Smart time processing: preserve UTC fields as strings, convert timezone-aware fields to UTC objects
+  const processTimeValue = (iso: string) => {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso; // fallback: let Vega-Lite parse string
+
+    // For UTC fields (format: "2025-09-25 18:19:02.49"), keep as string to let Vega-Lite handle naturally
+    if (!hasTimezoneInfo(iso)) {
+      return iso;
+    }
+
+    return {
+      year: d.getUTCFullYear(),
+      month: d.getUTCMonth() + 1,
+      date: d.getUTCDate(),
+      hours: d.getUTCHours(),
+      minutes: d.getUTCMinutes(),
+      seconds: d.getUTCSeconds(),
+      milliseconds: d.getUTCMilliseconds(),
+      utc: true,
+    };
+  };
+
+  const scaleConfig = {
+    domain: [processTimeValue(timeRange.from), processTimeValue(timeRange.to)],
+  };
+
+  if (mainLayerEncoding[targetRole]) {
+    mainLayerEncoding[targetRole].scale = {
+      ...(mainLayerEncoding[targetRole].scale || {}),
+      ...scaleConfig,
+    };
+  }
+}

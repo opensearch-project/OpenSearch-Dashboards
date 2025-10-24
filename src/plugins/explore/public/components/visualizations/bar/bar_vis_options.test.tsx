@@ -140,7 +140,7 @@ jest.mock('../style_panel/tooltip/tooltip', () => ({
 }));
 
 jest.mock('../style_panel/axes/standard_axes_options', () => ({
-  AllAxesOptions: jest.fn(({ standardAxes, onStandardAxesChange }) => (
+  AllAxesOptions: jest.fn(({ standardAxes, onStandardAxesChange, onShowFullTimeRangeChange }) => (
     <div data-test-subj="allAxesOptions">
       <button
         data-test-subj="changeAxis"
@@ -153,6 +153,12 @@ jest.mock('../style_panel/axes/standard_axes_options', () => ({
         onClick={() => onStandardAxesChange([...standardAxes, { id: 'new-axis' }])}
       >
         Update Value Axes
+      </button>
+      <button
+        data-test-subj="mockUpdateShowFullTimeRange"
+        onClick={() => onShowFullTimeRangeChange && onShowFullTimeRangeChange(true)}
+      >
+        Show Full Time Range
       </button>
     </div>
   )),
@@ -433,6 +439,19 @@ describe('BarVisStyleControls', () => {
     await userEvent.click(screen.getByTestId('changeAxis'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
       standardAxes: [...defaultProps.styleOptions.standardAxes, { id: 'new-axis' }],
+    });
+  });
+
+  test('calls onStyleChange with correct parameters for show full time range', async () => {
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...defaultProps} />
+      </Provider>
+    );
+
+    await userEvent.click(screen.getByTestId('mockUpdateShowFullTimeRange'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+      showFullTimeRange: true,
     });
   });
 

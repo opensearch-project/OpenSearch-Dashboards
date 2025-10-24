@@ -99,6 +99,10 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
                 updateStyleOption('standardAxes', standardAxes)
               }
               switchAxes={styleOptions.switchAxes}
+              showFullTimeRange={styleOptions.showFullTimeRange}
+              onShowFullTimeRangeChange={(showFullTimeRange) =>
+                updateStyleOption('showFullTimeRange', showFullTimeRange)
+              }
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

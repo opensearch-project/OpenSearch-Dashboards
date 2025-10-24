@@ -105,7 +105,8 @@ const oneMetricOneDateRule: VisualizationRule = {
     dateColumns,
     styleOptions,
     chartType = 'line',
-    axisColumnMappings
+    axisColumnMappings,
+    timeRange?: { from: string; to: string }
   ) => {
     // Select the appropriate chart creation function based on the chart type
     switch (chartType) {
@@ -115,7 +116,8 @@ const oneMetricOneDateRule: VisualizationRule = {
           numericalColumns,
           dateColumns,
           styleOptions as LineChartStyle,
-          axisColumnMappings
+          axisColumnMappings,
+          timeRange
         );
       case 'area':
         return createSimpleAreaChart(
@@ -123,7 +125,8 @@ const oneMetricOneDateRule: VisualizationRule = {
           numericalColumns,
           dateColumns,
           styleOptions as AreaChartStyle,
-          axisColumnMappings
+          axisColumnMappings,
+          timeRange
         );
       case 'bar':
         return createTimeBarChart(
@@ -131,7 +134,8 @@ const oneMetricOneDateRule: VisualizationRule = {
           numericalColumns,
           dateColumns,
           styleOptions as BarChartStyle,
-          axisColumnMappings
+          axisColumnMappings,
+          timeRange
         );
       case 'metric':
         return createSingleMetric(
@@ -148,7 +152,8 @@ const oneMetricOneDateRule: VisualizationRule = {
           numericalColumns,
           dateColumns,
           styleOptions as LineChartStyle,
-          axisColumnMappings
+          axisColumnMappings,
+          timeRange
         );
     }
   },
@@ -169,7 +174,8 @@ const twoMetricOneDateRule: VisualizationRule = {
     dateColumns,
     styleOptions,
     chartType = 'line',
-    axisColumnMappings
+    axisColumnMappings,
+    timeRange?: { from: string; to: string }
   ) => {
     // Select the appropriate chart creation function based on the chart type
     switch (chartType) {
@@ -179,7 +185,8 @@ const twoMetricOneDateRule: VisualizationRule = {
           numericalColumns,
           dateColumns,
           styleOptions as LineChartStyle,
-          axisColumnMappings
+          axisColumnMappings,
+          timeRange
         );
       default:
         return createLineBarChart(
@@ -187,7 +194,8 @@ const twoMetricOneDateRule: VisualizationRule = {
           numericalColumns,
           dateColumns,
           styleOptions as LineChartStyle,
-          axisColumnMappings
+          axisColumnMappings,
+          timeRange
         );
     }
   },
@@ -213,7 +221,8 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
     dateColumns,
     styleOptions,
     chartType = 'line',
-    axisColumnMappings
+    axisColumnMappings,
+    timeRange?: { from: string; to: string }
   ) => {
     // Select the appropriate chart creation function based on the chart type
     switch (chartType) {
@@ -224,7 +233,8 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
           categoricalColumns,
           dateColumns,
           styleOptions as LineChartStyle,
-          axisColumnMappings
+          axisColumnMappings,
+          timeRange
         );
       case 'area':
         return createMultiAreaChart(
@@ -233,7 +243,8 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
           categoricalColumns,
           dateColumns,
           styleOptions as AreaChartStyle,
-          axisColumnMappings
+          axisColumnMappings,
+          timeRange
         );
       case 'bar':
         return createGroupedTimeBarChart(
@@ -242,7 +253,8 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
           categoricalColumns,
           dateColumns,
           styleOptions as BarChartStyle,
-          axisColumnMappings
+          axisColumnMappings,
+          timeRange
         );
       case 'state_timeline':
         return createNumericalStateTimeline(
@@ -260,7 +272,8 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
           categoricalColumns,
           dateColumns,
           styleOptions as LineChartStyle,
-          axisColumnMappings
+          axisColumnMappings,
+          timeRange
         );
     }
   },
@@ -285,7 +298,8 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
     dateColumns,
     styleOptions,
     chartType = 'line',
-    axisColumnMappings
+    axisColumnMappings,
+    timeRange?: { from: string; to: string }
   ) => {
     // Select the appropriate chart creation function based on the chart type
     switch (chartType) {
@@ -296,7 +310,8 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
           categoricalColumns,
           dateColumns,
           styleOptions as LineChartStyle,
-          axisColumnMappings
+          axisColumnMappings,
+          timeRange
         );
       case 'area':
         return createFacetedMultiAreaChart(
@@ -305,7 +320,8 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
           categoricalColumns,
           dateColumns,
           styleOptions as AreaChartStyle,
-          axisColumnMappings
+          axisColumnMappings,
+          timeRange
         );
       case 'bar':
         return createFacetedTimeBarChart(
@@ -314,7 +330,8 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
           categoricalColumns,
           dateColumns,
           styleOptions as BarChartStyle,
-          axisColumnMappings
+          axisColumnMappings,
+          timeRange
         );
       default:
         return createFacetedMultiLineChart(
@@ -323,7 +340,8 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
           categoricalColumns,
           dateColumns,
           styleOptions as LineChartStyle,
-          axisColumnMappings
+          axisColumnMappings,
+          timeRange
         );
     }
   },

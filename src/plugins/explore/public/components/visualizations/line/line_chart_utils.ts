@@ -221,7 +221,12 @@ export const applyAxisStyling = (
 
     // Add time format for date schema
     if (dateColumns?.length && dateColumns[0]?.schema === VisFieldType.Date) {
-      axisConfig.format = { seconds: '%I:%M:%S', milliseconds: '%I:%M:%S.%L' };
+      axisConfig.format = {
+        hours: '%H:%M',
+        minutes: '%H:%M',
+        seconds: '%H:%M:%S',
+        milliseconds: '%H:%M:%S.%L',
+      };
     }
 
     return axisConfig;
