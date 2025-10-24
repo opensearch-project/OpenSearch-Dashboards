@@ -6,20 +6,22 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSwitch, EuiSpacer } from '@elastic/eui';
-import { GaugeChartStyle } from './gauge_vis_config';
-import { AxisRole } from '../types';
-import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { BarGaugeChartStyle, BarGaugeChartStyleOptions } from './bar_gauge_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
-import { StyleAccordion } from '../style_panel/style_accordion';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
-import { DebouncedFieldText } from '../style_panel/utils';
+import { TitleOptionsPanel } from '../style_panel/title/title';
+import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
+import { BarGaugeExclusiveVisOptions } from './bar_gauge_exclusive_vis_options';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
+import { StyleAccordion } from '../style_panel/style_accordion';
 import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
+import { AxisRole, VisFieldType } from '../types';
 
-export type GaugeVisStyleControlsProps = StyleControlsProps<GaugeChartStyle>;
+export type BarGaugeVisStyleControlsProps = StyleControlsProps<BarGaugeChartStyle>;
 
-export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
+export const BarGaugeVisStyleControls: React.FC<BarGaugeVisStyleControlsProps> = ({
   styleOptions,
   onStyleChange,
   numericalColumns = [],
@@ -30,27 +32,26 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof GaugeChartStyle>(
+  const updateStyleOption = <K extends keyof BarGaugeChartStyleOptions>(
     key: K,
-    value: GaugeChartStyle[K]
+    value: BarGaugeChartStyleOptions[K]
   ) => {
     onStyleChange({ [key]: value });
   };
 
-  // The mapping object will be an empty object if no fields are selected on the axes selector. No
-  // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
+  const isXaxisNumerical = axisColumnMappings[AxisRole.X]?.schema === VisFieldType.Numerical;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem>
         <AxesSelectPanel
           numericalColumns={numericalColumns}
           categoricalColumns={categoricalColumns}
           dateColumns={dateColumns}
           currentMapping={axisColumnMappings}
           updateVisualization={updateVisualization}
-          chartType="gauge"
+          chartType="bar_gauge"
         />
       </EuiFlexItem>
       {hasMappingSelected && (
@@ -75,13 +76,14 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
               </EuiFormRow>
             </StyleAccordion>
           </EuiFlexItem>
+
           <EuiFlexItem>
             <ThresholdPanel
               thresholdsOptions={styleOptions.thresholdOptions}
               onChange={(options) => updateStyleOption('thresholdOptions', options)}
+              showThresholdStyle={false}
             />
           </EuiFlexItem>
-
           <EuiFlexItem>
             <StandardOptionsPanel
               min={styleOptions.min}
@@ -93,51 +95,36 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
             />
           </EuiFlexItem>
 
+          <EuiFlexItem>
+            <BarGaugeExclusiveVisOptions
+              styles={styleOptions.exclusive}
+              onChange={(options) => updateStyleOption('exclusive', options)}
+              isXaxisNumerical={isXaxisNumerical}
+            />
+          </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
-            <StyleAccordion
-              id="gaugeSection"
-              accordionLabel={i18n.translate('explore.stylePanel.gauge', {
-                defaultMessage: 'Gauge',
-              })}
-              initialIsOpen={true}
-            >
-              <EuiFormRow>
-                <EuiSwitch
-                  compressed
-                  label={i18n.translate('explore.vis.gauge.useThresholdColor', {
-                    defaultMessage: 'Use threshold colors',
-                  })}
-                  data-test-subj="useThresholdColorButton"
-                  checked={styleOptions?.useThresholdColor ?? false}
-                  onChange={(e) => updateStyleOption('useThresholdColor', e.target.checked)}
-                />
-              </EuiFormRow>
+            <TitleOptionsPanel
+              titleOptions={styleOptions.titleOptions}
+              onShowTitleChange={(titleOptions) => {
+                updateStyleOption('titleOptions', {
+                  ...styleOptions.titleOptions,
+                  ...titleOptions,
+                });
+              }}
+            />
+          </EuiFlexItem>
 
-              <EuiSpacer size="s" />
-
-              <EuiFormRow>
-                <EuiSwitch
-                  compressed
-                  label={i18n.translate('explore.stylePanel.gauge.title', {
-                    defaultMessage: 'Show title',
-                  })}
-                  checked={styleOptions.showTitle}
-                  onChange={(e) => updateStyleOption('showTitle', e.target.checked)}
-                  data-test-subj="showTitleSwitch"
-                />
-              </EuiFormRow>
-              {styleOptions.showTitle && (
-                <EuiFormRow>
-                  <DebouncedFieldText
-                    value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
-                    placeholder={i18n.translate('explore.vis.gauge.title', {
-                      defaultMessage: 'Title',
-                    })}
-                    onChange={(text) => updateStyleOption('title', text)}
-                  />
-                </EuiFormRow>
-              )}
-            </StyleAccordion>
+          <EuiFlexItem grow={false}>
+            <TooltipOptionsPanel
+              tooltipOptions={styleOptions.tooltipOptions}
+              onTooltipOptionsChange={(tooltipOptions) =>
+                updateStyleOption('tooltipOptions', {
+                  ...styleOptions.tooltipOptions,
+                  ...tooltipOptions,
+                })
+              }
+            />
           </EuiFlexItem>
         </>
       )}
