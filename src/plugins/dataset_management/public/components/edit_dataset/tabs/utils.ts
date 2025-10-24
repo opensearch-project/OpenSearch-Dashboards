@@ -143,7 +143,7 @@ export function getTabs(
 }
 
 export function getPath(field: IndexPatternField, dataset: DataView) {
-  return `/patterns/${dataset?.id}/field/${field.name}`;
+  return `/patterns/${encodeURIComponent(dataset?.id || '')}/field/${field.name}`;
 }
 
 const allTypesDropDown = i18n.translate('datasetManagement.editDataset.fields.allTypesDropDown', {

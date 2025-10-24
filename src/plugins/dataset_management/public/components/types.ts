@@ -12,7 +12,11 @@ export interface DatasetCreationOption {
 export interface DatasetTableItem {
   id: string;
   title: string;
+  displayName?: string;
+  signalType?: string;
+  description?: string;
   default: boolean;
   tag?: string[];
   sort: string;
+  referenceId?: string;
 }

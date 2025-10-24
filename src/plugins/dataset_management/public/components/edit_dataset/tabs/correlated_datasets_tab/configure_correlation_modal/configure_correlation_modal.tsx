@@ -246,7 +246,7 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
             })}
           </EuiDescriptionListTitle>
           <EuiDescriptionListDescription data-test-subj="traceDatasetField">
-            {traceDataset.title}
+            {traceDataset.getDisplayName()}
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
 

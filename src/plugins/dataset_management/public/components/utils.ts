@@ -18,7 +18,7 @@ export async function getDatasets(
     savedObjectsClient
       .find<IDataView>({
         type: 'index-pattern',
-        fields: ['title', 'type'],
+        fields: ['title', 'type', 'displayName', 'signalType', 'description'],
         perPage: 10000,
       })
       .then((response) =>
@@ -26,6 +26,9 @@ export async function getDatasets(
           .map((pattern) => {
             const id = pattern.id;
             const title = pattern.get('title');
+            const displayName = pattern.get('displayName');
+            const signalType = pattern.get('signalType');
+            const description = pattern.get('description');
             const references = pattern.references;
             const isDefault = defaultIndex === id;
 
@@ -39,6 +42,9 @@ export async function getDatasets(
             return {
               id,
               title,
+              displayName,
+              signalType,
+              description,
               default: isDefault,
               tags,
               referenceId,

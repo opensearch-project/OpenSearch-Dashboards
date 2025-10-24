@@ -6,18 +6,18 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { DatasetTableV2 } from './dataset_table_v2';
-import { mockManagementPlugin } from '../../mocks';
-import { DuplicateDataViewError } from '../../../../data/public';
+import { mockManagementPlugin } from '../../../mocks';
+import { DuplicateDataViewError } from '../../../../../data/public';
 import { MemoryRouter } from 'react-router-dom';
-import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
-import { scopedHistoryMock } from '../../../../../core/public/mocks';
+import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
+import { scopedHistoryMock } from '../../../../../../core/public/mocks';
 
 // Mock i18n translate function
 jest.mock('@osd/i18n', () => ({
   ...jest.requireActual('@osd/i18n'),
   i18n: {
     translate: jest.fn(
-      (key: string, options: { defaultMessage: string }) => options.defaultMessage
+      (_key: string, options: { defaultMessage: string }) => options.defaultMessage
     ),
   },
 }));
@@ -26,11 +26,11 @@ const mockGetDatasets = jest.fn();
 const mockGetDatasetCreationOptions = jest.fn();
 const mockGetIndices = jest.fn();
 
-jest.mock('../utils', () => ({
+jest.mock('../../utils', () => ({
   getDatasets: () => mockGetDatasets(),
 }));
 
-jest.mock('../create_dataset_wizard/lib', () => ({
+jest.mock('../../create_dataset_wizard/lib', () => ({
   getIndices: (options: any) => mockGetIndices(options),
 }));
 
@@ -134,8 +134,8 @@ describe('DatasetTableV2', () => {
     renderComponent();
 
     await waitFor(() => {
-      expect(screen.getByText('Test Dataset 1')).toBeInTheDocument();
-      expect(screen.getByText('Test Dataset 2')).toBeInTheDocument();
+      expect(screen.getAllByText('Test Dataset 1').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Test Dataset 2').length).toBeGreaterThan(0);
     });
   });
 
@@ -321,8 +321,8 @@ describe('DatasetTableV2', () => {
       renderComponent();
 
       await waitFor(() => {
-        const datasetLink = screen.getByText('Test Dataset');
-        expect(datasetLink).toBeInTheDocument();
+        const datasetLinks = screen.getAllByText('Test Dataset');
+        expect(datasetLinks.length).toBeGreaterThan(0);
       });
     });
   });
