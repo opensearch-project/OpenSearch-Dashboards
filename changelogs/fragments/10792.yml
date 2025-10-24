@@ -1,2 +1,2 @@
 chore:
-- Test whitesource config ([#10792](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10792))
+- Configure whitesource remediate to auto create PRs for deps with known vulnerabilities ([#10792](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10792))
