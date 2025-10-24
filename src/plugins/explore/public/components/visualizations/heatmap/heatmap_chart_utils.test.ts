@@ -2,7 +2,13 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { createLabelLayer, getDataBound, addTransform, enhanceStyle } from './heatmap_chart_utils';
+import {
+  createLabelLayer,
+  getDataBound,
+  addTransform,
+  enhanceStyle,
+  generateSchemeList,
+} from './heatmap_chart_utils';
 import { AggregationType, VisFieldType, ColorSchemas, ScaleType, VisColumn } from '../types';
 import { DEFAULT_GREY } from '../theme/default_colors';
 import { defaultHeatmapChartStyles, HeatmapLabels, HeatmapChartStyle } from './heatmap_vis_config';
@@ -326,5 +332,27 @@ describe('enhanceStyle', () => {
     enhanceStyle(markLayer, ({} as unknown) as HeatmapChartStyle, transformedData, colorField);
 
     expect(markLayer).toEqual(baseMarkLayer);
+  });
+});
+
+describe('generateSchemeList', () => {
+  it('should generate default 11 colors with center color matching target', () => {
+    const result = generateSchemeList('#ff0000');
+    expect(result).toHaveLength(11);
+    expect(result[5]).toBe('#ff0000');
+  });
+
+  it('should create lighter colors on left side', () => {
+    const result = generateSchemeList('#808080');
+    expect(result[0]).toBe('#e4e4e4');
+    expect(result[1]).toBe('#d0d0d0');
+    expect(result[5]).toBe('#808080');
+  });
+
+  it('should create darker colors on right side', () => {
+    const result = generateSchemeList('#808080');
+    expect(result[5]).toBe('#808080');
+    expect(result[6]).toBe('#6c6c6c');
+    expect(result[7]).toBe('#585858');
   });
 });

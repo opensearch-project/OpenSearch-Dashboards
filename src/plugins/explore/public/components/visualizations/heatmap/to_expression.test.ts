@@ -11,6 +11,7 @@ jest.mock('./heatmap_chart_utils', () => ({
   enhanceStyle: jest.fn(),
   addTransform: jest.fn(() => []),
   createLabelLayer: jest.fn(() => null),
+  getScale: jest.fn(() => undefined),
 }));
 
 jest.mock('../utils/utils', () => ({

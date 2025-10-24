@@ -11,6 +11,9 @@ export const getColors = () => {
   // been implemented accordingly.
   const isExperimental =
     localStorage.getItem('__DEVELOPMENT__.discover.vis.theme') === 'experimental';
+
+  const euiPaletteColorBlindColors = euiPaletteColorBlind();
+
   if (isExperimental) {
     if (darkMode) {
       return {
@@ -69,7 +72,18 @@ export const getColors = () => {
     text: euiThemeVars.euiTextColor,
     grid: euiThemeVars.euiColorChartLines,
     backgroundShade: darkMode ? '#27252C' : '#f1f1f1ff',
-    categories: euiPaletteColorBlind(),
+    categories: [
+      euiPaletteColorBlindColors[1],
+      euiPaletteColorBlindColors[3],
+      euiPaletteColorBlindColors[9],
+      euiPaletteColorBlindColors[5],
+      euiPaletteColorBlindColors[1],
+      euiPaletteColorBlindColors[0],
+      euiPaletteColorBlindColors[2],
+      euiPaletteColorBlindColors[8],
+      euiPaletteColorBlindColors[0],
+      euiPaletteColorBlindColors[4],
+    ],
   };
 };
 

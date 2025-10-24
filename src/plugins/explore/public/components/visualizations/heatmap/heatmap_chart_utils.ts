@@ -4,7 +4,7 @@
  */
 
 import type { Encoding } from 'vega-lite/build/src/encoding';
-import { AggregationType, VisColumn } from '../types';
+import { AggregationType, VisColumn, ColorSchemas } from '../types';
 import { HeatmapChartStyle } from './heatmap_vis_config';
 
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
@@ -115,5 +115,77 @@ export const enhanceStyle = (
     markLayer.encoding.color.scale.domain = colorDomain;
     // require one more color for values below the first threshold(base)
     markLayer.encoding.color.scale.range = [DEFAULT_GREY, ...colorRange];
+  }
+};
+
+export function generateSchemeList(targetHex: string, n = 11, step = 20) {
+  function hexToRgb(hex: string) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) {
+      hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    }
+    return {
+      r: parseInt(hex.slice(0, 2), 16),
+      g: parseInt(hex.slice(2, 4), 16),
+      b: parseInt(hex.slice(4, 6), 16),
+    };
+  }
+
+  function rgbToHex({ r, g, b }: { r: number; g: number; b: number }) {
+    return (
+      '#' +
+      r.toString(16).padStart(2, '0') +
+      g.toString(16).padStart(2, '0') +
+      b.toString(16).padStart(2, '0')
+    );
+  }
+
+  const half = Math.floor(n / 2);
+  const target = hexToRgb(targetHex);
+  const colors = [];
+
+  // Left side (lighter)
+  for (let i = half; i > 0; i--) {
+    colors.push(
+      rgbToHex({
+        r: Math.min(255, target.r + i * step),
+        g: Math.min(255, target.g + i * step),
+        b: Math.min(255, target.b + i * step),
+      })
+    );
+  }
+
+  // Center
+  colors.push(rgbToHex(target));
+
+  // Right side (darker)
+  for (let i = 1; i <= half; i++) {
+    colors.push(
+      rgbToHex({
+        r: Math.max(0, target.r - i * step),
+        g: Math.max(0, target.g - i * step),
+        b: Math.max(0, target.b - i * step),
+      })
+    );
+  }
+  return colors;
+}
+
+export const getScale = (colorSchema: ColorSchemas) => {
+  switch (colorSchema) {
+    case ColorSchemas.BLUES:
+      return generateSchemeList(getColors().categories[0]);
+    case ColorSchemas.PURPLES:
+      return generateSchemeList(getColors().categories[1]);
+    case ColorSchemas.ORANGES:
+      return generateSchemeList(getColors().categories[2]);
+    case ColorSchemas.YELLOWS:
+      return generateSchemeList(getColors().categories[3]);
+    case ColorSchemas.GREENS:
+      return generateSchemeList(getColors().categories[5]);
+    case ColorSchemas.REDS:
+      return generateSchemeList(getColors().categories[6]);
+    default:
+      return undefined;
   }
 };
