@@ -10,7 +10,7 @@ import { OverlayStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { toMountPoint } from '../../../../../../opensearch_dashboards_react/public';
 import { DataPublicPluginStart, DuplicateDataViewError } from '../../../../../../data/public';
 import { AdvancedSelector } from '../../../../../../data/public';
-import { Query } from '../../../../../../data/common';
+import { DEFAULT_DATA, Query } from '../../../../../../data/common';
 import { IDataPluginServices } from '../../../../../../data/public';
 
 interface UseDatasetSelectorParams {
@@ -39,6 +39,7 @@ export const useDatasetSelector = ({
             alwaysShowDatasetFields
             signalType={signalType}
             services={services}
+            supportedTypes={[DEFAULT_DATA.SET_TYPES.INDEX]}
             onSelect={async (query: Partial<Query>) => {
               overlay?.close();
               if (query?.dataset) {
