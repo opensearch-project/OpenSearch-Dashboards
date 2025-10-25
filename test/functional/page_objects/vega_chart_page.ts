@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const compareSpecs = (first: string, second: string) => {
@@ -96,7 +96,7 @@ export function VegaChartPageProvider({
         await this.focusEditor();
         await browser.pressKeys(newSpec);
 
-        expect(compareSpecs(await this.getSpec(), newSpec)).to.be(true);
+        expect(compareSpecs(await this.getSpec(), newSpec)).toBe(true);
       });
     }
 
@@ -117,7 +117,7 @@ export function VegaChartPageProvider({
         await aceGutter.doubleClick();
         await browser.pressKeys(browser.keys.BACK_SPACE);
 
-        expect(await this.getSpec()).to.be('');
+        expect(await this.getSpec()).toBe('');
       });
     }
 

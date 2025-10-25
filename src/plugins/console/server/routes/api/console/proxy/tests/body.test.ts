@@ -31,8 +31,6 @@
 // @ts-expect-error TS6133 TODO(ts-error): fixme
 import { buildBufferedBodyMock, getProxyRouteHandlerDeps } from './mocks';
 
-import expect from '@osd/expect';
-
 import {
   IScopedClusterClient,
   opensearchDashboardsResponseFactory,
@@ -76,38 +74,38 @@ describe('Console Proxy Route', () => {
     describe('GET request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('GET', '/', 'foobar');
-        expect(payload).to.be('foobar');
+        expect(payload).toBe('foobar');
       });
     });
     describe('POST request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('POST', '/', 'foobar');
-        expect(payload).to.be('foobar');
+        expect(payload).toBe('foobar');
       });
     });
     describe('PUT request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('PUT', '/', 'foobar');
-        expect(payload).to.be('foobar');
+        expect(payload).toBe('foobar');
       });
     });
     describe('DELETE request', () => {
       it('returns the exact body', async () => {
         const { payload } = await request('DELETE', '/', 'foobar');
-        expect(payload).to.be('foobar');
+        expect(payload).toBe('foobar');
       });
     });
     describe('HEAD request', () => {
       it('returns the status code and text', async () => {
         const { payload } = await request('HEAD', '/', 'OK');
-        expect(typeof payload).to.be('string');
-        expect(payload).to.be('200 - OK');
+        expect(typeof payload).toBe('string');
+        expect(payload).toBe('200 - OK');
       });
       describe('mixed casing', () => {
         it('returns the status code and text', async () => {
           const { payload } = await request('HeAd', '/', 'OK');
-          expect(typeof payload).to.be('string');
-          expect(payload).to.be('200 - OK');
+          expect(typeof payload).toBe('string');
+          expect(payload).toBe('200 - OK');
         });
       });
     });

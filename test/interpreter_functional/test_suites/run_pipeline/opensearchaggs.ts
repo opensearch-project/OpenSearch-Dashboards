@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { ExpectExpression, expectExpressionProvider } from './helpers';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
@@ -65,7 +65,7 @@ export default function ({
           'opensearchaggs_primary_timefield',
           expression
         ).getResponse();
-        expect(getCell(result, 0, 0)).to.be(9375);
+        expect(getCell(result, 0, 0)).toBe(9375);
       });
 
       it('filters on the specified date field', async () => {
@@ -84,7 +84,7 @@ export default function ({
           'opensearchaggs_other_timefield',
           expression
         ).getResponse();
-        expect(getCell(result, 0, 0)).to.be(11134);
+        expect(getCell(result, 0, 0)).toBe(11134);
       });
 
       it('filters on multiple specified date field', async () => {
@@ -103,7 +103,7 @@ export default function ({
           'opensearchaggs_multiple_timefields',
           expression
         ).getResponse();
-        expect(getCell(result, 0, 0)).to.be(7452);
+        expect(getCell(result, 0, 0)).toBe(7452);
       });
     });
   });

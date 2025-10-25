@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect/expect.js';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function ErrorPageProvider({ getPageObjects }: FtrProviderContext) {
@@ -37,12 +37,12 @@ export function ErrorPageProvider({ getPageObjects }: FtrProviderContext) {
   class ErrorPage {
     public async expectForbidden() {
       const messageText = await common.getBodyText();
-      expect(messageText).to.contain('You do not have permission to access the requested page');
+      expect(messageText).toContain('You do not have permission to access the requested page');
     }
 
     public async expectNotFound() {
       const messageText = await common.getJsonBodyText();
-      expect(messageText).to.eql(
+      expect(messageText).toEqual(
         JSON.stringify({
           statusCode: 404,
           error: 'Not Found',

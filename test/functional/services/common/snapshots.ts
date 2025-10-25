@@ -32,7 +32,7 @@ import { dirname, resolve } from 'path';
 import { writeFile, readFileSync, mkdir } from 'fs';
 import { promisify } from 'util';
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import del from 'del';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -77,7 +77,7 @@ export async function SnapshotsProvider({ getService }: FtrProviderContext) {
     private compare(sessionPath: string, baselinePath: string) {
       const currentObject = readFileSync(sessionPath, { encoding: 'utf8' });
       const baselineObject = readFileSync(baselinePath, { encoding: 'utf8' });
-      expect(currentObject).to.eql(baselineObject);
+      expect(currentObject).toEqual(baselineObject);
       return 0;
     }
 

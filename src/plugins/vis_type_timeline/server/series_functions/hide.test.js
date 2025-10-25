@@ -31,7 +31,6 @@
 import fn from './hide';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('hide.js', () => {
@@ -42,13 +41,13 @@ describe('hide.js', () => {
 
   it('hides a series', () => {
     return invoke(fn, [seriesList, true]).then((r) => {
-      _.each(r.output.list, (series) => expect(series._hide).to.equal(true));
+      _.each(r.output.list, (series) => expect(series._hide).toEqual(true));
     });
   });
 
   it('unhides a series', () => {
     return invoke(fn, [seriesList, false]).then((r) => {
-      _.each(r.output.list, (series) => expect(series._hide).to.equal(false));
+      _.each(r.output.list, (series) => expect(series._hide).toEqual(false));
     });
   });
 });

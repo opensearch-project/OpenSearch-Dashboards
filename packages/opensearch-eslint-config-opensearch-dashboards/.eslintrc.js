@@ -42,10 +42,6 @@ module.exports = {
       'error',
       [
         {
-          from: 'expect.js',
-          to: '@osd/expect',
-        },
-        {
           from: 'mkdirp',
           to: false,
           disallowedMessage: `Don't use 'mkdirp', use the new { recursive: true } option of Fs.mkdir instead`

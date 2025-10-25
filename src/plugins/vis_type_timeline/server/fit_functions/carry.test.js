@@ -30,7 +30,6 @@
 
 import fn from './carry';
 import moment from 'moment';
-const expect = require('chai').expect;
 import _ from 'lodash';
 
 describe('carry.js', function () {
@@ -49,7 +48,7 @@ describe('carry.js', function () {
       [moment.utc('1984', 'YYYY').valueOf(), null],
     ];
 
-    expect(_.map(fn(data, target), 1)).to.eql([10, 10, 10, 40, 50]);
+    expect(_.map(fn(data, target), 1)).toEqual([10, 10, 10, 40, 50]);
   });
 
   describe('sampling', function () {
@@ -68,7 +67,7 @@ describe('carry.js', function () {
         [moment.utc('1985', 'YYYY').valueOf(), null],
       ];
 
-      expect(_.map(fn(data, target), 1)).to.eql([10, 10, 30, 30, 70]);
+      expect(_.map(fn(data, target), 1)).toEqual([10, 10, 30, 30, 70]);
     });
 
     it('down does not make sense', function () {
@@ -93,7 +92,7 @@ describe('carry.js', function () {
         fn(data, target);
         expect.fail('Success. Doh.');
       } catch (e) {
-        expect(e).to.be.an('error');
+        expect(e).toBeInstanceOf(Error);
       }
     });
   });

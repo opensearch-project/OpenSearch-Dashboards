@@ -31,7 +31,6 @@
 import fn from './derivative';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('derivative.js', () => {
@@ -42,7 +41,7 @@ describe('derivative.js', () => {
 
   it('gets the change in the set', () => {
     return invoke(fn, [seriesList]).then((r) => {
-      expect(_.map(r.output.list[1].data, 1)).to.eql([null, -50, 0, -30]);
+      expect(_.map(r.output.list[1].data, 1)).toEqual([null, -50, 0, -30]);
     });
   });
 });

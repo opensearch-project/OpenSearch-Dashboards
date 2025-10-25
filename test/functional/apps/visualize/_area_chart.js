@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -65,10 +65,10 @@ export default function ({ getService, getPageObjects }) {
       log.debug('Check field value');
       const fieldValues = await PageObjects.visEditor.getField();
       log.debug('fieldValue = ' + fieldValues);
-      expect(fieldValues[0]).to.be('@timestamp');
+      expect(fieldValues[0]).toBe('@timestamp');
       const intervalValue = await PageObjects.visEditor.getInterval();
       log.debug('intervalValue = ' + intervalValue);
-      expect(intervalValue[0]).to.be('Auto');
+      expect(intervalValue[0]).toBe('Auto');
       return PageObjects.visEditor.clickGo();
     };
 
@@ -147,15 +147,15 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async function tryingForTime() {
         const labels = await PageObjects.visChart.getXAxisLabels();
         log.debug('X-Axis labels = ' + labels);
-        expect(labels).to.eql(xAxisLabels);
+        expect(labels).toEqual(xAxisLabels);
       });
       const labels = await PageObjects.visChart.getYAxisLabels();
       log.debug('Y-Axis labels = ' + labels);
-      expect(labels).to.eql(yAxisLabels);
+      expect(labels).toEqual(yAxisLabels);
       const paths = await PageObjects.visChart.getAreaChartData('Count');
       log.debug('expectedAreaChartData = ' + expectedAreaChartData);
       log.debug('actual chart data =     ' + paths);
-      expect(paths).to.eql(expectedAreaChartData);
+      expect(paths).toEqual(expectedAreaChartData);
     });
 
     it('should show correct data', async function () {
@@ -299,7 +299,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.navigateToUrl('visualize', embedUrl, { useActualUrl: true });
         await PageObjects.header.waitUntilLoadingHasFinished();
         const sideEditorExists = await PageObjects.visualize.getSideEditorExists();
-        expect(sideEditorExists).to.be(false);
+        expect(sideEditorExists).toBe(false);
       });
 
       after(async () => {
@@ -323,9 +323,9 @@ export default function ({ getService, getPageObjects }) {
         const minLabel = 2;
         const maxLabel = 5000;
         const numberOfLabels = 10;
-        expect(labels.length).to.be.greaterThan(numberOfLabels);
-        expect(labels[0]).to.eql(minLabel);
-        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
+        expect(labels.length).toBeGreaterThan(numberOfLabels);
+        expect(labels[0]).toEqual(minLabel);
+        expect(labels[labels.length - 1]).toBeGreaterThan(maxLabel);
       });
 
       it('should show filtered ticks on selecting log scale', async () => {
@@ -335,9 +335,9 @@ export default function ({ getService, getPageObjects }) {
         const minLabel = 2;
         const maxLabel = 5000;
         const numberOfLabels = 10;
-        expect(labels.length).to.be.greaterThan(numberOfLabels);
-        expect(labels[0]).to.eql(minLabel);
-        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
+        expect(labels.length).toBeGreaterThan(numberOfLabels);
+        expect(labels[0]).toEqual(minLabel);
+        expect(labels[labels.length - 1]).toBeGreaterThan(maxLabel);
       });
 
       it('should show ticks on selecting square root scale', async () => {
@@ -356,7 +356,7 @@ export default function ({ getService, getPageObjects }) {
           '1,400',
           '1,600',
         ];
-        expect(labels).to.eql(expectedLabels);
+        expect(labels).toEqual(expectedLabels);
       });
 
       it('should show filtered ticks on selecting square root scale', async () => {
@@ -364,7 +364,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = ['200', '400', '600', '800', '1,000', '1,200', '1,400'];
-        expect(labels).to.eql(expectedLabels);
+        expect(labels).toEqual(expectedLabels);
       });
 
       it('should show ticks on selecting linear scale', async () => {
@@ -384,7 +384,7 @@ export default function ({ getService, getPageObjects }) {
           '1,400',
           '1,600',
         ];
-        expect(labels).to.eql(expectedLabels);
+        expect(labels).toEqual(expectedLabels);
       });
 
       it('should show filtered ticks on selecting linear scale', async () => {
@@ -392,7 +392,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickGo();
         const labels = await PageObjects.visChart.getYAxisLabels();
         const expectedLabels = ['200', '400', '600', '800', '1,000', '1,200', '1,400'];
-        expect(labels).to.eql(expectedLabels);
+        expect(labels).toEqual(expectedLabels);
       });
     });
     describe('date histogram with long time range', () => {
@@ -420,7 +420,7 @@ export default function ({ getService, getPageObjects }) {
         const paths = await PageObjects.visChart.getAreaChartPaths('Count');
         log.debug('actual chart data =     ' + paths);
         const numberOfSegments = 7 * 2;
-        expect(paths.length).to.eql(numberOfSegments);
+        expect(paths.length).toEqual(numberOfSegments);
       });
       it('should render monthly areas with 168 svg paths', async () => {
         log.debug('navigateToApp visualize');
@@ -443,7 +443,7 @@ export default function ({ getService, getPageObjects }) {
         const numberOfSegments = 67 * 2;
         const paths = await PageObjects.visChart.getAreaChartPaths('Count');
         log.debug('actual chart data =     ' + paths);
-        expect(paths.length).to.eql(numberOfSegments);
+        expect(paths.length).toEqual(numberOfSegments);
       });
     });
 
@@ -463,7 +463,7 @@ export default function ({ getService, getPageObjects }) {
           '[data-test-subj="visDefaultEditorField"] + .euiFormErrorText'
         );
         const errorMessage = await fieldErrorMessage.getVisibleText();
-        expect(errorMessage).to.be(
+        expect(errorMessage).toBe(
           'The index pattern test_index* does not contain any of the following compatible field types: date'
         );
       });
@@ -482,11 +482,11 @@ export default function ({ getService, getPageObjects }) {
 
       it('should not show error message on init when the field is not selected', async () => {
         const fieldValues = await PageObjects.visEditor.getField();
-        expect(fieldValues[0]).to.be(undefined);
+        expect(fieldValues[0]).toBe(undefined);
         const isFieldErrorMessageExists = await find.existsByCssSelector(
           '[data-test-subj="visDefaultEditorField"] + .euiFormErrorText'
         );
-        expect(isFieldErrorMessageExists).to.be(false);
+        expect(isFieldErrorMessageExists).toBe(false);
       });
 
       describe('interval errors', () => {
@@ -500,7 +500,7 @@ export default function ({ getService, getPageObjects }) {
         it('should not fail during changing interval when the field is not selected', async () => {
           await PageObjects.visEditor.setInterval('m');
           const intervalValues = await PageObjects.visEditor.getInterval();
-          expect(intervalValues[0]).to.be('Millisecond');
+          expect(intervalValues[0]).toBe('Millisecond');
         });
 
         it('should not fail during changing custom interval when the field is not selected', async () => {
@@ -508,7 +508,7 @@ export default function ({ getService, getPageObjects }) {
           const isInvalidIntervalExists = await find.existsByCssSelector(
             '.euiComboBox-isInvalid[data-test-subj="visEditorInterval"]'
           );
-          expect(isInvalidIntervalExists).to.be(false);
+          expect(isInvalidIntervalExists).toBe(false);
         });
 
         it('should show error when interval invalid', async () => {
@@ -516,7 +516,7 @@ export default function ({ getService, getPageObjects }) {
           const isIntervalErrorMessageExists = await find.existsByCssSelector(
             '[data-test-subj="visEditorInterval"] + .euiFormErrorText'
           );
-          expect(isIntervalErrorMessageExists).to.be(true);
+          expect(isIntervalErrorMessageExists).toBe(true);
         });
 
         it('should show error when calendar interval invalid', async () => {
@@ -526,12 +526,12 @@ export default function ({ getService, getPageObjects }) {
 
           let intervalErrorMessage = await find.byCssSelector(intervalErrorMessageSelector);
           let errorMessage = await intervalErrorMessage.getVisibleText();
-          expect(errorMessage).to.be('Invalid calendar interval: 2w, value must be 1');
+          expect(errorMessage).toBe('Invalid calendar interval: 2w, value must be 1');
 
           await PageObjects.visEditor.setInterval('3w', { type: 'custom' });
           intervalErrorMessage = await find.byCssSelector(intervalErrorMessageSelector);
           errorMessage = await intervalErrorMessage.getVisibleText();
-          expect(errorMessage).to.be('Invalid calendar interval: 3w, value must be 1');
+          expect(errorMessage).toBe('Invalid calendar interval: 3w, value must be 1');
         });
       });
     });
@@ -553,12 +553,12 @@ export default function ({ getService, getPageObjects }) {
           '[data-test-subj="visEditorAggAccordion2"] .visEditorSidebar__aggGroupAccordionButtonContent'
         );
         let accordionLabelText = await accordionLabel.getVisibleText();
-        expect(accordionLabelText).to.include.string('per 30 minutes');
+        expect(accordionLabelText).toContain('per 30 minutes');
         const fromTime = 'Sep 20, 2015 @ 08:30:00.000';
         const toTime = 'Sep 20, 2015 @ 23:30:00.000';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
         accordionLabelText = await accordionLabel.getVisibleText();
-        expect(accordionLabelText).to.include.string('per 10 minutes');
+        expect(accordionLabelText).toContain('per 10 minutes');
       });
 
       describe('expanded accordion', () => {
@@ -568,10 +568,10 @@ export default function ({ getService, getPageObjects }) {
           const isHelperScaledLabelExists = await find.existsByCssSelector(
             '[data-test-subj="currentlyScaledText"]'
           );
-          expect(isHelperScaledLabelExists).to.be(false);
+          expect(isHelperScaledLabelExists).toBe(false);
           await PageObjects.visEditor.setInterval('Millisecond');
           const helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
-          expect(helperScaledLabelText).to.include.string('to 10 minutes');
+          expect(helperScaledLabelText).toContain('to 10 minutes');
         });
 
         it('should display updated scaled label text after time range is changed', async () => {
@@ -583,14 +583,14 @@ export default function ({ getService, getPageObjects }) {
           const isHelperScaledLabelExists = await find.existsByCssSelector(
             '[data-test-subj="currentlyScaledText"]'
           );
-          expect(isHelperScaledLabelExists).to.be(true);
+          expect(isHelperScaledLabelExists).toBe(true);
           let helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
-          expect(helperScaledLabelText).to.include.string('to 10 minutes');
+          expect(helperScaledLabelText).toContain('to 10 minutes');
           const fromTime = 'Sep 20, 2015 @ 22:30:00.000';
           const toTime = 'Sep 20, 2015 @ 23:30:00.000';
           await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
           helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
-          expect(helperScaledLabelText).to.include.string('to 30 seconds');
+          expect(helperScaledLabelText).toContain('to 30 seconds');
         });
 
         it('should update scaled label text after custom interval is set and time range is changed', async () => {
@@ -599,14 +599,14 @@ export default function ({ getService, getPageObjects }) {
           const isHelperScaledLabelExists = await find.existsByCssSelector(
             '[data-test-subj="currentlyScaledText"]'
           );
-          expect(isHelperScaledLabelExists).to.be(true);
+          expect(isHelperScaledLabelExists).toBe(true);
           let helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
-          expect(helperScaledLabelText).to.include.string('to 10 minutes');
+          expect(helperScaledLabelText).toContain('to 10 minutes');
           const fromTime = 'Sep 20, 2015 @ 21:30:00.000';
           const toTime = 'Sep 20, 2015 @ 23:30:00.000';
           await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
           helperScaledLabelText = await testSubjects.getVisibleText('currentlyScaledText');
-          expect(helperScaledLabelText).to.include.string('to minute');
+          expect(helperScaledLabelText).toContain('to minute');
         });
       });
     });

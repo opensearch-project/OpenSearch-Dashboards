@@ -107,19 +107,7 @@ module.exports = function () {
     //    runs all node.js/server mocha tests
     mocha: {
       cmd: NODE,
-      args: ['scripts/mocha'],
-    },
-
-    // used by the test:mochaCoverage task
-    mochaCoverage: {
-      cmd: YARN,
-      args: [
-        'nyc',
-        '--reporter=html',
-        '--report-dir=./target/opensearch-dashboards-coverage/mocha',
-        NODE,
-        'scripts/mocha',
-      ],
+      args: ['scripts/jest', 'src/dev/mocha'],
     },
 
     verifyNotice: {

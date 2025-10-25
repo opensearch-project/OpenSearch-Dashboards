@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const opensearchArchiver = getService('opensearchArchiver');
@@ -45,9 +45,9 @@ export default function ({ getService }) {
         .send({ url: '/app/visualize#/create' })
         .expect(200);
 
-      expect(resp.body).to.have.property('urlId');
-      expect(typeof resp.body.urlId).to.be('string');
-      expect(resp.body.urlId.length > 0).to.be(true);
+      expect(resp.body).toHaveProperty('urlId');
+      expect(typeof resp.body.urlId).toBe('string');
+      expect(resp.body.urlId.length > 0).toBe(true);
     });
 
     it('redirects shortened urls', async () => {

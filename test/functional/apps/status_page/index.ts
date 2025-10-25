@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -44,23 +44,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show the build hash and number', async () => {
       const buildNumberText = await testSubjects.getVisibleText('statusBuildNumber');
-      expect(buildNumberText).to.contain('BUILD ');
+      expect(buildNumberText).toContain('BUILD ');
 
       const hashText = await testSubjects.getVisibleText('statusBuildHash');
-      expect(hashText).to.contain('COMMIT ');
+      expect(hashText).toContain('COMMIT ');
     });
 
     it('should display the server metrics', async () => {
       const metrics = await testSubjects.findAll('serverMetric');
-      expect(metrics).to.have.length(6);
+      expect(metrics).toHaveLength(6);
     });
 
     it('should display the server status', async () => {
       const titleText = await testSubjects.getVisibleText('serverStatusTitle');
-      expect(titleText).to.contain('OpenSearch Dashboards status is');
+      expect(titleText).toContain('OpenSearch Dashboards status is');
 
       const serverStatus = await testSubjects.getAttribute('serverStatusTitleBadge', 'aria-label');
-      expect(serverStatus).to.be('Green');
+      expect(serverStatus).toBe('Green');
     });
   });
 }

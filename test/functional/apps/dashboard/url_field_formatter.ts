@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -51,11 +51,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const fieldValue = await fieldLink.getVisibleText();
     await fieldLink.click();
     const windowHandlers = await browser.getAllWindowHandles();
-    expect(windowHandlers.length).to.equal(2);
+    expect(windowHandlers.length).toEqual(2);
     await browser.switchToWindow(windowHandlers[1]);
     const currentUrl = await browser.getCurrentUrl();
     const fieldUrl = deployment.getHostPort() + '/app/' + fieldValue;
-    expect(currentUrl).to.equal(fieldUrl);
+    expect(currentUrl).toEqual(fieldUrl);
   };
 
   // FLAKY: https://github.com/elastic/kibana/issues/79463

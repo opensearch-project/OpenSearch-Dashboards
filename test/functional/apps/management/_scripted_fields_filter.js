@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
@@ -79,16 +79,16 @@ export default function ({ getService, getPageObjects }) {
       // confirm two additional scripted fields were created
       await retry.try(async function () {
         const scriptedFieldLangs = await PageObjects.settings.getScriptedFieldLangs();
-        expect(scriptedFieldLangs.length).to.be(scriptedFieldLangsBefore.length + 1);
+        expect(scriptedFieldLangs.length).toBe(scriptedFieldLangsBefore.length + 1);
       });
 
       await PageObjects.settings.setScriptedFieldLanguageFilter('painless');
 
       await retry.try(async function () {
         const scriptedFieldLangs = await PageObjects.settings.getScriptedFieldLangs();
-        expect(scriptedFieldLangs.length).to.be.above(0);
+        expect(scriptedFieldLangs.length).toBeGreaterThan(0);
         for (const lang of scriptedFieldLangs) {
-          expect(lang).to.be('painless');
+          expect(lang).toBe('painless');
         }
       });
 
@@ -96,9 +96,9 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.try(async function () {
         const scriptedFieldLangs = await PageObjects.settings.getScriptedFieldLangs();
-        expect(scriptedFieldLangs.length).to.be.above(0);
+        expect(scriptedFieldLangs.length).toBeGreaterThan(0);
         for (const lang of scriptedFieldLangs) {
-          expect(lang).to.be('expression');
+          expect(lang).toBe('expression');
         }
       });
     });

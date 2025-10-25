@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -39,7 +39,7 @@ export default function ({ getService }) {
         .get('/api/opensearch-dashboards/scripts/languages')
         .expect(200)
         .then((response) => {
-          expect(response.body).to.be.an('array');
+          expect(Array.isArray(response.body)).toBe(true);
         }));
 
     // eslint-disable-next-line jest/no-disabled-tests
@@ -48,9 +48,9 @@ export default function ({ getService }) {
         .get('/api/opensearch-dashboards/scripts/languages')
         .expect(200)
         .then((response) => {
-          expect(response.body).to.contain('expression');
-          expect(response.body).to.contain('painless');
-          expect(response.body).to.not.contain('groovy');
+          expect(response.body).toContain('expression');
+          expect(response.body).toContain('painless');
+          expect(response.body).not.toContain('groovy');
         }));
   });
 }

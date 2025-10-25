@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SavedQueryManagementComponentProvider({
@@ -77,7 +77,7 @@ export function SavedQueryManagementComponentProvider({
       );
 
       try {
-        expect(saveQueryFormSaveButtonStatus).to.not.eql(true);
+        expect(saveQueryFormSaveButtonStatus).not.toEqual(true);
       } finally {
         await testSubjects.click('savedQueryFormCancelButton');
       }
@@ -112,7 +112,7 @@ export function SavedQueryManagementComponentProvider({
         const selectedSavedQueryText = await testSubjects.getVisibleText(
           '~saved-query-list-item-selected'
         );
-        expect(selectedSavedQueryText).to.eql(title);
+        expect(selectedSavedQueryText).toEqual(title);
       });
       await this.closeSavedQueryManagementComponent();
     }
@@ -128,7 +128,7 @@ export function SavedQueryManagementComponentProvider({
       await testSubjects.click('saved-query-management-clear-button');
       await this.closeSavedQueryManagementComponent();
       const queryString = await queryBar.getQueryString();
-      expect(queryString).to.be.empty();
+      expect(queryString).toBe('');
     }
 
     async submitSaveQueryForm(
@@ -169,7 +169,7 @@ export function SavedQueryManagementComponentProvider({
     async savedQueryTextExist(text: string) {
       await this.openSavedQueryManagementComponent();
       const queryString = await queryBar.getQueryString();
-      expect(queryString).to.eql(text);
+      expect(queryString).toEqual(text);
     }
 
     async savedQueryMissingOrFail(title: string) {
