@@ -35,6 +35,7 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     return {
       id: pattern.id,
       title: pattern.title,
+      displayName: pattern.displayName, // Preserve displayName from DataStructure
       type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       timeFieldName: patternMeta?.timeFieldName,
       isRemoteDataset: pattern?.title?.includes(':') ?? false,
@@ -99,9 +100,9 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
 const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
   const resp = await client.find<IIndexPattern>({
     type: 'index-pattern',
-    fields: ['title', 'timeFieldName', 'references'],
+    fields: ['title', 'displayName', 'timeFieldName', 'references'],
     search: `*`,
-    searchFields: ['title'],
+    searchFields: ['title', 'displayName'],
     perPage: 100,
   });
 
@@ -133,7 +134,8 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
 
       const indexPatternDataStructure: DataStructure = {
         id: savedObject.id,
-        title: savedObject.attributes.title,
+        title: savedObject.attributes.title, // Keep title as the technical pattern
+        displayName: savedObject.attributes.displayName, // Add displayName separately
         type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
         meta: {
           type: DATA_STRUCTURE_META_TYPES.CUSTOM,
