@@ -3,82 +3,74 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { ThresholdCustomValues } from './threshold_custom_values';
-import { Threshold } from '../../types';
+import { Threshold, ThresholdMode, ThresholdOptions } from '../../types';
 import { StyleAccordion } from '../style_accordion';
-import { DebouncedFieldNumber } from '../utils';
+import { getThresholdOptions } from '../../utils/collections';
+import { getColors } from '../../theme/default_colors';
 
 export interface ThresholdPanelProps {
-  thresholds: Threshold[];
-  onThresholdValuesChange: (thresholds: Threshold[]) => void;
-  baseColor: string;
-  onBaseColorChange: (baseColor: string) => void;
-  min?: number;
-  max?: number;
-  onMinChange: (min: number | undefined) => void;
-  onMaxChange: (max: number | undefined) => void;
+  thresholdsOptions?: ThresholdOptions;
+  onChange: (thresholds: ThresholdOptions) => void;
+  showThresholdStyle?: boolean;
 }
+
 export const ThresholdPanel = ({
-  thresholds,
-  baseColor,
-  min,
-  max,
-  onThresholdValuesChange,
-  onBaseColorChange,
-  onMaxChange,
-  onMinChange,
+  thresholdsOptions,
+  onChange,
+  showThresholdStyle = false,
 }: ThresholdPanelProps) => {
+  const updateThresholdOption = <K extends keyof ThresholdOptions>(
+    key: K,
+    value: ThresholdOptions[K]
+  ) => {
+    onChange({
+      ...thresholdsOptions,
+      [key]: value,
+    });
+  };
+
+  const options = useMemo(() => getThresholdOptions(), []);
   return (
     <StyleAccordion
       id="thresholdSection"
-      accordionLabel={i18n.translate('explore.stylePanel.threshold', {
-        defaultMessage: 'Threshold',
+      accordionLabel={i18n.translate('explore.stylePanel.threshold.title', {
+        defaultMessage: 'Thresholds',
       })}
       initialIsOpen={true}
     >
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.threshold.base.min', {
-          defaultMessage: 'Min',
-        })}
-        helpText={i18n.translate('explore.stylePanel.threshold.base.min.help', {
-          defaultMessage: 'Leave empty to calculate based on all values',
-        })}
-      >
-        <DebouncedFieldNumber
-          data-test-subj="thresholdMinBase"
-          value={min}
-          onChange={(value) => onMinChange(value)}
-          placeholder="auto"
-        />
-      </EuiFormRow>
-
-      <EuiFormRow
-        label={i18n.translate('explore.stylePanel.threshold.base.max', {
-          defaultMessage: 'Max',
-        })}
-        helpText={i18n.translate('explore.stylePanel.threshold.base.max.help', {
-          defaultMessage: 'Leave empty to calculate based on all values',
-        })}
-      >
-        <DebouncedFieldNumber
-          data-test-subj="thresholdMaxBase"
-          value={max}
-          onChange={(value) => onMaxChange(value)}
-          placeholder="auto"
-        />
-      </EuiFormRow>
-
       <ThresholdCustomValues
-        thresholds={thresholds}
-        onThresholdValuesChange={(ranges: Threshold[]) => {
-          onThresholdValuesChange(ranges);
-        }}
-        baseColor={baseColor}
-        onBaseColorChange={(color: string) => onBaseColorChange(color)}
+        thresholds={thresholdsOptions?.thresholds || []}
+        onThresholdValuesChange={(ranges: Threshold[]) =>
+          updateThresholdOption('thresholds', ranges)
+        }
+        baseColor={thresholdsOptions?.baseColor || getColors().statusGreen}
+        onBaseColorChange={(color: string) => updateThresholdOption('baseColor', color)}
       />
+
+      {showThresholdStyle && (
+        <>
+          <EuiSpacer />
+          <EuiFormRow
+            label={i18n.translate('explore.stylePanel.threshold.thresholdMode', {
+              defaultMessage: 'Threshold mode',
+            })}
+          >
+            <EuiSelect
+              data-test-subj="thresholdModeSelect"
+              compressed={true}
+              options={options}
+              value={thresholdsOptions?.thresholdStyle || ThresholdMode.Off}
+              onChange={(e) =>
+                updateThresholdOption('thresholdStyle', e.target.value as ThresholdMode)
+              }
+            />
+          </EuiFormRow>
+        </>
+      )}
     </StyleAccordion>
   );
 };

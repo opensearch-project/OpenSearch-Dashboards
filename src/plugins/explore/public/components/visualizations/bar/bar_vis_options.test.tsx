@@ -81,12 +81,14 @@ jest.mock('../style_panel/axes/axes_selector', () => ({
   ),
 }));
 
-jest.mock('../style_panel/threshold_lines/threshold', () => ({
-  ThresholdOptions: jest.fn(({ thresholdLines, onThresholdLinesChange }) => (
+jest.mock('../style_panel/threshold/threshold_panel', () => ({
+  ThresholdPanel: jest.fn(({ thresholdsOptions, onChange }) => (
     <div data-test-subj="mockThresholdOptions">
       <button
         data-test-subj="mockUpdateThreshold"
-        onClick={() => onThresholdLinesChange([...thresholdLines, { id: '2', show: true }])}
+        onClick={() =>
+          onChange({ ...thresholdsOptions, thresholds: [{ value: 50, color: '#FF0000' }] })
+        }
       >
         Update Threshold
       </button>
@@ -115,6 +117,11 @@ jest.mock('../style_panel/legend/legend', () => ({
       >
         Change Both
       </button>
+      <input
+        data-test-subj="mockLegendTitle"
+        placeholder="Legend Title"
+        onChange={(e) => onLegendOptionsChange({ title: e.target.value })}
+      />
     </div>
   )),
 }));
@@ -320,6 +327,14 @@ describe('BarVisStyleControls', () => {
       ...defaultProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
+        [AxisRole.COLOR]: {
+          id: 5,
+          name: 'Color Category',
+          schema: VisFieldType.Categorical,
+          column: 'color',
+          validValuesCount: 10,
+          uniqueValuesCount: 5,
+        },
         [AxisRole.FACET]: {
           id: 6,
           name: 'Facet Category',
@@ -368,6 +383,11 @@ describe('BarVisStyleControls', () => {
     await userEvent.click(screen.getByTestId('mockLegendPosition'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: 'bottom' });
 
+    await userEvent.type(screen.getByTestId('mockLegendTitle'), 'New Legend Title');
+    await waitFor(() => {
+      expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendTitle: 'New Legend Title' });
+    });
+
     jest.clearAllMocks();
     await userEvent.click(screen.getByTestId('mockLegendBoth'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
@@ -383,7 +403,10 @@ describe('BarVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('mockUpdateThreshold'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      thresholdLines: [...defaultProps.styleOptions.thresholdLines, { id: '2', show: true }],
+      thresholdOptions: {
+        ...defaultProps.styleOptions.thresholdOptions,
+        thresholds: [{ color: '#FF0000', value: 50 }],
+      },
     });
   });
 

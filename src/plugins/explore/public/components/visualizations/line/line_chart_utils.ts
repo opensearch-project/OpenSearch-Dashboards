@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LineChartStyleControls } from './line_vis_config';
+import { LineChartStyle } from './line_vis_config';
 import { VisColumn, Positions, VisFieldType } from '../types';
 import { DEFAULT_OPACITY } from '../constants';
+import { AreaChartStyle } from '../area/area_vis_config';
 
 /**
  * Get Vega interpolation from UI lineMode
@@ -59,13 +60,10 @@ type VegaLiteMarkConfig =
  * TODO: refactor this to create chart type specific mark builder instead of having one builder for all
  */
 export const buildMarkConfig = (
-  styles: Partial<LineChartStyleControls> | undefined,
+  styles: LineChartStyle | AreaChartStyle | undefined,
   markType: 'line' | 'bar' | 'area' = 'line'
 ): VegaLiteMarkConfig => {
   // Default values - handle undefined styles object
-  const lineStyle = styles?.lineStyle ?? 'both';
-  const lineWidth = styles?.lineWidth ?? 2;
-  const lineMode = styles?.lineMode ?? 'smooth';
   const showTooltip = styles?.tooltipOptions?.mode !== 'hidden';
 
   if (markType === 'bar') {
@@ -81,11 +79,14 @@ export const buildMarkConfig = (
       type: 'area',
       opacity: DEFAULT_OPACITY,
       tooltip: showTooltip,
-      strokeWidth: lineWidth,
-      interpolate: getVegaInterpolation(lineMode),
+      strokeWidth: 2,
+      interpolate: getVegaInterpolation('smooth'),
     };
   }
 
+  const lineStyle = (styles as LineChartStyle | undefined)?.lineStyle ?? 'both';
+  const lineWidth = (styles as LineChartStyle | undefined)?.lineWidth ?? 2;
+  const lineMode = (styles as LineChartStyle | undefined)?.lineMode ?? 'smooth';
   // For line charts - use lineStyle to determine the visualization
   switch (lineStyle) {
     case 'dots':
@@ -129,7 +130,7 @@ export const buildMarkConfig = (
  * @param styles The style options
  * @returns The time marker layer configuration or null if disabled
  */
-export const createTimeMarkerLayer = (styles: Partial<LineChartStyleControls> | undefined): any => {
+export const createTimeMarkerLayer = (styles: LineChartStyle | AreaChartStyle | undefined): any => {
   if (!styles?.addTimeMarker) {
     return null;
   }
@@ -178,7 +179,7 @@ export enum ValueAxisPosition {
 // TODO move applyAxisStyling out line folder as it is also used in area
 export const applyAxisStyling = (
   baseAxis: any,
-  styles: Partial<LineChartStyleControls>,
+  styles: LineChartStyle | AreaChartStyle,
   axisType: 'category' | 'value',
   numericalColumns?: VisColumn[],
   categoricalColumns?: VisColumn[],

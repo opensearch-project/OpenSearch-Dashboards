@@ -22,8 +22,10 @@ export const runBuildVisTests = () => {
 
     const selectFieldFromComboBox = (labelText, index, fieldName) => {
       cy.get('.euiFormLabel').contains(labelText).should('be.visible');
-      cy.get('[data-test-subj="comboBoxInput"]').eq(index).click();
-      cy.get('.euiFilterSelectItem').contains(fieldName).click();
+      cy.get('#axesSelector').within(() => {
+        cy.get('[data-test-subj="comboBoxInput"]').eq(index).click();
+      });
+      cy.get('div[role="listBox"]').contains(fieldName).click();
       cy.wait(500);
     };
 
@@ -34,7 +36,7 @@ export const runBuildVisTests = () => {
 
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_WITH_TIME_1,
         timefieldName: 'timestamp',
@@ -76,6 +78,7 @@ export const runBuildVisTests = () => {
       // Verify discover table is visible firstly
       cy.getElementByTestId('discoverTable').should('be.visible');
 
+      cy.wait(2000);
       // Switch to visualization type
       cy.get('#explore_visualization_tab').click();
     });

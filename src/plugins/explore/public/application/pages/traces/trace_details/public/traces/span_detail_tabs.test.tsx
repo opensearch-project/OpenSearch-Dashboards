@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SpanDetailTabs } from './span_detail_tabs';
+import { SpanDetailTab } from '../../constants/span_detail_tabs';
 
 // Mock the utility functions
 jest.mock('../utils/span_data_utils', () => ({
@@ -46,8 +47,9 @@ jest.mock('./span_tabs/span_issues_tab', () => ({
 }));
 
 jest.mock('./span_tabs/span_metadata_tab', () => ({
+  // @ts-ignore
   SpanMetadataTab: ({ selectedSpan, addSpanFilter }: any) => (
-    <div data-testid="span-metadata-tab">
+    <div data-test-subj="span-metadata-tab" data-testid="span-metadata-tab">
       <div>Metadata Tab Content</div>
       <div>Span: {selectedSpan?.spanId || 'none'}</div>
       {addSpanFilter && (
@@ -318,11 +320,12 @@ describe('SpanDetailTabs', () => {
     render(<SpanDetailTabs {...defaultProps} />);
 
     const tabs = screen.getAllByRole('tab');
-    expect(tabs).toHaveLength(4);
+    expect(tabs).toHaveLength(5);
     expect(tabs[0]).toHaveTextContent('Overview');
     expect(tabs[1]).toHaveTextContent('Errors');
-    expect(tabs[2]).toHaveTextContent('Metadata');
-    expect(tabs[3]).toHaveTextContent('Raw span');
+    expect(tabs[2]).toHaveTextContent('Logs');
+    expect(tabs[3]).toHaveTextContent('Metadata');
+    expect(tabs[4]).toHaveTextContent('Raw span');
   });
 
   it('applies correct CSS classes', () => {
@@ -373,5 +376,164 @@ describe('SpanDetailTabs', () => {
 
     // Should not have any badge with count
     expect(screen.queryByText('1')).not.toBeInTheDocument();
+  });
+
+  // CRITICAL TEST 1: Tab persistence with external state control (using real components)
+  it('maintains tab state when controlled by external activeTab prop', () => {
+    const mockOnTabChange = jest.fn();
+
+    const { rerender, container } = render(
+      <SpanDetailTabs
+        {...defaultProps}
+        activeTab={SpanDetailTab.METADATA}
+        onTabChange={mockOnTabChange}
+      />
+    );
+
+    // Should start with metadata tab active (controlled by external prop)
+    expect(screen.getByRole('tab', { name: 'Metadata' })).toHaveAttribute('aria-selected', 'true');
+    expect(container.querySelector('[data-test-subj="span-metadata-tab"]')).toBeInTheDocument();
+
+    // Change span but keep same external activeTab
+    const newSpan = { ...mockSpan, spanId: 'new-span-id' };
+    rerender(
+      <SpanDetailTabs
+        {...defaultProps}
+        selectedSpan={newSpan}
+        activeTab={SpanDetailTab.METADATA}
+        onTabChange={mockOnTabChange}
+      />
+    );
+
+    // Should still be on metadata tab (persistence across span changes)
+    expect(screen.getByRole('tab', { name: 'Metadata' })).toHaveAttribute('aria-selected', 'true');
+    expect(container.querySelector('[data-test-subj="span-metadata-tab"]')).toBeInTheDocument();
+
+    // Click on errors tab - should call onTabChange but not change internal state
+    const errorsTab = screen.getByRole('tab', { name: 'Errors' });
+    fireEvent.click(errorsTab);
+
+    expect(mockOnTabChange).toHaveBeenCalledWith(SpanDetailTab.ERRORS);
+    // Tab should still show metadata since external prop hasn't changed
+    expect(screen.getByRole('tab', { name: 'Metadata' })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('renders logs tab when logDatasets and datasetLogs are provided', () => {
+    const logDatasets = [
+      { id: 'log-dataset-1', title: 'app-logs-*', type: 'INDEX_PATTERN' },
+      { id: 'log-dataset-2', title: 'error-logs-*', type: 'INDEX_PATTERN' },
+    ];
+
+    const datasetLogs = {
+      'log-dataset-1': [
+        {
+          _id: 'log1',
+          _source: { message: 'Test log message 1' },
+          spanId: 'test-span-id',
+        },
+        {
+          _id: 'log2',
+          _source: { message: 'Test log message 2' },
+          spanId: 'test-span-id',
+        },
+      ],
+      'log-dataset-2': [
+        {
+          _id: 'log3',
+          _source: { message: 'Error log message' },
+          spanId: 'test-span-id',
+        },
+      ],
+    };
+
+    const propsWithLogs = {
+      ...defaultProps,
+      logDatasets,
+      datasetLogs,
+      isLogsLoading: false,
+    };
+
+    render(<SpanDetailTabs {...propsWithLogs} />);
+
+    // Check that logs tab is present
+    expect(screen.getByText('Logs')).toBeInTheDocument();
+
+    // Check that we now have 5 tabs instead of 4
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(5);
+    expect(tabs[0]).toHaveTextContent('Overview');
+    expect(tabs[1]).toHaveTextContent('Errors');
+    expect(tabs[2]).toHaveTextContent('Logs');
+    expect(tabs[3]).toHaveTextContent('Metadata');
+    expect(tabs[4]).toHaveTextContent('Raw span');
+
+    // Click on Logs tab to verify it works
+    const logsTab = screen.getByRole('tab', { name: 'Logs' });
+    fireEvent.click(logsTab);
+
+    // Check that logs tab is now selected
+    expect(logsTab).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('renders logs tab even when logDatasets is empty', () => {
+    const propsWithoutLogs = {
+      ...defaultProps,
+      logDatasets: [],
+      datasetLogs: {},
+      isLogsLoading: false,
+    };
+
+    render(<SpanDetailTabs {...propsWithoutLogs} />);
+
+    // Check that logs tab is present even when logDatasets is empty
+    expect(screen.getByText('Logs')).toBeInTheDocument();
+
+    // Should have 5 tabs
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(5);
+    expect(tabs[0]).toHaveTextContent('Overview');
+    expect(tabs[1]).toHaveTextContent('Errors');
+    expect(tabs[2]).toHaveTextContent('Logs');
+    expect(tabs[3]).toHaveTextContent('Metadata');
+    expect(tabs[4]).toHaveTextContent('Raw span');
+
+    // Click on Logs tab to verify it works
+    const logsTab = screen.getByRole('tab', { name: 'Logs' });
+    fireEvent.click(logsTab);
+    expect(logsTab).toHaveAttribute('aria-selected', 'true');
+
+    // Verify that the correct content is displayed when no log datasets are available
+    expect(screen.getByText('Span Logs')).toBeInTheDocument();
+    expect(screen.getByText('No log datasets found for this span')).toBeInTheDocument();
+  });
+
+  it('render logs tab', () => {
+    const logDatasets = [{ id: 'log-dataset-1', title: 'app-logs-*', type: 'INDEX_PATTERN' }];
+
+    const datasetLogs = {
+      'log-dataset-1': [
+        {
+          _id: 'log1',
+          _source: { message: 'Test log message 1' },
+          spanId: 'different-span-id',
+        },
+      ],
+    };
+
+    const propsWithNonMatchingLogs = {
+      ...defaultProps,
+      logDatasets,
+      datasetLogs,
+      isLogsLoading: false,
+    };
+
+    render(<SpanDetailTabs {...propsWithNonMatchingLogs} />);
+
+    // Check that logs tab is not present since no logs match the span
+    expect(screen.queryByText('Logs')).toBeInTheDocument();
+
+    // Should only have 4 tabs
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(5);
   });
 });

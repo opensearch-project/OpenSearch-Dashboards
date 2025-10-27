@@ -4,6 +4,7 @@
  */
 
 import { LogsTab } from '../components/tabs/logs_tab';
+import { FieldStatsTab } from '../components/tabs/field_stats_tab';
 import { TabDefinition, TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { ExploreServices } from '../types';
 import {
@@ -12,6 +13,8 @@ import {
   EXPLORE_LOGS_TAB_ID,
   EXPLORE_VISUALIZATION_TAB_ID,
   EXPLORE_PATTERNS_TAB_ID,
+  EXPLORE_FIELD_STATS_TAB_ID,
+  ENABLE_EXPERIMENTAL_SETTING,
 } from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
 import { getQueryWithSource } from './utils/languages';
@@ -107,6 +110,7 @@ export const registerBuiltInTabs = (
           executeTabQuery({
             services,
             cacheKey: regexPatternQuery(preparedQuery.query, patternsField),
+            queryString: query.query,
           })
         );
 
@@ -149,6 +153,19 @@ export const registerBuiltInTabs = (
 
     component: VisTab,
   });
+
+  // Register Field Stats Tab
+  const isExperimentalEnabled = services.uiSettings.get(ENABLE_EXPERIMENTAL_SETTING, false);
+  if (isExperimentalEnabled) {
+    tabRegistry.registerTab({
+      id: EXPLORE_FIELD_STATS_TAB_ID,
+      label: 'Field Stats',
+      flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics],
+      order: 25,
+      supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
+      component: FieldStatsTab,
+    });
+  }
 };
 
 /**

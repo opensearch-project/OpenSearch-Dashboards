@@ -128,6 +128,83 @@ describe('url_builder', () => {
 
       expect(result).toContain('timeFieldName:time');
     });
+
+    it('should use schema mappings for traceId and spanId field names', () => {
+      const datasetWithSchemaMappings: Dataset = {
+        id: 'logs-dataset-id',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+        timeFieldName: '@timestamp',
+        schemaMappings: {
+          otelLogs: {
+            traceId: 'custom_trace_id',
+            spanId: 'custom_span_id',
+          },
+        },
+      };
+
+      const params = {
+        traceId: 'test-trace-id',
+        spanId: 'test-span-id',
+        logDataset: datasetWithSchemaMappings,
+        timeRange: mockTimeRange,
+      };
+
+      const result = buildExploreLogsUrl(params);
+
+      // Should use custom field names from schema mappings
+      expect(result).toContain('custom_trace_id');
+      expect(result).toContain('custom_span_id');
+      expect(result).toContain('test-trace-id');
+      expect(result).toContain('test-span-id');
+    });
+
+    it('should fall back to default field names when schema mappings are not provided', () => {
+      const params = {
+        traceId: 'test-trace-id',
+        spanId: 'test-span-id',
+        logDataset: mockLogDataset,
+        timeRange: mockTimeRange,
+      };
+
+      const result = buildExploreLogsUrl(params);
+
+      // Should use default field names when no schema mappings
+      expect(result).toContain('traceId');
+      expect(result).toContain('spanId');
+      expect(result).toContain('test-trace-id');
+      expect(result).toContain('test-span-id');
+    });
+
+    it('should fall back to default field names when schema mappings are incomplete', () => {
+      const datasetWithPartialSchemaMappings: Dataset = {
+        id: 'logs-dataset-id',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+        timeFieldName: '@timestamp',
+        schemaMappings: {
+          otelLogs: {
+            traceId: 'custom_trace_id',
+            // spanId mapping is missing
+          },
+        },
+      };
+
+      const params = {
+        traceId: 'test-trace-id',
+        spanId: 'test-span-id',
+        logDataset: datasetWithPartialSchemaMappings,
+        timeRange: mockTimeRange,
+      };
+
+      const result = buildExploreLogsUrl(params);
+
+      // Should use custom traceId but default spanId
+      expect(result).toContain('custom_trace_id');
+      expect(result).toContain('spanId'); // default fallback
+      expect(result).toContain('test-trace-id');
+      expect(result).toContain('test-span-id');
+    });
   });
 
   describe('getTimeRangeFromTraceData', () => {
@@ -285,7 +362,13 @@ describe('url_builder', () => {
     ];
 
     it('should filter logs by span ID', () => {
-      const result = filterLogsBySpanId(mockLogs, 'span-1');
+      const mockDataset: Dataset = {
+        id: 'logs-dataset-id',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+      };
+
+      const result = filterLogsBySpanId(mockLogs, 'span-1', mockDataset);
 
       expect(result).toHaveLength(2);
       expect(result[0].spanId).toBe('span-1');
@@ -295,13 +378,25 @@ describe('url_builder', () => {
     });
 
     it('should return empty array when no logs match span ID', () => {
-      const result = filterLogsBySpanId(mockLogs, 'non-existent-span');
+      const mockDataset: Dataset = {
+        id: 'logs-dataset-id',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+      };
+
+      const result = filterLogsBySpanId(mockLogs, 'non-existent-span', mockDataset);
 
       expect(result).toHaveLength(0);
     });
 
     it('should return empty array for empty logs input', () => {
-      const result = filterLogsBySpanId([], 'span-1');
+      const mockDataset: Dataset = {
+        id: 'logs-dataset-id',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+      };
+
+      const result = filterLogsBySpanId([], 'span-1', mockDataset);
 
       expect(result).toHaveLength(0);
     });
@@ -320,9 +415,125 @@ describe('url_builder', () => {
         } as any,
       ];
 
-      const result = filterLogsBySpanId(logsWithoutSpanId, 'span-1');
+      const mockDataset: Dataset = {
+        id: 'logs-dataset-id',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+      };
+
+      const result = filterLogsBySpanId(logsWithoutSpanId, 'span-1', mockDataset);
 
       expect(result).toHaveLength(0);
+    });
+
+    it('should use schema mappings for spanId field name', () => {
+      const logsWithCustomSpanIdField: LogHit[] = [
+        {
+          _id: 'log-1',
+          _source: {
+            message: 'Log message 1',
+            custom_span_id: 'span-1',
+            traceId: 'trace-1',
+          },
+          timestamp: '2023-01-01T10:00:00Z',
+          message: 'Log message 1',
+          traceId: 'trace-1',
+        } as any,
+        {
+          _id: 'log-2',
+          _source: {
+            message: 'Log message 2',
+            custom_span_id: 'span-2',
+            traceId: 'trace-1',
+          },
+          timestamp: '2023-01-01T10:01:00Z',
+          message: 'Log message 2',
+          traceId: 'trace-1',
+        } as any,
+      ];
+
+      const datasetWithSchemaMappings: Dataset = {
+        id: 'logs-dataset-id',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+        schemaMappings: {
+          otelLogs: {
+            spanId: 'custom_span_id',
+          },
+        },
+      };
+
+      const result = filterLogsBySpanId(
+        logsWithCustomSpanIdField,
+        'span-1',
+        datasetWithSchemaMappings
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0]._id).toBe('log-1');
+      expect(result[0]._source.custom_span_id).toBe('span-1');
+    });
+
+    it('should fall back to default spanId property when schema mapping field is not found', () => {
+      const logsWithMixedSpanIdFields: LogHit[] = [
+        {
+          _id: 'log-1',
+          _source: {
+            message: 'Log message 1',
+            traceId: 'trace-1',
+          },
+          timestamp: '2023-01-01T10:00:00Z',
+          message: 'Log message 1',
+          spanId: 'span-1', // fallback to default property
+          traceId: 'trace-1',
+        },
+        {
+          _id: 'log-2',
+          _source: {
+            message: 'Log message 2',
+            custom_span_id: 'span-2',
+            traceId: 'trace-1',
+          },
+          timestamp: '2023-01-01T10:01:00Z',
+          message: 'Log message 2',
+          traceId: 'trace-1',
+        } as any,
+      ];
+
+      const datasetWithSchemaMappings: Dataset = {
+        id: 'logs-dataset-id',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+        schemaMappings: {
+          otelLogs: {
+            spanId: 'custom_span_id',
+          },
+        },
+      };
+
+      const result = filterLogsBySpanId(
+        logsWithMixedSpanIdFields,
+        'span-1',
+        datasetWithSchemaMappings
+      );
+
+      expect(result).toHaveLength(1);
+      expect(result[0]._id).toBe('log-1');
+      expect(result[0].spanId).toBe('span-1');
+    });
+
+    it('should use default spanId field when dataset has no schema mappings', () => {
+      const datasetWithoutSchemaMappings: Dataset = {
+        id: 'logs-dataset-id',
+        title: 'logs-*',
+        type: 'INDEX_PATTERN',
+      };
+
+      const result = filterLogsBySpanId(mockLogs, 'span-1', datasetWithoutSchemaMappings);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].spanId).toBe('span-1');
+      expect(result[1].spanId).toBe('span-1');
     });
   });
 });

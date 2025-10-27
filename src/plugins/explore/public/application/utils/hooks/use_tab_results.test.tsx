@@ -24,6 +24,10 @@ import {
   UIState,
 } from '../state_management/slices';
 import { tabReducer } from '../state_management/slices/tab/tab_slice';
+import {
+  queryEditorReducer,
+  queryEditorInitialState,
+} from '../state_management/slices/query_editor/query_editor_slice';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { ExploreServices } from '../../../types';
 
@@ -61,6 +65,7 @@ interface MockRootState {
     };
     logs: {};
   };
+  queryEditor?: any;
 }
 
 // Helper function to create a mock store
@@ -79,6 +84,10 @@ const createMockStore = (initialState: MockRootState) => {
       ...initialState.results,
     },
     tab: initialState.tab,
+    queryEditor: {
+      ...queryEditorInitialState,
+      ...(initialState.queryEditor || {}),
+    },
   };
 
   return configureStore({
@@ -87,6 +96,7 @@ const createMockStore = (initialState: MockRootState) => {
       query: queryReducer,
       results: resultsReducer,
       tab: tabReducer,
+      queryEditor: queryEditorReducer,
     },
     preloadedState,
   });

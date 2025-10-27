@@ -632,6 +632,7 @@ Object {
     },
   },
   "id": "test-pattern",
+  "schemaMappings": undefined,
   "signalType": undefined,
   "sourceFilters": undefined,
   "timeFieldName": "timestamp",
@@ -646,7 +647,6 @@ exports[`DataViewWithDataSource toSpec should match snapshot 1`] = `
 Object {
   "dataSourceRef": Object {
     "id": "id",
-    "name": "title",
     "type": "data-source",
   },
   "description": undefined,
@@ -1278,6 +1278,7 @@ Object {
     },
   },
   "id": "test-pattern",
+  "schemaMappings": undefined,
   "signalType": undefined,
   "sourceFilters": undefined,
   "timeFieldName": "timestamp",

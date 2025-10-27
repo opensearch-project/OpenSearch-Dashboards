@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiButtonGroup, EuiFormRow, EuiRange, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { useDebouncedNumber } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';

@@ -11,7 +11,7 @@ import {
   ValueAxisPosition,
 } from './line_chart_utils';
 import { VisColumn, VisFieldType, Positions } from '../types';
-import { LineChartStyleControls } from './line_vis_config';
+import { defaultLineChartStyles, LineChartStyle } from './line_vis_config';
 
 describe('Line Chart Utils', () => {
   describe('getVegaInterpolation', () => {
@@ -35,6 +35,7 @@ describe('Line Chart Utils', () => {
   describe('buildMarkConfig', () => {
     it('should build a bar mark config', () => {
       const styles = {
+        ...defaultLineChartStyles,
         tooltipOptions: { mode: 'all' as const },
       };
       const result = buildMarkConfig(styles, 'bar');
@@ -46,8 +47,9 @@ describe('Line Chart Utils', () => {
     });
 
     it('should build a point-only mark config when lineStyle is dots', () => {
-      const styles: Partial<LineChartStyleControls> = {
-        lineStyle: 'dots',
+      const styles = {
+        ...defaultLineChartStyles,
+        lineStyle: 'dots' as const,
         tooltipOptions: { mode: 'all' as const },
       };
       const result = buildMarkConfig(styles);
@@ -59,10 +61,11 @@ describe('Line Chart Utils', () => {
     });
 
     it('should build a line-only mark config when lineStyle is line', () => {
-      const styles: Partial<LineChartStyleControls> = {
-        lineStyle: 'line',
+      const styles = {
+        ...defaultLineChartStyles,
+        lineStyle: 'line' as const,
         lineWidth: 3,
-        lineMode: 'straight',
+        lineMode: 'straight' as const,
         tooltipOptions: { mode: 'all' as const },
       };
       const result = buildMarkConfig(styles);
@@ -75,10 +78,11 @@ describe('Line Chart Utils', () => {
     });
 
     it('should build a line with points mark config when lineStyle is both', () => {
-      const styles: Partial<LineChartStyleControls> = {
-        lineStyle: 'both',
+      const styles = {
+        ...defaultLineChartStyles,
+        lineStyle: 'both' as const,
         lineWidth: 2,
-        lineMode: 'smooth',
+        lineMode: 'smooth' as const,
         tooltipOptions: { mode: 'all' as const },
       };
       const result = buildMarkConfig(styles);
@@ -105,14 +109,16 @@ describe('Line Chart Utils', () => {
 
   describe('createTimeMarkerLayer', () => {
     it('should return null when time marker is not enabled', () => {
-      const styles: Partial<LineChartStyleControls> = {
+      const styles = {
+        ...defaultLineChartStyles,
         addTimeMarker: false,
       };
       expect(createTimeMarkerLayer(styles)).toBeNull();
     });
 
     it('should create a time marker layer with tooltip when enabled', () => {
-      const styles: Partial<LineChartStyleControls> = {
+      const styles = {
+        ...defaultLineChartStyles,
         addTimeMarker: true,
         tooltipOptions: { mode: 'all' as const },
       };
@@ -138,7 +144,8 @@ describe('Line Chart Utils', () => {
     });
 
     it('should create a time marker layer without tooltip when tooltips are disabled', () => {
-      const styles: Partial<LineChartStyleControls> = {
+      const styles = {
+        ...defaultLineChartStyles,
         addTimeMarker: true,
         tooltipOptions: { mode: 'hidden' as const },
       };
@@ -203,7 +210,8 @@ describe('Line Chart Utils', () => {
     });
 
     it('should apply category axis styling with fallback title and orientation', () => {
-      const styles: Partial<LineChartStyleControls> = {
+      const styles: LineChartStyle = {
+        ...defaultLineChartStyles,
         categoryAxes: [
           {
             id: 'CategoryAxis-1',
@@ -239,7 +247,8 @@ describe('Line Chart Utils', () => {
     });
 
     it('should apply category axis styling with date format for date columns', () => {
-      const styles: Partial<LineChartStyleControls> = {
+      const styles: LineChartStyle = {
+        ...defaultLineChartStyles,
         categoryAxes: [
           {
             id: 'CategoryAxis-1',
@@ -275,7 +284,8 @@ describe('Line Chart Utils', () => {
     });
 
     it('should hide category axis when show is false', () => {
-      const styles: Partial<LineChartStyleControls> = {
+      const styles: LineChartStyle = {
+        ...defaultLineChartStyles,
         categoryAxes: [
           {
             id: 'CategoryAxis-1',
@@ -309,7 +319,8 @@ describe('Line Chart Utils', () => {
     });
 
     it('should apply value axis styling', () => {
-      const styles: Partial<LineChartStyleControls> = {
+      const styles: LineChartStyle = {
+        ...defaultLineChartStyles,
         valueAxes: [
           {
             id: 'ValueAxis-1',
@@ -343,7 +354,8 @@ describe('Line Chart Utils', () => {
     });
 
     it('should hide value axis when show is false', () => {
-      const styles: Partial<LineChartStyleControls> = {
+      const styles: LineChartStyle = {
+        ...defaultLineChartStyles,
         valueAxes: [
           {
             id: 'ValueAxis-1',
@@ -378,7 +390,8 @@ describe('Line Chart Utils', () => {
     });
 
     it('should handle Rule 2 (two metrics, one date) correctly', () => {
-      const styles: Partial<LineChartStyleControls> = {
+      const styles: LineChartStyle = {
+        ...defaultLineChartStyles,
         valueAxes: [
           {
             id: 'ValueAxis-1',
@@ -449,7 +462,8 @@ describe('Line Chart Utils', () => {
     });
 
     it('should handle Rule 2 with insufficient value axes', () => {
-      const styles: Partial<LineChartStyleControls> = {
+      const styles: LineChartStyle = {
+        ...defaultLineChartStyles,
         valueAxes: [
           {
             id: 'ValueAxis-1',
@@ -499,7 +513,8 @@ describe('Line Chart Utils', () => {
     });
 
     it('should handle Rule 2 with no value axes', () => {
-      const styles: Partial<LineChartStyleControls> = {
+      const styles: LineChartStyle = {
+        ...defaultLineChartStyles,
         valueAxes: [],
       };
 

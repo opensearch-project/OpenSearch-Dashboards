@@ -3,14 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiDataGrid, EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
 import { VisColumn, VisFieldType } from '../types';
-import {
-  defaultTableChartStyles,
-  CellTypeConfig,
-  TableChartStyleControls,
-} from './table_vis_config';
+import { defaultTableChartStyles, CellTypeConfig, TableChartStyle } from './table_vis_config';
 import { FilterConfig, TableColumnHeader } from './table_vis_filter';
 import { calculateValue } from '../utils/calculation';
 import { CellValue } from './cell_value';
@@ -22,15 +18,19 @@ import './table_vis.scss';
 interface TableVisProps {
   rows: Array<Record<string, any>>;
   columns: VisColumn[];
-  styleOptions?: TableChartStyleControls;
+  styleOptions?: TableChartStyle;
   pageSizeOptions?: number[];
   showStyleSelector?: boolean;
 }
 
 export const TableVis = React.memo(
   ({ rows, columns, styleOptions, pageSizeOptions, showStyleSelector }: TableVisProps) => {
+    const sortedColumns = useMemo(() => [...columns].sort((a, b) => a.id - b.id), [columns]);
+    const [visibleColumns, setVisibleColumns] = useState(() =>
+      sortedColumns.map(({ column }) => column)
+    );
+
     const pageSize = styleOptions?.pageSize ?? defaultTableChartStyles.pageSize;
-    const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ column }) => column));
     const [pagination, setPagination] = useState({ pageIndex: 0, pageSize });
     const [filters, setFilters] = useState<Record<string, FilterConfig>>({});
     const [popoverOpenColumnId, setPopoverOpenColumnId] = useState<string | null>(null);
@@ -41,9 +41,9 @@ export const TableVis = React.memo(
 
     const columnUniques = useMemo(() => {
       const uniques: Record<string, Set<any>> = {};
-      columns.forEach((col) => (uniques[col.column] = new Set()));
+      sortedColumns.forEach((col) => (uniques[col.column] = new Set()));
       rows.forEach((row) => {
-        columns.forEach((col) => {
+        sortedColumns.forEach((col) => {
           const value = row[col.column];
           if (row.hasOwnProperty(col.column) && value != null && value !== '') {
             uniques[col.column].add(row[col.column]);
@@ -55,18 +55,18 @@ export const TableVis = React.memo(
           .map(([key, set]) => [key, Array.from(set).sort()])
           .filter(([, arr]) => arr.length > 0)
       );
-    }, [columns, rows]);
+    }, [sortedColumns, rows]);
 
     const columnTypes = useMemo(() => {
       const types: Record<string, VisFieldType> = {};
-      columns.forEach((col) => {
+      sortedColumns.forEach((col) => {
         types[col.column] = col.schema;
       });
       return types;
-    }, [columns]);
+    }, [sortedColumns]);
 
     const dataGridColumns: EuiDataGridColumn[] = useMemo(() => {
-      return columns.map((col) => ({
+      return sortedColumns.map((col) => ({
         id: col.column,
         displayAsText: col.name,
         display: (
@@ -82,7 +82,7 @@ export const TableVis = React.memo(
         ),
       }));
     }, [
-      columns,
+      sortedColumns,
       styleOptions?.showColumnFilter,
       popoverOpenColumnId,
       filters,
@@ -121,7 +121,7 @@ export const TableVis = React.memo(
       ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
         const cellTypes: CellTypeConfig[] = styleOptions?.cellTypes || [];
         const columnCellType = cellTypes.find((ct) => ct.field === columnId)?.type || 'auto';
-        const alignment = styleOptions?.globalAlignment || 'auto';
+        const alignment = styleOptions?.globalAlignment || 'left';
         const textAlign =
           alignment === 'auto'
             ? columnTypes[columnId] === 'numerical'
@@ -176,7 +176,7 @@ export const TableVis = React.memo(
 
     const renderFooterCellValue = useCallback(
       ({ columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
-        const alignment = styleOptions?.globalAlignment || 'auto';
+        const alignment = styleOptions?.globalAlignment || 'left';
         const textAlign =
           alignment === 'auto'
             ? columnTypes[columnId] === 'numerical'

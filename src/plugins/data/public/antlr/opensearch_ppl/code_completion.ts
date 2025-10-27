@@ -31,6 +31,25 @@ import {
   KEYWORD_ITEM_KIND_MAP,
 } from './constants';
 import { Documentation } from './ppl_documentation';
+import { getPPLQuerySnippetForSuggestions } from '../../query_snippet_suggestions/ppl/suggestions';
+
+// Utility function to extract query text up to cursor position
+const extractQueryTillCursor = (
+  fullQuery: string,
+  cursorPosition: { lineNumber: number; column: number }
+) => {
+  const lines = fullQuery.split('\n');
+
+  // Get all lines before the cursor line
+  const linesBefore = lines.slice(0, cursorPosition.lineNumber - 1);
+
+  // Get the current line up to cursor position
+  const currentLine = lines[cursorPosition.lineNumber - 1] || '';
+  const currentLineUpToCursor = currentLine.slice(0, cursorPosition.column - 1);
+
+  // Combine all text up to cursor
+  return [...linesBefore, currentLineUpToCursor].join('\n');
+};
 // Centralized function to generate appropriate insertion text based on context
 function getInsertText(
   text: string,
@@ -350,7 +369,18 @@ export const getSimplifiedPPLSuggestions = async ({
         );
       }
     }
-    return finalSuggestions;
+
+    const queryTillCursor =
+      position && position.lineNumber && position.column
+        ? extractQueryTillCursor(query, {
+            lineNumber: position.lineNumber,
+            column: position.column,
+          })
+        : query.slice(0, selectionEnd);
+
+    const querySnippetSuggestions = await getPPLQuerySnippetForSuggestions(queryTillCursor);
+
+    return [...finalSuggestions, ...querySnippetSuggestions];
   } catch (e) {
     return [];
   }

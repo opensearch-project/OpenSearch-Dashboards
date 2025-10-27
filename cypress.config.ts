@@ -5,7 +5,6 @@
 
 import { defineConfig } from 'cypress';
 import webpackPreprocessor from '@cypress/webpack-preprocessor';
-// TODO: import { paste } from 'copy-paste';
 
 module.exports = defineConfig({
   experimentalMemoryManagement: true,
@@ -52,6 +51,7 @@ module.exports = defineConfig({
     ML_COMMONS_DASHBOARDS_ENABLED: true,
     WAIT_FOR_LOADER_BUFFER_MS: 0,
     WAIT_MS: 2000,
+    WAIT_MS_LONG: 10000,
     DISABLE_LOCAL_CLUSTER: false,
     CYPRESS_RUNTIME_ENV: 'osd',
   },
@@ -60,6 +60,7 @@ module.exports = defineConfig({
     specPattern: 'cypress/integration/**/*.spec.{js,jsx,ts,tsx}',
     testIsolation: false,
     setupNodeEvents,
+    chromeWebSecurity: false,
   },
 });
 
@@ -81,6 +82,27 @@ function setupNodeEvents(
     test: /\.m?js/,
     resolve: {
       enforceExtension: false,
+    },
+  });
+
+  /**
+   * Add babel-loader to handle modern JavaScript syntax like optional chaining
+   */
+  webpackOptions!.module!.rules.push({
+    test: /\.(js|ts)$/,
+    exclude: /node_modules/,
+    use: {
+      loader: 'babel-loader',
+      options: {
+        presets: [
+          ['@babel/preset-env', { targets: { node: 'current' } }],
+          '@babel/preset-typescript',
+        ],
+        plugins: [
+          '@babel/plugin-proposal-optional-chaining',
+          '@babel/plugin-proposal-nullish-coalescing-operator',
+        ],
+      },
     },
   });
 

@@ -7,65 +7,71 @@ import { useEffect, useMemo, useState } from 'react';
 import { useObservable } from 'react-use';
 import { BehaviorSubject } from 'rxjs';
 
-import { ALL_USE_CASE_ID, DEFAULT_NAV_GROUPS, SavedObjectsStart } from '../../../../../core/public';
+import { ALL_USE_CASE_ID, SavedObjectsStart, UseCaseId } from '../../../../../core/public';
 import { WorkspaceUseCase } from '../../types';
-import { getIsOnlyAllowEssentialUseCase } from '../../utils';
+import { areAllDataSourcesOpenSearchServerless } from '../../utils';
 import { AvailableUseCaseItem } from './types';
+import { UseCaseService } from '../../services';
 
 interface UseFormAvailableUseCasesOptions {
-  onlyAllowEssentialEnabled?: boolean;
   savedObjects?: SavedObjectsStart;
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
+  useCaseService: UseCaseService;
 }
 
 export const useFormAvailableUseCases = ({
-  onlyAllowEssentialEnabled = false,
   savedObjects,
   registeredUseCases$,
+  useCaseService,
 }: UseFormAvailableUseCasesOptions) => {
-  const [isOnlyAllowEssential, setIsOnlyAllowEssential] = useState<boolean>();
+  const [areAllDatasourcesServerless, setAreAllDatasourcesServerless] = useState(false);
   const registeredUseCases = useObservable(registeredUseCases$, undefined);
 
   useEffect(() => {
     let shouldUpdate = true;
-    if (!onlyAllowEssentialEnabled || !savedObjects) {
+    if (!savedObjects) {
       return;
     }
     const updateEssential = (payload: boolean) => {
       if (shouldUpdate) {
-        setIsOnlyAllowEssential(payload);
+        setAreAllDatasourcesServerless(payload);
       }
     };
     (async () => {
       try {
-        const result = await getIsOnlyAllowEssentialUseCase(savedObjects.client);
+        const result = await areAllDataSourcesOpenSearchServerless(savedObjects.client);
         updateEssential(result);
       } catch (e) {
-        // Set to false if failed to fetch the "only allow essential use case" setting
         updateEssential(false);
       }
     })();
     return () => {
       shouldUpdate = false;
     };
-  }, [savedObjects, onlyAllowEssentialEnabled]);
+  }, [savedObjects]);
 
   const availableUseCases = useMemo<AvailableUseCaseItem[] | undefined>(() => {
     if (!registeredUseCases) {
       return undefined;
     }
-    if (onlyAllowEssentialEnabled && isOnlyAllowEssential) {
+    if (areAllDatasourcesServerless) {
+      const useCaseOptionDisabled = useCaseService.supportedUseCasesForServerless.length === 1;
       return registeredUseCases.flatMap((useCase) =>
-        useCase.id === DEFAULT_NAV_GROUPS.essentials.id ? [{ ...useCase, disabled: true }] : []
+        useCaseService.supportedUseCasesForServerless.includes(useCase.id as UseCaseId)
+          ? [{ ...useCase, disabled: useCaseOptionDisabled }]
+          : []
       );
     }
     return registeredUseCases.filter(
       (useCase) => !useCase.systematic || useCase.id === ALL_USE_CASE_ID
     );
-  }, [registeredUseCases, isOnlyAllowEssential, onlyAllowEssentialEnabled]);
+  }, [
+    registeredUseCases,
+    areAllDatasourcesServerless,
+    useCaseService.supportedUseCasesForServerless,
+  ]);
 
   return {
-    isOnlyAllowEssential,
     availableUseCases,
   };
 };

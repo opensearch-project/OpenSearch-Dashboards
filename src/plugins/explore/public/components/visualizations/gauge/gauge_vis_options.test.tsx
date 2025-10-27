@@ -14,51 +14,41 @@ jest.mock('@osd/i18n', () => ({
   },
 }));
 
-jest.mock('../style_panel/unit/unit_panel', () => ({
-  UnitPanel: jest.fn(({ unitId, onUnitChange }) => (
-    <div data-test-subj="mockGaugeUnitPanel">
-      <select data-test-subj="changeUnit" onClick={() => onUnitChange('number')}>
-        <option value="number">Number</option>
-      </select>
-    </div>
+jest.mock('../style_panel/threshold/threshold_panel', () => ({
+  ThresholdPanel: jest.fn(({ thresholdsOptions, onChange }) => (
+    <>
+      <div data-test-subj="mockGaugeThresholdPanel">
+        <button
+          data-test-subj="mockAddRange"
+          onClick={() =>
+            onChange({ ...thresholdsOptions, thresholds: [{ value: 50, color: '#FF0000' }] })
+          }
+        >
+          Add Range
+        </button>
+      </div>
+    </>
   )),
 }));
 
-jest.mock('../style_panel/threshold/threshold_panel', () => ({
-  ThresholdPanel: jest.fn(
-    ({
-      thresholds,
-      onThresholdValuesChange,
-      min,
-      onMinChange,
-      max,
-      onMaxChange,
-      baseColor,
-      onBaseColorChange,
-    }) => (
-      <>
-        <div data-test-subj="mockGaugeThresholdPanel">
-          <button
-            data-test-subj="mockAddRange"
-            onClick={() =>
-              onThresholdValuesChange([...thresholds, { value: 50, color: '#FF0000' }])
-            }
-          >
-            Add Range
-          </button>
-        </div>
-
-        <input
-          data-test-subj="thresholdMinBase"
-          onChange={(e) => onMinChange(Number(e.target.value))}
-        />
-        <input
-          data-test-subj="thresholdMaxBase"
-          onChange={(e) => onMaxChange(Number(e.target.value))}
-        />
-      </>
-    )
-  ),
+jest.mock('../style_panel/standard_options/standard_options_panel', () => ({
+  StandardOptionsPanel: jest.fn(({ min, onMinChange, max, onMaxChange, unit, onUnitChange }) => (
+    <div data-test-subj="mockGaugeStandardPanel">
+      <input
+        data-test-subj="thresholdMinBase"
+        onChange={(e) => onMinChange(Number(e.target.value))}
+      />
+      <input
+        data-test-subj="thresholdMaxBase"
+        onChange={(e) => onMaxChange(Number(e.target.value))}
+      />
+      <div data-test-subj="mockGaugeUnitPanel">
+        <select data-test-subj="changeUnit" onClick={() => onUnitChange('number')}>
+          <option value="number">Number</option>
+        </select>
+      </div>
+    </div>
+  )),
 }));
 
 describe('GaugeVisStyleControls', () => {
@@ -144,6 +134,11 @@ describe('GaugeVisStyleControls', () => {
     expect(screen.getByTestId('mockGaugeThresholdPanel')).toBeInTheDocument();
   });
 
+  it('renders standard options panel', () => {
+    render(<GaugeVisStyleControls {...mockProps} />);
+    expect(screen.getByTestId('mockGaugeStandardPanel')).toBeInTheDocument();
+  });
+
   it('renders min and max inputs', () => {
     render(<GaugeVisStyleControls {...mockProps} />);
     expect(screen.getByTestId('thresholdMinBase')).toBeInTheDocument();
@@ -168,20 +163,18 @@ describe('GaugeVisStyleControls', () => {
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({ max: 50 });
   });
 
-  it('calls onStyleChange when custom range is added', () => {
+  it('calls onStyleChange when threshold is added', () => {
     render(<GaugeVisStyleControls {...mockProps} />);
 
     const addRangeButton = screen.getByTestId('mockAddRange');
     fireEvent.click(addRangeButton);
 
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      thresholds: [{ value: 50, color: '#FF0000' }],
+      thresholdOptions: {
+        ...mockProps.styleOptions.thresholdOptions,
+        thresholds: [{ color: '#FF0000', value: 50 }],
+      },
     });
-  });
-
-  it('renders unit panel', () => {
-    render(<GaugeVisStyleControls {...mockProps} />);
-    expect(screen.getByTestId('mockGaugeUnitPanel')).toBeInTheDocument();
   });
 
   it('calls onStyleChange when unit is changed', () => {

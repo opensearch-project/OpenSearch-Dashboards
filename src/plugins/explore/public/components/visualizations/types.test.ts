@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisFieldType, ThresholdLineStyle, Positions } from './types';
+import { VisFieldType, ThresholdMode, Positions } from './types';
 
 describe('types', () => {
   describe('VisFieldType', () => {
@@ -15,11 +15,11 @@ describe('types', () => {
     });
   });
 
-  describe('ThresholdLineStyle', () => {
+  describe('ThresholdMode', () => {
     it('should define the correct threshold line styles', () => {
-      expect(ThresholdLineStyle.Full).toBe('full');
-      expect(ThresholdLineStyle.Dashed).toBe('dashed');
-      expect(ThresholdLineStyle.DotDashed).toBe('dot-dashed');
+      expect(ThresholdMode.Solid).toBe('solid');
+      expect(ThresholdMode.Dashed).toBe('dashed');
+      expect(ThresholdMode.DotDashed).toBe('dot-dashed');
     });
   });
 

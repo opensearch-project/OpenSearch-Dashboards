@@ -33,6 +33,7 @@ import moment from 'moment-timezone';
 import { unitOfTime } from 'moment';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
+import { euiPaletteColorBlind } from '@elastic/eui';
 
 import {
   AnnotationDomainType,
@@ -326,6 +327,33 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
     type: TooltipType.VerticalCursor,
   };
 
+  const renderHistogramSeries = () => {
+    if (!chartData.series || chartData.series.length === 0) {
+      return null;
+    }
+
+    const colorPalette = euiPaletteColorBlind();
+
+    return chartData.series.map((series, index) => (
+      <HistogramBarSeries
+        key={series.id}
+        id={series.id}
+        name={series.name}
+        minBarHeight={2}
+        xScaleType={ScaleType.Time}
+        yScaleType={ScaleType.Linear}
+        xAccessor="x"
+        yAccessors={['y']}
+        data={series.data}
+        timeZone={timeZone}
+        color={colorPalette[index % colorPalette.length]}
+      />
+    ));
+  };
+
+  const hasMultipleSeries = chartData.series && chartData.series.length > 0;
+  const showLegend = hasMultipleSeries;
+
   return (
     <Chart size="100%">
       <Settings
@@ -335,6 +363,8 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
         tooltip={tooltipProps}
         theme={chartsTheme}
         baseTheme={chartsBaseTheme}
+        showLegend={showLegend}
+        legendPosition={Position.Right}
       />
       <Axis
         id="discover-histogram-left-axis"
@@ -362,19 +392,22 @@ export const DiscoverHistogram: React.FC<DiscoverHistogramProps> = ({
         style={rectAnnotationStyle}
         hideTooltips={true}
       />
-      {chartType === 'HistogramBar' && (
-        <HistogramBarSeries
-          id="discover-histogram"
-          minBarHeight={2}
-          xScaleType={ScaleType.Time}
-          yScaleType={ScaleType.Linear}
-          xAccessor="x"
-          yAccessors={['y']}
-          data={data}
-          timeZone={timeZone}
-          name={chartData.yAxisLabel}
-        />
-      )}
+      {chartType === 'HistogramBar' &&
+        (hasMultipleSeries ? (
+          renderHistogramSeries()
+        ) : (
+          <HistogramBarSeries
+            id="discover-histogram"
+            minBarHeight={2}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            xAccessor="x"
+            yAccessors={['y']}
+            data={data}
+            timeZone={timeZone}
+            name={chartData.yAxisLabel}
+          />
+        ))}
       {chartType === 'Line' && (
         <LineSeries
           id="discover-histogram"

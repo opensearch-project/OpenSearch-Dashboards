@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { defaultPieChartStyles, PieChartStyleControls } from './pie_vis_config';
+import { defaultPieChartStyles, PieChartStyle } from './pie_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { DEFAULT_OPACITY } from '../constants';
 
@@ -12,7 +12,7 @@ export const createPieSpec = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styleOptions: Partial<PieChartStyleControls>,
+  styleOptions: PieChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {
   const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
@@ -33,7 +33,11 @@ export const createPieSpec = (
       field: categoryField,
       type: 'nominal',
       legend: styleOptions.addLegend
-        ? { title: numericName, orient: styleOptions.legendPosition, symbolLimit: 10 }
+        ? {
+            title: styleOptions.legendTitle,
+            orient: styleOptions.legendPosition,
+            symbolLimit: 10,
+          }
         : null,
     },
   };
@@ -42,7 +46,6 @@ export const createPieSpec = (
     params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
     mark: {
       type: 'arc',
-      // TODO: make radius relative to the chart width/height
       innerRadius: styleOptions.exclusive?.donut ? { expr: '7*stepSize' } : 0,
       radius: { expr: '9*stepSize' },
       tooltip: styleOptions?.tooltipOptions?.mode === 'all',
@@ -59,6 +62,21 @@ export const createPieSpec = (
           { field: numericField, type: 'quantitative', title: numericName },
         ],
       }),
+    },
+  };
+
+  const hoverStateLayer = {
+    mark: {
+      type: 'arc',
+      innerRadius: styleOptions.exclusive?.donut ? { expr: '7*stepSize' } : 0,
+      radius: { expr: '9*stepSize + 0.35*stepSize' },
+      padAngle: styleOptions.exclusive?.donut ? 0.01 : 0,
+    },
+    encoding: {
+      opacity: {
+        value: 0,
+        condition: { param: 'highlight', value: DEFAULT_OPACITY / 3, empty: false },
+      },
     },
   };
 
@@ -98,6 +116,7 @@ export const createPieSpec = (
     data: { values: transformedData },
     layer: [
       markLayer,
+      hoverStateLayer,
       styleOptions.exclusive?.showLabels ? labelLayer : null,
       styleOptions.exclusive?.showValues ? valueLayer : null,
     ].filter(Boolean),

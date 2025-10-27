@@ -3,28 +3,32 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import React, { useCallback, useMemo } from 'react';
+import { Observable } from 'rxjs';
 import { useObservable } from 'react-use';
-import { ChartConfig, VisData } from './visualization_builder.types';
+import { VisData } from './visualization_builder.types';
 import { TableVis } from './table/table_vis';
-import { TableChartStyleControls } from './table/table_vis_config';
+import { defaultTableChartStyles, TableChartStyle } from './table/table_vis_config';
 import { convertStringsToMappings } from './visualization_builder_utils';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { toExpression } from './utils/to_expression';
-import { ExpressionsStart } from '../../../../expressions/public';
+import { ExpressionRendererEvent, ExpressionsStart } from '../../../../expressions/public';
 import { VisualizationEmptyState } from './visualization_empty_state';
 import { visualizationRegistry } from './visualization_registry';
+import { RenderChartConfig } from './types';
+import { opensearchFilters, TimeRange } from '../../../../data/public';
 
 interface Props {
-  data$: BehaviorSubject<VisData | undefined>;
-  visConfig$: BehaviorSubject<ChartConfig | undefined>;
-  showRawTable$: BehaviorSubject<boolean>;
+  data$: Observable<VisData | undefined>;
+  config$: Observable<RenderChartConfig | undefined>;
+  showRawTable$: Observable<boolean>;
   searchContext?: ExecutionContextSearch;
   ExpressionRenderer?: ExpressionsStart['ReactExpressionRenderer'];
+  onSelectTimeRange?: (timeRange?: TimeRange) => void;
 }
 
-const defaultStyleOptions: TableChartStyleControls = {
+const defaultStyleOptions: TableChartStyle = {
+  ...defaultTableChartStyles,
   showColumnFilter: false,
   showFooter: false,
   pageSize: 10,
@@ -33,10 +37,17 @@ const defaultStyleOptions: TableChartStyleControls = {
 
 const PAGE_SIZE_OPTIONS = [10, 50, 100];
 
-export const VisualizationRender = (props: Props) => {
-  const visualizationData = useObservable(props.data$);
-  const visConfig = useObservable(props.visConfig$);
-  const showRawTable = useObservable(props.showRawTable$);
+export const VisualizationRender = ({
+  data$,
+  config$,
+  showRawTable$,
+  searchContext,
+  ExpressionRenderer,
+  onSelectTimeRange,
+}: Props) => {
+  const visualizationData = useObservable(data$);
+  const visConfig = useObservable(config$);
+  const showRawTable = useObservable(showRawTable$);
   const rows = useMemo(() => {
     return visualizationData?.transformedData ?? [];
   }, [visualizationData?.transformedData]);
@@ -57,6 +68,11 @@ export const VisualizationRender = (props: Props) => {
     if (!visualizationData) {
       return;
     }
+
+    if (!visConfig?.type) {
+      return;
+    }
+
     const rule = visualizationRegistry.findRuleByAxesMapping(visConfig?.axesMapping ?? {}, columns);
     if (!rule || !rule.toSpec) {
       return;
@@ -67,23 +83,37 @@ export const VisualizationRender = (props: Props) => {
       visualizationData.numericalColumns,
       visualizationData.categoricalColumns,
       visualizationData.dateColumns,
-      visConfig?.styles,
-      visConfig?.type,
+      visConfig.styles,
+      visConfig.type,
       axisColumnMappings
     );
   }, [columns, visConfig, visualizationData]);
 
-  if (!visualizationData) {
+  const onExpressionEvent = useCallback(
+    async (e: ExpressionRendererEvent) => {
+      if (!onSelectTimeRange) {
+        return;
+      }
+      if (e.name === 'applyFilter') {
+        if (e.data && e.data.filters) {
+          const { timeRange } = opensearchFilters.extractTimeRange(
+            e.data.filters,
+            e.data.timeFieldName
+          );
+          onSelectTimeRange(timeRange);
+        }
+      }
+    },
+    [onSelectTimeRange]
+  );
+
+  if (!visualizationData || columns.length === 0) {
     return null;
   }
 
   if (visConfig?.type === 'table') {
     return (
-      <TableVis
-        styleOptions={visConfig?.styles as TableChartStyleControls}
-        rows={visualizationData?.transformedData ?? []}
-        columns={columns}
-      />
+      <TableVis styleOptions={visConfig.styles as TableChartStyle} rows={rows} columns={columns} />
     );
   }
 
@@ -104,15 +134,16 @@ export const VisualizationRender = (props: Props) => {
 
   const hasSelectionMapping = Object.keys(visConfig?.axesMapping ?? {}).length !== 0;
   if (hasSelectionMapping) {
-    if (!props.ExpressionRenderer) {
+    if (!ExpressionRenderer) {
       return null;
     }
-    const expression = toExpression(props.searchContext, spec);
+    const expression = toExpression(searchContext, spec);
     return (
-      <props.ExpressionRenderer
-        key={JSON.stringify(props.searchContext) + expression}
+      <ExpressionRenderer
+        key={JSON.stringify(searchContext) + expression}
         expression={expression}
-        searchContext={props.searchContext}
+        searchContext={searchContext}
+        onEvent={onExpressionEvent}
       />
     );
   }

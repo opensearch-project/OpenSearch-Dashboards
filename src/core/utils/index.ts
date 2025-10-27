@@ -57,4 +57,5 @@ export {
   ESSENTIAL_USE_CASE_ID,
   OBSERVABILITY_USE_CASE_ID,
   SECURITY_ANALYTICS_USE_CASE_ID,
+  UseCaseId,
 } from './default_nav_groups';

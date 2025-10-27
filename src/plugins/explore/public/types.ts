@@ -37,6 +37,8 @@ import { VisualizationsSetup, VisualizationsStart } from 'src/plugins/visualizat
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { ExpressionsPublicPlugin, ExpressionsStart } from 'src/plugins/expressions/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
+import { ContextProviderStart } from '../../context_provider/public';
+import { DatasetManagementSetup } from '../../dataset_management/public';
 import { Storage, IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
 import { ScopedHistory } from '../../../core/public';
 import { SavedExploreLoader, SavedExplore } from './saved_explore';
@@ -90,11 +92,13 @@ export interface ExploreSetupDependencies {
   opensearchDashboardsLegacy: OpenSearchDashboardsLegacySetup;
   urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
+  contextProvider?: ContextProviderStart;
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   dashboard: DashboardSetup;
+  datasetManagement?: DatasetManagementSetup;
 }
 
 /**
@@ -113,6 +117,7 @@ export interface ExploreStartDependencies {
   visualizations: VisualizationsStart;
   expressions: ExpressionsStart;
   dashboard: DashboardStart;
+  contextProvider?: ContextProviderStart;
 }
 
 // ============================================================================
@@ -174,9 +179,11 @@ export interface ExploreServices {
   visualizationRegistry: VisualizationRegistryService;
   queryPanelActionsRegistry: QueryPanelActionsRegistryService;
   expressions: ExpressionsStart;
+  contextProvider?: ContextProviderStart;
 
   dashboard: DashboardStart;
   keyboardShortcut?: KeyboardShortcutStart;
 
   supportedTypes?: string[];
+  isDatasetManagementEnabled: boolean;
 }

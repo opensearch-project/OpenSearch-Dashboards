@@ -69,7 +69,9 @@ interface RenderCustomDataGridParams {
   rowCount: number;
   sorting?: EuiDataGridSorting;
   pagination?: PaginationParams;
+  showColumnSelector?: boolean;
   toolbarButtons?: React.ReactNode[];
+  secondaryToolbar?: React.ReactNode[];
   fullScreen?: boolean;
   availableWidth?: number;
   defaultHeight?: string;
@@ -83,7 +85,9 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
   rowCount,
   sorting,
   pagination,
+  showColumnSelector = true,
   toolbarButtons = [],
+  secondaryToolbar = [],
   fullScreen = false,
   availableWidth,
   defaultHeight = '500px',
@@ -162,37 +166,42 @@ export const RenderCustomDataGrid: React.FC<RenderCustomDataGridParams> = ({
             minHeight: isTableDataLoading && isEmpty ? '100px' : undefined,
           }}
         >
-          <EuiDataGrid
-            data-test-subj="custom-data-grid"
-            aria-labelledby="custom-data-grid"
-            columns={columns}
-            columnVisibility={{
-              visibleColumns: localVisibleColumns,
-              setVisibleColumns: setLocalVisibleColumns,
-            }}
-            rowCount={displayedRowCount}
-            renderCellValue={(props) =>
-              renderCellValue({
-                ...props,
-                disableInteractions,
-              })
-            }
-            sorting={sorting}
-            toolbarVisibility={{
-              showColumnSelector: true,
-              showSortSelector: !!sorting,
-              showFullScreenSelector: false,
-              additionalControls: toolbarControls,
-            }}
-            pagination={pagination}
-            gridStyle={gridStyle}
-            style={{
-              width: isFullScreen ? '100%' : availableWidth ? `${availableWidth}px` : '100%',
-              height: isFullScreen ? '100%' : pagination ? 'auto' : defaultHeight,
-              maxWidth: isFullScreen ? 'none' : '100%',
-              overflow: isFullScreen ? 'visible' : 'hidden',
-            }}
-          />
+          <div style={{ position: 'relative' }}>
+            <EuiDataGrid
+              data-test-subj="custom-data-grid"
+              aria-labelledby="custom-data-grid"
+              columns={columns}
+              columnVisibility={{
+                visibleColumns: localVisibleColumns,
+                setVisibleColumns: setLocalVisibleColumns,
+              }}
+              rowCount={displayedRowCount}
+              renderCellValue={(props) =>
+                renderCellValue({
+                  ...props,
+                  disableInteractions,
+                })
+              }
+              sorting={sorting}
+              toolbarVisibility={{
+                showColumnSelector,
+                showSortSelector: !!sorting,
+                showFullScreenSelector: false,
+                additionalControls: toolbarControls,
+              }}
+              pagination={pagination}
+              gridStyle={gridStyle}
+              style={{
+                width: isFullScreen ? '100%' : availableWidth ? `${availableWidth}px` : '100%',
+                height: isFullScreen ? '100%' : pagination ? 'auto' : defaultHeight,
+                maxWidth: isFullScreen ? 'none' : '100%',
+                overflow: isFullScreen ? 'visible' : 'hidden',
+              }}
+            />
+            {secondaryToolbar.length > 0 && (
+              <div className="exploreCustomDataGrid__secondaryToolbar">{secondaryToolbar}</div>
+            )}
+          </div>
           {isTableDataLoading && (
             <div className="exploreCustomDataGrid__gridLoadingOverlay">
               <EuiLoadingSpinner data-test-subj="loadingSpinner" size="xl" />

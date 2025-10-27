@@ -1,0 +1,2 @@
+test:
+- Enable dataset in Explore Cypress test ([#10689](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10689))

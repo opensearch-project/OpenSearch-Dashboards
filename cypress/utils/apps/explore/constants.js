@@ -37,6 +37,18 @@ export const INVALID_INDEX = 'index_that_does_not_exist';
 export const TRACE_INDEX_PATTERN = 'otel_v1_apm_span_*';
 export const TRACE_TIME_FIELD = 'endTimeUnixNano';
 export const TRACE_INDEX = 'otel_v1_apm_span_sample_1';
+export const LOG_INDEX_PATTERN = 'logs*';
+export const LOG_TIME_FIELD = '@timestamp';
+export const LOG_INDEX = 'logs_otel_v1_000001';
+
+export const RESOURCES = {
+  DATASETS: {
+    OTEL_V1_APM_SPAN: {
+      title: 'otel-v1-apm-span-*',
+      timeFieldName: 'endTime',
+    },
+  },
+};
 
 /**
  * The dataset type in Explore

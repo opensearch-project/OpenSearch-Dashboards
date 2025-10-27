@@ -25,12 +25,15 @@ interface BarExclusiveVisOptionsProps {
   showBarBorder: boolean;
   barBorderWidth: number;
   barBorderColor: string;
+  useThresholdColor?: boolean;
   onBarSizeModeChange: (barSizeMode: 'auto' | 'manual') => void;
   onBarWidthChange: (barWidth: number) => void;
   onBarPaddingChange: (barPadding: number) => void;
   onShowBarBorderChange: (showBarBorder: boolean) => void;
   onBarBorderWidthChange: (barBorderWidth: number) => void;
   onBarBorderColorChange: (barBorderColor: string) => void;
+  onUseThresholdColorChange: (useThresholdColor: boolean) => void;
+  shouldDisableUseThresholdColor?: boolean;
 }
 
 export const BarExclusiveVisOptions = ({
@@ -40,12 +43,15 @@ export const BarExclusiveVisOptions = ({
   showBarBorder,
   barBorderWidth,
   barBorderColor,
+  useThresholdColor,
   onBarSizeModeChange,
   onBarWidthChange,
   onBarPaddingChange,
   onShowBarBorderChange,
   onBarBorderWidthChange,
   onBarBorderColorChange,
+  onUseThresholdColorChange,
+  shouldDisableUseThresholdColor = false,
 }: BarExclusiveVisOptionsProps) => {
   const sizeModeOptions = [
     {
@@ -70,6 +76,20 @@ export const BarExclusiveVisOptions = ({
       })}
       initialIsOpen={true}
     >
+      {!shouldDisableUseThresholdColor && (
+        <EuiFormRow>
+          <EuiSwitch
+            compressed
+            label={i18n.translate('explore.vis.bar.useThresholdColor', {
+              defaultMessage: 'Use threshold colors',
+            })}
+            data-test-subj="useThresholdColorButton"
+            checked={useThresholdColor ?? false}
+            onChange={(e) => onUseThresholdColorChange(e.target.checked)}
+          />
+        </EuiFormRow>
+      )}
+
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.bar.sizeMode', {
           defaultMessage: 'Size',

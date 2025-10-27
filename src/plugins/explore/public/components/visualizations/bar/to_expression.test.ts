@@ -12,13 +12,13 @@ import {
   createNumericalHistogramBarChart,
   createSingleBarChart,
 } from './to_expression';
-import { defaultBarChartStyles, BarChartStyleControls } from './bar_vis_config';
+import { defaultBarChartStyles, BarChartStyle } from './bar_vis_config';
 import {
   VisColumn,
   VisFieldType,
   VEGASCHEMA,
   AxisRole,
-  ThresholdLineStyle,
+  ThresholdMode,
   AggregationType,
 } from '../types';
 
@@ -159,7 +159,7 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'manual',
         barWidth: 0.5,
@@ -192,7 +192,7 @@ describe('bar to_expression', () => {
     });
 
     test('does not apply size and spacing when barSizeMode is auto', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'auto',
         barWidth: 0.5,
@@ -227,17 +227,11 @@ describe('bar to_expression', () => {
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#00FF00',
-            show: true,
-            style: ThresholdLineStyle.Full,
-            value: 15,
-            width: 2,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const mockAxisColumnMappings = {
@@ -259,7 +253,7 @@ describe('bar to_expression', () => {
       const thresholdLayer = spec.layer[1];
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
-      expect(thresholdLayer.mark.strokeWidth).toBe(2);
+      expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 
@@ -295,11 +289,20 @@ describe('bar to_expression', () => {
       expect(spec.$schema).toBe(VEGASCHEMA);
       expect(spec.data.values).toBe(mockData);
 
-      const encoding = spec.layer[0].encoding;
+      const mainLayer = spec.layer[0];
+      const encoding = mainLayer.encoding;
       // Check encoding
       expect(encoding.x.field).toBe('category');
       expect(encoding.y.field).toBe('count');
       expect(encoding.color.field).toBe('category2');
+
+      // select time range params
+      expect(spec.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     test('handles different title display options', () => {
@@ -398,17 +401,11 @@ describe('bar to_expression', () => {
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#00FF00',
-            show: true,
-            style: ThresholdLineStyle.Full,
-            value: 15,
-            width: 2,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const spec = createStackedBarSpec(
@@ -430,7 +427,7 @@ describe('bar to_expression', () => {
       const thresholdLayer = spec.layer[1];
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
-      expect(thresholdLayer.mark.strokeWidth).toBe(2);
+      expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
   });
@@ -463,6 +460,14 @@ describe('bar to_expression', () => {
       expect(mainLayer.encoding.x.type).toBe('temporal');
       expect(mainLayer.encoding.y.field).toBe('count');
       expect(mainLayer.encoding.y.type).toBe('quantitative');
+
+      // select time range params
+      expect(spec.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     test('handles different title display options', () => {
@@ -527,7 +532,7 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'manual',
         barWidth: 0.5,
@@ -561,17 +566,11 @@ describe('bar to_expression', () => {
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#00FF00',
-            show: true,
-            style: ThresholdLineStyle.Full,
-            value: 15,
-            width: 2,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const mockAxisColumnMappings = {
@@ -592,7 +591,7 @@ describe('bar to_expression', () => {
       const thresholdLayer = spec.layer[1];
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
-      expect(thresholdLayer.mark.strokeWidth).toBe(2);
+      expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 
@@ -660,13 +659,22 @@ describe('bar to_expression', () => {
       expect(spec.$schema).toBe(VEGASCHEMA);
       expect(spec.data.values).toBe(mockData);
 
-      const encoding = spec.layer[0].encoding;
+      const mainLayer = spec.layer[0];
+      const encoding = mainLayer.encoding;
       // Check encoding
       expect(encoding.x.field).toBe('date');
       expect(encoding.x.type).toBe('temporal');
       expect(encoding.y.field).toBe('count');
       expect(encoding.y.type).toBe('quantitative');
       expect(encoding.color.field).toBe('category');
+
+      // select time range params
+      expect(spec.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     test('handles different title display options', () => {
@@ -735,7 +743,7 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'manual',
         barWidth: 0.5,
@@ -771,17 +779,11 @@ describe('bar to_expression', () => {
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#00FF00',
-            show: true,
-            style: ThresholdLineStyle.Full,
-            value: 15,
-            width: 2,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const mockAxisColumnMappings = {
@@ -805,7 +807,7 @@ describe('bar to_expression', () => {
       const thresholdLayer = spec.layer[1];
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
-      expect(thresholdLayer.mark.strokeWidth).toBe(2);
+      expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 
@@ -875,10 +877,19 @@ describe('bar to_expression', () => {
       expect(spec.facet).toBeDefined();
       expect(spec.facet.field).toBe('category2');
 
+      const mainLayer = spec.spec.layer[0];
       // Check encoding in the spec
-      expect(spec.spec.layer[0].encoding.x.field).toBe('date');
-      expect(spec.spec.layer[0].encoding.y.field).toBe('count');
-      expect(spec.spec.layer[0].encoding.color.field).toBe('category');
+      expect(mainLayer.encoding.x.field).toBe('date');
+      expect(mainLayer.encoding.y.field).toBe('count');
+      expect(mainLayer.encoding.color.field).toBe('category');
+
+      // select time range params
+      expect(spec.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     test('handles different title display options', () => {
@@ -948,7 +959,7 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'manual',
         barWidth: 0.5,
@@ -985,17 +996,11 @@ describe('bar to_expression', () => {
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#00FF00',
-            show: true,
-            style: ThresholdLineStyle.Full,
-            value: 15,
-            width: 2,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const mockAxisColumnMappings = {
@@ -1019,7 +1024,7 @@ describe('bar to_expression', () => {
       const thresholdLayer = spec.spec.layer[1];
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
-      expect(thresholdLayer.mark.strokeWidth).toBe(2);
+      expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 
@@ -1099,6 +1104,14 @@ describe('bar to_expression', () => {
       expect(mainLayer.encoding.y.field).toBe('sum');
       expect(mainLayer.encoding.y.aggregate).toBe('sum');
       expect(mainLayer.encoding.y.type).toBe('quantitative');
+
+      // select time range params
+      expect(spec.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     test('applies bucket options correctly', () => {
@@ -1144,6 +1157,14 @@ describe('bar to_expression', () => {
       expect(mainLayer.encoding.x.field).toBe('count');
       expect(mainLayer.encoding.x.type).toBe('quantitative');
       expect(spec.layer[0].encoding.y.aggregate).toBe('count');
+
+      // select time range params
+      expect(spec.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     test('applies bucket options correctly, single bar aggregation should only be count', () => {

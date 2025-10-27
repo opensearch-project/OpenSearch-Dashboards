@@ -4,7 +4,6 @@
  */
 
 import { toExpression } from './to_expression';
-import { VisColumn, VisFieldType } from '../types';
 import * as expressionsPublic from '../../../../../expressions/public';
 
 // Mock the expressions module

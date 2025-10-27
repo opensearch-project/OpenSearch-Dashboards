@@ -6,17 +6,17 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { AreaChartStyleControls } from './area_vis_config';
+import { AreaChartStyle, AreaChartStyleOptions } from './area_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
-import { LegendOptionsPanel } from '../style_panel/legend/legend';
-import { ThresholdOptions } from '../style_panel/threshold_lines/threshold';
+import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesOptions } from '../style_panel/axes/axes';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole } from '../types';
+import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 
-export type AreaVisStyleControlsProps = StyleControlsProps<AreaChartStyleControls>;
+export type AreaVisStyleControlsProps = StyleControlsProps<AreaChartStyle>;
 
 export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
   styleOptions,
@@ -29,9 +29,9 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof AreaChartStyleControls>(
+  const updateStyleOption = <K extends keyof AreaChartStyleOptions>(
     key: K,
-    value: AreaChartStyleControls[K]
+    value: AreaChartStyleOptions[K]
   ) => {
     onStyleChange({ [key]: value });
   };
@@ -60,6 +60,13 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
 
       {hasMappingSelected && (
         <>
+          <EuiFlexItem>
+            <ThresholdPanel
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+              showThresholdStyle={true}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AxesOptions
               categoryAxes={styleOptions.categoryAxes}
@@ -75,33 +82,11 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
             />
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <ThresholdOptions
-              thresholdLines={styleOptions.thresholdLines}
-              onThresholdLinesChange={(thresholdLines) =>
-                updateStyleOption('thresholdLines', thresholdLines)
-              }
-            />
-          </EuiFlexItem>
-
-          {shouldShowLegend && (
-            <EuiFlexItem grow={false}>
-              <LegendOptionsPanel
-                legendOptions={{
-                  show: styleOptions.addLegend,
-                  position: styleOptions.legendPosition,
-                }}
-                onLegendOptionsChange={(legendOptions) => {
-                  if (legendOptions.show !== undefined) {
-                    updateStyleOption('addLegend', legendOptions.show);
-                  }
-                  if (legendOptions.position !== undefined) {
-                    updateStyleOption('legendPosition', legendOptions.position);
-                  }
-                }}
-              />
-            </EuiFlexItem>
-          )}
+          <LegendOptionsWrapper
+            styleOptions={styleOptions}
+            updateStyleOption={updateStyleOption}
+            shouldShow={shouldShowLegend}
+          />
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel

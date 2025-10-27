@@ -1,0 +1,14 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.contextPills {
+  padding: 8px 12px;
+  background-color: var(--eui-color-lightest-shade);
+  border-top: 1px solid var(--eui-color-light-shade);
+
+  &__pill {
+    max-width: 200px;
+  }
+}

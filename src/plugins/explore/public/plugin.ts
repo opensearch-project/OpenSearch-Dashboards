@@ -93,6 +93,7 @@ export class ExplorePlugin
   private servicesInitialized: boolean = false;
   private urlGenerator?: import('./types').ExplorePluginStart['urlGenerator'];
   private initializeServices?: () => { core: CoreStart; plugins: ExploreStartDependencies };
+  private isDatasetManagementEnabled: boolean = false;
 
   // Registries
   private tabRegistry: TabRegistryService = new TabRegistryService();
@@ -107,6 +108,9 @@ export class ExplorePlugin
     core: CoreSetup<ExploreStartDependencies, ExplorePluginStart>,
     setupDeps: ExploreSetupDependencies
   ): ExplorePluginSetup {
+    // Check if dataset management plugin is enabled
+    this.isDatasetManagementEnabled = !!setupDeps.datasetManagement;
+
     // Set usage collector
     setUsageCollector(setupDeps.usageCollection);
     this.registerExploreVisualization(core, setupDeps);
@@ -306,7 +310,8 @@ export class ExplorePlugin
           this.initializerContext,
           this.tabRegistry,
           this.visualizationRegistryService,
-          this.queryPanelActionsRegistryService
+          this.queryPanelActionsRegistryService,
+          this.isDatasetManagementEnabled
         );
 
         // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
@@ -372,7 +377,7 @@ export class ExplorePlugin
     );
     core.application.register(createExploreApp());
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+    const navLinks = [
       {
         id: PLUGIN_ID,
         category: undefined,
@@ -384,21 +389,29 @@ export class ExplorePlugin
         order: 300,
         parentNavLinkId: PLUGIN_ID,
       },
-      {
+    ];
+
+    // Only add Traces nav link if the discoverTraces feature is enabled
+    if (this.config.discoverTraces?.enabled) {
+      navLinks.push({
         id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
-      },
-      // uncomment when metrics is ready for launch
-      /*
-      {
-        id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
-        category: undefined,
-        order: 300,
-        parentNavLinkId: PLUGIN_ID,
-      }, */
-    ]);
+      });
+    }
+
+    // uncomment when metrics is ready for launch
+    /*
+    navLinks.push({
+      id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
+      category: undefined,
+      order: 300,
+      parentNavLinkId: PLUGIN_ID,
+    });
+    */
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks);
     this.registerEmbeddable(core, setupDeps);
 
     setupDeps.urlForwarding.forwardApp('doc', PLUGIN_ID, (path) => {
@@ -460,7 +473,8 @@ export class ExplorePlugin
         this.initializerContext,
         this.tabRegistry,
         this.visualizationRegistryService,
-        this.queryPanelActionsRegistryService
+        this.queryPanelActionsRegistryService,
+        this.isDatasetManagementEnabled
       );
       setLegacyServices({
         ...services,

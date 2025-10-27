@@ -203,7 +203,7 @@ describe('detect_optimal_tab', () => {
       spy.mockRestore();
     });
 
-    it('should not set tab when no results are available', async () => {
+    it('should not set tab as empty when no results are available', async () => {
       const mockStateWithoutResults = {
         query: { query: 'SELECT * FROM logs' },
         results: {},
@@ -222,11 +222,10 @@ describe('detect_optimal_tab', () => {
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
-
-      expect(mockSetActiveTab).not.toHaveBeenCalled();
+      expect(mockSetActiveTab).toHaveBeenCalledWith('');
     });
 
-    it('should not set tab when results have no hits', async () => {
+    it('should not set tab as empty when results have no hits', async () => {
       const mockStateWithEmptyResults = {
         query: { query: 'SELECT * FROM logs' },
         results: {
@@ -250,8 +249,7 @@ describe('detect_optimal_tab', () => {
       });
 
       await thunk(mockDispatch, mockGetState, undefined);
-
-      expect(mockSetActiveTab).not.toHaveBeenCalled();
+      expect(mockSetActiveTab).toHaveBeenCalledWith('');
     });
 
     it('should use defaultPrepareQueryString when tab has no prepareQuery function', async () => {

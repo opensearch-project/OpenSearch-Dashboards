@@ -6,6 +6,7 @@
 import { getDefaultQuery, setDatePickerDatesAndSearchIfRelevant } from './shared';
 import { verifyDiscoverPageState } from './saved';
 import { DatasetTypes, QueryLanguages } from './constants';
+import { DEFAULT_OPTIONS } from '../../commands.core';
 
 /**
  * Returns the expected hit count, if relevant, for the provided datasetType + language
@@ -56,6 +57,7 @@ export const generateDatasetSelectorTestConfiguration = (dataset, datasetType, l
   const baseConfig = {
     dataset,
     datasetType,
+    dataSource: DEFAULT_OPTIONS.dataSource.title,
     language: language.name,
     testName: `${language.name}-${datasetType}`,
   };

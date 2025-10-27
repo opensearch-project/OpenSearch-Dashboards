@@ -1,2 +1,0 @@
-fix:
-- Discover visualization empty state should use correct PPL ([#10365](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10365))
