@@ -59,6 +59,17 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
       </EuiFlexItem>
       {hasMappingSelected && (
         <>
+          <EuiFlexItem grow={false}>
+            <ScatterExclusiveVisOptions
+              styles={styleOptions.exclusive}
+              useThresholdColor={styleOptions?.useThresholdColor}
+              onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
+              onUseThresholdColorChange={(useThresholdColor) =>
+                updateStyleOption('useThresholdColor', useThresholdColor)
+              }
+              shouldDisableUseThresholdColor={hasColorMapping}
+            />
+          </EuiFlexItem>
           <EuiFlexItem>
             <ThresholdPanel
               thresholdsOptions={styleOptions.thresholdOptions}
@@ -74,17 +85,6 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
               onStandardAxesChange={(standardAxes) =>
                 updateStyleOption('standardAxes', standardAxes)
               }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ScatterExclusiveVisOptions
-              styles={styleOptions.exclusive}
-              useThresholdColor={styleOptions?.useThresholdColor}
-              onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
-              onUseThresholdColorChange={(useThresholdColor) =>
-                updateStyleOption('useThresholdColor', useThresholdColor)
-              }
-              shouldDisableUseThresholdColor={hasColorMapping}
             />
           </EuiFlexItem>
 

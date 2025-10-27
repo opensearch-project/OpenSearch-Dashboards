@@ -69,7 +69,7 @@ export const defaultBarChartStyles: BarChartStyle = {
   // Basic controls
   switchAxes: false,
   addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legendPosition: Positions.BOTTOM,
   tooltipOptions: {
     mode: 'all',
   },

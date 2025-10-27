@@ -58,7 +58,7 @@ export type LineChartStyle = Required<
 
 export const defaultLineChartStyles: LineChartStyle = {
   addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legendPosition: Positions.BOTTOM,
   addTimeMarker: false,
 
   lineStyle: 'both',

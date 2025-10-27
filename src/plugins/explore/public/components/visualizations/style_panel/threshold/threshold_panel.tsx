@@ -16,12 +16,14 @@ export interface ThresholdPanelProps {
   thresholdsOptions?: ThresholdOptions;
   onChange: (thresholds: ThresholdOptions) => void;
   showThresholdStyle?: boolean;
+  initialIsOpen?: boolean;
 }
 
 export const ThresholdPanel = ({
   thresholdsOptions,
   onChange,
   showThresholdStyle = false,
+  initialIsOpen = false,
 }: ThresholdPanelProps) => {
   const updateThresholdOption = <K extends keyof ThresholdOptions>(
     key: K,
@@ -40,7 +42,7 @@ export const ThresholdPanel = ({
       accordionLabel={i18n.translate('explore.stylePanel.threshold.title', {
         defaultMessage: 'Thresholds',
       })}
-      initialIsOpen={true}
+      initialIsOpen={initialIsOpen}
     >
       <ThresholdCustomValues
         thresholds={thresholdsOptions?.thresholds || []}
