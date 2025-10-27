@@ -31,10 +31,11 @@ export const createPieSpec = (
     },
     color: {
       field: categoryField,
+      // if color mapping is numerical, also treat it as nominal
       type: 'nominal',
       legend: styleOptions.addLegend
         ? {
-            title: styleOptions.legendTitle,
+            title: styleOptions.legendTitle || colorColumn?.name,
             orient: styleOptions.legendPosition,
             symbolLimit: 10,
           }

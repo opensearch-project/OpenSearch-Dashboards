@@ -312,10 +312,10 @@ export const createGroupedTimeBarChart = (
       },
       color: {
         field: categoryField,
-        type: getSchemaByAxis(colorColumn),
+        type: 'nominal',
         legend: styles.addLegend
           ? {
-              title: styles.legendTitle,
+              title: styles.legendTitle || colorColumn?.name,
               orient: styles.legendPosition?.toLowerCase() || 'right',
               symbolType: styles.legendShape ?? 'circle',
             }
@@ -437,10 +437,10 @@ export const createFacetedTimeBarChart = (
     },
     color: {
       field: category1Field,
-      type: getSchemaByAxis(colorMapping),
+      type: 'nominal',
       legend: styles.addLegend
         ? {
-            title: styles.legendTitle,
+            title: styles.legendTitle || colorMapping?.name,
             orient: styles.legendPosition?.toLowerCase() || 'right',
             symbolType: styles.legendShape ?? 'circle',
           }
@@ -557,7 +557,7 @@ export const createStackedBarSpec = (
         type: 'nominal',
         legend: styles.addLegend
           ? {
-              title: styles.legendTitle,
+              title: styles.legendTitle || colorMapping?.name,
               orient: styles.legendPosition?.toLowerCase() || 'bottom',
               symbolType: styles.legendShape ?? 'circle',
             }

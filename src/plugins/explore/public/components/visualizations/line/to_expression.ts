@@ -397,7 +397,7 @@ export const createMultiLineChart = (
         legend:
           styles?.addLegend !== false
             ? {
-                title: styles.legendTitle,
+                title: styles.legendTitle || colorColumn?.name,
                 orient: styles?.legendPosition || Positions.RIGHT,
               }
             : null,
@@ -543,7 +543,7 @@ export const createFacetedMultiLineChart = (
       legend:
         styles?.addLegend !== false
           ? {
-              title: styles.legendTitle,
+              title: styles.legendTitle || colorMapping?.name,
               orient: styles?.legendPosition || Positions.RIGHT,
             }
           : null,

@@ -216,7 +216,7 @@ export const createMultiAreaChart = (
         type: 'nominal',
         legend: styles.addLegend
           ? {
-              title: styles.legendTitle,
+              title: styles.legendTitle || colorColumn?.name,
               orient: styles.legendPosition?.toLowerCase() || 'right',
             }
           : null,
@@ -359,7 +359,7 @@ export const createFacetedMultiAreaChart = (
       type: 'nominal',
       legend: styles.addLegend
         ? {
-            title: styles.legendTitle,
+            title: styles.legendTitle || colorMapping?.name,
             orient: styles.legendPosition?.toLowerCase() || 'right',
           }
         : null,

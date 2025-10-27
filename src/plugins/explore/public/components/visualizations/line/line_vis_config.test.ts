@@ -114,7 +114,7 @@ describe('line_vis_config', () => {
     it('should have available mappings configured', () => {
       const config = createLineConfig();
 
-      expect(config.ui.availableMappings).toHaveLength(5);
+      expect(config.ui.availableMappings).toHaveLength(7);
       expect(config.ui.availableMappings[0]).toHaveProperty('x');
       expect(config.ui.availableMappings[0]).toHaveProperty('y');
     });

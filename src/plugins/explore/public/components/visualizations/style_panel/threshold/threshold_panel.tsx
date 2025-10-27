@@ -56,7 +56,7 @@ export const ThresholdPanel = ({
           <EuiSpacer />
           <EuiFormRow
             label={i18n.translate('explore.stylePanel.threshold.thresholdMode', {
-              defaultMessage: 'Threshold mode',
+              defaultMessage: 'Threshold lines mode',
             })}
           >
             <EuiSelect
