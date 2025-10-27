@@ -101,61 +101,76 @@ jest.mock('../style_panel/tooltip/tooltip', () => ({
 }));
 
 jest.mock('../style_panel/axes/axes', () => ({
-  AxesOptions: jest.fn(({ categoryAxes, valueAxes, onCategoryAxesChange, onValueAxesChange }) => (
-    <div data-test-subj="axes-panel">
-      <button
-        data-test-subj="update-category-axes"
-        onClick={() =>
-          onCategoryAxesChange([
-            ...categoryAxes,
-            {
-              id: 'new-category',
-              type: 'category' as const,
-              position: 'bottom',
-              show: true,
-              labels: {
+  AxesOptions: jest.fn(
+    ({
+      categoryAxes,
+      valueAxes,
+      onCategoryAxesChange,
+      onValueAxesChange,
+      onShowFullTimeRangeChange,
+      showFullTimeRange,
+    }) => (
+      <div data-test-subj="axes-panel">
+        <button
+          data-test-subj="update-category-axes"
+          onClick={() =>
+            onCategoryAxesChange([
+              ...categoryAxes,
+              {
+                id: 'new-category',
+                type: 'category' as const,
+                position: 'bottom',
                 show: true,
-                filter: true,
-                rotate: 0,
-                truncate: 100,
+                labels: {
+                  show: true,
+                  filter: true,
+                  rotate: 0,
+                  truncate: 100,
+                },
+                title: {
+                  text: 'New Category',
+                },
               },
-              title: {
-                text: 'New Category',
-              },
-            },
-          ])
-        }
-      >
-        Update Category Axes
-      </button>
-      <button
-        data-test-subj="update-value-axes"
-        onClick={() =>
-          onValueAxesChange([
-            ...valueAxes,
-            {
-              id: 'new-value',
-              name: 'NewAxis',
-              type: 'value' as const,
-              position: 'left',
-              show: true,
-              labels: {
+            ])
+          }
+        >
+          Update Category Axes
+        </button>
+        <button
+          data-test-subj="update-value-axes"
+          onClick={() =>
+            onValueAxesChange([
+              ...valueAxes,
+              {
+                id: 'new-value',
+                name: 'NewAxis',
+                type: 'value' as const,
+                position: 'left',
                 show: true,
-                rotate: 0,
-                filter: false,
-                truncate: 100,
+                labels: {
+                  show: true,
+                  rotate: 0,
+                  filter: false,
+                  truncate: 100,
+                },
+                title: {
+                  text: 'New Value',
+                },
               },
-              title: {
-                text: 'New Value',
-              },
-            },
-          ])
-        }
-      >
-        Update Value Axes
-      </button>
-    </div>
-  )),
+            ])
+          }
+        >
+          Update Value Axes
+        </button>
+        <button
+          data-test-subj="toggle-full-time-range"
+          onClick={() => onShowFullTimeRangeChange(!showFullTimeRange)}
+        >
+          Toggle Full Time Range
+        </button>
+      </div>
+    )
+  ),
 }));
 
 jest.mock('../style_panel/title/title', () => ({
@@ -235,6 +250,7 @@ describe('AreaVisStyleControls', () => {
         show: true,
         titleName: '',
       },
+      showFullTimeRange: false,
     },
     onStyleChange: jest.fn(),
     axisColumnMappings: {
@@ -304,6 +320,10 @@ describe('AreaVisStyleControls', () => {
   test('shows legend when FACET mapping is present', () => {
     const props = {
       ...defaultProps,
+      styleOptions: {
+        ...defaultProps.styleOptions,
+        showFullTimeRange: false,
+      },
       axisColumnMappings: {
         ...defaultProps.axisColumnMappings,
         [AxisRole.FACET]: {
@@ -544,6 +564,16 @@ describe('AreaVisStyleControls', () => {
           titleName: 'New Chart Title',
         },
       });
+    });
+  });
+
+  test('updates showFullTimeRange correctly', async () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId('toggle-full-time-range'));
+
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+      showFullTimeRange: true, // Default is false, so toggling sets it to true
     });
   });
 });

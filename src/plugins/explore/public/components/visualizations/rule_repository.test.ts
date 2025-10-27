@@ -118,6 +118,7 @@ describe('rule_repository', () => {
   // Sample transformed data for testing
   const transformedData = [{ 'field-0': '2023-01-01', 'field-1': 100, 'field-2': 'Category A' }];
   const styleOptions = { showLine: true };
+  const timeRange = { from: '2023-01-01', to: '2023-01-02' };
 
   describe('ALL_VISUALIZATION_RULES', () => {
     it('should export an array of visualization rules', () => {
@@ -178,7 +179,10 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
-        styleOptions
+        styleOptions,
+        'line',
+        undefined,
+        timeRange
       );
 
       expect(expression).toBe('simple-line-chart-expression');
@@ -189,7 +193,8 @@ describe('rule_repository', () => {
         numericalColumns,
         dateColumns,
         styleOptions,
-        undefined
+        undefined,
+        timeRange
       );
     });
   });
@@ -214,7 +219,10 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
-        styleOptions
+        styleOptions,
+        'line',
+        undefined,
+        timeRange
       );
 
       expect(expression).toBe('line-bar-chart-expression');
@@ -225,7 +233,8 @@ describe('rule_repository', () => {
         numericalColumns,
         dateColumns,
         styleOptions,
-        undefined
+        undefined,
+        timeRange
       );
     });
   });
@@ -250,7 +259,10 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
-        styleOptions
+        styleOptions,
+        'line',
+        undefined,
+        timeRange
       );
       expect(expression).toBe('multi-line-chart-expression');
       expect(createMultiLineChart).toHaveBeenCalledWith(
@@ -259,7 +271,8 @@ describe('rule_repository', () => {
         categoricalColumns,
         dateColumns,
         styleOptions,
-        undefined
+        undefined,
+        timeRange
       );
     });
   });
@@ -284,7 +297,10 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
-        styleOptions
+        styleOptions,
+        'line',
+        undefined,
+        timeRange
       );
 
       expect(expression).toBe('faceted-multi-line-chart-expression');
@@ -296,7 +312,8 @@ describe('rule_repository', () => {
         categoricalColumns,
         dateColumns,
         styleOptions,
-        undefined
+        undefined,
+        timeRange
       );
     });
   });

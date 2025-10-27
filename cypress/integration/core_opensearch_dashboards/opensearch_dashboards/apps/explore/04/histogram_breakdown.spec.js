@@ -38,6 +38,10 @@ const runHistogramBreakdownTests = () => {
         page: 'explore/logs',
         isEnhancement: true,
       });
+
+      cy.setAdvancedSetting({
+        'explore:experimental': true,
+      });
     });
 
     after(() => {
