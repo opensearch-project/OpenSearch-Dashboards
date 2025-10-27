@@ -236,41 +236,6 @@ describe('<HeaderSearchBar />', () => {
     });
   });
 
-  it('should display submit command hint when submit commands are available', async () => {
-    const submitCommandRun = jest.fn();
-    const globalSearchSubmitCommands = [
-      {
-        id: 'submit-command',
-        name: 'Submit Command',
-        run: submitCommandRun,
-      },
-    ];
-
-    const { getByTestId, queryByText } = render(
-      <HeaderSearchBar
-        globalSearchCommands={globalSearchCommands}
-        globalSearchSubmitCommands={globalSearchSubmitCommands}
-        panel
-      />
-    );
-
-    const searchInput = getByTestId('global-search-input');
-
-    // Verify placeholder includes submit command name
-    expect(searchInput).toHaveAttribute('placeholder', 'Search or Submit Command');
-
-    act(() => {
-      fireEvent.change(searchInput, {
-        target: { value: 'test query' },
-      });
-    });
-
-    // Verify submit command hint is displayed
-    await waitFor(() => {
-      expect(queryByText('Press Enter to Submit Command.')).toBeInTheDocument();
-    });
-  });
-
   it('should call onSearchResultClick callback when provided', async () => {
     const onSearchResultClick = jest.fn();
     const mockSearchFn = jest.fn().mockImplementation((query, callback) => {
@@ -377,6 +342,111 @@ describe('<HeaderSearchBar />', () => {
 
     await waitFor(() => {
       expect(queryByText('test result')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should trigger action commands when Enter key is pressed', async () => {
+    const actionFn = jest.fn();
+    const commandsWithAction: GlobalSearchCommand[] = [
+      {
+        id: 'action-command',
+        type: 'ACTIONS',
+        run: jest.fn().mockResolvedValue([]),
+        action: actionFn,
+      },
+      {
+        id: 'regular-command',
+        type: 'PAGES',
+        run: searchFn,
+      },
+    ];
+
+    const { getByTestId } = render(
+      <HeaderSearchBar globalSearchCommands={commandsWithAction} panel />
+    );
+
+    const searchInput = getByTestId('global-search-input');
+
+    // Type in the search input
+    act(() => {
+      fireEvent.change(searchInput, {
+        target: { value: 'test query' },
+      });
+    });
+
+    // Press Enter key
+    act(() => {
+      fireEvent.keyDown(searchInput, {
+        key: 'Enter',
+        code: 'Enter',
+      });
+    });
+    act(() => {
+      fireEvent.keyUp(searchInput, {
+        key: 'Enter',
+        code: 'Enter',
+      });
+    });
+
+    await waitFor(() => {
+      expect(actionFn).toHaveBeenCalledWith({
+        content: 'test query',
+      });
+    });
+  });
+
+  it('should display custom input placeholder from commands', () => {
+    const customPlaceholder = 'Search for custom items';
+    const commandsWithPlaceholder: GlobalSearchCommand[] = [
+      {
+        id: 'custom',
+        type: 'PAGES',
+        run: searchFn,
+        inputPlaceholder: customPlaceholder,
+      },
+    ];
+
+    const { getByTestId } = render(
+      <HeaderSearchBar globalSearchCommands={commandsWithPlaceholder} panel />
+    );
+
+    const searchInput = getByTestId('global-search-input');
+    expect(searchInput).toHaveAttribute('placeholder', customPlaceholder);
+  });
+
+  it('should include ACTIONS type commands in filtered results', async () => {
+    const actionSearchFn = jest.fn().mockResolvedValue([<EuiText>action result</EuiText>]);
+    const commandsWithActions: GlobalSearchCommand[] = [
+      {
+        id: 'page-command',
+        type: 'PAGES',
+        run: searchFn,
+      },
+      {
+        id: 'action-command',
+        type: 'ACTIONS',
+        run: actionSearchFn,
+      },
+    ];
+
+    const { getByTestId, queryByText } = render(
+      <HeaderSearchBar globalSearchCommands={commandsWithActions} panel />
+    );
+
+    searchFn.mockResolvedValue([<EuiText>page result</EuiText>]);
+
+    act(() => {
+      fireEvent.change(getByTestId('global-search-input'), {
+        target: { value: 'test' },
+      });
+    });
+
+    await waitFor(() => {
+      // Both PAGES and ACTIONS commands should be called
+      expect(searchFn).toHaveBeenCalled();
+      expect(actionSearchFn).toHaveBeenCalled();
+      expect(queryByText('page result')).toBeInTheDocument();
+      expect(queryByText('action result')).toBeInTheDocument();
     });
   });
 });

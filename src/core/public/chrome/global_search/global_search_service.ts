@@ -25,6 +25,12 @@ export const SearchCommandTypes = {
     }),
     alias: SAVED_OBJECTS_SYMBOL,
   },
+  ACTIONS: {
+    description: i18n.translate('core.globalSearch.actions.description', {
+      defaultMessage: 'Actions',
+    }),
+    alias: null,
+  },
 } as const;
 
 export type SearchCommandKeyTypes = keyof typeof SearchCommandTypes;
@@ -42,21 +48,38 @@ export interface GlobalSearchCommand {
    * @type {SearchCommandTypes}
    */
   type: SearchCommandKeyTypes;
+
+  /**
+   * Defines the placeholder text displayed in the global search input field.
+   * When multiple commands specify a placeholder, only the first registered command's placeholder will be used.
+   *
+   * @example 'Search pages, assets, and actions...'
+   */
+  inputPlaceholder?: string;
+
   /**
    * do the search and return search result with a React element
    * @param value search query
    * @param callback callback function when search is done
    */
   run(value: string, callback?: () => void, abortSignal?: AbortSignal): Promise<ReactNode[]>;
-}
 
-/**
- * @experimental
- */
-export interface GlobalSearchSubmitCommand {
-  id: string;
-  name: string;
-  run: (payload: { content: string }) => void;
+  /**
+   * Callback function executed when the user presses Enter in the global search bar.
+   * This allows commands to perform custom actions based on the search query, such as navigation or triggering specific functionality.
+   *
+   * @param payload - The payload object containing the search content
+   * @param payload.content - The search query string entered by the user
+   *
+   * @example
+   * ```typescript
+   * action: ({ content }) => {
+   *   // Navigate to search results page
+   *   window.location.href = `/search?q=${encodeURIComponent(content)}`;
+   * }
+   * ```
+   */
+  action?: (payload: { content: string }) => void;
 }
 
 /**
@@ -85,27 +108,6 @@ export interface GlobalSearchServiceSetupContract {
    * ```
    */
   registerSearchCommand(searchCommand: GlobalSearchCommand): void;
-
-  /**
-   * Registers a submit command that will be available when users submit content from the global search bar.
-   * Submit commands allow plugins to handle user submissions with custom actions.
-   *
-   * @param searchResultCommand - The submit command to register
-   * @throws Warning if a command with the same ID already exists
-   *
-   * @example
-   * ```typescript
-   * chrome.globalSearch.registerSearchSubmitCommand({
-   *   id: 'my-submit-command',
-   *   name: 'Create New Item',
-   *   run: (payload) => {
-   *     // Handle the submitted content
-   *     console.log('User submitted:', payload.content);
-   *   }
-   * });
-   * ```
-   */
-  registerSearchSubmitCommand(searchResultCommand: GlobalSearchSubmitCommand): void;
 }
 
 /**
@@ -142,32 +144,19 @@ export interface GlobalSearchServiceStartContract {
   unregisterSearchCommand(id: string): void;
 
   /**
-   * Unregisters a previously registered submit command by its ID.
-   * This removes the command from the list of available submit commands.
+   * Returns an observable stream of all registered search commands.
+   * Subscribers will receive updates whenever search commands are added or removed.
    *
-   * @param id - The unique identifier of the submit command to unregister
-   *
-   * @example
-   * ```typescript
-   * chrome.globalSearch.unregisterSearchSubmitCommand('my-submit-command');
-   * ```
-   */
-  unregisterSearchSubmitCommand(id: string): void;
-
-  /**
-   * Returns an observable stream of all registered submit commands.
-   * Subscribers will receive updates whenever submit commands are added or removed.
-   *
-   * @returns An Observable that emits the current array of GlobalSearchSubmitCommand instances
+   * @returns An Observable that emits the current array of GlobalSearchCommand instances
    *
    * @example
    * ```typescript
-   * chrome.globalSearch.getSearchSubmitCommands$().subscribe(commands => {
-   *   console.log(`Available submit commands: ${commands.length}`);
+   * chrome.globalSearch.getAllSearchCommands$().subscribe(commands => {
+   *   console.log(`Available commands: ${commands.length}`);
    * });
    * ```
    */
-  getSearchSubmitCommands$: () => Observable<GlobalSearchSubmitCommand[]>;
+  getAllSearchCommands$: () => Observable<GlobalSearchCommand[]>;
 }
 
 /**
@@ -188,8 +177,11 @@ export interface GlobalSearchServiceStartContract {
  * @experimental
  */
 export class GlobalSearchService {
-  private searchCommands: GlobalSearchCommand[] = [];
-  private searchSubmitCommands$ = new BehaviorSubject<GlobalSearchSubmitCommand[]>([]);
+  private searchCommands$ = new BehaviorSubject<GlobalSearchCommand[]>([]);
+
+  private get searchCommands() {
+    return this.searchCommands$.getValue();
+  }
 
   private registerSearchCommand(searchHandler: GlobalSearchCommand) {
     const exists = this.searchCommands.find((item) => {
@@ -200,48 +192,27 @@ export class GlobalSearchService {
       console.warn(`Duplicate SearchCommands id ${searchHandler.id} found`);
       return;
     }
-    this.searchCommands.push(searchHandler);
+    this.searchCommands$.next([...this.searchCommands, searchHandler]);
   }
 
   private unregisterSearchCommand(id: string) {
-    this.searchCommands = this.searchCommands.filter((item) => {
-      return item.id !== id;
-    });
+    this.searchCommands$.next(
+      this.searchCommands.filter((item) => {
+        return item.id !== id;
+      })
+    );
   }
-
-  private registerSearchSubmitCommand = (searchSubmitCommand: GlobalSearchSubmitCommand) => {
-    const commands = this.searchSubmitCommands$.getValue();
-    if (commands.find((command) => command.id === searchSubmitCommand.id)) {
-      // eslint-disable-next-line no-console
-      console.warn(`Duplicate SearchSubmitCommands id ${searchSubmitCommand.id} found`);
-      return;
-    }
-    this.searchSubmitCommands$.next([...commands, searchSubmitCommand]);
-  };
-
-  private unregisterSearchSubmitCommand(id: string) {
-    const newCommands = this.searchSubmitCommands$.getValue().filter((item) => {
-      return item.id !== id;
-    });
-    if (newCommands.length === this.searchSubmitCommands$.getValue().length) {
-      return;
-    }
-    this.searchSubmitCommands$.next(newCommands);
-  }
-
   public setup(): GlobalSearchServiceSetupContract {
     return {
       registerSearchCommand: this.registerSearchCommand.bind(this),
-      registerSearchSubmitCommand: this.registerSearchSubmitCommand,
     };
   }
 
   public start(): GlobalSearchServiceStartContract {
     return {
       getAllSearchCommands: () => this.searchCommands,
-      getSearchSubmitCommands$: () => this.searchSubmitCommands$.asObservable(),
       unregisterSearchCommand: this.unregisterSearchCommand.bind(this),
-      unregisterSearchSubmitCommand: this.unregisterSearchSubmitCommand.bind(this),
+      getAllSearchCommands$: () => this.searchCommands$.asObservable(),
     };
   }
 }

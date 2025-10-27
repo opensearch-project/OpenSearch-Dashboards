@@ -12,9 +12,14 @@ describe('GlobalSearchService', () => {
     const setup = globalSearchService.setup();
     const start = globalSearchService.start();
 
+    const mockAction = jest.fn();
+    const customPlaceholder = 'Search for pages...';
+
     setup.registerSearchCommand({
       id: 'test1',
       type: 'PAGES',
+      inputPlaceholder: customPlaceholder,
+      action: mockAction,
       run: async (query) => {
         return [];
       },
@@ -23,6 +28,12 @@ describe('GlobalSearchService', () => {
     expect(start.getAllSearchCommands()).toHaveLength(1);
     expect(start.getAllSearchCommands()[0].id).toEqual('test1');
     expect(start.getAllSearchCommands()[0].type).toEqual('PAGES');
+    expect(start.getAllSearchCommands()[0].inputPlaceholder).toEqual(customPlaceholder);
+    expect(start.getAllSearchCommands()[0].action).toBeDefined();
+
+    // Test that action can be called with payload
+    start.getAllSearchCommands()[0].action?.({ content: 'test query' });
+    expect(mockAction).toHaveBeenCalledWith({ content: 'test query' });
   });
 
   it('unregisterSearchCommand', async () => {
@@ -70,118 +81,65 @@ describe('GlobalSearchService', () => {
     expect(start.getAllSearchCommands()[0].type).toEqual('PAGES');
   });
 
-  it('registerSearchSubmitCommand', () => {
+  it('registerSearchCommand with action callback', async () => {
     const globalSearchService = new GlobalSearchService();
     const setup = globalSearchService.setup();
     const start = globalSearchService.start();
 
-    const mockRun = jest.fn();
-    setup.registerSearchSubmitCommand({
-      id: 'submit1',
-      name: 'Submit Command 1',
-      run: mockRun,
+    const mockAction = jest.fn();
+
+    setup.registerSearchCommand({
+      id: 'test-action',
+      type: 'ACTIONS',
+      run: async (query) => {
+        return [];
+      },
+      action: mockAction,
     });
 
-    let commands: any[] = [];
-    start.getSearchSubmitCommands$().subscribe((cmds) => {
-      commands = cmds;
-    });
-
+    const commands = start.getAllSearchCommands();
     expect(commands).toHaveLength(1);
-    expect(commands[0].id).toEqual('submit1');
-    expect(commands[0].name).toEqual('Submit Command 1');
+    expect(commands[0].action).toBeDefined();
+
+    // Test that action can be called with payload
+    commands[0].action?.({ content: 'test query' });
+    expect(mockAction).toHaveBeenCalledWith({ content: 'test query' });
   });
 
-  it('unregisterSearchSubmitCommand', () => {
+  it('getAllSearchCommands$', async () => {
     const globalSearchService = new GlobalSearchService();
     const setup = globalSearchService.setup();
     const start = globalSearchService.start();
 
-    setup.registerSearchSubmitCommand({
-      id: 'submit1',
-      name: 'Submit Command 1',
-      run: jest.fn(),
+    const commands$ = start.getAllSearchCommands$();
+    const receivedCommands: any[] = [];
+
+    const subscription = commands$.subscribe((commands) => {
+      receivedCommands.push(commands);
     });
 
-    let commands: any[] = [];
-    start.getSearchSubmitCommands$().subscribe((cmds) => {
-      commands = cmds;
+    // Initially should have empty array
+    expect(receivedCommands[0]).toHaveLength(0);
+
+    // Register a command
+    setup.registerSearchCommand({
+      id: 'test-observable',
+      type: 'PAGES',
+      run: async (query) => {
+        return [];
+      },
     });
 
-    expect(commands).toHaveLength(1);
+    // Should receive updated commands
+    expect(receivedCommands[1]).toHaveLength(1);
+    expect(receivedCommands[1][0].id).toEqual('test-observable');
 
-    start.unregisterSearchSubmitCommand('submit1');
+    // Unregister the command
+    start.unregisterSearchCommand('test-observable');
 
-    expect(commands).toHaveLength(0);
-  });
+    // Should receive empty array again
+    expect(receivedCommands[2]).toHaveLength(0);
 
-  it('registerSearchSubmitCommand with duplicate id', () => {
-    const globalSearchService = new GlobalSearchService();
-    const setup = globalSearchService.setup();
-    const start = globalSearchService.start();
-
-    setup.registerSearchSubmitCommand({
-      id: 'submit1',
-      name: 'Submit Command 1',
-      run: jest.fn(),
-    });
-
-    setup.registerSearchSubmitCommand({
-      id: 'submit1',
-      name: 'Submit Command 1 Duplicate',
-      run: jest.fn(),
-    });
-
-    let commands: any[] = [];
-    start.getSearchSubmitCommands$().subscribe((cmds) => {
-      commands = cmds;
-    });
-
-    // the second one will not overwrite the first one
-    expect(commands).toHaveLength(1);
-    expect(commands[0].name).toEqual('Submit Command 1');
-  });
-
-  it('getSearchSubmitCommands$ returns observable that emits updates', () => {
-    const globalSearchService = new GlobalSearchService();
-    const setup = globalSearchService.setup();
-    const start = globalSearchService.start();
-
-    const emittedValues: any[][] = [];
-    start.getSearchSubmitCommands$().subscribe((cmds) => {
-      emittedValues.push([...cmds]);
-    });
-
-    // Initial empty state
-    expect(emittedValues).toHaveLength(1);
-    expect(emittedValues[0]).toHaveLength(0);
-
-    // Register first command
-    setup.registerSearchSubmitCommand({
-      id: 'submit1',
-      name: 'Submit Command 1',
-      run: jest.fn(),
-    });
-
-    expect(emittedValues).toHaveLength(2);
-    expect(emittedValues[1]).toHaveLength(1);
-    expect(emittedValues[1][0].id).toEqual('submit1');
-
-    // Register second command
-    setup.registerSearchSubmitCommand({
-      id: 'submit2',
-      name: 'Submit Command 2',
-      run: jest.fn(),
-    });
-
-    expect(emittedValues).toHaveLength(3);
-    expect(emittedValues[2]).toHaveLength(2);
-
-    // Unregister first command
-    start.unregisterSearchSubmitCommand('submit1');
-
-    expect(emittedValues).toHaveLength(4);
-    expect(emittedValues[3]).toHaveLength(1);
-    expect(emittedValues[3][0].id).toEqual('submit2');
+    subscription.unsubscribe();
   });
 });

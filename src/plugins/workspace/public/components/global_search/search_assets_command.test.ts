@@ -7,6 +7,7 @@ import { searchAssets } from './search_assets_command';
 import { HttpStart } from '../../../../../core/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { SavedObjectWithMetadata } from '../../../../saved_objects_management/common';
+import { AssetType, SUPPORTED_ASSET_TYPES } from './constants';
 
 describe('searchAssets', () => {
   let httpMock: jest.Mocked<HttpStart>;
@@ -85,7 +86,7 @@ describe('searchAssets', () => {
       '/api/opensearch-dashboards/management/saved_objects/_find',
       {
         query: {
-          type: ['dashboard', 'visualization'],
+          type: SUPPORTED_ASSET_TYPES,
           search: '*dashboard*',
           perPage: 10,
           workspaces: [],
@@ -114,7 +115,7 @@ describe('searchAssets', () => {
       '/api/opensearch-dashboards/management/saved_objects/_find',
       {
         query: {
-          type: ['dashboard', 'visualization'],
+          type: SUPPORTED_ASSET_TYPES,
           search: '*test*',
           perPage: 10,
           workspaces: [currentWorkspaceId],

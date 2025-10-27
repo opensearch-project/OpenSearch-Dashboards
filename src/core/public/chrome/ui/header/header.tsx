@@ -87,7 +87,7 @@ import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
 import { HomeLoader } from './home_loader';
 import { RecentItems } from './recent_items';
-import { GlobalSearchCommand, GlobalSearchSubmitCommand } from '../../global_search';
+import { GlobalSearchCommand } from '../../global_search';
 import { HeaderBanner } from './header_banner';
 
 export interface HeaderProps {
@@ -131,10 +131,9 @@ export interface HeaderProps {
   workspaceList$: Observable<WorkspaceObject[]>;
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
-  globalSearchCommands?: GlobalSearchCommand[];
   globalBanner$?: Observable<ChromeGlobalBanner | undefined>;
   keyboardShortcut?: KeyboardShortcutStart;
-  globalSearchSubmitCommands$: Observable<GlobalSearchSubmitCommand[]>;
+  globalSearchCommands$: Observable<GlobalSearchCommand[]>;
 }
 
 const hasValue = (value: any) => {
@@ -160,7 +159,6 @@ export function Header({
   navGroupEnabled,
   setCurrentNavGroup,
   useUpdatedHeader,
-  globalSearchCommands,
   keyboardShortcut,
   ...observables
 }: HeaderProps) {
@@ -717,8 +715,7 @@ export function Header({
             setCurrentNavGroup={setCurrentNavGroup}
             capabilities={application.capabilities}
             currentWorkspace$={observables.currentWorkspace$}
-            globalSearchCommands={globalSearchCommands}
-            globalSearchSubmitCommands$={observables.globalSearchSubmitCommands$}
+            globalSearchCommands$={observables.globalSearchCommands$}
           />
         ) : (
           <CollapsibleNav

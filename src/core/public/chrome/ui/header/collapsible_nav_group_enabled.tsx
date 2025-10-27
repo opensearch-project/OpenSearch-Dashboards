@@ -24,7 +24,7 @@ import {
 } from '../../nav_group';
 import { fulfillRegistrationLinksToChromeNavLinks, getVisibleUseCases, sortBy } from '../../utils';
 import { ALL_USE_CASE_ID, DEFAULT_APP_CATEGORIES } from '../../../../../core/utils';
-import { GlobalSearchCommand, GlobalSearchSubmitCommand } from '../../global_search';
+import { GlobalSearchCommand } from '../../global_search';
 import { CollapsibleNavTop } from './collapsible_nav_group_enabled_top';
 import { HeaderNavControls } from './header_nav_controls';
 import { NavGroups } from './collapsible_nav_groups';
@@ -49,8 +49,7 @@ export interface CollapsibleNavGroupEnabledProps {
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
   capabilities: InternalApplicationStart['capabilities'];
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
-  globalSearchCommands?: GlobalSearchCommand[];
-  globalSearchSubmitCommands$: Rx.Observable<GlobalSearchSubmitCommand[]>;
+  globalSearchCommands$: Rx.Observable<GlobalSearchSubmitCommand[]>;
 }
 
 const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
@@ -74,7 +73,6 @@ export function CollapsibleNavGroupEnabled({
   setCurrentNavGroup,
   capabilities,
   collapsibleNavHeaderRender,
-  globalSearchCommands,
   ...observables
 }: CollapsibleNavGroupEnabledProps) {
   const allNavLinks = useObservable(observables.navLinks$, []);
@@ -84,10 +82,7 @@ export function CollapsibleNavGroupEnabled({
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
   const currentWorkspace = useObservable(observables.currentWorkspace$);
-  const globalSearchSubmitCommands = useObservable(
-    observables.globalSearchSubmitCommands$,
-    undefined
-  );
+  const globalSearchCommands = useObservable(observables.globalSearchCommands$);
 
   const visibleUseCases = useMemo(() => getVisibleUseCases(navGroupsMap), [navGroupsMap]);
 
@@ -226,10 +221,7 @@ export function CollapsibleNavGroupEnabled({
         {!isNavOpen ? (
           <div className="searchBarIcon euiHeaderSectionItemButton">
             {globalSearchCommands && (
-              <HeaderSearchBarIcon
-                globalSearchCommands={globalSearchCommands}
-                globalSearchSubmitCommands={globalSearchSubmitCommands}
-              />
+              <HeaderSearchBarIcon globalSearchCommands={globalSearchCommands} />
             )}
           </div>
         ) : (
@@ -240,10 +232,7 @@ export function CollapsibleNavGroupEnabled({
             className="searchBar-wrapper"
           >
             {globalSearchCommands && (
-              <HeaderSearchBar
-                globalSearchCommands={globalSearchCommands}
-                globalSearchSubmitCommands={globalSearchSubmitCommands}
-              />
+              <HeaderSearchBar globalSearchCommands={globalSearchCommands} />
             )}
           </EuiPanel>
         )}

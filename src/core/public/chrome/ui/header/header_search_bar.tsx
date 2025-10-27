@@ -20,22 +20,17 @@ import React, { ReactNode, useCallback, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   GlobalSearchCommand,
-  GlobalSearchSubmitCommand,
   SearchCommandKeyTypes,
   SearchCommandTypes,
 } from '../../global_search';
 
 interface Props {
   globalSearchCommands: GlobalSearchCommand[];
-  globalSearchSubmitCommands?: GlobalSearchSubmitCommand[];
   panel?: boolean;
   onSearchResultClick?: () => void;
 }
 
-export const HeaderSearchBarIcon = ({
-  globalSearchCommands,
-  globalSearchSubmitCommands,
-}: Props) => {
+export const HeaderSearchBarIcon = ({ globalSearchCommands }: Props) => {
   const [isSearchPopoverOpen, setIsSearchPopoverOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   return (
@@ -81,19 +76,13 @@ export const HeaderSearchBarIcon = ({
             setIsSearchPopoverOpen(false);
             buttonRef.current?.blur();
           }}
-          globalSearchSubmitCommands={globalSearchSubmitCommands}
         />
       </EuiPanel>
     </EuiPopover>
   );
 };
 
-export const HeaderSearchBar = ({
-  globalSearchCommands,
-  panel,
-  onSearchResultClick,
-  globalSearchSubmitCommands,
-}: Props) => {
+export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultClick }: Props) => {
   const [results, setResults] = useState([] as React.JSX.Element[]);
   const [isLoading, setIsLoading] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -110,21 +99,23 @@ export const HeaderSearchBar = ({
     setSearchValue('');
   };
 
-  const resultSection = (items: ReactNode[], sectionHeader: string) => {
+  const resultSection = (items: ReactNode[], sectionHeader: string | undefined) => {
     return (
       <EuiFlexGroup direction="column" gutterSize="xs">
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <EuiText size="xs" color="subdued">
-              {sectionHeader}
-            </EuiText>
-          </EuiTitle>
-        </EuiFlexItem>
+        {sectionHeader && (
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <EuiText size="xs" color="subdued">
+                {sectionHeader}
+              </EuiText>
+            </EuiTitle>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           {items.length ? (
             <EuiListGroup flush={true} gutterSize="none" maxWidth={false}>
               {items.map((item, index) => (
-                <EuiListGroupItem key={index} label={item} color="text" />
+                <EuiListGroupItem key={index} label={item} color="text" style={{ padding: 0 }} />
               ))}
             </EuiListGroup>
           ) : (
@@ -154,16 +145,6 @@ export const HeaderSearchBar = ({
           })}
         </EuiText>
       )}
-      {searchValue.length > 0 && (globalSearchSubmitCommands?.length ?? 0) > 0 && (
-        <EuiText color="subdued" size="xs">
-          {i18n.translate('core.globalSearch.submitCommands.description', {
-            defaultMessage: 'Press Enter to {commands}.',
-            values: {
-              commands: globalSearchSubmitCommands?.map(({ name }) => name).join(', '),
-            },
-          })}
-        </EuiText>
-      )}
     </>
   );
 
@@ -171,28 +152,37 @@ export const HeaderSearchBar = ({
     async (value: string) => {
       const abortController = new AbortController();
       ongoingAbortControllersRef.current.push({ controller: abortController, query: value });
-      if (enterKeyDownRef.current && (globalSearchSubmitCommands?.length ?? 0) > 0) {
-        globalSearchSubmitCommands?.forEach((command) => {
-          command.run({
-            content: value,
+      if (enterKeyDownRef.current) {
+        globalSearchCommands
+          .filter((item) => !!item.action)
+          .forEach((command) => {
+            command.action?.({
+              content: value,
+            });
           });
-        });
         enterKeyDownRef.current = false;
         setIsPopoverOpen(false);
         setSearchValue('');
         searchBarInputRef.current?.blur();
         return;
       }
-      const filteredCommands = globalSearchCommands.filter((command) => {
+      const commandsWithoutActions = globalSearchCommands.filter(
+        (command) => command.type !== 'ACTIONS'
+      );
+      const filteredCommands = commandsWithoutActions.filter((command) => {
         const alias = SearchCommandTypes[command.type].alias;
         return alias && value.startsWith(alias);
       });
-      const defaultSearchCommands = globalSearchCommands.filter((command) => {
+      const defaultSearchCommands = commandsWithoutActions.filter((command) => {
         return !SearchCommandTypes[command.type].alias;
       });
       if (filteredCommands.length === 0) {
         filteredCommands.push(...defaultSearchCommands);
       }
+      filteredCommands.push(
+        ...globalSearchCommands.filter((command) => command.type === 'ACTIONS')
+      );
+
       if (value && filteredCommands && filteredCommands.length) {
         setIsPopoverOpen(true);
         setIsLoading(true);
@@ -223,7 +213,7 @@ export const HeaderSearchBar = ({
           }, {} as Record<SearchCommandKeyTypes, ReactNode[]>);
         const sections = Object.entries(searchResults).map(([key, items]) => {
           const sectionHeader = SearchCommandTypes[key as SearchCommandKeyTypes].description;
-          return resultSection(items, sectionHeader);
+          return resultSection(items, key !== 'ACTIONS' ? sectionHeader : undefined);
         });
         if (abortController.signal.aborted) {
           return;
@@ -242,7 +232,7 @@ export const HeaderSearchBar = ({
         setResults([]);
       }
     },
-    [globalSearchCommands, onSearchResultClick, globalSearchSubmitCommands]
+    [globalSearchCommands, onSearchResultClick]
   );
 
   const searchBar = (
@@ -252,18 +242,10 @@ export const HeaderSearchBar = ({
       onSearch={onSearch}
       fullWidth
       placeholder={
-        (globalSearchSubmitCommands?.length ?? 0) > 0
-          ? i18n.translate('core.globalSearch.withSubmitCommands.input.placeholder', {
-              defaultMessage: 'Search or {submitCommandsText}',
-              values: {
-                submitCommandsText: globalSearchSubmitCommands
-                  ?.map((command) => command.name)
-                  .join(', '),
-              },
-            })
-          : i18n.translate('core.globalSearch.input.placeholder', {
-              defaultMessage: 'Search menu or assets',
-            })
+        globalSearchCommands.find((item) => item.inputPlaceholder)?.inputPlaceholder ??
+        i18n.translate('core.globalSearch.input.placeholder', {
+          defaultMessage: 'Search menu or assets',
+        })
       }
       isLoading={isLoading}
       aria-label="Search the menus"
