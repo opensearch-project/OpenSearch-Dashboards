@@ -13,6 +13,7 @@ import {
   inferTimeUnitFromTimestamps,
   getTooltipFormat,
   mergeStyles,
+  applyTimeRangeToEncoding,
 } from './utils';
 import { AxisRole, Positions, ColorSchemas, VisFieldType, StandardAxes } from '../types';
 import { ChartStyles, StyleOptions } from './use_visualization_types';
@@ -112,7 +113,8 @@ describe('applyAxisStyling', () => {
 describe('getAxisByRole', () => {
   it('returns the axis with specified role', () => {
     const axes = [{ axisRole: AxisRole.X }, { axisRole: AxisRole.Y }];
-    expect(getAxisByRole(axes as any, AxisRole.X)?.axisRole).toBe(AxisRole.X);
+    const result = getAxisByRole(axes as any, AxisRole.X);
+    expect(result && result.axisRole).toBe(AxisRole.X);
   });
 
   it('returns undefined when no axis matches', () => {
@@ -418,155 +420,268 @@ describe('mergeStyles', () => {
     });
   });
 
-  it('should replace arrays instead of merging them', () => {
-    const dest = ({
-      colors: ['red', 'green', 'blue'],
-    } as unknown) as ChartStyles;
+  describe('applyTimeRangeToEncoding', () => {
+    const baseAxis = {
+      id: 1,
+      name: 'Test Axis',
+      column: 'test',
+      validValuesCount: 10,
+      uniqueValuesCount: 10,
+    };
 
-    const source = ({
-      colors: ['yellow', 'purple'],
-    } as unknown) as StyleOptions;
+    const timeRange = { from: '2023-01-01', to: '2023-12-31' };
 
-    const result = mergeStyles(dest, source);
-
-    // Arrays should be replaced, not merged
-    expect(result).toEqual({
-      colors: ['yellow', 'purple'],
+    it('does nothing when axisColumnMappings is undefined', () => {
+      const encoding = { x: { field: 'test' } };
+      const result = applyTimeRangeToEncoding(encoding, undefined, timeRange);
+      expect(result).toBeUndefined();
+      expect(encoding).toEqual({ x: { field: 'test' } }); // unchanged
     });
-  });
 
-  it('should handle complex nested structures', () => {
-    const dest = ({
-      title: 'Chart',
-      axes: {
-        x: {
-          title: 'X Axis',
-          labels: {
-            show: true,
-            rotate: 0,
-          },
-        },
-        y: {
-          title: 'Y Axis',
-          labels: {
-            show: true,
-            rotate: 0,
-          },
-        },
-      },
-      legend: {
-        show: true,
-        position: 'right',
-      },
-    } as unknown) as ChartStyles;
-
-    const source = ({
-      title: 'Updated Chart',
-      axes: {
-        x: {
-          labels: {
-            rotate: 45,
-          },
-        },
-        y: {
-          title: 'Updated Y Axis',
-        },
-      },
-      legend: {
-        position: 'bottom',
-      },
-    } as unknown) as StyleOptions;
-
-    const result = mergeStyles(dest, source);
-
-    expect(result).toEqual({
-      title: 'Updated Chart',
-      axes: {
-        x: {
-          title: 'X Axis',
-          labels: {
-            show: true,
-            rotate: 45,
-          },
-        },
-        y: {
-          title: 'Updated Y Axis',
-          labels: {
-            show: true,
-            rotate: 0,
-          },
-        },
-      },
-      legend: {
-        show: true,
-        position: 'bottom',
-      },
+    it('does nothing when timeRange is undefined', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Date },
+      };
+      const encoding = { x: { field: 'test' } };
+      const result = applyTimeRangeToEncoding(encoding, axisColumnMappings, undefined);
+      expect(result).toBeUndefined();
+      expect(encoding).toEqual({ x: { field: 'test' } }); // unchanged
     });
-  });
 
-  it('should handle null values', () => {
-    const dest = ({
-      title: 'Chart',
-      subtitle: 'Subtitle',
-    } as unknown) as ChartStyles;
-
-    const source = ({
-      title: null,
-      description: 'Description',
-    } as unknown) as StyleOptions;
-
-    const result = mergeStyles(dest, source);
-
-    expect(result).toEqual({
-      title: null,
-      subtitle: 'Subtitle',
-      description: 'Description',
+    it('does nothing when no temporal axis is found', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Numerical },
+        y: { ...baseAxis, schema: VisFieldType.Categorical },
+      };
+      const encoding = { x: { field: 'test' } };
+      const result = applyTimeRangeToEncoding(encoding, axisColumnMappings, timeRange);
+      expect(result).toBeUndefined();
+      expect(encoding).toEqual({ x: { field: 'test' } }); // unchanged
     });
-  });
 
-  it('should handle empty objects', () => {
-    const dest = ({
-      title: 'Chart',
-      config: {
-        showGrid: true,
-        showLabels: true,
-      },
-    } as unknown) as ChartStyles;
-
-    const source = ({
-      config: {},
-    } as unknown) as StyleOptions;
-
-    const result = mergeStyles(dest, source);
-
-    // Empty object should not override properties
-    expect(result).toEqual({
-      title: 'Chart',
-      config: {
-        showGrid: true,
-        showLabels: true,
-      },
+    it('does nothing when mainLayerEncoding is undefined', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Date, column: 'date_x' },
+        y: { ...baseAxis, schema: VisFieldType.Numerical },
+      };
+      const result = applyTimeRangeToEncoding(undefined, axisColumnMappings, timeRange, false);
+      expect(result).toBeUndefined();
     });
-  });
 
-  it('should not override with undefined values in source', () => {
-    const dest = ({
-      title: 'Chart',
-      subtitle: 'Subtitle',
-    } as unknown) as ChartStyles;
+    it('should replace arrays instead of merging them', () => {
+      const dest = ({
+        colors: ['red', 'green', 'blue'],
+      } as unknown) as ChartStyles;
 
-    const source = ({
-      title: undefined,
-      description: 'Description',
-    } as unknown) as StyleOptions;
+      const source = ({
+        colors: ['yellow', 'purple'],
+      } as unknown) as StyleOptions;
 
-    const result = mergeStyles(dest, source);
+      const result = mergeStyles(dest, source);
 
-    // Undefined values should not override
-    expect(result).toEqual({
-      title: 'Chart',
-      subtitle: 'Subtitle',
-      description: 'Description',
+      // Arrays should be replaced, not merged
+      expect(result).toEqual({
+        colors: ['yellow', 'purple'],
+      });
+    });
+
+    it('should handle complex nested structures', () => {
+      const dest = ({
+        title: 'Chart',
+        axes: {
+          x: {
+            title: 'X Axis',
+            labels: {
+              show: true,
+              rotate: 0,
+            },
+          },
+          y: {
+            title: 'Y Axis',
+            labels: {
+              show: true,
+              rotate: 0,
+            },
+          },
+        },
+        legend: {
+          show: true,
+          position: 'right',
+        },
+      } as unknown) as ChartStyles;
+
+      const source = ({
+        title: 'Updated Chart',
+        axes: {
+          x: {
+            labels: {
+              rotate: 45,
+            },
+          },
+          y: {
+            title: 'Updated Y Axis',
+          },
+        },
+        legend: {
+          position: 'bottom',
+        },
+      } as unknown) as StyleOptions;
+
+      const result = mergeStyles(dest, source);
+
+      expect(result).toEqual({
+        title: 'Updated Chart',
+        axes: {
+          x: {
+            title: 'X Axis',
+            labels: {
+              show: true,
+              rotate: 45,
+            },
+          },
+          y: {
+            title: 'Updated Y Axis',
+            labels: {
+              show: true,
+              rotate: 0,
+            },
+          },
+        },
+        legend: {
+          show: true,
+          position: 'bottom',
+        },
+      });
+    });
+    it('applies scale to mainLayerEncoding when provided', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Date, column: 'date_x' },
+        y: { ...baseAxis, schema: VisFieldType.Numerical },
+      };
+      const mainLayerEncoding: any = {
+        x: { field: 'date_x', type: 'temporal' },
+        y: { field: 'value', type: 'quantitative' },
+      };
+      const result = applyTimeRangeToEncoding(
+        mainLayerEncoding,
+        axisColumnMappings,
+        timeRange,
+        false
+      );
+
+      expect(result).toBeUndefined(); // Function returns undefined when modifying encoding directly
+      expect(mainLayerEncoding.x.scale).toEqual({
+        domain: ['2023-01-01', '2023-12-31'],
+      });
+    });
+
+    it('should handle null values', () => {
+      const dest = ({
+        title: 'Chart',
+        subtitle: 'Subtitle',
+      } as unknown) as ChartStyles;
+
+      const source = ({
+        title: null,
+        description: 'Description',
+      } as unknown) as StyleOptions;
+
+      const result = mergeStyles(dest, source);
+
+      expect(result).toEqual({
+        title: null,
+        subtitle: 'Subtitle',
+        description: 'Description',
+      });
+    });
+
+    it('should handle empty objects', () => {
+      const dest = ({
+        title: 'Chart',
+        config: {
+          showGrid: true,
+          showLabels: true,
+        },
+      } as unknown) as ChartStyles;
+
+      const source = ({
+        config: {},
+      } as unknown) as StyleOptions;
+
+      const result = mergeStyles(dest, source);
+
+      // Empty object should not override properties
+      expect(result).toEqual({
+        title: 'Chart',
+        config: {
+          showGrid: true,
+          showLabels: true,
+        },
+      });
+    });
+    it('applies scale to y axis when temporal axis is on Y', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Numerical },
+        y: { ...baseAxis, schema: VisFieldType.Date, column: 'date_y' },
+      };
+      const mainLayerEncoding: any = {
+        x: { field: 'value', type: 'quantitative' },
+        y: { field: 'date_y', type: 'temporal' },
+      };
+      const result = applyTimeRangeToEncoding(
+        mainLayerEncoding,
+        axisColumnMappings,
+        timeRange,
+        false
+      );
+
+      expect(result).toBeUndefined();
+      expect(mainLayerEncoding.y.scale).toEqual({
+        domain: ['2023-01-01', '2023-12-31'],
+      });
+    });
+
+    it('should not override with undefined values in source', () => {
+      const dest = ({
+        title: 'Chart',
+        subtitle: 'Subtitle',
+      } as unknown) as ChartStyles;
+
+      const source = ({
+        title: undefined,
+        description: 'Description',
+      } as unknown) as StyleOptions;
+
+      const result = mergeStyles(dest, source);
+
+      // Undefined values should not override
+      expect(result).toEqual({
+        title: 'Chart',
+        subtitle: 'Subtitle',
+        description: 'Description',
+      });
+    });
+    it('applies scale with switchAxes correctly', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Numerical },
+        y: { ...baseAxis, schema: VisFieldType.Date, column: 'date_y' },
+      };
+      const mainLayerEncoding: any = {
+        x: { field: 'value', type: 'quantitative' },
+        y: { field: 'date_y', type: 'temporal' },
+      };
+      const result = applyTimeRangeToEncoding(
+        mainLayerEncoding,
+        axisColumnMappings,
+        timeRange,
+        true
+      );
+
+      expect(result).toBeUndefined();
+      // When switchAxes is true, Y temporal axis should apply scale to x encoding
+      expect(mainLayerEncoding.x.scale).toEqual({
+        domain: ['2023-01-01', '2023-12-31'],
+      });
     });
   });
 });

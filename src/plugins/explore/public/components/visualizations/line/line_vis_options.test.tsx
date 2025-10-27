@@ -102,6 +102,8 @@ jest.mock('../style_panel/axes/axes', () => ({
       numericalColumns,
       categoricalColumns,
       dateColumns,
+      showFullTimeRange,
+      onShowFullTimeRangeChange,
     }) => (
       <div data-test-subj="mockAxesOptions">
         <button
@@ -115,6 +117,12 @@ jest.mock('../style_panel/axes/axes', () => ({
           onClick={() => onValueAxesChange([...valueAxes, { id: 'new-axis' }])}
         >
           Update Value Axes
+        </button>
+        <button
+          data-test-subj="mockUpdateShowFullTimeRange"
+          onClick={() => onShowFullTimeRangeChange(!showFullTimeRange)}
+        >
+          Toggle Full Time Range
         </button>
         <div data-test-subj="numericalColumnsLength">{numericalColumns?.length || 0}</div>
         <div data-test-subj="categoricalColumnsLength">{categoricalColumns?.length || 0}</div>
@@ -283,6 +291,7 @@ describe('LineVisStyleControls', () => {
         show: true,
         titleName: '',
       },
+      showFullTimeRange: false,
     },
     onStyleChange: jest.fn(),
     numericalColumns: [mockNumericalColumn],
@@ -424,6 +433,11 @@ describe('LineVisStyleControls', () => {
     await userEvent.click(screen.getByTestId('mockUpdateValueAxes'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
       valueAxes: [...mockProps.styleOptions.valueAxes, { id: 'new-axis' }],
+    });
+
+    await userEvent.click(screen.getByTestId('mockUpdateShowFullTimeRange'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      showFullTimeRange: !mockProps.styleOptions.showFullTimeRange,
     });
   });
 
