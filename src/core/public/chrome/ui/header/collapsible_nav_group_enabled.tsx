@@ -49,7 +49,7 @@ export interface CollapsibleNavGroupEnabledProps {
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
   capabilities: InternalApplicationStart['capabilities'];
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
-  globalSearchCommands$: Rx.Observable<GlobalSearchSubmitCommand[]>;
+  globalSearchCommands$: Rx.Observable<GlobalSearchCommand[]>;
 }
 
 const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
