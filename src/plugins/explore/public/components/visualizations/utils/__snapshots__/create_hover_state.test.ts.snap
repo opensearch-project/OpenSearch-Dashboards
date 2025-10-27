@@ -101,7 +101,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -134,7 +136,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -170,7 +174,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -295,7 +301,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "value",
             "type": "quantitative",
           },
@@ -338,7 +346,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "value",
             "type": "quantitative",
           },
@@ -384,7 +394,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "value",
             "type": "quantitative",
           },
@@ -502,7 +514,9 @@ Array [
             "value": 0,
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "type": "quantitative",
           },
@@ -536,7 +550,9 @@ Array [
             "type": "nominal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -566,7 +582,9 @@ Array [
             "type": "nominal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -599,7 +617,9 @@ Array [
             "type": "nominal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -696,7 +716,9 @@ Array [
             "value": 0,
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "type": "quantitative",
           },
@@ -730,7 +752,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -760,7 +784,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -793,7 +819,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -901,7 +929,9 @@ Array [
             "value": 0,
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "type": "quantitative",
           },
@@ -935,7 +965,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -965,7 +997,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -998,7 +1032,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1040,7 +1076,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "average",
             "stack": undefined,
             "type": "quantitative",
@@ -1070,7 +1108,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "average",
             "stack": undefined,
             "type": "quantitative",
@@ -1103,7 +1143,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "average",
             "stack": undefined,
             "type": "quantitative",
@@ -1211,7 +1253,9 @@ Array [
             "value": 0,
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "type": "quantitative",
           },
@@ -1245,7 +1289,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1275,7 +1321,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1308,7 +1356,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1353,7 +1403,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1386,7 +1438,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1422,7 +1476,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1527,7 +1583,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "value",
             "type": "quantitative",
           },
@@ -1570,7 +1628,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "value",
             "type": "quantitative",
           },
@@ -1616,7 +1676,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "value",
             "type": "quantitative",
           },
@@ -1720,7 +1782,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1750,7 +1814,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1783,7 +1849,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1861,7 +1929,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1891,7 +1961,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1924,7 +1996,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -2013,7 +2087,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -2043,7 +2119,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -2076,7 +2154,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -2113,7 +2193,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "average",
             "stack": undefined,
             "type": "quantitative",
@@ -2143,7 +2225,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "average",
             "stack": undefined,
             "type": "quantitative",
@@ -2176,7 +2260,9 @@ Array [
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "average",
             "stack": undefined,
             "type": "quantitative",
