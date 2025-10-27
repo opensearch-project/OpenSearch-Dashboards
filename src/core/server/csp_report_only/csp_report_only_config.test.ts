@@ -23,15 +23,27 @@ describe('CspReportOnlyConfig', () => {
     test('DEFAULT', () => {
       expect(CspReportOnlyConfig.DEFAULT).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
-          "cspReportOnlyHeader": "script-src 'self'; worker-src 'self'; style-src 'self'",
+          "cspReportOnlyHeader": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'",
           "endpoint": undefined,
           "endpointName": "csp-endpoint",
           "isEmitting": false,
           "reportingEndpointsHeader": undefined,
           "rules": Array [
+            "default-src 'self'",
             "script-src 'self'",
-            "worker-src 'self'",
+            "script-src-attr 'none'",
             "style-src 'self'",
+            "child-src 'none'",
+            "worker-src 'self'",
+            "frame-src 'none'",
+            "object-src 'none'",
+            "manifest-src 'self'",
+            "media-src 'none'",
+            "font-src 'self'",
+            "connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org",
+            "img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org",
+            "form-action 'self'",
+            "frame-ancestors 'self'",
           ],
           "useDeprecatedReportUriOnly": false,
         }
@@ -41,15 +53,27 @@ describe('CspReportOnlyConfig', () => {
     test('defaults from config', () => {
       expect(new CspReportOnlyConfig()).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
-          "cspReportOnlyHeader": "script-src 'self'; worker-src 'self'; style-src 'self'",
+          "cspReportOnlyHeader": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'",
           "endpoint": undefined,
           "endpointName": "csp-endpoint",
           "isEmitting": false,
           "reportingEndpointsHeader": undefined,
           "rules": Array [
+            "default-src 'self'",
             "script-src 'self'",
-            "worker-src 'self'",
+            "script-src-attr 'none'",
             "style-src 'self'",
+            "child-src 'none'",
+            "worker-src 'self'",
+            "frame-src 'none'",
+            "object-src 'none'",
+            "manifest-src 'self'",
+            "media-src 'none'",
+            "font-src 'self'",
+            "connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org",
+            "img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org",
+            "form-action 'self'",
+            "frame-ancestors 'self'",
           ],
           "useDeprecatedReportUriOnly": false,
         }
@@ -59,15 +83,27 @@ describe('CspReportOnlyConfig', () => {
     test('creates from partial config', () => {
       expect(new CspReportOnlyConfig({ isEmitting: true })).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
-          "cspReportOnlyHeader": "script-src 'self'; worker-src 'self'; style-src 'self'",
+          "cspReportOnlyHeader": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'",
           "endpoint": undefined,
           "endpointName": "csp-endpoint",
           "isEmitting": true,
           "reportingEndpointsHeader": undefined,
           "rules": Array [
+            "default-src 'self'",
             "script-src 'self'",
-            "worker-src 'self'",
+            "script-src-attr 'none'",
             "style-src 'self'",
+            "child-src 'none'",
+            "worker-src 'self'",
+            "frame-src 'none'",
+            "object-src 'none'",
+            "manifest-src 'self'",
+            "media-src 'none'",
+            "font-src 'self'",
+            "connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org",
+            "img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org",
+            "form-action 'self'",
+            "frame-ancestors 'self'",
           ],
           "useDeprecatedReportUriOnly": false,
         }
@@ -105,15 +141,27 @@ describe('CspReportOnlyConfig', () => {
 
       expect(config).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
-          "cspReportOnlyHeader": "script-src 'self'; worker-src 'self'; style-src 'self'; report-uri https://opensearch.org/csp-endpoints; report-to csp-endpoint;",
+          "cspReportOnlyHeader": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'; report-uri https://opensearch.org/csp-endpoints; report-to csp-endpoint;",
           "endpoint": "https://opensearch.org/csp-endpoints",
           "endpointName": "csp-endpoint",
           "isEmitting": true,
           "reportingEndpointsHeader": "csp-endpoint=\\"https://opensearch.org/csp-endpoints\\"",
           "rules": Array [
+            "default-src 'self'",
             "script-src 'self'",
-            "worker-src 'self'",
+            "script-src-attr 'none'",
             "style-src 'self'",
+            "child-src 'none'",
+            "worker-src 'self'",
+            "frame-src 'none'",
+            "object-src 'none'",
+            "manifest-src 'self'",
+            "media-src 'none'",
+            "font-src 'self'",
+            "connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org",
+            "img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org",
+            "form-action 'self'",
+            "frame-ancestors 'self'",
           ],
           "useDeprecatedReportUriOnly": false,
         }
@@ -173,15 +221,27 @@ describe('CspReportOnlyConfig', () => {
 
       expect(config).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
-          "cspReportOnlyHeader": "script-src 'self'; worker-src 'self'; style-src 'self'; report-uri https://opensearch.org/csp-endpoints;",
+          "cspReportOnlyHeader": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'; report-uri https://opensearch.org/csp-endpoints;",
           "endpoint": "https://opensearch.org/csp-endpoints",
           "endpointName": "csp-endpoint",
           "isEmitting": true,
           "reportingEndpointsHeader": undefined,
           "rules": Array [
+            "default-src 'self'",
             "script-src 'self'",
-            "worker-src 'self'",
+            "script-src-attr 'none'",
             "style-src 'self'",
+            "child-src 'none'",
+            "worker-src 'self'",
+            "frame-src 'none'",
+            "object-src 'none'",
+            "manifest-src 'self'",
+            "media-src 'none'",
+            "font-src 'self'",
+            "connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org",
+            "img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org",
+            "form-action 'self'",
+            "frame-ancestors 'self'",
           ],
           "useDeprecatedReportUriOnly": true,
         }

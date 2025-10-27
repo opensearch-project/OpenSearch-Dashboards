@@ -23,6 +23,27 @@ export interface ICspReportOnlyConfig {
   readonly rules: string[];
 
   /**
+   * Allowed sources for Frame Ancestors. Used to allow OSD to be embedded
+   * in external websites. These will be added to
+   * the CSP rule `frame-ancestors 'self' ...`
+   */
+  readonly allowedFrameAncestorSources?: string[];
+
+  /**
+   * Allowed sources for the connect-src directive. These allowlist
+   * which endpoints that can be loaded using a script interface (eg fetch())
+   * These will be added to the CSP rule `connect-src 'self' ${TRUSTED_ENDPOINTS} ...`
+   */
+  readonly allowedConnectSources?: string[];
+
+  /**
+   * Allowed sources for the img-src directive. These allowlist
+   * which endpoints we can load images from
+   * These will be added to the CSP rule `img-src 'self' data: ${TRUSTED_ENDPOINTS} ...`
+   */
+  readonly allowedImgSources?: string[];
+
+  /**
    * The CSP rules in a formatted directives string for use
    * in a `Content-Security-Policy-Report-Only`
    */
@@ -76,7 +97,20 @@ export class CspReportOnlyConfig implements ICspReportOnlyConfig {
     this.rules = source.rules;
     this.useDeprecatedReportUriOnly = source.useDeprecatedReportUriOnly;
 
-    let cspReportOnlyHeader = source.rules.join('; ');
+    const finalRules = source.rules.map((rule) => {
+      if (source.allowedFrameAncestorSources && rule.startsWith('frame-ancestors')) {
+        return `${rule} ${source.allowedFrameAncestorSources.join(' ')}`;
+      }
+      if (source.allowedConnectSources && rule.startsWith('connect-src')) {
+        return `${rule} ${source.allowedConnectSources.join(' ')}`;
+      }
+      if (source.allowedImgSources && rule.startsWith('img-src')) {
+        return `${rule} ${source.allowedImgSources.join(' ')}`;
+      }
+      return rule;
+    });
+
+    let cspReportOnlyHeader = finalRules.join('; ');
 
     if (source.endpoint) {
       this.endpoint = source.endpoint;
