@@ -184,7 +184,7 @@ export const getTimeUnits = () => [
   },
   {
     text: i18n.translate('explore.vis.timeUnit.date', {
-      defaultMessage: 'Date',
+      defaultMessage: 'Day',
     }),
     value: TimeUnit.DATE,
   },

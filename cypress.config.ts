@@ -85,6 +85,27 @@ function setupNodeEvents(
     },
   });
 
+  /**
+   * Add babel-loader to handle modern JavaScript syntax like optional chaining
+   */
+  webpackOptions!.module!.rules.push({
+    test: /\.(js|ts)$/,
+    exclude: /node_modules/,
+    use: {
+      loader: 'babel-loader',
+      options: {
+        presets: [
+          ['@babel/preset-env', { targets: { node: 'current' } }],
+          '@babel/preset-typescript',
+        ],
+        plugins: [
+          '@babel/plugin-proposal-optional-chaining',
+          '@babel/plugin-proposal-nullish-coalescing-operator',
+        ],
+      },
+    },
+  });
+
   on(
     'file:preprocessor',
     webpackPreprocessor({

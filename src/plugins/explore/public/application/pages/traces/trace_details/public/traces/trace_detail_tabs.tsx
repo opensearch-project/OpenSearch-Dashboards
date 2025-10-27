@@ -56,24 +56,21 @@ export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
     },
   ];
 
-  // Add logs tab if we have log datasets and logs data
-  if (logDatasets.length > 0) {
-    tabs.push({
-      id: TraceDetailTab.LOGS,
-      name: (
-        <>
-          {!isLogsLoading && (
-            <>
-              <EuiBadge color="default">{logCount}</EuiBadge>{' '}
-            </>
-          )}
-          {i18n.translate('explore.traceView.tab.logs', {
-            defaultMessage: 'Related logs',
-          })}
-        </>
-      ),
-    });
-  }
+  tabs.push({
+    id: TraceDetailTab.LOGS,
+    name: (
+      <>
+        {!isLogsLoading && (
+          <>
+            <EuiBadge color="default">{logCount}</EuiBadge>{' '}
+          </>
+        )}
+        {i18n.translate('explore.traceView.tab.logs', {
+          defaultMessage: 'Related logs',
+        })}
+      </>
+    ),
+  });
 
   return (
     <EuiTabs>

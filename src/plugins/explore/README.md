@@ -45,13 +45,13 @@ Update your `config/opensearch_dashboards.yml` file with the following configura
 # ===========================================
 
 # Set the value of this setting to true to enable multiple data source feature.
-# data_source.enabled: false
+# data_source.enabled: true
 
 # Set the value to true to enable workspace feature
 # Please note, workspace will not work with multi-tenancy. To enable workspace feature, you need to disable multi-tenancy first with `opensearch_security.multitenancy.enabled: false`
-# workspace.enabled: false
+# workspace.enabled: true
 
-# explore.enabled: false
+# explore.enabled: true
 ```
 
 Once the above flags are enabled, when users visit the home page, they will see the workspace page.

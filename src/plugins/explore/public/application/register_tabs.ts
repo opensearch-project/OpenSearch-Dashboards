@@ -14,6 +14,7 @@ import {
   EXPLORE_VISUALIZATION_TAB_ID,
   EXPLORE_PATTERNS_TAB_ID,
   EXPLORE_FIELD_STATS_TAB_ID,
+  ENABLE_EXPERIMENTAL_SETTING,
 } from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
 import { getQueryWithSource } from './utils/languages';
@@ -154,14 +155,17 @@ export const registerBuiltInTabs = (
   });
 
   // Register Field Stats Tab
-  tabRegistry.registerTab({
-    id: EXPLORE_FIELD_STATS_TAB_ID,
-    label: 'Field Stats',
-    flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics],
-    order: 25,
-    supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
-    component: FieldStatsTab,
-  });
+  const isExperimentalEnabled = services.uiSettings.get(ENABLE_EXPERIMENTAL_SETTING, false);
+  if (isExperimentalEnabled) {
+    tabRegistry.registerTab({
+      id: EXPLORE_FIELD_STATS_TAB_ID,
+      label: 'Field Stats',
+      flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics],
+      order: 25,
+      supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
+      component: FieldStatsTab,
+    });
+  }
 };
 
 /**

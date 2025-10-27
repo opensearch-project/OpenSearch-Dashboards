@@ -114,6 +114,7 @@ const defaultProps: TableProps = {
   onDuplicateSingle: () => {},
   showDuplicate: false,
   useUpdatedUX: false,
+  isDatasetManagementEnabled: false,
 };
 
 describe('Table', () => {

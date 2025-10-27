@@ -55,7 +55,8 @@ export interface VisualizationRule {
     dateColumns: VisColumn[],
     styleOptions: ChartStylesMapping[ChartType],
     chartType?: ChartType,
-    axisColumnMappings?: AxisColumnMappings
+    axisColumnMappings?: AxisColumnMappings,
+    timeRange?: { from: string; to: string }
   ) => any;
 }
 export interface VisColumn {
@@ -265,6 +266,8 @@ export interface AxisConfig {
   ticks?: boolean;
   domain?: boolean;
   format?: {
+    hours?: string;
+    minutes?: string;
     seconds?: string;
     milliseconds?: string;
   };
@@ -308,4 +311,32 @@ export interface Unit {
 
 export interface RenderChartConfig extends ChartConfig {
   styles: ChartStyles;
+}
+export interface ValueMapping {
+  id?: string;
+  type: 'range' | 'value';
+  value?: string;
+  range?: RangeValue;
+  displayText?: string;
+  color?: string;
+}
+
+export interface ValueMappingOptions {
+  valueMappings?: ValueMapping[];
+}
+
+// state timeline
+export enum DisableMode {
+  Never = 'never',
+  Threshold = 'threshold',
+}
+
+export interface DisconnectValuesOption {
+  disableMode: DisableMode;
+  threshold: string;
+}
+
+export interface ConnectNullValuesOption {
+  connectMode: DisableMode;
+  threshold: string;
 }

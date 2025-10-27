@@ -170,6 +170,7 @@ describe('SavedObjectsTable', () => {
       canGoInApp: () => true,
       search,
       workspaces,
+      isDatasetManagementEnabled: false,
     };
 
     findObjectsMock.mockImplementation(() => ({
