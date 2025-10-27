@@ -93,6 +93,7 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
       uiSettings: {},
       savedObjects: {},
       http: {},
+      isDatasetManagementEnabled: false,
     },
   }),
   withOpenSearchDashboards: (Component: any) => (props: any) => <Component {...props} />,

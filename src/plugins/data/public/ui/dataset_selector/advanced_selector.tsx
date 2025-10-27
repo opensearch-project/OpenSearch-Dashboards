@@ -68,7 +68,8 @@ export const AdvancedSelector = ({
           (type) =>
             (!supportedTypes?.length || supportedTypes.includes(type.id)) &&
             (type.meta.supportedAppNames === undefined ||
-              type.meta.supportedAppNames.includes(services.appName))
+              type.meta.supportedAppNames.includes(services.appName)) &&
+            (!useConfiguratorV2 || type.id !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN)
         )
         .map((type) => {
           return {
@@ -85,7 +86,10 @@ export const AdvancedSelector = ({
   ]);
   const [selectedDataset, setSelectedDataset] = useState<BaseDataset | undefined>();
 
-  const ConfiguratorComponent = useConfiguratorV2 ? ConfiguratorV2 : Configurator;
+  const ConfiguratorComponent =
+    useConfiguratorV2 && selectedDataset?.type === DEFAULT_DATA.SET_TYPES.INDEX
+      ? ConfiguratorV2
+      : Configurator;
 
   return selectedDataset ? (
     <ConfiguratorComponent

@@ -256,17 +256,25 @@ describe('timechart header', function () {
       expect(BreakdownFieldSelector).toHaveBeenCalledWith({ services: mockServices }, {});
     });
 
-    it('should call shouldShowBreakdownSelector with dataset from context', () => {
+    it('should call shouldShowBreakdownSelector with dataset and services from context', () => {
       const mockDataset = { timeFieldName: '@timestamp', fields: [] };
       mockUseDatasetContext.mockReturnValue({
         dataset: mockDataset as any,
         isLoading: false,
       } as any);
       mockShouldShowBreakdownSelector.mockReturnValue(false);
+      const mockServices = {
+        data: {},
+        uiSettings: {
+          get: jest.fn().mockImplementation((setting) => {
+            if (setting === 'explore:experimental') return true;
+          }),
+        },
+      };
 
-      component = mountWithIntl(<TimechartHeader {...props} />);
+      component = mountWithIntl(<TimechartHeader {...props} services={mockServices} />);
 
-      expect(mockShouldShowBreakdownSelector).toHaveBeenCalledWith(mockDataset);
+      expect(mockShouldShowBreakdownSelector).toHaveBeenCalledWith(mockDataset, mockServices);
     });
   });
 });

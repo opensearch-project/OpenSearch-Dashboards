@@ -17,6 +17,7 @@ describe('TraceDetailTabs', () => {
       { spanId: 'span-1', serviceName: 'service-a' },
       { spanId: 'span-2', serviceName: 'service-b' },
     ],
+    logCount: 2,
   };
 
   beforeEach(() => {
@@ -33,7 +34,11 @@ describe('TraceDetailTabs', () => {
   });
 
   it('shows span count badge in span list tab', () => {
-    render(<TraceDetailTabs {...defaultProps} />);
+    const propsWithNologs = {
+      ...defaultProps,
+      logCount: 0,
+    };
+    render(<TraceDetailTabs {...propsWithNologs} />);
 
     const badge = screen.getByText('2');
     expect(badge).toBeInTheDocument();
@@ -58,5 +63,65 @@ describe('TraceDetailTabs', () => {
     expect(screen.getByText('Timeline')).toBeInTheDocument();
     expect(screen.getByText('Span list')).toBeInTheDocument();
     expect(screen.queryByText('0')).not.toBeInTheDocument(); // No badge shown for empty hits
+  });
+
+  it('renders logs tab when logDatasets are provided', () => {
+    const propsWithLogs = {
+      ...defaultProps,
+      logDatasets: [{ id: 'log-dataset-1', title: 'app-logs-*', type: 'INDEX_PATTERN' }],
+      logCount: 5,
+      isLogsLoading: false,
+    };
+
+    render(<TraceDetailTabs {...propsWithLogs} />);
+
+    // Check that logs tab is present
+    expect(screen.getByText('Related logs')).toBeInTheDocument();
+
+    // Check that log count badge is displayed
+    expect(screen.getByText('5')).toBeInTheDocument();
+
+    // Verify we have 3 tabs now (Timeline, Span list, Related logs)
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(3);
+  });
+
+  it('render logs tab when logDatasets are not present', () => {
+    const propsWithoutLogs = {
+      ...defaultProps,
+      logDatasets: [],
+      logCount: 0,
+      isLogsLoading: false,
+    };
+
+    render(<TraceDetailTabs {...propsWithoutLogs} />);
+
+    // Check that logs tab is not present
+    expect(screen.queryByText('Related logs')).toBeInTheDocument();
+
+    // Verify we only have 3 tabs (Timeline, Span list, Related Logs)
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(3);
+  });
+
+  it('does not render logCount badge when isLogsLoading is true', () => {
+    const propsWithLoadingLogs = {
+      ...defaultProps,
+      logDatasets: [{ id: 'log-dataset-1', title: 'app-logs-*', type: 'INDEX_PATTERN' }],
+      logCount: 5,
+      isLogsLoading: true,
+    };
+
+    render(<TraceDetailTabs {...propsWithLoadingLogs} />);
+
+    // Check that logs tab is present
+    expect(screen.getByText('Related logs')).toBeInTheDocument();
+
+    // Check that log count badge is NOT displayed when loading
+    expect(screen.queryByText('5')).not.toBeInTheDocument();
+
+    // Verify we have 3 tabs (Timeline, Span list, Related logs)
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(3);
   });
 });

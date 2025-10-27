@@ -4,7 +4,7 @@
  */
 
 import { ParsedHit } from './types';
-import { isSpanError, isSpanOk, extractStatusCode } from '../ppl_resolve_helpers';
+import { isSpanError, extractStatusCode } from '../ppl_resolve_helpers';
 
 export const parseHits = (payloadData: string): ParsedHit[] => {
   try {
@@ -57,7 +57,7 @@ export const isStatusMatch = (span: ParsedHit, field: string, value: any): boole
 
     // Then check for OK (status code 1)
     if (value === 1) {
-      return isSpanOk(span);
+      return !isSpanError(span);
     }
 
     // Final check for Unset (status code 0)

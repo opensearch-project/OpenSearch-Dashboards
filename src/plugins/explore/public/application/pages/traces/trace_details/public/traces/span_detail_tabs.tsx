@@ -25,6 +25,7 @@ import { SpanRawSpanTab } from './span_tabs/span_raw_span_tab';
 import { SpanLogsTab } from '../logs/span_logs_tab';
 import { filterLogsBySpanId } from '../logs/url_builder';
 import { SpanDetailTab } from '../../constants/span_detail_tabs';
+import { Dataset } from '../../../../../../../../data/common';
 
 export interface SpanDetailTabsProps {
   selectedSpan?: any;
@@ -32,10 +33,11 @@ export interface SpanDetailTabsProps {
   serviceName?: string;
   setCurrentSpan?: (spanId: string) => void;
   logDatasets?: any[];
-  logsData?: any[];
+  datasetLogs?: Record<string, any[]>;
   isLogsLoading?: boolean;
   activeTab?: TabId;
   onTabChange?: (tabId: TabId) => void;
+  traceDataset?: Dataset;
 }
 
 type TabId = SpanDetailTab;
@@ -52,10 +54,11 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
   serviceName,
   setCurrentSpan,
   logDatasets = [],
-  logsData = [],
+  datasetLogs = {},
   isLogsLoading = false,
   activeTab: externalActiveTab,
   onTabChange,
+  traceDataset,
 }) => {
   const [internalActiveTab, setInternalActiveTab] = useState<TabId>(SpanDetailTab.OVERVIEW);
 
@@ -78,11 +81,25 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
     return selectedSpan ? getSpanIssueCount(selectedSpan) : 0;
   }, [selectedSpan]);
 
-  // Filter logs for the selected span
+  // Filter logs for the selected span from datasetLogs
   const spanLogs = useMemo(() => {
-    if (!selectedSpan?.spanId || !logsData.length) return [];
-    return filterLogsBySpanId(logsData, selectedSpan.spanId);
-  }, [logsData, selectedSpan?.spanId]);
+    if (!selectedSpan?.spanId || Object.keys(datasetLogs).length === 0) return [];
+
+    // Combine all logs from all datasets and filter by span ID
+    const allLogs: any[] = [];
+    Object.keys(datasetLogs).forEach((datasetId) => {
+      const dataset = logDatasets.find((ds) => ds.id === datasetId);
+      if (dataset) {
+        const filteredLogs = filterLogsBySpanId(
+          datasetLogs[datasetId],
+          selectedSpan.spanId,
+          dataset
+        );
+        allLogs.push(...filteredLogs);
+      }
+    });
+    return allLogs;
+  }, [datasetLogs, selectedSpan?.spanId, logDatasets]);
 
   const tabs = useMemo((): TabItem[] => {
     const tabList: TabItem[] = [
@@ -119,23 +136,22 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
       content: <SpanIssuesTab selectedSpan={selectedSpan} />,
     });
 
-    if (logDatasets.length > 0 && spanLogs.length > 0) {
-      tabList.push({
-        id: SpanDetailTab.LOGS,
-        name: i18n.translate('explore.spanDetailTabs.tab.logs', {
-          defaultMessage: 'Logs',
-        }),
-        content: (
-          <SpanLogsTab
-            traceId={selectedSpan?.traceId || ''}
-            spanId={selectedSpan?.spanId}
-            logDatasets={logDatasets}
-            logsData={logsData}
-            isLoading={isLogsLoading}
-          />
-        ),
-      });
-    }
+    tabList.push({
+      id: SpanDetailTab.LOGS,
+      name: i18n.translate('explore.spanDetailTabs.tab.logs', {
+        defaultMessage: 'Logs',
+      }),
+      content: (
+        <SpanLogsTab
+          traceId={selectedSpan?.traceId || ''}
+          spanId={selectedSpan?.spanId}
+          logDatasets={logDatasets}
+          datasetLogs={datasetLogs}
+          isLoading={isLogsLoading}
+          traceDataset={traceDataset}
+        />
+      ),
+    });
 
     tabList.push(
       {
@@ -160,10 +176,10 @@ export const SpanDetailTabs: React.FC<SpanDetailTabsProps> = ({
     addSpanFilter,
     issueCount,
     logDatasets,
-    logsData,
-    spanLogs,
     isLogsLoading,
+    datasetLogs,
     handleTabChange,
+    traceDataset,
   ]);
 
   // Auto-fallback to 'overview' tab when the current active tab is no longer available

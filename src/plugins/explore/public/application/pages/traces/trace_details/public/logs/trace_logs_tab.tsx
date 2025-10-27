@@ -6,16 +6,15 @@ import React from 'react';
 import {
   EuiPanel,
   EuiSpacer,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiAccordion,
   EuiTitle,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { DatasetLogsTable } from './dataset_logs_table';
+import { DatasetAccordionList } from './dataset_accordion_list';
+import { CorrelationEmptyState } from './correlation_empty_state';
 import { LogHit } from '../../server/ppl_request_logs';
 import { Dataset } from '../../../../../../../../data/common';
 import { buildExploreLogsUrl, getTimeRangeFromTraceData } from './url_builder';
@@ -23,19 +22,19 @@ import { buildExploreLogsUrl, getTimeRangeFromTraceData } from './url_builder';
 export interface TraceLogsTabProps {
   traceId: string;
   logDatasets: Dataset[];
-  logsData: LogHit[];
   datasetLogs: Record<string, LogHit[]>;
   isLoading: boolean;
   onSpanClick?: (spanId: string) => void;
+  traceDataset?: Dataset;
 }
 
 export const TraceLogsTab: React.FC<TraceLogsTabProps> = ({
   traceId,
   logDatasets,
-  logsData,
   datasetLogs,
   isLoading,
   onSpanClick,
+  traceDataset,
 }) => {
   const handleViewInExplore = (logDataset: Dataset, logs: LogHit[]) => {
     try {
@@ -78,11 +77,7 @@ export const TraceLogsTab: React.FC<TraceLogsTabProps> = ({
           </h3>
         </EuiTitle>
         <EuiSpacer size="m" />
-        <EuiText size="s" color="subdued">
-          {i18n.translate('explore.traceLogsTab.noDatasets', {
-            defaultMessage: 'No log datasets found for this trace',
-          })}
-        </EuiText>
+        <CorrelationEmptyState traceDataset={traceDataset} />
       </EuiPanel>
     );
   }
@@ -104,80 +99,14 @@ export const TraceLogsTab: React.FC<TraceLogsTabProps> = ({
         </EuiText>
         <EuiSpacer size="m" />
 
-        {logDatasets.map((dataset, index) => {
-          const logs = datasetLogs[dataset.id] || [];
-          const accordionId = `logsDatasetAccordion-${dataset.id}`;
-
-          return (
-            <div key={dataset.id}>
-              <EuiAccordion
-                id={accordionId}
-                buttonContent={
-                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                    <EuiFlexItem>
-                      <EuiFlexGroup direction="column" gutterSize="xs">
-                        <EuiFlexItem>
-                          <EuiFlexGroup gutterSize="s" alignItems="center">
-                            <EuiFlexItem grow={false}>
-                              <EuiText size="s" style={{ fontWeight: 'bold' }}>
-                                {i18n.translate('explore.traceLogsTab.dataset', {
-                                  defaultMessage: 'Dataset: ',
-                                })}
-                              </EuiText>
-                            </EuiFlexItem>
-                            <EuiFlexItem>
-                              <EuiText size="s">{dataset.title}</EuiText>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText size="xs" color="subdued">
-                            {i18n.translate('explore.traceLogsTab.recentResults', {
-                              defaultMessage: '10 recent results',
-                            })}
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                    {logs.length > 0 && (
-                      <EuiFlexItem grow={false}>
-                        <EuiButton
-                          size="s"
-                          iconType="popout"
-                          onClick={(event: React.MouseEvent) => {
-                            event.stopPropagation();
-                            handleViewInExplore(dataset, logs);
-                          }}
-                          data-test-subj={`trace-logs-view-in-explore-button-${dataset.id}`}
-                        >
-                          {i18n.translate('explore.traceLogsTab.viewInDiscoverLogs', {
-                            defaultMessage: 'View in Discover Logs',
-                          })}
-                        </EuiButton>
-                      </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                }
-                paddingSize="m"
-                initialIsOpen={true}
-                data-test-subj={`dataset-accordion-${dataset.id}`}
-              >
-                <div>
-                  {logs.length > 0 ? (
-                    <DatasetLogsTable logs={logs} isLoading={false} onSpanClick={onSpanClick} />
-                  ) : (
-                    <EuiText size="s" color="subdued">
-                      {i18n.translate('explore.traceLogsTab.noLogsForDataset', {
-                        defaultMessage: 'No logs found for this dataset',
-                      })}
-                    </EuiText>
-                  )}
-                </div>
-              </EuiAccordion>
-              {index < logDatasets.length - 1 && <EuiSpacer size="m" />}
-            </div>
-          );
-        })}
+        <DatasetAccordionList
+          logDatasets={logDatasets}
+          datasetLogs={datasetLogs}
+          onViewInExplore={handleViewInExplore}
+          onSpanClick={onSpanClick}
+          testSubjPrefix="trace-logs"
+          traceDataset={traceDataset}
+        />
       </EuiPanel>
     </div>
   );

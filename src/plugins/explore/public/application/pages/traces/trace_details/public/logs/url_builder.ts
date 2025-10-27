@@ -27,10 +27,14 @@ export function buildExploreLogsUrl(params: {
   const basePathMatch = pathname.match(/^(.*?)\/app/);
   const basePath = basePathMatch ? basePathMatch[1] : '';
 
-  let pplQuery = `%7C%20where%20traceId%20%3D%20!'${traceId}!'`;
+  // Use schema mappings for field names, with fallbacks to default field names
+  const traceIdFieldName = logDataset.schemaMappings?.otelLogs?.traceId || 'traceId';
+  const spanIdFieldName = logDataset.schemaMappings?.otelLogs?.spanId || 'spanId';
+
+  let pplQuery = `%7C%20where%20${traceIdFieldName}%20%3D%20!'${traceId}!'`;
 
   if (spanId) {
-    pplQuery += `%20%7C%20where%20spanId%20%3D%20!'${spanId}!'`;
+    pplQuery += `%20%7C%20where%20${spanIdFieldName}%20%3D%20!'${spanId}!'`;
   }
 
   const baseUrl = `${origin}${basePath}/app/explore/logs/#/`;
@@ -110,6 +114,13 @@ export function getTimeRangeFromTraceData(traceData: any[]): TimeRange {
   return { from, to };
 }
 
-export function filterLogsBySpanId(logs: LogHit[], spanId: string): LogHit[] {
-  return logs.filter((log) => log.spanId === spanId);
+export function filterLogsBySpanId(logs: LogHit[], spanId: string, dataset: Dataset): LogHit[] {
+  // Use schema mappings for spanId field name, with fallback to default
+  const spanIdFieldName = dataset.schemaMappings?.otelLogs?.spanId || 'spanId';
+
+  return logs.filter((log) => {
+    // Check both the mapped field name and the default spanId property for compatibility
+    const logSpanId = log._source?.[spanIdFieldName] || log.spanId;
+    return logSpanId === spanId;
+  });
 }

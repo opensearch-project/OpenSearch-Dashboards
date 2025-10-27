@@ -10,6 +10,7 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { ExploreServices } from '../../../types';
 import { defaultPrepareQueryString } from '../state_management/actions/query_actions';
 import { selectPatternsField } from '../state_management/selectors';
+import { selectQueryStatusMapByKey } from '../state_management/selectors/query_editor/query_editor';
 
 /**
  * Hook for reading tab specific result from result slice
@@ -29,7 +30,10 @@ export const useTabResults = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, activeTabId, services, patternsField]);
 
+  const status = useSelector((state: RootState) => selectQueryStatusMapByKey(state, cacheKey));
+
   return {
     results: cacheKey ? results[cacheKey] : null,
+    status,
   };
 };

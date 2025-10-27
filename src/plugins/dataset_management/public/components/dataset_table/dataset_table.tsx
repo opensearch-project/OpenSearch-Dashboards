@@ -58,11 +58,11 @@ const search = {
 };
 
 const ariaRegion = i18n.translate('datasetManagement.editDatasetLiveRegionAriaLabel', {
-  defaultMessage: 'Index patterns',
+  defaultMessage: 'Datasets',
 });
 
 const title = i18n.translate('datasetManagement.datasetTable.title', {
-  defaultMessage: 'Index patterns',
+  defaultMessage: 'Datasets',
 });
 
 interface Props extends RouteComponentProps {
@@ -222,14 +222,14 @@ export const DatasetTable = ({ canSave, history }: Props) => {
   const description = currentWorkspace
     ? i18n.translate('datasetManagement.datasetTable.datasetExplanationWithWorkspace', {
         defaultMessage:
-          'Create and manage the index patterns that help you retrieve your data from OpenSearch for {name} workspace.',
+          'Create and manage the datasets that help you retrieve your data from OpenSearch for {name} workspace.',
         values: {
           name: currentWorkspace.name,
         },
       })
     : i18n.translate('datasetManagement.datasetTable.datasetExplanation', {
         defaultMessage:
-          'Create and manage the index patterns that help you retrieve your data from OpenSearch.',
+          'Create and manage the datasets that help you retrieve your data from OpenSearch.',
       });
   const pageTitleAndDescription = useUpdatedUX ? (
     <HeaderControl

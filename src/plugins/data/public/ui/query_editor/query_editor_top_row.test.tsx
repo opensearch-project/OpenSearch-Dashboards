@@ -377,4 +377,119 @@ describe('QueryEditorTopRow', () => {
       }).not.toThrow();
     });
   });
+
+  describe('Cancel Button Functionality', () => {
+    it('Should not render cancel button when showCancelButton is false', async () => {
+      const { queryByTestId } = render(
+        wrapQueryEditorTopRowInContext({
+          showQueryEditor: true,
+          showCancelButton: false,
+          isQueryRunning: true,
+        })
+      );
+
+      expect(queryByTestId('queryCancelButton')).not.toBeInTheDocument();
+    });
+
+    it('Should not render cancel button when isQueryRunning is false', async () => {
+      const { queryByTestId } = render(
+        wrapQueryEditorTopRowInContext({
+          showQueryEditor: true,
+          showCancelButton: true,
+          isQueryRunning: false,
+        })
+      );
+
+      expect(queryByTestId('queryCancelButton')).not.toBeInTheDocument();
+    });
+
+    it('Should render cancel button when showCancelButton and isQueryRunning are true', async () => {
+      const { getByTestId } = render(
+        wrapQueryEditorTopRowInContext({
+          showQueryEditor: true,
+          showCancelButton: true,
+          isQueryRunning: true,
+        })
+      );
+
+      expect(getByTestId('queryCancelButton')).toBeInTheDocument();
+    });
+
+    it('Should call onCancel when cancel button is clicked', async () => {
+      const mockOnCancel = jest.fn();
+      const { getByTestId } = render(
+        wrapQueryEditorTopRowInContext({
+          showQueryEditor: true,
+          showCancelButton: true,
+          isQueryRunning: true,
+          onCancel: mockOnCancel,
+        })
+      );
+
+      const cancelButton = getByTestId('queryCancelButton');
+      cancelButton.click();
+
+      expect(mockOnCancel).toHaveBeenCalledTimes(1);
+    });
+
+    it('Should not throw error when cancel button is clicked without onCancel handler', async () => {
+      const { getByTestId } = render(
+        wrapQueryEditorTopRowInContext({
+          showQueryEditor: true,
+          showCancelButton: true,
+          isQueryRunning: true,
+        })
+      );
+
+      const cancelButton = getByTestId('queryCancelButton');
+
+      expect(() => {
+        cancelButton.click();
+      }).not.toThrow();
+    });
+
+    it('Should render both update and cancel buttons when query is running', async () => {
+      const { getByTestId } = render(
+        wrapQueryEditorTopRowInContext({
+          showQueryEditor: true,
+          showCancelButton: true,
+          isQueryRunning: true,
+          isDirty: true,
+        })
+      );
+
+      expect(getByTestId('querySubmitButton')).toBeInTheDocument();
+      expect(getByTestId('queryCancelButton')).toBeInTheDocument();
+    });
+
+    it('Should have correct accessibility attributes for cancel button', async () => {
+      const { getByTestId } = render(
+        wrapQueryEditorTopRowInContext({
+          showQueryEditor: true,
+          showCancelButton: true,
+          isQueryRunning: true,
+        })
+      );
+
+      const cancelButton = getByTestId('queryCancelButton');
+
+      expect(cancelButton).toHaveAttribute('aria-label', 'Cancel');
+      expect(cancelButton).toHaveAttribute('type', 'button');
+    });
+
+    it('Should have correct styling classes for cancel button', async () => {
+      const { getByTestId } = render(
+        wrapQueryEditorTopRowInContext({
+          showQueryEditor: true,
+          showCancelButton: true,
+          isQueryRunning: true,
+        })
+      );
+
+      const cancelButton = getByTestId('queryCancelButton');
+
+      expect(cancelButton).toHaveClass('euiButtonIcon');
+      expect(cancelButton).toHaveClass('osdQueryEditor__cancelButton');
+    });
+  });
 });

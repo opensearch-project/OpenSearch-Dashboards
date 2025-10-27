@@ -72,6 +72,10 @@ export const runFieldStatsTests = () => {
           setDatePickerDatesAndSearchIfRelevant(config.language);
           cy.osd.waitForLoader(true);
 
+          cy.setAdvancedSetting({
+            'explore:experimental': true,
+          });
+
           cy.get('#explore_field_stats_tab').click();
           cy.osd.waitForLoader(true);
         });
