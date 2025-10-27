@@ -17,6 +17,11 @@ import { BarChartStyle, BarChartStyleOptions } from '../bar/bar_vis_config';
 import { UpdateVisualizationProps } from '../visualization_container';
 import { TableChartStyle, TableChartStyleOptions } from '../table/table_vis_config';
 import { GaugeChartStyle, GaugeChartStyleOptions } from '../gauge/gauge_vis_config';
+import {
+  StateTimeLineChartStyle,
+  StateTimeLineChartStyleOptions,
+} from '../state_timeline/state_timeline_config';
+import { BarGaugeChartStyle, BarGaugeChartStyleOptions } from '../bar_gauge/bar_gauge_vis_config';
 
 export type ChartType =
   | 'line'
@@ -27,7 +32,9 @@ export type ChartType =
   | 'bar'
   | 'area'
   | 'table'
-  | 'gauge';
+  | 'gauge'
+  | 'state_timeline'
+  | 'bar_gauge';
 
 export interface ChartStylesMapping {
   line: LineChartStyle;
@@ -39,6 +46,8 @@ export interface ChartStylesMapping {
   area: AreaChartStyle;
   table: TableChartStyle;
   gauge: GaugeChartStyle;
+  state_timeline: StateTimeLineChartStyle;
+  bar_gauge: BarGaugeChartStyle;
 }
 
 export type StyleOptions =
@@ -50,7 +59,9 @@ export type StyleOptions =
   | ScatterChartStyleOptions
   | AreaChartStyleOptions
   | TableChartStyleOptions
-  | GaugeChartStyleOptions;
+  | GaugeChartStyleOptions
+  | StateTimeLineChartStyleOptions
+  | BarGaugeChartStyleOptions;
 
 export type ChartStyles = ChartStylesMapping[ChartType];
 

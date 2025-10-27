@@ -428,7 +428,8 @@ cy.explore.add('setIndexPatternAsDataset', (indexPattern) => {
 
 cy.explore.add(
   'setIndexPatternFromAdvancedSelector',
-  (indexPattern, language, finalAction = 'submit') => {
+  (indexPattern, dataSourceName, language, timeFieldName = 'timestamp', finalAction = 'submit') => {
+    // Step 1 - Set up intercept for agent config request
     cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
       req.continue((res) => {
         if (res.statusCode === 404) {
@@ -437,23 +438,57 @@ cy.explore.add(
       });
     }).as('agentConfigRequest');
 
+    // Step 2 - Open dataset selector
     cy.getElementByTestId('datasetSelectButton')
       .should('be.visible')
       .should('not.be.disabled')
       .click();
-    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
-    cy.get(`[title="Index Patterns"]`).click();
 
-    cy.getElementByTestId('datasetExplorerWindow')
-      .find(`[title="${indexPattern}"]`)
+    // Step 3 - Click advanced selector button
+    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
+
+    // Step 4 - Select Indexes
+    cy.get(`[title="Indexes"]`).should('be.visible');
+    cy.get(`[title="Indexes"]`).click();
+
+    // Step 5 - Select data source
+    cy.get(`[title="${dataSourceName}"]`).should('be.visible');
+    cy.get(`[title="${dataSourceName}"]`).click();
+
+    // Step 6 - Select index scope (Index wildcard)
+    cy.getElementByTestId('index-scope-selector')
       .should('be.visible')
-      .click({ force: true });
+      .find('[data-test-subj="comboBoxInput"]')
+      .click();
+
+    cy.get(`[title="Index wildcard"]`).should('be.visible').click({ force: true });
+
+    // Step 7 - Enter index pattern
+    cy.getElementByTestId('dataset-prefix-selector')
+      .should('be.visible')
+      .find('[data-test-subj="comboBoxInput"]')
+      .click();
+
+    cy.getElementByTestId('dataset-prefix-selector')
+      .should('be.visible')
+      .find('[data-test-subj="comboBoxSearchInput"]')
+      .clear()
+      .type(`${indexPattern}*{enter}`);
+
+    // Step 8 - Click Next button
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
 
+    // Step 9 - Select language (if provided)
     if (language) {
       cy.getElementByTestId('advancedSelectorLanguageSelect').should('be.visible').select(language);
     }
 
+    // Step 10 - Select time field
+    cy.getElementByTestId('advancedSelectorTimeFieldSelect')
+      .should('be.visible')
+      .select(timeFieldName);
+
+    // Step 11 - Confirm or cancel based on finalAction
     if (finalAction === 'submit') {
       cy.getElementByTestId('advancedSelectorConfirmButton').should('be.visible').click();
 
@@ -510,12 +545,14 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName) =
 });
 
 cy.explore.add('setupWorkspaceAndDataSourceWithTraces', (workspaceName, traceIndices) => {
-  // Load trace test data
-  cy.osd.setupTestData(
-    PATHS.SECONDARY_ENGINE,
-    traceIndices.map((index) => `cypress/fixtures/explore/traces/${index}.mapping.json`),
-    traceIndices.map((index) => `cypress/fixtures/explore/traces/${index}.data.ndjson`)
-  );
+  // Load trace test data for each index individually
+  traceIndices.forEach((index) => {
+    cy.osd.setupTestData(
+      PATHS.SECONDARY_ENGINE,
+      [`cypress/fixtures/explore/traces/${index}.mapping.json`],
+      [`cypress/fixtures/explore/traces/${index}.data.ndjson`]
+    );
+  });
 
   // Add data source
   cy.osd.addDataSource({
@@ -554,6 +591,7 @@ cy.explore.add(
       isEnhancement = false,
       signalType = 'logs',
       language = null, // Optional language parameter
+      schemaMappings = null, // Optional schema mappings for correlation
     } = opts;
 
     // Step 1 - Navigate to datasets page
@@ -647,6 +685,44 @@ cy.explore.add(
       cy.getElementByTestId('advancedSelectorTimeFieldSelect').select(
         "I don't want to use the time filter"
       );
+    }
+
+    // Step 11.5 - Configure schema mappings for logs signal type with correlation
+    if (signalType === 'logs' && schemaMappings) {
+      cy.getElementByTestId('schemaMappingsAccordion').should('be.visible').click();
+
+      // Configure mappings based on provided schemaMappings object
+      if (schemaMappings.otelLogs) {
+        const mappings = schemaMappings.otelLogs;
+
+        // Configure traceId mapping
+        if (mappings.traceId) {
+          cy.getElementByTestId('schemaMappingSelect-otelLogs-traceId')
+            .should('be.visible')
+            .select(mappings.traceId);
+        }
+
+        // Configure spanId mapping
+        if (mappings.spanId) {
+          cy.getElementByTestId('schemaMappingSelect-otelLogs-spanId')
+            .should('be.visible')
+            .select(mappings.spanId);
+        }
+
+        // Configure serviceName mapping
+        if (mappings.serviceName) {
+          cy.getElementByTestId('schemaMappingSelect-otelLogs-serviceName')
+            .should('be.visible')
+            .select(mappings.serviceName);
+        }
+
+        // Configure timestamp mapping
+        if (mappings.timeField) {
+          cy.getElementByTestId('schemaMappingSelect-otelLogs-timestamp')
+            .should('be.visible')
+            .select(mappings.timeField);
+        }
+      }
     }
 
     // Step 12 - Set up intercept to capture dataset creation response

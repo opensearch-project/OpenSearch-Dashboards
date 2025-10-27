@@ -19,7 +19,7 @@ const CreateEditFieldCont: React.FC<CreateEditFieldContainerProps> = ({ ...props
   const [dataset, setDataset] = useState<DataView>();
 
   useEffect(() => {
-    data.dataViews.get(props.match.params.id).then((ip: DataView) => {
+    data.dataViews.get(decodeURIComponent(props.match.params.id)).then((ip: DataView) => {
       setDataset(ip);
       if (ip) {
         setBreadcrumbs(

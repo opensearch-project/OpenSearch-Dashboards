@@ -43,7 +43,7 @@ export const getDatasetTableColumns = ({
         <>
           <EuiButtonEmpty
             size="xs"
-            {...reactRouterNavigate(history, `patterns/${dataset.id}`)}
+            {...reactRouterNavigate(history, `patterns/${encodeURIComponent(dataset.id)}`)}
             {...(useUpdatedUX ? { textProps: { style: { fontWeight: 600 } } } : {})}
           >
             {displayName || dataset.title}

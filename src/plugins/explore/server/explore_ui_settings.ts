@@ -7,9 +7,9 @@ import { i18n } from '@osd/i18n';
 import { schema } from '@osd/config-schema';
 
 import { UiSettingsParams } from 'opensearch-dashboards/server';
-import { DEFAULT_TRACE_COLUMNS_SETTING } from '../common';
+import { DEFAULT_TRACE_COLUMNS_SETTING, ENABLE_EXPERIMENTAL_SETTING } from '../common';
 
-export const traceUiSettings: Record<string, UiSettingsParams> = {
+export const exploreUiSettings: Record<string, UiSettingsParams> = {
   [DEFAULT_TRACE_COLUMNS_SETTING]: {
     name: i18n.translate('explore.advancedSettings.defaultTraceColumnsTitle', {
       defaultMessage: 'Default trace columns',
@@ -29,5 +29,17 @@ export const traceUiSettings: Record<string, UiSettingsParams> = {
     }),
     category: ['explore'],
     schema: schema.arrayOf(schema.string()),
+  },
+  [ENABLE_EXPERIMENTAL_SETTING]: {
+    name: i18n.translate('explore.advancedSettings.enableExperimentalTitle', {
+      defaultMessage: 'Enable experimental features',
+    }),
+    value: false,
+    description: i18n.translate('explore.advancedSettings.enableExperimentalText', {
+      defaultMessage:
+        'Enable experimental features in Explore including field statistics and histogram breakdown selector.',
+    }),
+    category: ['explore'],
+    schema: schema.boolean(),
   },
 };

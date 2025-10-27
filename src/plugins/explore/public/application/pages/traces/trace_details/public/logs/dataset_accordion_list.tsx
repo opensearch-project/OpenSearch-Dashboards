@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DatasetLogsTable } from './dataset_logs_table';
+import { CorrelationEmptyState } from './correlation_empty_state';
 import { LogHit } from '../../server/ppl_request_logs';
 import { Dataset } from '../../../../../../../../data/common';
 
@@ -23,6 +24,7 @@ export interface DatasetAccordionListProps {
   onViewInExplore: (dataset: Dataset, logs: LogHit[]) => void;
   onSpanClick?: (spanId: string) => void;
   testSubjPrefix?: string;
+  traceDataset?: Dataset;
 }
 
 export const DatasetAccordionList: React.FC<DatasetAccordionListProps> = ({
@@ -31,7 +33,13 @@ export const DatasetAccordionList: React.FC<DatasetAccordionListProps> = ({
   onViewInExplore,
   onSpanClick,
   testSubjPrefix = 'dataset',
+  traceDataset,
 }) => {
+  // Show CorrelationEmptyState when no datasets are available
+  if (logDatasets.length === 0) {
+    return <CorrelationEmptyState traceDataset={traceDataset} />;
+  }
+
   return (
     <>
       {logDatasets.map((dataset, index) => {

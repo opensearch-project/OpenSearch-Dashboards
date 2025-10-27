@@ -320,11 +320,12 @@ describe('SpanDetailTabs', () => {
     render(<SpanDetailTabs {...defaultProps} />);
 
     const tabs = screen.getAllByRole('tab');
-    expect(tabs).toHaveLength(4);
+    expect(tabs).toHaveLength(5);
     expect(tabs[0]).toHaveTextContent('Overview');
     expect(tabs[1]).toHaveTextContent('Errors');
-    expect(tabs[2]).toHaveTextContent('Metadata');
-    expect(tabs[3]).toHaveTextContent('Raw span');
+    expect(tabs[2]).toHaveTextContent('Logs');
+    expect(tabs[3]).toHaveTextContent('Metadata');
+    expect(tabs[4]).toHaveTextContent('Raw span');
   });
 
   it('applies correct CSS classes', () => {
@@ -417,43 +418,6 @@ describe('SpanDetailTabs', () => {
     expect(screen.getByRole('tab', { name: 'Metadata' })).toHaveAttribute('aria-selected', 'true');
   });
 
-  // CRITICAL TEST 2: Fallback to overview when active tab becomes unavailable (using real components)
-  it('falls back to overview tab when logs tab becomes unavailable', () => {
-    const mockOnTabChange = jest.fn();
-
-    // Start with logs tab available (provide logs data)
-    const propsWithLogs = {
-      ...defaultProps,
-      activeTab: SpanDetailTab.LOGS,
-      onTabChange: mockOnTabChange,
-      logDatasets: [{ id: 'test-dataset', title: 'Test Dataset' }],
-      logsData: [{ timestamp: '2023-01-01', message: 'test log', spanId: 'test-span-id' }],
-    };
-
-    const { rerender } = render(<SpanDetailTabs {...propsWithLogs} />);
-
-    // Should show logs tab if available (we need to check if it's rendered)
-    // Since logs tab is conditionally rendered, let's check if it exists
-    const logsTab = screen.queryByRole('tab', { name: 'Logs' });
-    if (logsTab) {
-      expect(logsTab).toHaveAttribute('aria-selected', 'true');
-    }
-
-    // Remove logs data to make logs tab unavailable, but keep activeTab as LOGS
-    // This simulates the scenario where the parent hasn't updated the activeTab yet
-    rerender(<SpanDetailTabs {...propsWithLogs} logDatasets={[]} activeTab={SpanDetailTab.LOGS} />);
-
-    // Should call onTabChange to request fallback to overview tab
-    expect(mockOnTabChange).toHaveBeenCalledWith(SpanDetailTab.OVERVIEW);
-
-    // Now simulate the parent updating the activeTab prop in response to the callback
-    rerender(
-      <SpanDetailTabs {...propsWithLogs} logDatasets={[]} activeTab={SpanDetailTab.OVERVIEW} />
-    );
-
-    // Now the overview tab should be selected
-    expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'true');
-  });
   it('renders logs tab when logDatasets and datasetLogs are provided', () => {
     const logDatasets = [
       { id: 'log-dataset-1', title: 'app-logs-*', type: 'INDEX_PATTERN' },
@@ -511,7 +475,7 @@ describe('SpanDetailTabs', () => {
     expect(logsTab).toHaveAttribute('aria-selected', 'true');
   });
 
-  it('does not render logs tab when logDatasets is empty', () => {
+  it('renders logs tab even when logDatasets is empty', () => {
     const propsWithoutLogs = {
       ...defaultProps,
       logDatasets: [],
@@ -521,15 +485,29 @@ describe('SpanDetailTabs', () => {
 
     render(<SpanDetailTabs {...propsWithoutLogs} />);
 
-    // Check that logs tab is not present
-    expect(screen.queryByText('Logs')).not.toBeInTheDocument();
+    // Check that logs tab is present even when logDatasets is empty
+    expect(screen.getByText('Logs')).toBeInTheDocument();
 
-    // Should only have 4 tabs
+    // Should have 5 tabs
     const tabs = screen.getAllByRole('tab');
-    expect(tabs).toHaveLength(4);
+    expect(tabs).toHaveLength(5);
+    expect(tabs[0]).toHaveTextContent('Overview');
+    expect(tabs[1]).toHaveTextContent('Errors');
+    expect(tabs[2]).toHaveTextContent('Logs');
+    expect(tabs[3]).toHaveTextContent('Metadata');
+    expect(tabs[4]).toHaveTextContent('Raw span');
+
+    // Click on Logs tab to verify it works
+    const logsTab = screen.getByRole('tab', { name: 'Logs' });
+    fireEvent.click(logsTab);
+    expect(logsTab).toHaveAttribute('aria-selected', 'true');
+
+    // Verify that the correct content is displayed when no log datasets are available
+    expect(screen.getByText('Span Logs')).toBeInTheDocument();
+    expect(screen.getByText('No log datasets found for this span')).toBeInTheDocument();
   });
 
-  it('does not render logs tab when no logs match the span', () => {
+  it('render logs tab', () => {
     const logDatasets = [{ id: 'log-dataset-1', title: 'app-logs-*', type: 'INDEX_PATTERN' }];
 
     const datasetLogs = {
@@ -552,10 +530,10 @@ describe('SpanDetailTabs', () => {
     render(<SpanDetailTabs {...propsWithNonMatchingLogs} />);
 
     // Check that logs tab is not present since no logs match the span
-    expect(screen.queryByText('Logs')).not.toBeInTheDocument();
+    expect(screen.queryByText('Logs')).toBeInTheDocument();
 
     // Should only have 4 tabs
     const tabs = screen.getAllByRole('tab');
-    expect(tabs).toHaveLength(4);
+    expect(tabs).toHaveLength(5);
   });
 });

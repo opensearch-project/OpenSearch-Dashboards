@@ -1,0 +1,2 @@
+fix:
+- Added support for empty trace details flyout when query changes ([#10797](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10797))
