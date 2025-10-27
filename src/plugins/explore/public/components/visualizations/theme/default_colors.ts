@@ -21,6 +21,7 @@ export const getColors = () => {
         statusRed: '#DB0000',
         text: '#FFF',
         grid: '#27252C',
+        backgroundShade: '#27252C',
         categories: [
           '#7598FF',
           '#A669E2',
@@ -43,6 +44,7 @@ export const getColors = () => {
       statusRed: '#DB0000',
       text: '#313131',
       grid: '#F5F7FF',
+      backgroundShade: '#f1f1f1ff',
       categories: [
         '#5C7FFF',
         '#A669E2',
@@ -66,6 +68,7 @@ export const getColors = () => {
     statusRed: '#DB0000',
     text: euiThemeVars.euiTextColor,
     grid: euiThemeVars.euiColorChartLines,
+    backgroundShade: darkMode ? '#27252C' : '#f1f1f1ff',
     categories: euiPaletteColorBlind(),
   };
 };
