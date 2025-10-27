@@ -59,15 +59,114 @@ export interface GlobalSearchSubmitCommand {
   run: (payload: { content: string }) => void;
 }
 
+/**
+ * Setup contract for the global search service.
+ * Provides methods to register search commands and submit commands during the setup lifecycle.
+ * @experimental
+ */
 export interface GlobalSearchServiceSetupContract {
+  /**
+   * Registers a search command that will be executed when users perform searches in the global search bar.
+   * Each command must have a unique ID and will be invoked based on the search query pattern.
+   *
+   * @param searchCommand - The search command to register
+   * @throws Warning if a command with the same ID already exists
+   *
+   * @example
+   * ```typescript
+   * chrome.globalSearch.registerSearchCommand({
+   *   id: 'my-search-command',
+   *   type: 'PAGES',
+   *   run: async (query, callback, abortSignal) => {
+   *     // Perform search logic
+   *     return [<SearchResult key="1">Result 1</SearchResult>];
+   *   }
+   * });
+   * ```
+   */
   registerSearchCommand(searchCommand: GlobalSearchCommand): void;
+
+  /**
+   * Registers a submit command that will be available when users submit content from the global search bar.
+   * Submit commands allow plugins to handle user submissions with custom actions.
+   *
+   * @param searchResultCommand - The submit command to register
+   * @throws Warning if a command with the same ID already exists
+   *
+   * @example
+   * ```typescript
+   * chrome.globalSearch.registerSearchSubmitCommand({
+   *   id: 'my-submit-command',
+   *   name: 'Create New Item',
+   *   run: (payload) => {
+   *     // Handle the submitted content
+   *     console.log('User submitted:', payload.content);
+   *   }
+   * });
+   * ```
+   */
   registerSearchSubmitCommand(searchResultCommand: GlobalSearchSubmitCommand): void;
 }
 
+/**
+ * Start contract for the global search service.
+ * Provides methods to retrieve and manage search commands during the start lifecycle.
+ * @experimental
+ */
 export interface GlobalSearchServiceStartContract {
+  /**
+   * Retrieves all registered search commands.
+   * Returns an array of all search commands that have been registered during the setup phase.
+   *
+   * @returns An array of all registered GlobalSearchCommand instances
+   *
+   * @example
+   * ```typescript
+   * const commands = chrome.globalSearch.getAllSearchCommands();
+   * console.log(`Total commands: ${commands.length}`);
+   * ```
+   */
   getAllSearchCommands(): GlobalSearchCommand[];
+
+  /**
+   * Unregisters a previously registered search command by its ID.
+   * This removes the command from the list of available search commands.
+   *
+   * @param id - The unique identifier of the search command to unregister
+   *
+   * @example
+   * ```typescript
+   * chrome.globalSearch.unregisterSearchCommand('my-search-command');
+   * ```
+   */
   unregisterSearchCommand(id: string): void;
+
+  /**
+   * Unregisters a previously registered submit command by its ID.
+   * This removes the command from the list of available submit commands.
+   *
+   * @param id - The unique identifier of the submit command to unregister
+   *
+   * @example
+   * ```typescript
+   * chrome.globalSearch.unregisterSearchSubmitCommand('my-submit-command');
+   * ```
+   */
   unregisterSearchSubmitCommand(id: string): void;
+
+  /**
+   * Returns an observable stream of all registered submit commands.
+   * Subscribers will receive updates whenever submit commands are added or removed.
+   *
+   * @returns An Observable that emits the current array of GlobalSearchSubmitCommand instances
+   *
+   * @example
+   * ```typescript
+   * chrome.globalSearch.getSearchSubmitCommands$().subscribe(commands => {
+   *   console.log(`Available submit commands: ${commands.length}`);
+   * });
+   * ```
+   */
   getSearchSubmitCommands$: () => Observable<GlobalSearchSubmitCommand[]>;
 }
 
