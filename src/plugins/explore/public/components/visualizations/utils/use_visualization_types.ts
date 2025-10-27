@@ -21,6 +21,7 @@ import {
   StateTimeLineChartStyle,
   StateTimeLineChartStyleOptions,
 } from '../state_timeline/state_timeline_config';
+import { BarGaugeChartStyle, BarGaugeChartStyleOptions } from '../bar_gauge/bar_gauge_vis_config';
 
 export type ChartType =
   | 'line'
@@ -32,7 +33,8 @@ export type ChartType =
   | 'area'
   | 'table'
   | 'gauge'
-  | 'state_timeline';
+  | 'state_timeline'
+  | 'bar_gauge';
 
 export interface ChartStylesMapping {
   line: LineChartStyle;
@@ -45,6 +47,7 @@ export interface ChartStylesMapping {
   table: TableChartStyle;
   gauge: GaugeChartStyle;
   state_timeline: StateTimeLineChartStyle;
+  bar_gauge: BarGaugeChartStyle;
 }
 
 export type StyleOptions =
@@ -57,7 +60,8 @@ export type StyleOptions =
   | AreaChartStyleOptions
   | TableChartStyleOptions
   | GaugeChartStyleOptions
-  | StateTimeLineChartStyleOptions;
+  | StateTimeLineChartStyleOptions
+  | BarGaugeChartStyleOptions;
 
 export type ChartStyles = ChartStylesMapping[ChartType];
 
