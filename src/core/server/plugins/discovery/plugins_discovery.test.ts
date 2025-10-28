@@ -53,7 +53,7 @@ const Plugins = {
     'opensearch_dashboards.json': JSON.stringify({ version: '1' }),
   }),
   incompatible: () => ({
-    'opensearch_dashboards.json': JSON.stringify({ id: 'plugin', version: '1' }),
+    'opensearch_dashboards.json': JSON.stringify({ id: 'plugin', version: '2.0.0' }),
   }),
   missingManifest: () => ({}),
   inaccessibleManifest: () => ({
