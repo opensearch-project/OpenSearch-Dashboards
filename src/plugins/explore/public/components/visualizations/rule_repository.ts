@@ -10,6 +10,7 @@ import {
   createMultiLineChart,
   createFacetedMultiLineChart,
   createCategoryLineChart,
+  createCategoryMultiLineChart,
 } from './line/to_expression';
 
 import {
@@ -444,6 +445,15 @@ const oneMetricTwoCateHighCardRule: VisualizationRule = {
           styleOptions as AreaChartStyle,
           axisColumnMappings
         );
+      case 'line':
+        return createCategoryMultiLineChart(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions as LineChartStyle,
+          axisColumnMappings
+        );
       default:
         return createRegularHeatmap(
           transformedData,
@@ -513,6 +523,15 @@ const oneMetricTwoCateLowCardRule: VisualizationRule = {
           categoricalColumns,
           dateColumns,
           styleOptions as AreaChartStyle,
+          axisColumnMappings
+        );
+      case 'line':
+        return createCategoryMultiLineChart(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions as LineChartStyle,
           axisColumnMappings
         );
       default:
@@ -726,6 +745,7 @@ const twoMetricOneCateRule: VisualizationRule = {
     { ...CHART_METADATA.scatter, priority: 100 },
     { ...CHART_METADATA.bar, priority: 80 },
     { ...CHART_METADATA.area, priority: 60 },
+    { ...CHART_METADATA.line, priority: 40 },
   ],
   toSpec: (
     transformedData,
@@ -762,6 +782,15 @@ const twoMetricOneCateRule: VisualizationRule = {
           categoricalColumns,
           dateColumns,
           styleOptions as AreaChartStyle,
+          axisColumnMappings
+        );
+      case 'line':
+        return createCategoryMultiLineChart(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions as LineChartStyle,
           axisColumnMappings
         );
     }

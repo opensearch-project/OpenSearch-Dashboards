@@ -397,7 +397,7 @@ export const createMultiLineChart = (
         legend:
           styles?.addLegend !== false
             ? {
-                title: styles.legendTitle || colorColumn?.name,
+                title: styles.legendTitle,
                 orient: styles?.legendPosition || Positions.RIGHT,
               }
             : null,
@@ -543,7 +543,7 @@ export const createFacetedMultiLineChart = (
       legend:
         styles?.addLegend !== false
           ? {
-              title: styles.legendTitle || colorMapping?.name,
+              title: styles.legendTitle,
               orient: styles?.legendPosition || Positions.RIGHT,
             }
           : null,
@@ -744,6 +744,119 @@ export const createCategoryLineChart = (
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metricName} by ${categoryName}`
+      : undefined,
+    data: { values: transformedData },
+    layer: layers,
+  };
+};
+
+export const createCategoryMultiLineChart = (
+  transformedData: Array<Record<string, any>>,
+  numericalColumns: VisColumn[],
+  categoricalColumns: VisColumn[],
+  dateColumns: VisColumn[],
+  styles: LineChartStyle,
+  axisColumnMappings?: AxisColumnMappings
+): any => {
+  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
+  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+  const colorAxisColumn = axisColumnMappings?.[AxisRole.COLOR];
+
+  const metricField = yAxisColumn?.column;
+  const categoryField = xAxisColumn?.column;
+  const categoryField2 = colorAxisColumn?.column;
+  const metricName = yAxisColumn?.name;
+  const categoryName = xAxisColumn?.name;
+  const category2Name = colorAxisColumn?.name;
+  const layers: any[] = [];
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
+
+  const mainLayer = {
+    mark: buildMarkConfig(styles, 'line'),
+    encoding: {
+      x: {
+        field: categoryField,
+        type: 'nominal',
+        axis: applyAxisStyling(
+          {
+            title: categoryName,
+            labelAngle: -45,
+            labelSeparation: 8,
+          },
+          styles,
+          'category',
+          numericalColumns,
+          categoricalColumns,
+          dateColumns
+        ),
+      },
+      y: {
+        field: metricField,
+        type: 'quantitative',
+        axis: applyAxisStyling(
+          { title: metricName },
+          styles,
+          'value',
+          numericalColumns,
+          categoricalColumns,
+          dateColumns
+        ),
+      },
+      color: {
+        field: categoryField2,
+        type: 'nominal',
+        legend: styles.addLegend
+          ? {
+              title: styles.legendTitle,
+              orient: styles.legendPosition?.toLowerCase() || Positions.RIGHT,
+            }
+          : null,
+      },
+      ...(showTooltip && {
+        tooltip: [
+          { field: categoryField, type: 'nominal', title: categoryName },
+          { field: metricField, type: 'quantitative', title: metricName },
+          { field: categoryField2, type: 'nominal', title: category2Name },
+        ],
+      }),
+    },
+  };
+
+  layers.push(mainLayer);
+
+  layers.push(
+    ...createCrosshairLayers(
+      {
+        x: {
+          name: categoryField ?? '',
+          type: 'nominal',
+          title: categoryName ?? '',
+        },
+        y: {
+          name: metricField ?? '',
+          type: 'quantitative',
+          title: metricName ?? '',
+        },
+        color: {
+          name: categoryField2 ?? '',
+          type: 'nominal',
+          title: category2Name ?? '',
+        },
+      },
+      { showTooltip, data: transformedData }
+    )
+  );
+
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
+  if (thresholdLayer) {
+    layers.push(thresholdLayer);
+  }
+
+  return {
+    $schema: VEGASCHEMA,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${metricName} by ${categoryName} and ${category2Name}`
       : undefined,
     data: { values: transformedData },
     layer: layers,

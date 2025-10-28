@@ -1051,19 +1051,5 @@ describe('Area Chart to_expression', () => {
       expect(thresholdLayer).toHaveProperty('mark.strokeWidth', 1);
       expect(thresholdLayer).toHaveProperty('mark.strokeDash');
     });
-
-    it('should throw an error when required columns are missing', () => {
-      expect(() => {
-        createStackedAreaChart(
-          mockTransformedData,
-          mockNumericalColumns,
-          [mockCategoricalColumns[0]],
-          [],
-          mockStyles
-        );
-      }).toThrow(
-        'Stacked area chart requires at least one numerical column and two categorical columns'
-      );
-    });
   });
 });

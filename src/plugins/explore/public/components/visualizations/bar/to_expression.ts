@@ -315,7 +315,7 @@ export const createGroupedTimeBarChart = (
         type: 'nominal',
         legend: styles.addLegend
           ? {
-              title: styles.legendTitle || colorColumn?.name,
+              title: styles.legendTitle,
               orient: styles.legendPosition?.toLowerCase() || 'right',
               symbolType: styles.legendShape ?? 'circle',
             }
@@ -440,7 +440,7 @@ export const createFacetedTimeBarChart = (
       type: 'nominal',
       legend: styles.addLegend
         ? {
-            title: styles.legendTitle || colorMapping?.name,
+            title: styles.legendTitle,
             orient: styles.legendPosition?.toLowerCase() || 'right',
             symbolType: styles.legendShape ?? 'circle',
           }
@@ -507,13 +507,6 @@ export const createStackedBarSpec = (
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length === 0 || categoricalColumns.length < 2) {
-    throw new Error(
-      'Stacked bar chart requires at least one numerical column and two categorical columns'
-    );
-  }
-
   const styles = { ...defaultBarChartStyles, ...styleOptions };
 
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
@@ -557,7 +550,7 @@ export const createStackedBarSpec = (
         type: 'nominal',
         legend: styles.addLegend
           ? {
-              title: styles.legendTitle || colorMapping?.name,
+              title: styles.legendTitle,
               orient: styles.legendPosition?.toLowerCase() || 'bottom',
               symbolType: styles.legendShape ?? 'circle',
             }
