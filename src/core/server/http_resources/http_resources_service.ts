@@ -96,6 +96,15 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     response: OpenSearchDashboardsResponseFactory
   ): HttpResourcesServiceToolkit {
     const cspHeader = deps.http.csp.header;
+
+    const cspReportOnly = deps.http.cspReportOnly;
+    const cspReportOnlyHeaders = cspReportOnly.isEmitting
+      ? {
+          'content-security-policy-report-only': cspReportOnly.cspReportOnlyHeader,
+          'reporting-endpoints': cspReportOnly.reportingEndpointsHeader,
+        }
+      : {};
+
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
         const body = await deps.rendering.render(request, context.core.uiSettings.client, {
@@ -104,7 +113,11 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
         return response.ok({
           body,
-          headers: { ...options.headers, 'content-security-policy': cspHeader },
+          headers: {
+            ...options.headers,
+            ...cspReportOnlyHeaders,
+            'content-security-policy': cspHeader,
+          },
         });
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
@@ -114,7 +127,11 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
         return response.ok({
           body,
-          headers: { ...options.headers, 'content-security-policy': cspHeader },
+          headers: {
+            ...options.headers,
+            ...cspReportOnlyHeaders,
+            'content-security-policy': cspHeader,
+          },
         });
       },
       renderHtml(options: HttpResourcesResponseOptions) {
@@ -122,6 +139,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           body: options.body,
           headers: {
             ...options.headers,
+            ...cspReportOnlyHeaders,
             'content-type': 'text/html',
             'content-security-policy': cspHeader,
           },
@@ -132,6 +150,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           body: options.body,
           headers: {
             ...options.headers,
+            ...cspReportOnlyHeaders,
             'content-type': 'text/javascript',
             'content-security-policy': cspHeader,
           },
