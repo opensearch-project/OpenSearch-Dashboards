@@ -409,6 +409,7 @@ const oneMetricTwoCateHighCardRule: VisualizationRule = {
     { ...CHART_METADATA.heatmap, priority: 100 },
     { ...CHART_METADATA.bar, priority: 80 },
     { ...CHART_METADATA.area, priority: 60 },
+    { ...CHART_METADATA.line, priority: 40 },
   ],
   toSpec: (
     transformedData,
@@ -489,6 +490,7 @@ const oneMetricTwoCateLowCardRule: VisualizationRule = {
     { ...CHART_METADATA.bar, priority: 100 },
     { ...CHART_METADATA.heatmap, priority: 80 },
     { ...CHART_METADATA.area, priority: 60 },
+    { ...CHART_METADATA.line, priority: 40 },
   ],
   toSpec: (
     transformedData,
