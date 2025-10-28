@@ -117,19 +117,19 @@
   td {
     @include euiTextTruncate;
 
-    padding-top: $euiSizeXS;
-    padding-bottom: $euiSizeXS;
+    padding-top: calc($euiSizeXS / 4);
+    padding-bottom: calc($euiSizeXS / 4);
 
     &.key {
       color: $euiColorMediumShade;
       max-width: $euiSize * 10;
-      text-align: right;
+      text-align: left;
       padding-right: $euiSizeXS;
     }
 
     &.value {
       max-width: $euiSizeL * 10;
-      text-align: left;
+      text-align: right;
     }
   }
 
