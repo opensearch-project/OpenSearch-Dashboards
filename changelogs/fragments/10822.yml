@@ -1,0 +1,2 @@
+chore:
+- CVE Fixed for 2.19, Update Webpack to support jspdf upgrade ([#10822](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10822))
