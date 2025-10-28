@@ -173,6 +173,26 @@ export interface GlobalSearchServiceStartContract {
    * ```
    */
   getAllSearchCommands$: () => Observable<GlobalSearchCommand[]>;
+  /**
+   * Registers a search command that will be executed when users perform searches in the global search bar.
+   * Each command must have a unique ID and will be invoked based on the search query pattern.
+   *
+   * @param searchCommand - The search command to register
+   * @throws Warning if a command with the same ID already exists
+   *
+   * @example
+   * ```typescript
+   * chrome.globalSearch.registerSearchCommand({
+   *   id: 'my-search-command',
+   *   type: 'PAGES',
+   *   run: async (query, callback, abortSignal) => {
+   *     // Perform search logic
+   *     return [<SearchResult key="1">Result 1</SearchResult>];
+   *   }
+   * });
+   * ```
+   */
+  registerSearchCommand(searchCommand: GlobalSearchCommand): void;
 }
 
 /**
@@ -229,6 +249,7 @@ export class GlobalSearchService {
       getAllSearchCommands: () => this.searchCommands,
       unregisterSearchCommand: this.unregisterSearchCommand.bind(this),
       getAllSearchCommands$: () => this.searchCommands$.asObservable(),
+      registerSearchCommand: this.registerSearchCommand.bind(this),
     };
   }
 }

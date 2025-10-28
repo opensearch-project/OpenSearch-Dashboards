@@ -101,7 +101,7 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
 
   const resultSection = (items: ReactNode[], sectionHeader: string | undefined) => {
     return (
-      <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexGroup direction="column" gutterSize="xs" key={sectionHeader}>
         {sectionHeader && (
           <EuiFlexItem>
             <EuiTitle size="s">
