@@ -36,6 +36,17 @@ export const SearchCommandTypes = {
 export type SearchCommandKeyTypes = keyof typeof SearchCommandTypes;
 
 /**
+ * Options for the run method of GlobalSearchCommand
+ * @experimental
+ */
+export interface GlobalSearchCommandRunOptions {
+  /**
+   * AbortSignal to cancel the search operation
+   */
+  abortSignal?: AbortSignal;
+}
+
+/**
  * @experimental
  */
 export interface GlobalSearchCommand {
@@ -61,8 +72,13 @@ export interface GlobalSearchCommand {
    * do the search and return search result with a React element
    * @param value search query
    * @param callback callback function when search is done
+   * @param options options object containing abortSignal and other future extensible properties
    */
-  run(value: string, callback?: () => void, abortSignal?: AbortSignal): Promise<ReactNode[]>;
+  run(
+    value: string,
+    callback?: () => void,
+    options?: GlobalSearchCommandRunOptions
+  ): Promise<ReactNode[]>;
 
   /**
    * Callback function executed when the user presses Enter in the global search bar.

@@ -191,9 +191,11 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
             const callback = onSearchResultClick || closePopover;
             const alias = SearchCommandTypes[command.type].alias;
             const queryValue = alias ? value.replace(alias, '').trim() : value;
-            return command.run(queryValue, callback, abortController.signal).then((items) => {
-              return { items, type: command.type };
-            });
+            return command
+              .run(queryValue, callback, { abortSignal: abortController.signal })
+              .then((items) => {
+                return { items, type: command.type };
+              });
           })
         );
         const searchResults = settleResults

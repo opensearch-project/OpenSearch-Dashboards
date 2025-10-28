@@ -272,10 +272,10 @@ describe('<HeaderSearchBar />', () => {
   });
 
   it('should abort previous search requests when new search is triggered', async () => {
-    const abortedSearchFn = jest.fn().mockImplementation((query, callback, signal) => {
+    const abortedSearchFn = jest.fn().mockImplementation((query, callback, options) => {
       return new Promise((resolve) => {
         setTimeout(() => {
-          if (!signal?.aborted) {
+          if (!options?.abortSignal?.aborted) {
             resolve([<EuiText>slow result</EuiText>]);
           }
         }, 100);

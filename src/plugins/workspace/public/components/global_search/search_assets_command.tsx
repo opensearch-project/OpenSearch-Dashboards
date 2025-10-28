@@ -10,7 +10,7 @@ import type { ApplicationStart } from '../../../../../core/public';
 import { HttpStart, IBasePath } from '../../../../../core/public';
 import type { SavedObjectWithMetadata } from '../../../../saved_objects_management/common';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
-import { AssetType, SUPPORTED_ASSET_TYPES } from './constants';
+import { SUPPORTED_ASSET_TYPES } from './constants';
 
 // TODO: Separate a util function to share with src/plugins/saved_objects_management/public/management_section/objects_table/components/table.tsx in the future
 const getAssetsFinalPath = ({

@@ -553,7 +553,7 @@ export class WorkspacePlugin
     core.chrome.globalSearch.registerSearchCommand({
       id: 'assetsSearch',
       type: 'SAVED_OBJECTS',
-      run: async (query: string, callback, abortSignal) => {
+      run: async (query: string, callback, options) => {
         const [{ workspaces, http }] = await core.getStartServices();
         const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
         const visibleWorkspaceIds = workspaces.workspaceList$.getValue().map(({ id }) => id);
@@ -564,7 +564,7 @@ export class WorkspacePlugin
             http,
             query,
             currentWorkspaceId,
-            abortSignal,
+            abortSignal: options?.abortSignal,
             visibleWorkspaceIds,
             onAssetClick: callback,
           });
