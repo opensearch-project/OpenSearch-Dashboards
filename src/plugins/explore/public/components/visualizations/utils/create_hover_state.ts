@@ -45,7 +45,12 @@ function createPointLayer(xField: Field, yFields: Field[], colorField?: Field) {
 
   let y = null;
   if (yFields.length === 1) {
-    y = { field: yFields[0].name, type: yFields[0].type, stack: yFields[0].stack, axis: null };
+    y = {
+      field: yFields[0].name,
+      type: yFields[0].type,
+      stack: yFields[0].stack,
+      axis: { title: '' },
+    };
   }
 
   const pointLayerTransform: any[] = [];
@@ -55,7 +60,7 @@ function createPointLayer(xField: Field, yFields: Field[], colorField?: Field) {
       as: ['key', 'value'],
     });
     color = { field: 'key', type: 'nominal' };
-    y = { field: 'value', type: 'quantitative', axis: null };
+    y = { field: 'value', type: 'quantitative', axis: { title: '' } };
   }
 
   const marks = [
@@ -201,7 +206,7 @@ export function createCrosshairLayers(axisConfig: AxisConfig, options: Options) 
     const yRuleLayer = {
       mark: { type: 'rule', color: colors.text, strokeDash: [3, 3] },
       encoding: {
-        y: { field: yFields[0].name, type: yFields[0].type, axis: null },
+        y: { field: yFields[0].name, type: yFields[0].type, axis: { title: '' } },
         opacity: {
           condition: { param: 'hover', value: 1, empty: false },
           value: 0,
