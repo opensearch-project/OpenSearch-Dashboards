@@ -69,6 +69,7 @@ export interface HttpServerSetup {
   registerStaticDir: (path: string, dirPath: string) => void;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
+  cspReportOnly: HttpServiceSetup['cspReportOnly'];
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
   registerOnPreRouting: HttpServiceSetup['registerOnPreRouting'];
   registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
@@ -149,6 +150,7 @@ export class HttpServer {
         this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
       basePath: basePathService,
       csp: config.csp,
+      cspReportOnly: config.cspReportOnly,
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,
