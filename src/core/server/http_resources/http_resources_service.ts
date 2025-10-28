@@ -98,12 +98,22 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     const cspHeader = deps.http.csp.header;
 
     const cspReportOnly = deps.http.cspReportOnly;
-    const cspReportOnlyHeaders = cspReportOnly.isEmitting
-      ? {
-          'content-security-policy-report-only': cspReportOnly.cspReportOnlyHeader,
-          'reporting-endpoints': cspReportOnly.reportingEndpointsHeader,
-        }
-      : {};
+    let cspReportOnlyHeaders:
+      | { 'content-security-policy-report-only': string; 'reporting-endpoints': string }
+      | { 'content-security-policy-report-only': string }
+      | {};
+    if (cspReportOnly.isEmitting && cspReportOnly.reportingEndpointsHeader) {
+      cspReportOnlyHeaders = {
+        'content-security-policy-report-only': cspReportOnly.cspReportOnlyHeader,
+        'reporting-endpoints': cspReportOnly.reportingEndpointsHeader,
+      };
+    } else if (cspReportOnly.isEmitting) {
+      cspReportOnlyHeaders = {
+        'content-security-policy-report-only': cspReportOnly.cspReportOnlyHeader,
+      };
+    } else {
+      cspReportOnlyHeaders = {};
+    }
 
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
