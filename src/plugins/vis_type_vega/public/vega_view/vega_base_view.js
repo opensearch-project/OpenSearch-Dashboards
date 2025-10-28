@@ -70,6 +70,7 @@ export function bypassExternalUrlCheck(url) {
   // processed in the  loader.sanitize  below
   return { url, bypassToken };
 }
+
 export class VegaBaseView {
   constructor(opts) {
     this._$parentEl = $(opts.parentEl);

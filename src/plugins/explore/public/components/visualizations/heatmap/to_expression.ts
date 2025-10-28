@@ -6,7 +6,7 @@
 import { HeatmapChartStyle } from './heatmap_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
-import { createLabelLayer, enhanceStyle, addTransform, getScale } from './heatmap_chart_utils';
+import { createLabelLayer, enhanceStyle, addTransform, getColorRange } from './heatmap_chart_utils';
 
 export const createHeatmapWithBin = (
   transformedData: Array<Record<string, any>>,
@@ -103,8 +103,8 @@ export const createRegularHeatmap = (
   const colorField = colorFieldColumn?.column;
   const colorName = colorFieldColumn?.name;
 
-  const colorScale = getScale(styles.exclusive?.colorSchema)
-    ? { range: getScale(styles.exclusive?.colorSchema) }
+  const colorScale = getColorRange(styles.exclusive?.colorSchema)
+    ? { range: getColorRange(styles.exclusive?.colorSchema) }
     : { scheme: styles.exclusive?.colorSchema };
 
   const markLayer: any = {

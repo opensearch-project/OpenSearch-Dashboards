@@ -171,7 +171,7 @@ export function generateSchemeList(targetHex: string, n = 11, step = 20) {
   return colors;
 }
 
-export const getScale = (colorSchema: ColorSchemas) => {
+export const getColorRange = (colorSchema: ColorSchemas) => {
   switch (colorSchema) {
     case ColorSchemas.BLUES:
       return generateSchemeList(getColors().categories[0]);
