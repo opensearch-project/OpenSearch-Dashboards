@@ -227,13 +227,7 @@ export class GithubApi {
     }
 
     try {
-      const response = await this.x.request<T>(options);
-      return {
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers as Record<string, string | string[] | undefined>,
-        data: response.data,
-      };
+      return await this.x.request<T>(options);
     } catch (error) {
       const unableToReachGithub = isAxiosRequestError(error);
       const githubApiFailed = isAxiosResponseError(error) && error.response.status >= 500;
