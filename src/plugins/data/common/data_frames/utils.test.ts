@@ -8,6 +8,7 @@ import {
   convertResult,
   DATA_FRAME_TYPES,
   formatTimePickerDate,
+  getFieldType,
   IDataFrameErrorResponse,
   IDataFrameResponse,
 } from '.';
@@ -33,6 +34,52 @@ describe('formatTimePickerDate', () => {
     expect(datemath.parse).toHaveBeenCalledTimes(2);
     expect(datemath.parse).toHaveBeenCalledWith('now/d', { roundUp: undefined });
     expect(datemath.parse).toHaveBeenCalledWith('now/d', { roundUp: true });
+  });
+});
+
+describe('getFieldType', () => {
+  it('should return object for struct type', () => {
+    const field = { type: 'struct' };
+    const result = getFieldType(field);
+    expect(result).toBe('object');
+  });
+
+  it('should return date for timestamp type', () => {
+    const field = { type: 'timestamp' };
+    const result = getFieldType(field);
+    expect(result).toBe('date');
+  });
+
+  it('should return date for field name containing date', () => {
+    const field = { name: 'created_date' };
+    const result = getFieldType(field);
+    expect(result).toBe('date');
+  });
+
+  it('should return date for field name containing timestamp', () => {
+    const field = { name: 'event_timestamp' };
+    const result = getFieldType(field);
+    expect(result).toBe('date');
+  });
+
+  it('should return date for field with Date values', () => {
+    const field = { values: [new Date()] };
+    const result = getFieldType(field);
+    expect(result).toBe('date');
+  });
+
+  it('should return date for field with datemath parseable values', () => {
+    jest.spyOn(datemath, 'isDateTime').mockReturnValue(true);
+    const field = { values: ['2025-02-13T00:51:50Z'] };
+    const result = getFieldType(field);
+    expect(result).toBe('date');
+    expect(datemath.isDateTime).toHaveBeenCalledWith('2025-02-13T00:51:50Z');
+  });
+
+  it('should return original type if no special conditions match', () => {
+    const field = { type: 'keyword' };
+    const result = getFieldType(field);
+    expect(result).toBe('keyword');
   });
 });
 
