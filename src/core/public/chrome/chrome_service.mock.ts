@@ -93,6 +93,7 @@ const createStartContractMock = () => {
       getAllSearchCommands: jest.fn(() => []),
       unregisterSearchCommand: jest.fn(),
       getAllSearchCommands$: jest.fn(() => new BehaviorSubject([])),
+      registerSearchCommand: jest.fn(),
     },
     setAppTitle: jest.fn(),
     setIsVisible: jest.fn(),
