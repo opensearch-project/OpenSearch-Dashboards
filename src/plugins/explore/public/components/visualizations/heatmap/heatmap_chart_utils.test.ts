@@ -8,6 +8,7 @@ import {
   addTransform,
   enhanceStyle,
   generateSchemeList,
+  getColorRange,
 } from './heatmap_chart_utils';
 import { AggregationType, VisFieldType, ColorSchemas, ScaleType, VisColumn } from '../types';
 import { DEFAULT_GREY } from '../theme/default_colors';
@@ -354,5 +355,52 @@ describe('generateSchemeList', () => {
     expect(result[5]).toBe('#808080');
     expect(result[6]).toBe('#6c6c6c');
     expect(result[7]).toBe('#585858');
+  });
+});
+
+describe('getColorRange', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return blues color scheme', () => {
+    const result = getColorRange(ColorSchemas.BLUES);
+    expect(result).toHaveLength(11);
+    expect(result[5]).toBe('#6092c0');
+  });
+
+  it('should return purples color scheme', () => {
+    const result = getColorRange(ColorSchemas.PURPLES);
+    expect(result).toHaveLength(11);
+    expect(result[5]).toBe('#9170b8');
+  });
+
+  it('should return oranges color scheme', () => {
+    const result = getColorRange(ColorSchemas.ORANGES);
+    expect(result).toHaveLength(11);
+    expect(result[5]).toBe('#e7664c');
+  });
+
+  it('should return yellows color scheme', () => {
+    const result = getColorRange(ColorSchemas.YELLOWS);
+    expect(result).toHaveLength(11);
+    expect(result[5]).toBe('#d6bf57');
+  });
+
+  it('should return greens color scheme', () => {
+    const result = getColorRange(ColorSchemas.GREENS);
+    expect(result).toHaveLength(11);
+    expect(result[5]).toBe('#54b399');
+  });
+
+  it('should return reds color scheme', () => {
+    const result = getColorRange(ColorSchemas.REDS);
+    expect(result).toHaveLength(11);
+    expect(result[5]).toBe('#d36086');
+  });
+
+  it('should return undefined for unknown color schema', () => {
+    const result = getColorRange('UNKNOWN' as ColorSchemas);
+    expect(result).toBeUndefined();
   });
 });
