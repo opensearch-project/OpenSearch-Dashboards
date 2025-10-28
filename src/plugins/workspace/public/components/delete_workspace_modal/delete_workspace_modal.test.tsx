@@ -14,6 +14,7 @@ const defaultProps: DeleteWorkspaceModalProps = {
   onClose: jest.fn(),
   selectedWorkspaces: [],
   onDeleteSuccess: jest.fn(),
+  openModal: jest.fn(),
 };
 
 const coreStartMock = coreMock.createStart();
@@ -73,13 +74,15 @@ describe('DeleteWorkspaceModal', () => {
       onDeleteSuccess: onDeleteSuccessFn,
     };
     const deleteFn = jest.fn().mockReturnValue({
-      success: true,
+      success: 1,
+      fail: 0,
+      failedIds: [],
     });
     const newServices = {
       ...coreStartMock,
       workspaceClient: {
         ...workspaceClientMock,
-        delete: deleteFn,
+        batchDelete: deleteFn,
       },
     };
     const { getByTestId, findByTestId } = render(
@@ -93,7 +96,7 @@ describe('DeleteWorkspaceModal', () => {
     const confirmButton = getByTestId('delete-workspace-modal-confirm');
     expect(deleteFn).not.toHaveBeenCalled();
     fireEvent.click(confirmButton);
-    expect(deleteFn).toHaveBeenCalledWith('test');
+    expect(deleteFn).toHaveBeenCalledWith(['test']);
     await waitFor(() => {
       expect(coreStartMock.notifications.toasts.addSuccess).toHaveBeenCalled();
       expect(onCloseFn).toHaveBeenCalled();
@@ -138,7 +141,7 @@ describe('DeleteWorkspaceModal', () => {
       ...coreStartMock,
       workspaceClient: {
         ...workspaceClientMock,
-        delete: deleteFn,
+        batchDelete: deleteFn,
       },
     };
     const { getByTestId, findByTestId } = render(
@@ -151,7 +154,7 @@ describe('DeleteWorkspaceModal', () => {
     });
     const confirmButton = getByTestId('delete-workspace-modal-confirm');
     fireEvent.click(confirmButton);
-    expect(deleteFn).toHaveBeenCalledWith('test');
+    expect(deleteFn).toHaveBeenCalledWith(['test']);
     await waitFor(() => {
       expect(coreStartMock.notifications.toasts.addSuccess).not.toHaveBeenCalled();
       expect(coreStartMock.notifications.toasts.addDanger).toHaveBeenCalled();
@@ -175,7 +178,7 @@ describe('DeleteWorkspaceModal', () => {
       ...coreStartMock,
       workspaceClient: {
         ...workspaceClientMock,
-        delete: deleteFn,
+        batchDelete: deleteFn,
       },
     };
     const { getByTestId, findByTestId } = render(
@@ -209,7 +212,7 @@ describe('DeleteWorkspaceModal', () => {
       ...coreStartMock,
       workspaceClient: {
         ...workspaceClientMock,
-        delete: deleteFn,
+        batchDelete: deleteFn,
       },
     };
     const { getByTestId, findByTestId } = render(
@@ -222,7 +225,7 @@ describe('DeleteWorkspaceModal', () => {
     });
     const confirmButton = getByTestId('delete-workspace-modal-confirm');
     fireEvent.click(confirmButton);
-    expect(deleteFn).toHaveBeenCalledWith('test');
+    expect(deleteFn).toHaveBeenCalledWith(['test']);
     expect(coreStartMock.notifications.toasts.addDanger).toHaveBeenCalled();
   });
 });

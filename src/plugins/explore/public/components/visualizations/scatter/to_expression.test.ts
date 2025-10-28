@@ -17,7 +17,7 @@ import {
   AxisColumnMappings,
   PointShape,
 } from '../types';
-import { ScatterChartStyleControls } from './scatter_vis_config';
+import { defaultScatterChartStyles, ScatterChartStyle } from './scatter_vis_config';
 
 describe('Scatter Chart to_expression', () => {
   // Mock data for testing
@@ -70,9 +70,12 @@ describe('Scatter Chart to_expression', () => {
 
   const mockDateColumns: VisColumn[] = [];
 
-  const mockStyles: Partial<ScatterChartStyleControls> = {
+  const mockStyles: ScatterChartStyle = {
+    ...defaultScatterChartStyles,
     addLegend: true,
     legendPosition: Positions.RIGHT,
+    legendTitle: 'Category', // Added to fix legend title for color
+    legendTitleForSize: 'Size', // Added to fix legend title for size
     tooltipOptions: {
       mode: 'all',
     },

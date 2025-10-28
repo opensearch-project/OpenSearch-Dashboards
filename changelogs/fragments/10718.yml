@@ -1,0 +1,2 @@
+fix:
+- Incorrect bucket options displayed ([#10718](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10718))

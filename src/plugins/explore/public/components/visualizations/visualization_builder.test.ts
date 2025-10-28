@@ -216,6 +216,18 @@ describe('VisualizationBuilder', () => {
       const defaultStyles = visualizationRegistry.getVisualizationConfig('bar')?.ui.style.defaults;
       expect(setVisConfigSpy).toHaveBeenCalledWith({ type: 'bar', styles: defaultStyles });
     });
+
+    test('should turn off raw table when switching to table type', () => {
+      const builder = new VisualizationBuilder({
+        getExpressions: () => expressionsPluginMock.createStartContract(),
+      });
+
+      builder.showRawTable$.next(true);
+      builder.visConfig$.next({ type: 'bar', axesMapping: {}, styles: {} as any });
+
+      builder.onChartTypeChange('table');
+      expect(builder.showRawTable$.value).toBe(false);
+    });
   });
 
   describe('createAutoVis()', () => {
@@ -558,5 +570,17 @@ describe('VisualizationBuilder', () => {
 
     expect(builder.data$.value).toBe(undefined);
     expect(builder.visConfig$.value).toBe(undefined);
+  });
+});
+
+describe('showRawTable$', () => {
+  test('should update when calling setShowRawTable', () => {
+    const builder = new VisualizationBuilder({
+      getExpressions: () => expressionsPluginMock.createStartContract(),
+    });
+
+    expect(builder.showRawTable$.value).toBe(false);
+    builder.setShowRawTable(true);
+    expect(builder.showRawTable$.value).toBe(true);
   });
 });

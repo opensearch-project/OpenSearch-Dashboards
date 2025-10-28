@@ -16,12 +16,6 @@ jest.mock('../../../doc_viewer/doc_viewer', () => ({
   ),
 }));
 
-jest.mock('./span_link', () => ({
-  SpanLink: ({ rowData }: { rowData: any }) => (
-    <div data-test-subj="span-link">Span Link for {rowData._id}</div>
-  ),
-}));
-
 jest.mock('../../../../helpers/use_flavor_id');
 
 const mockUseFlavorId = useFlavorId as jest.MockedFunction<typeof useFlavorId>;
@@ -77,19 +71,6 @@ describe('ExpandedTableRow', () => {
 
       expect(screen.getByText('Expanded span')).toBeInTheDocument();
     });
-
-    it('renders SpanLink component', () => {
-      render(
-        <table>
-          <tbody>
-            <ExpandedTableRow {...defaultProps} />
-          </tbody>
-        </table>
-      );
-
-      expect(screen.getByTestId('span-link')).toBeInTheDocument();
-      expect(screen.getByText('Span Link for test-row-1')).toBeInTheDocument();
-    });
   });
 
   describe('when flavor is not Traces', () => {
@@ -107,18 +88,6 @@ describe('ExpandedTableRow', () => {
       );
 
       expect(screen.getByText('Expanded document')).toBeInTheDocument();
-    });
-
-    it('does not render SpanLink component', () => {
-      render(
-        <table>
-          <tbody>
-            <ExpandedTableRow {...defaultProps} />
-          </tbody>
-        </table>
-      );
-
-      expect(screen.queryByTestId('span-link')).not.toBeInTheDocument();
     });
   });
 

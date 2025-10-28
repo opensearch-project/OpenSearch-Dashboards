@@ -9,7 +9,7 @@ import userEvent from '@testing-library/user-event';
 import { AreaVisStyleControls } from './area_vis_options';
 import {
   Positions,
-  ThresholdLineStyle,
+  ThresholdMode,
   VisFieldType,
   TooltipOptions,
   AxisRole,
@@ -39,6 +39,7 @@ jest.mock('../style_panel/axes/axes_selector', () => ({
     </div>
   )),
 }));
+
 jest.mock('../style_panel/legend/legend', () => ({
   LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
     <div data-test-subj="legend-panel">
@@ -60,32 +61,29 @@ jest.mock('../style_panel/legend/legend', () => ({
       >
         Change Both
       </button>
+      <input
+        data-test-subj="legend-title-input"
+        placeholder="Legend Title"
+        onChange={(e) => onLegendOptionsChange({ title: e.target.value })}
+      />
     </div>
   )),
 }));
 
-jest.mock('../style_panel/threshold/threshold', () => ({
-  ThresholdOptions: jest.fn(({ thresholdLines, onThresholdLinesChange }) => (
-    <div data-test-subj="threshold-panel">
-      <button
-        data-test-subj="update-threshold"
-        onClick={() =>
-          onThresholdLinesChange([
-            ...thresholdLines,
-            {
-              id: '2',
-              color: '#000000',
-              show: true,
-              style: 'full',
-              value: 20,
-              width: 1,
-            },
-          ])
-        }
-      >
-        Update Threshold
-      </button>
-    </div>
+jest.mock('../style_panel/threshold/threshold_panel', () => ({
+  ThresholdPanel: jest.fn(({ thresholdsOptions, onChange }) => (
+    <>
+      <div data-test-subj="mockAreaThresholdPanel">
+        <button
+          data-test-subj="mockAddRange"
+          onClick={() =>
+            onChange({ ...thresholdsOptions, thresholds: [{ value: 50, color: '#FF0000' }] })
+          }
+        >
+          Add Range
+        </button>
+      </div>
+    </>
   )),
 }));
 
@@ -103,61 +101,76 @@ jest.mock('../style_panel/tooltip/tooltip', () => ({
 }));
 
 jest.mock('../style_panel/axes/axes', () => ({
-  AxesOptions: jest.fn(({ categoryAxes, valueAxes, onCategoryAxesChange, onValueAxesChange }) => (
-    <div data-test-subj="axes-panel">
-      <button
-        data-test-subj="update-category-axes"
-        onClick={() =>
-          onCategoryAxesChange([
-            ...categoryAxes,
-            {
-              id: 'new-category',
-              type: 'category' as const,
-              position: 'bottom',
-              show: true,
-              labels: {
+  AxesOptions: jest.fn(
+    ({
+      categoryAxes,
+      valueAxes,
+      onCategoryAxesChange,
+      onValueAxesChange,
+      onShowFullTimeRangeChange,
+      showFullTimeRange,
+    }) => (
+      <div data-test-subj="axes-panel">
+        <button
+          data-test-subj="update-category-axes"
+          onClick={() =>
+            onCategoryAxesChange([
+              ...categoryAxes,
+              {
+                id: 'new-category',
+                type: 'category' as const,
+                position: 'bottom',
                 show: true,
-                filter: true,
-                rotate: 0,
-                truncate: 100,
+                labels: {
+                  show: true,
+                  filter: true,
+                  rotate: 0,
+                  truncate: 100,
+                },
+                title: {
+                  text: 'New Category',
+                },
               },
-              title: {
-                text: 'New Category',
-              },
-            },
-          ])
-        }
-      >
-        Update Category Axes
-      </button>
-      <button
-        data-test-subj="update-value-axes"
-        onClick={() =>
-          onValueAxesChange([
-            ...valueAxes,
-            {
-              id: 'new-value',
-              name: 'NewAxis',
-              type: 'value' as const,
-              position: 'left',
-              show: true,
-              labels: {
+            ])
+          }
+        >
+          Update Category Axes
+        </button>
+        <button
+          data-test-subj="update-value-axes"
+          onClick={() =>
+            onValueAxesChange([
+              ...valueAxes,
+              {
+                id: 'new-value',
+                name: 'NewAxis',
+                type: 'value' as const,
+                position: 'left',
                 show: true,
-                rotate: 0,
-                filter: false,
-                truncate: 100,
+                labels: {
+                  show: true,
+                  rotate: 0,
+                  filter: false,
+                  truncate: 100,
+                },
+                title: {
+                  text: 'New Value',
+                },
               },
-              title: {
-                text: 'New Value',
-              },
-            },
-          ])
-        }
-      >
-        Update Value Axes
-      </button>
-    </div>
-  )),
+            ])
+          }
+        >
+          Update Value Axes
+        </button>
+        <button
+          data-test-subj="toggle-full-time-range"
+          onClick={() => onShowFullTimeRangeChange(!showFullTimeRange)}
+        >
+          Toggle Full Time Range
+        </button>
+      </div>
+    )
+  ),
 }));
 
 jest.mock('../style_panel/title/title', () => ({
@@ -183,18 +196,14 @@ describe('AreaVisStyleControls', () => {
     styleOptions: {
       addLegend: true,
       legendPosition: Positions.RIGHT,
+      legendTitle: '',
       addTimeMarker: false,
-      thresholdLines: [
-        {
-          id: '1',
-          color: '#E7664C',
-          show: false,
-          style: ThresholdLineStyle.Full,
-          value: 10,
-          width: 1,
-          name: '',
-        },
-      ],
+      // Threshold options
+      thresholdOptions: {
+        baseColor: '#00BD6B',
+        thresholds: [],
+        thresholdStyle: ThresholdMode.Solid,
+      },
       tooltipOptions: { mode: 'all' as TooltipOptions['mode'] },
       categoryAxes: [
         {
@@ -241,6 +250,7 @@ describe('AreaVisStyleControls', () => {
         show: true,
         titleName: '',
       },
+      showFullTimeRange: false,
     },
     onStyleChange: jest.fn(),
     axisColumnMappings: {
@@ -280,7 +290,7 @@ describe('AreaVisStyleControls', () => {
     render(<AreaVisStyleControls {...defaultProps} />);
 
     expect(screen.getByTestId('legend-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('threshold-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('mockAreaThresholdPanel')).toBeInTheDocument();
     expect(screen.getByTestId('tooltip-panel')).toBeInTheDocument();
     expect(screen.getByTestId('axes-panel')).toBeInTheDocument();
     expect(screen.getByTestId('title-panel')).toBeInTheDocument();
@@ -310,6 +320,10 @@ describe('AreaVisStyleControls', () => {
   test('shows legend when FACET mapping is present', () => {
     const props = {
       ...defaultProps,
+      styleOptions: {
+        ...defaultProps.styleOptions,
+        showFullTimeRange: false,
+      },
       axisColumnMappings: {
         ...defaultProps.axisColumnMappings,
         [AxisRole.FACET]: {
@@ -368,23 +382,27 @@ describe('AreaVisStyleControls', () => {
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: Positions.TOP });
   });
 
-  test('updates threshold lines correctly', async () => {
+  test('updates legend title correctly', async () => {
     render(<AreaVisStyleControls {...defaultProps} />);
 
-    await userEvent.click(screen.getByTestId('update-threshold'));
+    const legendTitleInput = screen.getByTestId('legend-title-input');
+    await userEvent.type(legendTitleInput, 'New Legend Title');
+
+    await waitFor(() => {
+      expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendTitle: 'New Legend Title' });
+    });
+  });
+
+  test('adds threshold lines correctly', async () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId('mockAddRange'));
 
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      thresholdLines: [
-        ...defaultProps.styleOptions.thresholdLines,
-        {
-          id: '2',
-          color: '#000000',
-          show: true,
-          style: ThresholdLineStyle.Full,
-          value: 20,
-          width: 1,
-        },
-      ],
+      thresholdOptions: {
+        ...defaultProps.styleOptions.thresholdOptions,
+        thresholds: [{ color: '#FF0000', value: 50 }],
+      },
     });
   });
 
@@ -464,7 +482,7 @@ describe('AreaVisStyleControls', () => {
     // Only the axes select panel should be rendered
     expect(screen.getByTestId('axes-select-panel')).toBeInTheDocument();
     expect(screen.queryByTestId('legend-panel')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('threshold-panel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('mockAreaThresholdPanel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('tooltip-panel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('axes-panel')).not.toBeInTheDocument();
     expect(screen.queryByTestId('title-panel')).not.toBeInTheDocument();
@@ -546,6 +564,16 @@ describe('AreaVisStyleControls', () => {
           titleName: 'New Chart Title',
         },
       });
+    });
+  });
+
+  test('updates showFullTimeRange correctly', async () => {
+    render(<AreaVisStyleControls {...defaultProps} />);
+
+    await userEvent.click(screen.getByTestId('toggle-full-time-range'));
+
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+      showFullTimeRange: true, // Default is false, so toggling sets it to true
     });
   });
 });

@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { PieVisStyleControls } from './pie_vis_options';
-import { PieChartStyleControls, defaultPieChartStyles } from './pie_vis_config';
+import { defaultPieChartStyles } from './pie_vis_config';
 import { VisColumn, VisFieldType } from '../types';
 
 export default {
@@ -40,7 +40,7 @@ const mockDateColumns: VisColumn[] = [];
 
 const Template: ComponentStory<typeof PieVisStyleControls> = (args) => {
   // Use state to track changes
-  const [styleOptions, setStyleOptions] = useState<PieChartStyleControls>(args.styleOptions);
+  const [styleOptions, setStyleOptions] = useState(args.styleOptions);
 
   return (
     <div style={{ maxWidth: '800px', padding: '16px' }}>

@@ -68,10 +68,13 @@ describe('processVisitedRules', () => {
 
   describe('Test Specific Rules', () => {
     // test for not suggesting if prev token is ID
-    it('RULE_tableIdent - should suggest sources or tables when rule is present', () => {
+    it('RULE_tableQualifiedName - should suggest sources or tables when rule is present and last token is not ID or BQUOTA_STRING', () => {
       const mockRules = new Map();
       mockRules.set(OpenSearchPPLParser.RULE_tableQualifiedName, {});
-      const tokenStream = createTokenStream([1]);
+      const tokenStream = createTokenStream([
+        OpenSearchPPLParser.SOURCE,
+        OpenSearchPPLParser.EQUAL,
+      ]); // Not ID or BQUOTA_STRING
 
       const result = processVisitedRules(mockRules, 1, tokenStream);
       expect(result.suggestSourcesOrTables).toBe(SourceOrTableSuggestion.TABLES);
@@ -88,80 +91,6 @@ describe('processVisitedRules', () => {
 
       const resultWithAs = processVisitedRules(mockRules, 2, tokenStream);
       expect(resultWithAs.suggestRenameAs).toBe(true);
-    });
-
-    it('RULE_literalValue - should suggest values for column when rule is present', () => {
-      const mockRules = new Map();
-      mockRules.set(OpenSearchPPLParser.RULE_literalValue, { startTokenIndex: 0 });
-      const tokenStream = createTokenStream([
-        { type: OpenSearchPPLParser.ID, text: 'columnName' },
-        OpenSearchPPLParser.SPACE,
-        OpenSearchPPLParser.EQUAL,
-        OpenSearchPPLParser.SPACE,
-      ]);
-
-      const result = processVisitedRules(mockRules, 4, tokenStream);
-      expect(result.suggestValuesForColumn).toBe('columnName');
-    });
-
-    it('RULE_literalValue - should suggest values for column with dots in the name', () => {
-      const mockRules = new Map();
-      mockRules.set(OpenSearchPPLParser.RULE_literalValue, { startTokenIndex: 0 });
-      const tokenStream = createTokenStream([
-        { type: OpenSearchPPLParser.ID, text: 'column' },
-        { type: OpenSearchPPLParser.DOT, text: '.' },
-        { type: OpenSearchPPLParser.ID, text: 'name' },
-        OpenSearchPPLParser.SPACE,
-        OpenSearchPPLParser.EQUAL,
-        OpenSearchPPLParser.SPACE,
-      ]);
-
-      const result = processVisitedRules(mockRules, 6, tokenStream);
-      expect(result.suggestValuesForColumn).toBe('column.name');
-    });
-
-    it('RULE_literalValue - should suggest values for column with backticks in the name', () => {
-      const mockRules = new Map();
-      mockRules.set(OpenSearchPPLParser.RULE_literalValue, { startTokenIndex: 0 });
-      const tokenStream = createTokenStream([
-        { type: OpenSearchPPLParser.BQUOTA_STRING, text: '`column`' },
-        OpenSearchPPLParser.SPACE,
-        OpenSearchPPLParser.EQUAL,
-        OpenSearchPPLParser.SPACE,
-      ]);
-
-      const result = processVisitedRules(mockRules, 4, tokenStream);
-      expect(result.suggestValuesForColumn).toBe('column');
-    });
-
-    it('RULE_literalValue - should suggest values for column with dots and backticks in the name', () => {
-      const mockRules = new Map();
-      mockRules.set(OpenSearchPPLParser.RULE_literalValue, { startTokenIndex: 0 });
-      const tokenStream = createTokenStream([
-        { type: OpenSearchPPLParser.BQUOTA_STRING, text: '`column`' },
-        { type: OpenSearchPPLParser.DOT, text: '.' },
-        { type: OpenSearchPPLParser.BQUOTA_STRING, text: '`name`' },
-        OpenSearchPPLParser.SPACE,
-        OpenSearchPPLParser.EQUAL,
-        OpenSearchPPLParser.SPACE,
-      ]);
-
-      const result = processVisitedRules(mockRules, 6, tokenStream);
-      expect(result.suggestValuesForColumn).toBe('column.name');
-    });
-
-    it('RULE_literalValue - should suggest values for backticked column with dots inside', () => {
-      const mockRules = new Map();
-      mockRules.set(OpenSearchPPLParser.RULE_literalValue, { startTokenIndex: 0 });
-      const tokenStream = createTokenStream([
-        { type: OpenSearchPPLParser.BQUOTA_STRING, text: '`column.name`' },
-        OpenSearchPPLParser.SPACE,
-        OpenSearchPPLParser.EQUAL,
-        OpenSearchPPLParser.SPACE,
-      ]);
-
-      const result = processVisitedRules(mockRules, 4, tokenStream);
-      expect(result.suggestValuesForColumn).toBe('column.name');
     });
   });
 });

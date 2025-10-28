@@ -170,7 +170,7 @@ describe('KeyStringParser', () => {
 
     it('should handle keys without display mappings', () => {
       expect(parser.getDisplayString('cmd+a')).toMatch(/A$/);
-      expect(parser.getDisplayString('shift+1')).toMatch(/1$/);
+      expect(parser.getDisplayString('shift+1')).toMatch('!');
     });
   });
 

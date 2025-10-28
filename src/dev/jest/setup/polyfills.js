@@ -35,7 +35,4 @@ bluebird.Promise.setScheduler(function (fn) {
   global.setImmediate.call(global, fn);
 });
 
-const MutationObserver = require('mutation-observer');
-Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
-
 require('whatwg-fetch');

@@ -6,18 +6,18 @@
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiButtonGroup, EuiSwitch } from '@elastic/eui';
 import React from 'react';
-import { PieChartStyleControls } from './pie_vis_config';
-import { DebouncedTruncateField } from '../style_panel/utils';
+import { defaultPieChartStyles, PieChartStyle } from './pie_vis_config';
+import { DebouncedFieldNumber } from '../style_panel/utils';
 import { StyleAccordion } from '../style_panel/style_accordion';
 interface PieVisOptionsProps {
-  styles: PieChartStyleControls['exclusive'];
-  onChange: (styles: PieChartStyleControls['exclusive']) => void;
+  styles: PieChartStyle['exclusive'];
+  onChange: (styles: PieChartStyle['exclusive']) => void;
 }
 
 export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps) => {
-  const updateStyle = <K extends keyof PieChartStyleControls['exclusive']>(
+  const updateStyle = <K extends keyof PieChartStyle['exclusive']>(
     key: K,
-    value: PieChartStyleControls['exclusive'][K]
+    value: PieChartStyle['exclusive'][K]
   ) => {
     onChange({
       ...styles,
@@ -70,7 +70,7 @@ export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps)
           label={i18n.translate('explore.vis.pie.exclusive.showValues', {
             defaultMessage: 'Show values',
           })}
-          checked={styles.showValues}
+          checked={!!styles.showValues}
           onChange={(e) => updateStyle('showValues', e.target.checked)}
           data-test-subj="showValuesSwtich"
         />
@@ -81,19 +81,25 @@ export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps)
           label={i18n.translate('explore.vis.pie.exclusive.showLabels', {
             defaultMessage: 'Show labels',
           })}
-          checked={styles.showLabels}
+          checked={!!styles.showLabels}
           onChange={(e) => updateStyle('showLabels', e.target.checked)}
           data-test-subj="showLabelsSwitch"
         />
       </EuiFormRow>
       {styles.showLabels && (
-        <DebouncedTruncateField
-          value={styles.truncate ?? 100}
-          onChange={(truncateValue) => updateStyle('truncate', truncateValue)}
+        <EuiFormRow
           label={i18n.translate('explore.vis.pie.exclusive.labelTruncate', {
             defaultMessage: 'Truncate after',
           })}
-        />
+        >
+          <DebouncedFieldNumber
+            value={styles.truncate}
+            defaultValue={defaultPieChartStyles.exclusive.truncate}
+            onChange={(truncateValue) =>
+              updateStyle('truncate', truncateValue ?? defaultPieChartStyles.exclusive.truncate)
+            }
+          />
+        </EuiFormRow>
       )}
     </StyleAccordion>
   );

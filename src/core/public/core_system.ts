@@ -233,6 +233,15 @@ export class CoreSystem {
       });
       const workspaces = this.workspaces.start();
       const application = await this.application.start({ http, overlays, workspaces });
+
+      // Only enable keyboard shortcuts when both the configuration is enabled AND workspaces are enabled
+      const keyboardShortcutsConfigEnabled = injectedMetadata.getKeyboardShortcuts().enabled;
+      const workspacesEnabled = application.capabilities.workspaces.enabled;
+      const keyboardShortcutsEnabled = keyboardShortcutsConfigEnabled && workspacesEnabled;
+
+      const keyboardShortcut = keyboardShortcutsEnabled
+        ? this.keyboardShortcut.start({ enabled: true })
+        : undefined;
       const chrome = await this.chrome.start({
         application,
         docLinks,
@@ -242,9 +251,7 @@ export class CoreSystem {
         uiSettings,
         overlays,
         workspaces,
-      });
-      const keyboardShortcut = this.keyboardShortcut.start({
-        enabled: injectedMetadata.getKeyboardShortcuts().enabled,
+        keyboardShortcut,
       });
 
       this.coreApp.start({ application, http, notifications, uiSettings });
@@ -276,7 +283,7 @@ export class CoreSystem {
         uiSettings,
         fatalErrors,
         workspaces,
-        keyboardShortcut,
+        keyboardShortcut: keyboardShortcut || undefined,
       };
 
       await this.plugins.start(core);

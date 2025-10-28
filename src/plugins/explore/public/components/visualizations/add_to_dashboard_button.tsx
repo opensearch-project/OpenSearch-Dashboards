@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { SimpleSavedObject } from 'src/core/public';
 import { useObservable } from 'react-use';
@@ -56,11 +56,29 @@ export const SaveAndAddButtonWithModal = ({ dataset }: { dataset?: IndexPattern 
     uiSettings,
     scopedHistory,
     data,
+    keyboardShortcut,
   } = services;
   const visualizationBuilder = getVisualizationBuilder();
   const chartConfig = useObservable(visualizationBuilder.visConfig$);
 
   const searchContext = useSearchContext();
+
+  const handleAddToDashboard = useCallback(() => {
+    setShowAddToDashboardModal(true);
+  }, []);
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'addToDashboard',
+    pluginId: 'explore',
+    name: i18n.translate('explore.addToDashboard.addToDashboardShortcut', {
+      defaultMessage: 'Add to dashboard',
+    }),
+    category: i18n.translate('explore.addToDashboard.dataActionsCategory', {
+      defaultMessage: 'Data actions',
+    }),
+    keys: 'a',
+    execute: handleAddToDashboard,
+  });
 
   // Create osdUrlStateStorage from storage
   const osdUrlStateStorage = useMemo(() => {

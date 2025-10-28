@@ -9,11 +9,10 @@ import userEvent from '@testing-library/user-event';
 import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
 import {
   CategoryAxis,
-  ThresholdLineStyle,
+  ThresholdMode,
   ValueAxis,
   Positions,
   VisFieldType,
-  ThresholdLines,
   TooltipOptions,
   AxisRole,
   AxisColumnMappings,
@@ -56,16 +55,23 @@ jest.mock('../style_panel/legend/legend', () => ({
       >
         Change Both
       </button>
+      <input
+        data-test-subj="mockLegendTitle"
+        placeholder="Legend Title"
+        onChange={(e) => onLegendOptionsChange({ title: e.target.value })}
+      />
     </div>
   )),
 }));
 
-jest.mock('../style_panel/threshold/threshold', () => ({
-  ThresholdOptions: jest.fn(({ thresholdLines, onThresholdLinesChange }) => (
+jest.mock('../style_panel/threshold/threshold_panel', () => ({
+  ThresholdPanel: jest.fn(({ thresholdsOptions, onChange }) => (
     <div data-test-subj="mockThresholdOptions">
       <button
         data-test-subj="mockUpdateThreshold"
-        onClick={() => onThresholdLinesChange([...thresholdLines, { id: '2', show: true }])}
+        onClick={() =>
+          onChange({ ...thresholdsOptions, thresholds: [{ value: 50, color: '#FF0000' }] })
+        }
       >
         Update Threshold
       </button>
@@ -96,6 +102,8 @@ jest.mock('../style_panel/axes/axes', () => ({
       numericalColumns,
       categoricalColumns,
       dateColumns,
+      showFullTimeRange,
+      onShowFullTimeRangeChange,
     }) => (
       <div data-test-subj="mockAxesOptions">
         <button
@@ -109,6 +117,12 @@ jest.mock('../style_panel/axes/axes', () => ({
           onClick={() => onValueAxesChange([...valueAxes, { id: 'new-axis' }])}
         >
           Update Value Axes
+        </button>
+        <button
+          data-test-subj="mockUpdateShowFullTimeRange"
+          onClick={() => onShowFullTimeRangeChange(!showFullTimeRange)}
+        >
+          Toggle Full Time Range
         </button>
         <div data-test-subj="numericalColumnsLength">{numericalColumns?.length || 0}</div>
         <div data-test-subj="categoricalColumnsLength">{categoricalColumns?.length || 0}</div>
@@ -184,18 +198,6 @@ jest.mock('../style_panel/title/title', () => ({
 }));
 
 describe('LineVisStyleControls', () => {
-  const defaultThresholdLine = {
-    id: '1',
-    color: '#E7664C',
-    show: false,
-    style: ThresholdLineStyle.Full,
-    value: 10,
-    width: 1,
-    name: '',
-  };
-
-  const defaultThresholdLines: ThresholdLines = [defaultThresholdLine];
-
   const defaultCategoryAxis: CategoryAxis = {
     id: 'CategoryAxis-1',
     type: 'category',
@@ -272,11 +274,16 @@ describe('LineVisStyleControls', () => {
     styleOptions: {
       addLegend: true,
       legendPosition: Positions.RIGHT,
+      legendTitle: '',
       addTimeMarker: false,
       lineStyle: 'both' as LineStyle,
       lineMode: 'smooth',
       lineWidth: 2,
-      thresholdLines: defaultThresholdLines,
+      thresholdOptions: {
+        baseColor: '#00BD6B',
+        thresholds: [],
+        thresholdStyle: ThresholdMode.Solid,
+      },
       tooltipOptions: defaultTooltipOptions,
       categoryAxes: [defaultCategoryAxis],
       valueAxes: [defaultValueAxis],
@@ -284,6 +291,7 @@ describe('LineVisStyleControls', () => {
         show: true,
         titleName: '',
       },
+      showFullTimeRange: false,
     },
     onStyleChange: jest.fn(),
     numericalColumns: [mockNumericalColumn],
@@ -385,6 +393,12 @@ describe('LineVisStyleControls', () => {
     await userEvent.click(screen.getByTestId('mockLegendBoth'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: 'top' });
+
+    const legendTitleInput = screen.getByTestId('mockLegendTitle');
+    await userEvent.type(legendTitleInput, 'New Legend Title');
+    await waitFor(() => {
+      expect(mockProps.onStyleChange).toHaveBeenCalledWith({ legendTitle: 'New Legend Title' });
+    });
   });
 
   test('calls onStyleChange with correct parameters for threshold options', async () => {
@@ -392,7 +406,10 @@ describe('LineVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('mockUpdateThreshold'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      thresholdLines: [...mockProps.styleOptions.thresholdLines, { id: '2', show: true }],
+      thresholdOptions: {
+        ...mockProps.styleOptions.thresholdOptions,
+        thresholds: [{ color: '#FF0000', value: 50 }],
+      },
     });
   });
 
@@ -416,6 +433,11 @@ describe('LineVisStyleControls', () => {
     await userEvent.click(screen.getByTestId('mockUpdateValueAxes'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
       valueAxes: [...mockProps.styleOptions.valueAxes, { id: 'new-axis' }],
+    });
+
+    await userEvent.click(screen.getByTestId('mockUpdateShowFullTimeRange'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      showFullTimeRange: !mockProps.styleOptions.showFullTimeRange,
     });
   });
 

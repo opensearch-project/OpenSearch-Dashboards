@@ -257,6 +257,11 @@ declare namespace Cypress {
        * Verifies error message exist
        */
       verifyResultsError(error: string): Chainable<any>;
+
+      /**
+       * Gets a data source ID for a Data Source and sets it as DATASOURCE_ID alias
+       */
+      getDataSourceId(dataSourceName: string, endpoint: string): Chainable<any>;
     };
 
     // explore namespace
@@ -282,6 +287,16 @@ declare namespace Cypress {
       setRelativeTopNavDate(time: number, timeUnit: string): Chainable<any>;
 
       updateTopNav(options: any): Chainable<any>;
+
+      setupWorkspaceAndDataSourceWithTraces(
+        workspaceName: string,
+        traceIndices: string[]
+      ): Chainable<any>;
+
+      cleanupWorkspaceAndDataSourceAndTraces(
+        workspaceName: string,
+        traceIndices: string[]
+      ): Chainable<any>;
     };
   }
 }

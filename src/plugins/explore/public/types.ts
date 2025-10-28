@@ -11,6 +11,7 @@ import {
   DocLinksStart,
   ToastsStart,
   IUiSettingsClient,
+  KeyboardShortcutStart,
 } from 'opensearch-dashboards/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
 import {
@@ -36,6 +37,8 @@ import { VisualizationsSetup, VisualizationsStart } from 'src/plugins/visualizat
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { ExpressionsPublicPlugin, ExpressionsStart } from 'src/plugins/expressions/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
+import { ContextProviderStart } from '../../context_provider/public';
+import { DatasetManagementSetup } from '../../dataset_management/public';
 import { Storage, IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
 import { ScopedHistory } from '../../../core/public';
 import { SavedExploreLoader, SavedExplore } from './saved_explore';
@@ -47,6 +50,10 @@ import {
   VisualizationRegistryServiceStart,
 } from './services/visualization_registry_service';
 import { AppStore } from './application/utils/state_management/store';
+import {
+  QueryPanelActionsRegistryService,
+  QueryPanelActionsRegistryServiceSetup,
+} from './services/query_panel_actions_registry';
 
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
@@ -54,6 +61,7 @@ import { AppStore } from './application/utils/state_management/store';
 
 export interface ExplorePluginSetup {
   visualizationRegistry: VisualizationRegistryServiceSetup;
+  queryPanelActionsRegistry: QueryPanelActionsRegistryServiceSetup;
   docViews: {
     addDocView: (docViewSpec: unknown) => void;
   };
@@ -84,11 +92,13 @@ export interface ExploreSetupDependencies {
   opensearchDashboardsLegacy: OpenSearchDashboardsLegacySetup;
   urlForwarding: UrlForwardingSetup;
   home?: HomePublicPluginSetup;
+  contextProvider?: ContextProviderStart;
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   dashboard: DashboardSetup;
+  datasetManagement?: DatasetManagementSetup;
 }
 
 /**
@@ -107,6 +117,7 @@ export interface ExploreStartDependencies {
   visualizations: VisualizationsStart;
   expressions: ExpressionsStart;
   dashboard: DashboardStart;
+  contextProvider?: ContextProviderStart;
 }
 
 // ============================================================================
@@ -166,9 +177,13 @@ export interface ExploreServices {
   // Explore-specific services
   tabRegistry: TabRegistryService;
   visualizationRegistry: VisualizationRegistryService;
+  queryPanelActionsRegistry: QueryPanelActionsRegistryService;
   expressions: ExpressionsStart;
+  contextProvider?: ContextProviderStart;
 
   dashboard: DashboardStart;
+  keyboardShortcut?: KeyboardShortcutStart;
 
   supportedTypes?: string[];
+  isDatasetManagementEnabled: boolean;
 }

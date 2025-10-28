@@ -34,7 +34,7 @@ import { SavedExplore } from '../saved_explore';
 import { SAMPLE_SIZE_SETTING } from '../../common/legacy/discover';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
-import { ExpressionRenderError } from '../../../expressions/public';
+import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
 import { VisColumn } from '../components/visualizations/types';
 import { toExpression } from '../components/visualizations/utils/to_expression';
 import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../common';
@@ -49,6 +49,7 @@ import { defaultPrepareQueryString } from '../application/utils/state_management
 import { convertStringsToMappings } from '../components/visualizations/visualization_builder_utils';
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
+import { getQueryWithSource } from '../application/utils/languages';
 
 export interface SearchProps {
   description?: string;
@@ -79,6 +80,7 @@ export interface SearchProps {
   onMoveColumn?: (column: string, index: number) => void;
   onSetColumns?: (columns: string[]) => void;
   onFilter?: (field: IFieldType, value: string[], operator: string) => void;
+  onExpressionEvent?: (e: ExpressionRendererEvent) => void;
   tableData?: {
     rows: Array<Record<string, any>>;
     columns: VisColumn[];
@@ -192,9 +194,13 @@ export class ExploreEmbeddable
     const query = this.savedExplore.searchSource.getField('query');
     const uiState = JSON.parse(this.savedExplore.uiState || '{}');
     const activeTab = uiState.activeTab;
-    // If the active tab is logs, we need to prepare the query for the logs tab
-    if (activeTab === 'logs' && query) {
-      query.query = defaultPrepareQueryString(query);
+    if (query) {
+      // If the active tab is logs, we need to prepare the query for the logs tab
+      if (activeTab === 'logs') {
+        query.query = defaultPrepareQueryString(query);
+      } else {
+        query.query = getQueryWithSource(query).query;
+      }
     }
     searchSource.setFields({
       index: indexPattern,
@@ -261,6 +267,15 @@ export class ExploreEmbeddable
       });
     };
 
+    searchProps.onExpressionEvent = async (e: ExpressionRendererEvent) => {
+      if (e.name === 'applyFilter') {
+        await this.executeTriggerActions(APPLY_FILTER_TRIGGER, {
+          embeddable: this,
+          ...e.data,
+        });
+      }
+    };
+
     this.updateHandler(searchProps);
   }
 
@@ -281,7 +296,18 @@ export class ExploreEmbeddable
     if (needFetch) {
       this.prevState = { filters, query, timeRange };
       this.searchProps = searchProps;
-      await this.fetch();
+      try {
+        await this.fetch();
+      } catch (error: any) {
+        this.updateOutput({
+          loading: false,
+          error: {
+            name: error?.body?.error,
+            message: error?.body?.message,
+          },
+        });
+        throw error;
+      }
     } else if (searchProps) {
       this.searchProps = searchProps;
     }
@@ -350,40 +376,44 @@ export class ExploreEmbeddable
         ...(categoricalColumns ?? []),
         ...(dateColumns ?? []),
       ];
-      if (selectedChartType === 'table') {
-        this.searchProps.tableData = {
-          columns: allColumns,
-          rows: visualizationData.transformedData ?? [],
-        };
-      } else {
-        const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
-        const matchedRule = visualizationRegistry.findRuleByAxesMapping(
-          visualization.axesMapping,
-          allColumns
-        );
-        if (!matchedRule || !matchedRule.toSpec) {
-          throw new Error(
-            `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
+
+      // Check if there's data to visualize
+      if (visualizationData.transformedData && visualizationData.transformedData.length > 0) {
+        if (selectedChartType === 'table') {
+          this.searchProps.tableData = {
+            columns: allColumns,
+            rows: visualizationData.transformedData ?? [],
+          };
+        } else {
+          const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
+          const matchedRule = visualizationRegistry.findRuleByAxesMapping(
+            visualization.axesMapping,
+            allColumns
           );
+          if (!matchedRule || !matchedRule.toSpec) {
+            throw new Error(
+              `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
+            );
+          }
+          const searchContext = {
+            query: this.input.query,
+            filters: this.input.filters,
+            timeRange: this.input.timeRange,
+          };
+          this.searchProps.searchContext = searchContext;
+          const styleOptions = visualization.params;
+          const spec = matchedRule.toSpec(
+            visualizationData.transformedData,
+            numericalColumns,
+            categoricalColumns,
+            dateColumns,
+            styleOptions,
+            selectedChartType,
+            axesMapping
+          );
+          const exp = toExpression(searchContext, spec);
+          this.searchProps.expression = exp;
         }
-        const searchContext = {
-          query: this.input.query,
-          filters: this.input.filters,
-          timeRange: this.input.timeRange,
-        };
-        this.searchProps.searchContext = searchContext;
-        const styleOptions = visualization.params;
-        const spec = matchedRule.toSpec(
-          visualizationData.transformedData,
-          numericalColumns,
-          categoricalColumns,
-          dateColumns,
-          styleOptions,
-          selectedChartType,
-          axesMapping
-        );
-        const exp = toExpression(searchContext, spec);
-        this.searchProps.expression = exp;
       }
     }
     this.updateOutput({ loading: false, error: undefined });

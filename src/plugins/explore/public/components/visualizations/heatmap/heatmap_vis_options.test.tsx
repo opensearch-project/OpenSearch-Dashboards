@@ -93,7 +93,7 @@ jest.mock('./heatmap_exclusive_vis_options', () => ({
           data-test-subj="changeHeatmapUseCustomRanges"
           onClick={() =>
             onChange({
-              useCustomRanges: true,
+              useThresholdColor: true,
             })
           }
         >
@@ -145,6 +145,23 @@ jest.mock('./heatmap_exclusive_vis_options', () => ({
   )),
 }));
 
+jest.mock('../style_panel/threshold/threshold_panel', () => ({
+  ThresholdPanel: jest.fn(({ thresholdsOptions, onChange }) => (
+    <>
+      <div data-test-subj="mockAreaThresholdPanel">
+        <button
+          data-test-subj="mockAddRange"
+          onClick={() =>
+            onChange({ ...thresholdsOptions, thresholds: [{ value: 50, color: '#FF0000' }] })
+          }
+        >
+          Add Range
+        </button>
+      </div>
+    </>
+  )),
+}));
+
 jest.mock('../style_panel/legend/legend', () => {
   const { Positions: PositionsEnum } = jest.requireActual('../types');
   return {
@@ -162,6 +179,11 @@ jest.mock('../style_panel/legend/legend', () => {
         >
           Change Position
         </button>
+        <input
+          data-test-subj="mockLegendTitle"
+          placeholder="Legend Title"
+          onChange={(e) => onLegendOptionsChange({ title: e.target.value })}
+        />
       </div>
     )),
   };
@@ -249,11 +271,11 @@ describe('HeatmapVisStyleControls', () => {
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('heatmapLabelOptions')).toBeInTheDocument();
     expect(screen.getByTestId('heatmapExclusiveOptions')).toBeInTheDocument();
-    expect(screen.queryByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
   });
 
-  it('calls onStyleChange with correct parameters for legend options', () => {
+  it('calls onStyleChange with correct parameters for legend options', async () => {
     render(
       <Provider store={store}>
         <HeatmapVisStyleControls {...mockProps} />
@@ -261,15 +283,24 @@ describe('HeatmapVisStyleControls', () => {
     );
 
     // Test legend show toggle
-    fireEvent.click(screen.getByTestId('mockLegendShow'));
+    await userEvent.click(screen.getByTestId('mockLegendShow'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
       addLegend: !mockProps.styleOptions.addLegend,
     });
 
     // Test legend position change
-    fireEvent.click(screen.getByTestId('mockLegendPosition'));
+    await userEvent.click(screen.getByTestId('mockLegendPosition'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
       legendPosition: Positions.BOTTOM,
+    });
+
+    // Test legend title change
+    const legendTitleInput = screen.getByTestId('mockLegendTitle');
+    await userEvent.type(legendTitleInput, 'New Legend Title');
+    await waitFor(() => {
+      expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+        legendTitle: 'New Legend Title',
+      });
     });
   });
 
@@ -310,6 +341,7 @@ describe('HeatmapVisStyleControls', () => {
       ],
     });
   });
+
   it('calls onStyleChange with correct parameters for heatmap exclusive options', () => {
     render(
       <Provider store={store}>
@@ -337,10 +369,11 @@ describe('HeatmapVisStyleControls', () => {
     fireEvent.click(screen.getByTestId('changeHeatmapUseCustomRanges'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({
       exclusive: {
-        useCustomRanges: true,
+        useThresholdColor: true,
       },
     });
   });
+
   it('calls onStyleChange with correct parameters for heatmap label options', () => {
     render(
       <Provider store={store}>
@@ -380,7 +413,7 @@ describe('HeatmapVisStyleControls', () => {
     });
   });
 
-  test('updates title show option correctly', async () => {
+  it('updates title show option correctly', async () => {
     render(
       <Provider store={store}>
         <HeatmapVisStyleControls {...mockProps} />
@@ -399,7 +432,7 @@ describe('HeatmapVisStyleControls', () => {
     });
   });
 
-  test('updates title name when text is entered', async () => {
+  it('updates title name when text is entered', async () => {
     // Set show to true to ensure the title field is visible
     const props = {
       ...mockProps,
@@ -421,13 +454,30 @@ describe('HeatmapVisStyleControls', () => {
     const titleInput = screen.getByPlaceholderText('Default title');
     await userEvent.type(titleInput, 'New Chart Title');
 
-    waitFor(() => {
+    await waitFor(() => {
       expect(mockProps.onStyleChange).toHaveBeenCalledWith({
         titleOptions: {
           ...props.styleOptions.titleOptions,
           titleName: 'New Chart Title',
         },
       });
+    });
+  });
+
+  it('adds threshold correctly', async () => {
+    render(
+      <Provider store={store}>
+        <HeatmapVisStyleControls {...mockProps} />
+      </Provider>
+    );
+
+    await userEvent.click(screen.getByTestId('mockAddRange'));
+
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      thresholdOptions: {
+        ...mockProps.styleOptions.thresholdOptions,
+        thresholds: [{ color: '#FF0000', value: 50 }],
+      },
     });
   });
 });

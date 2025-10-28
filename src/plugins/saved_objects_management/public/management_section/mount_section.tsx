@@ -47,6 +47,7 @@ interface MountParams {
   mountParams: ManagementAppMountParams & { wrapInPage?: boolean };
   dataSourceEnabled: boolean;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  isDatasetManagementEnabled: boolean;
 }
 
 let allowedObjectTypes: string[] | undefined;
@@ -69,6 +70,7 @@ export const mountManagementSection = async ({
   serviceRegistry,
   dataSourceEnabled,
   dataSourceManagement,
+  isDatasetManagementEnabled,
 }: MountParams) => {
   const [coreStart, { data, uiActions, navigation }, pluginStart] = await core.getStartServices();
   const { element, history, setBreadcrumbs } = mountParams;
@@ -141,6 +143,7 @@ export const mountManagementSection = async ({
                 dataSourceManagement={dataSourceManagement}
                 navigation={navigation}
                 useUpdatedUX={useUpdatedUX}
+                isDatasetManagementEnabled={isDatasetManagementEnabled}
               />
             </Suspense>
           </RedirectToHomeIfUnauthorized>

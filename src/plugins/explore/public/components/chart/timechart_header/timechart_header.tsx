@@ -28,19 +28,14 @@
  * under the License.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  EuiText,
-  EuiSelect,
-  EuiIconTip,
-} from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSelect, EuiIconTip } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import moment from 'moment';
 import { DiscoverChartToggleId } from '../utils/use_persist_chart_state';
+import { BreakdownFieldSelector } from '../breakdown_field_selector';
+import { shouldShowBreakdownSelector } from '../utils/breakdown_utils';
+import { useDatasetContext } from '../../../application/context/dataset_context/dataset_context';
 
 export interface TimechartHeaderBucketInterval {
   scaled?: boolean;
@@ -92,6 +87,10 @@ export interface TimechartHeaderProps {
    * Additional control element
    */
   additionalControl?: React.JSX.Element;
+  /**
+   * Explore services for executing queries
+   */
+  services?: any;
 }
 
 export function TimechartHeader({
@@ -104,21 +103,11 @@ export function TimechartHeader({
   stateInterval,
   additionalControl,
   toggleIdSelected,
+  services,
 }: TimechartHeaderProps) {
   const [interval, setInterval] = useState(stateInterval);
-
-  const toMoment = useCallback(
-    (datetime: string) => {
-      if (!datetime) {
-        return '';
-      }
-      if (!dateFormat) {
-        return datetime;
-      }
-      return moment(datetime).format(dateFormat);
-    },
-    [dateFormat]
-  );
+  const { dataset } = useDatasetContext();
+  const showBreakdownSelector = shouldShowBreakdownSelector(dataset, services);
 
   useEffect(() => {
     setInterval(stateInterval);
@@ -148,24 +137,6 @@ export function TimechartHeader({
         {(toggleIdSelected === 'histogram' || additionalControl == null) && (
           <>
             <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate('explore.discover.howToChangeTheTimeTooltip', {
-                  defaultMessage: 'To change the time, use the global time filter above',
-                })}
-                delay="long"
-              >
-                <EuiText data-test-subj="discoverIntervalDateRange" size="s">
-                  {`${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${
-                    interval !== 'auto'
-                      ? i18n.translate('explore.discover.timechartHeader.timeIntervalSelect.per', {
-                          defaultMessage: 'per',
-                        })
-                      : ''
-                  }`}
-                </EuiText>
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
               <EuiSelect
                 className="exploreChart__TimechartHeader__selection"
                 aria-label={i18n.translate(
@@ -188,6 +159,7 @@ export function TimechartHeader({
                   })}
                 value={interval}
                 onChange={handleIntervalChange}
+                onMouseUp={(e) => e.stopPropagation()}
                 prepend={
                   <EuiText
                     className="exploreChart__TimechartHeader__selection__prependText"
@@ -232,6 +204,7 @@ export function TimechartHeader({
                 }
               />
             </EuiFlexItem>
+            {showBreakdownSelector && services && <BreakdownFieldSelector services={services} />}
           </>
         )}
         {additionalControl}

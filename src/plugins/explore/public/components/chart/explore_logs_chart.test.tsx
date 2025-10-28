@@ -29,6 +29,7 @@ jest.mock('../../application/utils/state_management/actions/query_actions', () =
   executeQueries: jest.fn(() => ({ type: 'mock/executeQueries' })),
   executeHistogramQuery: jest.fn(() => ({ type: 'mock/executeHistogramQuery' })),
   defaultPrepareQueryString: jest.fn((query) => `${query.language}:${query.query}`),
+  prepareHistogramCacheKey: jest.fn((query) => `histogram:${query.language}:${query.query}`),
 }));
 
 // Mock the TimechartHeader component

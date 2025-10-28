@@ -78,7 +78,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       const datasetTypeConfig = this.queryService.queryString
         .getDatasetService()
         .getType(datasetType);
-      strategy = datasetTypeConfig?.getSearchOptions?.().strategy ?? strategy;
+      strategy = datasetTypeConfig?.getSearchOptions?.(dataset).strategy ?? strategy;
 
       if (
         dataset?.timeFieldName &&
@@ -150,6 +150,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     };
   }
 
+  // PPL aggregations are not in use for the histogram anymore
   private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {
     const { aggs } = request.params.body;
     if (!aggs || !query.dataset || !query.dataset.timeFieldName) return;

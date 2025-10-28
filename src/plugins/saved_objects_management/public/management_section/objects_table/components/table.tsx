@@ -52,6 +52,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
+import { convertIndexPatternTerminology } from '../../../../../opensearch_dashboards_utils/public';
 import { SavedObjectWithMetadata } from '../../../types';
 import {
   SavedObjectsManagementActionServiceStart,
@@ -76,6 +77,7 @@ export interface TableProps {
   onDuplicate: () => void;
   onDuplicateSingle: (object: SavedObjectWithMetadata) => void;
   onActionRefresh: (object: SavedObjectWithMetadata) => void;
+  isDatasetManagementEnabled: boolean;
   onExport: (includeReferencesDeep: boolean) => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   pageIndex: number;
@@ -221,10 +223,14 @@ export class Table extends PureComponent<TableProps, TableState> {
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowType',
         render: (type: string, object: SavedObjectWithMetadata) => {
+          const typeLabel = convertIndexPatternTerminology(
+            getSavedObjectLabel(type),
+            this.props.isDatasetManagementEnabled
+          );
           return (
-            <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
+            <EuiToolTip position="top" content={typeLabel}>
               <EuiIcon
-                aria-label={getSavedObjectLabel(type)}
+                aria-label={typeLabel}
                 type={object.meta.icon || 'apps'}
                 size="s"
                 data-test-subj="objectType"
@@ -254,6 +260,12 @@ export class Table extends PureComponent<TableProps, TableState> {
           let finalPath = path;
           if (this.props.useUpdatedUX && finalPath) {
             finalPath = finalPath.replace(/^\/app\/management\/opensearch-dashboards/, '/app');
+          }
+          // Decode the path
+          try {
+            finalPath = decodeURIComponent(finalPath);
+          } catch (e) {
+            // If decoding fails, use the original path
           }
           let inAppUrl = basePath.prepend(finalPath);
           if (object.workspaces?.length) {

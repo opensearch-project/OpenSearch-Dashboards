@@ -5,6 +5,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, parse } from 'vega';
+import { Handler } from 'vega-tooltip';
 import { createGanttSpec } from './gantt_chart_spec';
 import { convertToVegaGanttData } from './gantt_data_adapter';
 import { GANTT_CHART_CONSTANTS, TOTAL_PADDING } from './gantt_constants';
@@ -127,11 +128,21 @@ export function GanttChart({
           data.length,
           containerWidth,
           selectedSpanId,
-          isDarkMode
+          isDarkMode,
+          isEmbedded
         );
 
         const runtime = parse(spec);
         const view = new View(runtime).renderer('svg').initialize(containerRef.current);
+
+        // Configure tooltip to appear instantly using vega-tooltip
+        const tooltipHandler = new Handler();
+
+        // Set delay properties directly on the handler instance
+        (tooltipHandler as any).delay = 0;
+        (tooltipHandler as any).hideDelay = 200;
+
+        view.tooltip(tooltipHandler.call);
 
         await view.data('spans', vegaData.values).run();
 
@@ -167,6 +178,7 @@ export function GanttChart({
     calculateHeight,
     selectedSpanId,
     services?.uiSettings,
+    isEmbedded,
   ]);
 
   const finalHeight = calculateHeight(data.length);

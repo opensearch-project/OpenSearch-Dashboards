@@ -3,20 +3,59 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Mock moment-timezone BEFORE any imports to prevent loading issues
+jest.mock('moment-timezone', () => {
+  const moment = jest.requireActual('moment');
+  if (!moment) {
+    // Fallback if moment isn't available
+    return {
+      tz: {
+        guess: () => 'America/New_York',
+        setDefault: () => {},
+      },
+    };
+  }
+
+  // Extend moment with timezone methods
+  moment.tz = {
+    guess: () => 'America/New_York',
+    setDefault: () => {},
+  };
+
+  return moment;
+});
+
+jest.mock('./utils', () => ({
+  buildPPLHistogramQuery: jest.fn((queryString) => queryString),
+  processRawResultsForHistogram: jest.fn((_queryString, rawResults) => rawResults),
+  createHistogramConfigWithInterval: jest.fn(() => ({
+    toDsl: jest.fn().mockReturnValue({}),
+    aggs: [
+      {},
+      {
+        buckets: {
+          getInterval: jest.fn(() => ({ interval: '1h', scale: 1 })),
+        },
+      },
+    ],
+  })),
+}));
+
 import { configureStore } from '@reduxjs/toolkit';
 import {
   abortAllActiveQueries,
   defaultPrepareQueryString,
   defaultResultsProcessor,
   histogramResultsProcessor,
+  prepareHistogramCacheKey,
   executeQueries,
   executeHistogramQuery,
   executeTabQuery,
+  executeDataTableQuery,
 } from './query_actions';
 import { QueryExecutionStatus } from '../types';
 import { setResults } from '../slices';
 import { Query, DataView } from 'src/plugins/data/common';
-import { DataPublicPluginStart } from '../../../../../../data/public';
 import { ExploreServices } from '../../../../types';
 import { SAMPLE_SIZE_SETTING } from '../../../../../common';
 
@@ -37,6 +76,9 @@ jest.mock('moment', () => {
   });
   Object.assign(mockMoment, {
     duration: actualMoment.duration,
+    isMoment: actualMoment.isMoment,
+    utc: actualMoment.utc,
+    unix: actualMoment.unix,
   });
   return mockMoment;
 });
@@ -76,6 +118,7 @@ jest.mock('../../../../../../data/public', () => ({
 
 jest.mock('../../../../components/chart/utils', () => ({
   buildPointSeriesData: jest.fn(),
+  buildChartFromBreakdownSeries: jest.fn(),
   createHistogramConfigs: jest.fn(),
   getDimensions: jest.fn(),
 }));
@@ -174,10 +217,16 @@ describe('Query Actions - Comprehensive Test Suite', () => {
             create: jest.fn().mockResolvedValue(mockSearchSource),
           },
           showError: jest.fn(),
+          aggs: {
+            calculateAutoTimeExpression: jest.fn().mockReturnValue('1h'),
+          },
         },
         query: {
           queryString: {
             getQuery: jest.fn().mockReturnValue({ query: '', language: 'PPL' }),
+            getLanguageService: jest.fn().mockReturnValue({
+              getLanguage: jest.fn().mockReturnValue({}),
+            }),
           },
           filterManager: {
             getFilters: jest.fn().mockReturnValue([]),
@@ -185,6 +234,10 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           timefilter: {
             timefilter: {
               createFilter: jest.fn().mockReturnValue({}),
+              getTime: jest.fn().mockReturnValue({
+                from: 'now-1h',
+                to: 'now',
+              }),
             },
           },
         },
@@ -300,6 +353,124 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       const result = defaultPrepareQueryString(complexQuery);
       expect(result).toBe('processed-complex-query');
+    });
+  });
+
+  describe('prepareHistogramCacheKey', () => {
+    const mockDefaultPreparePplQuery = languagesModule.defaultPreparePplQuery as jest.MockedFunction<
+      typeof languagesModule.defaultPreparePplQuery
+    >;
+
+    beforeEach(() => {
+      mockDefaultPreparePplQuery.mockClear();
+    });
+
+    it('should use "histogram:" prefix without breakdown', () => {
+      const query: Query = {
+        query: 'source=logs',
+        language: 'PPL',
+        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      };
+
+      mockDefaultPreparePplQuery.mockReturnValue({
+        ...query,
+        query: 'processed-query',
+      });
+
+      const result = prepareHistogramCacheKey(query, false);
+
+      expect(result).toBe('histogram:processed-query');
+      expect(mockDefaultPreparePplQuery).toHaveBeenCalledWith(query);
+    });
+
+    it('should use "histogram:breakdown:" prefix with breakdown', () => {
+      const query: Query = {
+        query: 'source=logs',
+        language: 'PPL',
+        dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
+      };
+
+      mockDefaultPreparePplQuery.mockReturnValue({
+        ...query,
+        query: 'processed-query',
+      });
+
+      const result = prepareHistogramCacheKey(query, true);
+
+      expect(result).toBe('histogram:breakdown:processed-query');
+      expect(mockDefaultPreparePplQuery).toHaveBeenCalledWith(query);
+    });
+
+    it('should use "histogram:" prefix when hasBreakdown is undefined', () => {
+      const query: Query = {
+        query: 'source=logs',
+        language: 'PPL',
+      };
+
+      mockDefaultPreparePplQuery.mockReturnValue({
+        ...query,
+        query: 'processed-query',
+      });
+
+      const result = prepareHistogramCacheKey(query);
+
+      expect(result).toBe('histogram:processed-query');
+    });
+
+    it('should handle different query strings correctly', () => {
+      const queries = [
+        'source=logs',
+        'source=metrics | stats avg(value)',
+        'source=traces | where service="api" | stats count() by status',
+      ];
+
+      queries.forEach((queryString) => {
+        const query: Query = {
+          query: queryString,
+          language: 'PPL',
+        };
+
+        mockDefaultPreparePplQuery.mockReturnValue({
+          ...query,
+          query: `processed-${queryString}`,
+        });
+
+        const resultWithoutBreakdown = prepareHistogramCacheKey(query, false);
+        expect(resultWithoutBreakdown).toBe(`histogram:processed-${queryString}`);
+
+        const resultWithBreakdown = prepareHistogramCacheKey(query, true);
+        expect(resultWithBreakdown).toBe(`histogram:breakdown:processed-${queryString}`);
+      });
+    });
+
+    it('should handle empty query string', () => {
+      const query: Query = {
+        query: '',
+        language: 'PPL',
+      };
+
+      mockDefaultPreparePplQuery.mockReturnValue({
+        ...query,
+        query: '',
+      });
+
+      const result = prepareHistogramCacheKey(query, false);
+      expect(result).toBe('histogram:');
+    });
+
+    it('should handle query with special characters', () => {
+      const query: Query = {
+        query: 'source=logs | where field="value with spaces"',
+        language: 'PPL',
+      };
+
+      mockDefaultPreparePplQuery.mockReturnValue({
+        ...query,
+        query: 'source=logs | where field="value with spaces"',
+      });
+
+      const result = prepareHistogramCacheKey(query, true);
+      expect(result).toBe('histogram:breakdown:source=logs | where field="value with spaces"');
     });
   });
 
@@ -439,7 +610,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(mockGetFieldValueCounts).toHaveBeenCalledWith({
         hits: rawResults.hits.hits,
         field: mockField,
-        indexPattern: mockDatasetWithFields,
+        dataSet: mockDatasetWithFields,
         count: 5,
         grouped: false,
       });
@@ -488,7 +659,6 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       mockBuildPointSeriesData.mockReturnValue([{ x: 1609459200000, y: 5 }] as any);
       mockTabifyAggResponse.mockReturnValue({ rows: [], columns: [] } as any);
     });
-
     it('should process histogram data when timeFieldName exists', () => {
       const rawResults = {
         hits: {
@@ -553,6 +723,203 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
         histogramResultsProcessor(rawResults, mockDataView, mockData, interval);
         expect(mockCreateHistogramConfigs).toHaveBeenCalledWith(mockDataView, interval, mockData);
+      });
+    });
+
+    it('should handle breakdown series in raw results', () => {
+      const mockBreakdownSeries = {
+        breakdownField: 'status',
+        series: [
+          {
+            breakdownValue: '200',
+            dataPoints: [
+              [1609459200000, 10],
+              [1609462800000, 15],
+            ] as Array<[number, number]>,
+          },
+          {
+            breakdownValue: '404',
+            dataPoints: [
+              [1609459200000, 5],
+              [1609462800000, 3],
+            ] as Array<[number, number]>,
+          },
+        ],
+      };
+
+      const rawResultsWithBreakdown = {
+        hits: {
+          hits: [{ _id: '1', _source: { field1: 'value1' } }],
+          total: 1,
+        },
+        breakdownSeries: mockBreakdownSeries,
+        elapsedMs: 200,
+      } as any;
+
+      const mockChartData = {
+        values: mockBreakdownSeries,
+        xAxisLabel: '@timestamp',
+        yAxisLabel: 'Count',
+      };
+
+      const mockBuildChartFromBreakdownSeries = chartUtilsModule.buildChartFromBreakdownSeries as jest.MockedFunction<
+        typeof chartUtilsModule.buildChartFromBreakdownSeries
+      >;
+      mockBuildChartFromBreakdownSeries.mockReturnValueOnce(mockChartData as any);
+
+      const result = histogramResultsProcessor(
+        rawResultsWithBreakdown,
+        mockDataView,
+        mockData,
+        'auto'
+      );
+
+      expect(result.bucketInterval).toEqual({ interval: '1h', scale: 1 });
+      expect(mockBuildChartFromBreakdownSeries).toHaveBeenCalledWith(mockBreakdownSeries, {
+        x: 'time',
+        y: 'count',
+      });
+      expect(result.chartData).toEqual(mockChartData);
+    });
+
+    it('should fallback to regular point series when no breakdown series', () => {
+      const rawResultsWithoutBreakdown = {
+        hits: {
+          hits: [{ _id: '1', _source: { field1: 'value1' } }],
+          total: 1,
+        },
+        aggregations: {
+          histogram: {
+            buckets: [{ key: 1609459200000, doc_count: 5 }],
+          },
+        },
+        elapsedMs: 200,
+      } as any;
+
+      const result = histogramResultsProcessor(
+        rawResultsWithoutBreakdown,
+        mockDataView,
+        mockData,
+        'auto'
+      );
+
+      expect(result.chartData).toEqual([{ x: 1609459200000, y: 5 }]);
+      expect(mockBuildPointSeriesData).toHaveBeenCalled();
+    });
+
+    it('should handle empty breakdown series', () => {
+      const mockEmptyBreakdownSeries = {
+        breakdownField: 'status',
+        series: [],
+      };
+
+      const rawResultsWithEmptyBreakdown = {
+        hits: {
+          hits: [{ _id: '1', _source: { field1: 'value1' } }],
+          total: 1,
+        },
+        breakdownSeries: mockEmptyBreakdownSeries,
+        elapsedMs: 200,
+      } as any;
+
+      const mockChartData = {
+        values: mockEmptyBreakdownSeries,
+        xAxisLabel: '@timestamp',
+        yAxisLabel: 'Count',
+      };
+
+      const mockBuildChartFromBreakdownSeries = chartUtilsModule.buildChartFromBreakdownSeries as jest.MockedFunction<
+        typeof chartUtilsModule.buildChartFromBreakdownSeries
+      >;
+      mockBuildChartFromBreakdownSeries.mockReturnValueOnce(mockChartData as any);
+
+      const result = histogramResultsProcessor(
+        rawResultsWithEmptyBreakdown,
+        mockDataView,
+        mockData,
+        'auto'
+      );
+
+      expect(result.chartData).toEqual(mockChartData);
+    });
+
+    it('should not process breakdown when dimensions are not available', () => {
+      mockGetDimensions.mockReturnValue(undefined as any);
+
+      const rawResultsWithBreakdown = {
+        hits: {
+          hits: [{ _id: '1', _source: { field1: 'value1' } }],
+          total: 1,
+        },
+        breakdownSeries: [
+          {
+            label: 'status:200',
+            values: [{ x: 1609459200000, y: 10 }],
+          },
+        ],
+        elapsedMs: 200,
+      } as any;
+
+      const result = histogramResultsProcessor(
+        rawResultsWithBreakdown,
+        mockDataView,
+        mockData,
+        'auto'
+      );
+
+      expect(result.chartData).toBeUndefined();
+    });
+
+    it('should handle breakdown series with multiple breakdown values', () => {
+      const mockBreakdownSeries = {
+        breakdownField: 'service',
+        series: [
+          {
+            breakdownValue: 'api',
+            dataPoints: [[1609459200000, 20] as [number, number]],
+          },
+          {
+            breakdownValue: 'web',
+            dataPoints: [[1609459200000, 15] as [number, number]],
+          },
+          {
+            breakdownValue: 'mobile',
+            dataPoints: [[1609459200000, 10] as [number, number]],
+          },
+        ],
+      };
+
+      const rawResultsWithMultiBreakdown = {
+        hits: {
+          hits: [{ _id: '1', _source: { field1: 'value1' } }],
+          total: 1,
+        },
+        breakdownSeries: mockBreakdownSeries,
+        elapsedMs: 200,
+      } as any;
+
+      const mockChartData = {
+        values: mockBreakdownSeries,
+        xAxisLabel: '@timestamp',
+        yAxisLabel: 'Count',
+      };
+
+      const mockBuildChartFromBreakdownSeries = chartUtilsModule.buildChartFromBreakdownSeries as jest.MockedFunction<
+        typeof chartUtilsModule.buildChartFromBreakdownSeries
+      >;
+      mockBuildChartFromBreakdownSeries.mockReturnValueOnce(mockChartData as any);
+
+      const result = histogramResultsProcessor(
+        rawResultsWithMultiBreakdown,
+        mockDataView,
+        mockData,
+        'auto'
+      );
+
+      expect(result.chartData).toEqual(mockChartData);
+      expect(mockBuildChartFromBreakdownSeries).toHaveBeenCalledWith(mockBreakdownSeries, {
+        x: 'time',
+        y: 'count',
       });
     });
   });
@@ -649,6 +1016,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           ui: (state = { activeTabId: '' }) => state,
           results: (state = {}) => state,
           legacy: (state = { interval: '1h' }) => state,
+          queryEditor: (state = { breakdownField: undefined }) => state,
         },
       });
 
@@ -665,6 +1033,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         ui: { activeTabId: '' },
         results: {},
         legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       };
 
       mockGetState.mockReturnValue(mockState);
@@ -686,6 +1055,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         ui: { activeTabId: '' },
         results: {},
         legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       };
 
       mockGetState.mockReturnValue(mockState);
@@ -709,6 +1079,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
           'source=test-dataset': { hits: { hits: [] } },
         },
         legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       };
 
       mockGetState.mockReturnValue(mockState);
@@ -730,6 +1101,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         ui: { activeTabId: 'explore_visualization_tab' },
         results: {},
         legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       };
 
       mockGetState.mockReturnValue(mockState);
@@ -752,6 +1124,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         ui: { activeTabId: '' },
         results: {},
         legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       };
 
       mockGetState.mockReturnValue(mockState);
@@ -785,6 +1158,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         },
         legacy: { interval: '1h' },
         ui: { activeTabId: 'test-tab' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       });
 
       const mockIndexPatterns = dataPublicModule.indexPatterns as any;
@@ -792,14 +1166,51 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       // Using mockCreateHistogramConfigs from module scope
       mockCreateHistogramConfigs.mockReturnValue({
-        toDsl: jest.fn().mockReturnValue({}),
+        toDsl: jest.fn().mockReturnValue([
+          {},
+          {},
+          {
+            date_histogram: {
+              fixed_interval: '5m',
+              field: '@timestamp',
+            },
+          },
+        ]),
+        aggs: [
+          {} as any,
+          {
+            buckets: {
+              getInterval: jest.fn(() => ({ interval: '1h', scale: 1 })),
+            },
+          } as any,
+        ],
       } as any);
+      mockSearchSource.fetch.mockReset();
+      mockSearchSource.fetch.mockResolvedValue({
+        hits: {
+          hits: [
+            { _id: '1', _source: { field1: 'value1' } },
+            { _id: '2', _source: { field2: 'value2' } },
+          ],
+          total: 2,
+        },
+        took: 5,
+        aggregations: {
+          histogram: {
+            buckets: [
+              { key: 1609459200000, doc_count: 5 },
+              { key: 1609462800000, doc_count: 3 },
+            ],
+          },
+        },
+      });
     });
 
     it('should execute histogram query with custom interval', async () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
         interval: '5m',
       };
 
@@ -808,18 +1219,117 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       expect(mockServices.data.dataViews.get).toHaveBeenCalled();
       expect(mockSearchSource.fetch).toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            cacheKey: 'test-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.READY,
+            }),
+          }),
+        })
+      );
     });
 
-    it('should handle missing interval gracefully', async () => {
+    it('should execute histogram query with formatter in language config', async () => {
+      const mockFormatter = jest.fn();
+      (mockServices.data.query.queryString.getLanguageService as jest.Mock).mockReturnValue({
+        getLanguage: jest.fn().mockReturnValue({
+          fields: {
+            formatter: mockFormatter,
+          },
+        }),
+      });
+
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
+        interval: '5m',
       };
 
       const thunk = executeHistogramQuery(params);
       await thunk(mockDispatch, mockGetState, undefined);
 
       expect(mockServices.data.dataViews.get).toHaveBeenCalled();
+      expect(mockSearchSource.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          abortSignal: expect.any(Object),
+          formatter: mockFormatter,
+        })
+      );
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            cacheKey: 'test-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.READY,
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should execute histogram query without formatter in language config', async () => {
+      (mockServices.data.query.queryString.getLanguageService as jest.Mock).mockReturnValue({
+        getLanguage: jest.fn().mockReturnValue({}),
+      });
+
+      const params = {
+        services: mockServices,
+        cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
+        interval: '5m',
+      };
+
+      const thunk = executeHistogramQuery(params);
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockServices.data.dataViews.get).toHaveBeenCalled();
+      expect(mockSearchSource.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          abortSignal: expect.any(Object),
+          withLongNumeralsSupport: false,
+        })
+      );
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            cacheKey: 'test-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.READY,
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should handle missing interval gracefully', async () => {
+      const params = {
+        services: mockServices,
+        cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
+      };
+
+      const thunk = executeHistogramQuery(params);
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockServices.data.dataViews.get).toHaveBeenCalled();
+      expect(mockSearchSource.fetch).toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            cacheKey: 'test-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.READY,
+            }),
+          }),
+        })
+      );
     });
 
     it('should handle dataView without timeFieldName', async () => {
@@ -829,21 +1339,38 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
         interval: '1h',
       };
 
       const thunk = executeHistogramQuery(params);
       await thunk(mockDispatch, mockGetState, undefined);
-
+      expect(mockServices.data.dataViews.get).toHaveBeenCalled();
       expect(mockSearchSource.fetch).toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            cacheKey: 'test-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.READY,
+            }),
+          }),
+        })
+      );
     });
 
     it('should handle search errors gracefully', async () => {
       const error = {
         body: {
           error: 'Search failed',
-          message:
-            '{"error":{"details":"Query syntax error","reason":"Invalid query","type":"parsing_exception"}}',
+          message: JSON.stringify({
+            error: {
+              details: 'Query syntax error',
+              reason: 'Invalid query',
+              type: 'parsing_exception',
+            },
+          }),
           statusCode: 400,
         },
       };
@@ -852,6 +1379,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
         interval: '1h',
       };
 
@@ -866,11 +1394,20 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       // Verify error status is set in Redux
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: expect.stringContaining('setIndividualQueryStatus'),
+          type: 'queryEditor/setIndividualQueryStatus',
           payload: expect.objectContaining({
             cacheKey: 'test-cache-key',
             status: expect.objectContaining({
               status: QueryExecutionStatus.ERROR,
+              error: expect.objectContaining({
+                error: 'Search failed',
+                message: {
+                  details: 'Query syntax error',
+                  reason: 'Invalid query',
+                  type: 'parsing_exception',
+                },
+                statusCode: 400,
+              }),
             }),
           }),
         })
@@ -885,6 +1422,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
         interval: '1h',
       };
 
@@ -893,6 +1431,103 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       expect(result.payload).toBeUndefined();
       expect(mockServices.data.search.showError).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('executeDataTableQuery', () => {
+    let mockGetState: jest.Mock;
+    let mockDispatch: jest.Mock;
+
+    beforeEach(() => {
+      mockGetState = jest.fn();
+      mockDispatch = jest.fn();
+
+      mockGetState.mockReturnValue({
+        query: {
+          query: 'source=logs',
+          language: 'PPL',
+          dataset: { id: 'test', type: 'INDEX_PATTERN' },
+        },
+      });
+
+      const mockIndexPatterns = dataPublicModule.indexPatterns as any;
+      mockIndexPatterns.isDefault.mockReturnValue(true);
+    });
+
+    it('should execute data table query successfully', async () => {
+      const params = {
+        services: mockServices,
+        cacheKey: 'test-datatable-cache-key',
+        queryString: 'source=logs',
+      };
+
+      const thunk = executeDataTableQuery(params);
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockServices.data.dataViews.get).toHaveBeenCalled();
+      expect(mockSearchSource.fetch).toHaveBeenCalled();
+      expect(setResults).toHaveBeenCalled();
+    });
+
+    it('should execute without histogram aggregations', async () => {
+      const params = {
+        services: mockServices,
+        cacheKey: 'test-datatable-cache-key',
+        queryString: 'source=logs',
+      };
+
+      const thunk = executeDataTableQuery(params);
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      // Verify that no aggregations are added to the search source
+      expect(mockSearchSource.setField).not.toHaveBeenCalledWith('aggs', expect.anything());
+    });
+
+    it('should set query status to READY when results found', async () => {
+      mockSearchSource.fetch.mockResolvedValue({
+        hits: {
+          hits: [{ _id: '1', _source: { field: 'value' } }],
+          total: 1,
+        },
+      });
+
+      const params = {
+        services: mockServices,
+        cacheKey: 'test-datatable-cache-key',
+        queryString: 'source=logs',
+      };
+
+      const thunk = executeDataTableQuery(params);
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: {
+            cacheKey: 'test-datatable-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.READY,
+            }),
+          },
+        })
+      );
+    });
+
+    it('should use separate cache key from query string', async () => {
+      const params = {
+        services: mockServices,
+        cacheKey: 'source=logs__datatable',
+        queryString: 'source=logs',
+      };
+
+      const thunk = executeDataTableQuery(params);
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      // Verify that results are stored with the cache key, not query string
+      expect(setResults).toHaveBeenCalledWith({
+        cacheKey: 'source=logs__datatable',
+        results: expect.any(Object),
+      });
     });
   });
 
@@ -917,12 +1552,24 @@ describe('Query Actions - Comprehensive Test Suite', () => {
 
       const mockIndexPatterns = dataPublicModule.indexPatterns as any;
       mockIndexPatterns.isDefault.mockReturnValue(true);
+      mockSearchSource.fetch.mockReset();
+      mockSearchSource.fetch.mockResolvedValue({
+        hits: {
+          hits: [
+            { _id: '1', _source: { field1: 'value1' } },
+            { _id: '2', _source: { field2: 'value2' } },
+          ],
+          total: 2,
+        },
+        took: 5,
+      });
     });
 
     it('should execute tab query successfully', async () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -931,12 +1578,24 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(mockServices.data.dataViews.get).toHaveBeenCalled();
       expect(mockSearchSource.fetch).toHaveBeenCalled();
       expect(setResults).toHaveBeenCalled();
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            cacheKey: 'test-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.READY,
+            }),
+          }),
+        })
+      );
     });
 
     it('should handle missing services gracefully', async () => {
       const params = {
         services: undefined as any,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -951,6 +1610,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -972,6 +1632,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -989,6 +1650,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -1001,6 +1663,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -1030,6 +1693,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -1059,6 +1723,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -1081,6 +1746,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       const params = {
         services: mockServices,
         cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
       };
 
       const thunk = executeTabQuery(params);
@@ -1195,6 +1861,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         ui: { activeTabId: '' },
         results: {},
         legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       };
 
       const mockGetState = jest.fn().mockReturnValue(mockState);
@@ -1213,11 +1880,18 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         executeHistogramQuery({
           services: mockServices,
           cacheKey: 'histogram-query',
+          queryString: 'source=logs',
           interval: '1h',
         }),
         executeTabQuery({
           services: mockServices,
           cacheKey: 'tab-query',
+          queryString: 'source=logs',
+        }),
+        executeDataTableQuery({
+          services: mockServices,
+          cacheKey: 'datatable-query',
+          queryString: 'source=logs',
         }),
       ];
 
@@ -1229,6 +1903,7 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         },
         legacy: { interval: '1h' },
         ui: { activeTabId: 'test-tab' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
       });
       const mockDispatch = jest.fn();
 
@@ -1236,8 +1911,8 @@ describe('Query Actions - Comprehensive Test Suite', () => {
         promises.map((thunk) => thunk(mockDispatch, mockGetState, undefined))
       );
 
-      expect(results).toHaveLength(2);
-      expect(mockSearchSource.fetch).toHaveBeenCalledTimes(2);
+      expect(results).toHaveLength(3);
+      expect(mockSearchSource.fetch).toHaveBeenCalledTimes(3);
     });
   });
 });

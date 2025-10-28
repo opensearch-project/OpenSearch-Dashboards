@@ -6,18 +6,23 @@
 import React, { useCallback, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { EuiSpacer } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { ChartTypeSelector } from './chart_type_selector';
-import { ChartType, StyleOptions } from './utils/use_visualization_types';
-import { AxisColumnMappings } from './types';
+import {
+  ChartStylesMapping,
+  ChartType,
+  StyleOptions,
+  VisualizationType,
+} from './utils/use_visualization_types';
+import { AxisColumnMappings, RenderChartConfig } from './types';
 import { convertMappingsToStrings, convertStringsToMappings } from './visualization_builder_utils';
 import { visualizationRegistry } from './visualization_registry';
-import { ChartConfig, VisData } from './visualization_builder.types';
+import { VisData } from './visualization_builder.types';
 
 interface StylePanelProps<T> {
-  data$: BehaviorSubject<VisData | undefined>;
-  visConfig$: BehaviorSubject<ChartConfig | undefined>;
+  data$: Observable<VisData | undefined>;
+  config$: Observable<RenderChartConfig | undefined>;
   onStyleChange: (changes: Partial<StyleOptions>) => void;
   onChartTypeChange: (type: ChartType) => void;
   onAxesMappingChange: (mappings: Record<string, string>) => void;
@@ -26,14 +31,14 @@ interface StylePanelProps<T> {
 
 export const StylePanelRender = <T extends ChartType>({
   data$,
-  visConfig$,
+  config$,
   onStyleChange,
   onChartTypeChange,
   onAxesMappingChange,
   className,
 }: StylePanelProps<T>) => {
   const visualizationData = useObservable(data$);
-  const chartConfig = useObservable(visConfig$);
+  const chartConfig = useObservable(config$);
   const axesMapping = chartConfig?.axesMapping;
 
   const updateVisualization = useCallback(
@@ -59,7 +64,9 @@ export const StylePanelRender = <T extends ChartType>({
   }
 
   const visConfig = chartConfig?.type
-    ? visualizationRegistry.getVisualizationConfig(chartConfig?.type)
+    ? (visualizationRegistry.getVisualizationConfig(chartConfig?.type) as
+        | VisualizationType<T>
+        | undefined)
     : null;
 
   const bestMatch = visualizationRegistry.findBestMatch(
@@ -67,6 +74,10 @@ export const StylePanelRender = <T extends ChartType>({
     visualizationData.categoricalColumns,
     visualizationData.dateColumns
   );
+
+  if (!chartConfig?.styles || !visConfig) {
+    return null;
+  }
 
   return (
     <div className={className} data-test-subj="exploreVisStylePanel">
@@ -76,14 +87,14 @@ export const StylePanelRender = <T extends ChartType>({
         chartType={chartConfig?.type}
       />
       <EuiSpacer size="s" />
-      {visConfig?.ui.style.render({
-        styleOptions: chartConfig?.styles ?? ({} as any),
+      {visConfig.ui.style.render({
+        styleOptions: chartConfig.styles as ChartStylesMapping[T],
         onStyleChange,
         numericalColumns: visualizationData.numericalColumns,
         categoricalColumns: visualizationData.categoricalColumns,
         dateColumns: visualizationData.dateColumns,
         availableChartTypes: bestMatch?.rule.chartTypes,
-        selectedChartType: chartConfig?.type,
+        selectedChartType: chartConfig.type,
         axisColumnMappings,
         updateVisualization,
       })}

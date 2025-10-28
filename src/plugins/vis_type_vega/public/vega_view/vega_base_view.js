@@ -38,7 +38,7 @@ import { i18n } from '@osd/i18n';
 import { TooltipHandler } from './vega_tooltip';
 import { opensearchFilters } from '../../../data/public';
 
-import { getEnableExternalUrls, getData } from '../services';
+import { getEnableExternalUrls, getData, getExposeDebugObjectToWindow } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 
 vega.scheme('euiPaletteColorBlind', euiPaletteColorBlind());
@@ -52,6 +52,7 @@ const vegaFunctions = {
   opensearchDashboardsRemoveAllFilters: 'removeAllFiltersHandler',
   opensearchDashboardsSetTimeFilter: 'setTimeFilterHandler',
   opensearchDashboardsVisEventTriggered: 'triggerExternalActionHandler',
+  opensearchDashboardsSelectTimeRange: 'selectTimeRange',
 };
 
 for (const funcName of Object.keys(vegaFunctions)) {
@@ -86,6 +87,7 @@ export class VegaBaseView {
     this._destroyHandlers = [];
     this._initialized = false;
     this._enableExternalUrls = getEnableExternalUrls();
+    this._exposeDebugObjectToWindow = getExposeDebugObjectToWindow();
   }
 
   async init() {
@@ -413,6 +415,15 @@ export class VegaBaseView {
     });
   }
 
+  selectTimeRange(selection) {
+    if (selection) {
+      const range = Object.values(selection)[0];
+      if (range && Object.values(range).length === 2) {
+        this.setTimeFilterHandler(range[0], range[1]);
+      }
+    }
+  }
+
   /**
    * Parse start and end values, determining the mode, and if order should be reversed
    * @private
@@ -481,7 +492,7 @@ export class VegaBaseView {
       spec: vlspec || spec,
     });
 
-    if (window) {
+    if (window && this._exposeDebugObjectToWindow) {
       if (window.VEGA_DEBUG === undefined && console) {
         console.log(
           '%cWelcome to OpenSearch Dashboards Vega Plugin!',

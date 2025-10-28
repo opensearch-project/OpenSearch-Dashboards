@@ -72,6 +72,10 @@ const languageConfiguration: LanguageConfiguration = {
     { open: "'", close: "'" },
     { open: '`', close: '`' },
   ],
+  comments: {
+    lineComment: '//', // line comment
+    blockComment: ['/*', '*/'], // block comment
+  },
   wordPattern: /@?\w[\w@'.-]*[?!,;:"]*/, // Consider tokens containing . @ as words while applying suggestions. Refer https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10118#discussion_r2201428532 for details.
 };
 
@@ -96,6 +100,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const { promptIsTyping, handleChangeForPromptIsTyping } = usePromptIsTyping();
   const promptModeIsAvailable = useSelector(selectPromptModeIsAvailable);
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const { keyboardShortcut } = services;
   const userQueryString = useSelector(selectQueryString);
   const [editorText, setEditorText] = useState<string>(userQueryString);
   const [editorIsFocused, setEditorIsFocused] = useState(false);
@@ -129,6 +134,21 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   useEffect(() => {
     promptModeIsAvailableRef.current = promptModeIsAvailable;
   }, [promptModeIsAvailable]);
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'focus_query_bar',
+    pluginId: 'explore',
+    name: i18n.translate('explore.queryPanelEditor.focusQueryBarShortcut', {
+      defaultMessage: 'Focus query bar',
+    }),
+    category: i18n.translate('explore.queryPanelEditor.searchCategory', {
+      defaultMessage: 'Search',
+    }),
+    keys: '/',
+    execute: () => {
+      editorRef.current?.focus();
+    },
+  });
 
   // The 'triggerSuggestOnFocus' prop of CodeEditor only happens on mount, so I am intentionally not passing it
   // and programmatically doing it here. We should only trigger autosuggestion on focus while on isQueryMode and there is text

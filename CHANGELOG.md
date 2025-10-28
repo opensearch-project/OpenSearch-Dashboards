@@ -53,6 +53,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
  - Support loading state from object ([#9978](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9978))
  - Update table action bar and field selector in Explore ([#9985](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9985))
  - Add static banner plugin and feature flag ([#9989](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9989))
+ - Add route path to request ([#10399](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10399))
 
 ### 🐛 Bug Fixes
 

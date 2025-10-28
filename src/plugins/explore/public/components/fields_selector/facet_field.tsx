@@ -5,23 +5,23 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React, { useState } from 'react';
-import { IndexPatternField, IndexPattern } from '../../../../data/public';
+import { DataViewField, DataView } from '../../../../data/public';
 import { Bucket, FieldDetails } from './types';
 import { FieldIcon } from '../../../../opensearch_dashboards_react/public';
 import { FacetValue } from './facet_value';
 import { getFieldTypeName } from './lib/get_field_type_name';
 
 interface FacetFieldProps {
-  field: IndexPatternField;
-  selectedIndexPattern?: IndexPattern;
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
-  getDetailsByField: (field: IndexPatternField) => FieldDetails;
+  field: DataViewField;
+  selectedDataSet?: DataView;
+  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  getDetailsByField: (field: DataViewField) => FieldDetails;
   shortDotsEnabled: boolean;
 }
 
 export const FacetField = ({
   field,
-  selectedIndexPattern,
+  selectedDataSet,
   onAddFilter,
   getDetailsByField,
   shortDotsEnabled,
@@ -29,7 +29,7 @@ export const FacetField = ({
   const [expanded, setExpanded] = useState(true);
   const { buckets } = getDetailsByField(field);
 
-  if (!selectedIndexPattern || buckets.length === 0) return null;
+  if (!selectedDataSet || buckets.length === 0) return null;
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} color="transparent" paddingSize="none">
@@ -42,7 +42,7 @@ export const FacetField = ({
         className="exploreSideBar__facetField"
         data-test-subj="exploreSideBarFacetFieldButton"
         aria-label={field.name}
-        isLoading={!!selectedIndexPattern.fieldsLoading}
+        isLoading={!!selectedDataSet.fieldsLoading}
       >
         <EuiFlexGroup
           gutterSize="s"

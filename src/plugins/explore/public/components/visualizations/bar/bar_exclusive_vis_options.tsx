@@ -6,7 +6,6 @@
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import {
-  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -15,8 +14,9 @@ import {
   EuiSwitch,
   EuiButtonGroup,
 } from '@elastic/eui';
-import { useDebouncedNumericValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
+import { DebouncedFieldNumber } from '../style_panel/utils';
+import { defaultBarChartStyles } from './bar_vis_config';
 
 interface BarExclusiveVisOptionsProps {
   barSizeMode: 'auto' | 'manual';
@@ -25,12 +25,15 @@ interface BarExclusiveVisOptionsProps {
   showBarBorder: boolean;
   barBorderWidth: number;
   barBorderColor: string;
+  useThresholdColor?: boolean;
   onBarSizeModeChange: (barSizeMode: 'auto' | 'manual') => void;
   onBarWidthChange: (barWidth: number) => void;
   onBarPaddingChange: (barPadding: number) => void;
   onShowBarBorderChange: (showBarBorder: boolean) => void;
   onBarBorderWidthChange: (barBorderWidth: number) => void;
   onBarBorderColorChange: (barBorderColor: string) => void;
+  onUseThresholdColorChange: (useThresholdColor: boolean) => void;
+  shouldDisableUseThresholdColor?: boolean;
 }
 
 export const BarExclusiveVisOptions = ({
@@ -40,32 +43,16 @@ export const BarExclusiveVisOptions = ({
   showBarBorder,
   barBorderWidth,
   barBorderColor,
+  useThresholdColor,
   onBarSizeModeChange,
   onBarWidthChange,
   onBarPaddingChange,
   onShowBarBorderChange,
   onBarBorderWidthChange,
   onBarBorderColorChange,
+  onUseThresholdColorChange,
+  shouldDisableUseThresholdColor = false,
 }: BarExclusiveVisOptionsProps) => {
-  // Use debounced value for numeric inputs
-  const [localBarWidth, handleBarWidthChange] = useDebouncedNumericValue(
-    barWidth,
-    onBarWidthChange,
-    { min: 0.1, max: 1, defaultValue: 0.7 }
-  );
-
-  const [localBarPadding, handleBarPaddingChange] = useDebouncedNumericValue(
-    barPadding,
-    onBarPaddingChange,
-    { min: 0, max: 0.5, defaultValue: 0.1 }
-  );
-
-  const [localBarBorderWidth, handleBarBorderWidthChange] = useDebouncedNumericValue(
-    barBorderWidth,
-    onBarBorderWidthChange,
-    { min: 1, max: 10, defaultValue: 1 }
-  );
-
   const sizeModeOptions = [
     {
       id: 'auto',
@@ -89,6 +76,20 @@ export const BarExclusiveVisOptions = ({
       })}
       initialIsOpen={true}
     >
+      {!shouldDisableUseThresholdColor && (
+        <EuiFormRow>
+          <EuiSwitch
+            compressed
+            label={i18n.translate('explore.vis.bar.useThresholdColor', {
+              defaultMessage: 'Use threshold colors',
+            })}
+            data-test-subj="useThresholdColorButton"
+            checked={useThresholdColor ?? false}
+            onChange={(e) => onUseThresholdColorChange(e.target.checked)}
+          />
+        </EuiFormRow>
+      )}
+
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.bar.sizeMode', {
           defaultMessage: 'Size',
@@ -120,10 +121,11 @@ export const BarExclusiveVisOptions = ({
                   defaultMessage: 'Value between 0.1 and 1',
                 })}
               >
-                <EuiFieldNumber
+                <DebouncedFieldNumber
                   compressed
-                  value={localBarWidth}
-                  onChange={(e) => handleBarWidthChange(e.target.value)}
+                  value={barWidth}
+                  onChange={(value) => onBarWidthChange(value ?? defaultBarChartStyles.barWidth)}
+                  defaultValue={defaultBarChartStyles.barWidth}
                   min={0.1}
                   max={1}
                   step={0.1}
@@ -140,10 +142,13 @@ export const BarExclusiveVisOptions = ({
                   defaultMessage: 'Value between 0 and 0.5',
                 })}
               >
-                <EuiFieldNumber
+                <DebouncedFieldNumber
                   compressed
-                  value={localBarPadding}
-                  onChange={(e) => handleBarPaddingChange(e.target.value)}
+                  value={barPadding}
+                  onChange={(value) =>
+                    onBarPaddingChange(value ?? defaultBarChartStyles.barPadding)
+                  }
+                  defaultValue={defaultBarChartStyles.barPadding}
                   min={0}
                   max={0.5}
                   step={0.05}
@@ -177,10 +182,13 @@ export const BarExclusiveVisOptions = ({
                   defaultMessage: 'Border width',
                 })}
               >
-                <EuiFieldNumber
+                <DebouncedFieldNumber
                   compressed
-                  value={localBarBorderWidth}
-                  onChange={(e) => handleBarBorderWidthChange(e.target.value)}
+                  value={barBorderWidth}
+                  onChange={(value) =>
+                    onBarBorderWidthChange(value ?? defaultBarChartStyles.barBorderWidth)
+                  }
+                  defaultValue={defaultBarChartStyles.barBorderWidth}
                   min={1}
                   max={10}
                   step={1}

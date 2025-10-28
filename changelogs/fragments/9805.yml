@@ -1,2 +1,0 @@
-fix:
-- Fix default data source not set when re-associating after deletion ([#9805](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9805))

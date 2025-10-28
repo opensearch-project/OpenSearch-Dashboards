@@ -158,4 +158,32 @@ describe('DiscoverFieldSearch', () => {
     popover = component.find(EuiPopover);
     expect(popover.prop('isOpen')).toBe(false);
   });
+
+  test('calls stopPropagation on mouseUp for type selector', () => {
+    const component = mountComponent();
+    const btn = findTestSubject(component, 'toggleFieldFilterButton');
+    btn.simulate('click'); // Open the popover to make typeSelect accessible
+
+    const typeSelector = findTestSubject(component, 'typeSelect');
+    expect(typeSelector.exists()).toBe(true); // Verify element exists
+
+    const stopPropagation = jest.fn();
+    const stopImmediatePropagation = jest.fn();
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent, 'stopPropagation', { value: stopPropagation });
+    Object.defineProperty(mouseUpEvent, 'stopImmediatePropagation', {
+      value: stopImmediatePropagation,
+    });
+
+    typeSelector.simulate('mouseUp', {
+      ...mouseUpEvent,
+      nativeEvent: mouseUpEvent,
+    });
+
+    expect(stopPropagation).toHaveBeenCalled();
+    expect(stopImmediatePropagation).toHaveBeenCalled();
+  });
 });

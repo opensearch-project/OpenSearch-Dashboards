@@ -82,10 +82,10 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
    */
   visitFieldsCommand = (ctx: any): SymbolTableState => {
     try {
-      const fieldList = this.extractFieldList(ctx.fieldList());
-
+      const fieldBodyContext = ctx.fieldsCommandBody().wcFieldList();
+      const fieldList = this.extractWcFieldList(fieldBodyContext);
       if (fieldList.length > 0) {
-        const hasMinus = ctx.MINUS() !== null;
+        const hasMinus = ctx.fieldsCommandBody().MINUS() !== null;
 
         if (hasMinus) {
           fieldList.forEach((fieldName) => {
@@ -278,6 +278,28 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
     }
   }
 
+  private extractWcFieldList(wcFieldListCtx: any): string[] {
+    if (!wcFieldListCtx) return [];
+
+    try {
+      // Get select field expressions using ANTLR's generated method
+      const selectFieldExpressions = wcFieldListCtx.selectFieldExpression();
+      if (!selectFieldExpressions) return [];
+
+      // Handle both single expression and array of expressions
+      const expressions = Array.isArray(selectFieldExpressions)
+        ? selectFieldExpressions
+        : [selectFieldExpressions];
+
+      // Extract field names using ANTLR's getText() method
+      return expressions
+        .map((expr: any) => this.extractFieldName(expr))
+        .filter((name: string) => name.length > 0);
+    } catch (error) {
+      return [];
+    }
+  }
+
   private extractFieldName(fieldExpr: any): string {
     if (!fieldExpr) return '';
 
@@ -298,16 +320,35 @@ export class PPLSymbolTableParser extends SimplifiedOpenSearchPPLParserVisitor<S
     try {
       const fields: string[] = [];
 
-      if (statsByClause.fieldList && statsByClause.fieldList()) {
-        return this.extractFieldList(statsByClause.fieldList());
+      // Handle different forms of statsByClause based on updated grammar:
+      // BY fieldList
+      // BY bySpanClause
+      // BY bySpanClause COMMA fieldList
+      // BY fieldList COMMA bySpanClause
+
+      // Check for fieldList (can be standalone or combined with bySpanClause)
+      const fieldListContext = statsByClause.fieldList();
+      if (fieldListContext) {
+        const fieldListResults = this.extractFieldList(fieldListContext);
+        fields.push(...fieldListResults);
       }
 
-      if (statsByClause.bySpanClause && statsByClause.bySpanClause()) {
-        const spanClause = statsByClause.bySpanClause();
-        if (spanClause.alias) {
-          fields.push(this.extractFieldName(spanClause.alias));
-        } else if (spanClause.spanClause && spanClause.spanClause().fieldExpression) {
-          fields.push(this.extractFieldName(spanClause.spanClause().fieldExpression()));
+      // Check for bySpanClause (can be standalone or combined with fieldList)
+      const bySpanClauseContext = statsByClause.bySpanClause();
+      if (bySpanClauseContext) {
+        // Check if there's an alias (AS alias) - using _alias property from grammar
+        const aliasContext = bySpanClauseContext._alias || bySpanClauseContext.qualifiedName();
+        if (aliasContext) {
+          fields.push(this.extractFieldName(aliasContext));
+        } else {
+          // Extract field name from spanClause fieldExpression
+          const spanClauseContext = bySpanClauseContext.spanClause();
+          if (spanClauseContext) {
+            const fieldExpressionContext = spanClauseContext.fieldExpression();
+            if (fieldExpressionContext) {
+              fields.push(this.extractFieldName(fieldExpressionContext));
+            }
+          }
         }
       }
 

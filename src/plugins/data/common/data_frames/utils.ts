@@ -174,15 +174,19 @@ export const convertResult = ({
  * @returns field type
  */
 export const getFieldType = (field: IFieldType | Partial<IFieldType>): string | undefined => {
-  const fieldName = field.name?.toLowerCase();
-  if (fieldName?.includes('date') || fieldName?.includes('timestamp')) {
+  const rawType = field.type?.toString().toLowerCase();
+  if (rawType) {
+    if (rawType === 'struct') return 'object';
+    if (rawType === 'timestamp') return 'date';
+    return rawType;
+  }
+
+  const fieldName = field.name?.toLowerCase() ?? '';
+  if (fieldName.includes('date') || fieldName.includes('timestamp')) {
     return 'date';
   }
   if (field.values?.some((value) => value instanceof Date || datemath.isDateTime(value))) {
     return 'date';
-  }
-  if (field.type === 'struct') {
-    return 'object';
   }
 
   return field.type;

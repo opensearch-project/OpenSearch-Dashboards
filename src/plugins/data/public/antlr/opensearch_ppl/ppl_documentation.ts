@@ -573,4 +573,191 @@ The \`source\` command specifies the data source (index) for the query. This is 
 
 [Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/search.rst)
   `,
+  APPEND: `
+# **APPEND Command**
+*Append Sub-search Results to Main Search*
+
+&nbsp;
+
+\`\`\`
+append <sub-search>
+\`\`\`
+
+&nbsp;
+
+The \`append\` command appends the result of a sub-search and attaches it as additional rows to the bottom of the input search results. Aligns columns with matching field names and types, filling NULL values for different column fields.
+
+&nbsp;
+
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/append.rst)
+  `,
+  BIN: `
+# **BIN Command**
+*Group Numeric Values into Equal-Interval Buckets*
+
+&nbsp;
+
+\`\`\`
+bin <field> [span=<interval>] [minspan=<interval>] [bins=<count>] [aligntime=<time-specifier>] [start=<value>] [end=<value>]
+\`\`\`
+
+&nbsp;
+
+The \`bin\` command groups numeric values into equal-interval buckets for data distribution analysis. Supports numeric, logarithmic, and time-based binning with flexible interval calculation algorithms.
+
+&nbsp;
+
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/bin.rst)
+  `,
+  MULTISEARCH: `
+# **MULTISEARCH Command**
+*Combine Results from Multiple Search Operations*
+
+&nbsp;
+
+\`\`\`
+multisearch [search ...] [search ...] [optional result-processing]
+\`\`\`
+
+&nbsp;
+
+The \`multisearch\` command combines results from multiple search operations into a single result set. Allows merging data from different queries on same or different sources with automatic field type conflict resolution.
+
+&nbsp;
+
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/multisearch.rst)
+  `,
+  REGEX: `
+# **REGEX Command**
+*Filter Search Results with Regular Expression Patterns*
+
+&nbsp;
+
+\`\`\`
+regex <field> = <pattern>
+regex <field> != <pattern>
+\`\`\`
+
+&nbsp;
+
+The \`regex\` command filters search results by matching field values against a regular expression pattern. Uses Java regex engine and supports positive (=) or negative (!=) matching.
+
+&nbsp;
+
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/regex.rst)
+  `,
+  REPLACE: `
+# **REPLACE Command**
+*Replace Text in Search Result Fields*
+
+**Experimental Feature** *(Requires Calcite engine)*
+
+&nbsp;
+
+\`\`\`
+replace '<pattern>' WITH '<replacement>' [, '<pattern>' WITH '<replacement>']... IN <field-name>[, <field-name>]...
+\`\`\`
+
+&nbsp;
+
+The \`replace\` command replaces text in one or more fields within search results. Only supports plain text literals without wildcards or regular expressions.
+
+&nbsp;
+
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/replace.rst)
+  `,
+  REVERSE: `
+# **REVERSE Command**
+*Reverse Display Order of Search Results*
+
+**Enhanced Feature** *(Available from v3.2.0)*
+
+&nbsp;
+
+\`\`\`
+reverse
+\`\`\`
+
+&nbsp;
+
+The \`reverse\` command reverses the display order of search results without changing the actual data. Takes no parameters and is useful for viewing results from a different perspective.
+
+&nbsp;
+
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/reverse.rst)
+  `,
+  REX: `
+# **REX Command**
+*Extract Fields from Raw Text Using Regular Expressions*
+
+&nbsp;
+
+\`\`\`
+rex [mode=<mode>] field=<field> <pattern> [max_match=<int>] [offset_field=<string>]
+\`\`\`
+
+&nbsp;
+
+The \`rex\` command extracts fields from a raw text field using regular expression named capture groups. Supports extraction and substitution modes for creating structured data from unstructured text.
+
+&nbsp;
+
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/rex.rst)
+  `,
+  SPATH: `
+# **SPATH Command**
+*Extract Fields from Structured Text Data*
+
+&nbsp;
+
+\`\`\`
+spath input=<field> [output=<field>] [path=]<path>
+\`\`\`
+
+&nbsp;
+
+The \`spath\` command extracts fields from structured text data, currently supporting JSON data extraction with JSON paths. Allows navigation of nested JSON structures and access to list elements.
+
+&nbsp;
+
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/spath.rst)
+  `,
+  TABLE: `
+# **TABLE Command**
+*Select or Remove Specific Fields (Fields Command Alias)*
+
+**Experimental Feature** *(Requires Calcite engine)*
+
+&nbsp;
+
+\`\`\`
+table [+|-] <field-list>
+\`\`\`
+
+&nbsp;
+
+The \`table\` command is an alias for the fields command that provides field selection capabilities in search results. Supports advanced field selection syntax with wildcard pattern matching.
+
+&nbsp;
+
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/table.rst)
+  `,
+  TIMECHART: `
+# **TIMECHART Command**
+*Create Time-based Data Aggregations*
+
+&nbsp;
+
+\`\`\`
+timechart [span=<time_interval>] [limit=<number>] [useother=<boolean>] <aggregation_function> [by <field>]
+\`\`\`
+
+&nbsp;
+
+The \`timechart\` command creates time-based aggregation of data by grouping data into time intervals and optionally by a field, then applying an aggregation function. Requires @timestamp field.
+
+&nbsp;
+
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/timechart.rst)
+  `,
 };

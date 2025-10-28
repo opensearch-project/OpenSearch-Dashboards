@@ -37,6 +37,13 @@ import { IFieldType } from './fields';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
+// Core known signal types - plugins can extend with custom strings
+export const CORE_SIGNAL_TYPES = {
+  LOGS: 'logs',
+  METRICS: 'metrics',
+  TRACES: 'traces',
+} as const;
+
 export interface IIndexPattern {
   fields: IFieldType[];
   title: string;
@@ -46,6 +53,8 @@ export interface IIndexPattern {
   type?: string;
   timeFieldName?: string;
   intervalName?: string | null;
+  signalType?: string;
+  schemaMappings?: Record<string, Record<string, string>>;
   getTimeField?(): IFieldType | undefined;
   fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
   getFormatterForField?: (
@@ -59,11 +68,13 @@ export interface IndexPatternAttributes {
   title: string;
   displayName?: string;
   description?: string;
+  signalType?: string;
   typeMeta: string;
   timeFieldName?: string;
   intervalName?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
+  schemaMappings?: string;
 }
 
 export type OnNotification = (toastInputFields: ToastInputFields) => void;
@@ -209,6 +220,7 @@ export interface IndexPatternSpec {
   title?: string;
   displayName?: string;
   description?: string;
+  signalType?: string;
   intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
@@ -217,6 +229,7 @@ export interface IndexPatternSpec {
   type?: string;
   dataSourceRef?: SavedObjectReference;
   fieldsLoading?: boolean;
+  schemaMappings?: Record<string, Record<string, string>>;
 }
 
 export interface SourceFilter {

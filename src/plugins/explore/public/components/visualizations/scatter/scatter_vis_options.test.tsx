@@ -66,6 +66,21 @@ jest.mock('@osd/i18n', () => ({
   },
 }));
 
+jest.mock('../style_panel/threshold/threshold_panel', () => ({
+  ThresholdPanel: jest.fn(({ thresholdsOptions, onChange }) => (
+    <div data-test-subj="mockThresholdOptions">
+      <button
+        data-test-subj="mockUpdateThreshold"
+        onClick={() =>
+          onChange({ ...thresholdsOptions, thresholds: [{ value: 50, color: '#FF0000' }] })
+        }
+      >
+        Update Threshold
+      </button>
+    </div>
+  )),
+}));
+
 jest.mock('./scatter_exclusive_vis_options', () => ({
   ScatterExclusiveVisOptions: jest.fn(({ onChange }) => (
     <div data-test-subj="scatterExclusiveOptions">
@@ -79,7 +94,6 @@ jest.mock('./scatter_exclusive_vis_options', () => ({
       >
         Update Scatter Style
       </button>
-
       <button
         data-test-subj="changeScatterFilled"
         onClick={() =>
@@ -90,7 +104,6 @@ jest.mock('./scatter_exclusive_vis_options', () => ({
       >
         Update Scatter Filled
       </button>
-
       <button
         data-test-subj="changeScatterAngled"
         onClick={() =>
@@ -109,7 +122,7 @@ jest.mock('../style_panel/legend/legend', () => {
   // Import Positions inside the mock to avoid reference error
   const { Positions: PositionsEnum } = jest.requireActual('../types');
   return {
-    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
+    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange, hasSizeLegend }) => (
       <div data-test-subj="mockLegendOptionsPanel">
         <button
           data-test-subj="mockLegendShow"
@@ -123,6 +136,18 @@ jest.mock('../style_panel/legend/legend', () => {
         >
           Change Position
         </button>
+        <input
+          data-test-subj="mockLegendTitle"
+          placeholder="Legend Title"
+          onChange={(e) => onLegendOptionsChange({ title: e.target.value })}
+        />
+        {hasSizeLegend && (
+          <input
+            data-test-subj="mockLegendTitleForSize"
+            placeholder="Size Legend Title"
+            onChange={(e) => onLegendOptionsChange({ titleForSize: e.target.value })}
+          />
+        )}
       </div>
     )),
   };
@@ -211,6 +236,21 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     },
   };
 
+  const propsWithCategoryColorAndSize: ScatterVisStyleControlsProps = {
+    ...propsWithCategoryColor,
+    axisColumnMappings: {
+      ...propsWithCategoryColor.axisColumnMappings,
+      [AxisRole.SIZE]: {
+        id: 5,
+        name: 'Size Value',
+        schema: VisFieldType.Numerical,
+        column: 'size',
+        validValuesCount: 6,
+        uniqueValuesCount: 6,
+      },
+    },
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -221,7 +261,7 @@ describe('ScatterVisStyleControls (updated structure)', () => {
         <ScatterVisStyleControls {...mockProps} />
       </Provider>
     );
-
+    expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('allAxesOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('scatterExclusiveOptions')).toBeInTheDocument();
@@ -259,6 +299,38 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     fireEvent.click(screen.getByTestId('mockLegendPosition'));
     expect(propsWithCategoryColor.onStyleChange).toHaveBeenCalledWith({
       legendPosition: Positions.BOTTOM,
+    });
+  });
+
+  it('calls onStyleChange with correct parameters for legend title options', async () => {
+    render(
+      <Provider store={store}>
+        <ScatterVisStyleControls {...propsWithCategoryColor} />
+      </Provider>
+    );
+
+    // Test legend title change
+    const legendTitleInput = screen.getByTestId('mockLegendTitle');
+    await userEvent.type(legendTitleInput, 'New Legend Title');
+
+    expect(propsWithCategoryColor.onStyleChange).toHaveBeenCalledWith({
+      legendTitle: 'New Legend Title',
+    });
+  });
+
+  it('calls onStyleChange with correct parameters for second legend title when size mapping is present', async () => {
+    render(
+      <Provider store={store}>
+        <ScatterVisStyleControls {...propsWithCategoryColorAndSize} />
+      </Provider>
+    );
+
+    // Test second legend title change
+    const legendTitleForSizeInput = screen.getByTestId('mockLegendTitleForSize');
+    await userEvent.type(legendTitleForSizeInput, 'New Size Legend Title');
+
+    expect(propsWithCategoryColorAndSize.onStyleChange).toHaveBeenCalledWith({
+      legendTitleForSize: 'New Size Legend Title',
     });
   });
 
@@ -383,13 +455,29 @@ describe('ScatterVisStyleControls (updated structure)', () => {
     const titleInput = screen.getByPlaceholderText('Default title');
     await userEvent.type(titleInput, 'New Chart Title');
 
-    waitFor(() => {
-      expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+    await waitFor(() => {
+      expect(props.onStyleChange).toHaveBeenCalledWith({
         titleOptions: {
           ...props.styleOptions.titleOptions,
           titleName: 'New Chart Title',
         },
       });
+    });
+  });
+
+  it('calls onStyleChange with correct parameters for threshold options', async () => {
+    render(
+      <Provider store={store}>
+        <ScatterVisStyleControls {...mockProps} />
+      </Provider>
+    );
+
+    await userEvent.click(screen.getByTestId('mockUpdateThreshold'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      thresholdOptions: {
+        ...mockProps.styleOptions.thresholdOptions,
+        thresholds: [{ color: '#FF0000', value: 50 }],
+      },
     });
   });
 });

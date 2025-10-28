@@ -8,22 +8,12 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useRef, useState } from 'react';
 import { IDataPluginServices } from '../..';
-import { DataStructure } from '../../../common';
+import { DataStructureCreatorProps, DataStructure } from '../../../common';
 import { DatasetTypeConfig, DataStructureFetchOptions } from '../../query';
 import { getQueryService } from '../../services';
 
-interface DatasetTableProps {
+interface DatasetTableProps extends DataStructureCreatorProps<DataStructureFetchOptions> {
   services: IDataPluginServices;
-  path: DataStructure[];
-  setPath: (newPath: DataStructure[]) => void;
-  index: number;
-  explorerDataset: DataStructure | undefined;
-  selectDataStructure: (item: DataStructure | undefined, newPath: DataStructure[]) => Promise<void>;
-  fetchNextDataStructure: (
-    nextPath: DataStructure[],
-    dataType: string,
-    options?: DataStructureFetchOptions
-  ) => Promise<DataStructure>;
 }
 
 export const DatasetTable: React.FC<DatasetTableProps> = (props) => {
@@ -40,7 +30,7 @@ export const DatasetTable: React.FC<DatasetTableProps> = (props) => {
 
     setLoading(true);
     await props
-      .fetchNextDataStructure(props.path, typeConfig.id, options)
+      .fetchDataStructure(props.path, typeConfig.id, options)
       .then((newDataStructure) => {
         props.setPath([...props.path.slice(0, props.index), newDataStructure]);
       })

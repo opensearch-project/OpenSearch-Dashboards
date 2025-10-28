@@ -4,11 +4,11 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, Subscription, combineLatest } from 'rxjs';
+import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
 import { isEmpty } from 'lodash';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, map } from 'rxjs/operators';
 
-import { ChartType, StyleOptions } from './utils/use_visualization_types';
+import { ChartStyles, ChartType, StyleOptions } from './utils/use_visualization_types';
 import { convertMappingsToStrings, isValidMapping } from './visualization_builder_utils';
 import { getServices } from '../../services/services';
 import { IOsdUrlStateStorage } from '../../../../opensearch_dashboards_utils/public';
@@ -21,6 +21,10 @@ import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { VisualizationRender } from './visualization_render';
 import { ExpressionsStart } from '../../../../expressions/public';
 import { StylePanelRender } from './style_panel_render';
+import { adaptLegacyData } from './visualization_builder_utils';
+import { mergeStyles } from './utils/utils';
+import { RenderChartConfig } from './types';
+import { TimeRange } from '../../../../data/common';
 
 interface VisState {
   styleOptions?: StyleOptions;
@@ -41,6 +45,7 @@ export class VisualizationBuilder {
 
   visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
   data$ = new BehaviorSubject<VisData | undefined>(undefined);
+  showRawTable$ = new BehaviorSubject<boolean>(false);
 
   constructor({ getUrlStateStorage, getExpressions }: Options) {
     if (getUrlStateStorage) {
@@ -94,6 +99,10 @@ export class VisualizationBuilder {
     this.setIsInitialized(true);
   }
 
+  setShowRawTable(on: boolean) {
+    this.showRawTable$.next(on);
+  }
+
   setIsInitialized(isInitialized: boolean) {
     this.isInitialized = isInitialized;
   }
@@ -102,6 +111,10 @@ export class VisualizationBuilder {
     if (!chartType || !isChartType(chartType)) {
       this.setVisConfig(undefined);
       return;
+    }
+
+    if (chartType === 'table' && this.showRawTable$.value) {
+      this.showRawTable$.next(false);
     }
 
     const currentVisConfig = this.visConfig$.value;
@@ -295,13 +308,14 @@ export class VisualizationBuilder {
     if (currentVisConfig.styles) {
       this.visConfig$.next({
         ...currentVisConfig,
-        styles: { ...currentVisConfig.styles, ...styles } as StyleOptions,
+        styles: { ...currentVisConfig.styles, ...styles },
       });
     }
   }
 
   setVisConfig(config?: ChartConfig) {
-    this.visConfig$.next(config);
+    const newConfig = adaptLegacyData(config);
+    this.visConfig$.next(newConfig);
   }
 
   setCurrentChartType(chartType?: ChartType) {
@@ -330,6 +344,7 @@ export class VisualizationBuilder {
 
     this.visConfig$.complete();
     this.data$.complete();
+    this.showRawTable$.complete();
   }
 
   reset(): void {
@@ -337,6 +352,7 @@ export class VisualizationBuilder {
 
     this.visConfig$ = new BehaviorSubject<ChartConfig | undefined>(undefined);
     this.data$ = new BehaviorSubject<VisData | undefined>(undefined);
+    this.showRawTable$ = new BehaviorSubject<boolean>(false);
     this.isInitialized = false;
   }
 
@@ -344,7 +360,28 @@ export class VisualizationBuilder {
     this.syncToUrl({ axesMapping: {}, styleOptions: undefined, chartType: undefined });
   }
 
-  renderVisualization({ searchContext }: { searchContext?: ExecutionContextSearch }) {
+  getRenderConfig$(): Observable<RenderChartConfig | undefined> {
+    return this.visConfig$.pipe(
+      map((config) => {
+        if (config?.type) {
+          const vis = visualizationRegistry.getVisualizationConfig(config.type);
+          if (vis) {
+            const styles: ChartStyles = mergeStyles(vis.ui.style.defaults, config.styles);
+            return { styles, type: config.type, axesMapping: config.axesMapping };
+          }
+          return undefined;
+        }
+      })
+    );
+  }
+
+  renderVisualization({
+    searchContext,
+    onSelectTimeRange,
+  }: {
+    searchContext?: ExecutionContextSearch;
+    onSelectTimeRange?: (range?: TimeRange) => void;
+  }) {
     const ExpressionRenderer = this.getExpression()?.ReactExpressionRenderer;
     if (!ExpressionRenderer) {
       return null;
@@ -352,9 +389,11 @@ export class VisualizationBuilder {
 
     return React.createElement(VisualizationRender, {
       data$: this.data$,
-      visConfig$: this.visConfig$,
+      config$: this.getRenderConfig$(),
+      showRawTable$: this.showRawTable$,
       searchContext,
       ExpressionRenderer,
+      onSelectTimeRange,
     });
   }
 
@@ -362,7 +401,7 @@ export class VisualizationBuilder {
     return React.createElement(StylePanelRender, {
       className,
       data$: this.data$,
-      visConfig$: this.visConfig$,
+      config$: this.getRenderConfig$(),
       onStyleChange: this.updateStyles.bind(this),
       onAxesMappingChange: this.setAxesMapping.bind(this),
       onChartTypeChange: this.setCurrentChartType.bind(this),

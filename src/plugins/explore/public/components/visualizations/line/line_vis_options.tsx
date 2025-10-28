@@ -6,18 +6,18 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { LineChartStyleControls } from './line_vis_config';
+import { LineChartStyle, LineChartStyleOptions } from './line_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
-import { LegendOptionsPanel } from '../style_panel/legend/legend';
-import { ThresholdOptions } from '../style_panel/threshold/threshold';
+import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
 import { LineExclusiveVisOptions } from './line_exclusive_vis_options';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesOptions } from '../style_panel/axes/axes';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole } from '../types';
+import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 
-export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyleControls>;
+export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyle>;
 
 export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
   styleOptions,
@@ -28,9 +28,9 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof LineChartStyleControls>(
+  const updateStyleOption = <K extends keyof LineChartStyleOptions>(
     key: K,
-    value: LineChartStyleControls[K]
+    value: LineChartStyleOptions[K]
   ) => {
     onStyleChange({ [key]: value });
   };
@@ -61,6 +61,13 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
 
       {hasMappingSelected && (
         <>
+          <EuiFlexItem>
+            <ThresholdPanel
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+              showThresholdStyle={true}
+            />
+          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AxesOptions
               categoryAxes={styleOptions.categoryAxes}
@@ -73,6 +80,10 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
               categoricalColumns={categoricalColumns}
               dateColumns={dateColumns}
               axisColumnMappings={axisColumnMappings}
+              showFullTimeRange={styleOptions.showFullTimeRange}
+              onShowFullTimeRangeChange={(showFullTimeRange) =>
+                updateStyleOption('showFullTimeRange', showFullTimeRange)
+              }
             />
           </EuiFlexItem>
 
@@ -92,33 +103,11 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
             />
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <ThresholdOptions
-              thresholdLines={styleOptions.thresholdLines}
-              onThresholdLinesChange={(thresholdLines) =>
-                updateStyleOption('thresholdLines', thresholdLines)
-              }
-            />
-          </EuiFlexItem>
-
-          {shouldShowLegend && (
-            <EuiFlexItem grow={false}>
-              <LegendOptionsPanel
-                legendOptions={{
-                  show: styleOptions.addLegend,
-                  position: styleOptions.legendPosition,
-                }}
-                onLegendOptionsChange={(legendOptions) => {
-                  if (legendOptions.show !== undefined) {
-                    updateStyleOption('addLegend', legendOptions.show);
-                  }
-                  if (legendOptions.position !== undefined) {
-                    updateStyleOption('legendPosition', legendOptions.position);
-                  }
-                }}
-              />
-            </EuiFlexItem>
-          )}
+          <LegendOptionsWrapper
+            styleOptions={styleOptions}
+            updateStyleOption={updateStyleOption}
+            shouldShow={shouldShowLegend}
+          />
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel

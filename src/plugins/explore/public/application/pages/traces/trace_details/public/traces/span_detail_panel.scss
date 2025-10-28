@@ -24,9 +24,8 @@
   }
 
   &__contentContainer {
-    overflow-y: auto;
-    max-height: 800px;
     min-height: 150px;
+    overflow-y: visible;
   }
 }
 

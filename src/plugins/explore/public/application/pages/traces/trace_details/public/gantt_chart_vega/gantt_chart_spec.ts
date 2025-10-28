@@ -7,14 +7,47 @@ import { Spec } from 'vega';
 import { i18n } from '@osd/i18n';
 import { GANTT_CHART_CONSTANTS, calculateTextPadding } from './gantt_constants';
 
+function createTooltipSignal(isEmbedded: boolean): string {
+  const embeddedMessage = isEmbedded
+    ? "'" +
+      i18n.translate('explore.ganttChart.tooltip.action', {
+        defaultMessage: 'Action',
+      }) +
+      "': '" +
+      i18n.translate('explore.ganttChart.tooltip.clickToViewDetails', {
+        defaultMessage: 'click to view span details',
+      }) +
+      "', "
+    : '';
+
+  const baseTooltip =
+    "'" +
+    i18n.translate('explore.ganttChart.tooltip.service', {
+      defaultMessage: 'Service',
+    }) +
+    "': datum.serviceName, '" +
+    i18n.translate('explore.ganttChart.tooltip.name', { defaultMessage: 'Name' }) +
+    "': datum.name, '" +
+    i18n.translate('explore.ganttChart.tooltip.duration', {
+      defaultMessage: 'Duration',
+    }) +
+    "': datum.duration + ' ms', '" +
+    i18n.translate('explore.ganttChart.tooltip.start', { defaultMessage: 'Start' }) +
+    "': datum.startTime + ' ms'";
+
+  return `{${embeddedMessage}${baseTooltip}}`;
+}
+
 export function createGanttSpec(
   height: number,
   dataLength: number = 0,
   containerWidth: number = 800,
   selectedSpanId?: string,
-  isDarkMode: boolean = false
+  isDarkMode: boolean = false,
+  isEmbedded?: boolean
 ): Spec {
   const textPadding = calculateTextPadding(containerWidth);
+  const isEmbeddedMode = isEmbedded || false;
 
   // Calculate proper height based on number of spans
   const calculatedHeight = Math.max(
@@ -27,7 +60,7 @@ export function createGanttSpec(
   return {
     $schema: 'https://vega.github.io/schema/vega/v5.json',
     description: 'Trace spans Gantt chart',
-    autosize: { type: 'fit', resize: true, contains: 'padding' },
+    autosize: { type: 'fit', resize: false, contains: 'padding' },
     width: containerWidth,
     height: chartHeight,
     padding: GANTT_CHART_CONSTANTS.PADDING,
@@ -115,40 +148,7 @@ export function createGanttSpec(
             fill: { field: 'color' },
             cursor: { value: 'pointer' },
             tooltip: {
-              signal:
-                "datum.hasError ? {'⚠️ " +
-                i18n.translate('explore.ganttChart.tooltip.error', {
-                  defaultMessage: 'Error',
-                }) +
-                "': '" +
-                i18n.translate('explore.ganttChart.tooltip.clickForDetails', {
-                  defaultMessage: 'click for details',
-                }) +
-                "', '" +
-                i18n.translate('explore.ganttChart.tooltip.service', {
-                  defaultMessage: 'Service',
-                }) +
-                "': datum.serviceName, '" +
-                i18n.translate('explore.ganttChart.tooltip.name', { defaultMessage: 'Name' }) +
-                "': datum.name, '" +
-                i18n.translate('explore.ganttChart.tooltip.duration', {
-                  defaultMessage: 'Duration',
-                }) +
-                "': datum.duration + ' ms', '" +
-                i18n.translate('explore.ganttChart.tooltip.start', { defaultMessage: 'Start' }) +
-                "': datum.startTime + ' ms'} : {'" +
-                i18n.translate('explore.ganttChart.tooltip.service', {
-                  defaultMessage: 'Service',
-                }) +
-                "': datum.serviceName, '" +
-                i18n.translate('explore.ganttChart.tooltip.name', { defaultMessage: 'Name' }) +
-                "': datum.name, '" +
-                i18n.translate('explore.ganttChart.tooltip.duration', {
-                  defaultMessage: 'Duration',
-                }) +
-                "': datum.duration + ' ms', '" +
-                i18n.translate('explore.ganttChart.tooltip.start', { defaultMessage: 'Start' }) +
-                "': datum.startTime + ' ms'}",
+              signal: createTooltipSignal(isEmbeddedMode),
             },
           },
           update: {
@@ -262,9 +262,16 @@ export function createGanttSpec(
             text: { signal: 'format(datum.startTime, ".2f") + " ms"' },
             align: { value: 'right' },
             fontStyle: { value: 'italic' },
+            cursor: { value: 'pointer' },
+            tooltip: {
+              signal: createTooltipSignal(isEmbeddedMode),
+            },
           },
           update: {
             x: { scale: 'xscale', field: 'startTime', offset: -5 },
+          },
+          hover: {
+            fill: { value: '#555' },
           },
         },
       },
@@ -278,6 +285,10 @@ export function createGanttSpec(
             fontSize: { value: 10 },
             fontWeight: { value: 'bold' },
             baseline: { value: 'middle' },
+            cursor: { value: 'pointer' },
+            tooltip: {
+              signal: createTooltipSignal(isEmbeddedMode),
+            },
           },
           update: {
             x: { scale: 'xscale', field: 'endTime', offset: 8 },
@@ -291,6 +302,11 @@ export function createGanttSpec(
             },
             fill: {
               signal: `datum.hasError ? "#c14125" : "${isDarkMode ? '#ffffff' : '#000000'}"`,
+            },
+          },
+          hover: {
+            fill: {
+              signal: `datum.hasError ? "#d14a2a" : "${isDarkMode ? '#cccccc' : '#333333'}"`,
             },
           },
         },

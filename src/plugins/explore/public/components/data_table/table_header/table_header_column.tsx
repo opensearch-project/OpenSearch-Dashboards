@@ -23,8 +23,35 @@ interface Props {
 }
 
 export function TableHeaderColumn({ displayName, isRemoveable, name, onRemoveColumn }: Props) {
+  const handleCopyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(name);
+    } catch (err) {
+      const textArea = document.createElement('textarea');
+      textArea.value = name;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
+  };
+
   // action buttons displayed on the right side of the column name
   const buttons = [
+    // Copy Button
+    {
+      active: true,
+      ariaLabel: i18n.translate('explore.docTable.tableHeader.copyColumnButtonAriaLabel', {
+        defaultMessage: 'Copy {columnName} column name',
+        values: { columnName: name },
+      }),
+      onClick: handleCopyToClipboard,
+      testSubject: `docTableCopyHeader-${name}`,
+      tooltip: i18n.translate('explore.docTable.tableHeader.copyColumnButtonTooltip', {
+        defaultMessage: 'Copy Column Name',
+      }),
+      iconType: 'copy',
+    },
     // Remove Button
     {
       active: isRemoveable && typeof onRemoveColumn === 'function',
@@ -32,7 +59,6 @@ export function TableHeaderColumn({ displayName, isRemoveable, name, onRemoveCol
         defaultMessage: 'Remove {columnName} column',
         values: { columnName: name },
       }),
-      className: 'fa fa-remove exploreDocTableHeader__move',
       onClick: () => onRemoveColumn && onRemoveColumn(name),
       testSubject: `docTableRemoveHeader-${name}`,
       tooltip: i18n.translate('explore.docTable.tableHeader.removeColumnButtonTooltip', {
@@ -53,7 +79,9 @@ export function TableHeaderColumn({ displayName, isRemoveable, name, onRemoveCol
       })}
     >
       <span data-test-subj={`docTableHeader-${name}`}>
-        {displayName}
+        <EuiToolTip content={displayName} position="top">
+          <span className="header-text">{displayName}</span>
+        </EuiToolTip>
         {buttons
           .filter((button) => button.active)
           .map((button, idx) => (

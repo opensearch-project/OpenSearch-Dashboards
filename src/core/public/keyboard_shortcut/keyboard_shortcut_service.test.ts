@@ -769,15 +769,27 @@ describe('KeyboardShortcutService', () => {
         pluginId: 'dashboard',
         name: 'Go to Dashboard',
         category: 'navigation',
-        keys: 'g d',
+        keys: 'g b',
         execute: mockExecute2,
       };
 
       start.register(sequence1);
       start.register(sequence2);
 
+      // Test discover shortcut (g d)
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'g', code: 'KeyG' }));
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'd', code: 'KeyD' }));
+
+      expect(mockExecute).toHaveBeenCalledTimes(1);
+      expect(mockExecute2).not.toHaveBeenCalled();
+
+      // Reset mocks
+      mockExecute.mockClear();
+      mockExecute2.mockClear();
+
+      // Test dashboard shortcut (g b)
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'g', code: 'KeyG' }));
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'b', code: 'KeyB' }));
 
       expect(mockExecute2).toHaveBeenCalledTimes(1);
       expect(mockExecute).not.toHaveBeenCalled();

@@ -19,7 +19,7 @@ jest.mock('../../utils/use_debounced_value', () => {
       };
       return [value, handleChange];
     }),
-    useDebouncedNumericValue: jest.fn((initialValue, onChange, options) => {
+    useDebouncedNumber: jest.fn((initialValue, onChange, options) => {
       // Use Jest's mock function instead of React.useState
       const value = initialValue;
       const handleChange = (newValue: any) => {
@@ -128,6 +128,8 @@ describe('AxesOptions', () => {
       [AxisRole.Y]: mockNumericalColumns[0],
       [AxisRole.Y_SECOND]: undefined,
     },
+    showFullTimeRange: true,
+    onShowFullTimeRangeChange: jest.fn(),
   };
 
   const rule2Props = {
@@ -236,13 +238,13 @@ describe('AxesOptions', () => {
     render(<AxesOptions {...defaultProps} />);
 
     const buttonGroup = screen.getAllByRole('group', { name: 'Select axis position' })[1];
-    const topButton = within(buttonGroup).getByTestId('left');
+    const topButton = within(buttonGroup).getByTestId('right');
 
     fireEvent.click(topButton);
     expect(defaultProps.onValueAxesChange).toHaveBeenCalledWith([
       {
         ...mockValueAxes[0],
-        position: Positions.LEFT,
+        position: Positions.RIGHT,
       },
     ]);
   });
@@ -278,10 +280,11 @@ describe('AxesOptions', () => {
   it('calls onValueAxesChange when show is toggled and there are 2 value axes', () => {
     render(<AxesOptions {...rule2Props} />);
 
-    const showSwitch = screen.getAllByTestId('showYAxisSwitch');
-    expect(showSwitch.length).toBe(2);
+    const panels = screen.getAllByTestId('twoValueAxesPanel');
+    const firstPanel = panels[0];
+    const showSwitch = within(firstPanel).getAllByRole('switch')[0];
 
-    fireEvent.click(showSwitch[0]);
+    fireEvent.click(showSwitch);
 
     expect(rule2Props.onValueAxesChange).toHaveBeenCalledWith([
       {
@@ -325,6 +328,15 @@ describe('AxesOptions', () => {
     });
   });
 
+  it('calls onShowFullTimeRangeChange when the show full time range switch is toggled', () => {
+    render(<AxesOptions {...rule2Props} />);
+
+    const fullTimeRangeSwitch = screen.getByTestId('showFullTimeRangeSwitch');
+    fireEvent.click(fullTimeRangeSwitch);
+
+    expect(rule2Props.onShowFullTimeRangeChange).toHaveBeenCalledWith(false);
+  });
+
   it('updates label rotation when alignment is changed', () => {
     render(<AxesOptions {...defaultProps} />);
 
@@ -366,9 +378,9 @@ describe('AxesOptions', () => {
   it('shows/hides grid options based on show grid lines toggle', () => {
     render(<AxesOptions {...defaultProps} />);
 
-    // Toggle off show labels
-    const showLabelsSwitch = screen.getAllByRole('switch')[1];
-    fireEvent.click(showLabelsSwitch);
+    // Toggle off show grid lines for X-axis
+    const showGridSwitch = screen.getAllByRole('switch')[1];
+    fireEvent.click(showGridSwitch);
 
     // Check that the callback was called with the correct parameters
     expect(defaultProps.onCategoryAxesChange).toHaveBeenCalledWith(
@@ -401,19 +413,12 @@ describe('AxesOptions', () => {
     );
   });
 
-  // New tests to improve coverage
-
   it('handles angled label rotation', () => {
     render(<AxesOptions {...defaultProps} />);
 
-    const comboboxes = screen.getAllByRole('combobox');
-    const alignmentSelect = comboboxes.find((select) => select.innerHTML.includes('horizontal'));
+    const comboboxes = screen.getByTestId('xLinesAlignment');
 
-    if (!alignmentSelect) {
-      throw new Error('Alignment select not found');
-    }
-
-    fireEvent.change(alignmentSelect, { target: { value: 'angled' } });
+    fireEvent.change(comboboxes, { target: { value: 'angled' } });
 
     expect(defaultProps.onCategoryAxesChange).toHaveBeenCalledWith(
       expect.arrayContaining([
@@ -442,7 +447,7 @@ describe('AxesOptions', () => {
 
     // Check that the title input has the default value (from the first date or categorical column)
     const titleInput = screen.getAllByRole('textbox')[0];
-    expect(titleInput).toHaveValue('timestamp');
+    expect(titleInput).toHaveValue('');
   });
 
   it('uses default value axis title when title text is empty', () => {
@@ -461,9 +466,8 @@ describe('AxesOptions', () => {
 
     render(<AxesOptions {...propsWithEmptyTitle} />);
 
-    // Check that the title input has the default value (from the first numerical column)
     const titleInput = screen.getAllByRole('textbox')[1];
-    expect(titleInput).toHaveValue('count');
+    expect(titleInput).toHaveValue('');
   });
 
   it('uses default value axis title for second axis when title text is empty', () => {
@@ -501,7 +505,7 @@ describe('AxesOptions', () => {
 
     // Check that the title input for the second axis has the default value (from the second numerical column)
     const titleInput = screen.getAllByRole('textbox')[2];
-    expect(titleInput).toHaveValue('price');
+    expect(titleInput).toHaveValue('');
   });
 
   it('handles Rule 2 scenario with incomplete value axes', () => {
@@ -673,6 +677,8 @@ describe('AxesOptions', () => {
         [AxisRole.Y]: undefined,
         [AxisRole.Y_SECOND]: undefined,
       },
+      showFullTimeRange: false,
+      onShowFullTimeRangeChange: jest.fn(),
     };
 
     // @ts-ignore - Testing with null props
@@ -703,7 +709,7 @@ describe('AxesOptions', () => {
 
     // Check that the title input has the default value "Category"
     const titleInput = screen.getAllByRole('textbox')[0];
-    expect(titleInput).toHaveValue('Category');
+    expect(titleInput).toHaveValue('');
   });
 
   it('displays correct default title for value axis with no columns', () => {
@@ -727,7 +733,7 @@ describe('AxesOptions', () => {
 
     // Check that the title input has the default value "Metric 1"
     const titleInput = screen.getAllByRole('textbox')[1];
-    expect(titleInput).toHaveValue('Metric 1');
+    expect(titleInput).toHaveValue('');
   });
 
   it('handles multiple category axes', () => {
@@ -814,11 +820,13 @@ describe('AxesOptions', () => {
     expect(screen.getByDisplayValue('Second Value Axis')).toBeInTheDocument();
   });
 
-  it('updates value axis grid when there are 2 value axes', async () => {
+  it('updates value axis grid when there are 2 value axes', () => {
     render(<AxesOptions {...rule2Props} />);
 
-    // Toggle off show grid for the first value axis
-    const showGridsSwitch = screen.getAllByRole('switch')[4];
+    const panels = screen.getAllByTestId('twoValueAxesPanel');
+    const firstPanel = panels[0]; // Left Y-Axis panel
+    const showGridsSwitch = within(firstPanel).getAllByRole('switch')[1]; // Second switch in the panel (Show grid lines)
+
     fireEvent.click(showGridsSwitch);
 
     // Check that the callback was called with the correct parameters
@@ -827,15 +835,20 @@ describe('AxesOptions', () => {
         expect.objectContaining({
           grid: expect.objectContaining({ showLines: false }),
         }),
+        expect.objectContaining({
+          id: 'ValueAxis-2',
+        }),
       ])
     );
   });
 
-  it('shows/hides label when there are 2 value axes', async () => {
+  it('shows/hides label when there are 2 value axes', () => {
     render(<AxesOptions {...rule2Props} />);
 
-    // Toggle off show grid for the first value axis
-    const showLabelsSwitch = screen.getAllByRole('switch')[5];
+    const panels = screen.getAllByTestId('twoValueAxesPanel');
+    const firstPanel = panels[0]; // Left Y-Axis panel
+    const showLabelsSwitch = within(firstPanel).getAllByRole('switch')[2]; // Third switch in the panel (Show labels)
+
     fireEvent.click(showLabelsSwitch);
 
     // Check that the callback was called with the correct parameters
@@ -843,6 +856,9 @@ describe('AxesOptions', () => {
       expect.arrayContaining([
         expect.objectContaining({
           labels: expect.objectContaining({ show: false }),
+        }),
+        expect.objectContaining({
+          id: 'ValueAxis-2',
         }),
       ])
     );
@@ -860,6 +876,9 @@ describe('AxesOptions', () => {
       expect.arrayContaining([
         expect.objectContaining({
           labels: expect.objectContaining({ rotate: -90 }),
+        }),
+        expect.objectContaining({
+          id: 'ValueAxis-2',
         }),
       ])
     );
@@ -966,5 +985,69 @@ describe('AxesOptions', () => {
         },
       ]);
     });
+  });
+
+  it('calls stopPropagation on mouseUp for X-axis alignment select', () => {
+    render(<AxesOptions {...defaultProps} />);
+
+    const xAlignmentSelect = screen.getByTestId('xLinesAlignment');
+    expect(xAlignmentSelect).toBeInTheDocument(); // Verify element exists
+
+    const stopPropagation = jest.fn();
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent, 'stopPropagation', { value: stopPropagation });
+
+    xAlignmentSelect.dispatchEvent(mouseUpEvent);
+
+    expect(stopPropagation).toHaveBeenCalled();
+  });
+
+  it('calls stopPropagation on mouseUp for Y-axis alignment select (single axis)', () => {
+    render(<AxesOptions {...defaultProps} />);
+
+    const yAlignmentSelect = screen.getByTestId('singleyLinesAlignment');
+    expect(yAlignmentSelect).toBeInTheDocument(); // Verify element exists
+
+    const stopPropagation = jest.fn();
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent, 'stopPropagation', { value: stopPropagation });
+
+    yAlignmentSelect.dispatchEvent(mouseUpEvent);
+
+    expect(stopPropagation).toHaveBeenCalled();
+  });
+
+  it('calls stopPropagation on mouseUp for Y-axis alignment select (Rule 2, both axes)', () => {
+    render(<AxesOptions {...rule2Props} />);
+
+    const yAlignmentSelects = screen.getAllByTestId('yLinesAlignment');
+    expect(yAlignmentSelects).toHaveLength(2); // Verify both elements exist
+
+    const stopPropagation1 = jest.fn();
+    const stopPropagation2 = jest.fn();
+
+    const mouseUpEvent1 = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent1, 'stopPropagation', { value: stopPropagation1 });
+
+    const mouseUpEvent2 = new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+    });
+    Object.defineProperty(mouseUpEvent2, 'stopPropagation', { value: stopPropagation2 });
+
+    yAlignmentSelects[0].dispatchEvent(mouseUpEvent1);
+    yAlignmentSelects[1].dispatchEvent(mouseUpEvent2);
+
+    expect(stopPropagation1).toHaveBeenCalled();
+    expect(stopPropagation2).toHaveBeenCalled();
   });
 });

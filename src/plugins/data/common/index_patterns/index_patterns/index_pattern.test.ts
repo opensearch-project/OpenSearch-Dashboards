@@ -82,7 +82,15 @@ function create(id: string) {
   } = stubbedSavedObjectIndexPattern(id);
 
   return new IndexPattern({
-    spec: { id, type, version, timeFieldName, fields, title },
+    spec: {
+      id,
+      type,
+      version,
+      timeFieldName,
+      fields,
+      title,
+      schemaMappings: { otelLogs: { traceId: 'trace.id', spanId: 'span.id' } },
+    },
     savedObjectsClient: {} as any,
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
@@ -100,7 +108,16 @@ function createWithDataSource(id: string) {
 
   const dataSourceRef = { id: reference[0].id, type: reference[0].type };
   return new IndexPattern({
-    spec: { id, type, version, timeFieldName, fields, title, dataSourceRef },
+    spec: {
+      id,
+      type,
+      version,
+      timeFieldName,
+      fields,
+      title,
+      dataSourceRef,
+      schemaMappings: { otelLogs: { serviceName: 'service.name' } },
+    },
     savedObjectsClient: {} as any,
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,

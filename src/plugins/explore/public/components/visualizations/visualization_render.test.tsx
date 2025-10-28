@@ -6,10 +6,13 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
+import dateMath from '@elastic/datemath';
 import { VisualizationRender } from './visualization_render';
-import { VisData, ChartConfig } from './visualization_builder.types';
-import { VisFieldType, Positions } from './types';
+import { VisData } from './visualization_builder.types';
+import { VisFieldType, Positions, RenderChartConfig } from './types';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
+import { defaultBarChartStyles } from './bar/bar_vis_config';
+import { defaultTableChartStyles } from './table/table_vis_config';
 
 // Mock the dependencies
 jest.mock('./table/table_vis', () => ({
@@ -24,6 +27,24 @@ jest.mock('./visualization_empty_state', () => ({
 
 jest.mock('./utils/to_expression', () => ({
   toExpression: jest.fn(() => 'mocked-expression'),
+}));
+
+// Mock getServices
+jest.mock('../../services/services', () => ({
+  getServices: jest.fn(() => ({
+    data: {
+      query: {
+        timefilter: {
+          timefilter: {
+            getTime: jest.fn(() => ({
+              from: 'now-15m',
+              to: 'now',
+            })),
+          },
+        },
+      },
+    },
+  })),
 }));
 
 describe('VisualizationRender', () => {
@@ -56,19 +77,21 @@ describe('VisualizationRender', () => {
     dateColumns: [],
   };
 
-  const mockTableConfig: ChartConfig = {
+  const mockTableConfig: RenderChartConfig = {
     type: 'table',
     styles: {
+      ...defaultTableChartStyles,
       pageSize: 10,
     },
     axesMapping: {},
   };
 
-  const mockChartConfig: ChartConfig = {
+  const mockChartConfig: RenderChartConfig = {
     type: 'bar',
     styles: {
+      ...defaultBarChartStyles,
       legendPosition: Positions.RIGHT,
-    } as any,
+    },
     axesMapping: {
       x: 'field1',
       y: 'count',
@@ -93,30 +116,38 @@ describe('VisualizationRender', () => {
 
   it('returns null when no visualization data is provided', () => {
     const data$ = new BehaviorSubject<VisData | undefined>(undefined);
-    const visConfig$ = new BehaviorSubject<ChartConfig | undefined>(mockTableConfig);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockTableConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
 
-    const { container } = render(<VisualizationRender data$={data$} visConfig$={visConfig$} />);
+    const { container } = render(
+      <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
+    );
 
     expect(container.firstChild).toBeNull();
   });
 
   it('renders table visualization when type is table', () => {
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
-    const visConfig$ = new BehaviorSubject<ChartConfig | undefined>(mockTableConfig);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockTableConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
 
-    render(<VisualizationRender data$={data$} visConfig$={visConfig$} />);
+    render(
+      <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
+    );
 
     expect(screen.getByTestId('tableVisualization')).toBeInTheDocument();
   });
 
   it('renders expression renderer when there is a selection mapping and ExpressionRenderer is provided', () => {
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
-    const visConfig$ = new BehaviorSubject<ChartConfig | undefined>(mockChartConfig);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
 
     render(
       <VisualizationRender
         data$={data$}
-        visConfig$={visConfig$}
+        config$={visConfig$}
+        showRawTable$={showRawTable$}
         searchContext={mockSearchContext}
         ExpressionRenderer={mockExpressionRenderer}
       />
@@ -127,12 +158,14 @@ describe('VisualizationRender', () => {
 
   it('returns null when there is a selection mapping but no ExpressionRenderer', () => {
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
-    const visConfig$ = new BehaviorSubject<ChartConfig | undefined>(mockChartConfig);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
 
     const { container } = render(
       <VisualizationRender
         data$={data$}
-        visConfig$={visConfig$}
+        config$={visConfig$}
+        showRawTable$={showRawTable$}
         searchContext={mockSearchContext}
       />
     );
@@ -142,13 +175,37 @@ describe('VisualizationRender', () => {
 
   it('renders empty state when there is no selection mapping', () => {
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
-    const visConfig$ = new BehaviorSubject<ChartConfig | undefined>({
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>({
       ...mockChartConfig,
       axesMapping: undefined,
     });
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
 
-    render(<VisualizationRender data$={data$} visConfig$={visConfig$} />);
+    render(
+      <VisualizationRender data$={data$} config$={visConfig$} showRawTable$={showRawTable$} />
+    );
 
     expect(screen.getByTestId('visualizationEmptyState')).toBeInTheDocument();
+  });
+
+  it('parses timeRange `from` and `to` with correct roundUp options', () => {
+    const parseSpy = jest.spyOn(dateMath, 'parse');
+
+    const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
+    const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
+    const showRawTable$ = new BehaviorSubject<boolean>(false);
+
+    render(
+      <VisualizationRender
+        data$={data$}
+        config$={visConfig$}
+        showRawTable$={showRawTable$}
+        searchContext={mockSearchContext}
+        ExpressionRenderer={mockExpressionRenderer}
+      />
+    );
+
+    expect(parseSpy).toHaveBeenCalledWith('now-15m');
+    expect(parseSpy).toHaveBeenCalledWith('now', { roundUp: true });
   });
 });

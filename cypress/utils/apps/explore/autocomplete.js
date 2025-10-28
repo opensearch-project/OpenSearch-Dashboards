@@ -36,7 +36,19 @@ export const typeAndVerifySuggestion = (input, expectedSuggestion) => {
   cy.get('.suggest-widget')
     .should('be.visible')
     .within(() => {
-      cy.get('.monaco-list-row').should('exist').contains(expectedSuggestion);
+      cy.get('.monaco-list-row')
+        .should('exist')
+        .then(($rows) => {
+          const matchFound = $rows.toArray().some((row) => {
+            const extractedSuggestion = Cypress.$(row)
+              .find('.monaco-icon-label-container .label-name')
+              .text();
+            return (
+              extractedSuggestion.trim().toLowerCase() === expectedSuggestion.trim().toLowerCase()
+            );
+          });
+          expect(matchFound).to.be.true;
+        });
     });
 };
 
@@ -51,7 +63,10 @@ export const selectSpecificSuggestion = (suggestionText) => {
       cy.get('.monaco-list-row.focused').then(() => {
         cy.get('.monaco-list-row').then(($rows) => {
           const exactMatch = $rows.filter((_, row) => {
-            return Cypress.$(row).text().includes(suggestionText);
+            const extractedSuggestion = Cypress.$(row)
+              .find('.monaco-icon-label-container .label-name')
+              .text();
+            return extractedSuggestion.trim().toLowerCase() === suggestionText.trim().toLowerCase();
           });
 
           if (exactMatch.length > 0) {
@@ -126,14 +141,14 @@ const getLanguageSpecificConfig = (language, config) => {
     case QueryLanguages.PPL.name:
       return {
         initialCommands: [
-          { value: 'source', input: 's' },
+          { value: 'SOURCE', input: 's' },
           { value: '=' },
           { value: getDatasetName('data_logs_small_time_1', config.datasetType) },
           { value: '|' },
-          { value: 'where', input: 'w' },
+          { value: 'WHERE', input: 'w' },
         ],
         editorType: 'exploreQueryPanelEditor',
-        andOperator: 'and',
+        andOperator: 'AND',
       };
     default:
       throw new Error(`Unsupported language: ${language}`);
@@ -203,9 +218,23 @@ export const selectSuggestion = (suggestionText, useKeyboard = false) => {
         .some((row) => Cypress.$(row).text().includes(suggestionText));
 
       if (isVisible) {
+        const getMatchingSuggestion = ($rows) => {
+          return $rows.toArray().find((row) => {
+            const $row = Cypress.$(row);
+            const extractedSuggestion = $row
+              .find('.monaco-icon-label-container .label-name')
+              .text();
+            return extractedSuggestion.trim().toLowerCase() === suggestionText.trim().toLowerCase();
+          });
+        };
+
         if (useKeyboard) {
-          const highlightedRow = $rows.filter('.focused').text();
-          if (highlightedRow.includes(suggestionText)) {
+          const highlightedRow = $rows.filter('.focused');
+          const extractedSuggestion = highlightedRow
+            .find('.monaco-icon-label-container .label-name')
+            .text();
+          cy.log('Pikachu says:', extractedSuggestion);
+          if (extractedSuggestion.trim().toLowerCase() === suggestionText.trim().toLowerCase()) {
             return cy.get('.inputarea').trigger('keydown', {
               key: 'Tab',
               keyCode: 9,
@@ -214,7 +243,10 @@ export const selectSuggestion = (suggestionText, useKeyboard = false) => {
             });
           }
         } else {
-          return cy.get('.monaco-list-row').contains(suggestionText).click({ force: true });
+          const matchingRow = getMatchingSuggestion($rows);
+          if (matchingRow) {
+            return cy.wrap(matchingRow).click({ force: true });
+          }
         }
       }
       return cy
@@ -244,6 +276,7 @@ export const showSuggestionAndHint = (maxAttempts = 3) => {
 
   const attemptShow = () => {
     attempts++;
+    cy.get('.inputarea').clear();
     cy.get('.inputarea').type('source ', { force: true });
 
     return cy.get('.suggest-widget.visible').then(($widget) => {
@@ -345,7 +378,7 @@ export const createQuery = (config, useKeyboard = false) => {
         const dataset = getDatasetName('data_logs_small_time_1', config.datasetType);
         selectSuggestion(dataset, useKeyboard);
         selectSuggestion('|', useKeyboard);
-        selectSuggestion('where', useKeyboard);
+        selectSuggestion('WHERE', useKeyboard);
         selectSuggestion('unique_category', useKeyboard);
         selectSuggestion('=', useKeyboard);
         selectSuggestion('Development', useKeyboard);
@@ -452,26 +485,32 @@ export const verifyMonacoEditorContent = (queryString) => {
   cy.getElementByTestId('exploreQueryPanelEditor')
     .should('be.visible')
     .then(($editor) => {
-      // Try different selectors to get the text content
+      // Get text from all lines in the editor
       let text = '';
 
-      const viewLine = $editor.find('.view-line').first();
-      if (viewLine.length > 0) {
-        text = viewLine.text();
+      const viewLines = $editor.find('.view-line');
+      if (viewLines.length > 0) {
+        // Collect text from all lines
+        const allLinesText = viewLines
+          .toArray()
+          .map((line) => Cypress.$(line).text())
+          .join(' ');
+        text = allLinesText;
       }
 
-      // Sanitize the text by normalizing whitespace characters
-      const sanitizeText = (str) => {
+      // Normalize the text by removing newlines and merging multiple spaces into single space
+      const normalizeText = (str) => {
         return str
-          .replace(/[\s\u00A0\u00B7\u2022\u2023\u25E6\u2043\u2219\u22C5\u30FB\u00B7.·]+/g, ' ')
+          .replace(/\n/g, ' ') // Remove newlines
+          .replace(/[\s\u00A0\u00B7\u2022\u2023\u25E6\u2043\u2219\u22C5\u30FB\u00B7.·]+/g, ' ') // Normalize whitespace characters and merge multiple spaces
           .trim();
       };
 
-      const sanitizedText = sanitizeText(text);
-      const sanitizedQuery = sanitizeText(queryString);
+      const normalizedText = normalizeText(text);
+      const normalizedQuery = normalizeText(queryString);
 
       expect(text).to.not.be.empty;
-      expect(sanitizedText).to.include(sanitizedQuery);
+      expect(normalizedText).to.include(normalizedQuery);
     });
 };
 

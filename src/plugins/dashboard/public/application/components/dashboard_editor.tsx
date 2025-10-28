@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { EventEmitter } from 'events';
+import { i18n } from '@osd/i18n';
 import { DashboardTopNav } from '../components/dashboard_top_nav';
 import { useChromeVisibility } from '../utils/use/use_chrome_visibility';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -18,7 +19,7 @@ import { HeaderVariant } from '../../../../../core/public';
 export const DashboardEditor = () => {
   const { id: dashboardIdFromUrl } = useParams<{ id: string }>();
   const { services } = useOpenSearchDashboards<DashboardServices>();
-  const { chrome, uiSettings } = services;
+  const { chrome, uiSettings, keyboardShortcut } = services;
   const { setHeaderVariant } = chrome;
   const isChromeVisible = useChromeVisibility({ chrome });
   const [eventEmitter] = useState(new EventEmitter());
@@ -54,6 +55,25 @@ export const DashboardEditor = () => {
       setHeaderVariant?.();
     };
   }, [setHeaderVariant, showActionsInGroup]);
+
+  const handleFullScreen = useCallback(() => {
+    if (appState) {
+      appState.transitions.set('fullScreenMode', true);
+    }
+  }, [appState]);
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'dashboard_fullscreen',
+    pluginId: 'dashboard',
+    name: i18n.translate('dashboard.editor.toggleFullScreenShortcut', {
+      defaultMessage: 'Toggle full-screen',
+    }),
+    category: i18n.translate('dashboard.editor.panelLayoutCategory', {
+      defaultMessage: 'Panel / layout',
+    }),
+    keys: 'shift+f',
+    execute: handleFullScreen,
+  });
 
   return (
     <div>

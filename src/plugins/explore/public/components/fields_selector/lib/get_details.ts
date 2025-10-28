@@ -31,13 +31,13 @@
 // @ts-ignore
 import { i18n } from '@osd/i18n';
 import { getFieldValueCounts } from './field_calculator';
-import { IndexPattern, IndexPatternField } from '../../../../../data/public';
+import { DataView, DataViewField } from '../../../../../data/public';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 
 export function getDetails(
-  field: IndexPatternField,
+  field: DataViewField,
   hits: Array<OpenSearchSearchHit<Record<string, any>>>,
-  indexPattern?: IndexPattern
+  dataSet?: DataView
 ) {
   const defaultDetails = {
     error: '',
@@ -45,11 +45,11 @@ export function getDetails(
     total: 0,
     buckets: [],
   };
-  if (!indexPattern) {
+  if (!dataSet) {
     return {
       ...defaultDetails,
       error: i18n.translate('explore.discover.fieldChooser.noIndexPatternSelectedErrorMessage', {
-        defaultMessage: 'Index pattern not specified.',
+        defaultMessage: 'Data view not specified.',
       }),
     };
   }
@@ -58,14 +58,14 @@ export function getDetails(
     ...getFieldValueCounts({
       hits,
       field,
-      indexPattern,
+      dataSet,
       count: 5,
       grouped: false,
     }),
   };
   if (details.buckets) {
     for (const bucket of details.buckets) {
-      bucket.display = indexPattern.getFormatterForField(field).convert(bucket.value);
+      bucket.display = dataSet.getFormatterForField(field).convert(bucket.value);
     }
   }
 

@@ -9,11 +9,32 @@ import {
   createTimeBarChart,
   createGroupedTimeBarChart,
   createFacetedTimeBarChart,
+  createNumericalHistogramBarChart,
+  createSingleBarChart,
 } from './to_expression';
-import { defaultBarChartStyles, BarChartStyleControls } from './bar_vis_config';
-import { VisColumn, VisFieldType, VEGASCHEMA, AxisRole, ThresholdLineStyle } from '../types';
+import { defaultBarChartStyles, BarChartStyle } from './bar_vis_config';
+import {
+  VisColumn,
+  VisFieldType,
+  VEGASCHEMA,
+  AxisRole,
+  ThresholdMode,
+  AggregationType,
+} from '../types';
+import * as Utils from '../utils/utils';
+
+jest.mock('../utils/utils', () => {
+  const actual = jest.requireActual('../utils/utils');
+  return {
+    ...actual,
+    applyTimeRangeToEncoding: jest.fn(() => undefined),
+  };
+});
 
 describe('bar to_expression', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   // Create mock VisColumn objects
   const mockNumericalColumn: VisColumn = {
     id: 1,
@@ -150,7 +171,7 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'manual',
         barWidth: 0.5,
@@ -183,7 +204,7 @@ describe('bar to_expression', () => {
     });
 
     test('does not apply size and spacing when barSizeMode is auto', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'auto',
         barWidth: 0.5,
@@ -218,17 +239,11 @@ describe('bar to_expression', () => {
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#00FF00',
-            show: true,
-            style: ThresholdLineStyle.Full,
-            value: 15,
-            width: 2,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const mockAxisColumnMappings = {
@@ -250,7 +265,7 @@ describe('bar to_expression', () => {
       const thresholdLayer = spec.layer[1];
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
-      expect(thresholdLayer.mark.strokeWidth).toBe(2);
+      expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 
@@ -286,11 +301,20 @@ describe('bar to_expression', () => {
       expect(spec.$schema).toBe(VEGASCHEMA);
       expect(spec.data.values).toBe(mockData);
 
+      const mainLayer = spec.layer[0];
+      const encoding = mainLayer.encoding;
       // Check encoding
-      expect(spec.encoding.x.field).toBe('category');
-      expect(spec.encoding.y.field).toBe('count');
-      expect(spec.encoding.y.stack).toBe('zero');
-      expect(spec.encoding.color.field).toBe('category2');
+      expect(encoding.x.field).toBe('category');
+      expect(encoding.y.field).toBe('count');
+      expect(encoding.color.field).toBe('category2');
+
+      // select time range params
+      expect(spec.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     test('handles different title display options', () => {
@@ -389,17 +413,11 @@ describe('bar to_expression', () => {
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#00FF00',
-            show: true,
-            style: ThresholdLineStyle.Full,
-            value: 15,
-            width: 2,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const spec = createStackedBarSpec(
@@ -421,7 +439,7 @@ describe('bar to_expression', () => {
       const thresholdLayer = spec.layer[1];
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
-      expect(thresholdLayer.mark.strokeWidth).toBe(2);
+      expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
   });
@@ -454,6 +472,14 @@ describe('bar to_expression', () => {
       expect(mainLayer.encoding.x.type).toBe('temporal');
       expect(mainLayer.encoding.y.field).toBe('count');
       expect(mainLayer.encoding.y.type).toBe('quantitative');
+
+      // select time range params
+      expect(spec.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     test('handles different title display options', () => {
@@ -518,7 +544,7 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'manual',
         barWidth: 0.5,
@@ -552,17 +578,11 @@ describe('bar to_expression', () => {
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#00FF00',
-            show: true,
-            style: ThresholdLineStyle.Full,
-            value: 15,
-            width: 2,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const mockAxisColumnMappings = {
@@ -583,7 +603,7 @@ describe('bar to_expression', () => {
       const thresholdLayer = spec.layer[1];
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
-      expect(thresholdLayer.mark.strokeWidth).toBe(2);
+      expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 
@@ -597,22 +617,6 @@ describe('bar to_expression', () => {
       expect(() => {
         createTimeBarChart(mockData, [mockNumericalColumn], [], defaultBarChartStyles);
       }).toThrow('Time bar chart requires at least one numerical column and one date column');
-    });
-
-    test('falls back to default tooltip format when dateField is missing', () => {
-      const fallbackMapping = {
-        [AxisRole.X]: { ...mockDateColumn, column: undefined as any },
-        [AxisRole.Y]: mockNumericalColumn,
-      };
-      const result = createTimeBarChart(
-        mockData,
-        [mockNumericalColumn],
-        [mockDateColumn],
-        defaultBarChartStyles,
-        fallbackMapping
-      );
-      const tooltip = result.layer[0].encoding.tooltip;
-      expect(tooltip[0].format).toBe('%b %d, %Y %H:%M:%S');
     });
 
     test('uses xAxis as numericalAxis when xAxis is not temporal', () => {
@@ -644,6 +648,37 @@ describe('bar to_expression', () => {
       expect(spec.layer[0].encoding.y.field).toBe('date');
       expect(spec.layer[0].encoding.y.type).toBe('temporal');
     });
+
+    test('adds domain layer when showFullTimeRange is true (createTimeBarChart)', () => {
+      const styles: BarChartStyle = {
+        ...defaultBarChartStyles,
+        showFullTimeRange: true,
+      };
+      const axisMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      };
+      const timeRange = {
+        from: '2024-01-01T00:00:00.000Z',
+        to: '2024-01-31T00:00:00.000Z',
+      };
+
+      const spec = createTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockDateColumn],
+        styles,
+        axisMappings,
+        timeRange
+      );
+
+      expect(Utils.applyTimeRangeToEncoding).toHaveBeenCalledWith(
+        expect.any(Object), // mainLayerEncoding
+        axisMappings,
+        timeRange,
+        styles.switchAxes
+      );
+    });
   });
 
   describe('createGroupedTimeBarChart', () => {
@@ -667,12 +702,22 @@ describe('bar to_expression', () => {
       expect(spec.$schema).toBe(VEGASCHEMA);
       expect(spec.data.values).toBe(mockData);
 
+      const mainLayer = spec.layer[0];
+      const encoding = mainLayer.encoding;
       // Check encoding
-      expect(spec.encoding.x.field).toBe('date');
-      expect(spec.encoding.x.type).toBe('temporal');
-      expect(spec.encoding.y.field).toBe('count');
-      expect(spec.encoding.y.type).toBe('quantitative');
-      expect(spec.encoding.color.field).toBe('category');
+      expect(encoding.x.field).toBe('date');
+      expect(encoding.x.type).toBe('temporal');
+      expect(encoding.y.field).toBe('count');
+      expect(encoding.y.type).toBe('quantitative');
+      expect(encoding.color.field).toBe('category');
+
+      // select time range params
+      expect(spec.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     test('handles different title display options', () => {
@@ -741,7 +786,7 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'manual',
         barWidth: 0.5,
@@ -766,27 +811,22 @@ describe('bar to_expression', () => {
         mockAxisColumnMappings
       );
 
+      const mark = spec.layer[0].mark;
       // Check bar styling
-      expect(spec.mark.size).toBe(10); // 0.5 * 20
-      expect(spec.mark.binSpacing).toBe(2); // 0.2 * 10
-      expect(spec.mark.stroke).toBe('#FF0000');
-      expect(spec.mark.strokeWidth).toBe(2);
+      expect(mark.size).toBe(10); // 0.5 * 20
+      expect(mark.binSpacing).toBe(2); // 0.2 * 10
+      expect(mark.stroke).toBe('#FF0000');
+      expect(mark.strokeWidth).toBe(2);
     });
 
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#00FF00',
-            show: true,
-            style: ThresholdLineStyle.Full,
-            value: 15,
-            width: 2,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const mockAxisColumnMappings = {
@@ -810,7 +850,7 @@ describe('bar to_expression', () => {
       const thresholdLayer = spec.layer[1];
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
-      expect(thresholdLayer.mark.strokeWidth).toBe(2);
+      expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 
@@ -855,25 +895,37 @@ describe('bar to_expression', () => {
       );
     });
 
-    test('falls back to default tooltip format when dateField is missing', () => {
-      const fallbackMapping = {
-        [AxisRole.X]: { ...mockDateColumn, column: undefined as any },
+    test('adds domain layer when showFullTimeRange is true (createGroupedTimeBarChart)', () => {
+      const styles: BarChartStyle = {
+        ...defaultBarChartStyles,
+        showFullTimeRange: true,
+      };
+      const axisMappings = {
+        [AxisRole.X]: mockDateColumn,
         [AxisRole.Y]: mockNumericalColumn,
         [AxisRole.COLOR]: mockCategoricalColumn,
       };
-      const result = createGroupedTimeBarChart(
+      const timeRange = {
+        from: '2024-02-01T00:00:00.000Z',
+        to: '2024-02-29T00:00:00.000Z',
+      };
+
+      const spec = createGroupedTimeBarChart(
         mockData,
         [mockNumericalColumn],
         [mockCategoricalColumn],
         [mockDateColumn],
-        defaultBarChartStyles,
-        fallbackMapping
+        styles,
+        axisMappings,
+        timeRange
       );
-      const tooltip = result.encoding.tooltip;
-      expect(tooltip[0].field).toBeUndefined();
-      expect(tooltip[1].field).toBe('category');
-      expect(tooltip[2].field).toBe('count');
-      expect(tooltip[2].format).toBeUndefined();
+
+      expect(Utils.applyTimeRangeToEncoding).toHaveBeenCalledWith(
+        expect.any(Object), // mainLayerEncoding
+        axisMappings,
+        timeRange,
+        styles.switchAxes
+      );
     });
   });
 
@@ -901,10 +953,19 @@ describe('bar to_expression', () => {
       expect(spec.facet).toBeDefined();
       expect(spec.facet.field).toBe('category2');
 
+      const mainLayer = spec.spec.layer[0];
       // Check encoding in the spec
-      expect(spec.spec.layer[0].encoding.x.field).toBe('date');
-      expect(spec.spec.layer[0].encoding.y.field).toBe('count');
-      expect(spec.spec.layer[0].encoding.color.field).toBe('category');
+      expect(mainLayer.encoding.x.field).toBe('date');
+      expect(mainLayer.encoding.y.field).toBe('count');
+      expect(mainLayer.encoding.color.field).toBe('category');
+
+      // select time range params
+      expect(spec.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
     });
 
     test('handles different title display options', () => {
@@ -974,7 +1035,7 @@ describe('bar to_expression', () => {
     });
 
     test('applies bar styling options', () => {
-      const customStyles: Partial<BarChartStyleControls> = {
+      const customStyles: BarChartStyle = {
         ...defaultBarChartStyles,
         barSizeMode: 'manual',
         barWidth: 0.5,
@@ -1011,17 +1072,11 @@ describe('bar to_expression', () => {
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#00FF00',
-            show: true,
-            style: ThresholdLineStyle.Full,
-            value: 15,
-            width: 2,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [{ value: 15, color: '#00FF00' }],
+          thresholdStyle: ThresholdMode.Solid,
+        },
       };
 
       const mockAxisColumnMappings = {
@@ -1045,7 +1100,7 @@ describe('bar to_expression', () => {
       const thresholdLayer = spec.spec.layer[1];
       expect(thresholdLayer.mark.type).toBe('rule');
       expect(thresholdLayer.mark.color).toBe('#00FF00');
-      expect(thresholdLayer.mark.strokeWidth).toBe(2);
+      expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 
@@ -1090,23 +1145,155 @@ describe('bar to_expression', () => {
       );
     });
 
-    test('falls back to default tooltip format when dateField is missing', () => {
-      const fallbackMapping = {
-        [AxisRole.X]: { ...mockDateColumn, column: undefined as any },
+    test('adds domain layer when showFullTimeRange is true (createFacetedTimeBarChart)', () => {
+      const styles: BarChartStyle = {
+        ...defaultBarChartStyles,
+        showFullTimeRange: true,
+      };
+      const axisMappings = {
+        [AxisRole.X]: mockDateColumn,
         [AxisRole.Y]: mockNumericalColumn,
         [AxisRole.COLOR]: mockCategoricalColumn,
         [AxisRole.FACET]: mockCategoricalColumn2,
       };
-      const result = createFacetedTimeBarChart(
+      const timeRange = {
+        from: '2024-03-01T00:00:00.000Z',
+        to: '2024-03-31T00:00:00.000Z',
+      };
+
+      const spec = createFacetedTimeBarChart(
         mockData,
         [mockNumericalColumn],
         [mockCategoricalColumn, mockCategoricalColumn2],
         [mockDateColumn],
-        defaultBarChartStyles,
-        fallbackMapping
+        styles,
+        axisMappings,
+        timeRange
       );
-      const tooltip = result.spec.layer[0].encoding.tooltip;
-      expect(tooltip[1].format).toBe('%b %d, %Y %H:%M:%S');
+      expect(Utils.applyTimeRangeToEncoding).toHaveBeenCalledWith(
+        expect.any(Object), // mainLayerEncoding
+        axisMappings,
+        timeRange,
+        styles.switchAxes
+      );
+    });
+  });
+
+  describe('createNumericalHistogramBarChart', () => {
+    const mockNumericalColumn2 = {
+      id: 2,
+      name: 'sum',
+      column: 'sum',
+      schema: VisFieldType.Numerical,
+      validValuesCount: 100,
+      uniqueValuesCount: 50,
+    };
+
+    const mockAxisColumnMappings = {
+      [AxisRole.X]: mockNumericalColumn,
+      [AxisRole.Y]: mockNumericalColumn2,
+    };
+    test('creates a numerical histogram bar chart spec', () => {
+      const spec = createNumericalHistogramBarChart(
+        mockData,
+        [mockNumericalColumn, mockNumericalColumn2],
+        defaultBarChartStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.$schema).toBe(VEGASCHEMA);
+      expect(spec.data.values).toBe(mockData);
+      expect(spec.layer).toHaveLength(1);
+
+      const mainLayer = spec.layer[0];
+      expect(mainLayer.mark.type).toBe('bar');
+      expect(mainLayer.mark.tooltip).toBe(true);
+      expect(mainLayer.encoding.x.field).toBe('count');
+      expect(mainLayer.encoding.x.type).toBe('quantitative');
+      expect(mainLayer.encoding.y.field).toBe('sum');
+      expect(mainLayer.encoding.y.aggregate).toBe('sum');
+      expect(mainLayer.encoding.y.type).toBe('quantitative');
+
+      // select time range params
+      expect(spec.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
+    });
+
+    test('applies bucket options correctly', () => {
+      const stylesWithBucket = {
+        ...defaultBarChartStyles,
+        bucket: {
+          bucketSize: 50,
+          aggregationType: AggregationType.SUM,
+        },
+      };
+
+      const spec = createNumericalHistogramBarChart(
+        mockData,
+        [mockNumericalColumn, mockNumericalColumn2],
+        stylesWithBucket,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.layer[0].encoding.x.bin.step).toBe(50);
+      expect(spec.layer[0].encoding.y.aggregate).toBe('sum');
+    });
+  });
+
+  describe('createSingleBarChart', () => {
+    const mockAxisColumnMappings = {
+      [AxisRole.X]: mockNumericalColumn,
+    };
+    test('creates a numerical histogram bar chart spec', () => {
+      const spec = createSingleBarChart(
+        mockData,
+        [mockNumericalColumn],
+        defaultBarChartStyles,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.$schema).toBe(VEGASCHEMA);
+      expect(spec.data.values).toBe(mockData);
+      expect(spec.layer).toHaveLength(1);
+
+      const mainLayer = spec.layer[0];
+      expect(mainLayer.mark.type).toBe('bar');
+      expect(mainLayer.mark.tooltip).toBe(true);
+      expect(mainLayer.encoding.x.field).toBe('count');
+      expect(mainLayer.encoding.x.type).toBe('quantitative');
+      expect(spec.layer[0].encoding.y.aggregate).toBe('count');
+
+      // select time range params
+      expect(spec.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
+      );
+      expect(mainLayer.params).not.toEqual(
+        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
+      );
+    });
+
+    test('applies bucket options correctly, single bar aggregation should only be count', () => {
+      const stylesWithBucket = {
+        ...defaultBarChartStyles,
+        bucket: {
+          bucketSize: 50,
+          aggregationType: AggregationType.SUM,
+        },
+      };
+
+      const spec = createSingleBarChart(
+        mockData,
+        [mockNumericalColumn],
+        stylesWithBucket,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.layer[0].encoding.x.bin.step).toBe(50);
+      expect(spec.layer[0].encoding.y.aggregate).toBe('count');
     });
   });
 });

@@ -3,11 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AreaChartStyleControls } from './area_vis_config';
+import { AreaChartStyle } from './area_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
-import { createThresholdLayer, getStrokeDash } from '../style_panel/threshold/utils';
-import { getTooltipFormat } from '../utils/utils';
+import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
+import { applyTimeRangeToEncoding, getTooltipFormat } from '../utils/utils';
+import { DEFAULT_OPACITY } from '../constants';
+import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
+import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
 
 /**
  * Create a simple area chart with one metric and one date
@@ -21,8 +24,9 @@ export const createSimpleAreaChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<AreaChartStyleControls>,
-  axisColumnMappings?: AxisColumnMappings
+  styles: AreaChartStyle,
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
   const xAxisColumn = axisColumnMappings?.[AxisRole.X];
@@ -32,12 +36,14 @@ export const createSimpleAreaChart = (
   const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
   const layers: any[] = [];
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   const mainLayer = {
+    params: [createTimeRangeBrush({ timeAxis: 'x' })],
     mark: {
-      ...buildMarkConfig(styles, 'line'),
+      ...buildMarkConfig(styles, 'area'),
       type: 'area',
-      opacity: styles.areaOpacity || 0.6,
+      opacity: styles.areaOpacity || DEFAULT_OPACITY,
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
     },
     encoding: {
@@ -69,7 +75,7 @@ export const createSimpleAreaChart = (
           dateColumns
         ),
       },
-      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+      ...(showTooltip && {
         tooltip: [
           {
             field: dateField,
@@ -84,9 +90,27 @@ export const createSimpleAreaChart = (
   };
 
   layers.push(mainLayer);
+  layers.push({
+    layer: createCrosshairLayers(
+      {
+        x: {
+          name: dateField ?? '',
+          type: 'temporal',
+          title: dateName,
+          format: getTooltipFormat(transformedData, dateField),
+        },
+        y: {
+          name: metricField ?? '',
+          type: 'quantitative',
+          title: metricName,
+        },
+      },
+      { showTooltip, data: transformedData }
+    ),
+  });
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -97,8 +121,13 @@ export const createSimpleAreaChart = (
     layers.push(timeMarkerLayer);
   }
 
+  if (styles.showFullTimeRange) {
+    applyTimeRangeToEncoding(mainLayer.encoding, axisColumnMappings, timeRange);
+  }
+
   return {
     $schema: VEGASCHEMA,
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metricName} Over Time`
       : undefined,
@@ -108,6 +137,7 @@ export const createSimpleAreaChart = (
     legend: styles.addLegend
       ? {
           orient: styles.legendPosition?.toLowerCase() || 'right',
+          title: styles.legendTitle,
         }
       : null,
   };
@@ -127,8 +157,9 @@ export const createMultiAreaChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<AreaChartStyleControls>,
-  axisColumnMappings?: AxisColumnMappings
+  styles: AreaChartStyle,
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
   const xAxisColumn = axisColumnMappings?.[AxisRole.X];
@@ -141,12 +172,14 @@ export const createMultiAreaChart = (
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
   const categoryName = colorColumn?.name;
   const layers: any[] = [];
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   const mainLayer = {
+    params: [createTimeRangeBrush({ timeAxis: 'x' })],
     mark: {
-      ...buildMarkConfig(styles, 'line'),
+      ...buildMarkConfig(styles, 'area'),
       type: 'area',
-      opacity: styles.areaOpacity || 0.6,
+      opacity: styles.areaOpacity || DEFAULT_OPACITY,
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
     },
     encoding: {
@@ -183,13 +216,13 @@ export const createMultiAreaChart = (
         type: 'nominal',
         legend: styles.addLegend
           ? {
-              title: categoryName,
+              title: styles.legendTitle,
               orient: styles.legendPosition?.toLowerCase() || 'right',
             }
           : null,
       },
       // Optional: Add tooltip with all information if tooltip mode is not hidden
-      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+      ...(showTooltip && {
         tooltip: [
           {
             field: dateField,
@@ -205,9 +238,33 @@ export const createMultiAreaChart = (
   };
 
   layers.push(mainLayer);
+  layers.push({
+    layer: createCrosshairLayers(
+      {
+        x: {
+          name: dateField ?? '',
+          type: 'temporal',
+          title: dateName,
+          format: getTooltipFormat(transformedData, dateField),
+        },
+        y: {
+          name: metricField ?? '',
+          type: 'quantitative',
+          title: metricName,
+          stack: true,
+        },
+        color: {
+          name: categoryField ?? '',
+          type: 'nominal',
+          title: categoryName,
+        },
+      },
+      { showTooltip, data: transformedData }
+    ),
+  });
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -218,8 +275,13 @@ export const createMultiAreaChart = (
     layers.push(timeMarkerLayer);
   }
 
+  if (styles.showFullTimeRange) {
+    applyTimeRangeToEncoding(mainLayer.encoding, axisColumnMappings, timeRange);
+  }
+
   return {
     $schema: VEGASCHEMA,
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metricName} Over Time by ${categoryName}`
       : undefined,
@@ -242,8 +304,9 @@ export const createFacetedMultiAreaChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<AreaChartStyleControls>,
-  axisColumnMappings?: AxisColumnMappings
+  styles: AreaChartStyle,
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
   const xAxisMapping = axisColumnMappings?.[AxisRole.X];
@@ -258,9 +321,72 @@ export const createFacetedMultiAreaChart = (
   const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
+
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
+
+  const mainLayerEncoding = {
+    x: {
+      field: dateField,
+      type: 'temporal',
+      axis: applyAxisStyling(
+        {
+          title: dateName,
+          labelAngle: -45,
+          labelSeparation: 8,
+        },
+        styles,
+        'category',
+        numericalColumns,
+        categoricalColumns,
+        dateColumns
+      ),
+    },
+    y: {
+      field: metricField,
+      type: 'quantitative',
+      axis: applyAxisStyling(
+        { title: metricName },
+        styles,
+        'value',
+        numericalColumns,
+        categoricalColumns,
+        dateColumns
+      ),
+    },
+    color: {
+      field: category1Field,
+      type: 'nominal',
+      legend: styles.addLegend
+        ? {
+            title: styles.legendTitle,
+            orient: styles.legendPosition?.toLowerCase() || 'right',
+          }
+        : null,
+    },
+    // Optional: Add tooltip with all information if tooltip mode is not hidden
+    ...(showTooltip && {
+      tooltip: [
+        {
+          field: dateField,
+          type: 'temporal',
+          title: dateName,
+          format: getTooltipFormat(transformedData, dateField),
+        },
+        { field: category1Field, type: 'nominal', title: category1Name },
+        { field: metricField, type: 'quantitative', title: metricName },
+      ],
+    }),
+  };
+
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange && timeRange) {
+    applyTimeRangeToEncoding(mainLayerEncoding, axisColumnMappings, timeRange);
+  }
 
   return {
     $schema: VEGASCHEMA,
+    params: [...(dateField ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName ||
         `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`
@@ -274,90 +400,41 @@ export const createFacetedMultiAreaChart = (
     spec: {
       layer: [
         {
+          params: [createTimeRangeBrush({ timeAxis: 'x' })],
           mark: {
-            ...buildMarkConfig(styles, 'line'),
+            ...buildMarkConfig(styles, 'area'),
             type: 'area',
-            opacity: styles.areaOpacity || 0.6,
+            opacity: styles.areaOpacity || DEFAULT_OPACITY,
             tooltip: styles.tooltipOptions?.mode !== 'hidden',
           },
-          encoding: {
-            x: {
-              field: dateField,
-              type: 'temporal',
-              axis: applyAxisStyling(
-                {
-                  title: dateName,
-                  labelAngle: -45,
-                  labelSeparation: 8,
-                },
-                styles,
-                'category',
-                numericalColumns,
-                categoricalColumns,
-                dateColumns
-              ),
+          encoding: mainLayerEncoding,
+        },
+        {
+          layer: createCrosshairLayers(
+            {
+              x: {
+                name: dateField ?? '',
+                type: 'temporal',
+                title: dateName,
+                format: getTooltipFormat(transformedData, dateField),
+              },
+              y: {
+                name: metricField ?? '',
+                type: 'quantitative',
+                title: metricName,
+                stack: true,
+              },
+              color: {
+                name: category1Field ?? '',
+                type: 'nominal',
+                title: category1Name,
+              },
             },
-            y: {
-              field: metricField,
-              type: 'quantitative',
-              axis: applyAxisStyling(
-                { title: metricName },
-                styles,
-                'value',
-                numericalColumns,
-                categoricalColumns,
-                dateColumns
-              ),
-            },
-            color: {
-              field: category1Field,
-              type: 'nominal',
-              legend: styles.addLegend
-                ? {
-                    title: category1Name,
-                    orient: styles.legendPosition?.toLowerCase() || 'right',
-                  }
-                : null,
-            },
-            // Optional: Add tooltip with all information if tooltip mode is not hidden
-            ...(styles.tooltipOptions?.mode !== 'hidden' && {
-              tooltip: [
-                {
-                  field: dateField,
-                  type: 'temporal',
-                  title: dateName,
-                  format: getTooltipFormat(transformedData, dateField),
-                },
-                { field: category1Field, type: 'nominal', title: category1Name },
-                { field: metricField, type: 'quantitative', title: metricName },
-              ],
-            }),
-          },
+            { showTooltip, data: transformedData }
+          ),
         },
         // Add threshold layer to each facet if enabled
-        ...(styles.thresholdLines && styles.thresholdLines.length > 0
-          ? styles.thresholdLines
-              .filter((threshold) => threshold.show)
-              .map((threshold) => ({
-                mark: {
-                  type: 'rule',
-                  color: threshold.color || '#E7664C',
-                  strokeWidth: threshold.width || 1,
-                  strokeDash: getStrokeDash(threshold.style),
-                  tooltip: styles.tooltipOptions?.mode !== 'hidden',
-                },
-                encoding: {
-                  y: { value: threshold.value || 0 },
-                  ...(styles.tooltipOptions?.mode !== 'hidden' && {
-                    tooltip: {
-                      value: `${threshold.name ? threshold.name + ': ' : ''}Threshold: ${
-                        threshold.value
-                      }`,
-                    },
-                  }),
-                },
-              }))
-          : []),
+        ...(thresholdLayer?.layer ?? []),
         // Add time marker to each facet if enabled
         ...(styles?.addTimeMarker
           ? [
@@ -402,7 +479,7 @@ export const createCategoryAreaChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<AreaChartStyleControls>,
+  styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
@@ -420,12 +497,13 @@ export const createCategoryAreaChart = (
   const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
   const categoryName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
   const layers: any[] = [];
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
   const mainLayer = {
     mark: {
-      ...buildMarkConfig(styles, 'line'),
+      ...buildMarkConfig(styles, 'area'),
       type: 'area',
-      opacity: styles.areaOpacity || 0.6,
+      opacity: styles.areaOpacity || DEFAULT_OPACITY,
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
     },
     encoding: {
@@ -458,7 +536,7 @@ export const createCategoryAreaChart = (
         ),
       },
       // Optional: Add tooltip with all information if tooltip mode is not hidden
-      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+      ...(showTooltip && {
         tooltip: [
           { field: categoryField, type: 'nominal', title: categoryName },
           { field: metricField, type: 'quantitative', title: metricName },
@@ -468,9 +546,26 @@ export const createCategoryAreaChart = (
   };
 
   layers.push(mainLayer);
+  layers.push({
+    layer: createHighlightBarLayers(
+      {
+        x: {
+          name: categoryField ?? '',
+          type: 'nominal',
+          title: categoryName,
+        },
+        y: {
+          name: metricField ?? '',
+          type: 'quantitative',
+          title: metricName,
+        },
+      },
+      { showTooltip, data: transformedData }
+    ),
+  });
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -486,6 +581,7 @@ export const createCategoryAreaChart = (
     legend: styles.addLegend
       ? {
           orient: styles.legendPosition?.toLowerCase() || 'right',
+          title: styles.legendTitle,
         }
       : null,
   };
@@ -496,7 +592,7 @@ export const createStackedAreaChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<AreaChartStyleControls>,
+  styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
@@ -516,16 +612,13 @@ export const createStackedAreaChart = (
   const metricName = styles.valueAxes?.[0]?.title?.text || yAxisMapping?.name;
   const categoryName1 = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
   const categoryName2 = colorMapping?.name;
+  const layers = [];
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
-  const spec: any = {
-    $schema: VEGASCHEMA,
-    title: styles.titleOptions?.show
-      ? styles.titleOptions?.titleName || `${metricName} by ${categoryName1} and ${categoryName2}`
-      : undefined,
-    data: { values: transformedData },
+  const mainLayer = {
     mark: {
       type: 'area',
-      opacity: styles.areaOpacity || 0.6,
+      opacity: styles.areaOpacity || DEFAULT_OPACITY,
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
     },
     encoding: {
@@ -564,13 +657,13 @@ export const createStackedAreaChart = (
         type: 'nominal',
         legend: styles.addLegend
           ? {
-              title: categoryName2,
+              title: styles.legendTitle,
               orient: styles.legendPosition?.toLowerCase() || 'bottom',
             }
           : null,
       },
       // Optional: Add tooltip with all information if tooltip mode is not hidden
-      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+      ...(showTooltip && {
         tooltip: [
           { field: categoryField1, type: 'nominal', title: categoryName1 },
           { field: categoryField2, type: 'nominal', title: categoryName2 },
@@ -579,14 +672,43 @@ export const createStackedAreaChart = (
       }),
     },
   };
+  layers.push(mainLayer);
+  layers.push({
+    layer: createHighlightBarLayers(
+      {
+        x: {
+          name: categoryField1 ?? '',
+          type: 'nominal',
+          title: categoryName1,
+        },
+        y: {
+          name: metricField ?? '',
+          type: 'quantitative',
+          title: metricName,
+          stack: 'normalize',
+        },
+        color: {
+          name: categoryField2 ?? '',
+          type: 'nominal',
+          title: categoryName2,
+        },
+      },
+      { showTooltip, data: transformedData }
+    ),
+  });
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(styles.thresholdLines, styles.tooltipOptions?.mode);
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
   if (thresholdLayer) {
-    spec.layer = [{ mark: spec.mark, encoding: spec.encoding }, ...thresholdLayer.layer];
-    delete spec.mark;
-    delete spec.encoding;
+    layers.push(thresholdLayer);
   }
 
-  return spec;
+  return {
+    $schema: VEGASCHEMA,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${metricName} by ${categoryName1} and ${categoryName2}`
+      : undefined,
+    data: { values: transformedData },
+    layer: layers,
+  };
 };

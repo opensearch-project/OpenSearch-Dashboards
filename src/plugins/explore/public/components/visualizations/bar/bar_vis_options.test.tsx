@@ -81,12 +81,14 @@ jest.mock('../style_panel/axes/axes_selector', () => ({
   ),
 }));
 
-jest.mock('../style_panel/threshold/threshold', () => ({
-  ThresholdOptions: jest.fn(({ thresholdLines, onThresholdLinesChange }) => (
+jest.mock('../style_panel/threshold/threshold_panel', () => ({
+  ThresholdPanel: jest.fn(({ thresholdsOptions, onChange }) => (
     <div data-test-subj="mockThresholdOptions">
       <button
         data-test-subj="mockUpdateThreshold"
-        onClick={() => onThresholdLinesChange([...thresholdLines, { id: '2', show: true }])}
+        onClick={() =>
+          onChange({ ...thresholdsOptions, thresholds: [{ value: 50, color: '#FF0000' }] })
+        }
       >
         Update Threshold
       </button>
@@ -115,6 +117,11 @@ jest.mock('../style_panel/legend/legend', () => ({
       >
         Change Both
       </button>
+      <input
+        data-test-subj="mockLegendTitle"
+        placeholder="Legend Title"
+        onChange={(e) => onLegendOptionsChange({ title: e.target.value })}
+      />
     </div>
   )),
 }));
@@ -133,7 +140,7 @@ jest.mock('../style_panel/tooltip/tooltip', () => ({
 }));
 
 jest.mock('../style_panel/axes/standard_axes_options', () => ({
-  AllAxesOptions: jest.fn(({ standardAxes, onStandardAxesChange }) => (
+  AllAxesOptions: jest.fn(({ standardAxes, onStandardAxesChange, onShowFullTimeRangeChange }) => (
     <div data-test-subj="allAxesOptions">
       <button
         data-test-subj="changeAxis"
@@ -146,6 +153,12 @@ jest.mock('../style_panel/axes/standard_axes_options', () => ({
         onClick={() => onStandardAxesChange([...standardAxes, { id: 'new-axis' }])}
       >
         Update Value Axes
+      </button>
+      <button
+        data-test-subj="mockUpdateShowFullTimeRange"
+        onClick={() => onShowFullTimeRangeChange && onShowFullTimeRangeChange(true)}
+      >
+        Show Full Time Range
       </button>
     </div>
   )),
@@ -210,6 +223,47 @@ jest.mock('../style_panel/title/title', () => ({
   )),
 }));
 
+jest.mock('./bucket_options.tsx', () => ({
+  BucketOptionsPanel: jest.fn(({ styles, bucketType, onChange }) => (
+    <div data-test-subj="mockBucketOptionsPanel">
+      <span data-test-subj="bucketType">{bucketType}</span>
+      {bucketType === 'time' && (
+        <button
+          data-test-subj="mockUpdateTimeUnit"
+          onClick={() => onChange({ ...styles, bucketTimeUnit: 'year' })}
+        >
+          Update Time Unit
+        </button>
+      )}
+      {bucketType === 'num' && (
+        <>
+          <button
+            data-test-subj="mockUpdateBucketSize"
+            onClick={() => onChange({ ...styles, bucketSize: 100 })}
+          >
+            Update Bucket Size
+          </button>
+
+          <button
+            data-test-subj="mockUpdateBucketCount"
+            onClick={() => onChange({ ...styles, bucketCount: 20 })}
+          >
+            Update Bucket Size
+          </button>
+        </>
+      )}
+      {bucketType !== 'single' && (
+        <button
+          data-test-subj="mockUpdateAggregation"
+          onClick={() => onChange({ ...styles, aggregationType: 'sum' })}
+        >
+          Update Aggregation
+        </button>
+      )}
+    </div>
+  )),
+}));
+
 describe('BarVisStyleControls', () => {
   const defaultProps: BarVisStyleControlsProps = {
     styleOptions: {
@@ -246,6 +300,7 @@ describe('BarVisStyleControls', () => {
     expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockBarExclusiveVisOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('mockBucketOptionsPanel')).toBeInTheDocument();
   });
 
   test('renders legend panel when COLOR mapping is present', () => {
@@ -278,6 +333,14 @@ describe('BarVisStyleControls', () => {
       ...defaultProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
+        [AxisRole.COLOR]: {
+          id: 5,
+          name: 'Color Category',
+          schema: VisFieldType.Categorical,
+          column: 'color',
+          validValuesCount: 10,
+          uniqueValuesCount: 5,
+        },
         [AxisRole.FACET]: {
           id: 6,
           name: 'Facet Category',
@@ -326,6 +389,11 @@ describe('BarVisStyleControls', () => {
     await userEvent.click(screen.getByTestId('mockLegendPosition'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendPosition: 'bottom' });
 
+    await userEvent.type(screen.getByTestId('mockLegendTitle'), 'New Legend Title');
+    await waitFor(() => {
+      expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ legendTitle: 'New Legend Title' });
+    });
+
     jest.clearAllMocks();
     await userEvent.click(screen.getByTestId('mockLegendBoth'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({ addLegend: false });
@@ -341,7 +409,10 @@ describe('BarVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('mockUpdateThreshold'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      thresholdLines: [...defaultProps.styleOptions.thresholdLines, { id: '2', show: true }],
+      thresholdOptions: {
+        ...defaultProps.styleOptions.thresholdOptions,
+        thresholds: [{ color: '#FF0000', value: 50 }],
+      },
     });
   });
 
@@ -368,6 +439,19 @@ describe('BarVisStyleControls', () => {
     await userEvent.click(screen.getByTestId('changeAxis'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
       standardAxes: [...defaultProps.styleOptions.standardAxes, { id: 'new-axis' }],
+    });
+  });
+
+  test('calls onStyleChange with correct parameters for show full time range', async () => {
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...defaultProps} />
+      </Provider>
+    );
+
+    await userEvent.click(screen.getByTestId('mockUpdateShowFullTimeRange'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+      showFullTimeRange: true,
     });
   });
 
@@ -449,6 +533,88 @@ describe('BarVisStyleControls', () => {
           titleName: 'New Chart Title',
         },
       });
+    });
+  });
+
+  test('render bucket panel with num bucket type', async () => {
+    const propsWithNumBucket = {
+      ...defaultProps,
+      axisColumnMappings: {
+        ...mockAxisColumnMappings,
+        x: {
+          id: 1,
+          name: 'Numerical X',
+          schema: VisFieldType.Numerical,
+          column: 'numX',
+          validValuesCount: 100,
+          uniqueValuesCount: 50,
+        },
+      },
+    };
+
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...propsWithNumBucket} />
+      </Provider>
+    );
+
+    expect(screen.getByTestId('mockBucketOptionsPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('bucketType')).toHaveTextContent('num');
+    expect(screen.getByTestId('mockUpdateBucketSize')).toBeInTheDocument();
+    expect(screen.getByTestId('mockUpdateBucketCount')).toBeInTheDocument();
+    expect(screen.getByTestId('mockUpdateAggregation')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('mockUpdateBucketSize'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+      bucket: { bucketTimeUnit: 'auto', aggregationType: 'sum', bucketSize: 100 },
+    });
+
+    await userEvent.click(screen.getByTestId('mockUpdateBucketCount'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+      bucket: { bucketTimeUnit: 'auto', aggregationType: 'sum', bucketCount: 20 },
+    });
+
+    await userEvent.click(screen.getByTestId('mockUpdateAggregation'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+      bucket: { bucketTimeUnit: 'auto', aggregationType: 'sum' },
+    });
+  });
+
+  test('render bucket panel with time bucket type', async () => {
+    const propsWithTimeBucket = {
+      ...defaultProps,
+      axisColumnMappings: {
+        ...mockAxisColumnMappings,
+        x: {
+          id: 1,
+          name: 'Date X',
+          schema: VisFieldType.Date,
+          column: 'column',
+          validValuesCount: 100,
+          uniqueValuesCount: 50,
+        },
+      },
+    };
+
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...propsWithTimeBucket} />
+      </Provider>
+    );
+
+    expect(screen.getByTestId('bucketType')).toHaveTextContent('time');
+    expect(screen.getByTestId('mockUpdateTimeUnit')).toBeInTheDocument();
+    expect(screen.getByTestId('mockUpdateAggregation')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockUpdateBucketSize')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId('mockUpdateTimeUnit'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+      bucket: { aggregationType: 'sum', bucketTimeUnit: 'year' },
+    });
+
+    await userEvent.click(screen.getByTestId('mockUpdateAggregation'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+      bucket: { bucketTimeUnit: 'auto', aggregationType: 'sum' },
     });
   });
 });
