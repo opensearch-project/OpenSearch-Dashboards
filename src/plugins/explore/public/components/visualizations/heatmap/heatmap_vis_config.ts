@@ -75,6 +75,7 @@ export const defaultHeatmapChartStyles: HeatmapChartStyle = {
     mode: 'all',
   },
   addLegend: true,
+  legendTitle: '',
   legendPosition: Positions.BOTTOM,
 
   // exclusive

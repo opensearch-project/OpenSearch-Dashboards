@@ -40,6 +40,7 @@ export const defaultPieChartStyles: PieChartStyle = {
   addTooltip: true,
   addLegend: true,
   legendPosition: Positions.BOTTOM,
+  legendTitle: '',
   tooltipOptions: {
     mode: 'all',
   },
