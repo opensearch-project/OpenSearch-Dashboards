@@ -74,7 +74,6 @@ export async function download(options: DownloadOptions): Promise<void> {
   try {
     log.debug(`Attempting download of ${url}`, chalk.dim(sha256));
 
-    // @ts-expect-error Use eval-based dynamic import to prevent TypeScript transpilation
     const { default: AxiosHttpAdapter } = await dynamicImport('axios/lib/adapters/http.js');
 
     const response = await Axios.request({

@@ -404,7 +404,6 @@ export class RenderingService {
     if (url.startsWith('/')) {
       return true;
     }
-    // @ts-expect-error Use eval-based dynamic import to prevent TypeScript transpilation
     const { default: AxiosHttpAdapter } = await dynamicImport('axios/lib/adapters/http.js');
 
     return await Axios.get(url, {
