@@ -1,5 +1,5 @@
 OpenSearch (https://opensearch.org/)
-Copyright OpenSearch Contributors
+Copyright OpenSearch Contributors -test
 
 This product includes software, including Kibana source code,
 developed by Elasticsearch (http://www.elastic.co).
