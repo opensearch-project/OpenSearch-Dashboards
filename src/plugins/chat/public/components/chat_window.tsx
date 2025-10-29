@@ -60,6 +60,12 @@ function ChatWindowContent({
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
+  
+  const timelineRef = React.useRef<Message[]>(timeline);
+  
+  React.useEffect(() => {
+    timelineRef.current = timeline;
+  }, [timeline]);
 
   // Create the event handler using useMemo
   const eventHandler = useMemo(
@@ -69,9 +75,9 @@ function ChatWindowContent({
         chatService,
         setTimeline,
         setIsStreaming,
-        () => timeline
+        () => timelineRef.current
       ),
-    [service, chatService, timeline] // Only recreate if services change
+    [service, chatService]
   );
 
   // Register actions
