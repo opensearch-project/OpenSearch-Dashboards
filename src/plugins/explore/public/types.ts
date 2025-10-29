@@ -54,6 +54,7 @@ import {
   QueryPanelActionsRegistryService,
   QueryPanelActionsRegistryServiceSetup,
 } from './services/query_panel_actions_registry';
+import { ChatPluginStart } from '../../chat/public';
 
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
@@ -118,6 +119,7 @@ export interface ExploreStartDependencies {
   expressions: ExpressionsStart;
   dashboard: DashboardStart;
   contextProvider?: ContextProviderStart;
+  chat?: ChatPluginStart;
 }
 
 // ============================================================================
