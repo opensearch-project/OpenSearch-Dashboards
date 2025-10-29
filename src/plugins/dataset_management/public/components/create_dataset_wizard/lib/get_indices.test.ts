@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getIndices, responseToItemArray, dedupeMatchedItems } from './get_indices';
+import { getIndices, responseToItemArray } from './get_indices';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
 import { ResolveIndexResponseItemIndexAttrs, MatchedItem } from '../types';
 import { Observable } from 'rxjs';
@@ -158,12 +158,6 @@ describe('getIndices', () => {
     };
     expect(responseToItemArray(result, getIndexTags)).toMatchSnapshot();
     expect(responseToItemArray({}, getIndexTags)).toEqual([]);
-  });
-
-  it('matched items are deduped', () => {
-    const setA = [{ name: 'a' }, { name: 'b' }] as MatchedItem[];
-    const setB = [{ name: 'b' }, { name: 'c' }] as MatchedItem[];
-    expect(dedupeMatchedItems(setA, setB)).toHaveLength(3);
   });
 
   describe('errors', () => {
