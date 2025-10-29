@@ -153,32 +153,42 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
       const abortController = new AbortController();
       ongoingAbortControllersRef.current.push({ controller: abortController, query: value });
       if (enterKeyDownRef.current) {
-        globalSearchCommands
-          .filter((item) => !!item.action)
-          .forEach((command) => {
-            command.action?.({
-              content: value,
-            });
+        globalSearchCommands.forEach((command) => {
+          command.action?.({
+            content: value,
           });
+        });
         enterKeyDownRef.current = false;
         setIsPopoverOpen(false);
         setSearchValue('');
         searchBarInputRef.current?.blur();
         return;
       }
+      // Separate ACTIONS commands from other command types for special handling
+      // ACTIONS commands should always be executed and rendered at the end
       const commandsWithoutActions = globalSearchCommands.filter(
         (command) => command.type !== 'ACTIONS'
       );
+
+      // Filter commands that have an alias and match the search input prefix
+      // For example, if a command has alias "@" and user types "@something", it will be included
       const filteredCommands = commandsWithoutActions.filter((command) => {
         const alias = SearchCommandTypes[command.type].alias;
         return alias && value.startsWith(alias);
       });
+
+      // Get commands without aliases as default search commands
       const defaultSearchCommands = commandsWithoutActions.filter((command) => {
         return !SearchCommandTypes[command.type].alias;
       });
+
+      // If no alias-based commands matched, use default search commands instead
       if (filteredCommands.length === 0) {
         filteredCommands.push(...defaultSearchCommands);
       }
+
+      // Always append ACTIONS commands at the end to ensure they are executed and rendered last
+      // This ensures action commands are available regardless of whether user used an alias or not
       filteredCommands.push(
         ...globalSearchCommands.filter((command) => command.type === 'ACTIONS')
       );
