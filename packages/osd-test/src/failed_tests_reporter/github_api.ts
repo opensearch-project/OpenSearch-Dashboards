@@ -227,7 +227,14 @@ export class GithubApi {
     }
 
     try {
-      return await this.x.request<T>(options);
+      const response = await this.x.request<T>(options);
+      // Convert axios response to match expected type
+      return {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers as Record<string, string | string[] | undefined>,
+        data: response.data,
+      };
     } catch (error) {
       const unableToReachGithub = isAxiosRequestError(error);
       const githubApiFailed = isAxiosResponseError(error) && error.response.status >= 500;

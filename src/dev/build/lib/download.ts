@@ -38,7 +38,7 @@ import { ToolingLog } from '@osd/dev-utils';
 
 // https://github.com/axios/axios/tree/ffea03453f77a8176c51554d5f6c3c6829294649/lib/adapters
 // @ts-expect-error untyped internal module used to prevent axios from using xhr adapter in tests
-import AxiosHttpAdapter from 'axios/lib/adapters/http';
+import AxiosHttpAdapter from 'axios/lib/adapters/http.js';
 
 import { mkdirp } from './fs';
 

@@ -37,7 +37,7 @@ import { themeVersionValueMap, themeTagDetailMap, ThemeTag } from '@osd/ui-share
 
 import Axios from 'axios';
 // @ts-expect-error untyped internal module used to prevent axios from using xhr adapter in tests
-import AxiosHttpAdapter from 'axios/lib/adapters/http';
+import AxiosHttpAdapter from 'axios/lib/adapters/http.js';
 import { UiPlugins } from '../plugins';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
