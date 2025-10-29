@@ -36,8 +36,6 @@ import { Agent as HttpsAgent } from 'https';
 import { themeVersionValueMap, themeTagDetailMap, ThemeTag } from '@osd/ui-shared-deps';
 
 import Axios from 'axios';
-// @ts-expect-error untyped internal module used to prevent axios from using xhr adapter in tests
-import AxiosHttpAdapter from 'axios/lib/adapters/http';
 import { UiPlugins } from '../plugins';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
@@ -406,7 +404,6 @@ export class RenderingService {
     }
     return await Axios.get(url, {
       httpsAgent: this.httpsAgent,
-      adapter: AxiosHttpAdapter,
       maxRedirects: 0,
     })
       .then(() => {
