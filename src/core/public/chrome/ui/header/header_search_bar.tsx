@@ -86,27 +86,36 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
   const [results, setResults] = useState([] as React.JSX.Element[]);
   const [isLoading, setIsLoading] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
+  const enterKeyDownRef = useRef(false);
+  const searchBarInputRef = useRef<HTMLInputElement | null>(null);
+  const ongoingAbortControllersRef = useRef<Array<{ controller: AbortController; query: string }>>(
+    []
+  );
 
   const closePopover = () => {
     setIsPopoverOpen(false);
     setResults([]);
+    setSearchValue('');
   };
 
-  const resultSection = (items: ReactNode[], sectionHeader: string) => {
+  const resultSection = (items: ReactNode[], sectionHeader: string | undefined) => {
     return (
-      <EuiFlexGroup direction="column" gutterSize="xs">
-        <EuiFlexItem>
-          <EuiTitle size="s">
-            <EuiText size="xs" color="subdued">
-              {sectionHeader}
-            </EuiText>
-          </EuiTitle>
-        </EuiFlexItem>
+      <EuiFlexGroup direction="column" gutterSize="xs" key={sectionHeader}>
+        {sectionHeader && (
+          <EuiFlexItem>
+            <EuiTitle size="s">
+              <EuiText size="xs" color="subdued">
+                {sectionHeader}
+              </EuiText>
+            </EuiTitle>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           {items.length ? (
             <EuiListGroup flush={true} gutterSize="none" maxWidth={false}>
               {items.map((item, index) => (
-                <EuiListGroupItem key={index} label={item} color="text" />
+                <EuiListGroupItem key={index} label={item} color="text" style={{ padding: 0 }} />
               ))}
             </EuiListGroup>
           ) : (
@@ -121,51 +130,74 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
     );
   };
 
-  const searchResultSections =
-    results && results.length ? (
-      <EuiFlexGroup direction="column" gutterSize="none">
-        {results.map((result) => (
-          <EuiFlexItem key={result.key}>{result}</EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    ) : (
-      <EuiText color="subdued" size="xs">
-        {i18n.translate('core.globalSearch.emptyResult.description', {
-          defaultMessage: 'No results found.',
-        })}
-      </EuiText>
-    );
+  const searchResultSections = (
+    <>
+      {results && results.length ? (
+        <EuiFlexGroup direction="column" gutterSize="none">
+          {results.map((result) => (
+            <EuiFlexItem key={result.key}>{result}</EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      ) : (
+        <EuiText color="subdued" size="xs">
+          {i18n.translate('core.globalSearch.emptyResult.description', {
+            defaultMessage: 'No results found.',
+          })}
+        </EuiText>
+      )}
+    </>
+  );
 
   const onSearch = useCallback(
     async (value: string) => {
-      const filteredCommands = globalSearchCommands.filter((command) => {
+      const abortController = new AbortController();
+      ongoingAbortControllersRef.current.push({ controller: abortController, query: value });
+      if (enterKeyDownRef.current) {
+        globalSearchCommands
+          .filter((item) => !!item.action)
+          .forEach((command) => {
+            command.action?.({
+              content: value,
+            });
+          });
+        enterKeyDownRef.current = false;
+        setIsPopoverOpen(false);
+        setSearchValue('');
+        searchBarInputRef.current?.blur();
+        return;
+      }
+      const commandsWithoutActions = globalSearchCommands.filter(
+        (command) => command.type !== 'ACTIONS'
+      );
+      const filteredCommands = commandsWithoutActions.filter((command) => {
         const alias = SearchCommandTypes[command.type].alias;
         return alias && value.startsWith(alias);
       });
-
-      const defaultSearchCommands = globalSearchCommands.filter((command) => {
+      const defaultSearchCommands = commandsWithoutActions.filter((command) => {
         return !SearchCommandTypes[command.type].alias;
       });
-
       if (filteredCommands.length === 0) {
         filteredCommands.push(...defaultSearchCommands);
       }
+      filteredCommands.push(
+        ...globalSearchCommands.filter((command) => command.type === 'ACTIONS')
+      );
 
       if (value && filteredCommands && filteredCommands.length) {
         setIsPopoverOpen(true);
         setIsLoading(true);
-
         const settleResults = await Promise.allSettled(
           filteredCommands.map((command) => {
             const callback = onSearchResultClick || closePopover;
             const alias = SearchCommandTypes[command.type].alias;
             const queryValue = alias ? value.replace(alias, '').trim() : value;
-            return command.run(queryValue, callback).then((items) => {
-              return { items, type: command.type };
-            });
+            return command
+              .run(queryValue, callback, { abortSignal: abortController.signal })
+              .then((items) => {
+                return { items, type: command.type };
+              });
           })
         );
-
         const searchResults = settleResults
           .filter((result) => result.status === 'fulfilled')
           .map(
@@ -181,14 +213,23 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
               [type]: (acc[type] || []).concat(items),
             };
           }, {} as Record<SearchCommandKeyTypes, ReactNode[]>);
-
         const sections = Object.entries(searchResults).map(([key, items]) => {
           const sectionHeader = SearchCommandTypes[key as SearchCommandKeyTypes].description;
-          return resultSection(items, sectionHeader);
+          return resultSection(items, key !== 'ACTIONS' ? sectionHeader : undefined);
         });
-
+        if (abortController.signal.aborted) {
+          return;
+        }
         setIsLoading(false);
         setResults(sections);
+        // Abort previous search requests
+        do {
+          const currentItem = ongoingAbortControllersRef.current.shift();
+          if (currentItem?.controller === abortController) {
+            break;
+          }
+          currentItem?.controller?.abort('Previous search results filled');
+        } while (ongoingAbortControllersRef.current.length > 0);
       } else {
         setResults([]);
       }
@@ -202,15 +243,31 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
       incremental
       onSearch={onSearch}
       fullWidth
-      placeholder={i18n.translate('core.globalSearch.input.placeholder', {
-        defaultMessage: 'Search the menu',
-      })}
+      placeholder={
+        globalSearchCommands.find((item) => item.inputPlaceholder)?.inputPlaceholder ??
+        i18n.translate('core.globalSearch.input.placeholder', {
+          defaultMessage: 'Search menu or assets',
+        })
+      }
       isLoading={isLoading}
       aria-label="Search the menus"
       data-test-subj="global-search-input"
       className="searchInput"
       onFocus={() => {
         setIsPopoverOpen(true);
+      }}
+      inputRef={(input) => {
+        searchBarInputRef.current = input;
+      }}
+      style={{ paddingRight: 32 }}
+      value={searchValue}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          enterKeyDownRef.current = true;
+        }
+      }}
+      onChange={(e) => {
+        setSearchValue(e.currentTarget.value);
       }}
     />
   );
@@ -231,28 +288,28 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
 
   if (panel) {
     return searchBarPanel;
-  } else {
-    return (
-      <>
-        {!isPopoverOpen && searchBar}
-        {isPopoverOpen && (
-          <EuiPopover
-            panelStyle={{ minWidth: '400px', minHeight: '100px' }}
-            button={<></>}
-            zIndex={2000}
-            panelPaddingSize="s"
-            attachToAnchor={true}
-            ownFocus={true}
-            display="block"
-            isOpen={isPopoverOpen}
-            closePopover={() => {
-              closePopover();
-            }}
-          >
-            {searchBarPanel}
-          </EuiPopover>
-        )}
-      </>
-    );
   }
+
+  return (
+    <>
+      {!isPopoverOpen && searchBar}
+      {isPopoverOpen && (
+        <EuiPopover
+          panelStyle={{ minWidth: '400px', minHeight: '100px' }}
+          button={<></>}
+          zIndex={2000}
+          panelPaddingSize="s"
+          attachToAnchor={true}
+          ownFocus={true}
+          display="block"
+          isOpen={isPopoverOpen}
+          closePopover={() => {
+            closePopover();
+          }}
+        >
+          {searchBarPanel}
+        </EuiPopover>
+      )}
+    </>
+  );
 };
