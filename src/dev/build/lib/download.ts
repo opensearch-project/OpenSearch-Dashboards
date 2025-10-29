@@ -37,8 +37,7 @@ import Axios from 'axios';
 import { ToolingLog } from '@osd/dev-utils';
 
 // https://github.com/axios/axios/tree/ffea03453f77a8176c51554d5f6c3c6829294649/lib/adapters
-// @ts-expect-error untyped internal module used to prevent axios from using xhr adapter in tests
-import AxiosHttpAdapter from 'axios/lib/adapters/http.js';
+// Dynamic import for axios HTTP adapter to handle ES module compatibility
 
 import { mkdirp } from './fs';
 
@@ -73,6 +72,9 @@ export async function download(options: DownloadOptions): Promise<void> {
   let error;
   try {
     log.debug(`Attempting download of ${url}`, chalk.dim(sha256));
+
+    // @ts-expect-error Dynamic import for ES module compatibility
+    const { default: AxiosHttpAdapter } = await import('axios/lib/adapters/http.js');
 
     const response = await Axios.request({
       url,
