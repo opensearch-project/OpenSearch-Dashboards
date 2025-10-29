@@ -36,10 +36,11 @@ import { createHash } from 'crypto';
 import Axios from 'axios';
 import { ToolingLog } from '@osd/dev-utils';
 
-// https://github.com/axios/axios/tree/ffea03453f77a8176c51554d5f6c3c6829294649/lib/adapters
-// Dynamic import for axios HTTP adapter to handle ES module compatibility
-
 import { mkdirp } from './fs';
+
+// https://github.com/axios/axios/tree/ffea03453f77a8176c51554d5f6c3c6829294649/lib/adapters
+// Use eval to prevent TypeScript from transpiling dynamic import to require
+const dynamicImport = new Function('specifier', 'return import(specifier)');
 
 function tryUnlink(path: string) {
   try {
@@ -73,8 +74,8 @@ export async function download(options: DownloadOptions): Promise<void> {
   try {
     log.debug(`Attempting download of ${url}`, chalk.dim(sha256));
 
-    // @ts-expect-error Dynamic import for ES module compatibility
-    const { default: AxiosHttpAdapter } = await import('axios/lib/adapters/http.js');
+    // @ts-expect-error Use eval-based dynamic import to prevent TypeScript transpilation
+    const { default: AxiosHttpAdapter } = await dynamicImport('axios/lib/adapters/http.js');
 
     const response = await Axios.request({
       url,

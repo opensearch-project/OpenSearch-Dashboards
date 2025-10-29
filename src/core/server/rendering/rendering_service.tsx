@@ -36,7 +36,6 @@ import { Agent as HttpsAgent } from 'https';
 import { themeVersionValueMap, themeTagDetailMap, ThemeTag } from '@osd/ui-shared-deps';
 
 import Axios from 'axios';
-// Dynamic import for axios HTTP adapter to handle ES module compatibility
 import { UiPlugins } from '../plugins';
 import { CoreContext } from '../core_context';
 import { Template } from './views';
@@ -54,6 +53,8 @@ import { SslConfig } from '../http/ssl_config';
 import { LoggerFactory } from '../logging';
 import { IUiSettingsClient, PublicUiSettingsParams, UserProvidedValues } from '../ui_settings';
 
+// Use eval to prevent TypeScript from transpiling dynamic import to require
+const dynamicImport = new Function('specifier', 'return import(specifier)');
 const DEFAULT_TITLE = 'OpenSearch Dashboards';
 
 /** @internal */
@@ -403,8 +404,8 @@ export class RenderingService {
     if (url.startsWith('/')) {
       return true;
     }
-    // @ts-expect-error Dynamic import for ES module compatibility
-    const { default: AxiosHttpAdapter } = await import('axios/lib/adapters/http.js');
+    // @ts-expect-error Use eval-based dynamic import to prevent TypeScript transpilation
+    const { default: AxiosHttpAdapter } = await dynamicImport('axios/lib/adapters/http.js');
 
     return await Axios.get(url, {
       httpsAgent: this.httpsAgent,
