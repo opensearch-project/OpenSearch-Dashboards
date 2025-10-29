@@ -111,7 +111,6 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         ),
       ],
       action: async ({ content }: { content: string }) => {
-        // chatService.abort();
         await chatHeaderButtonRef.current?.startNewConversation({ content });
       },
     });
