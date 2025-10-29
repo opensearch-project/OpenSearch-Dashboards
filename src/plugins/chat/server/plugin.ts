@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -13,6 +15,7 @@ import {
 
 import { ChatPluginSetup, ChatPluginStart } from './types';
 import { defineRoutes } from './routes';
+import { ChatConfigType } from './config';
 
 /**
  * @experimental
@@ -20,17 +23,20 @@ import { defineRoutes } from './routes';
  */
 export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private readonly logger: Logger;
+  private readonly config$: Observable<ChatConfigType>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.config$ = initializerContext.config.create<ChatConfigType>();
   }
 
-  public setup(core: CoreSetup) {
+  public async setup(core: CoreSetup) {
     this.logger.debug('chat: Setup');
+    const config = await this.config$.pipe(first()).toPromise();
     const router = core.http.createRouter();
 
-    // Register server side APIs
-    defineRoutes(router);
+    // Register server side APIs with config
+    defineRoutes(router, this.logger, config.agUiUrl);
 
     return {};
   }

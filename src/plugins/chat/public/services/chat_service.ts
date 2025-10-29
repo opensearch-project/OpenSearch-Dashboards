@@ -22,8 +22,9 @@ export class ChatService {
   private activeRequests: Set<string> = new Set();
   private requestCounter: number = 0;
 
-  constructor(serverUrl?: string) {
-    this.agent = new AgUiAgent(serverUrl);
+  constructor() {
+    // No need to pass URL anymore - agent will use the proxy endpoint
+    this.agent = new AgUiAgent();
     this.threadId = this.generateThreadId();
   }
 
