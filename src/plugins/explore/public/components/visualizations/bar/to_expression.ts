@@ -312,7 +312,7 @@ export const createGroupedTimeBarChart = (
       },
       color: {
         field: categoryField,
-        type: getSchemaByAxis(colorColumn),
+        type: 'nominal',
         legend: styles.addLegend
           ? {
               title: styles.legendTitle,
@@ -437,7 +437,7 @@ export const createFacetedTimeBarChart = (
     },
     color: {
       field: category1Field,
-      type: getSchemaByAxis(colorMapping),
+      type: 'nominal',
       legend: styles.addLegend
         ? {
             title: styles.legendTitle,
@@ -507,13 +507,6 @@ export const createStackedBarSpec = (
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length === 0 || categoricalColumns.length < 2) {
-    throw new Error(
-      'Stacked bar chart requires at least one numerical column and two categorical columns'
-    );
-  }
-
   const styles = { ...defaultBarChartStyles, ...styleOptions };
 
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
