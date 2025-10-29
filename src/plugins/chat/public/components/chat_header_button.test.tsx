@@ -5,33 +5,25 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+
 import { ChatHeaderButton, ChatHeaderButtonInstance } from './chat_header_button';
 import { ChatService } from '../services/chat_service';
 import { coreMock } from '../../../../core/public/mocks';
 
 // Mock dependencies
-jest.mock('./chat_window', () => ({
-  ChatWindow: React.forwardRef((props: any, ref: any) => {
-    React.useImperativeHandle(ref, () => ({
-      startNewChat: jest.fn(),
-      sendMessage: jest.fn().mockResolvedValue(undefined),
-    }));
-    return <div data-test-subj="mock-chat-window">Mock Chat Window</div>;
-  }),
-}));
 
-jest.mock('../contexts/chat_context', () => ({
-  ChatProvider: ({ children }: any) => <div>{children}</div>,
-}));
-
-jest.mock('../../../context_provider/public', () => ({
-  GlobalAssistantProvider: ({ children }: any) => <div>{children}</div>,
-  TextSelectionMonitor: () => <div data-test-subj="text-selection-monitor" />,
-}));
-
-jest.mock('../../../opensearch_dashboards_react/public', () => ({
-  OpenSearchDashboardsContextProvider: ({ children }: any) => <div>{children}</div>,
-}));
+jest.mock('./chat_window', () => {
+  const ActualReact = jest.requireActual('react');
+  return {
+    ChatWindow: ActualReact.forwardRef((props: any, ref: any) => {
+      ActualReact.useImperativeHandle(ref, () => ({
+        startNewChat: jest.fn(),
+        sendMessage: jest.fn().mockResolvedValue(undefined),
+      }));
+      return null;
+    }),
+  };
+});
 
 describe('ChatHeaderButton', () => {
   let mockCore: ReturnType<typeof coreMock.createStart>;
