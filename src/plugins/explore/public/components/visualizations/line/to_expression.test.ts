@@ -43,6 +43,7 @@ jest.mock('../style_panel/threshold/threshold_utils', () => ({
 
 // Mock the utils module
 jest.mock('../utils/utils', () => ({
+  sanitizeFieldName: jest.fn((v: any) => v),
   applyTimeRangeToEncoding: jest.fn().mockReturnValue(undefined),
   getTooltipFormat: jest.fn().mockReturnValue('%b %d, %Y %H:%M:%S'),
 }));

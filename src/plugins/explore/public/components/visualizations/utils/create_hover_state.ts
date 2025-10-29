@@ -4,6 +4,7 @@
  */
 
 import { getColors } from '../theme/default_colors';
+import { sanitizeFieldName } from './utils';
 
 interface Field {
   name: string;
@@ -64,12 +65,7 @@ function createPointLayer(xField: Field, yFields: Field[], colorField?: Field) {
   }
 
   const marks = [
-    {
-      type: 'point',
-      shape: 'circle',
-      size: 60,
-      filled: true,
-    },
+    { type: 'point', shape: 'circle', size: 60, filled: true },
     {
       type: 'point',
       shape: 'circle',
@@ -97,10 +93,7 @@ function createPointLayer(xField: Field, yFields: Field[], colorField?: Field) {
       x: { field: xField.name, type: xField.type },
       y,
       color,
-      opacity: {
-        condition: { param: 'hover', value: 1, empty: false },
-        value: 0,
-      },
+      opacity: { condition: { param: 'hover', value: 1, empty: false }, value: 0 },
     },
   }));
 
@@ -127,12 +120,15 @@ function createHiddenBarLayer(axisConfig: AxisConfig, options: Options & { barOp
   if (options.showTooltip) {
     if (axisConfig.color && !Array.isArray(axisConfig.y)) {
       const uniqueColorFieldValues = new Set(
-        (options.data ?? []).map((d) => d[axisConfig.color?.name ?? ''])
+        (options.data ?? []).flatMap((d) => {
+          const value = d[axisConfig.color?.name ?? ''];
+          return Array.isArray(value) ? value : [value];
+        })
       );
       tooltip = createTooltip([
         axisConfig.x,
         ...[...uniqueColorFieldValues].map((v) => ({
-          name: v,
+          name: sanitizeFieldName(v),
           type: (axisConfig.y as Field).type,
         })),
       ]);
@@ -160,16 +156,10 @@ function createHiddenBarLayer(axisConfig: AxisConfig, options: Options & { barOp
       },
     ],
     transform: hiddenBarLayerTransform,
-    mark: {
-      type: 'bar',
-      color: colors.text,
-    },
+    mark: { type: 'bar', color: colors.text },
     encoding: {
       x: { field: axisConfig.x.name, type: axisConfig.x.type },
-      opacity: {
-        condition: { param: 'hover', value: barOpacity, empty: false },
-        value: 0,
-      },
+      opacity: { condition: { param: 'hover', value: barOpacity, empty: false }, value: 0 },
       tooltip,
     },
   };
@@ -194,10 +184,7 @@ export function createCrosshairLayers(axisConfig: AxisConfig, options: Options) 
     mark: { type: 'rule', color: colors.text, strokeDash: [3, 3] },
     encoding: {
       x: { field: axisConfig.x.name, type: axisConfig.x.type },
-      opacity: {
-        condition: { param: 'hover', value: 1, empty: false },
-        value: 0,
-      },
+      opacity: { condition: { param: 'hover', value: 1, empty: false }, value: 0 },
     },
   };
   ruleLayers.push(xRuleLayer);
@@ -206,11 +193,12 @@ export function createCrosshairLayers(axisConfig: AxisConfig, options: Options) 
     const yRuleLayer = {
       mark: { type: 'rule', color: colors.text, strokeDash: [3, 3] },
       encoding: {
-        y: { field: yFields[0].name, type: yFields[0].type, axis: { title: '' } },
-        opacity: {
-          condition: { param: 'hover', value: 1, empty: false },
-          value: 0,
+        y: {
+          field: yFields[0].name,
+          type: yFields[0].type,
+          axis: { title: '' },
         },
+        opacity: { condition: { param: 'hover', value: 1, empty: false }, value: 0 },
       },
     };
     ruleLayers.push(yRuleLayer);

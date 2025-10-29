@@ -408,3 +408,12 @@ export function applyTimeRangeToEncoding(
     };
   }
 }
+
+export const sanitizeFieldName = (fieldName: string | any): string => {
+  const fieldStr = String(fieldName);
+  return fieldStr
+    .replace(/'/g, "\\'")
+    .replace(/\./g, '\\.')
+    .replace(/\[/g, '\\[')
+    .replace(/\]/g, '\\]');
+};
