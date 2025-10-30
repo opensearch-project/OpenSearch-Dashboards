@@ -7,7 +7,7 @@ import { MetricChartStyle } from './metric_vis_config';
 import { VisColumn, VEGASCHEMA, AxisRole, AxisColumnMappings, Threshold } from '../types';
 import { getTooltipFormat } from '../utils/utils';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
-import { getColors } from '../theme/default_colors';
+import { getColors, resolveColor } from '../theme/default_colors';
 import { DEFAULT_OPACITY } from '../constants';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 import {
@@ -82,7 +82,7 @@ export const createSingleMetric = (
       calculatedValue
     );
 
-    const fillColor = useThresholdColor ? textColor : colorPalette.text;
+    const fillColor = useThresholdColor ? resolveColor(textColor) : colorPalette.text;
 
     return fillColor;
   }

@@ -61,14 +61,14 @@ export const getColors = () => {
   }
 
   return {
-    statusBlue: '#004A9E',
-    statusGreen: '#00BD6B',
-    statusYellow: '#F90',
-    statusOrange: '#FF6A3D',
-    statusRed: '#DB0000',
+    statusBlue: euiThemeVars.euiColorPrimary,
+    statusGreen: euiThemeVars.ouiColorSuccess,
+    statusYellow: euiThemeVars.ouiColorWarning,
+    statusOrange: euiThemeVars.ouiColorVis15,
+    statusRed: euiThemeVars.euiColorDanger,
     text: euiThemeVars.euiTextColor,
     grid: euiThemeVars.euiColorChartLines,
-    backgroundShade: darkMode ? '#27252C' : '#f1f1f1ff',
+    backgroundShade: euiThemeVars.ouiColorLightestShade,
     categories: euiPaletteColorBlind(),
   };
 };

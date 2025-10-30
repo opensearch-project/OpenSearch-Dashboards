@@ -7,7 +7,7 @@ import type { Encoding } from 'vega-lite/build/src/encoding';
 import { AggregationType, VisColumn } from '../types';
 import { HeatmapChartStyle } from './heatmap_vis_config';
 
-import { getColors, DEFAULT_GREY } from '../theme/default_colors';
+import { getColors, DEFAULT_GREY, resolveColor } from '../theme/default_colors';
 
 // isRegular=== true refers to 2 dimension and 1 metric heatmap.
 export const createLabelLayer = (
@@ -108,7 +108,7 @@ export const enhanceStyle = (
     ];
 
     const colorDomain = thresholdWithBase.map<number>((val) => val.value);
-    const colorRange = thresholdWithBase.map<string>((val) => val.color);
+    const colorRange = thresholdWithBase.map<string>((val) => resolveColor(val.color));
 
     // overwrite color scale type to quantize to map continuous domains to discrete output ranges
     markLayer.encoding.color.scale.type = 'threshold';

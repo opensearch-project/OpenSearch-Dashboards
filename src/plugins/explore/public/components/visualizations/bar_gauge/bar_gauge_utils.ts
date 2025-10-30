@@ -5,6 +5,7 @@
 
 import { AxisColumnMappings, Threshold, VisFieldType } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
+import { resolveColor } from '../theme/default_colors';
 
 export const getBarOrientation = (
   styles: BarGaugeChartStyle,
@@ -117,14 +118,14 @@ export const generateParams = (
     if (i === 0) {
       result.push({
         name: `gradient${i}`,
-        value: thresholds[0]?.color,
+        value: resolveColor(thresholds[0]?.color),
       });
       continue;
     }
 
     const allStops = thresholds.slice(0, i + 1).map((t) => ({
       offset: normalizeData(t.value, start, end),
-      color: t.color,
+      color: resolveColor(t.color),
     }));
 
     const stops = [];

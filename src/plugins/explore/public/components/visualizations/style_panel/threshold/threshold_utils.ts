@@ -4,6 +4,7 @@
  */
 
 import { getColors, DEFAULT_GREY } from '../../theme/default_colors';
+import { resolveColor } from '../../theme/color_utils';
 import {
   Threshold,
   ThresholdLine,
@@ -258,7 +259,7 @@ export const createThresholdLayer = (
   const layers = activeThresholds.map((threshold) => {
     const markType = 'rule';
     const markConfig: any = {
-      color: threshold.color,
+      color: resolveColor(threshold.color),
       strokeWidth: 1,
     };
 

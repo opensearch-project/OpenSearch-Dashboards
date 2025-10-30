@@ -12,12 +12,12 @@ import {
   EuiButtonIcon,
   EuiButton,
   EuiSpacer,
-  EuiColorPicker,
 } from '@elastic/eui';
 import { Threshold } from '../../types';
 import { useDebouncedValue } from '../../utils/use_debounced_value';
 import { getColors } from '../../theme/default_colors';
 import { DebouncedFieldNumber } from '../utils';
+import { ColorGroupButton } from '../color_group_panel/color_group_button';
 
 export interface RangeProps {
   id: number;
@@ -53,13 +53,8 @@ export const Range: React.FC<RangeProps> = ({ id, value, onChange, onDelete }) =
       gutterSize="s"
       data-test-subj={`exploreVisThreshold-${id}`}
     >
-      <EuiFlexItem>
-        <EuiColorPicker
-          swatches={THRESHOLD_COLORS}
-          color={color}
-          onChange={setDebouncedColor}
-          compressed
-        />
+      <EuiFlexItem grow={false}>
+        <ColorGroupButton buttonColor={color} onChange={setDebouncedColor} />
       </EuiFlexItem>
 
       <EuiFlexItem grow={true}>
@@ -187,13 +182,8 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
         gutterSize="s"
         data-test-subj="exploreVisThresholdBaseColor"
       >
-        <EuiFlexItem>
-          <EuiColorPicker
-            swatches={THRESHOLD_COLORS}
-            color={localBaseColor}
-            onChange={setLocalBaseColor}
-            compressed
-          />
+        <EuiFlexItem grow={false}>
+          <ColorGroupButton buttonColor={localBaseColor} onChange={setLocalBaseColor} />
         </EuiFlexItem>
 
         <EuiFlexItem grow={true}>

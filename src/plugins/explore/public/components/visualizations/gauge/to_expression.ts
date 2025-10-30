@@ -13,7 +13,7 @@ import {
   mergeThresholdsWithBase,
   getMaxAndMinBase,
 } from '../style_panel/threshold/threshold_utils';
-import { getColors, DEFAULT_GREY } from '../theme/default_colors';
+import { getColors, DEFAULT_GREY, resolveColor } from '../theme/default_colors';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 
 export const createGauge = (
@@ -76,7 +76,7 @@ export const createGauge = (
   const fillColor =
     !targetThreshold || minBase > targetValue || minBase >= maxBase || !isValidNumber
       ? DEFAULT_GREY
-      : targetThreshold.color;
+      : resolveColor(targetThreshold.color);
 
   const ranges = generateRanges(mergedThresholds, maxBase);
 
@@ -112,7 +112,9 @@ export const createGauge = (
     { name: 'theta2_single_arc', value: 2 },
   ];
 
-  const rangeArcs = ranges.map((range) => generateArcExpression(range.min, range.max, range.color));
+  const rangeArcs = ranges.map((range) =>
+    generateArcExpression(range.min, range.max, resolveColor(range.color))
+  );
 
   const titleLayer = styleOptions.showTitle
     ? [
