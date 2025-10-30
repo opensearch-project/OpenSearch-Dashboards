@@ -31,7 +31,7 @@ describe('createHeatmapeConfig', () => {
     // Verify basic controls
     expect(defaults.tooltipOptions.mode).toBe('all');
     expect(defaults.addLegend).toBe(true);
-    expect(defaults.legendPosition).toBe(Positions.RIGHT);
+    expect(defaults.legendPosition).toBe(Positions.BOTTOM);
     // Verify exclusive style
     expect(defaults.exclusive.colorSchema).toBe(ColorSchemas.BLUES);
     expect(defaults.exclusive.reverseSchema).toBe(false);

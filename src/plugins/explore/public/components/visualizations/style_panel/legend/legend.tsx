@@ -21,12 +21,14 @@ export interface LegendOptionsProps {
   legendOptions: LegendOptions;
   onLegendOptionsChange: (legendOptions: Partial<LegendOptions>) => void;
   hasSizeLegend?: boolean;
+  initialIsOpen?: boolean;
 }
 
 export const LegendOptionsPanel = ({
   legendOptions,
   onLegendOptionsChange,
   hasSizeLegend = false,
+  initialIsOpen = false,
 }: LegendOptionsProps) => {
   if (!legendOptions || !onLegendOptionsChange) {
     return null;
@@ -65,7 +67,7 @@ export const LegendOptionsPanel = ({
       accordionLabel={i18n.translate('explore.stylePanel.tabs.legend', {
         defaultMessage: 'Legend',
       })}
-      initialIsOpen={true}
+      initialIsOpen={initialIsOpen}
     >
       <EuiSwitch
         compressed

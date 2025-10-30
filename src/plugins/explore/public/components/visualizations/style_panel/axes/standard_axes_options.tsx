@@ -28,6 +28,7 @@ interface AllAxesOptionsProps {
   switchAxes?: boolean;
   showFullTimeRange: boolean;
   onShowFullTimeRangeChange: (showFullTimeRange: boolean) => void;
+  initialIsOpen?: boolean;
 }
 
 export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
@@ -38,6 +39,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
   switchAxes = false,
   showFullTimeRange,
   onShowFullTimeRangeChange,
+  initialIsOpen = false,
 }) => {
   const updateAxis = (index: number, updates: Partial<StandardAxes>) => {
     const updatedAxes = [...standardAxes];
@@ -103,7 +105,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
       accordionLabel={i18n.translate('explore.stylePanel.tabs.allAxes', {
         defaultMessage: 'Axes',
       })}
-      initialIsOpen={true}
+      initialIsOpen={initialIsOpen}
       data-test-subj="standardAxesPanel"
     >
       {standardAxes.map((axis, index) => {

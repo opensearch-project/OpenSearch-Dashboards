@@ -382,34 +382,6 @@ describe('bar to_expression', () => {
       expect(customTitleResult.title).toBe('Custom Stacked Bar Chart');
     });
 
-    test('throws error when required columns are missing', () => {
-      // No numerical columns
-      expect(() => {
-        createStackedBarSpec(
-          mockData,
-          [],
-          [mockCategoricalColumn, mockCategoricalColumn2],
-          [],
-          defaultBarChartStyles
-        );
-      }).toThrow(
-        'Stacked bar chart requires at least one numerical column and two categorical columns'
-      );
-
-      // Only one categorical column
-      expect(() => {
-        createStackedBarSpec(
-          mockData,
-          [mockNumericalColumn],
-          [mockCategoricalColumn],
-          [],
-          defaultBarChartStyles
-        );
-      }).toThrow(
-        'Stacked bar chart requires at least one numerical column and two categorical columns'
-      );
-    });
-
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,

@@ -51,7 +51,7 @@ export const createSimpleLineChart = (
         type: 'temporal',
         axis: applyAxisStyling(
           {
-            title: dateName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
@@ -65,14 +65,7 @@ export const createSimpleLineChart = (
       y: {
         field: metricField,
         type: 'quantitative',
-        axis: applyAxisStyling(
-          { title: metricName },
-          styles,
-          'value',
-          numericalColumns,
-          [],
-          dateColumns
-        ),
+        axis: applyAxisStyling({ title: '' }, styles, 'value', numericalColumns, [], dateColumns),
       },
       ...(showTooltip && {
         tooltip: [
@@ -174,7 +167,7 @@ export const createLineBarChart = (
         type: 'temporal',
         axis: applyAxisStyling(
           {
-            title: dateName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
@@ -189,7 +182,7 @@ export const createLineBarChart = (
         field: metric1Field,
         type: 'quantitative',
         axis: applyAxisStyling(
-          { title: metric1Name },
+          { title: '' },
           styles,
           'value',
           numericalColumns,
@@ -237,7 +230,7 @@ export const createLineBarChart = (
         type: 'quantitative',
         axis: applyAxisStyling(
           {
-            title: metric2Name,
+            title: '',
             orient: Positions.RIGHT,
           },
           styles,
@@ -368,7 +361,7 @@ export const createMultiLineChart = (
         type: 'temporal',
         axis: applyAxisStyling(
           {
-            title: dateName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
@@ -383,7 +376,7 @@ export const createMultiLineChart = (
         field: metricField,
         type: 'quantitative',
         axis: applyAxisStyling(
-          { title: metricName },
+          { title: '' },
           styles,
           'value',
           numericalColumns,
@@ -514,7 +507,7 @@ export const createFacetedMultiLineChart = (
       type: 'temporal',
       axis: applyAxisStyling(
         {
-          title: dateName,
+          title: '',
           labelAngle: -45,
           labelSeparation: 8,
         },
@@ -529,7 +522,7 @@ export const createFacetedMultiLineChart = (
       field: metricField,
       type: 'quantitative',
       axis: applyAxisStyling(
-        { title: metricName },
+        { title: '' },
         styles,
         'value',
         numericalColumns,
@@ -682,7 +675,7 @@ export const createCategoryLineChart = (
         type: 'nominal',
         axis: applyAxisStyling(
           {
-            title: categoryName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
@@ -697,7 +690,7 @@ export const createCategoryLineChart = (
         field: metricField,
         type: 'quantitative',
         axis: applyAxisStyling(
-          { title: metricName },
+          { title: '' },
           styles,
           'value',
           numericalColumns,
@@ -744,6 +737,119 @@ export const createCategoryLineChart = (
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${metricName} by ${categoryName}`
+      : undefined,
+    data: { values: transformedData },
+    layer: layers,
+  };
+};
+
+export const createCategoryMultiLineChart = (
+  transformedData: Array<Record<string, any>>,
+  numericalColumns: VisColumn[],
+  categoricalColumns: VisColumn[],
+  dateColumns: VisColumn[],
+  styles: LineChartStyle,
+  axisColumnMappings?: AxisColumnMappings
+): any => {
+  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
+  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+  const colorAxisColumn = axisColumnMappings?.[AxisRole.COLOR];
+
+  const metricField = yAxisColumn?.column;
+  const categoryField = xAxisColumn?.column;
+  const categoryField2 = colorAxisColumn?.column;
+  const metricName = yAxisColumn?.name;
+  const categoryName = xAxisColumn?.name;
+  const category2Name = colorAxisColumn?.name;
+  const layers: any[] = [];
+  const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
+
+  const mainLayer = {
+    mark: buildMarkConfig(styles, 'line'),
+    encoding: {
+      x: {
+        field: categoryField,
+        type: 'nominal',
+        axis: applyAxisStyling(
+          {
+            title: categoryName,
+            labelAngle: -45,
+            labelSeparation: 8,
+          },
+          styles,
+          'category',
+          numericalColumns,
+          categoricalColumns,
+          dateColumns
+        ),
+      },
+      y: {
+        field: metricField,
+        type: 'quantitative',
+        axis: applyAxisStyling(
+          { title: metricName },
+          styles,
+          'value',
+          numericalColumns,
+          categoricalColumns,
+          dateColumns
+        ),
+      },
+      color: {
+        field: categoryField2,
+        type: 'nominal',
+        legend: styles.addLegend
+          ? {
+              title: styles.legendTitle,
+              orient: styles.legendPosition?.toLowerCase() || Positions.RIGHT,
+            }
+          : null,
+      },
+      ...(showTooltip && {
+        tooltip: [
+          { field: categoryField, type: 'nominal', title: categoryName },
+          { field: metricField, type: 'quantitative', title: metricName },
+          { field: categoryField2, type: 'nominal', title: category2Name },
+        ],
+      }),
+    },
+  };
+
+  layers.push(mainLayer);
+
+  layers.push(
+    ...createCrosshairLayers(
+      {
+        x: {
+          name: categoryField ?? '',
+          type: 'nominal',
+          title: categoryName ?? '',
+        },
+        y: {
+          name: metricField ?? '',
+          type: 'quantitative',
+          title: metricName ?? '',
+        },
+        color: {
+          name: categoryField2 ?? '',
+          type: 'nominal',
+          title: category2Name ?? '',
+        },
+      },
+      { showTooltip, data: transformedData }
+    )
+  );
+
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
+  if (thresholdLayer) {
+    layers.push(thresholdLayer);
+  }
+
+  return {
+    $schema: VEGASCHEMA,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${metricName} by ${categoryName} and ${category2Name}`
       : undefined,
     data: { values: transformedData },
     layer: layers,

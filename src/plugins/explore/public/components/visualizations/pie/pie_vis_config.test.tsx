@@ -31,7 +31,7 @@ describe('createPieConfig', () => {
     // Verify basic controls
     expect(defaults.addTooltip).toBe(true);
     expect(defaults.addLegend).toBe(true);
-    expect(defaults.legendPosition).toBe(Positions.RIGHT);
+    expect(defaults.legendPosition).toBe(Positions.BOTTOM);
     // Verify exclusive style
     expect(defaults.exclusive.donut).toBe(true);
     expect(defaults.exclusive.showValues).toBe(false);

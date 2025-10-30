@@ -45,7 +45,7 @@ export const inferTimeIntervals = (data: Array<Record<string, any>>, field: stri
   return TimeUnit.YEAR;
 };
 
-export const transformIntervelsToTickCount = (interval: TimeUnit | undefined) => {
+export const transformIntervalsToTickCount = (interval: TimeUnit | undefined) => {
   switch (interval) {
     case TimeUnit.YEAR:
       return 'year';
@@ -89,15 +89,16 @@ export const buildEncoding = (
   interval: TimeUnit | undefined,
   aggregationType: AggregationType | undefined
 ) => {
+  const defaultAxisTitle = '';
   const encoding: any = {
     field: axis?.column,
     type: getSchemaByAxis(axis),
-    axis: applyAxisStyling(axis, axisStyle),
+    axis: applyAxisStyling({ axis, axisStyle, defaultAxisTitle }),
   };
 
   if (axis?.schema === VisFieldType.Date && interval) {
     encoding.timeUnit = interval;
-    encoding.axis.tickCount = transformIntervelsToTickCount(interval);
+    encoding.axis.tickCount = transformIntervalsToTickCount(interval);
   }
 
   if (axis?.schema === VisFieldType.Numerical && aggregationType) {
