@@ -101,9 +101,15 @@ it('builds a generated plugin into a viable archive', async () => {
      info running @osd/optimizer
      │ info initialized, 0 bundles cached
      │ info starting worker [1 bundle]
+     │ warn worker stderr Browserslist: caniuse-lite is outdated. Please run:
+     │ warn worker stderr   npx update-browserslist-db@latest
+     │ warn worker stderr   Why you should do it regularly: https://github.com/browserslist/update-db#readme
      │ succ 1 bundles compiled successfully after <time>
      info copying assets from \`public/assets\` to build
      info copying server source into the build and converting with babel
+    Browserslist: caniuse-lite is outdated. Please run:
+      npx update-browserslist-db@latest
+      Why you should do it regularly: https://github.com/browserslist/update-db#readme
      info running yarn to install dependencies
      info compressing plugin into [fooTestPlugin-1.0.0.zip]
      info cleaning up compression temporary artifacts"
@@ -189,9 +195,15 @@ it('builds a non-semver generated plugin into a viable archive', async () => {
      info running @osd/optimizer
      │ info initialized, 0 bundles cached
      │ info starting worker [1 bundle]
+     │ warn worker stderr Browserslist: caniuse-lite is outdated. Please run:
+     │ warn worker stderr   npx update-browserslist-db@latest
+     │ warn worker stderr   Why you should do it regularly: https://github.com/browserslist/update-db#readme
      │ succ 1 bundles compiled successfully after <time>
      info copying assets from \`public/assets\` to build
      info copying server source into the build and converting with babel
+    Browserslist: caniuse-lite is outdated. Please run:
+      npx update-browserslist-db@latest
+      Why you should do it regularly: https://github.com/browserslist/update-db#readme
      info running yarn to install dependencies
      info compressing plugin into [fooTestPlugin-1.0.0.x.zip]
      info cleaning up compression temporary artifacts"
