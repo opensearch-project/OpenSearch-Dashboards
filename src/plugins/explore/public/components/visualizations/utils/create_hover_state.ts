@@ -122,7 +122,8 @@ function createHiddenBarLayer(axisConfig: AxisConfig, options: Options & { barOp
       const uniqueColorFieldValues = new Set(
         (options.data ?? []).flatMap((d) => {
           const value = d[axisConfig.color?.name ?? ''];
-          return Array.isArray(value) ? value : [value];
+          if (value == null) return [];
+          return Array.isArray(value) ? value.filter((v) => v != null) : [value];
         })
       );
       tooltip = createTooltip([
