@@ -51,7 +51,7 @@ export const createSimpleLineChart = (
         type: 'temporal',
         axis: applyAxisStyling(
           {
-            title: dateName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
@@ -65,14 +65,7 @@ export const createSimpleLineChart = (
       y: {
         field: metricField,
         type: 'quantitative',
-        axis: applyAxisStyling(
-          { title: metricName },
-          styles,
-          'value',
-          numericalColumns,
-          [],
-          dateColumns
-        ),
+        axis: applyAxisStyling({ title: '' }, styles, 'value', numericalColumns, [], dateColumns),
       },
       ...(showTooltip && {
         tooltip: [
@@ -174,7 +167,7 @@ export const createLineBarChart = (
         type: 'temporal',
         axis: applyAxisStyling(
           {
-            title: dateName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
@@ -189,7 +182,7 @@ export const createLineBarChart = (
         field: metric1Field,
         type: 'quantitative',
         axis: applyAxisStyling(
-          { title: metric1Name },
+          { title: '' },
           styles,
           'value',
           numericalColumns,
@@ -237,7 +230,7 @@ export const createLineBarChart = (
         type: 'quantitative',
         axis: applyAxisStyling(
           {
-            title: metric2Name,
+            title: '',
             orient: Positions.RIGHT,
           },
           styles,
@@ -368,7 +361,7 @@ export const createMultiLineChart = (
         type: 'temporal',
         axis: applyAxisStyling(
           {
-            title: dateName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
@@ -383,7 +376,7 @@ export const createMultiLineChart = (
         field: metricField,
         type: 'quantitative',
         axis: applyAxisStyling(
-          { title: metricName },
+          { title: '' },
           styles,
           'value',
           numericalColumns,
@@ -514,7 +507,7 @@ export const createFacetedMultiLineChart = (
       type: 'temporal',
       axis: applyAxisStyling(
         {
-          title: dateName,
+          title: '',
           labelAngle: -45,
           labelSeparation: 8,
         },
@@ -529,7 +522,7 @@ export const createFacetedMultiLineChart = (
       field: metricField,
       type: 'quantitative',
       axis: applyAxisStyling(
-        { title: metricName },
+        { title: '' },
         styles,
         'value',
         numericalColumns,
@@ -682,7 +675,7 @@ export const createCategoryLineChart = (
         type: 'nominal',
         axis: applyAxisStyling(
           {
-            title: categoryName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
@@ -697,7 +690,7 @@ export const createCategoryLineChart = (
         field: metricField,
         type: 'quantitative',
         axis: applyAxisStyling(
-          { title: metricName },
+          { title: '' },
           styles,
           'value',
           numericalColumns,

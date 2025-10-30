@@ -12,11 +12,13 @@ import { StyleAccordion } from '../style_accordion';
 export interface TooltipOptionsProps {
   tooltipOptions: TooltipOptions;
   onTooltipOptionsChange: (tooltipOptions: Partial<TooltipOptions>) => void;
+  initialIsOpen?: boolean;
 }
 
 export const TooltipOptionsPanel = ({
   tooltipOptions,
   onTooltipOptionsChange,
+  initialIsOpen = false,
 }: TooltipOptionsProps) => {
   if (!tooltipOptions || !onTooltipOptionsChange) {
     return null;
@@ -28,7 +30,7 @@ export const TooltipOptionsPanel = ({
       accordionLabel={i18n.translate('explore.stylePanel.tabs.tooltip', {
         defaultMessage: 'Tooltip',
       })}
-      initialIsOpen={true}
+      initialIsOpen={initialIsOpen}
     >
       <EuiSwitch
         compressed

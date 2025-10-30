@@ -39,7 +39,8 @@ export const defaultPieChartStyles: PieChartStyle = {
   // Basic controls
   addTooltip: true,
   addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legendPosition: Positions.BOTTOM,
+  legendTitle: '',
   tooltipOptions: {
     mode: 'all',
   },

@@ -61,6 +61,22 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
 
       {hasMappingSelected && (
         <>
+          <EuiFlexItem grow={false}>
+            <LineExclusiveVisOptions
+              shouldShowTimeMarker={shouldShowTimeMarker}
+              addTimeMarker={styleOptions.addTimeMarker}
+              lineStyle={styleOptions.lineStyle}
+              lineMode={styleOptions.lineMode}
+              lineWidth={styleOptions.lineWidth}
+              onAddTimeMarkerChange={(addTimeMarker) =>
+                updateStyleOption('addTimeMarker', addTimeMarker)
+              }
+              onLineModeChange={(lineMode) => updateStyleOption('lineMode', lineMode)}
+              onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
+              onLineStyleChange={(lineStyle) => updateStyleOption('lineStyle', lineStyle)}
+            />
+          </EuiFlexItem>
+
           <EuiFlexItem>
             <ThresholdPanel
               thresholdsOptions={styleOptions.thresholdOptions}
@@ -84,22 +100,6 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
               onShowFullTimeRangeChange={(showFullTimeRange) =>
                 updateStyleOption('showFullTimeRange', showFullTimeRange)
               }
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <LineExclusiveVisOptions
-              shouldShowTimeMarker={shouldShowTimeMarker}
-              addTimeMarker={styleOptions.addTimeMarker}
-              lineStyle={styleOptions.lineStyle}
-              lineMode={styleOptions.lineMode}
-              lineWidth={styleOptions.lineWidth}
-              onAddTimeMarkerChange={(addTimeMarker) =>
-                updateStyleOption('addTimeMarker', addTimeMarker)
-              }
-              onLineModeChange={(lineMode) => updateStyleOption('lineMode', lineMode)}
-              onLineWidthChange={(lineWidth) => updateStyleOption('lineWidth', lineWidth)}
-              onLineStyleChange={(lineStyle) => updateStyleOption('lineStyle', lineStyle)}
             />
           </EuiFlexItem>
 
