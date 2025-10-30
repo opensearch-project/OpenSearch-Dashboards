@@ -68,7 +68,13 @@ describe('opensearchdsl', () => {
       } catch (error) {
         errorMessage = error.message;
       }
-      expect(errorMessage).toEqual('Unexpected token i in JSON at position 0');
+      // Different Node.js versions produce different JSON error message formats
+      // Handle both formats to ensure tests pass in different environments
+      const expectedMessages = [
+        'Unexpected token i in JSON at position 0', // Node.js 18+
+        `Unexpected token 'i', "invalid json" is not valid JSON`, // Older Node.js versions
+      ];
+      expect(expectedMessages).toContain(errorMessage);
     });
 
     test('adds filters', async () => {
