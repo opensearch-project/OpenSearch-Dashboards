@@ -29,7 +29,7 @@
  */
 
 import { load } from 'cheerio';
-import { i18n, i18nLoader } from '@osd/i18n';
+import { i18nLoader } from '@osd/i18n';
 
 jest.mock('@osd/i18n', () => {
   const originalModule = jest.requireActual('@osd/i18n');
