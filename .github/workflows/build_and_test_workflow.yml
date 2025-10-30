@@ -299,7 +299,20 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: yarn osd bootstrap || yarn osd bootstrap
 
+      - name: Restore plugin build cache
+        id: plugin-build-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/
+            src/plugins/*/target/
+            packages/*/target/
+          key: plugins-build-${{ matrix.os }}-${{ hashFiles('**/yarn.lock') }}-${{ github.sha }}
+          restore-keys: |
+            plugins-build-${{ matrix.os }}-${{ hashFiles('**/yarn.lock') }}-
+
       - name: Build plugins
+        if: steps.plugin-build-cache.outputs.cache-hit != 'true'
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
 
       - name: Run CI test group ${{ matrix.group }}
@@ -415,7 +428,21 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: yarn osd bootstrap || yarn osd bootstrap
 
+      - name: Restore plugin build cache
+        id: plugin-build-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/
+            src/plugins/*/target/
+            packages/*/target/
+            test/plugin_functional/plugins/*/target/
+          key: plugins-build-${{ matrix.os }}-${{ hashFiles('**/yarn.lock') }}-${{ github.sha }}-plugin-functional
+          restore-keys: |
+            plugins-build-${{ matrix.os }}-${{ hashFiles('**/yarn.lock') }}-
+
       - name: Build plugins
+        if: steps.plugin-build-cache.outputs.cache-hit != 'true'
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10 --scan-dir "./test/plugin_functional/plugins"
 
       - name: Run functional plugin tests
