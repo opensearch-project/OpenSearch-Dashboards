@@ -29,7 +29,7 @@
  */
 
 import { load } from 'cheerio';
-import { i18nLoader } from '@osd/i18n';
+import { i18n, i18nLoader } from '@osd/i18n';
 
 jest.mock('@osd/i18n', () => {
   const originalModule = jest.requireActual('@osd/i18n');
@@ -43,8 +43,12 @@ jest.mock('@osd/i18n', () => {
   };
 });
 
+jest.mock('axios');
+
 const i18nLoaderMock = jest.mocked(i18nLoader, true);
 
+import axios from 'axios';
+const mockedAxios = axios as jest.Mocked<typeof axios>;
 import { httpServerMock } from '../http/http_server.mocks';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { mockRenderingSetupDeps } from './__mocks__/params';
@@ -633,6 +637,15 @@ describe('RenderingService', () => {
   });
 
   describe('isUrlValid()', () => {
+    beforeEach(() => {
+      mockedAxios.get.mockImplementation((url) => {
+        if (typeof url === 'string' && url.includes('notfound')) {
+          return Promise.reject(new Error('Not found'));
+        }
+        return Promise.resolve({ status: 200 });
+      });
+    });
+
     it('checks valid SVG URL', async () => {
       const result = await service.isUrlValid(
         'https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.svg',

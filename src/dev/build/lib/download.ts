@@ -39,8 +39,6 @@ import { ToolingLog } from '@osd/dev-utils';
 import { mkdirp } from './fs';
 
 // https://github.com/axios/axios/tree/ffea03453f77a8176c51554d5f6c3c6829294649/lib/adapters
-// Use eval to prevent TypeScript from transpiling dynamic import to require
-const dynamicImport = new Function('specifier', 'return import(specifier)');
 
 function tryUnlink(path: string) {
   try {
@@ -74,12 +72,9 @@ export async function download(options: DownloadOptions): Promise<void> {
   try {
     log.debug(`Attempting download of ${url}`, chalk.dim(sha256));
 
-    const { default: AxiosHttpAdapter } = await dynamicImport('axios/lib/adapters/http.js');
-
     const response = await Axios.request({
       url,
       responseType: 'stream',
-      adapter: AxiosHttpAdapter,
     });
 
     if (response.status !== 200) {

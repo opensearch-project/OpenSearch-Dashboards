@@ -53,8 +53,6 @@ import { SslConfig } from '../http/ssl_config';
 import { LoggerFactory } from '../logging';
 import { IUiSettingsClient, PublicUiSettingsParams, UserProvidedValues } from '../ui_settings';
 
-// Use eval to prevent TypeScript from transpiling dynamic import to require
-const dynamicImport = new Function('specifier', 'return import(specifier)');
 const DEFAULT_TITLE = 'OpenSearch Dashboards';
 
 /** @internal */
@@ -404,11 +402,9 @@ export class RenderingService {
     if (url.startsWith('/')) {
       return true;
     }
-    const { default: AxiosHttpAdapter } = await dynamicImport('axios/lib/adapters/http.js');
 
     return await Axios.get(url, {
       httpsAgent: this.httpsAgent,
-      adapter: AxiosHttpAdapter,
       maxRedirects: 0,
     })
       .then(() => {
