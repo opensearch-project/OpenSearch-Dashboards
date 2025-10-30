@@ -5,7 +5,7 @@
 
 /* eslint-disable no-console */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
 import { CoreStart } from '../../../../core/public';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatEventHandler } from '../services/chat_event_handler';
@@ -33,6 +33,11 @@ import { ChatInput } from './chat_input';
 import { ContextTreeView } from './context_tree_view';
 import { useGraphTimeseriesDataAction } from '../actions/graph_timeseries_data_action';
 
+export interface ChatWindowInstance{
+  startNewChat: ()=>void;
+  sendMessage: (options:{content: string})=>Promise<unknown>;
+}
+
 interface ChatWindowProps {
   layoutMode?: ChatLayoutMode;
   onToggleLayout?: () => void;
@@ -41,14 +46,14 @@ interface ChatWindowProps {
 /**
  * ChatWindow with AssistantAction support
  */
-export const ChatWindow: React.FC<ChatWindowProps> = (props) => {
-  return <ChatWindowContent {...props} />;
-};
+export const ChatWindow = React.forwardRef<ChatWindowInstance, ChatWindowProps>((props, ref) => {
+  return <ChatWindowContent ref={ref} {...props} />;
+});
 
-function ChatWindowContent({
+const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(({
   layoutMode = ChatLayoutMode.SIDECAR,
   onToggleLayout,
-}: ChatWindowProps) {
+}, ref) => {
   const service = AssistantActionService.getInstance();
   const [availableTools, setAvailableTools] = useState<ToolDefinition[]>([]);
   const { chatService } = useChatContext();
@@ -60,6 +65,7 @@ function ChatWindowContent({
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
+  const handleSendRef = useRef<typeof handleSend>();
 
   // Create the event handler using useMemo
   const eventHandler = useMemo(
@@ -100,10 +106,10 @@ function ChatWindowContent({
     };
   }, [eventHandler]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isStreaming) return;
+  const handleSend = async (options?: {input?: string}) => {
+    const messageContent = options?.input ?? input.trim();
+    if (!messageContent || isStreaming) return;
 
-    const messageContent = input.trim();
     setInput('');
     setIsStreaming(true);
 
@@ -158,6 +164,8 @@ function ChatWindowContent({
       setIsStreaming(false);
     }
   };
+
+  handleSendRef.current = handleSend;
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -239,12 +247,12 @@ function ChatWindowContent({
     }
   };
 
-  const handleNewChat = () => {
+  const handleNewChat = useCallback(() => {
     chatService.newThread();
     setTimeline([]);
     setCurrentRunId(null);
     setIsStreaming(false);
-  };
+  }, [chatService]);
 
   // No cleanup needed - RFC hooks handle their own lifecycle
 
@@ -254,6 +262,11 @@ function ChatWindowContent({
     toolCallStates: currentState.toolCallStates,
     getActionRenderer: service.getActionRenderer,
   };
+
+  useImperativeHandle(ref, ()=>({
+    startNewChat: ()=>handleNewChat(),
+    sendMessage: async ({content})=>(await handleSendRef.current?.({input:content}))
+  }), [handleNewChat]);
 
   return (
     <ChatContainer layoutMode={layoutMode}>
@@ -282,4 +295,4 @@ function ChatWindowContent({
       />
     </ChatContainer>
   );
-}
+});

@@ -16,7 +16,7 @@ describe('area_vis_config', () => {
     test('should have the expected default values', () => {
       expect(defaultAreaChartStyles).toMatchObject({
         addLegend: true,
-        legendPosition: Positions.RIGHT,
+        legendPosition: Positions.BOTTOM,
         addTimeMarker: false,
         tooltipOptions: {
           mode: 'all',
@@ -103,7 +103,18 @@ describe('area_vis_config', () => {
             {
               [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
               [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+              [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
+            },
+            {
+              [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+              [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
               [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+              [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
+            },
+            {
+              [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+              [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+              [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
               [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
             },
             {
@@ -114,6 +125,11 @@ describe('area_vis_config', () => {
               [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
               [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
               [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
+            },
+            {
+              [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+              [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+              [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
             },
           ],
         },

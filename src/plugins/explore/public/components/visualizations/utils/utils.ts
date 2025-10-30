@@ -18,11 +18,17 @@ import {
 } from '../types';
 import { ChartStyles, StyleOptions } from './use_visualization_types';
 
-export const applyAxisStyling = (
-  axis?: VisColumn,
-  axisStyle?: StandardAxes,
-  disableGrid?: boolean
-): AxisConfig => {
+export const applyAxisStyling = ({
+  axis,
+  axisStyle,
+  disableGrid,
+  defaultAxisTitle = '',
+}: {
+  axis?: VisColumn;
+  axisStyle?: StandardAxes;
+  disableGrid?: boolean;
+  defaultAxisTitle?: string;
+}): AxisConfig => {
   const gridEnabled = disableGrid ? false : axisStyle?.grid.showLines ?? true;
 
   const fullAxisConfig: AxisConfig = {
@@ -30,7 +36,7 @@ export const applyAxisStyling = (
     grid: gridEnabled,
     labelSeparation: 8,
     orient: axisStyle?.position,
-    title: axisStyle?.title.text || axis?.name,
+    title: axisStyle?.title.text || defaultAxisTitle,
   };
 
   // Apply axis visibility

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { MinMaxControls } from './min_max_control';
 import { StyleAccordion } from '../style_accordion';
@@ -18,6 +18,7 @@ export interface StandardOptionsPanelProps {
   onMaxChange: (max: number | undefined) => void;
   unit?: string;
   onUnitChange: (unit: string | undefined) => void;
+  initialIsOpen?: boolean;
 }
 
 export const StandardOptionsPanel = ({
@@ -27,6 +28,7 @@ export const StandardOptionsPanel = ({
   onMinChange,
   unit,
   onUnitChange,
+  initialIsOpen = false,
 }: StandardOptionsPanelProps) => {
   return (
     // TODO add unit panel to standardOptions panel
@@ -35,7 +37,7 @@ export const StandardOptionsPanel = ({
       accordionLabel={i18n.translate('explore.stylePanel.threshold', {
         defaultMessage: 'Standard options',
       })}
-      initialIsOpen={false}
+      initialIsOpen={initialIsOpen}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>

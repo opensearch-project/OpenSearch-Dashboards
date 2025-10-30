@@ -52,7 +52,7 @@ export const createSimpleAreaChart = (
         type: 'temporal',
         axis: applyAxisStyling(
           {
-            title: dateName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
@@ -66,14 +66,7 @@ export const createSimpleAreaChart = (
       y: {
         field: metricField,
         type: 'quantitative',
-        axis: applyAxisStyling(
-          { title: metricName },
-          styles,
-          'value',
-          numericalColumns,
-          [],
-          dateColumns
-        ),
+        axis: applyAxisStyling({ title: '' }, styles, 'value', numericalColumns, [], dateColumns),
       },
       ...(showTooltip && {
         tooltip: [
@@ -188,7 +181,7 @@ export const createMultiAreaChart = (
         type: 'temporal',
         axis: applyAxisStyling(
           {
-            title: dateName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
@@ -203,7 +196,7 @@ export const createMultiAreaChart = (
         field: metricField,
         type: 'quantitative',
         axis: applyAxisStyling(
-          { title: metricName },
+          { title: '' },
           styles,
           'value',
           numericalColumns,
@@ -331,7 +324,7 @@ export const createFacetedMultiAreaChart = (
       type: 'temporal',
       axis: applyAxisStyling(
         {
-          title: dateName,
+          title: '',
           labelAngle: -45,
           labelSeparation: 8,
         },
@@ -346,7 +339,7 @@ export const createFacetedMultiAreaChart = (
       field: metricField,
       type: 'quantitative',
       axis: applyAxisStyling(
-        { title: metricName },
+        { title: '' },
         styles,
         'value',
         numericalColumns,
@@ -512,7 +505,7 @@ export const createCategoryAreaChart = (
         type: 'nominal',
         axis: applyAxisStyling(
           {
-            title: categoryName,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
@@ -527,7 +520,7 @@ export const createCategoryAreaChart = (
         field: metricField,
         type: 'quantitative',
         axis: applyAxisStyling(
-          { title: metricName },
+          { title: '' },
           styles,
           'value',
           numericalColumns,
@@ -595,13 +588,6 @@ export const createStackedAreaChart = (
   styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length === 0 || categoricalColumns.length < 2) {
-    throw new Error(
-      'Stacked area chart requires at least one numerical column and two categorical columns'
-    );
-  }
-
   const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
   const xAxisMapping = axisColumnMappings?.[AxisRole.X];
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
@@ -627,7 +613,7 @@ export const createStackedAreaChart = (
         type: 'nominal',
         axis: applyAxisStyling(
           {
-            title: categoryName1,
+            title: '',
             labelAngle: -45,
             labelSeparation: 8,
           },
@@ -642,7 +628,7 @@ export const createStackedAreaChart = (
         field: metricField,
         type: 'quantitative',
         axis: applyAxisStyling(
-          { title: metricName },
+          { title: '' },
           styles,
           'value',
           numericalColumns,

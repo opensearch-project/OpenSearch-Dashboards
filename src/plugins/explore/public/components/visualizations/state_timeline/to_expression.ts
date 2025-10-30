@@ -124,13 +124,19 @@ export const createNumericalStateTimeline = (
         field: yAxis?.column,
         type: 'nominal',
         scale: { padding: rowHeight },
-        axis: { ...applyAxisStyling(yAxis, yAxisStyle, true), tickOpacity: 0 },
+        axis: {
+          ...applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle, disableGrid: true }),
+          tickOpacity: 0,
+        },
       },
       x: {
         field: xAxis?.column,
         type: 'temporal',
         timeUnit: 'yearmonthdatehoursminutesseconds',
-        axis: { ...applyAxisStyling(xAxis, xAxisStyle, true), tickOpacity: 0 },
+        axis: {
+          ...applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle, disableGrid: true }),
+          tickOpacity: 0,
+        },
       },
       x2: { field: 'end', type: 'temporal' },
       color: {
@@ -296,14 +302,20 @@ export const createCategoricalStateTimeline = (
         field: yAxis?.column,
         type: 'nominal',
         scale: { padding: rowHeight },
-        axis: { ...applyAxisStyling(yAxis, yAxisStyle, true), tickOpacity: 0 },
+        axis: {
+          ...applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle, disableGrid: true }),
+          tickOpacity: 0,
+        },
       },
       x: {
         field: xAxis?.column,
         type: 'temporal',
         // use the minimum timeunit to avoid rect overlapping
         timeUnit: 'yearmonthdatehoursminutesseconds',
-        axis: { ...applyAxisStyling(xAxis, xAxisStyle, true), tickOpacity: 0 },
+        axis: {
+          ...applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle, disableGrid: true }),
+          tickOpacity: 0,
+        },
       },
       x2: { field: 'end', type: 'temporal' },
       color: {
@@ -479,7 +491,7 @@ export const createSingleCategoricalStateTimeline = (
         field: 'fakeYAxis',
         scale: { padding: rowHeight },
         axis: {
-          ...applyAxisStyling(colorMapping, yAxisStyle, true),
+          ...applyAxisStyling({ axis: colorMapping, axisStyle: yAxisStyle, disableGrid: true }),
           labels: false,
           tickOpacity: 0,
         },
@@ -489,7 +501,14 @@ export const createSingleCategoricalStateTimeline = (
         type: 'temporal',
         // use the minimum timeunit to avoid rect overlapping
         timeUnit: 'yearmonthdatehoursminutesseconds',
-        axis: { ...applyAxisStyling(xAxis, xAxisStyle, true), tickOpacity: 0 },
+        axis: {
+          ...applyAxisStyling({
+            axis: xAxis,
+            axisStyle: xAxisStyle,
+            disableGrid: true,
+          }),
+          tickOpacity: 0,
+        },
       },
       x2: { field: 'end', type: 'temporal' },
       color: {

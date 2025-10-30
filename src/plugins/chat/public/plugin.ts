@@ -3,11 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import React from 'react';
+import { EuiText } from '@elastic/eui';
+
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { ChatPluginSetup, ChatPluginStart, AppPluginStartDependencies } from './types';
 import { ChatService } from './services/chat_service';
-import { ChatHeaderButton } from './components/chat_header_button';
+import { ChatHeaderButton, ChatHeaderButtonInstance } from './components/chat_header_button';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 
 /**
@@ -35,6 +38,8 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       };
     }
 
+    const chatHeaderButtonRef = React.createRef<ChatHeaderButtonInstance>();
+
     // Initialize chat service with configured AG-UI URL
     this.chatService = new ChatService(config.agUiUrl);
 
@@ -59,6 +64,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
                 chatService,
                 contextProvider: deps.contextProvider,
                 charts: deps.charts,
+                ref: chatHeaderButtonRef,
               })
             );
             unmountComponent = mountPoint(element);
@@ -83,6 +89,29 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
             unmountComponent();
           }
         };
+      },
+    });
+
+    core.chrome.globalSearch.registerSearchCommand({
+      id: 'AI_CHATBOT_COMMAND',
+      type: 'ACTIONS',
+      inputPlaceholder: i18n.translate('chat.globalSearch.chatWithAI.placeholder', {
+        defaultMessage: 'Search or chat with AI',
+      }),
+      run: async () => [
+        React.createElement(
+          EuiText,
+          {
+            size: 'xs',
+            color: 'subdued',
+          },
+          i18n.translate('chat.globalSearch.chatWithAI.hints', {
+            defaultMessage: 'Press Enter to chat with AI',
+          })
+        ),
+      ],
+      action: async ({ content }: { content: string }) => {
+        await chatHeaderButtonRef.current?.startNewConversation({ content });
       },
     });
 

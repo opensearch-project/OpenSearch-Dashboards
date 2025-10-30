@@ -31,6 +31,7 @@ interface AxesOptionsProps {
   axisColumnMappings: Partial<Record<AxisRole, VisColumn>>;
   showFullTimeRange: boolean;
   onShowFullTimeRangeChange: (showFullTimeRange: boolean) => void;
+  initialIsOpen?: boolean;
 }
 
 export const AxesOptions: React.FC<AxesOptionsProps> = ({
@@ -44,6 +45,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
   axisColumnMappings,
   showFullTimeRange,
   onShowFullTimeRangeChange,
+  initialIsOpen = false,
 }) => {
   const updateCategoryAxis = (index: number, updates: Partial<CategoryAxis>) => {
     const updatedAxes = [...categoryAxes];
@@ -129,7 +131,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
       accordionLabel={i18n.translate('explore.stylePanel.tabs.axes', {
         defaultMessage: 'Axes',
       })}
-      initialIsOpen={true}
+      initialIsOpen={initialIsOpen}
     >
       {/* Category Axes */}
       {categoryAxes.map((axis, index) => (

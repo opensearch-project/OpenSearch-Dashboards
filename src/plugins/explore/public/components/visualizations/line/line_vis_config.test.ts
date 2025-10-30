@@ -44,7 +44,7 @@ describe('line_vis_config', () => {
 
       // Verify basic controls
       expect(defaults.addLegend).toBe(true);
-      expect(defaults.legendPosition).toBe(Positions.RIGHT);
+      expect(defaults.legendPosition).toBe(Positions.BOTTOM);
       expect(defaults.addTimeMarker).toBe(false);
 
       // Verify line style
@@ -114,7 +114,7 @@ describe('line_vis_config', () => {
     it('should have available mappings configured', () => {
       const config = createLineConfig();
 
-      expect(config.ui.availableMappings).toHaveLength(5);
+      expect(config.ui.availableMappings).toHaveLength(9);
       expect(config.ui.availableMappings[0]).toHaveProperty('x');
       expect(config.ui.availableMappings[0]).toHaveProperty('y');
     });
