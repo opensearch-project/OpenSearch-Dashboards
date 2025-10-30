@@ -73,6 +73,7 @@ export async function download(options: DownloadOptions): Promise<void> {
     const response = await Axios.request({
       url,
       responseType: 'stream',
+      adapter: 'http',
     });
 
     if (response.status !== 200) {
