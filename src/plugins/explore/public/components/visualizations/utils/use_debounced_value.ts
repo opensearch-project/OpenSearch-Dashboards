@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useState, useEffect, useRef } from 'react';
-import { useDebounce } from 'react-use';
+import { useDebounce, useEffectOnce } from 'react-use';
 
 /**
  * Custom hook for debouncing values
@@ -74,12 +74,11 @@ export const useDebouncedNumber = (
   const [localValue, setLocalValue] = useState(constrainedInitialValue);
 
   // Call onChange immediately if initial value was constrained
-  useEffect(() => {
+  useEffectOnce(() => {
     if (constrainedInitialValue !== value) {
       onChange(constrainedInitialValue);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run on mount
+  });
 
   const onDebouncedValueChange = useCallback(
     (num: number | undefined) => {
