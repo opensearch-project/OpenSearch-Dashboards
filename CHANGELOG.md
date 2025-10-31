@@ -4,6 +4,54 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+## [2.19.4-2025-10-31](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.19.4)
+
+### 💥 Breaking Changes
+
+### Deprecations
+
+### 🛡 Security
+
+### 📈 Features/Enhancements
+
+### 🐛 Bug Fixes
+
+### 🚞 Infrastructure
+
+### 📝 Documentation
+
+### 🛠 Maintenance
+
+ - Release notes for 2.19.4 ([#10838](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10838))
+
+### 🪛 Refactoring
+
+### 🔩 Tests
+
+## [2.19.4-2025-10-31](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.19.4)
+
+### 💥 Breaking Changes
+
+### Deprecations
+
+### 🛡 Security
+
+### 📈 Features/Enhancements
+
+### 🐛 Bug Fixes
+
+### 🚞 Infrastructure
+
+### 📝 Documentation
+
+### 🛠 Maintenance
+
+ - CVE Fixed for 2.19, Update Webpack to support jspdf upgrade ([#10828](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10828))
+
+### 🪛 Refactoring
+
+### 🔩 Tests
+
 ## [2.19.3-2025-07-18](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.19.3)
 
 ### 💥 Breaking Changes
