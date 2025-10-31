@@ -55,13 +55,13 @@ export const createNumericalHistogramChart = (
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
         bin: adjustBucketBins(styles?.bucket, transformedData, xAxis?.column),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        axis: applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle }),
       },
       y: {
         field: yAxis?.column,
         aggregate: styles?.bucket?.aggregationType,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
       },
       color: styles?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
@@ -140,12 +140,12 @@ export const createSingleHistogramChart = (
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
         bin: adjustBucketBins(styles?.bucket, transformedData, xAxis?.column),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        axis: applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle }),
       },
       y: {
         aggregate: AggregationType.COUNT,
         type: 'quantitative',
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
       },
       color: styles?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {

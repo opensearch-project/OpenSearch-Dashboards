@@ -631,7 +631,7 @@ export const createDoubleNumericalBarChart = (
       x: {
         field: xAxis?.column,
         type: 'nominal',
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        axis: applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle }),
       },
       y: {
         field: yAxis?.column,
