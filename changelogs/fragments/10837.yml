@@ -1,0 +1,2 @@
+fix:
+- Fix recent queries not working for DQL and Lucene ([#10837](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10837))
