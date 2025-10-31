@@ -20,6 +20,8 @@
 
 - CVE Fixed for 2.19, Update Webpack to support jspdf upgrade ([#10828](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10828))
 
+ - Vega bump CVE fixes ([#10839](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10839))
+
 ### 🪛 Refactoring
 
 ### 🔩 Tests
