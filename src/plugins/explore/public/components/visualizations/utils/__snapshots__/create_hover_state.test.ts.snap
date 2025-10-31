@@ -14,7 +14,7 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "temporal",
         },
@@ -212,17 +212,17 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "temporal",
         },
         Object {
-          "field": "count",
+          "field": "[\\"count\\"]",
           "title": undefined,
           "type": "quantitative",
         },
         Object {
-          "field": "sum",
+          "field": "[\\"sum\\"]",
           "title": undefined,
           "type": "quantitative",
         },
@@ -442,12 +442,12 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "nominal",
         },
         Object {
-          "field": "count",
+          "field": "[\\"count\\"]",
           "title": undefined,
           "type": "quantitative",
         },
@@ -857,12 +857,12 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "temporal",
         },
         Object {
-          "field": "count",
+          "field": "[\\"count\\"]",
           "title": undefined,
           "type": "quantitative",
         },
@@ -1176,17 +1176,17 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "temporal",
         },
         Object {
-          "field": "count",
+          "field": "[\\"count\\"]",
           "title": undefined,
           "type": "quantitative",
         },
         Object {
-          "field": "average",
+          "field": "[\\"average\\"]",
           "title": undefined,
           "type": "quantitative",
         },
@@ -1509,18 +1509,18 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "temporal",
         },
         Object {
-          "field": "A",
-          "title": undefined,
+          "field": "[\\"A\\"]",
+          "title": "A",
           "type": "quantitative",
         },
         Object {
-          "field": "B",
-          "title": undefined,
+          "field": "[\\"B\\"]",
+          "title": "B",
           "type": "quantitative",
         },
       ],
@@ -1719,17 +1719,17 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "temporal",
         },
         Object {
-          "field": "count",
+          "field": "[\\"count\\"]",
           "title": undefined,
           "type": "quantitative",
         },
         Object {
-          "field": "sum",
+          "field": "[\\"sum\\"]",
           "title": undefined,
           "type": "quantitative",
         },
@@ -2029,12 +2029,12 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "temporal",
         },
         Object {
-          "field": "count",
+          "field": "[\\"count\\"]",
           "title": undefined,
           "type": "quantitative",
         },
@@ -2293,17 +2293,17 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "temporal",
         },
         Object {
-          "field": "count",
+          "field": "[\\"count\\"]",
           "title": undefined,
           "type": "quantitative",
         },
         Object {
-          "field": "average",
+          "field": "[\\"average\\"]",
           "title": undefined,
           "type": "quantitative",
         },
