@@ -73,6 +73,7 @@ describe('AgUiAgent', () => {
             headers: {
               'Content-Type': 'application/json',
               Accept: 'text/event-stream',
+              'osd-xsrf': 'true',
             },
             body: JSON.stringify(mockInput),
             signal: expect.any(AbortSignal),

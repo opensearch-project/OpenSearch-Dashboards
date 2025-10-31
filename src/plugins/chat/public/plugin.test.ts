@@ -72,10 +72,11 @@ describe('ChatPlugin', () => {
   });
 
   describe('start', () => {
-    it('should initialize chat service with configured AG-UI URL', () => {
+    it('should initialize chat service when enabled', () => {
       plugin.start(mockCoreStart, mockDeps);
 
-      expect(ChatService).toHaveBeenCalledWith('http://test-ag-ui:3000');
+      // ChatService is called without arguments (uses proxy endpoint)
+      expect(ChatService).toHaveBeenCalledWith();
     });
 
     it('should register chat button in header nav controls', () => {
@@ -94,14 +95,17 @@ describe('ChatPlugin', () => {
       expect(startContract.chatService).toBeInstanceOf(ChatService);
     });
 
-    it('should handle missing AG-UI URL configuration', () => {
+    it('should initialize chat service even without agUiUrl config', () => {
+      // agUiUrl is server-side config only; client doesn't need it
       mockInitializerContext.config.get = jest.fn().mockReturnValue({ enabled: true });
+      const testPlugin = new ChatPlugin(mockInitializerContext);
 
-      const startContract = plugin.start(mockCoreStart, mockDeps);
+      const startContract = testPlugin.start(mockCoreStart, mockDeps);
 
-      expect(ChatService).not.toHaveBeenCalled();
-      expect(startContract.chatService).toBeUndefined();
-      expect(mockCoreStart.chrome.navControls.registerRight).not.toHaveBeenCalled();
+      // ChatService should still be created (uses proxy endpoint)
+      expect(ChatService).toHaveBeenCalledWith();
+      expect(startContract.chatService).toBeInstanceOf(ChatService);
+      expect(mockCoreStart.chrome.navControls.registerRight).toHaveBeenCalled();
     });
 
     it('should not initialize when plugin is disabled', () => {
@@ -266,19 +270,22 @@ describe('ChatPlugin', () => {
         { enabled: true, agUiUrl: 'http://localhost:3000' },
         { enabled: true, agUiUrl: 'https://remote-server:8080' },
         { enabled: false, agUiUrl: 'http://localhost:3000' },
-        { enabled: true }, // Missing agUiUrl
+        { enabled: true }, // Missing agUiUrl (still works with proxy)
         {}, // Missing both enabled and agUiUrl
       ];
 
-      configs.forEach((config) => {
+      configs.forEach((config, index) => {
+        jest.clearAllMocks();
         mockInitializerContext.config.get = jest.fn().mockReturnValue(config);
         const testPlugin = new ChatPlugin(mockInitializerContext);
 
         expect(() => testPlugin.start(mockCoreStart, mockDeps)).not.toThrow();
 
-        // Only first two configs should initialize the service
-        if (config.enabled && config.agUiUrl) {
-          expect(ChatService).toHaveBeenCalledWith(config.agUiUrl);
+        // ChatService is initialized whenever enabled is true (regardless of agUiUrl)
+        if (config.enabled) {
+          expect(ChatService).toHaveBeenCalledWith();
+        } else {
+          expect(ChatService).not.toHaveBeenCalled();
         }
       });
     });
