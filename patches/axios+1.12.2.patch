@@ -1,0 +1,13 @@
+diff --git a/node_modules/axios/index.d.ts b/node_modules/axios/index.d.ts
+index 554140e..f19e682 100644
+--- a/node_modules/axios/index.d.ts
++++ b/node_modules/axios/index.d.ts
+@@ -425,7 +425,7 @@ export class AxiosError<T = unknown, D = any> extends Error {
+   isAxiosError: boolean;
+   status?: number;
+   toJSON: () => object;
+-  cause?: unknown;
++  cause?: Error | undefined;
+   event?: BrowserProgressEvent;
+   static from<T = unknown, D = any>(
+     error: Error | unknown,
