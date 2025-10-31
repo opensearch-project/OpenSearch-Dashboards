@@ -1,5 +1,5 @@
 fix:
-- Optimize discover vis performance by turn off visual interfactor for data point cound > 1000 ([#10836](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10836))
+- Optimize discover vis performance by turn off visual interactions for data point cound > 1000 ([#10836](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10836))
 - UseDebounceValue bug which onChange get called for initial value ([#10836](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10836))
 - Discover vis tooltip issue for multiple series data that if field contains vega reserved charaters ([#10836](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10836))
 - React missing key warnings ([#10836](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10836))
