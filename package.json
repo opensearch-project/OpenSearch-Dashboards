@@ -139,7 +139,9 @@
     "**/axios": "1.12.2",
     "**/cipher-base": "^1.0.6",
     "**/pbkdf2": "^3.1.3",
-    "**/sha.js": "^2.4.12"
+    "**/sha.js": "^2.4.12",
+    "**/vega-functions": "5.17.0",
+    "**/vega-selections": "5.4.2"
   },
   "workspaces": {
     "packages": [
@@ -507,7 +509,7 @@
     "tough-cookie": "^4.1.3",
     "tree-kill": "^1.2.2",
     "typescript": "4.0.2",
-    "vega": "^5.23.0",
+    "vega": "^5.32.0",
     "vega-interpreter": "^1.0.5",
     "vega-lite": "^4.16.8",
     "vega-lite-next": "npm:vega-lite@^5.6.0",
