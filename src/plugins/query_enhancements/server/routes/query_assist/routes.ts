@@ -52,11 +52,10 @@ export function registerQueryAssistRoutes(router: IRouter) {
           // @ts-expect-error TS7006 TODO(ts-error): fixme
           config.queryAssist.supportedLanguages.map((languageConfig) =>
             // if the call does not throw any error, then the agent is properly configured
-            isServerlessDatasource
+            (isServerlessDatasource
               ? Promise.resolve(languageConfig.agentConfig)
-              : getAgentIdByConfig(client, languageConfig.agentConfig).then(() =>
-                  configuredLanguages.push(languageConfig.language)
-                )
+              : getAgentIdByConfig(client, languageConfig.agentConfig)
+            ).then(() => configuredLanguages.push(languageConfig.language))
           )
         );
         return response.ok({ body: { configuredLanguages } });
