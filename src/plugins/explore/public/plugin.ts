@@ -70,6 +70,7 @@ import { createAbortDataQueryAction } from './application/utils/state_management
 import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
 import { setServices } from './services/services';
+import { SlotRegistryService } from './services/slot_registry';
 
 export class ExplorePlugin
   implements
@@ -99,6 +100,7 @@ export class ExplorePlugin
   private tabRegistry: TabRegistryService = new TabRegistryService();
   private visualizationRegistryService = new VisualizationRegistryService();
   private queryPanelActionsRegistryService = new QueryPanelActionsRegistryService();
+  private slotRegistryService = new SlotRegistryService();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -311,7 +313,8 @@ export class ExplorePlugin
           this.tabRegistry,
           this.visualizationRegistryService,
           this.queryPanelActionsRegistryService,
-          this.isDatasetManagementEnabled
+          this.isDatasetManagementEnabled,
+          this.slotRegistryService
         );
 
         // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
@@ -474,7 +477,8 @@ export class ExplorePlugin
         this.tabRegistry,
         this.visualizationRegistryService,
         this.queryPanelActionsRegistryService,
-        this.isDatasetManagementEnabled
+        this.isDatasetManagementEnabled,
+        this.slotRegistryService
       );
       setLegacyServices({
         ...services,
@@ -500,6 +504,7 @@ export class ExplorePlugin
       savedSearchLoader: savedExploreLoader, // For backward compatibility
       savedExploreLoader,
       visualizationRegistry: this.visualizationRegistryService.start(),
+      slotRegistry: this.slotRegistryService.start(),
     };
   }
 
