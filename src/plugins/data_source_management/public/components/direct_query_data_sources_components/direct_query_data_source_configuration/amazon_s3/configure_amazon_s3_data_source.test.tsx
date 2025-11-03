@@ -122,9 +122,7 @@ describe('ConfigureS3DatasourcePanel', () => {
       textArea.simulate('change', { target: { value: 'New details' } });
       textArea.simulate('blur', { target: { value: 'New details' } });
     });
-    setTimeout(() => {
-      expect(mockSetDetailsForRequest).toHaveBeenCalledWith('New details');
-    }, 1000);
+    expect(mockSetDetailsForRequest).toHaveBeenCalledWith('New details');
   });
 
   it('updates ARN state on change', async () => {
@@ -134,9 +132,7 @@ describe('ConfigureS3DatasourcePanel', () => {
       arnField.simulate('change', { target: { value: 'New ARN' } });
       arnField.simulate('blur', { target: { value: 'New ARN' } });
     });
-    setTimeout(() => {
-      expect(mockSetArnForRequest).toHaveBeenCalledWith('New ARN');
-    }, 1000);
+    expect(mockSetArnForRequest).toHaveBeenCalledWith('New ARN');
   });
 
   it('updates store URI state on change', async () => {
@@ -146,37 +142,38 @@ describe('ConfigureS3DatasourcePanel', () => {
       storeField.simulate('change', { target: { value: 'New Store URI' } });
       storeField.simulate('blur', { target: { value: 'New Store URI' } });
     });
-    setTimeout(() => {
-      expect(mockSetStoreForRequest).toHaveBeenCalledWith('New Store URI');
-    }, 1000);
+    expect(mockSetStoreForRequest).toHaveBeenCalledWith('New Store URI');
   });
 
   it('updates auth method on select change', async () => {
     const wrapper = mountComponent();
-    const select = wrapper.find(EuiSelect).at(0);
+    const select = wrapper.find(EuiSelect);
     await act(async () => {
-      select.simulate('change', { target: { value: 'noauth' } });
+      const onChange = select.prop('onChange');
+      if (onChange) {
+        onChange({ target: { value: 'noauth' } } as any);
+      }
     });
-    setTimeout(() => {
-      expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('noauth');
-    }, 1000);
+    expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('noauth');
   });
 
   it('displays authentication fields based on auth method', async () => {
     const wrapper = mountComponent();
-    const select = wrapper.find(EuiSelect).at(0);
+    const select = wrapper.find(EuiSelect);
     await act(async () => {
-      select.simulate('change', { target: { value: 'noauth' } });
+      const onChange = select.prop('onChange');
+      if (onChange) {
+        onChange({ target: { value: 'noauth' } } as any);
+      }
     });
-    setTimeout(() => {
-      expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('noauth');
-    }, 1000);
+    expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('noauth');
 
     await act(async () => {
-      select.simulate('change', { target: { value: 'basicauth' } });
+      const onChange = select.prop('onChange');
+      if (onChange) {
+        onChange({ target: { value: 'basicauth' } } as any);
+      }
     });
-    setTimeout(() => {
-      expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('basicauth');
-    }, 1000);
+    expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('basicauth');
   });
 });
