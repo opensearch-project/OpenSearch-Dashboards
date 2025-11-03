@@ -467,7 +467,6 @@ export class ExploreEmbeddable
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = node;
-    this.renderComponent(node, this.searchProps);
   }
 
   public getInspectorAdapters() {
