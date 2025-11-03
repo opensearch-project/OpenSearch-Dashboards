@@ -136,10 +136,7 @@ describe('Query Assist Routes', () => {
       });
     });
 
-    it('should able to detect data source gracefully', async () => {
-      // Mock agent configuration failure
-      mockGetAgentIdByConfig.mockRejectedValue(new Error('Agent not found'));
-
+    it('should able to detect serverless data source gracefully', async () => {
       const mockSavedObjectsClient = {
         get: jest.fn().mockResolvedValue({
           attributes: {
@@ -154,7 +151,7 @@ describe('Query Assist Routes', () => {
         .expect(200);
 
       expect(result.body).toEqual({
-        configuredLanguages: [],
+        configuredLanguages: ['PPL', 'SQL'],
       });
     });
     it('should handle agent configuration errors gracefully', async () => {
