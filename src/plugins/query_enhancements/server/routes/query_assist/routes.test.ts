@@ -13,6 +13,7 @@ import { API } from '../../../common';
 import { getAgentIdByConfig, requestAgentByConfig } from './agents';
 import { getUnselectedTimeFields, parseTimeRangeXML } from './ppl/time_parser_utils';
 import { HttpService } from 'opensearch-dashboards/server/http';
+import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
 
 // Mock the dependencies
 jest.mock('./agents');
@@ -31,7 +32,7 @@ describe('Query Assist Routes', () => {
   let testServer: HttpService;
   let opensearchClient: ReturnType<typeof opensearchClientMock.createInternalClient>;
 
-  const testSetup = async () => {
+  const testSetup = async (saveObjectClient: { get: any } = { get: jest.fn() }) => {
     const { server, httpSetup, handlerContext } = await setupServer();
     const router = httpSetup.createRouter('');
 
@@ -44,6 +45,11 @@ describe('Query Assist Routes', () => {
         opensearch: {
           client: {
             asCurrentUser: opensearchClient,
+          },
+        },
+        savedObjects: {
+          client: {
+            saveObjectClient,
           },
         },
       },
@@ -108,7 +114,6 @@ describe('Query Assist Routes', () => {
     testServer = server;
     return httpSetup;
   };
-
   afterEach(async () => {
     if (testServer) {
       await testServer.stop();
@@ -131,6 +136,27 @@ describe('Query Assist Routes', () => {
       });
     });
 
+    it('should able to detect data source gracefully', async () => {
+      // Mock agent configuration failure
+      mockGetAgentIdByConfig.mockRejectedValue(new Error('Agent not found'));
+
+      const mockSavedObjectsClient = {
+        get: jest.fn().mockResolvedValue({
+          attributes: {
+            dataSourceEngineType: DataSourceEngineType.OpenSearchServerless,
+          },
+        }),
+      };
+
+      const httpSetup = await testSetup(mockSavedObjectsClient);
+      const result = await supertest(httpSetup.server.listener)
+        .get(API.QUERY_ASSIST.LANGUAGES)
+        .expect(200);
+
+      expect(result.body).toEqual({
+        configuredLanguages: [],
+      });
+    });
     it('should handle agent configuration errors gracefully', async () => {
       // Mock agent configuration failure
       mockGetAgentIdByConfig.mockRejectedValue(new Error('Agent not found'));
