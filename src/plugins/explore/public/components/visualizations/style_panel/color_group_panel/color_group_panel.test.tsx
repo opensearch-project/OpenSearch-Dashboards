@@ -16,7 +16,10 @@ jest.mock('../../../visualizations/theme/color_utils', () => ({
       blue1: '#5885bfff',
     },
   }),
-  resolveColor: (color: string) => color,
+  resolveColor: jest.fn((color) => color),
+}));
+
+jest.mock('../../../visualizations/theme/default_colors', () => ({
   getColors: () => [],
 }));
 

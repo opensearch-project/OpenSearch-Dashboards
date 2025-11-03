@@ -7,7 +7,8 @@ import { groupBy } from 'lodash';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { VisColumn, AxisColumnMappings, VEGASCHEMA, Threshold, VisFieldType } from '../types';
 import { calculateValue } from '../utils/calculation';
-import { getColors, resolveColor } from '../theme/default_colors';
+import { getColors } from '../theme/default_colors';
+import { resolveColor } from '../theme/color_utils';
 import { getSchemaByAxis } from '../utils/utils';
 import {
   getBarOrientation,

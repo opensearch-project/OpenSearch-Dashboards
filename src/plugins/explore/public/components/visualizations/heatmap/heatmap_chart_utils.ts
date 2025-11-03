@@ -7,7 +7,8 @@ import type { Encoding } from 'vega-lite/build/src/encoding';
 import { AggregationType, VisColumn } from '../types';
 import { HeatmapChartStyle } from './heatmap_vis_config';
 
-import { getColors, DEFAULT_GREY, resolveColor } from '../theme/default_colors';
+import { getColors, DEFAULT_GREY } from '../theme/default_colors';
+import { resolveColor } from '../theme/color_utils';
 
 // isRegular=== true refers to 2 dimension and 1 metric heatmap.
 export const createLabelLayer = (

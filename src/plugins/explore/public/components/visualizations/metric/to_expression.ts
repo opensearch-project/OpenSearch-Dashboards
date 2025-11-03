@@ -7,7 +7,8 @@ import { MetricChartStyle } from './metric_vis_config';
 import { VisColumn, VEGASCHEMA, AxisRole, AxisColumnMappings, Threshold } from '../types';
 import { getTooltipFormat } from '../utils/utils';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
-import { getColors, resolveColor } from '../theme/default_colors';
+import { getColors } from '../theme/default_colors';
+import { resolveColor } from '../theme/color_utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 import {

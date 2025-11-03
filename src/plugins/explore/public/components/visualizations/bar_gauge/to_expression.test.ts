@@ -18,6 +18,9 @@ jest.mock('../utils/calculation', () => ({
 jest.mock('../theme/default_colors', () => ({
   darkenColor: jest.fn((color) => '#00000'),
   getColors: jest.fn(() => ({ text: 'black', statusGreen: 'green', backgroundShade: 'grey' })),
+}));
+
+jest.mock('../theme/color_utils', () => ({
   resolveColor: jest.fn((color) => color),
 }));
 

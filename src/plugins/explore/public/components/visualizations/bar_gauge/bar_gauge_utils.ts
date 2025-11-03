@@ -5,7 +5,7 @@
 
 import { AxisColumnMappings, Threshold, VisFieldType } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
-import { resolveColor } from '../theme/default_colors';
+import { resolveColor } from '../theme/color_utils';
 
 export const getBarOrientation = (
   styles: BarGaugeChartStyle,

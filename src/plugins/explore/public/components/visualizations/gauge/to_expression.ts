@@ -13,7 +13,8 @@ import {
   mergeThresholdsWithBase,
   getMaxAndMinBase,
 } from '../style_panel/threshold/threshold_utils';
-import { getColors, DEFAULT_GREY, resolveColor } from '../theme/default_colors';
+import { getColors, DEFAULT_GREY } from '../theme/default_colors';
+import { resolveColor } from '../theme/color_utils';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 
 export const createGauge = (
