@@ -58,7 +58,7 @@ export const FIELD_TYPE_MAP: Partial<Record<string, VisFieldType>> = {
   [PPL_FIELD_TYPES.TIMESTAMP]: VisFieldType.Date,
   [PPL_FIELD_TYPES.TIME]: VisFieldType.Date,
   [PPL_FIELD_TYPES.INTERVAL]: VisFieldType.Unknown,
-  [PPL_FIELD_TYPES.IP]: VisFieldType.Unknown,
+  [PPL_FIELD_TYPES.IP]: VisFieldType.Categorical,
   [PPL_FIELD_TYPES.GEO_POINT]: VisFieldType.Unknown,
   [PPL_FIELD_TYPES.BINARY]: VisFieldType.Unknown,
   [PPL_FIELD_TYPES.STRUCT]: VisFieldType.Unknown,
