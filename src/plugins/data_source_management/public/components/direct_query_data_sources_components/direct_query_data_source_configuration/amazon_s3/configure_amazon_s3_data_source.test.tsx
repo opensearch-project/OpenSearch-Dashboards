@@ -127,7 +127,7 @@ describe('ConfigureS3DatasourcePanel', () => {
 
   it('updates ARN state on change', async () => {
     const wrapper = mountComponent();
-    const arnField = wrapper.find(EuiFieldText).at(0);
+    const arnField = wrapper.find('[data-test-subj="role-ARN"]');
     await act(async () => {
       arnField.simulate('change', { target: { value: 'New ARN' } });
       arnField.simulate('blur', { target: { value: 'New ARN' } });
@@ -137,7 +137,7 @@ describe('ConfigureS3DatasourcePanel', () => {
 
   it('updates store URI state on change', async () => {
     const wrapper = mountComponent();
-    const storeField = wrapper.find(EuiFieldText).at(1);
+    const storeField = wrapper.find('[data-test-subj="index-URI"]');
     await act(async () => {
       storeField.simulate('change', { target: { value: 'New Store URI' } });
       storeField.simulate('blur', { target: { value: 'New Store URI' } });
