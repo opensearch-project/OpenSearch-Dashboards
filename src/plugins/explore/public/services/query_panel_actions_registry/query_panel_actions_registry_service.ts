@@ -14,37 +14,18 @@ import { ExploreServices } from '../../types';
 // Please update the doc when updating this
 export interface QueryPanelActionDependencies {
   /**
-   * Currently set Query (last executed query from Redux)
+   * Last executed query (includes query string, language, and dataset)
    */
-  executedQuery: QueryWithQueryAsString;
+  query: QueryWithQueryAsString;
   /**
-   * Current query in the editor (may not be executed yet)
-   */
-  editorQuery: string;
-  /**
-   * Query language (PPL, SQL, DQL, or Natural Language)
-   */
-  language: string;
-  /**
-   * Fetch status for the current query
+   * Query execution status (loading, success, error, etc.)
    */
   resultStatus: QueryResultStatus;
   /**
-   * Currently selected dataset/index pattern
+   * Current query string in the editor (may differ from executed query)
+   * This is what the user is currently typing/editing
    */
-  dataset?: Dataset;
-  /**
-   * Dataset type (logs, traces, metrics)
-   */
-  datasetType?: string;
-  /**
-   * User-selected records from the results table
-   */
-  selectedRecords?: any[];
-  /**
-   * Current time range filter
-   */
-  timeRange?: TimeRange;
+  queryInEditor: string;
 }
 
 /**
@@ -126,7 +107,6 @@ export interface FlyoutActionConfig extends BaseActionConfig {
 
 /**
  * Union type for all action configurations
- * @deprecated Use ButtonActionConfig or FlyoutActionConfig directly
  */
 export type QueryPanelActionConfig = ButtonActionConfig | FlyoutActionConfig;
 

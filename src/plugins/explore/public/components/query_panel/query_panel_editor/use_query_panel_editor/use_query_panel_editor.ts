@@ -28,7 +28,10 @@ import { getShiftEnterAction } from './shift_enter_action';
 import { getTabAction } from './tab_action';
 import { getEnterAction } from './enter_action';
 import { getSpacebarAction } from './spacebar_action';
-import { setIsQueryEditorDirty } from '../../../../application/utils/state_management/slices/query_editor/query_editor_slice';
+import {
+  setIsQueryEditorDirty,
+  setCurrentEditorQuery,
+} from '../../../../application/utils/state_management/slices/query_editor/query_editor_slice';
 import { getEscapeAction } from './escape_action';
 import { usePromptIsTyping } from './use_prompt_is_typing';
 import { EditorMode } from '../../../../application/utils/state_management/types';
@@ -347,6 +350,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   const onChange = useCallback(
     (newText: string) => {
       setEditorText(newText);
+      dispatch(setCurrentEditorQuery(newText));
 
       if (!isQueryEditorDirty) {
         dispatch(setIsQueryEditorDirty(true));

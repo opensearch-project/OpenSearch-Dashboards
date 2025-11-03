@@ -27,6 +27,7 @@ export interface QueryEditorSliceState {
   isQueryEditorDirty: boolean;
   hasUserInitiatedQuery: boolean;
   breakdownField?: string;
+  currentEditorQuery: string;
 }
 
 const initialState: QueryEditorSliceState = {
@@ -46,6 +47,7 @@ const initialState: QueryEditorSliceState = {
   dateRange: undefined,
   isQueryEditorDirty: false,
   hasUserInitiatedQuery: false,
+  currentEditorQuery: '',
 };
 
 const queryEditorSlice = createSlice({
@@ -144,6 +146,9 @@ const queryEditorSlice = createSlice({
     setBreakdownField: (state, action: PayloadAction<string | undefined>) => {
       state.breakdownField = action.payload;
     },
+    setCurrentEditorQuery: (state, action: PayloadAction<string>) => {
+      state.currentEditorQuery = action.payload;
+    },
   },
 });
 
@@ -169,6 +174,7 @@ export const {
   setIsQueryEditorDirty,
   setHasUserInitiatedQuery,
   setBreakdownField,
+  setCurrentEditorQuery,
 } = queryEditorSlice.actions;
 export const queryEditorReducer = queryEditorSlice.reducer;
 export const queryEditorInitialState = initialState;
