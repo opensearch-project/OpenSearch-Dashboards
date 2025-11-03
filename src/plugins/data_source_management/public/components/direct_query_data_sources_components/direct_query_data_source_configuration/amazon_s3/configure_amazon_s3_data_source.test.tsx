@@ -7,7 +7,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiFieldText, EuiTextArea, EuiSelect } from '@elastic/eui';
+import { EuiTextArea, EuiSelect } from '@elastic/eui';
 import { ConfigureS3DatasourcePanelWithRouter } from './configure_amazon_s3_data_source';
 import { AuthMethod } from '../../../constants';
 
@@ -127,7 +127,7 @@ describe('ConfigureS3DatasourcePanel', () => {
 
   it('updates ARN state on change', async () => {
     const wrapper = mountComponent();
-    const arnField = wrapper.find('[data-test-subj="role-ARN"]');
+    const arnField = wrapper.find('[data-test-subj="role-ARN"]').first();
     await act(async () => {
       arnField.simulate('change', { target: { value: 'New ARN' } });
       arnField.simulate('blur', { target: { value: 'New ARN' } });
@@ -137,7 +137,7 @@ describe('ConfigureS3DatasourcePanel', () => {
 
   it('updates store URI state on change', async () => {
     const wrapper = mountComponent();
-    const storeField = wrapper.find('[data-test-subj="index-URI"]');
+    const storeField = wrapper.find('[data-test-subj="index-URI"]').first();
     await act(async () => {
       storeField.simulate('change', { target: { value: 'New Store URI' } });
       storeField.simulate('blur', { target: { value: 'New Store URI' } });
