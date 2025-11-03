@@ -15,7 +15,7 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import { getColorGroups, resolveColor } from '../../../visualizations/theme/default_colors';
+import { getColorGroups, resolveColor } from '../../../visualizations/theme/color_utils';
 import { useDebouncedValue } from '../../utils/use_debounced_value';
 import './color_group_panel.scss';
 

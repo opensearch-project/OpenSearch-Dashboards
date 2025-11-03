@@ -26,8 +26,8 @@ interface AllAxesOptionsProps {
   axisColumnMappings: Partial<Record<AxisRole, VisColumn>>;
   disableGrid?: boolean;
   switchAxes?: boolean;
-  showFullTimeRange: boolean;
-  onShowFullTimeRangeChange: (showFullTimeRange: boolean) => void;
+  showFullTimeRange?: boolean;
+  onShowFullTimeRangeChange?: (showFullTimeRange: boolean) => void;
   initialIsOpen?: boolean;
 }
 
@@ -173,19 +173,20 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                     />
                   </EuiFormRow>
 
-                  {getSchemaByAxis(axisColumnMappings?.[axis.axisRole]) === 'temporal' && (
-                    <EuiFormRow>
-                      <EuiSwitch
-                        compressed
-                        label={i18n.translate('explore.vis.standardAxes.showFullTimeRange', {
-                          defaultMessage: 'Show full time range',
-                        })}
-                        checked={showFullTimeRange}
-                        onChange={(e) => onShowFullTimeRangeChange(e.target.checked)}
-                        data-testid="showFullTimeRangeSwitch"
-                      />
-                    </EuiFormRow>
-                  )}
+                  {getSchemaByAxis(axisColumnMappings?.[axis.axisRole]) === 'temporal' &&
+                    onShowFullTimeRangeChange && (
+                      <EuiFormRow>
+                        <EuiSwitch
+                          compressed
+                          label={i18n.translate('explore.vis.standardAxes.showFullTimeRange', {
+                            defaultMessage: 'Show full time range',
+                          })}
+                          checked={showFullTimeRange ?? false}
+                          onChange={(e) => onShowFullTimeRangeChange(e.target.checked)}
+                          data-testid="showFullTimeRangeSwitch"
+                        />
+                      </EuiFormRow>
+                    )}
 
                   {!disableGrid && (
                     <EuiFormRow>
