@@ -128,20 +128,42 @@ describe('ConfigureS3DatasourcePanel', () => {
   it('updates ARN state on change', async () => {
     const wrapper = mountComponent();
     const arnField = wrapper.find('[data-test-subj="role-ARN"]').first();
+
     await act(async () => {
-      arnField.simulate('change', { target: { value: 'New ARN' } });
-      arnField.simulate('blur', { target: { value: 'New ARN' } });
+      const onChange = arnField.prop('onChange');
+      if (onChange) {
+        onChange({ target: { value: 'New ARN' } } as any);
+      }
     });
+
+    await act(async () => {
+      const onBlur = arnField.prop('onBlur');
+      if (onBlur) {
+        onBlur({ target: { value: 'New ARN' } } as any);
+      }
+    });
+
     expect(mockSetArnForRequest).toHaveBeenCalledWith('New ARN');
   });
 
   it('updates store URI state on change', async () => {
     const wrapper = mountComponent();
     const storeField = wrapper.find('[data-test-subj="index-URI"]').first();
+
     await act(async () => {
-      storeField.simulate('change', { target: { value: 'New Store URI' } });
-      storeField.simulate('blur', { target: { value: 'New Store URI' } });
+      const onChange = storeField.prop('onChange');
+      if (onChange) {
+        onChange({ target: { value: 'New Store URI' } } as any);
+      }
     });
+
+    await act(async () => {
+      const onBlur = storeField.prop('onBlur');
+      if (onBlur) {
+        onBlur({ target: { value: 'New Store URI' } } as any);
+      }
+    });
+
     expect(mockSetStoreForRequest).toHaveBeenCalledWith('New Store URI');
   });
 

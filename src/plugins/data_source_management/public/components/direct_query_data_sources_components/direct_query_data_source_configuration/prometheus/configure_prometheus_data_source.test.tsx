@@ -133,11 +133,22 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
 
   it('updates store URI state on change', async () => {
     const wrapper = mountComponent();
-    const storeField = wrapper.find('input[data-test-subj="Prometheus-URI"]');
+    const storeField = wrapper.find('[data-test-subj="Prometheus-URI"]').first();
+
     await act(async () => {
-      storeField.simulate('change', { target: { value: 'New Store URI' } });
-      storeField.simulate('blur', { target: { value: 'New Store URI' } });
+      const onChange = storeField.prop('onChange');
+      if (onChange) {
+        onChange({ target: { value: 'New Store URI' } } as any);
+      }
     });
+
+    await act(async () => {
+      const onBlur = storeField.prop('onBlur');
+      if (onBlur) {
+        onBlur({ target: { value: 'New Store URI' } } as any);
+      }
+    });
+
     expect(mockSetStoreForRequest).toHaveBeenCalledWith('New Store URI');
   });
 
