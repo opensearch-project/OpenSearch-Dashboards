@@ -454,6 +454,9 @@ export class ExplorePlugin
       },
       visualizationRegistry: visualizationRegistryService,
       queryPanelActionsRegistry: this.queryPanelActionsRegistryService.setup(),
+      logActionRegistry: {
+        registerAction: (action) => logActionRegistry.registerAction(action),
+      },
     };
   }
 

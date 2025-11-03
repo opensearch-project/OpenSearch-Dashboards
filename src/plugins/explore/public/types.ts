@@ -63,6 +63,9 @@ import { ChatPluginStart } from '../../chat/public';
 export interface ExplorePluginSetup {
   visualizationRegistry: VisualizationRegistryServiceSetup;
   queryPanelActionsRegistry: QueryPanelActionsRegistryServiceSetup;
+  logActionRegistry: {
+    registerAction: (action: import('./types/log_actions').LogActionDefinition) => void;
+  };
   docViews: {
     addDocView: (docViewSpec: unknown) => void;
   };

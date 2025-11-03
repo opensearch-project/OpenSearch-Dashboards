@@ -22,6 +22,9 @@ export function createAskAiAction(chatService: ChatService | undefined): LogActi
       return !!chatService;
     },
 
-    component: (props) => AskAIActionItem({ ...props, chatService }),
+    component: (props) => {
+      // chatService is guaranteed to be defined here because isCompatible checks it
+      return AskAIActionItem({ ...props, chatService: chatService! });
+    },
   };
 }

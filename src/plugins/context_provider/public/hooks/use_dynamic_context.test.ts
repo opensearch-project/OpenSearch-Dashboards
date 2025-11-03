@@ -195,6 +195,115 @@ describe('useDynamicContext', () => {
     });
   });
 
+  describe('shouldCleanupOnUnmount parameter', () => {
+    it('should cleanup context on unmount by default (shouldCleanupOnUnmount not specified)', () => {
+      const options: AssistantContextOptions = {
+        id: 'test-context',
+        description: 'Test context',
+        value: { test: 'data' },
+        label: 'Test Label',
+      };
+
+      const { unmount } = renderHook(() => useDynamicContext(options));
+
+      mockContextStore.removeContextById.mockClear();
+
+      unmount();
+
+      expect(mockContextStore.removeContextById).toHaveBeenCalledWith('test-context');
+    });
+
+    it('should cleanup context on unmount when shouldCleanupOnUnmount is true', () => {
+      const options: AssistantContextOptions = {
+        id: 'test-context',
+        description: 'Test context',
+        value: { test: 'data' },
+        label: 'Test Label',
+      };
+
+      const { unmount } = renderHook(() => useDynamicContext(options, true));
+
+      mockContextStore.removeContextById.mockClear();
+
+      unmount();
+
+      expect(mockContextStore.removeContextById).toHaveBeenCalledWith('test-context');
+    });
+
+    it('should NOT cleanup context on unmount when shouldCleanupOnUnmount is false', () => {
+      const options: AssistantContextOptions = {
+        id: 'test-context',
+        description: 'Test context',
+        value: { test: 'data' },
+        label: 'Test Label',
+      };
+
+      const { unmount } = renderHook(() => useDynamicContext(options, false));
+
+      mockContextStore.removeContextById.mockClear();
+
+      unmount();
+
+      expect(mockContextStore.removeContextById).not.toHaveBeenCalled();
+    });
+
+    it('should handle changes to shouldCleanupOnUnmount parameter', () => {
+      const options: AssistantContextOptions = {
+        id: 'test-context',
+        description: 'Test context',
+        value: { test: 'data' },
+        label: 'Test Label',
+      };
+
+      // Start with cleanup enabled
+      const { rerender, unmount } = renderHook(
+        ({ cleanup }) => useDynamicContext(options, cleanup),
+        { initialProps: { cleanup: true } }
+      );
+
+      // Change to cleanup disabled
+      rerender({ cleanup: false });
+
+      mockContextStore.removeContextById.mockClear();
+
+      unmount();
+
+      // Should not cleanup since last value was false
+      expect(mockContextStore.removeContextById).not.toHaveBeenCalled();
+    });
+
+    it('should preserve context when shouldCleanupOnUnmount is false even if options change', () => {
+      const options1: AssistantContextOptions = {
+        id: 'test-context',
+        description: 'Context 1',
+        value: { test: 'data1' },
+        label: 'Label 1',
+      };
+
+      const options2: AssistantContextOptions = {
+        id: 'test-context',
+        description: 'Context 2',
+        value: { test: 'data2' },
+        label: 'Label 2',
+      };
+
+      mockDeepEqual.mockReturnValue(false);
+
+      const { rerender, unmount } = renderHook(({ opts }) => useDynamicContext(opts, false), {
+        initialProps: { opts: options1 },
+      });
+
+      rerender({ opts: options2 });
+
+      mockContextStore.removeContextById.mockClear();
+
+      unmount();
+
+      // Should not cleanup on unmount
+      expect(mockContextStore.removeContextById).not.toHaveBeenCalled();
+    });
+  });
+
   describe('context cleanup', () => {
     it('should remove context by ID when previous options had ID', () => {
       const options1: AssistantContextOptions = {
@@ -305,7 +414,7 @@ describe('useDynamicContext', () => {
 
       mockContextStore.removeContextById.mockClear();
 
-      rerender({ opts: null });
+      rerender({ opts: null as any });
 
       expect(mockContextStore.removeContextById).toHaveBeenCalledWith('test-context');
     });
@@ -327,7 +436,7 @@ describe('useDynamicContext', () => {
 
       mockContextStore.addContext.mockClear();
 
-      rerender({ opts: options });
+      rerender({ opts: options as any });
 
       expect(mockContextStore.addContext).toHaveBeenCalledWith(options);
     });
