@@ -70,6 +70,7 @@ import { createAbortDataQueryAction } from './application/utils/state_management
 import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
 import { setServices } from './services/services';
+import { getQueryWithSource } from './application/utils/languages';
 
 export class ExplorePlugin
   implements
@@ -500,6 +501,7 @@ export class ExplorePlugin
       savedSearchLoader: savedExploreLoader, // For backward compatibility
       savedExploreLoader,
       visualizationRegistry: this.visualizationRegistryService.start(),
+      getQueryWithSource, // Export query transformation utility for external plugins
     };
   }
 

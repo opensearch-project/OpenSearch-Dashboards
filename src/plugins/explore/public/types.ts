@@ -21,6 +21,7 @@ import {
   IndexPatternsContract,
   FilterManager,
   TimefilterContract,
+  Query,
 } from 'src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { DashboardSetup, DashboardStart } from 'src/plugins/dashboard/public';
@@ -54,6 +55,7 @@ import {
   QueryPanelActionsRegistryService,
   QueryPanelActionsRegistryServiceSetup,
 } from './services/query_panel_actions_registry';
+import { QueryWithQueryAsString } from './application/utils/languages';
 
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
@@ -75,6 +77,7 @@ export interface ExplorePluginStart {
   urlGenerator?: UrlGeneratorContract<'EXPLORE_APP_URL_GENERATOR'>;
   savedSearchLoader: SavedExploreLoader;
   savedExploreLoader: SavedExploreLoader;
+  getQueryWithSource: (query: Query) => QueryWithQueryAsString;
 }
 
 // ============================================================================
