@@ -58,7 +58,6 @@ import {
 import { QueryWithQueryAsString } from './application/utils/languages';
 import { ChatPluginStart } from '../../chat/public';
 
-
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
 // ============================================================================
@@ -82,7 +81,6 @@ export interface ExplorePluginStart {
   urlGenerator?: UrlGeneratorContract<'EXPLORE_APP_URL_GENERATOR'>;
   savedSearchLoader: SavedExploreLoader;
   savedExploreLoader: SavedExploreLoader;
-  getQueryWithSource: (query: Query) => QueryWithQueryAsString;
 }
 
 // ============================================================================

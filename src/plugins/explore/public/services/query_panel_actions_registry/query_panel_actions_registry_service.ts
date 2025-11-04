@@ -100,9 +100,9 @@ export interface FlyoutActionConfig extends BaseActionConfig {
    */
   component: React.ComponentType<FlyoutComponentProps>;
   /**
-   * Optional callback when flyout is opened
+   * Optional callback when flyout opens
    */
-  onOpen?(deps: QueryPanelActionDependencies): void;
+  onFlyoutOpen?(deps: QueryPanelActionDependencies): void;
 }
 
 /**

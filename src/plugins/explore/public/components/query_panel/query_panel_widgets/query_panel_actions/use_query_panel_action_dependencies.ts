@@ -9,9 +9,9 @@ import { QueryPanelActionDependencies } from '../../../../services/query_panel_a
 import {
   selectQuery,
   selectOverallQueryStatus,
-  selectCurrentEditorQuery,
 } from '../../../../application/utils/state_management/selectors';
 import { getQueryWithSource } from '../../../../application/utils/languages';
+import { useEditorText } from '../../../../application/hooks/editor_hooks/use_editor_text/use_editor_text';
 
 /**
  * Hook to gather all dependencies for query panel actions
@@ -20,20 +20,32 @@ import { getQueryWithSource } from '../../../../application/utils/languages';
  * @returns QueryPanelActionDependencies object with 3 fields:
  *   - query: Last executed query (includes query string, language, dataset)
  *   - resultStatus: Query execution status
- *   - queryInEditor: Current query string in the editor (may differ from executed query)
+ *   - queryInEditor: Current query string in the editor with source clause added (ready to execute)
  */
 export const useQueryPanelActionDependencies = (): QueryPanelActionDependencies => {
   // Get query state from Redux
   const executedQueryState = useSelector(selectQuery);
   const resultStatus = useSelector(selectOverallQueryStatus);
-  const queryInEditor = useSelector(selectCurrentEditorQuery);
 
-  return useMemo<QueryPanelActionDependencies>(
-    () => ({
+  // Get current editor text directly from editor (no Redux performance issues)
+  const getEditorText = useEditorText();
+
+  return useMemo<QueryPanelActionDependencies>(() => {
+    // Get current editor query text
+    const editorQuery = getEditorText();
+
+    // Transform editor query to add source clause (same as executed query)
+    // This ensures external plugins receive ready-to-execute queries
+    const transformedEditorQuery = getQueryWithSource({
+      query: editorQuery,
+      language: executedQueryState.language,
+      dataset: executedQueryState.dataset,
+    });
+
+    return {
       query: getQueryWithSource(executedQueryState),
       resultStatus,
-      queryInEditor,
-    }),
-    [executedQueryState, resultStatus, queryInEditor]
-  );
+      queryInEditor: transformedEditorQuery.query, // Pass the transformed query string
+    };
+  }, [executedQueryState, resultStatus, getEditorText]);
 };

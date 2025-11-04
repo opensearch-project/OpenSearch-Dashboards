@@ -23,7 +23,7 @@ export interface QueryPanelActionsProps {
 
 export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [activeFlyoutId, setActiveFlyoutId] = useState<string | null>(null);
+  const [openFlyoutId, setOpenFlyoutId] = useState<string | null>(null);
 
   const { services } = useOpenSearchDashboards<ExploreServices>();
 
@@ -35,7 +35,7 @@ export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
 
   // Close flyout handler
   const closeFlyout = useCallback(() => {
-    setActiveFlyoutId(null);
+    setOpenFlyoutId(null);
   }, []);
 
   // Handle action click
@@ -46,10 +46,10 @@ export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
         buttonAction.onClick(dependencies);
       } else if (action.actionType === 'flyout') {
         const flyoutAction = action as FlyoutActionConfig;
-        // Call onOpen callback if provided
-        flyoutAction.onOpen?.(dependencies);
-        // Set active flyout
-        setActiveFlyoutId(action.id);
+        // Call onFlyoutOpen callback if provided
+        flyoutAction.onFlyoutOpen?.(dependencies);
+        // Set open flyout
+        setOpenFlyoutId(action.id);
         // Close the popover
         closePopover();
       }
@@ -57,12 +57,12 @@ export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
     [dependencies]
   );
 
-  // Get active flyout config
-  const activeFlyout = useMemo(() => {
-    if (!activeFlyoutId) return null;
-    const action = registry.getAction(activeFlyoutId);
+  // Get open flyout configuration
+  const openFlyoutConfig = useMemo(() => {
+    if (!openFlyoutId) return null;
+    const action = registry.getAction(openFlyoutId);
     return action?.actionType === 'flyout' ? (action as FlyoutActionConfig) : null;
-  }, [activeFlyoutId, registry]);
+  }, [openFlyoutId, registry]);
 
   return (
     <>
@@ -109,9 +109,9 @@ export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
         </EuiListGroup>
       </EuiPopover>
 
-      {/* Render active flyout */}
-      {activeFlyout && (
-        <activeFlyout.component
+      {/* Render open flyout */}
+      {openFlyoutConfig && (
+        <openFlyoutConfig.component
           closeFlyout={closeFlyout}
           dependencies={dependencies}
           services={services}

@@ -21,29 +21,30 @@ jest.mock('react-redux', () => ({
 jest.mock('../../../../application/utils/state_management/selectors', () => ({
   selectOverallQueryStatus: jest.fn(),
   selectQuery: jest.fn(),
-  selectCurrentEditorQuery: jest.fn(),
 }));
 
 jest.mock('../../../../application/utils/languages', () => ({
   getQueryWithSource: jest.fn((query) => query),
 }));
 
+jest.mock('../../../../application/hooks/editor_hooks/use_editor_text/use_editor_text', () => ({
+  useEditorText: jest.fn(),
+}));
+
 const mockUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
 
-// Import the mocked selectors
+// Import the mocked selectors and hooks
 import {
   selectQuery,
   selectOverallQueryStatus,
-  selectCurrentEditorQuery,
 } from '../../../../application/utils/state_management/selectors';
+import { useEditorText } from '../../../../application/hooks/editor_hooks/use_editor_text/use_editor_text';
 
 const mockSelectQuery = selectQuery as jest.MockedFunction<typeof selectQuery>;
 const mockSelectOverallQueryStatus = selectOverallQueryStatus as jest.MockedFunction<
   typeof selectOverallQueryStatus
 >;
-const mockSelectCurrentEditorQuery = selectCurrentEditorQuery as jest.MockedFunction<
-  typeof selectCurrentEditorQuery
->;
+const mockUseEditorText = useEditorText as jest.MockedFunction<typeof useEditorText>;
 
 describe('QueryPanelActions', () => {
   let mockRegistry: jest.Mocked<QueryPanelActionsRegistryService>;
@@ -75,7 +76,9 @@ describe('QueryPanelActions', () => {
     // Set up the individual selector mocks
     mockSelectQuery.mockReturnValue(mockQuery);
     mockSelectOverallQueryStatus.mockReturnValue(mockResultStatus);
-    mockSelectCurrentEditorQuery.mockReturnValue('SELECT * FROM table');
+
+    // Set up useEditorText to return a function that returns the editor text
+    mockUseEditorText.mockReturnValue(() => 'SELECT * FROM table');
 
     // Set up useSelector to delegate to the selector functions
     mockUseSelector.mockImplementation((selector) => {
@@ -84,9 +87,6 @@ describe('QueryPanelActions', () => {
       }
       if (selector === mockSelectOverallQueryStatus) {
         return mockResultStatus;
-      }
-      if (selector === mockSelectCurrentEditorQuery) {
-        return 'SELECT * FROM table';
       }
       // Call the selector with empty state as fallback
       return selector({} as any);

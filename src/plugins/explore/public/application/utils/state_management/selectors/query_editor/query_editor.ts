@@ -89,8 +89,3 @@ export const selectShouldShowCancelButton = createSelector(
     return shouldShow;
   }
 );
-
-export const selectCurrentEditorQuery = createSelector(
-  [selectState],
-  (state) => state.currentEditorQuery
-);
