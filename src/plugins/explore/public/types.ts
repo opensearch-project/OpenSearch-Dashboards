@@ -21,7 +21,6 @@ import {
   IndexPatternsContract,
   FilterManager,
   TimefilterContract,
-  Query,
 } from 'src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { DashboardSetup, DashboardStart } from 'src/plugins/dashboard/public';
@@ -55,7 +54,6 @@ import {
   QueryPanelActionsRegistryService,
   QueryPanelActionsRegistryServiceSetup,
 } from './services/query_panel_actions_registry';
-import { QueryWithQueryAsString } from './application/utils/languages';
 import { ChatPluginStart } from '../../chat/public';
 
 // ============================================================================

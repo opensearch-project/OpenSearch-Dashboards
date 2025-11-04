@@ -46,7 +46,7 @@ export interface FlyoutActionConfig {
   getLabel(deps: QueryPanelActionDependencies): string;
   getIcon?(deps: QueryPanelActionDependencies): IconType;
   component: React.ComponentType<FlyoutComponentProps>;
-  onOpen?(deps: QueryPanelActionDependencies): void;
+  onFlyoutOpen?(deps: QueryPanelActionDependencies): void;
 }
 
 type QueryPanelActionConfig = ButtonActionConfig | FlyoutActionConfig;
@@ -75,8 +75,10 @@ export interface QueryPanelActionDependencies {
 }
 ```
 
+**Important:** Both `query.query` and `queryInEditor` are **already transformed** with the `source = <dataset>` clause added by the explore plugin. External plugins receive ready-to-execute queries and do NOT need to perform any transformation.
+
 **Note:** The `query` object includes:
-- `query.query`: The query string
+- `query.query`: The query string (pre-transformed with source clause)
 - `query.language`: The query language (PPL, SQL, etc.)
 - `query.dataset`: The selected dataset/index pattern (includes title, dataSource, signalType, etc.)
 
@@ -132,6 +134,7 @@ const CreateMonitorFlyout: React.FC<FlyoutComponentProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        {/* queryInEditor already includes source clause, ready to execute */}
         <p>Query: {dependencies.queryInEditor}</p>
         <p>Dataset: {dependencies.query.dataset?.title}</p>
         <p>Language: {dependencies.query.language}</p>
@@ -154,7 +157,7 @@ export class ExamplePlugin {
       getLabel: () => 'Create monitor (flyout)',
       getIcon: () => 'bell',
       component: CreateMonitorFlyout, // Pass your flyout component
-      onOpen: (deps) => {
+      onFlyoutOpen: (deps) => {
         // Optional: Log or perform actions when flyout opens
         console.log('Opening create monitor flyout');
       }

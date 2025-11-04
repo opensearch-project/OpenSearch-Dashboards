@@ -189,31 +189,48 @@ Renders registered actions from the QueryPanelActionsRegistry:
 
 ```typescript
 export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
-  const query = useSelector(selectQuery);
-  const resultStatus = useSelector(selectOverallQueryStatus);
-  const queryInEditor = useSelector(selectCurrentEditorQuery);
+  // Get fresh dependencies on every render (intentionally not memoized)
+  // This ensures flyouts always receive current editor content
+  const dependencies = useQueryPanelActionDependencies();
 
-  const dependencies = useMemo<QueryPanelActionDependencies>(() => ({
-    query: getQueryWithSource(query),
-    resultStatus,
-    queryInEditor,
-  }), [query, resultStatus, queryInEditor]);
+  const handleActionClick = (action: QueryPanelActionConfig) => {
+    if (action.actionType === 'button') {
+      action.onClick(dependencies);
+    } else if (action.actionType === 'flyout') {
+      action.onFlyoutOpen?.(dependencies);
+      setOpenFlyoutId(action.id);
+    }
+  };
 
   return (
-    <EuiPopover button={<ActionButton />}>
-      <EuiListGroup>
-        {registry.getSortedActions().map((action) => (
-          <ActionButton
-            key={action.id}
-            action={action}
-            dependencies={dependencies}
-          />
-        ))}
-      </EuiListGroup>
-    </EuiPopover>
+    <>
+      <EuiPopover button={<ActionButton />}>
+        <EuiListGroup>
+          {registry.getSortedActions().map((action) => (
+            <ActionButton
+              key={action.id}
+              action={action}
+              onClick={() => handleActionClick(action)}
+              dependencies={dependencies}
+            />
+          ))}
+        </EuiListGroup>
+      </EuiPopover>
+
+      {/* Render flyout if one is open */}
+      {openFlyoutConfig && (
+        <openFlyoutConfig.component
+          closeFlyout={closeFlyout}
+          dependencies={dependencies}
+          services={services}
+        />
+      )}
+    </>
   );
 };
 ```
+
+**Note:** Dependencies are not memoized to ensure fresh editor content is always passed to actions. This approach maintains performance because the component only re-renders on state changes (not on every keystroke).
 
 ### Results Display
 
@@ -367,8 +384,10 @@ Allows plugins to add actions to the query panel actions dropdown.
 
 **API:**
 ```typescript
-interface QueryPanelActionConfig {
+// Button action - executes onClick callback
+interface ButtonActionConfig {
   id: string;
+  actionType: 'button';
   order: number;
   getIsEnabled?(deps: QueryPanelActionDependencies): boolean;
   getLabel(deps: QueryPanelActionDependencies): string;
@@ -376,12 +395,28 @@ interface QueryPanelActionConfig {
   onClick(deps: QueryPanelActionDependencies): void;
 }
 
+// Flyout action - renders React component
+interface FlyoutActionConfig {
+  id: string;
+  actionType: 'flyout';
+  order: number;
+  getIsEnabled?(deps: QueryPanelActionDependencies): boolean;
+  getLabel(deps: QueryPanelActionDependencies): string;
+  getIcon?(deps: QueryPanelActionDependencies): IconType;
+  component: React.ComponentType<FlyoutComponentProps>;
+  onFlyoutOpen?(deps: QueryPanelActionDependencies): void;
+}
+
+type QueryPanelActionConfig = ButtonActionConfig | FlyoutActionConfig;
+
 interface QueryPanelActionDependencies {
-  query: QueryWithQueryAsString;    // Last executed query (includes language, dataset)
+  query: QueryWithQueryAsString;    // Last executed query (pre-transformed with source clause)
   resultStatus: QueryResultStatus;  // Query execution status
-  queryInEditor: string;             // Current query being edited (may differ from executed)
+  queryInEditor: string;             // Current editor content (pre-transformed, ready to execute)
 }
 ```
+
+**Important:** Both `query.query` and `queryInEditor` are pre-transformed with the `source = <dataset>` clause by the explore plugin. External plugins receive ready-to-execute queries.
 
 **Example Usage:**
 ```typescript
@@ -479,10 +514,11 @@ const MyComponent = () => {
 - Types: PascalCase with descriptive names
 
 ### Performance
-- Use `useMemo` for expensive computations
 - Use `React.memo` for expensive renders
 - Leverage cache keys for result caching
 - Avoid unnecessary re-renders with proper selectors
+- **Query panel action dependencies are NOT memoized** to ensure fresh editor content
+- Components re-render only on state changes, not on every keystroke (editor text is in local state, not Redux)
 
 ### Testing
 - Place test files next to source: `component.test.tsx`
@@ -572,8 +608,9 @@ Potential future extension points:
 - Field renderer registry (custom field formatters)
 - Context menu actions (right-click on results)
 - Toolbar button registry (custom toolbar buttons)
-- **Flyout registry** (modal/flyout components from actions)
 - Result row actions (per-row action buttons)
+
+**Note:** Flyout actions are already supported via `actionType: 'flyout'` in the Query Panel Actions Registry.
 
 ## References
 
