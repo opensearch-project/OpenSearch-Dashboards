@@ -8,7 +8,7 @@ import {
   EuiModal,
   EuiFlexItem,
   EuiModalHeaderTitle,
-  EuiSelect,
+  EuiComboBox,
   EuiModalBody,
   EuiFlexGroup,
   EuiFormRow,
@@ -41,9 +41,12 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
 }) => {
   const [selectedOption, setSelectedOption] = useState<'existing' | 'new'>('existing');
   const [existingDashboard, setExistingDashboard] = useState<DashboardInterface[]>([]);
+  const [searchResults, setSearchResults] = useState<DashboardInterface[]>([]);
   const [selectDashboard, setSelectDashboard] = useState<DashboardInterface | null>(null);
   const [newDashboardName, setNewDashboardName] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [searchValue, setSearchValue] = useState<string>('');
+  const [isSearching, setIsSearching] = useState<boolean>(false);
 
   const [isTitleOrDashboardTitleDuplicate, setIsTitleOrDashboardTitleDuplicate] = useState<boolean>(
     false
@@ -58,14 +61,50 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
     ((selectedOption === 'existing' && selectDashboard) ||
       (selectedOption === 'new' && newDashboardName));
 
-  useEffect(() => {
-    const loadAllDashboards = async () => {
+  // Function to search dashboards based on search input
+  const searchDashboards = async (searchTerm: string) => {
+    if (!searchTerm.trim()) {
+      // If search is empty, clear search results to show default dashboards
+      setSearchResults([]);
+      setSearchValue('');
+      return;
+    }
+
+    setIsSearching(true);
+    try {
       const res = await savedObjectsClient.find({
         type: 'dashboard',
+        search: `*${searchTerm}*`,
+        searchFields: ['title'],
+        perPage: 100,
       });
       const dashboards = res.savedObjects;
-      setExistingDashboard(dashboards as DashboardInterface[]);
-      setSelectDashboard(dashboards.length > 0 ? (dashboards[0] as DashboardInterface) : null);
+      setSearchResults(dashboards as DashboardInterface[]);
+      setSearchValue(searchTerm);
+    } catch (error) {
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Determine which dashboards to show: search results if searching, otherwise default dashboards
+  const dashboardsToShow = searchValue.trim() ? searchResults : existingDashboard;
+
+  useEffect(() => {
+    const loadAllDashboards = async () => {
+      try {
+        const res = await savedObjectsClient.find({
+          type: 'dashboard',
+        });
+        const dashboards = res.savedObjects;
+        setExistingDashboard(dashboards as DashboardInterface[]);
+        setSelectDashboard(dashboards.length > 0 ? (dashboards[0] as DashboardInterface) : null);
+      } catch (error) {
+        // Handle error silently or show error state
+        setExistingDashboard([]);
+        setSelectDashboard(null);
+      }
     };
     if (selectedOption === 'existing') {
       loadAllDashboards();
@@ -165,30 +204,51 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
             />
           </EuiFlexItem>
 
-          {existingDashboard.length > 0 && selectedOption === 'existing' && (
+          {selectedOption === 'existing' && (
             <EuiFlexItem style={{ width: '100%' }}>
               <EuiFormRow
                 label={i18n.translate('explore.addtoDashboardModal.selectDashboard', {
                   defaultMessage: 'Select a dashboard',
                 })}
               >
-                <EuiSelect
+                <EuiComboBox
                   data-test-subj="selectExistingDashboard"
                   compressed={true}
                   fullWidth={true}
-                  options={existingDashboard.map((dashboard) => {
+                  placeholder="Search and select a dashboard"
+                  singleSelection={{ asPlainText: true }}
+                  options={dashboardsToShow.map((dashboard) => {
                     return {
+                      label: dashboard.attributes?.title || dashboard.id,
                       value: dashboard.id,
-                      text: dashboard.attributes?.title || dashboard.id,
                     };
                   })}
-                  value={selectDashboard?.id}
-                  onChange={(e) => {
-                    const selected = existingDashboard.find((d) => d.id === e.target.value);
-                    if (selected) {
-                      setSelectDashboard(selected);
+                  selectedOptions={
+                    selectDashboard
+                      ? [
+                          {
+                            label: selectDashboard.attributes?.title || selectDashboard.id,
+                            value: selectDashboard.id,
+                          },
+                        ]
+                      : []
+                  }
+                  onChange={(selectedOptions) => {
+                    if (selectedOptions.length > 0) {
+                      const selectedValue = selectedOptions[0].value;
+                      const selected = dashboardsToShow.find((d) => d.id === selectedValue);
+                      if (selected) {
+                        setSelectDashboard(selected);
+                      }
+                    } else {
+                      setSelectDashboard(null);
                     }
                   }}
+                  onSearchChange={(searchTerm) => {
+                    searchDashboards(searchTerm);
+                  }}
+                  isLoading={isSearching}
+                  isClearable={true}
                 />
               </EuiFormRow>
             </EuiFlexItem>
