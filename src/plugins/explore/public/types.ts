@@ -55,6 +55,7 @@ import {
   QueryPanelActionsRegistryServiceSetup,
 } from './services/query_panel_actions_registry';
 import { SlotRegistryService, SlotRegistryServiceStart } from './services/slot_registry';
+import { ChatPluginStart } from '../../chat/public';
 
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
@@ -63,6 +64,9 @@ import { SlotRegistryService, SlotRegistryServiceStart } from './services/slot_r
 export interface ExplorePluginSetup {
   visualizationRegistry: VisualizationRegistryServiceSetup;
   queryPanelActionsRegistry: QueryPanelActionsRegistryServiceSetup;
+  logActionRegistry: {
+    registerAction: (action: import('./types/log_actions').LogActionDefinition) => void;
+  };
   docViews: {
     addDocView: (docViewSpec: unknown) => void;
   };
@@ -120,6 +124,7 @@ export interface ExploreStartDependencies {
   expressions: ExpressionsStart;
   dashboard: DashboardStart;
   contextProvider?: ContextProviderStart;
+  chat?: ChatPluginStart;
 }
 
 // ============================================================================

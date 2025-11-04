@@ -123,8 +123,8 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
             />
           </EuiFormRow>
           <EuiFormRow
-            label={i18n.translate('explore.stylePanel.table.cellTypes', {
-              defaultMessage: 'Cell types',
+            label={i18n.translate('explore.stylePanel.table.cellStyle', {
+              defaultMessage: 'Cell style',
             })}
           >
             <TableCellTypeOptions

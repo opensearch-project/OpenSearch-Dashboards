@@ -72,6 +72,10 @@ import { abortAllActiveQueries } from './application/utils/state_management/acti
 import { setServices } from './services/services';
 import { SlotRegistryService } from './services/slot_registry';
 
+// Log Actions
+import { logActionRegistry } from './services/log_action_registry';
+import { createAskAiAction } from './actions/ask_ai_action';
+
 export class ExplorePlugin
   implements
     Plugin<
@@ -453,6 +457,9 @@ export class ExplorePlugin
       },
       visualizationRegistry: visualizationRegistryService,
       queryPanelActionsRegistry: this.queryPanelActionsRegistryService.setup(),
+      logActionRegistry: {
+        registerAction: (action) => logActionRegistry.registerAction(action),
+      },
     };
   }
 
@@ -490,6 +497,13 @@ export class ExplorePlugin
     };
 
     this.initializeServices();
+
+    // Register Log Actions
+    // Register Ask AI action if chat service is available
+    if (plugins.chat?.chatService) {
+      const askAiAction = createAskAiAction(plugins.chat.chatService);
+      logActionRegistry.registerAction(askAiAction);
+    }
 
     const savedExploreLoader = createSavedExploreLoader({
       savedObjectsClient: core.savedObjects.client,

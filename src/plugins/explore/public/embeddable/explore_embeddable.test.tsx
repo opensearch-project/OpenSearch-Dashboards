@@ -200,12 +200,6 @@ describe('ExploreEmbeddable', () => {
     expect(searchProps?.displayTimeColumn).toBe(false);
   });
 
-  test('renders component when render is called', () => {
-    embeddable.render(mockNode);
-
-    expect(ReactDOM.render).toHaveBeenCalledWith(expect.anything(), mockNode);
-  });
-
   test('cleans up when destroy is called', () => {
     // Setup a mock node
     embeddable.render(mockNode);

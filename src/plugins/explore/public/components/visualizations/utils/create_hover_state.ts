@@ -28,7 +28,7 @@ interface Options {
 function createTooltip(fields: Field[]) {
   const tooltip = fields.map((f) => {
     return {
-      field: f.name,
+      field: `["${f.name}"]`,
       type: f.type,
       title: f.title,
       ...(f.format && { format: f.format }),
@@ -36,6 +36,8 @@ function createTooltip(fields: Field[]) {
   });
   return tooltip;
 }
+
+const MAX_DATA_POINTS_NUM = 1000;
 
 function createPointLayer(xField: Field, yFields: Field[], colorField?: Field) {
   let color = null;
@@ -133,6 +135,7 @@ function createHiddenBarLayer(axisConfig: AxisConfig, options: Options & { barOp
         axisConfig.x,
         ...[...uniqueColorFieldValues].map((v) => ({
           name: v,
+          title: v,
           type: (axisConfig.y as Field).type,
         })),
       ]);
@@ -177,6 +180,11 @@ function createHiddenBarLayer(axisConfig: AxisConfig, options: Options & { barOp
 }
 
 export function createCrosshairLayers(axisConfig: AxisConfig, options: Options) {
+  // For better performance, don't create crosshair layers if too many data points
+  if (options.data && options.data.length > MAX_DATA_POINTS_NUM) {
+    return [];
+  }
+
   const colors = getColors();
   const layers = [];
   const yFields = Array<Field>().concat(axisConfig.y);
@@ -224,6 +232,11 @@ export function createCrosshairLayers(axisConfig: AxisConfig, options: Options) 
 }
 
 export function createHighlightBarLayers(axisConfig: AxisConfig, options: Options) {
+  // For better performance, don't create highlight bar layers if too many data points
+  if (options.data && options.data.length > MAX_DATA_POINTS_NUM) {
+    return [];
+  }
+
   const layers = [];
   const yFields = Array<Field>().concat(axisConfig.y);
   const y1Fields = Array<Field>().concat(axisConfig.y1 ? axisConfig.y1 : []);
