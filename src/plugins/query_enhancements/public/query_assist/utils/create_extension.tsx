@@ -133,7 +133,9 @@ export const createQueryAssistExtension = (
       }
     },
     isEnabled$: () =>
-      getAvailableLanguages$(http, data).pipe(map((languages) => languages.length > 0)),
+      getAvailableLanguages$(http, data).pipe(
+        map((languages) => languages.length > 0 && assistantEnabled$.value)
+      ),
     getComponent: (dependencies) => {
       // only show the component if user is on a supported language.
       return (
