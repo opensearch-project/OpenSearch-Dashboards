@@ -36,6 +36,7 @@ export interface TableRowProps {
   onClose?: () => void;
   isShortDots: boolean;
   docViewsRegistry: DocViewsRegistry;
+  expandedTableHeader?: string;
 }
 
 export const TableRowUI = ({
@@ -49,6 +50,7 @@ export const TableRowUI = ({
   onClose,
   isShortDots,
   docViewsRegistry,
+  expandedTableHeader,
 }: TableRowProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -100,6 +102,7 @@ export const TableRowUI = ({
           onAddColumn={onAddColumn}
           onClose={onClose}
           docViewsRegistry={docViewsRegistry}
+          expandedTableHeader={expandedTableHeader}
         />
       )}
     </>

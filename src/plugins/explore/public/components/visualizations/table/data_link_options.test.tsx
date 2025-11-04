@@ -134,7 +134,7 @@ describe('DataLinkOptions', () => {
     fireEvent.click(addBtn);
 
     expect(
-      screen.getByText('Add Link', { selector: '.euiModalHeader__title' })
+      screen.getByText('Add link', { selector: '.euiModalHeader__title' })
     ).toBeInTheDocument();
   });
 
