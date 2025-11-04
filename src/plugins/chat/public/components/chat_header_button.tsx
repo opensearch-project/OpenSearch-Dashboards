@@ -32,11 +32,20 @@ interface ChatHeaderButtonProps {
 
 export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatHeaderButtonProps>(
   ({ core, chatService, contextProvider, charts }, ref) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [layoutMode, setLayoutMode] = useState<ChatLayoutMode>(ChatLayoutMode.SIDECAR);
+    // Use ChatService as source of truth for window state
+    const [isOpen, setIsOpen] = useState<boolean>(chatService.isWindowOpen());
+    const [layoutMode, setLayoutMode] = useState<ChatLayoutMode>(chatService.getWindowMode());
     const sideCarRef = useRef<{ close: () => void }>();
     const mountPointRef = useRef<HTMLDivElement>(null);
     const chatWindowRef = useRef<ChatWindowInstance>(null);
+
+    // Register ChatWindow ref with ChatService for external access
+    useEffect(() => {
+      chatService.setChatWindowRef(chatWindowRef);
+      return () => {
+        chatService.clearChatWindowRef();
+      };
+    }, [chatService]);
 
     const openSidecar = useCallback(() => {
       if (!mountPointRef.current) return;
@@ -70,16 +79,20 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
         config: sidecarConfig,
       });
 
+      // Notify ChatService that window is now open
+      chatService.setWindowState(true, layoutMode);
       setIsOpen(true);
-    }, [core.overlays, layoutMode]);
+    }, [core.overlays, layoutMode, chatService]);
 
     const closeSidecar = useCallback(() => {
       if (sideCarRef.current) {
         sideCarRef.current.close();
         sideCarRef.current = undefined;
       }
+      // Notify ChatService that window is now closed
+      chatService.setWindowState(false);
       setIsOpen(false);
-    }, []);
+    }, [chatService]);
 
     const toggleSidecar = useCallback(() => {
       if (isOpen) {
@@ -112,7 +125,10 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
 
         core.overlays.sidecar.setSidecarConfig(newSidecarConfig);
       }
-    }, [layoutMode, isOpen, core.overlays.sidecar]);
+
+      // Update ChatService with new layout mode
+      chatService.setWindowState(isOpen, newLayoutMode);
+    }, [layoutMode, isOpen, chatService, core.overlays.sidecar]);
 
     const startNewConversation = useCallback<ChatHeaderButtonInstance['startNewConversation']>(
       async ({ content }) => {
@@ -124,6 +140,34 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
     );
 
     useImperativeHandle(ref, () => ({ startNewConversation }), [startNewConversation]);
+
+    // Listen to ChatService window state changes and sync local state
+    useEffect(() => {
+      const unsubscribe = chatService.onWindowStateChange((newIsOpen) => {
+        setIsOpen(newIsOpen);
+      });
+      return unsubscribe;
+    }, [chatService]);
+
+    // Register callbacks for external window open/close requests
+    useEffect(() => {
+      const unsubscribeOpen = chatService.onWindowOpenRequest(() => {
+        if (!isOpen) {
+          openSidecar();
+        }
+      });
+
+      const unsubscribeClose = chatService.onWindowCloseRequest(() => {
+        if (isOpen) {
+          closeSidecar();
+        }
+      });
+
+      return () => {
+        unsubscribeOpen();
+        unsubscribeClose();
+      };
+    }, [chatService, isOpen, openSidecar, closeSidecar]);
 
     // Cleanup on unmount
     useEffect(() => {
