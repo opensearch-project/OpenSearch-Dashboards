@@ -48,6 +48,7 @@ describe('QueryEditor Slice', () => {
     dateRange: undefined,
     isQueryEditorDirty: false,
     hasUserInitiatedQuery: false,
+    currentEditorQuery: '',
   };
 
   it('should return the initial state', () => {

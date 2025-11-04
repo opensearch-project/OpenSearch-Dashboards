@@ -21,6 +21,7 @@ jest.mock('react-redux', () => ({
 jest.mock('../../../../application/utils/state_management/selectors', () => ({
   selectOverallQueryStatus: jest.fn(),
   selectQuery: jest.fn(),
+  selectCurrentEditorQuery: jest.fn(),
 }));
 
 jest.mock('../../../../application/utils/languages', () => ({
@@ -33,11 +34,15 @@ const mockUseSelector = useSelector as jest.MockedFunction<typeof useSelector>;
 import {
   selectQuery,
   selectOverallQueryStatus,
+  selectCurrentEditorQuery,
 } from '../../../../application/utils/state_management/selectors';
 
 const mockSelectQuery = selectQuery as jest.MockedFunction<typeof selectQuery>;
 const mockSelectOverallQueryStatus = selectOverallQueryStatus as jest.MockedFunction<
   typeof selectOverallQueryStatus
+>;
+const mockSelectCurrentEditorQuery = selectCurrentEditorQuery as jest.MockedFunction<
+  typeof selectCurrentEditorQuery
 >;
 
 describe('QueryPanelActions', () => {
@@ -70,6 +75,7 @@ describe('QueryPanelActions', () => {
     // Set up the individual selector mocks
     mockSelectQuery.mockReturnValue(mockQuery);
     mockSelectOverallQueryStatus.mockReturnValue(mockResultStatus);
+    mockSelectCurrentEditorQuery.mockReturnValue('SELECT * FROM table');
 
     // Set up useSelector to delegate to the selector functions
     mockUseSelector.mockImplementation((selector) => {
@@ -78,6 +84,9 @@ describe('QueryPanelActions', () => {
       }
       if (selector === mockSelectOverallQueryStatus) {
         return mockResultStatus;
+      }
+      if (selector === mockSelectCurrentEditorQuery) {
+        return 'SELECT * FROM table';
       }
       // Call the selector with empty state as fallback
       return selector({} as any);
@@ -102,12 +111,14 @@ describe('QueryPanelActions', () => {
         {
           id: 'action-1',
           order: 1,
+          actionType: 'button',
           getLabel: () => 'Test Action 1',
           onClick: jest.fn(),
         },
         {
           id: 'action-2',
           order: 2,
+          actionType: 'button',
           getLabel: () => 'Test Action 2',
           onClick: jest.fn(),
         },
@@ -164,6 +175,7 @@ describe('QueryPanelActions', () => {
         {
           id: 'clickable-action',
           order: 1,
+          actionType: 'button',
           getLabel: () => 'Clickable Action',
           onClick: mockOnClick,
         },
@@ -185,6 +197,7 @@ describe('QueryPanelActions', () => {
       expect(mockOnClick).toHaveBeenCalledWith({
         query: mockQuery,
         resultStatus: mockResultStatus,
+        queryInEditor: 'SELECT * FROM table',
       });
     });
 
@@ -194,6 +207,7 @@ describe('QueryPanelActions', () => {
         {
           id: 'disabled-action',
           order: 1,
+          actionType: 'button',
           getLabel: () => 'Disabled Action',
           getIsEnabled: () => false,
           onClick: jest.fn(),
@@ -223,6 +237,7 @@ describe('QueryPanelActions', () => {
         {
           id: 'enabled-action',
           order: 1,
+          actionType: 'button',
           getLabel: () => 'Enabled Action',
           getIsEnabled: () => true,
           onClick: jest.fn(),
@@ -248,6 +263,7 @@ describe('QueryPanelActions', () => {
         {
           id: 'default-enabled-action',
           order: 1,
+          actionType: 'button',
           getLabel: () => 'Default Enabled Action',
           onClick: jest.fn(),
         },
@@ -272,6 +288,7 @@ describe('QueryPanelActions', () => {
         {
           id: 'action-with-icon',
           order: 1,
+          actionType: 'button',
           getLabel: () => 'Action With Icon',
           getIcon: () => 'download',
           onClick: jest.fn(),
@@ -296,6 +313,7 @@ describe('QueryPanelActions', () => {
         {
           id: 'action-without-icon',
           order: 1,
+          actionType: 'button',
           getLabel: () => 'Action Without Icon',
           onClick: jest.fn(),
         },
@@ -326,6 +344,7 @@ describe('QueryPanelActions', () => {
         {
           id: 'full-featured-action',
           order: 1,
+          actionType: 'button',
           getLabel: mockGetLabel,
           getIsEnabled: mockGetIsEnabled,
           getIcon: mockGetIcon,
@@ -344,6 +363,7 @@ describe('QueryPanelActions', () => {
       const expectedDependencies = {
         query: mockQuery,
         resultStatus: mockResultStatus,
+        queryInEditor: 'SELECT * FROM table',
       };
 
       // Verify all callbacks receive correct dependencies
@@ -364,6 +384,7 @@ describe('QueryPanelActions', () => {
         {
           id: 'test-action',
           order: 1,
+          actionType: 'button',
           getLabel: jest.fn().mockReturnValue('Test Action'),
           onClick: jest.fn(),
         },
