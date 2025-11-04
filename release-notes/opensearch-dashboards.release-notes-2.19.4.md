@@ -22,6 +22,8 @@
 
  - Vega bump CVE fixes ([#10839](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10839))
 
+ - Revert Vega Lite ([#10852](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10852))
+
 ### 🪛 Refactoring
 
 ### 🔩 Tests
