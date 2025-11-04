@@ -39,23 +39,20 @@ export const QueryPanelActions = ({ registry }: QueryPanelActionsProps) => {
   }, []);
 
   // Handle action click
-  const handleActionClick = useCallback(
-    (action: QueryPanelActionConfig) => {
-      if (action.actionType === 'button') {
-        const buttonAction = action as ButtonActionConfig;
-        buttonAction.onClick(dependencies);
-      } else if (action.actionType === 'flyout') {
-        const flyoutAction = action as FlyoutActionConfig;
-        // Call onFlyoutOpen callback if provided
-        flyoutAction.onFlyoutOpen?.(dependencies);
-        // Set open flyout
-        setOpenFlyoutId(action.id);
-        // Close the popover
-        closePopover();
-      }
-    },
-    [dependencies]
-  );
+  const handleActionClick = (action: QueryPanelActionConfig) => {
+    if (action.actionType === 'button') {
+      const buttonAction = action as ButtonActionConfig;
+      buttonAction.onClick(dependencies);
+    } else if (action.actionType === 'flyout') {
+      const flyoutAction = action as FlyoutActionConfig;
+      // Call onFlyoutOpen callback if provided
+      flyoutAction.onFlyoutOpen?.(dependencies);
+      // Set open flyout
+      setOpenFlyoutId(action.id);
+      // Close the popover
+      closePopover();
+    }
+  };
 
   // Get open flyout configuration
   const openFlyoutConfig = useMemo(() => {

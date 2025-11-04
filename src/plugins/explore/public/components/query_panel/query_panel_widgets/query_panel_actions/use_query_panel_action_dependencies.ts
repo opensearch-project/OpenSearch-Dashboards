@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { QueryPanelActionDependencies } from '../../../../services/query_panel_actions_registry';
 import {
@@ -27,25 +26,23 @@ export const useQueryPanelActionDependencies = (): QueryPanelActionDependencies 
   const executedQueryState = useSelector(selectQuery);
   const resultStatus = useSelector(selectOverallQueryStatus);
 
-  // Get current editor text directly from editor (no Redux performance issues)
+  // Get current editor text directly from editor
   const getEditorText = useEditorText();
 
-  return useMemo<QueryPanelActionDependencies>(() => {
-    // Get current editor query text
-    const editorQuery = getEditorText();
+  // Get current editor query text
+  const editorQuery = getEditorText();
 
-    // Transform editor query to add source clause (same as executed query)
-    // This ensures external plugins receive ready-to-execute queries
-    const transformedEditorQuery = getQueryWithSource({
-      query: editorQuery,
-      language: executedQueryState.language,
-      dataset: executedQueryState.dataset,
-    });
+  // Transform editor query to add source clause (same as executed query)
+  // This ensures external plugins receive ready-to-execute queries
+  const transformedEditorQuery = getQueryWithSource({
+    query: editorQuery,
+    language: executedQueryState.language,
+    dataset: executedQueryState.dataset,
+  });
 
-    return {
-      query: getQueryWithSource(executedQueryState),
-      resultStatus,
-      queryInEditor: transformedEditorQuery.query, // Pass the transformed query string
-    };
-  }, [executedQueryState, resultStatus, getEditorText]);
+  return {
+    query: getQueryWithSource(executedQueryState),
+    resultStatus,
+    queryInEditor: transformedEditorQuery.query, // Pass the transformed query string
+  };
 };
