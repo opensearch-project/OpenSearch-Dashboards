@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import { ColorGroupPanel } from './color_group_panel';
-import { resolveColor } from '../../theme/default_colors';
+import { resolveColor } from '../../theme/color_utils';
 import './color_group_panel.scss';
 
 interface ColorGroupButtonProps {

@@ -49,6 +49,8 @@ export const runCreateVisTests = () => {
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
         });
+      // Open legend setting
+      cy.get('[aria-controls="legendSection"]').click();
       cy.getElementByTestId('legendModeSwitch').click();
       // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {

@@ -45,7 +45,7 @@ describe('BarGaugeExclusiveVisOptions', () => {
     });
   });
 
-  it('should call onChange when display mode is changed', () => {
+  it('should call onChange when display style is changed', () => {
     const { getByText } = render(
       <BarGaugeExclusiveVisOptions
         styles={defaultStyles}

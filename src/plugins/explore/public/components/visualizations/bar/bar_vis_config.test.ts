@@ -14,7 +14,7 @@ describe('bar_vis_config', () => {
       expect(defaultBarChartStyles).toMatchObject({
         // Basic controls
         addLegend: true,
-        legendPosition: Positions.RIGHT,
+        legendPosition: Positions.BOTTOM,
         tooltipOptions: {
           mode: 'all',
         },

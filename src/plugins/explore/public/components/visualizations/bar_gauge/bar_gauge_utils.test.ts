@@ -118,7 +118,7 @@ describe('bar_gauge_utils', () => {
       expect(result).toEqual({ x1: 1, y1: 1, x2: 1, y2: 0 });
     });
 
-    it('returns undefined for non-gradient display mode', () => {
+    it('returns undefined for non-gradient display style', () => {
       const result = getGradientConfig('horizontal', 'basic', false);
       expect(result).toBeUndefined();
     });
