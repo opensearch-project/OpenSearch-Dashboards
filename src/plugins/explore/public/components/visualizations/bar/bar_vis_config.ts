@@ -234,9 +234,6 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
         [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
         [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
       },
-      {
-        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
-      },
     ],
   },
 });

@@ -20,8 +20,8 @@ import {
   convertThresholdsToValueMappings,
 } from './state_timeline_utils';
 import { DEFAULT_OPACITY } from '../constants';
-import { getCategoryNextColor } from '../theme/default_colors';
-import { resolveColor } from '../theme/default_colors';
+import { getCategoryNextColor } from '../theme/color_utils';
+import { resolveColor } from '../theme/color_utils';
 
 export const createNumericalStateTimeline = (
   transformedData: Array<Record<string, any>>,

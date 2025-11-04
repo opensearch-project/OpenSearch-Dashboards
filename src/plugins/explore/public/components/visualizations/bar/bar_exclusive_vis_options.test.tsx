@@ -16,6 +16,7 @@ jest.mock('../utils/use_debounced_value', () => ({
 
 describe('BarExclusiveVisOptions', () => {
   const defaultProps = {
+    type: 'bar',
     barSizeMode: 'manual' as 'manual' | 'auto',
     barWidth: 0.7,
     barPadding: 0.1,
