@@ -20,11 +20,12 @@ import {
   EuiRadio,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { DebouncedFieldText } from './style_panel/utils';
-import { OnSaveProps, DashboardInterface } from './add_to_dashboard_button';
+import { OnSaveProps } from './add_to_dashboard_button';
 import { useSavedExplore } from '../../application/utils/hooks/use_saved_explore';
+import { useExistingDashboard } from '../../application/utils/hooks/use_existing_dashboard';
 
 interface AddToDashboardModalProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -40,13 +41,8 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   onCancel,
 }) => {
   const [selectedOption, setSelectedOption] = useState<'existing' | 'new'>('existing');
-  const [existingDashboard, setExistingDashboard] = useState<DashboardInterface[]>([]);
-  const [searchResults, setSearchResults] = useState<DashboardInterface[]>([]);
-  const [selectDashboard, setSelectDashboard] = useState<DashboardInterface | null>(null);
   const [newDashboardName, setNewDashboardName] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [searchValue, setSearchValue] = useState<string>('');
-  const [isSearching, setIsSearching] = useState<boolean>(false);
 
   const [isTitleOrDashboardTitleDuplicate, setIsTitleOrDashboardTitleDuplicate] = useState<boolean>(
     false
@@ -56,60 +52,27 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
 
   const [title, setTitle] = useState<string>('');
 
-  const enableButton =
-    title &&
-    ((selectedOption === 'existing' && selectDashboard) ||
-      (selectedOption === 'new' && newDashboardName));
+  // Dashboard-related state managed by custom hook
+  const {
+    dashboardsToShow,
+    selectedDashboard,
+    isSearching,
+    setSelectedDashboard,
+    searchDashboards,
+    loadAllDashboards,
+  } = useExistingDashboard(savedObjectsClient);
 
-  // Function to search dashboards based on search input
-  const searchDashboards = async (searchTerm: string) => {
-    if (!searchTerm.trim()) {
-      // If search is empty, clear search results to show default dashboards
-      setSearchResults([]);
-      setSearchValue('');
-      return;
-    }
-
-    setIsSearching(true);
-    try {
-      const res = await savedObjectsClient.find({
-        type: 'dashboard',
-        search: `*${searchTerm}*`,
-        searchFields: ['title'],
-        perPage: 100,
-      });
-      const dashboards = res.savedObjects;
-      setSearchResults(dashboards as DashboardInterface[]);
-      setSearchValue(searchTerm);
-    } catch (error) {
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  // Determine which dashboards to show: search results if searching, otherwise default dashboards
-  const dashboardsToShow = searchValue.trim() ? searchResults : existingDashboard;
-
+  // Load dashboards on mount and when switching to existing option
   useEffect(() => {
-    const loadAllDashboards = async () => {
-      try {
-        const res = await savedObjectsClient.find({
-          type: 'dashboard',
-        });
-        const dashboards = res.savedObjects;
-        setExistingDashboard(dashboards as DashboardInterface[]);
-        setSelectDashboard(dashboards.length > 0 ? (dashboards[0] as DashboardInterface) : null);
-      } catch (error) {
-        // Handle error silently or show error state
-        setExistingDashboard([]);
-        setSelectDashboard(null);
-      }
-    };
     if (selectedOption === 'existing') {
       loadAllDashboards();
     }
-  }, [savedObjectsClient, selectedOption]);
+  }, [selectedOption, loadAllDashboards]);
+
+  const enableButton =
+    title &&
+    ((selectedOption === 'existing' && selectedDashboard) ||
+      (selectedOption === 'new' && newDashboardName));
 
   const handleSave = async () => {
     if (isLoading) return;
@@ -121,7 +84,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
         isTitleDuplicateConfirmed: isTitleOrDashboardTitleDuplicate,
         onTitleDuplicate: handleTitleDuplicate,
         mode: selectedOption,
-        selectDashboard,
+        selectDashboard: selectedDashboard,
         newDashboardName,
       });
     }
@@ -224,11 +187,11 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
                     };
                   })}
                   selectedOptions={
-                    selectDashboard
+                    selectedDashboard
                       ? [
                           {
-                            label: selectDashboard.attributes?.title || selectDashboard.id,
-                            value: selectDashboard.id,
+                            label: selectedDashboard.attributes?.title || selectedDashboard.id,
+                            value: selectedDashboard.id,
                           },
                         ]
                       : []
@@ -238,10 +201,10 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
                       const selectedValue = selectedOptions[0].value;
                       const selected = dashboardsToShow.find((d) => d.id === selectedValue);
                       if (selected) {
-                        setSelectDashboard(selected);
+                        setSelectedDashboard(selected);
                       }
                     } else {
-                      setSelectDashboard(null);
+                      setSelectedDashboard(null);
                     }
                   }}
                   onSearchChange={(searchTerm) => {

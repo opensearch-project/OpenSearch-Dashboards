@@ -365,13 +365,10 @@ describe('AddToDashboardModal', () => {
     const comboBoxInput = screen.getByTestId('selectExistingDashboard').querySelector('input');
     fireEvent.click(comboBoxInput!);
 
+    // Select Dashboard One from the dropdown
     await waitFor(() => {
-      const options = screen.getAllByText('Dashboard One');
-      // Click on the dropdown option, not the selected pill
-      const dropdownOption = options.find((el) => el.closest('.euiComboBoxOption'));
-      if (dropdownOption) {
-        fireEvent.click(dropdownOption);
-      }
+      const option = screen.getByText('Dashboard One');
+      fireEvent.click(option);
     });
 
     const addButton = screen.getByRole('button', { name: 'Add' });
