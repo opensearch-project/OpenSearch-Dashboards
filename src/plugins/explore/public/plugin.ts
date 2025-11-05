@@ -11,7 +11,6 @@ import { filter, map, take } from 'rxjs/operators';
 import {
   App,
   AppMountParameters,
-  AppNavLinkStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
