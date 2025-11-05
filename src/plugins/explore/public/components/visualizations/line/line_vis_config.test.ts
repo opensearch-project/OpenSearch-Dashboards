@@ -4,12 +4,12 @@
  */
 
 import React from 'react';
-import { createLineConfig, LineChartStyleControls } from './line_vis_config';
+import { createLineConfig } from './line_vis_config';
 import { LineVisStyleControls } from './line_vis_options';
 import {
   CategoryAxis,
   GridOptions,
-  ThresholdLineStyle,
+  ThresholdMode,
   ValueAxis,
   Positions,
   TooltipOptions,
@@ -40,16 +40,16 @@ describe('line_vis_config', () => {
 
     it('should have the correct default style settings', () => {
       const config = createLineConfig();
-      const defaults = config.ui.style.defaults as LineChartStyleControls;
+      const defaults = config.ui.style.defaults;
 
       // Verify basic controls
       expect(defaults.addLegend).toBe(true);
-      expect(defaults.legendPosition).toBe(Positions.RIGHT);
+      expect(defaults.legendPosition).toBe(Positions.BOTTOM);
       expect(defaults.addTimeMarker).toBe(false);
 
       // Verify line style
       expect(defaults.lineStyle).toBe('both');
-      expect(defaults.lineMode).toBe('smooth');
+      expect(defaults.lineMode).toBe('straight');
       expect(defaults.lineWidth).toBe(2);
 
       // Verify tooltip options
@@ -58,17 +58,11 @@ describe('line_vis_config', () => {
       });
 
       // Verify threshold settings
-      expect(defaults.thresholdLines).toEqual([
-        {
-          id: '1',
-          color: '#E7664C',
-          show: false,
-          style: ThresholdLineStyle.Full,
-          value: 10,
-          width: 1,
-          name: '',
-        },
-      ]);
+      expect(defaults.thresholdOptions).toMatchObject({
+        baseColor: '#00BD6B',
+        thresholds: [],
+        thresholdStyle: ThresholdMode.Off,
+      });
 
       // Verify axes
       expect(defaults.categoryAxes).toHaveLength(1);
@@ -84,7 +78,7 @@ describe('line_vis_config', () => {
           truncate: 100,
         },
         grid: {
-          showLines: false,
+          showLines: true,
         },
         title: {
           text: '',
@@ -104,7 +98,7 @@ describe('line_vis_config', () => {
           truncate: 100,
         },
         grid: {
-          showLines: false,
+          showLines: true,
         },
         title: {
           text: '',
@@ -120,7 +114,7 @@ describe('line_vis_config', () => {
     it('should have available mappings configured', () => {
       const config = createLineConfig();
 
-      expect(config.ui.availableMappings).toHaveLength(5);
+      expect(config.ui.availableMappings).toHaveLength(9);
       expect(config.ui.availableMappings[0]).toHaveProperty('x');
       expect(config.ui.availableMappings[0]).toHaveProperty('y');
     });
@@ -134,20 +128,14 @@ describe('line_vis_config', () => {
         styleOptions: {
           addLegend: true,
           legendPosition: Positions.RIGHT,
-          thresholdLines: [
-            {
-              id: '1',
-              show: false,
-              value: 100,
-              color: 'red',
-              width: 1,
-              style: ThresholdLineStyle.Dashed,
-              name: '',
-            },
-          ],
+          thresholdOptions: {
+            baseColor: '#00BD6B',
+            thresholds: [],
+            thresholdStyle: ThresholdMode.Solid,
+          },
           addTimeMarker: false,
           lineStyle: 'both' as LineStyle,
-          lineMode: 'smooth',
+          lineMode: 'smooth' as const,
           lineWidth: 1,
           tooltipOptions: { mode: 'all' } as TooltipOptions,
           grid: {} as GridOptions,

@@ -72,6 +72,7 @@ import {
   GlobalSearchServiceStartContract,
 } from './global_search';
 import { searchPages } from './ui/global_search/search_pages_command';
+import { KeyboardShortcutStart } from '../keyboard_shortcut';
 
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -134,6 +135,7 @@ export interface StartDeps {
   uiSettings: IUiSettingsClient;
   overlays: OverlayStart;
   workspaces: WorkspacesStart;
+  keyboardShortcut: KeyboardShortcutStart | undefined;
 }
 
 type CollapsibleNavHeaderRender = () => JSX.Element | null;
@@ -255,6 +257,7 @@ export class ChromeService {
     uiSettings,
     overlays,
     workspaces,
+    keyboardShortcut,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.initHeaderVariant(application);
@@ -429,8 +432,9 @@ export class ChromeService {
           workspaceList$={workspaces.workspaceList$}
           currentWorkspace$={workspaces.currentWorkspace$}
           useUpdatedHeader={this.useUpdatedHeader}
-          globalSearchCommands={globalSearch.getAllSearchCommands()}
+          globalSearchCommands$={globalSearch.getAllSearchCommands$()}
           globalBanner$={this.globalBanner$.pipe(takeUntil(this.stop$))}
+          keyboardShortcut={keyboardShortcut}
         />
       ),
 

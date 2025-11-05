@@ -37,8 +37,8 @@ import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { coreMock } from 'opensearch-dashboards/public/mocks';
-import { IndexPatternField } from '../../../../data/public';
-import { getStubIndexPattern } from '../../../../data/public/test_utils';
+import { DataViewField } from '../../../../data/public';
+import { getStubDataView } from '../../../../data/public/data_views/data_view.stub';
 
 const mockGetHref = jest.fn();
 const mockGetTriggerCompatibleActions = jest.fn();
@@ -49,7 +49,7 @@ jest.mock('../../application/legacy/discover/opensearch_dashboards_services', ()
   }),
 }));
 
-const indexPattern = getStubIndexPattern(
+const dataSet = getStubDataView(
   'logstash-*',
   (cfg: any) => cfg,
   'time',
@@ -61,7 +61,7 @@ describe('discover sidebar field details', function () {
   const defaultProps = {
     columns: [],
     details: { buckets: [], error: '', exists: 1, total: 1 },
-    indexPattern,
+    dataSet,
     onAddFilter: jest.fn(),
   };
 
@@ -74,25 +74,24 @@ describe('discover sidebar field details', function () {
     ]);
   });
 
-  function mountComponent(field: IndexPatternField, props?: Record<string, any>) {
+  function mountComponent(field: DataViewField, props?: Record<string, any>) {
     const compProps = { ...defaultProps, ...props, field };
     return mountWithIntl(<DiscoverFieldDetails {...compProps} />);
   }
 
   it('should render buckets if they exist', async function () {
-    const visualizableField = new IndexPatternField(
-      {
-        name: 'bytes',
-        type: 'number',
-        esTypes: ['long'],
-        count: 10,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'bytes'
-    );
+    const visualizableField = {
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'bytes',
+      visualizable: true,
+    } as DataViewField;
     const buckets = [1, 2, 3].map((n) => ({
       display: `display-${n}`,
       value: `value-${n}`,
@@ -126,19 +125,18 @@ describe('discover sidebar field details', function () {
   });
 
   it('should only render buckets if they exist', async function () {
-    const visualizableField = new IndexPatternField(
-      {
-        name: 'bytes',
-        type: 'number',
-        esTypes: ['long'],
-        count: 10,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'bytes'
-    );
+    const visualizableField = {
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'bytes',
+      visualizable: true,
+    } as DataViewField;
     const comp = mountComponent(visualizableField);
     expect(findTestSubject(comp, 'fieldVisualizeContainer').length).toBe(1);
     expect(findTestSubject(comp, 'fieldVisualizeError').length).toBe(0);
@@ -159,19 +157,18 @@ describe('discover sidebar field details', function () {
   });
 
   it('should render a details error', async function () {
-    const visualizableField = new IndexPatternField(
-      {
-        name: 'bytes',
-        type: 'number',
-        esTypes: ['long'],
-        count: 10,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'bytes'
-    );
+    const visualizableField = {
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'bytes',
+      visualizable: true,
+    } as DataViewField;
     const errText = 'Some error';
     const comp = mountComponent(visualizableField, {
       details: { ...defaultProps.details, error: errText },
@@ -191,19 +188,18 @@ describe('discover sidebar field details', function () {
 
   it('should handle promise rejection from isFieldVisualizable', async function () {
     mockGetTriggerCompatibleActions.mockRejectedValue(new Error('Async error'));
-    const visualizableField = new IndexPatternField(
-      {
-        name: 'bytes',
-        type: 'number',
-        esTypes: ['long'],
-        count: 10,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'bytes'
-    );
+    const visualizableField = {
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'bytes',
+      visualizable: true,
+    } as DataViewField;
     const comp = mountComponent(visualizableField);
 
     await act(async () => {
@@ -216,19 +212,18 @@ describe('discover sidebar field details', function () {
 
   it('should handle promise rejection from getVisualizeHref', async function () {
     mockGetHref.mockRejectedValue(new Error('Async error'));
-    const visualizableField = new IndexPatternField(
-      {
-        name: 'bytes',
-        type: 'number',
-        esTypes: ['long'],
-        count: 10,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'bytes'
-    );
+    const visualizableField = {
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'bytes',
+      visualizable: true,
+    } as DataViewField;
     const comp = mountComponent(visualizableField);
 
     await act(async () => {
@@ -240,19 +235,18 @@ describe('discover sidebar field details', function () {
   });
 
   it('should enable the visualize link for a number field', async function () {
-    const visualizableField = new IndexPatternField(
-      {
-        name: 'bytes',
-        type: 'number',
-        esTypes: ['long'],
-        count: 10,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'bytes'
-    );
+    const visualizableField = {
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'bytes',
+      visualizable: true,
+    } as DataViewField;
     const comp = mountComponent(visualizableField);
 
     await act(async () => {
@@ -265,19 +259,17 @@ describe('discover sidebar field details', function () {
 
   it('should disable the visualize link for an _id field', async function () {
     expect.assertions(1);
-    const conflictField = new IndexPatternField(
-      {
-        name: '_id',
-        type: 'string',
-        esTypes: ['_id'],
-        count: 0,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'test'
-    );
+    const conflictField = {
+      name: '_id',
+      type: 'string',
+      esTypes: ['_id'],
+      count: 0,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: '_id',
+    } as DataViewField;
     const comp = mountComponent(conflictField);
 
     await act(async () => {
@@ -288,19 +280,17 @@ describe('discover sidebar field details', function () {
   });
 
   it('should disable the visualize link for an unknown field', async function () {
-    const unknownField = new IndexPatternField(
-      {
-        name: 'test',
-        type: 'unknown',
-        esTypes: ['double'],
-        count: 0,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'test'
-    );
+    const unknownField = {
+      name: 'test',
+      type: 'unknown',
+      esTypes: ['double'],
+      count: 0,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'test',
+    } as DataViewField;
     const comp = mountComponent(unknownField);
 
     await act(async () => {

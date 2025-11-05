@@ -6,25 +6,19 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiRange,
-  EuiSelect,
-  EuiSwitch,
-  EuiFormRow,
-} from '@elastic/eui';
-import { MetricChartStyleControls } from './metric_vis_config';
-import { RangeValue, ColorSchemas, AxisRole } from '../types';
-import { CustomRange } from '../style_panel/custom_ranges';
-import { DebouncedText } from '../style_panel/utils';
-import { useDebouncedNumericValue } from '../utils/use_debounced_value';
-import { getColorSchemas } from '../utils/collections';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiFormRow } from '@elastic/eui';
+import { defaultMetricChartStyles, MetricChartStyle } from './metric_vis_config';
+import { AxisRole } from '../types';
+import { DebouncedFieldNumber, DebouncedFieldText } from '../style_panel/utils';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
+import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
+import { PercentageSelector } from '../style_panel/percentage/percentage_selector';
+import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
 
-export type MetricVisStyleControlsProps = StyleControlsProps<MetricChartStyleControls>;
+export type MetricVisStyleControlsProps = StyleControlsProps<MetricChartStyle>;
 
 export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
   styleOptions,
@@ -37,24 +31,12 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const updateStyleOption = <K extends keyof MetricChartStyleControls>(
+  const updateStyleOption = <K extends keyof MetricChartStyle>(
     key: K,
-    value: MetricChartStyleControls[K]
+    value: MetricChartStyle[K]
   ) => {
     onStyleChange({ [key]: value });
   };
-
-  const [fontSize, handleFontSize] = useDebouncedNumericValue(
-    styleOptions.fontSize,
-    (val) => onStyleChange({ fontSize: val }),
-    {
-      min: 10,
-      max: 100,
-      defaultValue: 60,
-    }
-  );
-
-  const colorSchemas = getColorSchemas();
 
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
@@ -82,62 +64,27 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               })}
               initialIsOpen={true}
             >
-              <EuiFormRow
-                label={i18n.translate('explore.vis.metric.fontSize', {
-                  defaultMessage: 'Font size',
-                })}
-              >
-                <EuiRange
-                  compressed
-                  value={fontSize}
-                  onChange={(e) => handleFontSize((e.target as HTMLInputElement).value)}
-                  min={10}
-                  max={100}
-                  step={1}
-                  showLabels
-                  showValue
-                  aria-label={i18n.translate('explore.vis.metric.fontSize', {
-                    defaultMessage: 'Font size',
-                  })}
-                />
-              </EuiFormRow>
               <EuiFormRow>
                 <EuiSwitch
                   compressed
-                  label={i18n.translate('explore.vis.metric.useColor', {
-                    defaultMessage: 'Value color',
+                  label={i18n.translate('explore.vis.metric.useThresholdColor', {
+                    defaultMessage: 'Use threshold colors',
                   })}
-                  checked={styleOptions.useColor}
-                  onChange={(e) => updateStyleOption('useColor', e.target.checked)}
+                  data-test-subj="useThresholdColorButton"
+                  checked={styleOptions?.useThresholdColor ?? false}
+                  onChange={(e) => updateStyleOption('useThresholdColor', e.target.checked)}
                 />
               </EuiFormRow>
-              {styleOptions.useColor && (
-                <>
-                  <EuiFormRow
-                    label={i18n.translate('explore.vis.metric.colorSchema', {
-                      defaultMessage: 'Color Schema',
-                    })}
-                  >
-                    <EuiSelect
-                      compressed
-                      options={colorSchemas}
-                      value={styleOptions.colorSchema}
-                      onChange={(e) =>
-                        updateStyleOption('colorSchema', e.target.value as ColorSchemas)
-                      }
-                      data-test-subj="colorSchemaSelect"
-                    />
-                  </EuiFormRow>
-                  <EuiFormRow>
-                    <CustomRange
-                      customRanges={styleOptions.customRanges}
-                      onCustomRangesChange={(ranges: RangeValue[]) => {
-                        updateStyleOption('customRanges', ranges);
-                      }}
-                    />
-                  </EuiFormRow>
-                </>
-              )}
+              <PercentageSelector
+                percentageColor={
+                  styleOptions.percentageColor ?? defaultMetricChartStyles.percentageColor
+                }
+                showPercentage={
+                  styleOptions.showPercentage ?? defaultMetricChartStyles.showPercentage
+                }
+                onPercentageColorChange={(color) => updateStyleOption('percentageColor', color)}
+                onShowPercentageToggle={(show) => updateStyleOption('showPercentage', show)}
+              />
               <EuiFormRow>
                 <EuiSwitch
                   compressed
@@ -151,19 +98,104 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
               </EuiFormRow>
 
               {styleOptions.showTitle && (
-                <EuiFormRow>
-                  <DebouncedText
+                <EuiFormRow
+                  label={i18n.translate('explore.vis.metric.title', {
+                    defaultMessage: 'Title',
+                  })}
+                >
+                  <DebouncedFieldText
                     value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
                     placeholder={i18n.translate('explore.vis.metric.title', {
                       defaultMessage: 'Title',
                     })}
                     onChange={(text) => updateStyleOption('title', text)}
-                    label={i18n.translate('explore.vis.metric.title', {
-                      defaultMessage: 'Title',
-                    })}
                   />
                 </EuiFormRow>
               )}
+            </StyleAccordion>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <StyleAccordion
+              id="metricValueOptions"
+              accordionLabel={i18n.translate('explore.stylePanel.tabs.metricValueOptions', {
+                defaultMessage: 'Value options',
+              })}
+              initialIsOpen={true}
+            >
+              <EuiFormRow
+                label={i18n.translate('explore.vis.metric.calculation', {
+                  defaultMessage: 'Calculation',
+                })}
+              >
+                <ValueCalculationSelector
+                  selectedValue={
+                    styleOptions.valueCalculation ?? defaultMetricChartStyles.valueCalculation
+                  }
+                  onChange={(value) => updateStyleOption('valueCalculation', value)}
+                />
+              </EuiFormRow>
+            </StyleAccordion>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ThresholdPanel
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <StandardOptionsPanel
+              min={styleOptions.min}
+              max={styleOptions.max}
+              onMinChange={(value) => updateStyleOption('min', value)}
+              onMaxChange={(value) => updateStyleOption('max', value)}
+              unit={styleOptions.unitId}
+              onUnitChange={(value) => updateStyleOption('unitId', value)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <StyleAccordion
+              id="metricTextStyles"
+              accordionLabel={i18n.translate('explore.stylePanel.tabs.metricTextSize', {
+                defaultMessage: 'Text size',
+              })}
+              initialIsOpen={false}
+            >
+              <EuiFormRow
+                label={i18n.translate('explore.vis.metric.valueFontSize', {
+                  defaultMessage: 'Value size',
+                })}
+              >
+                <DebouncedFieldNumber
+                  value={styleOptions.fontSize}
+                  onChange={(val) => onStyleChange({ fontSize: val })}
+                  placeholder="auto"
+                  data-test-subj="valueFontSizeInput"
+                />
+              </EuiFormRow>
+              <EuiFormRow
+                label={i18n.translate('explore.vis.metric.titleFontSize', {
+                  defaultMessage: 'Title size',
+                })}
+              >
+                <DebouncedFieldNumber
+                  value={styleOptions.titleSize}
+                  onChange={(val) => onStyleChange({ titleSize: val })}
+                  placeholder="auto"
+                  data-test-subj="titleFontSizeInput"
+                />
+              </EuiFormRow>
+              <EuiFormRow
+                label={i18n.translate('explore.vis.metric.percentageFontSize', {
+                  defaultMessage: 'Percentage size',
+                })}
+              >
+                <DebouncedFieldNumber
+                  value={styleOptions.percentageSize}
+                  onChange={(val) => onStyleChange({ percentageSize: val })}
+                  placeholder="auto"
+                  data-test-subj="percentageFontSizeInput"
+                />
+              </EuiFormRow>
             </StyleAccordion>
           </EuiFlexItem>
         </>

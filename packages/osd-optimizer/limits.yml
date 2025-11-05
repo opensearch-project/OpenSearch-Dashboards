@@ -8,15 +8,15 @@ pageLoadAssetSize:
   contentManagement: 189948
   core: 1052848
   dashboard: 694542
-  data: 3277774
+  data: 3628132
   dataExplorer: 142726
-  dataImporter: 22156
+  dataImporter: 22984
   dataSource: 24232
-  dataSourceManagement: 549474
+  dataSourceManagement: 551157
   devTools: 66175
-  discover: 827286
+  discover: 827839
   embeddable: 242671
-  explore: 999025
+  explore: 1928537
   expressions: 224120
   home: 75810
   indexPatternManagement: 154366
@@ -54,4 +54,4 @@ pageLoadAssetSize:
   visTypeXy: 20255
   visualizations: 295169
   visualize: 57433
-  workspace: 454041
+  workspace: 457462

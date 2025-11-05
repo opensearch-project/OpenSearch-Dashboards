@@ -267,6 +267,16 @@ describe('#set', () => {
 
     await expect(client.set('not_exist', UiSettingScope.GLOBAL)).resolves.not.toThrowError();
   });
+
+  it('should not compare the old in the cache with new value if a scope is provided', async () => {
+    const { client, batchSet } = setup({
+      initialSettings: {
+        defaultIndex: { userValue: '123' },
+      },
+    });
+    await client.set('defaultIndex', '123', UiSettingScope.USER);
+    expect(batchSet).toHaveBeenCalledWith('defaultIndex', '123');
+  });
 });
 
 describe('#getUserProvidedWithScope', () => {

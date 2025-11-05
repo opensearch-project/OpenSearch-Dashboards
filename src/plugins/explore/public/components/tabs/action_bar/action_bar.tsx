@@ -2,7 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
+import { useObservable } from 'react-use';
 import { DiscoverResultsActionBar } from './results_action_bar/results_action_bar';
 import { ExploreServices } from '../../../types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -11,6 +12,7 @@ import { selectSavedSearch } from '../../../application/utils/state_management/s
 import { useDatasetContext } from '../../../application/context';
 import { ExploreFlavor } from '../../../../common';
 import { useTabResults } from '../../../application/utils/hooks/use_tab_results';
+import { useHistogramResults } from '../../../application/utils/hooks/use_histogram_results';
 
 /**
  * Logs tab component for displaying log entries
@@ -20,8 +22,14 @@ const ActionBarComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { dataset } = useDatasetContext();
   const { results } = useTabResults();
-  const { core, inspector, inspectorAdapters } = services;
+  const { results: histogramResults } = useHistogramResults();
+  const { core, inspector, inspectorAdapters, slotRegistry } = services;
   const savedSearch = useSelector(selectSavedSearch);
+
+  const sortedSlotItems$ = useMemo(() => {
+    return slotRegistry.getSortedItems$('resultsActionBar');
+  }, [slotRegistry]);
+  const slotItems = useObservable(sortedSlotItems$, []);
 
   const openInspector = () => {
     if (inspector) {
@@ -32,7 +40,7 @@ const ActionBarComponent = () => {
   };
 
   const rows = results?.hits?.hits || [];
-  const totalHits = (results?.hits?.total as any)?.value || results?.hits?.total || 0;
+  const totalHits = histogramResults?.hits.total;
   const elapsedMs = results?.elapsedMs;
 
   return (
@@ -48,6 +56,7 @@ const ActionBarComponent = () => {
       elapsedMs={elapsedMs}
       dataset={dataset}
       inspectionHanlder={openInspector}
+      extraActions={slotItems}
     />
   );
 };

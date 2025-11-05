@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HeatmapChartStyleControls } from './heatmap_vis_config';
+import { HeatmapChartStyle } from './heatmap_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
 import { createLabelLayer, enhanceStyle, addTransform } from './heatmap_chart_utils';
@@ -11,7 +11,7 @@ import { createLabelLayer, enhanceStyle, addTransform } from './heatmap_chart_ut
 export const createHeatmapWithBin = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
-  styles: Partial<HeatmapChartStyleControls>,
+  styles: HeatmapChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
@@ -32,19 +32,19 @@ export const createHeatmapWithBin = (
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
         bin: true,
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        axis: { ...applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle }), tickOpacity: 0 },
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
         bin: true,
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        axis: { ...applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }), tickOpacity: 0 },
       },
       color: {
         field: colorField,
         type: getSchemaByAxis(colorFieldColumn),
         // TODO: a dedicate method to handle scale type is log especially in percentage mode
-        bin: !styles.exclusive?.useCustomRanges
+        bin: !styles?.useThresholdColor
           ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
           : false,
         scale: {
@@ -54,7 +54,7 @@ export const createHeatmapWithBin = (
         },
         legend: styles.addLegend
           ? {
-              title: colorName || 'Metrics',
+              title: styles.legendTitle,
               orient: styles.legendPosition,
             }
           : null,
@@ -94,7 +94,7 @@ export const createHeatmapWithBin = (
 export const createRegularHeatmap = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
-  styles: Partial<HeatmapChartStyleControls>,
+  styles: HeatmapChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
@@ -114,19 +114,25 @@ export const createRegularHeatmap = (
       x: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, xAxisStyle, true),
+        axis: {
+          ...applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle, disableGrid: true }),
+          tickOpacity: 0,
+        },
         // for regular heatmap, both x and y refer to categorical fields, we shall disable grid line for this case
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle, true),
+        axis: {
+          ...applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle, disableGrid: true }),
+          tickOpacity: 0,
+        },
       },
       color: {
         field: colorField,
         type: getSchemaByAxis(colorFieldColumn),
         // TODO: a dedicate method to handle scale type is log especially in percentage mode
-        bin: !styles.exclusive?.useCustomRanges
+        bin: !styles?.useThresholdColor
           ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
           : false,
         scale: {
@@ -136,7 +142,7 @@ export const createRegularHeatmap = (
         },
         legend: styles.addLegend
           ? {
-              title: colorName || 'Metrics',
+              title: styles.legendTitle,
               orient: styles.legendPosition,
             }
           : null,

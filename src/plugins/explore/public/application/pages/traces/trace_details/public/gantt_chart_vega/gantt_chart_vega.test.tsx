@@ -224,7 +224,7 @@ describe('GanttChart', () => {
 
     // Wait for the async initialization to complete
     setTimeout(() => {
-      expect(__mockView.addEventListener).toHaveBeenCalledWith('click', expect.any(Function));
+      expect(__mockView.addEventListener).toHaveBeenCalledWith('mousedown', expect.any(Function));
     }, 0);
   });
 

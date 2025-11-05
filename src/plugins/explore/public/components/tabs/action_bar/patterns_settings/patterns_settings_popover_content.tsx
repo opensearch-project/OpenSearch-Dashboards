@@ -7,7 +7,8 @@ import { EuiCallOut, EuiLoadingSpinner, EuiSelect, EuiText } from '@elastic/eui'
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useDispatch, useSelector } from 'react-redux';
-import { DataView } from 'src/plugins/data/common';
+import { DataView } from 'src/plugins/data/common/data_views';
+import { IndexPatternField } from 'src/plugins/data/common';
 import { setPatternsField } from '../../../../application/utils/state_management/slices/tab/tab_slice';
 import { executeQueries } from '../../../../application/utils/state_management/actions/query_actions';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
@@ -29,12 +30,12 @@ const gatherOptions = (dataset?: DataView) => {
 
   // Filter out fields that are not suitable for patterns
   // For example, exclude scripted fields or meta fields
-  const filteredFields = fields.filter((field) => {
+  const filteredFields = fields.filter((field: IndexPatternField) => {
     return (
       !field.scripted &&
       !dataset.metaFields.includes(field.name) &&
       !field.subType &&
-      ['text', 'keyword'].includes(field?.esTypes?.[0] ?? '')
+      field.type === 'string'
     );
   });
 

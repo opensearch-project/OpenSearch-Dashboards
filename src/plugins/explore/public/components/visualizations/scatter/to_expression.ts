@@ -3,39 +3,73 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ScatterChartStyleControls } from './scatter_vis_config';
+import { ScatterChartStyle } from './scatter_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
+import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
+import { buildThresholdColorEncoding } from '../bar/bar_chart_utils';
+
+const DEFAULT_POINTER_SIZE = 80;
+const DEFAULT_STROKE_OPACITY = 0.65;
+
+const hoverParams = [
+  {
+    name: 'hover',
+    select: { type: 'point', on: 'mouseover' },
+  },
+];
+
+const hoverStateEncoding = {
+  opacity: {
+    value: DEFAULT_STROKE_OPACITY,
+    condition: { param: 'hover', value: 1, empty: false },
+  },
+  stroke: {
+    value: null,
+    condition: { param: 'hover', value: 'white', empty: false },
+  },
+  strokeWidth: {
+    value: 0,
+    condition: { param: 'hover', value: 2, empty: false },
+  },
+};
 
 export const createTwoMetricScatter = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<ScatterChartStyleControls>,
+  styles: ScatterChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
+  const colorEncodingLayer = buildThresholdColorEncoding(yAxis, styles);
+
   const markLayer = {
+    params: hoverParams,
     mark: {
       type: 'point',
       tooltip: styles?.tooltipOptions?.mode !== 'hidden',
       shape: styles?.exclusive?.pointShape,
       angle: styles?.exclusive?.angle,
       filled: styles?.exclusive?.filled,
+      size: DEFAULT_POINTER_SIZE,
+      strokeOpacity: DEFAULT_STROKE_OPACITY,
     },
     encoding: {
       x: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        axis: applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle }),
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
       },
+      ...hoverStateEncoding,
+      color: styles?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -53,10 +87,13 @@ export const createTwoMetricScatter = (
     },
   };
 
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
+
   const baseSpec = {
     $schema: VEGASCHEMA,
     data: { values: transformedData },
-    layer: [markLayer].filter(Boolean),
+    layer: [markLayer, thresholdLayer].filter(Boolean),
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${xAxis?.name} with ${yAxis?.name}`
       : undefined,
@@ -69,7 +106,7 @@ export const createTwoMetricOneCateScatter = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<ScatterChartStyleControls>,
+  styles: ScatterChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const colorColumn = axisColumnMappings?.color;
@@ -77,35 +114,39 @@ export const createTwoMetricOneCateScatter = (
   const categoryNames = axisColumnMappings?.color?.name!;
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
   const markLayer = {
+    params: hoverParams,
     mark: {
       type: 'point',
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
       shape: styles.exclusive?.pointShape,
       angle: styles.exclusive?.angle,
       filled: styles.exclusive?.filled,
+      size: DEFAULT_POINTER_SIZE,
+      strokeOpacity: DEFAULT_STROKE_OPACITY,
     },
     encoding: {
       x: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        axis: applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle }),
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
       },
       color: {
         field: categoryFields,
         type: getSchemaByAxis(colorColumn),
         legend: styles?.addLegend
           ? {
-              title: categoryNames || 'Metrics',
+              title: styles?.legendTitle,
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
           : null,
       },
+      ...hoverStateEncoding,
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -124,11 +165,14 @@ export const createTwoMetricOneCateScatter = (
     },
   };
 
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
+
   const baseSpec = {
     $schema: VEGASCHEMA,
     autosize: { type: 'fit', contains: 'padding' },
     data: { values: transformedData },
-    layer: [markLayer].filter(Boolean),
+    layer: [markLayer, thresholdLayer].filter(Boolean),
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${xAxis?.name} with ${yAxis?.name} by ${categoryNames}`
       : undefined,
@@ -141,7 +185,7 @@ export const createThreeMetricOneCateScatter = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<ScatterChartStyleControls>,
+  styles: ScatterChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const colorColumn = axisColumnMappings?.color;
@@ -151,30 +195,33 @@ export const createThreeMetricOneCateScatter = (
 
   const numericalSize = axisColumnMappings?.size;
   const markLayer = {
+    params: hoverParams,
     mark: {
       type: 'point',
       tooltip: styles.tooltipOptions?.mode !== 'hidden',
       shape: styles.exclusive?.pointShape,
       angle: styles.exclusive?.angle,
       filled: styles.exclusive?.filled,
+      size: DEFAULT_POINTER_SIZE,
+      strokeOpacity: DEFAULT_STROKE_OPACITY,
     },
     encoding: {
       x: {
         field: xAxis?.column,
         type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        axis: applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle }),
       },
       y: {
         field: yAxis?.column,
         type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
       },
       color: {
         field: categoryFields,
         type: getSchemaByAxis(colorColumn),
         legend: styles?.addLegend
           ? {
-              title: categoryNames || 'Metrics',
+              title: styles?.legendTitle,
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
@@ -185,12 +232,13 @@ export const createThreeMetricOneCateScatter = (
         type: getSchemaByAxis(numericalSize),
         legend: styles?.addLegend
           ? {
-              title: numericalSize?.name || 'Metrics',
+              title: styles?.legendTitleForSize,
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
           : null,
       },
+      ...hoverStateEncoding,
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -210,11 +258,13 @@ export const createThreeMetricOneCateScatter = (
     },
   };
 
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
+
   const baseSpec = {
     $schema: VEGASCHEMA,
     autosize: { type: 'fit', contains: 'padding' },
     data: { values: transformedData },
-    layer: [markLayer].filter(Boolean),
+    layer: [markLayer, thresholdLayer].filter(Boolean),
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName ||
         `${xAxis?.name} with ${yAxis?.name} by ${categoryNames} (Size shows ${numericalSize?.name})`

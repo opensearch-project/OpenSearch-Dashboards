@@ -19,6 +19,8 @@ const mockSetQuery = jest.fn();
 const mockGetQuery = jest.fn();
 const mockToastAddError = jest.fn();
 const mockToastAddWarning = jest.fn();
+const mockUseFlavorId = jest.fn();
+const mockClearEditors = jest.fn();
 
 jest.doMock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
@@ -33,6 +35,8 @@ jest.doMock('react-redux', () => {
     },
   };
 });
+
+let capturedSignalType: string | null | undefined;
 
 jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: () => ({
@@ -53,16 +57,28 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
           },
         },
         ui: {
-          DatasetSelect: ({ onSelect }: { onSelect: (dataset: any) => void }) => (
-            <div data-test-subj="dataset-select">
-              <button
-                data-test-subj="dataset-select-button"
-                onClick={() => onSelect({ id: 'test-dataset', type: 'index_pattern' })}
-              >
-                Select Dataset
-              </button>
-            </div>
-          ),
+          DatasetSelect: ({
+            onSelect,
+            signalType,
+          }: {
+            onSelect: (dataset: any) => void;
+            signalType: string | null;
+          }) => {
+            capturedSignalType = signalType;
+            return (
+              <div data-test-subj="dataset-select">
+                <button
+                  data-test-subj="dataset-select-button"
+                  onClick={() => onSelect({ id: 'test-dataset', type: 'index_pattern' })}
+                >
+                  Select Dataset
+                </button>
+                <div data-test-subj="dataset-singaltype-prop">
+                  {signalType !== undefined ? `Signal type: ${signalType}` : 'No signal type'}
+                </div>
+              </div>
+            );
+          },
         },
         dataViews: {
           get: mockGetDataView,
@@ -77,8 +93,10 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
       uiSettings: {},
       savedObjects: {},
       http: {},
+      isDatasetManagementEnabled: false,
     },
   }),
+  withOpenSearchDashboards: (Component: any) => (props: any) => <Component {...props} />,
 }));
 
 jest.doMock('../../utils', () => ({
@@ -105,6 +123,25 @@ jest.doMock('../../../../../../data/common', () => ({
   EMPTY_QUERY: {
     QUERY: '',
   },
+  CORE_SIGNAL_TYPES: {
+    LOGS: 'logs',
+    METRICS: 'metrics',
+    TRACES: 'traces',
+  },
+}));
+
+jest.doMock('../../../../helpers/use_flavor_id', () => ({
+  useFlavorId: () => mockUseFlavorId(),
+}));
+
+jest.doMock('../../../../../common', () => ({
+  ExploreFlavor: {
+    Traces: 'traces',
+  },
+}));
+
+jest.doMock('../../../../application/hooks', () => ({
+  useClearEditors: () => mockClearEditors,
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -132,6 +169,7 @@ describe('DatasetSelectWidget', () => {
     jest.clearAllMocks();
     mockGetQuery.mockReturnValue({ query: 'test query', language: 'PPL' });
     mockGetInitialQueryByDataset.mockReturnValue({ query: 'initial query', language: 'PPL' });
+    mockUseFlavorId.mockReturnValue(null);
   });
 
   it('renders the dataset select component', () => {
@@ -186,6 +224,47 @@ describe('DatasetSelectWidget', () => {
         dataset: { id: 'test-dataset', type: 'index_pattern' },
       });
       expect(mockDispatch).toHaveBeenCalledWith(mockSetQueryWithHistory());
+      expect(mockClearEditors).toHaveBeenCalled();
+    });
+  });
+
+  it('provides signalType prop to DatasetSelect', () => {
+    mockUseFlavorId.mockReturnValue('traces');
+    renderWithStore();
+    expect(screen.getByTestId('dataset-singaltype-prop')).toHaveTextContent('Signal type: traces');
+  });
+
+  describe('signalType functionality', () => {
+    beforeEach(() => {
+      capturedSignalType = undefined;
+    });
+
+    it('passes traces signal type for Traces flavor', () => {
+      mockUseFlavorId.mockReturnValue('traces');
+      renderWithStore();
+
+      expect(capturedSignalType).toBe('traces');
+    });
+
+    it('passes logs signal type for Logs flavor', () => {
+      mockUseFlavorId.mockReturnValue('logs');
+      renderWithStore();
+
+      expect(capturedSignalType).toBe('logs');
+    });
+
+    it('passes metrics signal type for Metrics flavor', () => {
+      mockUseFlavorId.mockReturnValue('metrics');
+      renderWithStore();
+
+      expect(capturedSignalType).toBe('metrics');
+    });
+
+    it('passes null when flavor is null', () => {
+      mockUseFlavorId.mockReturnValue(null);
+      renderWithStore();
+
+      expect(capturedSignalType).toBe(null);
     });
   });
 });

@@ -36,6 +36,44 @@ import { ChromeBreadcrumb } from '../../chrome_service';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 
 describe('HeaderBreadcrumbs', () => {
+  it('renders correct component for all three conditional cases', () => {
+    const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
+    // Case 1: hideTrailingSeparator
+    let wrapper = mount(
+      <HeaderBreadcrumbs
+        appTitle$={new BehaviorSubject('')}
+        breadcrumbs$={breadcrumbs$}
+        breadcrumbsEnricher$={new BehaviorSubject(undefined)}
+        hideTrailingSeparator={true}
+      />
+    );
+    expect(wrapper.find('EuiSimplifiedBreadcrumbs')).toHaveLength(1);
+    expect(wrapper.find('EuiHeaderBreadcrumbs')).toHaveLength(0);
+
+    // Case 2: useUpdatedHeader
+    wrapper = mount(
+      <HeaderBreadcrumbs
+        appTitle$={new BehaviorSubject('')}
+        breadcrumbs$={breadcrumbs$}
+        breadcrumbsEnricher$={new BehaviorSubject(undefined)}
+        useUpdatedHeader={true}
+      />
+    );
+    expect(wrapper.find('EuiSimplifiedBreadcrumbs')).toHaveLength(1);
+    expect(wrapper.find('EuiHeaderBreadcrumbs')).toHaveLength(0);
+
+    // Case 3: default
+    wrapper = mount(
+      <HeaderBreadcrumbs
+        appTitle$={new BehaviorSubject('')}
+        breadcrumbs$={breadcrumbs$}
+        breadcrumbsEnricher$={new BehaviorSubject(undefined)}
+      />
+    );
+    expect(wrapper.find('EuiHeaderBreadcrumbs')).toHaveLength(1);
+    expect(wrapper.find('EuiSimplifiedBreadcrumbs')).toHaveLength(0);
+  });
+
   it('renders updates to the breadcrumbs$ observable', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
     const wrapper = mount(

@@ -13,6 +13,7 @@ import {
   DataGridTableProps,
 } from '../application/legacy/discover/application/components/data_grid/data_grid_table';
 import { TableVis } from '../components/visualizations/table/table_vis';
+import { TableChartStyle } from '../components/visualizations/table/table_vis_config';
 interface ExploreEmbeddableProps {
   searchProps: SearchProps;
 }
@@ -64,6 +65,7 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
         <TableVis
           columns={searchProps.tableData?.columns ?? []}
           rows={searchProps.tableData?.rows ?? []}
+          styleOptions={searchProps.styleOptions as TableChartStyle}
         />
       );
     }
@@ -73,6 +75,9 @@ export const ExploreEmbeddableComponent = ({ searchProps }: ExploreEmbeddablePro
         expression={searchProps.expression ?? ''}
         searchContext={searchProps.searchContext}
         key={JSON.stringify(searchProps.searchContext) + searchProps.expression}
+        onEvent={(e) => {
+          searchProps.onExpressionEvent?.(e);
+        }}
       />
     );
   };

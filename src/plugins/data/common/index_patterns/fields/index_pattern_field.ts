@@ -148,6 +148,10 @@ export class IndexPatternField implements IFieldType {
     return this.aggregatable && !notVisualizableFieldTypes.includes(this.spec.type);
   }
 
+  public isSuggestionAvailable() {
+    return ([OSD_FIELD_TYPES.STRING, OSD_FIELD_TYPES.BOOLEAN] as string[]).includes(this.spec.type);
+  }
+
   public toJSON() {
     return {
       count: this.count,

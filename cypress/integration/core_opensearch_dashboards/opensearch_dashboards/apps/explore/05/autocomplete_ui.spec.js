@@ -28,7 +28,7 @@ export const runAutocompleteTests = () => {
   describe('discover autocomplete tests', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_WITH_TIME_1,
         timefieldName: 'timestamp',
@@ -95,7 +95,7 @@ export const runAutocompleteTests = () => {
 
             cy.osd.waitForLoader(true);
             cy.wait(1000);
-            validateQueryResults('unique_category', 'Configuration');
+            validateQueryResults('unique_category', 'Development');
           });
 
           it('should build query using keyboard shortcuts', () => {
@@ -114,18 +114,7 @@ export const runAutocompleteTests = () => {
 
             cy.osd.waitForLoader(true);
             cy.wait(2000);
-            validateQueryResults('unique_category', 'Configuration');
-          });
-
-          it('should validate that error markers are shown for invalide query', () => {
-            cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
-            setDatePickerDatesAndSearchIfRelevant(config.language);
-            cy.wait(2000);
-            cy.explore.clearQueryEditor();
-
-            createInvalidQuery(config); // use keyboard
-
-            validateEditorContainsError();
+            validateQueryResults('unique_category', 'Development');
           });
 
           it('should validate that error markers are shown for invalid query', () => {

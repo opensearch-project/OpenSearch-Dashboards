@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { createAreaConfig } from './area_vis_config';
-import { Positions, ThresholdLineStyle, AxisRole, VisFieldType } from '../types';
+import { Positions, ThresholdMode, AxisRole, VisFieldType } from '../types';
 import { AreaVisStyleControls } from './area_vis_options';
 
 describe('area_vis_config', () => {
@@ -16,7 +16,7 @@ describe('area_vis_config', () => {
     test('should have the expected default values', () => {
       expect(defaultAreaChartStyles).toMatchObject({
         addLegend: true,
-        legendPosition: Positions.RIGHT,
+        legendPosition: Positions.BOTTOM,
         addTimeMarker: false,
         tooltipOptions: {
           mode: 'all',
@@ -24,15 +24,10 @@ describe('area_vis_config', () => {
       });
 
       // Check threshold lines
-      expect(defaultAreaChartStyles.thresholdLines).toHaveLength(1);
-      expect(defaultAreaChartStyles.thresholdLines[0]).toMatchObject({
-        id: '1',
-        color: '#E7664C',
-        show: false,
-        style: ThresholdLineStyle.Full,
-        value: 10,
-        width: 1,
-        name: '',
+      expect(defaultAreaChartStyles.thresholdOptions).toMatchObject({
+        baseColor: '#00BD6B',
+        thresholds: [],
+        thresholdStyle: ThresholdMode.Off,
       });
 
       // Check axes configuration
@@ -49,7 +44,7 @@ describe('area_vis_config', () => {
           truncate: 100,
         },
         grid: {
-          showLines: false,
+          showLines: true,
         },
         title: {
           text: '',
@@ -70,7 +65,7 @@ describe('area_vis_config', () => {
           truncate: 100,
         },
         grid: {
-          showLines: false,
+          showLines: true,
         },
         title: {
           text: '',
@@ -108,7 +103,18 @@ describe('area_vis_config', () => {
             {
               [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
               [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+              [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
+            },
+            {
+              [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+              [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
               [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+              [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
+            },
+            {
+              [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+              [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+              [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
               [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
             },
             {
@@ -119,6 +125,11 @@ describe('area_vis_config', () => {
               [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
               [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
               [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
+            },
+            {
+              [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+              [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+              [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
             },
           ],
         },

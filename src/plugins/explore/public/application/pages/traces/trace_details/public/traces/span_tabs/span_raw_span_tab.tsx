@@ -26,13 +26,7 @@ export const SpanRawSpanTab: React.FC<SpanRawSpanTabProps> = ({ selectedSpan }) 
 
   return (
     <>
-      <EuiCodeBlock
-        language="json"
-        paddingSize="s"
-        isCopyable
-        overflowHeight={600}
-        whiteSpace="pre"
-      >
+      <EuiCodeBlock language="json" paddingSize="s" isCopyable>
         {JSON.stringify(selectedSpan, null, 2)}
       </EuiCodeBlock>
     </>

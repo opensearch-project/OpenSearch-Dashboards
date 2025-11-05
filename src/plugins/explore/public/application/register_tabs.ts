@@ -4,53 +4,58 @@
  */
 
 import { LogsTab } from '../components/tabs/logs_tab';
-import { TabRegistryService } from '../services/tab_registry/tab_registry_service';
-import { PatternsTab } from '../components/tabs/patterns_tab';
+import { FieldStatsTab } from '../components/tabs/field_stats_tab';
+import { TabDefinition, TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { ExploreServices } from '../types';
-import { EXPLORE_DEFAULT_LANGUAGE } from '../../common';
+import {
+  ExploreFlavor,
+  EXPLORE_DEFAULT_LANGUAGE,
+  EXPLORE_LOGS_TAB_ID,
+  EXPLORE_VISUALIZATION_TAB_ID,
+  EXPLORE_PATTERNS_TAB_ID,
+  EXPLORE_FIELD_STATS_TAB_ID,
+  ENABLE_EXPERIMENTAL_SETTING,
+} from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
 import { getQueryWithSource } from './utils/languages';
-import { setUsingRegexPatterns } from './utils/state_management/slices/tab/tab_slice';
 import {
   brainPatternQuery,
   findDefaultPatternsField,
   regexPatternQuery,
 } from '../components/patterns_table/utils/utils';
+import { setUsingRegexPatterns } from './utils/state_management/slices/tab/tab_slice';
 import { executeTabQuery } from './utils/state_management/actions/query_actions';
+import { setIndividualQueryStatus } from './utils/state_management/slices/query_editor/query_editor_slice';
 import { QueryExecutionStatus } from './utils/state_management/types';
+import { PatternsTab } from '../components/tabs/patterns_tab';
 import { BRAIN_QUERY_OLD_ENGINE_ERROR_PREFIX } from '../components/patterns_table/utils/constants';
-import { setIndividualQueryStatus } from './utils/state_management/slices';
 
 /**
  * Registers built-in tabs with the tab registry
  */
-export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: ExploreServices) => {
+export const registerBuiltInTabs = (
+  tabRegistry: TabRegistryService,
+  services: ExploreServices,
+  registryFlavor: ExploreFlavor
+) => {
   // Register Logs Tab
-  const logsTabDefinition = {
-    id: 'logs',
-    label: 'Logs',
-    flavor: [],
+  const logsTabDefinition: TabDefinition = {
+    id: EXPLORE_LOGS_TAB_ID,
+    label: registryFlavor === ExploreFlavor.Traces ? 'Spans' : 'Logs',
+    flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics, ExploreFlavor.Traces],
     order: 10,
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
     component: LogsTab,
-
-    // Add lifecycle hooks
-    onActive: () => {
-      // Tab activated
-    },
-    onInactive: () => {
-      // Tab deactivated
-    },
   };
 
   tabRegistry.registerTab(logsTabDefinition);
 
   // Register Patterns Tab
   tabRegistry.registerTab({
-    id: 'explore_patterns_tab',
+    id: EXPLORE_PATTERNS_TAB_ID,
     label: 'Patterns',
-    flavor: [],
+    flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics],
     order: 15,
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
@@ -62,7 +67,11 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
 
       const preparedQuery = getQueryWithSource(query);
       if (!patternsField) {
-        patternsField = findDefaultPatternsField(services);
+        try {
+          patternsField = findDefaultPatternsField(services);
+        } catch {
+          return preparedQuery.query;
+        }
       }
 
       if (state.tab.patterns.usingRegexPatterns)
@@ -101,6 +110,7 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
           executeTabQuery({
             services,
             cacheKey: regexPatternQuery(preparedQuery.query, patternsField),
+            queryString: query.query,
           })
         );
 
@@ -128,9 +138,9 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
 
   // Register Visualizations Tab
   tabRegistry.registerTab({
-    id: 'explore_visualization_tab',
+    id: EXPLORE_VISUALIZATION_TAB_ID,
     label: 'Visualization',
-    flavor: [],
+    flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics, ExploreFlavor.Traces],
     order: 20,
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
@@ -143,15 +153,28 @@ export const registerBuiltInTabs = (tabRegistry: TabRegistryService, services: E
 
     component: VisTab,
   });
+
+  // Register Field Stats Tab
+  const isExperimentalEnabled = services.uiSettings.get(ENABLE_EXPERIMENTAL_SETTING, false);
+  if (isExperimentalEnabled) {
+    tabRegistry.registerTab({
+      id: EXPLORE_FIELD_STATS_TAB_ID,
+      label: 'Field Stats',
+      flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics],
+      order: 25,
+      supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
+      component: FieldStatsTab,
+    });
+  }
 };
 
 /**
  * Register tabs in the application
  * This is the main entry point for tab registration
  */
-export const registerTabs = (services: ExploreServices) => {
+export const registerTabs = (services: ExploreServices, flavor: ExploreFlavor) => {
   // Register built-in tabs
-  registerBuiltInTabs(services.tabRegistry, services);
+  registerBuiltInTabs(services.tabRegistry, services, flavor);
 
   // Register plugin-provided tabs
   // This would be called by plugins that want to add tabs

@@ -8,5 +8,6 @@ export * from './use_clear_editors';
 export * from './use_editor_focus';
 export * from './use_editor_ref';
 export * from './use_editor_text';
+export * from './use_switch_language';
 export * from './use_set_editor_text';
 export * from './use_set_editor_text_with_query';

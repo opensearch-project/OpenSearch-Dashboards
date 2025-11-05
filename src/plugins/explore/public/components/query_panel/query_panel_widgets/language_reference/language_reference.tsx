@@ -59,6 +59,7 @@ export const LanguageReference = () => {
           }
         >
           <EuiButtonIcon
+            aria-label="language reference"
             size="xs"
             className={classNames('exploreLanguageReference', {
               ['exploreLanguageReference--disabled']: !languageIsHandled,

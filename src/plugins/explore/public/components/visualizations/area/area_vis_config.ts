@@ -9,55 +9,64 @@ import { VisualizationType } from '../utils/use_visualization_types';
 import {
   CategoryAxis,
   ThresholdLines,
-  ThresholdLineStyle,
+  ThresholdMode,
   ValueAxis,
   Positions,
   TooltipOptions,
   AxisRole,
   VisFieldType,
   TitleOptions,
+  ThresholdOptions,
 } from '../types';
+import { AXIS_LABEL_MAX_LENGTH } from '../constants';
+import { getColors } from '../theme/default_colors';
 
 // Complete area chart style controls interface
-export interface AreaChartStyleControls {
+export interface AreaChartStyleOptions {
   // Basic controls
-  addLegend: boolean;
-  legendPosition: Positions;
-  addTimeMarker: boolean;
+  addLegend?: boolean;
+  legendPosition?: Positions;
+  legendTitle?: string;
+  addTimeMarker?: boolean;
   areaOpacity?: number;
-  tooltipOptions: TooltipOptions;
+  tooltipOptions?: TooltipOptions;
 
-  // Threshold and grid
-  thresholdLines: ThresholdLines;
+  /**
+   * @deprecated - use thresholdOptions instead
+   */
+  thresholdLines?: ThresholdLines;
 
   // Axes configuration
-  categoryAxes: CategoryAxis[];
-  valueAxes: ValueAxis[];
+  categoryAxes?: CategoryAxis[];
+  valueAxes?: ValueAxis[];
 
-  titleOptions: TitleOptions;
+  titleOptions?: TitleOptions;
+
+  thresholdOptions?: ThresholdOptions;
+  showFullTimeRange?: boolean;
 }
 
-const defaultAreaChartStyles: AreaChartStyleControls = {
+export type AreaChartStyle = Required<
+  Omit<AreaChartStyleOptions, 'areaOpacity' | 'thresholdLines' | 'legendTitle'>
+> &
+  Pick<AreaChartStyleOptions, 'areaOpacity' | 'legendTitle'>;
+
+const defaultAreaChartStyles: AreaChartStyle = {
   // Basic controls
   addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legendTitle: '',
+  legendPosition: Positions.BOTTOM,
   addTimeMarker: false,
   tooltipOptions: {
     mode: 'all',
   },
 
-  // Threshold and grid
-  thresholdLines: [
-    {
-      id: '1',
-      color: '#E7664C',
-      show: false,
-      style: ThresholdLineStyle.Full,
-      value: 10,
-      width: 1,
-      name: '',
-    },
-  ],
+  // Threshold options
+  thresholdOptions: {
+    baseColor: getColors().statusGreen,
+    thresholds: [],
+    thresholdStyle: ThresholdMode.Off,
+  },
 
   // Category axes
   categoryAxes: [
@@ -70,10 +79,10 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
         show: true,
         filter: true,
         rotate: 0,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       grid: {
-        showLines: false,
+        showLines: true,
       },
       title: {
         text: '',
@@ -93,10 +102,10 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
         show: true,
         rotate: 0,
         filter: false,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       grid: {
-        showLines: false,
+        showLines: true,
       },
       title: {
         text: '',
@@ -108,6 +117,8 @@ const defaultAreaChartStyles: AreaChartStyleControls = {
     show: false,
     titleName: '',
   },
+
+  showFullTimeRange: false,
 };
 
 export const createAreaConfig = (): VisualizationType<'area'> => ({
@@ -131,7 +142,18 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
       {
         [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
         [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
         [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
         [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
       },
       {
@@ -142,6 +164,11 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
         [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
         [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
         [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
       },
     ],
   },

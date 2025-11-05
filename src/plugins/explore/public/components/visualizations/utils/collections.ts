@@ -4,7 +4,15 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { ColorSchemas, ScaleType, Positions, LabelAggregationType, PointShape } from '../types';
+import {
+  ColorSchemas,
+  ScaleType,
+  Positions,
+  AggregationType,
+  PointShape,
+  TimeUnit,
+  ThresholdMode,
+} from '../types';
 
 export const getPositions = () => [
   {
@@ -95,36 +103,42 @@ export const getScaleType = () => [
   },
 ];
 
-export const getLabelType = () => [
+export const getAggregationType = () => [
   {
-    text: i18n.translate('explore.vis.heatmap.labelType.sum', {
+    text: i18n.translate('explore.vis.aggregationn.type.sum', {
       defaultMessage: 'Sum',
     }),
-    value: LabelAggregationType.SUM,
+    value: AggregationType.SUM,
   },
   {
-    text: i18n.translate('explore.vis.heatmap.labelType.mean', {
+    text: i18n.translate('explore.vis.aggregationn.type.mean', {
       defaultMessage: 'Mean',
     }),
-    value: LabelAggregationType.MEAN,
+    value: AggregationType.MEAN,
   },
   {
-    text: i18n.translate('explore.vis.heatmap.labelType.max', {
+    text: i18n.translate('explore.vis.aggregationn.type.max', {
       defaultMessage: 'Max',
     }),
-    value: LabelAggregationType.MAX,
+    value: AggregationType.MAX,
   },
   {
-    text: i18n.translate('explore.vis.heatmap.labelType.min', {
+    text: i18n.translate('explore.vis.aggregationn.type.min', {
       defaultMessage: 'Min',
     }),
-    value: LabelAggregationType.MIN,
+    value: AggregationType.MIN,
   },
   {
-    text: i18n.translate('explore.vis.heatmap.labelType.none', {
+    text: i18n.translate('explore.vis.aggregationn.type.count', {
+      defaultMessage: 'Count',
+    }),
+    value: AggregationType.COUNT,
+  },
+  {
+    text: i18n.translate('explore.vis.aggregationn.type.none', {
       defaultMessage: 'None',
     }),
-    value: LabelAggregationType.NONE,
+    value: AggregationType.NONE,
   },
 ];
 
@@ -152,5 +166,77 @@ export const getPointShapes = () => [
       defaultMessage: 'Diamond',
     }),
     value: PointShape.DIAMOND,
+  },
+];
+
+export const getTimeUnits = () => [
+  {
+    text: i18n.translate('explore.vis.timeUnit.year', {
+      defaultMessage: 'Year',
+    }),
+    value: TimeUnit.YEAR,
+  },
+  {
+    text: i18n.translate('explore.vis.timeUnit.month', {
+      defaultMessage: 'Month',
+    }),
+    value: TimeUnit.MONTH,
+  },
+  {
+    text: i18n.translate('explore.vis.timeUnit.date', {
+      defaultMessage: 'Day',
+    }),
+    value: TimeUnit.DATE,
+  },
+  {
+    text: i18n.translate('explore.vis.timeUnit.hour', {
+      defaultMessage: 'Hour',
+    }),
+    value: TimeUnit.HOUR,
+  },
+  {
+    text: i18n.translate('explore.vis.timeUnit.minute', {
+      defaultMessage: 'Minute',
+    }),
+    value: TimeUnit.MINUTE,
+  },
+  {
+    text: i18n.translate('explore.vis.timeUnit.second', {
+      defaultMessage: 'Second',
+    }),
+    value: TimeUnit.SECOND,
+  },
+  {
+    text: i18n.translate('explore.vis.timeUnit.auto', {
+      defaultMessage: 'Auto',
+    }),
+    value: TimeUnit.AUTO,
+  },
+];
+
+export const getThresholdOptions = () => [
+  {
+    text: i18n.translate('explore.vis.threshold.off', {
+      defaultMessage: 'Off',
+    }),
+    value: ThresholdMode.Off,
+  },
+  {
+    text: i18n.translate('explore.vis.threshold.lines', {
+      defaultMessage: 'Solid lines',
+    }),
+    value: ThresholdMode.Solid,
+  },
+  {
+    text: i18n.translate('explore.vis.threshold.dashed', {
+      defaultMessage: 'Dashed lines',
+    }),
+    value: ThresholdMode.Dashed,
+  },
+  {
+    text: i18n.translate('explore.vis.threshold.dotted', {
+      defaultMessage: 'Dotted lines',
+    }),
+    value: ThresholdMode.DotDashed,
   },
 ];

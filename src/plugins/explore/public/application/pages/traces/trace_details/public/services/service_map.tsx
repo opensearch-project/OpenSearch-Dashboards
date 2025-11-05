@@ -39,6 +39,8 @@ import { useOpenSearchDashboards } from '../../../../../../../../opensearch_dash
 import { DataExplorerServices } from '../../../../../../../../data_explorer/public';
 import '@xyflow/react/dist/style.css';
 import './service_map.scss';
+import { extractSpanDuration } from '../utils/span_data_utils';
+import { resolveServiceNameFromSpan } from '../traces/ppl_resolve_helpers';
 
 interface SpanHit {
   spanId: string;
@@ -805,7 +807,7 @@ export const ServiceMap: React.FC<ServiceMap> = ({
     if (!selectedSpanId || !hits || hits.length === 0) return null;
 
     const selectedSpan = hits.find((hit) => hit.spanId === selectedSpanId);
-    return selectedSpan ? selectedSpan.serviceName : null;
+    return selectedSpan ? resolveServiceNameFromSpan(selectedSpan) : null;
   }, [selectedSpanId, hits]);
 
   const { initialNodes, initialEdges } = useMemo(() => {
@@ -819,7 +821,9 @@ export const ServiceMap: React.FC<ServiceMap> = ({
     const serviceLatencies = new Map<string, number[]>();
 
     hits.forEach((h) => {
-      const { spanId, serviceName, durationInNanos } = h;
+      const { spanId } = h;
+      const serviceName = resolveServiceNameFromSpan(h) || h.serviceName;
+      const duration = extractSpanDuration(h);
       id2svc.set(spanId, serviceName);
       serviceSpanCounts.set(serviceName, (serviceSpanCounts.get(serviceName) || 0) + 1);
 
@@ -827,13 +831,15 @@ export const ServiceMap: React.FC<ServiceMap> = ({
       if (!serviceLatencies.has(serviceName)) {
         serviceLatencies.set(serviceName, []);
       }
-      serviceLatencies.get(serviceName)!.push(durationInNanos || 0);
+      serviceLatencies.get(serviceName)!.push(duration);
     });
 
     const svcSet = new Set<string>();
     const edgeSet = new Set<string>();
 
-    hits.forEach(({ spanId, parentSpanId, serviceName }) => {
+    hits.forEach((h) => {
+      const { spanId, parentSpanId } = h;
+      const serviceName = resolveServiceNameFromSpan(h) || h.serviceName;
       svcSet.add(serviceName);
 
       if (parentSpanId && id2svc.has(parentSpanId)) {
@@ -857,7 +863,9 @@ export const ServiceMap: React.FC<ServiceMap> = ({
       const spanCount = serviceSpanCounts.get(service) || 0;
       maxRequestRate = Math.max(maxRequestRate, spanCount);
 
-      const serviceSpans = hits.filter((h) => h.serviceName === service);
+      const serviceSpans = hits.filter(
+        (h) => (resolveServiceNameFromSpan(h) || h.serviceName) === service
+      );
       const errorCount = serviceSpans.filter((h) => h.status?.code === 2).length;
       const errorRate = serviceSpans.length > 0 ? errorCount / serviceSpans.length : 0;
       maxErrorRate = Math.max(maxErrorRate, errorRate);
@@ -873,7 +881,9 @@ export const ServiceMap: React.FC<ServiceMap> = ({
       const avgLatency = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
       const maxLatency = Math.max(...latencies);
 
-      const serviceSpans = hits.filter((h) => h.serviceName === service);
+      const serviceSpans = hits.filter(
+        (h) => (resolveServiceNameFromSpan(h) || h.serviceName) === service
+      );
       const errorCount = serviceSpans.filter((h) => h.status?.code === 2).length;
       const errorRate = serviceSpans.length > 0 ? errorCount / serviceSpans.length : 0;
 

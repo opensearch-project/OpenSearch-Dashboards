@@ -6,6 +6,7 @@
 import initCommandNamespace from './command_namespace';
 import { DATASOURCE_NAME } from './apps/explore/constants';
 import { setDatePickerDatesAndSearchIfRelevant } from './apps/explore/shared';
+import { PATHS } from './constants';
 
 /**
  * This file houses all the commands specific to Explore. For commands that are used across the project please move it to the general commands file
@@ -301,6 +302,7 @@ cy.explore.add(
     // The force is necessary as there is occasionally a popover that covers the button
     cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
     cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+    cy.osd.waitForSync();
   }
 );
 
@@ -333,6 +335,7 @@ cy.explore.add('deleteSavedQuery', (name) => {
     .click();
 
   cy.getElementByTestId('confirmModalConfirmButton').click();
+  cy.osd.waitForSync();
 });
 
 cy.explore.add('setDataset', (dataset, dataSourceName, type) => {
@@ -359,43 +362,6 @@ cy.explore.add('setDataset', (dataset, dataSourceName, type) => {
 });
 
 cy.explore.add(
-  'setIndexPatternFromAdvancedSelector',
-  (indexPattern, dataSourceName, language, finalAction = 'submit') => {
-    cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
-      req.continue((res) => {
-        if (res.statusCode === 404) {
-          res.send(200, { status: 'ok', data: {} });
-        }
-      });
-    }).as('agentConfigRequest');
-    cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
-    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
-    cy.get(`[title="Index Patterns"]`).click();
-
-    cy.getElementByTestId('datasetExplorerWindow')
-      .find(`[title="${dataSourceName}::${indexPattern}"]`)
-      .should('be.visible')
-      .click({ force: true });
-    cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
-
-    if (language) {
-      cy.getElementByTestId('advancedSelectorLanguageSelect').should('be.visible').select(language);
-    }
-
-    if (finalAction === 'submit') {
-      cy.getElementByTestId('advancedSelectorConfirmButton').should('be.visible').click();
-
-      // verify that it has been selected
-      cy.getElementByTestId('datasetSelectButton').should('contain.text', `${indexPattern}`);
-    } else {
-      cy.get('[type="button"]').contains('Cancel').click();
-    }
-
-    cy.wait(3000);
-  }
-);
-
-cy.explore.add(
   'setIndexAsDataset',
   (index, dataSourceName, language, timeFieldName = 'timestamp', finalAction = 'submit') => {
     cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
@@ -406,10 +372,16 @@ cy.explore.add(
       });
     }).as('agentConfigRequest');
 
-    cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
+    cy.getElementByTestId('datasetSelectButton')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click();
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Indexes"]`).click();
     cy.get(`[title="${dataSourceName}"]`).click();
+    cy.getElementByTestId('dataset-index-selector')
+      .find('[data-test-subj="comboBoxInput"]')
+      .click();
     // this element is sometimes dataSourceName masked by another element
     cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
@@ -442,8 +414,11 @@ cy.explore.add('setIndexPatternAsDataset', (indexPattern) => {
     });
   }).as('agentConfigRequest');
 
-  cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
-  cy.get(`[title="${indexPattern}"]`).should('be.visible').click();
+  cy.getElementByTestId('datasetSelectButton')
+    .should('be.visible')
+    .should('not.be.disabled')
+    .click();
+  cy.getElementByTestId(`datasetSelectOption-${indexPattern}`).should('be.visible').click();
 
   // verify that it has been selected
   cy.getElementByTestId('datasetSelectButton').should('contain.text', `${indexPattern}`);
@@ -453,7 +428,8 @@ cy.explore.add('setIndexPatternAsDataset', (indexPattern) => {
 
 cy.explore.add(
   'setIndexPatternFromAdvancedSelector',
-  (indexPattern, dataSourceName, language, finalAction = 'submit') => {
+  (indexPattern, dataSourceName, language, timeFieldName = 'timestamp', finalAction = 'submit') => {
+    // Step 1 - Set up intercept for agent config request
     cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
       req.continue((res) => {
         if (res.statusCode === 404) {
@@ -462,20 +438,57 @@ cy.explore.add(
       });
     }).as('agentConfigRequest');
 
-    cy.getElementByTestId('datasetSelectButton').should('be.visible').click();
-    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
-    cy.get(`[title="Index Patterns"]`).click();
-
-    cy.getElementByTestId('datasetExplorerWindow')
-      .find(`[title="${dataSourceName}::${indexPattern}"]`)
+    // Step 2 - Open dataset selector
+    cy.getElementByTestId('datasetSelectButton')
       .should('be.visible')
-      .click({ force: true });
+      .should('not.be.disabled')
+      .click();
+
+    // Step 3 - Click advanced selector button
+    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
+
+    // Step 4 - Select Indexes
+    cy.get(`[title="Indexes"]`).should('be.visible');
+    cy.get(`[title="Indexes"]`).click();
+
+    // Step 5 - Select data source
+    cy.get(`[title="${dataSourceName}"]`).should('be.visible');
+    cy.get(`[title="${dataSourceName}"]`).click();
+
+    // Step 6 - Select index scope (Index wildcard)
+    cy.getElementByTestId('index-scope-selector')
+      .should('be.visible')
+      .find('[data-test-subj="comboBoxInput"]')
+      .click();
+
+    cy.get(`[title="Index wildcard"]`).should('be.visible').click({ force: true });
+
+    // Step 7 - Enter index pattern
+    cy.getElementByTestId('dataset-prefix-selector')
+      .should('be.visible')
+      .find('[data-test-subj="comboBoxInput"]')
+      .click();
+
+    cy.getElementByTestId('dataset-prefix-selector')
+      .should('be.visible')
+      .find('[data-test-subj="comboBoxSearchInput"]')
+      .clear()
+      .type(`${indexPattern}*{enter}`);
+
+    // Step 8 - Click Next button
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
 
+    // Step 9 - Select language (if provided)
     if (language) {
       cy.getElementByTestId('advancedSelectorLanguageSelect').should('be.visible').select(language);
     }
 
+    // Step 10 - Select time field
+    cy.getElementByTestId('advancedSelectorTimeFieldSelect')
+      .should('be.visible')
+      .select(timeFieldName);
+
+    // Step 11 - Confirm or cancel based on finalAction
     if (finalAction === 'submit') {
       cy.getElementByTestId('advancedSelectorConfirmButton').should('be.visible').click();
 
@@ -505,7 +518,7 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName) =
   cy.getElementByTestId('exploreVisStylePanel')
     .should('be.visible')
     .within(() => {
-      cy.get('button[class*="euiSuperSelect"]').should('be.visible').click();
+      cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
     });
 
   // for pie and area, it needs manual chart type switch
@@ -519,7 +532,7 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName) =
     cy.getElementByTestId('exploreVisStylePanel')
       .should('be.visible')
       .within(() => {
-        cy.get('button[class*="euiSuperSelect"]').should('be.visible').click();
+        cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
       });
   }
 
@@ -530,3 +543,206 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName) =
   cy.get('body').click(0, 0);
   cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
 });
+
+cy.explore.add('setupWorkspaceAndDataSourceWithTraces', (workspaceName, traceIndices) => {
+  // Load trace test data for each index individually
+  traceIndices.forEach((index) => {
+    cy.osd.setupTestData(
+      PATHS.SECONDARY_ENGINE,
+      [`cypress/fixtures/explore/traces/${index}.mapping.json`],
+      [`cypress/fixtures/explore/traces/${index}.data.ndjson`]
+    );
+  });
+
+  // Add data source
+  cy.osd.addDataSource({
+    name: DATASOURCE_NAME,
+    url: PATHS.SECONDARY_ENGINE,
+    authType: 'no_auth',
+  });
+
+  // delete any old workspaces and potentially conflicting one
+  cy.deleteWorkspaceByName(workspaceName);
+  cy.osd.deleteAllOldWorkspaces();
+
+  cy.visit('/app/home');
+  cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
+});
+
+cy.explore.add('cleanupWorkspaceAndDataSourceAndTraces', (workspaceName, traceIndices) => {
+  cy.deleteWorkspaceByName(workspaceName);
+  cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
+  for (const index of traceIndices) {
+    cy.osd.deleteIndex(index);
+  }
+});
+
+cy.explore.add(
+  // Creates an index pattern within the workspace using cluster
+  // Don't use * in the indexPattern it adds it by default at the end of name
+  'createWorkspaceDataSets',
+  (opts) => {
+    const {
+      workspaceName,
+      indexPattern,
+      timefieldName,
+      indexPatternHasTimefield = true,
+      dataSource,
+      isEnhancement = false,
+      signalType = 'logs',
+      language = null, // Optional language parameter
+      schemaMappings = null, // Optional schema mappings for correlation
+    } = opts;
+
+    // Step 1 - Navigate to datasets page
+    cy.osd.navigateToWorkSpaceSpecificPage({
+      workspaceName,
+      page: 'datasets',
+      isEnhancement,
+    });
+
+    // There is a bug in Neo where the header of the index pattern page has the home page's header. Happens only in cypress
+    // Therefore it is unreliable to leverage the "create" button to navigate to this page
+    if (Cypress.env('CYPRESS_RUNTIME_ENV') === 'neo') {
+      cy.get('@WORKSPACE_ID').then((workspaceId) => {
+        cy.visit(`/w/${workspaceId}/app/indexPatterns/create`);
+      });
+    } else {
+      // Navigate to Workspace Specific IndexPattern Page
+      cy.osd.navigateToWorkSpaceSpecificPage({
+        workspaceName,
+        page: 'datasets',
+        isEnhancement,
+      });
+
+      // Adding a wait here as sometimes the button doesn't click below
+      cy.wait(2000);
+
+      // Step 2 - Click create dataset button
+      cy.getElementByTestId('createDatasetButton').should('exist').should('be.visible');
+      cy.getElementByTestId('createDatasetButton').click({ force: true });
+
+      // Step 3 - Select signal type (logs or traces)
+      if (signalType === 'logs') {
+        cy.getElementByTestId('createLogsDataset').should('be.visible').click({ force: true });
+      }
+
+      if (signalType === 'traces') {
+        cy.getElementByTestId('createTracesDataset').should('be.visible').click({ force: true });
+      }
+    }
+
+    // Step 4 - Select Indexes
+    cy.get(`[title="Indexes"]`).should('be.visible');
+    cy.get(`[title="Indexes"]`).click();
+
+    // Step 5 - Select data source
+    cy.get(`[title="${dataSource}"]`).should('be.visible');
+    cy.get(`[title="${dataSource}"]`).click();
+
+    // Step 6 - Select index scope (Index wildcard)
+    cy.getElementByTestId('index-scope-selector')
+      .should('be.visible')
+      .find('[data-test-subj="comboBoxInput"]')
+      .click();
+
+    cy.get(`[title="Index wildcard"]`).should('be.visible').click({ force: true });
+
+    // Step 7 - Enter index pattern
+    cy.getElementByTestId('dataset-prefix-selector')
+      .should('be.visible')
+      .find('[data-test-subj="comboBoxInput"]')
+      .click();
+
+    cy.getElementByTestId('dataset-prefix-selector')
+      .should('be.visible')
+      .find('[data-test-subj="comboBoxSearchInput"]')
+      .clear()
+      .type(`${indexPattern}*{enter}`);
+
+    // Step 8 - Click Next button
+    cy.getElementByTestId('datasetSelectorNext')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click();
+
+    // Step 9 - Select language (if provided)
+    if (language) {
+      cy.getElementByTestId('advancedSelectorLanguageSelect').should('be.visible').select(language);
+    }
+
+    // Step 10 - Wait for time field selector if needed
+    if (indexPatternHasTimefield || timefieldName) {
+      cy.getElementByTestId('advancedSelectorTimeFieldSelect').should('be.visible');
+    }
+
+    // Step 11 - Select time field
+    if (indexPatternHasTimefield && !!timefieldName) {
+      cy.getElementByTestId('advancedSelectorTimeFieldSelect')
+        .should('be.visible')
+        .select(timefieldName);
+    } else if (indexPatternHasTimefield && !timefieldName) {
+      cy.getElementByTestId('advancedSelectorTimeFieldSelect').select(
+        "I don't want to use the time filter"
+      );
+    }
+
+    // Step 11.5 - Configure schema mappings for logs signal type with correlation
+    if (signalType === 'logs' && schemaMappings) {
+      cy.getElementByTestId('schemaMappingsAccordion').should('be.visible').click();
+
+      // Configure mappings based on provided schemaMappings object
+      if (schemaMappings.otelLogs) {
+        const mappings = schemaMappings.otelLogs;
+
+        // Configure traceId mapping
+        if (mappings.traceId) {
+          cy.getElementByTestId('schemaMappingSelect-otelLogs-traceId')
+            .should('be.visible')
+            .select(mappings.traceId);
+        }
+
+        // Configure spanId mapping
+        if (mappings.spanId) {
+          cy.getElementByTestId('schemaMappingSelect-otelLogs-spanId')
+            .should('be.visible')
+            .select(mappings.spanId);
+        }
+
+        // Configure serviceName mapping
+        if (mappings.serviceName) {
+          cy.getElementByTestId('schemaMappingSelect-otelLogs-serviceName')
+            .should('be.visible')
+            .select(mappings.serviceName);
+        }
+
+        // Configure timestamp mapping
+        if (mappings.timeField) {
+          cy.getElementByTestId('schemaMappingSelect-otelLogs-timestamp')
+            .should('be.visible')
+            .select(mappings.timeField);
+        }
+      }
+    }
+
+    // Step 12 - Set up intercept to capture dataset creation response
+    cy.intercept('POST', '**/api/saved_objects/index-pattern/**').as('createDatasetInterception');
+
+    // Step 13 - Click Confirm button
+    cy.getElementByTestId('advancedSelectorConfirmButton')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click();
+
+    // Step 14 - Wait for dataset creation request and save ID
+    cy.wait('@createDatasetInterception', { timeout: 15000 }).then((interception) => {
+      // Save the created index pattern ID as an alias
+      cy.wrap(interception.response.body.id).as('INDEX_PATTERN_ID');
+    });
+
+    cy.wait(3000);
+
+    // Step 15 - Verify page title contains the index pattern
+    cy.getElementByTestId('headerApplicationTitle').should('contain', indexPattern);
+  }
+);

@@ -3,6 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Override app-wrapper min-height to prevent scroll bar
+/* stylelint-disable @osd/stylelint/no_modifying_global_selectors */
+.app-wrapper {
+  min-height: 60vh !important;
+}
+
 .exploreTraceView {
   &__loadingContainer {
     display: flex;
@@ -12,7 +18,7 @@
   }
 
   &__resizableContainer {
-    height: calc(100vh - 150px);
+    height: calc(100vh - 140px);
   }
 
   &__mainPanel {
@@ -24,11 +30,13 @@
   }
 
   &__tabsContainer {
-    padding: 8px 16px;
+    padding-left: $euiSizeS;
+    padding-right: $euiSizeS;
+    padding-bottom: $euiSizeS;
   }
 
   &__filtersContainer {
-    padding: 0 16px;
+    padding: 0 $euiSizeS;
   }
 
   &__serviceLegendColorIndicator {
@@ -36,4 +44,14 @@
     height: 16px;
     border-radius: 2px;
   }
+}
+
+.visStylePanelLeft {
+  padding-left: $euiSizeS;
+  padding-right: $euiSizeS;
+}
+
+.visStylePanelRight {
+  padding-left: $euiSizeS;
+  padding-right: $euiSizeS;
 }

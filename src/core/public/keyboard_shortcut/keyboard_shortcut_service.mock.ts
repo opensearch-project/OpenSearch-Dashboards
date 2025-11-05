@@ -1,12 +1,6 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
  */
 
 import type { PublicMethodsOf } from '@osd/utility-types';
@@ -22,12 +16,17 @@ const createSetupMock = (): jest.Mocked<KeyboardShortcutSetup> => ({
 const createStartMock = (): jest.Mocked<KeyboardShortcutStart> => ({
   register: jest.fn(),
   unregister: jest.fn(),
+  useKeyboardShortcut: jest.fn(),
+  getAllShortcuts: jest.fn().mockReturnValue([]),
 });
 
 const createMock = (): jest.Mocked<KeyboardShortcutServiceContract> => ({
   setup: jest.fn().mockReturnValue(createSetupMock()),
   start: jest.fn().mockReturnValue(createStartMock()),
   stop: jest.fn(),
+  register: jest.fn(),
+  unregister: jest.fn(),
+  getAllShortcuts: jest.fn().mockReturnValue([]),
 });
 
 export const keyboardShortcutServiceMock = {

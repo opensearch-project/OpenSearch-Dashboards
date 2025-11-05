@@ -70,6 +70,9 @@ export {
   SingleLineInput,
   DatasetSelector,
   DatasetSelectorAppearance,
+  DetailedDataset,
+  AdvancedSelector,
+  ConfiguratorV2,
 } from './ui';
 
 import {
@@ -517,6 +520,7 @@ export {
   IUiStart as DataPublicPluginStartUi,
   useQueryStringManager,
   getEffectiveLanguageForAutoComplete,
+  useCancelButtonTiming,
 } from './ui';
 
 /**
@@ -628,3 +632,8 @@ export {
 
 export { SavedQueryManagementComponent } from './ui/saved_query_management';
 export { SaveQueryForm, SavedQueryMeta } from './ui/saved_query_form';
+export {
+  getSchemaConfigs,
+  SchemaConfig,
+  SchemaAttributeConfig,
+} from './ui/dataset_selector/configurator/schema_config';

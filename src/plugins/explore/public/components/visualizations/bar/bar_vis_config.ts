@@ -9,44 +9,68 @@ import { VisualizationType } from '../utils/use_visualization_types';
 import {
   Positions,
   ThresholdLines,
-  ThresholdLineStyle,
+  ThresholdMode,
   TooltipOptions,
   VisFieldType,
   AxisRole,
   StandardAxes,
   TitleOptions,
+  AggregationType,
+  BucketOptions,
+  TimeUnit,
+  ThresholdOptions,
 } from '../types';
-import { BarVisStyleControls, BarVisStyleControlsProps } from './bar_vis_options';
+import { BarVisStyleControls } from './bar_vis_options';
+import { AXIS_LABEL_MAX_LENGTH } from '../constants';
+import { getColors } from '../theme/default_colors';
 
-export interface BarChartStyleControls {
+export interface BarChartStyleOptions {
   // Basic controls
-  addLegend: boolean;
-  legendPosition: Positions;
-  tooltipOptions: TooltipOptions;
+  addLegend?: boolean;
+  legendPosition?: Positions;
+  legendTitle?: string;
+  legendShape?: 'circle' | 'square';
+  tooltipOptions?: TooltipOptions;
 
   // Bar specific controls
-  barSizeMode: 'auto' | 'manual';
-  barWidth: number;
-  barPadding: number;
-  showBarBorder: boolean;
-  barBorderWidth: number;
-  barBorderColor: string;
+  barSizeMode?: 'auto' | 'manual';
+  barWidth?: number;
+  barPadding?: number;
+  showBarBorder?: boolean;
+  barBorderWidth?: number;
+  barBorderColor?: string;
 
-  // Threshold and grid
-  thresholdLines: ThresholdLines;
+  /**
+   * @deprecated - use thresholdOptions instead
+   */
+  thresholdLines?: ThresholdLines;
   // Axes configuration
-  standardAxes: StandardAxes[];
+  standardAxes?: StandardAxes[];
 
-  switchAxes: boolean;
+  switchAxes?: boolean;
 
-  titleOptions: TitleOptions;
+  titleOptions?: TitleOptions;
+
+  // histogram bucket config
+  bucket?: BucketOptions;
+
+  thresholdOptions?: ThresholdOptions;
+
+  useThresholdColor?: boolean;
+  showFullTimeRange?: boolean;
 }
 
-export const defaultBarChartStyles: BarChartStyleControls = {
+export type BarChartStyle = Required<
+  Omit<BarChartStyleOptions, 'legendShape' | 'thresholdLines' | 'legendTitle'>
+> &
+  Pick<BarChartStyleOptions, 'legendShape' | 'legendTitle'>;
+
+export const defaultBarChartStyles: BarChartStyle = {
   // Basic controls
   switchAxes: false,
   addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legendTitle: '',
+  legendPosition: Positions.BOTTOM,
   tooltipOptions: {
     mode: 'all',
   },
@@ -59,19 +83,13 @@ export const defaultBarChartStyles: BarChartStyleControls = {
   barBorderWidth: 1,
   barBorderColor: '#000000',
 
-  // Threshold and grid
-  thresholdLines: [
-    {
-      id: '1',
-      color: '#E7664C',
-      show: false,
-      style: ThresholdLineStyle.Full,
-      value: 10,
-      width: 1,
-      name: '',
-    },
-  ],
-
+  // Threshold options
+  thresholdOptions: {
+    baseColor: getColors().statusGreen,
+    thresholds: [],
+    thresholdStyle: ThresholdMode.Off,
+  },
+  useThresholdColor: false,
   standardAxes: [
     {
       id: 'Axis-1',
@@ -82,7 +100,7 @@ export const defaultBarChartStyles: BarChartStyleControls = {
         show: true,
         rotate: 0,
         filter: false,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       title: {
         text: '',
@@ -101,13 +119,13 @@ export const defaultBarChartStyles: BarChartStyleControls = {
         show: true,
         rotate: 0,
         filter: false,
-        truncate: 100,
+        truncate: AXIS_LABEL_MAX_LENGTH,
       },
       title: {
         text: '',
       },
       grid: {
-        showLines: false,
+        showLines: true,
       },
       axisRole: AxisRole.Y,
     },
@@ -116,6 +134,11 @@ export const defaultBarChartStyles: BarChartStyleControls = {
     show: false,
     titleName: '',
   },
+  bucket: {
+    aggregationType: AggregationType.SUM,
+    bucketTimeUnit: TimeUnit.AUTO,
+  },
+  showFullTimeRange: false,
 };
 
 export const createBarConfig = (): VisualizationType<'bar'> => ({
@@ -124,8 +147,7 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
   ui: {
     style: {
       defaults: defaultBarChartStyles,
-      render: (props) =>
-        React.createElement(BarVisStyleControls, props as BarVisStyleControlsProps),
+      render: (props) => React.createElement(BarVisStyleControls, props),
     },
     availableMappings: [
       {
@@ -150,9 +172,19 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
         [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
       },
       {
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
+      },
+      {
         [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
         [AxisRole.Y]: { type: VisFieldType.Date, index: 0 },
         [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
       },
       {
         [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
@@ -161,9 +193,21 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
         [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
       },
       {
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
+        [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
+      },
+      {
         [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
         [AxisRole.Y]: { type: VisFieldType.Date, index: 0 },
         [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
         [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
       },
       {
@@ -172,9 +216,23 @@ export const createBarConfig = (): VisualizationType<'bar'> => ({
         [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
       },
       {
+        [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
+      },
+      {
         [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
         [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
         [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 1 },
       },
     ],
   },

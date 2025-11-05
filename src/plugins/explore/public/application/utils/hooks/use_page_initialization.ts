@@ -66,9 +66,7 @@ export const useInitPage = () => {
         const uiState = savedExplore.uiState;
         if (visualization) {
           const { chartType, params, axesMapping } = JSON.parse(visualization);
-          visualizationBuilder.setCurrentChartType(chartType);
-          visualizationBuilder.setAxesMapping(axesMapping);
-          visualizationBuilder.setStyles({ type: chartType, styles: params });
+          visualizationBuilder.setVisConfig({ type: chartType, styles: params, axesMapping });
         }
         if (uiState) {
           const { activeTab } = JSON.parse(uiState);

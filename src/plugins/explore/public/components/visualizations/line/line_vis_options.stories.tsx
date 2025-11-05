@@ -7,8 +7,8 @@ import React, { useState } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { ComponentStory, ComponentMeta } from '@storybook/react';
 import { LineVisStyleControls } from './line_vis_options';
-import { LineChartStyleControls } from './line_vis_config';
-import { ThresholdLineStyle, VisColumn, VisFieldType, Positions } from '../types';
+import { LineChartStyle } from './line_vis_config';
+import { ThresholdMode, VisColumn, VisFieldType, Positions } from '../types';
 
 export default {
   component: LineVisStyleControls,
@@ -75,7 +75,7 @@ const mockDateColumns: VisColumn[] = [
 ];
 
 // Default style options
-const defaultStyleOptions: LineChartStyleControls = {
+const defaultStyleOptions: LineChartStyle = {
   // Basic controls
   tooltipOptions: { mode: 'all' },
   addLegend: true,
@@ -91,7 +91,7 @@ const defaultStyleOptions: LineChartStyleControls = {
     {
       color: '#E7664C',
       show: false,
-      style: ThresholdLineStyle.Full,
+      style: ThresholdMode.Full,
       value: 10,
       width: 1,
     },
@@ -146,7 +146,7 @@ const defaultStyleOptions: LineChartStyleControls = {
 // Template for the story
 const Template: ComponentStory<typeof LineVisStyleControls> = (args) => {
   // Use state to track changes
-  const [styleOptions, setStyleOptions] = useState<LineChartStyleControls>(args.styleOptions);
+  const [styleOptions, setStyleOptions] = useState<LineChartStyle>(args.styleOptions);
 
   return (
     <div style={{ maxWidth: '800px', padding: '16px' }}>

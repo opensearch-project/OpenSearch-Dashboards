@@ -139,7 +139,7 @@ describe('prompt code_completion', () => {
         'test-index',
         'field1',
         mockServices,
-        expect.objectContaining({ name: 'field1' }),
+        mockIndexPattern,
         'INDEX_PATTERN'
       );
 
@@ -153,7 +153,7 @@ describe('prompt code_completion', () => {
         'test-index',
         'field2',
         mockServices,
-        expect.objectContaining({ name: 'field2' }),
+        mockIndexPattern,
         'INDEX_PATTERN'
       );
 
@@ -167,7 +167,7 @@ describe('prompt code_completion', () => {
         'test-index',
         'field3',
         mockServices,
-        expect.objectContaining({ name: 'field3' }),
+        mockIndexPattern,
         'INDEX_PATTERN'
       );
 

@@ -10,8 +10,18 @@ import { IDataPluginServices } from '../../types';
 import { QuerySuggestion } from '../../autocomplete';
 import * as utils from '../shared/utils';
 import { PPL_AGGREGATE_FUNCTIONS } from './constants';
+import * as querySnippets from '../../query_snippet_suggestions/ppl/suggestions';
 
 describe('ppl code_completion', () => {
+  // Mock the query snippet suggestions function at the top level
+  beforeEach(() => {
+    jest.spyOn(querySnippets, 'getPPLQuerySnippetForSuggestions').mockResolvedValue([]);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   const mockIndexPattern = {
     title: 'test-index',
     fields: [
@@ -20,6 +30,14 @@ describe('ppl code_completion', () => {
       { name: 'field2', type: 'number' },
       { name: 'field3', type: 'boolean' },
       { name: 'field4', type: 'string' },
+      // Fields with dots for backtick testing
+      { name: 'resource.attributes.host', type: 'string' },
+      { name: 'kubernetes.pod.name', type: 'string' },
+      // Fields with @ symbols for backtick testing
+      { name: 'host@name', type: 'string' },
+      { name: 'user@domain', type: 'string' },
+      // Fields with both . and @
+      { name: 'service.name@env', type: 'string' },
     ],
   } as IndexPattern;
 
@@ -133,7 +151,7 @@ describe('ppl code_completion', () => {
     it('should suggest source, columns names when query is empty', async () => {
       const result = await getSimpleSuggestions(' ');
       checkSuggestionsContain(result, {
-        text: 'source',
+        text: 'SOURCE',
         type: monaco.languages.CompletionItemKind.Function,
       });
 
@@ -356,7 +374,7 @@ describe('ppl code_completion', () => {
     it('should show the documentations for PPL commands', async () => {
       const results = await getSimpleSuggestions('source = test-index | ');
 
-      const resultField = results.find((result) => result.text === 'where');
+      const resultField = results.find((result) => result.text === 'WHERE');
       expect(resultField?.documentation).not.toBeFalsy();
     });
 
@@ -371,7 +389,7 @@ describe('ppl code_completion', () => {
       const results = await getSimpleSuggestions('source = test-index | stats count() by ');
 
       checkSuggestionsContain(results, {
-        text: 'span()',
+        text: 'SPAN()',
         type: monaco.languages.CompletionItemKind.Module,
       });
     });
@@ -380,22 +398,22 @@ describe('ppl code_completion', () => {
       const results = await getSimpleSuggestions('source = test-index | where ');
 
       checkSuggestionsContain(results, {
-        text: 'match()',
+        text: 'MATCH()',
         type: monaco.languages.CompletionItemKind.Module,
       });
 
       checkSuggestionsContain(results, {
-        text: 'match_phrase()',
+        text: 'MATCH_PHRASE()',
         type: monaco.languages.CompletionItemKind.Module,
       });
 
       checkSuggestionsContain(results, {
-        text: 'match_phrase_prefix()',
+        text: 'MATCH_PHRASE_PREFIX()',
         type: monaco.languages.CompletionItemKind.Module,
       });
 
       checkSuggestionsContain(results, {
-        text: 'match_bool_prefix()',
+        text: 'MATCH_BOOL_PREFIX()',
         type: monaco.languages.CompletionItemKind.Module,
       });
     });
@@ -428,6 +446,128 @@ describe('ppl code_completion', () => {
           text: `${af}()`,
           type: monaco.languages.CompletionItemKind.Module,
         });
+      });
+    });
+
+    it('should wrap fields with dots and @ symbols in backticks for fields command', async () => {
+      const results = await getSimpleSuggestions('source = test-index | fields ');
+      const resultField1 = results.find((result) => result.text === 'resource.attributes.host');
+      expect(resultField1?.insertText).toBe('`resource.attributes.host` ');
+
+      const resultField2 = results.find((result) => result.text === 'host@name');
+      expect(resultField2?.insertText).toBe('`host@name` ');
+    });
+
+    it('should suggest fields/values based on context within quotes', async () => {
+      // Suggesting Fields
+      const query = 'source = test-index | where ``';
+      const position = new monaco.Position(1, query.length);
+
+      const results = await getSimpleSuggestions(query, position);
+      const resultField = results.find((result) => result.text === 'resource.attributes.host');
+      expect(resultField?.insertText).toBe('resource.attributes.host');
+
+      const mockedValues = ['value1', 'value2'];
+      jest.spyOn(utils, 'fetchColumnValues').mockResolvedValue(mockedValues);
+
+      // Suggesting Values
+      const query1 = 'source = test-index | where field1 = ""';
+      const position1 = new monaco.Position(1, query1.length);
+      const results1 = await getSimpleSuggestions(query1, position1);
+
+      const resultValue = results1.find((result) => result.text === 'value1');
+      expect(resultValue?.insertText).toBe('value1');
+    });
+
+    it('should include query snippet suggestions in results', async () => {
+      const mockSnippetSuggestions = [
+        {
+          text: 'stats count() by field1',
+          insertText: 'stats count() by field1 ',
+          type: monaco.languages.CompletionItemKind.Reference,
+          detail: 'Saved Query Snippet',
+        },
+      ];
+
+      // Override the default mock for this specific test
+      (querySnippets.getPPLQuerySnippetForSuggestions as jest.Mock).mockResolvedValue(
+        mockSnippetSuggestions
+      );
+
+      const result = await getSimpleSuggestions('source = test-index | ');
+
+      expect(querySnippets.getPPLQuerySnippetForSuggestions).toHaveBeenCalled();
+      checkSuggestionsContain(result, {
+        text: 'stats count() by field1',
+        type: monaco.languages.CompletionItemKind.Reference,
+      });
+    });
+
+    it('should pass correct query text to snippet suggestions', async () => {
+      const query = 'source = test-index | where field1 = "value" | ';
+      const position = new monaco.Position(1, query.length);
+
+      await getSimpleSuggestions(query, position);
+
+      expect(querySnippets.getPPLQuerySnippetForSuggestions).toHaveBeenCalledWith(query.trim());
+    });
+
+    it('should handle multiline queries correctly for snippet suggestions', async () => {
+      const query = `source = test-index
+      | where field1 = "value"
+      | `;
+      const position = new monaco.Position(3, 7); // Line 3, column 7
+
+      await getSimpleSuggestions(query, position);
+
+      const expectedQueryTillCursor = `source = test-index
+      | where field1 = "value"
+      `;
+      expect(querySnippets.getPPLQuerySnippetForSuggestions).toHaveBeenCalledWith(
+        expectedQueryTillCursor
+      );
+    });
+
+    describe('extractQueryTillCursor behavior', () => {
+      it('should handle single line queries correctly', async () => {
+        const query = 'source = test-index | where field1 = "value" ';
+        const position = new monaco.Position(1, 25); // At "value"
+
+        await getSimpleSuggestions(query, position);
+
+        expect(querySnippets.getPPLQuerySnippetForSuggestions).toHaveBeenCalledWith(
+          'source = test-index | wh'
+        );
+      });
+
+      it('should handle multiline queries and extract text up to cursor', async () => {
+        const query = `source = test-index
+| where field1 = "value"
+| stats count()`;
+        const position = new monaco.Position(2, 10); // Line 2, column 10
+
+        await getSimpleSuggestions(query, position);
+
+        const expectedExtracted = `source = test-index
+| where f`;
+        expect(querySnippets.getPPLQuerySnippetForSuggestions).toHaveBeenCalledWith(
+          expectedExtracted
+        );
+      });
+
+      it('should handle empty lines correctly', async () => {
+        const query = `source = test-index
+
+| where field1 = "value"`;
+        const position = new monaco.Position(2, 1); // Empty line
+
+        await getSimpleSuggestions(query, position);
+
+        const expectedExtracted = `source = test-index
+`;
+        expect(querySnippets.getPPLQuerySnippetForSuggestions).toHaveBeenCalledWith(
+          expectedExtracted
+        );
       });
     });
   });

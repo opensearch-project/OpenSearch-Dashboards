@@ -15,13 +15,18 @@ import { getHistory } from './application/legacy/discover/opensearch_dashboards_
 import { TabRegistryService } from './services/tab_registry/tab_registry_service';
 import { VisualizationRegistryService } from './services/visualization_registry_service';
 import { AppStore } from './application/utils/state_management/store';
+import { QueryPanelActionsRegistryService } from './services/query_panel_actions_registry';
+import { SlotRegistryService } from './services/slot_registry';
 
 export function buildServices(
   core: CoreStart,
   plugins: ExploreStartDependencies,
   context: PluginInitializerContext,
   tabRegistry: TabRegistryService,
-  visualizationRegistry: VisualizationRegistryService
+  visualizationRegistry: VisualizationRegistryService,
+  queryPanelActionsRegistry: QueryPanelActionsRegistryService,
+  isDatasetManagementEnabled: boolean,
+  slotRegistry: SlotRegistryService
 ): ExploreServices {
   const config = context.config.get<ConfigSchema>();
   const supportedTypes = config.supportedTypes;
@@ -61,6 +66,7 @@ export function buildServices(
     },
     navigation: plugins.navigation,
     share: plugins.share,
+    contextProvider: plugins.contextProvider,
     opensearchDashboardsLegacy: plugins.opensearchDashboardsLegacy,
     urlForwarding: plugins.urlForwarding,
     timefilter: plugins.data.query.timefilter.timefilter,
@@ -86,11 +92,15 @@ export function buildServices(
     // Explore-specific services
     tabRegistry,
     visualizationRegistry,
+    queryPanelActionsRegistry,
+    slotRegistry,
     expressions: plugins.expressions,
 
     dashboard: plugins.dashboard,
+    keyboardShortcut: core.keyboardShortcut,
 
     // Add supportedTypes from config
     supportedTypes,
+    isDatasetManagementEnabled,
   };
 }

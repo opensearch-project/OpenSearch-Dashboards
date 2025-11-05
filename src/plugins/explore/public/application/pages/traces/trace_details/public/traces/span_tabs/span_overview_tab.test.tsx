@@ -95,14 +95,14 @@ describe('SpanOverviewTab', () => {
       expect(screen.getByText('Span ID')).toBeInTheDocument();
 
       // Check values
-      expect(screen.getByText('user-service')).toBeInTheDocument();
+      expect(screen.getByText('getUserData')).toBeInTheDocument();
       expect(screen.getByText('test-span-123')).toBeInTheDocument();
     });
 
-    it('renders dash when service name or span ID is missing', () => {
+    it('renders dash when operation or span ID is missing', () => {
       const span = {
-        // Missing spanId and serviceName
-        name: 'operation',
+        // Missing spanId and name (operation)
+        serviceName: 'test-service',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
         'status.code': 1,
@@ -112,13 +112,13 @@ describe('SpanOverviewTab', () => {
 
       // Should render dashes for missing values
       const dashElements = screen.getAllByText('-');
-      expect(dashElements.length).toBeGreaterThanOrEqual(2);
+      expect(dashElements.length).toBeGreaterThanOrEqual(1);
     });
 
     it('renders copyable service identifier and span ID', () => {
       const span = {
         spanId: 'copyable-span-123',
-        serviceName: 'copyable-service',
+        serviceName: 'copyable-operation',
         name: 'operation',
         durationInNanos: 1000000,
         startTime: '2023-01-15T14:30:45.123Z',
@@ -187,7 +187,7 @@ describe('SpanOverviewTab', () => {
       expect(screen.queryByText('View errors')).not.toBeInTheDocument();
     });
 
-    it('renders Fault status for error spans with View errors link', () => {
+    it('renders Error status for error spans with View errors link', () => {
       const span = {
         spanId: 'test-span',
         serviceName: 'test-service',
@@ -200,7 +200,7 @@ describe('SpanOverviewTab', () => {
       render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
       expect(screen.getByText('Span status')).toBeInTheDocument();
-      expect(screen.getByText('Fault')).toBeInTheDocument();
+      expect(screen.getByText('Error')).toBeInTheDocument();
 
       // Should show "View errors" link for error status
       expect(screen.getByText('View errors')).toBeInTheDocument();
@@ -236,7 +236,7 @@ describe('SpanOverviewTab', () => {
 
       render(<SpanOverviewTab selectedSpan={span} />);
 
-      expect(screen.getByText('Fault')).toBeInTheDocument();
+      expect(screen.getByText('Error')).toBeInTheDocument();
       expect(screen.queryByText('View errors')).not.toBeInTheDocument();
     });
   });
@@ -352,7 +352,9 @@ describe('SpanOverviewTab', () => {
       );
 
       expect(screen.getByText('Request method')).toBeInTheDocument();
-      expect(screen.getByText('getUserData')).toBeInTheDocument();
+      // Operation name appears in both Service identifier and Request method, so check both exist
+      const userDataElements = screen.getAllByText('getUserData');
+      expect(userDataElements).toHaveLength(2);
     });
   });
 
@@ -458,9 +460,11 @@ describe('SpanOverviewTab', () => {
 
       render(<SpanOverviewTab selectedSpan={span} onSwitchToErrorsTab={mockOnSwitchToErrorsTab} />);
 
-      const badge = screen.getByText('Error');
-      expect(badge).toBeInTheDocument();
-      expect(badge.closest('.euiBadge')).toBeInTheDocument();
+      // Find the Error badge specifically (not the span status Error text)
+      const badges = screen.getAllByText('Error');
+      const errorBadge = badges.find((badge) => badge.closest('.euiBadge'));
+      expect(errorBadge).toBeInTheDocument();
+      expect(errorBadge?.closest('.euiBadge')).toBeInTheDocument();
     });
 
     it('renders Success badge when span has no error and no HTTP status code', () => {
@@ -536,7 +540,9 @@ describe('SpanOverviewTab', () => {
       // Should still render HTTP section
       expect(screen.getByText('Request')).toBeInTheDocument();
       expect(screen.getByText('https://api.example.com/test')).toBeInTheDocument();
-      expect(screen.getByText('operation')).toBeInTheDocument(); // Falls back to operation name
+      // Operation name appears in both Service identifier and Request method
+      const operationElements = screen.getAllByText('operation');
+      expect(operationElements).toHaveLength(2);
     });
 
     it('handles span with only HTTP method but no URL', () => {

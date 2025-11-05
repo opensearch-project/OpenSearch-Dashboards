@@ -29,8 +29,10 @@ export const getOsdSidecarPaddingStyle = (config: ISidecarConfig | undefined) =>
       config?.dockedMode === SIDECAR_DOCKED_MODE.RIGHT)
   ) {
     const { dockedMode, paddingSize } = config;
+    // 8px adjustment needed for newTopNavHeader to match other elements
+    const adjustedPaddingSize = paddingSize + 8;
     return {
-      [`padding${dockedMode === SIDECAR_DOCKED_MODE.LEFT ? 'Left' : 'Right'}`]: paddingSize,
+      [`padding${dockedMode === SIDECAR_DOCKED_MODE.LEFT ? 'Left' : 'Right'}`]: adjustedPaddingSize,
     };
   }
   return {};

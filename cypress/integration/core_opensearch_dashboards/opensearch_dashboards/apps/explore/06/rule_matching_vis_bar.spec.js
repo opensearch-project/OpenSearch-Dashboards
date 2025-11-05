@@ -14,7 +14,7 @@ export const runCreateVisTests = () => {
   describe('create bar visualization tests', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_WITH_TIME_1,
         timefieldName: 'timestamp',
@@ -47,6 +47,8 @@ export const runCreateVisTests = () => {
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
         });
+      // Open Axes setting
+      cy.get('[aria-controls="allAxesSection"]').click();
       cy.getElementByTestId('showAxisSwitch').eq(1).click();
       // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {
@@ -80,7 +82,11 @@ export const runCreateVisTests = () => {
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
         });
-      // turn off show X axis
+
+      cy.getElementByTestId('useThresholdColorButton').click();
+
+      // Open thresholds setting
+      cy.get('[aria-controls="thresholdSection"]').click();
       cy.getElementByTestId('exploreVisAddThreshold').click();
       // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {

@@ -15,8 +15,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { StandardAxes, Positions, AxisRole, VisColumn } from '../../types';
-import { DebouncedTruncateField, DebouncedText } from '.././utils';
+import { DebouncedFieldText, DebouncedFieldNumber } from '.././utils';
 import { StyleAccordion } from '../../style_panel/style_accordion';
+import { AXIS_LABEL_MAX_LENGTH } from '../../constants';
+import { getSchemaByAxis } from '../../utils/utils';
 
 interface AllAxesOptionsProps {
   standardAxes: StandardAxes[];
@@ -24,6 +26,9 @@ interface AllAxesOptionsProps {
   axisColumnMappings: Partial<Record<AxisRole, VisColumn>>;
   disableGrid?: boolean;
   switchAxes?: boolean;
+  showFullTimeRange?: boolean;
+  onShowFullTimeRangeChange?: (showFullTimeRange: boolean) => void;
+  initialIsOpen?: boolean;
 }
 
 export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
@@ -32,6 +37,9 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
   axisColumnMappings,
   disableGrid = false,
   switchAxes = false,
+  showFullTimeRange,
+  onShowFullTimeRangeChange,
+  initialIsOpen = false,
 }) => {
   const updateAxis = (index: number, updates: Partial<StandardAxes>) => {
     const updatedAxes = [...standardAxes];
@@ -41,13 +49,6 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
     };
 
     onStandardAxesChange(updatedAxes);
-  };
-
-  const getTitleByAxisRole = (axis: StandardAxes) => {
-    if (axis.title?.text && axis.title.text.trim() !== '') {
-      return axis.title.text;
-    }
-    return axisColumnMappings[axis.axisRole]?.name || '';
   };
 
   const getPositionsForAxis = (axis: StandardAxes) => {
@@ -104,7 +105,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
       accordionLabel={i18n.translate('explore.stylePanel.tabs.allAxes', {
         defaultMessage: 'Axes',
       })}
-      initialIsOpen={true}
+      initialIsOpen={initialIsOpen}
       data-test-subj="standardAxesPanel"
     >
       {standardAxes.map((axis, index) => {
@@ -136,18 +137,21 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
               </EuiFormRow>
               {axis.show && (
                 <>
-                  <DebouncedText
-                    value={getTitleByAxisRole(axis)}
-                    placeholder="Axis name"
-                    onChange={(text) =>
-                      updateAxis(index, {
-                        title: { ...axis.title, text },
-                      })
-                    }
+                  <EuiFormRow
                     label={i18n.translate('explore.vis.standardAxes.axisTitle', {
                       defaultMessage: 'Title',
                     })}
-                  />
+                  >
+                    <DebouncedFieldText
+                      value={axis.title.text ?? ''}
+                      placeholder="Axis name"
+                      onChange={(text) =>
+                        updateAxis(index, {
+                          title: { ...axis.title, text },
+                        })
+                      }
+                    />
+                  </EuiFormRow>
 
                   <EuiFormRow
                     label={i18n.translate('explore.vis.standardAxes.axisPosition', {
@@ -168,6 +172,21 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                       isFullWidth
                     />
                   </EuiFormRow>
+
+                  {getSchemaByAxis(axisColumnMappings?.[axis.axisRole]) === 'temporal' &&
+                    onShowFullTimeRangeChange && (
+                      <EuiFormRow>
+                        <EuiSwitch
+                          compressed
+                          label={i18n.translate('explore.vis.standardAxes.showFullTimeRange', {
+                            defaultMessage: 'Show full time range',
+                          })}
+                          checked={showFullTimeRange ?? false}
+                          onChange={(e) => onShowFullTimeRangeChange(e.target.checked)}
+                          data-testid="showFullTimeRangeSwitch"
+                        />
+                      </EuiFormRow>
+                    )}
 
                   {!disableGrid && (
                     <EuiFormRow>
@@ -229,6 +248,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                               },
                             });
                           }}
+                          onMouseUp={(e) => e.stopPropagation()}
                           options={[
                             { value: 'horizontal', text: 'Horizontal' },
                             { value: 'vertical', text: 'Vertical' },
@@ -237,20 +257,24 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
                         />
                       </EuiFormRow>
 
-                      <DebouncedTruncateField
-                        value={axis.labels.truncate ?? 100}
-                        onChange={(truncateValue) => {
-                          updateAxis(index, {
-                            labels: {
-                              ...axis.labels,
-                              truncate: truncateValue,
-                            },
-                          });
-                        }}
-                        label={i18n.translate('explore.vis.standardAxes.labelTruncate', {
+                      <EuiFormRow
+                        label={i18n.translate('explore.vis.axis.label.truncate.label', {
                           defaultMessage: 'Truncate after',
                         })}
-                      />
+                      >
+                        <DebouncedFieldNumber
+                          value={axis.labels.truncate}
+                          defaultValue={AXIS_LABEL_MAX_LENGTH}
+                          onChange={(truncateValue) => {
+                            updateAxis(index, {
+                              labels: {
+                                ...axis.labels,
+                                truncate: truncateValue ?? AXIS_LABEL_MAX_LENGTH,
+                              },
+                            });
+                          }}
+                        />
+                      </EuiFormRow>
                     </>
                   )}
                 </>

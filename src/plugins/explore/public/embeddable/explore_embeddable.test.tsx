@@ -9,6 +9,7 @@ import { ExploreEmbeddable } from './explore_embeddable';
 import { ExploreInput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { discoverPluginMock } from '../application/legacy/discover/mocks';
+import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 
 // Mock ReactDOM
 jest.mock('react-dom', () => ({
@@ -66,7 +67,7 @@ jest.mock('../components/visualizations/utils/to_expression', () => ({
 }));
 
 // Mock the visualization container utils
-jest.mock('../components/visualizations/visualization_container_utils', () => ({
+jest.mock('../components/visualizations/visualization_builder_utils', () => ({
   convertStringsToMappings: jest.fn().mockReturnValue({}),
   findRuleByIndex: jest.fn().mockReturnValue({
     toExpression: jest.fn(),
@@ -197,12 +198,6 @@ describe('ExploreEmbeddable', () => {
     expect(searchProps?.title).toBe('Test Explore');
     expect(searchProps?.description).toBe('Test description');
     expect(searchProps?.displayTimeColumn).toBe(false);
-  });
-
-  test('renders component when render is called', () => {
-    embeddable.render(mockNode);
-
-    expect(ReactDOM.render).toHaveBeenCalledWith(expect.anything(), mockNode);
   });
 
   test('cleans up when destroy is called', () => {
@@ -475,10 +470,7 @@ describe('ExploreEmbeddable', () => {
   });
 
   test('fetch throws error when no matchedRule is exist', async () => {
-    const { findRuleByIndex } = await import(
-      '../components/visualizations/visualization_container_utils'
-    );
-    jest.mocked(findRuleByIndex).mockReturnValueOnce(undefined);
+    jest.spyOn(visualizationRegistry, 'findRuleByAxesMapping').mockReturnValueOnce(undefined);
 
     mockSavedExplore.visualization = JSON.stringify({
       chartType: 'line',
@@ -490,5 +482,29 @@ describe('ExploreEmbeddable', () => {
     await expect(embeddable.fetch()).rejects.toThrow(
       'Cannot load saved visualization "Test Explore" with id test-id'
     );
+  });
+
+  test('fetch handles empty data by skipping visualization processing', async () => {
+    const mockNormalizeResultRows = await import(
+      '../components/visualizations/utils/normalize_result_rows'
+    );
+    jest.spyOn(mockNormalizeResultRows, 'normalizeResultRows').mockReturnValueOnce({
+      transformedData: [],
+      numericalColumns: [],
+      categoricalColumns: [],
+      dateColumns: [],
+    });
+
+    mockSavedExplore.visualization = JSON.stringify({
+      chartType: 'line',
+      axesMapping: { x: 'field1', y: 'field2' },
+    });
+    mockSavedExplore.uiState = JSON.stringify({ activeTab: 'visualization' });
+
+    // @ts-ignore
+    await embeddable.fetch();
+
+    expect(embeddable.getOutput().error).toBeUndefined();
+    expect(embeddable.getOutput().loading).toBe(false);
   });
 });

@@ -8,11 +8,17 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import {
   isOnTracesPage,
   isSpanIdColumn,
-  extractTraceIdFromRowData,
+  isDurationColumn,
   buildTraceDetailsUrl,
+  getTraceDetailsUrlParams,
   handleSpanIdNavigation,
   SpanIdLink,
+  TraceFlyoutButton,
+  navigateToTraceDetailsWithSpan,
+  getStatusCodeColor,
+  DurationTableCell,
 } from './trace_utils';
+import { extractFieldFromRowData } from '../../../../utils/trace_field_validation';
 
 const mockLocation = {
   pathname: '',
@@ -32,12 +38,27 @@ Object.defineProperty(window, 'open', {
   writable: true,
 });
 
+jest.mock('../../../../application/pages/traces/trace_flyout/trace_flyout_context', () => ({
+  useTraceFlyoutContext: jest.fn(),
+}));
+
+const mockOpenTraceFlyout = jest.fn();
+const { useTraceFlyoutContext } = jest.requireMock(
+  '../../../../application/pages/traces/trace_flyout/trace_flyout_context'
+);
+
 describe('trace_utils', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockLocation.pathname = '';
     mockLocation.hash = '';
     mockLocation.origin = 'http://localhost:5601';
+    useTraceFlyoutContext.mockReturnValue({
+      openTraceFlyout: mockOpenTraceFlyout,
+      closeTraceFlyout: jest.fn(),
+      isFlyoutOpen: false,
+      flyoutData: undefined,
+    });
   });
 
   describe('isOnTracesPage', () => {
@@ -107,73 +128,141 @@ describe('trace_utils', () => {
     });
   });
 
-  describe('extractTraceIdFromRowData', () => {
+  describe('isDurationColumn', () => {
+    it('should return true for duration columns', () => {
+      expect(isDurationColumn('durationNano')).toBe(true);
+      expect(isDurationColumn('durationInNanos')).toBe(true);
+    });
+
+    it('should return false for other column names', () => {
+      expect(isDurationColumn('duration')).toBe(false);
+      expect(isDurationColumn('durationMs')).toBe(false);
+      expect(isDurationColumn('spanId')).toBe(false);
+      expect(isDurationColumn('traceId')).toBe(false);
+      expect(isDurationColumn('')).toBe(false);
+    });
+
+    it('should be case sensitive', () => {
+      expect(isDurationColumn('durationnano')).toBe(false);
+      expect(isDurationColumn('DURATIONNANO')).toBe(false);
+      expect(isDurationColumn('DurationInNanos')).toBe(false);
+    });
+
+    it('should handle null and undefined', () => {
+      expect(isDurationColumn(null as any)).toBe(false);
+      expect(isDurationColumn(undefined as any)).toBe(false);
+    });
+  });
+
+  describe('extractFieldFromRowData', () => {
+    const TRACE_ID_FIELDS = [
+      'traceId',
+      'trace_id',
+      'traceID',
+      '_source.traceId',
+      '_source.trace_id',
+      '_source.traceID',
+    ];
+    const SPAN_ID_FIELDS = [
+      'spanId',
+      'span_id',
+      'spanID',
+      '_source.spanId',
+      '_source.span_id',
+      '_source.spanID',
+    ];
+
     it('should return empty string for null or undefined rowData', () => {
-      expect(extractTraceIdFromRowData(null)).toBe('');
-      expect(extractTraceIdFromRowData(undefined)).toBe('');
+      expect(extractFieldFromRowData(null as any, TRACE_ID_FIELDS)).toBe('');
+      expect(extractFieldFromRowData(undefined as any, TRACE_ID_FIELDS)).toBe('');
     });
 
-    it('should extract traceId from direct field', () => {
-      const rowData = { traceId: 'trace-123' };
-      expect(extractTraceIdFromRowData(rowData)).toBe('trace-123');
+    describe('trace ID extraction', () => {
+      it('should extract traceId from direct field', () => {
+        const rowData = { traceId: 'trace-123' } as any;
+        expect(extractFieldFromRowData(rowData, TRACE_ID_FIELDS)).toBe('trace-123');
+      });
+
+      it('should extract trace_id from direct field', () => {
+        const rowData = { trace_id: 'trace-456' } as any;
+        expect(extractFieldFromRowData(rowData, TRACE_ID_FIELDS)).toBe('trace-456');
+      });
+
+      it('should extract traceID from direct field', () => {
+        const rowData = { traceID: 'trace-789' } as any;
+        expect(extractFieldFromRowData(rowData, TRACE_ID_FIELDS)).toBe('trace-789');
+      });
+
+      it('should extract traceId from _source.traceId', () => {
+        const rowData = { _source: { traceId: 'trace-source-123' } } as any;
+        expect(extractFieldFromRowData(rowData, TRACE_ID_FIELDS)).toBe('trace-source-123');
+      });
+
+      it('should extract trace_id from _source.trace_id', () => {
+        const rowData = { _source: { trace_id: 'trace-source-456' } } as any;
+        expect(extractFieldFromRowData(rowData, TRACE_ID_FIELDS)).toBe('trace-source-456');
+      });
+
+      it('should extract traceID from _source.traceID', () => {
+        const rowData = { _source: { traceID: 'trace-source-789' } } as any;
+        expect(extractFieldFromRowData(rowData, TRACE_ID_FIELDS)).toBe('trace-source-789');
+      });
+
+      it('should prioritize direct fields over _source fields', () => {
+        const rowData = {
+          traceId: 'direct-trace',
+          _source: { traceId: 'source-trace' },
+        } as any;
+        expect(extractFieldFromRowData(rowData, TRACE_ID_FIELDS)).toBe('direct-trace');
+      });
     });
 
-    it('should extract trace_id from direct field', () => {
-      const rowData = { trace_id: 'trace-456' };
-      expect(extractTraceIdFromRowData(rowData)).toBe('trace-456');
+    describe('span ID extraction', () => {
+      it('should extract spanId from direct field', () => {
+        const rowData = { spanId: 'span-123' } as any;
+        expect(extractFieldFromRowData(rowData, SPAN_ID_FIELDS)).toBe('span-123');
+      });
+
+      it('should extract span_id from direct field', () => {
+        const rowData = { span_id: 'span-456' } as any;
+        expect(extractFieldFromRowData(rowData, SPAN_ID_FIELDS)).toBe('span-456');
+      });
+
+      it('should extract spanID from direct field', () => {
+        const rowData = { spanID: 'span-789' } as any;
+        expect(extractFieldFromRowData(rowData, SPAN_ID_FIELDS)).toBe('span-789');
+      });
+
+      it('should extract spanId from _source.spanId', () => {
+        const rowData = { _source: { spanId: 'span-source-123' } } as any;
+        expect(extractFieldFromRowData(rowData, SPAN_ID_FIELDS)).toBe('span-source-123');
+      });
     });
 
-    it('should extract traceID from direct field', () => {
-      const rowData = { traceID: 'trace-789' };
-      expect(extractTraceIdFromRowData(rowData)).toBe('trace-789');
+    it('should return empty string if no specified fields are found', () => {
+      const rowData = { otherId: 'other-123', message: 'test message' } as any;
+      expect(extractFieldFromRowData(rowData, TRACE_ID_FIELDS)).toBe('');
+      expect(extractFieldFromRowData(rowData, SPAN_ID_FIELDS)).toBe('');
     });
 
-    it('should extract traceId from _source.traceId', () => {
-      const rowData = { _source: { traceId: 'trace-source-123' } };
-      expect(extractTraceIdFromRowData(rowData)).toBe('trace-source-123');
+    it('should convert number fields to strings', () => {
+      const rowData = { traceId: 1234 } as any;
+      expect(extractFieldFromRowData(rowData, TRACE_ID_FIELDS)).toBe('1234');
     });
 
-    it('should extract trace_id from _source.trace_id', () => {
-      const rowData = { _source: { trace_id: 'trace-source-456' } };
-      expect(extractTraceIdFromRowData(rowData)).toBe('trace-source-456');
-    });
-
-    it('should extract traceID from _source.traceID', () => {
-      const rowData = { _source: { traceID: 'trace-source-789' } };
-      expect(extractTraceIdFromRowData(rowData)).toBe('trace-source-789');
-    });
-
-    it('should prioritize direct fields over _source fields', () => {
-      const rowData = {
-        traceId: 'direct-trace',
-        _source: { traceId: 'source-trace' },
-      };
-      expect(extractTraceIdFromRowData(rowData)).toBe('direct-trace');
-    });
-
-    it('should return empty string if no trace ID fields are found', () => {
-      const rowData = { spanId: 'span-123', message: 'test message' };
-      expect(extractTraceIdFromRowData(rowData)).toBe('');
-    });
-
-    it('should return empty string if trace ID field exists but is not a string', () => {
-      const rowData = { traceId: 123 };
-      expect(extractTraceIdFromRowData(rowData)).toBe('');
-    });
-
-    it('should return empty string if trace ID field is empty string', () => {
-      const rowData = { traceId: '' };
-      expect(extractTraceIdFromRowData(rowData)).toBe('');
+    it('should return empty string if field is empty string', () => {
+      const rowData = { traceId: '' } as any;
+      expect(extractFieldFromRowData(rowData, TRACE_ID_FIELDS)).toBe('');
     });
 
     it('should handle nested _source field that is null', () => {
-      const rowData = { _source: null };
-      expect(extractTraceIdFromRowData(rowData)).toBe('');
+      const rowData = { _source: null } as any;
+      expect(extractFieldFromRowData(rowData, TRACE_ID_FIELDS)).toBe('');
     });
 
     it('should handle missing _source field gracefully', () => {
-      const rowData = { traceId: null };
-      expect(extractTraceIdFromRowData(rowData)).toBe('');
+      const rowData = { traceId: null } as any;
+      expect(extractFieldFromRowData(rowData, TRACE_ID_FIELDS)).toBe('');
     });
 
     it('should handle complex nested objects', () => {
@@ -184,8 +273,40 @@ describe('trace_utils', () => {
           },
           traceId: 'correct-trace-id',
         },
-      };
-      expect(extractTraceIdFromRowData(rowData)).toBe('correct-trace-id');
+      } as any;
+      expect(extractFieldFromRowData(rowData, TRACE_ID_FIELDS)).toBe('correct-trace-id');
+    });
+
+    it('should return empty string for empty fields array', () => {
+      const rowData = { traceId: 'trace-123' } as any;
+      expect(extractFieldFromRowData(rowData, [])).toBe('');
+    });
+
+    it('should handle deeply nested paths correctly', () => {
+      const rowData = {
+        level1: {
+          level2: {
+            level3: {
+              spanId: 'deep-span-123',
+            },
+          },
+        },
+      } as any;
+      expect(extractFieldFromRowData(rowData, ['level1.level2.level3.spanId'])).toBe(
+        'deep-span-123'
+      );
+    });
+  });
+
+  describe('DurationTableCell', () => {
+    it('should render duration in milliseconds', () => {
+      render(<DurationTableCell sanitizedCellValue="<span>2,000,000</span>" />);
+      expect(screen.getByText('2 ms')).toBeInTheDocument();
+    });
+
+    it('should handle negative values', () => {
+      render(<DurationTableCell sanitizedCellValue="-1000000" />);
+      expect(screen.getByText('0 ms')).toBeInTheDocument();
     });
   });
 
@@ -199,7 +320,7 @@ describe('trace_utils', () => {
         id: 'test-dataset',
         title: 'test-title',
         type: 'INDEX_PATTERN',
-      };
+      } as any;
       const result = buildTraceDetailsUrl('span-123', 'trace-456', dataset);
 
       expect(result).toBe(
@@ -212,7 +333,7 @@ describe('trace_utils', () => {
         id: 'test-dataset',
         title: 'test-title',
         type: 'INDEX_PATTERN',
-      };
+      } as any;
       const result = buildTraceDetailsUrl('span-123', '', dataset);
 
       expect(result).toBe(
@@ -221,7 +342,7 @@ describe('trace_utils', () => {
     });
 
     it('should use default values when dataset is null', () => {
-      const result = buildTraceDetailsUrl('span-123', 'trace-456', null);
+      const result = buildTraceDetailsUrl('span-123', 'trace-456', null as any);
 
       expect(result).toBe(
         "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v1-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')"
@@ -229,7 +350,7 @@ describe('trace_utils', () => {
     });
 
     it('should use default values when dataset properties are missing', () => {
-      const dataset = {};
+      const dataset = {} as any;
       const result = buildTraceDetailsUrl('span-123', 'trace-456', dataset);
 
       expect(result).toBe(
@@ -243,7 +364,7 @@ describe('trace_utils', () => {
         id: 'test-dataset',
         title: 'test-title',
         type: 'INDEX_PATTERN',
-      };
+      } as any;
       const result = buildTraceDetailsUrl('span-123', 'trace-456', dataset);
 
       expect(result).toBe(
@@ -257,7 +378,7 @@ describe('trace_utils', () => {
         id: 'test-dataset',
         title: 'test-title',
         type: 'INDEX_PATTERN',
-      };
+      } as any;
       const result = buildTraceDetailsUrl('span-123', 'trace-456', dataset);
 
       expect(result).toBe(
@@ -270,7 +391,7 @@ describe('trace_utils', () => {
         id: 'test-dataset-with-special-chars',
         title: 'test title with spaces',
         type: 'INDEX_PATTERN',
-      };
+      } as any;
       const result = buildTraceDetailsUrl('span-123', 'trace-456', dataset);
 
       expect(result).toBe(
@@ -283,11 +404,62 @@ describe('trace_utils', () => {
         id: 'test-dataset',
         title: 'test-title',
         type: 'INDEX_PATTERN',
-      };
+      } as any;
       const result = buildTraceDetailsUrl('', 'trace-456', dataset);
 
       expect(result).toBe(
         "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN'),spanId:'',traceId:'trace-456')"
+      );
+    });
+
+    it('should include timeFieldName when present', () => {
+      const dataset = {
+        id: 'test-dataset',
+        title: 'test-title',
+        type: 'INDEX_PATTERN',
+        timeFieldName: 'endTime',
+      } as any;
+      const result = buildTraceDetailsUrl('span-123', 'trace-456', dataset);
+
+      expect(result).toBe(
+        "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN',timeFieldName:'endTime'),spanId:'span-123',traceId:'trace-456')"
+      );
+    });
+
+    it('should include dataSource when present (external data source)', () => {
+      const dataset = {
+        id: 'test-dataset',
+        title: 'test-title',
+        type: 'INDEX_PATTERN',
+        timeFieldName: 'endTime',
+        dataSource: {
+          id: 'external-datasource-id',
+          title: 'external',
+          type: 'OpenSearch',
+        },
+      } as any;
+      const result = buildTraceDetailsUrl('span-123', 'trace-456', dataset);
+
+      expect(result).toBe(
+        "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN',timeFieldName:'endTime',dataSource:(id:'external-datasource-id',title:'external',type:'OpenSearch')),spanId:'span-123',traceId:'trace-456')"
+      );
+    });
+
+    it('should work with external data source without timeFieldName', () => {
+      const dataset = {
+        id: 'test-dataset',
+        title: 'test-title',
+        type: 'INDEX_PATTERN',
+        dataSource: {
+          id: 'external-datasource-id',
+          title: 'external',
+          type: 'OpenSearch',
+        },
+      } as any;
+      const result = buildTraceDetailsUrl('span-123', 'trace-456', dataset);
+
+      expect(result).toBe(
+        "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN',dataSource:(id:'external-datasource-id',title:'external',type:'OpenSearch')),spanId:'span-123',traceId:'trace-456')"
       );
     });
   });
@@ -298,15 +470,14 @@ describe('trace_utils', () => {
     });
 
     it('should open new window with correct URL', () => {
-      const sanitizedCellValue = 'span-123';
-      const rowData = { traceId: 'trace-456' };
+      const rowData = { spanId: 'span-123', traceId: 'trace-456' } as any;
       const dataset = {
         id: 'test-dataset',
         title: 'test-title',
         type: 'INDEX_PATTERN',
-      };
+      } as any;
 
-      handleSpanIdNavigation(sanitizedCellValue, rowData, dataset);
+      handleSpanIdNavigation(rowData, dataset);
 
       expect(mockOpen).toHaveBeenCalledWith(
         "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')",
@@ -314,50 +485,15 @@ describe('trace_utils', () => {
       );
     });
 
-    it('should strip HTML tags from sanitized cell value', () => {
-      const sanitizedCellValue = '<span>span-123</span>';
-      const rowData = { traceId: 'trace-456' };
+    it('should extract spanId and traceId from row data', () => {
+      const rowData = { spanId: 'span-123', traceId: 'trace-456' } as any;
       const dataset = {
         id: 'test-dataset',
         title: 'test-title',
         type: 'INDEX_PATTERN',
-      };
+      } as any;
 
-      handleSpanIdNavigation(sanitizedCellValue, rowData, dataset);
-
-      expect(mockOpen).toHaveBeenCalledWith(
-        "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')",
-        '_blank'
-      );
-    });
-
-    it('should trim whitespace from span ID', () => {
-      const sanitizedCellValue = '  span-123  ';
-      const rowData = { traceId: 'trace-456' };
-      const dataset = {
-        id: 'test-dataset',
-        title: 'test-title',
-        type: 'INDEX_PATTERN',
-      };
-
-      handleSpanIdNavigation(sanitizedCellValue, rowData, dataset);
-
-      expect(mockOpen).toHaveBeenCalledWith(
-        "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')",
-        '_blank'
-      );
-    });
-
-    it('should handle complex HTML tags', () => {
-      const sanitizedCellValue = '<div class="highlight"><strong>span-123</strong></div>';
-      const rowData = { traceId: 'trace-456' };
-      const dataset = {
-        id: 'test-dataset',
-        title: 'test-title',
-        type: 'INDEX_PATTERN',
-      };
-
-      handleSpanIdNavigation(sanitizedCellValue, rowData, dataset);
+      handleSpanIdNavigation(rowData, dataset);
 
       expect(mockOpen).toHaveBeenCalledWith(
         "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')",
@@ -366,15 +502,14 @@ describe('trace_utils', () => {
     });
 
     it('should work when no trace ID is found in row data', () => {
-      const sanitizedCellValue = 'span-123';
-      const rowData = { spanId: 'span-123', message: 'test' };
+      const rowData = { spanId: 'span-123', message: 'test' } as any;
       const dataset = {
         id: 'test-dataset',
         title: 'test-title',
         type: 'INDEX_PATTERN',
-      };
+      } as any;
 
-      handleSpanIdNavigation(sanitizedCellValue, rowData, dataset);
+      handleSpanIdNavigation(rowData, dataset);
 
       expect(mockOpen).toHaveBeenCalledWith(
         "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN'),spanId:'span-123')",
@@ -383,28 +518,26 @@ describe('trace_utils', () => {
     });
 
     it('should handle null row data', () => {
-      const sanitizedCellValue = 'span-123';
-      const rowData = null;
+      const rowData = null as any;
       const dataset = {
         id: 'test-dataset',
         title: 'test-title',
         type: 'INDEX_PATTERN',
-      };
+      } as any;
 
-      handleSpanIdNavigation(sanitizedCellValue, rowData, dataset);
+      handleSpanIdNavigation(rowData, dataset);
 
       expect(mockOpen).toHaveBeenCalledWith(
-        "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN'),spanId:'span-123')",
+        "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN'),spanId:'')",
         '_blank'
       );
     });
 
     it('should handle null dataset', () => {
-      const sanitizedCellValue = 'span-123';
-      const rowData = { traceId: 'trace-456' };
-      const dataset = null;
+      const rowData = { spanId: 'span-123', traceId: 'trace-456' } as any;
+      const dataset = null as any;
 
-      handleSpanIdNavigation(sanitizedCellValue, rowData, dataset);
+      handleSpanIdNavigation(rowData, dataset);
 
       expect(mockOpen).toHaveBeenCalledWith(
         "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'default-dataset-id',title:'otel-v1-apm-span-*',type:'INDEX_PATTERN'),spanId:'span-123',traceId:'trace-456')",
@@ -412,16 +545,15 @@ describe('trace_utils', () => {
       );
     });
 
-    it('should handle empty sanitized cell value', () => {
-      const sanitizedCellValue = '';
-      const rowData = { traceId: 'trace-456' };
+    it('should handle missing spanId in row data', () => {
+      const rowData = { traceId: 'trace-456', message: 'test' } as any;
       const dataset = {
         id: 'test-dataset',
         title: 'test-title',
         type: 'INDEX_PATTERN',
-      };
+      } as any;
 
-      handleSpanIdNavigation(sanitizedCellValue, rowData, dataset);
+      handleSpanIdNavigation(rowData, dataset);
 
       expect(mockOpen).toHaveBeenCalledWith(
         "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN'),spanId:'',traceId:'trace-456')",
@@ -435,11 +567,22 @@ describe('trace_utils', () => {
       mockLocation.pathname = '/app/explore/traces';
     });
 
+    const validRowData = {
+      spanId: 'span-123',
+      traceId: 'trace-456',
+      parentSpanId: 'parent-span-123',
+      serviceName: 'test-service',
+      name: 'test-operation',
+      startTime: '2023-01-01T00:00:00.000Z',
+      endTime: '2023-01-01T00:01:00.000Z',
+      status: { code: 0 },
+    };
+
     it('should render span ID link with correct text', () => {
       const props = {
         sanitizedCellValue: 'span-123',
-        rowData: { traceId: 'trace-456' },
-        dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' },
+        rowData: validRowData as any,
+        dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' } as any,
       };
 
       render(<SpanIdLink {...props} />);
@@ -451,8 +594,8 @@ describe('trace_utils', () => {
     it('should strip HTML tags from sanitized cell value in display', () => {
       const props = {
         sanitizedCellValue: '<span>span-123</span>',
-        rowData: { traceId: 'trace-456' },
-        dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' },
+        rowData: validRowData as any,
+        dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' } as any,
       };
 
       render(<SpanIdLink {...props} />);
@@ -464,8 +607,8 @@ describe('trace_utils', () => {
     it('should call handleSpanIdNavigation when clicked', () => {
       const props = {
         sanitizedCellValue: 'span-123',
-        rowData: { traceId: 'trace-456' },
-        dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' },
+        rowData: validRowData as any,
+        dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' } as any,
       };
 
       render(<SpanIdLink {...props} />);
@@ -482,8 +625,8 @@ describe('trace_utils', () => {
     it('should display popout icon', () => {
       const props = {
         sanitizedCellValue: 'span-123',
-        rowData: { traceId: 'trace-456' },
-        dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' },
+        rowData: validRowData as any,
+        dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' } as any,
       };
 
       render(<SpanIdLink {...props} />);
@@ -496,8 +639,8 @@ describe('trace_utils', () => {
     it('should handle whitespace in sanitized cell value', () => {
       const props = {
         sanitizedCellValue: '  span-123  ',
-        rowData: { traceId: 'trace-456' },
-        dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' },
+        rowData: validRowData as any,
+        dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' } as any,
       };
 
       render(<SpanIdLink {...props} />);
@@ -508,26 +651,22 @@ describe('trace_utils', () => {
     it('should work with null row data', () => {
       const props = {
         sanitizedCellValue: 'span-123',
-        rowData: null,
-        dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' },
+        rowData: null as any,
+        dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' } as any,
       };
 
       render(<SpanIdLink {...props} />);
 
-      const link = screen.getByTestId('spanIdLink');
-      fireEvent.click(link);
-
-      expect(mockOpen).toHaveBeenCalledWith(
-        "http://localhost:5601/app/explore/traces/traceDetails#/?_a=(dataset:(id:'test-dataset',title:'test-title',type:'INDEX_PATTERN'),spanId:'span-123')",
-        '_blank'
-      );
+      // With null row data, validation fails, so no spanIdLink should be rendered
+      expect(screen.queryByTestId('spanIdLink')).not.toBeInTheDocument();
+      expect(screen.getByText('span-123')).toBeInTheDocument();
     });
 
     it('should work with null dataset', () => {
       const props = {
         sanitizedCellValue: 'span-123',
-        rowData: { traceId: 'trace-456' },
-        dataset: null,
+        rowData: validRowData as any,
+        dataset: null as any,
       };
 
       render(<SpanIdLink {...props} />);
@@ -544,8 +683,8 @@ describe('trace_utils', () => {
     it('should have correct tooltip text', () => {
       const props = {
         sanitizedCellValue: 'span-123',
-        rowData: { traceId: 'trace-456' },
-        dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' },
+        rowData: validRowData as any,
+        dataset: { id: 'test-dataset', title: 'test-title', type: 'INDEX_PATTERN' } as any,
       };
 
       render(<SpanIdLink {...props} />);
@@ -553,6 +692,155 @@ describe('trace_utils', () => {
       // The tooltip should be present (though we can't easily test the hover behavior in jsdom)
       const link = screen.getByTestId('spanIdLink');
       expect(link).toBeInTheDocument();
+    });
+  });
+
+  describe('TraceFlyoutButton', () => {
+    const mockSetIsRowSelected = jest.fn();
+
+    const defaultProps = {
+      sanitizedCellValue: 'test-value',
+      rowData: { spanId: 'span-123', traceId: 'trace-456' } as any,
+      dataset: { id: 'test', title: 'test', type: 'INDEX_PATTERN' } as any,
+      setIsRowSelected: mockSetIsRowSelected,
+    };
+
+    beforeEach(() => {
+      mockSetIsRowSelected.mockClear();
+    });
+
+    it('should render button with sanitized text', () => {
+      render(<TraceFlyoutButton {...defaultProps} />);
+
+      expect(screen.getByText('test-value')).toBeInTheDocument();
+      expect(screen.getByTestId('traceFlyoutButton')).toBeInTheDocument();
+    });
+
+    it('should call openTraceFlyout when clicked', () => {
+      render(<TraceFlyoutButton {...defaultProps} />);
+
+      fireEvent.click(screen.getByTestId('traceFlyoutButton'));
+
+      expect(mockOpenTraceFlyout).toHaveBeenCalledWith({
+        spanId: 'span-123',
+        traceId: 'trace-456',
+        dataset: defaultProps.dataset,
+        rowData: defaultProps.rowData,
+      });
+    });
+
+    it('should call setIsRowSelected(true) when flyout is open with matching spanId', () => {
+      useTraceFlyoutContext.mockReturnValue({
+        openTraceFlyout: mockOpenTraceFlyout,
+        closeTraceFlyout: jest.fn(),
+        isFlyoutOpen: true,
+        flyoutData: { spanId: 'span-123' },
+      });
+
+      render(<TraceFlyoutButton {...defaultProps} sanitizedCellValue="span-123" />);
+      expect(mockSetIsRowSelected).toHaveBeenCalledWith(true);
+    });
+
+    it('should call setIsRowSelected(false) when flyout is open with different spanId', () => {
+      useTraceFlyoutContext.mockReturnValue({
+        openTraceFlyout: mockOpenTraceFlyout,
+        closeTraceFlyout: jest.fn(),
+        isFlyoutOpen: true,
+        flyoutData: { spanId: 'different-span-id' },
+      });
+
+      render(<TraceFlyoutButton {...defaultProps} />);
+
+      expect(mockSetIsRowSelected).toHaveBeenCalledWith(false);
+    });
+
+    it('should call setIsRowSelected(false) when flyout is closed', () => {
+      useTraceFlyoutContext.mockReturnValue({
+        openTraceFlyout: mockOpenTraceFlyout,
+        closeTraceFlyout: jest.fn(),
+        isFlyoutOpen: false,
+        flyoutData: undefined,
+      });
+
+      render(<TraceFlyoutButton {...defaultProps} />);
+
+      expect(mockSetIsRowSelected).toHaveBeenCalledWith(false);
+    });
+
+    it('should call setIsRowSelected(false) when flyoutData is undefined', () => {
+      useTraceFlyoutContext.mockReturnValue({
+        openTraceFlyout: mockOpenTraceFlyout,
+        closeTraceFlyout: jest.fn(),
+        isFlyoutOpen: true,
+        flyoutData: undefined,
+      });
+
+      render(<TraceFlyoutButton {...defaultProps} />);
+
+      expect(mockSetIsRowSelected).toHaveBeenCalledWith(false);
+    });
+  });
+
+  describe('getTraceDetailsUrlParams', () => {
+    it('should return correct URL params with trace ID', () => {
+      const dataset = {
+        id: 'test-dataset',
+        title: 'test-title',
+        type: 'INDEX_PATTERN',
+        timeFieldName: 'endTime',
+      } as any;
+      const result = getTraceDetailsUrlParams('span-123', 'trace-456', dataset);
+
+      expect(result).toEqual({
+        spanId: 'span-123',
+        traceId: 'trace-456',
+        dataset: {
+          id: 'test-dataset',
+          title: 'test-title',
+          type: 'INDEX_PATTERN',
+          timeFieldName: 'endTime',
+        },
+      });
+    });
+
+    it('should omit traceId when empty', () => {
+      const dataset = { id: 'test', title: 'test', type: 'INDEX_PATTERN' } as any;
+      const result = getTraceDetailsUrlParams('span-123', '', dataset);
+
+      expect(result).toEqual({
+        spanId: 'span-123',
+        dataset: {
+          id: 'test',
+          title: 'test',
+          type: 'INDEX_PATTERN',
+          timeFieldName: 'timestamp',
+        },
+      });
+    });
+  });
+
+  describe('navigateToTraceDetailsWithSpan', () => {
+    it('should open URL with correct parameters', () => {
+      const context = {
+        spanId: 'span-123',
+        traceId: 'trace-456',
+        dataset: { id: 'test', title: 'test', type: 'INDEX_PATTERN' } as any,
+      };
+
+      navigateToTraceDetailsWithSpan(context);
+
+      expect(mockOpen).toHaveBeenCalledWith(expect.stringContaining('span-123'), '_blank');
+    });
+  });
+
+  describe('getStatusCodeColor', () => {
+    it('should handle all status codes', () => {
+      expect(getStatusCodeColor(undefined)).toBe('default');
+      expect(getStatusCodeColor(100)).toBe('default');
+      expect(getStatusCodeColor(200)).toBe('success');
+      expect(getStatusCodeColor(300)).toBe('primary');
+      expect(getStatusCodeColor(400)).toBe('warning');
+      expect(getStatusCodeColor(500)).toBe('danger');
     });
   });
 });

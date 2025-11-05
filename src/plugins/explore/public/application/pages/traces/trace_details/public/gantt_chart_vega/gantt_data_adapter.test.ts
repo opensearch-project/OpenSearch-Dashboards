@@ -262,6 +262,8 @@ describe('gantt_data_adapter', () => {
     // Invalid timestamps should be handled gracefully
     const span1 = result.values[0];
     expect(span1.startTime).toBe(0);
-    expect(span1.duration).toBe(0);
+    // When timestamps are invalid but durationInNanos is available, use the duration field
+    // 100000000 nanoseconds = 100 milliseconds
+    expect(span1.duration).toBe(100);
   });
 });

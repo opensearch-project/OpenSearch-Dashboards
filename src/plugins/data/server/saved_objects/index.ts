@@ -32,3 +32,4 @@ export { querySavedObjectType } from './query';
 export { indexPatternSavedObjectType } from './index_patterns';
 export { dqlTelemetry } from './dql_telemetry';
 export { searchTelemetry } from './search_telemetry';
+export { correlationsSavedObjectType } from './correlations';

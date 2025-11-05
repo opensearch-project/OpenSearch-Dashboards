@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { createBarConfig, defaultBarChartStyles } from './bar_vis_config';
-import { Positions, ThresholdLineStyle, AxisRole } from '../types';
+import { Positions, ThresholdMode, AxisRole, AggregationType, TimeUnit } from '../types';
 import { BarVisStyleControls } from './bar_vis_options';
 
 describe('bar_vis_config', () => {
@@ -14,7 +14,7 @@ describe('bar_vis_config', () => {
       expect(defaultBarChartStyles).toMatchObject({
         // Basic controls
         addLegend: true,
-        legendPosition: Positions.RIGHT,
+        legendPosition: Positions.BOTTOM,
         tooltipOptions: {
           mode: 'all',
         },
@@ -27,21 +27,21 @@ describe('bar_vis_config', () => {
         barBorderColor: '#000000',
 
         // Threshold and grid
-        thresholdLines: [
-          {
-            id: '1',
-            color: '#E7664C',
-            show: false,
-            style: ThresholdLineStyle.Full,
-            value: 10,
-            width: 1,
-            name: '',
-          },
-        ],
+        thresholdOptions: {
+          baseColor: '#00BD6B',
+          thresholds: [],
+          thresholdStyle: ThresholdMode.Off,
+        },
+
         titleOptions: {
           show: false,
           titleName: '',
         },
+        bucket: {
+          aggregationType: AggregationType.SUM,
+          bucketTimeUnit: TimeUnit.AUTO,
+        },
+        useThresholdColor: false,
       });
 
       // Check axes configuration
@@ -61,7 +61,7 @@ describe('bar_vis_config', () => {
           text: '',
         },
         grid: {
-          showLines: false,
+          showLines: true,
         },
         axisRole: AxisRole.Y,
       });

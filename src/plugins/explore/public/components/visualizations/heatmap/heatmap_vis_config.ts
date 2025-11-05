@@ -14,17 +14,19 @@ import {
   Positions,
   AxisRole,
   TooltipOptions,
-  LabelAggregationType,
+  AggregationType,
   VisFieldType,
   TitleOptions,
+  ThresholdOptions,
 } from '../types';
+import { getColors } from '../theme/default_colors';
 
 export interface HeatmapLabels {
   show: boolean;
   rotate: boolean;
   overwriteColor: boolean;
   color: string;
-  type?: LabelAggregationType;
+  type?: AggregationType;
 }
 export interface ExclusiveHeatmapConfig {
   colorSchema: ColorSchemas;
@@ -33,34 +35,48 @@ export interface ExclusiveHeatmapConfig {
   scaleToDataBounds: boolean;
   percentageMode: boolean;
   maxNumberOfColors: number;
-  useCustomRanges: boolean;
+  /**
+   * @deprecated - use useThresholdColor instead
+   */
+  useCustomRanges?: boolean;
   label: HeatmapLabels;
+
+  /**
+   * @deprecated - use global thresholdOptions instead
+   */
   customRanges?: RangeValue[];
 }
-// Complete heatmap chart style controls interface
-export interface HeatmapChartStyleControls {
+// Complete heatmap chart style options interface
+export interface HeatmapChartStyleOptions {
   // Basic controls
-  tooltipOptions: TooltipOptions;
-  addLegend: boolean;
-  legendPosition: Positions;
+  tooltipOptions?: TooltipOptions;
+  addLegend?: boolean;
+  legendPosition?: Positions;
+  legendTitle?: string;
 
   // Axes configuration
-  standardAxes: StandardAxes[];
+  standardAxes?: StandardAxes[];
 
-  exclusive: ExclusiveHeatmapConfig;
-  switchAxes: boolean;
+  exclusive?: ExclusiveHeatmapConfig;
+  switchAxes?: boolean;
 
-  titleOptions: TitleOptions;
+  titleOptions?: TitleOptions;
+  useThresholdColor?: boolean;
+  thresholdOptions?: ThresholdOptions;
 }
 
-export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
+export type HeatmapChartStyle = Required<Omit<HeatmapChartStyleOptions, 'legendTitle'>> &
+  Pick<HeatmapChartStyleOptions, 'legendTitle'>;
+
+export const defaultHeatmapChartStyles: HeatmapChartStyle = {
   switchAxes: false,
   // Basic controls
   tooltipOptions: {
     mode: 'all',
   },
   addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legendTitle: '',
+  legendPosition: Positions.BOTTOM,
 
   // exclusive
   exclusive: {
@@ -70,14 +86,19 @@ export const defaultHeatmapChartStyles: HeatmapChartStyleControls = {
     scaleToDataBounds: false,
     percentageMode: false,
     maxNumberOfColors: 4,
-    useCustomRanges: false,
+
     label: {
-      type: LabelAggregationType.SUM,
+      type: AggregationType.SUM,
       show: false,
       rotate: false,
       overwriteColor: false,
       color: 'black',
     },
+  },
+  useThresholdColor: false,
+  thresholdOptions: {
+    baseColor: getColors().statusGreen,
+    thresholds: [],
   },
 
   // Standard axes

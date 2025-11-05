@@ -29,25 +29,22 @@
  */
 
 import { difference } from 'lodash';
-import { DataView, IndexPattern, IndexPatternField } from '../../../../../data/public';
+import { DataView, DataViewField } from '../../../../../data/public';
 
-export function getIndexPatternFieldList(
-  indexPattern?: IndexPattern | DataView,
-  fieldCounts?: Record<string, number>
-) {
-  if (!indexPattern || !fieldCounts) return [];
+export function getIndexPatternFieldList(dataSet?: DataView, fieldCounts?: Record<string, number>) {
+  if (!dataSet || !fieldCounts) return [];
 
   const fieldNamesInDocs = Object.keys(fieldCounts);
-  const fieldNamesInIndexPattern = indexPattern.fields.getAll().map((fld) => fld.name);
-  const unknownTypes: IndexPatternField[] = [];
+  const fieldNamesInIndexPattern = dataSet.fields.getAll().map((fld) => fld.name);
+  const unknownTypes: DataViewField[] = [];
 
   difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach((unknownFieldName) => {
     unknownTypes.push({
       displayName: String(unknownFieldName),
       name: String(unknownFieldName),
       type: 'unknown',
-    } as IndexPatternField);
+    } as DataViewField);
   });
 
-  return [...indexPattern.fields.getAll(), ...unknownTypes];
+  return [...dataSet.fields.getAll(), ...unknownTypes];
 }

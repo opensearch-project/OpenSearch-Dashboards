@@ -5,7 +5,7 @@
 
 import './tabs.scss';
 import React, { useCallback } from 'react';
-import { EuiErrorBoundary, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import { EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import { setActiveTab } from '../../application/utils/state_management/slices';
 import { clearQueryStatusMapByKey } from '../../application/utils/state_management/slices';
@@ -17,6 +17,10 @@ import { selectActiveTab } from '../../application/utils/state_management/select
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
 import { RootState } from '../../application/utils/state_management/store';
+import { useFlavorId } from '../../helpers/use_flavor_id';
+import { ErrorGuard } from './error_guard/error_guard';
+import { EXPLORE_PATTERNS_TAB_ID } from '../../../common';
+import { DEFAULT_DATA } from '../../../../data/common';
 
 /**
  * Rendering tabs with different views of 1 OpenSearch hit in Discover.
@@ -27,6 +31,7 @@ import { RootState } from '../../application/utils/state_management/store';
 export const ExploreTabs = () => {
   const dispatch = useDispatch();
   const { services } = useOpenSearchDashboards<ExploreServices>();
+  const flavorId = useFlavorId();
   const registryTabs = services.tabRegistry.getAllTabs();
   const results = useSelector((state: RootState) => state.results);
   const query = useSelector((state: RootState) => state.query);
@@ -48,6 +53,7 @@ export const ExploreTabs = () => {
           executeTabQuery({
             services,
             cacheKey: newTabCacheKey,
+            queryString: newTabCacheKey,
           })
         );
       }
@@ -55,17 +61,35 @@ export const ExploreTabs = () => {
     [query, results, dispatch, services]
   );
 
-  const tabs: EuiTabbedContentTab[] = registryTabs.map((registryTab) => {
-    return {
-      id: registryTab.id,
-      name: registryTab.label,
-      content: (
-        <EuiErrorBoundary>
-          <registryTab.component />
-        </EuiErrorBoundary>
-      ),
-    };
-  });
+  if (flavorId == null) {
+    return null;
+  }
+
+  // Display tabs that registered under current flavor
+  const tabs: EuiTabbedContentTab[] = registryTabs
+    .filter((registryTab) => {
+      const registeredFlavor = registryTab.flavor.includes(flavorId);
+      const isPatternsTab = registryTab.id === EXPLORE_PATTERNS_TAB_ID;
+      const isDefaultDataset =
+        query?.dataset &&
+        (query.dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN ||
+          query.dataset.type === DEFAULT_DATA.SET_TYPES.INDEX);
+      if (isPatternsTab) {
+        return registeredFlavor && isDefaultDataset;
+      }
+      return registeredFlavor;
+    })
+    .map((registryTab) => {
+      return {
+        id: registryTab.id,
+        name: registryTab.label,
+        content: (
+          <ErrorGuard registryTab={registryTab}>
+            <registryTab.component />
+          </ErrorGuard>
+        ),
+      };
+    });
 
   const activeTab =
     tabs.find((tab) => {

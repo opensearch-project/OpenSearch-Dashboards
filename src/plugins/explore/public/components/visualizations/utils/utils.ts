@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { mergeWith, isPlainObject } from 'lodash';
 import {
   StandardAxes,
   ColorSchemas,
@@ -12,29 +13,31 @@ import {
   VisColumn,
   AxisColumnMappings,
   AxisSupportedStyles,
+  Threshold,
+  AxisConfig,
 } from '../types';
+import { ChartStyles, StyleOptions } from './use_visualization_types';
 
-export const applyAxisStyling = (
-  axis?: VisColumn,
-  axisStyle?: StandardAxes,
-  disableGrid?: boolean
-): any => {
+export const applyAxisStyling = ({
+  axis,
+  axisStyle,
+  disableGrid,
+  defaultAxisTitle = '',
+}: {
+  axis?: VisColumn;
+  axisStyle?: StandardAxes;
+  disableGrid?: boolean;
+  defaultAxisTitle?: string;
+}): AxisConfig => {
   const gridEnabled = disableGrid ? false : axisStyle?.grid.showLines ?? true;
 
-  const fullAxisConfig: any = {
+  const fullAxisConfig: AxisConfig = {
     // Grid settings
     grid: gridEnabled,
-    gridColor: '#E0E0E0',
-    gridOpacity: 0.5,
     labelSeparation: 8,
+    orient: axisStyle?.position,
+    title: axisStyle?.title.text || defaultAxisTitle,
   };
-
-  // Apply position
-
-  fullAxisConfig.orient = axisStyle?.position;
-
-  // Apply title settings
-  fullAxisConfig.title = axisStyle?.title.text || axis?.name;
 
   // Apply axis visibility
   if (!axisStyle?.show) {
@@ -47,23 +50,38 @@ export const applyAxisStyling = (
 
   // Apply label settings
   if (axisStyle?.labels) {
-    if (!axisStyle?.labels.show) {
-      fullAxisConfig.labels = false;
-    } else {
-      fullAxisConfig.labels = true;
-      // Apply label rotation/alignment
-      if (axisStyle?.labels.rotate !== undefined) {
-        fullAxisConfig.labelAngle = axisStyle?.labels.rotate;
+    fullAxisConfig.labels = !!axisStyle.labels.show;
+    if (fullAxisConfig.labels) {
+      fullAxisConfig.labelAngle = 0;
+      fullAxisConfig.labelLimit = 100;
+
+      if (axisStyle.labels.rotate !== undefined) {
+        fullAxisConfig.labelAngle = axisStyle.labels.rotate;
+      }
+      if (axisStyle.labels.truncate !== undefined && axisStyle.labels.truncate > 0) {
+        fullAxisConfig.labelLimit = axisStyle.labels.truncate;
       }
 
-      // Apply label truncation
-      if (axisStyle?.labels.truncate !== undefined && axisStyle?.labels.truncate > 0) {
-        fullAxisConfig.labelLimit = axisStyle?.labels.truncate;
-      }
-
-      // Apply label filtering (this controls overlapping labels)
       fullAxisConfig.labelOverlap = 'greedy';
+      fullAxisConfig.labelFlush = false;
     }
+  }
+
+  // Apply time formatting for date/time axes
+  if (axis?.schema === VisFieldType.Date) {
+    // Configure time formats for different granularities using 24-hour format for better clarity.
+    // Each format corresponds to the appropriate time precision:
+    // - hours: Display hours and minutes (HH:MM)
+    // - minutes: Display hours and minutes (HH:MM)
+    // - seconds: Display full time with seconds (HH:MM:SS)
+    // - milliseconds: Display full time with milliseconds (HH:MM:SS.mmm)
+    // Using %H (24-hour) instead of %I (12-hour) provides clearer, unambiguous time representation
+    fullAxisConfig.format = {
+      hours: '%H:%M',
+      minutes: '%H:%M',
+      seconds: '%H:%M:%S',
+      milliseconds: '%H:%M:%S.%L',
+    };
   }
 
   return fullAxisConfig;
@@ -271,3 +289,122 @@ export const getTooltipFormat = (
   const timeUnit = inferTimeUnitFromTimestamps(data, field);
   return timeUnit ? timeUnitToFormat[timeUnit] ?? fallback : fallback;
 };
+
+/**
+ * Determines the color for a value based on a set of thresholds.
+ * @param value - The value to evaluate (e.g., a number, string, or any type that can be converted to a number).
+ * @param thresholds - Array of threshold objects with `value` (number) and `color` (string) properties.
+ * @returns The matched threshold
+ */
+export function getThresholdByValue<T>(
+  value: any,
+  thresholds: Threshold[] = []
+): Threshold | undefined {
+  const numValue = Number(value);
+  if (isNaN(numValue)) {
+    return undefined;
+  }
+
+  // Sort thresholds in descending order
+  const sortedThresholds = [...thresholds].sort((a, b) => b.value - a.value);
+
+  // Find the first threshold where the value is greater than or equal to the threshold value
+  for (const threshold of sortedThresholds) {
+    if (numValue >= threshold.value) {
+      return threshold;
+    }
+  }
+
+  return undefined;
+}
+
+export const mergeStyles = (dest: ChartStyles, source: StyleOptions | undefined) => {
+  const copiedDest = { ...dest };
+
+  function customMerge(objValue: any, srcValue: any) {
+    if (isPlainObject(objValue) && isPlainObject(srcValue)) {
+      // Deep merge nested objects
+      const merged = { ...objValue };
+
+      // Iterate through all keys in srcValue
+      Object.keys(srcValue).forEach((key) => {
+        if (isPlainObject(objValue[key]) && isPlainObject(srcValue[key])) {
+          // Recursively merge nested objects
+          merged[key] = customMerge(objValue[key], srcValue[key]);
+        } else if (srcValue[key] !== undefined) {
+          // Only override if srcValue[key] is not undefined
+          merged[key] = srcValue[key];
+        }
+      });
+
+      return merged;
+    }
+
+    // For non-objects or if one of the values is not an object,
+    // return srcValue if it's not undefined, otherwise keep objValue
+    return srcValue !== undefined ? srcValue : objValue;
+  }
+
+  return mergeWith(copiedDest, source, customMerge);
+};
+
+export function applyTimeRangeToEncoding(
+  mainLayerEncoding?: any,
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string },
+  switchAxes: boolean = false
+): void {
+  if (!axisColumnMappings || !timeRange?.from || !timeRange?.to || !mainLayerEncoding) {
+    return;
+  }
+
+  const timeAxisEntry = Object.entries(axisColumnMappings).find(
+    ([, col]) => getSchemaByAxis(col) === 'temporal'
+  );
+
+  if (!timeAxisEntry) return;
+
+  const [axisRole] = timeAxisEntry as [AxisRole, VisColumn];
+  const targetRole = axisRole === AxisRole.X ? (switchAxes ? 'y' : 'x') : switchAxes ? 'x' : 'y';
+
+  // Check if the time field has timezone information or is UTC format
+  const hasTimezoneInfo = (timeString: string) => {
+    return (
+      timeString.includes('T') &&
+      (timeString.endsWith('Z') || timeString.includes('+') || timeString.includes('-'))
+    );
+  };
+
+  // Smart time processing: preserve UTC fields as strings, convert timezone-aware fields to UTC objects
+  const processTimeValue = (iso: string) => {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso; // fallback: let Vega-Lite parse string
+
+    // For UTC fields (format: "2025-09-25 18:19:02.49"), keep as string to let Vega-Lite handle naturally
+    if (!hasTimezoneInfo(iso)) {
+      return iso;
+    }
+
+    return {
+      year: d.getUTCFullYear(),
+      month: d.getUTCMonth() + 1,
+      date: d.getUTCDate(),
+      hours: d.getUTCHours(),
+      minutes: d.getUTCMinutes(),
+      seconds: d.getUTCSeconds(),
+      milliseconds: d.getUTCMilliseconds(),
+      utc: true,
+    };
+  };
+
+  const scaleConfig = {
+    domain: [processTimeValue(timeRange.from), processTimeValue(timeRange.to)],
+  };
+
+  if (mainLayerEncoding[targetRole]) {
+    mainLayerEncoding[targetRole].scale = {
+      ...(mainLayerEncoding[targetRole].scale || {}),
+      ...scaleConfig,
+    };
+  }
+}

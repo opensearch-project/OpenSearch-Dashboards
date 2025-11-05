@@ -4,10 +4,11 @@
  */
 
 import './results_action_bar.scss';
-
+import { i18n } from '@osd/i18n';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { useSelector } from 'react-redux';
+import { useObservable } from 'react-use';
 import { HitsCounter } from '../hits_counter';
 import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { DiscoverDownloadCsv } from '../download_csv';
@@ -16,6 +17,8 @@ import { ACTION_BAR_BUTTONS_CONTAINER_ID } from '../../../../../../data/public';
 import { SaveAndAddButtonWithModal } from '../../../visualizations/add_to_dashboard_button';
 import { selectActiveTabId } from '../../../../application/utils/state_management/selectors';
 import { PatternsSettingsPopoverButton } from '../patterns_settings/patterns_settings_popover_button';
+import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
+import { SlotItemsForType } from '../../../../services/slot_registry';
 
 export interface DiscoverResultsActionBarProps {
   hits?: number;
@@ -25,6 +28,7 @@ export interface DiscoverResultsActionBarProps {
   elapsedMs?: number;
   dataset?: Dataset;
   inspectionHanlder?: () => void;
+  extraActions?: Array<SlotItemsForType<'resultsActionBar'>>;
 }
 
 export const DiscoverResultsActionBar = ({
@@ -35,11 +39,16 @@ export const DiscoverResultsActionBar = ({
   elapsedMs,
   dataset,
   inspectionHanlder,
+  extraActions,
 }: DiscoverResultsActionBarProps) => {
   const currentTab = useSelector(selectActiveTabId);
   const shouldShowAddToDashboardButton = currentTab !== 'explore_patterns_tab';
   const shouldShowExportButton = currentTab !== 'explore_patterns_tab';
   const showTabSpecificSettings = currentTab === 'explore_patterns_tab';
+  const visualizationBuilder = getVisualizationBuilder();
+  const visConfig = useObservable(visualizationBuilder.visConfig$);
+  const showRawTable = useObservable(visualizationBuilder.showRawTable$);
+  const isNonTableChart = !!visConfig?.type && visConfig.type !== 'table';
 
   return (
     <EuiFlexGroup
@@ -54,7 +63,7 @@ export const DiscoverResultsActionBar = ({
           alignItems="center"
           direction="row"
           gutterSize="none"
-          justifyContent="flexStart"
+          justifyContent="spaceBetween"
         >
           <EuiFlexItem grow={false}>
             <HitsCounter
@@ -77,30 +86,58 @@ export const DiscoverResultsActionBar = ({
               })}
             </EuiButtonEmpty>
           </EuiFlexItem> */}
-          {dataset && rows?.length ? (
-            <>
-              {shouldShowExportButton && (
-                <EuiFlexItem
-                  grow={false}
-                  className="explore-results-action-bar__explore-download-csv-flex-item"
-                >
-                  <DiscoverDownloadCsv indexPattern={dataset as any} rows={rows} hits={hits} />
-                </EuiFlexItem>
-              )}
-
-              {showTabSpecificSettings && (
-                <EuiFlexItem grow={false}>
-                  <PatternsSettingsPopoverButton />
-                </EuiFlexItem>
-              )}
-
-              {shouldShowAddToDashboardButton && (
-                <EuiFlexItem grow={false}>
-                  <SaveAndAddButtonWithModal dataset={dataset} />
-                </EuiFlexItem>
-              )}
-            </>
-          ) : null}
+          <EuiFlexItem grow={false}>
+            {dataset && rows?.length ? (
+              <EuiFlexGroup
+                alignItems="center"
+                direction="row"
+                gutterSize="none"
+                justifyContent="flexStart"
+              >
+                {isNonTableChart && dataset && rows?.length ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      content={i18n.translate('explore.discover.showRawDataTooltip', {
+                        defaultMessage: 'View raw data table for this visualization',
+                      })}
+                    >
+                      <EuiSwitch
+                        label={i18n.translate('explore.discover.showRawData', {
+                          defaultMessage: 'Show raw data',
+                        })}
+                        checked={!!showRawTable}
+                        onChange={(e) => visualizationBuilder.setShowRawTable(e.target.checked)}
+                        data-test-subj="exploreShowRawDataSwitch"
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                ) : null}
+                {showTabSpecificSettings && (
+                  <EuiFlexItem grow={false}>
+                    <PatternsSettingsPopoverButton />
+                  </EuiFlexItem>
+                )}
+                {shouldShowExportButton && (
+                  <EuiFlexItem
+                    grow={false}
+                    className="explore-results-action-bar__explore-download-csv-flex-item"
+                  >
+                    <DiscoverDownloadCsv indexPattern={dataset} rows={rows} hits={hits} />
+                  </EuiFlexItem>
+                )}
+                {shouldShowAddToDashboardButton && (
+                  <EuiFlexItem grow={false}>
+                    <SaveAndAddButtonWithModal dataset={dataset} />
+                  </EuiFlexItem>
+                )}
+                {extraActions?.map((item) => (
+                  <EuiFlexItem grow={false} key={item.id}>
+                    {item.render()}
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            ) : null}
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

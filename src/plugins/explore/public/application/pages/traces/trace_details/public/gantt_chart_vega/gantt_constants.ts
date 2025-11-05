@@ -10,10 +10,8 @@
  */
 
 export const GANTT_CHART_CONSTANTS = {
-  TOP_PADDING: 20,
-  BOTTOM_PADDING: 20,
+  PADDING: 20,
   BUFFER_PADDING: 10,
-  RIGHT_PADDING: 20,
 
   MIN_ROW_HEIGHT: 30,
   BASE_CALCULATION_HEIGHT: 40,
@@ -28,17 +26,23 @@ export const GANTT_CHART_CONSTANTS = {
 
   // Default fallback width for span detail panel when container width cannot be determined
   DEFAULT_AVAILABLE_WIDTH: 800,
+
+  // Text truncation settings for service names and operation names
+  TEXT_TRUNCATE_THRESHOLD: 30, // Minimum length before truncation
+  TEXT_TRUNCATE_HEAD_LENGTH: 8, // Characters to keep from the beginning
+  TEXT_TRUNCATE_TAIL_LENGTH: 18, // Characters to keep from the end
 } as const;
 
+// Top padding + Bottom padding + Buffer padding
 export const TOTAL_PADDING =
-  GANTT_CHART_CONSTANTS.TOP_PADDING +
-  GANTT_CHART_CONSTANTS.BOTTOM_PADDING +
+  GANTT_CHART_CONSTANTS.PADDING +
+  GANTT_CHART_CONSTANTS.PADDING +
   GANTT_CHART_CONSTANTS.BUFFER_PADDING;
 
 /**
  * Calculate left padding based on container width
  * Uses responsive sizing to ensure labels have adequate space
  */
-export const calculateLeftPadding = (containerWidth: number): number => {
-  return Math.max(60, Math.min(90, containerWidth * 0.08));
+export const calculateTextPadding = (containerWidth: number): number => {
+  return Math.max(120, Math.min(180, containerWidth * 0.12));
 };

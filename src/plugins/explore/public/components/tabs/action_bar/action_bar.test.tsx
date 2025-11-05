@@ -45,6 +45,11 @@ jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
           },
         },
       },
+      slotRegistry: {
+        getSortedItems$: () => ({
+          subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
+        }),
+      },
     },
   }),
   withOpenSearchDashboards: jest.fn((component: any) => component),
@@ -68,6 +73,16 @@ jest.mock('../../../application/utils/hooks/use_tab_results', () => ({
         total: 0,
       },
       elapsedMs: 100,
+    },
+  }),
+}));
+
+jest.mock('../../../application/utils/hooks/use_histogram_results', () => ({
+  useHistogramResults: () => ({
+    results: {
+      hits: {
+        total: { value: 10, relation: 'eq' },
+      },
     },
   }),
 }));

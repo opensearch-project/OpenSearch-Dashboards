@@ -3,18 +3,34 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AxisColumnMappings, AxisRole, VEGASCHEMA, VisColumn, VisFieldType } from '../types';
-import { BarChartStyleControls } from './bar_vis_config';
-import { createThresholdLayer } from '../style_panel/threshold/utils';
+import {
+  AxisColumnMappings,
+  AxisRole,
+  VEGASCHEMA,
+  VisColumn,
+  VisFieldType,
+  TimeUnit,
+} from '../types';
+import { BarChartStyle, defaultBarChartStyles } from './bar_vis_config';
+import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
 import {
   applyAxisStyling,
   getSwappedAxisRole,
   getSchemaByAxis,
-  getTooltipFormat,
+  applyTimeRangeToEncoding,
 } from '../utils/utils';
 
+import {
+  inferTimeIntervals,
+  buildEncoding,
+  buildTooltipEncoding,
+  buildThresholdColorEncoding,
+} from './bar_chart_utils';
+import { DEFAULT_OPACITY } from '../constants';
+import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
+
 // Only set size and binSpacing in manual mode
-const configureBarSizeAndSpacing = (barMark: any, styles: Partial<BarChartStyleControls>) => {
+const configureBarSizeAndSpacing = (barMark: any, styles: BarChartStyle) => {
   if (styles.barSizeMode === 'manual') {
     barMark.size = styles.barWidth ? styles.barWidth * 20 : 14;
     barMark.binSpacing = styles.barPadding ? styles.barPadding * 10 : 1;
@@ -26,13 +42,15 @@ export const createBarSpec = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>,
+  styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length === 0 || categoricalColumns.length === 0) {
     throw new Error('Bar chart requires at least one numerical column and one categorical column');
   }
+
+  const styles = { ...defaultBarChartStyles, ...styleOptions };
 
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
@@ -55,48 +73,45 @@ export const createBarSpec = (
     barMark.strokeWidth = styles.barBorderWidth || 1;
   }
 
+  const numericalAxis = yAxis?.schema === VisFieldType.Numerical ? yAxis : xAxis;
+
+  const colorEncodingLayer = buildThresholdColorEncoding(numericalAxis, styleOptions);
+
   const mainLayer = {
+    params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
     mark: barMark,
     encoding: {
       // Category axis (X or Y depending on orientation)
       [categoryAxis]: {
-        field: xAxis?.column,
-        type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        ...buildEncoding(xAxis, xAxisStyle, undefined, styles?.bucket?.aggregationType),
       },
       // Value axis (Y or X depending on orientation)
       [valueAxis]: {
-        field: yAxis?.column,
-        type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        ...buildEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType),
       },
+      color: styleOptions?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
-            field: xAxis?.column,
-            type: getSchemaByAxis(xAxis),
-            title: xAxisStyle?.title?.text || xAxis?.name,
+            ...buildTooltipEncoding(xAxis, xAxisStyle, undefined, styles?.bucket?.aggregationType),
           },
           {
-            field: yAxis?.column,
-            type: getSchemaByAxis(yAxis),
-            title: yAxisStyle?.title?.text || yAxis?.name,
+            ...buildTooltipEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType),
           },
         ],
       }),
+      fillOpacity: {
+        condition: { param: 'highlight', value: 1, empty: false },
+        value: DEFAULT_OPACITY,
+      },
     },
   };
-
   layers.push(mainLayer);
 
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
 
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles.thresholdLines,
-    styles.tooltipOptions?.mode,
-    barEncodingDefault
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
@@ -108,12 +123,6 @@ export const createBarSpec = (
       : undefined,
     data: { values: transformedData },
     layer: layers,
-    // Add legend configuration if needed, or explicitly set to null if disabled
-    legend: styles.addLegend
-      ? {
-          orient: styles.legendPosition?.toLowerCase() || 'right',
-        }
-      : null,
   };
 };
 
@@ -129,8 +138,9 @@ export const createTimeBarChart = (
   transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>,
-  axisColumnMappings?: AxisColumnMappings
+  styles: BarChartStyle,
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length === 0 || dateColumns.length === 0) {
@@ -138,6 +148,17 @@ export const createTimeBarChart = (
   }
 
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const timeAxis = xAxis?.schema === VisFieldType.Date ? xAxis : yAxis;
+  // Determine the numerical axis for the title
+  const numericalAxis = xAxis?.schema === VisFieldType.Date ? yAxis : xAxis;
+
+  const colorEncodingLayer = buildThresholdColorEncoding(numericalAxis, styles);
+
+  const interval =
+    styles?.bucket?.bucketTimeUnit === TimeUnit.AUTO
+      ? inferTimeIntervals(transformedData, timeAxis?.column)
+      : styles?.bucket?.bucketTimeUnit;
 
   const layers: any[] = [];
 
@@ -155,38 +176,33 @@ export const createTimeBarChart = (
   }
 
   const mainLayer = {
+    params: [
+      { name: 'highlight', select: { type: 'point', on: 'pointerover' } },
+      createTimeRangeBrush({ timeAxis: styles.switchAxes ? 'y' : 'x' }),
+    ],
     mark: barMark,
     encoding: {
       x: {
-        field: xAxis?.column,
-        type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        ...buildEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
       },
       y: {
-        field: yAxis?.column,
-        type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        ...buildEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
       },
+      color: styles?.useThresholdColor ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
-            field: xAxis?.column,
-            type: getSchemaByAxis(xAxis),
-            title: xAxisStyle?.title?.text || xAxis?.name,
-            ...(getSchemaByAxis(xAxis) === 'temporal' && {
-              format: getTooltipFormat(transformedData, xAxis?.column),
-            }),
+            ...buildTooltipEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
           },
           {
-            field: yAxis?.column,
-            type: getSchemaByAxis(yAxis),
-            title: yAxisStyle?.title?.text || yAxis?.name,
-            ...(getSchemaByAxis(yAxis) === 'temporal' && {
-              format: getTooltipFormat(transformedData, yAxis?.column),
-            }),
+            ...buildTooltipEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
           },
         ],
       }),
+      fillOpacity: {
+        condition: { param: 'highlight', value: 1, empty: false },
+        value: DEFAULT_OPACITY,
+      },
     },
   };
 
@@ -194,28 +210,24 @@ export const createTimeBarChart = (
 
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
   // Add threshold layer if enabled
-  const thresholdLayer = createThresholdLayer(
-    styles.thresholdLines,
-    styles.tooltipOptions?.mode,
-    barEncodingDefault
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
   if (thresholdLayer) {
     layers.push(...thresholdLayer.layer);
   }
 
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange) {
+    applyTimeRangeToEncoding(mainLayer.encoding, axisColumnMappings, timeRange, styles.switchAxes);
+  }
+
   return {
     $schema: VEGASCHEMA,
+    params: [...(timeAxis ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
-      ? styles.titleOptions?.titleName || `${yAxis?.name} Over Time`
+      ? styles.titleOptions?.titleName || `${numericalAxis?.name} Over Time`
       : undefined,
     data: { values: transformedData },
     layer: layers,
-    // Add legend configuration if needed, or explicitly set to null if disabled
-    legend: styles.addLegend
-      ? {
-          orient: styles.legendPosition?.toLowerCase() || 'right',
-        }
-      : null,
   };
 };
 
@@ -233,8 +245,9 @@ export const createGroupedTimeBarChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>,
-  axisColumnMappings?: AxisColumnMappings
+  styleOptions: BarChartStyle,
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   // Check if we have the required columns
   if (
@@ -246,6 +259,8 @@ export const createGroupedTimeBarChart = (
       'Grouped time bar chart requires at least one numerical column, one categorical column, and one date column'
     );
   }
+
+  const styles = { ...defaultBarChartStyles, ...styleOptions };
 
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
@@ -266,69 +281,81 @@ export const createGroupedTimeBarChart = (
     barMark.strokeWidth = styles.barBorderWidth || 1;
   }
 
-  const spec: any = {
+  const layer = [];
+  const timeAxis = xAxis?.schema === VisFieldType.Date ? xAxis : yAxis;
+  const interval =
+    styles?.bucket?.bucketTimeUnit === TimeUnit.AUTO
+      ? inferTimeIntervals(transformedData, timeAxis?.column)
+      : styles?.bucket?.bucketTimeUnit;
+
+  const barLayer: any = {
     $schema: VEGASCHEMA,
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${yAxis?.name} Over Time by ${categoryName}`
       : undefined,
     data: { values: transformedData },
+    params: [
+      { name: 'highlight', select: { type: 'point', on: 'pointerover' } },
+      createTimeRangeBrush({ timeAxis: styles.switchAxes ? 'y' : 'x' }),
+    ],
     mark: barMark,
     encoding: {
       x: {
-        field: xAxis?.column,
-        type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        ...buildEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
       },
       y: {
-        field: yAxis?.column,
-        type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle),
+        ...buildEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
       },
       color: {
         field: categoryField,
-        type: getSchemaByAxis(colorColumn),
+        type: 'nominal',
         legend: styles.addLegend
           ? {
-              title: categoryName,
+              title: styles.legendTitle,
               orient: styles.legendPosition?.toLowerCase() || 'right',
+              symbolType: styles.legendShape ?? 'circle',
             }
           : null,
       },
       // Optional: Add tooltip with all information
       tooltip: [
         {
-          field: xAxis?.column,
-          type: getSchemaByAxis(xAxis),
-          title: xAxisStyle?.title?.text || xAxis?.name,
-          ...(getSchemaByAxis(xAxis) === 'temporal' && {
-            format: getTooltipFormat(transformedData, xAxis?.column),
-          }),
+          ...buildTooltipEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
+        },
+        {
+          ...buildTooltipEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
         },
         { field: categoryField, type: getSchemaByAxis(colorColumn), title: categoryName },
-        {
-          field: yAxis?.column,
-          type: getSchemaByAxis(yAxis),
-          title: yAxisStyle?.title?.text || yAxis?.name,
-          ...(getSchemaByAxis(yAxis) === 'temporal' && {
-            format: getTooltipFormat(transformedData, yAxis?.column),
-          }),
-        },
       ],
+      fillOpacity: {
+        condition: { param: 'highlight', value: 1, empty: false },
+        value: DEFAULT_OPACITY,
+      },
     },
   };
+  layer.push(barLayer);
 
   // Add threshold layer if enabled
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
-  const thresholdLayer = createThresholdLayer(
-    styles.thresholdLines,
-    styles.tooltipOptions?.mode,
-    barEncodingDefault
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
   if (thresholdLayer) {
-    spec.layer = [{ mark: barMark, encoding: spec.encoding }, ...thresholdLayer.layer];
-    delete spec.mark;
-    delete spec.encoding;
+    layer.push(...thresholdLayer.layer);
   }
+
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange) {
+    applyTimeRangeToEncoding(barLayer.encoding, axisColumnMappings, timeRange, styles.switchAxes);
+  }
+
+  const spec: any = {
+    $schema: VEGASCHEMA,
+    params: [...(timeAxis ? [createTimeRangeUpdater()] : [])],
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${yAxis?.name} Over Time by ${categoryName}`
+      : undefined,
+    data: { values: transformedData },
+    layer,
+  };
 
   return spec;
 };
@@ -347,8 +374,9 @@ export const createFacetedTimeBarChart = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>,
-  axisColumnMappings?: AxisColumnMappings
+  styleOptions: BarChartStyle,
+  axisColumnMappings?: AxisColumnMappings,
+  timeRange?: { from: string; to: string }
 ): any => {
   // Check if we have the required columns
   if (numericalColumns.length === 0 || categoricalColumns.length < 2 || dateColumns.length === 0) {
@@ -357,6 +385,7 @@ export const createFacetedTimeBarChart = (
     );
   }
 
+  const styles = { ...defaultBarChartStyles, ...styleOptions };
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
   const facetMapping = axisColumnMappings?.[AxisRole.FACET];
@@ -369,6 +398,13 @@ export const createFacetedTimeBarChart = (
   const dateName = xAxisStyle?.title?.text || xAxis?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
+
+  const timeAxis = xAxis?.schema === VisFieldType.Date ? xAxis : yAxis;
+
+  const interval =
+    styles?.bucket?.bucketTimeUnit === TimeUnit.AUTO
+      ? inferTimeIntervals(transformedData, timeAxis?.column)
+      : styles?.bucket?.bucketTimeUnit;
 
   // Configure bar mark
   const barMark: any = {
@@ -385,14 +421,52 @@ export const createFacetedTimeBarChart = (
 
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
 
-  const thresholdLayer = createThresholdLayer(
-    styles.thresholdLines,
-    styles.tooltipOptions?.mode,
-    barEncodingDefault
-  );
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
+
+  // Create the main layer encoding first
+  const mainLayerEncoding = {
+    x: {
+      ...buildEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
+    },
+    y: {
+      ...buildEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
+    },
+    color: {
+      field: category1Field,
+      type: 'nominal',
+      legend: styles.addLegend
+        ? {
+            title: styles.legendTitle,
+            orient: styles.legendPosition?.toLowerCase() || 'right',
+            symbolType: styles.legendShape ?? 'circle',
+          }
+        : null,
+    },
+    ...(styles.tooltipOptions?.mode !== 'hidden' && {
+      tooltip: [
+        {
+          ...buildTooltipEncoding(xAxis, xAxisStyle, interval, styles?.bucket?.aggregationType),
+        },
+        {
+          ...buildTooltipEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
+        },
+        { field: category1Field, type: 'nominal', title: category1Name },
+      ],
+    }),
+    fillOpacity: {
+      condition: { param: 'highlight', value: 1, empty: false },
+      value: DEFAULT_OPACITY,
+    },
+  };
+
+  // Apply time range to main layer's scale if enabled
+  if (styles.showFullTimeRange && timeRange) {
+    applyTimeRangeToEncoding(mainLayerEncoding, axisColumnMappings, timeRange, styles.switchAxes);
+  }
 
   return {
     $schema: VEGASCHEMA,
+    params: [...(timeAxis ? [createTimeRangeUpdater()] : [])],
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName ||
         `${metricName} Over Time by ${category1Name} (Faceted by ${category2Name})`
@@ -406,50 +480,12 @@ export const createFacetedTimeBarChart = (
     spec: {
       layer: [
         {
+          params: [
+            { name: 'highlight', select: { type: 'point', on: 'pointerover' } },
+            createTimeRangeBrush({ timeAxis: styles.switchAxes ? 'y' : 'x' }),
+          ],
           mark: barMark,
-          encoding: {
-            x: {
-              field: dateField,
-              type: getSchemaByAxis(xAxis),
-              axis: applyAxisStyling(xAxis, xAxisStyle),
-            },
-            y: {
-              field: metricField,
-              type: getSchemaByAxis(yAxis),
-              axis: applyAxisStyling(yAxis, yAxisStyle),
-            },
-            color: {
-              field: category1Field,
-              type: getSchemaByAxis(colorMapping),
-              legend: styles.addLegend
-                ? {
-                    title: category1Name,
-                    orient: styles.legendPosition?.toLowerCase() || 'right',
-                  }
-                : null,
-            },
-            ...(styles.tooltipOptions?.mode !== 'hidden' && {
-              tooltip: [
-                {
-                  field: metricField,
-                  type: getSchemaByAxis(yAxis),
-                  title: metricName,
-                  ...(getSchemaByAxis(yAxis) === 'temporal' && {
-                    format: getTooltipFormat(transformedData, yAxis?.column),
-                  }),
-                },
-                {
-                  field: dateField,
-                  type: getSchemaByAxis(xAxis),
-                  title: dateName,
-                  ...(getSchemaByAxis(xAxis) === 'temporal' && {
-                    format: getTooltipFormat(transformedData, xAxis?.column),
-                  }),
-                },
-                { field: category1Field, type: 'nominal', title: category1Name },
-              ],
-            }),
-          },
+          encoding: mainLayerEncoding,
         },
 
         // Add threshold layer to each facet if enabled
@@ -464,15 +500,10 @@ export const createStackedBarSpec = (
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
-  styles: Partial<BarChartStyleControls>,
+  styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length === 0 || categoricalColumns.length < 2) {
-    throw new Error(
-      'Stacked bar chart requires at least one numerical column and two categorical columns'
-    );
-  }
+  const styles = { ...defaultBarChartStyles, ...styleOptions };
 
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
@@ -497,26 +528,17 @@ export const createStackedBarSpec = (
     barMark.strokeWidth = styles.barBorderWidth || 1;
   }
 
-  const spec: any = {
-    $schema: VEGASCHEMA,
-    title: styles.titleOptions?.show
-      ? styles.titleOptions?.titleName || `${yAxis?.name} by ${xAxis?.name} and ${categoryName2}`
-      : undefined,
-    data: { values: transformedData },
+  const barLayer = {
+    params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
     mark: barMark,
     encoding: {
       // Category axis (X or Y depending on orientation)
       [categoryAxis]: {
-        field: xAxis?.column,
-        type: getSchemaByAxis(xAxis),
-        axis: applyAxisStyling(xAxis, xAxisStyle),
+        ...buildEncoding(xAxis, xAxisStyle, undefined, styles?.bucket?.aggregationType),
       },
       // Value axis (Y or X depending on orientation)
       [valueAxis]: {
-        field: yAxis?.column,
-        type: getSchemaByAxis(yAxis),
-        axis: applyAxisStyling(yAxis, yAxisStyle),
-        stack: 'zero', // Can be 'zero', 'normalize', or 'center'
+        ...buildEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType),
       },
       // Color: Second categorical field (stacking)
       color: {
@@ -524,34 +546,133 @@ export const createStackedBarSpec = (
         type: 'nominal',
         legend: styles.addLegend
           ? {
-              title: categoryName2,
+              title: styles.legendTitle,
               orient: styles.legendPosition?.toLowerCase() || 'bottom',
+              symbolType: styles.legendShape ?? 'circle',
             }
           : null,
       },
       // Optional: Add tooltip with all information if tooltip mode is not hidden
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
-          { field: xAxis?.column, type: getSchemaByAxis(xAxis), title: xAxis?.name },
+          {
+            ...buildTooltipEncoding(xAxis, xAxisStyle, undefined, styles?.bucket?.aggregationType),
+          },
+          {
+            ...buildTooltipEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType),
+          },
           { field: categoryField2, type: 'nominal', title: categoryName2 },
-          { field: yAxis?.column, type: getSchemaByAxis(yAxis), title: yAxis?.name },
+        ],
+      }),
+      fillOpacity: {
+        condition: { param: 'highlight', value: 1, empty: false },
+        value: DEFAULT_OPACITY,
+      },
+    },
+  };
+
+  const layer = [barLayer];
+
+  // Add threshold layer if enabled
+  const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
+
+  if (thresholdLayer) {
+    layer.push(...thresholdLayer.layer);
+  }
+
+  const spec: any = {
+    $schema: VEGASCHEMA,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${yAxis?.name} by ${xAxis?.name} and ${categoryName2}`
+      : undefined,
+    data: { values: transformedData },
+    layer,
+  };
+
+  return spec;
+};
+
+export const createDoubleNumericalBarChart = (
+  transformedData: Array<Record<string, any>>,
+  numericalColumns: VisColumn[],
+  styleOptions: BarChartStyle,
+  axisColumnMappings?: AxisColumnMappings
+): any => {
+  // Check if we have the required columns
+  if (numericalColumns.length < 2) {
+    throw new Error('Histogram bar chart requires at least two numerical column');
+  }
+
+  const styles = { ...defaultBarChartStyles, ...styleOptions };
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const layers: any[] = [];
+
+  // Configure bar mark
+  const barMark: any = {
+    type: 'bar',
+    tooltip: styles.tooltipOptions?.mode !== 'hidden',
+  };
+
+  configureBarSizeAndSpacing(barMark, styles);
+
+  // Add border if enabled
+  if (styles.showBarBorder) {
+    barMark.stroke = styles.barBorderColor || '#000000';
+    barMark.strokeWidth = styles.barBorderWidth || 1;
+  }
+
+  const colorEncodingLayer = buildThresholdColorEncoding(yAxis, styleOptions);
+
+  const mainLayer = {
+    mark: barMark,
+    encoding: {
+      x: {
+        field: xAxis?.column,
+        type: 'nominal',
+        axis: applyAxisStyling({ axis: xAxis, axisStyle: xAxisStyle }),
+      },
+      y: {
+        field: yAxis?.column,
+        aggregate: styles?.bucket?.aggregationType,
+        type: getSchemaByAxis(yAxis),
+        axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
+      },
+      color: styleOptions?.useThresholdColor ? colorEncodingLayer : [],
+      ...(styles.tooltipOptions?.mode !== 'hidden' && {
+        tooltip: [
+          {
+            field: xAxis?.column,
+            type: 'nominal',
+            title: xAxisStyle?.title?.text || xAxis?.name,
+          },
+          {
+            field: yAxis?.column,
+            type: getSchemaByAxis(yAxis),
+            aggregate: styles?.bucket?.aggregationType,
+            title: yAxisStyle?.title?.text || `${yAxis?.name}(${styles?.bucket?.aggregationType})`,
+          },
         ],
       }),
     },
   };
 
-  // Add threshold layer if enabled
+  layers.push(mainLayer);
+
   const barEncodingDefault = yAxis?.schema === VisFieldType.Numerical ? 'y' : 'x';
-  const thresholdLayer = createThresholdLayer(
-    styles.thresholdLines,
-    styles.tooltipOptions?.mode,
-    barEncodingDefault
-  );
+  // Add threshold layer if enabled
+  const thresholdLayer = createThresholdLayer(styles?.thresholdOptions, barEncodingDefault);
   if (thresholdLayer) {
-    spec.layer = [{ mark: barMark, encoding: spec.encoding }, ...thresholdLayer.layer];
-    delete spec.mark;
-    delete spec.encoding;
+    layers.push(...thresholdLayer.layer);
   }
 
-  return spec;
+  return {
+    $schema: VEGASCHEMA,
+    title: styles.titleOptions?.show
+      ? styles.titleOptions?.titleName || `${xAxis?.name} with ${yAxis?.name}`
+      : undefined,
+    data: { values: transformedData },
+    layer: layers,
+  };
 };

@@ -29,9 +29,9 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { IndexPatternField } from '../../../../../data/public';
+import { DataViewField } from '../../../../../data/public';
 
-export function getWarnings(field: IndexPatternField) {
+export function getWarnings(field: DataViewField) {
   let warnings = [];
 
   if (field.scripted) {

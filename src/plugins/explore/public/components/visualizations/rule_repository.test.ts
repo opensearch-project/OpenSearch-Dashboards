@@ -4,7 +4,7 @@
  */
 
 import { ALL_VISUALIZATION_RULES } from './rule_repository';
-import { VisColumn, VisFieldType } from './types';
+import { VisColumn, VisFieldType, AxisColumnMappings, AxisRole } from './types';
 import {
   createSimpleLineChart,
   createLineBarChart,
@@ -19,7 +19,17 @@ import {
   createThreeMetricOneCateScatter,
 } from './scatter/to_expression';
 import { createSingleMetric } from './metric/to_expression';
-import { createBarSpec, createStackedBarSpec } from './bar/to_expression';
+import {
+  createBarSpec,
+  createStackedBarSpec,
+  createGroupedTimeBarChart,
+  createFacetedTimeBarChart,
+} from './bar/to_expression';
+import {
+  createMultiAreaChart,
+  createStackedAreaChart,
+  createFacetedMultiAreaChart,
+} from './area/to_expression';
 // Area chart expressions are only used in mocks, removing unused import
 
 // Mock the chart expression functions
@@ -48,6 +58,10 @@ jest.mock('./scatter/to_expression', () => ({
   createThreeMetricOneCateScatter: jest
     .fn()
     .mockReturnValue('three-metric-one-cate-scatter-expression'),
+}));
+
+jest.mock('./gauge/to_expression', () => ({
+  createGauge: jest.fn().mockReturnValue('single-metric-gauge-expression'),
 }));
 
 jest.mock('./metric/to_expression', () => ({
@@ -114,6 +128,7 @@ describe('rule_repository', () => {
   // Sample transformed data for testing
   const transformedData = [{ 'field-0': '2023-01-01', 'field-1': 100, 'field-2': 'Category A' }];
   const styleOptions = { showLine: true };
+  const timeRange = { from: '2023-01-01', to: '2023-01-02' };
 
   describe('ALL_VISUALIZATION_RULES', () => {
     it('should export an array of visualization rules', () => {
@@ -138,7 +153,7 @@ describe('rule_repository', () => {
 
     it('should match 1 metric and 1 date', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 0, 1);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should not match other combinations', () => {
@@ -146,19 +161,25 @@ describe('rule_repository', () => {
       const test1 = createTestColumns(2, 0, 1);
       expect(
         rule?.matches(test1.numericalColumns, test1.categoricalColumns, test1.dateColumns)
-      ).toBe(false);
+      ).toBe('COMPATIBLE_MATCH');
 
       // 1 metric, 1 category, 1 date
       const test2 = createTestColumns(1, 1, 1);
       expect(
         rule?.matches(test2.numericalColumns, test2.categoricalColumns, test2.dateColumns)
-      ).toBe(false);
+      ).toBe('COMPATIBLE_MATCH');
 
       // 1 metric, 0 categories, 2 dates
       const test3 = createTestColumns(1, 0, 2);
       expect(
         rule?.matches(test3.numericalColumns, test3.categoricalColumns, test3.dateColumns)
-      ).toBe(false);
+      ).toBe('COMPATIBLE_MATCH');
+
+      // 1 metric, 1 categories, 0 date
+      const test4 = createTestColumns(1, 1, 0);
+      expect(
+        rule?.matches(test4.numericalColumns, test4.categoricalColumns, test4.dateColumns)
+      ).toBe('NOT_MATCH');
     });
 
     it('should create a simple line chart expression by default', () => {
@@ -168,7 +189,10 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
-        styleOptions
+        styleOptions,
+        'line',
+        undefined,
+        timeRange
       );
 
       expect(expression).toBe('simple-line-chart-expression');
@@ -179,7 +203,8 @@ describe('rule_repository', () => {
         numericalColumns,
         dateColumns,
         styleOptions,
-        undefined
+        undefined,
+        timeRange
       );
     });
   });
@@ -194,17 +219,26 @@ describe('rule_repository', () => {
 
     it('should match 2 metrics and 1 date', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 1);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should create a line bar chart expression by default', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 1);
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericalColumns[0],
+        [AxisRole.X]: dateColumns[0],
+        [AxisRole.Y_SECOND]: numericalColumns[1],
+      };
+
       const expression = rule?.toSpec?.(
         transformedData,
         numericalColumns,
         categoricalColumns,
         dateColumns,
-        styleOptions
+        styleOptions,
+        'line',
+        mockAxisColumnMappings,
+        timeRange
       );
 
       expect(expression).toBe('line-bar-chart-expression');
@@ -215,7 +249,101 @@ describe('rule_repository', () => {
         numericalColumns,
         dateColumns,
         styleOptions,
-        undefined
+        mockAxisColumnMappings,
+        timeRange
+      );
+    });
+
+    it('should create multi-line chart when no y2 axis mapping', () => {
+      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 1);
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericalColumns[0],
+        [AxisRole.X]: dateColumns[0],
+        [AxisRole.COLOR]: numericalColumns[1],
+      };
+      const expression = rule?.toSpec?.(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        'line',
+        mockAxisColumnMappings,
+        timeRange
+      );
+      expect(expression).toBe('multi-line-chart-expression');
+
+      expect(createMultiLineChart).toHaveBeenCalledWith(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        mockAxisColumnMappings,
+        timeRange
+      );
+    });
+
+    it('should create grouped bar chart', () => {
+      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 1);
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericalColumns[0],
+        [AxisRole.X]: dateColumns[0],
+        [AxisRole.COLOR]: numericalColumns[1],
+      };
+
+      const expression = rule?.toSpec?.(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        'bar',
+        mockAxisColumnMappings,
+        timeRange
+      );
+
+      expect(expression).toBe('grouped-time-bar-chart-expression');
+
+      expect(createGroupedTimeBarChart).toHaveBeenCalledWith(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        mockAxisColumnMappings,
+        timeRange
+      );
+    });
+    it('should create multi area chart', () => {
+      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 1);
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericalColumns[0],
+        [AxisRole.X]: dateColumns[0],
+        [AxisRole.COLOR]: numericalColumns[1],
+      };
+
+      const expression = rule?.toSpec?.(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        'area',
+        mockAxisColumnMappings,
+        timeRange
+      );
+
+      expect(expression).toBe('multi-area-chart-expression');
+
+      expect(createMultiAreaChart).toHaveBeenCalledWith(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        mockAxisColumnMappings,
+        timeRange
       );
     });
   });
@@ -230,7 +358,7 @@ describe('rule_repository', () => {
 
     it('should match 1 metric, 1 category, and 1 date', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 1, 1);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should create a multi line chart expression by default', () => {
@@ -240,7 +368,10 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
-        styleOptions
+        styleOptions,
+        'line',
+        undefined,
+        timeRange
       );
       expect(expression).toBe('multi-line-chart-expression');
       expect(createMultiLineChart).toHaveBeenCalledWith(
@@ -249,7 +380,8 @@ describe('rule_repository', () => {
         categoricalColumns,
         dateColumns,
         styleOptions,
-        undefined
+        undefined,
+        timeRange
       );
     });
   });
@@ -264,7 +396,7 @@ describe('rule_repository', () => {
 
     it('should match 1 metric, 2 categories, and 1 date', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 2, 1);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should create a faceted multi line chart expression by default', () => {
@@ -274,7 +406,10 @@ describe('rule_repository', () => {
         numericalColumns,
         categoricalColumns,
         dateColumns,
-        styleOptions
+        styleOptions,
+        'line',
+        undefined,
+        timeRange
       );
 
       expect(expression).toBe('faceted-multi-line-chart-expression');
@@ -286,7 +421,8 @@ describe('rule_repository', () => {
         categoricalColumns,
         dateColumns,
         styleOptions,
-        undefined
+        undefined,
+        timeRange
       );
     });
   });
@@ -305,13 +441,15 @@ describe('rule_repository', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 2, 0);
       // Modify one of the columns to have high cardinality
       categoricalColumns[0].uniqueValuesCount = 10;
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should not match with low cardinality', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 2, 0);
       // All columns have low cardinality
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(false);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(
+        'COMPATIBLE_MATCH'
+      );
     });
 
     it('should create a regular heatmap expression by default', () => {
@@ -368,7 +506,7 @@ describe('rule_repository', () => {
 
     it('should match 1 metric, 1 category, and 0 dates', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 1, 0);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should create a pie chart expression by default', () => {
@@ -447,7 +585,7 @@ describe('rule_repository', () => {
 
     it('should match 1 metric with validValuesCount=1, 0 categories, and 0 dates', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(1, 0, 0);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should create a single metric expression', () => {
@@ -482,7 +620,7 @@ describe('rule_repository', () => {
 
     it('should match 2 metrics, 0 categories, and 0 dates', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 0);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should create a scatter chart expression', () => {
@@ -505,6 +643,34 @@ describe('rule_repository', () => {
         undefined
       );
     });
+
+    it('should create a pie chart expression', () => {
+      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 0, 0);
+
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.SIZE]: numericalColumns[0],
+        [AxisRole.COLOR]: numericalColumns[1],
+      };
+      const expression = rule?.toSpec?.(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        'pie',
+        mockAxisColumnMappings
+      );
+
+      expect(expression).toBe('pie-chart-expression');
+      expect(createPieSpec).toHaveBeenCalledWith(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        mockAxisColumnMappings
+      );
+    });
   });
 
   describe('twoMetricOneCateRule', () => {
@@ -517,7 +683,7 @@ describe('rule_repository', () => {
 
     it('should match 2 metrics, 1 category, and 0 dates', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 1, 0);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should create a scatter chart with category expression', () => {
@@ -540,6 +706,64 @@ describe('rule_repository', () => {
         undefined
       );
     });
+
+    it('should create a stacked bar chart with category expression', () => {
+      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 1, 0);
+
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericalColumns[0],
+        [AxisRole.X]: categoricalColumns[0],
+        [AxisRole.COLOR]: numericalColumns[1],
+      };
+      const expression = rule?.toSpec?.(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        'bar',
+        mockAxisColumnMappings
+      );
+
+      expect(expression).toBe('stacked-bar-chart-expression');
+      expect(createStackedBarSpec).toHaveBeenCalledWith(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        mockAxisColumnMappings
+      );
+    });
+
+    it('should create a stacked area chart with category expression', () => {
+      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 1, 0);
+
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericalColumns[0],
+        [AxisRole.X]: categoricalColumns[0],
+        [AxisRole.COLOR]: numericalColumns[1],
+      };
+      const expression = rule?.toSpec?.(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        'area',
+        mockAxisColumnMappings
+      );
+
+      expect(expression).toBe('stacked-area-chart-expression');
+      expect(createStackedAreaChart).toHaveBeenCalledWith(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        mockAxisColumnMappings
+      );
+    });
   });
 
   describe('threeMetricOneCateRule', () => {
@@ -552,7 +776,7 @@ describe('rule_repository', () => {
 
     it('should match 3 metrics, 1 category, and 0 dates', () => {
       const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(3, 1, 0);
-      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe(true);
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
     });
 
     it('should create a scatter chart with three metrics and one category expression', () => {
@@ -573,6 +797,114 @@ describe('rule_repository', () => {
         dateColumns,
         styleOptions,
         undefined
+      );
+    });
+  });
+
+  describe('twoMetricOneCateOneDateRule', () => {
+    // Find the rule by ID
+    const rule = ALL_VISUALIZATION_RULES.find((r) => r.id === 'two-metric-one-category-one-date');
+
+    it('should exist', () => {
+      expect(rule).toBeDefined();
+    });
+
+    it('should match 2 metrics, 1 category, and 1 dates', () => {
+      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 1, 1);
+
+      expect(rule?.matches(numericalColumns, categoricalColumns, dateColumns)).toBe('EXACT_MATCH');
+    });
+
+    it('should create a faceted bar chart with two metrics and one category and one date expression', () => {
+      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 1, 1);
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.X]: dateColumns[0],
+        [AxisRole.COLOR]: numericalColumns[1],
+        [AxisRole.FACET]: categoricalColumns[1],
+        [AxisRole.Y]: numericalColumns[0],
+      };
+      const expression = rule?.toSpec?.(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        'bar',
+        mockAxisColumnMappings,
+        timeRange
+      );
+
+      expect(expression).toBe('faceted-time-bar-chart-expression');
+      expect(createFacetedTimeBarChart).toHaveBeenCalledWith(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        mockAxisColumnMappings,
+        timeRange
+      );
+    });
+
+    it('should create a faceted area chart with two metrics and one category and one date expression', () => {
+      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 1, 1);
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.X]: dateColumns[0],
+        [AxisRole.COLOR]: numericalColumns[1],
+        [AxisRole.FACET]: categoricalColumns[1],
+        [AxisRole.Y]: numericalColumns[0],
+      };
+      const expression = rule?.toSpec?.(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        'area',
+        mockAxisColumnMappings,
+        timeRange
+      );
+
+      expect(expression).toBe('faceted-multi-area-chart-expression');
+      expect(createFacetedMultiAreaChart).toHaveBeenCalledWith(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        mockAxisColumnMappings,
+        timeRange
+      );
+    });
+
+    it('should create a faceted line chart with two metrics and one category and one date expression', () => {
+      const { numericalColumns, categoricalColumns, dateColumns } = createTestColumns(2, 1, 1);
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.X]: dateColumns[0],
+        [AxisRole.COLOR]: numericalColumns[1],
+        [AxisRole.FACET]: categoricalColumns[1],
+        [AxisRole.Y]: numericalColumns[0],
+      };
+      const expression = rule?.toSpec?.(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        'line',
+        mockAxisColumnMappings,
+        timeRange
+      );
+
+      expect(expression).toBe('faceted-multi-line-chart-expression');
+      expect(createFacetedMultiLineChart).toHaveBeenCalledWith(
+        transformedData,
+        numericalColumns,
+        categoricalColumns,
+        dateColumns,
+        styleOptions,
+        mockAxisColumnMappings,
+        timeRange
       );
     });
   });

@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { CriteriaWithPagination, EuiBasicTable } from '@elastic/eui';
 import { patternsTableColumns } from './patterns_table_columns';
+import { usePatternsFlyoutContext } from './patterns_table_flyout/patterns_flyout_context';
 
 export interface PatternsTableProps {
   items: PatternItem[];
@@ -18,6 +19,7 @@ export interface PatternItem {
 }
 
 export const PatternsTable = ({ items }: PatternsTableProps) => {
+  const { openPatternsTableFlyout } = usePatternsFlyoutContext();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
@@ -28,7 +30,7 @@ export const PatternsTable = ({ items }: PatternsTableProps) => {
   return (
     <EuiBasicTable<PatternItem>
       items={paginatedItems}
-      columns={patternsTableColumns}
+      columns={patternsTableColumns(openPatternsTableFlyout)}
       pagination={{ pageIndex, pageSize, totalItemCount: items.length }}
       onChange={({ page: { index, size } }: CriteriaWithPagination<PatternItem>) => {
         setPageIndex(index);

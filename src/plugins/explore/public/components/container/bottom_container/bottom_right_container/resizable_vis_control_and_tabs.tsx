@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './resizable_vis_control_and_tabs.scss';
+
 import React, { useRef } from 'react';
 import { useObservable } from 'react-use';
 import { useSelector } from 'react-redux';
@@ -19,11 +21,15 @@ import { PanelDirection } from '@elastic/eui/src/components/resizable_container/
 import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
 import { ExploreTabs } from '../../../tabs/tabs';
 import { selectActiveTab } from '../../../../application/utils/state_management/selectors';
-import { StylePanel } from '../../../visualizations/style_panel/style_panel';
-
-import './resizable_vis_control_and_tabs.scss';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+import { useTabError } from '../../../../application/utils/hooks/use_tab_error';
+import { ExploreServices } from '../../../../types';
+import { EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../common';
 
 export const ResizableVisControlAndTabs = () => {
+  const { services } = useOpenSearchDashboards<ExploreServices>();
+  const visualizationTab = services.tabRegistry.getTab(EXPLORE_VISUALIZATION_TAB_ID);
+  const visualizationTabError = useTabError(visualizationTab);
   const visualizationBuilder = getVisualizationBuilder();
   const data = useObservable(visualizationBuilder.data$);
   const activeTabId = useSelector(selectActiveTab);
@@ -33,7 +39,12 @@ export const ResizableVisControlAndTabs = () => {
     collapseFn.current(panelId, 'right');
   };
 
-  if (activeTabId !== 'explore_visualization_tab') {
+  if (activeTabId !== EXPLORE_VISUALIZATION_TAB_ID) {
+    return <ExploreTabs />;
+  }
+
+  // Do not display style panel if there are errors
+  if (activeTabId === EXPLORE_VISUALIZATION_TAB_ID && !!visualizationTabError) {
     return <ExploreTabs />;
   }
 
@@ -89,10 +100,7 @@ export const ResizableVisControlAndTabs = () => {
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>
-                  <StylePanel
-                    className="visStylePanelBody"
-                    visualizationBuilder={visualizationBuilder}
-                  />
+                  {visualizationBuilder.renderStylePanel({ className: 'visStylePanelBody' })}
                 </div>
               )}
             </EuiResizablePanel>

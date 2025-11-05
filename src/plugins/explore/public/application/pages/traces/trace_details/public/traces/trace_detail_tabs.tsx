@@ -5,130 +5,80 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import {
-  EuiTabs,
-  EuiTab,
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiBadge } from '@elastic/eui';
+import { TraceDetailTab } from '../../constants/trace_detail_tabs';
 
 export interface TraceDetailTabsProps {
   activeTab: string;
   setActiveTab: (tabId: string) => void;
   transformedHits: any[];
-  errorCount: number;
-  spanFilters: any[];
-  handleErrorFilterClick: () => void;
-  servicesInOrder: string[];
-  setIsServiceLegendOpen: (isOpen: boolean) => void;
-  isServiceLegendOpen: boolean;
+  logDatasets?: any[];
+  logCount: number;
+  isLogsLoading?: boolean;
 }
 
 export const TraceDetailTabs: React.FC<TraceDetailTabsProps> = ({
   activeTab,
   setActiveTab,
   transformedHits,
-  errorCount,
-  spanFilters,
-  handleErrorFilterClick,
-  servicesInOrder,
-  setIsServiceLegendOpen,
-  isServiceLegendOpen,
+  logDatasets = [],
+  logCount = 0,
+  isLogsLoading = false,
 }) => {
-  return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-      <EuiFlexItem>
-        <EuiTabs>
-          {[
-            {
-              id: 'timeline',
-              name: i18n.translate('explore.traceView.tab.timeline', {
-                defaultMessage: 'Timeline',
-              }),
-            },
-            {
-              id: 'span_list',
-              name: (
-                <>
-                  {transformedHits.length > 0 && (
-                    <>
-                      <EuiBadge color="default">{transformedHits.length}</EuiBadge>{' '}
-                    </>
-                  )}
-                  {i18n.translate('explore.traceView.tab.spanList', {
-                    defaultMessage: 'Span list',
-                  })}
-                </>
-              ),
-            },
-            {
-              id: 'tree_view',
-              name: i18n.translate('explore.traceView.tab.treeView', {
-                defaultMessage: 'Tree view',
-              }),
-            },
-            {
-              id: 'service_map',
-              name: i18n.translate('explore.traceView.tab.serviceMap', {
-                defaultMessage: 'Service map',
-              }),
-            },
-          ].map((tab) => (
-            <EuiTab
-              key={tab.id}
-              isSelected={activeTab === tab.id}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          {errorCount > 0 &&
-            !spanFilters.some((filter) => filter.field === 'status.code' && filter.value === 2) && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={i18n.translate('explore.traceView.tooltip.clickToApplyFilter', {
-                    defaultMessage: 'Click to apply filter',
-                  })}
-                >
-                  <EuiButton
-                    onClick={handleErrorFilterClick}
-                    data-test-subj="error-count-button"
-                    size="s"
-                    color="secondary"
-                  >
-                    {i18n.translate('explore.traceView.button.filterErrors', {
-                      defaultMessage: 'Filter errors ({errorCount})',
-                      values: { errorCount },
-                    })}
-                  </EuiButton>
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
-          {servicesInOrder.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                onClick={() => setIsServiceLegendOpen(!isServiceLegendOpen)}
-                iconType="inspect"
-                data-test-subj="service-legend-toggle"
-                isSelected={isServiceLegendOpen}
-              >
-                {i18n.translate('explore.traceView.button.serviceLegend', {
-                  defaultMessage: 'Service legend',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+  const tabs = [
+    {
+      id: TraceDetailTab.TIMELINE,
+      name: i18n.translate('explore.traceView.tab.timeline', {
+        defaultMessage: 'Timeline',
+      }),
+    },
+    // Disabled: Service Map tab
+    // {
+    //   id: TraceDetailTab.SERVICE_MAP,
+    //   name: i18n.translate('explore.traceView.tab.serviceMap', {
+    //     defaultMessage: 'Service map',
+    //   }),
+    // },
+    {
+      id: TraceDetailTab.SPAN_LIST,
+      name: (
+        <>
+          {transformedHits.length > 0 && (
+            <>
+              <EuiBadge color="default">{transformedHits.length}</EuiBadge>{' '}
+            </>
           )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          {i18n.translate('explore.traceView.tab.spanList', {
+            defaultMessage: 'Span list',
+          })}
+        </>
+      ),
+    },
+  ];
+
+  tabs.push({
+    id: TraceDetailTab.LOGS,
+    name: (
+      <>
+        {!isLogsLoading && (
+          <>
+            <EuiBadge color="default">{logCount}</EuiBadge>{' '}
+          </>
+        )}
+        {i18n.translate('explore.traceView.tab.logs', {
+          defaultMessage: 'Related logs',
+        })}
+      </>
+    ),
+  });
+
+  return (
+    <EuiTabs>
+      {tabs.map((tab) => (
+        <EuiTab key={tab.id} isSelected={activeTab === tab.id} onClick={() => setActiveTab(tab.id)}>
+          {tab.name}
+        </EuiTab>
+      ))}
+    </EuiTabs>
   );
 };

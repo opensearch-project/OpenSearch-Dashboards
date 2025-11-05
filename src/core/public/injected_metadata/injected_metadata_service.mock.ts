@@ -46,6 +46,7 @@ const createSetupContractMock = () => {
     getOpenSearchDashboardsBuildNumber: jest.fn(),
     getBranding: jest.fn(),
     getSurvey: jest.fn(),
+    getKeyboardShortcuts: jest.fn(),
   };
   setupContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
   setupContract.getOpenSearchDashboardsVersion.mockReturnValue('opensearchDashboardsVersion');
@@ -62,6 +63,7 @@ const createSetupContractMock = () => {
     },
   } as any);
   setupContract.getPlugins.mockReturnValue([]);
+  setupContract.getKeyboardShortcuts.mockReturnValue({ enabled: true });
   return setupContract;
 };
 

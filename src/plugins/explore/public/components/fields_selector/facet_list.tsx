@@ -5,29 +5,29 @@
 
 import { EuiButtonEmpty, EuiPanel } from '@elastic/eui';
 import React, { useState } from 'react';
-import { IndexPatternField } from '../../../../data/public';
+import { DataViewField } from '../../../../data/public';
 import { DiscoverSidebarProps } from './discover_sidebar';
 import { FacetField } from './facet_field';
 import { FieldDetails } from './types';
 
 interface FacetListProps extends DiscoverSidebarProps {
   title: string;
-  fields: IndexPatternField[];
-  getDetailsByField: (field: IndexPatternField) => FieldDetails;
+  fields: DataViewField[];
+  getDetailsByField: (field: DataViewField) => FieldDetails;
   shortDotsEnabled: boolean;
 }
 
 export const FacetList = ({
   title,
   fields,
-  selectedIndexPattern,
+  selectedDataSet,
   onAddFilter,
   getDetailsByField,
   shortDotsEnabled,
 }: FacetListProps) => {
   const [expanded, setExpanded] = useState(true);
 
-  if (!selectedIndexPattern) return null;
+  if (!selectedDataSet) return null;
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false} color="transparent" paddingSize="none">
@@ -40,12 +40,12 @@ export const FacetList = ({
         className="exploreSideBar_fieldGroup"
         data-test-subj="exploreSideBarFieldGroupButton"
         aria-label={title}
-        isLoading={!!selectedIndexPattern.fieldsLoading}
+        isLoading={!!selectedDataSet.fieldsLoading}
       >
         {title}
       </EuiButtonEmpty>
       {expanded &&
-        fields.map((field: IndexPatternField, index) => {
+        fields.map((field: DataViewField, index) => {
           return (
             <FacetField
               key={field.name + index}
@@ -53,7 +53,7 @@ export const FacetList = ({
               getDetailsByField={getDetailsByField}
               shortDotsEnabled={shortDotsEnabled}
               onAddFilter={onAddFilter}
-              selectedIndexPattern={selectedIndexPattern}
+              selectedDataSet={selectedDataSet}
             />
           );
         })}

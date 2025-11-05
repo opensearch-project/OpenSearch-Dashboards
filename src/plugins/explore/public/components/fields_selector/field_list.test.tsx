@@ -9,11 +9,11 @@ import stubbedLogstashFields from 'fixtures/logstash_fields';
 import { render, screen, fireEvent } from 'test_utils/testing_lib_helpers';
 import { FieldList } from './field_list';
 import { coreMock } from 'opensearch-dashboards/public/mocks';
-import { IndexPatternField } from '../../../../data/public';
-import { getStubIndexPattern } from '../../../../data/public/test_utils';
+import { DataViewField } from '../../../../data/public';
+import { getStubDataView } from '../../../../data/public/data_views/data_view.stub';
 
 jest.mock('./discover_field', () => ({
-  DiscoverField: ({ field }: { field: IndexPatternField }) => (
+  DiscoverField: ({ field }: { field: DataViewField }) => (
     <div data-test-subj={`mocked-discover-field-${field.name}`}>{field.name}</div>
   ),
 }));
@@ -26,10 +26,10 @@ function getProps({
 }: {
   category?: 'query' | 'discovered' | 'selected';
   title?: string;
-  fields?: IndexPatternField[];
+  fields?: DataViewField[];
   shortDotsEnabled?: boolean;
 } = {}) {
-  const indexPattern = getStubIndexPattern(
+  const dataSet = getStubDataView(
     'logstash-*',
     (cfg: any) => cfg,
     'time',
@@ -38,32 +38,28 @@ function getProps({
   );
 
   const defaultFields = [
-    new IndexPatternField(
-      {
-        name: 'bytes',
-        type: 'number',
-        esTypes: ['long'],
-        count: 10,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'bytes'
-    ),
-    new IndexPatternField(
-      {
-        name: 'extension',
-        type: 'string',
-        esTypes: ['keyword'],
-        count: 5,
-        scripted: false,
-        searchable: true,
-        aggregatable: true,
-        readFromDocValues: true,
-      },
-      'extension'
-    ),
+    {
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'bytes',
+    } as DataViewField,
+    {
+      name: 'extension',
+      type: 'string',
+      esTypes: ['keyword'],
+      count: 5,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+      displayName: 'extension',
+    } as DataViewField,
   ];
 
   const mockFields = fields !== undefined ? fields : defaultFields;
@@ -73,7 +69,7 @@ function getProps({
     title,
     fields: mockFields,
     columns: ['@timestamp'],
-    selectedIndexPattern: indexPattern,
+    selectedDataSet: dataSet,
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     onAddFilter: jest.fn(),
@@ -125,8 +121,8 @@ describe('FieldList', () => {
     expect(screen.getByTestId('mocked-discover-field-bytes')).toBeInTheDocument();
   });
 
-  it('renders nothing when selectedIndexPattern is null', () => {
-    const props = { ...getProps(), selectedIndexPattern: undefined };
+  it('renders nothing when selectedDataSet is null', () => {
+    const props = { ...getProps(), selectedDataSet: undefined };
     const { container } = render(<FieldList {...props} />);
 
     expect(container.firstChild).toBeNull();

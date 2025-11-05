@@ -30,7 +30,6 @@ import {
 } from '../../opensearch_dashboards_utils/public';
 import { ExploreFlavor, PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ConfigSchema } from '../common/config';
-import { resetVisualizationBuilder } from './components/visualizations/visualization_builder';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
 import {
@@ -55,6 +54,7 @@ import {
 import { createSavedExploreLoader } from './saved_explore';
 import { TabRegistryService } from './services/tab_registry/tab_registry_service';
 import { setUsageCollector } from './services/usage_collector';
+import { QueryPanelActionsRegistryService } from './services/query_panel_actions_registry';
 import { VisualizationRegistryService } from './services/visualization_registry_service';
 import {
   ExplorePluginSetup,
@@ -70,6 +70,11 @@ import { createAbortDataQueryAction } from './application/utils/state_management
 import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
 import { setServices } from './services/services';
+import { SlotRegistryService } from './services/slot_registry';
+
+// Log Actions
+import { logActionRegistry } from './services/log_action_registry';
+import { createAskAiAction } from './actions/ask_ai_action';
 
 export class ExplorePlugin
   implements
@@ -93,12 +98,13 @@ export class ExplorePlugin
   private servicesInitialized: boolean = false;
   private urlGenerator?: import('./types').ExplorePluginStart['urlGenerator'];
   private initializeServices?: () => { core: CoreStart; plugins: ExploreStartDependencies };
+  private isDatasetManagementEnabled: boolean = false;
 
-  // Add a new property for the tab registry
+  // Registries
   private tabRegistry: TabRegistryService = new TabRegistryService();
-
-  /** visualization registry */
   private visualizationRegistryService = new VisualizationRegistryService();
+  private queryPanelActionsRegistryService = new QueryPanelActionsRegistryService();
+  private slotRegistryService = new SlotRegistryService();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -108,6 +114,9 @@ export class ExplorePlugin
     core: CoreSetup<ExploreStartDependencies, ExplorePluginStart>,
     setupDeps: ExploreSetupDependencies
   ): ExplorePluginSetup {
+    // Check if dataset management plugin is enabled
+    this.isDatasetManagementEnabled = !!setupDeps.datasetManagement;
+
     // Set usage collector
     setUsageCollector(setupDeps.usageCollection);
     this.registerExploreVisualization(core, setupDeps);
@@ -306,7 +315,10 @@ export class ExplorePlugin
           pluginsStart,
           this.initializerContext,
           this.tabRegistry,
-          this.visualizationRegistryService
+          this.visualizationRegistryService,
+          this.queryPanelActionsRegistryService,
+          this.isDatasetManagementEnabled,
+          this.slotRegistryService
         );
 
         // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
@@ -320,7 +332,7 @@ export class ExplorePlugin
         services.scopedHistory = this.currentHistory;
 
         // Register tabs with the tab registry
-        registerTabs(services);
+        registerTabs(services, flavor);
 
         // Instantiate the store
         const { store, unsubscribe: unsubscribeStore, reset: resetStore } = await getPreloadedStore(
@@ -342,7 +354,6 @@ export class ExplorePlugin
         return () => {
           abortAllActiveQueries();
           services.uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, abortActionId);
-          resetVisualizationBuilder();
           appUnMounted();
           unmount();
           unsubscribeStore();
@@ -373,7 +384,7 @@ export class ExplorePlugin
     );
     core.application.register(createExploreApp());
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+    const navLinks = [
       {
         id: PLUGIN_ID,
         category: undefined,
@@ -385,20 +396,29 @@ export class ExplorePlugin
         order: 300,
         parentNavLinkId: PLUGIN_ID,
       },
-      // uncomment when traces and metrics are ready for launch
-      /* {
+    ];
+
+    // Only add Traces nav link if the discoverTraces feature is enabled
+    if (this.config.discoverTraces?.enabled) {
+      navLinks.push({
         id: `${PLUGIN_ID}/${ExploreFlavor.Traces}`,
         category: undefined,
         order: 300,
         parentNavLinkId: PLUGIN_ID,
-      },
-      {
-        id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
-        category: undefined,
-        order: 300,
-        parentNavLinkId: PLUGIN_ID,
-      }, */
-    ]);
+      });
+    }
+
+    // uncomment when metrics is ready for launch
+    /*
+    navLinks.push({
+      id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
+      category: undefined,
+      order: 300,
+      parentNavLinkId: PLUGIN_ID,
+    });
+    */
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks);
     this.registerEmbeddable(core, setupDeps);
 
     setupDeps.urlForwarding.forwardApp('doc', PLUGIN_ID, (path) => {
@@ -436,6 +456,10 @@ export class ExplorePlugin
           this.docViewsLinksRegistry?.addDocViewLink(docViewLinkSpec as any),
       },
       visualizationRegistry: visualizationRegistryService,
+      queryPanelActionsRegistry: this.queryPanelActionsRegistryService.setup(),
+      logActionRegistry: {
+        registerAction: (action) => logActionRegistry.registerAction(action),
+      },
     };
   }
 
@@ -458,7 +482,10 @@ export class ExplorePlugin
         plugins,
         this.initializerContext,
         this.tabRegistry,
-        this.visualizationRegistryService
+        this.visualizationRegistryService,
+        this.queryPanelActionsRegistryService,
+        this.isDatasetManagementEnabled,
+        this.slotRegistryService
       );
       setLegacyServices({
         ...services,
@@ -470,6 +497,13 @@ export class ExplorePlugin
     };
 
     this.initializeServices();
+
+    // Register Log Actions
+    // Register Ask AI action if chat service is available
+    if (plugins.chat?.chatService) {
+      const askAiAction = createAskAiAction(plugins.chat.chatService);
+      logActionRegistry.registerAction(askAiAction);
+    }
 
     const savedExploreLoader = createSavedExploreLoader({
       savedObjectsClient: core.savedObjects.client,
@@ -484,6 +518,7 @@ export class ExplorePlugin
       savedSearchLoader: savedExploreLoader, // For backward compatibility
       savedExploreLoader,
       visualizationRegistry: this.visualizationRegistryService.start(),
+      slotRegistry: this.slotRegistryService.start(),
     };
   }
 

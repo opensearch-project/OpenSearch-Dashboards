@@ -5,17 +5,49 @@
 
 import { Spec } from 'vega';
 import { i18n } from '@osd/i18n';
-import { GANTT_CHART_CONSTANTS, TOTAL_PADDING, calculateLeftPadding } from './gantt_constants';
+import { GANTT_CHART_CONSTANTS, calculateTextPadding } from './gantt_constants';
+
+function createTooltipSignal(isEmbedded: boolean): string {
+  const embeddedMessage = isEmbedded
+    ? "'" +
+      i18n.translate('explore.ganttChart.tooltip.action', {
+        defaultMessage: 'Action',
+      }) +
+      "': '" +
+      i18n.translate('explore.ganttChart.tooltip.clickToViewDetails', {
+        defaultMessage: 'click to view span details',
+      }) +
+      "', "
+    : '';
+
+  const baseTooltip =
+    "'" +
+    i18n.translate('explore.ganttChart.tooltip.service', {
+      defaultMessage: 'Service',
+    }) +
+    "': datum.serviceName, '" +
+    i18n.translate('explore.ganttChart.tooltip.name', { defaultMessage: 'Name' }) +
+    "': datum.name, '" +
+    i18n.translate('explore.ganttChart.tooltip.duration', {
+      defaultMessage: 'Duration',
+    }) +
+    "': datum.duration + ' ms', '" +
+    i18n.translate('explore.ganttChart.tooltip.start', { defaultMessage: 'Start' }) +
+    "': datum.startTime + ' ms'";
+
+  return `{${embeddedMessage}${baseTooltip}}`;
+}
 
 export function createGanttSpec(
   height: number,
   dataLength: number = 0,
   containerWidth: number = 800,
   selectedSpanId?: string,
-  isDarkMode: boolean = false
+  isDarkMode: boolean = false,
+  isEmbedded?: boolean
 ): Spec {
-  const leftPadding = calculateLeftPadding(containerWidth);
-  const effectiveWidth = containerWidth - leftPadding - GANTT_CHART_CONSTANTS.RIGHT_PADDING;
+  const textPadding = calculateTextPadding(containerWidth);
+  const isEmbeddedMode = isEmbedded || false;
 
   // Calculate proper height based on number of spans
   const calculatedHeight = Math.max(
@@ -23,20 +55,15 @@ export function createGanttSpec(
     dataLength * GANTT_CHART_CONSTANTS.MIN_ROW_HEIGHT +
       GANTT_CHART_CONSTANTS.BASE_CALCULATION_HEIGHT
   );
-  const chartHeight = calculatedHeight - TOTAL_PADDING;
+  const chartHeight = calculatedHeight;
 
   return {
     $schema: 'https://vega.github.io/schema/vega/v5.json',
     description: 'Trace spans Gantt chart',
-    autosize: { type: 'fit', resize: true },
-    width: effectiveWidth,
+    autosize: { type: 'fit', resize: false, contains: 'padding' },
+    width: containerWidth,
     height: chartHeight,
-    padding: {
-      left: leftPadding,
-      right: GANTT_CHART_CONSTANTS.RIGHT_PADDING,
-      top: GANTT_CHART_CONSTANTS.TOP_PADDING,
-      bottom: GANTT_CHART_CONSTANTS.BOTTOM_PADDING,
-    },
+    padding: GANTT_CHART_CONSTANTS.PADDING,
 
     signals: [],
 
@@ -121,40 +148,7 @@ export function createGanttSpec(
             fill: { field: 'color' },
             cursor: { value: 'pointer' },
             tooltip: {
-              signal:
-                "datum.hasError ? {'⚠️ " +
-                i18n.translate('explore.ganttChart.tooltip.error', {
-                  defaultMessage: 'Error',
-                }) +
-                "': '" +
-                i18n.translate('explore.ganttChart.tooltip.clickForDetails', {
-                  defaultMessage: 'click for details',
-                }) +
-                "', '" +
-                i18n.translate('explore.ganttChart.tooltip.service', {
-                  defaultMessage: 'Service',
-                }) +
-                "': datum.serviceName, '" +
-                i18n.translate('explore.ganttChart.tooltip.name', { defaultMessage: 'Name' }) +
-                "': datum.name, '" +
-                i18n.translate('explore.ganttChart.tooltip.duration', {
-                  defaultMessage: 'Duration',
-                }) +
-                "': datum.duration + ' ms', '" +
-                i18n.translate('explore.ganttChart.tooltip.start', { defaultMessage: 'Start' }) +
-                "': datum.startTime + ' ms'} : {'" +
-                i18n.translate('explore.ganttChart.tooltip.service', {
-                  defaultMessage: 'Service',
-                }) +
-                "': datum.serviceName, '" +
-                i18n.translate('explore.ganttChart.tooltip.name', { defaultMessage: 'Name' }) +
-                "': datum.name, '" +
-                i18n.translate('explore.ganttChart.tooltip.duration', {
-                  defaultMessage: 'Duration',
-                }) +
-                "': datum.duration + ' ms', '" +
-                i18n.translate('explore.ganttChart.tooltip.start', { defaultMessage: 'Start' }) +
-                "': datum.startTime + ' ms'}",
+              signal: createTooltipSignal(isEmbeddedMode),
             },
           },
           update: {
@@ -170,6 +164,9 @@ export function createGanttSpec(
             strokeWidth: selectedSpanId
               ? { signal: `datum.spanId === '${selectedSpanId}' ? 3 : 1` }
               : { value: 1 },
+            fillOpacity: selectedSpanId
+              ? { signal: `datum.spanId === '${selectedSpanId}' ? 1.0 : 0.4` }
+              : { value: 1.0 },
           },
           hover: {
             fillOpacity: { value: 0.8 },
@@ -183,6 +180,7 @@ export function createGanttSpec(
         encode: {
           enter: {
             y: { scale: 'yscale', field: 'label', band: 0.5 },
+            x: { value: 5 }, // Position after serviceName text (which ends at x: -5)
             size: { value: 120 },
             shape: { value: 'triangle-up' },
             fill: { value: '#c14125' },
@@ -197,9 +195,6 @@ export function createGanttSpec(
                 "'",
             },
           },
-          update: {
-            x: { scale: 'xscale', field: 'endTime' },
-          },
         },
       },
       {
@@ -212,10 +207,19 @@ export function createGanttSpec(
             fontWeight: { value: 'bold' },
             baseline: { value: 'middle' },
             fill: { value: isDarkMode ? '#ffffff' : '#000000' },
-            text: { field: 'serviceName' },
+            text: {
+              signal:
+                'length(datum.serviceName) > ' +
+                GANTT_CHART_CONSTANTS.TEXT_TRUNCATE_THRESHOLD +
+                ' ? slice(datum.serviceName, 0, ' +
+                GANTT_CHART_CONSTANTS.TEXT_TRUNCATE_HEAD_LENGTH +
+                ") + '…' + slice(datum.serviceName, -" +
+                GANTT_CHART_CONSTANTS.TEXT_TRUNCATE_TAIL_LENGTH +
+                ') : datum.serviceName',
+            },
             x: { value: -5 },
             align: { value: 'right' },
-            limit: { value: leftPadding - 8 }, // Aggressive truncation
+            limit: { value: textPadding - 5 }, // Use full left padding space
           },
         },
       },
@@ -229,10 +233,19 @@ export function createGanttSpec(
             fontSize: { value: 9 },
             baseline: { value: 'middle' },
             fill: { value: isDarkMode ? '#cccccc' : '#666666' },
-            text: { field: 'name' },
+            text: {
+              signal:
+                'length(datum.name) > ' +
+                GANTT_CHART_CONSTANTS.TEXT_TRUNCATE_THRESHOLD +
+                ' ? slice(datum.name, 0, ' +
+                GANTT_CHART_CONSTANTS.TEXT_TRUNCATE_HEAD_LENGTH +
+                ") + '…' + slice(datum.name, -" +
+                GANTT_CHART_CONSTANTS.TEXT_TRUNCATE_TAIL_LENGTH +
+                ') : datum.name',
+            },
             x: { value: -5 },
             align: { value: 'right' },
-            limit: { value: leftPadding - 8 }, // Aggressive truncation
+            limit: { value: textPadding - 5 }, // Use full left padding space
           },
         },
       },
@@ -249,9 +262,16 @@ export function createGanttSpec(
             text: { signal: 'format(datum.startTime, ".2f") + " ms"' },
             align: { value: 'right' },
             fontStyle: { value: 'italic' },
+            cursor: { value: 'pointer' },
+            tooltip: {
+              signal: createTooltipSignal(isEmbeddedMode),
+            },
           },
           update: {
             x: { scale: 'xscale', field: 'startTime', offset: -5 },
+          },
+          hover: {
+            fill: { value: '#555' },
           },
         },
       },
@@ -265,6 +285,10 @@ export function createGanttSpec(
             fontSize: { value: 10 },
             fontWeight: { value: 'bold' },
             baseline: { value: 'middle' },
+            cursor: { value: 'pointer' },
+            tooltip: {
+              signal: createTooltipSignal(isEmbeddedMode),
+            },
           },
           update: {
             x: { scale: 'xscale', field: 'endTime', offset: 8 },
@@ -278,6 +302,11 @@ export function createGanttSpec(
             },
             fill: {
               signal: `datum.hasError ? "#c14125" : "${isDarkMode ? '#ffffff' : '#000000'}"`,
+            },
+          },
+          hover: {
+            fill: {
+              signal: `datum.hasError ? "#d14a2a" : "${isDarkMode ? '#cccccc' : '#333333'}"`,
             },
           },
         },

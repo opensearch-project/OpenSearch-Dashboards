@@ -1,10 +1,14 @@
 .exploreDocTableHeader {
-  white-space: nowrap;
   text-align: left;
 
   // nested for specificity
   .exploreDocTableHeaderField {
     padding: $euiSizeS;
+
+    .header-text {
+      display: inline-block;
+      vertical-align: top;
+    }
   }
 }
 

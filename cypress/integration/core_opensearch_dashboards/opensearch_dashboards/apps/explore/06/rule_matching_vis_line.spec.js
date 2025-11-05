@@ -14,7 +14,7 @@ export const runCreateVisTests = () => {
   describe('create line visualization tests', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_WITH_TIME_1,
         timefieldName: 'timestamp',
@@ -47,6 +47,8 @@ export const runCreateVisTests = () => {
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
         });
+      // Open axes setting
+      cy.get('[aria-controls="axesSection"]').click();
       // turn off show X axis
       cy.getElementByTestId('showXAxisSwitch').click();
       // compare with new canvas
@@ -82,6 +84,10 @@ export const runCreateVisTests = () => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
         });
 
+      // Open thresholds setting
+      cy.get('[aria-controls="thresholdSection"]').click();
+      // Change threshold mode from default 'Off' to enable threshold functionality
+      cy.getElementByTestId('thresholdModeSelect').select('Solid lines');
       cy.getElementByTestId('exploreVisAddThreshold').click();
       // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {

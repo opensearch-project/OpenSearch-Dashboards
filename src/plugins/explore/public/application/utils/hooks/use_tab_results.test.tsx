@@ -23,6 +23,11 @@ import {
   QueryState,
   UIState,
 } from '../state_management/slices';
+import { tabReducer } from '../state_management/slices/tab/tab_slice';
+import {
+  queryEditorReducer,
+  queryEditorInitialState,
+} from '../state_management/slices/query_editor/query_editor_slice';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { ExploreServices } from '../../../types';
 
@@ -53,6 +58,14 @@ interface MockRootState {
   query: Pick<QueryState, 'query'>;
   ui: Pick<UIState, 'activeTabId'>;
   results: { [key: string]: any };
+  tab: {
+    patterns: {
+      patternsField?: string;
+      usingRegexPatterns: boolean;
+    };
+    logs: {};
+  };
+  queryEditor?: any;
 }
 
 // Helper function to create a mock store
@@ -70,6 +83,11 @@ const createMockStore = (initialState: MockRootState) => {
       ...resultsInitialState,
       ...initialState.results,
     },
+    tab: initialState.tab,
+    queryEditor: {
+      ...queryEditorInitialState,
+      ...(initialState.queryEditor || {}),
+    },
   };
 
   return configureStore({
@@ -77,6 +95,8 @@ const createMockStore = (initialState: MockRootState) => {
       ui: uiReducer,
       query: queryReducer,
       results: resultsReducer,
+      tab: tabReducer,
+      queryEditor: queryEditorReducer,
     },
     preloadedState,
   });
@@ -119,6 +139,13 @@ describe('useTabResults', () => {
       query: { query: 'test query' },
       ui: { activeTabId: 'tab-1' },
       results: { 'custom-cache-key': { data: 'test data' } },
+      tab: {
+        logs: {},
+        patterns: {
+          patternsField: 'message',
+          usingRegexPatterns: false,
+        },
+      },
     };
 
     mockServices.tabRegistry.getTab.mockReturnValue(mockTab);
@@ -138,6 +165,13 @@ describe('useTabResults', () => {
       query: { query: 'test query' },
       ui: { activeTabId: 'tab-1' },
       results: { 'other-cache-key': { data: 'other data' } },
+      tab: {
+        logs: {},
+        patterns: {
+          patternsField: 'message',
+          usingRegexPatterns: false,
+        },
+      },
     };
 
     mockServices.tabRegistry.getTab.mockReturnValue(mockTab);
@@ -157,6 +191,13 @@ describe('useTabResults', () => {
       query: { query: 'test query' },
       ui: { activeTabId: 'tab-1' },
       results: { 'default-cache-key': { data: 'default data' } },
+      tab: {
+        logs: {},
+        patterns: {
+          patternsField: 'message',
+          usingRegexPatterns: false,
+        },
+      },
     };
 
     mockServices.tabRegistry.getTab.mockReturnValue({});

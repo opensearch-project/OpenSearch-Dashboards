@@ -14,7 +14,7 @@ export const runCreateVisTests = () => {
   describe('create Metric visualization tests', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
+      cy.explore.createWorkspaceDataSets({
         workspaceName: workspaceName,
         indexPattern: INDEX_WITH_TIME_1,
         timefieldName: 'timestamp',
@@ -39,7 +39,7 @@ export const runCreateVisTests = () => {
       cy.explore.createVisualizationWithQuery(query, 'Metric', datasetName);
     });
 
-    it('should change style options and the changes reflect immediatly to the metric visualization', () => {
+    it('should change style options and the changes reflect immediately to the metric visualization', () => {
       const query = `source=${datasetName} | stats count()`;
       cy.explore.createVisualizationWithQuery(query, 'Metric', datasetName);
       let beforeCanvasDataUrl;
