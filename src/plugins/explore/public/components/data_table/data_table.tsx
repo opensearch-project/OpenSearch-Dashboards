@@ -276,6 +276,17 @@ const DataTableUI = ({
     startRow: 0,
     endRow: rows.length < PAGINATED_PAGE_SIZE ? rows.length : PAGINATED_PAGE_SIZE,
   });
+  // Track count of expanded rows
+  const [expandedRowCount, setExpandedRowCount] = useState(0);
+
+  // Callbacks for row expansion state
+  const handleRowExpand = useCallback(() => {
+    setExpandedRowCount((prev) => prev + 1);
+  }, []);
+
+  const handleRowCollapse = useCallback(() => {
+    setExpandedRowCount((prev) => prev - 1);
+  }, []);
 
   const observerRef = useRef<IntersectionObserver | null>(null);
   // `sentinelElement` is attached to the bottom of the table to observe when the table is scrolled all the way.
@@ -506,6 +517,39 @@ const DataTableUI = ({
     return () => cancelAnimationFrame(tableLayoutRequestFrameRef.current);
   }, [columns, tableElement, indexOfRenderedData, timeFromFirstRow]);
 
+  // Auto-capture visible rows for chat context (only when no rows are expanded)
+  useEffect(() => {
+    const contextStore = (window as any).assistantContextStore;
+
+    if (!contextStore) {
+      // DataTable: assistantContextStore not available yet
+      return;
+    }
+
+    // Check if any rows are currently expanded using state
+    const hasExpandedRows = expandedRowCount > 0;
+
+    const shouldRegisterContext = rows.length > 0 && !hasExpandedRows;
+
+    if (shouldRegisterContext) {
+      // Get top 5 visible rows based on rendering mode
+      const visibleRows = showPagination
+        ? displayedRows.slice(0, 5)
+        : rows.slice(0, Math.min(5, renderedRowCount));
+
+      contextStore.addContext({
+        id: 'data-table-visible-rows',
+        description: 'Top 5 visible rows from data table',
+        value: visibleRows.map((row) => row._source),
+        label: 'Visible Rows',
+        categories: ['explore', 'chat', 'dynamic'],
+      });
+    } else {
+      // Remove context if conditions not met (expanded rows exist or no data)
+      contextStore.removeContextById('data-table-visible-rows');
+    }
+  }, [rows, displayedRows, renderedRowCount, showPagination, expandedRowCount]);
+
   return (
     <div className="explore-table-container">
       {showPagination ? (
@@ -539,6 +583,8 @@ const DataTableUI = ({
                   onClose={onClose}
                   isShortDots={isShortDots}
                   docViewsRegistry={docViewsRegistry}
+                  onRowExpand={handleRowExpand}
+                  onRowCollapse={handleRowCollapse}
                 />
               );
             }
