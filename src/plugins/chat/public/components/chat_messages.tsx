@@ -11,6 +11,7 @@ import { ToolCallRow } from './tool_call_row';
 import { ErrorRow } from './error_row';
 import type { Message, AssistantMessage, ToolMessage, ToolCall } from '../../common/types';
 import './chat_messages.scss';
+import { ChatSuggestions } from './chat_suggestions';
 
 type TimelineItem = Message;
 
@@ -52,6 +53,10 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   }, [timeline]);
 
   // Context is now handled by RFC hooks - no subscriptions needed
+
+  // Only show suggestion on llm outputs after last user input
+  const showSuggestions =
+    !isStreaming && timeline.length > 0 && timeline[timeline.length - 1].role === 'assistant';
 
   return (
     <>
@@ -139,6 +144,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
           return null;
         })}
+        {showSuggestions && <ChatSuggestions messages={timeline} />}
 
         {/* Loading indicator - waiting for agent response */}
         {isStreaming && timeline.length === 0 && (

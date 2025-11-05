@@ -13,6 +13,7 @@ import { GlobalAssistantProvider } from '../../../context_provider/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ContextProviderStart, TextSelectionMonitor } from '../../../context_provider/public';
 import './chat_header_button.scss';
+import { SuggestedActionsService } from '../services/suggested_action';
 
 export interface ChatHeaderButtonInstance {
   startNewConversation: ({ content }: { content: string }) => Promise<void>;
@@ -28,10 +29,11 @@ interface ChatHeaderButtonProps {
   chatService: ChatService;
   contextProvider?: ContextProviderStart;
   charts?: any;
+  suggestedActionsService: SuggestedActionsService;
 }
 
 export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatHeaderButtonProps>(
-  ({ core, chatService, contextProvider, charts }, ref) => {
+  ({ core, chatService, contextProvider, charts, suggestedActionsService }, ref) => {
     // Use ChatService as source of truth for window state
     const [isOpen, setIsOpen] = useState<boolean>(chatService.isWindowOpen());
     const [layoutMode, setLayoutMode] = useState<ChatLayoutMode>(chatService.getWindowMode());
@@ -210,7 +212,10 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
                   // Tools updated in chat
                 }}
               >
-                <ChatProvider chatService={chatService}>
+                <ChatProvider
+                  chatService={chatService}
+                  suggestedActionsService={suggestedActionsService}
+                >
                   <ChatWindow
                     layoutMode={layoutMode}
                     onToggleLayout={toggleLayoutMode}

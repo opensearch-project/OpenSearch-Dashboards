@@ -7,9 +7,11 @@ import { NavigationPublicPluginStart } from '../../navigation/public';
 import { ContextProviderStart } from '../../context_provider/public';
 import { ChartsPluginStart } from '../../charts/public';
 import { ChatService } from './services/chat_service';
+import { SuggestionServiceContract } from './services/suggested_action';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ChatPluginSetup {}
+export interface ChatPluginSetup {
+  registerSuggestedActionsProvider: SuggestionServiceContract['registerProvider'] | undefined;
+}
 
 export interface ChatPluginStart {
   chatService: ChatService | undefined;

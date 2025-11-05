@@ -12,6 +12,7 @@ import { ChatPluginSetup, ChatPluginStart, AppPluginStartDependencies } from './
 import { ChatService } from './services/chat_service';
 import { ChatHeaderButton, ChatHeaderButtonInstance } from './components/chat_header_button';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
+import { SuggestedActionsService } from './services/suggested_action';
 
 /**
  * @experimental
@@ -19,12 +20,21 @@ import { toMountPoint } from '../../opensearch_dashboards_react/public';
  */
 export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private chatService: ChatService | undefined;
+  private suggestedActionsService: SuggestedActionsService | undefined;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): ChatPluginSetup {
     // Return methods that should be available to other plugins
-    return {};
+    const suggestedActionsService = new SuggestedActionsService();
+    suggestedActionsService.setup();
+
+    this.suggestedActionsService = suggestedActionsService;
+    return {
+      registerSuggestedActionsProvider: suggestedActionsService.registerProvider.bind(
+        suggestedActionsService
+      ),
+    };
   }
 
   public start(core: CoreStart, deps: AppPluginStartDependencies): ChatPluginStart {
@@ -65,6 +75,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
                 contextProvider: deps.contextProvider,
                 charts: deps.charts,
                 ref: chatHeaderButtonRef,
+                suggestedActionsService: this.suggestedActionsService!,
               })
             );
             unmountComponent = mountPoint(element);
