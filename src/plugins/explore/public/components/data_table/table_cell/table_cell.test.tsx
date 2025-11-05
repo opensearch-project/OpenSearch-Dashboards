@@ -15,6 +15,39 @@ jest.mock('../../../application/context', () => ({
 
 jest.mock('../../../application/pages/traces/trace_flyout/trace_flyout_context');
 
+jest.mock('../../../services/log_action_registry', () => ({
+  logActionRegistry: {
+    getCompatibleActions: jest.fn(() => [
+      {
+        id: 'mock-action',
+        displayName: 'Mock Action',
+        iconType: 'gear',
+        order: 10,
+        isCompatible: () => true,
+        component: () => null,
+      },
+    ]),
+    registerAction: jest.fn(),
+    unregisterAction: jest.fn(),
+    getAction: jest.fn(),
+    getAllActions: jest.fn(),
+    clear: jest.fn(),
+  },
+}));
+
+jest.mock('../../log_action_menu', () => ({
+  LogActionMenu: ({ document, iconType, size }: any) => (
+    <div
+      data-test-subj="logActionMenu"
+      data-document={JSON.stringify(document)}
+      data-icon-type={iconType}
+      data-size={size}
+    >
+      LogActionMenu
+    </div>
+  ),
+}));
+
 describe('TableCell', () => {
   const mockOnFilter = jest.fn();
   const mockUseDatasetContext = useDatasetContext as jest.MockedFunction<typeof useDatasetContext>;
@@ -406,6 +439,111 @@ describe('TableCell', () => {
       expect(cellContent.innerHTML).toBe('<span>Sep 20, 2025 @ 01:00:00.000000000</span>');
 
       expect(screen.queryByTestId('traceFlyoutButton')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('LogActionMenu functionality', () => {
+    const propsWithRowData: ITableCellProps = {
+      columnId: 'message',
+      sanitizedCellValue: '<span>Error occurred</span>',
+      onFilter: mockOnFilter,
+      fieldMapping: { value: 'test' },
+      isTimeField: false,
+      isOnTracesPage: false,
+      setIsRowSelected: jest.fn(),
+      rowData: {
+        _index: 'test-index',
+        _id: 'test-id',
+        _score: 1,
+        _source: {
+          message: 'Error occurred',
+          timestamp: '2024-01-01T00:00:00Z',
+          level: 'error',
+        },
+      },
+      index: 5,
+    };
+
+    it('renders LogActionMenu when rowData with _source is provided', () => {
+      render(<TableCell {...propsWithRowData} />);
+
+      const logActionMenu = screen.getByTestId('logActionMenu');
+      expect(logActionMenu).toBeInTheDocument();
+      expect(logActionMenu).toHaveAttribute('data-icon-type', 'generate');
+      expect(logActionMenu).toHaveAttribute('data-size', 'xs');
+    });
+
+    it('passes correct document data to LogActionMenu', () => {
+      render(<TableCell {...propsWithRowData} />);
+
+      const logActionMenu = screen.getByTestId('logActionMenu');
+      const documentData = JSON.parse(logActionMenu.getAttribute('data-document') || '{}');
+
+      expect(documentData).toEqual({
+        message: 'Error occurred',
+        timestamp: '2024-01-01T00:00:00Z',
+        level: 'error',
+      });
+    });
+
+    it('does not render LogActionMenu for _source column', () => {
+      const sourceColumnProps = {
+        ...propsWithRowData,
+        columnId: '_source',
+      };
+
+      render(<TableCell {...sourceColumnProps} />);
+
+      expect(screen.queryByTestId('logActionMenu')).not.toBeInTheDocument();
+    });
+
+    it('does not render LogActionMenu when rowData is not provided', () => {
+      const propsWithoutRowData = {
+        ...defaultProps,
+        columnId: 'message',
+      };
+
+      render(<TableCell {...propsWithoutRowData} />);
+
+      expect(screen.queryByTestId('logActionMenu')).not.toBeInTheDocument();
+    });
+
+    it('does not render LogActionMenu when _source is not present in rowData', () => {
+      const propsWithoutSource = {
+        ...propsWithRowData,
+        rowData: {
+          _index: 'test-index',
+          _id: 'test-id',
+          _score: 1,
+        } as any,
+      };
+
+      render(<TableCell {...propsWithoutSource} />);
+
+      expect(screen.queryByTestId('logActionMenu')).not.toBeInTheDocument();
+    });
+
+    it('renders LogActionMenu for all non-_source columns with valid rowData', () => {
+      const columns = ['timestamp', 'level', 'message', 'user'];
+
+      columns.forEach((columnId) => {
+        const { unmount } = render(<TableCell {...{ ...propsWithRowData, columnId }} />);
+
+        expect(screen.getByTestId('logActionMenu')).toBeInTheDocument();
+        unmount();
+      });
+    });
+
+    it('passes index metadata to LogActionMenu', () => {
+      const propsWithIndex = {
+        ...propsWithRowData,
+        index: 10,
+      };
+
+      render(<TableCell {...propsWithIndex} />);
+
+      const logActionMenu = screen.getByTestId('logActionMenu');
+      expect(logActionMenu).toBeInTheDocument();
     });
   });
 });

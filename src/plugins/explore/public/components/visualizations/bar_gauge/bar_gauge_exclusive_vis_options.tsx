@@ -119,13 +119,13 @@ export const BarGaugeExclusiveVisOptions = ({
       </EuiFormRow>
 
       <EuiFormRow
-        label={i18n.translate('explore.stylePanel.barGauge.exclusive.displayMode', {
-          defaultMessage: 'Display mode',
+        label={i18n.translate('explore.stylePanel.barGauge.exclusive.displayStyle', {
+          defaultMessage: 'Display style',
         })}
       >
         <EuiButtonGroup
-          legend={i18n.translate('explore.stylePanel.barGauge.exclusive.displayMode', {
-            defaultMessage: 'Display mode',
+          legend={i18n.translate('explore.stylePanel.barGauge.exclusive.displayStyle', {
+            defaultMessage: 'Display style',
           })}
           isFullWidth
           options={displayModeOption}

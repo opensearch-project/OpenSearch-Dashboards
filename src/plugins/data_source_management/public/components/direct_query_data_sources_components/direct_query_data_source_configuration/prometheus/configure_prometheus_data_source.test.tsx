@@ -7,7 +7,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router-dom';
-import { EuiFieldText, EuiTextArea, EuiSelect } from '@elastic/eui';
+import { EuiTextArea, EuiSelect } from '@elastic/eui';
 import { ConfigurePrometheusDatasourcePanel } from './configure_prometheus_data_source';
 import { AuthMethod } from '../../../constants';
 
@@ -128,49 +128,59 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
       textArea.simulate('change', { target: { value: 'New details' } });
       textArea.simulate('blur', { target: { value: 'New details' } });
     });
-    setTimeout(() => {
-      expect(mockSetDetailsForRequest).toHaveBeenCalledWith('New details');
-    }, 1000);
+    expect(mockSetDetailsForRequest).toHaveBeenCalledWith('New details');
   });
 
   it('updates store URI state on change', async () => {
     const wrapper = mountComponent();
-    const storeField = wrapper.find(EuiFieldText).at(0);
+    const storeField = wrapper.find('[data-test-subj="Prometheus-URI"]').first();
+
     await act(async () => {
-      storeField.simulate('change', { target: { value: 'New Store URI' } });
-      storeField.simulate('blur', { target: { value: 'New Store URI' } });
+      const onChange = storeField.prop('onChange');
+      if (onChange) {
+        onChange({ target: { value: 'New Store URI' } } as any);
+      }
     });
-    setTimeout(() => {
-      expect(mockSetStoreForRequest).toHaveBeenCalledWith('New Store URI');
-    }, 1000);
+
+    await act(async () => {
+      const onBlur = storeField.prop('onBlur');
+      if (onBlur) {
+        onBlur({ target: { value: 'New Store URI' } } as any);
+      }
+    });
+
+    expect(mockSetStoreForRequest).toHaveBeenCalledWith('New Store URI');
   });
 
   it('updates auth method on select change', async () => {
     const wrapper = mountComponent();
-    const select = wrapper.find(EuiSelect).at(0);
+    const select = wrapper.find(EuiSelect);
     await act(async () => {
-      select.simulate('change', { target: { value: 'awssigv4' } });
+      const onChange = select.prop('onChange');
+      if (onChange) {
+        onChange({ target: { value: 'awssigv4' } } as any);
+      }
     });
-    setTimeout(() => {
-      expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('awssigv4');
-    }, 1000);
+    expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('awssigv4');
   });
 
   it('displays authentication fields based on auth method', async () => {
     const wrapper = mountComponent();
-    const select = wrapper.find(EuiSelect).at(0);
+    const select = wrapper.find(EuiSelect);
     await act(async () => {
-      select.simulate('change', { target: { value: 'awssigv4' } });
+      const onChange = select.prop('onChange');
+      if (onChange) {
+        onChange({ target: { value: 'awssigv4' } } as any);
+      }
     });
-    setTimeout(() => {
-      expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('awssigv4');
-    }, 100);
+    expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('awssigv4');
 
     await act(async () => {
-      select.simulate('change', { target: { value: 'basicauth' } });
+      const onChange = select.prop('onChange');
+      if (onChange) {
+        onChange({ target: { value: 'basicauth' } } as any);
+      }
     });
-    setTimeout(() => {
-      expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('basicauth');
-    }, 1000);
+    expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('basicauth');
   });
 });

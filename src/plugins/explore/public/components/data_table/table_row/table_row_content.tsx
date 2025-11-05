@@ -22,6 +22,7 @@ import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_t
 
 export interface TableRowContentProps {
   row: OpenSearchSearchHit<Record<string, unknown>>;
+  index?: number;
   columns: string[];
   dataset: IndexPattern | Dataset;
   onFilter?: DocViewFilterFn;
@@ -54,6 +55,7 @@ const formatFieldValue = (
 
 export const TableRowContent: React.FC<TableRowContentProps> = ({
   row,
+  index,
   columns,
   dataset,
   onFilter,
@@ -129,6 +131,7 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
           <TableCell
             key={colName}
             columnId={colName}
+            index={index}
             onFilter={onFilter}
             isTimeField={dataset.timeFieldName === colName}
             fieldMapping={fieldMapping}

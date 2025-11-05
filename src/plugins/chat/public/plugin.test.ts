@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React from 'react';
 import { ChatPlugin } from './plugin';
 import { ChatService } from './services/chat_service';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
@@ -42,6 +43,9 @@ describe('ChatPlugin', () => {
       chrome: {
         navControls: {
           registerRight: jest.fn(),
+        },
+        globalSearch: {
+          registerSearchCommand: jest.fn(),
         },
       },
     };
@@ -304,6 +308,51 @@ describe('ChatPlugin', () => {
           }),
         })
       );
+    });
+  });
+
+  describe('global search integration', () => {
+    beforeEach(() => {
+      mockCoreStart.chrome.globalSearch = {
+        registerSearchCommand: jest.fn(),
+      };
+    });
+
+    it('should register chat command with global search', () => {
+      plugin.start(mockCoreStart, mockDeps);
+
+      expect(mockCoreStart.chrome.globalSearch.registerSearchCommand).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'AI_CHATBOT_COMMAND',
+          type: 'ACTIONS',
+          inputPlaceholder: expect.any(String),
+          run: expect.any(Function),
+          action: expect.any(Function),
+        })
+      );
+    });
+
+    it('should call startNewConversation when global search action is triggered', async () => {
+      const mockStartNewConversation = jest.fn().mockResolvedValue(undefined);
+
+      // Mock React.createRef to return a ref with our mock function
+      const mockRef = {
+        current: {
+          startNewConversation: mockStartNewConversation,
+        },
+      };
+      jest.spyOn(React, 'createRef').mockReturnValue(mockRef as any);
+
+      plugin.start(mockCoreStart, mockDeps);
+
+      const registerCall = (mockCoreStart.chrome.globalSearch.registerSearchCommand as jest.Mock)
+        .mock.calls[0];
+      const commandConfig = registerCall[0];
+
+      // Trigger the action
+      await commandConfig.action({ content: 'test query' });
+
+      expect(mockStartNewConversation).toHaveBeenCalledWith({ content: 'test query' });
     });
   });
 });

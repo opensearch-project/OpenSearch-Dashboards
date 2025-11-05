@@ -56,13 +56,71 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
       </EuiFlexItem>
       {hasMappingSelected && (
         <>
+          <EuiFlexItem grow={false}>
+            <StyleAccordion
+              id="metricSection"
+              accordionLabel={i18n.translate('explore.stylePanel.tabs.metric', {
+                defaultMessage: 'Metric',
+              })}
+              initialIsOpen={true}
+            >
+              <EuiFormRow>
+                <EuiSwitch
+                  compressed
+                  label={i18n.translate('explore.vis.metric.useThresholdColor', {
+                    defaultMessage: 'Use threshold colors',
+                  })}
+                  data-test-subj="useThresholdColorButton"
+                  checked={styleOptions?.useThresholdColor ?? false}
+                  onChange={(e) => updateStyleOption('useThresholdColor', e.target.checked)}
+                />
+              </EuiFormRow>
+              <PercentageSelector
+                percentageColor={
+                  styleOptions.percentageColor ?? defaultMetricChartStyles.percentageColor
+                }
+                showPercentage={
+                  styleOptions.showPercentage ?? defaultMetricChartStyles.showPercentage
+                }
+                onPercentageColorChange={(color) => updateStyleOption('percentageColor', color)}
+                onShowPercentageToggle={(show) => updateStyleOption('showPercentage', show)}
+              />
+              <EuiFormRow>
+                <EuiSwitch
+                  compressed
+                  label={i18n.translate('explore.stylePanel.metric.title', {
+                    defaultMessage: 'Show title',
+                  })}
+                  checked={styleOptions.showTitle}
+                  onChange={(e) => updateStyleOption('showTitle', e.target.checked)}
+                  data-test-subj="showTitleSwitch"
+                />
+              </EuiFormRow>
+
+              {styleOptions.showTitle && (
+                <EuiFormRow
+                  label={i18n.translate('explore.vis.metric.title', {
+                    defaultMessage: 'Title',
+                  })}
+                >
+                  <DebouncedFieldText
+                    value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
+                    placeholder={i18n.translate('explore.vis.metric.title', {
+                      defaultMessage: 'Title',
+                    })}
+                    onChange={(text) => updateStyleOption('title', text)}
+                  />
+                </EuiFormRow>
+              )}
+            </StyleAccordion>
+          </EuiFlexItem>
           <EuiFlexItem>
             <StyleAccordion
               id="metricValueOptions"
               accordionLabel={i18n.translate('explore.stylePanel.tabs.metricValueOptions', {
                 defaultMessage: 'Value options',
               })}
-              initialIsOpen={false}
+              initialIsOpen={true}
             >
               <EuiFormRow
                 label={i18n.translate('explore.vis.metric.calculation', {
@@ -138,64 +196,6 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                   data-test-subj="percentageFontSizeInput"
                 />
               </EuiFormRow>
-            </StyleAccordion>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <StyleAccordion
-              id="metricSection"
-              accordionLabel={i18n.translate('explore.stylePanel.tabs.metric', {
-                defaultMessage: 'Metric',
-              })}
-              initialIsOpen={true}
-            >
-              <EuiFormRow>
-                <EuiSwitch
-                  compressed
-                  label={i18n.translate('explore.vis.metric.useThresholdColor', {
-                    defaultMessage: 'Use threshold colors',
-                  })}
-                  data-test-subj="useThresholdColorButton"
-                  checked={styleOptions?.useThresholdColor ?? false}
-                  onChange={(e) => updateStyleOption('useThresholdColor', e.target.checked)}
-                />
-              </EuiFormRow>
-              <PercentageSelector
-                percentageColor={
-                  styleOptions.percentageColor ?? defaultMetricChartStyles.percentageColor
-                }
-                showPercentage={
-                  styleOptions.showPercentage ?? defaultMetricChartStyles.showPercentage
-                }
-                onPercentageColorChange={(color) => updateStyleOption('percentageColor', color)}
-                onShowPercentageToggle={(show) => updateStyleOption('showPercentage', show)}
-              />
-              <EuiFormRow>
-                <EuiSwitch
-                  compressed
-                  label={i18n.translate('explore.stylePanel.metric.title', {
-                    defaultMessage: 'Show title',
-                  })}
-                  checked={styleOptions.showTitle}
-                  onChange={(e) => updateStyleOption('showTitle', e.target.checked)}
-                  data-test-subj="showTitleSwitch"
-                />
-              </EuiFormRow>
-
-              {styleOptions.showTitle && (
-                <EuiFormRow
-                  label={i18n.translate('explore.vis.metric.title', {
-                    defaultMessage: 'Title',
-                  })}
-                >
-                  <DebouncedFieldText
-                    value={styleOptions.title || axisColumnMappings[AxisRole.Value]?.name || ''}
-                    placeholder={i18n.translate('explore.vis.metric.title', {
-                      defaultMessage: 'Title',
-                    })}
-                    onChange={(text) => updateStyleOption('title', text)}
-                  />
-                </EuiFormRow>
-              )}
             </StyleAccordion>
           </EuiFlexItem>
         </>

@@ -292,11 +292,15 @@ const fallbackMerge = (
   const result: Array<Record<string, any>> = [];
 
   for (const g1 of Object.values(groups)) {
+    const endTime = g1[g1.length - 1][timestampField];
+    const startTime = g1[0][timestampField];
+    const duration = new Date(endTime).getTime() - new Date(startTime).getTime();
     result.push({
       ...g1[0],
-      start: g1[0][timestampField],
-      end: g1[g1.length - 1][timestampField],
+      start: startTime,
+      end: endTime,
       mergedCount: g1.length,
+      duration: formatDuration(duration),
     });
   }
 
