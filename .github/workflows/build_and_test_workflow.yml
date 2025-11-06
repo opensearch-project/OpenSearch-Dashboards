@@ -83,6 +83,7 @@ jobs:
           path: |
             node_modules
             packages/*/node_modules
+            packages/*/target
             src/*/node_modules
           key: node-modules-linux-${{ hashFiles('**/yarn.lock') }}
           fail-on-cache-miss: true
@@ -94,6 +95,7 @@ jobs:
           path: |
             node_modules
             packages/*/node_modules
+            packages/*/target
             src/*/node_modules
           key: node-modules-windows-${{ hashFiles('**/yarn.lock') }}
           fail-on-cache-miss: true
@@ -148,6 +150,7 @@ jobs:
           path: |
             node_modules
             packages/*/node_modules
+            packages/*/target
             src/*/node_modules
           key: node-modules-linux-${{ hashFiles('**/yarn.lock') }}
           fail-on-cache-miss: true
@@ -249,6 +252,7 @@ jobs:
           path: |
             node_modules
             packages/*/node_modules
+            packages/*/target
             src/*/node_modules
           key: node-modules-linux-${{ hashFiles('**/yarn.lock') }}
           fail-on-cache-miss: true
@@ -260,6 +264,7 @@ jobs:
           path: |
             node_modules
             packages/*/node_modules
+            packages/*/target
             src/*/node_modules
           key: node-modules-windows-${{ hashFiles('**/yarn.lock') }}
           fail-on-cache-miss: true
@@ -386,6 +391,7 @@ jobs:
           path: |
             node_modules
             packages/*/node_modules
+            packages/*/target
             src/*/node_modules
           key: node-modules-linux-${{ hashFiles('**/yarn.lock') }}
           fail-on-cache-miss: true
@@ -397,6 +403,7 @@ jobs:
           path: |
             node_modules
             packages/*/node_modules
+            packages/*/target
             src/*/node_modules
           key: node-modules-windows-${{ hashFiles('**/yarn.lock') }}
           fail-on-cache-miss: true
