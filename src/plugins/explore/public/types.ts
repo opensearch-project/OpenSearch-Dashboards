@@ -54,6 +54,8 @@ import {
   QueryPanelActionsRegistryService,
   QueryPanelActionsRegistryServiceSetup,
 } from './services/query_panel_actions_registry';
+import { SlotRegistryService, SlotRegistryServiceStart } from './services/slot_registry';
+import { ChatPluginStart } from '../../chat/public';
 
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
@@ -62,6 +64,9 @@ import {
 export interface ExplorePluginSetup {
   visualizationRegistry: VisualizationRegistryServiceSetup;
   queryPanelActionsRegistry: QueryPanelActionsRegistryServiceSetup;
+  logActionRegistry: {
+    registerAction: (action: import('./types/log_actions').LogActionDefinition) => void;
+  };
   docViews: {
     addDocView: (docViewSpec: unknown) => void;
   };
@@ -75,6 +80,7 @@ export interface ExplorePluginStart {
   urlGenerator?: UrlGeneratorContract<'EXPLORE_APP_URL_GENERATOR'>;
   savedSearchLoader: SavedExploreLoader;
   savedExploreLoader: SavedExploreLoader;
+  slotRegistry: SlotRegistryServiceStart;
 }
 
 // ============================================================================
@@ -118,6 +124,7 @@ export interface ExploreStartDependencies {
   expressions: ExpressionsStart;
   dashboard: DashboardStart;
   contextProvider?: ContextProviderStart;
+  chat?: ChatPluginStart;
 }
 
 // ============================================================================
@@ -178,6 +185,7 @@ export interface ExploreServices {
   tabRegistry: TabRegistryService;
   visualizationRegistry: VisualizationRegistryService;
   queryPanelActionsRegistry: QueryPanelActionsRegistryService;
+  slotRegistry: SlotRegistryService;
   expressions: ExpressionsStart;
   contextProvider?: ContextProviderStart;
 
