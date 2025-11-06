@@ -45,7 +45,19 @@ class OpenSearchIngestor {
   private batchSize: number = 100;
   private batchDelay: number = 500; // Delay in ms between batches
   private processedFiles: Set<string> = new Set();
+  private filePositions: Map<string, number> = new Map(); // Track byte position for each file
   private stateFile: string;
+
+  /**
+   * Check if OpenSearch credentials are configured in environment
+   */
+  static areCredentialsConfigured(): boolean {
+    const opensearchUrl = process.env.EXTERNAL_OPENSEARCH_URL;
+    const username = process.env.EXTERNAL_OPENSEARCH_USERNAME;
+    const password = process.env.EXTERNAL_OPENSEARCH_PASSWORD;
+
+    return !!(opensearchUrl && username && password);
+  }
 
   constructor(options?: { batchSize?: number; batchDelay?: number }) {
     const opensearchUrl = process.env.EXTERNAL_OPENSEARCH_URL;
@@ -86,6 +98,10 @@ class OpenSearchIngestor {
       if (fs.existsSync(this.stateFile)) {
         const state = JSON.parse(fs.readFileSync(this.stateFile, 'utf-8'));
         this.processedFiles = new Set(state.processedFiles || []);
+        // Load file positions for watch mode
+        if (state.filePositions) {
+          this.filePositions = new Map(Object.entries(state.filePositions));
+        }
       }
     } catch (error) {
       console.error('Error loading state:', error);
@@ -96,6 +112,7 @@ class OpenSearchIngestor {
     try {
       const state = {
         processedFiles: Array.from(this.processedFiles),
+        filePositions: Object.fromEntries(this.filePositions),
         lastRun: new Date().toISOString(),
       };
       fs.writeFileSync(this.stateFile, JSON.stringify(state, null, 2));
@@ -382,6 +399,84 @@ class OpenSearchIngestor {
     console.log(`Completed processing ${filePath}`);
   }
 
+  /**
+   * Process a file incrementally from a specific byte position
+   * Used in watch mode to only ingest new lines appended to files
+   */
+  private async processFileFromPosition(
+    filePath: string,
+    type: 'logs' | 'audit-logs' | 'metrics',
+    startPosition: number
+  ): Promise<void> {
+    console.log(`Processing ${type} file from position ${startPosition}: ${filePath}`);
+    const filename = path.basename(filePath);
+
+    // Get file size to track new position
+    const stats = fs.statSync(filePath);
+    const fileSize = stats.size;
+
+    // If file was truncated (log rotation), reset position to 0
+    if (fileSize < startPosition) {
+      console.log(`File ${filePath} was truncated, resetting position to 0`);
+      startPosition = 0;
+    }
+
+    // If no new content, skip processing
+    if (fileSize <= startPosition) {
+      console.log(`No new content in ${filePath}`);
+      return;
+    }
+
+    const fileStream = fs.createReadStream(filePath, {
+      start: startPosition,
+      encoding: 'utf8',
+    });
+
+    const rl = readline.createInterface({
+      input: fileStream,
+      crlfDelay: Infinity,
+    });
+
+    let batch: any[] = [];
+    const indexName = this.getDailyIndexName(type);
+    let linesProcessed = 0;
+
+    for await (const line of rl) {
+      if (!line.trim()) continue;
+
+      let entry: any = null;
+      if (type === 'metrics') {
+        entry = this.parseMetricLine(line, filename);
+      } else {
+        entry = this.parseLogLine(line, filename);
+      }
+
+      if (entry) {
+        batch.push(entry);
+        linesProcessed++;
+
+        if (batch.length >= this.batchSize) {
+          await this.bulkIndex(batch, indexName);
+          batch = [];
+
+          // Add delay between batches to avoid overwhelming OpenSearch
+          if (this.batchDelay > 0) {
+            await new Promise((resolve) => setTimeout(resolve, this.batchDelay));
+          }
+        }
+      }
+    }
+
+    // Index remaining entries
+    if (batch.length > 0) {
+      await this.bulkIndex(batch, indexName);
+    }
+
+    // Update file position to end of file
+    this.filePositions.set(filePath, fileSize);
+    this.saveState();
+  }
+
   private async bulkIndex(entries: any[], indexName: string, retries: number = 3): Promise<void> {
     if (entries.length === 0) return;
 
@@ -520,7 +615,7 @@ class OpenSearchIngestor {
     // Initial ingestion
     await this.ingestAll();
 
-    // Watch for new files
+    // Record initial file positions after full ingestion
     const baseDir = path.join(__dirname, '..');
     const dirs = [
       { path: path.join(baseDir, 'logs'), type: 'logs' as const },
@@ -528,20 +623,66 @@ class OpenSearchIngestor {
       { path: path.join(baseDir, 'metrics'), type: 'metrics' as const },
     ];
 
+    // Initialize file positions for all existing files
+    for (const dir of dirs) {
+      if (fs.existsSync(dir.path)) {
+        const files = fs.readdirSync(dir.path);
+        for (const filename of files) {
+          const filePath = path.join(dir.path, filename);
+          if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+            const stats = fs.statSync(filePath);
+            this.filePositions.set(filePath, stats.size);
+          }
+        }
+      }
+    }
+    this.saveState();
+    console.log(`Initialized file positions for ${this.filePositions.size} files`);
+
+    // Watch for file changes and new files
     for (const dir of dirs) {
       if (fs.existsSync(dir.path)) {
         fs.watch(dir.path, async (eventType, filename) => {
           if (eventType === 'change' || eventType === 'rename') {
             const filePath = path.join(dir.path, filename);
-            if (fs.existsSync(filePath) && !this.processedFiles.has(filePath)) {
-              console.log(`New file detected: ${filePath}`);
-              await this.processFile(filePath, dir.type);
+
+            if (!fs.existsSync(filePath)) {
+              // File was deleted or renamed away
+              return;
+            }
+
+            try {
+              const isNewFile = !this.processedFiles.has(filePath);
+
+              if (isNewFile) {
+                // New file - process it completely
+                console.log(`New file detected: ${filePath}`);
+                await this.processFile(filePath, dir.type);
+                // Record file position after processing
+                const stats = fs.statSync(filePath);
+                this.filePositions.set(filePath, stats.size);
+                this.saveState();
+              } else {
+                // Existing file changed - process only new content
+                const lastPosition = this.filePositions.get(filePath) || 0;
+                const stats = fs.statSync(filePath);
+
+                if (stats.size > lastPosition) {
+                  console.log(`File changed: ${filePath} (${stats.size - lastPosition} new bytes)`);
+                  await this.processFileFromPosition(filePath, dir.type, lastPosition);
+                }
+              }
+            } catch (error) {
+              console.error(`Error processing file ${filePath}:`, error);
             }
           }
         });
         console.log(`Watching directory: ${dir.path}`);
       }
     }
+
+    console.log('\n✨ Watch mode active - logs will be ingested in real-time');
+    console.log('Press Ctrl+C to stop\n');
 
     // Keep process running
     process.on('SIGINT', () => {

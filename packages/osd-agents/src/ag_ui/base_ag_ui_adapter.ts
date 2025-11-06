@@ -83,6 +83,7 @@ export interface BaseAGUIConfig {
     credentials: boolean;
   };
   mcpConfigs?: Record<string, MCPServerConfig>;
+  enableRealtimeLogIngestion?: boolean;
 }
 
 export class BaseAGUIAdapter {

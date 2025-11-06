@@ -25,17 +25,20 @@ export class HTTPServer {
   private config: BaseAGUIConfig;
   private adapter: BaseAGUIAdapter;
   private isShuttingDown: boolean = false;
+  private agServer?: any; // Reference to BaseAGUIServer for health status
 
   constructor(
     config: BaseAGUIConfig,
     adapter: BaseAGUIAdapter,
     logger: Logger,
-    auditLogger?: AGUIAuditLogger
+    auditLogger?: AGUIAuditLogger,
+    agServer?: any
   ) {
     this.config = config;
     this.adapter = adapter;
     this.logger = logger;
     this.auditLogger = auditLogger;
+    this.agServer = agServer;
     this.app = express();
     this.server = http.createServer(this.app);
   }
@@ -70,11 +73,23 @@ export class HTTPServer {
   setupRoutes(): void {
     // Health check endpoint
     this.app.get('/health', (req, res) => {
-      res.json({
+      const healthResponse: any = {
         status: 'healthy',
         timestamp: new Date().toISOString(),
         version: '1.0.0',
-      });
+      };
+
+      // Add ingestion service status if server reference is available
+      if (this.agServer) {
+        healthResponse.ingestion = {
+          enabled: this.config.enableRealtimeLogIngestion || false,
+          active: this.agServer.isIngestionWatcherActive
+            ? this.agServer.isIngestionWatcherActive()
+            : false,
+        };
+      }
+
+      res.json(healthResponse);
     });
 
     // AG UI protocol info endpoint

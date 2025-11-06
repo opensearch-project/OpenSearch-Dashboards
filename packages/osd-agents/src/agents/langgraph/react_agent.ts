@@ -40,6 +40,9 @@ export interface ReactAgentState {
   threadId?: string; // Store thread identifier
   runId?: string; // Store run identifier
   modelId?: string; // Store model identifier from forwardedProps for dynamic model selection
+  // Duplicate detection
+  duplicateCallCount?: number; // Counter for consecutive duplicate tool calls
+  recentToolSignatures?: string[]; // Signatures of recent tool calls for duplicate detection
 }
 
 /**
@@ -197,6 +200,9 @@ export class ReactAgent implements BaseAgent {
         threadId: additionalInputs?.threadId,
         runId: additionalInputs?.runId,
         modelId: additionalInputs?.modelId,
+        // Initialize duplicate detection
+        duplicateCallCount: 0,
+        recentToolSignatures: [],
       };
 
       // Run the graph - unique config per request for stateless operation
