@@ -1,2 +1,2 @@
 feat:
-- Remove the restriction that workspace cannot be created without datasource ([#10861](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10861))
+- [Workspace] Remove the restriction that workspace cannot be created without datasource ([#10861](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10861))
