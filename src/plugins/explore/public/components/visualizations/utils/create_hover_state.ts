@@ -251,12 +251,9 @@ export function createHighlightBarLayers(axisConfig: AxisConfig, options: Option
   const yFields = Array<Field>().concat(axisConfig.y);
   const y1Fields = Array<Field>().concat(axisConfig.y1 ? axisConfig.y1 : []);
 
-  const pointLayer = createPointLayer(axisConfig.x, yFields, axisConfig.color);
-  layers.push(pointLayer);
-
-  if (y1Fields.length > 0) {
-    const pointLayer1 = createPointLayer(axisConfig.x, y1Fields, axisConfig.color);
-    layers.push(pointLayer1);
+  if (y1Fields.length === 0) {
+    const pointLayer = createPointLayer(axisConfig.x, yFields, axisConfig.color);
+    layers.push(pointLayer);
   }
 
   layers.push(createHiddenBarLayer(axisConfig, { ...options, barOpacity: 0.1 }));
