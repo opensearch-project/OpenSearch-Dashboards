@@ -44,6 +44,10 @@ export class ChatService {
     this.threadId = this.generateThreadId();
   }
 
+  public getThreadId = () => {
+    return this.threadId;
+  };
+
   private generateThreadId(): string {
     return `thread-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
