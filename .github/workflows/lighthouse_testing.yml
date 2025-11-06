@@ -1,7 +1,10 @@
-name: Lighthouse Testing
+name: Lighthouse performance tests
 
 on:
-  pull_request:
+  workflow_run:
+    workflows: ["Bootstrap and build workspace"]
+    types:
+      - completed
     branches:
       - main
 
@@ -17,6 +20,7 @@ env:
 
 jobs:
   lighthouse:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -32,11 +36,37 @@ jobs:
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
 
-      - name: Run bootstrap
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+
+      - name: Restore dependencies
+        id: node-modules-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            packages/*/target
+            src/*/node_modules
+          key: node-modules-linux-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            node-modules-linux-
+
+      - name: Bootstrap project dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: yarn osd bootstrap
 
-      - name: Download OpenSearch
+      - name: Download OpenSearch v2.17.0
         uses: suisei-cn/actions-download-file@v1.4.0
         with:
           url: https://artifacts.opensearch.org/releases/bundle/opensearch/${{ env.LATEST_VERSION }}/opensearch-${{ env.LATEST_VERSION }}-linux-x64.tar.gz
@@ -61,7 +91,20 @@ jobs:
       - name: Install Lighthouse CI
         run: yarn add --dev @lhci/cli
 
-      - name: Build plugins
+      - name: Restore build artifacts
+        id: plugin-build-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/
+            src/plugins/*/target/
+            packages/*/target/
+          key: plugins-build-linux-${{ hashFiles('**/yarn.lock', 'src/plugins/**/*.ts', 'src/plugins/**/*.tsx', 'src/plugins/**/*.js', 'packages/*/src/**/*.ts', 'packages/*/src/**/*.tsx') }}
+          restore-keys: |
+            plugins-build-linux-${{ hashFiles('**/yarn.lock') }}-
+
+      - name: Build dashboard plugins
+        if: steps.plugin-build-cache.outputs.cache-hit != 'true'
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
 
       - name: Wait for OpenSearch to be ready
