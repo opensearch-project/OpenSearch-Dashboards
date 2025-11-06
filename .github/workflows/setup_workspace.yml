@@ -1,0 +1,169 @@
+name: Bootstrap and build workspace
+
+on:
+  pull_request:
+    branches: ['**']
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.lycheeignore'
+      - 'CODEOWNERS'
+      - 'changelogs/fragments/**'
+  push:
+    branches: ['main', '[0-9]+\.x', '[0-9]+\.[0-9]+']
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - '.lycheeignore'
+      - 'CODEOWNERS'
+      - 'changelogs/fragments/**'
+
+env:
+  OSD_OPTIMIZER_MAX_WORKERS: 8
+  NODE_OPTIONS: '--max-old-space-size=8192 --max-semi-space-size=64 --dns-result-order=ipv4first'
+
+jobs:
+  setup-linux:
+    name: Bootstrap Linux environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+
+      - name: Restore dependencies cache
+        id: node-modules-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            src/*/node_modules
+          key: node-modules-linux-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            node-modules-linux-
+
+      - name: Bootstrap project dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: yarn osd bootstrap
+
+      - name: Restore plugin build artifacts
+        id: plugin-build-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/
+            src/plugins/*/target/
+            packages/*/target/
+            test/plugin_functional/plugins/*/target/
+          key: plugins-build-linux-${{ hashFiles('**/yarn.lock', 'src/**', 'packages/**', 'test/plugin_functional/plugins/**') }}
+          restore-keys: |
+            plugins-build-linux-${{ hashFiles('**/yarn.lock') }}-
+
+      - name: Build dashboard plugins
+        if: steps.plugin-build-cache.outputs.cache-hit != 'true'
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
+
+      - name: Build test plugins
+        if: steps.plugin-build-cache.outputs.cache-hit != 'true'
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10 --scan-dir "./test/plugin_functional/plugins"
+
+  setup-windows:
+    name: Bootstrap Windows environment
+    runs-on: windows-latest
+    steps:
+      - name: Configure git's autocrlf
+        run: git config --global core.autocrlf false
+
+      - name: Configure pagefile size
+        uses: al-cheb/configure-pagefile-action@v1.3
+        with:
+          minimum-size: 16GB
+          maximum-size: 64GB
+          disk-root: 'C:'
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'adopt'
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+          yarn config set network-timeout 1000000 -g
+
+      - name: Restore dependencies cache
+        id: node-modules-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            src/*/node_modules
+          key: node-modules-windows-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            node-modules-windows-
+
+      - name: Bootstrap project dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: yarn osd bootstrap || yarn osd bootstrap
+
+      - name: Restore plugin build artifacts
+        id: plugin-build-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/
+            src/plugins/*/target/
+            packages/*/target/
+            test/plugin_functional/plugins/*/target/
+          key: plugins-build-windows-${{ hashFiles('**/yarn.lock', 'src/**', 'packages/**', 'test/plugin_functional/plugins/**') }}
+          restore-keys: |
+            plugins-build-windows-${{ hashFiles('**/yarn.lock') }}-
+
+      - name: Build dashboard plugins
+        if: steps.plugin-build-cache.outputs.cache-hit != 'true'
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
+
+      - name: Build test plugins
+        if: steps.plugin-build-cache.outputs.cache-hit != 'true'
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10 --scan-dir "./test/plugin_functional/plugins"

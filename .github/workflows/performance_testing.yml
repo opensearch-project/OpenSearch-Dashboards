@@ -1,16 +1,12 @@
-name: Performance Testing
+name: Bundle size analysis
 
 on:
-  pull_request:
+  workflow_run:
+    workflows: ["Bootstrap and build workspace"]
+    types:
+      - completed
     branches:
       - main
-    paths-ignore:
-      - '**/*.md'
-      - '**/*.test.ts'
-      - '**/*.test.js'
-      - '**/__tests__/**'
-      - '.github/workflows/**'
-      - 'docs/**'
 
 permissions:
   contents: read
@@ -18,6 +14,7 @@ permissions:
 
 jobs:
   bundle-analyzer:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -46,7 +43,7 @@ jobs:
           restore-keys: |
             yarn-
 
-      - name: Restore node_modules cache
+      - name: Restore dependencies
         id: node-modules-cache
         uses: actions/cache@v4
         with:
@@ -58,11 +55,11 @@ jobs:
           restore-keys: |
             node-modules-linux-
 
-      - name: Run bootstrap
+      - name: Bootstrap project dependencies
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: yarn osd bootstrap
 
-      - name: Restore plugin build cache
+      - name: Restore build artifacts
         id: plugin-build-cache
         uses: actions/cache@v4
         with:
@@ -70,18 +67,18 @@ jobs:
             build/
             src/plugins/*/target/
             packages/*/target/
-          key: plugins-build-linux-${{ hashFiles('**/yarn.lock', 'src/**', 'packages/**') }}
+          key: plugins-build-linux-${{ hashFiles('**/yarn.lock', 'src/**', 'packages/**', 'test/plugin_functional/plugins/**') }}
           restore-keys: |
             plugins-build-linux-${{ hashFiles('**/yarn.lock') }}-
 
-      - name: Build plugins
+      - name: Build dashboard plugins
         if: steps.plugin-build-cache.outputs.cache-hit != 'true'
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
 
-      - name: Update Limit and bundle size variation
+      - name: Calculate bundle size changes
         run: node scripts/build_opensearch_dashboards_platform_plugins --update-limits
 
-      - name: Check and upload bundle size variations
+      - name: Detect bundle size changes
         id: check_bundle_size
         run: |
           if [ -f packages/osd-optimizer/limits_delta.yml ]; then
@@ -92,14 +89,14 @@ jobs:
             echo "bundle_size_changed=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Upload limits_delta.yml as artifact
+      - name: Upload bundle size delta
         if: steps.check_bundle_size.outputs.bundle_size_changed == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: bundle-size-delta
           path: packages/osd-optimizer/limits_delta.yml
 
-      - name: Fail the CI if bundle size exceeded
+      - name: Fail if bundle size limits exceeded
         if: steps.check_bundle_size.outputs.bundle_size_changed == 'true'
         run: |
           echo "❌ Bundle size exceeded threshold. Failing the job."

@@ -1,26 +1,15 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: Build and test
+name: Unit and integration tests
 
-# trigger on every commit push and PR for all branches except pushes for backport branches
+# trigger after setup workspace completes
 on:
-  push:
-    branches: ['main', '[0-9]+\.x', '[0-9]+\.[0-9]+'] # Run the functional test on push for only release branches
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.lycheeignore'
-      - 'CODEOWNERS'
-      - 'changelogs/fragments/**'
-  pull_request:
-    branches: ['**']
-    paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
-      - '.lycheeignore'
-      - 'CODEOWNERS'
-      - 'changelogs/fragments/**'
+  workflow_run:
+    workflows: ["Bootstrap and build workspace"]
+    types:
+      - completed
+    branches: ['main', '[0-9]+\.x', '[0-9]+\.[0-9]+', '**']
 
 env:
   TEST_BROWSER_HEADLESS: 1
@@ -35,155 +24,9 @@ env:
   NODE_OPTIONS: '--max-old-space-size=8192 --max-semi-space-size=64 --dns-result-order=ipv4first'
 
 jobs:
-  # Setup jobs - run once per OS to bootstrap and build plugins
-  setup-linux:
-    name: Setup Linux workspace
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'adopt'
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Setup Yarn
-        run: |
-          npm uninstall -g yarn
-          npm i -g yarn@1.22.10
-          yarn config set network-timeout 1000000 -g
-
-      - name: Configure Yarn Cache
-        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
-
-      - name: Initialize Yarn Cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.YARN_CACHE_LOCATION }}
-          key: yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            yarn-
-
-      - name: Restore node_modules cache
-        id: node-modules-cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            packages/*/node_modules
-            src/*/node_modules
-          key: node-modules-linux-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            node-modules-linux-
-
-      - name: Run bootstrap
-        if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: yarn osd bootstrap
-
-      - name: Restore plugin build cache
-        id: plugin-build-cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            build/
-            src/plugins/*/target/
-            packages/*/target/
-            test/plugin_functional/plugins/*/target/
-          key: plugins-build-linux-${{ hashFiles('**/yarn.lock', 'src/**', 'packages/**', 'test/plugin_functional/plugins/**') }}
-          restore-keys: |
-            plugins-build-linux-${{ hashFiles('**/yarn.lock') }}-
-
-      - name: Build plugins
-        if: steps.plugin-build-cache.outputs.cache-hit != 'true'
-        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
-
-      - name: Build plugin functional test plugins
-        if: steps.plugin-build-cache.outputs.cache-hit != 'true'
-        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10 --scan-dir "./test/plugin_functional/plugins"
-
-  setup-windows:
-    name: Setup Windows workspace
-    runs-on: windows-latest
-    steps:
-      - name: Configure git's autocrlf
-        run: git config --global core.autocrlf false
-
-      - name: Configure pagefile size
-        uses: al-cheb/configure-pagefile-action@v1.3
-        with:
-          minimum-size: 16GB
-          maximum-size: 64GB
-          disk-root: 'C:'
-
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'adopt'
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: '.nvmrc'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Setup Yarn
-        run: |
-          npm uninstall -g yarn
-          npm i -g yarn@1.22.10
-          yarn config set network-timeout 1000000 -g
-
-      - name: Restore node_modules cache
-        id: node-modules-cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            packages/*/node_modules
-            src/*/node_modules
-          key: node-modules-windows-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            node-modules-windows-
-
-      - name: Run bootstrap
-        if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: yarn osd bootstrap || yarn osd bootstrap
-
-      - name: Restore plugin build cache
-        id: plugin-build-cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            build/
-            src/plugins/*/target/
-            packages/*/target/
-            test/plugin_functional/plugins/*/target/
-          key: plugins-build-windows-${{ hashFiles('**/yarn.lock', 'src/**', 'packages/**', 'test/plugin_functional/plugins/**') }}
-          restore-keys: |
-            plugins-build-windows-${{ hashFiles('**/yarn.lock') }}-
-
-      - name: Build plugins
-        if: steps.plugin-build-cache.outputs.cache-hit != 'true'
-        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
-
-      - name: Build plugin functional test plugins
-        if: steps.plugin-build-cache.outputs.cache-hit != 'true'
-        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10 --scan-dir "./test/plugin_functional/plugins"
-
   build-test:
-    name: Build and Verify on ${{ matrix.name }} (ciGroup${{ matrix.group }})
-    needs: [setup-linux, setup-windows]
+    name: Unit tests on ${{ matrix.name }} (group ${{ matrix.group }})
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     strategy:
       fail-fast: false
       matrix:
@@ -233,7 +76,7 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Restore node_modules cache (Linux)
+      - name: Restore dependencies (Linux)
         if: matrix.os != 'windows-latest'
         uses: actions/cache/restore@v4
         with:
@@ -244,7 +87,7 @@ jobs:
           key: node-modules-linux-${{ hashFiles('**/yarn.lock') }}
           fail-on-cache-miss: true
 
-      - name: Restore node_modules cache (Windows)
+      - name: Restore dependencies (Windows)
         if: matrix.os == 'windows-latest'
         uses: actions/cache/restore@v4
         with:
@@ -281,7 +124,7 @@ jobs:
 
   lint-and-validate:
     name: Lint and validate
-    needs: [setup-linux]
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -299,7 +142,7 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Restore node_modules cache
+      - name: Restore dependencies
         uses: actions/cache/restore@v4
         with:
           path: |
@@ -309,7 +152,7 @@ jobs:
           key: node-modules-linux-${{ hashFiles('**/yarn.lock') }}
           fail-on-cache-miss: true
 
-      - name: Check for yarn.lock changes
+      - name: Verify yarn.lock is in sync
         run: |
           if [[ `git status --porcelain yarn.lock` ]]; then
             echo -e "\033[31mThe yarn.lock file is out of sync!\033[0m"
@@ -332,15 +175,15 @@ jobs:
         id: typeScript-error-check
         run: yarn typecheck
 
-      - name: Run linter
+      - name: Lint code
         id: linter
         run: yarn lint
 
-      - name: Validate NOTICE file
+      - name: Validate NOTICE
         id: notice-validate
         run: yarn notice:validate
 
-      - name: Validate licenses
+      - name: Check license compliance
         id: i18n-licenses
         run: yarn checkLicenses
 
@@ -349,8 +192,8 @@ jobs:
         run: yarn i18n:check
 
   functional-tests:
-    name: Run functional tests on ${{ matrix.name }} (ciGroup${{ matrix.group }})
-    needs: [setup-linux, setup-windows]
+    name: Functional tests on ${{ matrix.name }} (group ${{ matrix.group }})
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     strategy:
       fail-fast: false
       matrix:
@@ -399,7 +242,7 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Restore node_modules cache (Linux)
+      - name: Restore dependencies (Linux)
         if: matrix.os != 'windows-latest'
         uses: actions/cache/restore@v4
         with:
@@ -410,7 +253,7 @@ jobs:
           key: node-modules-linux-${{ hashFiles('**/yarn.lock') }}
           fail-on-cache-miss: true
 
-      - name: Restore node_modules cache (Windows)
+      - name: Restore dependencies (Windows)
         if: matrix.os == 'windows-latest'
         uses: actions/cache/restore@v4
         with:
@@ -421,7 +264,7 @@ jobs:
           key: node-modules-windows-${{ hashFiles('**/yarn.lock') }}
           fail-on-cache-miss: true
 
-      - name: Restore plugin build cache (Linux)
+      - name: Restore build artifacts (Linux)
         if: matrix.os != 'windows-latest'
         uses: actions/cache/restore@v4
         with:
@@ -432,7 +275,7 @@ jobs:
           key: plugins-build-linux-${{ hashFiles('**/yarn.lock', 'src/**', 'packages/**', 'test/plugin_functional/plugins/**') }}
           fail-on-cache-miss: true
 
-      - name: Restore plugin build cache (Windows)
+      - name: Restore build artifacts (Windows)
         if: matrix.os == 'windows-latest'
         uses: actions/cache/restore@v4
         with:
@@ -487,8 +330,8 @@ jobs:
           overwrite: true
 
   plugin-functional-tests:
-    name: Run plugin functional tests on ${{ matrix.name }}
-    needs: [setup-linux, setup-windows]
+    name: Plugin functional tests on ${{ matrix.name }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     strategy:
       fail-fast: false
       matrix:
@@ -536,7 +379,7 @@ jobs:
           npm i -g yarn@1.22.10
           yarn config set network-timeout 1000000 -g
 
-      - name: Restore node_modules cache (Linux)
+      - name: Restore dependencies (Linux)
         if: matrix.os != 'windows-latest'
         uses: actions/cache/restore@v4
         with:
@@ -547,7 +390,7 @@ jobs:
           key: node-modules-linux-${{ hashFiles('**/yarn.lock') }}
           fail-on-cache-miss: true
 
-      - name: Restore node_modules cache (Windows)
+      - name: Restore dependencies (Windows)
         if: matrix.os == 'windows-latest'
         uses: actions/cache/restore@v4
         with:
