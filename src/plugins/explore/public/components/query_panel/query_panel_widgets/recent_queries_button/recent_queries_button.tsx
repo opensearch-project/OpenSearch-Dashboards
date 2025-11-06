@@ -16,7 +16,7 @@ import { useSetEditorTextWithQuery } from '../../../../application/hooks';
 import './recent_queries_button.scss';
 
 const label = i18n.translate('explore.queryPanel.recentQueryLabel', {
-  defaultMessage: 'Recent Queries',
+  defaultMessage: 'Recent queries',
 });
 
 export const RecentQueriesButton = () => {

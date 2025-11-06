@@ -3,4 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './language_reference';
+.exploreSidebar__headerTitle {
+  &__text {
+    font-weight: 600;
+  }
+}
