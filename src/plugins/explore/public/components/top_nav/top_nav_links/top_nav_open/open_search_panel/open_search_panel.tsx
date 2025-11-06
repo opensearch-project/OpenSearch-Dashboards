@@ -72,7 +72,7 @@ export const OpenSearchPanel = ({ onClose }: OpenSearchPanelProps) => {
           <h2>
             <FormattedMessage
               id="explore.discover.topNav.openSearchPanel.openSavedTitle"
-              defaultMessage="Open Saved Discover Search"
+              defaultMessage="Select Saved Search"
             />
           </h2>
         </EuiText>

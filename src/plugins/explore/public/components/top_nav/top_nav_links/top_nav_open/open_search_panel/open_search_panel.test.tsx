@@ -80,7 +80,7 @@ describe('OpenSearchPanel', () => {
     render(<OpenSearchPanel onClose={mockOnClose} />);
 
     expect(screen.getByTestId('loadSearchForm')).toBeInTheDocument();
-    expect(screen.getByText('Open Saved Discover Search')).toBeInTheDocument();
+    expect(screen.getByText('Select Saved Search')).toBeInTheDocument();
     expect(screen.getByText('Manage searches')).toBeInTheDocument();
   });
 
