@@ -348,10 +348,10 @@ export class UiSettingsClient implements IUiSettingsClient {
         this.log.warn(
           `Deprecation warning: The setting "${key}" has multiple scopes. Please specify a scope when updating it.`
         );
-      } else if (this.userLevelSettingsKeys.includes(key)) {
-        groupedChanges[UiSettingScope.USER][key] = val;
       } else if (this.adminUiSettingsKeys.includes(key)) {
         groupedChanges[UiSettingScope.DASHBOARD_ADMIN][key] = val;
+      } else if (this.userLevelSettingsKeys.includes(key)) {
+        groupedChanges[UiSettingScope.USER][key] = val;
       } else if (this.workspaceLevelSettingsKeys.includes(key)) {
         groupedChanges[UiSettingScope.WORKSPACE][key] = val;
       } else {

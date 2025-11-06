@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { ENABLE_AI_FEATURES, HttpSetup } from 'opensearch-dashboards/public';
 import React, { useCallback, useEffect, useState } from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, of, combineLatest } from 'rxjs';
 import { useObservable } from 'react-use';
 import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 import { DATA_STRUCTURE_META_TYPES, DEFAULT_DATA } from '../../../../data/common';
@@ -133,8 +133,8 @@ export const createQueryAssistExtension = (
       }
     },
     isEnabled$: () =>
-      getAvailableLanguages$(http, data).pipe(
-        map((languages) => languages.length > 0 && assistantEnabled$.value)
+      combineLatest([getAvailableLanguages$(http, data), assistantEnabled$]).pipe(
+        map(([languages, assistantEnabled]) => languages.length > 0 && assistantEnabled)
       ),
     getComponent: (dependencies) => {
       // only show the component if user is on a supported language.
