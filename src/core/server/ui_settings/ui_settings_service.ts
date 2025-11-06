@@ -101,6 +101,8 @@ export class UiSettingsService
     // Use uiSettings.defaults from the config file
     this.validateAndUpdateConfiguredDefaults(config.uiSettingsConfig.defaults);
 
+    this.register(getAIFeaturesSetting());
+
     const permissionControlledUiSettingsWrapper = new PermissionControlledUiSettingsWrapper(
       config.savedObjectsConfig.permission.enabled
     );
@@ -110,8 +112,6 @@ export class UiSettingsService
       PERMISSION_CONTROLLED_UI_SETTINGS_WRAPPER_ID,
       permissionControlledUiSettingsWrapper.wrapperFactory
     );
-
-    this.register(getAIFeaturesSetting());
 
     return {
       register: this.register.bind(this),
