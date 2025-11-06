@@ -155,6 +155,10 @@ describe('createBarGaugeSpec', () => {
           type: 'quantitative',
           field: 'maxVal',
         },
+        y2: {
+          type: 'quantitative',
+          field: 'minVal',
+        },
       },
     });
   });
