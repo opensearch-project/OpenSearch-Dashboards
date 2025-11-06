@@ -47,7 +47,7 @@ const AXIS_SELECT_LABEL = {
     defaultMessage: 'Color',
   }),
   [AxisRole.FACET]: i18n.translate('explore.visualize.axisSelectLabelFacet', {
-    defaultMessage: 'Split Chart By',
+    defaultMessage: 'Split chart by',
   }),
   [AxisRole.SIZE]: i18n.translate('explore.visualize.axisSelectLabelSize', {
     defaultMessage: 'Size',
