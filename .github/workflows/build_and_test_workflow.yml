@@ -272,7 +272,7 @@ jobs:
             build/
             src/plugins/*/target/
             packages/*/target/
-          key: plugins-build-linux-${{ hashFiles('**/yarn.lock', 'src/**', 'packages/**', 'test/plugin_functional/plugins/**') }}
+          key: plugins-build-linux-${{ hashFiles('**/yarn.lock', 'src/plugins/**/*.ts', 'src/plugins/**/*.tsx', 'src/plugins/**/*.js', 'packages/*/src/**/*.ts', 'packages/*/src/**/*.tsx') }}
           fail-on-cache-miss: true
 
       - name: Restore build artifacts (Windows)
@@ -283,7 +283,7 @@ jobs:
             build/
             src/plugins/*/target/
             packages/*/target/
-          key: plugins-build-windows-${{ hashFiles('**/yarn.lock', 'src/**', 'packages/**', 'test/plugin_functional/plugins/**') }}
+          key: plugins-build-windows-${{ hashFiles('**/yarn.lock', 'src/plugins/**/*.ts', 'src/plugins/**/*.tsx', 'src/plugins/**/*.js', 'packages/*/src/**/*.ts', 'packages/*/src/**/*.tsx') }}
           fail-on-cache-miss: true
 
       # Lock Chrome version until ChromeDriver's release pipeline is fixed
@@ -410,7 +410,7 @@ jobs:
             src/plugins/*/target/
             packages/*/target/
             test/plugin_functional/plugins/*/target/
-          key: plugins-build-linux-${{ hashFiles('**/yarn.lock', 'src/**', 'packages/**', 'test/plugin_functional/plugins/**') }}
+          key: plugins-build-linux-${{ hashFiles('**/yarn.lock', 'src/plugins/**/*.ts', 'src/plugins/**/*.tsx', 'src/plugins/**/*.js', 'packages/*/src/**/*.ts', 'packages/*/src/**/*.tsx') }}
           fail-on-cache-miss: true
 
       - name: Restore plugin build cache (Windows)
@@ -422,7 +422,7 @@ jobs:
             src/plugins/*/target/
             packages/*/target/
             test/plugin_functional/plugins/*/target/
-          key: plugins-build-windows-${{ hashFiles('**/yarn.lock', 'src/**', 'packages/**', 'test/plugin_functional/plugins/**') }}
+          key: plugins-build-windows-${{ hashFiles('**/yarn.lock', 'src/plugins/**/*.ts', 'src/plugins/**/*.tsx', 'src/plugins/**/*.js', 'packages/*/src/**/*.ts', 'packages/*/src/**/*.tsx') }}
           fail-on-cache-miss: true
 
       # Lock Chrome version until ChromeDriver's release pipeline is fixed

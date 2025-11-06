@@ -235,7 +235,7 @@ jobs:
             build/
             src/plugins/*/target/
             packages/*/target/
-          key: plugins-build-linux-${{ hashFiles('**/yarn.lock', 'src/**', 'packages/**', 'test/plugin_functional/plugins/**') }}
+          key: plugins-build-linux-${{ hashFiles('**/yarn.lock', 'src/plugins/**/*.ts', 'src/plugins/**/*.tsx', 'src/plugins/**/*.js', 'packages/*/src/**/*.ts', 'packages/*/src/**/*.tsx') }}
           restore-keys: |
             plugins-build-linux-${{ hashFiles('**/yarn.lock') }}-
 
