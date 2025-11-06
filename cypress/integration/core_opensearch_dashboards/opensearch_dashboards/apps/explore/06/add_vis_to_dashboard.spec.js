@@ -132,9 +132,9 @@ export const runAddVisToDashboardTests = () => {
       const existingDashboardName = 'Test Dashboard';
       const exploreName = 'Test Saved Explore in existing dashboard';
 
-      cy.getElementByTestId('selectExistingDashboard')
-        .should('be.visible')
-        .select(existingDashboardName);
+      cy.getElementByTestId('selectExistingDashboard').should('be.visible').click();
+
+      cy.get(`[title="${existingDashboardName}"]`).click();
 
       cy.get('input[placeholder="Enter save search name"]').should('be.visible').type(exploreName);
 
