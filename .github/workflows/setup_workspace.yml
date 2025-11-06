@@ -1,5 +1,6 @@
 name: Bootstrap and build workspace
 
+# This workflow bootstraps dependencies and builds plugins once, then caches them for downstream workflows
 on:
   pull_request:
     branches: ['**']
