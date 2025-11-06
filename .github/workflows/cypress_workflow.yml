@@ -202,10 +202,47 @@ jobs:
           npm i -g yarn@^1.22.10
           yarn config set network-timeout 1000000 -g
 
+      - name: Configure Yarn Cache
+        run: echo "YARN_CACHE_LOCATION=$(yarn cache dir)" >> $GITHUB_ENV
+
+      - name: Initialize Yarn Cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.YARN_CACHE_LOCATION }}
+          key: yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            yarn-
+
+      - name: Restore node_modules cache
+        id: node-modules-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+            src/*/node_modules
+          key: node-modules-linux-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            node-modules-linux-
+
       - name: Run bootstrap
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: yarn osd bootstrap
 
+      - name: Restore plugin build cache
+        id: plugin-build-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/
+            src/plugins/*/target/
+            packages/*/target/
+          key: plugins-build-linux-${{ hashFiles('**/yarn.lock', 'src/**', 'packages/**') }}
+          restore-keys: |
+            plugins-build-linux-${{ hashFiles('**/yarn.lock') }}-
+
       - name: Build plugins
+        if: steps.plugin-build-cache.outputs.cache-hit != 'true'
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
 
       - name: Checkout FT repo
