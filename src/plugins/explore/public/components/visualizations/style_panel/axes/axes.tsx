@@ -31,6 +31,7 @@ interface AxesOptionsProps {
   axisColumnMappings: Partial<Record<AxisRole, VisColumn>>;
   showFullTimeRange: boolean;
   onShowFullTimeRangeChange: (showFullTimeRange: boolean) => void;
+  initialIsOpen?: boolean;
 }
 
 export const AxesOptions: React.FC<AxesOptionsProps> = ({
@@ -44,6 +45,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
   axisColumnMappings,
   showFullTimeRange,
   onShowFullTimeRangeChange,
+  initialIsOpen = false,
 }) => {
   const updateCategoryAxis = (index: number, updates: Partial<CategoryAxis>) => {
     const updatedAxes = [...categoryAxes];
@@ -129,7 +131,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
       accordionLabel={i18n.translate('explore.stylePanel.tabs.axes', {
         defaultMessage: 'Axes',
       })}
-      initialIsOpen={true}
+      initialIsOpen={initialIsOpen}
     >
       {/* Category Axes */}
       {categoryAxes.map((axis, index) => (
@@ -301,10 +303,9 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
       {isRule2
         ? // Special rendering for Rule 2: Show both axes with clear labels
           valueAxes.slice(0, 2).map((axis, index) => (
-            <>
+            <React.Fragment key={axis.id}>
               <EuiSplitPanel.Inner
                 paddingSize="s"
-                key={axis.id}
                 color="subdued"
                 data-test-subj="twoValueAxesPanel"
               >
@@ -467,17 +468,12 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                   </>
                 )}
               </EuiSplitPanel.Inner>
-            </>
+            </React.Fragment>
           ))
         : // Standard rendering for other rules
           valueAxes.map((axis, index) => (
-            <>
-              <EuiSplitPanel.Inner
-                paddingSize="s"
-                key={axis.id}
-                color="subdued"
-                data-test-subj="ValueAxisPanel"
-              >
+            <React.Fragment key={axis.id}>
+              <EuiSplitPanel.Inner paddingSize="s" color="subdued" data-test-subj="ValueAxisPanel">
                 <EuiText size="s" style={{ fontWeight: 600 }}>
                   {i18n.translate('explore.vis.gridOptions.valueAxis', {
                     defaultMessage: 'Y-Axis',
@@ -625,7 +621,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                   </>
                 )}
               </EuiSplitPanel.Inner>
-            </>
+            </React.Fragment>
           ))}
     </StyleAccordion>
   );

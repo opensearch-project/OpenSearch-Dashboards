@@ -536,19 +536,11 @@ describe('BarVisStyleControls', () => {
     });
   });
 
-  test('render bucket panel with num bucket type', async () => {
+  test('render bucket panel with category bucket', async () => {
     const propsWithNumBucket = {
       ...defaultProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        x: {
-          id: 1,
-          name: 'Numerical X',
-          schema: VisFieldType.Numerical,
-          column: 'numX',
-          validValuesCount: 100,
-          uniqueValuesCount: 50,
-        },
       },
     };
 
@@ -559,20 +551,8 @@ describe('BarVisStyleControls', () => {
     );
 
     expect(screen.getByTestId('mockBucketOptionsPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('bucketType')).toHaveTextContent('num');
-    expect(screen.getByTestId('mockUpdateBucketSize')).toBeInTheDocument();
-    expect(screen.getByTestId('mockUpdateBucketCount')).toBeInTheDocument();
+    expect(screen.getByTestId('bucketType')).toHaveTextContent('cate');
     expect(screen.getByTestId('mockUpdateAggregation')).toBeInTheDocument();
-
-    await userEvent.click(screen.getByTestId('mockUpdateBucketSize'));
-    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      bucket: { bucketTimeUnit: 'auto', aggregationType: 'sum', bucketSize: 100 },
-    });
-
-    await userEvent.click(screen.getByTestId('mockUpdateBucketCount'));
-    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      bucket: { bucketTimeUnit: 'auto', aggregationType: 'sum', bucketCount: 20 },
-    });
 
     await userEvent.click(screen.getByTestId('mockUpdateAggregation'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({

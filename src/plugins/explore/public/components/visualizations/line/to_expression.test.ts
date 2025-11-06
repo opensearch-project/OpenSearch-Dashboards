@@ -8,6 +8,7 @@ import {
   createMultiLineChart,
   createFacetedMultiLineChart,
   createCategoryLineChart,
+  createCategoryMultiLineChart,
 } from './to_expression';
 import {
   ThresholdMode,
@@ -278,7 +279,7 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('title', 'value1 (Bar) and value2 (Line) Over Time');
       expect(result).toHaveProperty('data.values', transformedData);
       expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(6); // Bar layer (with threshold) + line layer + 3 hover state layers + time marker
+      expect(result.layer).toHaveLength(4); // Bar layer (with threshold) + line layer + 1 hover state layers + time marker
 
       // Verify the bar layer
       const barLayer = result.layer[0].layer[0];
@@ -325,7 +326,7 @@ describe('to_expression', () => {
         mockAxisColumnMappings,
         timeRange
       );
-      expect(result.layer).toHaveLength(6); // Bar layer (with threshold) + line layer + 3 hover state layers + time marker
+      expect(result.layer).toHaveLength(4); // Bar layer (with threshold) + line layer + 1 hover state layers + time marker
       expect(utils.applyTimeRangeToEncoding).toHaveBeenCalledWith(
         expect.any(Object),
         mockAxisColumnMappings,
@@ -825,6 +826,81 @@ describe('to_expression', () => {
       }).toThrow(
         'Category line chart requires at least one numerical column and one categorical column'
       );
+    });
+  });
+
+  describe('createCategoryMultiLineChart', () => {
+    it('should create a category-based multi-line chart with one metric and two categorical columns', () => {
+      const mockThresholdLayer = { mark: { type: 'rule' } };
+      (thresholdUtils.createThresholdLayer as jest.Mock).mockReturnValueOnce(mockThresholdLayer);
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: categoricalColumn1,
+        [AxisRole.COLOR]: categoricalColumn2,
+      };
+      const result = createCategoryMultiLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1, categoricalColumn2],
+        [],
+        styleOptions,
+        mockAxisColumnMappings
+      );
+      expect(result).toHaveProperty('$schema');
+      expect(result).toHaveProperty('title', 'value1 by category1 and category2');
+      expect(result).toHaveProperty('data.values', transformedData);
+      expect(result).toHaveProperty('layer');
+      expect(result.layer).toHaveLength(5);
+
+      // Verify the main layer
+      const mainLayer = result.layer[0];
+      expect(mainLayer).toHaveProperty('encoding.x.field', 'field-2');
+      expect(mainLayer).toHaveProperty('encoding.x.type', 'nominal');
+      expect(mainLayer).toHaveProperty('encoding.y.field', 'field-1');
+      expect(mainLayer).toHaveProperty('encoding.y.type', 'quantitative');
+      expect(mainLayer).toHaveProperty('encoding.color.field', 'field-3');
+      expect(mainLayer).toHaveProperty('encoding.color.type', 'nominal');
+
+      expect(lineChartUtils.buildMarkConfig).toHaveBeenCalledWith(styleOptions, 'line');
+      expect(lineChartUtils.applyAxisStyling).toHaveBeenCalledTimes(2);
+      expect(thresholdUtils.createThresholdLayer).toHaveBeenCalledWith(
+        styleOptions.thresholdOptions
+      );
+    });
+
+    it('should handle different title display options', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: categoricalColumn1,
+        [AxisRole.COLOR]: categoricalColumn2,
+      };
+      const noTitleStyles = {
+        ...styleOptions,
+        titleOptions: { show: false, titleName: '' },
+      };
+      const noTitleResult = createCategoryMultiLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1, categoricalColumn2],
+        [],
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(noTitleResult.title).toBeUndefined();
+
+      const customTitleStyles = {
+        ...styleOptions,
+        titleOptions: { show: true, titleName: 'Custom Category Multi-Line Chart' },
+      };
+      const customTitleResult = createCategoryMultiLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1, categoricalColumn2],
+        [],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(customTitleResult.title).toBe('Custom Category Multi-Line Chart');
     });
   });
 });

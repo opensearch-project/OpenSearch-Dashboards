@@ -8,7 +8,7 @@ import {
   EuiModal,
   EuiFlexItem,
   EuiModalHeaderTitle,
-  EuiSelect,
+  EuiComboBox,
   EuiModalBody,
   EuiFlexGroup,
   EuiFormRow,
@@ -20,11 +20,12 @@ import {
   EuiRadio,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SavedObjectsClientContract } from 'src/core/public';
 import { DebouncedFieldText } from './style_panel/utils';
-import { OnSaveProps, DashboardInterface } from './add_to_dashboard_button';
+import { OnSaveProps } from './add_to_dashboard_button';
 import { useSavedExplore } from '../../application/utils/hooks/use_saved_explore';
+import { useExistingDashboard } from '../../application/utils/hooks/use_existing_dashboard';
 
 interface AddToDashboardModalProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -40,8 +41,6 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
   onCancel,
 }) => {
   const [selectedOption, setSelectedOption] = useState<'existing' | 'new'>('existing');
-  const [existingDashboard, setExistingDashboard] = useState<DashboardInterface[]>([]);
-  const [selectDashboard, setSelectDashboard] = useState<DashboardInterface | null>(null);
   const [newDashboardName, setNewDashboardName] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -53,24 +52,27 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
 
   const [title, setTitle] = useState<string>('');
 
-  const enableButton =
-    title &&
-    ((selectedOption === 'existing' && selectDashboard) ||
-      (selectedOption === 'new' && newDashboardName));
+  // Dashboard-related state managed by custom hook
+  const {
+    dashboardsToShow,
+    selectedDashboard,
+    isSearching,
+    setSelectedDashboard,
+    searchDashboards,
+    loadAllDashboards,
+  } = useExistingDashboard(savedObjectsClient);
 
+  // Load dashboards on mount and when switching to existing option
   useEffect(() => {
-    const loadAllDashboards = async () => {
-      const res = await savedObjectsClient.find({
-        type: 'dashboard',
-      });
-      const dashboards = res.savedObjects;
-      setExistingDashboard(dashboards as DashboardInterface[]);
-      setSelectDashboard(dashboards.length > 0 ? (dashboards[0] as DashboardInterface) : null);
-    };
     if (selectedOption === 'existing') {
       loadAllDashboards();
     }
-  }, [savedObjectsClient, selectedOption]);
+  }, [selectedOption, loadAllDashboards]);
+
+  const enableButton =
+    title &&
+    ((selectedOption === 'existing' && selectedDashboard) ||
+      (selectedOption === 'new' && newDashboardName));
 
   const handleSave = async () => {
     if (isLoading) return;
@@ -82,7 +84,7 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
         isTitleDuplicateConfirmed: isTitleOrDashboardTitleDuplicate,
         onTitleDuplicate: handleTitleDuplicate,
         mode: selectedOption,
-        selectDashboard,
+        selectDashboard: selectedDashboard,
         newDashboardName,
       });
     }
@@ -165,30 +167,51 @@ export const AddToDashboardModal: React.FC<AddToDashboardModalProps> = ({
             />
           </EuiFlexItem>
 
-          {existingDashboard.length > 0 && selectedOption === 'existing' && (
+          {selectedOption === 'existing' && (
             <EuiFlexItem style={{ width: '100%' }}>
               <EuiFormRow
                 label={i18n.translate('explore.addtoDashboardModal.selectDashboard', {
                   defaultMessage: 'Select a dashboard',
                 })}
               >
-                <EuiSelect
+                <EuiComboBox
                   data-test-subj="selectExistingDashboard"
                   compressed={true}
                   fullWidth={true}
-                  options={existingDashboard.map((dashboard) => {
+                  placeholder="Search and select a dashboard"
+                  singleSelection={{ asPlainText: true }}
+                  options={dashboardsToShow.map((dashboard) => {
                     return {
+                      label: dashboard.attributes?.title || dashboard.id,
                       value: dashboard.id,
-                      text: dashboard.attributes?.title || dashboard.id,
                     };
                   })}
-                  value={selectDashboard?.id}
-                  onChange={(e) => {
-                    const selected = existingDashboard.find((d) => d.id === e.target.value);
-                    if (selected) {
-                      setSelectDashboard(selected);
+                  selectedOptions={
+                    selectedDashboard
+                      ? [
+                          {
+                            label: selectedDashboard.attributes?.title || selectedDashboard.id,
+                            value: selectedDashboard.id,
+                          },
+                        ]
+                      : []
+                  }
+                  onChange={(selectedOptions) => {
+                    if (selectedOptions.length > 0) {
+                      const selectedValue = selectedOptions[0].value;
+                      const selected = dashboardsToShow.find((d) => d.id === selectedValue);
+                      if (selected) {
+                        setSelectedDashboard(selected);
+                      }
+                    } else {
+                      setSelectedDashboard(null);
                     }
                   }}
+                  onSearchChange={(searchTerm) => {
+                    searchDashboards(searchTerm);
+                  }}
+                  isLoading={isSearching}
+                  isClearable={true}
                 />
               </EuiFormRow>
             </EuiFlexItem>

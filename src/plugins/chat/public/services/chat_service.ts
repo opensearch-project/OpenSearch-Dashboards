@@ -7,11 +7,18 @@ import { Observable } from 'rxjs';
 import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
+import { ChatLayoutMode } from '../components/chat_header_button';
+import type { ChatWindowInstance } from '../components/chat_window';
 
 export interface ChatState {
   messages: Message[];
   isStreaming: boolean;
   currentStreamingMessage?: string;
+}
+
+export interface ChatWindowState {
+  isWindowOpen: boolean;
+  windowMode: ChatLayoutMode;
 }
 
 export class ChatService {
@@ -22,10 +29,24 @@ export class ChatService {
   private activeRequests: Set<string> = new Set();
   private requestCounter: number = 0;
 
+  // Window state management
+  private _isWindowOpen: boolean = false;
+  private _windowMode: ChatLayoutMode = ChatLayoutMode.SIDECAR;
+  private windowStateCallbacks: Set<(isOpen: boolean) => void> = new Set();
+  private windowOpenCallbacks: Set<() => void> = new Set();
+  private windowCloseCallbacks: Set<() => void> = new Set();
+
+  // ChatWindow ref for delegating sendMessage calls to proper timeline management
+  private chatWindowRef: React.RefObject<ChatWindowInstance> | null = null;
+
   constructor(serverUrl?: string) {
     this.agent = new AgUiAgent(serverUrl);
     this.threadId = this.generateThreadId();
   }
+
+  public getThreadId = () => {
+    return this.threadId;
+  };
 
   private generateThreadId(): string {
     return `thread-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
@@ -58,6 +79,126 @@ export class ChatService {
     console.log(
       `📊 [ChatService] Active requests: ${this.activeRequests.size} (removed: ${requestId})`
     );
+  }
+
+  // Window state management public API
+  public isWindowOpen(): boolean {
+    return this._isWindowOpen;
+  }
+
+  public getWindowMode(): ChatLayoutMode {
+    return this._windowMode;
+  }
+
+  public getWindowState(): ChatWindowState {
+    return {
+      isWindowOpen: this._isWindowOpen,
+      windowMode: this._windowMode,
+    };
+  }
+
+  public setWindowState(isOpen: boolean, mode?: ChatLayoutMode): void {
+    const wasOpen = this._isWindowOpen;
+    this._isWindowOpen = isOpen;
+
+    if (mode !== undefined) {
+      this._windowMode = mode;
+    }
+
+    // Notify listeners if state changed
+    if (wasOpen !== isOpen) {
+      this.windowStateCallbacks.forEach((callback) => callback(isOpen));
+    }
+  }
+
+  public onWindowStateChange(callback: (isOpen: boolean) => void): () => void {
+    this.windowStateCallbacks.add(callback);
+    // Return unsubscribe function
+    return () => this.windowStateCallbacks.delete(callback);
+  }
+
+  public onWindowOpenRequest(callback: () => void): () => void {
+    this.windowOpenCallbacks.add(callback);
+    // Return unsubscribe function
+    return () => this.windowOpenCallbacks.delete(callback);
+  }
+
+  public onWindowCloseRequest(callback: () => void): () => void {
+    this.windowCloseCallbacks.add(callback);
+    // Return unsubscribe function
+    return () => this.windowCloseCallbacks.delete(callback);
+  }
+
+  // ChatWindow ref management for proper timeline handling
+  public setChatWindowRef(ref: React.RefObject<ChatWindowInstance>): void {
+    this.chatWindowRef = ref;
+  }
+
+  public clearChatWindowRef(): void {
+    this.chatWindowRef = null;
+  }
+
+  public async openWindow(): Promise<void> {
+    if (!this._isWindowOpen) {
+      // Trigger callbacks to request window opening
+      this.windowOpenCallbacks.forEach((callback) => callback());
+    }
+  }
+
+  public async closeWindow(): Promise<void> {
+    if (this._isWindowOpen) {
+      // Trigger callbacks to request window closing
+      this.windowCloseCallbacks.forEach((callback) => callback());
+    }
+  }
+
+  public async sendMessageWithWindow(
+    content: string,
+    messages: Message[],
+    options?: { clearConversation?: boolean }
+  ): Promise<{
+    observable: any;
+    userMessage: UserMessage;
+  }> {
+    // Ensure window is open
+    await this.openWindow();
+
+    // Clear conversation if requested (create new thread)
+    if (options?.clearConversation) {
+      this.newThread();
+
+      // If we have ChatWindow ref, also clear its conversation
+      if (this.chatWindowRef?.current) {
+        this.chatWindowRef.current.startNewChat();
+      }
+    }
+
+    // If ChatWindow is available, delegate to its sendMessage for proper timeline management
+    if (this.chatWindowRef?.current && this._isWindowOpen) {
+      try {
+        await this.chatWindowRef.current.sendMessage({ content });
+
+        // Create a user message for consistency with the return type
+        const userMessage: UserMessage = {
+          id: this.generateMessageId(),
+          role: 'user',
+          content: content.trim(),
+        };
+
+        // Return a dummy observable since ChatWindow handles everything internally
+        const dummyObservable = new Observable((subscriber) => {
+          subscriber.complete();
+        });
+
+        return { observable: dummyObservable, userMessage };
+      } catch (error) {
+        // Fall back to direct service call if delegation fails
+      }
+    }
+
+    // Fallback to direct service call
+    const result = await this.sendMessage(content, messages);
+    return result;
   }
 
   public async sendMessage(

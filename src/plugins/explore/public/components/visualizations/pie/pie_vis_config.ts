@@ -39,7 +39,8 @@ export const defaultPieChartStyles: PieChartStyle = {
   // Basic controls
   addTooltip: true,
   addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legendPosition: Positions.BOTTOM,
+  legendTitle: '',
   tooltipOptions: {
     mode: 'all',
   },
@@ -67,6 +68,10 @@ export const createPieConfig = (): VisualizationType<'pie'> => ({
       {
         [AxisRole.SIZE]: { type: VisFieldType.Numerical, index: 0 },
         [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+      },
+      {
+        [AxisRole.SIZE]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
       },
     ],
   },

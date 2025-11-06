@@ -49,7 +49,7 @@ describe('applyAxisStyling', () => {
   };
 
   it('returns default config with title and labels when style is provided', () => {
-    const config = applyAxisStyling(defaultAxis, defaultAxisStyle);
+    const config = applyAxisStyling({ axis: defaultAxis, axisStyle: defaultAxisStyle });
     expect(config.grid).toBe(true);
     expect(config.orient).toBe(Positions.LEFT);
     expect(config.title).toBe('Custom Title');
@@ -59,7 +59,10 @@ describe('applyAxisStyling', () => {
   });
 
   it('disables axis when show is false', () => {
-    const config = applyAxisStyling(defaultAxis, { ...defaultAxisStyle, show: false });
+    const config = applyAxisStyling({
+      axis: defaultAxis,
+      axisStyle: { ...defaultAxisStyle, show: false },
+    });
     expect(config.title).toBeNull();
     expect(config.labels).toBe(false);
     expect(config.ticks).toBe(false);
@@ -67,22 +70,32 @@ describe('applyAxisStyling', () => {
   });
 
   it('disables grid when disableGrid is true', () => {
-    const config = applyAxisStyling(defaultAxis, defaultAxisStyle, true);
+    const config = applyAxisStyling({
+      axis: defaultAxis,
+      axisStyle: defaultAxisStyle,
+      disableGrid: true,
+    });
     expect(config.grid).toBe(false);
   });
 
   it('disables grid when showLines is false', () => {
-    const config = applyAxisStyling(defaultAxis, {
-      ...defaultAxisStyle,
-      grid: { showLines: false },
+    const config = applyAxisStyling({
+      axis: defaultAxis,
+      axisStyle: {
+        ...defaultAxisStyle,
+        grid: { showLines: false },
+      },
     });
     expect(config.grid).toBe(false);
   });
 
   it('disables labels when labels.show is false', () => {
-    const config = applyAxisStyling(defaultAxis, {
-      ...defaultAxisStyle,
-      labels: { show: false, filter: false, rotate: 0, truncate: 0 },
+    const config = applyAxisStyling({
+      axis: defaultAxis,
+      axisStyle: {
+        ...defaultAxisStyle,
+        labels: { show: false, filter: false, rotate: 0, truncate: 0 },
+      },
     });
     expect(config.labels).toBe(false);
     expect(config.labelAngle).toBeUndefined();
@@ -90,9 +103,12 @@ describe('applyAxisStyling', () => {
   });
 
   it('uses default label settings when labels.show is true with default rotate and truncate', () => {
-    const config = applyAxisStyling(defaultAxis, {
-      ...defaultAxisStyle,
-      labels: { show: true, filter: false, rotate: 0, truncate: 0 },
+    const config = applyAxisStyling({
+      axis: defaultAxis,
+      axisStyle: {
+        ...defaultAxisStyle,
+        labels: { show: true, filter: false, rotate: 0, truncate: 0 },
+      },
     });
     expect(config.labels).toBe(true);
     expect(config.labelAngle).toBe(0);
@@ -100,9 +116,12 @@ describe('applyAxisStyling', () => {
   });
 
   it('preserves existing labelAngle and labelLimit when rotate and truncate are provided', () => {
-    const config = applyAxisStyling(defaultAxis, {
-      ...defaultAxisStyle,
-      labels: { show: true, filter: false, rotate: 30, truncate: 20 },
+    const config = applyAxisStyling({
+      axis: defaultAxis,
+      axisStyle: {
+        ...defaultAxisStyle,
+        labels: { show: true, filter: false, rotate: 30, truncate: 20 },
+      },
     });
     expect(config.labels).toBe(true);
     expect(config.labelAngle).toBe(30);

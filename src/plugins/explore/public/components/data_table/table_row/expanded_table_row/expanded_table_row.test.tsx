@@ -6,8 +6,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ExpandedTableRow, ExpandedTableRowProps } from './expanded_table_row';
-import { ExploreFlavor } from '../../../../../common';
-import { useFlavorId } from '../../../../helpers/use_flavor_id';
 
 // Mock the child components
 jest.mock('../../../doc_viewer/doc_viewer', () => ({
@@ -15,10 +13,6 @@ jest.mock('../../../doc_viewer/doc_viewer', () => ({
     <div data-test-subj="doc-viewer">Doc Viewer for {renderProps.hit._id}</div>
   ),
 }));
-
-jest.mock('../../../../helpers/use_flavor_id');
-
-const mockUseFlavorId = useFlavorId as jest.MockedFunction<typeof useFlavorId>;
 
 describe('ExpandedTableRow', () => {
   const mockDataset = {
@@ -55,44 +49,31 @@ describe('ExpandedTableRow', () => {
     jest.clearAllMocks();
   });
 
-  describe('when flavor is Traces', () => {
-    beforeEach(() => {
-      mockUseFlavorId.mockReturnValue(ExploreFlavor.Traces);
-    });
+  it('renders default expanded document heading when no custom header provided', () => {
+    render(
+      <table>
+        <tbody>
+          <ExpandedTableRow {...defaultProps} />
+        </tbody>
+      </table>
+    );
 
-    it('renders expanded span heading', () => {
-      render(
-        <table>
-          <tbody>
-            <ExpandedTableRow {...defaultProps} />
-          </tbody>
-        </table>
-      );
-
-      expect(screen.getByText('Expanded span')).toBeInTheDocument();
-    });
+    expect(screen.getByText('Expanded document')).toBeInTheDocument();
   });
 
-  describe('when flavor is not Traces', () => {
-    beforeEach(() => {
-      mockUseFlavorId.mockReturnValue(null);
-    });
+  it('renders custom expanded table header when provided', () => {
+    render(
+      <table>
+        <tbody>
+          <ExpandedTableRow {...defaultProps} expandedTableHeader="Custom Header" />
+        </tbody>
+      </table>
+    );
 
-    it('renders expanded document heading', () => {
-      render(
-        <table>
-          <tbody>
-            <ExpandedTableRow {...defaultProps} />
-          </tbody>
-        </table>
-      );
-
-      expect(screen.getByText('Expanded document')).toBeInTheDocument();
-    });
+    expect(screen.getByText('Custom Header')).toBeInTheDocument();
   });
 
   it('renders DocViewer with correct props', () => {
-    mockUseFlavorId.mockReturnValue(ExploreFlavor.Traces);
     render(
       <table>
         <tbody>
@@ -106,7 +87,6 @@ describe('ExpandedTableRow', () => {
   });
 
   it('renders with correct table structure', () => {
-    mockUseFlavorId.mockReturnValue(ExploreFlavor.Traces);
     const { container } = render(
       <table>
         <tbody>
@@ -125,7 +105,6 @@ describe('ExpandedTableRow', () => {
   });
 
   it('renders folder icon', () => {
-    mockUseFlavorId.mockReturnValue(ExploreFlavor.Traces);
     const { container } = render(
       <table>
         <tbody>
@@ -142,10 +121,6 @@ describe('ExpandedTableRow', () => {
   });
 
   describe('callback functions', () => {
-    beforeEach(() => {
-      mockUseFlavorId.mockReturnValue(ExploreFlavor.Traces);
-    });
-
     it('passes onClose callback correctly', () => {
       const onCloseMock = jest.fn();
       render(

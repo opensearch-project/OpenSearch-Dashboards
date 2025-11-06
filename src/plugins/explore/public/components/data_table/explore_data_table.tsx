@@ -5,12 +5,14 @@
 
 import './explore_data_table.scss';
 
+import { i18n } from '@osd/i18n';
 import React, { useCallback, useMemo, useRef, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   DEFAULT_COLUMNS_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
+  ExploreFlavor,
   MODIFY_COLUMNS_ON_SWITCH,
   SAMPLE_SIZE_SETTING,
 } from '../../../common';
@@ -34,6 +36,7 @@ import {
 import { useChangeQueryEditor } from '../../application/hooks';
 import { useDatasetContext } from '../../application/context';
 import { addColumn, removeColumn } from '../../application/utils/state_management/slices';
+import { useFlavorId } from '../../helpers/use_flavor_id';
 
 const ExploreDataTableComponent = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -60,6 +63,18 @@ const ExploreDataTableComponent = () => {
     const processed = defaultResultsProcessor(rawResults, dataset);
     return processed;
   }, [rawResults, dataset]);
+
+  const flavorId = useFlavorId();
+  const expandedTableHeader = useMemo(() => {
+    if (flavorId === ExploreFlavor.Traces) {
+      return i18n.translate('explore.dataTable.expandedRow.spanHeading', {
+        defaultMessage: 'Expanded span',
+      });
+    }
+    return i18n.translate('explore.dataTable.expandedRow.documentHeading', {
+      defaultMessage: 'Expanded document',
+    });
+  }, [flavorId]);
 
   const tableColumns = useMemo(() => {
     if (dataset == null) {
@@ -142,6 +157,7 @@ const ExploreDataTableComponent = () => {
             scrollToTop={scrollToTop}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
+            expandedTableHeader={expandedTableHeader}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

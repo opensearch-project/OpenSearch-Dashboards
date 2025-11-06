@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getColorGroups, resolveColor } from './default_colors';
+import { getColorGroups, resolveColor } from './color_utils';
 
 describe('getColorGroups', () => {
   it('returns color groups', () => {

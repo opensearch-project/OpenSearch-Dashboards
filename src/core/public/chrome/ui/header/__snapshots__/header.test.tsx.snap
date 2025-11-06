@@ -1058,6 +1058,17 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  globalSearchCommands$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   headerVariant$={
     BehaviorSubject {
       "_isScalar": false,
@@ -9157,6 +9168,17 @@ exports[`Header renders application header without title 1`] = `
       "thrownError": null,
     }
   }
+  globalSearchCommands$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   headerVariant$={
     BehaviorSubject {
       "_isScalar": false,
@@ -12750,6 +12772,17 @@ exports[`Header renders condensed header 1`] = `
           "syncErrorValue": null,
         },
       ],
+      "thrownError": null,
+    }
+  }
+  globalSearchCommands$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
       "thrownError": null,
     }
   }
@@ -19007,6 +19040,17 @@ exports[`Header renders page header with application title 1`] = `
       "thrownError": null,
     }
   }
+  globalSearchCommands$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   headerVariant$={
     BehaviorSubject {
       "_isScalar": false,
@@ -22797,6 +22841,17 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
           "syncErrorValue": null,
         },
       ],
+      "thrownError": null,
+    }
+  }
+  globalSearchCommands$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
       "thrownError": null,
     }
   }

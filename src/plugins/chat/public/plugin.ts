@@ -3,12 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import React from 'react';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
+import { EuiText } from '@elastic/eui';
+
+import { CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { ChatPluginSetup, ChatPluginStart, AppPluginStartDependencies } from './types';
 import { ChatService } from './services/chat_service';
-import { ChatHeaderButton } from './components/chat_header_button';
+import { ChatHeaderButton, ChatHeaderButtonInstance } from './components/chat_header_button';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
+import { SuggestedActionsService } from './services/suggested_action';
 
 /**
  * @experimental
@@ -16,12 +20,14 @@ import { toMountPoint } from '../../opensearch_dashboards_react/public';
  */
 export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private chatService: ChatService | undefined;
+  private suggestedActionsService = new SuggestedActionsService();
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): ChatPluginSetup {
-    // Return methods that should be available to other plugins
-    return {};
+  public setup(): ChatPluginSetup {
+    return {
+      suggestedActionsService: this.suggestedActionsService.setup(),
+    };
   }
 
   public start(core: CoreStart, deps: AppPluginStartDependencies): ChatPluginStart {
@@ -34,6 +40,8 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         chatService: undefined,
       };
     }
+
+    const chatHeaderButtonRef = React.createRef<ChatHeaderButtonInstance>();
 
     // Initialize chat service with configured AG-UI URL
     this.chatService = new ChatService(config.agUiUrl);
@@ -59,6 +67,8 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
                 chatService,
                 contextProvider: deps.contextProvider,
                 charts: deps.charts,
+                ref: chatHeaderButtonRef,
+                suggestedActionsService: this.suggestedActionsService!,
               })
             );
             unmountComponent = mountPoint(element);
@@ -83,6 +93,29 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
             unmountComponent();
           }
         };
+      },
+    });
+
+    core.chrome.globalSearch.registerSearchCommand({
+      id: 'AI_CHATBOT_COMMAND',
+      type: 'ACTIONS',
+      inputPlaceholder: i18n.translate('chat.globalSearch.chatWithAI.placeholder', {
+        defaultMessage: 'Search or chat with AI',
+      }),
+      run: async () => [
+        React.createElement(
+          EuiText,
+          {
+            size: 'xs',
+            color: 'subdued',
+          },
+          i18n.translate('chat.globalSearch.chatWithAI.hints', {
+            defaultMessage: 'Press Enter to chat with AI',
+          })
+        ),
+      ],
+      action: async ({ content }: { content: string }) => {
+        await chatHeaderButtonRef.current?.startNewConversation({ content });
       },
     });
 

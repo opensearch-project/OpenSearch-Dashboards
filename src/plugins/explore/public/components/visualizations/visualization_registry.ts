@@ -26,6 +26,7 @@ import { getColumnsByAxesMapping } from './visualization_builder_utils';
 import { createGaugeConfig } from './gauge/gauge_vis_config';
 import { createStateTimelineConfig } from './state_timeline/state_timeline_config';
 import { createBarGaugeConfig } from './bar_gauge/bar_gauge_vis_config';
+import { createHistogramConfig } from './histogram/histogram_vis_config';
 
 /**
  * Registry for visualization rules and configurations.
@@ -172,6 +173,8 @@ export class VisualizationRegistry {
         return createStateTimelineConfig();
       case 'bar_gauge':
         return createBarGaugeConfig();
+      case 'histogram':
+        return createHistogramConfig();
       default:
         return;
     }

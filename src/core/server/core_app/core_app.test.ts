@@ -79,4 +79,15 @@ describe('CoreApp', () => {
       );
     });
   });
+
+  describe('static routes', () => {
+    it('registers code editor worker static directory with buildHash', () => {
+      coreApp.setup(internalCoreSetup);
+
+      expect(internalCoreSetup.http.registerStaticDir).toHaveBeenCalledWith(
+        expect.stringMatching(/^\/\d+\/editor\/workers\/\{path\*\}$/),
+        expect.stringContaining('node_modules/@osd/monaco/target/public')
+      );
+    });
+  });
 });

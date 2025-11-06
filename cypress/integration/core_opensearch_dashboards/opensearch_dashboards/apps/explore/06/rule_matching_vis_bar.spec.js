@@ -47,6 +47,8 @@ export const runCreateVisTests = () => {
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
         });
+      // Open Axes setting
+      cy.get('[aria-controls="allAxesSection"]').click();
       cy.getElementByTestId('showAxisSwitch').eq(1).click();
       // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {
@@ -82,6 +84,9 @@ export const runCreateVisTests = () => {
         });
 
       cy.getElementByTestId('useThresholdColorButton').click();
+
+      // Open thresholds setting
+      cy.get('[aria-controls="thresholdSection"]').click();
       cy.getElementByTestId('exploreVisAddThreshold').click();
       // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {
