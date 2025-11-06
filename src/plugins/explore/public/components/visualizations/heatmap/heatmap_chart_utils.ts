@@ -105,7 +105,7 @@ export const enhanceStyle = (
     const thresholdWithBase = [
       { value: 0, color: styles?.thresholdOptions?.baseColor ?? getColors().statusGreen },
       ...newThreshold,
-    ].sort((a, b) => a.value - b.value);
+    ];
 
     const colorDomain = thresholdWithBase.map<number>((val) => val.value);
     const colorRange = thresholdWithBase.map<string>((val) => val.color);
