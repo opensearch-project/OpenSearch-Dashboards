@@ -93,6 +93,18 @@ export const createBarGaugeSpec = (
 
   const invalidCase = minBase >= maxBase || minBase > maxNumber;
 
+  // text color only display the corresponding threshold color and ignore min/max control
+  const allThresholds =
+    !styleOptions?.thresholdOptions?.thresholds ||
+    styleOptions?.thresholdOptions?.thresholds?.length < 1
+      ? [
+          {
+            value: minBase,
+            color: styleOptions?.thresholdOptions?.baseColor ?? getColors().statusGreen,
+          },
+        ]
+      : styleOptions?.thresholdOptions?.thresholds;
+
   const { textColor, mergedThresholds } = mergeThresholdsWithBase(
     minBase,
     maxBase,
@@ -100,17 +112,13 @@ export const createBarGaugeSpec = (
     styleOptions?.thresholdOptions?.thresholds
   );
 
-  console.log('mergedThresholds', mergedThresholds);
-
-  const validThresholds = mergedThresholds;
-
   // transfer value to threshold
   const valueToThreshold = [];
 
   for (const record of newRecord) {
-    for (let i = validThresholds.length - 1; i >= 0; i--) {
-      if (numericField && record[numericField] >= validThresholds[i].value) {
-        valueToThreshold.push({ value: record[numericField], color: validThresholds[i].color });
+    for (let i = mergedThresholds.length - 1; i >= 0; i--) {
+      if (numericField && record[numericField] >= mergedThresholds[i].value) {
+        valueToThreshold.push({ value: record[numericField], color: mergedThresholds[i].color });
         break;
       }
     }
@@ -119,12 +127,11 @@ export const createBarGaugeSpec = (
   // only use value-based thresholds in gradient mode
   const finalThreshold = styleOptions?.exclusive.displayMode === 'gradient' ? valueToThreshold : [];
 
-  const completeThreshold = [...validThresholds, ...(invalidCase ? [] : finalThreshold)].sort(
+  const completeThreshold = [...mergedThresholds, ...(invalidCase ? [] : finalThreshold)].sort(
     (a, b) => a.value - b.value
   );
 
-  console.log('completeThreshold', completeThreshold);
-
+  // filter out value thresholds that are beyond maxBase, this ensures that the gradient mode on different bar is always aligned.
   const processedThresholds = processThresholds(
     completeThreshold.filter((t) => t.value <= maxBase)
   );
@@ -372,8 +379,8 @@ export const createBarGaugeSpec = (
           type: 'quantitative',
           scale: {
             type: 'threshold',
-            domain: completeThreshold.map((t) => t.value),
-            range: [getColors().backgroundShade, ...completeThreshold.map((t) => t.color)],
+            domain: allThresholds.map((t) => t.value),
+            range: [getColors().backgroundShade, ...allThresholds.map((t) => t.color)],
           },
           legend: null,
         },
@@ -392,6 +399,11 @@ export const createBarGaugeSpec = (
     transform: transformLayer,
     encoding: encodingLayer,
     layer: layers,
+    resolve: {
+      scale: {
+        color: 'independent',
+      },
+    },
   };
 
   return baseSpec;

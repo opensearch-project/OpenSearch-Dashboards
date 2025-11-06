@@ -53,10 +53,9 @@ export function mergeThresholdsWithBase(
   // Otherwise, insert a new base threshold at the beginning
   return {
     textColor,
-    mergedThresholds: [{ value: minBase, color: defaultColor }, ...validThresholds],
-    // .filter(
-    //   (t) => t.value <= maxBase
-    // ),
+    mergedThresholds: [{ value: minBase, color: defaultColor }, ...validThresholds].filter(
+      (t) => t.value <= maxBase
+    ),
   };
 }
 

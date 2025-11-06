@@ -65,8 +65,9 @@ export const Range: React.FC<RangeProps> = ({ id, value, onChange, onDelete }) =
       <EuiFlexItem grow={true}>
         <DebouncedFieldNumber
           compressed
+          min={0}
           value={value.value}
-          // defaultValue={0}
+          defaultValue={0}
           onChange={(val) => onChange(id, { ...value, value: val ?? 0 })}
           placeholder="Value"
           data-test-subj={`exploreVisThresholdValue-${id}`}
