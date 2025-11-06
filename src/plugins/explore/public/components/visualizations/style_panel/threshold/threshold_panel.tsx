@@ -17,6 +17,8 @@ export interface ThresholdPanelProps {
   onChange: (thresholds: ThresholdOptions) => void;
   showThresholdStyle?: boolean;
   initialIsOpen?: boolean;
+  // TODO: temporary, only enable it for bar/bar-gauge/metric
+  considerNegative?: boolean;
 }
 
 export const ThresholdPanel = ({
@@ -24,6 +26,7 @@ export const ThresholdPanel = ({
   onChange,
   showThresholdStyle = false,
   initialIsOpen = false,
+  considerNegative = false,
 }: ThresholdPanelProps) => {
   const updateThresholdOption = <K extends keyof ThresholdOptions>(
     key: K,
@@ -45,6 +48,7 @@ export const ThresholdPanel = ({
       initialIsOpen={initialIsOpen}
     >
       <ThresholdCustomValues
+        considerNegative={considerNegative}
         thresholds={thresholdsOptions?.thresholds || []}
         onThresholdValuesChange={(ranges: Threshold[]) =>
           updateThresholdOption('thresholds', ranges)

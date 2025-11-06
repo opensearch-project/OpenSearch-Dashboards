@@ -18,7 +18,7 @@ export const getBarOrientation = (
   const axisStyle = {
     axis: { tickOpacity: 0, grid: false, title: null, labelAngle: 0, labelOverlap: 'greedy' },
   };
-  const nullStyle = { axis: null };
+  const nullStyle = {};
 
   if (isHorizontal) {
     return {
