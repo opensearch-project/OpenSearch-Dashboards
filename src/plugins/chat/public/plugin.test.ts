@@ -64,10 +64,16 @@ describe('ChatPlugin', () => {
   });
 
   describe('setup', () => {
-    it('should return empty setup contract', () => {
+    it('should return valid setup contract', () => {
       const setupContract = plugin.setup(mockCoreSetup);
 
-      expect(setupContract).toEqual({});
+      expect(setupContract).toEqual({
+        suggestedActionsService: expect.objectContaining({
+          getCustomSuggestions: expect.any(Function),
+          registerProvider: expect.any(Function),
+          unregisterProvider: expect.any(Function),
+        }),
+      });
     });
   });
 

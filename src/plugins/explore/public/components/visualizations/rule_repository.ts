@@ -35,8 +35,7 @@ import {
   createTimeBarChart,
   createGroupedTimeBarChart,
   createFacetedTimeBarChart,
-  createNumericalHistogramBarChart,
-  createSingleBarChart,
+  createDoubleNumericalBarChart,
 } from './bar/to_expression';
 import { CHART_METADATA } from './constants';
 import { createGauge } from './gauge/to_expression';
@@ -50,12 +49,17 @@ import { BarGaugeChartStyle } from './bar_gauge/bar_gauge_vis_config';
 import { ScatterChartStyle } from './scatter/scatter_vis_config';
 import { HeatmapChartStyle } from './heatmap/heatmap_vis_config';
 import { StateTimeLineChartStyle } from './state_timeline/state_timeline_config';
+import { HistogramChartStyle } from './histogram/histogram_vis_config';
 import {
   createNumericalStateTimeline,
   createCategoricalStateTimeline,
   createSingleCategoricalStateTimeline,
 } from './state_timeline/to_expression';
 import { createBarGaugeSpec } from './bar_gauge/to_expression';
+import {
+  createSingleHistogramChart,
+  createNumericalHistogramChart,
+} from './histogram/to_expression';
 
 type RuleMatchIndex = [number, number, number];
 
@@ -637,7 +641,8 @@ const oneMetricRule: VisualizationRule = {
   chartTypes: [
     { ...CHART_METADATA.metric, priority: 100 },
     { ...CHART_METADATA.gauge, priority: 80 },
-    { ...CHART_METADATA.bar, priority: 60 },
+    { ...CHART_METADATA.histogram, priority: 60 },
+    { ...CHART_METADATA.bar, priority: 40 },
   ],
   toSpec: (
     transformedData,
@@ -667,11 +672,11 @@ const oneMetricRule: VisualizationRule = {
           styleOptions as GaugeChartStyle,
           axisColumnMappings
         );
-      case 'bar':
-        return createSingleBarChart(
+      case 'histogram':
+        return createSingleHistogramChart(
           transformedData,
           numericalColumns,
-          styleOptions as BarChartStyle,
+          styleOptions as HistogramChartStyle,
           axisColumnMappings
         );
       default:
@@ -695,8 +700,9 @@ const twoMetricRule: VisualizationRule = {
     compare([2, 0, 0], [numerical.length, categorical.length, date.length]),
   chartTypes: [
     { ...CHART_METADATA.scatter, priority: 100 },
-    { ...CHART_METADATA.bar, priority: 80 },
-    { ...CHART_METADATA.pie, priority: 60 },
+    { ...CHART_METADATA.histogram, priority: 80 },
+    { ...CHART_METADATA.bar, priority: 60 },
+    { ...CHART_METADATA.pie, priority: 40 },
   ],
   toSpec: (
     transformedData,
@@ -717,8 +723,15 @@ const twoMetricRule: VisualizationRule = {
           styleOptions as ScatterChartStyle,
           axisColumnMappings
         );
+      case 'histogram':
+        return createNumericalHistogramChart(
+          transformedData,
+          numericalColumns,
+          styleOptions as HistogramChartStyle,
+          axisColumnMappings
+        );
       case 'bar':
-        return createNumericalHistogramBarChart(
+        return createDoubleNumericalBarChart(
           transformedData,
           numericalColumns,
           styleOptions as BarChartStyle,

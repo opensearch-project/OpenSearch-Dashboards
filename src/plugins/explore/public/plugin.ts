@@ -70,6 +70,11 @@ import { createAbortDataQueryAction } from './application/utils/state_management
 import { ABORT_DATA_QUERY_TRIGGER } from '../../ui_actions/public';
 import { abortAllActiveQueries } from './application/utils/state_management/actions/query_actions';
 import { setServices } from './services/services';
+import { SlotRegistryService } from './services/slot_registry';
+
+// Log Actions
+import { logActionRegistry } from './services/log_action_registry';
+import { createAskAiAction } from './actions/ask_ai_action';
 
 export class ExplorePlugin
   implements
@@ -99,6 +104,7 @@ export class ExplorePlugin
   private tabRegistry: TabRegistryService = new TabRegistryService();
   private visualizationRegistryService = new VisualizationRegistryService();
   private queryPanelActionsRegistryService = new QueryPanelActionsRegistryService();
+  private slotRegistryService = new SlotRegistryService();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -311,7 +317,8 @@ export class ExplorePlugin
           this.tabRegistry,
           this.visualizationRegistryService,
           this.queryPanelActionsRegistryService,
-          this.isDatasetManagementEnabled
+          this.isDatasetManagementEnabled,
+          this.slotRegistryService
         );
 
         // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
@@ -450,6 +457,9 @@ export class ExplorePlugin
       },
       visualizationRegistry: visualizationRegistryService,
       queryPanelActionsRegistry: this.queryPanelActionsRegistryService.setup(),
+      logActionRegistry: {
+        registerAction: (action) => logActionRegistry.registerAction(action),
+      },
     };
   }
 
@@ -474,7 +484,8 @@ export class ExplorePlugin
         this.tabRegistry,
         this.visualizationRegistryService,
         this.queryPanelActionsRegistryService,
-        this.isDatasetManagementEnabled
+        this.isDatasetManagementEnabled,
+        this.slotRegistryService
       );
       setLegacyServices({
         ...services,
@@ -486,6 +497,13 @@ export class ExplorePlugin
     };
 
     this.initializeServices();
+
+    // Register Log Actions
+    // Register Ask AI action if chat service is available
+    if (plugins.chat?.chatService) {
+      const askAiAction = createAskAiAction(plugins.chat.chatService);
+      logActionRegistry.registerAction(askAiAction);
+    }
 
     const savedExploreLoader = createSavedExploreLoader({
       savedObjectsClient: core.savedObjects.client,
@@ -500,6 +518,7 @@ export class ExplorePlugin
       savedSearchLoader: savedExploreLoader, // For backward compatibility
       savedExploreLoader,
       visualizationRegistry: this.visualizationRegistryService.start(),
+      slotRegistry: this.slotRegistryService.start(),
     };
   }
 

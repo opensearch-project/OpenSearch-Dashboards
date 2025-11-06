@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getColors } from '../../theme/default_colors';
+import { getColors, DEFAULT_GREY } from '../../theme/default_colors';
 import {
   Threshold,
   ThresholdLine,
@@ -13,31 +13,50 @@ import {
   ThresholdOptions,
 } from '../../types';
 
-/**
- * Merge custom ranges with min base.
- * @param minBase Minimum value for the gauge scale
- * @param baseColor Default color for the base range
- * @param thresholds  threshold values with colors
- * @returns Array of merged threshold ranges
- */
-
 export function mergeThresholdsWithBase(
   minBase: number,
   maxBase: number,
   baseColor?: string,
-  thresholds?: Threshold[]
-): Threshold[] {
-  // only display threshold ranges under the max base and above min base
-  const validThresholds =
-    thresholds?.filter((range) => range.value >= minBase && range.value <= maxBase) || [];
+  validThresholds?: Threshold[],
+  targetValue?: number
+): { textColor: string; mergedThresholds: Threshold[] } {
+  const defaultColor = baseColor ?? getColors().statusGreen;
 
-  // Return existing thresholds if minBase already exists as a threshold
-  if (validThresholds.some((range) => range.value === minBase)) {
-    return validThresholds;
+  // Handle empty thresholds
+  if (!validThresholds || validThresholds.length === 0) {
+    return {
+      textColor: !targetValue || targetValue < minBase ? DEFAULT_GREY : defaultColor,
+      mergedThresholds: [{ value: minBase, color: defaultColor }],
+    };
   }
 
-  const aboveMin = validThresholds.filter((range) => range.value > minBase);
-  return [{ value: minBase, color: baseColor ?? getColors().statusGreen }, ...aboveMin];
+  let lastBelowIndex = -1;
+  let textColor: string | undefined;
+
+  for (let i = 0; i < validThresholds.length; i++) {
+    const { value, color } = validThresholds[i];
+
+    if (value <= minBase) lastBelowIndex = i;
+    if (targetValue !== undefined && targetValue >= value) textColor = color;
+  }
+
+  // Default to baseColor if no textColor was found
+  textColor ??= defaultColor;
+
+  // If found a threshold below minBase, update thresholds
+  if (lastBelowIndex !== -1) {
+    const updated = validThresholds.slice(lastBelowIndex);
+    updated[0] = { ...updated[0], value: minBase };
+    return { textColor, mergedThresholds: updated.filter((t) => t.value <= maxBase) };
+  }
+
+  // Otherwise, insert a new base threshold at the beginning
+  return {
+    textColor,
+    mergedThresholds: [{ value: minBase, color: defaultColor }, ...validThresholds].filter(
+      (t) => t.value <= maxBase
+    ),
+  };
 }
 
 /**
@@ -48,7 +67,7 @@ export function mergeThresholdsWithBase(
  */
 export function locateThreshold(thresholds: Threshold[], targetValue: number): Threshold | null {
   // Return null if target value is below the minimum range
-  if (targetValue < thresholds[0].value) return null;
+  if (thresholds.length < 1 || targetValue < thresholds[0].value) return null;
 
   // Iterate through ranges to find where target value belongs
   for (let i = 0; i < thresholds.length - 1; i++) {
@@ -268,13 +287,14 @@ export const createThresholdLayer = (
 };
 
 export const getMaxAndMinBase = (
+  minNumber: number,
   maxNumber: number,
   min?: number,
   max?: number,
   calculatedValue?: number
 ) => {
-  const minBase = min || 0;
-  const maxBase = max || Math.max(maxNumber, calculatedValue ?? 0);
+  const minBase = min ?? Math.min(minNumber, 0);
+  const maxBase = max ?? Math.max(maxNumber, calculatedValue ?? 0);
   return {
     minBase,
     maxBase,

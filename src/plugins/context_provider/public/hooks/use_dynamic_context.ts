@@ -12,9 +12,13 @@ import { AssistantContextOptions, AssistantContextStore } from '../types';
  * This hook automatically handles registration/cleanup lifecycle.
  *
  * @param options - Context options to register
+ * @param shouldCleanupOnUnmount - Whether to automatically cleanup context when component unmounts (default: true)
  * @returns Context ID for the registered context
  */
-export function useDynamicContext(options: AssistantContextOptions | null): string {
+export function useDynamicContext(
+  options: AssistantContextOptions | null,
+  shouldCleanupOnUnmount: boolean = true
+): string {
   const previousOptionsRef = useRef<AssistantContextOptions | null>(null);
   const contextIdRef = useRef<string | null>(null);
 
@@ -56,15 +60,19 @@ export function useDynamicContext(options: AssistantContextOptions | null): stri
     contextStore.addContext(options);
   }, [options]);
 
-  // Cleanup on unmount
+  // Cleanup on unmount (only if shouldCleanupOnUnmount is true)
   useEffect(() => {
+    if (!shouldCleanupOnUnmount) {
+      return; // No cleanup function returned
+    }
+
     return () => {
       const contextStore = (window as any).assistantContextStore as AssistantContextStore;
       if (contextStore && contextIdRef.current && contextStore.removeContextById) {
         contextStore.removeContextById(contextIdRef.current);
       }
     };
-  }, []);
+  }, [shouldCleanupOnUnmount]);
 
   return contextIdRef.current || 'context';
 }

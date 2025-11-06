@@ -23,7 +23,7 @@ import { TableRowContent } from './table_row_content';
 import { isOnTracesPage } from '../table_cell/trace_utils/trace_utils';
 
 // Create stable NOOP hook reference outside component to avoid re-renders
-const NOOP_DYNAMIC_CONTEXT_HOOK = (options?: any): string => '';
+const NOOP_DYNAMIC_CONTEXT_HOOK = (options?: any, _shouldCleanup?: boolean): string => '';
 
 export interface TableRowProps {
   row: OpenSearchSearchHit<Record<string, unknown>>;
@@ -36,6 +36,7 @@ export interface TableRowProps {
   onClose?: () => void;
   isShortDots: boolean;
   docViewsRegistry: DocViewsRegistry;
+  expandedTableHeader?: string;
 }
 
 export const TableRowUI = ({
@@ -49,6 +50,7 @@ export const TableRowUI = ({
   onClose,
   isShortDots,
   docViewsRegistry,
+  expandedTableHeader,
 }: TableRowProps) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const [isExpanded, setIsExpanded] = useState(false);
@@ -82,6 +84,7 @@ export const TableRowUI = ({
     <>
       <TableRowContent
         row={row}
+        index={index}
         columns={columns}
         dataset={dataset}
         onFilter={onFilter}
@@ -100,6 +103,7 @@ export const TableRowUI = ({
           onAddColumn={onAddColumn}
           onClose={onClose}
           docViewsRegistry={docViewsRegistry}
+          expandedTableHeader={expandedTableHeader}
         />
       )}
     </>

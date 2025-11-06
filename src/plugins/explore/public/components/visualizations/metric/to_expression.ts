@@ -12,7 +12,6 @@ import { DEFAULT_OPACITY } from '../constants';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 import {
   mergeThresholdsWithBase,
-  locateThreshold,
   getMaxAndMinBase,
 } from '../style_panel/threshold/threshold_utils';
 
@@ -41,9 +40,11 @@ export const createSingleMetric = (
 
   let numericalValues: number[] = [];
   let maxNumber: number = 0;
+  let minNumber: number = 0;
   if (numericField) {
     numericalValues = transformedData.map((d) => d[numericField]);
     maxNumber = Math.max(...numericalValues);
+    minNumber = Math.min(...numericalValues);
   }
 
   const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
@@ -55,13 +56,14 @@ export const createSingleMetric = (
   const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
 
   const { minBase, maxBase } = getMaxAndMinBase(
+    minNumber,
     maxNumber,
     styles?.min,
     styles?.max,
     calculatedValue
   );
 
-  const targetValue = calculatedValue || 0;
+  const targetValue = calculatedValue ?? 0;
 
   function targetFillColor(
     useThresholdColor: boolean,
@@ -72,19 +74,15 @@ export const createSingleMetric = (
 
     const newBaseColor = baseColor ?? getColors().statusGreen;
 
-    const mergedThresholds = mergeThresholdsWithBase(minBase, maxBase, newBaseColor, newThreshold);
+    const { textColor, mergedThresholds } = mergeThresholdsWithBase(
+      minBase,
+      maxBase,
+      newBaseColor,
+      newThreshold,
+      calculatedValue
+    );
 
-    // Locate which threshold the target value falls into
-    const targetThreshold = locateThreshold(mergedThresholds, targetValue);
-
-    const fillColor =
-      targetThreshold &&
-      minBase <= targetValue &&
-      minBase < maxBase &&
-      isValidNumber &&
-      useThresholdColor
-        ? targetThreshold.color
-        : colorPalette.text;
+    const fillColor = useThresholdColor ? textColor : colorPalette.text;
 
     return fillColor;
   }
