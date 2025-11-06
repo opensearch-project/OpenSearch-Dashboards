@@ -10,16 +10,16 @@ import { SuggestedActionsRegistry } from './suggested_actions_registry';
 import {
   ChatContext,
   SuggestedActionsProvider,
-  SuggestionServiceContract,
+  SuggestedActionsServiceSetupContract,
+  SuggestedActionsServiceStartContract,
   SuggestedActions,
 } from './types';
 
 /**
  * Service for managing custom suggestion providers and retrieving suggestions
  */
-export class SuggestedActionsService implements SuggestionServiceContract {
+export class SuggestedActionsService {
   private registry: SuggestedActionsRegistry;
-  private isInitialized = false;
 
   constructor() {
     this.registry = new SuggestedActionsRegistry();
@@ -28,25 +28,19 @@ export class SuggestedActionsService implements SuggestionServiceContract {
   /**
    * Initialize the suggestion service
    */
-  setup(): void {
-    if (this.isInitialized) {
-      console.warn('SuggestionService is already initialized');
-      return;
-    }
-
-    // Initialize the registry (already done in constructor)
-    this.isInitialized = true;
+  setup(): SuggestedActionsServiceSetupContract {
+    return {
+      registerProvider: this.registerProvider.bind(this),
+      unregisterProvider: this.unregisterProvider.bind(this),
+      getCustomSuggestions: this.getCustomSuggestions.bind(this),
+    };
   }
 
   /**
    * Start the suggestion service and return the contract interface
    * @returns SuggestionServiceContract for use by other services
    */
-  start(): SuggestionServiceContract {
-    if (!this.isInitialized) {
-      throw new Error('SuggestionService must be initialized with setup() before starting');
-    }
-
+  start(): SuggestedActionsServiceStartContract {
     return {
       registerProvider: this.registerProvider.bind(this),
       unregisterProvider: this.unregisterProvider.bind(this),
@@ -58,13 +52,8 @@ export class SuggestedActionsService implements SuggestionServiceContract {
    * Stop the suggestion service and perform cleanup
    */
   stop(): void {
-    if (!this.isInitialized) {
-      return;
-    }
-
     // Clear all registered providers
     this.registry.clear();
-    this.isInitialized = false;
   }
 
   /**
@@ -73,10 +62,6 @@ export class SuggestedActionsService implements SuggestionServiceContract {
    * @throws Error if provider is invalid
    */
   registerProvider(provider: SuggestedActionsProvider): void {
-    if (!this.isInitialized) {
-      throw new Error('SuggestionService must be initialized before registering providers');
-    }
-
     // Additional validation beyond what the registry does
     if (!provider) {
       throw new Error('Provider cannot be null or undefined');
@@ -101,11 +86,6 @@ export class SuggestedActionsService implements SuggestionServiceContract {
    * @returns true if provider was found and removed, false otherwise
    */
   unregisterProvider(providerId: string): void {
-    if (!this.isInitialized) {
-      console.warn('SuggestionService is not initialized, cannot unregister provider');
-      return;
-    }
-
     if (!providerId || typeof providerId !== 'string') {
       throw new Error('Provider ID must be a non-empty string');
     }
@@ -124,11 +104,6 @@ export class SuggestedActionsService implements SuggestionServiceContract {
    * @returns Promise resolving to array of custom suggestions
    */
   async getCustomSuggestions(context: ChatContext): Promise<SuggestedActions[]> {
-    if (!this.isInitialized) {
-      console.warn('SuggestionService is not initialized, returning empty suggestions');
-      return [];
-    }
-
     // Validate context
     if (!context) {
       throw new Error('Chat context is required');
@@ -193,13 +168,5 @@ export class SuggestedActionsService implements SuggestionServiceContract {
    */
   getProviderIds(): string[] {
     return this.registry.getProviderIds();
-  }
-
-  /**
-   * Check if service is initialized
-   * @returns true if service is initialized
-   */
-  isServiceInitialized(): boolean {
-    return this.isInitialized;
   }
 }

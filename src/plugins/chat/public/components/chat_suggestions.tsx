@@ -18,7 +18,7 @@ import { Message } from '../../common/types';
 import { ChatContext } from '../services/suggested_action';
 import { SuggestedActions } from '../services/suggested_action/types';
 
-import './chat_suggestions';
+import './chat_suggestions.scss';
 
 interface SuggestionBubbleProps {
   onClick: () => void;

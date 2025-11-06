@@ -7,7 +7,7 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
+import { CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { ChatPluginSetup, ChatPluginStart, AppPluginStartDependencies } from './types';
 import { ChatService } from './services/chat_service';
 import { ChatHeaderButton, ChatHeaderButtonInstance } from './components/chat_header_button';
@@ -20,20 +20,13 @@ import { SuggestedActionsService } from './services/suggested_action';
  */
 export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private chatService: ChatService | undefined;
-  private suggestedActionsService: SuggestedActionsService | undefined;
+  private suggestedActionsService = new SuggestedActionsService();
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): ChatPluginSetup {
-    // Return methods that should be available to other plugins
-    const suggestedActionsService = new SuggestedActionsService();
-    suggestedActionsService.setup();
-
-    this.suggestedActionsService = suggestedActionsService;
+  public setup(): ChatPluginSetup {
     return {
-      registerSuggestedActionsProvider: suggestedActionsService.registerProvider.bind(
-        suggestedActionsService
-      ),
+      suggestedActionsService: this.suggestedActionsService.setup(),
     };
   }
 

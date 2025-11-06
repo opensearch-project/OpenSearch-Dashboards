@@ -37,9 +37,9 @@ export interface SuggestedActionsProvider {
 }
 
 /**
- * Contract interface for the suggestion service
+ * Contract interface for the suggested actions service setup
  */
-export interface SuggestionServiceContract {
+export interface SuggestedActionsServiceSetupContract {
   /** Register a new suggestion provider */
   registerProvider(provider: SuggestedActionsProvider): void;
   /** Unregister a suggestion provider by ID */
@@ -47,3 +47,8 @@ export interface SuggestionServiceContract {
   /** Get all custom suggestions for the given context */
   getCustomSuggestions(context: ChatContext): Promise<SuggestedActions[]>;
 }
+
+/**
+ * Contract interface for the suggested actions service start
+ */
+export type SuggestedActionsServiceStartContract = SuggestedActionsServiceSetupContract;
