@@ -78,20 +78,13 @@ export const createBarGaugeSpec = (
     }
   }
 
-  // corner case: all calculate are invalid
-  // In such case, will display background shade using fake min and max
-  if (minNumber === Infinity) {
-    maxNumber = 100;
-    minNumber = 0;
-  }
-
   // To support negative values, when all the values are above 0, take minBase as 0 to start a bar.
   // Similarly, when all values are below 0, take maxBase as 0 to end a bar
 
   const maxBase = styleOptions?.max ?? Math.max(maxNumber, 0);
   const minBase = styleOptions?.min ?? Math.min(minNumber, 0);
 
-  const invalidCase = minBase >= maxBase || minBase > maxNumber;
+  const invalidCase = minNumber === Infinity || minBase >= maxBase || minBase > maxNumber;
 
   // text color only display the corresponding threshold color and ignore min/max control
   const allThresholds =
@@ -138,23 +131,23 @@ export const createBarGaugeSpec = (
 
   const gradientParams = generateParams(processedThresholds, styleOptions, isXaxisNumerical);
 
-  const scaleType = !invalidCase
-    ? {
-        scale: {
+  const scaleType = {
+    scale: !invalidCase
+      ? {
           domainMin: { expr: 'minBase' },
-        },
-      }
-    : {};
+        }
+      : { domain: [0, 100] }, // For invalid cases, use a fake domain to keep rendering consistent
+  };
 
   const params = [
     { name: 'fontColor', value: getColors().text },
     {
       name: 'maxBase',
-      value: maxBase,
+      value: invalidCase ? 100 : maxBase,
     },
     {
       name: 'minBase',
-      value: minBase,
+      value: invalidCase ? 0 : minBase,
     },
     {
       name: 'fontFactor',
@@ -218,11 +211,11 @@ export const createBarGaugeSpec = (
       encoding: {
         [`${processedSymbol}`]: {
           type: 'quantitative',
-          expr: 'max(maxBase,minBase)',
+          field: 'maxVal',
         },
         [`${processedSymbol}2`]: {
           type: 'quantitative',
-          expr: 'min(maxBase,minBase)',
+          field: 'minVal',
         },
       },
     });

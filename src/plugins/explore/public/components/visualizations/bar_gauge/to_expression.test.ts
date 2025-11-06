@@ -153,11 +153,11 @@ describe('createBarGaugeSpec', () => {
       encoding: {
         y: {
           type: 'quantitative',
-          expr: 'max(maxBase,minBase)',
+          field: 'maxVal',
         },
         y2: {
           type: 'quantitative',
-          expr: 'min(maxBase,minBase)',
+          field: 'minVal',
         },
       },
     });
