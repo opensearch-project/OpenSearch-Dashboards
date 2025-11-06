@@ -230,7 +230,7 @@ export class ExplorePlugin
       if (flavor) {
         this.stateUpdaterByApp[flavor] =
           this.stateUpdaterByApp[flavor] || new BehaviorSubject<AppUpdater>(() => ({}));
-        appStateUpdater = this.stateUpdaterByApp[flavor];
+        appStateUpdater = this.stateUpdaterByApp[flavor] as BehaviorSubject<AppUpdater>;
       }
 
       const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
