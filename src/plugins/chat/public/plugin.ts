@@ -53,7 +53,6 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     core.chrome.navControls.registerPrimaryHeaderRight({
       order: 1000,
       mount: (element) => {
-        // let isVisible = false;
         let unmountComponent: (() => void) | null = null;
 
         // Mount the component
