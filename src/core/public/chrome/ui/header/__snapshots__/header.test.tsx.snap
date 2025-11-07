@@ -21172,6 +21172,13 @@ exports[`Header renders page header with application title 1`] = `
                 </nav>
               </EuiSimplifiedBreadcrumbs>
             </HeaderBreadcrumbs>
+            <EuiHeaderSection
+              grow={true}
+            >
+              <div
+                className="euiHeaderSection euiHeaderSection--grow euiHeaderSection--left"
+              />
+            </EuiHeaderSection>
             <EuiHeaderSectionItem
               border="none"
             >
