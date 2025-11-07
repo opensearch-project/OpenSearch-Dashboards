@@ -11,7 +11,13 @@ describe('shouldShowBreakdownSelector', () => {
     timeFieldName: '@timestamp',
   } as DataView;
 
-  it('should return false when dataView is undefined', () => {
+  const mockServices = {
+    uiSettings: {
+      get: jest.fn().mockReturnValue(true),
+    },
+  };
+
+  it('should return false when dataset is undefined', () => {
     expect(shouldShowBreakdownSelector(undefined)).toBe(false);
   });
 
@@ -20,22 +26,174 @@ describe('shouldShowBreakdownSelector', () => {
   });
 
   it('should return false when experimental setting is disabled', () => {
-    const mockServices = {
+    const mockDisabledServices = {
       uiSettings: {
         get: jest.fn().mockReturnValue(false),
       },
     };
-
-    expect(shouldShowBreakdownSelector(mockDataView, mockServices)).toBe(false);
+    expect(shouldShowBreakdownSelector(mockDataView, mockDisabledServices)).toBe(false);
   });
 
-  it('should return true when dataView exists and experimental setting is enabled', () => {
-    const mockServices = {
-      uiSettings: {
-        get: jest.fn().mockReturnValue(true),
-      },
-    };
+  it('should return true when dataSourceRef does not exist (default behavior)', () => {
+    expect(
+      shouldShowBreakdownSelector(
+        {
+          timeFieldName: '@timestamp',
+        } as DataView,
+        mockServices
+      )
+    ).toBe(true);
+  });
 
-    expect(shouldShowBreakdownSelector(mockDataView, mockServices)).toBe(true);
+  it('should return true when dataSourceRef exists but type is missing', () => {
+    expect(
+      shouldShowBreakdownSelector(
+        {
+          timeFieldName: '@timestamp',
+          dataSourceRef: {
+            id: 'test-id',
+            version: '3.3.0',
+          },
+        } as any,
+        mockServices
+      )
+    ).toBe(true);
+  });
+
+  it('should return true when dataSourceRef exists but version is missing', () => {
+    expect(
+      shouldShowBreakdownSelector(
+        {
+          timeFieldName: '@timestamp',
+          dataSourceRef: {
+            id: 'test-id',
+            type: 'OpenSearch',
+          },
+        } as any,
+        mockServices
+      )
+    ).toBe(true);
+  });
+
+  it('should return true for OpenSearch version 3.3.0', () => {
+    expect(
+      shouldShowBreakdownSelector(
+        {
+          timeFieldName: '@timestamp',
+          dataSourceRef: {
+            id: 'test-id',
+            type: 'OpenSearch',
+            version: '3.3.0',
+          },
+        } as any,
+        mockServices
+      )
+    ).toBe(true);
+  });
+
+  it('should return true for OpenSearch version greater than 3.3.0', () => {
+    expect(
+      shouldShowBreakdownSelector(
+        {
+          timeFieldName: '@timestamp',
+          dataSourceRef: {
+            id: 'test-id',
+            type: 'OpenSearch',
+            version: '3.4.0',
+          },
+        } as any,
+        mockServices
+      )
+    ).toBe(true);
+
+    expect(
+      shouldShowBreakdownSelector(
+        {
+          timeFieldName: '@timestamp',
+          dataSourceRef: {
+            id: 'test-id',
+            type: 'OpenSearch',
+            version: '4.0.0',
+          },
+        } as any,
+        mockServices
+      )
+    ).toBe(true);
+  });
+
+  it('should return false for OpenSearch version less than 3.3.0', () => {
+    expect(
+      shouldShowBreakdownSelector(
+        {
+          timeFieldName: '@timestamp',
+          dataSourceRef: {
+            id: 'test-id',
+            type: 'OpenSearch',
+            version: '3.2.0',
+          },
+        } as any,
+        mockServices
+      )
+    ).toBe(false);
+
+    expect(
+      shouldShowBreakdownSelector(
+        {
+          timeFieldName: '@timestamp',
+          dataSourceRef: {
+            id: 'test-id',
+            type: 'OpenSearch',
+            version: '2.5.0',
+          },
+        } as any,
+        mockServices
+      )
+    ).toBe(false);
+  });
+
+  it('should return false for non-OpenSearch data sources', () => {
+    expect(
+      shouldShowBreakdownSelector(
+        {
+          timeFieldName: '@timestamp',
+          dataSourceRef: {
+            id: 'test-id',
+            type: 'S3',
+            version: '8.0.0',
+          },
+        } as any,
+        mockServices
+      )
+    ).toBe(false);
+  });
+
+  it('should handle version strings without patch version', () => {
+    expect(
+      shouldShowBreakdownSelector(
+        {
+          timeFieldName: '@timestamp',
+          dataSourceRef: {
+            id: 'test-id',
+            type: 'OpenSearch',
+            version: '3.3',
+          },
+        } as any,
+        mockServices
+      )
+    ).toBe(true);
+
+    expect(
+      shouldShowBreakdownSelector(
+        {
+          timeFieldName: '@timestamp',
+          dataSourceRef: {
+            id: 'test-id',
+            type: 'OpenSearch',
+            version: '3.2',
+          },
+        } as any,
+        mockServices
+      )
+    ).toBe(false);
   });
 });
