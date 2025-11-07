@@ -96,18 +96,21 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     response: OpenSearchDashboardsResponseFactory
   ): Promise<HttpResourcesServiceToolkit> {
     const cspHeader = deps.http.csp.header;
-
-    const dynamicConfigClient = context.core.dynamicConfig.client;
-    const dynamicConfigStore = context.core.dynamicConfig.createStoreFromRequest(request);
-
-    const cspReportOnlyDynamicConfig = await dynamicConfigClient.getConfig(
-      { pluginConfigPath: 'csp-report-only' },
-      dynamicConfigStore ? { asyncLocalStorageContext: dynamicConfigStore } : undefined
-    );
-
     const cspReportOnly = deps.http.cspReportOnly;
-    const cspReportOnlyIsEmitting =
-      cspReportOnlyDynamicConfig?.isEmitting ?? cspReportOnly.isEmitting;
+
+    let cspReportOnlyIsEmitting: boolean;
+    try {
+      const dynamicConfigClient = context.core.dynamicConfig.client;
+      const dynamicConfigStore = context.core.dynamicConfig.createStoreFromRequest(request);
+      const cspReportOnlyDynamicConfig = await dynamicConfigClient.getConfig(
+        { pluginConfigPath: 'csp-report-only' },
+        dynamicConfigStore ? { asyncLocalStorageContext: dynamicConfigStore } : undefined
+      );
+      cspReportOnlyIsEmitting = cspReportOnlyDynamicConfig?.isEmitting ?? cspReportOnly.isEmitting;
+    } catch (e) {
+      cspReportOnlyIsEmitting = cspReportOnly.isEmitting;
+    }
+
     const cspReportOnlyHeaders = cspReportOnlyIsEmitting
       ? {
           'content-security-policy-report-only': cspReportOnly.cspReportOnlyHeader,
