@@ -88,6 +88,7 @@ export const runCreateVisTests = () => {
       // Open thresholds setting
       cy.get('[aria-controls="thresholdSection"]').click();
       cy.getElementByTestId('exploreVisAddThreshold').click();
+      cy.wait(1000);
       // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
