@@ -135,8 +135,8 @@ describe('create_hover_state', () => {
 
       const layers = createHighlightBarLayers(axisConfig, options);
 
-      // Should create 3 layers: point layer for y, point layer for y1, and hidden bar layer
-      expect(layers).toHaveLength(3);
+      // Should create 1 layers: hidden bar layer
+      expect(layers).toHaveLength(1);
       expect(layers).toMatchSnapshot();
     });
 

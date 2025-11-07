@@ -32,9 +32,12 @@ export const createGauge = (
 
   let numericalValues: number[] = [];
   let maxNumber: number = 0;
+  let minNumber: number = 0;
+
   if (numericField) {
     numericalValues = transformedData.map((d) => d[numericField]);
     maxNumber = Math.max(...numericalValues);
+    minNumber = Math.min(...numericalValues);
   }
 
   const calculatedValue = calculateValue(numericalValues, styleOptions.valueCalculation);
@@ -42,28 +45,31 @@ export const createGauge = (
   const isValidNumber =
     calculatedValue !== undefined && typeof calculatedValue === 'number' && !isNaN(calculatedValue);
 
-  const targetValue = calculatedValue || 0;
+  const targetValue = calculatedValue ?? 0;
 
   const selectedUnit = getUnitById(styleOptions?.unitId);
 
   const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
 
   const { minBase, maxBase } = getMaxAndMinBase(
+    minNumber,
     maxNumber,
     styleOptions?.min,
     styleOptions?.max,
     calculatedValue
   );
 
-  const mergedThresholds = mergeThresholdsWithBase(
+  // textColor won't consider min/max control
+  const { textColor, mergedThresholds } = mergeThresholdsWithBase(
     minBase,
     maxBase,
     // TODO: update to use the color from color palette
-    styleOptions?.thresholdOptions?.baseColor || colors.statusBlue,
-    styleOptions?.thresholdOptions?.thresholds
+    styleOptions?.thresholdOptions?.baseColor || colors.statusGreen,
+    styleOptions?.thresholdOptions?.thresholds,
+    calculatedValue
   );
 
-  // Locate which threshold the target value falls into
+  // Locate which threshold the target value falls into(should consider min and max control)
   const targetThreshold = locateThreshold(mergedThresholds, targetValue);
 
   // if threshold is not found or minBase > targetValue or minBase >= maxBase, use default gray color
@@ -85,6 +91,10 @@ export const createGauge = (
     {
       name: 'fillColor',
       value: fillColor,
+    },
+    {
+      name: 'textColor',
+      value: textColor,
     },
     { name: 'fontColor', value: colors.text },
 
@@ -160,7 +170,7 @@ export const createGauge = (
         dy: { expr: `-fontFactor*30 * ${selectedUnit?.fontScale ?? 1}` },
         fontSize: { expr: `fontFactor * 25 * ${selectedUnit?.fontScale ?? 1}` },
         fill: {
-          expr: `${styleOptions?.useThresholdColor ?? false} ? fillColor : fontColor`,
+          expr: `${styleOptions?.useThresholdColor ?? false} ? textColor : fontColor`,
         },
       },
       encoding: {

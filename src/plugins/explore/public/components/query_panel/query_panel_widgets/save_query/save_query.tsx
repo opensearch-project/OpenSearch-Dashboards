@@ -197,6 +197,7 @@ export const SaveQueryButton = () => {
         saveQuery={handleSaveQuery}
         useNewSavedQueryUI={true}
         saveQueryIsDisabled={saveButtonIsDisabled}
+        textSize="xs"
       />
     </EuiPopover>
   );
