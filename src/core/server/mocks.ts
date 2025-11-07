@@ -253,6 +253,8 @@ function createCoreRequestHandlerContextMock() {
     dynamicConfig: {
       client: dynamicConfigServiceMock.createInternalStartContract().getClient(),
       asyncLocalStore: dynamicConfigServiceMock.createInternalStartContract().getAsyncLocalStore(),
+      createStoreFromRequest: dynamicConfigServiceMock.createInternalStartContract()
+        .createStoreFromRequest,
     },
   };
 }
