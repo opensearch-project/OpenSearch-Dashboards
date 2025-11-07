@@ -142,9 +142,8 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
     const newRange = { value: newDefaultValue, color: getNextColor(curRangeLength + 1) };
 
     const updated = [...ranges, newRange];
-    const sorted = updated.sort((a, b) => a.value - b.value);
-    setRanges(sorted);
-    onThresholdValuesChange(sorted);
+    setRanges(updated);
+    onThresholdValuesChange(updated);
   }, [ranges, onThresholdValuesChange]);
 
   const getNextColor = (rangesLength: number): string => {
