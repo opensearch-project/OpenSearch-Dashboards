@@ -58,7 +58,7 @@ import {
   OpenSearchServiceStart,
   IScopedClusterClient,
 } from './opensearch';
-import { HttpServiceSetup, HttpServiceStart } from './http';
+import { HttpServiceSetup, HttpServiceStart, OpenSearchDashboardsRequest } from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -451,6 +451,9 @@ export interface RequestHandlerContext {
     dynamicConfig: {
       client: IDynamicConfigurationClient;
       asyncLocalStore: AsyncLocalStorageContext | undefined;
+      createStoreFromRequest: (
+        req: OpenSearchDashboardsRequest
+      ) => AsyncLocalStorageContext | undefined;
     };
     auditor: Auditor;
   };

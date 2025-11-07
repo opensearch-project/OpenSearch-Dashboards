@@ -79,26 +79,39 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         route: RouteConfig<P, Q, B, 'get'>,
         handler: HttpResourcesRequestHandler<P, Q, B>
       ) => {
-        return router.get<P, Q, B>(route, (context, request, response) => {
+        return router.get<P, Q, B>(route, async (context, request, response) => {
           return handler(context, request, {
             ...response,
-            ...this.createResponseToolkit(deps, context, request, response),
+            ...(await this.createResponseToolkit(deps, context, request, response)),
           });
         });
       },
     };
   }
 
-  private createResponseToolkit(
+  private async createResponseToolkit(
     deps: SetupDeps,
     context: RequestHandlerContext,
     request: OpenSearchDashboardsRequest,
     response: OpenSearchDashboardsResponseFactory
-  ): HttpResourcesServiceToolkit {
+  ): Promise<HttpResourcesServiceToolkit> {
     const cspHeader = deps.http.csp.header;
-
     const cspReportOnly = deps.http.cspReportOnly;
-    const cspReportOnlyHeaders = cspReportOnly.isEmitting
+
+    let cspReportOnlyIsEmitting: boolean;
+    try {
+      const dynamicConfigClient = context.core.dynamicConfig.client;
+      const dynamicConfigStore = context.core.dynamicConfig.createStoreFromRequest(request);
+      const cspReportOnlyDynamicConfig = await dynamicConfigClient.getConfig(
+        { pluginConfigPath: 'csp-report-only' },
+        dynamicConfigStore ? { asyncLocalStorageContext: dynamicConfigStore } : undefined
+      );
+      cspReportOnlyIsEmitting = cspReportOnlyDynamicConfig?.isEmitting ?? cspReportOnly.isEmitting;
+    } catch (e) {
+      cspReportOnlyIsEmitting = cspReportOnly.isEmitting;
+    }
+
+    const cspReportOnlyHeaders = cspReportOnlyIsEmitting
       ? {
           'content-security-policy-report-only': cspReportOnly.cspReportOnlyHeader,
           'reporting-endpoints': cspReportOnly.reportingEndpointsHeader,
