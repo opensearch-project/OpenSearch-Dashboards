@@ -34,8 +34,8 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     // Get configuration
     const config = this.initializerContext.config.get<{ enabled: boolean; agUiUrl?: string }>();
 
-    // Check if chat plugin is enabled and has required agUiUrl
-    if (!config.enabled || !config.agUiUrl) {
+    // Check if chat plugin is enabled
+    if (!config.enabled) {
       return {
         chatService: undefined,
       };
@@ -43,8 +43,8 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
 
     const chatHeaderButtonRef = React.createRef<ChatHeaderButtonInstance>();
 
-    // Initialize chat service with configured AG-UI URL
-    this.chatService = new ChatService(config.agUiUrl);
+    // Initialize chat service (it will use the server proxy)
+    this.chatService = new ChatService();
 
     // Store reference to chat service for use in subscription
     const chatService = this.chatService;

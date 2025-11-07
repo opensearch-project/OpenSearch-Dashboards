@@ -30,7 +30,7 @@ describe('ChatService', () => {
     // Mock AgUiAgent constructor
     (AgUiAgent as jest.MockedClass<typeof AgUiAgent>).mockImplementation(() => mockAgent);
 
-    chatService = new ChatService('http://test-server');
+    chatService = new ChatService();
   });
 
   afterEach(() => {
@@ -38,17 +38,6 @@ describe('ChatService', () => {
   });
 
   describe('constructor', () => {
-    it('should create instance with default server URL', () => {
-      const service = new ChatService();
-      expect(AgUiAgent).toHaveBeenCalledWith(undefined);
-    });
-
-    it('should create instance with custom server URL', () => {
-      const customUrl = 'http://custom-server:8080';
-      const service = new ChatService(customUrl);
-      expect(AgUiAgent).toHaveBeenCalledWith(customUrl);
-    });
-
     it('should initialize with empty available tools', () => {
       expect(chatService.availableTools).toEqual([]);
     });

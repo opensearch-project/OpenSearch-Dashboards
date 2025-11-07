@@ -39,8 +39,9 @@ export class ChatService {
   // ChatWindow ref for delegating sendMessage calls to proper timeline management
   private chatWindowRef: React.RefObject<ChatWindowInstance> | null = null;
 
-  constructor(serverUrl?: string) {
-    this.agent = new AgUiAgent(serverUrl);
+  constructor() {
+    // No need to pass URL anymore - agent will use the proxy endpoint
+    this.agent = new AgUiAgent();
     this.threadId = this.generateThreadId();
   }
 
