@@ -5,9 +5,20 @@
 
 import { schema } from '@osd/config-schema';
 import { Readable } from 'stream';
-import { IRouter, Logger } from '../../../../core/server';
+import {
+  IRouter,
+  Logger,
+  OpenSearchDashboardsRequest,
+  Capabilities,
+} from '../../../../core/server';
+import { forwardToMLCommonsAgent } from './ml_routes/ml_commons_agent';
 
-export function defineRoutes(router: IRouter, logger: Logger, agUiUrl?: string) {
+export function defineRoutes(
+  router: IRouter,
+  logger: Logger,
+  agUiUrl?: string,
+  capabilitiesResolver?: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>
+) {
   // Proxy route for AG-UI requests
   router.post(
     {
@@ -24,14 +35,41 @@ export function defineRoutes(router: IRouter, logger: Logger, agUiUrl?: string) 
         }),
       },
     },
-    async (_context, request, response) => {
-      if (!agUiUrl) {
-        return response.customError({
-          statusCode: 503,
-          body: {
-            message: 'AG-UI URL is not configured',
-          },
-        });
+    async (context, request, response) => {
+      try {
+        // Check if ML Commons agentic features are enabled via capabilities
+        if (capabilitiesResolver) {
+          const capabilities = await capabilitiesResolver(request);
+
+          if (capabilities?.investigation?.agenticFeaturesEnabled === true) {
+            logger.debug('Routing to ML Commons agent proxy');
+            return await forwardToMLCommonsAgent(context, request, response, logger);
+          }
+        }
+
+        // Fallback to external AG-UI
+        if (!agUiUrl) {
+          return response.customError({
+            statusCode: 503,
+            body: {
+              message:
+                'No AI agent available: ML Commons agent not enabled and AG-UI URL not configured',
+            },
+          });
+        }
+
+        logger.debug('Routing to external AG-UI');
+      } catch (error) {
+        logger.error(`Error checking capabilities or routing: ${error}`);
+        // If capabilities check fails, fallback to external AG-UI
+        if (!agUiUrl) {
+          return response.customError({
+            statusCode: 500,
+            body: {
+              message: error instanceof Error ? error.message : 'Unknown error occurred',
+            },
+          });
+        }
       }
 
       try {

@@ -11,6 +11,7 @@ import {
   CoreStart,
   Plugin,
   Logger,
+  OpenSearchDashboardsRequest,
 } from '../../../core/server';
 
 import { ChatPluginSetup, ChatPluginStart } from './types';
@@ -35,8 +36,12 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     const config = await this.config$.pipe(first()).toPromise();
     const router = core.http.createRouter();
 
+    const [coreStart] = await core.getStartServices();
+    const capabilitiesResolver = (request: OpenSearchDashboardsRequest) =>
+      coreStart.capabilities.resolveCapabilities(request);
+
     // Register server side APIs with config
-    defineRoutes(router, this.logger, config.agUiUrl);
+    defineRoutes(router, this.logger, config.agUiUrl, capabilitiesResolver);
 
     return {};
   }

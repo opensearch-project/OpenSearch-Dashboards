@@ -118,7 +118,7 @@ describe('Chat Proxy Routes', () => {
       expect(response.body).toEqual({
         statusCode: 503,
         error: 'Service Unavailable',
-        message: 'AG-UI URL is not configured',
+        message: 'No AI agent available: ML Commons agent not enabled and AG-UI URL not configured',
       });
 
       // Verify fetch was not called
