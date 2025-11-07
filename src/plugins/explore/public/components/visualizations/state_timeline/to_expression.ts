@@ -43,16 +43,7 @@ export const createNumericalStateTimeline = (
     (mapping) => mapping?.type === 'range'
   );
 
-  const valueMappings = styleOptions?.valueMappingOptions?.valueMappings?.filter(
-    (mapping) => mapping?.type === 'value'
-  );
-
-  if (
-    valueMappings?.length &&
-    valueMappings?.length > 0 &&
-    !rangeMappings?.length &&
-    !styleOptions?.useThresholdColor
-  ) {
+  if (!rangeMappings?.length && !styleOptions?.useThresholdColor) {
     return createCategoricalStateTimeline(
       transformedData,
       numericalColumns,
