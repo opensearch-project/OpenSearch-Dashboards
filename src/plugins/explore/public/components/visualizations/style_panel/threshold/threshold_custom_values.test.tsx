@@ -30,11 +30,10 @@ describe('ThresholdCustomValues component', () => {
     expect(screen.getByTestId('exploreVisThreshold-0')).toBeInTheDocument();
   });
 
-  it('adds a new range when "+ Add threshold" is clicked', async () => {
+  it('adds a new range when "+ Add threshold" is clicked', () => {
     const { handleChange } = setup([{ value: 0, color: '#f8f8f8ff' }]);
 
     fireEvent.click(screen.getByText('+ Add threshold'));
-    await new Promise((resolve) => setTimeout(resolve, 1000));
     expect(handleChange).toHaveBeenCalledWith([
       { value: 0, color: '#f8f8f8ff' },
       { value: 100, color: '#FF6A3D' },
@@ -51,11 +50,10 @@ describe('ThresholdCustomValues component', () => {
     expect(handleChange).toHaveBeenCalledWith([{ value: 5, color: '#f8f8f8ff' }]);
   });
 
-  it('deletes a threshold when trash icon is clicked', async () => {
+  it('deletes a threshold when trash icon is clicked', () => {
     const { handleChange } = setup([{ value: 0, color: '#f8f8f8ff' }]);
     const deleteButton = screen.getByTestId('exploreVisThresholdDeleteButton-0');
     fireEvent.click(deleteButton);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
     expect(handleChange).toHaveBeenCalledWith([]);
   });
 
