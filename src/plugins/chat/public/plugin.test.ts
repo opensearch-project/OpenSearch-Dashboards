@@ -42,7 +42,7 @@ describe('ChatPlugin', () => {
       },
       chrome: {
         navControls: {
-          registerRight: jest.fn(),
+          registerPrimaryHeaderRight: jest.fn(),
         },
         globalSearch: {
           registerSearchCommand: jest.fn(),
@@ -88,7 +88,7 @@ describe('ChatPlugin', () => {
     it('should register chat button in header nav controls', () => {
       plugin.start(mockCoreStart, mockDeps);
 
-      expect(mockCoreStart.chrome.navControls.registerRight).toHaveBeenCalledWith({
+      expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalledWith({
         order: 1000,
         mount: expect.any(Function),
       });
@@ -111,7 +111,7 @@ describe('ChatPlugin', () => {
       // ChatService should still be created (uses proxy endpoint)
       expect(ChatService).toHaveBeenCalledWith();
       expect(startContract.chatService).toBeInstanceOf(ChatService);
-      expect(mockCoreStart.chrome.navControls.registerRight).toHaveBeenCalled();
+      expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
     });
 
     it('should not initialize when plugin is disabled', () => {
@@ -124,7 +124,7 @@ describe('ChatPlugin', () => {
 
       expect(ChatService).not.toHaveBeenCalled();
       expect(startContract.chatService).toBeUndefined();
-      expect(mockCoreStart.chrome.navControls.registerRight).not.toHaveBeenCalled();
+      expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).not.toHaveBeenCalled();
     });
 
     it('should not initialize when enabled is missing (defaults to false)', () => {
@@ -136,7 +136,7 @@ describe('ChatPlugin', () => {
 
       expect(ChatService).not.toHaveBeenCalled();
       expect(startContract.chatService).toBeUndefined();
-      expect(mockCoreStart.chrome.navControls.registerRight).not.toHaveBeenCalled();
+      expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).not.toHaveBeenCalled();
     });
   });
 
@@ -147,12 +147,12 @@ describe('ChatPlugin', () => {
       plugin.start(mockCoreStart, mockDeps);
 
       // Get the mount function that was registered
-      const registerCall = (mockCoreStart.chrome.navControls.registerRight as jest.Mock).mock
-        .calls[0];
+      const registerCall = (mockCoreStart.chrome.navControls
+        .registerPrimaryHeaderRight as jest.Mock).mock.calls[0];
       mountFunction = registerCall[0].mount;
     });
 
-    it('should show chat button when app starts with "explore"', () => {
+    it('should show chat button', () => {
       const mockElement = document.createElement('div');
       const mockUnmount = jest.fn();
       (toMountPoint as jest.Mock).mockReturnValue(jest.fn().mockReturnValue(mockUnmount));
@@ -166,101 +166,6 @@ describe('ChatPlugin', () => {
 
       // Cleanup
       cleanup();
-    });
-
-    it('should hide chat button when app does not start with "explore"', () => {
-      const mockElement = document.createElement('div');
-      const mockUnmount = jest.fn();
-      (toMountPoint as jest.Mock).mockReturnValue(jest.fn().mockReturnValue(mockUnmount));
-
-      // Reset the mock to clear previous calls
-      (toMountPoint as jest.Mock).mockClear();
-
-      // Start with a fresh BehaviorSubject for non-explore app
-      const nonExploreAppId$ = new BehaviorSubject<string | undefined>('dashboard');
-      mockCoreStart.application.currentAppId$ = nonExploreAppId$;
-
-      // Re-register the plugin with the new app ID
-      plugin.start(mockCoreStart, mockDeps);
-      const registerCall = (mockCoreStart.chrome.navControls.registerRight as jest.Mock).mock
-        .calls[1];
-      const newMountFunction = registerCall[0].mount;
-
-      const cleanup = newMountFunction(mockElement);
-
-      // Should not mount the component for non-explore apps
-      expect(toMountPoint).not.toHaveBeenCalled();
-
-      // Cleanup
-      cleanup();
-    });
-
-    it('should handle app changes from explore to non-explore', () => {
-      const mockElement = document.createElement('div');
-      const mockUnmount = jest.fn();
-      (toMountPoint as jest.Mock).mockReturnValue(jest.fn().mockReturnValue(mockUnmount));
-
-      const cleanup = mountFunction(mockElement);
-
-      // Start with explore app
-      mockCurrentAppId$.next('explore-metrics');
-      expect(toMountPoint).toHaveBeenCalled();
-
-      // Change to non-explore app
-      mockCurrentAppId$.next('discover');
-      expect(mockUnmount).toHaveBeenCalled();
-
-      // Cleanup
-      cleanup();
-    });
-
-    it('should handle undefined app id', () => {
-      const mockElement = document.createElement('div');
-
-      // Reset the mock to clear previous calls
-      (toMountPoint as jest.Mock).mockClear();
-
-      // Create a new plugin instance for this test
-      const testPlugin = new ChatPlugin(mockInitializerContext);
-
-      // Start with a fresh BehaviorSubject for undefined app
-      const undefinedAppId$ = new BehaviorSubject<string | undefined>(undefined);
-      const testCoreStart = {
-        ...mockCoreStart,
-        application: {
-          currentAppId$: undefinedAppId$,
-        },
-      };
-
-      // Start the plugin with undefined app ID
-      testPlugin.start(testCoreStart, mockDeps);
-      const registerCall = (testCoreStart.chrome.navControls.registerRight as jest.Mock).mock
-        .calls[0];
-      const newMountFunction = registerCall[0].mount;
-
-      const cleanup = newMountFunction(mockElement);
-
-      expect(toMountPoint).not.toHaveBeenCalled();
-
-      // Cleanup
-      cleanup();
-    });
-
-    it('should cleanup subscription on unmount', () => {
-      const mockElement = document.createElement('div');
-      const mockSubscription = {
-        unsubscribe: jest.fn(),
-      };
-
-      // Mock the subscription
-      jest.spyOn(mockCurrentAppId$, 'subscribe').mockReturnValue(mockSubscription as any);
-
-      const cleanup = mountFunction(mockElement);
-
-      // Call cleanup
-      cleanup();
-
-      expect(mockSubscription.unsubscribe).toHaveBeenCalled();
     });
   });
 
@@ -301,8 +206,8 @@ describe('ChatPlugin', () => {
     it('should pass correct props to ChatHeaderButton', () => {
       plugin.start(mockCoreStart, mockDeps);
 
-      const registerCall = (mockCoreStart.chrome.navControls.registerRight as jest.Mock).mock
-        .calls[0];
+      const registerCall = (mockCoreStart.chrome.navControls
+        .registerPrimaryHeaderRight as jest.Mock).mock.calls[0];
       const mountFunction = registerCall[0].mount;
       const mockElement = document.createElement('div');
 
