@@ -142,8 +142,10 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
     const newRange = { value: newDefaultValue, color: getNextColor(curRangeLength + 1) };
 
     const updated = [...ranges, newRange];
-    debouncedSort(updated);
-  }, [ranges, debouncedSort]);
+    const sorted = updated.sort((a, b) => a.value - b.value);
+    setRanges(sorted);
+    onThresholdValuesChange(sorted);
+  }, [ranges, onThresholdValuesChange]);
 
   const getNextColor = (rangesLength: number): string => {
     const index = rangesLength % THRESHOLD_COLORS.length;
@@ -153,9 +155,10 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
   const handleDeleteRange = useCallback(
     (index: number) => {
       const updated = ranges.filter((_, i) => i !== index);
-      debouncedSort(updated);
+      setRanges(updated);
+      onThresholdValuesChange(updated);
     },
-    [debouncedSort, ranges]
+    [onThresholdValuesChange, ranges]
   );
 
   const [localBaseColor, setLocalBaseColor] = useDebouncedValue<string>(
