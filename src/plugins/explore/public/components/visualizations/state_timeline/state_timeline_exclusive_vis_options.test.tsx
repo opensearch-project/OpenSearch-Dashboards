@@ -59,7 +59,7 @@ describe('StateTimeLineExclusiveVisOptions', () => {
       />
     );
 
-    expect(screen.getByText('Show values')).toBeInTheDocument();
+    expect(screen.getByText('Show display text')).toBeInTheDocument();
     expect(screen.getByText('Row height')).toBeInTheDocument();
     expect(screen.getByTestId('connectValuesGroupButton')).toBeInTheDocument();
     expect(screen.getByTestId('disconnectValuesGroupButton')).toBeInTheDocument();

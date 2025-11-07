@@ -119,6 +119,7 @@ const mockStyleOptions = defaultStateTimeLineChartStyles;
 describe('to_expression', () => {
   describe('createNumericalStateTimeline', () => {
     it('should create a state timeline chart with one date one cate and one metric', () => {
+      const rangeMappings = [{ type: 'range', range: { min: 0 } }];
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.COLOR]: mockNumericalColumns[0],
         [AxisRole.Y]: mockCateColumns[0],
@@ -130,7 +131,7 @@ describe('to_expression', () => {
         mockNumericalColumns,
         mockCateColumns,
         mockTimeColumns,
-        mockStyleOptions,
+        { ...mockStyleOptions, valueMappingOptions: { valueMappings: rangeMappings } },
         mockAxisColumnMappings
       );
 
@@ -164,6 +165,52 @@ describe('to_expression', () => {
       expect(markLayer).toHaveProperty('encoding.color.field', 'mergedLabel');
     });
 
+    it('should fallback to categorical state timeline when no range mappings are provided', () => {
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.COLOR]: mockNumericalColumns[0],
+        [AxisRole.Y]: mockCateColumns[0],
+        [AxisRole.X]: mockTimeColumns[0],
+      };
+
+      const result = createNumericalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        mockStyleOptions,
+        mockAxisColumnMappings
+      );
+
+      // Verify the basic structure
+      expect(result).toHaveProperty('$schema', VEGASCHEMA);
+      expect(result).toHaveProperty('data.values', [
+        {
+          timestamp: '2023-01-01',
+          start: '2023-01-01',
+          end: '2023-01-02',
+          category: 'A',
+          category2: 'true',
+        },
+      ]);
+      expect(result).toHaveProperty('layer');
+      expect(Array.isArray(result.layer)).toBe(true);
+
+      // Verify the mark layer
+      const markLayer = result.layer[0];
+      expect(markLayer).toHaveProperty('mark.type', 'rect');
+      expect(markLayer).toHaveProperty('mark.tooltip', true);
+
+      // Verify encoding
+      expect(markLayer).toHaveProperty('encoding.x.field', 'timestamp');
+      expect(markLayer).toHaveProperty('encoding.x.type', 'temporal');
+      expect(markLayer).toHaveProperty('encoding.x.type', 'temporal');
+      expect(markLayer).toHaveProperty('encoding.x2.field', 'end');
+
+      expect(markLayer).toHaveProperty('encoding.y.field', 'category');
+      expect(markLayer).toHaveProperty('encoding.y.type', 'nominal');
+      expect(markLayer).toHaveProperty('encoding.color.field', 'mappingValue');
+    });
+
     it('includes text layer when showValues is true', () => {
       const styleWithText = {
         ...mockStyleOptions,
@@ -172,6 +219,24 @@ describe('to_expression', () => {
 
       const result = createNumericalStateTimeline(mockData, [], [], [], styleWithText);
       expect(result.layer).toHaveLength(2);
+    });
+    it('should display Ranges when customized legend title is not set', () => {
+      const rangeMappings = [{ type: 'range', range: { min: 0 } }];
+      const styleWithLegend = {
+        ...mockStyleOptions,
+        valueMappingOptions: { valueMappings: rangeMappings },
+      };
+      const result = createNumericalStateTimeline(mockData, [], [], [], styleWithLegend);
+      expect(result.layer[0].encoding.color.legend.title).toBe('Ranges');
+    });
+
+    it('should display customized legend title', () => {
+      const styleWithLegend = {
+        ...mockStyleOptions,
+        legendTitle: 'default',
+      };
+      const result = createNumericalStateTimeline(mockData, [], [], [], styleWithLegend);
+      expect(result.layer[0].encoding.color.legend.title).toBe('default');
     });
   });
 
@@ -229,6 +294,14 @@ describe('to_expression', () => {
       const result = createCategoricalStateTimeline(mockData, [], [], [], styleWithTitle);
       expect(result.title).toBe('Test Title');
     });
+    it('should display customized legend title', () => {
+      const styleWithLegend = {
+        ...mockStyleOptions,
+        legendTitle: 'default',
+      };
+      const result = createCategoricalStateTimeline(mockData, [], [], [], styleWithLegend);
+      expect(result.layer[0].encoding.color.legend.title).toBe('default');
+    });
   });
 
   describe('createSingleCategoricalStateTimeline', () => {
@@ -282,6 +355,14 @@ describe('to_expression', () => {
 
       const result = createSingleCategoricalStateTimeline(mockData, [], [], [], styleWithThreshold);
       expect(result).toHaveProperty('data.values');
+    });
+    it('should display customized legend title', () => {
+      const styleWithLegend = {
+        ...mockStyleOptions,
+        legendTitle: 'default',
+      };
+      const result = createSingleCategoricalStateTimeline(mockData, [], [], [], styleWithLegend);
+      expect(result.layer[0].encoding.color.legend.title).toBe('default');
     });
   });
 });
