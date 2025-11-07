@@ -55,7 +55,7 @@ const runSavedSearchTests = () => {
           cy.visit(`/w/${workspaceId}/app/data-explorer/discover`);
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType, true);
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         cy.osd.grabIdsFromDiscoverPageUrl();
 
         // using a POST request to create a saved search to load
