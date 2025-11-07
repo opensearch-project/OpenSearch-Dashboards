@@ -50,45 +50,27 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     const chatService = this.chatService;
 
     // Register chat button in header with conditional visibility
-    core.chrome.navControls.registerRight({
+    core.chrome.navControls.registerPrimaryHeaderRight({
       order: 1000,
       mount: (element) => {
-        let isVisible = false;
+        // let isVisible = false;
         let unmountComponent: (() => void) | null = null;
 
-        const updateVisibility = (currentAppId: string | undefined) => {
-          const shouldShow = currentAppId && currentAppId.startsWith('explore');
-
-          if (shouldShow && !isVisible) {
-            // Mount the component
-            const mountPoint = toMountPoint(
-              React.createElement(ChatHeaderButton, {
-                core,
-                chatService,
-                contextProvider: deps.contextProvider,
-                charts: deps.charts,
-                ref: chatHeaderButtonRef,
-                suggestedActionsService: this.suggestedActionsService!,
-              })
-            );
-            unmountComponent = mountPoint(element);
-            isVisible = true;
-          } else if (!shouldShow && isVisible) {
-            // Unmount the component
-            if (unmountComponent) {
-              unmountComponent();
-              unmountComponent = null;
-            }
-            isVisible = false;
-          }
-        };
-
-        // Subscribe to app changes
-        const subscription = core.application.currentAppId$.subscribe(updateVisibility);
+        // Mount the component
+        const mountPoint = toMountPoint(
+          React.createElement(ChatHeaderButton, {
+            core,
+            chatService,
+            contextProvider: deps.contextProvider,
+            charts: deps.charts,
+            ref: chatHeaderButtonRef,
+            suggestedActionsService: this.suggestedActionsService!,
+          })
+        );
+        unmountComponent = mountPoint(element);
 
         // Return cleanup function
         return () => {
-          subscription.unsubscribe();
           if (unmountComponent) {
             unmountComponent();
           }

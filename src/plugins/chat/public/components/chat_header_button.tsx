@@ -5,12 +5,16 @@
 
 import React, { useCallback, useRef, useState, useEffect, useImperativeHandle } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { CoreStart, MountPoint, SIDECAR_DOCKED_MODE } from '../../../../core/public';
+import { useUnmount } from 'react-use';
+import { CoreStart, SIDECAR_DOCKED_MODE } from '../../../../core/public';
 import { ChatWindow, ChatWindowInstance } from './chat_window';
 import { ChatProvider } from '../contexts/chat_context';
 import { ChatService } from '../services/chat_service';
 import { GlobalAssistantProvider } from '../../../context_provider/public';
-import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
+import {
+  MountPointPortal,
+  OpenSearchDashboardsContextProvider,
+} from '../../../opensearch_dashboards_react/public';
 import { ContextProviderStart, TextSelectionMonitor } from '../../../context_provider/public';
 import './chat_header_button.scss';
 import { SuggestedActionsService } from '../services/suggested_action';
@@ -38,8 +42,12 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
     const [isOpen, setIsOpen] = useState<boolean>(chatService.isWindowOpen());
     const [layoutMode, setLayoutMode] = useState<ChatLayoutMode>(chatService.getWindowMode());
     const sideCarRef = useRef<{ close: () => void }>();
-    const mountPointRef = useRef<HTMLDivElement>(null);
     const chatWindowRef = useRef<ChatWindowInstance>(null);
+    const flyoutMountPoint = useRef(null);
+
+    const setMountPoint = useCallback((mountPoint) => {
+      flyoutMountPoint.current = mountPoint;
+    }, []);
 
     // Register ChatWindow ref with ChatService for external access
     useEffect(() => {
@@ -50,18 +58,7 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
     }, [chatService]);
 
     const openSidecar = useCallback(() => {
-      if (!mountPointRef.current) return;
-
-      const mountPoint: MountPoint = (element) => {
-        if (mountPointRef.current) {
-          element.appendChild(mountPointRef.current);
-        }
-        return () => {
-          if (mountPointRef.current && element.contains(mountPointRef.current)) {
-            element.removeChild(mountPointRef.current);
-          }
-        };
-      };
+      if (!flyoutMountPoint.current) return;
 
       const sidecarConfig =
         layoutMode === ChatLayoutMode.FULLSCREEN
@@ -76,7 +73,7 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
               isHidden: false,
             };
 
-      sideCarRef.current = core.overlays.sidecar.open(mountPoint, {
+      sideCarRef.current = core.overlays.sidecar.open(flyoutMountPoint.current, {
         className: `chat-sidecar chat-sidecar--${layoutMode}`,
         config: sidecarConfig,
       });
@@ -172,13 +169,12 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
     }, [chatService, isOpen, openSidecar, closeSidecar]);
 
     // Cleanup on unmount
-    useEffect(() => {
-      return () => {
-        if (sideCarRef.current) {
-          sideCarRef.current.close();
-        }
-      };
-    }, []);
+    useUnmount(() => {
+      if (sideCarRef.current) {
+        chatService.setWindowState(false);
+        sideCarRef.current.close();
+      }
+    });
 
     return (
       <>
@@ -197,35 +193,36 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
         </EuiToolTip>
 
         {/* Mount point for sidecar content */}
-        <div
-          ref={mountPointRef}
-          className={`chatHeaderButton__mountPoint ${
-            isOpen
-              ? 'chatHeaderButton__mountPoint--visible'
-              : 'chatHeaderButton__mountPoint--hidden'
-          }`}
-        >
-          <div className="chatHeaderButton__content">
-            <OpenSearchDashboardsContextProvider services={{ core, contextProvider, charts }}>
-              <GlobalAssistantProvider
-                onToolsUpdated={(tools) => {
-                  // Tools updated in chat
-                }}
-              >
-                <ChatProvider
-                  chatService={chatService}
-                  suggestedActionsService={suggestedActionsService}
+        <MountPointPortal setMountPoint={setMountPoint}>
+          <div
+            className={`chatHeaderButton__mountPoint ${
+              isOpen
+                ? 'chatHeaderButton__mountPoint--visible'
+                : 'chatHeaderButton__mountPoint--hidden'
+            }`}
+          >
+            <div className="chatHeaderButton__content">
+              <OpenSearchDashboardsContextProvider services={{ core, contextProvider, charts }}>
+                <GlobalAssistantProvider
+                  onToolsUpdated={(tools) => {
+                    // Tools updated in chat
+                  }}
                 >
-                  <ChatWindow
-                    layoutMode={layoutMode}
-                    onToggleLayout={toggleLayoutMode}
-                    ref={chatWindowRef}
-                  />
-                </ChatProvider>
-              </GlobalAssistantProvider>
-            </OpenSearchDashboardsContextProvider>
+                  <ChatProvider
+                    chatService={chatService}
+                    suggestedActionsService={suggestedActionsService}
+                  >
+                    <ChatWindow
+                      layoutMode={layoutMode}
+                      onToggleLayout={toggleLayoutMode}
+                      ref={chatWindowRef}
+                    />
+                  </ChatProvider>
+                </GlobalAssistantProvider>
+              </OpenSearchDashboardsContextProvider>
+            </div>
           </div>
-        </div>
+        </MountPointPortal>
       </>
     );
   }
