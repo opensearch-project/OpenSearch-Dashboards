@@ -7,3 +7,22 @@
 .exploreSaveQuery {
   @include exploreQueryPanelButton;
 }
+
+// Override saved query management popover padding for explore plugin only
+.exploreSaveQuery__popoverContent {
+  .osdSavedQueryManagement__newUIList {
+    padding: 0;
+  }
+
+  .osdSavedQueryManagement__newUIItem {
+    padding: 0;
+    margin: 0;
+  }
+
+  .osdSavedQueryManagement__newUIButton {
+    padding: $euiSizeS;
+    width: 100%;
+    text-align: left;
+    justify-content: flex-start;
+  }
+}
