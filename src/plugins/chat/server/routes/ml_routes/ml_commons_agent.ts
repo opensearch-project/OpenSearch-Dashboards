@@ -17,17 +17,25 @@ export async function forwardToMLCommonsAgent(
   context: RequestHandlerContext,
   request: OpenSearchDashboardsRequest,
   response: OpenSearchDashboardsResponse,
-  logger: Logger
+  logger: Logger,
+  configuredAgentId?: string
 ) {
-  const agentId = 'olly-chat-agent-id';
+  if (!configuredAgentId) {
+    return response.customError({
+      statusCode: 503,
+      body: {
+        message: 'ML Commons agent ID not configured',
+      },
+    });
+  }
 
   try {
-    logger.debug('Forwarding request to ML Commons agent', { agentId });
+    logger.debug('Forwarding request to ML Commons agent', { agentId: configuredAgentId });
 
     // Make request to ML Commons agent execute API
     const mlResponse = await context.core.opensearch.client.asCurrentUser.transport.request({
       method: 'POST',
-      path: `/_plugins/_ml/agents/${agentId}/_execute`,
+      path: `/_plugins/_ml/agents/${configuredAgentId}/_execute`,
       body: request.body, // Forward the RunAgentInput directly
     });
 
@@ -48,7 +56,7 @@ export async function forwardToMLCommonsAgent(
       return response.customError({
         statusCode: 404,
         body: {
-          message: `ML Commons agent "${agentId}" not found`,
+          message: `ML Commons agent "${configuredAgentId}" not found`,
         },
       });
     }

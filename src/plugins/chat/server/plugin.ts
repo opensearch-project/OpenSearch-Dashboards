@@ -25,6 +25,7 @@ import { ChatConfigType } from './config';
 export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private readonly logger: Logger;
   private readonly config$: Observable<ChatConfigType>;
+  private capabilitiesResolver?: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -35,19 +36,25 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     this.logger.debug('chat: Setup');
     const config = await this.config$.pipe(first()).toPromise();
     const router = core.http.createRouter();
+    const getCapabilitiesResolver = () => this.capabilitiesResolver;
 
-    const [coreStart] = await core.getStartServices();
-    const capabilitiesResolver = (request: OpenSearchDashboardsRequest) =>
-      coreStart.capabilities.resolveCapabilities(request);
-
-    // Register server side APIs with config
-    defineRoutes(router, this.logger, config.agUiUrl, capabilitiesResolver);
+    defineRoutes(
+      router,
+      this.logger,
+      config.agUiUrl,
+      getCapabilitiesResolver,
+      config.mlCommonsAgentId
+    );
 
     return {};
   }
 
   public start(core: CoreStart) {
     this.logger.debug('chat: Started');
+
+    this.capabilitiesResolver = (request: OpenSearchDashboardsRequest) =>
+      core.capabilities.resolveCapabilities(request);
+
     return {};
   }
 

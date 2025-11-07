@@ -410,6 +410,7 @@
 # chat:
   # enabled: true
   # agUiUrl: "http://your-ai-agent-url:port"
+  # mlCommonsAgentId: "olly-chat-agent-id"
 
 # @experimental Set the value to true to enable context provider
 # contextProvider:

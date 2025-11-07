@@ -63,14 +63,20 @@ describe('forwardToMLCommonsAgent', () => {
         mockMLResponse
       );
 
-      await forwardToMLCommonsAgent(mockContext, mockRequest, mockResponse, mockLogger);
+      await forwardToMLCommonsAgent(
+        mockContext,
+        mockRequest,
+        mockResponse,
+        mockLogger,
+        'test-agent-id'
+      );
 
       // Verify OpenSearch client was called correctly
       expect(
         mockContext.core.opensearch.client.asCurrentUser.transport.request
       ).toHaveBeenCalledWith({
         method: 'POST',
-        path: '/_plugins/_ml/agents/olly-chat-agent-id/_execute',
+        path: '/_plugins/_ml/agents/test-agent-id/_execute',
         body: mockRequest.body,
       });
 
@@ -84,7 +90,7 @@ describe('forwardToMLCommonsAgent', () => {
 
       // Verify logging
       expect(mockLogger.debug).toHaveBeenCalledWith('Forwarding request to ML Commons agent', {
-        agentId: 'olly-chat-agent-id',
+        agentId: 'test-agent-id',
       });
 
       expect(mockResponse.customError).not.toHaveBeenCalled();
@@ -111,14 +117,84 @@ describe('forwardToMLCommonsAgent', () => {
         mockMLResponse
       );
 
-      await forwardToMLCommonsAgent(mockContext, mockRequest, mockResponse, mockLogger);
+      await forwardToMLCommonsAgent(
+        mockContext,
+        mockRequest,
+        mockResponse,
+        mockLogger,
+        'test-agent-id'
+      );
 
       expect(
         mockContext.core.opensearch.client.asCurrentUser.transport.request
       ).toHaveBeenCalledWith({
         method: 'POST',
-        path: '/_plugins/_ml/agents/olly-chat-agent-id/_execute',
+        path: '/_plugins/_ml/agents/test-agent-id/_execute',
         body: differentRequestBody,
+      });
+    });
+  });
+
+  describe('configuration handling', () => {
+    it('should return 503 error when agent ID is not configured', async () => {
+      await forwardToMLCommonsAgent(mockContext, mockRequest, mockResponse, mockLogger);
+
+      expect(mockResponse.customError).toHaveBeenCalledWith({
+        statusCode: 503,
+        body: {
+          message: 'ML Commons agent ID not configured',
+        },
+      });
+
+      // Verify OpenSearch client was not called
+      expect(
+        mockContext.core.opensearch.client.asCurrentUser.transport.request
+      ).not.toHaveBeenCalled();
+      expect(mockResponse.ok).not.toHaveBeenCalled();
+    });
+
+    it('should use custom configured agent ID', async () => {
+      const customAgentId = 'custom-production-agent-123';
+      const mockMLResponse = {
+        body: {
+          id: 'response-123',
+          message: 'Custom agent response',
+          status: 'completed',
+        },
+      };
+
+      mockContext.core.opensearch.client.asCurrentUser.transport.request.mockResolvedValue(
+        mockMLResponse
+      );
+
+      await forwardToMLCommonsAgent(
+        mockContext,
+        mockRequest,
+        mockResponse,
+        mockLogger,
+        customAgentId
+      );
+
+      // Verify OpenSearch client was called with custom agent ID
+      expect(
+        mockContext.core.opensearch.client.asCurrentUser.transport.request
+      ).toHaveBeenCalledWith({
+        method: 'POST',
+        path: `/_plugins/_ml/agents/${customAgentId}/_execute`,
+        body: mockRequest.body,
+      });
+
+      // Verify logging includes custom agent ID
+      expect(mockLogger.debug).toHaveBeenCalledWith('Forwarding request to ML Commons agent', {
+        agentId: customAgentId,
+      });
+
+      // Verify successful response
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: mockMLResponse.body,
       });
     });
   });
@@ -130,12 +206,18 @@ describe('forwardToMLCommonsAgent', () => {
         notFoundError
       );
 
-      await forwardToMLCommonsAgent(mockContext, mockRequest, mockResponse, mockLogger);
+      await forwardToMLCommonsAgent(
+        mockContext,
+        mockRequest,
+        mockResponse,
+        mockLogger,
+        'test-agent-id'
+      );
 
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 404,
         body: {
-          message: 'ML Commons agent "olly-chat-agent-id" not found',
+          message: 'ML Commons agent "test-agent-id" not found',
         },
       });
 
@@ -152,7 +234,13 @@ describe('forwardToMLCommonsAgent', () => {
         generalError
       );
 
-      await forwardToMLCommonsAgent(mockContext, mockRequest, mockResponse, mockLogger);
+      await forwardToMLCommonsAgent(
+        mockContext,
+        mockRequest,
+        mockResponse,
+        mockLogger,
+        'test-agent-id'
+      );
 
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
@@ -174,7 +262,13 @@ describe('forwardToMLCommonsAgent', () => {
         nonErrorException
       );
 
-      await forwardToMLCommonsAgent(mockContext, mockRequest, mockResponse, mockLogger);
+      await forwardToMLCommonsAgent(
+        mockContext,
+        mockRequest,
+        mockResponse,
+        mockLogger,
+        'test-agent-id'
+      );
 
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 500,
@@ -201,12 +295,18 @@ describe('forwardToMLCommonsAgent', () => {
         const error = new Error(errorMessage);
         mockContext.core.opensearch.client.asCurrentUser.transport.request.mockRejectedValue(error);
 
-        await forwardToMLCommonsAgent(mockContext, mockRequest, mockResponse, mockLogger);
+        await forwardToMLCommonsAgent(
+          mockContext,
+          mockRequest,
+          mockResponse,
+          mockLogger,
+          'test-agent-id'
+        );
 
         expect(mockResponse.customError).toHaveBeenCalledWith({
           statusCode: 404,
           body: {
-            message: 'ML Commons agent "olly-chat-agent-id" not found',
+            message: 'ML Commons agent "test-agent-id" not found',
           },
         });
       }
@@ -219,10 +319,16 @@ describe('forwardToMLCommonsAgent', () => {
         body: {},
       });
 
-      await forwardToMLCommonsAgent(mockContext, mockRequest, mockResponse, mockLogger);
+      await forwardToMLCommonsAgent(
+        mockContext,
+        mockRequest,
+        mockResponse,
+        mockLogger,
+        'test-agent-id'
+      );
 
       expect(mockLogger.debug).toHaveBeenCalledWith('Forwarding request to ML Commons agent', {
-        agentId: 'olly-chat-agent-id',
+        agentId: 'test-agent-id',
       });
     });
 
@@ -232,7 +338,13 @@ describe('forwardToMLCommonsAgent', () => {
         testError
       );
 
-      await forwardToMLCommonsAgent(mockContext, mockRequest, mockResponse, mockLogger);
+      await forwardToMLCommonsAgent(
+        mockContext,
+        mockRequest,
+        mockResponse,
+        mockLogger,
+        'test-agent-id'
+      );
 
       expect(mockLogger.error).toHaveBeenCalledWith(
         `Error forwarding to ML Commons agent: ${testError}`
@@ -247,7 +359,13 @@ describe('forwardToMLCommonsAgent', () => {
         mockMLResponse
       );
 
-      await forwardToMLCommonsAgent(mockContext, mockRequest, mockResponse, mockLogger);
+      await forwardToMLCommonsAgent(
+        mockContext,
+        mockRequest,
+        mockResponse,
+        mockLogger,
+        'test-agent-id'
+      );
 
       expect(mockResponse.ok).toHaveBeenCalledWith({
         headers: {
@@ -280,7 +398,13 @@ describe('forwardToMLCommonsAgent', () => {
         mockMLResponse
       );
 
-      await forwardToMLCommonsAgent(mockContext, mockRequest, mockResponse, mockLogger);
+      await forwardToMLCommonsAgent(
+        mockContext,
+        mockRequest,
+        mockResponse,
+        mockLogger,
+        'test-agent-id'
+      );
 
       expect(mockResponse.ok).toHaveBeenCalledWith({
         headers: {
@@ -292,18 +416,24 @@ describe('forwardToMLCommonsAgent', () => {
   });
 
   describe('agent configuration', () => {
-    it('should use the correct hardcoded agent ID', async () => {
+    it('should use the configured agent ID', async () => {
       mockContext.core.opensearch.client.asCurrentUser.transport.request.mockResolvedValue({
         body: {},
       });
 
-      await forwardToMLCommonsAgent(mockContext, mockRequest, mockResponse, mockLogger);
+      await forwardToMLCommonsAgent(
+        mockContext,
+        mockRequest,
+        mockResponse,
+        mockLogger,
+        'test-agent-id'
+      );
 
       expect(
         mockContext.core.opensearch.client.asCurrentUser.transport.request
       ).toHaveBeenCalledWith(
         expect.objectContaining({
-          path: '/_plugins/_ml/agents/olly-chat-agent-id/_execute',
+          path: '/_plugins/_ml/agents/test-agent-id/_execute',
         })
       );
     });

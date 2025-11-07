@@ -17,7 +17,10 @@ export function defineRoutes(
   router: IRouter,
   logger: Logger,
   agUiUrl?: string,
-  capabilitiesResolver?: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>
+  getCapabilitiesResolver?: () =>
+    | ((request: OpenSearchDashboardsRequest) => Promise<Capabilities>)
+    | undefined,
+  mlCommonsAgentId?: string
 ) {
   // Proxy route for AG-UI requests
   router.post(
@@ -38,12 +41,19 @@ export function defineRoutes(
     async (context, request, response) => {
       try {
         // Check if ML Commons agentic features are enabled via capabilities
+        const capabilitiesResolver = getCapabilitiesResolver?.();
         if (capabilitiesResolver) {
           const capabilities = await capabilitiesResolver(request);
 
           if (capabilities?.investigation?.agenticFeaturesEnabled === true) {
             logger.debug('Routing to ML Commons agent proxy');
-            return await forwardToMLCommonsAgent(context, request, response, logger);
+            return await forwardToMLCommonsAgent(
+              context,
+              request,
+              response,
+              logger,
+              mlCommonsAgentId
+            );
           }
         }
 
