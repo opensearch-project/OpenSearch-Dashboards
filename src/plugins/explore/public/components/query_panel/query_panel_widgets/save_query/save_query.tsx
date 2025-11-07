@@ -184,6 +184,7 @@ export const SaveQueryButton = () => {
       closePopover={closePopover}
       anchorPosition="downCenter"
       panelPaddingSize="none"
+      panelClassName="exploreSaveQuery__popoverContent"
     >
       <SavedQueryManagementComponent
         savedQueryService={savedQueryService}

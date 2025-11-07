@@ -83,6 +83,7 @@ export const RecentQueriesButton = () => {
         isVisible={popoverIsOpen}
         queryString={services.data.query.queryString}
         onClickRecentQuery={onClick}
+        className="exploreRecentQueriesButton__table"
       />
     </EuiPopover>
   );

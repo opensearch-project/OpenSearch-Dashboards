@@ -223,9 +223,10 @@ export function SavedQueryManagementComponent({
       className="osdSavedQueryManagement__popover"
       data-test-subj="saved-query-management-popover"
     >
-      <EuiListGroup>
-        <div>
+      <EuiListGroup className="osdSavedQueryManagement__newUIList">
+        <div className="osdSavedQueryManagement__newUIItem">
           <EuiButtonEmpty
+            className="osdSavedQueryManagement__newUIButton"
             data-test-subj="saved-query-management-save-button"
             disabled={saveQueryIsDisabled}
             iconType="save"
@@ -252,8 +253,9 @@ export function SavedQueryManagementComponent({
             </EuiText>
           </EuiButtonEmpty>
         </div>
-        <div>
+        <div className="osdSavedQueryManagement__newUIItem">
           <EuiButtonEmpty
+            className="osdSavedQueryManagement__newUIButton"
             data-test-subj="saved-query-management-open-button"
             iconType="folderOpen"
             onClick={() => {
