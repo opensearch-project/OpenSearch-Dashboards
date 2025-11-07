@@ -38,6 +38,8 @@ export const registerBuiltInTabs = (
   services: ExploreServices,
   registryFlavor: ExploreFlavor
 ) => {
+  const isExperimentalEnabled = services.uiSettings.get(ENABLE_EXPERIMENTAL_SETTING, false);
+
   // Register Logs Tab
   const logsTabDefinition: TabDefinition = {
     id: EXPLORE_LOGS_TAB_ID,
@@ -52,89 +54,91 @@ export const registerBuiltInTabs = (
   tabRegistry.registerTab(logsTabDefinition);
 
   // Register Patterns Tab
-  tabRegistry.registerTab({
-    id: EXPLORE_PATTERNS_TAB_ID,
-    label: 'Patterns',
-    flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics],
-    order: 15,
-    supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
+  if (isExperimentalEnabled) {
+    tabRegistry.registerTab({
+      id: EXPLORE_PATTERNS_TAB_ID,
+      label: 'Patterns',
+      flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics],
+      order: 15,
+      supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
-    prepareQuery: (query) => {
-      const state = services.store.getState();
+      prepareQuery: (query) => {
+        const state = services.store.getState();
 
-      // Get the selected patterns field from the Redux state
-      let patternsField = state.tab.patterns.patternsField;
-
-      const preparedQuery = getQueryWithSource(query);
-      if (!patternsField) {
-        try {
-          patternsField = findDefaultPatternsField(services);
-        } catch {
-          return preparedQuery.query;
-        }
-      }
-
-      if (state.tab.patterns.usingRegexPatterns)
-        return regexPatternQuery(preparedQuery.query, patternsField);
-
-      return brainPatternQuery(preparedQuery.query, patternsField);
-    },
-
-    handleQueryError: (error, cacheKey) => {
-      const state = services.store.getState();
-
-      /**
-       * The below conditional is checking for the error returned when attempting to use a BRAIN
-       * query on an older version of the querying engine. If this error appears, an attempt is made
-       * to switch over to a patterns query which works on older versions of the querying engine.
-       * A redux state is set to inform the UI that this older query is being utilized
-       * Finally, the query is retriggered.
-       * The return value being true will prevent the standard error from dispatching, keeping the page clear
-       */
-      if (
-        error &&
-        error.status &&
-        error.status === 400 &&
-        error.error.details &&
-        error.error.details.startsWith(BRAIN_QUERY_OLD_ENGINE_ERROR_PREFIX)
-      ) {
-        // can check further details of err if needed
+        // Get the selected patterns field from the Redux state
         let patternsField = state.tab.patterns.patternsField;
-        if (!patternsField) {
-          patternsField = findDefaultPatternsField(services);
-        }
-        const query = state.query;
+
         const preparedQuery = getQueryWithSource(query);
-        services.store.dispatch(setUsingRegexPatterns(true));
-        services.store.dispatch(
-          executeTabQuery({
-            services,
-            cacheKey: regexPatternQuery(preparedQuery.query, patternsField),
-            queryString: query.query,
-          })
-        );
+        if (!patternsField) {
+          try {
+            patternsField = findDefaultPatternsField(services);
+          } catch {
+            return preparedQuery.query;
+          }
+        }
 
-        // set the old cacheKey to uninitialized to finalize loading, our new tab query has new cacheKey
-        services.store.dispatch(
-          setIndividualQueryStatus({
-            cacheKey,
-            status: {
-              status: QueryExecutionStatus.UNINITIALIZED,
-              startTime: undefined,
-              elapsedMs: undefined,
-              error: undefined,
-            },
-          })
-        );
+        if (state.tab.patterns.usingRegexPatterns)
+          return regexPatternQuery(preparedQuery.query, patternsField);
 
-        return true;
-      }
+        return brainPatternQuery(preparedQuery.query, patternsField);
+      },
 
-      return false;
-    },
+      handleQueryError: (error, cacheKey) => {
+        const state = services.store.getState();
 
-    component: PatternsTab,
-  });
+        /**
+         * The below conditional is checking for the error returned when attempting to use a BRAIN
+         * query on an older version of the querying engine. If this error appears, an attempt is made
+         * to switch over to a patterns query which works on older versions of the querying engine.
+         * A redux state is set to inform the UI that this older query is being utilized
+         * Finally, the query is retriggered.
+         * The return value being true will prevent the standard error from dispatching, keeping the page clear
+         */
+        if (
+          error &&
+          error.status &&
+          error.status === 400 &&
+          error.error.details &&
+          error.error.details.startsWith(BRAIN_QUERY_OLD_ENGINE_ERROR_PREFIX)
+        ) {
+          // can check further details of err if needed
+          let patternsField = state.tab.patterns.patternsField;
+          if (!patternsField) {
+            patternsField = findDefaultPatternsField(services);
+          }
+          const query = state.query;
+          const preparedQuery = getQueryWithSource(query);
+          services.store.dispatch(setUsingRegexPatterns(true));
+          services.store.dispatch(
+            executeTabQuery({
+              services,
+              cacheKey: regexPatternQuery(preparedQuery.query, patternsField),
+              queryString: query.query,
+            })
+          );
+
+          // set the old cacheKey to uninitialized to finalize loading, our new tab query has new cacheKey
+          services.store.dispatch(
+            setIndividualQueryStatus({
+              cacheKey,
+              status: {
+                status: QueryExecutionStatus.UNINITIALIZED,
+                startTime: undefined,
+                elapsedMs: undefined,
+                error: undefined,
+              },
+            })
+          );
+
+          return true;
+        }
+
+        return false;
+      },
+
+      component: PatternsTab,
+    });
+  }
 
   // Register Visualizations Tab
   tabRegistry.registerTab({
@@ -155,7 +159,6 @@ export const registerBuiltInTabs = (
   });
 
   // Register Field Stats Tab
-  const isExperimentalEnabled = services.uiSettings.get(ENABLE_EXPERIMENTAL_SETTING, false);
   if (isExperimentalEnabled) {
     tabRegistry.registerTab({
       id: EXPLORE_FIELD_STATS_TAB_ID,
