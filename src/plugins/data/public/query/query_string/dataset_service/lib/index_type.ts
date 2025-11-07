@@ -231,15 +231,17 @@ const fetchIndices = async (dataStructure: DataStructure): Promise<string[]> => 
       return [];
     }
 
-    return rawResponse.aggregations.indices.buckets.map((bucket: { key: string }) => {
+    const uniqueResponses = new Set<string>();
+    rawResponse.aggregations.indices.buckets.forEach((bucket: { key: string }) => {
       const key = bucket.key;
       // Note: Index names cannot contain ':' or '::' in OpenSearch, so these delimiters
       // are guaranteed not to be part of the regular format of index name
       const parts = key.split(DELIMITER);
       const lastPart = parts[parts.length - 1] || key;
       // extract index name or return original key if pattern doesn't match
-      return lastPart.split(':')[0] || key;
+      uniqueResponses.add(lastPart.split(':')[0] || key);
     });
+    return Array.from(uniqueResponses);
   };
 
   return search

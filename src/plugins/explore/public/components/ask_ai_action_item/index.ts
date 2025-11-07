@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './ppl_reference';
+export { AskAIActionItem } from './ask_ai_action_item';

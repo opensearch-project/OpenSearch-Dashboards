@@ -7,7 +7,6 @@ import React from 'react';
 import { DatasetSelectWidget } from './dataset_select';
 import { SaveQueryButton } from './save_query';
 import { RecentQueriesButton } from './recent_queries_button';
-import { LanguageReference } from './language_reference';
 import { LanguageToggle } from './language_toggle';
 import { QueryPanelActions } from './query_panel_actions';
 import { ExploreServices } from '../../../types';
@@ -40,7 +39,6 @@ export const QueryPanelWidgets = () => {
       {/* Right Section */}
       <div className="exploreQueryPanelWidgets__right">
         <AskAIButton />
-        <LanguageReference />
       </div>
     </div>
   );

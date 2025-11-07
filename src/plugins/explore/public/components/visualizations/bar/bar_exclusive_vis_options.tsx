@@ -19,6 +19,7 @@ import { DebouncedFieldNumber } from '../style_panel/utils';
 import { defaultBarChartStyles } from './bar_vis_config';
 
 interface BarExclusiveVisOptionsProps {
+  type: 'bar' | 'histogram';
   barSizeMode: 'auto' | 'manual';
   barWidth: number;
   barPadding: number;
@@ -37,6 +38,7 @@ interface BarExclusiveVisOptionsProps {
 }
 
 export const BarExclusiveVisOptions = ({
+  type,
   barSizeMode,
   barWidth,
   barPadding,
@@ -68,14 +70,17 @@ export const BarExclusiveVisOptions = ({
     },
   ];
 
+  const barAccordionMessage =
+    type === 'bar'
+      ? i18n.translate('explore.vis.barChart.exclusiveSettings', {
+          defaultMessage: 'Bar',
+        })
+      : i18n.translate('explore.vis.histogramChart.exclusiveSettings', {
+          defaultMessage: 'Histogram',
+        });
+
   return (
-    <StyleAccordion
-      id="barSection"
-      accordionLabel={i18n.translate('explore.vis.barChart.exclusiveSettings', {
-        defaultMessage: 'Bar',
-      })}
-      initialIsOpen={true}
-    >
+    <StyleAccordion id="barSection" accordionLabel={barAccordionMessage} initialIsOpen={true}>
       {!shouldDisableUseThresholdColor && (
         <EuiFormRow>
           <EuiSwitch

@@ -172,7 +172,7 @@ export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
     <StyleAccordion
       id="tableFooterSection"
       accordionLabel={i18n.translate('explore.stylePanel.table.footerSection', {
-        defaultMessage: 'Table Footer',
+        defaultMessage: 'Table footer',
       })}
       initialIsOpen={true}
       data-test-subj="visTableFooter"
@@ -181,7 +181,7 @@ export const TableFooterOptions: React.FC<TableFooterStyleControlsProps> = ({
         <EuiSwitch
           compressed
           label={i18n.translate('explore.stylePanel.table.showFooter', {
-            defaultMessage: 'Show Footer',
+            defaultMessage: 'Show footer',
           })}
           checked={styleOptions.showFooter || false}
           onChange={(e) => onShowFooterChange(e.target.checked)}

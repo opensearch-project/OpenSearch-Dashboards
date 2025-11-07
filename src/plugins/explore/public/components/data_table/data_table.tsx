@@ -33,6 +33,7 @@ export interface DataTableProps {
   onFilter: DocViewFilterFn;
   onClose?: () => void;
   scrollToTop?: () => void;
+  expandedTableHeader?: string;
 }
 
 // ToDo: These would need to be read from an upcoming config panel
@@ -255,6 +256,7 @@ const DataTableUI = ({
   onFilter,
   onClose,
   scrollToTop,
+  expandedTableHeader,
 }: DataTableProps) => {
   const columnNames = columns.map((column) => column.name);
 
@@ -539,6 +541,7 @@ const DataTableUI = ({
                   onClose={onClose}
                   isShortDots={isShortDots}
                   docViewsRegistry={docViewsRegistry}
+                  expandedTableHeader={expandedTableHeader}
                 />
               );
             }

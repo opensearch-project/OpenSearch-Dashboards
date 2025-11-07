@@ -279,7 +279,7 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('title', 'value1 (Bar) and value2 (Line) Over Time');
       expect(result).toHaveProperty('data.values', transformedData);
       expect(result).toHaveProperty('layer');
-      expect(result.layer).toHaveLength(6); // Bar layer (with threshold) + line layer + 3 hover state layers + time marker
+      expect(result.layer).toHaveLength(4); // Bar layer (with threshold) + line layer + 1 hover state layers + time marker
 
       // Verify the bar layer
       const barLayer = result.layer[0].layer[0];
@@ -326,7 +326,7 @@ describe('to_expression', () => {
         mockAxisColumnMappings,
         timeRange
       );
-      expect(result.layer).toHaveLength(6); // Bar layer (with threshold) + line layer + 3 hover state layers + time marker
+      expect(result.layer).toHaveLength(4); // Bar layer (with threshold) + line layer + 1 hover state layers + time marker
       expect(utils.applyTimeRangeToEncoding).toHaveBeenCalledWith(
         expect.any(Object),
         mockAxisColumnMappings,

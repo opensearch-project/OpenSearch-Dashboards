@@ -7,11 +7,12 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
+import { CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { ChatPluginSetup, ChatPluginStart, AppPluginStartDependencies } from './types';
 import { ChatService } from './services/chat_service';
 import { ChatHeaderButton, ChatHeaderButtonInstance } from './components/chat_header_button';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
+import { SuggestedActionsService } from './services/suggested_action';
 
 /**
  * @experimental
@@ -19,12 +20,14 @@ import { toMountPoint } from '../../opensearch_dashboards_react/public';
  */
 export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private chatService: ChatService | undefined;
+  private suggestedActionsService = new SuggestedActionsService();
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): ChatPluginSetup {
-    // Return methods that should be available to other plugins
-    return {};
+  public setup(): ChatPluginSetup {
+    return {
+      suggestedActionsService: this.suggestedActionsService.setup(),
+    };
   }
 
   public start(core: CoreStart, deps: AppPluginStartDependencies): ChatPluginStart {
@@ -65,6 +68,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
                 contextProvider: deps.contextProvider,
                 charts: deps.charts,
                 ref: chatHeaderButtonRef,
+                suggestedActionsService: this.suggestedActionsService!,
               })
             );
             unmountComponent = mountPoint(element);
