@@ -163,11 +163,6 @@ const commonConfig = {
         test: /\.(woff|woff2|eot|ttf|otf)$/,
         use: 'file-loader',
       },
-      // Add raw-loader for worker files
-      {
-        test: /\.worker\.js$/,
-        use: 'raw-loader',
-      },
     ],
   },
 };

@@ -60,8 +60,12 @@ import {
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
+import * as monaco from '@osd/monaco';
 
 jest.spyOn(CoreSystem.prototype, 'stop');
+jest.mock('@osd/monaco', () => ({
+  setBuildHash: jest.fn(),
+}));
 
 const defaultCoreSystemParams = {
   rootDomElement: document.createElement('div'),
@@ -189,6 +193,17 @@ describe('#setup()', () => {
   it('calls injectedMetadata#setup()', async () => {
     await setupCore();
     expect(MockInjectedMetadataService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('initializes Monaco with build hash from injectedMetadata', async () => {
+    const mockBuildNumber = 12345;
+    MockInjectedMetadataService.setup.mockReturnValue({
+      getOpenSearchDashboardsBuildNumber: jest.fn().mockReturnValue(mockBuildNumber),
+    } as any);
+
+    await setupCore();
+
+    expect(monaco.setBuildHash).toHaveBeenCalledWith(mockBuildNumber);
   });
 
   it('calls docLinks#setup()', async () => {
