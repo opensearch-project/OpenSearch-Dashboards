@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiFlexGroup,
@@ -103,35 +103,62 @@ export const ThresholdCustomValues: React.FC<ThresholdCustomValuesProps> = ({
 }) => {
   const [ranges, setRanges] = useState<Threshold[]>(thresholds || []);
 
-  const handleRangeChange = (index: number, value: Threshold) => {
-    const updated = [...ranges];
-    updated[index] = value;
-    const sorted = updated.sort((a, b) => a.value - b.value);
-    setRanges(sorted);
-    onThresholdValuesChange(sorted);
-  };
+  const debouncedSortTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handleAddRange = () => {
+  const debouncedSort = useCallback(
+    (updatedRanges: Threshold[]) => {
+      if (debouncedSortTimeoutRef.current) {
+        clearTimeout(debouncedSortTimeoutRef.current);
+      }
+      debouncedSortTimeoutRef.current = setTimeout(() => {
+        const sorted = [...updatedRanges].sort((a, b) => a.value - b.value);
+        setRanges(sorted);
+        onThresholdValuesChange(sorted);
+      }, 300);
+    },
+    [onThresholdValuesChange]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (debouncedSortTimeoutRef.current !== null) {
+        clearTimeout(debouncedSortTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleRangeChange = useCallback(
+    (index: number, value: Threshold) => {
+      const updated = [...ranges];
+      updated[index] = value;
+      debouncedSort(updated);
+    },
+    [ranges, debouncedSort]
+  );
+
+  const handleAddRange = useCallback(() => {
     const curRangeLength = ranges.length;
     const newDefaultValue = curRangeLength > 0 ? Number(ranges[curRangeLength - 1].value) + 100 : 0;
     const newRange = { value: newDefaultValue, color: getNextColor(curRangeLength + 1) };
 
     const updated = [...ranges, newRange];
-    const sorted = updated.sort((a, b) => a.value - b.value);
-    setRanges(sorted);
-    onThresholdValuesChange(sorted);
-  };
+    setRanges(updated);
+    onThresholdValuesChange(updated);
+  }, [ranges, onThresholdValuesChange]);
 
   const getNextColor = (rangesLength: number): string => {
     const index = rangesLength % THRESHOLD_COLORS.length;
     return THRESHOLD_COLORS[index];
   };
 
-  const handleDeleteRange = (index: number) => {
-    const updated = ranges.filter((_, i) => i !== index);
-    setRanges(updated);
-    onThresholdValuesChange(updated);
-  };
+  const handleDeleteRange = useCallback(
+    (index: number) => {
+      const updated = ranges.filter((_, i) => i !== index);
+      setRanges(updated);
+      onThresholdValuesChange(updated);
+    },
+    [onThresholdValuesChange, ranges]
+  );
 
   const [localBaseColor, setLocalBaseColor] = useDebouncedValue<string>(
     baseColor,

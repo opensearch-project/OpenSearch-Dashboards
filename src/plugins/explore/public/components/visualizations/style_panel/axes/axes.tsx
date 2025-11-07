@@ -18,6 +18,7 @@ import { CategoryAxis, VisColumn, ValueAxis, Positions, AxisRole } from '../../t
 import { StyleAccordion } from '../style_accordion';
 import { DebouncedFieldNumber, DebouncedFieldText } from '.././utils';
 import { AXIS_LABEL_MAX_LENGTH } from '../../constants';
+import { getSchemaByAxis } from '../../utils/utils';
 
 interface AxesOptionsProps {
   categoryAxes: CategoryAxis[];
@@ -28,6 +29,9 @@ interface AxesOptionsProps {
   categoricalColumns: VisColumn[];
   dateColumns: VisColumn[];
   axisColumnMappings: Partial<Record<AxisRole, VisColumn>>;
+  showFullTimeRange: boolean;
+  onShowFullTimeRangeChange: (showFullTimeRange: boolean) => void;
+  initialIsOpen?: boolean;
 }
 
 export const AxesOptions: React.FC<AxesOptionsProps> = ({
@@ -39,6 +43,9 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
   categoricalColumns,
   dateColumns,
   axisColumnMappings,
+  showFullTimeRange,
+  onShowFullTimeRangeChange,
+  initialIsOpen = false,
 }) => {
   const updateCategoryAxis = (index: number, updates: Partial<CategoryAxis>) => {
     const updatedAxes = [...categoryAxes];
@@ -116,13 +123,15 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
     defaultMessage: 'Truncate after',
   });
 
+  const isDateXAxis = getSchemaByAxis(axisColumnMappings?.[AxisRole.X]) === 'temporal';
+
   return (
     <StyleAccordion
       id="axesSection"
       accordionLabel={i18n.translate('explore.stylePanel.tabs.axes', {
         defaultMessage: 'Axes',
       })}
-      initialIsOpen={true}
+      initialIsOpen={initialIsOpen}
     >
       {/* Category Axes */}
       {categoryAxes.map((axis, index) => (
@@ -190,6 +199,19 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                   isFullWidth
                 />
               </EuiFormRow>
+              {isDateXAxis && (
+                <EuiFormRow>
+                  <EuiSwitch
+                    compressed
+                    label={i18n.translate('explore.vis.gridOptions.showFullTimeRange', {
+                      defaultMessage: 'Show full time range',
+                    })}
+                    checked={showFullTimeRange}
+                    onChange={(e) => onShowFullTimeRangeChange(e.target.checked)}
+                    data-test-subj="showFullTimeRangeSwitch"
+                  />
+                </EuiFormRow>
+              )}
               <EuiFormRow>
                 <EuiSwitch
                   compressed
@@ -281,10 +303,9 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
       {isRule2
         ? // Special rendering for Rule 2: Show both axes with clear labels
           valueAxes.slice(0, 2).map((axis, index) => (
-            <>
+            <React.Fragment key={axis.id}>
               <EuiSplitPanel.Inner
                 paddingSize="s"
-                key={axis.id}
                 color="subdued"
                 data-test-subj="twoValueAxesPanel"
               >
@@ -447,17 +468,12 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                   </>
                 )}
               </EuiSplitPanel.Inner>
-            </>
+            </React.Fragment>
           ))
         : // Standard rendering for other rules
           valueAxes.map((axis, index) => (
-            <>
-              <EuiSplitPanel.Inner
-                paddingSize="s"
-                key={axis.id}
-                color="subdued"
-                data-test-subj="ValueAxisPanel"
-              >
+            <React.Fragment key={axis.id}>
+              <EuiSplitPanel.Inner paddingSize="s" color="subdued" data-test-subj="ValueAxisPanel">
                 <EuiText size="s" style={{ fontWeight: 600 }}>
                   {i18n.translate('explore.vis.gridOptions.valueAxis', {
                     defaultMessage: 'Y-Axis',
@@ -605,7 +621,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
                   </>
                 )}
               </EuiSplitPanel.Inner>
-            </>
+            </React.Fragment>
           ))}
     </StyleAccordion>
   );

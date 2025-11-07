@@ -49,14 +49,15 @@ export const VisualizationContainer = React.memo(() => {
   const searchContext = useSearchContext();
   const dispatch = useDispatch();
 
-  const rows = useMemo(() => results?.hits?.hits || [], [results]);
-  const fieldSchema = useMemo(() => results?.fieldSchema || [], [results]);
-
   const visualizationBuilder = getVisualizationBuilder();
 
   useEffect(() => {
-    visualizationBuilder.handleData(rows, fieldSchema);
-  }, [rows, fieldSchema, visualizationBuilder]);
+    if (results) {
+      const rows = results.hits?.hits || [];
+      const fieldSchema = results.fieldSchema || [];
+      visualizationBuilder.handleData(rows, fieldSchema);
+    }
+  }, [visualizationBuilder, results]);
 
   useEffect(() => {
     visualizationBuilder.init();

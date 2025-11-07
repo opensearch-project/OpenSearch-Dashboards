@@ -51,6 +51,7 @@ export const getSchemaConfigs = (): Record<string, SchemaConfig> => ({
         description: i18n.translate('data.schemaConfig.otelLogs.traceId.description', {
           defaultMessage: 'Unique identifier for the trace',
         }),
+        type: 'string',
       },
       spanId: {
         displayName: i18n.translate('data.schemaConfig.otelLogs.spanId.displayName', {
@@ -59,6 +60,7 @@ export const getSchemaConfigs = (): Record<string, SchemaConfig> => ({
         description: i18n.translate('data.schemaConfig.otelLogs.spanId.description', {
           defaultMessage: 'Unique identifier for the span',
         }),
+        type: 'string',
       },
       serviceName: {
         displayName: i18n.translate('data.schemaConfig.otelLogs.serviceName.displayName', {
@@ -67,6 +69,7 @@ export const getSchemaConfigs = (): Record<string, SchemaConfig> => ({
         description: i18n.translate('data.schemaConfig.otelLogs.serviceName.description', {
           defaultMessage: 'Name of the service',
         }),
+        type: 'string',
       },
       timestamp: {
         displayName: i18n.translate('data.schemaConfig.otelLogs.timestamp.displayName', {

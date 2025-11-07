@@ -31,13 +31,12 @@ import {
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { SortOrder } from '../types/saved_explore_types';
 import { SavedExplore } from '../saved_explore';
-import { SAMPLE_SIZE_SETTING } from '../../common/legacy/discover';
 import { ExploreEmbeddableComponent } from './explore_embeddable_component';
 import { ExploreServices } from '../types';
 import { ExpressionRendererEvent, ExpressionRenderError } from '../../../expressions/public';
 import { VisColumn } from '../components/visualizations/types';
 import { toExpression } from '../components/visualizations/utils/to_expression';
-import { DOC_HIDE_TIME_COLUMN_SETTING } from '../../common';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SAMPLE_SIZE_SETTING } from '../../common';
 import * as columnActions from '../application/legacy/discover/application/utils/state_management/common';
 import { buildColumns } from '../application/legacy/discover/application/utils/columns';
 import { UiActionsStart, APPLY_FILTER_TRIGGER } from '../../../ui_actions/public';
@@ -376,40 +375,44 @@ export class ExploreEmbeddable
         ...(categoricalColumns ?? []),
         ...(dateColumns ?? []),
       ];
-      if (selectedChartType === 'table') {
-        this.searchProps.tableData = {
-          columns: allColumns,
-          rows: visualizationData.transformedData ?? [],
-        };
-      } else {
-        const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
-        const matchedRule = visualizationRegistry.findRuleByAxesMapping(
-          visualization.axesMapping,
-          allColumns
-        );
-        if (!matchedRule || !matchedRule.toSpec) {
-          throw new Error(
-            `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
+
+      // Check if there's data to visualize
+      if (visualizationData.transformedData && visualizationData.transformedData.length > 0) {
+        if (selectedChartType === 'table') {
+          this.searchProps.tableData = {
+            columns: allColumns,
+            rows: visualizationData.transformedData ?? [],
+          };
+        } else {
+          const axesMapping = convertStringsToMappings(visualization.axesMapping, allColumns);
+          const matchedRule = visualizationRegistry.findRuleByAxesMapping(
+            visualization.axesMapping,
+            allColumns
           );
+          if (!matchedRule || !matchedRule.toSpec) {
+            throw new Error(
+              `Cannot load saved visualization "${this.panelTitle}" with id ${this.savedExplore.id}`
+            );
+          }
+          const searchContext = {
+            query: this.input.query,
+            filters: this.input.filters,
+            timeRange: this.input.timeRange,
+          };
+          this.searchProps.searchContext = searchContext;
+          const styleOptions = visualization.params;
+          const spec = matchedRule.toSpec(
+            visualizationData.transformedData,
+            numericalColumns,
+            categoricalColumns,
+            dateColumns,
+            styleOptions,
+            selectedChartType,
+            axesMapping
+          );
+          const exp = toExpression(searchContext, spec);
+          this.searchProps.expression = exp;
         }
-        const searchContext = {
-          query: this.input.query,
-          filters: this.input.filters,
-          timeRange: this.input.timeRange,
-        };
-        this.searchProps.searchContext = searchContext;
-        const styleOptions = visualization.params;
-        const spec = matchedRule.toSpec(
-          visualizationData.transformedData,
-          numericalColumns,
-          categoricalColumns,
-          dateColumns,
-          styleOptions,
-          selectedChartType,
-          axesMapping
-        );
-        const exp = toExpression(searchContext, spec);
-        this.searchProps.expression = exp;
       }
     }
     this.updateOutput({ loading: false, error: undefined });
@@ -463,7 +466,6 @@ export class ExploreEmbeddable
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = node;
-    this.renderComponent(node, this.searchProps);
   }
 
   public getInspectorAdapters() {

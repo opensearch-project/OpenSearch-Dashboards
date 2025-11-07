@@ -96,6 +96,7 @@ function mockProps() {
     workspaceList$: new BehaviorSubject([]),
     currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>(null),
     useUpdatedHeader: false,
+    globalSearchCommands$: new BehaviorSubject([]),
   };
 }
 

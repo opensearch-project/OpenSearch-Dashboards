@@ -95,7 +95,6 @@ export const createDatasetChangeMiddleware = (
           }
 
           await store.dispatch(executeQueries({ services }) as any);
-          store.dispatch(detectAndSetOptimalTab({ services }) as any);
         } catch (error) {
           services.notifications?.toasts.addError(error, {
             title: 'Error loading dataset',

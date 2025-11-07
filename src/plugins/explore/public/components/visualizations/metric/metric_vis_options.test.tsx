@@ -14,12 +14,22 @@ jest.mock('@osd/i18n', () => ({
   },
 }));
 
-jest.mock('../style_panel/unit/unit_panel', () => ({
-  UnitPanel: jest.fn(({ unitId, onUnitChange }) => (
-    <div data-test-subj="mockMetricUnitPanel">
-      <select data-test-subj="changeUnit" onClick={() => onUnitChange('number')}>
-        <option value="number">Number</option>
-      </select>
+jest.mock('../style_panel/standard_options/standard_options_panel', () => ({
+  StandardOptionsPanel: jest.fn(({ min, onMinChange, max, onMaxChange, unit, onUnitChange }) => (
+    <div data-test-subj="mockStandardPanel">
+      <input
+        data-test-subj="thresholdMinBase"
+        onChange={(e) => onMinChange(Number(e.target.value))}
+      />
+      <input
+        data-test-subj="thresholdMaxBase"
+        onChange={(e) => onMaxChange(Number(e.target.value))}
+      />
+      <div data-test-subj="mockGaugeUnitPanel">
+        <select data-test-subj="changeUnit" onClick={() => onUnitChange('number')}>
+          <option value="number">Number</option>
+        </select>
+      </div>
     </div>
   )),
 }));
@@ -173,9 +183,9 @@ describe('MetricVisStyleControls', () => {
     expect(titleInput).toHaveValue('');
   });
 
-  it('renders unit panel', () => {
+  it('renders standard panel', () => {
     render(<MetricVisStyleControls {...mockProps} />);
-    expect(screen.getByTestId('mockMetricUnitPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('mockStandardPanel')).toBeInTheDocument();
   });
 
   it('calls onStyleChange when unit is changed', () => {

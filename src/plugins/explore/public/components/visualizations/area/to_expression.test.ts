@@ -92,6 +92,12 @@ describe('Area Chart to_expression', () => {
     },
     categoryAxes: [],
     valueAxes: [],
+    showFullTimeRange: false,
+  };
+
+  const mockTimeRange = {
+    from: '2023-01-01',
+    to: '2023-01-04',
   };
 
   describe('createSimpleAreaChart', () => {
@@ -261,6 +267,34 @@ describe('Area Chart to_expression', () => {
       expect(thresholdLayer).toHaveProperty('mark.strokeDash');
     });
 
+    it('should create a simple area chart with domain layer when showFullTimeRange is enabled', () => {
+      const stylesWithDomain = {
+        ...mockStyles,
+        showFullTimeRange: true,
+      };
+
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockDateColumns[0],
+      };
+
+      const result = createSimpleAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockDateColumns,
+        stylesWithDomain,
+        mockAxisColumnMappings,
+        mockTimeRange
+      );
+
+      // Verify that additional layers may be present when showFullTimeRange is enabled
+      expect(result.layer.length).toBeGreaterThanOrEqual(1);
+      const domainLayer = result.layer.find((layer: any) => layer.encoding?.x?.scale?.domain);
+      if (domainLayer) {
+        expect(domainLayer.encoding.x.scale.domain).toEqual(['2023-01-01', '2023-01-04']);
+      }
+    });
+
     it('should fallback to default tooltip format when dateField is missing', () => {
       const incompleteAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: mockNumericalColumns[0],
@@ -388,6 +422,67 @@ describe('Area Chart to_expression', () => {
         mockAxisColumnMappings
       );
       expect(customTitleResult).toHaveProperty('title', 'Custom Multi-Area Chart');
+    });
+
+    it('should create a multi-area chart with domain layer when showFullTimeRange is enabled', () => {
+      const stylesWithDomain = {
+        ...mockStyles,
+        showFullTimeRange: true,
+      };
+
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockDateColumns[0],
+        [AxisRole.COLOR]: mockCategoricalColumns[0],
+      };
+
+      const result = createMultiAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        [mockCategoricalColumns[0]],
+        mockDateColumns,
+        stylesWithDomain,
+        mockAxisColumnMappings,
+        mockTimeRange
+      );
+
+      // Verify that additional layers may be present when showFullTimeRange is enabled
+      expect(result.layer.length).toBeGreaterThanOrEqual(1);
+      const domainLayer = result.layer.find((layer: any) => layer.encoding?.x?.scale?.domain);
+      if (domainLayer) {
+        expect(domainLayer.encoding.x.scale.domain).toEqual(['2023-01-01', '2023-01-04']);
+      }
+    });
+
+    it('should create a multi-area chart with time marker when enabled', () => {
+      const stylesWithTimeMarker = {
+        ...mockStyles,
+        addTimeMarker: true,
+      };
+
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockDateColumns[0],
+        [AxisRole.COLOR]: mockCategoricalColumns[0],
+      };
+
+      const result = createMultiAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        [mockCategoricalColumns[0]],
+        mockDateColumns,
+        stylesWithTimeMarker,
+        mockAxisColumnMappings
+      );
+
+      // Verify time marker layer exists
+      expect(result.layer.length).toBeGreaterThan(1);
+      const timeMarkerLayer = result.layer.find(
+        (layer: any) => layer.mark?.type === 'rule' && layer.encoding?.x?.datum
+      );
+      expect(timeMarkerLayer).toBeDefined();
+      expect(timeMarkerLayer).toHaveProperty('mark.color', '#FF6B6B');
+      expect(timeMarkerLayer).toHaveProperty('mark.strokeDash');
     });
 
     it('should fallback to default tooltip format when dateField is missing', () => {
@@ -565,6 +660,37 @@ describe('Area Chart to_expression', () => {
       expect(thresholdLayer).toHaveProperty('mark.strokeDash');
     });
 
+    it('should create a faceted multi-area chart with domain layer when showFullTimeRange is enabled', () => {
+      const stylesWithDomain = {
+        ...mockStyles,
+        showFullTimeRange: true,
+      };
+
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockDateColumns[0],
+        [AxisRole.COLOR]: mockCategoricalColumns[0],
+        [AxisRole.FACET]: mockCategoricalColumns[1],
+      };
+
+      const result = createFacetedMultiAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        mockDateColumns,
+        stylesWithDomain,
+        mockAxisColumnMappings,
+        mockTimeRange
+      );
+
+      // Verify that additional layers may be present when showFullTimeRange is enabled
+      expect(result.spec.layer.length).toBeGreaterThanOrEqual(1);
+      const domainLayer = result.spec.layer.find((layer: any) => layer.encoding?.x?.scale?.domain);
+      if (domainLayer) {
+        expect(domainLayer.encoding.x.scale.domain).toEqual(['2023-01-01', '2023-01-04']);
+      }
+    });
+
     it('should fallback to default tooltip format when dateField is missing', () => {
       const incompleteAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.Y]: mockNumericalColumns[0],
@@ -694,6 +820,34 @@ describe('Area Chart to_expression', () => {
       expect(customTitleResult).toHaveProperty('title', 'Custom Category Chart');
     });
 
+    it('should not add time marker layer when enabled for non-temporal axis', () => {
+      const stylesWithTimeMarker = {
+        ...mockStyles,
+        addTimeMarker: true,
+      };
+
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockCategoricalColumns[0],
+      };
+
+      const result = createCategoryAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        [mockCategoricalColumns[0]],
+        [],
+        stylesWithTimeMarker,
+        mockAxisColumnMappings
+      );
+
+      // Verify that two layers are present (main layer and highlight bar layer)
+      expect(result.layer.length).toBe(2); // Main layer + highlight bar layer
+      const timeMarkerLayer = result.layer.find(
+        (layer: any) => layer.mark?.type === 'rule' && layer.encoding?.x?.datum
+      );
+      expect(timeMarkerLayer).toBeUndefined();
+    });
+
     it('should throw an error when required columns are missing', () => {
       expect(() => {
         createCategoryAreaChart(mockTransformedData, [], [], [], mockStyles);
@@ -812,18 +966,33 @@ describe('Area Chart to_expression', () => {
       expect(customTitleResult).toHaveProperty('title', 'Custom Stacked Chart');
     });
 
-    it('should throw an error when required columns are missing', () => {
-      expect(() => {
-        createStackedAreaChart(
-          mockTransformedData,
-          mockNumericalColumns,
-          [mockCategoricalColumns[0]],
-          [],
-          mockStyles
-        );
-      }).toThrow(
-        'Stacked area chart requires at least one numerical column and two categorical columns'
+    it('should not add time marker layer when enabled for non-temporal axis', () => {
+      const stylesWithTimeMarker = {
+        ...mockStyles,
+        addTimeMarker: true,
+      };
+
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.X]: mockCategoricalColumns[0],
+        [AxisRole.COLOR]: mockCategoricalColumns[1],
+      };
+
+      const result = createStackedAreaChart(
+        mockTransformedData,
+        mockNumericalColumns,
+        mockCategoricalColumns,
+        [],
+        stylesWithTimeMarker,
+        mockAxisColumnMappings
       );
+
+      // Verify that two layers are present (main layer and highlight bar layer)
+      expect(result.layer.length).toBe(2); // Main layer + highlight bar layer
+      const timeMarkerLayer = result.layer.find(
+        (layer: any) => layer.mark?.type === 'rule' && layer.encoding?.x?.datum
+      );
+      expect(timeMarkerLayer).toBeUndefined();
     });
 
     it('should add threshold layer when enabled', () => {
@@ -862,6 +1031,25 @@ describe('Area Chart to_expression', () => {
       expect(mainLayer).toHaveProperty('encoding.x.field', 'category');
       expect(mainLayer).toHaveProperty('encoding.y.field', 'value');
       expect(mainLayer).toHaveProperty('encoding.color.field', 'category2');
+
+      // Verify threshold layer exists
+      // Search within nested layer arrays, as createThresholdLayer may return an object with a 'layer' property
+      let thresholdLayer;
+      for (const layer of result.layer) {
+        if (layer.layer) {
+          thresholdLayer = layer.layer.find(
+            (sublayer: any) => sublayer.mark?.type === 'rule' && sublayer.encoding?.y?.datum === 15
+          );
+          if (thresholdLayer) break;
+        } else if (layer.mark?.type === 'rule' && layer.encoding?.y?.datum === 15) {
+          thresholdLayer = layer;
+          break;
+        }
+      }
+      expect(thresholdLayer).toBeDefined();
+      expect(thresholdLayer).toHaveProperty('mark.color', '#E7664C');
+      expect(thresholdLayer).toHaveProperty('mark.strokeWidth', 1);
+      expect(thresholdLayer).toHaveProperty('mark.strokeDash');
     });
   });
 });

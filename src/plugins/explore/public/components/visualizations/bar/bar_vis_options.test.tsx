@@ -140,7 +140,7 @@ jest.mock('../style_panel/tooltip/tooltip', () => ({
 }));
 
 jest.mock('../style_panel/axes/standard_axes_options', () => ({
-  AllAxesOptions: jest.fn(({ standardAxes, onStandardAxesChange }) => (
+  AllAxesOptions: jest.fn(({ standardAxes, onStandardAxesChange, onShowFullTimeRangeChange }) => (
     <div data-test-subj="allAxesOptions">
       <button
         data-test-subj="changeAxis"
@@ -153,6 +153,12 @@ jest.mock('../style_panel/axes/standard_axes_options', () => ({
         onClick={() => onStandardAxesChange([...standardAxes, { id: 'new-axis' }])}
       >
         Update Value Axes
+      </button>
+      <button
+        data-test-subj="mockUpdateShowFullTimeRange"
+        onClick={() => onShowFullTimeRangeChange && onShowFullTimeRangeChange(true)}
+      >
+        Show Full Time Range
       </button>
     </div>
   )),
@@ -436,6 +442,19 @@ describe('BarVisStyleControls', () => {
     });
   });
 
+  test('calls onStyleChange with correct parameters for show full time range', async () => {
+    render(
+      <Provider store={store}>
+        <BarVisStyleControls {...defaultProps} />
+      </Provider>
+    );
+
+    await userEvent.click(screen.getByTestId('mockUpdateShowFullTimeRange'));
+    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
+      showFullTimeRange: true,
+    });
+  });
+
   test('calls onStyleChange with correct parameters for bar exclusive options', async () => {
     render(
       <Provider store={store}>
@@ -517,19 +536,11 @@ describe('BarVisStyleControls', () => {
     });
   });
 
-  test('render bucket panel with num bucket type', async () => {
+  test('render bucket panel with category bucket', async () => {
     const propsWithNumBucket = {
       ...defaultProps,
       axisColumnMappings: {
         ...mockAxisColumnMappings,
-        x: {
-          id: 1,
-          name: 'Numerical X',
-          schema: VisFieldType.Numerical,
-          column: 'numX',
-          validValuesCount: 100,
-          uniqueValuesCount: 50,
-        },
       },
     };
 
@@ -540,20 +551,8 @@ describe('BarVisStyleControls', () => {
     );
 
     expect(screen.getByTestId('mockBucketOptionsPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('bucketType')).toHaveTextContent('num');
-    expect(screen.getByTestId('mockUpdateBucketSize')).toBeInTheDocument();
-    expect(screen.getByTestId('mockUpdateBucketCount')).toBeInTheDocument();
+    expect(screen.getByTestId('bucketType')).toHaveTextContent('cate');
     expect(screen.getByTestId('mockUpdateAggregation')).toBeInTheDocument();
-
-    await userEvent.click(screen.getByTestId('mockUpdateBucketSize'));
-    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      bucket: { bucketTimeUnit: 'auto', aggregationType: 'sum', bucketSize: 100 },
-    });
-
-    await userEvent.click(screen.getByTestId('mockUpdateBucketCount'));
-    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      bucket: { bucketTimeUnit: 'auto', aggregationType: 'sum', bucketCount: 20 },
-    });
 
     await userEvent.click(screen.getByTestId('mockUpdateAggregation'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({

@@ -3,16 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useRef, useState, useEffect, useImperativeHandle } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { CoreStart, MountPoint, SIDECAR_DOCKED_MODE } from '../../../../core/public';
-import { ChatWindow } from './chat_window';
+import { useUnmount } from 'react-use';
+import { CoreStart, SIDECAR_DOCKED_MODE } from '../../../../core/public';
+import { ChatWindow, ChatWindowInstance } from './chat_window';
 import { ChatProvider } from '../contexts/chat_context';
 import { ChatService } from '../services/chat_service';
 import { GlobalAssistantProvider } from '../../../context_provider/public';
-import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
+import {
+  MountPointPortal,
+  OpenSearchDashboardsContextProvider,
+} from '../../../opensearch_dashboards_react/public';
 import { ContextProviderStart, TextSelectionMonitor } from '../../../context_provider/public';
 import './chat_header_button.scss';
+import { SuggestedActionsService } from '../services/suggested_action';
+
+export interface ChatHeaderButtonInstance {
+  startNewConversation: ({ content }: { content: string }) => Promise<void>;
+}
 
 export enum ChatLayoutMode {
   SIDECAR = 'sidecar',
@@ -24,83 +33,38 @@ interface ChatHeaderButtonProps {
   chatService: ChatService;
   contextProvider?: ContextProviderStart;
   charts?: any;
+  suggestedActionsService: SuggestedActionsService;
 }
 
-export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
-  core,
-  chatService,
-  contextProvider,
-  charts,
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [layoutMode, setLayoutMode] = useState<ChatLayoutMode>(ChatLayoutMode.SIDECAR);
-  const sideCarRef = useRef<{ close: () => void }>();
-  const mountPointRef = useRef<HTMLDivElement>(null);
+export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatHeaderButtonProps>(
+  ({ core, chatService, contextProvider, charts, suggestedActionsService }, ref) => {
+    // Use ChatService as source of truth for window state
+    const [isOpen, setIsOpen] = useState<boolean>(chatService.isWindowOpen());
+    const [layoutMode, setLayoutMode] = useState<ChatLayoutMode>(chatService.getWindowMode());
+    const sideCarRef = useRef<{ close: () => void }>();
+    const chatWindowRef = useRef<ChatWindowInstance>(null);
+    const flyoutMountPoint = useRef(null);
 
-  const openSidecar = useCallback(() => {
-    if (!mountPointRef.current) return;
+    const setMountPoint = useCallback((mountPoint) => {
+      flyoutMountPoint.current = mountPoint;
+    }, []);
 
-    const mountPoint: MountPoint = (element) => {
-      if (mountPointRef.current) {
-        element.appendChild(mountPointRef.current);
-      }
+    // Register ChatWindow ref with ChatService for external access
+    useEffect(() => {
+      chatService.setChatWindowRef(chatWindowRef);
       return () => {
-        if (mountPointRef.current && element.contains(mountPointRef.current)) {
-          element.removeChild(mountPointRef.current);
-        }
+        chatService.clearChatWindowRef();
       };
-    };
+    }, [chatService]);
 
-    const sidecarConfig =
-      layoutMode === ChatLayoutMode.FULLSCREEN
-        ? {
-            dockedMode: SIDECAR_DOCKED_MODE.TAKEOVER,
-            paddingSize: window.innerHeight,
-            isHidden: false,
-          }
-        : {
-            dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
-            paddingSize: 400,
-            isHidden: false,
-          };
+    const openSidecar = useCallback(() => {
+      if (!flyoutMountPoint.current) return;
 
-    sideCarRef.current = core.overlays.sidecar.open(mountPoint, {
-      className: `chat-sidecar chat-sidecar--${layoutMode}`,
-      config: sidecarConfig,
-    });
-
-    setIsOpen(true);
-  }, [core.overlays, layoutMode]);
-
-  const closeSidecar = useCallback(() => {
-    if (sideCarRef.current) {
-      sideCarRef.current.close();
-      sideCarRef.current = undefined;
-    }
-    setIsOpen(false);
-  }, []);
-
-  const toggleSidecar = useCallback(() => {
-    if (isOpen) {
-      closeSidecar();
-    } else {
-      openSidecar();
-    }
-  }, [isOpen, openSidecar, closeSidecar]);
-
-  const toggleLayoutMode = useCallback(() => {
-    const newLayoutMode =
-      layoutMode === ChatLayoutMode.SIDECAR ? ChatLayoutMode.FULLSCREEN : ChatLayoutMode.SIDECAR;
-
-    setLayoutMode(newLayoutMode);
-
-    // Update sidecar config dynamically if currently open
-    if (isOpen && sideCarRef.current) {
-      const newSidecarConfig =
-        newLayoutMode === ChatLayoutMode.FULLSCREEN
+      const sidecarConfig =
+        layoutMode === ChatLayoutMode.FULLSCREEN
           ? {
               dockedMode: SIDECAR_DOCKED_MODE.TAKEOVER,
-              paddingSize: window.innerHeight - 50,
+              paddingSize: window.innerHeight,
               isHidden: false,
             }
           : {
@@ -109,56 +73,157 @@ export const ChatHeaderButton: React.FC<ChatHeaderButtonProps> = ({
               isHidden: false,
             };
 
-      core.overlays.sidecar.setSidecarConfig(newSidecarConfig);
-    }
-  }, [layoutMode, isOpen, core.overlays.sidecar]);
+      sideCarRef.current = core.overlays.sidecar.open(flyoutMountPoint.current, {
+        className: `chat-sidecar chat-sidecar--${layoutMode}`,
+        config: sidecarConfig,
+      });
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
+      // Notify ChatService that window is now open
+      chatService.setWindowState(true, layoutMode);
+      setIsOpen(true);
+    }, [core.overlays, layoutMode, chatService]);
+
+    const closeSidecar = useCallback(() => {
       if (sideCarRef.current) {
         sideCarRef.current.close();
+        sideCarRef.current = undefined;
       }
-    };
-  }, []);
+      // Notify ChatService that window is now closed
+      chatService.setWindowState(false);
+      setIsOpen(false);
+    }, [chatService]);
 
-  return (
-    <>
-      {/* Text selection monitor - always active when chat UI is rendered */}
-      <TextSelectionMonitor />
+    const toggleSidecar = useCallback(() => {
+      if (isOpen) {
+        closeSidecar();
+      } else {
+        openSidecar();
+      }
+    }, [isOpen, openSidecar, closeSidecar]);
 
-      <EuiToolTip content="Open Chat Assistant">
-        <EuiButtonIcon
-          iconType="generate"
-          onClick={toggleSidecar}
-          color={isOpen ? 'primary' : 'subdued'}
-          size="s"
-          aria-label="Toggle chat assistant"
-          display="empty"
-        />
-      </EuiToolTip>
+    const toggleLayoutMode = useCallback(() => {
+      const newLayoutMode =
+        layoutMode === ChatLayoutMode.SIDECAR ? ChatLayoutMode.FULLSCREEN : ChatLayoutMode.SIDECAR;
 
-      {/* Mount point for sidecar content */}
-      <div
-        ref={mountPointRef}
-        className={`chatHeaderButton__mountPoint ${
-          isOpen ? 'chatHeaderButton__mountPoint--visible' : 'chatHeaderButton__mountPoint--hidden'
-        }`}
-      >
-        <div className="chatHeaderButton__content">
-          <OpenSearchDashboardsContextProvider services={{ core, contextProvider, charts }}>
-            <GlobalAssistantProvider
-              onToolsUpdated={(tools) => {
-                // Tools updated in chat
-              }}
-            >
-              <ChatProvider chatService={chatService}>
-                <ChatWindow layoutMode={layoutMode} onToggleLayout={toggleLayoutMode} />
-              </ChatProvider>
-            </GlobalAssistantProvider>
-          </OpenSearchDashboardsContextProvider>
-        </div>
-      </div>
-    </>
-  );
-};
+      setLayoutMode(newLayoutMode);
+
+      // Update sidecar config dynamically if currently open
+      if (isOpen && sideCarRef.current) {
+        const newSidecarConfig =
+          newLayoutMode === ChatLayoutMode.FULLSCREEN
+            ? {
+                dockedMode: SIDECAR_DOCKED_MODE.TAKEOVER,
+                paddingSize: window.innerHeight - 50,
+                isHidden: false,
+              }
+            : {
+                dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
+                paddingSize: 400,
+                isHidden: false,
+              };
+
+        core.overlays.sidecar.setSidecarConfig(newSidecarConfig);
+      }
+
+      // Update ChatService with new layout mode
+      chatService.setWindowState(isOpen, newLayoutMode);
+    }, [layoutMode, isOpen, chatService, core.overlays.sidecar]);
+
+    const startNewConversation = useCallback<ChatHeaderButtonInstance['startNewConversation']>(
+      async ({ content }) => {
+        openSidecar();
+        chatWindowRef.current?.startNewChat();
+        chatWindowRef.current?.sendMessage({ content });
+      },
+      [openSidecar]
+    );
+
+    useImperativeHandle(ref, () => ({ startNewConversation }), [startNewConversation]);
+
+    // Listen to ChatService window state changes and sync local state
+    useEffect(() => {
+      const unsubscribe = chatService.onWindowStateChange((newIsOpen) => {
+        setIsOpen(newIsOpen);
+      });
+      return unsubscribe;
+    }, [chatService]);
+
+    // Register callbacks for external window open/close requests
+    useEffect(() => {
+      const unsubscribeOpen = chatService.onWindowOpenRequest(() => {
+        if (!isOpen) {
+          openSidecar();
+        }
+      });
+
+      const unsubscribeClose = chatService.onWindowCloseRequest(() => {
+        if (isOpen) {
+          closeSidecar();
+        }
+      });
+
+      return () => {
+        unsubscribeOpen();
+        unsubscribeClose();
+      };
+    }, [chatService, isOpen, openSidecar, closeSidecar]);
+
+    // Cleanup on unmount
+    useUnmount(() => {
+      if (sideCarRef.current) {
+        chatService.setWindowState(false);
+        sideCarRef.current.close();
+      }
+    });
+
+    return (
+      <>
+        {/* Text selection monitor - always active when chat UI is rendered */}
+        <TextSelectionMonitor />
+
+        <EuiToolTip content="Open Chat Assistant">
+          <EuiButtonIcon
+            iconType="generate"
+            onClick={toggleSidecar}
+            color={isOpen ? 'primary' : 'subdued'}
+            size="s"
+            aria-label="Toggle chat assistant"
+            display="empty"
+          />
+        </EuiToolTip>
+
+        {/* Mount point for sidecar content */}
+        <MountPointPortal setMountPoint={setMountPoint}>
+          <div
+            className={`chatHeaderButton__mountPoint ${
+              isOpen
+                ? 'chatHeaderButton__mountPoint--visible'
+                : 'chatHeaderButton__mountPoint--hidden'
+            }`}
+          >
+            <div className="chatHeaderButton__content">
+              <OpenSearchDashboardsContextProvider services={{ core, contextProvider, charts }}>
+                <GlobalAssistantProvider
+                  onToolsUpdated={(tools) => {
+                    // Tools updated in chat
+                  }}
+                >
+                  <ChatProvider
+                    chatService={chatService}
+                    suggestedActionsService={suggestedActionsService}
+                  >
+                    <ChatWindow
+                      layoutMode={layoutMode}
+                      onToggleLayout={toggleLayoutMode}
+                      ref={chatWindowRef}
+                    />
+                  </ChatProvider>
+                </GlobalAssistantProvider>
+              </OpenSearchDashboardsContextProvider>
+            </div>
+          </div>
+        </MountPointPortal>
+      </>
+    );
+  }
+);

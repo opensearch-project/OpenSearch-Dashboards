@@ -32,6 +32,11 @@ import { ByteSizeValue, schema, TypeOf } from '@osd/config-schema';
 import { hostname } from 'os';
 
 import { CspConfigType, CspConfig, ICspConfig } from '../csp';
+import {
+  CspReportOnlyConfigType,
+  CspReportOnlyConfig,
+  ICspReportOnlyConfig,
+} from '../csp_report_only';
 import { SslConfig, sslSchema } from './ssl_config';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
@@ -153,13 +158,18 @@ export class HttpConfig {
   public ssl: SslConfig;
   public compression: { enabled: boolean; referrerWhitelist?: string[] };
   public csp: ICspConfig;
+  public cspReportOnly: ICspReportOnlyConfig;
   public xsrf: { disableProtection: boolean; whitelist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
 
   /**
    * @internal
    */
-  constructor(rawHttpConfig: HttpConfigType, rawCspConfig: CspConfigType) {
+  constructor(
+    rawHttpConfig: HttpConfigType,
+    rawCspConfig: CspConfigType,
+    rawCspReportOnlyConfig: CspReportOnlyConfigType
+  ) {
     this.autoListen = rawHttpConfig.autoListen;
     this.host = rawHttpConfig.host;
     this.port = rawHttpConfig.port;
@@ -182,6 +192,7 @@ export class HttpConfig {
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
     this.csp = new CspConfig(rawCspConfig);
+    this.cspReportOnly = new CspReportOnlyConfig(rawCspReportOnlyConfig);
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
   }

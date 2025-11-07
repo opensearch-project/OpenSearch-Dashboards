@@ -15,7 +15,6 @@ import { StyleAccordion } from '../style_panel/style_accordion';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
 import { PercentageSelector } from '../style_panel/percentage/percentage_selector';
-import { UnitPanel } from '../style_panel/unit/unit_panel';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
 import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
 
@@ -57,94 +56,6 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
       </EuiFlexItem>
       {hasMappingSelected && (
         <>
-          <EuiFlexItem>
-            <StyleAccordion
-              id="metricValueOptions"
-              accordionLabel={i18n.translate('explore.stylePanel.tabs.metricValueOptions', {
-                defaultMessage: 'Value options',
-              })}
-              initialIsOpen={false}
-            >
-              <EuiFormRow
-                label={i18n.translate('explore.vis.metric.calculation', {
-                  defaultMessage: 'Calculation',
-                })}
-              >
-                <ValueCalculationSelector
-                  selectedValue={
-                    styleOptions.valueCalculation ?? defaultMetricChartStyles.valueCalculation
-                  }
-                  onChange={(value) => updateStyleOption('valueCalculation', value)}
-                />
-              </EuiFormRow>
-            </StyleAccordion>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <UnitPanel
-              unit={styleOptions.unitId}
-              onUnitChange={(value) => updateStyleOption('unitId', value)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <ThresholdPanel
-              thresholdsOptions={styleOptions.thresholdOptions}
-              onChange={(options) => updateStyleOption('thresholdOptions', options)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <StandardOptionsPanel
-              min={styleOptions.min}
-              max={styleOptions.max}
-              onMinChange={(value) => updateStyleOption('min', value)}
-              onMaxChange={(value) => updateStyleOption('max', value)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <StyleAccordion
-              id="metricTextStyles"
-              accordionLabel={i18n.translate('explore.stylePanel.tabs.metricTextSize', {
-                defaultMessage: 'Text size',
-              })}
-              initialIsOpen={false}
-            >
-              <EuiFormRow
-                label={i18n.translate('explore.vis.metric.valueFontSize', {
-                  defaultMessage: 'Value size',
-                })}
-              >
-                <DebouncedFieldNumber
-                  value={styleOptions.fontSize}
-                  onChange={(val) => onStyleChange({ fontSize: val })}
-                  placeholder="auto"
-                  data-test-subj="valueFontSizeInput"
-                />
-              </EuiFormRow>
-              <EuiFormRow
-                label={i18n.translate('explore.vis.metric.titleFontSize', {
-                  defaultMessage: 'Title size',
-                })}
-              >
-                <DebouncedFieldNumber
-                  value={styleOptions.titleSize}
-                  onChange={(val) => onStyleChange({ titleSize: val })}
-                  placeholder="auto"
-                  data-test-subj="titleFontSizeInput"
-                />
-              </EuiFormRow>
-              <EuiFormRow
-                label={i18n.translate('explore.vis.metric.percentageFontSize', {
-                  defaultMessage: 'Percentage size',
-                })}
-              >
-                <DebouncedFieldNumber
-                  value={styleOptions.percentageSize}
-                  onChange={(val) => onStyleChange({ percentageSize: val })}
-                  placeholder="auto"
-                  data-test-subj="percentageFontSizeInput"
-                />
-              </EuiFormRow>
-            </StyleAccordion>
-          </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <StyleAccordion
               id="metricSection"
@@ -201,6 +112,90 @@ export const MetricVisStyleControls: React.FC<MetricVisStyleControlsProps> = ({
                   />
                 </EuiFormRow>
               )}
+            </StyleAccordion>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <StyleAccordion
+              id="metricValueOptions"
+              accordionLabel={i18n.translate('explore.stylePanel.tabs.metricValueOptions', {
+                defaultMessage: 'Value options',
+              })}
+              initialIsOpen={true}
+            >
+              <EuiFormRow
+                label={i18n.translate('explore.vis.metric.calculation', {
+                  defaultMessage: 'Calculation',
+                })}
+              >
+                <ValueCalculationSelector
+                  selectedValue={
+                    styleOptions.valueCalculation ?? defaultMetricChartStyles.valueCalculation
+                  }
+                  onChange={(value) => updateStyleOption('valueCalculation', value)}
+                />
+              </EuiFormRow>
+            </StyleAccordion>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ThresholdPanel
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <StandardOptionsPanel
+              min={styleOptions.min}
+              max={styleOptions.max}
+              onMinChange={(value) => updateStyleOption('min', value)}
+              onMaxChange={(value) => updateStyleOption('max', value)}
+              unit={styleOptions.unitId}
+              onUnitChange={(value) => updateStyleOption('unitId', value)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <StyleAccordion
+              id="metricTextStyles"
+              accordionLabel={i18n.translate('explore.stylePanel.tabs.metricTextSize', {
+                defaultMessage: 'Text size',
+              })}
+              initialIsOpen={false}
+            >
+              <EuiFormRow
+                label={i18n.translate('explore.vis.metric.valueFontSize', {
+                  defaultMessage: 'Value size',
+                })}
+              >
+                <DebouncedFieldNumber
+                  value={styleOptions.fontSize}
+                  onChange={(val) => onStyleChange({ fontSize: val })}
+                  placeholder="auto"
+                  data-test-subj="valueFontSizeInput"
+                />
+              </EuiFormRow>
+              <EuiFormRow
+                label={i18n.translate('explore.vis.metric.titleFontSize', {
+                  defaultMessage: 'Title size',
+                })}
+              >
+                <DebouncedFieldNumber
+                  value={styleOptions.titleSize}
+                  onChange={(val) => onStyleChange({ titleSize: val })}
+                  placeholder="auto"
+                  data-test-subj="titleFontSizeInput"
+                />
+              </EuiFormRow>
+              <EuiFormRow
+                label={i18n.translate('explore.vis.metric.percentageFontSize', {
+                  defaultMessage: 'Percentage size',
+                })}
+              >
+                <DebouncedFieldNumber
+                  value={styleOptions.percentageSize}
+                  onChange={(val) => onStyleChange({ percentageSize: val })}
+                  placeholder="auto"
+                  data-test-subj="percentageFontSizeInput"
+                />
+              </EuiFormRow>
             </StyleAccordion>
           </EuiFlexItem>
         </>

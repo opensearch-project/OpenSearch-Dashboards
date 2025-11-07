@@ -12,7 +12,7 @@ import {
 } from '../../../core/server';
 import { capabilitiesProvider } from './capabilities_provider';
 import { exploreSavedObjectType } from './saved_objects';
-import { traceUiSettings } from './trace_ui_settings';
+import { exploreUiSettings } from './explore_ui_settings';
 
 import { ExplorePluginSetup, ExplorePluginStart } from './types';
 
@@ -38,7 +38,7 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
       });
     });
     // core.uiSettings.register(uiSettings);
-    core.uiSettings.register(traceUiSettings);
+    core.uiSettings.register(exploreUiSettings);
     core.savedObjects.registerType(exploreSavedObjectType);
 
     return {};

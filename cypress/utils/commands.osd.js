@@ -619,3 +619,42 @@ cy.osd.add('verifyResultsError', (error) => {
   cy.getElementByTestId('queryResultError').click();
   cy.getElementByTestId('textBreakWord').contains(error);
 });
+
+/**
+ * Gets a data source ID by searching for it by name using the API
+ * @param {string} dataSourceName The name of the data source to find
+ * @param {string} [endpoint] Optional endpoint URL, defaults to current origin
+ */
+cy.osd.add('getDataSourceId', (dataSourceName, endpoint) => {
+  const baseUrl = endpoint || Cypress.config('baseUrl') || '';
+
+  cy.request({
+    method: 'GET',
+    url: `${baseUrl}/api/saved_objects/_find`,
+    headers: {
+      'osd-xsrf': true,
+    },
+    qs: {
+      fields: 'id,attributes.title',
+      per_page: 100,
+      type: 'data-source',
+      search: dataSourceName,
+      search_fields: 'title',
+    },
+  }).then((resp) => {
+    const savedObjects = resp.body?.saved_objects || [];
+
+    // Find the data source with exact name match
+    const dataSource = savedObjects.find((obj) => obj.attributes?.title === dataSourceName);
+
+    if (!dataSource) {
+      throw new Error(`Data source with name "${dataSourceName}" not found`);
+    }
+
+    // Log the ID
+    cy.log(`Found data source: ${dataSource.attributes?.title} (ID: ${dataSource.id})`);
+
+    // Save the data source ID as an alias for later use
+    cy.wrap(dataSource.id).as('DATASOURCE_ID');
+  });
+});

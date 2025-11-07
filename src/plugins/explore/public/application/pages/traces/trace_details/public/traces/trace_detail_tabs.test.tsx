@@ -34,7 +34,11 @@ describe('TraceDetailTabs', () => {
   });
 
   it('shows span count badge in span list tab', () => {
-    render(<TraceDetailTabs {...defaultProps} />);
+    const propsWithNologs = {
+      ...defaultProps,
+      logCount: 0,
+    };
+    render(<TraceDetailTabs {...propsWithNologs} />);
 
     const badge = screen.getByText('2');
     expect(badge).toBeInTheDocument();
@@ -82,22 +86,22 @@ describe('TraceDetailTabs', () => {
     expect(tabs).toHaveLength(3);
   });
 
-  it('does not render logs tab when logDatasets are not present', () => {
+  it('render logs tab when logDatasets are not present', () => {
     const propsWithoutLogs = {
       ...defaultProps,
       logDatasets: [],
-      logCount: 5,
+      logCount: 0,
       isLogsLoading: false,
     };
 
     render(<TraceDetailTabs {...propsWithoutLogs} />);
 
     // Check that logs tab is not present
-    expect(screen.queryByText('Related logs')).not.toBeInTheDocument();
+    expect(screen.queryByText('Related logs')).toBeInTheDocument();
 
-    // Verify we only have 2 tabs (Timeline, Span list)
+    // Verify we only have 3 tabs (Timeline, Span list, Related Logs)
     const tabs = screen.getAllByRole('tab');
-    expect(tabs).toHaveLength(2);
+    expect(tabs).toHaveLength(3);
   });
 
   it('does not render logCount badge when isLogsLoading is true', () => {

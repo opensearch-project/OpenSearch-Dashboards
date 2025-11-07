@@ -223,12 +223,12 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
   const tabs = useMemo(() => {
     const buildSampleQueryBlock = (sampleTitle: string, sampleQuery: string) => {
       return (
-        <>
+        <Fragment key={sampleQuery}>
           <EuiText size="s">{sampleTitle}</EuiText>
           <EuiSpacer size="s" />
           <EuiCodeBlock isCopyable>{sampleQuery}</EuiCodeBlock>
           <EuiSpacer size="s" />
-        </>
+        </Fragment>
       );
     };
     return [

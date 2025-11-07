@@ -40,10 +40,6 @@ jest.mock('./recent_queries_button', () => ({
   RecentQueriesButton: () => <div data-test-subj="recent-queries-button">Recent Queries</div>,
 }));
 
-jest.mock('./language_reference', () => ({
-  LanguageReference: () => <div data-test-subj="language-reference">Language Reference</div>,
-}));
-
 jest.mock('./language_toggle', () => ({
   LanguageToggle: () => <div data-test-subj="language-toggle">Language Toggle</div>,
 }));
@@ -124,9 +120,6 @@ describe('QueryPanelWidgets', () => {
       expect(screen.getByTestId('recent-queries-button')).toBeInTheDocument();
       expect(screen.getByTestId('save-query-button')).toBeInTheDocument();
 
-      // Check right section components
-      expect(screen.getByTestId('language-reference')).toBeInTheDocument();
-
       // Check separators exist
       const separators = container.querySelectorAll('.exploreQueryPanelWidgets__verticalSeparator');
       expect(separators).toHaveLength(2); // Only 2 separators when actions are not shown
@@ -201,7 +194,7 @@ describe('QueryPanelWidgets', () => {
         .filter((node) => node.getAttribute('data-test-subj'))
         .map((node) => node.getAttribute('data-test-subj'));
 
-      expect(testSubjects).toEqual(['ask-ai-button', 'language-reference']);
+      expect(testSubjects).toEqual(['ask-ai-button']);
     });
   });
 

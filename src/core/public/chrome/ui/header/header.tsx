@@ -131,9 +131,9 @@ export interface HeaderProps {
   workspaceList$: Observable<WorkspaceObject[]>;
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
-  globalSearchCommands?: GlobalSearchCommand[];
   globalBanner$?: Observable<ChromeGlobalBanner | undefined>;
   keyboardShortcut?: KeyboardShortcutStart;
+  globalSearchCommands$: Observable<GlobalSearchCommand[]>;
 }
 
 const hasValue = (value: any) => {
@@ -159,7 +159,6 @@ export function Header({
   navGroupEnabled,
   setCurrentNavGroup,
   useUpdatedHeader,
-  globalSearchCommands,
   keyboardShortcut,
   ...observables
 }: HeaderProps) {
@@ -598,7 +597,7 @@ export function Header({
         <EuiHeaderSection grow={false}>{renderRecentItems()}</EuiHeaderSection>
 
         {renderBreadcrumbs(false, false)}
-
+        <EuiHeaderSection grow={true} />
         {renderPrimaryHeaderRight()}
       </EuiHeader>
 
@@ -716,7 +715,7 @@ export function Header({
             setCurrentNavGroup={setCurrentNavGroup}
             capabilities={application.capabilities}
             currentWorkspace$={observables.currentWorkspace$}
-            globalSearchCommands={globalSearchCommands}
+            globalSearchCommands$={observables.globalSearchCommands$}
           />
         ) : (
           <CollapsibleNav

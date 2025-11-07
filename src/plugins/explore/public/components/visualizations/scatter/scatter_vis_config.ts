@@ -56,7 +56,8 @@ export const defaultScatterChartStyles: ScatterChartStyle = {
     mode: 'all',
   },
   addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legendTitle: '',
+  legendPosition: Positions.BOTTOM,
 
   // exclusive
   exclusive: {

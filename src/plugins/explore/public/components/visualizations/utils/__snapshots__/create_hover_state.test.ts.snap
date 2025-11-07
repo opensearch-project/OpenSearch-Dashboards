@@ -14,7 +14,7 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "temporal",
         },
@@ -37,7 +37,10 @@ Array [
             "x",
           ],
           "nearest": true,
-          "on": "mouseover",
+          "on": Object {
+            "throttle": 50,
+            "type": "mouseover",
+          },
           "type": "point",
         },
       },
@@ -56,14 +59,6 @@ Array [
     "layer": Array [
       Object {
         "encoding": Object {
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
@@ -77,6 +72,14 @@ Array [
           ],
           "type": "rule",
         },
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
     ],
   },
@@ -88,20 +91,14 @@ Array [
             "field": "category",
             "type": "nominal",
           },
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -113,7 +110,14 @@ Array [
           "size": 60,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
@@ -121,20 +125,14 @@ Array [
             "field": "category",
             "type": "nominal",
           },
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -149,7 +147,14 @@ Array [
           "strokeWidth": 1,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
@@ -157,20 +162,14 @@ Array [
             "field": "category",
             "type": "nominal",
           },
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -185,7 +184,14 @@ Array [
           "strokeWidth": 3,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
     ],
   },
@@ -206,17 +212,17 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "temporal",
         },
         Object {
-          "field": "count",
+          "field": "[\\"count\\"]",
           "title": undefined,
           "type": "quantitative",
         },
         Object {
-          "field": "sum",
+          "field": "[\\"sum\\"]",
           "title": undefined,
           "type": "quantitative",
         },
@@ -239,7 +245,10 @@ Array [
             "x",
           ],
           "nearest": true,
-          "on": "mouseover",
+          "on": Object {
+            "throttle": 50,
+            "type": "mouseover",
+          },
           "type": "point",
         },
       },
@@ -250,14 +259,6 @@ Array [
     "layer": Array [
       Object {
         "encoding": Object {
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
@@ -271,6 +272,14 @@ Array [
           ],
           "type": "rule",
         },
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
     ],
   },
@@ -282,20 +291,14 @@ Array [
             "field": "key",
             "type": "nominal",
           },
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "value",
             "type": "quantitative",
           },
@@ -317,6 +320,12 @@ Array [
               "sum",
             ],
           },
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
         ],
       },
       Object {
@@ -325,20 +334,14 @@ Array [
             "field": "key",
             "type": "nominal",
           },
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "value",
             "type": "quantitative",
           },
@@ -363,6 +366,12 @@ Array [
               "sum",
             ],
           },
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
         ],
       },
       Object {
@@ -371,20 +380,14 @@ Array [
             "field": "key",
             "type": "nominal",
           },
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "value",
             "type": "quantitative",
           },
@@ -408,6 +411,12 @@ Array [
               "count",
               "sum",
             ],
+          },
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
           },
         ],
       },
@@ -430,12 +439,12 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "nominal",
         },
         Object {
-          "field": "count",
+          "field": "[\\"count\\"]",
           "title": undefined,
           "type": "quantitative",
         },
@@ -458,7 +467,10 @@ Array [
             "x",
           ],
           "nearest": false,
-          "on": "mouseover",
+          "on": Object {
+            "throttle": 50,
+            "type": "mouseover",
+          },
           "type": "point",
         },
       },
@@ -469,14 +481,6 @@ Array [
     "layer": Array [
       Object {
         "encoding": Object {
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "nominal",
@@ -490,19 +494,21 @@ Array [
           ],
           "type": "rule",
         },
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "type": "quantitative",
           },
@@ -515,6 +521,14 @@ Array [
           ],
           "type": "rule",
         },
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
     ],
   },
@@ -523,20 +537,14 @@ Array [
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "nominal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -548,25 +556,26 @@ Array [
           "size": 60,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "nominal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -581,25 +590,26 @@ Array [
           "strokeWidth": 1,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "nominal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -614,7 +624,14 @@ Array [
           "strokeWidth": 3,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
     ],
   },
@@ -633,7 +650,6 @@ Array [
         },
         "value": 0,
       },
-      "tooltip": null,
       "x": Object {
         "field": "timestamp",
         "type": "temporal",
@@ -652,7 +668,10 @@ Array [
             "x",
           ],
           "nearest": true,
-          "on": "mouseover",
+          "on": Object {
+            "throttle": 50,
+            "type": "mouseover",
+          },
           "type": "point",
         },
       },
@@ -663,14 +682,6 @@ Array [
     "layer": Array [
       Object {
         "encoding": Object {
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
@@ -684,19 +695,21 @@ Array [
           ],
           "type": "rule",
         },
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "type": "quantitative",
           },
@@ -709,6 +722,14 @@ Array [
           ],
           "type": "rule",
         },
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
     ],
   },
@@ -717,20 +738,14 @@ Array [
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -742,25 +757,26 @@ Array [
           "size": 60,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -775,25 +791,26 @@ Array [
           "strokeWidth": 1,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -808,7 +825,14 @@ Array [
           "strokeWidth": 3,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
     ],
   },
@@ -829,12 +853,12 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "temporal",
         },
         Object {
-          "field": "count",
+          "field": "[\\"count\\"]",
           "title": undefined,
           "type": "quantitative",
         },
@@ -857,7 +881,10 @@ Array [
             "x",
           ],
           "nearest": true,
-          "on": "mouseover",
+          "on": Object {
+            "throttle": 50,
+            "type": "mouseover",
+          },
           "type": "point",
         },
       },
@@ -868,14 +895,6 @@ Array [
     "layer": Array [
       Object {
         "encoding": Object {
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
@@ -889,19 +908,21 @@ Array [
           ],
           "type": "rule",
         },
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "type": "quantitative",
           },
@@ -914,6 +935,14 @@ Array [
           ],
           "type": "rule",
         },
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
     ],
   },
@@ -922,20 +951,14 @@ Array [
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -947,25 +970,26 @@ Array [
           "size": 60,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -980,25 +1004,26 @@ Array [
           "strokeWidth": 1,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1013,7 +1038,14 @@ Array [
           "strokeWidth": 3,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
     ],
   },
@@ -1027,20 +1059,14 @@ Array [
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "average",
             "stack": undefined,
             "type": "quantitative",
@@ -1052,25 +1078,26 @@ Array [
           "size": 60,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "average",
             "stack": undefined,
             "type": "quantitative",
@@ -1085,25 +1112,26 @@ Array [
           "strokeWidth": 1,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "average",
             "stack": undefined,
             "type": "quantitative",
@@ -1118,7 +1146,14 @@ Array [
           "strokeWidth": 3,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
     ],
   },
@@ -1134,17 +1169,17 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "temporal",
         },
         Object {
-          "field": "count",
+          "field": "[\\"count\\"]",
           "title": undefined,
           "type": "quantitative",
         },
         Object {
-          "field": "average",
+          "field": "[\\"average\\"]",
           "title": undefined,
           "type": "quantitative",
         },
@@ -1167,7 +1202,10 @@ Array [
             "x",
           ],
           "nearest": true,
-          "on": "mouseover",
+          "on": Object {
+            "throttle": 50,
+            "type": "mouseover",
+          },
           "type": "point",
         },
       },
@@ -1178,14 +1216,6 @@ Array [
     "layer": Array [
       Object {
         "encoding": Object {
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
@@ -1199,19 +1229,21 @@ Array [
           ],
           "type": "rule",
         },
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "type": "quantitative",
           },
@@ -1224,6 +1256,14 @@ Array [
           ],
           "type": "rule",
         },
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
     ],
   },
@@ -1232,20 +1272,14 @@ Array [
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1257,25 +1291,26 @@ Array [
           "size": 60,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1290,25 +1325,26 @@ Array [
           "strokeWidth": 1,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1323,7 +1359,14 @@ Array [
           "strokeWidth": 3,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
     ],
   },
@@ -1340,20 +1383,14 @@ Array [
             "field": "category",
             "type": "nominal",
           },
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1365,7 +1402,14 @@ Array [
           "size": 60,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
@@ -1373,20 +1417,14 @@ Array [
             "field": "category",
             "type": "nominal",
           },
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1401,7 +1439,14 @@ Array [
           "strokeWidth": 1,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
@@ -1409,20 +1454,14 @@ Array [
             "field": "category",
             "type": "nominal",
           },
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1437,7 +1476,14 @@ Array [
           "strokeWidth": 3,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
     ],
   },
@@ -1453,18 +1499,18 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "temporal",
         },
         Object {
-          "field": "A",
-          "title": undefined,
+          "field": "[\\"A\\"]",
+          "title": "A",
           "type": "quantitative",
         },
         Object {
-          "field": "B",
-          "title": undefined,
+          "field": "[\\"B\\"]",
+          "title": "B",
           "type": "quantitative",
         },
       ],
@@ -1486,7 +1532,10 @@ Array [
             "x",
           ],
           "nearest": true,
-          "on": "mouseover",
+          "on": Object {
+            "throttle": 50,
+            "type": "mouseover",
+          },
           "type": "point",
         },
       },
@@ -1514,20 +1563,14 @@ Array [
             "field": "key",
             "type": "nominal",
           },
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "value",
             "type": "quantitative",
           },
@@ -1549,6 +1592,12 @@ Array [
               "sum",
             ],
           },
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
         ],
       },
       Object {
@@ -1557,20 +1606,14 @@ Array [
             "field": "key",
             "type": "nominal",
           },
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "value",
             "type": "quantitative",
           },
@@ -1595,6 +1638,12 @@ Array [
               "sum",
             ],
           },
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
         ],
       },
       Object {
@@ -1603,20 +1652,14 @@ Array [
             "field": "key",
             "type": "nominal",
           },
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "value",
             "type": "quantitative",
           },
@@ -1641,6 +1684,12 @@ Array [
               "sum",
             ],
           },
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
         ],
       },
     ],
@@ -1657,17 +1706,17 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "temporal",
         },
         Object {
-          "field": "count",
+          "field": "[\\"count\\"]",
           "title": undefined,
           "type": "quantitative",
         },
         Object {
-          "field": "sum",
+          "field": "[\\"sum\\"]",
           "title": undefined,
           "type": "quantitative",
         },
@@ -1690,7 +1739,10 @@ Array [
             "x",
           ],
           "nearest": true,
-          "on": "mouseover",
+          "on": Object {
+            "throttle": 50,
+            "type": "mouseover",
+          },
           "type": "point",
         },
       },
@@ -1707,20 +1759,14 @@ Array [
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1732,25 +1778,26 @@ Array [
           "size": 60,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1765,25 +1812,26 @@ Array [
           "strokeWidth": 1,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1798,7 +1846,14 @@ Array [
           "strokeWidth": 3,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
     ],
   },
@@ -1812,7 +1867,6 @@ Array [
         },
         "value": 0,
       },
-      "tooltip": null,
       "x": Object {
         "field": "timestamp",
         "type": "temporal",
@@ -1831,7 +1885,10 @@ Array [
             "x",
           ],
           "nearest": true,
-          "on": "mouseover",
+          "on": Object {
+            "throttle": 50,
+            "type": "mouseover",
+          },
           "type": "point",
         },
       },
@@ -1848,20 +1905,14 @@ Array [
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1873,25 +1924,26 @@ Array [
           "size": 60,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1906,25 +1958,26 @@ Array [
           "strokeWidth": 1,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
       Object {
         "encoding": Object {
           "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
           "x": Object {
             "field": "timestamp",
             "type": "temporal",
           },
           "y": Object {
-            "axis": null,
+            "axis": Object {
+              "title": "",
+            },
             "field": "count",
             "stack": undefined,
             "type": "quantitative",
@@ -1939,7 +1992,14 @@ Array [
           "strokeWidth": 3,
           "type": "point",
         },
-        "transform": Array [],
+        "transform": Array [
+          Object {
+            "filter": Object {
+              "empty": false,
+              "param": "hover",
+            },
+          },
+        ],
       },
     ],
   },
@@ -1955,12 +2015,12 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "temporal",
         },
         Object {
-          "field": "count",
+          "field": "[\\"count\\"]",
           "title": undefined,
           "type": "quantitative",
         },
@@ -1983,7 +2043,10 @@ Array [
             "x",
           ],
           "nearest": true,
-          "on": "mouseover",
+          "on": Object {
+            "throttle": 50,
+            "type": "mouseover",
+          },
           "type": "point",
         },
       },
@@ -1996,206 +2059,6 @@ Array [
 exports[`create_hover_state createHighlightBarLayers should create layers with y1 field 1`] = `
 Array [
   Object {
-    "layer": Array [
-      Object {
-        "encoding": Object {
-          "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
-          "x": Object {
-            "field": "timestamp",
-            "type": "temporal",
-          },
-          "y": Object {
-            "axis": null,
-            "field": "count",
-            "stack": undefined,
-            "type": "quantitative",
-          },
-        },
-        "mark": Object {
-          "filled": true,
-          "shape": "circle",
-          "size": 60,
-          "type": "point",
-        },
-        "transform": Array [],
-      },
-      Object {
-        "encoding": Object {
-          "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
-          "x": Object {
-            "field": "timestamp",
-            "type": "temporal",
-          },
-          "y": Object {
-            "axis": null,
-            "field": "count",
-            "stack": undefined,
-            "type": "quantitative",
-          },
-        },
-        "mark": Object {
-          "fill": "",
-          "filled": false,
-          "shape": "circle",
-          "size": 60,
-          "stroke": "#fff",
-          "strokeWidth": 1,
-          "type": "point",
-        },
-        "transform": Array [],
-      },
-      Object {
-        "encoding": Object {
-          "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
-          "x": Object {
-            "field": "timestamp",
-            "type": "temporal",
-          },
-          "y": Object {
-            "axis": null,
-            "field": "count",
-            "stack": undefined,
-            "type": "quantitative",
-          },
-        },
-        "mark": Object {
-          "fill": "",
-          "filled": false,
-          "shape": "circle",
-          "size": 90,
-          "strokeOpacity": 0.5,
-          "strokeWidth": 3,
-          "type": "point",
-        },
-        "transform": Array [],
-      },
-    ],
-  },
-  Object {
-    "layer": Array [
-      Object {
-        "encoding": Object {
-          "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
-          "x": Object {
-            "field": "timestamp",
-            "type": "temporal",
-          },
-          "y": Object {
-            "axis": null,
-            "field": "average",
-            "stack": undefined,
-            "type": "quantitative",
-          },
-        },
-        "mark": Object {
-          "filled": true,
-          "shape": "circle",
-          "size": 60,
-          "type": "point",
-        },
-        "transform": Array [],
-      },
-      Object {
-        "encoding": Object {
-          "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
-          "x": Object {
-            "field": "timestamp",
-            "type": "temporal",
-          },
-          "y": Object {
-            "axis": null,
-            "field": "average",
-            "stack": undefined,
-            "type": "quantitative",
-          },
-        },
-        "mark": Object {
-          "fill": "",
-          "filled": false,
-          "shape": "circle",
-          "size": 60,
-          "stroke": "#fff",
-          "strokeWidth": 1,
-          "type": "point",
-        },
-        "transform": Array [],
-      },
-      Object {
-        "encoding": Object {
-          "color": null,
-          "opacity": Object {
-            "condition": Object {
-              "empty": false,
-              "param": "hover",
-              "value": 1,
-            },
-            "value": 0,
-          },
-          "x": Object {
-            "field": "timestamp",
-            "type": "temporal",
-          },
-          "y": Object {
-            "axis": null,
-            "field": "average",
-            "stack": undefined,
-            "type": "quantitative",
-          },
-        },
-        "mark": Object {
-          "fill": "",
-          "filled": false,
-          "shape": "circle",
-          "size": 90,
-          "strokeOpacity": 0.5,
-          "strokeWidth": 3,
-          "type": "point",
-        },
-        "transform": Array [],
-      },
-    ],
-  },
-  Object {
     "encoding": Object {
       "opacity": Object {
         "condition": Object {
@@ -2207,17 +2070,17 @@ Array [
       },
       "tooltip": Array [
         Object {
-          "field": "timestamp",
+          "field": "[\\"timestamp\\"]",
           "title": undefined,
           "type": "temporal",
         },
         Object {
-          "field": "count",
+          "field": "[\\"count\\"]",
           "title": undefined,
           "type": "quantitative",
         },
         Object {
-          "field": "average",
+          "field": "[\\"average\\"]",
           "title": undefined,
           "type": "quantitative",
         },
@@ -2240,7 +2103,10 @@ Array [
             "x",
           ],
           "nearest": true,
-          "on": "mouseover",
+          "on": Object {
+            "throttle": 50,
+            "type": "mouseover",
+          },
           "type": "point",
         },
       },

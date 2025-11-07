@@ -47,6 +47,8 @@ export const runCreateVisTests = () => {
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
         });
+      // Open Axes setting
+      cy.get('[aria-controls="allAxesSection"]').click();
       // turn off show y axis
       cy.getElementByTestId('showAxisSwitch').eq(1).click();
       // compare with new canvas

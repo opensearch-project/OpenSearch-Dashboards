@@ -17,9 +17,11 @@ import {
   DurationTableCell,
   isDurationColumn,
 } from './trace_utils/trace_utils';
+import { LogActionMenu } from '../../log_action_menu';
 
 export interface ITableCellProps {
   columnId: string;
+  index?: number;
   isTimeField?: boolean;
   onFilter?: DocViewFilterFn;
   fieldMapping?: any;
@@ -32,6 +34,7 @@ export interface ITableCellProps {
 // TODO: Move to a better cell component design that not rely on rowData
 export const TableCellUI = ({
   columnId,
+  index,
   isTimeField,
   onFilter,
   fieldMapping,
@@ -67,6 +70,17 @@ export const TableCellUI = ({
     <>
       {dataFieldContent}
       <span className="exploreDocTableCell__filter" data-test-subj="osdDocTableCellFilter">
+        {/* Add AI icon before filter buttons - show for all cells except _source */}
+        {rowData?._source && columnId !== '_source' && (
+          <LogActionMenu
+            document={rowData._source}
+            query={undefined}
+            indexPattern={dataset?.title}
+            metadata={{ index }}
+            iconType="generate"
+            size="xs"
+          />
+        )}
         <EuiToolTip
           content={i18n.translate('explore.filterForValue', {
             defaultMessage: 'Filter for value',

@@ -43,6 +43,7 @@ export interface AreaChartStyleOptions {
   titleOptions?: TitleOptions;
 
   thresholdOptions?: ThresholdOptions;
+  showFullTimeRange?: boolean;
 }
 
 export type AreaChartStyle = Required<
@@ -53,7 +54,8 @@ export type AreaChartStyle = Required<
 const defaultAreaChartStyles: AreaChartStyle = {
   // Basic controls
   addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legendTitle: '',
+  legendPosition: Positions.BOTTOM,
   addTimeMarker: false,
   tooltipOptions: {
     mode: 'all',
@@ -115,6 +117,8 @@ const defaultAreaChartStyles: AreaChartStyle = {
     show: false,
     titleName: '',
   },
+
+  showFullTimeRange: false,
 };
 
 export const createAreaConfig = (): VisualizationType<'area'> => ({
@@ -138,7 +142,18 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
       {
         [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
         [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
         [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
         [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
       },
       {
@@ -149,6 +164,11 @@ export const createAreaConfig = (): VisualizationType<'area'> => ({
         [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
         [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
         [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
       },
     ],
   },

@@ -13,47 +13,68 @@ import {
 describe('gauge_chart_utils', () => {
   describe('mergeThresholdsWithBase', () => {
     it('returns base range when no thresholds exist', () => {
-      const result = mergeThresholdsWithBase(0, 10, '#blue', []);
-      expect(result).toEqual([{ value: 0, color: '#blue' }]);
+      const result = mergeThresholdsWithBase(5, 10, '#blue', [], 7);
+      expect(result.mergedThresholds).toEqual([{ value: 5, color: '#blue' }]);
+      expect(result.textColor).toBe('#blue');
     });
 
-    it('returns base range when minBase exceeds all thresholds', () => {
+    it('returns base range and grey text color when no thresholds exist and no targetValue', () => {
+      const result = mergeThresholdsWithBase(5, 10, '#blue', [], 7);
+      expect(result.mergedThresholds).toEqual([{ value: 5, color: '#blue' }]);
+      expect(result.textColor).toBe('#blue');
+    });
+
+    it('update thresholds when minBase exceeds one of them', () => {
       const thresholds = [
         { value: 10, color: '#red' },
         { value: 20, color: '#green' },
       ];
       const result = mergeThresholdsWithBase(30, 40, '#blue', thresholds);
-      expect(result).toEqual([{ value: 30, color: '#blue' }]);
-    });
+      expect(result.mergedThresholds).toEqual([{ value: 30, color: '#green' }]);
 
-    it('returns existing thresholds when minBase already exists', () => {
-      const thresholds = [
-        { value: 0, color: '#red' },
+      const newThresholds = [
+        { value: 10, color: '#red' },
         { value: 20, color: '#green' },
       ];
-      const result = mergeThresholdsWithBase(0, 30, '#blue', thresholds);
-      expect(result).toEqual(thresholds);
-    });
-
-    it('inserts base range and excludes thresholds below minBase', () => {
-      const thresholds = [
-        { value: 5, color: '#red' },
-        { value: 15, color: '#green' },
-      ];
-      const result = mergeThresholdsWithBase(10, 20, '#blue', thresholds);
-      expect(result).toEqual([
-        { value: 10, color: '#blue' },
-        { value: 15, color: '#green' },
+      const newResult = mergeThresholdsWithBase(15, 40, '#blue', newThresholds);
+      expect(newResult.mergedThresholds).toEqual([
+        { value: 15, color: '#red' },
+        { value: 20, color: '#green' },
       ]);
     });
 
-    it('includes thresholds below maxBase', () => {
+    it('add minBase as threshold when all thresholds exceed minBase', () => {
+      const thresholds = [
+        { value: 10, color: '#red' },
+        { value: 20, color: '#green' },
+      ];
+      const result = mergeThresholdsWithBase(0, 30, '#blue', thresholds);
+      expect(result.mergedThresholds).toEqual([
+        { value: 0, color: '#blue' },
+        { value: 10, color: '#red' },
+        { value: 20, color: '#green' },
+      ]);
+    });
+
+    it('filters thresholds above maxBase', () => {
       const thresholds = [
         { value: 5, color: '#red' },
         { value: 15, color: '#green' },
       ];
-      const result = mergeThresholdsWithBase(10, 12, '#blue', thresholds);
-      expect(result).toEqual([{ value: 10, color: '#blue' }]);
+      const result = mergeThresholdsWithBase(0, 12, '#blue', thresholds);
+      expect(result.mergedThresholds).toEqual([
+        { value: 0, color: '#blue' },
+        { value: 5, color: '#red' },
+      ]);
+    });
+
+    it('sets textColor based on targetValue', () => {
+      const thresholds = [
+        { value: 5, color: '#red' },
+        { value: 15, color: '#green' },
+      ];
+      const result = mergeThresholdsWithBase(0, 20, '#blue', thresholds, 10);
+      expect(result.textColor).toBe('#red');
     });
   });
 
@@ -111,25 +132,28 @@ describe('gauge_chart_utils', () => {
 
 describe('getMaxAndMinBase', () => {
   it('uses provided min and max values', () => {
-    const result = getMaxAndMinBase(50, 10, 100, 75);
+    const result = getMaxAndMinBase(0, 50, 10, 100, 75);
     expect(result.minBase).toBe(10);
     expect(result.maxBase).toBe(100);
   });
 
-  it('uses 0 as default min when not provided', () => {
-    const result = getMaxAndMinBase(50, undefined, 100, 75);
-    expect(result.minBase).toBe(0);
+  it('uses min(0,minNumber) as default min when not provided', () => {
+    const result = getMaxAndMinBase(-10, 50, undefined, 100, 75);
+    expect(result.minBase).toBe(-10);
     expect(result.maxBase).toBe(100);
+    const result2 = getMaxAndMinBase(3, 50, undefined, 100, 75);
+    expect(result2.minBase).toBe(0);
+    expect(result2.maxBase).toBe(100);
   });
 
   it('uses Math.max of maxNumber and calculatedValue when max is undefined', () => {
-    const result = getMaxAndMinBase(30, undefined, undefined, 60);
+    const result = getMaxAndMinBase(0, 30, undefined, undefined, 60);
     expect(result.minBase).toBe(0);
     expect(result.maxBase).toBe(60);
   });
 
   it('uses maxNumber when calculatedValue is undefined', () => {
-    const result = getMaxAndMinBase(40, undefined, undefined, undefined);
+    const result = getMaxAndMinBase(0, 40, undefined, undefined, undefined);
     expect(result.minBase).toBe(0);
     expect(result.maxBase).toBe(40);
   });

@@ -47,6 +47,8 @@ export interface LineChartStyleOptions {
 
   titleOptions?: TitleOptions;
   thresholdOptions?: ThresholdOptions;
+
+  showFullTimeRange?: boolean;
 }
 
 export type LineChartStyle = Required<
@@ -56,7 +58,8 @@ export type LineChartStyle = Required<
 
 export const defaultLineChartStyles: LineChartStyle = {
   addLegend: true,
-  legendPosition: Positions.RIGHT,
+  legendTitle: '',
+  legendPosition: Positions.BOTTOM,
   addTimeMarker: false,
 
   lineStyle: 'both',
@@ -122,6 +125,8 @@ export const defaultLineChartStyles: LineChartStyle = {
     show: false,
     titleName: '',
   },
+
+  showFullTimeRange: false,
 };
 
 export const createLineConfig = (): VisualizationType<'line'> => ({
@@ -150,8 +155,29 @@ export const createLineConfig = (): VisualizationType<'line'> => ({
       {
         [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
         [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
         [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
         [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 1 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.Y]: { type: VisFieldType.Numerical, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 1 },
+        [AxisRole.FACET]: { type: VisFieldType.Categorical, index: 0 },
       },
       {
         [AxisRole.X]: { type: VisFieldType.Categorical, index: 0 },

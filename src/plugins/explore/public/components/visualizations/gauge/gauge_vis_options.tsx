@@ -15,7 +15,6 @@ import { StyleAccordion } from '../style_panel/style_accordion';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { DebouncedFieldText } from '../style_panel/utils';
 import { ValueCalculationSelector } from '../style_panel/value/value_calculation_selector';
-import { UnitPanel } from '../style_panel/unit/unit_panel';
 import { StandardOptionsPanel } from '../style_panel/standard_options/standard_options_panel';
 
 export type GaugeVisStyleControlsProps = StyleControlsProps<GaugeChartStyle>;
@@ -56,48 +55,6 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
       </EuiFlexItem>
       {hasMappingSelected && (
         <>
-          <EuiFlexItem>
-            <StyleAccordion
-              id="gaugeValueOptions"
-              accordionLabel={i18n.translate('explore.stylePanel.gaugeValueOptions', {
-                defaultMessage: 'Value options',
-              })}
-              initialIsOpen={false}
-            >
-              <EuiFormRow
-                label={i18n.translate('explore.vis.gauge.calculation', {
-                  defaultMessage: 'Calculation',
-                })}
-              >
-                <ValueCalculationSelector
-                  selectedValue={styleOptions.valueCalculation}
-                  onChange={(value) => updateStyleOption('valueCalculation', value)}
-                />
-              </EuiFormRow>
-            </StyleAccordion>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <UnitPanel
-              unit={styleOptions.unitId}
-              onUnitChange={(value) => updateStyleOption('unitId', value)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <ThresholdPanel
-              thresholdsOptions={styleOptions.thresholdOptions}
-              onChange={(options) => updateStyleOption('thresholdOptions', options)}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <StandardOptionsPanel
-              min={styleOptions.min}
-              max={styleOptions.max}
-              onMinChange={(value) => updateStyleOption('min', value)}
-              onMaxChange={(value) => updateStyleOption('max', value)}
-            />
-          </EuiFlexItem>
-
           <EuiFlexItem grow={false}>
             <StyleAccordion
               id="gaugeSection"
@@ -143,6 +100,44 @@ export const GaugeVisStyleControls: React.FC<GaugeVisStyleControlsProps> = ({
                 </EuiFormRow>
               )}
             </StyleAccordion>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <StyleAccordion
+              id="gaugeValueOptions"
+              accordionLabel={i18n.translate('explore.stylePanel.gaugeValueOptions', {
+                defaultMessage: 'Value options',
+              })}
+              initialIsOpen={false}
+            >
+              <EuiFormRow
+                label={i18n.translate('explore.vis.gauge.calculation', {
+                  defaultMessage: 'Calculation',
+                })}
+              >
+                <ValueCalculationSelector
+                  selectedValue={styleOptions.valueCalculation}
+                  onChange={(value) => updateStyleOption('valueCalculation', value)}
+                />
+              </EuiFormRow>
+            </StyleAccordion>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ThresholdPanel
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <StandardOptionsPanel
+              min={styleOptions.min}
+              max={styleOptions.max}
+              onMinChange={(value) => updateStyleOption('min', value)}
+              onMaxChange={(value) => updateStyleOption('max', value)}
+              unit={styleOptions.unitId}
+              onUnitChange={(value) => updateStyleOption('unitId', value)}
+            />
           </EuiFlexItem>
         </>
       )}

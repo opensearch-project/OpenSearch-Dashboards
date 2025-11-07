@@ -49,7 +49,7 @@ export interface CollapsibleNavGroupEnabledProps {
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
   capabilities: InternalApplicationStart['capabilities'];
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
-  globalSearchCommands?: GlobalSearchCommand[];
+  globalSearchCommands$: Rx.Observable<GlobalSearchCommand[]>;
 }
 
 const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
@@ -73,7 +73,6 @@ export function CollapsibleNavGroupEnabled({
   setCurrentNavGroup,
   capabilities,
   collapsibleNavHeaderRender,
-  globalSearchCommands,
   ...observables
 }: CollapsibleNavGroupEnabledProps) {
   const allNavLinks = useObservable(observables.navLinks$, []);
@@ -83,6 +82,7 @@ export function CollapsibleNavGroupEnabled({
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
   const currentWorkspace = useObservable(observables.currentWorkspace$);
+  const globalSearchCommands = useObservable(observables.globalSearchCommands$);
 
   const visibleUseCases = useMemo(() => getVisibleUseCases(navGroupsMap), [navGroupsMap]);
 

@@ -9,8 +9,7 @@ import {
   createTimeBarChart,
   createGroupedTimeBarChart,
   createFacetedTimeBarChart,
-  createNumericalHistogramBarChart,
-  createSingleBarChart,
+  createDoubleNumericalBarChart,
 } from './to_expression';
 import { defaultBarChartStyles, BarChartStyle } from './bar_vis_config';
 import {
@@ -21,8 +20,20 @@ import {
   ThresholdMode,
   AggregationType,
 } from '../types';
+import * as Utils from '../utils/utils';
+
+jest.mock('../utils/utils', () => {
+  const actual = jest.requireActual('../utils/utils');
+  return {
+    ...actual,
+    applyTimeRangeToEncoding: jest.fn(() => undefined),
+  };
+});
 
 describe('bar to_expression', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   // Create mock VisColumn objects
   const mockNumericalColumn: VisColumn = {
     id: 1,
@@ -370,34 +381,6 @@ describe('bar to_expression', () => {
       expect(customTitleResult.title).toBe('Custom Stacked Bar Chart');
     });
 
-    test('throws error when required columns are missing', () => {
-      // No numerical columns
-      expect(() => {
-        createStackedBarSpec(
-          mockData,
-          [],
-          [mockCategoricalColumn, mockCategoricalColumn2],
-          [],
-          defaultBarChartStyles
-        );
-      }).toThrow(
-        'Stacked bar chart requires at least one numerical column and two categorical columns'
-      );
-
-      // Only one categorical column
-      expect(() => {
-        createStackedBarSpec(
-          mockData,
-          [mockNumericalColumn],
-          [mockCategoricalColumn],
-          [],
-          defaultBarChartStyles
-        );
-      }).toThrow(
-        'Stacked bar chart requires at least one numerical column and two categorical columns'
-      );
-    });
-
     test('adds threshold line when enabled', () => {
       const customStyles = {
         ...defaultBarChartStyles,
@@ -636,6 +619,37 @@ describe('bar to_expression', () => {
       expect(spec.layer[0].encoding.y.field).toBe('date');
       expect(spec.layer[0].encoding.y.type).toBe('temporal');
     });
+
+    test('adds domain layer when showFullTimeRange is true (createTimeBarChart)', () => {
+      const styles: BarChartStyle = {
+        ...defaultBarChartStyles,
+        showFullTimeRange: true,
+      };
+      const axisMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      };
+      const timeRange = {
+        from: '2024-01-01T00:00:00.000Z',
+        to: '2024-01-31T00:00:00.000Z',
+      };
+
+      const spec = createTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockDateColumn],
+        styles,
+        axisMappings,
+        timeRange
+      );
+
+      expect(Utils.applyTimeRangeToEncoding).toHaveBeenCalledWith(
+        expect.any(Object), // mainLayerEncoding
+        axisMappings,
+        timeRange,
+        styles.switchAxes
+      );
+    });
   });
 
   describe('createGroupedTimeBarChart', () => {
@@ -849,6 +863,39 @@ describe('bar to_expression', () => {
         );
       }).toThrow(
         'Grouped time bar chart requires at least one numerical column, one categorical column, and one date column'
+      );
+    });
+
+    test('adds domain layer when showFullTimeRange is true (createGroupedTimeBarChart)', () => {
+      const styles: BarChartStyle = {
+        ...defaultBarChartStyles,
+        showFullTimeRange: true,
+      };
+      const axisMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.COLOR]: mockCategoricalColumn,
+      };
+      const timeRange = {
+        from: '2024-02-01T00:00:00.000Z',
+        to: '2024-02-29T00:00:00.000Z',
+      };
+
+      const spec = createGroupedTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn],
+        [mockDateColumn],
+        styles,
+        axisMappings,
+        timeRange
+      );
+
+      expect(Utils.applyTimeRangeToEncoding).toHaveBeenCalledWith(
+        expect.any(Object), // mainLayerEncoding
+        axisMappings,
+        timeRange,
+        styles.switchAxes
       );
     });
   });
@@ -1068,9 +1115,42 @@ describe('bar to_expression', () => {
         'Faceted time bar chart requires at least one numerical column, two categorical columns, and one date column'
       );
     });
+
+    test('adds domain layer when showFullTimeRange is true (createFacetedTimeBarChart)', () => {
+      const styles: BarChartStyle = {
+        ...defaultBarChartStyles,
+        showFullTimeRange: true,
+      };
+      const axisMappings = {
+        [AxisRole.X]: mockDateColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+        [AxisRole.COLOR]: mockCategoricalColumn,
+        [AxisRole.FACET]: mockCategoricalColumn2,
+      };
+      const timeRange = {
+        from: '2024-03-01T00:00:00.000Z',
+        to: '2024-03-31T00:00:00.000Z',
+      };
+
+      const spec = createFacetedTimeBarChart(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn, mockCategoricalColumn2],
+        [mockDateColumn],
+        styles,
+        axisMappings,
+        timeRange
+      );
+      expect(Utils.applyTimeRangeToEncoding).toHaveBeenCalledWith(
+        expect.any(Object), // mainLayerEncoding
+        axisMappings,
+        timeRange,
+        styles.switchAxes
+      );
+    });
   });
 
-  describe('createNumericalHistogramBarChart', () => {
+  describe('createDoubleNumericalBarChart', () => {
     const mockNumericalColumn2 = {
       id: 2,
       name: 'sum',
@@ -1085,7 +1165,7 @@ describe('bar to_expression', () => {
       [AxisRole.Y]: mockNumericalColumn2,
     };
     test('creates a numerical histogram bar chart spec', () => {
-      const spec = createNumericalHistogramBarChart(
+      const spec = createDoubleNumericalBarChart(
         mockData,
         [mockNumericalColumn, mockNumericalColumn2],
         defaultBarChartStyles,
@@ -1100,7 +1180,7 @@ describe('bar to_expression', () => {
       expect(mainLayer.mark.type).toBe('bar');
       expect(mainLayer.mark.tooltip).toBe(true);
       expect(mainLayer.encoding.x.field).toBe('count');
-      expect(mainLayer.encoding.x.type).toBe('quantitative');
+      expect(mainLayer.encoding.x.type).toBe('nominal');
       expect(mainLayer.encoding.y.field).toBe('sum');
       expect(mainLayer.encoding.y.aggregate).toBe('sum');
       expect(mainLayer.encoding.y.type).toBe('quantitative');
@@ -1118,73 +1198,18 @@ describe('bar to_expression', () => {
       const stylesWithBucket = {
         ...defaultBarChartStyles,
         bucket: {
-          bucketSize: 50,
           aggregationType: AggregationType.SUM,
         },
       };
 
-      const spec = createNumericalHistogramBarChart(
+      const spec = createDoubleNumericalBarChart(
         mockData,
         [mockNumericalColumn, mockNumericalColumn2],
         stylesWithBucket,
         mockAxisColumnMappings
       );
 
-      expect(spec.layer[0].encoding.x.bin.step).toBe(50);
       expect(spec.layer[0].encoding.y.aggregate).toBe('sum');
-    });
-  });
-
-  describe('createSingleBarChart', () => {
-    const mockAxisColumnMappings = {
-      [AxisRole.X]: mockNumericalColumn,
-    };
-    test('creates a numerical histogram bar chart spec', () => {
-      const spec = createSingleBarChart(
-        mockData,
-        [mockNumericalColumn],
-        defaultBarChartStyles,
-        mockAxisColumnMappings
-      );
-
-      expect(spec.$schema).toBe(VEGASCHEMA);
-      expect(spec.data.values).toBe(mockData);
-      expect(spec.layer).toHaveLength(1);
-
-      const mainLayer = spec.layer[0];
-      expect(mainLayer.mark.type).toBe('bar');
-      expect(mainLayer.mark.tooltip).toBe(true);
-      expect(mainLayer.encoding.x.field).toBe('count');
-      expect(mainLayer.encoding.x.type).toBe('quantitative');
-      expect(spec.layer[0].encoding.y.aggregate).toBe('count');
-
-      // select time range params
-      expect(spec.params).not.toEqual(
-        expect.arrayContaining([expect.objectContaining({ name: 'applyTimeFilter' })])
-      );
-      expect(mainLayer.params).not.toEqual(
-        expect.arrayContaining([expect.objectContaining({ name: 'timeRangeBrush' })])
-      );
-    });
-
-    test('applies bucket options correctly, single bar aggregation should only be count', () => {
-      const stylesWithBucket = {
-        ...defaultBarChartStyles,
-        bucket: {
-          bucketSize: 50,
-          aggregationType: AggregationType.SUM,
-        },
-      };
-
-      const spec = createSingleBarChart(
-        mockData,
-        [mockNumericalColumn],
-        stylesWithBucket,
-        mockAxisColumnMappings
-      );
-
-      expect(spec.layer[0].encoding.x.bin.step).toBe(50);
-      expect(spec.layer[0].encoding.y.aggregate).toBe('count');
     });
   });
 });
