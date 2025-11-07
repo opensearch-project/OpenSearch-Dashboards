@@ -8,7 +8,6 @@
   @include exploreQueryPanelButton;
 }
 
-// Override saved query management popover padding for explore plugin only
 .exploreSaveQuery__popoverContent {
   .osdSavedQueryManagement__newUIList {
     padding: 0;
