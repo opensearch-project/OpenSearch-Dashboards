@@ -597,7 +597,7 @@ export function Header({
         <EuiHeaderSection grow={false}>{renderRecentItems()}</EuiHeaderSection>
 
         {renderBreadcrumbs(false, false)}
-
+        <EuiHeaderSection grow={true} />
         {renderPrimaryHeaderRight()}
       </EuiHeader>
 
