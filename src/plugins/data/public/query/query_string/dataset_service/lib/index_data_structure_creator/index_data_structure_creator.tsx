@@ -19,11 +19,9 @@ import './index_data_structure_creator.scss';
 
 type SelectionMode = 'single' | 'prefix';
 
-export const IndexDataStructureCreator: React.FC<DataStructureCreatorProps> = ({
-  path,
-  index,
-  selectDataStructure,
-}) => {
+export const IndexDataStructureCreator: React.FC<
+  DataStructureCreatorProps & { services?: any }
+> = ({ path, index, selectDataStructure, services }) => {
   const current = path[index];
   const isLast = index === path.length - 1;
   const isFinal = isLast && !current.hasNext;
@@ -117,7 +115,7 @@ export const IndexDataStructureCreator: React.FC<DataStructureCreatorProps> = ({
 
   const handleIndexSelectionChange = (selectedId: string | null) => {
     if (selectedId) {
-      const item = current.children?.find((child) => child.id === selectedId);
+      const item = (current.children || []).find((child: DataStructure) => child.id === selectedId);
       if (item) {
         if (isFinal) {
           setSelectedIndexId(selectedId);
@@ -148,10 +146,11 @@ export const IndexDataStructureCreator: React.FC<DataStructureCreatorProps> = ({
         customPrefix={customPrefix}
         validationError={validationError}
         onPrefixChange={handlePrefixChange}
-        children={current.children}
+        children={current.children || []}
         selectedIndexId={selectedIndexId}
         isFinal={isFinal}
         onIndexSelectionChange={handleIndexSelectionChange}
+        services={services}
       />
 
       <EuiSpacer size="s" />
