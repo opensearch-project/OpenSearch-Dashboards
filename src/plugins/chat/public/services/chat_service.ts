@@ -19,7 +19,13 @@ export interface ChatState {
 export interface ChatWindowState {
   isWindowOpen: boolean;
   windowMode: ChatLayoutMode;
+  paddingSize: number;
 }
+
+export type ChatWindowStateCallback = (
+  newWindowState: ChatWindowState,
+  changed: { [key in keyof ChatWindowState]: boolean }
+) => void;
 
 export class ChatService {
   private agent: AgUiAgent;
@@ -32,7 +38,8 @@ export class ChatService {
   // Window state management
   private _isWindowOpen: boolean = false;
   private _windowMode: ChatLayoutMode = ChatLayoutMode.SIDECAR;
-  private windowStateCallbacks: Set<(isOpen: boolean) => void> = new Set();
+  private _windowPaddingSize: number = 400;
+  private windowStateCallbacks: Set<ChatWindowStateCallback> = new Set();
   private windowOpenCallbacks: Set<() => void> = new Set();
   private windowCloseCallbacks: Set<() => void> = new Set();
 
@@ -91,28 +98,51 @@ export class ChatService {
     return this._windowMode;
   }
 
+  public getPaddingSize(): number {
+    return this._windowPaddingSize;
+  }
+
   public getWindowState(): ChatWindowState {
     return {
       isWindowOpen: this._isWindowOpen,
       windowMode: this._windowMode,
+      paddingSize: this._windowPaddingSize,
     };
   }
 
-  public setWindowState(isOpen: boolean, mode?: ChatLayoutMode): void {
-    const wasOpen = this._isWindowOpen;
-    this._isWindowOpen = isOpen;
+  public setWindowState(newWindowState: Partial<ChatWindowState>): void {
+    const { isWindowOpen, windowMode, paddingSize } = newWindowState;
+    const previousWindowState = this.getWindowState();
+    const changed = {
+      isWindowOpen: false,
+      windowMode: false,
+      paddingSize: false,
+    };
 
-    if (mode !== undefined) {
-      this._windowMode = mode;
+    if (isWindowOpen !== undefined && previousWindowState.isWindowOpen !== isWindowOpen) {
+      this._isWindowOpen = isWindowOpen;
+      changed.isWindowOpen = true;
+    }
+
+    if (windowMode !== undefined && previousWindowState.windowMode !== windowMode) {
+      this._windowMode = windowMode;
+      changed.windowMode = true;
+    }
+
+    if (paddingSize !== undefined && previousWindowState.paddingSize !== paddingSize) {
+      this._windowPaddingSize = paddingSize;
+      changed.paddingSize = true;
     }
 
     // Notify listeners if state changed
-    if (wasOpen !== isOpen) {
-      this.windowStateCallbacks.forEach((callback) => callback(isOpen));
+    if (changed.isWindowOpen || changed.windowMode || changed.paddingSize) {
+      this.windowStateCallbacks.forEach((callback) =>
+        callback({ ...previousWindowState, ...newWindowState }, changed)
+      );
     }
   }
 
-  public onWindowStateChange(callback: (isOpen: boolean) => void): () => void {
+  public onWindowStateChange(callback: ChatWindowStateCallback): () => void {
     this.windowStateCallbacks.add(callback);
     // Return unsubscribe function
     return () => this.windowStateCallbacks.delete(callback);

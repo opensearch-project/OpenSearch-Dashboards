@@ -7,7 +7,7 @@ import React from 'react';
 import { ChatPlugin } from './plugin';
 import { ChatService } from './services/chat_service';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 // Mock dependencies
 jest.mock('./services/chat_service');
@@ -46,6 +46,11 @@ describe('ChatPlugin', () => {
         },
         globalSearch: {
           registerSearchCommand: jest.fn(),
+        },
+      },
+      overlays: {
+        sidecar: {
+          getSidecarConfig$: jest.fn().mockReturnValue(of({ paddingSize: 400 })),
         },
       },
     };
@@ -271,6 +276,120 @@ describe('ChatPlugin', () => {
       await commandConfig.action({ content: 'test query' });
 
       expect(mockStartNewConversation).toHaveBeenCalledWith({ content: 'test query' });
+    });
+  });
+
+  describe('localStorage persistence', () => {
+    let mockLocalStorage: { [key: string]: string };
+    let mockChatService: any;
+    let originalLocalStorage: Storage;
+
+    beforeEach(() => {
+      // Save original localStorage
+      originalLocalStorage = window.localStorage;
+
+      // Mock localStorage
+      mockLocalStorage = {};
+      Object.defineProperty(window, 'localStorage', {
+        value: {
+          getItem: jest.fn((key: string) => mockLocalStorage[key] || null),
+          setItem: jest.fn((key: string, value: string) => {
+            mockLocalStorage[key] = value;
+          }),
+          removeItem: jest.fn((key: string) => {
+            delete mockLocalStorage[key];
+          }),
+          clear: jest.fn(() => {
+            mockLocalStorage = {};
+          }),
+        },
+        writable: true,
+        configurable: true,
+      });
+
+      // Create a mock ChatService instance
+      mockChatService = {
+        setWindowState: jest.fn(),
+        onWindowStateChange: jest.fn().mockReturnValue(jest.fn()),
+      };
+    });
+
+    afterEach(() => {
+      // Restore original localStorage
+      Object.defineProperty(window, 'localStorage', {
+        value: originalLocalStorage,
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    it('should restore window state from localStorage on start', () => {
+      // Set initial state in localStorage
+      mockLocalStorage['chat.windowState'] = JSON.stringify({
+        isWindowOpen: true,
+        windowMode: 'fullscreen',
+        paddingSize: 500,
+      });
+
+      // Mock ChatService to return our controlled instance
+      (ChatService as jest.MockedClass<typeof ChatService>).mockImplementation(
+        () => mockChatService
+      );
+
+      plugin.start(mockCoreStart, mockDeps);
+
+      expect(mockChatService.setWindowState).toHaveBeenCalledWith({
+        isWindowOpen: true,
+        windowMode: 'fullscreen',
+        paddingSize: 500,
+      });
+    });
+
+    it('should persist window state changes to localStorage', () => {
+      let stateChangeCallback: any;
+      mockChatService.onWindowStateChange = jest.fn((callback) => {
+        stateChangeCallback = callback;
+        return jest.fn();
+      });
+
+      // Mock ChatService to return our controlled instance
+      (ChatService as jest.MockedClass<typeof ChatService>).mockImplementation(
+        () => mockChatService
+      );
+
+      plugin.start(mockCoreStart, mockDeps);
+
+      // Simulate window state change
+      stateChangeCallback({ isWindowOpen: true, windowMode: 'sidecar', paddingSize: 400 });
+
+      expect(window.localStorage.setItem).toHaveBeenCalledWith(
+        'chat.windowState',
+        JSON.stringify({
+          isWindowOpen: true,
+          windowMode: 'sidecar',
+          paddingSize: 400,
+        })
+      );
+    });
+
+    it('should not restore invalid state from localStorage', () => {
+      // Set invalid state in localStorage
+      mockLocalStorage['chat.windowState'] = JSON.stringify({
+        isWindowOpen: 'invalid',
+        windowMode: 'invalid-mode',
+      });
+
+      // Mock ChatService to return our controlled instance
+      (ChatService as jest.MockedClass<typeof ChatService>).mockImplementation(
+        () => mockChatService
+      );
+
+      plugin.start(mockCoreStart, mockDeps);
+
+      // Should not call setWindowState with invalid data from localStorage
+      // but will be called with paddingSize from sidecar config subscription
+      expect(mockChatService.setWindowState).toHaveBeenCalledTimes(1);
+      expect(mockChatService.setWindowState).toHaveBeenCalledWith({ paddingSize: 400 });
     });
   });
 });

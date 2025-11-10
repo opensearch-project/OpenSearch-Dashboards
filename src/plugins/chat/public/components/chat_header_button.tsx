@@ -5,7 +5,7 @@
 
 import React, { useCallback, useRef, useState, useEffect, useImperativeHandle } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { useUnmount } from 'react-use';
+import { useEffectOnce, useUnmount } from 'react-use';
 import { CoreStart, SIDECAR_DOCKED_MODE } from '../../../../core/public';
 import { ChatWindow, ChatWindowInstance } from './chat_window';
 import { ChatProvider } from '../contexts/chat_context';
@@ -60,27 +60,20 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
     const openSidecar = useCallback(() => {
       if (!flyoutMountPoint.current) return;
 
-      const sidecarConfig =
-        layoutMode === ChatLayoutMode.FULLSCREEN
-          ? {
-              dockedMode: SIDECAR_DOCKED_MODE.TAKEOVER,
-              paddingSize: window.innerHeight,
-              isHidden: false,
-            }
-          : {
-              dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
-              paddingSize: 400,
-              isHidden: false,
-            };
-
       sideCarRef.current = core.overlays.sidecar.open(flyoutMountPoint.current, {
         className: `chat-sidecar chat-sidecar--${layoutMode}`,
-        config: sidecarConfig,
+        config: {
+          dockedMode:
+            layoutMode === ChatLayoutMode.FULLSCREEN
+              ? SIDECAR_DOCKED_MODE.TAKEOVER
+              : SIDECAR_DOCKED_MODE.RIGHT,
+          paddingSize: chatService.getPaddingSize(),
+          isHidden: false,
+        },
       });
 
       // Notify ChatService that window is now open
-      chatService.setWindowState(true, layoutMode);
-      setIsOpen(true);
+      chatService.setWindowState({ isWindowOpen: true });
     }, [core.overlays, layoutMode, chatService]);
 
     const closeSidecar = useCallback(() => {
@@ -89,8 +82,7 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
         sideCarRef.current = undefined;
       }
       // Notify ChatService that window is now closed
-      chatService.setWindowState(false);
-      setIsOpen(false);
+      chatService.setWindowState({ isWindowOpen: false });
     }, [chatService]);
 
     const toggleSidecar = useCallback(() => {
@@ -109,24 +101,18 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
 
       // Update sidecar config dynamically if currently open
       if (isOpen && sideCarRef.current) {
-        const newSidecarConfig =
-          newLayoutMode === ChatLayoutMode.FULLSCREEN
-            ? {
-                dockedMode: SIDECAR_DOCKED_MODE.TAKEOVER,
-                paddingSize: window.innerHeight - 50,
-                isHidden: false,
-              }
-            : {
-                dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
-                paddingSize: 400,
-                isHidden: false,
-              };
-
-        core.overlays.sidecar.setSidecarConfig(newSidecarConfig);
+        core.overlays.sidecar.setSidecarConfig({
+          dockedMode:
+            newLayoutMode === ChatLayoutMode.FULLSCREEN
+              ? SIDECAR_DOCKED_MODE.TAKEOVER
+              : SIDECAR_DOCKED_MODE.RIGHT,
+          paddingSize: newLayoutMode === ChatLayoutMode.FULLSCREEN ? window.innerHeight - 50 : 400,
+          isHidden: false,
+        });
       }
 
       // Update ChatService with new layout mode
-      chatService.setWindowState(isOpen, newLayoutMode);
+      chatService.setWindowState({ windowMode: newLayoutMode });
     }, [layoutMode, isOpen, chatService, core.overlays.sidecar]);
 
     const startNewConversation = useCallback<ChatHeaderButtonInstance['startNewConversation']>(
@@ -142,9 +128,16 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
 
     // Listen to ChatService window state changes and sync local state
     useEffect(() => {
-      const unsubscribe = chatService.onWindowStateChange((newIsOpen) => {
-        setIsOpen(newIsOpen);
-      });
+      const unsubscribe = chatService.onWindowStateChange(
+        ({ isWindowOpen, windowMode }, changed) => {
+          if (changed.isWindowOpen) {
+            setIsOpen(isWindowOpen);
+          }
+          if (changed.windowMode) {
+            setLayoutMode(windowMode);
+          }
+        }
+      );
       return unsubscribe;
     }, [chatService]);
 
@@ -171,8 +164,13 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
     // Cleanup on unmount
     useUnmount(() => {
       if (sideCarRef.current) {
-        chatService.setWindowState(false);
         sideCarRef.current.close();
+      }
+    });
+
+    useEffectOnce(() => {
+      if (isOpen) {
+        openSidecar();
       }
     });
 

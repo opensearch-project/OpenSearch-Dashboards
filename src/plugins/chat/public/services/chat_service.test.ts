@@ -307,10 +307,10 @@ describe('ChatService', () => {
       });
 
       it('should return updated state after setWindowState', () => {
-        chatService.setWindowState(true);
+        chatService.setWindowState({ isWindowOpen: true });
         expect(chatService.isWindowOpen()).toBe(true);
 
-        chatService.setWindowState(false);
+        chatService.setWindowState({ isWindowOpen: false });
         expect(chatService.isWindowOpen()).toBe(false);
       });
     });
@@ -321,7 +321,7 @@ describe('ChatService', () => {
       });
 
       it('should return updated mode after setWindowState', () => {
-        chatService.setWindowState(true, 'fullscreen' as any);
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
         expect(chatService.getWindowMode()).toBe('fullscreen');
       });
     });
@@ -332,33 +332,35 @@ describe('ChatService', () => {
         expect(state).toEqual({
           isWindowOpen: false,
           windowMode: 'sidecar',
+          paddingSize: 400,
         });
       });
 
       it('should return updated state', () => {
-        chatService.setWindowState(true, 'fullscreen' as any);
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
         const state = chatService.getWindowState();
         expect(state).toEqual({
           isWindowOpen: true,
           windowMode: 'fullscreen',
+          paddingSize: 400,
         });
       });
     });
 
     describe('setWindowState', () => {
       it('should update window open state', () => {
-        chatService.setWindowState(true);
+        chatService.setWindowState({ isWindowOpen: true });
         expect(chatService.isWindowOpen()).toBe(true);
       });
 
       it('should update window mode when provided', () => {
-        chatService.setWindowState(true, 'fullscreen' as any);
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
         expect(chatService.getWindowMode()).toBe('fullscreen');
       });
 
       it('should not update mode when not provided', () => {
-        chatService.setWindowState(true, 'fullscreen' as any);
-        chatService.setWindowState(false);
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
+        chatService.setWindowState({ isWindowOpen: false });
         expect(chatService.getWindowMode()).toBe('fullscreen');
       });
 
@@ -366,19 +368,70 @@ describe('ChatService', () => {
         const callback = jest.fn();
         chatService.onWindowStateChange(callback);
 
-        chatService.setWindowState(true);
-        expect(callback).toHaveBeenCalledWith(true);
+        chatService.setWindowState({ isWindowOpen: true });
+        expect(callback).toHaveBeenCalledWith(
+          { isWindowOpen: true, windowMode: 'sidecar', paddingSize: 400 },
+          { isWindowOpen: true, windowMode: false, paddingSize: false }
+        );
 
-        chatService.setWindowState(false);
-        expect(callback).toHaveBeenCalledWith(false);
+        chatService.setWindowState({ isWindowOpen: false });
+        expect(callback).toHaveBeenCalledWith(
+          { isWindowOpen: false, windowMode: 'sidecar', paddingSize: 400 },
+          { isWindowOpen: true, windowMode: false, paddingSize: false }
+        );
       });
 
       it('should not notify listeners when state does not change', () => {
         const callback = jest.fn();
+        chatService.setWindowState({ isWindowOpen: false });
+        chatService.onWindowStateChange(callback);
+        chatService.setWindowState({ isWindowOpen: false });
+        expect(callback).not.toHaveBeenCalled();
+      });
+
+      it('should notify listeners when window mode changes', () => {
+        const callback = jest.fn();
         chatService.onWindowStateChange(callback);
 
-        chatService.setWindowState(false);
+        // Set initial state - windowMode is already 'sidecar' by default, so only isWindowOpen changes
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'sidecar' as any });
+        expect(callback).toHaveBeenCalledWith(
+          { isWindowOpen: true, windowMode: 'sidecar', paddingSize: 400 },
+          { isWindowOpen: true, windowMode: false, paddingSize: false }
+        );
+
+        callback.mockClear();
+
+        // Change only the mode, keep isOpen the same
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
+        expect(callback).toHaveBeenCalledWith(
+          { isWindowOpen: true, windowMode: 'fullscreen', paddingSize: 400 },
+          { isWindowOpen: false, windowMode: true, paddingSize: false }
+        );
+      });
+
+      it('should not notify listeners when mode is set to same value', () => {
+        const callback = jest.fn();
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'sidecar' as any });
+
+        chatService.onWindowStateChange(callback);
+
+        // Set same mode again
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'sidecar' as any });
         expect(callback).not.toHaveBeenCalled();
+      });
+
+      it('should notify with both isOpen and windowMode parameters', () => {
+        const callback = jest.fn();
+        chatService.onWindowStateChange(callback);
+
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
+
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(callback).toHaveBeenCalledWith(
+          { isWindowOpen: true, windowMode: 'fullscreen', paddingSize: 400 },
+          { isWindowOpen: true, windowMode: true, paddingSize: false }
+        );
       });
     });
 
@@ -387,13 +440,16 @@ describe('ChatService', () => {
         const callback = jest.fn();
         const unsubscribe = chatService.onWindowStateChange(callback);
 
-        chatService.setWindowState(true);
-        expect(callback).toHaveBeenCalledWith(true);
+        chatService.setWindowState({ isWindowOpen: true });
+        expect(callback).toHaveBeenCalledWith(
+          { isWindowOpen: true, windowMode: 'sidecar', paddingSize: 400 },
+          { isWindowOpen: true, windowMode: false, paddingSize: false }
+        );
 
         callback.mockClear();
         unsubscribe();
 
-        chatService.setWindowState(false);
+        chatService.setWindowState({ isWindowOpen: false });
         expect(callback).not.toHaveBeenCalled();
       });
 
@@ -404,10 +460,16 @@ describe('ChatService', () => {
         chatService.onWindowStateChange(callback1);
         chatService.onWindowStateChange(callback2);
 
-        chatService.setWindowState(true);
+        chatService.setWindowState({ isWindowOpen: true });
 
-        expect(callback1).toHaveBeenCalledWith(true);
-        expect(callback2).toHaveBeenCalledWith(true);
+        expect(callback1).toHaveBeenCalledWith(
+          { isWindowOpen: true, windowMode: 'sidecar', paddingSize: 400 },
+          { isWindowOpen: true, windowMode: false, paddingSize: false }
+        );
+        expect(callback2).toHaveBeenCalledWith(
+          { isWindowOpen: true, windowMode: 'sidecar', paddingSize: 400 },
+          { isWindowOpen: true, windowMode: false, paddingSize: false }
+        );
       });
     });
 
@@ -446,7 +508,7 @@ describe('ChatService', () => {
         const unsubscribe = chatService.onWindowCloseRequest(callback);
 
         // Set window open first
-        chatService.setWindowState(true);
+        chatService.setWindowState({ isWindowOpen: true });
 
         await chatService.closeWindow();
         expect(callback).toHaveBeenCalled();
@@ -465,7 +527,7 @@ describe('ChatService', () => {
         chatService.onWindowCloseRequest(callback1);
         chatService.onWindowCloseRequest(callback2);
 
-        chatService.setWindowState(true);
+        chatService.setWindowState({ isWindowOpen: true });
         await chatService.closeWindow();
 
         expect(callback1).toHaveBeenCalled();
@@ -508,7 +570,7 @@ describe('ChatService', () => {
         const callback = jest.fn();
         chatService.onWindowOpenRequest(callback);
 
-        chatService.setWindowState(true);
+        chatService.setWindowState({ isWindowOpen: true });
         await chatService.openWindow();
 
         expect(callback).not.toHaveBeenCalled();
@@ -520,7 +582,7 @@ describe('ChatService', () => {
         const callback = jest.fn();
         chatService.onWindowCloseRequest(callback);
 
-        chatService.setWindowState(true);
+        chatService.setWindowState({ isWindowOpen: true });
         await chatService.closeWindow();
 
         expect(callback).toHaveBeenCalled();
@@ -573,7 +635,7 @@ describe('ChatService', () => {
       };
 
       chatService.setChatWindowRef(mockChatWindowRef as any);
-      chatService.setWindowState(true);
+      chatService.setWindowState({ isWindowOpen: true });
 
       const result = await chatService.sendMessageWithWindow('test message', []);
 
@@ -593,7 +655,7 @@ describe('ChatService', () => {
       };
 
       chatService.setChatWindowRef(mockChatWindowRef as any);
-      chatService.setWindowState(true);
+      chatService.setWindowState({ isWindowOpen: true });
 
       await chatService.sendMessageWithWindow('test', [], { clearConversation: true });
 
@@ -620,7 +682,7 @@ describe('ChatService', () => {
       };
 
       chatService.setChatWindowRef(mockChatWindowRef as any);
-      chatService.setWindowState(true);
+      chatService.setWindowState({ isWindowOpen: true });
 
       const mockObservable = new Observable<BaseEvent>();
       mockAgent.runAgent.mockReturnValue(mockObservable);
@@ -641,7 +703,7 @@ describe('ChatService', () => {
       };
 
       chatService.setChatWindowRef(mockChatWindowRef as any);
-      chatService.setWindowState(true);
+      chatService.setWindowState({ isWindowOpen: true });
 
       const result = await chatService.sendMessageWithWindow('test', []);
 
