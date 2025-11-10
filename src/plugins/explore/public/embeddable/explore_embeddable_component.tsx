@@ -7,13 +7,16 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SearchProps } from './explore_embeddable';
 import { VisualizationNoResults } from '../../../visualizations/public';
-import { getDocViewsRegistry } from '../application/legacy/discover/opensearch_dashboards_services';
+// TODO: refactor it to now use legacy getServices
+import {
+  getDocViewsRegistry,
+  getServices,
+} from '../application/legacy/discover/opensearch_dashboards_services';
 import { DataTable } from '../components/data_table/data_table';
 import { TableVis } from '../components/visualizations/table/table_vis';
 import { TableChartStyle } from '../components/visualizations/table/table_vis_config';
 import { getLegacyDisplayedColumns } from '../helpers/data_table_helper';
 import { SAMPLE_SIZE_SETTING } from '../../common';
-import { getServices } from '../services/services';
 
 interface ExploreEmbeddableProps {
   searchProps: SearchProps;
