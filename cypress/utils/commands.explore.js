@@ -501,7 +501,7 @@ cy.explore.add(
   }
 );
 
-cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName) => {
+cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName, options) => {
   cy.explore.clearQueryEditor();
   cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
   setDatePickerDatesAndSearchIfRelevant('PPL');
@@ -522,7 +522,7 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName) =
     });
 
   // for pie and area, it needs manual chart type switch
-  if (chartType === 'Pie' || chartType === 'Area') {
+  if (options && options.shouldManualSelectChartType) {
     cy.get('.euiContextMenuItem.euiSuperSelect__item')
       .contains(chartType)
       .should('be.visible')

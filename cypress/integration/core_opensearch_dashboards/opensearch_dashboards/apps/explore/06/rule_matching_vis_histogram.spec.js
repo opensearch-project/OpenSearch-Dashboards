@@ -11,7 +11,7 @@ const workspaceName = getRandomizedWorkspaceName();
 const datasetName = `${INDEX_WITH_TIME_1}*`;
 
 export const runCreateVisTests = () => {
-  describe('create pie visualization tests', () => {
+  describe('create Histogram visualization tests', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
       cy.explore.createWorkspaceDataSets({
@@ -27,23 +27,28 @@ export const runCreateVisTests = () => {
         isEnhancement: true,
       });
     });
+
     beforeEach(() => {
       cy.getElementByTestId('discoverNewButton').click();
       cy.osd.waitForLoader(true);
     });
+
     after(() => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
-    it('should create a pie visualization using a query with one metric and one categories', () => {
-      const query = `source=${datasetName} | stats count() by category`;
 
-      cy.explore.createVisualizationWithQuery(query, 'Pie', datasetName, {
+    it('should create a histogram visualization', () => {
+      const query = `source=${datasetName} | fields response_time`;
+      cy.explore.createVisualizationWithQuery(query, 'Histogram', datasetName, {
         shouldManualSelectChartType: true,
       });
+      cy.getElementByTestId('field-x').contains('response_time');
+      cy.get('canvas.marks').should('be.visible');
     });
-    it('should turn off legend of pie chart and reflect immediatly to the pie visualization', () => {
-      const query = `source=${datasetName} | stats count() by category`;
-      cy.explore.createVisualizationWithQuery(query, 'Pie', datasetName, {
+
+    it('should change style options and the changes reflect immediately to the histogram visualization', () => {
+      const query = `source=${datasetName} | fields response_time`;
+      cy.explore.createVisualizationWithQuery(query, 'Histogram', datasetName, {
         shouldManualSelectChartType: true,
       });
 
@@ -53,36 +58,35 @@ export const runCreateVisTests = () => {
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
         });
-      // Open legend setting
-      cy.get('[aria-controls="legendSection"]').click();
-      cy.getElementByTestId('legendModeSwitch').click();
+
+      // Use threshold color to update the histogram
+      cy.getElementByTestId('useThresholdColorButton').click();
       // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
-      });
-    });
-
-    it('should update pie chart style and reflect immediatly to the pie visualization', () => {
-      const query = `source=${datasetName} | stats count() by category`;
-      cy.explore.createVisualizationWithQuery(query, 'Pie', datasetName, {
-        shouldManualSelectChartType: true,
+        beforeCanvasDataUrl = afterCanvasDataUrl;
       });
 
-      let beforeCanvasDataUrl;
-      cy.get('canvas.marks')
-        .should('be.visible')
-        .then((canvas) => {
-          beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
-        });
-      cy.getElementByTestId('showLabelsSwitch').click();
-      // compare with new canvas
+      // Change bucket count should update the histogram
+      cy.contains('label', 'Bucket Count').click().type('10');
+      cy.wait(1000);
       cy.get('canvas.marks').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
+        beforeCanvasDataUrl = afterCanvasDataUrl;
+      });
+
+      // Change bucket size should update the histogram
+      cy.contains('label', 'Bucket Size').click().type('0.2');
+      cy.wait(1000);
+      cy.get('canvas.marks').then((canvas) => {
+        const afterCanvasDataUrl = canvas[0].toDataURL();
+        expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
+        beforeCanvasDataUrl = afterCanvasDataUrl;
       });
     });
   });
 };
 
-prepareTestSuite('Create Pie Visualization', runCreateVisTests);
+prepareTestSuite('Create Histogram Visualization', runCreateVisTests);
