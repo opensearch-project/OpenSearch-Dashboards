@@ -9,7 +9,7 @@ const workspaceName = getRandomizedWorkspaceName();
 const datasetName = `${INDEX_WITH_TIME_1}*`;
 
 export const runCreateVisTests = () => {
-  describe('create Bar Gauge visualization tests', () => {
+  describe('create bar gauge visualization tests', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
       cy.explore.createWorkspaceDataSets({
@@ -39,7 +39,7 @@ export const runCreateVisTests = () => {
       });
     });
 
-    it('should change style options and the changes reflect immediately to the Bar Gauge visualization', () => {
+    it('should change style options and the changes reflect immediately to the bar gauge visualization', () => {
       const query = `source=${datasetName} | stats count() by category`;
       cy.explore.createVisualizationWithQuery(query, 'Bar Gauge', datasetName, {
         shouldManualSelectChartType: true,
@@ -58,7 +58,7 @@ export const runCreateVisTests = () => {
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
       });
     });
-    it('should add threshold for bar gauge chart and reflect immediatly to the Bar Gauge visualization', () => {
+    it('should add threshold for bar gauge chart and reflect immediatly to the bar gauge visualization', () => {
       const query = `source=${datasetName} | stats count() by category`;
       cy.explore.createVisualizationWithQuery(query, 'Bar Gauge', datasetName, {
         shouldManualSelectChartType: true,
