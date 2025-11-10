@@ -50,6 +50,8 @@ export const runCreateVisTests = () => {
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
         });
+
+      // Show title on chart
       cy.getElementByTestId('showTitleSwitch').click();
       // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {
@@ -65,7 +67,41 @@ export const runCreateVisTests = () => {
       });
       cy.getElementByTestId('field-value').contains('count()');
       cy.getElementByTestId('field-time').contains('timestamp');
-      cy.get('canvas.marks').should('be.visible');
+
+      let beforeCanvasDataUrl;
+      cy.get('canvas.marks')
+        .should('be.visible')
+        .then((canvas) => {
+          beforeCanvasDataUrl = canvas[0].toDataURL();
+        });
+
+      // Use threshold color
+      cy.getElementByTestId('useThresholdColorButton').click();
+      cy.wait(1000);
+      cy.get('canvas.marks').then((canvas) => {
+        const afterCanvasDataUrl = canvas[0].toDataURL();
+        expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
+        beforeCanvasDataUrl = afterCanvasDataUrl;
+      });
+
+      // Show percentage
+      cy.contains('Show percentage').click();
+      cy.wait(1000);
+      cy.get('canvas.marks').then((canvas) => {
+        const afterCanvasDataUrl = canvas[0].toDataURL();
+        expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
+        beforeCanvasDataUrl = afterCanvasDataUrl;
+      });
+
+      // Update threshold
+      cy.get('[aria-controls="thresholdSection"]').click();
+      cy.getElementByTestId('exploreVisAddThreshold').click();
+      cy.wait(1000);
+      cy.get('canvas.marks').then((canvas) => {
+        const afterCanvasDataUrl = canvas[0].toDataURL();
+        expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
+        beforeCanvasDataUrl = afterCanvasDataUrl;
+      });
     });
   });
 };
