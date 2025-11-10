@@ -515,11 +515,7 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName, o
 
   // Ensure chart type is correct
 
-  cy.getElementByTestId('exploreVisStylePanel')
-    .should('be.visible')
-    .within(() => {
-      cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
-    });
+  cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
 
   // for pie and area, it needs manual chart type switch
   if (options && options.shouldManualSelectChartType) {
@@ -527,16 +523,10 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName, o
       .contains(chartType)
       .should('be.visible')
       .click();
-
-    // need to open again after switching chart type
-    cy.getElementByTestId('exploreVisStylePanel')
-      .should('be.visible')
-      .within(() => {
-        cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
-      });
   }
 
   // Ensure chart type is correct
+  cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
   cy.get('[role="option"][aria-selected="true"]')
     .should('be.visible')
     .and('contain.text', chartType);
