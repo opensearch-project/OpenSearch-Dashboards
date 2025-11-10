@@ -13,8 +13,6 @@ jest.mock('../application/legacy/discover/opensearch_dashboards_services', () =>
   getDocViewsRegistry: jest.fn(() => ({
     getDocViewsSorted: jest.fn(() => []),
   })),
-}));
-jest.mock('../services/services', () => ({
   getServices: jest.fn(() => ({
     uiSettings: {
       get: jest.fn((key) => {
