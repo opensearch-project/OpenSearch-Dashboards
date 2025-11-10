@@ -34,14 +34,14 @@ export const runCreateVisTests = () => {
     });
     it('should create a bar gauge visualization using a query with one metric and one category', () => {
       const query = `source=${datasetName} | stats count() by category`;
-      cy.explore.createVisualizationWithQuery(query, 'Bar Gauge', datasetName, {
+      cy.explore.createVisualizationWithQuery(query, 'bar_gauge', datasetName, {
         shouldManualSelectChartType: true,
       });
     });
 
     it('should change style options and the changes reflect immediately to the bar gauge visualization', () => {
       const query = `source=${datasetName} | stats count() by category`;
-      cy.explore.createVisualizationWithQuery(query, 'Bar Gauge', datasetName, {
+      cy.explore.createVisualizationWithQuery(query, 'bar_gauge', datasetName, {
         shouldManualSelectChartType: true,
       });
       let beforeCanvasDataUrl;
@@ -60,7 +60,7 @@ export const runCreateVisTests = () => {
     });
     it('should add threshold for bar gauge chart and reflect immediatly to the bar gauge visualization', () => {
       const query = `source=${datasetName} | stats count() by category`;
-      cy.explore.createVisualizationWithQuery(query, 'Bar Gauge', datasetName, {
+      cy.explore.createVisualizationWithQuery(query, 'bar_gauge', datasetName, {
         shouldManualSelectChartType: true,
       });
       let beforeCanvasDataUrl;

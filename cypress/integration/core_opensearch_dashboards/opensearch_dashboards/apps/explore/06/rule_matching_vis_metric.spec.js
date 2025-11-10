@@ -11,7 +11,7 @@ const workspaceName = getRandomizedWorkspaceName();
 const datasetName = `${INDEX_WITH_TIME_1}*`;
 
 export const runCreateVisTests = () => {
-  describe('create Metric visualization tests', () => {
+  describe('create metric visualization tests', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
       cy.explore.createWorkspaceDataSets({
@@ -36,14 +36,14 @@ export const runCreateVisTests = () => {
     });
     it('should create a metric visualization using a single metric query', () => {
       const query = `source=${datasetName} | stats count()`;
-      cy.explore.createVisualizationWithQuery(query, 'Metric', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'metric', datasetName);
       cy.getElementByTestId('field-value').contains('count()');
       cy.get('canvas.marks').should('be.visible');
     });
 
     it('should change style options and the changes reflect immediately to the metric visualization', () => {
       const query = `source=${datasetName} | stats count()`;
-      cy.explore.createVisualizationWithQuery(query, 'Metric', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'metric', datasetName);
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
         .should('be.visible')
@@ -62,7 +62,7 @@ export const runCreateVisTests = () => {
 
     it('should create a metric sparkline visualization using a metric query with time bucket', () => {
       const query = `source=${datasetName} | stats count() by span(timestamp, 1d)`;
-      cy.explore.createVisualizationWithQuery(query, 'Metric', datasetName, {
+      cy.explore.createVisualizationWithQuery(query, 'metric', datasetName, {
         shouldManualSelectChartType: true,
       });
       cy.getElementByTestId('field-value').contains('count()');

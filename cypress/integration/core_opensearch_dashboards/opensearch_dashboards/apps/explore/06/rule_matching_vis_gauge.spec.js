@@ -35,14 +35,14 @@ export const runCreateVisTests = () => {
     });
     it('should create a gauge visualization using a query with one metric', () => {
       const query = `source=${datasetName} | stats count()`;
-      cy.explore.createVisualizationWithQuery(query, 'Gauge', datasetName, {
+      cy.explore.createVisualizationWithQuery(query, 'gauge', datasetName, {
         shouldManualSelectChartType: true,
       });
     });
 
     it('should change style options and the changes reflect immediately to the gauge visualization', () => {
       const query = `source=${datasetName} | stats count()`;
-      cy.explore.createVisualizationWithQuery(query, 'Gauge', datasetName, {
+      cy.explore.createVisualizationWithQuery(query, 'gauge', datasetName, {
         shouldManualSelectChartType: true,
       });
       let beforeCanvasDataUrl;
@@ -60,7 +60,7 @@ export const runCreateVisTests = () => {
     });
     it('should add threshold for gauge chart and reflect immediatly to the gauge visualization', () => {
       const query = `source=${datasetName} | stats count()`;
-      cy.explore.createVisualizationWithQuery(query, 'Gauge', datasetName, {
+      cy.explore.createVisualizationWithQuery(query, 'gauge', datasetName, {
         shouldManualSelectChartType: true,
       });
       let beforeCanvasDataUrl;
