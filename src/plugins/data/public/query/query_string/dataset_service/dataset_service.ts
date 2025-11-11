@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import LRUCache from 'lru-cache';
 import { CoreStart } from 'opensearch-dashboards/public';
 import {
@@ -188,6 +189,8 @@ export class DatasetService {
           ? ({} as IndexPatternFieldMap)
           : await type?.fetchFields(dataset, services);
         const spec = {
+          // Generate ID with data source prefix if data source exists, otherwise allow UUID generation
+          id: dataset.dataSource?.id ? `${dataset.dataSource.id}::${uuidv4()}` : undefined,
           displayName: dataset.displayName,
           title: dataset.title,
           timeFieldName: dataset.timeFieldName,
