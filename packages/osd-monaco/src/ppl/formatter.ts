@@ -23,19 +23,3 @@ export const pplRangeFormatProvider = {
     ];
   },
 };
-
-export const pplOnTypeFormatProvider = {
-  autoFormatTriggerCharacters: ['|'],
-  provideOnTypeFormattingEdits(model: any) {
-    const fullRange = model.getFullModelRange();
-    const text = model.getValue();
-    const formatted = formatPPLQuery(text);
-
-    return [
-      {
-        range: fullRange,
-        text: formatted,
-      },
-    ];
-  },
-};
