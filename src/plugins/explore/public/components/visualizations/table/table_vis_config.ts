@@ -30,8 +30,7 @@ export interface TableChartStyleOptions {
   thresholds?: Threshold[];
   baseColor?: string;
   dataLinks?: DataLink[];
-  customizedColumnOrder?: boolean;
-  userColumnOrder?: string[];
+  visibleColumns?: string[];
   hiddenColumns?: string[];
 }
 
@@ -47,8 +46,7 @@ export const defaultTableChartStyles: TableChartStyle = {
   thresholds: [],
   baseColor: '#000000',
   dataLinks: [],
-  customizedColumnOrder: false,
-  userColumnOrder: [],
+  visibleColumns: [],
   hiddenColumns: [],
 };
 
