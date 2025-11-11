@@ -131,7 +131,7 @@ export const VisualizationRender = ({
         rows={rows}
         columns={columns}
         onStyleChange={onStyleChange}
-        isDashboardMode={false}
+        disableActions={false}
       />
     );
   }
@@ -147,7 +147,7 @@ export const VisualizationRender = ({
         styleOptions={defaultStyleOptions}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
         showStyleSelector={false}
-        isDashboardMode={false}
+        disableActions={false}
       />
     );
   }
