@@ -218,8 +218,12 @@ describe('DatasetService', () => {
       schemaMappings: { otelLogs: { spanId: 'span.id' } },
     } as Dataset;
 
+    const mockCreatedDataView = {
+      id: 'generated-uuid-1234',
+    };
+
     const mockDataViews = {
-      createAndSave: jest.fn().mockResolvedValue({}),
+      createAndSave: jest.fn().mockResolvedValue(mockCreatedDataView),
     };
 
     const servicesWithDataViews = {
@@ -233,9 +237,10 @@ describe('DatasetService', () => {
     service.registerType(mockType);
     await service.saveDataset(mockDataset, servicesWithDataViews, 'metrics');
 
+    // Should call createAndSave without the ID to allow UUID generation
     expect(mockDataViews.createAndSave).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'test-dataset',
+        // id should NOT be present to allow UUID generation
         title: 'Test Dataset',
         displayName: 'My Dataset',
         description: 'Test description',
@@ -246,6 +251,18 @@ describe('DatasetService', () => {
       undefined,
       false
     );
+
+    // Should NOT contain the original ID
+    expect(mockDataViews.createAndSave).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        id: 'test-dataset',
+      }),
+      undefined,
+      false
+    );
+
+    // Should update the dataset with the generated UUID
+    expect(mockDataset.id).toBe('generated-uuid-1234');
   });
 
   test('saveDataset does not save index pattern datasets', async () => {
@@ -488,6 +505,60 @@ describe('DatasetService', () => {
       await expect(service.saveDataset(mockDataset, servicesWithDataViews)).rejects.toThrow(
         'Failed to save dataset'
       );
+    });
+
+    test('does not update dataset ID when createAndSave returns undefined', async () => {
+      const originalId = 'test-dataset';
+      const mockDataset = {
+        id: originalId,
+        title: 'Test Dataset',
+        type: mockType.id,
+      } as Dataset;
+
+      const mockDataViews = {
+        createAndSave: jest.fn().mockResolvedValue(undefined),
+      };
+
+      const servicesWithDataViews = {
+        ...mockDataPluginServices,
+        data: {
+          ...dataPluginMock.createStartContract(),
+          dataViews: mockDataViews as any,
+        },
+      };
+
+      service.registerType(mockType);
+      await service.saveDataset(mockDataset, servicesWithDataViews);
+
+      // Dataset ID should remain unchanged when no ID is returned
+      expect(mockDataset.id).toBe(originalId);
+    });
+
+    test('does not update dataset ID when createAndSave returns object without ID', async () => {
+      const originalId = 'test-dataset';
+      const mockDataset = {
+        id: originalId,
+        title: 'Test Dataset',
+        type: mockType.id,
+      } as Dataset;
+
+      const mockDataViews = {
+        createAndSave: jest.fn().mockResolvedValue({}),
+      };
+
+      const servicesWithDataViews = {
+        ...mockDataPluginServices,
+        data: {
+          ...dataPluginMock.createStartContract(),
+          dataViews: mockDataViews as any,
+        },
+      };
+
+      service.registerType(mockType);
+      await service.saveDataset(mockDataset, servicesWithDataViews);
+
+      // Dataset ID should remain unchanged when no ID is returned
+      expect(mockDataset.id).toBe(originalId);
     });
   });
 });

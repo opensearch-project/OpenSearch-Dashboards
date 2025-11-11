@@ -188,7 +188,6 @@ export class DatasetService {
           ? ({} as IndexPatternFieldMap)
           : await type?.fetchFields(dataset, services);
         const spec = {
-          id: dataset.id,
           displayName: dataset.displayName,
           title: dataset.title,
           timeFieldName: dataset.timeFieldName,
@@ -214,7 +213,16 @@ export class DatasetService {
         // Consider fetching fields after createAndSave and updating the saved object:
         //   const dataView = await createAndSave(...);
         //   if (asyncType) { await type.fetchFields(...); await dataViews.updateSavedObject(dataView); }
-        await services.data?.dataViews.createAndSave(spec, undefined, asyncType);
+        const createdDataView = await services.data?.dataViews.createAndSave(
+          spec,
+          undefined,
+          asyncType
+        );
+
+        // Update the dataset with the new UUID generated during save
+        if (createdDataView?.id) {
+          dataset.id = createdDataView.id;
+        }
       }
     } catch (error) {
       // Re-throw DuplicateDataViewError without wrapping to preserve error type
