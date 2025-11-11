@@ -11,7 +11,7 @@ const workspaceName = getRandomizedWorkspaceName();
 const datasetName = `${INDEX_WITH_TIME_1}*`;
 
 export const runCreateVisTests = () => {
-  describe('create Histogram visualization tests', () => {
+  describe('create histogram visualization tests', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
       cy.explore.createWorkspaceDataSets({
@@ -39,7 +39,7 @@ export const runCreateVisTests = () => {
 
     it('should create a histogram visualization', () => {
       const query = `source=${datasetName} | fields response_time`;
-      cy.explore.createVisualizationWithQuery(query, 'Histogram', datasetName, {
+      cy.explore.createVisualizationWithQuery(query, 'histogram', datasetName, {
         shouldManualSelectChartType: true,
       });
       cy.getElementByTestId('field-x').contains('response_time');
@@ -48,7 +48,7 @@ export const runCreateVisTests = () => {
 
     it('should change style options and the changes reflect immediately to the histogram visualization', () => {
       const query = `source=${datasetName} | fields response_time`;
-      cy.explore.createVisualizationWithQuery(query, 'Histogram', datasetName, {
+      cy.explore.createVisualizationWithQuery(query, 'histogram', datasetName, {
         shouldManualSelectChartType: true,
       });
 

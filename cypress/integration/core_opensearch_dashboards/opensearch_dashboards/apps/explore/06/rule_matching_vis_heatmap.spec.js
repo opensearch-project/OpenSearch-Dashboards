@@ -36,11 +36,11 @@ export const runCreateVisTests = () => {
     });
     it('should create a heatmap visualization using a query with one metric and two categories', () => {
       const query = `source=${datasetName} | stats avg(bytes_transferred) by service_endpoint, category`;
-      cy.explore.createVisualizationWithQuery(query, 'Heatmap', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'heatmap', datasetName);
     });
     it('should change axes style of heatmap chart and reflect immediatly to the heatmap visualization', () => {
       const query = `source=${datasetName} | stats avg(bytes_transferred) by service_endpoint, category`;
-      cy.explore.createVisualizationWithQuery(query, 'Heatmap', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'heatmap', datasetName);
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
         .should('be.visible')
@@ -58,7 +58,7 @@ export const runCreateVisTests = () => {
     });
     it('should turn off legend of heatmap chart and reflect immediatly to the heatmap visualization', () => {
       const query = `source=${datasetName} | stats avg(bytes_transferred) by service_endpoint, category`;
-      cy.explore.createVisualizationWithQuery(query, 'Heatmap', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'heatmap', datasetName);
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
         .should('be.visible')
@@ -76,7 +76,7 @@ export const runCreateVisTests = () => {
     });
     it('should update style of heatmap chart and reflect immediatly to the heatmap visualization', () => {
       const query = `source=${datasetName} | stats avg(bytes_transferred) by service_endpoint, category`;
-      cy.explore.createVisualizationWithQuery(query, 'Heatmap', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'heatmap', datasetName);
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
         .should('be.visible')

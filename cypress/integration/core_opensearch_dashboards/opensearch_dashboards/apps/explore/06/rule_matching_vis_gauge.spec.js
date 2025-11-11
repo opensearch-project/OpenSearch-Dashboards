@@ -6,12 +6,11 @@
 import { INDEX_WITH_TIME_1, DATASOURCE_NAME } from '../../../../../../utils/apps/explore/constants';
 import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
-
 const workspaceName = getRandomizedWorkspaceName();
 const datasetName = `${INDEX_WITH_TIME_1}*`;
 
 export const runCreateVisTests = () => {
-  describe('create scatter visualization tests', () => {
+  describe('create gauge visualization tests', () => {
     before(() => {
       cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
       cy.explore.createWorkspaceDataSets({
@@ -34,40 +33,48 @@ export const runCreateVisTests = () => {
     after(() => {
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
-    it('should create a scatter plot visualization using a query with two metrics and one category', () => {
-      const query = `source=${datasetName} | fields bytes_transferred, status_code`;
-      cy.explore.createVisualizationWithQuery(query, 'scatter', datasetName);
+    it('should create a gauge visualization using a query with one metric', () => {
+      const query = `source=${datasetName} | stats count()`;
+      cy.explore.createVisualizationWithQuery(query, 'gauge', datasetName, {
+        shouldManualSelectChartType: true,
+      });
     });
-    it('should change axes style of scatter chart and reflect immediatly to the scatter visualization', () => {
-      const query = `source=${datasetName} | fields bytes_transferred, status_code`;
-      cy.explore.createVisualizationWithQuery(query, 'scatter', datasetName);
+
+    it('should change style options and the changes reflect immediately to the gauge visualization', () => {
+      const query = `source=${datasetName} | stats count()`;
+      cy.explore.createVisualizationWithQuery(query, 'gauge', datasetName, {
+        shouldManualSelectChartType: true,
+      });
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
         .should('be.visible')
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
         });
-      // Open Axes setting
-      cy.get('[aria-controls="allAxesSection"]').click();
-      // turn off show y axis
-      cy.getElementByTestId('showAxisSwitch').eq(1).click();
+      cy.getElementByTestId('showTitleSwitch').click();
       // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
       });
     });
-    it('should change point style of scatter chart and reflect immediatly to the scatter visualization', () => {
-      const query = `source=${datasetName} | fields bytes_transferred, status_code`;
-      cy.explore.createVisualizationWithQuery(query, 'scatter', datasetName);
+    it('should add threshold for gauge chart and reflect immediatly to the gauge visualization', () => {
+      const query = `source=${datasetName} | stats count()`;
+      cy.explore.createVisualizationWithQuery(query, 'gauge', datasetName, {
+        shouldManualSelectChartType: true,
+      });
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
         .should('be.visible')
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
         });
-      // turn off show y axis
-      cy.getElementByTestId('pointFilledSwitch').click();
+
+      cy.getElementByTestId('useThresholdColorButton').click();
+
+      // Open thresholds setting
+      cy.get('[aria-controls="thresholdSection"]').click();
+      cy.getElementByTestId('exploreVisAddThreshold').click();
       // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
@@ -77,4 +84,4 @@ export const runCreateVisTests = () => {
   });
 };
 
-prepareTestSuite('Create Scatter Visualization', runCreateVisTests);
+prepareTestSuite('Create Gauge Visualization', runCreateVisTests);

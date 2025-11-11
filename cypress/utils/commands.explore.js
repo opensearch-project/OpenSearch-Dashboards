@@ -515,33 +515,19 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName, o
 
   // Ensure chart type is correct
 
-  cy.getElementByTestId('exploreVisStylePanel')
-    .should('be.visible')
-    .within(() => {
-      cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
-    });
+  cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
 
   // for pie and area, it needs manual chart type switch
   if (options && options.shouldManualSelectChartType) {
-    cy.get('.euiContextMenuItem.euiSuperSelect__item')
-      .contains(chartType)
-      .should('be.visible')
-      .click();
-
-    // need to open again after switching chart type
-    cy.getElementByTestId('exploreVisStylePanel')
-      .should('be.visible')
-      .within(() => {
-        cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
-      });
+    cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
+    cy.getElementByTestId(`exploreChartTypeSelector-${chartType}`).should('be.visible').click();
   }
 
   // Ensure chart type is correct
-  cy.get('[role="option"][aria-selected="true"]')
-    .should('be.visible')
-    .and('contain.text', chartType);
+  cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
+  cy.getElementByTestId(`exploreChartTypeSelector-${chartType}`).should('be.visible');
+
   cy.get('body').click(0, 0);
-  cy.getElementByTestId('exploreVisStylePanel').should('be.visible');
 });
 
 cy.explore.add('setupWorkspaceAndDataSourceWithTraces', (workspaceName, traceIndices) => {

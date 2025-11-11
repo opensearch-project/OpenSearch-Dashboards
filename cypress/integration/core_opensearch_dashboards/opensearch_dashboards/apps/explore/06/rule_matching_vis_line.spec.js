@@ -36,11 +36,11 @@ export const runCreateVisTests = () => {
     });
     it('should create a line visualization using a query with timestamp', () => {
       const query = `source=${datasetName} | stats count() by event_time`;
-      cy.explore.createVisualizationWithQuery(query, 'Line', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'line', datasetName);
     });
     it('should change axes style of line chart and reflect immediatly to the line visualization', () => {
       const query = `source=${datasetName} | stats count() by event_time`;
-      cy.explore.createVisualizationWithQuery(query, 'Line', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'line', datasetName);
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
         .should('be.visible')
@@ -59,7 +59,7 @@ export const runCreateVisTests = () => {
     });
     it('should change line interpolation of line chart and reflect immediatly to the line visualization', () => {
       const query = `source=${datasetName} | stats count() by event_time`;
-      cy.explore.createVisualizationWithQuery(query, 'Line', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'line', datasetName);
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
         .should('be.visible')
@@ -76,7 +76,7 @@ export const runCreateVisTests = () => {
     });
     it('should add threshold for line chart and reflect immediatly to the line visualization', () => {
       const query = `source=${datasetName} | stats count() by event_time`;
-      cy.explore.createVisualizationWithQuery(query, 'Line', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'line', datasetName);
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
         .should('be.visible')
