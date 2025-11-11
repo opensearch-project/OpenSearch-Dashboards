@@ -8,7 +8,7 @@ import { ID, PPL_TOKEN_SETS } from './constants';
 import { PPLWorkerProxyService } from './worker_proxy_service';
 import { getPPLLanguageAnalyzer, PPLValidationResult } from './ppl_language_analyzer';
 import { getPPLDocumentationLink } from './ppl_documentation';
-import { pplOnTypeFormatProvider, pplRangeFormatProvider } from './formatter';
+import { pplRangeFormatProvider } from './formatter';
 
 const PPL_LANGUAGE_ID = ID;
 const OWNER = 'PPL_WORKER';
@@ -180,7 +180,6 @@ const setupPPLFormatter = () => {
     PPL_LANGUAGE_ID,
     pplRangeFormatProvider
   );
-  monaco.languages.registerOnTypeFormattingEditProvider(PPL_LANGUAGE_ID, pplOnTypeFormatProvider);
 };
 
 /**
