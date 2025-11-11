@@ -66,17 +66,6 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
     [updateStyleOption]
   );
 
-  const onCustomizedColumnOrderChange = useCallback(
-    (checked: boolean) => {
-      updateStyleOption('customizedColumnOrder', checked);
-      // Reset user column order when disabling customized order
-      if (!checked) {
-        updateStyleOption('userColumnOrder', []);
-      }
-    },
-    [updateStyleOption]
-  );
-
   const onThresholdsChange = useCallback(
     (thresholds: Threshold[]) => {
       updateStyleOption('thresholds', thresholds);
@@ -153,17 +142,6 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
               checked={styleOptions.showColumnFilter || false}
               onChange={(e) => onShowColumnFilterChange(e.target.checked)}
               data-test-subj="visTableColumnFilter"
-            />
-          </EuiFormRow>
-          <EuiFormRow>
-            <EuiSwitch
-              compressed
-              label={i18n.translate('explore.stylePanel.table.customizedColumnOrder', {
-                defaultMessage: 'Customized column order',
-              })}
-              checked={styleOptions.customizedColumnOrder || false}
-              onChange={(e) => onCustomizedColumnOrderChange(e.target.checked)}
-              data-test-subj="visTableCustomizedColumnOrder"
             />
           </EuiFormRow>
         </StyleAccordion>
