@@ -16,10 +16,7 @@ export const extractSnippetsFromQuery = (query: string) => {
   return pplQuerySegments;
 };
 
-export const convertQueryToMonacoSuggestion = (
-  queries: QuerySnippetItem[],
-  userQuery: string
-): QuerySuggestion[] => {
+export const convertQueryToMonacoSuggestion = (queries: QuerySnippetItem[]): QuerySuggestion[] => {
   const textMap = new Map<string, QuerySuggestion>();
 
   queries.forEach((query) => {
@@ -52,11 +49,12 @@ export const getPPLQuerySnippetForSuggestions = async (
   // Fetfch all User Queries
   const userQueries = await getUserPastQueries(languageId);
 
-  const suggestions = convertQueryToMonacoSuggestion(userQueries, userQuery);
+  const suggestions = convertQueryToMonacoSuggestion(userQueries);
 
   // Extract the last Segment from the query
   const userQuerySegments = userQuery.split('|');
   const currentUserQuerySegment = userQuerySegments.pop()?.trim().toLowerCase();
+  const typedTokens = currentUserQuerySegment?.split(/\s+/);
 
   // Using currentUserQuery to do a prefix filtering of the Query Segments
   if (currentUserQuerySegment) {
@@ -67,10 +65,29 @@ export const getPPLQuerySnippetForSuggestions = async (
           currentUserQuerySegment !== suggestion.text
         );
       })
-      .map((suggestion) => ({
-        ...suggestion,
-        insertText: suggestion.text.slice(currentUserQuerySegment.length).trim() + ' ',
-      }));
+      .map((suggestion) => {
+        const suggestionTokens = suggestion.text.split(/\s+/);
+
+        let insertIndex = 0;
+
+        // Skip fully matched tokens only
+        while (
+          typedTokens &&
+          insertIndex < typedTokens.length &&
+          insertIndex < suggestionTokens.length &&
+          suggestionTokens[insertIndex].toLowerCase() === typedTokens[insertIndex].toLowerCase()
+        ) {
+          insertIndex++;
+        }
+
+        // Insert from the first partially matched token onwards
+        const remainingTokens = suggestionTokens.slice(insertIndex).join(' ');
+
+        return {
+          ...suggestion,
+          insertText: remainingTokens + ' ',
+        };
+      });
   }
 
   return [];
