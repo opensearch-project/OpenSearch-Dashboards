@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiDataGrid, EuiDataGridCellValueElementProps, EuiDataGridColumn } from '@elastic/eui';
 import { VisColumn, VisFieldType } from '../types';
 import { defaultTableChartStyles, CellTypeConfig, TableChartStyle } from './table_vis_config';
@@ -21,13 +21,131 @@ interface TableVisProps {
   styleOptions?: TableChartStyle;
   pageSizeOptions?: number[];
   showStyleSelector?: boolean;
+  onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
+  isDashboardMode?: boolean;
 }
 
 export const TableVis = React.memo(
-  ({ rows, columns, styleOptions, pageSizeOptions, showStyleSelector }: TableVisProps) => {
-    const sortedColumns = useMemo(() => [...columns].sort((a, b) => a.id - b.id), [columns]);
+  ({
+    rows,
+    columns,
+    styleOptions,
+    pageSizeOptions,
+    showStyleSelector,
+    onStyleChange,
+    isDashboardMode,
+  }: TableVisProps) => {
+    const sortedColumns = useMemo(() => {
+      const baseColumns = [...columns].sort((a, b) => a.id - b.id);
+
+      // If customized column order is enabled and user has a saved order, use it
+      if (styleOptions?.customizedColumnOrder && styleOptions?.userColumnOrder?.length > 0) {
+        const userOrder = styleOptions.userColumnOrder;
+        const orderedColumns: VisColumn[] = [];
+
+        // First, add columns in user-specified order
+        userOrder.forEach((columnName) => {
+          const foundColumn = baseColumns.find((col) => col.column === columnName);
+          if (foundColumn) {
+            orderedColumns.push(foundColumn);
+          }
+        });
+
+        // Then add any new columns that weren't in the saved order
+        baseColumns.forEach((col) => {
+          if (!userOrder.includes(col.column)) {
+            orderedColumns.push(col);
+          }
+        });
+
+        return orderedColumns;
+      }
+
+      return baseColumns;
+    }, [columns, styleOptions?.customizedColumnOrder, styleOptions?.userColumnOrder]);
+
     const [visibleColumns, setVisibleColumns] = useState(() =>
       sortedColumns.map(({ column }) => column)
+    );
+
+    // Update visibleColumns when sortedColumns changes, but preserve user's visibility choices
+    useEffect(() => {
+      const newSortedColumnNames = sortedColumns.map(({ column }) => column);
+
+      if (!styleOptions?.customizedColumnOrder) {
+        // When customized column order is disabled, show all columns in their natural order
+        setVisibleColumns(newSortedColumnNames);
+        return;
+      }
+
+      // When customized column order is enabled, apply hiddenColumns from saved configuration
+      const hiddenColumns = styleOptions?.hiddenColumns || [];
+      const visibleColumnsFromConfig = newSortedColumnNames.filter(
+        (colName) => !hiddenColumns.includes(colName)
+      );
+
+      setVisibleColumns(visibleColumnsFromConfig);
+    }, [sortedColumns, styleOptions?.customizedColumnOrder, styleOptions?.hiddenColumns]);
+
+    // Handle user column order changes
+    const handleColumnVisibilityChange = useCallback(
+      (updatedVisibleColumns: string[]) => {
+        const previousVisibleColumns = visibleColumns;
+        setVisibleColumns(updatedVisibleColumns);
+
+        // If customized column order is enabled, save both order and hidden columns
+        if (styleOptions?.customizedColumnOrder && onStyleChange) {
+          const allColumns = sortedColumns.map((col) => col.column);
+
+          // Check if this is a reordering or visibility change
+          const isReordering =
+            updatedVisibleColumns.length === previousVisibleColumns.length &&
+            updatedVisibleColumns.every((col) => previousVisibleColumns.includes(col));
+
+          // Calculate hidden columns
+          const newHiddenColumns = allColumns.filter((col) => !updatedVisibleColumns.includes(col));
+
+          if (isReordering) {
+            // This is a reordering operation to update column order but preserve hidden columns
+            const currentUserOrder = styleOptions.userColumnOrder || allColumns;
+            const finalUserOrder: string[] = [];
+            const visibleQueue = [...updatedVisibleColumns];
+
+            currentUserOrder.forEach((col) => {
+              if (updatedVisibleColumns.includes(col)) {
+                // Insert visible columns in their new order
+                if (visibleQueue.length > 0) {
+                  finalUserOrder.push(visibleQueue.shift()!);
+                }
+              } else {
+                // Keep hidden columns in their original positions
+                finalUserOrder.push(col);
+              }
+            });
+
+            onStyleChange({
+              userColumnOrder: finalUserOrder,
+              hiddenColumns: newHiddenColumns,
+            });
+          } else {
+            // This is a visibility change to save hidden columns and initialize order if needed
+            const updates: Partial<TableChartStyle> = { hiddenColumns: newHiddenColumns };
+
+            if (!styleOptions.userColumnOrder || styleOptions.userColumnOrder.length === 0) {
+              updates.userColumnOrder = allColumns;
+            }
+
+            onStyleChange(updates);
+          }
+        }
+      },
+      [
+        styleOptions?.customizedColumnOrder,
+        styleOptions?.userColumnOrder,
+        onStyleChange,
+        visibleColumns,
+        sortedColumns,
+      ]
     );
 
     const pageSize = styleOptions?.pageSize ?? defaultTableChartStyles.pageSize;
@@ -69,6 +187,7 @@ export const TableVis = React.memo(
       return sortedColumns.map((col) => ({
         id: col.column,
         displayAsText: col.name,
+        actions: isDashboardMode ? false : undefined,
         display: (
           <TableColumnHeader
             col={col}
@@ -88,6 +207,7 @@ export const TableVis = React.memo(
       filters,
       columnUniques,
       setFilters,
+      isDashboardMode,
     ]);
 
     const onChangeItemsPerPage = useCallback((newPageSize: number) => {
@@ -240,7 +360,7 @@ export const TableVis = React.memo(
           className="tableVis__dataGrid"
           aria-label="Table visualization"
           columns={dataGridColumns}
-          columnVisibility={{ visibleColumns, setVisibleColumns }}
+          columnVisibility={{ visibleColumns, setVisibleColumns: handleColumnVisibilityChange }}
           rowCount={filteredRows.length}
           pagination={{
             ...pagination,
@@ -252,7 +372,8 @@ export const TableVis = React.memo(
           renderFooterCellValue={styleOptions?.showFooter ? renderFooterCellValue : undefined}
           toolbarVisibility={{
             showFullScreenSelector: false,
-            showStyleSelector: showStyleSelector ?? true,
+            showStyleSelector: isDashboardMode ? false : showStyleSelector ?? true,
+            showColumnSelector: isDashboardMode ? false : true,
           }}
           gridStyle={{ rowHover: 'highlight' }}
           leadingControlColumns={[]}

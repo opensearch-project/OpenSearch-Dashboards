@@ -30,6 +30,9 @@ export interface TableChartStyleOptions {
   thresholds?: Threshold[];
   baseColor?: string;
   dataLinks?: DataLink[];
+  customizedColumnOrder?: boolean;
+  userColumnOrder?: string[];
+  hiddenColumns?: string[];
 }
 
 export type TableChartStyle = Required<TableChartStyleOptions>;
@@ -44,6 +47,9 @@ export const defaultTableChartStyles: TableChartStyle = {
   thresholds: [],
   baseColor: '#000000',
   dataLinks: [],
+  customizedColumnOrder: false,
+  userColumnOrder: [],
+  hiddenColumns: [],
 };
 
 export const createTableConfig = (): VisualizationType<'table'> => ({
