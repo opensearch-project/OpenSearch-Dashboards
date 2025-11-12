@@ -24,6 +24,7 @@ import { ExploreFlavor } from '../../../../common';
 import { useSetEditorText } from '../../hooks';
 import { EditorMode } from '../state_management/types';
 import { getVisualizationBuilder } from '../../../components/visualizations/visualization_builder';
+import { getPreviousPageBreadcrumb } from '../../../utils/get_previous_page_breadcrumb';
 
 export const useInitPage = () => {
   const dispatch = useDispatch();
@@ -42,7 +43,29 @@ export const useInitPage = () => {
 
         // Update browser title and breadcrumbs
         chrome.docTitle.change(title);
-        chrome.setBreadcrumbs([{ text: 'Explore', href: '#/' }, { text: title }]);
+
+        // Get previous page info for smart breadcrumb navigation
+        const { breadcrumbConfig, previousPage } = getPreviousPageBreadcrumb({
+          chrome,
+          application: services.core.application,
+          currentPageId: savedExplore.id,
+        });
+
+        // Build breadcrumbs array
+        const breadcrumbs = [];
+
+        // If user came from a dashboard, show dashboard name as a breadcrumb
+        if (previousPage && previousPage.meta?.type === 'dashboard') {
+          breadcrumbs.push({
+            text: `Dashboard:${previousPage.label}`,
+            ...breadcrumbConfig,
+          });
+        }
+
+        // Always show the current explore title
+        breadcrumbs.push({ text: title });
+
+        chrome.setBreadcrumbs(breadcrumbs);
 
         // Sync query from saved object to data plugin (explore doesn't use filters)
         const searchSourceFields = savedExplore.kibanaSavedObjectMeta;
