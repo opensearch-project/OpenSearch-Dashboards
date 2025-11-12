@@ -26,6 +26,7 @@ interface Props {
   searchContext?: ExecutionContextSearch;
   ExpressionRenderer?: ExpressionsStart['ReactExpressionRenderer'];
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
+  onStyleChange?: (updatedStyle: Partial<TableChartStyle>) => void;
 }
 
 const defaultStyleOptions: TableChartStyle = {
@@ -45,6 +46,7 @@ export const VisualizationRender = ({
   searchContext,
   ExpressionRenderer,
   onSelectTimeRange,
+  onStyleChange,
 }: Props) => {
   const visualizationData = useObservable(data$);
   const visConfig = useObservable(config$);
@@ -124,7 +126,13 @@ export const VisualizationRender = ({
 
   if (visConfig?.type === 'table') {
     return (
-      <TableVis styleOptions={visConfig.styles as TableChartStyle} rows={rows} columns={columns} />
+      <TableVis
+        styleOptions={visConfig.styles as TableChartStyle}
+        rows={rows}
+        columns={columns}
+        onStyleChange={onStyleChange}
+        disableActions={false}
+      />
     );
   }
 
@@ -139,6 +147,7 @@ export const VisualizationRender = ({
         styleOptions={defaultStyleOptions}
         pageSizeOptions={PAGE_SIZE_OPTIONS}
         showStyleSelector={false}
+        disableActions={false}
       />
     );
   }
