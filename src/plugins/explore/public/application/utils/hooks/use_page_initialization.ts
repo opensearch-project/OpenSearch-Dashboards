@@ -57,7 +57,13 @@ export const useInitPage = () => {
         // If user came from a dashboard, show dashboard name as a breadcrumb
         if (previousPage && previousPage.meta?.type === 'dashboard') {
           breadcrumbs.push({
-            text: `Dashboard:${previousPage.label}`,
+            text: 'Dashboard',
+            onClick: () => {
+              services.core.application.navigateToApp('dashboards', { path: '#/' });
+            },
+          });
+          breadcrumbs.push({
+            text: `${previousPage.label}`,
             ...breadcrumbConfig,
           });
         }
