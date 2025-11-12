@@ -158,18 +158,18 @@ export const generateThresholds = (
     .sort((a, b) => a - b);
   const result: Threshold[] = [];
   let lastBelowIndex = -1;
-  let lastThresholdValue: Threshold | undefined;
+  let lastThreshold: Threshold | undefined;
 
   for (let i = 0; i < filteredThresholds.length; i++) {
     const currentThreshold = filteredThresholds[i];
 
     // Handle duplicate values - keep the latest one
-    if (lastThresholdValue && lastThresholdValue.value === currentThreshold.value) {
+    if (lastThreshold && lastThreshold.value === currentThreshold.value) {
       result.pop();
     }
 
     result.push(currentThreshold);
-    lastThresholdValue = currentThreshold;
+    lastThreshold = currentThreshold;
 
     // Track last threshold below minBase
     if (minBase >= currentThreshold.value) {
