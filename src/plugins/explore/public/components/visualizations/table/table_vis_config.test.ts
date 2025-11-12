@@ -52,6 +52,7 @@ describe('table_vis_config', () => {
       expect(defaults).toEqual({
         pageSize: 10,
         globalAlignment: 'left',
+        hiddenColumns: [],
         showColumnFilter: false,
         showFooter: false,
         footerCalculations: [],
@@ -59,6 +60,7 @@ describe('table_vis_config', () => {
         thresholds: [],
         baseColor: '#000000',
         dataLinks: [],
+        visibleColumns: [],
       });
     });
   });

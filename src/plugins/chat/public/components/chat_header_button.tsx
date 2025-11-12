@@ -169,9 +169,17 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
     });
 
     useEffectOnce(() => {
-      if (isOpen) {
-        openSidecar();
+      if (!isOpen) {
+        return;
       }
+
+      const rafId = window.requestAnimationFrame(() => {
+        openSidecar();
+      });
+
+      return () => {
+        window.cancelAnimationFrame(rafId);
+      };
     });
 
     return (
