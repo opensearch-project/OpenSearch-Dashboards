@@ -152,37 +152,36 @@ export const generateThresholds = (
 ) => {
   const defaultColor = baseColor ?? getColors().statusGreen;
 
-  const filteredThresholds = thresholds.filter((t) => t.value <= maxBase);
+  // sort thresholds by value and dedupe threshold by value
+  thresholds = thresholds
+    .sort((t1, t2) => t1.value - t2.value)
+    .reduce((acc, t) => {
+      const last = acc.pop();
+      if (last) {
+        if (last.value === t.value) {
+          return [...acc, t];
+        } else {
+          return [...acc, last, t];
+        }
+      }
+      return [...acc, t];
+    }, [] as Threshold[]);
+
   const filteredValueStops = valueStops
     .filter((v) => v <= maxBase && v >= minBase)
     .sort((a, b) => a - b);
   const result: Threshold[] = [];
-  let lastBelowIndex = -1;
-  let lastThreshold: Threshold | undefined;
 
-  for (let i = 0; i < filteredThresholds.length; i++) {
-    const currentThreshold = filteredThresholds[i];
-
-    // Handle duplicate values - keep the latest one
-    if (lastThreshold && lastThreshold.value === currentThreshold.value) {
-      result.pop();
+  const minThreshold: Threshold = { value: minBase, color: defaultColor };
+  for (const threshold of thresholds) {
+    if (minThreshold.value >= threshold.value) {
+      minThreshold.color = threshold.color;
     }
-
-    result.push(currentThreshold);
-    lastThreshold = currentThreshold;
-
-    // Track last threshold below minBase
-    if (minBase >= currentThreshold.value) {
-      lastBelowIndex = i;
+    if (threshold.value > minThreshold.value && threshold.value <= maxBase) {
+      result.push(threshold);
     }
   }
-
-  if (lastBelowIndex !== -1) {
-    result.splice(0, lastBelowIndex);
-    result[0] = { ...result[0], value: minBase };
-  } else {
-    result.unshift({ value: minBase, color: defaultColor });
-  }
+  result.unshift(minThreshold);
 
   const valueResults: Threshold[] = [];
   if (filteredValueStops.length > 0 && result.length > 0) {
