@@ -35,7 +35,6 @@ export const timeUnits = [
 export const massUnits = [
   { symbol: 'mg', value: 0.001 }, // 1 milligram = 0.001 grams
   { symbol: 'g', value: 1 }, // 1 gram = 1 gram
-  { symbol: 'lb', value: 453.59237 }, // 1 pound = 453.59237 grams
   { symbol: 'kg', value: 1000 }, // 1 kilogram = 1000 grams
   { symbol: 't', value: 1000000 }, // 1 metric ton = 1,000,000 grams
 ];
@@ -496,12 +495,6 @@ export const UnitsCollection: Record<string, Unit> = {
         id: 'gram',
         name: i18n.translate('explore.stylePanel.unit.gram', { defaultMessage: 'gram (g)' }),
         symbol: 'g',
-        display: (val, sy) => computing(val, massUnits, sy),
-      },
-      {
-        id: 'pound_mass',
-        name: i18n.translate('explore.stylePanel.unit.pound', { defaultMessage: 'pound (lb)' }),
-        symbol: 'lb',
         display: (val, sy) => computing(val, massUnits, sy),
       },
       {

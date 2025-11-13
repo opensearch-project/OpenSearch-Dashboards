@@ -11,7 +11,7 @@
 
 import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { IndexPattern, DataView as Dataset } from 'src/plugins/data/public';
 import {
   DocViewFilterFn,
@@ -19,8 +19,6 @@ import {
   OpenSearchSearchHit,
 } from '../../../../types/doc_views_types';
 import { DocViewer } from '../../../doc_viewer/doc_viewer';
-import { useFlavorId } from '../../../../helpers/use_flavor_id';
-import { ExploreFlavor } from '../../../../../common';
 
 export interface ExpandedTableRowProps {
   row: OpenSearchSearchHit<Record<string, unknown>>;
@@ -31,6 +29,7 @@ export interface ExpandedTableRowProps {
   onFilter?: DocViewFilterFn;
   onClose?: () => void;
   docViewsRegistry: DocViewsRegistry;
+  expandedTableHeader?: string;
 }
 
 export const ExpandedTableRow: React.FC<ExpandedTableRowProps> = ({
@@ -42,19 +41,11 @@ export const ExpandedTableRow: React.FC<ExpandedTableRowProps> = ({
   onAddColumn,
   onClose,
   docViewsRegistry,
+  expandedTableHeader,
 }) => {
-  const flavorId = useFlavorId();
-  const headerText = useMemo(() => {
-    if (flavorId === ExploreFlavor.Traces) {
-      return i18n.translate('explore.dataTable.expandedRow.spanHeading', {
-        defaultMessage: 'Expanded span',
-      });
-    }
-    return i18n.translate('explore.dataTable.expandedRow.documentHeading', {
-      defaultMessage: 'Expanded document',
-    });
-  }, [flavorId]);
-
+  const defaultHeader = i18n.translate('explore.dataTable.expandedRow.documentHeading', {
+    defaultMessage: 'Expanded document',
+  });
   return (
     <tr key={'x' + row._id}>
       <td
@@ -71,7 +62,7 @@ export const ExpandedTableRow: React.FC<ExpandedTableRowProps> = ({
             <EuiIcon type="folderOpen" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <h4 className="euiTitle euiTitle--xxsmall">{headerText}</h4>
+            <h4 className="euiTitle euiTitle--xxsmall">{expandedTableHeader || defaultHeader}</h4>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup gutterSize="m">

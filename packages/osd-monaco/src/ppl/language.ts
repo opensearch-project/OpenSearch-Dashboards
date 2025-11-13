@@ -5,19 +5,13 @@
 
 import { monaco } from '../monaco';
 import { ID, PPL_TOKEN_SETS } from './constants';
-import { registerWorker } from '../worker_store';
 import { PPLWorkerProxyService } from './worker_proxy_service';
 import { getPPLLanguageAnalyzer, PPLValidationResult } from './ppl_language_analyzer';
 import { getPPLDocumentationLink } from './ppl_documentation';
-import { pplOnTypeFormatProvider, pplRangeFormatProvider } from './formatter';
-// @ts-ignore
-import workerSrc from '!!raw-loader!../../target/public/ppl.editor.worker.js';
+import { pplRangeFormatProvider } from './formatter';
 
 const PPL_LANGUAGE_ID = ID;
 const OWNER = 'PPL_WORKER';
-
-// Register ppl worker to the worker map first
-registerWorker(ID, workerSrc);
 
 // PPL worker proxy service for worker-based syntax highlighting
 const pplWorkerProxyService = new PPLWorkerProxyService();
@@ -133,7 +127,7 @@ const processSyntaxHighlighting = async (model: monaco.editor.IModel) => {
     const content = model.getValue();
 
     // Ensure worker is set up before validation - always call setup as it has internal check
-    pplWorkerProxyService.setup(workerSrc);
+    pplWorkerProxyService.setup();
 
     // Get validation result from worker with timeout protection
     const validationResult = (await pplWorkerProxyService.validate(content)) as PPLValidationResult;
@@ -186,7 +180,6 @@ const setupPPLFormatter = () => {
     PPL_LANGUAGE_ID,
     pplRangeFormatProvider
   );
-  monaco.languages.registerOnTypeFormattingEditProvider(PPL_LANGUAGE_ID, pplOnTypeFormatProvider);
 };
 
 /**

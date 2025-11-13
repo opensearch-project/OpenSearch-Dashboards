@@ -134,7 +134,7 @@ describe('RecentQueriesButton', () => {
 
     const button = screen.getByTestId('exploreRecentQueriesButton');
     expect(button).toBeInTheDocument();
-    expect(button).toHaveTextContent('Recent Queries');
+    expect(button).toHaveTextContent('Recent queries');
   });
 
   it('toggles popover visibility when button is clicked', () => {

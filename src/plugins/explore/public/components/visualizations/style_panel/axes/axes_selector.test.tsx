@@ -323,7 +323,7 @@ describe('AxisSelector', () => {
 
     const facetAxisProps = { ...defaultProps, axisRole: AxisRole.FACET };
     rerender(<AxisSelector {...facetAxisProps} />);
-    expect(screen.getByText('Split Chart By')).toBeInTheDocument();
+    expect(screen.getByText('Split chart by')).toBeInTheDocument();
   });
 
   it('handles empty selected column', () => {

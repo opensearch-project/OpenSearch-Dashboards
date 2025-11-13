@@ -48,6 +48,8 @@ describe('createStateTimelineConfig', () => {
       threshold: '1h',
     });
 
+    expect(defaults.legendTitle).toBe('');
+
     // Verify axes
     expect(defaults.standardAxes).toHaveLength(2);
     const xAxis = defaults.standardAxes.find((axis) => axis.axisRole === AxisRole.X);

@@ -306,6 +306,7 @@ export function uiRenderMixin(osdServer, server, config) {
 
   async function renderApp(h) {
     const { http } = osdServer.newPlatform.setup.core;
+    const { dynamicConfig } = osdServer.newPlatform.start.core;
     const { savedObjects } = osdServer.newPlatform.start.core;
     const { rendering } = osdServer.newPlatform.__internals;
     const req = OpenSearchDashboardsRequest.from(h.request);
@@ -325,7 +326,21 @@ export function uiRenderMixin(osdServer, server, config) {
       .type('text/html')
       .header('content-security-policy', http.csp.header);
 
-    if (http.cspReportOnly.isEmitting) {
+    let cspReportOnlyIsEmitting;
+    try {
+      const dynamicConfigClient = dynamicConfig.getClient();
+      const dynamicConfigStore = dynamicConfig.createStoreFromRequest(req);
+      const cspReportOnlyDynamicConfig = await dynamicConfigClient.getConfig(
+        { pluginConfigPath: 'csp-report-only' },
+        dynamicConfigStore ? { asyncLocalStorageContext: dynamicConfigStore } : undefined
+      );
+      cspReportOnlyIsEmitting =
+        cspReportOnlyDynamicConfig.isEmitting ?? http.cspReportOnly.isEmitting;
+    } catch (e) {
+      cspReportOnlyIsEmitting = http.cspReportOnly.isEmitting;
+    }
+
+    if (cspReportOnlyIsEmitting) {
       output.header('content-security-policy-report-only', http.cspReportOnly.cspReportOnlyHeader);
 
       if (http.cspReportOnly.reportingEndpointsHeader) {

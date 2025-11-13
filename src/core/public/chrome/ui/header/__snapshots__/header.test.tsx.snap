@@ -11261,7 +11261,6 @@ exports[`Header renders application header without title 1`] = `
                           ]
                         }
                         data-test-subj="breadcrumbs"
-                        disableTrailingLink={true}
                         hideLastBreadCrumb={true}
                         max={5}
                         responsive={
@@ -21124,7 +21123,6 @@ exports[`Header renders page header with application title 1`] = `
                   ]
                 }
                 data-test-subj="breadcrumbs"
-                disableTrailingLink={true}
                 hideLastBreadCrumb={true}
                 max={5}
                 responsive={
@@ -21172,6 +21170,13 @@ exports[`Header renders page header with application title 1`] = `
                 </nav>
               </EuiSimplifiedBreadcrumbs>
             </HeaderBreadcrumbs>
+            <EuiHeaderSection
+              grow={true}
+            >
+              <div
+                className="euiHeaderSection euiHeaderSection--grow euiHeaderSection--left"
+              />
+            </EuiHeaderSection>
             <EuiHeaderSectionItem
               border="none"
             >

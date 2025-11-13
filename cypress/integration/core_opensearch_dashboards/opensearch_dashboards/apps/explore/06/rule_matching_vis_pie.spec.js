@@ -37,11 +37,15 @@ export const runCreateVisTests = () => {
     it('should create a pie visualization using a query with one metric and one categories', () => {
       const query = `source=${datasetName} | stats count() by category`;
 
-      cy.explore.createVisualizationWithQuery(query, 'Pie', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'pie', datasetName, {
+        shouldManualSelectChartType: true,
+      });
     });
     it('should turn off legend of pie chart and reflect immediatly to the pie visualization', () => {
       const query = `source=${datasetName} | stats count() by category`;
-      cy.explore.createVisualizationWithQuery(query, 'Pie', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'pie', datasetName, {
+        shouldManualSelectChartType: true,
+      });
 
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
@@ -61,7 +65,9 @@ export const runCreateVisTests = () => {
 
     it('should update pie chart style and reflect immediatly to the pie visualization', () => {
       const query = `source=${datasetName} | stats count() by category`;
-      cy.explore.createVisualizationWithQuery(query, 'Pie', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'pie', datasetName, {
+        shouldManualSelectChartType: true,
+      });
 
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')

@@ -29,6 +29,7 @@ describe('ChatHeaderButton', () => {
   let mockCore: ReturnType<typeof coreMock.createStart>;
   let mockChatService: jest.Mocked<ChatService>;
   let mockContextProvider: any;
+  let mockSuggestedActionsService: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -38,6 +39,7 @@ describe('ChatHeaderButton', () => {
       newThread: jest.fn(),
       isWindowOpen: jest.fn().mockReturnValue(false),
       getWindowMode: jest.fn().mockReturnValue('sidecar'),
+      getPaddingSize: jest.fn().mockReturnValue(400),
       setWindowState: jest.fn(),
       setChatWindowRef: jest.fn(),
       clearChatWindowRef: jest.fn(),
@@ -46,6 +48,9 @@ describe('ChatHeaderButton', () => {
       onWindowCloseRequest: jest.fn().mockReturnValue(() => {}),
     } as any;
     mockContextProvider = {};
+    mockSuggestedActionsService = {
+      getSuggestedActions: jest.fn().mockReturnValue([]),
+    };
 
     // Mock sidecar with complete SidecarRef
     const mockSidecarRef = {
@@ -65,6 +70,7 @@ describe('ChatHeaderButton', () => {
           core={mockCore}
           chatService={mockChatService}
           contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
           ref={ref}
         />
       );
@@ -82,6 +88,7 @@ describe('ChatHeaderButton', () => {
           core={mockCore}
           chatService={mockChatService}
           contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
           ref={ref}
         />
       );
@@ -105,6 +112,7 @@ describe('ChatHeaderButton', () => {
           core={mockCore}
           chatService={mockChatService}
           contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
         />
       );
 
@@ -120,6 +128,7 @@ describe('ChatHeaderButton', () => {
           core={mockCore}
           chatService={mockChatService}
           contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
         />
       );
 
@@ -132,6 +141,7 @@ describe('ChatHeaderButton', () => {
           core={mockCore}
           chatService={mockChatService}
           contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
         />
       );
 
@@ -144,6 +154,7 @@ describe('ChatHeaderButton', () => {
           core={mockCore}
           chatService={mockChatService}
           contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
         />
       );
 
@@ -166,6 +177,7 @@ describe('ChatHeaderButton', () => {
           core={mockCore}
           chatService={mockChatService}
           contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
         />
       );
 
@@ -188,34 +200,30 @@ describe('ChatHeaderButton', () => {
       });
       mockCore.overlays.sidecar.open.mockReturnValue(mockSidecarRef);
 
+      // Start with window open state
+      mockChatService.isWindowOpen.mockReturnValue(true);
+
       const { container } = render(
         <ChatHeaderButton
           core={mockCore}
           chatService={mockChatService}
           contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
         />
       );
 
-      // First open the sidecar by clicking the button
-      const button = container.querySelector('[aria-label="Toggle chat assistant"]') as HTMLElement;
-      button?.click();
-
-      // Wait for the sidecar to be opened
-      await waitFor(() => {
-        expect(mockCore.overlays.sidecar.open).toHaveBeenCalled();
-      });
-
-      // Then trigger the close request
+      // Trigger the close request
       closeRequestCallback!();
 
-      // Verify close was called
-      await waitFor(() => {
-        expect(mockClose).toHaveBeenCalled();
-      });
+      // Verify close was called on the sidecar ref
+      expect(mockChatService.setWindowState).toHaveBeenCalledWith({ isWindowOpen: false });
     });
 
     it('should sync local state when ChatService state changes', () => {
-      let stateChangeCallback: (isOpen: boolean) => void;
+      let stateChangeCallback: (
+        newWindowState: any,
+        changed: { isWindowOpen: boolean; windowMode: boolean; paddingSize: boolean }
+      ) => void;
       mockChatService.onWindowStateChange.mockImplementation((cb) => {
         stateChangeCallback = cb;
         return jest.fn();
@@ -226,11 +234,15 @@ describe('ChatHeaderButton', () => {
           core={mockCore}
           chatService={mockChatService}
           contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
         />
       );
 
       // Trigger state change to open
-      stateChangeCallback!(true);
+      stateChangeCallback!(
+        { isWindowOpen: true, windowMode: 'sidecar', paddingSize: 400 },
+        { isWindowOpen: true, windowMode: false, paddingSize: false }
+      );
 
       // Verify the component reflects the new state (button color should change)
       const button = document.querySelector('[aria-label="Toggle chat assistant"]');
@@ -245,6 +257,7 @@ describe('ChatHeaderButton', () => {
           core={mockCore}
           chatService={mockChatService}
           contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
         />
       );
 
@@ -265,6 +278,7 @@ describe('ChatHeaderButton', () => {
           core={mockCore}
           chatService={mockChatService}
           contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
         />
       );
 

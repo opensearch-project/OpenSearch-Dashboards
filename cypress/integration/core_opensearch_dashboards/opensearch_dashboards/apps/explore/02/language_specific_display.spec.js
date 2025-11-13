@@ -14,10 +14,7 @@ import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
-import {
-  generateDisplayTestConfiguration,
-  getLanguageReferenceTestText,
-} from '../../../../../../utils/apps/explore/language_specific_display';
+import { generateDisplayTestConfiguration } from '../../../../../../utils/apps/explore/language_specific_display';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
@@ -81,12 +78,6 @@ export const runDisplayTests = () => {
         cy.getElementByTestId('docTableHeaderFieldSort_timestamp').should(
           config.sort ? 'exist' : 'not.exist'
         );
-
-        // testing the language information popup button
-        cy.getElementByTestId('exploreLanguageReference').click();
-        cy.get('.euiPopoverTitle').contains('Syntax options').should('be.visible');
-        cy.get('.euiPanel').contains(getLanguageReferenceTestText(config.language));
-        cy.getElementByTestId('exploreLanguageReference').click();
 
         // testing the saved queries management button
         cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();

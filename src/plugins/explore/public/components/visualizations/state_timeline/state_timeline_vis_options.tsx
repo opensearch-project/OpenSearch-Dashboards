@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { StateTimeLineChartStyle, StateTimeLineChartStyleOptions } from './state_timeline_config';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
-import { LegendOptionsPanel } from '../style_panel/legend/legend';
+import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
@@ -88,22 +88,11 @@ export const StateTimeLineVisStyleControls: React.FC<StateTimeLineVisStyleContro
             />
           </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <LegendOptionsPanel
-              legendOptions={{
-                show: styleOptions.addLegend,
-                position: styleOptions.legendPosition,
-              }}
-              onLegendOptionsChange={(legendOptions) => {
-                if (legendOptions.show !== undefined) {
-                  updateStyleOption('addLegend', legendOptions.show);
-                }
-                if (legendOptions.position !== undefined) {
-                  updateStyleOption('legendPosition', legendOptions.position);
-                }
-              }}
-            />
-          </EuiFlexItem>
+          <LegendOptionsWrapper
+            styleOptions={styleOptions}
+            updateStyleOption={updateStyleOption}
+            shouldShow={true}
+          />
 
           <EuiFlexItem grow={false}>
             <TitleOptionsPanel

@@ -10,6 +10,7 @@ import { ScatterChartStyle, ScatterChartStyleOptions } from './scatter_vis_confi
 import { ScatterExclusiveVisOptions } from './scatter_exclusive_vis_options';
 import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 import { StyleControlsProps } from '../utils/use_visualization_types';
+import { LegendOptionsPanel } from '../style_panel/legend/legend';
 import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';

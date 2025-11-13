@@ -36,11 +36,11 @@ export const runCreateVisTests = () => {
     });
     it('should create a bar visualization using a query with one metric and one category', () => {
       const query = `source=${datasetName} | stats count() by category`;
-      cy.explore.createVisualizationWithQuery(query, 'Bar', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'bar', datasetName);
     });
     it('should change axes style of bar chart and reflect immediatly to the bar visualization', () => {
       const query = `source=${datasetName} | stats count() by category`;
-      cy.explore.createVisualizationWithQuery(query, 'Bar', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'bar', datasetName);
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
         .should('be.visible')
@@ -58,7 +58,7 @@ export const runCreateVisTests = () => {
     });
     it('should add border for bar and reflect immediatly to the bar visualization', () => {
       const query = `source=${datasetName} | stats count() by category`;
-      cy.explore.createVisualizationWithQuery(query, 'Bar', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'bar', datasetName);
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
         .should('be.visible')
@@ -75,7 +75,7 @@ export const runCreateVisTests = () => {
     });
     it('should add threshold for bar chart and reflect immediatly to the bar visualization', () => {
       const query = `source=${datasetName} | stats count() by category`;
-      cy.explore.createVisualizationWithQuery(query, 'Bar', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'bar', datasetName);
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
         .should('be.visible')

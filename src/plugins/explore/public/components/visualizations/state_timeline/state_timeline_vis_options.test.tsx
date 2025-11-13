@@ -80,25 +80,45 @@ jest.mock('../style_panel/axes/axes_selector', () => ({
   )),
 }));
 
-jest.mock('../style_panel/legend/legend', () => {
+jest.mock('../style_panel/legend/legend_options_wrapper', () => {
   const { Positions: PositionsEnum } = jest.requireActual('../types');
   return {
-    LegendOptionsPanel: jest.fn(({ legendOptions, onLegendOptionsChange }) => (
-      <div data-test-subj="mockLegendOptionsPanel">
-        <button
-          data-test-subj="mockLegendShow"
-          onClick={() => onLegendOptionsChange({ show: !legendOptions.show })}
-        >
-          Toggle Legend
-        </button>
-        <button
-          data-test-subj="mockLegendPosition"
-          onClick={() => onLegendOptionsChange({ position: PositionsEnum.BOTTOM })}
-        >
-          Change Position
-        </button>
-      </div>
-    )),
+    LegendOptionsWrapper: jest.fn(
+      ({ styleOptions, updateStyleOption, hasSizeLegend, shouldShow }) => {
+        if (!shouldShow) {
+          return null;
+        }
+
+        return (
+          <div data-test-subj="mockLegendOptionsWrapper">
+            <button
+              data-test-subj="mockLegendShow"
+              onClick={() => updateStyleOption('addLegend', !styleOptions.addLegend)}
+            >
+              Toggle Legend
+            </button>
+            <button
+              data-test-subj="mockLegendPosition"
+              onClick={() => updateStyleOption('legendPosition', PositionsEnum.BOTTOM)}
+            >
+              Change Position
+            </button>
+            <input
+              data-test-subj="legend-title-input"
+              placeholder="Legend Title"
+              onChange={(e) => updateStyleOption('legendTitle', e.target.value)}
+            />
+            {hasSizeLegend && (
+              <input
+                data-test-subj="legend-title-for-size-input"
+                placeholder="Legend Title for Size"
+                onChange={(e) => updateStyleOption('legendTitleForSize', e.target.value)}
+              />
+            )}
+          </div>
+        );
+      }
+    ),
   };
 });
 
@@ -217,7 +237,7 @@ describe('StateTimeLineVisStyleControls', () => {
     expect(screen.getByTestId('allAxesOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockStateTimelineExclusiveOptions')).toBeInTheDocument();
-    expect(screen.queryByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockLegendOptionsWrapper')).toBeInTheDocument();
     expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockValueMappingOption')).toBeInTheDocument();
   });
@@ -327,6 +347,17 @@ describe('StateTimeLineVisStyleControls', () => {
       valueMappingOptions: {
         valueMappings: [],
       },
+    });
+  });
+
+  it('updates legend title correctly', async () => {
+    render(<StateTimeLineVisStyleControls {...mockProps} />);
+
+    const legendTitleInput = screen.getByTestId('legend-title-input');
+    await userEvent.type(legendTitleInput, 'New Legend Title');
+
+    await waitFor(() => {
+      expect(mockProps.onStyleChange).toHaveBeenCalledWith({ legendTitle: 'New Legend Title' });
     });
   });
 });

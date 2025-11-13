@@ -16,6 +16,7 @@ export function RecentQueriesTable({
   queryString,
   onClickRecentQuery,
   isVisible,
+  className,
 }: RecentQueriesTableProps) {
   const currentLanguage = queryString.getQuery().language;
   const [recentQueries, setRecentQueries] = useState<RecentQueryItem[]>(
@@ -95,7 +96,7 @@ export function RecentQueriesTable({
       columns={tableColumns}
       rowProps={getRowProps}
       cellProps={getCellProps}
-      className="recentQuery__table"
+      className={className || 'recentQuery__table'}
       data-test-subj="recentQueryTable"
       tableLayout="fixed"
       compressed

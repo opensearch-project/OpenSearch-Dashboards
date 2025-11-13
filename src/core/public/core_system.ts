@@ -29,6 +29,7 @@
  */
 
 import { pick } from '@osd/std';
+import { setBuildHash } from '@osd/monaco';
 import { CoreSetup, CoreStart } from '.';
 import { CoreId } from '../server';
 import { EnvironmentMode, PackageInfo } from '../server/types';
@@ -161,6 +162,10 @@ export class CoreSystem {
         injectedMetadata,
         i18n: this.i18n.getContext(),
       });
+
+      // Initialize Monaco environment with build hash for worker URLs
+      setBuildHash(injectedMetadata.getOpenSearchDashboardsBuildNumber());
+
       await this.integrations.setup();
       this.docLinks.setup();
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });

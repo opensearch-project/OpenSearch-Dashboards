@@ -75,7 +75,7 @@ export const StateTimeLineExclusiveVisOptions = ({
       <EuiFormRow>
         <EuiSwitch
           compressed
-          label={i18n.translate('explore.vis.scatter.useThresholdColor', {
+          label={i18n.translate('explore.vis.statetimeline.useThresholdColor', {
             defaultMessage: 'Use threshold colors',
           })}
           data-test-subj="useThresholdColorButton"
@@ -88,7 +88,7 @@ export const StateTimeLineExclusiveVisOptions = ({
         <EuiSwitch
           compressed
           label={i18n.translate('explore.vis.stateTimeline.exclusive.showValues', {
-            defaultMessage: 'Show values',
+            defaultMessage: 'Show display text',
           })}
           checked={styles?.showValues ?? false}
           onChange={(e) => updateStyle('showValues', e.target.checked)}

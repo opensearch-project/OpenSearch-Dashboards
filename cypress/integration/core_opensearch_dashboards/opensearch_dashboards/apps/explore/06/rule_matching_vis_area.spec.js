@@ -36,11 +36,15 @@ export const runCreateVisTests = () => {
     });
     it('should create a area visualization using a query with one metric and one categories', () => {
       const query = `source=${datasetName} | stats count() by category`;
-      cy.explore.createVisualizationWithQuery(query, 'Area', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'area', datasetName, {
+        shouldManualSelectChartType: true,
+      });
     });
     it('should change axes style of area chart and reflect immediatly to the area visualization', () => {
       const query = `source=${datasetName} | stats count() by category`;
-      cy.explore.createVisualizationWithQuery(query, 'Area', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'area', datasetName, {
+        shouldManualSelectChartType: true,
+      });
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
         .should('be.visible')
@@ -59,7 +63,9 @@ export const runCreateVisTests = () => {
 
     it('should add threshold for area chart and reflect immediatly to the area visualization', () => {
       const query = `source=${datasetName} | stats count() by category`;
-      cy.explore.createVisualizationWithQuery(query, 'Area', datasetName);
+      cy.explore.createVisualizationWithQuery(query, 'area', datasetName, {
+        shouldManualSelectChartType: true,
+      });
       let beforeCanvasDataUrl;
       cy.get('canvas.marks')
         .should('be.visible')

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import LRUCache from 'lru-cache';
 import { CoreStart } from 'opensearch-dashboards/public';
 import {
@@ -120,6 +121,7 @@ export class DatasetService {
                 id: dataset.dataSource.id!,
                 name: dataset.dataSource.title,
                 type: dataset.dataSource.type,
+                version: dataset.dataSource.version,
               }
             : undefined,
         } as IndexPatternSpec;
@@ -187,7 +189,8 @@ export class DatasetService {
           ? ({} as IndexPatternFieldMap)
           : await type?.fetchFields(dataset, services);
         const spec = {
-          id: dataset.id,
+          // Generate ID with data source prefix if data source exists, otherwise allow UUID generation
+          id: dataset.dataSource?.id ? `${dataset.dataSource.id}::${uuidv4()}` : undefined,
           displayName: dataset.displayName,
           title: dataset.title,
           timeFieldName: dataset.timeFieldName,
@@ -201,6 +204,7 @@ export class DatasetService {
                 id: dataset.dataSource.id!,
                 name: dataset.dataSource.title,
                 type: dataset.dataSource.type,
+                version: dataset.dataSource.version,
               }
             : undefined,
         } as IndexPatternSpec;
@@ -212,7 +216,16 @@ export class DatasetService {
         // Consider fetching fields after createAndSave and updating the saved object:
         //   const dataView = await createAndSave(...);
         //   if (asyncType) { await type.fetchFields(...); await dataViews.updateSavedObject(dataView); }
-        await services.data?.dataViews.createAndSave(spec, undefined, asyncType);
+        const createdDataView = await services.data?.dataViews.createAndSave(
+          spec,
+          undefined,
+          asyncType
+        );
+
+        // Update the dataset with the new UUID generated during save
+        if (createdDataView?.id) {
+          dataset.id = createdDataView.id;
+        }
       }
     } catch (error) {
       // Re-throw DuplicateDataViewError without wrapping to preserve error type
