@@ -28,28 +28,8 @@ export interface GetBreadcrumbOptions {
  * @param options - Configuration options
  * @returns Previous page info with breadcrumb config
  */
-export function getPreviousPageBreadcrumb(options: GetBreadcrumbOptions): PreviousPageInfo;
-export function getPreviousPageBreadcrumb(
-  chrome: ChromeStart,
-  currentPageId?: string
-): PreviousPageInfo;
-export function getPreviousPageBreadcrumb(
-  optionsOrChrome: GetBreadcrumbOptions | ChromeStart,
-  currentPageId?: string
-): PreviousPageInfo {
-  // Handle both function signatures for backward compatibility
-  const chrome =
-    'chrome' in optionsOrChrome
-      ? (optionsOrChrome as GetBreadcrumbOptions).chrome
-      : optionsOrChrome;
-  const application =
-    'application' in optionsOrChrome
-      ? (optionsOrChrome as GetBreadcrumbOptions).application
-      : undefined;
-  const pageId =
-    'currentPageId' in optionsOrChrome
-      ? (optionsOrChrome as GetBreadcrumbOptions).currentPageId
-      : currentPageId;
+export function getPreviousPageBreadcrumb(options: GetBreadcrumbOptions): PreviousPageInfo {
+  const { chrome, application, currentPageId: pageId } = options;
   const recentlyAccessed = chrome.recentlyAccessed.get();
 
   // Get the most recently accessed page (first item, which is most recent)

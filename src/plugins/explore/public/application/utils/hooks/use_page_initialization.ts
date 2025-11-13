@@ -63,7 +63,7 @@ export const useInitPage = () => {
             },
           });
           breadcrumbs.push({
-            text: `${previousPage.label}`,
+            text: previousPage.label,
             ...breadcrumbConfig,
           });
         }
