@@ -46,11 +46,4 @@ describe('WorkspaceCollaboratorInput', () => {
     render(<WorkspaceCollaboratorInput {...defaultProps} error="error" />);
     expect(screen.getByTestId('workspaceCollaboratorIdInput-0')).toBeInvalid();
   });
-
-  it('trims whitespace from collaborator ID input', () => {
-    render(<WorkspaceCollaboratorInput {...defaultProps} />);
-    const input = screen.getByTestId('workspaceCollaboratorIdInput-0');
-    fireEvent.change(input, { target: { value: '  test  ' } });
-    expect(defaultProps.onCollaboratorIdChange).toHaveBeenCalledWith('test', 0);
-  });
 });

@@ -53,7 +53,7 @@ export const WorkspaceCollaboratorInput = ({
 }: WorkspaceCollaboratorInputProps) => {
   const handleCollaboratorIdChange = useCallback(
     (e) => {
-      onCollaboratorIdChange(e.target.value?.trim(), index);
+      onCollaboratorIdChange(e.target.value, index);
     },
     [index, onCollaboratorIdChange]
   );
