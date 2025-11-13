@@ -119,9 +119,9 @@ export function diffMappings(actual: IndexMapping, expected: IndexMapping) {
   return changedProp ? { changedProp: `properties.${changedProp}` } : undefined;
 }
 
-// Convert an object to an md5 hash string, using a stable serialization (canonicalStringify)
-function md5Object(obj: any) {
-  return crypto.createHash('md5').update(canonicalStringify(obj)).digest('hex');
+// Convert an object to a SHA-256 hash string, using a stable serialization (canonicalStringify)
+function sha256Object(obj: any) {
+  return crypto.createHash('sha256').update(canonicalStringify(obj)).digest('hex');
 }
 
 // JSON.stringify is non-canonical, meaning the same object may produce slightly
@@ -153,9 +153,9 @@ function canonicalStringify(obj: any): string {
   return `{${sortedObj}}`;
 }
 
-// Convert an object's values to md5 hash strings
+// Convert an object's values to sha256 hash strings
 function md5Values(obj: any) {
-  return mapValues(obj, md5Object);
+  return mapValues(obj, sha256Object);
 }
 
 // If something exists in actual, but is missing in expected, we don't
