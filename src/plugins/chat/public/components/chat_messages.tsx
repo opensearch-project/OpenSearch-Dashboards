@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { EuiIcon, EuiText } from '@elastic/eui';
 import { ChatLayoutMode } from './chat_header_button';
 import { MessageRow } from './message_row';
@@ -55,8 +55,19 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   // Context is now handled by RFC hooks - no subscriptions needed
 
   // Only show suggestion on llm outputs after last user input
-  const showSuggestions =
-    !isStreaming && timeline.length > 0 && timeline[timeline.length - 1].role === 'assistant';
+  const showSuggestions = useMemo(() => {
+    if (isStreaming) {
+      return false;
+    }
+    if (timeline.length === 0) {
+      return false;
+    }
+    const lastAssistantMessageIndex = timeline.findLastIndex(
+      (message) => message.role === 'assistant'
+    );
+    const lastUserMessageIndex = timeline.findLastIndex((message) => message.role === 'user');
+    return lastAssistantMessageIndex > lastUserMessageIndex;
+  }, [timeline, isStreaming]);
 
   return (
     <>
@@ -106,6 +117,8 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                   <MessageRow message={assistantMsg} />
                 )}
 
+                {showSuggestions && <ChatSuggestions messages={timeline} />}
+
                 {/* Tool calls below the message */}
                 {assistantMsg.toolCalls?.map((toolCall) => {
                   // Find corresponding tool result
@@ -144,7 +157,6 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
           return null;
         })}
-        {showSuggestions && <ChatSuggestions messages={timeline} />}
 
         {/* Loading indicator - waiting for agent response */}
         {isStreaming && timeline.length === 0 && (
