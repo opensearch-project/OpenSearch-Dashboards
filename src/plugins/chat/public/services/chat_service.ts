@@ -16,6 +16,11 @@ export interface ChatState {
   currentStreamingMessage?: string;
 }
 
+export interface CurrentChatState {
+  threadId: string;
+  messages: Message[];
+}
+
 export interface ChatWindowState {
   isWindowOpen: boolean;
   windowMode: ChatLayoutMode;
@@ -35,6 +40,10 @@ export class ChatService {
   private activeRequests: Set<string> = new Set();
   private requestCounter: number = 0;
 
+  // Chat state persistence
+  private readonly STORAGE_KEY = 'chat.currentState';
+  private currentMessages: Message[] = [];
+
   // Window state management
   private _isWindowOpen: boolean = false;
   private _windowMode: ChatLayoutMode = ChatLayoutMode.SIDECAR;
@@ -49,7 +58,11 @@ export class ChatService {
   constructor() {
     // No need to pass URL anymore - agent will use the proxy endpoint
     this.agent = new AgUiAgent();
-    this.threadId = this.generateThreadId();
+
+    // Try to restore existing state first
+    const currentChatState = this.loadCurrentChatState();
+    this.threadId = currentChatState?.threadId || this.generateThreadId();
+    this.currentMessages = currentChatState?.messages || [];
   }
 
   public getThreadId = () => {
@@ -365,7 +378,72 @@ export class ChatService {
     this.agent.resetConnection();
   }
 
+  // Chat state persistence methods
+  private saveCurrentChatState(): void {
+    const state: CurrentChatState = {
+      threadId: this.threadId,
+      messages: this.currentMessages,
+    };
+    try {
+      sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify(state));
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to save chat state to sessionStorage:', error);
+    }
+  }
+
+  private loadCurrentChatState(): CurrentChatState | null {
+    try {
+      const stored = sessionStorage.getItem(this.STORAGE_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to load chat state from sessionStorage:', error);
+      return null;
+    }
+  }
+
+  private clearCurrentChatState(): void {
+    try {
+      sessionStorage.removeItem(this.STORAGE_KEY);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to clear chat state from sessionStorage:', error);
+    }
+  }
+
+  public saveCurrentChatStatePublic(): void {
+    this.saveCurrentChatState();
+  }
+
+  public getCurrentMessages(): Message[] {
+    return this.currentMessages;
+  }
+
+  public updateCurrentMessages(messages: Message[]): void {
+    this.currentMessages = messages;
+    this.saveCurrentChatState();
+  }
+
+  private clearDynamicContextFromStore(): void {
+    const contextStore = (window as any).assistantContextStore;
+    if (!contextStore) return;
+
+    // Get all contexts with IDs (dynamic contexts) and remove them
+    const allContexts = contextStore.getAllContexts();
+    const dynamicContexts = allContexts.filter((ctx: any) => ctx.id);
+
+    dynamicContexts.forEach((ctx: any) => {
+      contextStore.removeContextById(ctx.id);
+    });
+  }
+
   public newThread(): void {
     this.threadId = this.generateThreadId();
+    this.currentMessages = [];
+    this.clearCurrentChatState();
+
+    // Clear dynamic context from global store for fresh chat session
+    this.clearDynamicContextFromStore();
   }
 }

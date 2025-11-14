@@ -106,6 +106,19 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     };
   }, [eventHandler]);
 
+  // Restore timeline from current chat state on component mount
+  useEffect(() => {
+    const currentMessages = chatService.getCurrentMessages();
+    if (currentMessages.length > 0) {
+      setTimeline(currentMessages);
+    }
+  }, [chatService]);
+
+  // Sync timeline changes with ChatService for persistence
+  useEffect(() => {
+    chatService.updateCurrentMessages(timeline);
+  }, [timeline, chatService]);
+
   const handleSend = async (options?: {input?: string}) => {
     const messageContent = options?.input ?? input.trim();
     if (!messageContent || isStreaming) return;
