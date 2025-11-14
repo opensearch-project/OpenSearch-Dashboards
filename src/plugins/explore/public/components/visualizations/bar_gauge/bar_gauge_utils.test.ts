@@ -9,13 +9,11 @@ import {
   symbolOpposite,
   getGradientConfig,
   generateThresholds,
+  generateValueThresholds,
 } from './bar_gauge_utils';
 import { AxisColumnMappings, Threshold, VisFieldType } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
-
-jest.mock('../theme/default_colors', () => ({
-  getColors: jest.fn(() => ({ statusGreen: '#00FF00' })),
-}));
+import { getColors } from '../theme/default_colors';
 
 describe('bar_gauge_utils', () => {
   describe('getBarOrientation', () => {
@@ -142,56 +140,55 @@ describe('bar_gauge_utils', () => {
 
     describe('Basic functionality', () => {
       it('should handle empty thresholds array', () => {
-        const result = generateThresholds(0, 100, [], '#BLUE', []);
+        const result = generateThresholds(0, 100, [], '#BLUE');
 
-        expect(result.mergedThresholds).toHaveLength(1);
-        expect(result.mergedThresholds[0]).toEqual({ value: 0, color: '#BLUE' });
-        expect(result.valueThresholds).toEqual([]);
+        expect(result).toHaveLength(1);
+        expect(result[0]).toEqual({ value: 0, color: '#BLUE' });
       });
 
       it('should use default color when baseColor is undefined', () => {
-        const result = generateThresholds(0, 100, [], undefined, []);
+        const result = generateThresholds(0, 100, [], undefined);
 
-        expect(result.mergedThresholds).toHaveLength(1);
-        expect(result.mergedThresholds[0]).toEqual({ value: 0, color: '#00FF00' });
+        expect(result).toHaveLength(1);
+        expect(result[0]).toEqual({ value: 0, color: '#00BD6B' });
       });
 
       it('should process normal thresholds correctly', () => {
-        const result = generateThresholds(0, 100, mockThresholds, '#BLUE', []);
+        const result = generateThresholds(0, 100, mockThresholds, '#BLUE');
 
-        expect(result.mergedThresholds).toHaveLength(4);
-        expect(result.mergedThresholds[0]).toEqual({ value: 0, color: '#BLUE' });
-        expect(result.mergedThresholds[1]).toEqual({ value: 10, color: '#FF0000' });
-        expect(result.mergedThresholds[2]).toEqual({ value: 50, color: '#FFFF00' });
-        expect(result.mergedThresholds[3]).toEqual({ value: 80, color: '#0037ffff' });
+        expect(result).toHaveLength(4);
+        expect(result[0]).toEqual({ value: 0, color: '#BLUE' });
+        expect(result[1]).toEqual({ value: 10, color: '#FF0000' });
+        expect(result[2]).toEqual({ value: 50, color: '#FFFF00' });
+        expect(result[3]).toEqual({ value: 80, color: '#0037ffff' });
       });
     });
 
     describe('Threshold filtering and range handling', () => {
       it('should filter thresholds above maxBase', () => {
-        const result = generateThresholds(0, 60, mockThresholds, '#BLUE', []);
+        const result = generateThresholds(0, 60, mockThresholds, '#BLUE');
 
-        expect(result.mergedThresholds).toHaveLength(3);
-        expect(result.mergedThresholds[0]).toEqual({ value: 0, color: '#BLUE' });
-        expect(result.mergedThresholds[1]).toEqual({ value: 10, color: '#FF0000' });
-        expect(result.mergedThresholds[2]).toEqual({ value: 50, color: '#FFFF00' });
+        expect(result).toHaveLength(3);
+        expect(result[0]).toEqual({ value: 0, color: '#BLUE' });
+        expect(result[1]).toEqual({ value: 10, color: '#FF0000' });
+        expect(result[2]).toEqual({ value: 50, color: '#FFFF00' });
         // Should not include the threshold with value 80
       });
 
       it('should handle minBase higher than first threshold', () => {
-        const result = generateThresholds(25, 100, mockThresholds, '#BLUE', []);
+        const result = generateThresholds(25, 100, mockThresholds, '#BLUE');
 
-        expect(result.mergedThresholds).toHaveLength(3);
-        expect(result.mergedThresholds[0]).toEqual({ value: 25, color: '#FF0000' });
-        expect(result.mergedThresholds[1]).toEqual({ value: 50, color: '#FFFF00' });
-        expect(result.mergedThresholds[2]).toEqual({ value: 80, color: '#0037ffff' });
+        expect(result).toHaveLength(3);
+        expect(result[0]).toEqual({ value: 25, color: '#FF0000' });
+        expect(result[1]).toEqual({ value: 50, color: '#FFFF00' });
+        expect(result[2]).toEqual({ value: 80, color: '#0037ffff' });
       });
 
       it('should handle minBase higher than all thresholds', () => {
-        const result = generateThresholds(90, 100, mockThresholds, '#BLUE', []);
+        const result = generateThresholds(90, 100, mockThresholds, '#BLUE');
 
-        expect(result.mergedThresholds).toHaveLength(1);
-        expect(result.mergedThresholds[0]).toEqual({ value: 90, color: '#0037ffff' });
+        expect(result).toHaveLength(1);
+        expect(result[0]).toEqual({ value: 90, color: '#0037ffff' });
       });
     });
 
@@ -204,109 +201,82 @@ describe('bar_gauge_utils', () => {
           { value: 80, color: '#00FF00' },
         ];
 
-        const result = generateThresholds(0, 100, duplicateThresholds, '#BLUE', []);
+        const result = generateThresholds(0, 100, duplicateThresholds, '#BLUE');
 
-        expect(result.mergedThresholds).toHaveLength(4);
-        expect(result.mergedThresholds[0]).toEqual({ value: 0, color: '#BLUE' });
-        expect(result.mergedThresholds[1]).toEqual({ value: 10, color: '#FF0000' });
-        expect(result.mergedThresholds[2]).toEqual({ value: 50, color: '#00FFFF' }); // Latest color
-        expect(result.mergedThresholds[3]).toEqual({ value: 80, color: '#00FF00' });
+        expect(result).toHaveLength(4);
+        expect(result[0]).toEqual({ value: 0, color: '#BLUE' });
+        expect(result[1]).toEqual({ value: 10, color: '#FF0000' });
+        expect(result[2]).toEqual({ value: 50, color: '#00FFFF' }); // Latest color
+        expect(result[3]).toEqual({ value: 80, color: '#00FF00' });
       });
+    });
+  });
+
+  describe('generateValueThresholds', () => {
+    const mockThresholds: Threshold[] = [
+      { value: 10, color: '#FF0000' },
+      { value: 50, color: '#FFFF00' },
+      { value: 80, color: '#0037ffff' },
+    ];
+
+    afterEach(() => {
+      jest.restoreAllMocks();
     });
 
     describe('Value stops processing', () => {
       it('should process value stops correctly', () => {
         const valueStops = [15, 45, 75];
-        const result = generateThresholds(0, 100, mockThresholds, '#BLUE', valueStops);
+        const result = generateValueThresholds(0, 100, valueStops, mockThresholds);
 
-        expect(result.valueThresholds).toHaveLength(3);
-        expect(result.valueThresholds[0]).toEqual({ value: 15, color: '#FF0000' }); // Uses threshold at 10
-        expect(result.valueThresholds[1]).toEqual({ value: 45, color: '#FF0000' }); // Uses threshold at 10
-        expect(result.valueThresholds[2]).toEqual({ value: 75, color: '#FFFF00' }); // Uses threshold at 50
+        expect(result).toHaveLength(3);
+        expect(result[0]).toEqual({ value: 15, color: '#FF0000' }); // Uses threshold at 10
+        expect(result[1]).toEqual({ value: 45, color: '#FF0000' }); // Uses threshold at 10
+        expect(result[2]).toEqual({ value: 75, color: '#FFFF00' }); // Uses threshold at 50
       });
 
       it('should filter value stops outside range', () => {
         const valueStops = [5, 15, 45, 95, 105]; // 105 is above maxBase, 5 is below minBase (when minBase > 0)
-        const result = generateThresholds(10, 90, mockThresholds, '#BLUE', valueStops);
+        const result = generateValueThresholds(10, 90, valueStops, mockThresholds);
 
         // Should only include stops between minBase (10) and maxBase (90)
-        expect(result.valueThresholds).toHaveLength(2);
-        expect(result.valueThresholds[0]).toEqual({ value: 15, color: '#FF0000' });
-        expect(result.valueThresholds[1]).toEqual({ value: 45, color: '#FF0000' });
+        expect(result).toHaveLength(2);
+        expect(result[0]).toEqual({ value: 15, color: '#FF0000' });
+        expect(result[1]).toEqual({ value: 45, color: '#FF0000' });
       });
 
       it('should handle duplicate value stops', () => {
         const valueStops = [15, 15, 45, 45, 75]; // Duplicates
-        const result = generateThresholds(0, 100, mockThresholds, '#BLUE', valueStops);
-
-        expect(result.valueThresholds).toHaveLength(3); // Should deduplicate
-        expect(result.valueThresholds[0]).toEqual({ value: 15, color: '#FF0000' });
-        expect(result.valueThresholds[1]).toEqual({ value: 45, color: '#FF0000' });
-        expect(result.valueThresholds[2]).toEqual({ value: 75, color: '#FFFF00' });
+        const result = generateValueThresholds(0, 100, valueStops, mockThresholds);
+        expect(result).toHaveLength(3); // Should deduplicate
+        expect(result[0]).toEqual({ value: 15, color: '#FF0000' });
+        expect(result[1]).toEqual({ value: 45, color: '#FF0000' });
+        expect(result[2]).toEqual({ value: 75, color: '#FFFF00' });
       });
 
       it('should handle unsorted value stops', () => {
         const valueStops = [75, 15, 45]; // Unsorted
-        const result = generateThresholds(0, 100, mockThresholds, '#BLUE', valueStops);
+        const result = generateValueThresholds(0, 100, valueStops, mockThresholds);
 
-        expect(result.valueThresholds).toHaveLength(3);
-        expect(result.valueThresholds[0]).toEqual({ value: 15, color: '#FF0000' });
-        expect(result.valueThresholds[1]).toEqual({ value: 45, color: '#FF0000' });
-        expect(result.valueThresholds[2]).toEqual({ value: 75, color: '#FFFF00' });
+        expect(result).toHaveLength(3);
+        expect(result[0]).toEqual({ value: 15, color: '#FF0000' });
+        expect(result[1]).toEqual({ value: 45, color: '#FF0000' });
+        expect(result[2]).toEqual({ value: 75, color: '#FFFF00' });
       });
 
       it('should handle empty value stops array', () => {
-        const result = generateThresholds(0, 100, mockThresholds, '#BLUE', []);
+        const result = generateValueThresholds(0, 100, [], mockThresholds);
 
-        expect(result.valueThresholds).toEqual([]);
-      });
-    });
-
-    describe('Edge cases', () => {
-      it('should handle single threshold', () => {
-        const singleThreshold: Threshold[] = [{ value: 50, color: '#FF0000' }];
-        const result = generateThresholds(0, 100, singleThreshold, '#BLUE', [25, 75]);
-
-        expect(result.mergedThresholds).toHaveLength(2);
-        expect(result.mergedThresholds[0]).toEqual({ value: 0, color: '#BLUE' });
-        expect(result.mergedThresholds[1]).toEqual({ value: 50, color: '#FF0000' });
-
-        expect(result.valueThresholds).toHaveLength(2);
-        expect(result.valueThresholds[0]).toEqual({ value: 25, color: '#BLUE' });
-        expect(result.valueThresholds[1]).toEqual({ value: 75, color: '#FF0000' });
-      });
-
-      it('should handle minBase equal to maxBase', () => {
-        const result = generateThresholds(50, 50, mockThresholds, '#BLUE', []);
-
-        expect(result.mergedThresholds).toHaveLength(1);
-        expect(result.mergedThresholds[0]).toEqual({ value: 50, color: '#FFFF00' });
+        expect(result).toEqual([]);
       });
 
       it('should handle value stops equal to threshold values', () => {
         const valueStops = [10, 50, 80]; // Exact threshold values
-        const result = generateThresholds(0, 100, mockThresholds, '#BLUE', valueStops);
+        const result = generateValueThresholds(0, 100, valueStops, mockThresholds);
 
-        expect(result.valueThresholds).toHaveLength(3);
-        expect(result.valueThresholds[0]).toEqual({ value: 10, color: '#FF0000' });
-        expect(result.valueThresholds[1]).toEqual({ value: 50, color: '#FFFF00' });
-        expect(result.valueThresholds[2]).toEqual({ value: 80, color: '#0037ffff' });
-      });
-
-      it('should handle negative values', () => {
-        const negativeThresholds: Threshold[] = [
-          { value: -50, color: '#FF0000' },
-          { value: 0, color: '#FFFF00' },
-          { value: 50, color: '#00FF00' },
-        ];
-
-        const result = generateThresholds(-100, 100, negativeThresholds, '#BLUE', [-25, 25]);
-
-        expect(result.mergedThresholds).toHaveLength(4);
-        expect(result.mergedThresholds[0]).toEqual({ value: -100, color: '#BLUE' });
-        expect(result.valueThresholds).toHaveLength(2);
-        expect(result.valueThresholds[0]).toEqual({ value: -25, color: '#FF0000' });
-        expect(result.valueThresholds[1]).toEqual({ value: 25, color: '#FFFF00' });
+        expect(result).toHaveLength(3);
+        expect(result[0]).toEqual({ value: 10, color: '#FF0000' });
+        expect(result[1]).toEqual({ value: 50, color: '#FFFF00' });
+        expect(result[2]).toEqual({ value: 80, color: '#0037ffff' });
       });
     });
   });

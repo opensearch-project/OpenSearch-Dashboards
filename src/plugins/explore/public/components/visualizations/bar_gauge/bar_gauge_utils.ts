@@ -147,8 +147,7 @@ export const generateThresholds = (
   minBase: number,
   maxBase: number,
   thresholds: Threshold[],
-  baseColor: string | undefined,
-  valueStops: number[]
+  baseColor: string | undefined
 ) => {
   const defaultColor = baseColor ?? getColors().statusGreen;
 
@@ -167,9 +166,6 @@ export const generateThresholds = (
       return [...acc, t];
     }, [] as Threshold[]);
 
-  const filteredValueStops = valueStops
-    .filter((v) => v <= maxBase && v >= minBase)
-    .sort((a, b) => a - b);
   const result: Threshold[] = [];
 
   const minThreshold: Threshold = { value: minBase, color: defaultColor };
@@ -183,26 +179,38 @@ export const generateThresholds = (
   }
   result.unshift(minThreshold);
 
-  const valueResults: Threshold[] = [];
-  if (filteredValueStops.length > 0 && result.length > 0) {
+  return result;
+};
+
+export const generateValueThresholds = (
+  minBase: number,
+  maxBase: number,
+  valueStops: number[],
+  thresholds: Threshold[]
+) => {
+  const filteredValueStops = valueStops
+    .filter((v) => v <= maxBase && v >= minBase)
+    .sort((a, b) => a - b);
+
+  const valueThresholds: Threshold[] = [];
+  if (filteredValueStops.length > 0 && thresholds.length > 0) {
     const stops = [...new Set(filteredValueStops)];
 
     let thresholdIndex = 0;
 
     for (const stop of stops) {
-      while (thresholdIndex < result.length - 1 && result[thresholdIndex + 1].value <= stop) {
+      while (
+        thresholdIndex < thresholds.length - 1 &&
+        thresholds[thresholdIndex + 1].value <= stop
+      ) {
         thresholdIndex++;
       }
 
       // Add valid threshold for this stop
-      if (result[thresholdIndex].value <= stop) {
-        valueResults.push({ value: stop, color: result[thresholdIndex].color });
+      if (thresholds[thresholdIndex].value <= stop) {
+        valueThresholds.push({ value: stop, color: thresholds[thresholdIndex].color });
       }
     }
   }
-
-  return {
-    mergedThresholds: result,
-    valueThresholds: valueResults,
-  };
+  return valueThresholds;
 };

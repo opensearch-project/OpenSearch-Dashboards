@@ -10,7 +10,6 @@ import { calculatePercentage, calculateValue } from '../utils/calculation';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { DEFAULT_OPACITY } from '../constants';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
-import { getMaxAndMinBase } from '../style_panel/threshold/threshold_utils';
 
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
@@ -36,12 +35,9 @@ export const createSingleMetric = (
   const percentageSize = styles.percentageSize;
 
   let numericalValues: number[] = [];
-  let maxNumber: number = 0;
-  let minNumber: number = 0;
+
   if (numericField) {
     numericalValues = transformedData.map((d) => d[numericField]);
-    maxNumber = Math.max(...numericalValues);
-    minNumber = Math.min(...numericalValues);
   }
 
   const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
@@ -52,14 +48,6 @@ export const createSingleMetric = (
 
   const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
 
-  const { minBase, maxBase } = getMaxAndMinBase(
-    minNumber,
-    maxNumber,
-    styles?.min,
-    styles?.max,
-    calculatedValue
-  );
-
   function targetFillColor(
     useThresholdColor: boolean,
     threshold?: Threshold[],
@@ -67,7 +55,7 @@ export const createSingleMetric = (
   ) {
     const newThreshold = threshold ?? [];
 
-    if (calculatedValue === undefined || calculatedValue < minBase) {
+    if (calculatedValue === undefined) {
       return useThresholdColor ? DEFAULT_GREY : colorPalette.text;
     }
 

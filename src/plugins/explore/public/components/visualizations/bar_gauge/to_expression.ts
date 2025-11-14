@@ -15,6 +15,7 @@ import {
   symbolOpposite,
   generateParams,
   generateThresholds,
+  generateValueThresholds,
 } from './bar_gauge_utils';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 
@@ -99,17 +100,18 @@ export const createBarGaugeSpec = (
         ]
       : styleOptions?.thresholdOptions?.thresholds;
 
-  const { mergedThresholds, valueThresholds } = generateThresholds(
+  const mergedThresholds = generateThresholds(
     minBase,
     maxBase,
     styleOptions?.thresholdOptions?.thresholds ?? [],
-    styleOptions?.thresholdOptions?.baseColor,
-    valueStops
+    styleOptions?.thresholdOptions?.baseColor
   );
 
   const processedThresholds = [
     ...mergedThresholds,
-    ...(styleOptions?.exclusive.displayMode === 'gradient' ? valueThresholds : []),
+    ...(styleOptions?.exclusive.displayMode === 'gradient'
+      ? generateValueThresholds(minBase, maxBase, valueStops, mergedThresholds)
+      : []),
   ].sort((a, b) => a.value - b.value);
 
   const gradientParams = generateParams(processedThresholds, styleOptions, isXaxisNumerical);
