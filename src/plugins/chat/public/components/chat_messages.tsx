@@ -54,20 +54,21 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
   // Context is now handled by RFC hooks - no subscriptions needed
 
-  // Only show suggestion on llm outputs after last user input
-  const showSuggestions = useMemo(() => {
+  const lastAssistantMessageIndex = useMemo(
+    () => timeline.findLastIndex((message) => message.role === 'assistant'),
+    [timeline]
+  );
+  // Only enable suggestion on llm outputs after last user input
+  const suggestionsEnabled = useMemo(() => {
     if (isStreaming) {
       return false;
     }
     if (timeline.length === 0) {
       return false;
     }
-    const lastAssistantMessageIndex = timeline.findLastIndex(
-      (message) => message.role === 'assistant'
-    );
     const lastUserMessageIndex = timeline.findLastIndex((message) => message.role === 'user');
     return lastAssistantMessageIndex > lastUserMessageIndex;
-  }, [timeline, isStreaming]);
+  }, [timeline, isStreaming, lastAssistantMessageIndex]);
 
   return (
     <>
@@ -87,7 +88,7 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           </div>
         )}
 
-        {timeline.map((message) => {
+        {timeline.map((message, index) => {
           // Handle different message types
           if (message.role === 'user') {
             return <MessageRow key={message.id} message={message} onResend={onResendMessage} />;
@@ -117,7 +118,9 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                   <MessageRow message={assistantMsg} />
                 )}
 
-                {showSuggestions && <ChatSuggestions messages={timeline} />}
+                {suggestionsEnabled && lastAssistantMessageIndex === index && (
+                  <ChatSuggestions messages={timeline} currentMessage={message} />
+                )}
 
                 {/* Tool calls below the message */}
                 {assistantMsg.toolCalls?.map((toolCall) => {
