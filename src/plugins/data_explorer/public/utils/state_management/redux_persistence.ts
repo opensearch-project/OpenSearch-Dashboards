@@ -24,6 +24,7 @@ export const loadReduxState = async (services: DataExplorerServices) => {
         const dataset: Dataset = {
           id: serializedState.metadata.indexPattern,
           title: indexPattern.title,
+          displayName: indexPattern.displayName, // Include displayName for UI
           type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
         };
 
