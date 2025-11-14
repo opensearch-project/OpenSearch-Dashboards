@@ -156,6 +156,6 @@ export function getUrlOrigin(url: string): string | null {
     }
     return `${obj.protocol}//${obj.hostname}${obj.port ? `:${obj.port}` : ''}`;
   } catch (error) {
-    return url; // Safe fallback to original url
+    return null; // Safe fallback to null
   }
 }
