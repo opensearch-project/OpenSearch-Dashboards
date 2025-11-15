@@ -77,9 +77,16 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     : [];
 
   const syncConfig = useMemo(() => {
+    // Check if navigating to a saved search without params - skip filter persistence
+    const currentHash = window.location.hash.split('?')[0];
+    const isSavedSearchUrl = currentHash.includes('#/view/');
+    const hasUrlParams = window.location.hash.includes('?');
+    const shouldSkipFilters = isSavedSearchUrl && !hasUrlParams;
+
     return {
       filters: opensearchFilters.FilterStateStore.APP_STATE,
       query: true,
+      skipAppFiltersFromMemory: shouldSkipFilters,
     };
   }, []);
 
