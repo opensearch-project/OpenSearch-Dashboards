@@ -17,6 +17,7 @@ describe('ChatSuggestions', () => {
   let mockSuggestedActionsService: any;
   let mockChatService: any;
   let mockMessages: Message[];
+  let mockMessage: Message;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -34,6 +35,12 @@ describe('ChatSuggestions', () => {
         content: 'Hi there!',
       },
     ] as Message[];
+
+    mockMessage = {
+      id: 'msg-2',
+      role: 'assistant',
+      content: 'Hi there!',
+    };
 
     // Setup mock services
     mockChatService = {
@@ -67,7 +74,7 @@ describe('ChatSuggestions', () => {
 
     mockSuggestedActionsService.getCustomSuggestions.mockResolvedValue(mockSuggestions);
 
-    render(<ChatSuggestions messages={mockMessages} />);
+    render(<ChatSuggestions messages={mockMessages} currentMessage={mockMessage} />);
 
     // Wait for suggestions to load
     await waitFor(() => {
@@ -83,7 +90,9 @@ describe('ChatSuggestions', () => {
     // Mock a promise that never resolves to simulate loading state
     mockSuggestedActionsService.getCustomSuggestions.mockReturnValue(new Promise(() => {}));
 
-    const { container } = render(<ChatSuggestions messages={mockMessages} />);
+    const { container } = render(
+      <ChatSuggestions messages={mockMessages} currentMessage={mockMessage} />
+    );
 
     // Component should render nothing while loading
     expect(container.firstChild).toBeNull();
@@ -92,7 +101,9 @@ describe('ChatSuggestions', () => {
   it('should not render anything when no custom suggestions are available', async () => {
     mockSuggestedActionsService.getCustomSuggestions.mockResolvedValue([]);
 
-    const { container } = render(<ChatSuggestions messages={mockMessages} />);
+    const { container } = render(
+      <ChatSuggestions messages={mockMessages} currentMessage={mockMessage} />
+    );
 
     // Wait for the async operation to complete
     await waitFor(() => {
@@ -109,7 +120,9 @@ describe('ChatSuggestions', () => {
       new Error('Failed to load suggestions')
     );
 
-    const { container } = render(<ChatSuggestions messages={mockMessages} />);
+    const { container } = render(
+      <ChatSuggestions messages={mockMessages} currentMessage={mockMessage} />
+    );
 
     // Wait for the async operation to complete
     await waitFor(() => {
@@ -128,7 +141,7 @@ describe('ChatSuggestions', () => {
   it('should call getCustomSuggestions with correct context', async () => {
     mockSuggestedActionsService.getCustomSuggestions.mockResolvedValue([]);
 
-    render(<ChatSuggestions messages={mockMessages} />);
+    render(<ChatSuggestions messages={mockMessages} currentMessage={mockMessage} />);
 
     await waitFor(() => {
       expect(mockSuggestedActionsService.getCustomSuggestions).toHaveBeenCalledWith({
@@ -151,7 +164,7 @@ describe('ChatSuggestions', () => {
 
     mockSuggestedActionsService.getCustomSuggestions.mockResolvedValue(mockSuggestions);
 
-    render(<ChatSuggestions messages={mockMessages} />);
+    render(<ChatSuggestions messages={mockMessages} currentMessage={mockMessage} />);
 
     // Wait for suggestions to load
     await waitFor(() => {
@@ -177,7 +190,7 @@ describe('ChatSuggestions', () => {
 
     mockSuggestedActionsService.getCustomSuggestions.mockResolvedValue(mockSuggestions);
 
-    render(<ChatSuggestions messages={mockMessages} />);
+    render(<ChatSuggestions messages={mockMessages} currentMessage={mockMessage} />);
 
     await waitFor(() => {
       expect(screen.getByText('Custom suggestion')).toBeInTheDocument();
@@ -200,7 +213,7 @@ describe('ChatSuggestions', () => {
 
     mockSuggestedActionsService.getCustomSuggestions.mockResolvedValue(mockSuggestions);
 
-    render(<ChatSuggestions messages={mockMessages} />);
+    render(<ChatSuggestions messages={mockMessages} currentMessage={mockMessage} />);
 
     await waitFor(() => {
       expect(screen.getByText('Default suggestion')).toBeInTheDocument();
