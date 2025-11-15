@@ -45,7 +45,7 @@ export const TableVis = React.memo(
 
         // First, add columns in user-specified order
         userOrder.forEach((columnName) => {
-          const foundColumn = baseColumns.find((col) => col.name === columnName);
+          const foundColumn = baseColumns.find((col) => col.column === columnName);
           if (foundColumn) {
             orderedColumns.push(foundColumn);
           }
@@ -53,7 +53,7 @@ export const TableVis = React.memo(
 
         // Then add any new columns that weren't in the saved order
         baseColumns.forEach((col) => {
-          if (!userOrder.includes(col.name)) {
+          if (!userOrder.includes(col.column)) {
             orderedColumns.push(col);
           }
         });
@@ -73,7 +73,7 @@ export const TableVis = React.memo(
       // Apply hiddenColumns from saved configuration if available
       const hiddenColumns = styleOptions?.hiddenColumns || [];
       const visibleColumnsFromConfig = sortedColumns.filter(
-        (col) => !hiddenColumns.includes(col.name)
+        (col) => !hiddenColumns.includes(col.column)
       );
 
       setVisibleColumns(visibleColumnsFromConfig.map((col) => col.column));
@@ -103,20 +103,10 @@ export const TableVis = React.memo(
 
             finalUserOrder.push(...updatedVisibleColumns);
 
-            onStyleChange({
-              visibleColumns: finalUserOrder
-                .map((id) => sortedColumns.find((col) => col.column === id)?.name ?? '')
-                .filter(Boolean),
-            });
+            onStyleChange({ visibleColumns: finalUserOrder });
           } else {
             // This is a visibility change - save hidden columns and update order if needed
-            const updates: Partial<TableChartStyle> = {
-              hiddenColumns: newHiddenColumns
-                .map((id) => sortedColumns.find((col) => col.column === id)?.name ?? '')
-                .filter(Boolean),
-            };
-
-            onStyleChange(updates);
+            onStyleChange({ hiddenColumns: newHiddenColumns });
           }
         }
       },

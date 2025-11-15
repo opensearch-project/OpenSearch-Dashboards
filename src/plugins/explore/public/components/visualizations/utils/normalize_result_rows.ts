@@ -6,6 +6,7 @@
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { FIELD_TYPE_MAP } from '../constants';
 import { VisColumn, VisFieldType } from '../types';
+import { normalizeField } from './field';
 
 export const normalizeResultRows = <T = unknown>(
   rows: Array<OpenSearchSearchHit<T>>,
@@ -16,7 +17,7 @@ export const normalizeResultRows = <T = unknown>(
       id: index,
       schema: FIELD_TYPE_MAP[field.type || ''] || VisFieldType.Unknown,
       name: field.name || '',
-      column: `field-${index}`,
+      column: field.name ? normalizeField(field.name) : '',
       validValuesCount: 0,
       uniqueValuesCount: 0,
     };
