@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { template, escape, keys } from 'lodash';
+import { escape, keys } from 'lodash';
 import { shortenDottedString } from '../../utils';
 import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
 import { FieldFormat } from '../field_format';
@@ -48,20 +48,6 @@ import { UI_SETTINGS } from '../../constants';
  * @param  {string} html - the html to modify
  * @return {string} - modified html
  */
-function noWhiteSpace(html: string) {
-  const TAGS_WITH_WS = />\s+</g;
-  return html.replace(TAGS_WITH_WS, '><');
-}
-
-const templateHtml = `
-  <dl class="source truncate-by-height">
-    <% defPairs.forEach(function (def) { %>
-      <dt><%- def[0] %>:</dt>
-      <dd><%= def[1] %></dd>
-      <%= ' ' %>
-    <% }); %>
-  </dl>`;
-const doTemplate = template(noWhiteSpace(templateHtml));
 
 export class SourceFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS._SOURCE;
@@ -92,6 +78,8 @@ export class SourceFormat extends FieldFormat {
       pairs.push([newField, val]);
     }, []);
 
-    return doTemplate({ defPairs: highlightPairs.concat(sourcePairs) });
+    return `<dl class="source truncate-by-height">${sourcePairs.map(
+      ([keyParam, valueParam]) => `<dt>${keyParam}</dt><dd>${valueParam}</dd>`
+    )}</dl>`;
   };
 }

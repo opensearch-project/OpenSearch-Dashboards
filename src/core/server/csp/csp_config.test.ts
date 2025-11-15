@@ -47,9 +47,9 @@ describe('CspConfig', () => {
   test('DEFAULT', () => {
     expect(CspConfig.DEFAULT).toMatchInlineSnapshot(`
       CspConfig {
-        "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+        "header": "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
         "rules": Array [
-          "script-src 'unsafe-eval' 'self'",
+          "script-src 'self'",
           "worker-src blob: 'self'",
           "style-src 'unsafe-inline' 'self'",
         ],
@@ -62,9 +62,9 @@ describe('CspConfig', () => {
   test('defaults from config', () => {
     expect(new CspConfig()).toMatchInlineSnapshot(`
       CspConfig {
-        "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+        "header": "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
         "rules": Array [
-          "script-src 'unsafe-eval' 'self'",
+          "script-src 'self'",
           "worker-src blob: 'self'",
           "style-src 'unsafe-inline' 'self'",
         ],
@@ -77,9 +77,9 @@ describe('CspConfig', () => {
   test('creates from partial config', () => {
     expect(new CspConfig({ strict: true, warnLegacyBrowsers: false })).toMatchInlineSnapshot(`
       CspConfig {
-        "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+        "header": "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
         "rules": Array [
-          "script-src 'unsafe-eval' 'self'",
+          "script-src 'self'",
           "worker-src blob: 'self'",
           "style-src 'unsafe-inline' 'self'",
         ],
