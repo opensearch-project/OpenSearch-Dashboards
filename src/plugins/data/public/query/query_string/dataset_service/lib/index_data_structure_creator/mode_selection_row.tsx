@@ -24,6 +24,10 @@ interface ModeSelectionRowProps {
   selectedIndexId: string | null;
   isFinal: boolean;
   onIndexSelectionChange: (selectedId: string | null) => void;
+  // Props for dynamic search
+  onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  isSearching?: boolean;
+  services?: any;
 }
 
 export const ModeSelectionRow: React.FC<ModeSelectionRowProps> = ({
@@ -36,6 +40,7 @@ export const ModeSelectionRow: React.FC<ModeSelectionRowProps> = ({
   selectedIndexId,
   isFinal,
   onIndexSelectionChange,
+  services,
 }) => {
   const modeOptions = [
     {
@@ -101,6 +106,7 @@ export const ModeSelectionRow: React.FC<ModeSelectionRowProps> = ({
               selectedIndexId={selectedIndexId}
               isFinal={isFinal}
               onSelectionChange={onIndexSelectionChange}
+              httpService={services?.http}
             />
           )}
         </EuiFormRow>

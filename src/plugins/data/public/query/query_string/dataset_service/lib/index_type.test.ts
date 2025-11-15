@@ -210,7 +210,7 @@ describe('indexTypeConfig', () => {
     ).toBeDefined();
   });
 
-  describe('fetchIndices', () => {
+  describe('fetch indices for DATA_SOURCE', () => {
     test('should extract index names correctly from different formats', async () => {
       const mockResponse = {
         rawResponse: {

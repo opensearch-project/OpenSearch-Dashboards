@@ -190,6 +190,7 @@ export const DatasetExplorer = ({
                     selectDataStructure={selectDataStructure}
                     // @ts-ignore custom component can have their own fetch options
                     fetchDataStructure={fetchNextDataStructure}
+                    services={services}
                   />
                 ) : current.multiSelect ? (
                   <DatasetTable

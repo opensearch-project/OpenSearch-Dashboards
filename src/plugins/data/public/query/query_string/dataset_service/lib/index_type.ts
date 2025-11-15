@@ -27,6 +27,17 @@ import {
 import { DataSourceEngineType } from '../../../../../../../plugins/data_source/common/data_sources';
 import { IndexDataStructureCreator } from './index_data_structure_creator/index_data_structure_creator';
 
+interface MatchedIndex {
+  name: string;
+  isRemoteIndex: boolean;
+}
+
+interface ResolveIndexResponse {
+  indices?: Array<{ name: string; attributes?: string[] }>;
+  aliases?: Array<{ name: string }>;
+  data_streams?: Array<{ name: string }>;
+}
+
 export const DELIMITER = '::';
 
 export const indexTypeConfig: DatasetTypeConfig = {
@@ -203,13 +214,17 @@ const mapDataSourceSavedObjectToDataStructure = (
   };
 };
 
-const fetchIndices = async (dataStructure: DataStructure): Promise<string[]> => {
+const fetchIndicesViaSearch = async (
+  dataStructure: DataStructure,
+  pattern: string = '*'
+): Promise<MatchedIndex[]> => {
   const search = getSearchService();
+
   const buildSearchRequest = () => ({
     params: {
       ignoreUnavailable: true,
       expand_wildcards: 'all',
-      index: '*',
+      index: pattern,
       body: {
         size: 0,
         aggs: {
@@ -241,29 +256,125 @@ const fetchIndices = async (dataStructure: DataStructure): Promise<string[]> => 
       // extract index name or return original key if pattern doesn't match
       uniqueResponses.add(lastPart.split(':')[0] || key);
     });
-    return Array.from(uniqueResponses);
+
+    return Array.from(uniqueResponses).map((name) => ({
+      name,
+      isRemoteIndex: false,
+    }));
   };
 
-  return search
-    .getDefaultSearchInterceptor()
-    .search(buildSearchRequest())
-    .pipe(map(searchResponseToArray))
-    .toPromise();
+  try {
+    return await search
+      .getDefaultSearchInterceptor()
+      .search(buildSearchRequest())
+      .pipe(map(searchResponseToArray))
+      .toPromise();
+  } catch (error) {
+    return [];
+  }
+};
+
+const fetchIndicesViaResolve = async (
+  dataStructure: DataStructure,
+  http: HttpSetup,
+  pattern: string = '*'
+): Promise<MatchedIndex[]> => {
+  try {
+    const query: any = {
+      expand_wildcards: 'all',
+    };
+
+    if (dataStructure.id && dataStructure.id !== '') {
+      query.data_source = dataStructure.id;
+    }
+
+    const response = await http.get<ResolveIndexResponse>(
+      `/internal/index-pattern-management/resolve_index/${pattern}`,
+      { query }
+    );
+
+    if (!response) {
+      return [];
+    }
+
+    const indices: MatchedIndex[] = [];
+
+    // Add regular indices
+    if (response.indices) {
+      response.indices.forEach((index) => {
+        indices.push({
+          name: index.name,
+          isRemoteIndex: false,
+        });
+      });
+    }
+
+    // Add aliases as indices
+    if (response.aliases) {
+      response.aliases.forEach((alias) => {
+        indices.push({
+          name: alias.name,
+          isRemoteIndex: false,
+        });
+      });
+    }
+
+    // Add data streams as indices
+    if (response.data_streams) {
+      response.data_streams.forEach((dataStream) => {
+        indices.push({
+          name: dataStream.name,
+          isRemoteIndex: false,
+        });
+      });
+    }
+
+    return indices;
+  } catch (error) {
+    return [];
+  }
+};
+
+export const fetchIndicesByPattern = async (
+  dataStructure: DataStructure,
+  http: HttpSetup,
+  pattern: string = '*'
+): Promise<MatchedIndex[]> => {
+  // Validate pattern
+  if (pattern === '*:' || pattern === '' || pattern.startsWith(',')) {
+    return [];
+  }
+
+  const [searchIndices, resolveIndices] = await Promise.all([
+    fetchIndicesViaSearch(dataStructure, pattern),
+    fetchIndicesViaResolve(dataStructure, http, pattern),
+  ]);
+
+  // Deduplicate results (prioritize resolve API results)
+  const indexMap = new Map<string, MatchedIndex>();
+
+  // Add search results first
+  searchIndices.forEach((index) => {
+    indexMap.set(index.name, index);
+  });
+
+  // Add resolve results (will overwrite duplicates)
+  resolveIndices.forEach((index) => {
+    indexMap.set(index.name, index);
+  });
+
+  return Array.from(indexMap.values()).sort((a, b) => a.name.localeCompare(b.name));
 };
 
 const fetchAllIndices = async (
   dataStructure: DataStructure,
-  http: HttpSetup
+  http: HttpSetup,
+  pattern: string = '*'
 ): Promise<Array<{ name: string; isRemoteIndex: boolean }>> => {
   // Create promises for both local and remote indices
   const [localIndices, remoteIndices] = await Promise.all([
-    // Fetch local indices
-    fetchIndices(dataStructure).then((indices) =>
-      indices.map((index) => ({
-        name: index,
-        isRemoteIndex: false,
-      }))
-    ),
+    // Fetch local indices using new dynamic approach
+    fetchIndicesByPattern(dataStructure, http, pattern),
 
     // Fetch remote indices if they exist
     dataStructure?.remoteConnections
