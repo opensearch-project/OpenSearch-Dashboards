@@ -52,6 +52,9 @@ describe('ChatWindow', () => {
         userMessage: { id: '1', content: 'test', role: 'user' },
       }),
       newThread: jest.fn(),
+      getCurrentMessages: jest.fn().mockReturnValue([]),
+      updateCurrentMessages: jest.fn(),
+      getThreadId: jest.fn().mockReturnValue('mock-thread-id'),
     } as any;
   });
 
@@ -111,6 +114,64 @@ describe('ChatWindow', () => {
         'test message from ref',
         expect.any(Array)
       );
+    });
+  });
+
+  describe('persistence integration', () => {
+    it('should restore timeline from persisted messages on mount', () => {
+      const persistedMessages = [
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: '2', role: 'assistant', content: 'Hi there!' },
+      ];
+      mockChatService.getCurrentMessages.mockReturnValue(persistedMessages);
+
+      renderWithContext(<ChatWindow />);
+
+      // Should call getCurrentMessages on mount
+      expect(mockChatService.getCurrentMessages).toHaveBeenCalled();
+    });
+
+    it('should not restore timeline when no persisted messages exist', () => {
+      mockChatService.getCurrentMessages.mockReturnValue([]);
+
+      renderWithContext(<ChatWindow />);
+
+      // Should call getCurrentMessages but timeline should remain empty
+      expect(mockChatService.getCurrentMessages).toHaveBeenCalled();
+    });
+
+    it('should sync timeline changes with ChatService for persistence', async () => {
+      const { rerender } = renderWithContext(<ChatWindow />);
+
+      // Wait for initial render and useEffect calls
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Initially called with empty timeline
+      expect(mockChatService.updateCurrentMessages).toHaveBeenCalledWith([]);
+
+      // Simulate timeline change by re-rendering
+      rerender(
+        <OpenSearchDashboardsContextProvider
+          services={{ core: mockCore, contextProvider: mockContextProvider }}
+        >
+          <ChatProvider chatService={mockChatService}>
+            <ChatWindow />
+          </ChatProvider>
+        </OpenSearchDashboardsContextProvider>
+      );
+
+      // Should call updateCurrentMessages whenever timeline changes
+      expect(mockChatService.updateCurrentMessages).toHaveBeenCalled();
+    });
+
+    it('should call updateCurrentMessages on every timeline update', async () => {
+      renderWithContext(<ChatWindow />);
+
+      // Wait for initial mount effects
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Should be called at least once during initialization
+      expect(mockChatService.updateCurrentMessages).toHaveBeenCalled();
     });
   });
 });

@@ -86,9 +86,13 @@ export class ExplorePlugin
     > {
   // @ts-ignore
   private config: ConfigSchema;
-  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private stateUpdaterByApp: Partial<
+    Record<ExploreFlavor | 'explore', BehaviorSubject<AppUpdater>>
+  > = {
+    explore: new BehaviorSubject<AppUpdater>(() => ({})),
+  };
 
-  private stopUrlTracking?: () => void;
+  private stopUrlTrackingCallbackByApp: Partial<Record<ExploreFlavor | 'explore', () => void>> = {};
   private currentHistory?: ScopedHistory;
   private readonly DISCOVER_VISUALIZATION_NAME = 'DiscoverVisualization';
 
@@ -215,153 +219,162 @@ export class ExplorePlugin
       order: 2,
     });
 
-    const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
-      baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
-      defaultSubUrl: '#/',
-      storageKey: `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}`,
-      navLinkUpdater$: this.appStateUpdater,
-      toastNotifications: core.notifications.toasts,
-      stateParams: [
-        {
-          osdUrlKey: '_g',
-          stateUpdate$: setupDeps.data.query.state$.pipe(
-            filter(
-              (value: Record<string, unknown>) =>
-                !!((value.changes as any)?.time || (value.changes as any)?.refreshInterval)
-            ),
-            map((value: Record<string, unknown>) => ({
-              ...(value.state as Record<string, unknown>),
-              // Note: We don't use data plugin's filterManager, filters are managed in Redux
-            }))
-          ),
-        },
-      ],
-      getHistory: () => {
-        return this.currentHistory!;
-      },
-    });
-    this.stopUrlTracking = () => {
-      stopUrlTracker();
-    };
-
     setupDeps.data.__enhance({
       editor: {
         queryEditorExtension: createQueryEditorExtensionConfig(core),
       },
     });
 
-    const createExploreApp = (flavor?: ExploreFlavor, options: Partial<App> = {}): App => ({
-      id: PLUGIN_ID,
-      title: PLUGIN_NAME,
-      updater$: this.appStateUpdater.asObservable(),
-      order: 1000,
-      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
-      euiIconType: 'inputOutput',
-      defaultPath: '#/',
-      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-      mount: async (params: AppMountParameters) => {
-        if (!this.initializeServices) {
-          throw Error('Explore plugin method initializeServices is undefined');
-        }
+    const createExploreApp = (flavor?: ExploreFlavor, options: Partial<App> = {}): App => {
+      let appStateUpdater = this.stateUpdaterByApp.explore as BehaviorSubject<AppUpdater>;
+      if (flavor) {
+        this.stateUpdaterByApp[flavor] =
+          this.stateUpdaterByApp[flavor] || new BehaviorSubject<AppUpdater>(() => ({}));
+        appStateUpdater = this.stateUpdaterByApp[flavor] as BehaviorSubject<AppUpdater>;
+      }
 
-        // Get start services
-        const { core: coreStart, plugins: pluginsStart } = await this.initializeServices();
-        const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(coreStart);
-        // We want to limit explore UI to only show up under the explore-enabled
-        // workspaces. If user lands in the explore plugin URL in a different
-        // workspace, we will redirect them to classic discover. We will also redirect if
-        // they have manually selected classic discover
-        if (
-          !isExploreEnabledWorkspace ||
-          !!localStorage.getItem(SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY)
-        ) {
-          coreStart.application.navigateToApp('discover', { replace: true });
-          return () => {};
-        }
+      const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
+        baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
+        defaultSubUrl: '#/',
+        storageKey: `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}`,
+        navLinkUpdater$: appStateUpdater,
+        toastNotifications: core.notifications.toasts,
+        stateParams: [
+          {
+            osdUrlKey: '_g',
+            stateUpdate$: setupDeps.data.query.state$.pipe(
+              filter(
+                (value: Record<string, unknown>) =>
+                  !!((value.changes as any)?.time || (value.changes as any)?.refreshInterval)
+              ),
+              map((value: Record<string, unknown>) => ({
+                ...(value.state as Record<string, unknown>),
+                // Note: We don't use data plugin's filterManager, filters are managed in Redux
+              }))
+            ),
+          },
+        ],
+        getHistory: () => {
+          return this.currentHistory!;
+        },
+      });
+      this.stopUrlTrackingCallbackByApp[flavor ?? 'explore'] = stopUrlTracker;
 
-        // If there's no flavor id, by default redirect to the logs flavor.
-        if (!flavor) {
-          coreStart.application.navigateToApp(`${PLUGIN_ID}/${ExploreFlavor.Logs}`, {
-            path: '#/',
-            replace: true,
-          });
-          return () => {};
-        }
+      return {
+        id: PLUGIN_ID,
+        title: PLUGIN_NAME,
+        updater$: appStateUpdater.asObservable(),
+        order: 1000,
+        workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+        euiIconType: 'inputOutput',
+        defaultPath: '#/',
+        category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+        mount: async (params: AppMountParameters) => {
+          if (!this.initializeServices) {
+            throw Error('Explore plugin method initializeServices is undefined');
+          }
 
-        this.currentHistory = params.history;
+          // Get start services
+          const { core: coreStart, plugins: pluginsStart } = await this.initializeServices();
+          const isExploreEnabledWorkspace = await this.getIsExploreEnabledWorkspace(coreStart);
+          // We want to limit explore UI to only show up under the explore-enabled
+          // workspaces. If user lands in the explore plugin URL in a different
+          // workspace, we will redirect them to classic discover. We will also redirect if
+          // they have manually selected classic discover
+          if (
+            !isExploreEnabledWorkspace ||
+            !!localStorage.getItem(SHOW_CLASSIC_DISCOVER_LOCAL_STORAGE_KEY)
+          ) {
+            coreStart.application.navigateToApp('discover', { replace: true });
+            return () => {};
+          }
 
-        // make sure the index pattern list is up to date
-        pluginsStart.data.indexPatterns.clearCache();
+          // If there's no flavor id, by default redirect to the logs flavor.
+          if (!flavor) {
+            coreStart.application.navigateToApp(`${PLUGIN_ID}/${ExploreFlavor.Logs}`, {
+              path: '#/',
+              replace: true,
+            });
+            return () => {};
+          }
 
-        // Check if this is a context or doc route (following discover pattern)
-        const path = window.location.hash;
-        if (path.startsWith('#/context') || path.startsWith('#/doc')) {
-          const { renderDocView } = await import(
-            './application/legacy/discover/application/components/doc_views'
+          this.currentHistory = params.history;
+
+          // make sure the index pattern list is up to date
+          pluginsStart.data.indexPatterns.clearCache();
+
+          // Check if this is a context or doc route (following discover pattern)
+          const path = window.location.hash;
+          if (path.startsWith('#/context') || path.startsWith('#/doc')) {
+            const { renderDocView } = await import(
+              './application/legacy/discover/application/components/doc_views'
+            );
+            const unmount = renderDocView(params.element);
+            return () => {
+              unmount();
+            };
+          }
+
+          // For main explore routes, load the full application
+          const { renderApp } = await import('./application');
+          const { registerTabs } = await import('./application/register_tabs');
+
+          // Build services using the buildServices function
+          const services = buildServices(
+            coreStart,
+            pluginsStart,
+            this.initializerContext,
+            this.tabRegistry,
+            this.visualizationRegistryService,
+            this.queryPanelActionsRegistryService,
+            this.isDatasetManagementEnabled,
+            this.slotRegistryService
           );
-          const unmount = renderDocView(params.element);
+
+          // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
+          services.osdUrlStateStorage = createOsdUrlStateStorage({
+            history: this.currentHistory,
+            useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+            ...withNotifyOnErrors(coreStart.notifications.toasts),
+          });
+
+          // Add scopedHistory to services
+          services.scopedHistory = this.currentHistory;
+
+          // Register tabs with the tab registry
+          registerTabs(services, flavor);
+
+          // Instantiate the store
+          const {
+            store,
+            unsubscribe: unsubscribeStore,
+            reset: resetStore,
+          } = await getPreloadedStore(services);
+          services.store = store;
+
+          // Register abort action
+          const abortActionId = `${PLUGIN_ID}`;
+          const abortAction = createAbortDataQueryAction(abortActionId);
+          services.uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, abortAction);
+          setServices(services);
+
+          appMounted();
+
+          // Call renderApp with params, services, and store
+          const unmount = renderApp(params, services, store, flavor);
+
           return () => {
+            abortAllActiveQueries();
+            services.uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, abortActionId);
+            appUnMounted();
             unmount();
+            unsubscribeStore();
+            resetStore();
           };
-        }
-
-        // For main explore routes, load the full application
-        const { renderApp } = await import('./application');
-        const { registerTabs } = await import('./application/register_tabs');
-
-        // Build services using the buildServices function
-        const services = buildServices(
-          coreStart,
-          pluginsStart,
-          this.initializerContext,
-          this.tabRegistry,
-          this.visualizationRegistryService,
-          this.queryPanelActionsRegistryService,
-          this.isDatasetManagementEnabled,
-          this.slotRegistryService
-        );
-
-        // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
-        services.osdUrlStateStorage = createOsdUrlStateStorage({
-          history: this.currentHistory,
-          useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
-          ...withNotifyOnErrors(coreStart.notifications.toasts),
-        });
-
-        // Add scopedHistory to services
-        services.scopedHistory = this.currentHistory;
-
-        // Register tabs with the tab registry
-        registerTabs(services, flavor);
-
-        // Instantiate the store
-        const { store, unsubscribe: unsubscribeStore, reset: resetStore } = await getPreloadedStore(
-          services
-        );
-        services.store = store;
-
-        // Register abort action
-        const abortActionId = `${PLUGIN_ID}`;
-        const abortAction = createAbortDataQueryAction(abortActionId);
-        services.uiActions.addTriggerAction(ABORT_DATA_QUERY_TRIGGER, abortAction);
-        setServices(services);
-
-        appMounted();
-
-        // Call renderApp with params, services, and store
-        const unmount = renderApp(params, services, store, flavor);
-
-        return () => {
-          abortAllActiveQueries();
-          services.uiActions.detachAction(ABORT_DATA_QUERY_TRIGGER, abortActionId);
-          appUnMounted();
-          unmount();
-          unsubscribeStore();
-          resetStore();
-        };
-      },
-      ...options,
-    });
+        },
+        ...options,
+      };
+    };
 
     // Register applications into the side navigation menu
     core.application.register(
@@ -523,9 +536,7 @@ export class ExplorePlugin
   }
 
   public stop() {
-    if (this.stopUrlTracking) {
-      this.stopUrlTracking();
-    }
+    Object.values(this.stopUrlTrackingCallbackByApp).forEach((callback) => callback());
   }
 
   private registerEmbeddable(

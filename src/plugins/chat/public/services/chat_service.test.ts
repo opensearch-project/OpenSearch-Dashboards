@@ -20,6 +20,22 @@ describe('ChatService', () => {
     // Clear all mocks
     jest.clearAllMocks();
 
+    // Set up global sessionStorage mock before creating ChatService
+    Object.defineProperty(global, 'sessionStorage', {
+      value: {
+        getItem: jest.fn(() => null),
+        setItem: jest.fn(),
+        removeItem: jest.fn(),
+      },
+      writable: true,
+    });
+
+    // Set up global window mock for context store
+    Object.defineProperty(global, 'window', {
+      value: {},
+      writable: true,
+    });
+
     // Create mock agent
     mockAgent = {
       runAgent: jest.fn(),
@@ -289,6 +305,41 @@ describe('ChatService', () => {
   });
 
   describe('newThread', () => {
+    let mockSessionStorage: { [key: string]: string };
+    let mockContextStore: any;
+
+    beforeEach(() => {
+      // Mock sessionStorage behavior
+      mockSessionStorage = {};
+      const sessionStorageMock = {
+        getItem: jest.fn((key: string) => mockSessionStorage[key] || null),
+        setItem: jest.fn((key: string, value: string) => {
+          mockSessionStorage[key] = value;
+        }),
+        removeItem: jest.fn((key: string) => {
+          delete mockSessionStorage[key];
+        }),
+      };
+
+      // Update the global sessionStorage mock
+      (global as any).sessionStorage = sessionStorageMock;
+
+      // Mock context store
+      mockContextStore = {
+        getAllContexts: jest.fn(() => [
+          { id: 'ctx1', description: 'Context 1', value: 'data1' },
+          { id: 'ctx2', description: 'Context 2', value: 'data2' },
+          { description: 'Page Context', value: 'page-data' }, // No ID = page context
+        ]),
+        removeContextById: jest.fn(),
+      };
+      (global as any).window.assistantContextStore = mockContextStore;
+    });
+
+    afterEach(() => {
+      delete (global as any).window.assistantContextStore;
+    });
+
     it('should generate new thread ID', () => {
       const originalThreadId = (chatService as any).threadId;
 
@@ -297,6 +348,172 @@ describe('ChatService', () => {
       const newThreadId = (chatService as any).threadId;
       expect(newThreadId).not.toBe(originalThreadId);
       expect(newThreadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+    });
+
+    it('should clear current messages', () => {
+      // Set some messages
+      (chatService as any).currentMessages = [
+        { id: '1', role: 'user', content: 'test' },
+        { id: '2', role: 'assistant', content: 'response' },
+      ];
+
+      chatService.newThread();
+
+      expect((chatService as any).currentMessages).toEqual([]);
+    });
+
+    it('should clear sessionStorage', () => {
+      // Set some data in sessionStorage
+      mockSessionStorage['chat.currentState'] = JSON.stringify({
+        threadId: 'old-thread',
+        messages: [{ id: '1', role: 'user', content: 'test' }],
+      });
+
+      const removeItemSpy = (global as any).sessionStorage.removeItem;
+
+      chatService.newThread();
+
+      expect(removeItemSpy).toHaveBeenCalledWith('chat.currentState');
+    });
+
+    it('should clear dynamic context from global store', () => {
+      chatService.newThread();
+
+      // Should get all contexts
+      expect(mockContextStore.getAllContexts).toHaveBeenCalled();
+
+      // Should remove only contexts with IDs (dynamic contexts)
+      expect(mockContextStore.removeContextById).toHaveBeenCalledWith('ctx1');
+      expect(mockContextStore.removeContextById).toHaveBeenCalledWith('ctx2');
+      expect(mockContextStore.removeContextById).toHaveBeenCalledTimes(2);
+    });
+
+    it('should handle missing context store gracefully', () => {
+      delete (global as any).window.assistantContextStore;
+
+      expect(() => chatService.newThread()).not.toThrow();
+    });
+  });
+
+  describe('chat state persistence methods', () => {
+    let mockSessionStorage: { [key: string]: string };
+
+    beforeEach(() => {
+      // Mock sessionStorage behavior
+      mockSessionStorage = {};
+      const sessionStorageMock = {
+        getItem: jest.fn((key: string) => mockSessionStorage[key] || null),
+        setItem: jest.fn((key: string, value: string) => {
+          mockSessionStorage[key] = value;
+        }),
+        removeItem: jest.fn((key: string) => {
+          delete mockSessionStorage[key];
+        }),
+      };
+
+      // Update the global sessionStorage mock
+      (global as any).sessionStorage = sessionStorageMock;
+    });
+
+    describe('getCurrentMessages', () => {
+      it('should return current messages array', () => {
+        const testMessages = [
+          { id: '1', role: 'user', content: 'Hello' },
+          { id: '2', role: 'assistant', content: 'Hi there!' },
+        ];
+        (chatService as any).currentMessages = testMessages;
+
+        const result = chatService.getCurrentMessages();
+
+        expect(result).toEqual(testMessages);
+      });
+
+      it('should return empty array when no messages', () => {
+        (chatService as any).currentMessages = [];
+
+        const result = chatService.getCurrentMessages();
+
+        expect(result).toEqual([]);
+      });
+    });
+
+    describe('updateCurrentMessages', () => {
+      it('should update current messages and save to sessionStorage', () => {
+        const newMessages = [
+          { id: '1', role: 'user', content: 'Test message' },
+          { id: '2', role: 'assistant', content: 'Test response' },
+        ];
+
+        chatService.updateCurrentMessages(newMessages);
+
+        expect((chatService as any).currentMessages).toEqual(newMessages);
+
+        // Check that setItem was called with the correct key
+        expect((global as any).sessionStorage.setItem).toHaveBeenCalledWith(
+          'chat.currentState',
+          expect.any(String)
+        );
+
+        // Verify the stored JSON contains the expected data
+        const setItemCall = ((global as any).sessionStorage.setItem as jest.Mock).mock.calls[0];
+        const storedData = JSON.parse(setItemCall[1]);
+        expect(storedData.threadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+        expect(storedData.messages).toEqual(newMessages);
+      });
+
+      it('should handle empty messages array', () => {
+        chatService.updateCurrentMessages([]);
+
+        expect((chatService as any).currentMessages).toEqual([]);
+
+        // Check that setItem was called with the correct key
+        expect((global as any).sessionStorage.setItem).toHaveBeenCalledWith(
+          'chat.currentState',
+          expect.any(String)
+        );
+
+        // Verify the stored JSON contains the expected data
+        const setItemCall = ((global as any).sessionStorage.setItem as jest.Mock).mock.calls[0];
+        const storedData = JSON.parse(setItemCall[1]);
+        expect(storedData.threadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+        expect(storedData.messages).toEqual([]);
+      });
+    });
+
+    describe('saveCurrentChatStatePublic', () => {
+      it('should save current state to sessionStorage', () => {
+        const testMessages = [{ id: '1', role: 'user', content: 'test' }];
+        (chatService as any).currentMessages = testMessages;
+
+        chatService.saveCurrentChatStatePublic();
+
+        // Check that setItem was called with the correct key
+        expect((global as any).sessionStorage.setItem).toHaveBeenCalledWith(
+          'chat.currentState',
+          expect.any(String)
+        );
+
+        // Verify the stored JSON contains the expected data
+        const setItemCall = ((global as any).sessionStorage.setItem as jest.Mock).mock.calls[0];
+        const storedData = JSON.parse(setItemCall[1]);
+        expect(storedData.threadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+        expect(storedData.messages).toEqual(testMessages);
+      });
+
+      it('should handle sessionStorage errors gracefully', () => {
+        const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+        ((global as any).sessionStorage.setItem as jest.Mock).mockImplementation(() => {
+          throw new Error('Storage full');
+        });
+
+        expect(() => chatService.saveCurrentChatStatePublic()).not.toThrow();
+        expect(consoleSpy).toHaveBeenCalledWith(
+          'Failed to save chat state to sessionStorage:',
+          expect.any(Error)
+        );
+
+        consoleSpy.mockRestore();
+      });
     });
   });
 
