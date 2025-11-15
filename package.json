@@ -562,7 +562,7 @@
     "tree-kill": "^1.2.2",
     "typescript": "4.5.5",
     "vega": "^5.33.0",
-    "vega-interpreter": "^1.0.5",
+    "vega-interpreter": "^1.2.1",
     "vega-lite": "^5.23.0",
     "vega-schema-url-parser": "^2.1.0",
     "vega-tooltip": "^0.30.0",
