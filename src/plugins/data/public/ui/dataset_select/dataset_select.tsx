@@ -43,6 +43,7 @@ export interface DetailedDataset extends Dataset {
 
 export interface DatasetSelectProps {
   onSelect: (dataset: Dataset) => void;
+  appName: string;
   supportedTypes?: string[];
   signalType: string | null;
 }
