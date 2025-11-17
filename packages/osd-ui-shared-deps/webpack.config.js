@@ -51,7 +51,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     'osd-ui-shared-deps.v9.light': ['@elastic/eui/dist/eui_theme_v9_light.css'],
   },
   context: __dirname,
-  devtool: dev ? '#cheap-source-map' : false,
+  devtool: dev ? 'cheap-source-map' : false,
   output: {
     path: UiSharedDeps.distDir,
     filename: '[name].js',
@@ -59,7 +59,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     devtoolModuleFilenameTemplate: (info) =>
       `osd-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
     library: '__osdSharedDeps__',
-    hashFunction: 'Xxh64',
+    hashFunction: 'xxhash64',
   },
 
   module: {
@@ -277,13 +277,11 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
             algorithm: 'brotliCompress',
             filename: '[path].br',
             test: /\.(js|css)$/,
-            cache: false,
           }),
           new CompressionPlugin({
             algorithm: 'gzip',
             filename: '[path].gz',
             test: /\.(js|css)$/,
-            cache: false,
           }),
         ]),
   ],

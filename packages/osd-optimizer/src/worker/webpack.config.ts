@@ -32,10 +32,8 @@ import Path from 'path';
 
 import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
-// @ts-expect-error
 import TerserPlugin from 'terser-webpack-plugin';
-// @ts-expect-error
-import webpackMerge from 'webpack-merge';
+import { merge } from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@osd/ui-shared-deps';
@@ -49,14 +47,13 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
 
   const commonConfig: webpack.Configuration = {
-    node: { fs: 'empty' },
     context: Path.normalize(bundle.contextDir),
     cache: true,
     entry: {
       [bundle.id]: ENTRY_CREATOR,
     },
 
-    devtool: worker.dist ? false : '#cheap-source-map',
+    devtool: worker.dist ? false : 'cheap-source-map',
     profile: worker.profileWebpack,
 
     output: {
@@ -68,12 +65,12 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           bundle.sourceRoot,
           info.absoluteResourcePath
         )}${info.query}`,
-      jsonpFunction: `${bundle.id}_bundle_jsonpfunction`,
-      hashFunction: 'Xxh64',
+      chunkLoadingGlobal: `${bundle.id}_bundle_jsonpfunction`,
+      hashFunction: 'xxhash64',
     },
 
     optimization: {
-      noEmitOnErrors: true,
+      emitOnErrors: false,
     },
 
     externals: [UiSharedDeps.externals],
@@ -185,7 +182,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                         )
                       )};\n${content}`;
                     },
-                    webpackImporter: false,
+                    webpackImporter: true,
                     implementation: require('sass-embedded'),
                     sassOptions: {
                       outputStyle: 'compressed',
@@ -324,21 +321,17 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         algorithm: 'brotliCompress',
         filename: '[path].br',
         test: /\.(js|css)$/,
-        cache: false,
       }),
       new CompressionPlugin({
         algorithm: 'gzip',
         filename: '[path].gz',
         test: /\.(js|css)$/,
-        cache: false,
       }),
     ],
 
     optimization: {
       minimizer: [
         new TerserPlugin({
-          cache: false,
-          sourceMap: false,
           extractComments: false,
           parallel: false,
           terserOptions: {
@@ -350,5 +343,5 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     },
   };
 
-  return webpackMerge(commonConfig, worker.dist ? distributableConfig : nonDistributableConfig);
+  return merge(commonConfig, worker.dist ? distributableConfig : nonDistributableConfig);
 }
