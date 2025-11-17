@@ -32,7 +32,7 @@
     "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-copy": "^1.0.0",
     "sass-embedded": "1.66.1",
-    "sass-loader": "npm:@amoo-miki/sass-loader@10.4.1-node-sass-9.0.0-libsass-3.6.5-with-sass-embedded.rc1",
+    "sass-loader": "^16.0.3",
     "postcss": "^8.4.31",
     "sinon": "^7.4.2"
   }
