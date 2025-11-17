@@ -222,6 +222,7 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
                       layoutMode={layoutMode}
                       onToggleLayout={toggleLayoutMode}
                       ref={chatWindowRef}
+                      onClose={closeSidecar}
                     />
                   </ChatProvider>
                 </GlobalAssistantProvider>
