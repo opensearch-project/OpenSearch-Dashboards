@@ -340,3 +340,5 @@ export interface ConnectNullValuesOption {
   connectMode: DisableMode;
   threshold: string;
 }
+
+export type FilterOption = 'filterAll' | 'filterButKeepOpposite' | 'none';
