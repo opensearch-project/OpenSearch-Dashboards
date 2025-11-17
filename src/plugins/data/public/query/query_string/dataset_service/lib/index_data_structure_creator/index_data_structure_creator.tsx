@@ -3,21 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
   DataStructureCreatorProps,
   DataStructure,
   DATA_STRUCTURE_META_TYPES,
 } from '../../../../../../common';
-import { ModeSelectionRow } from './mode_selection_row';
-import { MatchingIndicesList } from './matching_indices_list';
-import { validatePrefix, canAppendWildcard } from './index_data_structure_creator_utils';
+import { IndexSelector } from './index_selector';
 import './index_data_structure_creator.scss';
-
-type SelectionMode = 'single' | 'prefix';
 
 export const IndexDataStructureCreator: React.FC<
   DataStructureCreatorProps & { services?: any }
@@ -26,94 +21,10 @@ export const IndexDataStructureCreator: React.FC<
   const isLast = index === path.length - 1;
   const isFinal = isLast && !current.hasNext;
 
-  const [selectionMode, setSelectionMode] = useState<SelectionMode>('single');
-  const [customPrefix, setCustomPrefix] = useState('');
-  const [validationError, setValidationError] = useState<string>('');
-  const [appendedWildcard, setAppendedWildcard] = useState(false);
   const [selectedIndexId, setSelectedIndexId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  // Filter indices that match the custom prefix pattern
-  const matchingIndices = useMemo(() => {
-    if (selectionMode !== 'prefix' || !customPrefix) {
-      return [];
-    }
-
-    const children = current.children || [];
-    const pattern = customPrefix.replace(/\*/g, '.*');
-    const regex = new RegExp(`^${pattern}$`, 'i');
-
-    return children.filter((child) => regex.test(child.title)).map((child) => child.title);
-  }, [selectionMode, customPrefix, current.children]);
-
-  const handleModeChange = (selectedOptions: Array<{ label: string; value?: string }>) => {
-    if (selectedOptions.length > 0 && selectedOptions[0].value) {
-      const newMode = selectedOptions[0].value as SelectionMode;
-      setSelectionMode(newMode);
-
-      if (newMode === 'prefix') {
-        setCustomPrefix('*');
-      } else {
-        setCustomPrefix('');
-      }
-
-      setValidationError('');
-      setAppendedWildcard(false);
-    }
-  };
-
-  const handlePrefixChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { target } = e;
-    let value = target.value;
-
-    // Auto-append wildcard when user types a single alphanumeric character
-    // Places cursor before the wildcard for continued typing
-    if (value.length === 1 && canAppendWildcard(value)) {
-      value += '*';
-      setAppendedWildcard(true);
-      setTimeout(() => target.setSelectionRange(1, 1));
-    } else {
-      if (value === '*' && appendedWildcard) {
-        value = '';
-        setAppendedWildcard(false);
-      }
-    }
-
-    setCustomPrefix(value);
-
-    const error = validatePrefix(value);
-    setValidationError(error);
-
-    if (!error && value.trim()) {
-      const children = current.children || [];
-      const pattern = value.replace(/\*/g, '.*');
-      const regex = new RegExp(`^${pattern}$`, 'i');
-      const matches = children.filter((child) => regex.test(child.title));
-
-      if (matches.length === 0) {
-        setValidationError(
-          i18n.translate('data.datasetService.indexDataStructureCreator.noIndicesMatchError', {
-            defaultMessage: 'No indices match this prefix pattern',
-          })
-        );
-      } else {
-        const dataSourceId = path.find((item) => item.type === 'DATA_SOURCE')?.id || 'local';
-        const customDataStructure: DataStructure = {
-          id: `${dataSourceId}::${value}`,
-          title: value,
-          type: 'INDEX',
-          meta: {
-            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-            isCustomPrefix: true,
-            matchingIndicesCount: matches.length,
-          },
-        };
-
-        selectDataStructure(customDataStructure, path.slice(0, index + 1));
-      }
-    }
-  };
-
-  const handleIndexSelectionChange = (selectedId: string | null) => {
+  const handleIndexSelectionChange = (selectedId: string | null, isWildcardPattern?: boolean) => {
     if (selectedId) {
       const item = (current.children || []).find((child: DataStructure) => child.id === selectedId);
       if (item) {
@@ -125,7 +36,35 @@ export const IndexDataStructureCreator: React.FC<
     } else {
       if (isFinal) {
         setSelectedIndexId(null);
+        // If no specific selection but there's a search query, create a virtual dataset
+        if (searchQuery && searchQuery.trim().length > 0) {
+          createVirtualDatasetFromPattern(searchQuery.trim());
+        }
       }
+    }
+  };
+
+  const createVirtualDatasetFromPattern = (pattern: string) => {
+    // Create a virtual dataset structure for the pattern
+    const dataSourceId = path.find((item) => item.type === 'DATA_SOURCE')?.id || 'local';
+    const virtualDataStructure: DataStructure = {
+      id: `${dataSourceId}::${pattern}`,
+      title: pattern,
+      type: 'INDEX',
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+        isWildcardPattern: pattern.includes('*'),
+      },
+    };
+
+    selectDataStructure(virtualDataStructure, path.slice(0, index + 1));
+  };
+
+  const handleSearchQueryChange = (query: string) => {
+    setSearchQuery(query);
+    // If there's no specific selection but there's a search query, create virtual dataset
+    if (!selectedIndexId && query && query.trim().length > 0) {
+      createVirtualDatasetFromPattern(query.trim());
     }
   };
 
@@ -140,24 +79,14 @@ export const IndexDataStructureCreator: React.FC<
 
       <EuiSpacer size="s" />
 
-      <ModeSelectionRow
-        selectionMode={selectionMode}
-        onModeChange={handleModeChange}
-        customPrefix={customPrefix}
-        validationError={validationError}
-        onPrefixChange={handlePrefixChange}
-        children={current.children || []}
+      <IndexSelector
+        children={current.children}
         selectedIndexId={selectedIndexId}
         isFinal={isFinal}
-        onIndexSelectionChange={handleIndexSelectionChange}
-        services={services}
+        onSelectionChange={handleIndexSelectionChange}
+        onSearchQueryChange={handleSearchQueryChange}
+        httpService={services?.http}
       />
-
-      <EuiSpacer size="s" />
-
-      {selectionMode === 'prefix' && (
-        <MatchingIndicesList matchingIndices={matchingIndices} customPrefix={customPrefix} />
-      )}
     </div>
   );
 };

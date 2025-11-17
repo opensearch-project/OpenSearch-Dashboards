@@ -30,6 +30,7 @@ import { IndexDataStructureCreator } from './index_data_structure_creator/index_
 interface MatchedIndex {
   name: string;
   isRemoteIndex: boolean;
+  indexType?: 'index' | 'alias' | 'data_stream';
 }
 
 interface ResolveIndexResponse {
@@ -305,6 +306,7 @@ const fetchIndicesViaResolve = async (
         indices.push({
           name: index.name,
           isRemoteIndex: false,
+          indexType: 'index',
         });
       });
     }
@@ -315,6 +317,7 @@ const fetchIndicesViaResolve = async (
         indices.push({
           name: alias.name,
           isRemoteIndex: false,
+          indexType: 'alias',
         });
       });
     }
@@ -325,6 +328,7 @@ const fetchIndicesViaResolve = async (
         indices.push({
           name: dataStream.name,
           isRemoteIndex: false,
+          indexType: 'data_stream',
         });
       });
     }
