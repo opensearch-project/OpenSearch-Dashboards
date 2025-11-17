@@ -209,7 +209,6 @@ export class SidecarService {
   private cleanupDom(sidecarConfig$?: BehaviorSubject<ISidecarConfig | undefined>): void {
     if (this.targetDomElement != null) {
       unmountComponentAtNode(this.targetDomElement);
-      this.targetDomElement.innerHTML = '';
     }
     this.activeSidecar = null;
     // Reset the sidecar configuration to remove any padding from the main window

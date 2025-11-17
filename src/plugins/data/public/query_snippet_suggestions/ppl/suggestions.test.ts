@@ -79,8 +79,8 @@ describe('PPL Query Snippet Suggestions', () => {
   });
 
   describe('convertQueryToMonacoSuggestion', () => {
-    it('should convert queries to Monaco suggestions without user query', () => {
-      const result = convertQueryToMonacoSuggestion(mockQueries, '');
+    it('should convert queries to Monaco suggestions', () => {
+      const result = convertQueryToMonacoSuggestion(mockQueries);
 
       expect(result).toHaveLength(9); // 3 queries with 3, 3, 3 segments each
 
@@ -98,8 +98,8 @@ describe('PPL Query Snippet Suggestions', () => {
       );
     });
 
-    it('should convert queries to Monaco suggestions with user query', () => {
-      const result = convertQueryToMonacoSuggestion(mockQueries, 'source = logs | ');
+    it('should not include insertText in base conversion', () => {
+      const result = convertQueryToMonacoSuggestion(mockQueries);
 
       expect(result).toHaveLength(9);
 
@@ -122,7 +122,7 @@ describe('PPL Query Snippet Suggestions', () => {
         },
       ];
 
-      const result = convertQueryToMonacoSuggestion(duplicateQueries, '');
+      const result = convertQueryToMonacoSuggestion(duplicateQueries);
 
       // Should only have 2 unique suggestions (source = logs, where status = "error")
       expect(result).toHaveLength(2);
@@ -142,7 +142,7 @@ describe('PPL Query Snippet Suggestions', () => {
 
       const whereResult = result.find((s) => s.text.startsWith('where'));
       expect(whereResult).toBeDefined();
-      expect(whereResult?.insertText).toBe('re status = "error" '); // Should complete "whe" to "where status = "error"" with trailing space
+      expect(whereResult?.insertText).toBe('where status = "error" '); // Should complete "whe" to "where status = "error"" with trailing space
     });
 
     it('should return empty array when no matching suggestions', async () => {
@@ -158,7 +158,7 @@ describe('PPL Query Snippet Suggestions', () => {
 
       const statsResult = result.find((s) => s.text.startsWith('stats'));
       expect(statsResult).toBeDefined();
-      expect(statsResult?.insertText).toBe('ats count() by host ');
+      expect(statsResult?.insertText).toBe('stats count() by host ');
     });
 
     it('should not return suggestions that match exactly', async () => {
@@ -189,6 +189,80 @@ describe('PPL Query Snippet Suggestions', () => {
       const result = await getPPLQuerySnippetForSuggestions('source = logs | whe');
 
       expect(result).toHaveLength(0);
+    });
+
+    describe('token-based insertText logic', () => {
+      it('should handle partial token matching correctly', async () => {
+        const result = await getPPLQuerySnippetForSuggestions('source = logs | wh');
+
+        const whereResult = result.find((s) => s.text.startsWith('where'));
+        expect(whereResult).toBeDefined();
+        expect(whereResult?.insertText).toBe('where status = "error" ');
+      });
+
+      it('should skip fully matched tokens and insert remaining tokens', async () => {
+        const result = await getPPLQuerySnippetForSuggestions('source = logs | where status');
+
+        const whereResult = result.find((s) => s.text.startsWith('where'));
+        expect(whereResult).toBeDefined();
+        expect(whereResult?.insertText).toBe('= "error" ');
+      });
+
+      it('should handle multiple fully matched tokens', async () => {
+        const result = await getPPLQuerySnippetForSuggestions('source = logs | where status =');
+
+        const whereResult = result.find((s) => s.text.startsWith('where'));
+        expect(whereResult).toBeDefined();
+        expect(whereResult?.insertText).toBe('"error" ');
+      });
+
+      it('should return complete suggestion when no tokens match', async () => {
+        const result = await getPPLQuerySnippetForSuggestions('source = logs | xyz');
+
+        expect(result).toHaveLength(0); // No suggestions should match 'xyz'
+      });
+
+      it('should handle case-insensitive token matching', async () => {
+        const result = await getPPLQuerySnippetForSuggestions('source = logs | WHERE STATUS');
+
+        const whereResult = result.find((s) => s.text.startsWith('where'));
+        expect(whereResult).toBeDefined();
+        expect(whereResult?.insertText).toBe('= "error" ');
+      });
+
+      it('should handle single character partial match', async () => {
+        const result = await getPPLQuerySnippetForSuggestions('source = logs | w');
+
+        const whereResult = result.find((s) => s.text.startsWith('where'));
+        expect(whereResult).toBeDefined();
+        expect(whereResult?.insertText).toBe('where status = "error" ');
+      });
+
+      it('should handle exact token boundary matching', async () => {
+        const result = await getPPLQuerySnippetForSuggestions('source = logs | where');
+
+        const whereResult = result.find((s) => s.text.startsWith('where'));
+        expect(whereResult).toBeDefined();
+        expect(whereResult?.insertText).toBe('status = "error" ');
+      });
+
+      it('should handle suggestions with different token structures', async () => {
+        const result = await getPPLQuerySnippetForSuggestions('source = metrics | f');
+
+        const fieldsResult = result.find((s) => s.text.startsWith('fields'));
+        expect(fieldsResult).toBeDefined();
+        expect(fieldsResult?.insertText).toBe('fields timestamp, cpu_usage ');
+      });
+
+      it('should handle when suggestion has fewer tokens than user input', async () => {
+        // Test with a complex user query that has more tokens than any single suggestion
+        const result = await getPPLQuerySnippetForSuggestions(
+          'source = logs | where status = "error" extra token'
+        );
+
+        // Should have no matches since no suggestion starts with this complex pattern
+        expect(result).toHaveLength(0);
+      });
     });
   });
 });

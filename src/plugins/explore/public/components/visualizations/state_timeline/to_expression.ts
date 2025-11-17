@@ -43,16 +43,7 @@ export const createNumericalStateTimeline = (
     (mapping) => mapping?.type === 'range'
   );
 
-  const valueMappings = styleOptions?.valueMappingOptions?.valueMappings?.filter(
-    (mapping) => mapping?.type === 'value'
-  );
-
-  if (
-    valueMappings?.length &&
-    valueMappings?.length > 0 &&
-    !rangeMappings?.length &&
-    !styleOptions?.useThresholdColor
-  ) {
+  if (!rangeMappings?.length && !styleOptions?.useThresholdColor) {
     return createCategoricalStateTimeline(
       transformedData,
       numericalColumns,
@@ -144,7 +135,7 @@ export const createNumericalStateTimeline = (
         type: 'nominal',
         legend: styleOptions.addLegend
           ? {
-              title: canUseValueMapping ? 'Ranges' : 'Counts',
+              title: styleOptions?.legendTitle || (canUseValueMapping ? 'Ranges' : 'Counts'),
               orient: styleOptions.legendPosition?.toLowerCase() || 'bottom',
             }
           : null,
@@ -329,7 +320,7 @@ export const createCategoricalStateTimeline = (
         }),
         legend: styleOptions.addLegend
           ? {
-              title: categoryName2,
+              title: styleOptions?.legendTitle,
               orient: styleOptions.legendPosition?.toLowerCase() || 'bottom',
             }
           : null,
@@ -491,7 +482,12 @@ export const createSingleCategoricalStateTimeline = (
         field: 'fakeYAxis',
         scale: { padding: rowHeight },
         axis: {
-          ...applyAxisStyling({ axis: colorMapping, axisStyle: yAxisStyle, disableGrid: true }),
+          ...applyAxisStyling({
+            axis: colorMapping,
+            axisStyle: yAxisStyle,
+            disableGrid: true,
+            defaultAxisTitle: colorMapping?.name,
+          }),
           labels: false,
           tickOpacity: 0,
         },
@@ -522,7 +518,7 @@ export const createSingleCategoricalStateTimeline = (
         }),
         legend: styleOptions.addLegend
           ? {
-              title: categoryName,
+              title: styleOptions?.legendTitle,
               orient: styleOptions.legendPosition?.toLowerCase() || 'bottom',
             }
           : null,

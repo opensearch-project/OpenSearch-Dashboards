@@ -16,6 +16,8 @@ export interface DataSource {
   title: string;
   /** The engine type of the data source */
   type: string;
+  /** Version of the data source */
+  version: string;
   /** Optional metadata for the data source */
   meta?: DataSourceMeta;
 }

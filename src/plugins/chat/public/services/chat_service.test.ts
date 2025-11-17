@@ -20,6 +20,22 @@ describe('ChatService', () => {
     // Clear all mocks
     jest.clearAllMocks();
 
+    // Set up global sessionStorage mock before creating ChatService
+    Object.defineProperty(global, 'sessionStorage', {
+      value: {
+        getItem: jest.fn(() => null),
+        setItem: jest.fn(),
+        removeItem: jest.fn(),
+      },
+      writable: true,
+    });
+
+    // Set up global window mock for context store
+    Object.defineProperty(global, 'window', {
+      value: {},
+      writable: true,
+    });
+
     // Create mock agent
     mockAgent = {
       runAgent: jest.fn(),
@@ -30,7 +46,7 @@ describe('ChatService', () => {
     // Mock AgUiAgent constructor
     (AgUiAgent as jest.MockedClass<typeof AgUiAgent>).mockImplementation(() => mockAgent);
 
-    chatService = new ChatService('http://test-server');
+    chatService = new ChatService();
   });
 
   afterEach(() => {
@@ -38,17 +54,6 @@ describe('ChatService', () => {
   });
 
   describe('constructor', () => {
-    it('should create instance with default server URL', () => {
-      const service = new ChatService();
-      expect(AgUiAgent).toHaveBeenCalledWith(undefined);
-    });
-
-    it('should create instance with custom server URL', () => {
-      const customUrl = 'http://custom-server:8080';
-      const service = new ChatService(customUrl);
-      expect(AgUiAgent).toHaveBeenCalledWith(customUrl);
-    });
-
     it('should initialize with empty available tools', () => {
       expect(chatService.availableTools).toEqual([]);
     });
@@ -300,6 +305,41 @@ describe('ChatService', () => {
   });
 
   describe('newThread', () => {
+    let mockSessionStorage: { [key: string]: string };
+    let mockContextStore: any;
+
+    beforeEach(() => {
+      // Mock sessionStorage behavior
+      mockSessionStorage = {};
+      const sessionStorageMock = {
+        getItem: jest.fn((key: string) => mockSessionStorage[key] || null),
+        setItem: jest.fn((key: string, value: string) => {
+          mockSessionStorage[key] = value;
+        }),
+        removeItem: jest.fn((key: string) => {
+          delete mockSessionStorage[key];
+        }),
+      };
+
+      // Update the global sessionStorage mock
+      (global as any).sessionStorage = sessionStorageMock;
+
+      // Mock context store
+      mockContextStore = {
+        getAllContexts: jest.fn(() => [
+          { id: 'ctx1', description: 'Context 1', value: 'data1' },
+          { id: 'ctx2', description: 'Context 2', value: 'data2' },
+          { description: 'Page Context', value: 'page-data' }, // No ID = page context
+        ]),
+        removeContextById: jest.fn(),
+      };
+      (global as any).window.assistantContextStore = mockContextStore;
+    });
+
+    afterEach(() => {
+      delete (global as any).window.assistantContextStore;
+    });
+
     it('should generate new thread ID', () => {
       const originalThreadId = (chatService as any).threadId;
 
@@ -308,6 +348,172 @@ describe('ChatService', () => {
       const newThreadId = (chatService as any).threadId;
       expect(newThreadId).not.toBe(originalThreadId);
       expect(newThreadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+    });
+
+    it('should clear current messages', () => {
+      // Set some messages
+      (chatService as any).currentMessages = [
+        { id: '1', role: 'user', content: 'test' },
+        { id: '2', role: 'assistant', content: 'response' },
+      ];
+
+      chatService.newThread();
+
+      expect((chatService as any).currentMessages).toEqual([]);
+    });
+
+    it('should clear sessionStorage', () => {
+      // Set some data in sessionStorage
+      mockSessionStorage['chat.currentState'] = JSON.stringify({
+        threadId: 'old-thread',
+        messages: [{ id: '1', role: 'user', content: 'test' }],
+      });
+
+      const removeItemSpy = (global as any).sessionStorage.removeItem;
+
+      chatService.newThread();
+
+      expect(removeItemSpy).toHaveBeenCalledWith('chat.currentState');
+    });
+
+    it('should clear dynamic context from global store', () => {
+      chatService.newThread();
+
+      // Should get all contexts
+      expect(mockContextStore.getAllContexts).toHaveBeenCalled();
+
+      // Should remove only contexts with IDs (dynamic contexts)
+      expect(mockContextStore.removeContextById).toHaveBeenCalledWith('ctx1');
+      expect(mockContextStore.removeContextById).toHaveBeenCalledWith('ctx2');
+      expect(mockContextStore.removeContextById).toHaveBeenCalledTimes(2);
+    });
+
+    it('should handle missing context store gracefully', () => {
+      delete (global as any).window.assistantContextStore;
+
+      expect(() => chatService.newThread()).not.toThrow();
+    });
+  });
+
+  describe('chat state persistence methods', () => {
+    let mockSessionStorage: { [key: string]: string };
+
+    beforeEach(() => {
+      // Mock sessionStorage behavior
+      mockSessionStorage = {};
+      const sessionStorageMock = {
+        getItem: jest.fn((key: string) => mockSessionStorage[key] || null),
+        setItem: jest.fn((key: string, value: string) => {
+          mockSessionStorage[key] = value;
+        }),
+        removeItem: jest.fn((key: string) => {
+          delete mockSessionStorage[key];
+        }),
+      };
+
+      // Update the global sessionStorage mock
+      (global as any).sessionStorage = sessionStorageMock;
+    });
+
+    describe('getCurrentMessages', () => {
+      it('should return current messages array', () => {
+        const testMessages = [
+          { id: '1', role: 'user', content: 'Hello' },
+          { id: '2', role: 'assistant', content: 'Hi there!' },
+        ];
+        (chatService as any).currentMessages = testMessages;
+
+        const result = chatService.getCurrentMessages();
+
+        expect(result).toEqual(testMessages);
+      });
+
+      it('should return empty array when no messages', () => {
+        (chatService as any).currentMessages = [];
+
+        const result = chatService.getCurrentMessages();
+
+        expect(result).toEqual([]);
+      });
+    });
+
+    describe('updateCurrentMessages', () => {
+      it('should update current messages and save to sessionStorage', () => {
+        const newMessages = [
+          { id: '1', role: 'user', content: 'Test message' },
+          { id: '2', role: 'assistant', content: 'Test response' },
+        ];
+
+        chatService.updateCurrentMessages(newMessages);
+
+        expect((chatService as any).currentMessages).toEqual(newMessages);
+
+        // Check that setItem was called with the correct key
+        expect((global as any).sessionStorage.setItem).toHaveBeenCalledWith(
+          'chat.currentState',
+          expect.any(String)
+        );
+
+        // Verify the stored JSON contains the expected data
+        const setItemCall = ((global as any).sessionStorage.setItem as jest.Mock).mock.calls[0];
+        const storedData = JSON.parse(setItemCall[1]);
+        expect(storedData.threadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+        expect(storedData.messages).toEqual(newMessages);
+      });
+
+      it('should handle empty messages array', () => {
+        chatService.updateCurrentMessages([]);
+
+        expect((chatService as any).currentMessages).toEqual([]);
+
+        // Check that setItem was called with the correct key
+        expect((global as any).sessionStorage.setItem).toHaveBeenCalledWith(
+          'chat.currentState',
+          expect.any(String)
+        );
+
+        // Verify the stored JSON contains the expected data
+        const setItemCall = ((global as any).sessionStorage.setItem as jest.Mock).mock.calls[0];
+        const storedData = JSON.parse(setItemCall[1]);
+        expect(storedData.threadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+        expect(storedData.messages).toEqual([]);
+      });
+    });
+
+    describe('saveCurrentChatStatePublic', () => {
+      it('should save current state to sessionStorage', () => {
+        const testMessages = [{ id: '1', role: 'user', content: 'test' }];
+        (chatService as any).currentMessages = testMessages;
+
+        chatService.saveCurrentChatStatePublic();
+
+        // Check that setItem was called with the correct key
+        expect((global as any).sessionStorage.setItem).toHaveBeenCalledWith(
+          'chat.currentState',
+          expect.any(String)
+        );
+
+        // Verify the stored JSON contains the expected data
+        const setItemCall = ((global as any).sessionStorage.setItem as jest.Mock).mock.calls[0];
+        const storedData = JSON.parse(setItemCall[1]);
+        expect(storedData.threadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+        expect(storedData.messages).toEqual(testMessages);
+      });
+
+      it('should handle sessionStorage errors gracefully', () => {
+        const consoleSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+        ((global as any).sessionStorage.setItem as jest.Mock).mockImplementation(() => {
+          throw new Error('Storage full');
+        });
+
+        expect(() => chatService.saveCurrentChatStatePublic()).not.toThrow();
+        expect(consoleSpy).toHaveBeenCalledWith(
+          'Failed to save chat state to sessionStorage:',
+          expect.any(Error)
+        );
+
+        consoleSpy.mockRestore();
+      });
     });
   });
 
@@ -318,10 +524,10 @@ describe('ChatService', () => {
       });
 
       it('should return updated state after setWindowState', () => {
-        chatService.setWindowState(true);
+        chatService.setWindowState({ isWindowOpen: true });
         expect(chatService.isWindowOpen()).toBe(true);
 
-        chatService.setWindowState(false);
+        chatService.setWindowState({ isWindowOpen: false });
         expect(chatService.isWindowOpen()).toBe(false);
       });
     });
@@ -332,7 +538,7 @@ describe('ChatService', () => {
       });
 
       it('should return updated mode after setWindowState', () => {
-        chatService.setWindowState(true, 'fullscreen' as any);
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
         expect(chatService.getWindowMode()).toBe('fullscreen');
       });
     });
@@ -343,33 +549,35 @@ describe('ChatService', () => {
         expect(state).toEqual({
           isWindowOpen: false,
           windowMode: 'sidecar',
+          paddingSize: 400,
         });
       });
 
       it('should return updated state', () => {
-        chatService.setWindowState(true, 'fullscreen' as any);
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
         const state = chatService.getWindowState();
         expect(state).toEqual({
           isWindowOpen: true,
           windowMode: 'fullscreen',
+          paddingSize: 400,
         });
       });
     });
 
     describe('setWindowState', () => {
       it('should update window open state', () => {
-        chatService.setWindowState(true);
+        chatService.setWindowState({ isWindowOpen: true });
         expect(chatService.isWindowOpen()).toBe(true);
       });
 
       it('should update window mode when provided', () => {
-        chatService.setWindowState(true, 'fullscreen' as any);
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
         expect(chatService.getWindowMode()).toBe('fullscreen');
       });
 
       it('should not update mode when not provided', () => {
-        chatService.setWindowState(true, 'fullscreen' as any);
-        chatService.setWindowState(false);
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
+        chatService.setWindowState({ isWindowOpen: false });
         expect(chatService.getWindowMode()).toBe('fullscreen');
       });
 
@@ -377,19 +585,70 @@ describe('ChatService', () => {
         const callback = jest.fn();
         chatService.onWindowStateChange(callback);
 
-        chatService.setWindowState(true);
-        expect(callback).toHaveBeenCalledWith(true);
+        chatService.setWindowState({ isWindowOpen: true });
+        expect(callback).toHaveBeenCalledWith(
+          { isWindowOpen: true, windowMode: 'sidecar', paddingSize: 400 },
+          { isWindowOpen: true, windowMode: false, paddingSize: false }
+        );
 
-        chatService.setWindowState(false);
-        expect(callback).toHaveBeenCalledWith(false);
+        chatService.setWindowState({ isWindowOpen: false });
+        expect(callback).toHaveBeenCalledWith(
+          { isWindowOpen: false, windowMode: 'sidecar', paddingSize: 400 },
+          { isWindowOpen: true, windowMode: false, paddingSize: false }
+        );
       });
 
       it('should not notify listeners when state does not change', () => {
         const callback = jest.fn();
+        chatService.setWindowState({ isWindowOpen: false });
+        chatService.onWindowStateChange(callback);
+        chatService.setWindowState({ isWindowOpen: false });
+        expect(callback).not.toHaveBeenCalled();
+      });
+
+      it('should notify listeners when window mode changes', () => {
+        const callback = jest.fn();
         chatService.onWindowStateChange(callback);
 
-        chatService.setWindowState(false);
+        // Set initial state - windowMode is already 'sidecar' by default, so only isWindowOpen changes
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'sidecar' as any });
+        expect(callback).toHaveBeenCalledWith(
+          { isWindowOpen: true, windowMode: 'sidecar', paddingSize: 400 },
+          { isWindowOpen: true, windowMode: false, paddingSize: false }
+        );
+
+        callback.mockClear();
+
+        // Change only the mode, keep isOpen the same
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
+        expect(callback).toHaveBeenCalledWith(
+          { isWindowOpen: true, windowMode: 'fullscreen', paddingSize: 400 },
+          { isWindowOpen: false, windowMode: true, paddingSize: false }
+        );
+      });
+
+      it('should not notify listeners when mode is set to same value', () => {
+        const callback = jest.fn();
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'sidecar' as any });
+
+        chatService.onWindowStateChange(callback);
+
+        // Set same mode again
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'sidecar' as any });
         expect(callback).not.toHaveBeenCalled();
+      });
+
+      it('should notify with both isOpen and windowMode parameters', () => {
+        const callback = jest.fn();
+        chatService.onWindowStateChange(callback);
+
+        chatService.setWindowState({ isWindowOpen: true, windowMode: 'fullscreen' as any });
+
+        expect(callback).toHaveBeenCalledTimes(1);
+        expect(callback).toHaveBeenCalledWith(
+          { isWindowOpen: true, windowMode: 'fullscreen', paddingSize: 400 },
+          { isWindowOpen: true, windowMode: true, paddingSize: false }
+        );
       });
     });
 
@@ -398,13 +657,16 @@ describe('ChatService', () => {
         const callback = jest.fn();
         const unsubscribe = chatService.onWindowStateChange(callback);
 
-        chatService.setWindowState(true);
-        expect(callback).toHaveBeenCalledWith(true);
+        chatService.setWindowState({ isWindowOpen: true });
+        expect(callback).toHaveBeenCalledWith(
+          { isWindowOpen: true, windowMode: 'sidecar', paddingSize: 400 },
+          { isWindowOpen: true, windowMode: false, paddingSize: false }
+        );
 
         callback.mockClear();
         unsubscribe();
 
-        chatService.setWindowState(false);
+        chatService.setWindowState({ isWindowOpen: false });
         expect(callback).not.toHaveBeenCalled();
       });
 
@@ -415,10 +677,16 @@ describe('ChatService', () => {
         chatService.onWindowStateChange(callback1);
         chatService.onWindowStateChange(callback2);
 
-        chatService.setWindowState(true);
+        chatService.setWindowState({ isWindowOpen: true });
 
-        expect(callback1).toHaveBeenCalledWith(true);
-        expect(callback2).toHaveBeenCalledWith(true);
+        expect(callback1).toHaveBeenCalledWith(
+          { isWindowOpen: true, windowMode: 'sidecar', paddingSize: 400 },
+          { isWindowOpen: true, windowMode: false, paddingSize: false }
+        );
+        expect(callback2).toHaveBeenCalledWith(
+          { isWindowOpen: true, windowMode: 'sidecar', paddingSize: 400 },
+          { isWindowOpen: true, windowMode: false, paddingSize: false }
+        );
       });
     });
 
@@ -457,7 +725,7 @@ describe('ChatService', () => {
         const unsubscribe = chatService.onWindowCloseRequest(callback);
 
         // Set window open first
-        chatService.setWindowState(true);
+        chatService.setWindowState({ isWindowOpen: true });
 
         await chatService.closeWindow();
         expect(callback).toHaveBeenCalled();
@@ -476,7 +744,7 @@ describe('ChatService', () => {
         chatService.onWindowCloseRequest(callback1);
         chatService.onWindowCloseRequest(callback2);
 
-        chatService.setWindowState(true);
+        chatService.setWindowState({ isWindowOpen: true });
         await chatService.closeWindow();
 
         expect(callback1).toHaveBeenCalled();
@@ -519,7 +787,7 @@ describe('ChatService', () => {
         const callback = jest.fn();
         chatService.onWindowOpenRequest(callback);
 
-        chatService.setWindowState(true);
+        chatService.setWindowState({ isWindowOpen: true });
         await chatService.openWindow();
 
         expect(callback).not.toHaveBeenCalled();
@@ -531,7 +799,7 @@ describe('ChatService', () => {
         const callback = jest.fn();
         chatService.onWindowCloseRequest(callback);
 
-        chatService.setWindowState(true);
+        chatService.setWindowState({ isWindowOpen: true });
         await chatService.closeWindow();
 
         expect(callback).toHaveBeenCalled();
@@ -584,7 +852,7 @@ describe('ChatService', () => {
       };
 
       chatService.setChatWindowRef(mockChatWindowRef as any);
-      chatService.setWindowState(true);
+      chatService.setWindowState({ isWindowOpen: true });
 
       const result = await chatService.sendMessageWithWindow('test message', []);
 
@@ -604,7 +872,7 @@ describe('ChatService', () => {
       };
 
       chatService.setChatWindowRef(mockChatWindowRef as any);
-      chatService.setWindowState(true);
+      chatService.setWindowState({ isWindowOpen: true });
 
       await chatService.sendMessageWithWindow('test', [], { clearConversation: true });
 
@@ -631,7 +899,7 @@ describe('ChatService', () => {
       };
 
       chatService.setChatWindowRef(mockChatWindowRef as any);
-      chatService.setWindowState(true);
+      chatService.setWindowState({ isWindowOpen: true });
 
       const mockObservable = new Observable<BaseEvent>();
       mockAgent.runAgent.mockReturnValue(mockObservable);
@@ -652,7 +920,7 @@ describe('ChatService', () => {
       };
 
       chatService.setChatWindowRef(mockChatWindowRef as any);
-      chatService.setWindowState(true);
+      chatService.setWindowState({ isWindowOpen: true });
 
       const result = await chatService.sendMessageWithWindow('test', []);
 

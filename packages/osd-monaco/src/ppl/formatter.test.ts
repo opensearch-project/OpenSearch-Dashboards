@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { formatPPLQuery, pplRangeFormatProvider, pplOnTypeFormatProvider } from './formatter';
+import { formatPPLQuery, pplRangeFormatProvider } from './formatter';
 
 describe('formatPPLQuery', () => {
   it('should format single pipe separated query', () => {

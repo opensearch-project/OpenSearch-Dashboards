@@ -18,6 +18,7 @@ import { SaveAndAddButtonWithModal } from '../../../visualizations/add_to_dashbo
 import { selectActiveTabId } from '../../../../application/utils/state_management/selectors';
 import { PatternsSettingsPopoverButton } from '../patterns_settings/patterns_settings_popover_button';
 import { getVisualizationBuilder } from '../../../visualizations/visualization_builder';
+import { SlotItemsForType } from '../../../../services/slot_registry';
 
 export interface DiscoverResultsActionBarProps {
   hits?: number;
@@ -27,6 +28,7 @@ export interface DiscoverResultsActionBarProps {
   elapsedMs?: number;
   dataset?: Dataset;
   inspectionHanlder?: () => void;
+  extraActions?: Array<SlotItemsForType<'resultsActionBar'>>;
 }
 
 export const DiscoverResultsActionBar = ({
@@ -37,6 +39,7 @@ export const DiscoverResultsActionBar = ({
   elapsedMs,
   dataset,
   inspectionHanlder,
+  extraActions,
 }: DiscoverResultsActionBarProps) => {
   const currentTab = useSelector(selectActiveTabId);
   const shouldShowAddToDashboardButton = currentTab !== 'explore_patterns_tab';
@@ -127,6 +130,11 @@ export const DiscoverResultsActionBar = ({
                     <SaveAndAddButtonWithModal dataset={dataset} />
                   </EuiFlexItem>
                 )}
+                {extraActions?.map((item) => (
+                  <EuiFlexItem grow={false} key={item.id}>
+                    {item.render()}
+                  </EuiFlexItem>
+                ))}
               </EuiFlexGroup>
             ) : null}
           </EuiFlexItem>

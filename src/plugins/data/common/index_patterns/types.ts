@@ -213,6 +213,7 @@ export interface SavedObjectReference {
   name?: string;
   id: string;
   type: string;
+  version: string;
 }
 export interface IndexPatternSpec {
   id?: string;

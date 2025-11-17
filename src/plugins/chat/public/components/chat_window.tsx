@@ -41,6 +41,7 @@ export interface ChatWindowInstance{
 interface ChatWindowProps {
   layoutMode?: ChatLayoutMode;
   onToggleLayout?: () => void;
+  onClose: ()=>void;
 }
 
 /**
@@ -53,6 +54,7 @@ export const ChatWindow = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(({
   layoutMode = ChatLayoutMode.SIDECAR,
   onToggleLayout,
+  onClose,
 }, ref) => {
   const service = AssistantActionService.getInstance();
   const [availableTools, setAvailableTools] = useState<ToolDefinition[]>([]);
@@ -105,6 +107,19 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       eventHandler.clearState();
     };
   }, [eventHandler]);
+
+  // Restore timeline from current chat state on component mount
+  useEffect(() => {
+    const currentMessages = chatService.getCurrentMessages();
+    if (currentMessages.length > 0) {
+      setTimeline(currentMessages);
+    }
+  }, [chatService]);
+
+  // Sync timeline changes with ChatService for persistence
+  useEffect(() => {
+    chatService.updateCurrentMessages(timeline);
+  }, [timeline, chatService]);
 
   const handleSend = async (options?: {input?: string}) => {
     const messageContent = options?.input ?? input.trim();
@@ -275,6 +290,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         isStreaming={isStreaming}
         onToggleLayout={onToggleLayout}
         onNewChat={handleNewChat}
+        onClose={onClose}
       />
 
       <ChatMessages

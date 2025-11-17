@@ -42,18 +42,21 @@ const valueDisplayOption = [
     label: i18n.translate('explore.vis.barGauge.valueDisplay.valueColor', {
       defaultMessage: 'Value Color',
     }),
+    'data-test-subj': `valueDisplayOption-value`,
   },
   {
     id: 'textColor',
     label: i18n.translate('explore.vis.barGauge.valueDisplay.textColor', {
       defaultMessage: 'Text Color',
     }),
+    'data-test-subj': `valueDisplayOption-text`,
   },
   {
     id: 'hidden',
     label: i18n.translate('explore.vis.barGauge.valueDisplay.hidden', {
       defaultMessage: 'Hidden',
     }),
+    'data-test-subj': `valueDisplayOption-hidden`,
   },
 ];
 

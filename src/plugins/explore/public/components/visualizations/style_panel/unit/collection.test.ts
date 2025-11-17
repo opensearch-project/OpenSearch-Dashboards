@@ -127,7 +127,7 @@ describe('UnitsCollection', () => {
 
   it('should have all expected mass units', () => {
     const data = UnitsCollection.mass.units;
-    const expectedMassUnits = ['milligram', 'gram', 'pound_mass', 'kilogram', 'metric'];
+    const expectedMassUnits = ['milligram', 'gram', 'kilogram', 'metric'];
 
     expectedMassUnits.forEach((d) => {
       const unit = data.find((u) => u.id === d);
