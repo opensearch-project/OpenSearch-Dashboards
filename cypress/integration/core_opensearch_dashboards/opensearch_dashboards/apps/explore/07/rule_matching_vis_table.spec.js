@@ -39,7 +39,7 @@ export const runCreateVisTests = () => {
 
     it('should create a table visualization using a query with multiple fields', () => {
       const query = `source=${datasetName} | stats count() by category, response_time | head 10`;
-      cy.explore.createVisualizationWithQuery(query, 'Table', datasetName, {
+      cy.explore.createVisualizationWithQuery(query, 'table', datasetName, {
         shouldManualSelectChartType: true,
       });
 
@@ -48,7 +48,7 @@ export const runCreateVisTests = () => {
 
     it('should toggle column filter and the changes reflect immediately to the table visualization', () => {
       const query = `source=${datasetName} | stats count() by category, response_time | head 10`;
-      cy.explore.createVisualizationWithQuery(query, 'Table', datasetName, {
+      cy.explore.createVisualizationWithQuery(query, 'table', datasetName, {
         shouldManualSelectChartType: true,
       });
 
@@ -69,7 +69,7 @@ export const runCreateVisTests = () => {
 
     it('should add threshold coloring and reflect immediately to the table visualization', () => {
       const query = `source=${datasetName} | stats count() by category | head 5`;
-      cy.explore.createVisualizationWithQuery(query, 'Table', datasetName, {
+      cy.explore.createVisualizationWithQuery(query, 'table', datasetName, {
         shouldManualSelectChartType: true,
       });
 
@@ -93,7 +93,7 @@ export const runCreateVisTests = () => {
 
     it('should create data links that turn cell values into clickable links', () => {
       const query = `source=${datasetName} | stats count() by category | head 10`;
-      cy.explore.createVisualizationWithQuery(query, 'Table', datasetName, {
+      cy.explore.createVisualizationWithQuery(query, 'table', datasetName, {
         shouldManualSelectChartType: true,
       });
 
