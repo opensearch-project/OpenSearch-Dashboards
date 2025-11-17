@@ -41,7 +41,7 @@ export interface ChatWindowInstance{
 interface ChatWindowProps {
   layoutMode?: ChatLayoutMode;
   onToggleLayout?: () => void;
-  onClose: ()=>void;
+  onClose: () => void;
 }
 
 /**
