@@ -141,6 +141,9 @@ jobs:
           - group: 16Explore
             config: explore
             test_location: source
+          - group: 17Explore
+            config: explore
+            test_location: source
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: "--user 1001 --shm-size=4g"
