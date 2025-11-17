@@ -52,7 +52,14 @@ export default async function ({ readConfigFile }) {
 
     servers: commonConfig.get('servers'),
 
-    opensearchTestCluster: commonConfig.get('opensearchTestCluster'),
+    opensearchTestCluster: {
+      ...commonConfig.get('opensearchTestCluster'),
+      clusterSettings: {
+        persistent: {
+          'cluster.blocks.create_index': null,
+        },
+      },
+    },
 
     osdTestServer: {
       ...commonConfig.get('osdTestServer'),
