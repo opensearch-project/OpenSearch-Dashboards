@@ -5,19 +5,18 @@
 
 import { resolve } from 'path';
 import { stringifyRequest } from 'loader-utils';
-import { Configuration, Stats } from 'webpack';
-import webpackMerge from 'webpack-merge';
+import { Configuration } from 'webpack';
+import { merge } from 'webpack-merge';
 import { REPO_ROOT } from './lib/constants';
 
 const BABEL_PRESET_PATH = require.resolve('@osd/babel-preset/webpack_preset');
 
 const stats = {
-  ...Stats.presetToOptions('minimal'),
+  preset: 'minimal',
   colors: true,
   errorDetails: true,
   errors: true,
   moduleTrace: true,
-  warningsFilter: /(export .* was not found in)|(entrypoint size limit)/,
 };
 
 // Extend the Storybook Webpack config with some customizations
@@ -27,6 +26,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
     devServer: {
       stats,
     },
+    ignoreWarnings: [/export .* was not found in/, /entrypoint size limit/],
     module: {
       rules: [
         {
@@ -150,8 +150,5 @@ export default function ({ config: storybookConfig }: { config: Configuration })
     stats,
   };
 
-  // @ts-ignore There's a long error here about the types of the
-  // incompatibility of Configuration, but it looks like it just may be Webpack
-  // type definition related.
-  return webpackMerge(storybookConfig, config);
+  return merge(storybookConfig, config);
 }

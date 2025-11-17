@@ -21,7 +21,13 @@ export const defaultConfig: StorybookConfig = {
   },
   webpackFinal: async (config) => {
     // Configure PostCSS
-    config.module?.rules.push({
+    if (!config.module) {
+      config.module = { rules: [] };
+    }
+    if (!config.module.rules) {
+      config.module.rules = [];
+    }
+    config.module.rules.push({
       test: /\.css$/,
       use: [
         {
