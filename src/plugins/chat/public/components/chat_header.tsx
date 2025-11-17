@@ -58,13 +58,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           aria-label="New chat"
           size="m"
         />
-        <EuiButtonIcon
-          iconType="cross"
-          onClick={onClose}
-          disabled={isStreaming}
-          aria-label="Close chatbot"
-          size="m"
-        />
+        <EuiButtonIcon iconType="cross" onClick={onClose} aria-label="Close chatbot" size="m" />
       </div>
     </div>
   );
