@@ -7,7 +7,15 @@ import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 
 import { PieVisStyleControls } from './pie_vis_options';
-import { AxisRole, Positions, TitleOptions, TooltipOptions, VisFieldType } from '../types';
+import {
+  AxisRole,
+  Positions,
+  TitleOptions,
+  TooltipOptions,
+  VisFieldType,
+  ValueMappingOptions,
+  FilterOption,
+} from '../types';
 
 export interface PieExclusiveStyleOptions {
   donut?: boolean;
@@ -30,10 +38,14 @@ export interface PieChartStyleOptions {
   exclusive?: PieExclusiveStyleOptions;
 
   titleOptions?: TitleOptions;
+  valueMappingOptions?: ValueMappingOptions;
+  filterOption?: FilterOption;
 }
 
-export type PieChartStyle = Required<Omit<PieChartStyleOptions, 'legendTitle'>> &
-  Pick<PieChartStyleOptions, 'legendTitle'>;
+export type PieChartStyle = Required<
+  Omit<PieChartStyleOptions, 'legendTitle' | 'valueMappingOptions' | 'filterOption'>
+> &
+  Pick<PieChartStyleOptions, 'legendTitle' | 'valueMappingOptions' | 'filterOption'>;
 
 export const defaultPieChartStyles: PieChartStyle = {
   // Basic controls
@@ -54,6 +66,10 @@ export const defaultPieChartStyles: PieChartStyle = {
     show: false,
     titleName: '',
   },
+  valueMappingOptions: {
+    valueMappings: [],
+  },
+  filterOption: 'filterAll',
 };
 
 export const createPieConfig = (): VisualizationType<'pie'> => ({

@@ -13,6 +13,7 @@ import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
 import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
+import { ValueMappingPanel } from '../style_panel/value_mapping/value_mapping_panel';
 
 export type PieVisStyleControlsProps = StyleControlsProps<PieChartStyle>;
 
@@ -53,9 +54,17 @@ export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
       {hasMappingSelected && (
         <>
           <EuiFlexItem grow={false}>
+            <ValueMappingPanel
+              valueMappingOption={styleOptions?.valueMappingOptions}
+              onChange={(val) => updateStyleOption('valueMappingOptions', val)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <PieExclusiveVisOptions
               styles={styleOptions.exclusive}
+              filterOption={styleOptions?.filterOption}
               onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
+              onFilterOptionChange={(option) => updateStyleOption('filterOption', option)}
             />
           </EuiFlexItem>
           <LegendOptionsWrapper

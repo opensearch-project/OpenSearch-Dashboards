@@ -4,17 +4,25 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { EuiFormRow, EuiButtonGroup, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup, EuiSwitch, EuiSelect } from '@elastic/eui';
 import React from 'react';
 import { defaultPieChartStyles, PieChartStyle } from './pie_vis_config';
 import { DebouncedFieldNumber } from '../style_panel/utils';
 import { StyleAccordion } from '../style_panel/style_accordion';
+import { FilterOption } from '../types';
 interface PieVisOptionsProps {
   styles: PieChartStyle['exclusive'];
   onChange: (styles: PieChartStyle['exclusive']) => void;
+  filterOption?: FilterOption | undefined;
+  onFilterOptionChange?: (option: FilterOption | undefined) => void;
 }
 
-export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps) => {
+export const PieExclusiveVisOptions = ({
+  styles,
+  onChange,
+  filterOption,
+  onFilterOptionChange,
+}: PieVisOptionsProps) => {
   const updateStyle = <K extends keyof PieChartStyle['exclusive']>(
     key: K,
     value: PieChartStyle['exclusive'][K]
@@ -64,6 +72,39 @@ export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps)
           data-test-subj="donutButtonGroup"
         />
       </EuiFormRow>
+      <EuiFormRow
+        label={i18n.translate('explore.vis.pie.exclusive.filterOptions', {
+          defaultMessage: 'Filter Options',
+        })}
+      >
+        <EuiSelect
+          compressed
+          value={filterOption ? filterOption : 'filterAll'}
+          onChange={(e) => onFilterOptionChange?.(e.target.value as FilterOption)}
+          onMouseUp={(e) => e.stopPropagation()}
+          options={[
+            {
+              value: 'filterAll',
+              text: i18n.translate('explore.vis.pie.exclusive.filterAll', {
+                defaultMessage: 'Use value mappings',
+              }),
+            },
+            {
+              value: 'filterButKeepOpposite',
+              text: i18n.translate('explore.vis.pie.exclusive.filterButKeepOpposite', {
+                defaultMessage: 'Highlight value mappings',
+              }),
+            },
+            {
+              value: 'none',
+              text: i18n.translate('explore.vis.pie.exclusive.none', {
+                defaultMessage: 'None',
+              }),
+            },
+          ]}
+        />
+      </EuiFormRow>
+
       <EuiFormRow>
         <EuiSwitch
           compressed
