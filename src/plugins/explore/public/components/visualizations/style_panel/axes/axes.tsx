@@ -18,7 +18,6 @@ import { CategoryAxis, VisColumn, ValueAxis, Positions, AxisRole } from '../../t
 import { StyleAccordion } from '../style_accordion';
 import { DebouncedFieldNumber, DebouncedFieldText } from '.././utils';
 import { AXIS_LABEL_MAX_LENGTH } from '../../constants';
-import { getSchemaByAxis } from '../../utils/utils';
 
 interface AxesOptionsProps {
   categoryAxes: CategoryAxis[];
@@ -28,7 +27,7 @@ interface AxesOptionsProps {
   numericalColumns: VisColumn[];
   categoricalColumns: VisColumn[];
   dateColumns: VisColumn[];
-  axisColumnMappings: Partial<Record<AxisRole, VisColumn>>;
+  axisColumnMappings?: Record<string, string>;
   showFullTimeRange: boolean;
   onShowFullTimeRangeChange: (showFullTimeRange: boolean) => void;
   initialIsOpen?: boolean;
@@ -123,7 +122,7 @@ export const AxesOptions: React.FC<AxesOptionsProps> = ({
     defaultMessage: 'Truncate after',
   });
 
-  const isDateXAxis = getSchemaByAxis(axisColumnMappings?.[AxisRole.X]) === 'temporal';
+  const isDateXAxis = dateColumns.some((c) => c.name === axisColumnMappings?.[AxisRole.X]);
 
   return (
     <StyleAccordion

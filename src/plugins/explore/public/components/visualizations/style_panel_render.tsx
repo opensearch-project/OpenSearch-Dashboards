@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useObservable } from 'react-use';
 import { EuiSpacer } from '@elastic/eui';
 import { Observable } from 'rxjs';
@@ -15,8 +15,7 @@ import {
   StyleOptions,
   VisualizationType,
 } from './utils/use_visualization_types';
-import { AxisColumnMappings, RenderChartConfig } from './types';
-import { convertMappingsToStrings, convertStringsToMappings } from './visualization_builder_utils';
+import { RenderChartConfig } from './types';
 import { visualizationRegistry } from './visualization_registry';
 import { VisData } from './visualization_builder.types';
 
@@ -42,22 +41,11 @@ export const StylePanelRender = <T extends ChartType>({
   const axesMapping = chartConfig?.axesMapping;
 
   const updateVisualization = useCallback(
-    ({ mappings }: { mappings: AxisColumnMappings }) => {
-      onAxesMappingChange(convertMappingsToStrings(mappings));
+    ({ mappings }: { mappings: Record<string, string> }) => {
+      onAxesMappingChange(mappings);
     },
     [onAxesMappingChange]
   );
-
-  // TODO: refactor this and expose an observable from visualizationBuilder
-  // Or refactor visConfig?.ui.style.render() function to accept axesMapping
-  // and compute axisColumnMappings internally
-  const axisColumnMappings = useMemo(() => {
-    return convertStringsToMappings(axesMapping ?? {}, [
-      ...(visualizationData?.categoricalColumns ?? []),
-      ...(visualizationData?.numericalColumns ?? []),
-      ...(visualizationData?.dateColumns ?? []),
-    ]);
-  }, [axesMapping, visualizationData]);
 
   if (!visualizationData) {
     return null;
@@ -95,7 +83,7 @@ export const StylePanelRender = <T extends ChartType>({
         dateColumns: visualizationData.dateColumns,
         availableChartTypes: bestMatch?.rule.chartTypes,
         selectedChartType: chartConfig.type,
-        axisColumnMappings,
+        axisColumnMappings: axesMapping,
         updateVisualization,
       })}
     </div>

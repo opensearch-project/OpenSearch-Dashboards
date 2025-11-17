@@ -124,9 +124,8 @@ describe('AxesOptions', () => {
     categoricalColumns: mockCategoricalColumns,
     dateColumns: mockDateColumns,
     axisColumnMappings: {
-      [AxisRole.X]: mockCategoricalColumns[0],
-      [AxisRole.Y]: mockNumericalColumns[0],
-      [AxisRole.Y_SECOND]: undefined,
+      [AxisRole.X]: mockCategoricalColumns[0].name,
+      [AxisRole.Y]: mockNumericalColumns[0].name,
     },
     showFullTimeRange: true,
     onShowFullTimeRangeChange: jest.fn(),
@@ -194,9 +193,9 @@ describe('AxesOptions', () => {
       },
     ] as ValueAxis[],
     axisColumnMappings: {
-      [AxisRole.X]: mockDateColumns[0],
-      [AxisRole.Y]: mockNumericalColumns[0],
-      [AxisRole.Y_SECOND]: mockNumericalColumns[1],
+      [AxisRole.X]: mockDateColumns[0].name,
+      [AxisRole.Y]: mockNumericalColumns[0].name,
+      [AxisRole.Y_SECOND]: mockNumericalColumns[1].name,
     },
   };
 
@@ -439,7 +438,7 @@ describe('AxesOptions', () => {
         },
       ],
       axisColumnMappings: {
-        [AxisRole.X]: mockDateColumns[0],
+        [AxisRole.X]: mockDateColumns[0].name,
       },
     };
 
@@ -460,7 +459,7 @@ describe('AxesOptions', () => {
         },
       ],
       axisColumnMappings: {
-        [AxisRole.Y]: mockNumericalColumns[0],
+        [AxisRole.Y]: mockNumericalColumns[0].name,
       },
     };
 
@@ -496,8 +495,8 @@ describe('AxesOptions', () => {
         } as ValueAxis,
       ],
       axisColumnMappings: {
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.Y_SECOND]: mockNumericalColumns[1],
+        [AxisRole.Y]: mockNumericalColumns[0].name,
+        [AxisRole.Y_SECOND]: mockNumericalColumns[1].name,
       },
     };
 
@@ -554,9 +553,9 @@ describe('AxesOptions', () => {
         },
       ] as ValueAxis[],
       axisColumnMappings: {
-        [AxisRole.X]: mockDateColumns[0],
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.Y_SECOND]: mockNumericalColumns[1],
+        [AxisRole.X]: mockDateColumns[0].name,
+        [AxisRole.Y]: mockNumericalColumns[0].name,
+        [AxisRole.Y_SECOND]: mockNumericalColumns[1].name,
       },
     };
 
@@ -640,9 +639,9 @@ describe('AxesOptions', () => {
         },
       ] as ValueAxis[],
       axisColumnMappings: {
-        [AxisRole.X]: mockDateColumns[0],
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.Y_SECOND]: mockNumericalColumns[1],
+        [AxisRole.X]: mockDateColumns[0].name,
+        [AxisRole.Y]: mockNumericalColumns[0].name,
+        [AxisRole.Y_SECOND]: mockNumericalColumns[1].name,
       },
     };
 
@@ -699,9 +698,7 @@ describe('AxesOptions', () => {
         },
       ],
       axisColumnMappings: {
-        [AxisRole.X]: undefined,
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.Y_SECOND]: undefined,
+        [AxisRole.Y]: mockNumericalColumns[0].name,
       },
     };
 
@@ -723,9 +720,7 @@ describe('AxesOptions', () => {
         },
       ],
       axisColumnMappings: {
-        [AxisRole.X]: mockCategoricalColumns[0],
-        [AxisRole.Y]: undefined,
-        [AxisRole.Y_SECOND]: undefined,
+        [AxisRole.X]: mockCategoricalColumns[0].name,
       },
     };
 
@@ -761,9 +756,8 @@ describe('AxesOptions', () => {
         } as CategoryAxis,
       ],
       axisColumnMappings: {
-        [AxisRole.X]: mockCategoricalColumns[0],
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.Y_SECOND]: undefined,
+        [AxisRole.X]: mockCategoricalColumns[0].name,
+        [AxisRole.Y]: mockNumericalColumns[0].name,
       },
     };
 
@@ -804,9 +798,9 @@ describe('AxesOptions', () => {
         } as ValueAxis,
       ],
       axisColumnMappings: {
-        [AxisRole.X]: mockDateColumns[0],
-        [AxisRole.Y]: mockNumericalColumns[0],
-        [AxisRole.Y_SECOND]: mockNumericalColumns[1],
+        [AxisRole.X]: mockDateColumns[0].name,
+        [AxisRole.Y]: mockNumericalColumns[0].name,
+        [AxisRole.Y_SECOND]: mockNumericalColumns[1].name,
       },
     };
 
@@ -934,9 +928,8 @@ describe('AxesOptions', () => {
         {...defaultProps}
         categoryAxes={mockCategoryAxesWithVerticalRotation}
         axisColumnMappings={{
-          [AxisRole.X]: mockCategoricalColumns[0],
-          [AxisRole.Y]: mockNumericalColumns[0],
-          [AxisRole.Y_SECOND]: undefined,
+          [AxisRole.X]: mockCategoricalColumns[0].name,
+          [AxisRole.Y]: mockNumericalColumns[0].name,
         }}
       />
     );
@@ -961,9 +954,8 @@ describe('AxesOptions', () => {
         {...defaultProps}
         valueAxes={mockValueAxesWithVerticalRotation}
         axisColumnMappings={{
-          [AxisRole.X]: mockCategoricalColumns[0],
-          [AxisRole.Y]: mockNumericalColumns[0],
-          [AxisRole.Y_SECOND]: undefined,
+          [AxisRole.X]: mockCategoricalColumns[0].name,
+          [AxisRole.Y]: mockNumericalColumns[0].name,
         }}
       />
     );

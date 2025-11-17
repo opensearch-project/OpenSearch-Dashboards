@@ -9,12 +9,11 @@ import { MetricChartStyle, MetricChartStyleOptions } from '../metric/metric_vis_
 import { HeatmapChartStyle, HeatmapChartStyleOptions } from '../heatmap/heatmap_vis_config';
 import { ScatterChartStyle, ScatterChartStyleOptions } from '../scatter/scatter_vis_config';
 import { AreaChartStyle, AreaChartStyleOptions } from '../area/area_vis_config';
-import { AxisColumnMappings, AxisRole, ChartTypeMapping, VisColumn, VisFieldType } from '../types';
+import { AxisRole, ChartTypeMapping, VisColumn, VisFieldType } from '../types';
 import { visualizationRegistry } from '../visualization_registry';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { BarChartStyle, BarChartStyleOptions } from '../bar/bar_vis_config';
-import { UpdateVisualizationProps } from '../visualization_container';
 import { TableChartStyle, TableChartStyleOptions } from '../table/table_vis_config';
 import { GaugeChartStyle, GaugeChartStyleOptions } from '../gauge/gauge_vis_config';
 import {
@@ -77,8 +76,8 @@ export interface StyleControlsProps<T extends ChartStyles> {
   dateColumns?: VisColumn[];
   availableChartTypes?: ChartTypeMapping[];
   selectedChartType?: string;
-  axisColumnMappings: AxisColumnMappings;
-  updateVisualization: (data: UpdateVisualizationProps) => void;
+  axisColumnMappings?: Record<string, string>;
+  updateVisualization: (data: { mappings: Record<string, string> }) => void;
 }
 
 type ChartTypePossibleMapping = Partial<Record<AxisRole, { type: VisFieldType; index: number }>>;

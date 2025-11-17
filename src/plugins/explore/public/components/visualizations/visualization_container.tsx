@@ -10,7 +10,6 @@ import moment from 'moment';
 import { useDispatch } from 'react-redux';
 
 import './visualization_container.scss';
-import { AxisColumnMappings } from './types';
 import { useTabResults } from '../../application/utils/hooks/use_tab_results';
 import { useSearchContext } from '../query_panel/utils/use_search_context';
 import { getVisualizationBuilder } from './visualization_builder';
@@ -24,9 +23,6 @@ import {
 } from '../../application/utils/state_management/slices';
 import { executeQueries } from '../../application/utils/state_management/actions/query_actions';
 
-export interface UpdateVisualizationProps {
-  mappings: AxisColumnMappings;
-}
 // TODO: add back notifications
 // const VISUALIZATION_TOAST_MSG = {
 //   useRule: i18n.translate('explore.visualize.toast.useRule', {
