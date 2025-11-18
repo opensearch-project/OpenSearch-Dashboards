@@ -47,8 +47,8 @@ export const createNumericalStateTimeline = (
   );
 
   if (
-    (!rangeMappings?.length && !styleOptions?.useThresholdColor) ||
-    styleOptions.filterOption === 'none'
+    !styleOptions?.useThresholdColor &&
+    (!rangeMappings?.length || styleOptions.filterOption === 'none')
   ) {
     return createCategoricalStateTimeline(
       transformedData,
@@ -69,13 +69,12 @@ export const createNumericalStateTimeline = (
       ? styleOptions?.exclusive?.connectNullValues?.threshold || '1h'
       : undefined;
 
-  const completeThreshold =
-    styleOptions.thresholdOptions.thresholds && styleOptions.thresholdOptions.thresholds?.length > 0
-      ? [
-          { value: 0, color: styleOptions.thresholdOptions.baseColor } as Threshold,
-          ...styleOptions.thresholdOptions.thresholds,
-        ]
-      : [];
+  const completeThreshold = styleOptions.thresholdOptions.thresholds
+    ? [
+        { value: 0, color: styleOptions.thresholdOptions.baseColor } as Threshold,
+        ...styleOptions.thresholdOptions.thresholds,
+      ]
+    : [];
 
   const convertedThresholds = convertThresholdsToValueMappings(completeThreshold);
 
@@ -100,10 +99,12 @@ export const createNumericalStateTimeline = (
           lookup: 'mergedLabel',
           from: {
             data: {
-              values: rangeMappings?.map((mapping) => ({
-                mappingValue: `[${mapping?.range?.min},${mapping?.range?.max ?? '∞'})`,
-                displayText: mapping?.displayText,
-              })),
+              values: (styleOptions.useThresholdColor ? convertedThresholds : rangeMappings)?.map(
+                (mapping) => ({
+                  mappingValue: `[${mapping?.range?.min},${mapping?.range?.max ?? '∞'})`,
+                  displayText: mapping?.displayText,
+                })
+              ),
             },
             key: 'mappingValue',
             fields: ['displayText', 'mappingValue'],

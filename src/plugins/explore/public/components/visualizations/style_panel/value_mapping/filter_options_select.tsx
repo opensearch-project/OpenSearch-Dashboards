@@ -11,9 +11,11 @@ import { FilterOption } from '../../types';
 export const FilterOptionsSelect = ({
   filterOption,
   onFilterOptionChange,
+  disableSelect = false,
 }: {
   filterOption: FilterOption | undefined;
   onFilterOptionChange?: (option: FilterOption | undefined) => void;
+  disableSelect?: boolean;
 }) => {
   return (
     <EuiFormRow
@@ -26,6 +28,7 @@ export const FilterOptionsSelect = ({
         value={filterOption ? filterOption : 'filterAll'}
         onChange={(e) => onFilterOptionChange?.(e.target.value as FilterOption)}
         onMouseUp={(e) => e.stopPropagation()}
+        disabled={disableSelect}
         options={[
           {
             value: 'filterAll',

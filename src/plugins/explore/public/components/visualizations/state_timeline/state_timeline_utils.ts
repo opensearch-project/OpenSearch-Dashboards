@@ -110,7 +110,7 @@ export const convertThresholdsToValueMappings = (thresholds: Threshold[]): Value
     type: 'range',
     range: {
       min: t.value,
-      max: i === thresholds.length - 1 ? Infinity : thresholds[i + 1].value,
+      max: i === thresholds.length - 1 ? undefined : thresholds[i + 1].value,
     },
     color: t.color,
   }));
@@ -266,6 +266,7 @@ export const mergeNumericalData = (
   if (validRanges?.length === 0 || filterOption === 'none') {
     return [fallbackForCategorical(sorted, timestampField, groupField, rangeField), []];
   }
+  const INVALID_RANGE = { min: Infinity, max: Infinity };
 
   const findRange = (value: string) => {
     // Handle empty value
@@ -279,7 +280,7 @@ export const mergeNumericalData = (
     )?.range;
 
     // if unmatched, return an invalid range as indentifier
-    return range ? range : { min: Infinity, max: Infinity };
+    return range ? range : INVALID_RANGE;
   };
 
   const merged = mergeByGroup<RangeValue>({

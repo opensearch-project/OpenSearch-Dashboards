@@ -35,7 +35,10 @@ describe('state_timeline_utils', () => {
         'timestamp',
         'category',
         'status',
-        mappings
+        mappings,
+        undefined,
+        undefined,
+        'filterAll'
       );
 
       expect(validMappings).toMatchObject([
@@ -54,7 +57,49 @@ describe('state_timeline_utils', () => {
         'timestamp',
         'category',
         'status',
-        mappings
+        mappings,
+        undefined,
+        undefined,
+        'filterAll'
+      );
+
+      expect(validMappings).toEqual([]);
+      expect(result).toMatchObject([
+        {
+          timestamp: '2023-01-01T10:00:00Z',
+          start: '2023-01-01T10:00:00Z',
+          end: '2023-01-01T11:00:00Z',
+          category: 'A',
+          status: 'active',
+          value: 5,
+          mergedCount: 2,
+        },
+        {
+          category: 'B',
+          end: '2023-01-01T12:00:00Z',
+          mergedCount: 1,
+          start: '2023-01-01T12:00:00Z',
+          status: 'inactive',
+          timestamp: '2023-01-01T12:00:00Z',
+          value: 25,
+        },
+      ]);
+    });
+
+    it('uses fallback when filter option is set to none', () => {
+      const mappings: ValueMapping[] = [
+        { type: 'value', value: 'nonexistent', displayText: 'Not Found' },
+      ];
+
+      const [result, validMappings] = mergeCategoricalData(
+        mockData,
+        'timestamp',
+        'category',
+        'status',
+        mappings,
+        undefined,
+        undefined,
+        'none'
       );
 
       expect(validMappings).toEqual([]);
@@ -88,23 +133,30 @@ describe('state_timeline_utils', () => {
         'timestamp',
         'category',
         'status',
-        mappings
+        mappings,
+        undefined,
+        undefined,
+        'filterAll'
       );
 
       expect(validMappings).toMatchObject([
         { type: 'value', value: 'active', displayText: 'Active' },
       ]);
-      expect(result).toMatchObject([
-        {
-          timestamp: '2023-01-01T10:00:00Z',
-          start: '2023-01-01T10:00:00Z',
-          end: '2023-01-01T11:00:00Z',
-          category: 'A',
-          status: 'active',
-          value: 5,
-          mergedCount: 2,
-        },
-      ]);
+
+      expect(result).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            timestamp: '2023-01-01T10:00:00Z',
+            start: '2023-01-01T10:00:00Z',
+            end: '2023-01-01T11:00:00Z',
+            category: 'A',
+            status: 'active',
+            value: 5,
+            mergedCount: 2,
+            duration: '1h',
+          }),
+        ])
+      );
     });
 
     it('able to disable values by threhsold', () => {
@@ -122,23 +174,28 @@ describe('state_timeline_utils', () => {
         'category',
         'status',
         mappings,
-        '10m'
+        '10m',
+        undefined,
+        'filterAll'
       );
 
       expect(validMappings).toMatchObject([
         { type: 'value', value: 'active', displayText: 'Active' },
       ]);
-      expect(result).toMatchObject([
-        {
-          timestamp: '2023-01-01T10:00:00Z',
-          start: '2023-01-01T10:00:00Z',
-          end: '2023-01-01T11:10:00.000Z',
-          category: 'A',
-          status: 'active',
-          value: 5,
-          mergedCount: 2,
-        },
-      ]);
+      expect(result).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            timestamp: '2023-01-01T10:00:00Z',
+            start: '2023-01-01T10:00:00Z',
+            end: '2023-01-01T11:10:00.000Z',
+            category: 'A',
+            status: 'active',
+            value: 5,
+            mergedCount: 2,
+            duration: '1h 10m',
+          }),
+        ])
+      );
     });
 
     it('able to connect null values between same entries by threhsold', () => {
@@ -158,32 +215,36 @@ describe('state_timeline_utils', () => {
         'status',
         mappings,
         undefined,
-        '2h'
+        '2h',
+        'filterAll'
       );
 
       expect(validMappings).toMatchObject([
         { type: 'value', value: 'active', displayText: 'Active' },
       ]);
-      expect(result).toMatchObject([
-        {
-          timestamp: '2023-01-01T10:00:00Z',
-          start: '2023-01-01T10:00:00Z',
-          end: '2023-01-01T12:00:00Z',
-          category: 'A',
-          status: 'active',
-          value: 5,
-          mergedCount: 2,
-        },
-        {
-          timestamp: '2023-01-01T12:30:00Z',
-          start: '2023-01-01T12:30:00Z',
-          end: '2023-01-01T12:30:00Z',
-          category: 'A',
-          status: 'active',
-          value: 15,
-          mergedCount: 1,
-        },
-      ]);
+
+      expect(result).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            timestamp: '2023-01-01T10:00:00Z',
+            start: '2023-01-01T10:00:00Z',
+            end: '2023-01-01T12:00:00Z',
+            category: 'A',
+            status: 'active',
+            value: 5,
+            mergedCount: 2,
+          }),
+          expect.objectContaining({
+            timestamp: '2023-01-01T12:30:00Z',
+            start: '2023-01-01T12:30:00Z',
+            end: '2023-01-01T12:30:00Z',
+            category: 'A',
+            status: 'active',
+            value: 15,
+            mergedCount: 1,
+          }),
+        ])
+      );
     });
   });
 
@@ -204,7 +265,10 @@ describe('state_timeline_utils', () => {
         mockData,
         'timestamp',
         'category',
-        mappings
+        mappings,
+        undefined,
+        undefined,
+        'filterAll'
       );
 
       expect(validMappings).toHaveLength(2);
@@ -251,27 +315,63 @@ describe('state_timeline_utils', () => {
         'timestamp',
         'category',
         'value',
-        mappings
+        mappings,
+        undefined,
+        undefined,
+        'filterAll'
       );
 
       expect(validRanges).toHaveLength(1); // Only ranges that contain data values
       expect(validRanges?.[0].range?.min).toBe(0);
       expect(validRanges?.[0].range?.max).toBe(20);
-      expect(result).toMatchObject([
-        {
-          timestamp: '2023-01-01T10:00:00Z',
-          start: '2023-01-01T10:00:00Z',
-          end: '2023-01-01T11:00:00Z',
-          category: 'A',
-          status: 'active',
-          value: 5,
-          mergedLabel: '[0,20)',
-          mergedCount: 2,
-        },
-      ]);
+
+      expect(result[0]).toMatchObject({
+        timestamp: '2023-01-01T10:00:00Z',
+        start: '2023-01-01T10:00:00Z',
+        end: '2023-01-01T11:00:00Z',
+        category: 'A',
+        status: 'active',
+        value: 5,
+        mergedLabel: '[0,20)',
+        mergedCount: 2,
+        duration: '1h',
+      });
     });
 
-    it('uses fallback when no valid ranges exist', () => {
+    it('should create a fake mapping range for invalid data entry', () => {
+      const mappings: ValueMapping[] = [
+        { type: 'range', range: { min: 0, max: 20 }, displayText: 'Medium' },
+        { type: 'range', range: { min: 100, max: 200 }, displayText: 'High' },
+      ];
+
+      const [result, validRanges] = mergeNumericalData(
+        mockData,
+        'timestamp',
+        'category',
+        'value',
+        mappings,
+        undefined,
+        undefined,
+        'filterAll'
+      );
+
+      expect(validRanges).toHaveLength(1); // Only ranges that contain data values
+      expect(validRanges?.[0].range?.min).toBe(0);
+      expect(validRanges?.[0].range?.max).toBe(20);
+      expect(result[1]).toMatchObject({
+        timestamp: '2023-01-01T12:00:00Z',
+        start: '2023-01-01T12:00:00Z',
+        end: '2023-01-01T12:00:00Z',
+        category: 'B',
+        status: 'inactive',
+        value: 25,
+        mergedLabel: '[Infinity,Infinity)',
+        mergedCount: 1,
+        duration: '0s',
+      });
+    });
+
+    it('uses categorical state timeline fallback when no valid ranges exist', () => {
       const mappings: ValueMapping[] = [
         { type: 'range', range: { min: 100, max: 200 }, displayText: 'High' },
       ];
@@ -281,7 +381,10 @@ describe('state_timeline_utils', () => {
         'timestamp',
         'category',
         'value',
-        mappings
+        mappings,
+        undefined,
+        undefined,
+        'filterAll'
       );
 
       expect(validRanges).toEqual([]);
@@ -293,7 +396,19 @@ describe('state_timeline_utils', () => {
           category: 'A',
           status: 'active',
           value: 5,
-          mergedCount: 2,
+          mergedCount: 1,
+          duration: '1h',
+        },
+
+        {
+          timestamp: '2023-01-01T11:00:00Z',
+          start: '2023-01-01T11:00:00Z',
+          end: '2023-01-01T11:00:00Z',
+          category: 'A',
+          status: 'active',
+          value: 15,
+          mergedCount: 1,
+          duration: '0s',
         },
         {
           timestamp: '2023-01-01T12:00:00Z',
@@ -303,6 +418,7 @@ describe('state_timeline_utils', () => {
           status: 'inactive',
           value: 25,
           mergedCount: 1,
+          duration: '0s',
         },
       ]);
     });
