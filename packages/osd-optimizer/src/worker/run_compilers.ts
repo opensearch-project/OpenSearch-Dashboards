@@ -56,6 +56,7 @@ import {
   isNormalModule,
   isIgnoredModule,
   isConcatenatedModule,
+  isRuntimeModule,
   getModulePath,
 } from './webpack_helpers';
 import { getHashes } from '../optimizer/get_hashes';
@@ -171,7 +172,7 @@ const observeCompiler = (
           continue;
         }
 
-        if (isExternalModule(module) || isIgnoredModule(module)) {
+        if (isExternalModule(module) || isIgnoredModule(module) || isRuntimeModule(module)) {
           continue;
         }
 

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import webpack from 'webpack';
+import webpack, { RuntimeModule } from 'webpack';
 
 export function isFailureStats(stats: webpack.Stats) {
   if (stats.hasErrors()) {
@@ -129,7 +129,10 @@ export interface WebpackIgnoredModule {
 }
 
 export function isIgnoredModule(module: any): module is WebpackIgnoredModule {
-  return module?.constructor?.name === 'RawModule' && module.identifierStr?.startsWith('ignored ');
+  return (
+    module?.constructor?.name === 'RawModule' &&
+    (module.identifierStr?.startsWith('ignored ') || module.identifierStr?.startsWith('ignored|'))
+  );
 }
 
 /** module replacing imports for webpack externals */
@@ -157,6 +160,10 @@ export interface WebpackConcatenatedModule {
 
 export function isConcatenatedModule(module: any): module is WebpackConcatenatedModule {
   return module?.constructor?.name === 'ConcatenatedModule';
+}
+
+export function isRuntimeModule(module: any): module is RuntimeModule {
+  return module?.constructor?.name?.endsWith('RuntimeModule');
 }
 
 export function getModulePath(module: WebpackNormalModule) {
