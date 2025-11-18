@@ -142,9 +142,9 @@ const observeCompiler = (
             if (path.endsWith('.scss')) {
               workUnits += EXTRA_SCSS_WORK_UNITS;
 
-              for (const depPath of module.buildInfo.fileDependencies) {
+              /* for (const depPath of module.buildInfo.fileDependencies) {
                 referencedFiles.add(depPath);
-              }
+              } */
             }
 
             continue;
