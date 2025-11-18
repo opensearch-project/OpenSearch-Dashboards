@@ -44,7 +44,17 @@ export default function () {
     opensearchTestCluster: {
       license: 'oss',
       from: 'snapshot',
-      serverArgs: ['search.concurrent_segment_search.mode=none'],
+      serverArgs: [
+        'search.concurrent_segment_search.mode=none',
+        // Disable disk-based shard allocation to prevent index creation blocks in CI
+        'cluster.routing.allocation.disk.threshold_enabled=false',
+        // Set very low disk watermarks for testing
+        'cluster.routing.allocation.disk.watermark.low=1gb',
+        'cluster.routing.allocation.disk.watermark.high=500mb',
+        'cluster.routing.allocation.disk.watermark.flood_stage=100mb',
+        // Disable read-only index block when disk space is low
+        'cluster.blocks.read_only_allow_delete=false',
+      ],
     },
 
     osdTestServer: {
