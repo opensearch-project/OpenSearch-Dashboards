@@ -64,47 +64,6 @@ describe('line_vis_config', () => {
         thresholdStyle: ThresholdMode.Off,
       });
 
-      // Verify axes
-      expect(defaults.categoryAxes).toHaveLength(1);
-      expect(defaults.categoryAxes[0]).toEqual({
-        id: 'CategoryAxis-1',
-        type: 'category',
-        position: Positions.BOTTOM,
-        show: true,
-        labels: {
-          show: true,
-          filter: true,
-          rotate: 0,
-          truncate: 100,
-        },
-        grid: {
-          showLines: true,
-        },
-        title: {
-          text: '',
-        },
-      });
-      expect(defaults.valueAxes).toHaveLength(1);
-      expect(defaults.valueAxes[0]).toEqual({
-        id: 'ValueAxis-1',
-        name: 'LeftAxis-1',
-        type: 'value',
-        position: Positions.LEFT,
-        show: true,
-        labels: {
-          show: true,
-          rotate: 0,
-          filter: false,
-          truncate: 100,
-        },
-        grid: {
-          showLines: true,
-        },
-        title: {
-          text: '',
-        },
-      });
-
       expect(defaults.titleOptions).toMatchObject({
         show: false,
         titleName: '',
@@ -139,12 +98,12 @@ describe('line_vis_config', () => {
           lineWidth: 1,
           tooltipOptions: { mode: 'all' } as TooltipOptions,
           grid: {} as GridOptions,
-          categoryAxes: [] as CategoryAxis[],
-          valueAxes: [] as ValueAxis[],
+          standardAxes: [],
           titleOptions: {
             show: true,
             titleName: '',
           },
+          showFullTimeRange: false,
         },
         onStyleChange: jest.fn(),
         numericalColumns: [],

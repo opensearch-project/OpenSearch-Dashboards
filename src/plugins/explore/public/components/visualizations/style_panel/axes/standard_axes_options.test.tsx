@@ -110,7 +110,24 @@ describe('AllAxesOptions', () => {
     onStandardAxesChange: jest.fn(),
     onChangeSwitchAxes: jest.fn(),
     disableGrid: false,
-    axisColumnMappings: {},
+    axisColumnMappings: {
+      [AxisRole.X]: {
+        name: 'category',
+        column: 'category',
+        id: 0,
+        schema: VisFieldType.Categorical,
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
+      [AxisRole.Y]: {
+        name: 'value',
+        column: 'value',
+        id: 1,
+        schema: VisFieldType.Numerical,
+        validValuesCount: 1,
+        uniqueValuesCount: 1,
+      },
+    },
     showFullTimeRange: false,
     onShowFullTimeRangeChange: jest.fn(),
   };

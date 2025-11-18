@@ -19,7 +19,7 @@ import {
   ThresholdOptions,
 } from '../types';
 import { HistogramVisStyleControls } from './histogram_vis_options';
-import { AXIS_LABEL_MAX_LENGTH } from '../constants';
+import { AXIS_LABEL_MAX_LENGTH, DEFAULT_X_AXIS_CONFIG } from '../constants';
 import { getColors } from '../theme/default_colors';
 
 export interface HistogramChartStyleOptions {
@@ -70,42 +70,10 @@ export const defaultHistogramChartStyles: HistogramChartStyle = {
   useThresholdColor: false,
   standardAxes: [
     {
-      id: 'Axis-1',
-      position: Positions.BOTTOM,
-      show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 0,
-        filter: false,
-        truncate: AXIS_LABEL_MAX_LENGTH,
-      },
-      title: {
-        text: '',
-      },
+      ...DEFAULT_X_AXIS_CONFIG,
       grid: {
         showLines: false,
       },
-      axisRole: AxisRole.X,
-    },
-    {
-      id: 'Axis-2',
-      position: Positions.LEFT,
-      show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 0,
-        filter: false,
-        truncate: AXIS_LABEL_MAX_LENGTH,
-      },
-      title: {
-        text: '',
-      },
-      grid: {
-        showLines: true,
-      },
-      axisRole: AxisRole.Y,
     },
   ],
   titleOptions: {

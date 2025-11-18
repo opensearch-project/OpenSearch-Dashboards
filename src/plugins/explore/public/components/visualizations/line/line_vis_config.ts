@@ -16,6 +16,7 @@ import {
   VisFieldType,
   TitleOptions,
   ThresholdOptions,
+  StandardAxes,
 } from '../types';
 import { LineStyle } from './line_exclusive_vis_options';
 import { TooltipOptions } from '../types';
@@ -42,8 +43,15 @@ export interface LineChartStyleOptions {
   thresholdLines?: ThresholdLines;
 
   // Axes configuration
+  /**
+   * @deprecated - use standardAxes instead
+   */
   categoryAxes?: CategoryAxis[];
+  /**
+   * @deprecated - use standardAxes instead
+   */
   valueAxes?: ValueAxis[];
+  standardAxes?: StandardAxes[];
 
   titleOptions?: TitleOptions;
   thresholdOptions?: ThresholdOptions;
@@ -52,7 +60,7 @@ export interface LineChartStyleOptions {
 }
 
 export type LineChartStyle = Required<
-  Omit<LineChartStyleOptions, 'thresholdLines' | 'legendTitle'>
+  Omit<LineChartStyleOptions, 'thresholdLines' | 'legendTitle' | 'categoryAxes' | 'valueAxes'>
 > &
   Pick<LineChartStyleOptions, 'legendTitle'>;
 
@@ -76,50 +84,7 @@ export const defaultLineChartStyles: LineChartStyle = {
     thresholdStyle: ThresholdMode.Off,
   },
 
-  // Category axes
-  categoryAxes: [
-    {
-      id: 'CategoryAxis-1',
-      type: 'category',
-      position: Positions.BOTTOM,
-      show: true,
-      labels: {
-        show: true,
-        filter: true,
-        rotate: 0,
-        truncate: AXIS_LABEL_MAX_LENGTH,
-      },
-      title: {
-        text: '',
-      },
-      grid: {
-        showLines: true,
-      },
-    },
-  ],
-
-  // Value axes
-  valueAxes: [
-    {
-      id: 'ValueAxis-1',
-      name: 'LeftAxis-1',
-      type: 'value',
-      position: Positions.LEFT,
-      show: true,
-      labels: {
-        show: true,
-        rotate: 0,
-        filter: false,
-        truncate: AXIS_LABEL_MAX_LENGTH,
-      },
-      title: {
-        text: '',
-      },
-      grid: {
-        showLines: true,
-      },
-    },
-  ],
+  standardAxes: [],
 
   titleOptions: {
     show: false,

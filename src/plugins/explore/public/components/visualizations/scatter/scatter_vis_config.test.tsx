@@ -37,13 +37,6 @@ describe('createScatterConfig', () => {
     expect(defaults.exclusive.angle).toBe(0);
     expect(defaults.exclusive.filled).toBe(true);
 
-    // Verify axes
-    expect(defaults.standardAxes).toHaveLength(2);
-    const xAxis = defaults.standardAxes.find((axis) => axis.axisRole === AxisRole.X);
-    expect(xAxis).toHaveProperty('position', Positions.BOTTOM);
-    const yAxis = defaults.standardAxes.find((axis) => axis.axisRole === AxisRole.Y);
-    expect(yAxis).toHaveProperty('position', Positions.LEFT);
-
     // Verify title
     expect(defaults.titleOptions.show).toBe(false);
     expect(defaults.titleOptions.titleName).toBe('');

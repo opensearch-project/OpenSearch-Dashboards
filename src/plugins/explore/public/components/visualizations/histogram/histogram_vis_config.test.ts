@@ -40,46 +40,15 @@ describe('bar_vis_config', () => {
       });
 
       // Check axes configuration
-      expect(defaultHistogramChartStyles.standardAxes).toHaveLength(2);
-      expect(defaultHistogramChartStyles.standardAxes[1]).toMatchObject({
-        id: 'Axis-2',
-        position: Positions.LEFT,
-        show: true,
-        style: {},
-        labels: {
-          show: true,
-          rotate: 0,
-          filter: false,
-          truncate: 100,
-        },
-        title: {
-          text: '',
-        },
-        grid: {
-          showLines: true,
-        },
-        axisRole: AxisRole.Y,
-      });
-
-      expect(defaultHistogramChartStyles.standardAxes[0]).toMatchObject({
-        id: 'Axis-1',
-        position: Positions.BOTTOM,
-        show: true,
-        style: {},
-        labels: {
-          show: true,
-          rotate: 0,
-          filter: false,
-          truncate: 100,
-        },
-        title: {
-          text: '',
-        },
-        grid: {
-          showLines: false,
-        },
-        axisRole: AxisRole.X,
-      });
+      expect(defaultHistogramChartStyles.standardAxes).toHaveLength(1);
+      expect(defaultHistogramChartStyles.standardAxes[0]).toEqual(
+        expect.objectContaining({
+          grid: {
+            showLines: false,
+          },
+          axisRole: AxisRole.X,
+        })
+      );
 
       expect(defaultHistogramChartStyles.titleOptions).toMatchObject({
         show: false,

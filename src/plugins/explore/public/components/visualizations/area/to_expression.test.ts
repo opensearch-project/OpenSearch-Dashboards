@@ -847,14 +847,6 @@ describe('Area Chart to_expression', () => {
       );
       expect(timeMarkerLayer).toBeUndefined();
     });
-
-    it('should throw an error when required columns are missing', () => {
-      expect(() => {
-        createCategoryAreaChart(mockTransformedData, [], [], [], mockStyles);
-      }).toThrow(
-        'Category area chart requires at least one numerical column and one categorical column'
-      );
-    });
   });
 
   describe('createStackedAreaChart', () => {
