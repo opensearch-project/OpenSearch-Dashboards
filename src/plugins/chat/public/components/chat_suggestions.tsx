@@ -78,7 +78,13 @@ const SuggestionBubble: React.FC<SuggestionBubbleProps> = ({
   );
 };
 
-export const ChatSuggestions = ({ messages }: { messages: Message[] }) => {
+export const ChatSuggestions = ({
+  messages,
+  currentMessage,
+}: {
+  messages: Message[];
+  currentMessage: Message;
+}) => {
   const { suggestedActionsService, chatService } = useChatContext();
 
   const [customSuggestions, setCustomSuggestions] = useState<SuggestedActions[]>([]);
@@ -93,7 +99,7 @@ export const ChatSuggestions = ({ messages }: { messages: Message[] }) => {
         // Create ChatContext object from current chat state
         const context: ChatContext = {
           conversationId: chatService.getThreadId(),
-          currentMessage: messages[messages.length - 1],
+          currentMessage,
           messageHistory: messages,
         };
 
@@ -109,7 +115,7 @@ export const ChatSuggestions = ({ messages }: { messages: Message[] }) => {
     };
 
     loadCustomSuggestions();
-  }, [suggestedActionsService, chatService, messages]);
+  }, [suggestedActionsService, chatService, messages, currentMessage]);
 
   if (isLoadingCustomSuggestions || customSuggestions.length === 0) {
     return null;
