@@ -12,11 +12,7 @@ import { Subscription } from 'rxjs';
 import { CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { ChatPluginSetup, ChatPluginStart, AppPluginStartDependencies } from './types';
 import { ChatService, ChatWindowState } from './services/chat_service';
-import {
-  ChatHeaderButton,
-  ChatHeaderButtonInstance,
-  ChatLayoutMode,
-} from './components/chat_header_button';
+import { ChatHeaderButton, ChatLayoutMode } from './components/chat_header_button';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { SuggestedActionsService } from './services/suggested_action';
 
@@ -94,8 +90,6 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       };
     }
 
-    const chatHeaderButtonRef = React.createRef<ChatHeaderButtonInstance>();
-
     // Initialize chat service (it will use the server proxy)
     this.chatService = new ChatService();
 
@@ -115,7 +109,6 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
             chatService,
             contextProvider: deps.contextProvider,
             charts: deps.charts,
-            ref: chatHeaderButtonRef,
             suggestedActionsService: this.suggestedActionsService!,
           })
         );
@@ -149,7 +142,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         ),
       ],
       action: async ({ content }: { content: string }) => {
-        await chatHeaderButtonRef.current?.startNewConversation({ content });
+        await chatService.sendMessageWithWindow(content, [], { clearConversation: true });
       },
     });
 
