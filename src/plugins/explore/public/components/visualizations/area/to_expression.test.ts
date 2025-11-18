@@ -90,8 +90,7 @@ describe('Area Chart to_expression', () => {
       show: true,
       titleName: '',
     },
-    categoryAxes: [],
-    valueAxes: [],
+    standardAxes: [],
     showFullTimeRange: false,
   };
 

@@ -21,7 +21,7 @@ import {
   ThresholdOptions,
 } from '../types';
 import { BarVisStyleControls } from './bar_vis_options';
-import { AXIS_LABEL_MAX_LENGTH, DEFAULT_X_AXIS_CONFIG } from '../constants';
+import { DEFAULT_X_AXIS_CONFIG } from '../constants';
 import { getColors } from '../theme/default_colors';
 
 export interface BarChartStyleOptions {

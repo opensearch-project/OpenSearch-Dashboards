@@ -7,7 +7,6 @@ import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 
 import {
-  Positions,
   ThresholdMode,
   TooltipOptions,
   VisFieldType,
@@ -19,7 +18,7 @@ import {
   ThresholdOptions,
 } from '../types';
 import { HistogramVisStyleControls } from './histogram_vis_options';
-import { AXIS_LABEL_MAX_LENGTH, DEFAULT_X_AXIS_CONFIG } from '../constants';
+import { DEFAULT_X_AXIS_CONFIG } from '../constants';
 import { getColors } from '../theme/default_colors';
 
 export interface HistogramChartStyleOptions {
