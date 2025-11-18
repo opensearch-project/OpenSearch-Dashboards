@@ -4,7 +4,7 @@
  */
 
 import { groupBy } from 'lodash';
-import { RangeValue, Threshold, ValueMapping } from '../types';
+import { FilterOption, RangeValue, Threshold, ValueMapping } from '../types';
 
 const addThresholdTime = (currentTime: string, threshold: string): number | undefined => {
   const date = new Date(currentTime.replace(' ', 'T'));
@@ -99,7 +99,7 @@ const mergeNumercialRecord = (
     ...records[0],
     start: startTime,
     end: endTime,
-    ...(range ? { mergedLabel: `[${range?.min},${range?.max ?? Infinity})` } : {}),
+    ...(range ? { mergedLabel: `[${range?.min},${range?.max ?? '∞'})` } : {}),
     duration: formatDuration(duration),
     mergedCount: records.length,
   };
@@ -126,14 +126,14 @@ export const mergeCategoricalData = (
   groupField2?: string,
   mappings?: ValueMapping[],
   disconnectThreshold?: string,
-  connectThreshold?: string
+  connectThreshold?: string,
+  filterOption: FilterOption = 'none'
 ): [Array<Record<string, any>>, ValueMapping[] | undefined] => {
   if (!timestampField || !groupField1 || !groupField2) return [data, []];
 
   const sorted = [...data].sort(
     (a, b) => new Date(a[timestampField]).getTime() - new Date(b[timestampField]).getTime()
   );
-
   // Collect all possible values from the secondary categorical field
   const allPossibleOptions = Object.keys(groupBy(sorted, (item) => item[groupField2]));
 
@@ -143,11 +143,14 @@ export const mergeCategoricalData = (
   });
 
   // if validValues doesn't exist, fallback to group values by groupField2 and present a stacked bar
-  if (validValues?.length === 0) {
+  if (validValues?.length === 0 || filterOption === 'none') {
     return [fallbackForCategorical(sorted, timestampField, groupField1, groupField2), []];
   }
 
-  const findValue = (value: string) => validValues?.find((v) => v.value === `${value}`)?.value;
+  const findValue = (value: string) => {
+    const find = validValues?.find((v) => v.value === `${value}`)?.value;
+    return find ? find : value;
+  };
 
   const merged = mergeByGroup<string>({
     sorted,
@@ -169,7 +172,8 @@ export const mergeSingleCategoricalData = (
   groupField1?: string,
   mappings?: ValueMapping[],
   disconnectThreshold?: string,
-  connectThreshold?: string
+  connectThreshold?: string,
+  filterOption: FilterOption = 'none'
 ): [Array<Record<string, any>>, ValueMapping[] | undefined] => {
   if (!timestampField || !groupField1) return [data, []];
 
@@ -186,11 +190,17 @@ export const mergeSingleCategoricalData = (
   });
 
   // if validValues doesn't exist, fallback to group values by groupField2 and present a stacked bar
-  if (!validValues || validValues?.length === 0) {
+  if (!validValues || validValues?.length === 0 || filterOption === 'none') {
     return [fallbackForSingleCategorical(sorted, timestampField, groupField1), []];
   }
 
-  const findValue = (value: string) => validValues?.find((v) => v.value === `${value}`)?.value;
+  const findValue = (value: string) => {
+    // Handle empty value
+    // TODO Consider special values in value mapping
+    if (value === null || value === undefined) return undefined;
+    const find = validValues?.find((v) => v.value === `${value}`)?.value;
+    return find ? find : value;
+  };
 
   const merged: Array<Record<string, any>> = [];
 
@@ -230,7 +240,8 @@ export const mergeNumericalData = (
   rangeField?: string,
   mappings?: ValueMapping[],
   disconnectThreshold?: string,
-  connectThreshold?: string
+  connectThreshold?: string,
+  filterOption: FilterOption = 'none'
 ): [Array<Record<string, any>>, ValueMapping[] | undefined] => {
   if (!timestampField || !groupField || !rangeField) return [data, []];
 
@@ -251,20 +262,24 @@ export const mergeNumericalData = (
     });
   });
 
-  // if validRange doesn't exist, fallback to compute the entire count through the time range
-  if (validRanges?.length === 0) {
-    return [fallbackMerge(sorted, timestampField, groupField), []];
+  // if validRange doesn't exist, fallback to categorical state timeline
+  if (validRanges?.length === 0 || filterOption === 'none') {
+    return [fallbackForCategorical(sorted, timestampField, groupField, rangeField), []];
   }
 
   const findRange = (value: string) => {
+    // Handle empty value
     if (value === null || value === undefined) return undefined;
     const numberValue = Number(value);
-    return validRanges?.find(
+    const range = validRanges?.find(
       (r) =>
         r?.range?.min !== undefined &&
         r.range.min <= numberValue &&
         (r.range.max ?? Infinity) > numberValue
     )?.range;
+
+    // if unmatched, return an invalid range as indentifier
+    return range ? range : { min: Infinity, max: Infinity };
   };
 
   const merged = mergeByGroup<RangeValue>({
@@ -324,6 +339,10 @@ const fallbackForCategorical = (
 
     for (let i = 0; i < g1.length; i++) {
       const curr = g1[i];
+
+      if (!buffer?.length && (curr[groupField2] === undefined || curr[groupField2] === null))
+        continue;
+
       const prev = buffer.length ? buffer[0][groupField2] : null;
 
       if (curr[groupField2] === prev) {
@@ -524,7 +543,7 @@ export const mergeInAGroup = <T extends string | RangeValue>({
     }
 
     // Handle invalid mappings
-    if (!currentMapping) {
+    if (currentMapping === undefined || currentMapping === null) {
       flushBuffer(curr[timestampField]);
       continue;
     }

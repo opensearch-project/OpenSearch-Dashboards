@@ -10,6 +10,8 @@ import { defaultPieChartStyles, PieChartStyle } from './pie_vis_config';
 import { DebouncedFieldNumber } from '../style_panel/utils';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { FilterOption } from '../types';
+import { FilterOptionsSelect } from '../style_panel/value_mapping/filter_options_select';
+
 interface PieVisOptionsProps {
   styles: PieChartStyle['exclusive'];
   onChange: (styles: PieChartStyle['exclusive']) => void;
@@ -72,38 +74,10 @@ export const PieExclusiveVisOptions = ({
           data-test-subj="donutButtonGroup"
         />
       </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('explore.vis.pie.exclusive.filterOptions', {
-          defaultMessage: 'Filter Options',
-        })}
-      >
-        <EuiSelect
-          compressed
-          value={filterOption ? filterOption : 'filterAll'}
-          onChange={(e) => onFilterOptionChange?.(e.target.value as FilterOption)}
-          onMouseUp={(e) => e.stopPropagation()}
-          options={[
-            {
-              value: 'filterAll',
-              text: i18n.translate('explore.vis.pie.exclusive.filterAll', {
-                defaultMessage: 'Use value mappings',
-              }),
-            },
-            {
-              value: 'filterButKeepOpposite',
-              text: i18n.translate('explore.vis.pie.exclusive.filterButKeepOpposite', {
-                defaultMessage: 'Highlight value mappings',
-              }),
-            },
-            {
-              value: 'none',
-              text: i18n.translate('explore.vis.pie.exclusive.none', {
-                defaultMessage: 'None',
-              }),
-            },
-          ]}
-        />
-      </EuiFormRow>
+      <FilterOptionsSelect
+        filterOption={filterOption}
+        onFilterOptionChange={onFilterOptionChange}
+      />
 
       <EuiFormRow>
         <EuiSwitch

@@ -8,21 +8,20 @@ import {
   decideTransform,
   generateTransformLayer,
   generateLabelExpr,
-} from './pie_chart_utils';
-import { FilterOption, ValueMapping } from '../types';
-import { PieChartStyle } from './pie_vis_config';
+} from './value_mapping_utils';
+import { ValueMapping } from '../../types';
 
 // Mock the color utility functions
-jest.mock('../theme/color_utils', () => ({
+jest.mock('../../theme/color_utils', () => ({
   getCategoryNextColor: jest.fn((index: number) => `color-${index}`),
   resolveColor: jest.fn((color: string | undefined) => color),
 }));
 
-jest.mock('../theme/default_colors', () => ({
+jest.mock('../../theme/default_colors', () => ({
   DEFAULT_GREY: '#808080',
 }));
 
-describe('pie_chart_utils', () => {
+describe('value_mapping_utils', () => {
   describe('decideScale', () => {
     const mockValidRanges: ValueMapping[] = [
       {
@@ -155,24 +154,6 @@ describe('pie_chart_utils', () => {
   });
 
   describe('generateTransformLayer', () => {
-    const mockStyleOptions: PieChartStyle = {
-      addTooltip: true,
-      addLegend: true,
-      legendPosition: 'bottom' as any,
-      tooltipOptions: { mode: 'all' },
-      exclusive: {
-        donut: true,
-        showValues: false,
-        showLabels: false,
-        truncate: 100,
-      },
-      titleOptions: {
-        show: false,
-        titleName: '',
-      },
-      filterOption: 'filterAll',
-    };
-
     const mockValidRanges: ValueMapping[] = [
       {
         id: '1',
@@ -203,19 +184,13 @@ describe('pie_chart_utils', () => {
         'field',
         mockValidRanges,
         mockValidValues,
-        mockStyleOptions
+        'filterAll'
       );
       expect(result).toMatchObject([]);
     });
 
     it('should generate range-based transform when validRanges exist and validValues is empty', () => {
-      const result = generateTransformLayer(
-        true,
-        'numericField',
-        mockValidRanges,
-        [],
-        mockStyleOptions
-      );
+      const result = generateTransformLayer(true, 'numericField', mockValidRanges, [], 'filterAll');
 
       expect(result[0]).toEqual({
         calculate:
@@ -225,13 +200,7 @@ describe('pie_chart_utils', () => {
     });
 
     it('should generate lookup-based transform when using validValues', () => {
-      const result = generateTransformLayer(
-        true,
-        'field',
-        undefined,
-        mockValidValues,
-        mockStyleOptions
-      );
+      const result = generateTransformLayer(true, 'field', undefined, mockValidValues, 'filterAll');
 
       expect(result).toEqual([
         {
@@ -256,17 +225,12 @@ describe('pie_chart_utils', () => {
     });
 
     it('should handle filterButKeepOpposite option correctly', () => {
-      const styleWithKeepOpposite = {
-        ...mockStyleOptions,
-        filterOption: 'filterButKeepOpposite' as FilterOption,
-      };
-
       const result = generateTransformLayer(
         true,
         'field',
         undefined,
         mockValidValues,
-        styleWithKeepOpposite
+        'filterButKeepOpposite'
       );
 
       expect(result).toEqual([
@@ -290,24 +254,6 @@ describe('pie_chart_utils', () => {
   });
 
   describe('generateLabelExpr', () => {
-    const mockStyleOptions: PieChartStyle = {
-      addTooltip: true,
-      addLegend: true,
-      legendPosition: 'bottom' as any,
-      tooltipOptions: { mode: 'all' },
-      exclusive: {
-        donut: true,
-        showValues: false,
-        showLabels: false,
-        truncate: 100,
-      },
-      titleOptions: {
-        show: false,
-        titleName: '',
-      },
-      filterOption: 'filterAll',
-    };
-
     const mockValidRanges: ValueMapping[] = [
       {
         id: '1',
@@ -338,13 +284,13 @@ describe('pie_chart_utils', () => {
     ];
 
     it('should generate label expression for ranges with display text', () => {
-      const result = generateLabelExpr(mockValidRanges, [], mockStyleOptions);
+      const result = generateLabelExpr(mockValidRanges, [], 'filterAll');
 
       expect(result).toBe("{'[0,10)': 'Low Range', '[10,∞)': 'High Range'}[datum.label]");
     });
 
     it('should generate label expression for values with display text', () => {
-      const result = generateLabelExpr(undefined, mockValidValues, mockStyleOptions);
+      const result = generateLabelExpr(undefined, mockValidValues, 'filterAll');
 
       expect(result).toBe("{'A': 'Apple Display', 'B': 'B'}[datum.label]");
     });
@@ -363,24 +309,19 @@ describe('pie_chart_utils', () => {
         },
       ];
 
-      const result = generateLabelExpr(undefined, valuesWithoutDisplay, mockStyleOptions);
+      const result = generateLabelExpr(undefined, valuesWithoutDisplay, 'filterAll');
 
       expect(result).toBe("{'A': 'A', 'B': 'B'}[datum.label]");
     });
 
     it('should add unmatched entry for filterButKeepOpposite', () => {
-      const styleWithKeepOpposite = {
-        ...mockStyleOptions,
-        filterOption: 'filterButKeepOpposite' as FilterOption,
-      };
-
-      const result = generateLabelExpr(undefined, mockValidValues, styleWithKeepOpposite);
+      const result = generateLabelExpr(undefined, mockValidValues, 'filterButKeepOpposite');
 
       expect(result).toBe("{'A': 'Apple Display', 'B': 'B', null: 'unmatched'}[datum.label]");
     });
 
     it('should prefer values over ranges when both exist', () => {
-      const result = generateLabelExpr(mockValidRanges, mockValidValues, mockStyleOptions);
+      const result = generateLabelExpr(mockValidRanges, mockValidValues, 'filterAll');
 
       expect(result).toBe("{'A': 'Apple Display', 'B': 'B'}[datum.label]");
     });
@@ -395,7 +336,7 @@ describe('pie_chart_utils', () => {
         },
       ];
 
-      const result = generateLabelExpr(rangeWithoutMax, [], mockStyleOptions);
+      const result = generateLabelExpr(rangeWithoutMax, [], 'filterAll');
 
       expect(result).toBe("{'[5,∞)': 'Above 5'}[datum.label]");
     });

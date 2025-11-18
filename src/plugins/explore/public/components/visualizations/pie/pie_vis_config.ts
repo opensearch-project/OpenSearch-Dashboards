@@ -69,7 +69,7 @@ export const defaultPieChartStyles: PieChartStyle = {
   valueMappingOptions: {
     valueMappings: [],
   },
-  filterOption: 'filterAll',
+  filterOption: 'none',
 };
 
 export const createPieConfig = (): VisualizationType<'pie'> => ({
