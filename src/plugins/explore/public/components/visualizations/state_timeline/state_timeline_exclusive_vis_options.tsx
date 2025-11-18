@@ -85,6 +85,7 @@ export const StateTimeLineExclusiveVisOptions = ({
       <FilterOptionsSelect
         filterOption={filterOption}
         onFilterOptionChange={onFilterOptionChange}
+        disableSelect={useThresholdColor}
       />
       <EuiFormRow>
         <EuiSwitch
