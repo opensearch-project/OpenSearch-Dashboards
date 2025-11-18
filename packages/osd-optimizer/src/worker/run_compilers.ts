@@ -34,7 +34,7 @@ import Fs from 'fs';
 import Path from 'path';
 import { inspect } from 'util';
 
-import webpack, { Stats, NormalModule } from 'webpack';
+import webpack, { Stats } from 'webpack';
 import * as Rx from 'rxjs';
 import { mergeMap, map, mapTo, takeUntil } from 'rxjs/operators';
 
@@ -68,7 +68,7 @@ const PLUGIN_NAME = '@osd/optimizer';
  * so this constant is used to indicate to assignBundlesToWorkers() that there is
  * extra work done in a bundle that has a lot of scss imports. The value is
  * arbitrary and just intended to weigh the bundles so that they are distributed
- * across multiple workers on machines with lots of cores.
+ * across mulitple workers on machines with lots of cores.
  */
 const EXTRA_SCSS_WORK_UNITS = 100;
 
@@ -83,16 +83,6 @@ const observeCompiler = (
   const compilerMsgs = new CompilerMsgs(bundle.id);
   const done$ = new Rx.Subject();
   const { beforeRun, watchRun, done } = compiler.hooks;
-
-  const moduleFileDependencies = new Map<string, string[]>();
-  compiler.hooks.compilation.tap(PLUGIN_NAME, (compilation) => {
-    const hooks = NormalModule.getCompilationHooks(compilation);
-    hooks.beforeSnapshot.tap(PLUGIN_NAME, (module) => {
-      if (module.buildInfo?.fileDependencies?.size && module.buildInfo.fileDependencies.size > 0) {
-        moduleFileDependencies.set(module.identifier(), [...module.buildInfo.fileDependencies]);
-      }
-    });
-  });
 
   /**
    * Called by webpack as a single run compilation is starting
@@ -109,6 +99,7 @@ const observeCompiler = (
    */
   const complete$ = Rx.fromEventPattern<Stats>((cb) => done.tap(PLUGIN_NAME, cb)).pipe(
     maybeMap((stats) => {
+      // @ts-expect-error not included in types, but it is real https://github.com/webpack/webpack/blob/ab4fa8ddb3f433d286653cd6af7e3aad51168649/lib/Watching.js#L58
       if (stats.compilation.needAdditionalPass) {
         return undefined;
       }
@@ -151,12 +142,9 @@ const observeCompiler = (
             if (path.endsWith('.scss')) {
               workUnits += EXTRA_SCSS_WORK_UNITS;
 
-              const fileDeps = moduleFileDependencies.get(module.identifier());
-              if (fileDeps) {
-                for (const depPath of fileDeps) {
-                  referencedFiles.add(depPath);
-                }
-              }
+              /* for (const depPath of module.buildInfo.fileDependencies) {
+                referencedFiles.add(depPath);
+              } */
             }
 
             continue;
