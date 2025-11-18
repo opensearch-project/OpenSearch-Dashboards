@@ -28,40 +28,12 @@
  * under the License.
  */
 
-import { template, escape, keys } from 'lodash';
+import { escape, keys } from 'lodash';
 import { shortenDottedString } from '../../utils';
 import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
 import { FieldFormat } from '../field_format';
 import { TextContextTypeConvert, HtmlContextTypeConvert, FIELD_FORMAT_IDS } from '../types';
 import { UI_SETTINGS } from '../../constants';
-
-/**
- * Remove all of the whitespace between html tags
- * so that inline elements don't have extra spaces.
- *
- * If you have inline elements (span, a, em, etc.) and any
- * amount of whitespace around them in your markup, then the
- * browser will push them apart. This is ugly in certain
- * scenarios and is only fixed by removing the whitespace
- * from the html in the first place (or ugly css hacks).
- *
- * @param  {string} html - the html to modify
- * @return {string} - modified html
- */
-function noWhiteSpace(html: string) {
-  const TAGS_WITH_WS = />\s+</g;
-  return html.replace(TAGS_WITH_WS, '><');
-}
-
-const templateHtml = `
-  <dl class="source truncate-by-height">
-    <% defPairs.forEach(function (def) { %>
-      <dt><%- def[0] %>:</dt>
-      <dd><%= def[1] %></dd>
-      <%= ' ' %>
-    <% }); %>
-  </dl>`;
-const doTemplate = template(noWhiteSpace(templateHtml));
 
 export class SourceFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS._SOURCE;
@@ -92,6 +64,21 @@ export class SourceFormat extends FieldFormat {
       pairs.push([newField, val]);
     }, []);
 
-    return doTemplate({ defPairs: highlightPairs.concat(sourcePairs) });
+    const defPairs = highlightPairs.concat(sourcePairs);
+    /**
+     * Build HTML without whitespace between tags to prevent extra spacing.
+     *
+     * If you have inline elements (span, a, em, etc.) and any amount of
+     * whitespace around them in your markup, then the browser will push
+     * them apart. This is ugly in certain scenarios and is only fixed by
+     * removing the whitespace from the html in the first place (or ugly css hacks).
+     *
+     * Note: The space after </dd> is intentional to provide proper spacing between
+     * definition pairs.
+     */
+    const pairHtml = defPairs
+      .map((def) => `<dt>${escape(def[0])}:</dt><dd>${def[1]}</dd> `)
+      .join('');
+    return `<dl class="source truncate-by-height">${pairHtml}</dl>`;
   };
 }
