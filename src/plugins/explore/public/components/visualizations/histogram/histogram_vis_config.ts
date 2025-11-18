@@ -17,6 +17,8 @@ import {
   AggregationType,
   BucketOptions,
   ThresholdOptions,
+  ValueMappingOptions,
+  FilterOption,
 } from '../types';
 import { HistogramVisStyleControls } from './histogram_vis_options';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
@@ -44,6 +46,8 @@ export interface HistogramChartStyleOptions {
   thresholdOptions?: ThresholdOptions;
 
   useThresholdColor?: boolean;
+  valueMappingOptions?: ValueMappingOptions;
+  filterOption?: FilterOption;
 }
 
 export type HistogramChartStyle = Required<HistogramChartStyleOptions>;
@@ -115,6 +119,10 @@ export const defaultHistogramChartStyles: HistogramChartStyle = {
   bucket: {
     aggregationType: AggregationType.SUM,
   },
+  valueMappingOptions: {
+    valueMappings: [],
+  },
+  filterOption: 'filterAll',
 };
 
 export const createHistogramConfig = (): VisualizationType<'histogram'> => ({

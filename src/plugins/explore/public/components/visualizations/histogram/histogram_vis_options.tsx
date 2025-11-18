@@ -16,6 +16,7 @@ import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole, VisFieldType } from '../types';
 import { BucketOptionsPanel } from '../bar/bucket_options';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { ValueMappingPanel } from '../style_panel/value_mapping/value_mapping_panel';
 
 export type HistogramVisStyleControlsProps = StyleControlsProps<HistogramChartStyle>;
 
@@ -70,6 +71,12 @@ export const HistogramVisStyleControls: React.FC<HistogramVisStyleControlsProps>
               onChange={(bucket) => updateStyleOption('bucket', bucket)}
             />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ValueMappingPanel
+              valueMappingOption={styleOptions?.valueMappingOptions}
+              onChange={(val) => updateStyleOption('valueMappingOptions', val)}
+            />
+          </EuiFlexItem>
 
           <EuiFlexItem>
             <ThresholdPanel
@@ -113,6 +120,8 @@ export const HistogramVisStyleControls: React.FC<HistogramVisStyleControlsProps>
                 updateStyleOption('useThresholdColor', useThresholdColor)
               }
               shouldDisableUseThresholdColor={hasColorMapping}
+              filterOption={styleOptions?.filterOption}
+              onFilterOptionChange={(option) => updateStyleOption('filterOption', option)}
             />
           </EuiFlexItem>
 

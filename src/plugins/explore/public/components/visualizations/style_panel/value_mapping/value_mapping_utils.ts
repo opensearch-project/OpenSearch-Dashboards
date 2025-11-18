@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PieChartStyle } from './pie_vis_config';
-import { FilterOption, ValueMapping } from '../types';
-import { getCategoryNextColor, resolveColor } from '../theme/color_utils';
-import { DEFAULT_GREY } from '../theme/default_colors';
+import { FilterOption, ValueMapping } from '../../types';
+import { getCategoryNextColor, resolveColor } from '../../theme/color_utils';
+import { DEFAULT_GREY } from '../../theme/default_colors';
 
 export const decideScale = (
   filterOption: FilterOption | undefined,
@@ -48,7 +47,7 @@ export const generateTransformLayer = (
   numericField: string | undefined,
   validRanges: ValueMapping[] | undefined,
   validValues: ValueMapping[] | undefined,
-  styleOptions: PieChartStyle
+  filterOption: FilterOption | undefined
 ) => {
   if (!canUseValueMapping) return [];
   if (validRanges && validRanges?.length > 0 && validValues?.length === 0) {
@@ -72,7 +71,7 @@ export const generateTransformLayer = (
         calculate: `${rangeConditions}null`,
         as: 'mappingValue',
       },
-      decideTransform(styleOptions?.filterOption),
+      decideTransform(filterOption),
     ].filter(Boolean);
   }
   return [
@@ -89,14 +88,14 @@ export const generateTransformLayer = (
         fields: ['mappingValue', 'displayText'],
       },
     },
-    decideTransform(styleOptions?.filterOption),
+    decideTransform(filterOption),
   ].filter(Boolean);
 };
 
 export const generateLabelExpr = (
   validRanges: ValueMapping[] | undefined,
   validValues: ValueMapping[] | undefined,
-  styleOptions: PieChartStyle
+  filterOption: FilterOption
 ) => {
   const usingRanges = validRanges && validRanges?.length > 0 && validValues?.length === 0;
   const items = usingRanges ? validRanges : validValues;
@@ -116,7 +115,7 @@ export const generateLabelExpr = (
     )
     .join(', ');
 
-  if (styleOptions.filterOption === 'filterButKeepOpposite') {
+  if (filterOption === 'filterButKeepOpposite') {
     mappingObject = mappingObject + `, null: 'unmatched'`;
   }
 

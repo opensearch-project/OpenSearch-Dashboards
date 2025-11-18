@@ -6,7 +6,11 @@
 import { defaultPieChartStyles, PieChartStyle } from './pie_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { DEFAULT_OPACITY } from '../constants';
-import { decideScale, generateTransformLayer, generateLabelExpr } from './pie_chart_utils';
+import {
+  generateTransformLayer,
+  decideScale,
+  generateLabelExpr,
+} from '../style_panel/value_mapping/value_mapping_utils';
 
 export const createPieSpec = (
   transformedData: Array<Record<string, any>>,
@@ -71,7 +75,11 @@ export const createPieSpec = (
       legend: styleOptions.addLegend
         ? {
             ...(canUseValueMapping && {
-              labelExpr: generateLabelExpr(validRanges, validValues, styleOptions),
+              labelExpr: generateLabelExpr(
+                validRanges,
+                validValues,
+                styleOptions?.filterOption ?? 'none'
+              ),
             }),
             title: styleOptions.legendTitle,
             orient: styleOptions.legendPosition,
@@ -158,7 +166,7 @@ export const createPieSpec = (
       numericField,
       validRanges,
       validValues,
-      styleOptions
+      styleOptions?.filterOption ?? 'none'
     ),
     layer: [
       markLayer,
