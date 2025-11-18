@@ -1,0 +1,2 @@
+fix:
+- Detect serverless data source ([#10840](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10840))
