@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { ChatPlugin } from './plugin';
 import { ChatService } from './services/chat_service';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
@@ -255,17 +254,11 @@ describe('ChatPlugin', () => {
       );
     });
 
-    it('should call startNewConversation when global search action is triggered', async () => {
-      const mockStartNewConversation = jest.fn().mockResolvedValue(undefined);
-
-      // Mock React.createRef to return a ref with our mock function
-      const mockRef = {
-        current: {
-          startNewConversation: mockStartNewConversation,
-        },
-      };
-      jest.spyOn(React, 'createRef').mockReturnValue(mockRef as any);
-
+    it('should call sendMessageWithWindow when global search action is triggered', async () => {
+      const sendMessageWithWindowMock = jest.fn();
+      jest
+        .spyOn(ChatService.prototype, 'sendMessageWithWindow')
+        .mockImplementationOnce(sendMessageWithWindowMock);
       plugin.start(mockCoreStart, mockDeps);
 
       const registerCall = (mockCoreStart.chrome.globalSearch.registerSearchCommand as jest.Mock)
@@ -275,7 +268,9 @@ describe('ChatPlugin', () => {
       // Trigger the action
       await commandConfig.action({ content: 'test query' });
 
-      expect(mockStartNewConversation).toHaveBeenCalledWith({ content: 'test query' });
+      expect(sendMessageWithWindowMock).toHaveBeenCalledWith('test query', [], {
+        clearConversation: true,
+      });
     });
   });
 
