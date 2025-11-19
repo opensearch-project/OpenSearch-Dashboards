@@ -180,6 +180,7 @@
       "test/interpreter_functional/plugins/*"
     ],
     "nohoist": [
+      "**/json11",
       "**/@types/*",
       "**/@types/*/**",
       "**/grunt-*",
@@ -288,6 +289,7 @@
     "mustache": "^2.3.2",
     "ndjson": "^2.0.0",
     "node-fetch": "^2.6.7",
+    "node-polyfill-webpack-plugin": "^4.1.0",
     "p-map": "^4.0.0",
     "papaparse": "^5.5.2",
     "pegjs": "0.10.0",
@@ -354,6 +356,10 @@
     "@osd/utility-types": "1.0.0",
     "@percy/cli": "^1.0.0",
     "@percy/sdk-utils": "^1.0.0",
+    "@rsdoctor/rspack-plugin": "^1.3.11",
+    "@rspack/cli": "^1.6.4",
+    "@rspack/core": "^1.6.4",
+    "@swc/helpers": "^0.5.17",
     "@testing-library/dom": "^8.11.3",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^12.1.5",

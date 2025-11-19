@@ -44,8 +44,8 @@
     "css-loader": "^5.2.7",
     "del": "^6.1.1",
     "loader-utils": "^2.0.4",
-    "sass-embedded": "1.66.1",
-    "sass-loader": "npm:@amoo-miki/sass-loader@10.4.1-node-sass-9.0.0-libsass-3.6.5-with-sass-embedded.rc1",
+    "sass-embedded": "1.93.3",
+    "sass-loader": "16.0.5",
     "val-loader": "^2.1.2",
     "webpack": "npm:@amoo-miki/webpack@4.46.0-xxhash.1"
   }
