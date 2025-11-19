@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
@@ -14,7 +14,6 @@ import {
 } from '../../../../../../common';
 import { ModeSelectionRow } from './mode_selection_row';
 import { MatchingIndicesList } from './matching_indices_list';
-import { validatePrefix, canAppendWildcard } from './index_data_structure_creator_utils';
 import './index_data_structure_creator.scss';
 
 type SelectionMode = 'single' | 'prefix';
@@ -25,18 +24,34 @@ export const IndexDataStructureCreator: React.FC<DataStructureCreatorProps> = ({
   selectDataStructure,
 }) => {
   const current = path[index];
-  const isLast = index === path.length - 1;
-  const isFinal = isLast && !current.hasNext;
 
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('single');
   const [customPrefix, setCustomPrefix] = useState('');
-  const [validationError, setValidationError] = useState<string>('');
-  const [appendedWildcard, setAppendedWildcard] = useState(false);
-  const [selectedIndexId, setSelectedIndexId] = useState<string | null>(null);
+  const [selectedIndexIds, setSelectedIndexIds] = useState<string[]>([]);
+  const [wildcardPatterns, setWildcardPatterns] = useState<string[]>([]);
 
-  // Filter indices that match the custom prefix pattern
   const matchingIndices = useMemo(() => {
-    if (selectionMode !== 'prefix' || !customPrefix) {
+    if (selectionMode !== 'prefix') {
+      return [];
+    }
+
+    if (wildcardPatterns.length > 0) {
+      const children = current.children || [];
+      const allMatches = new Set<string>();
+
+      wildcardPatterns.forEach((pattern) => {
+        const regexPattern = pattern.replace(/\*/g, '.*');
+        const regex = new RegExp(`^${regexPattern}$`, 'i');
+
+        children
+          .filter((child) => regex.test(child.title))
+          .forEach((child) => allMatches.add(child.title));
+      });
+
+      return Array.from(allMatches).sort();
+    }
+
+    if (!customPrefix) {
       return [];
     }
 
@@ -45,7 +60,7 @@ export const IndexDataStructureCreator: React.FC<DataStructureCreatorProps> = ({
     const regex = new RegExp(`^${pattern}$`, 'i');
 
     return children.filter((child) => regex.test(child.title)).map((child) => child.title);
-  }, [selectionMode, customPrefix, current.children]);
+  }, [selectionMode, wildcardPatterns, customPrefix, current.children]);
 
   const handleModeChange = (selectedOptions: Array<{ label: string; value?: string }>) => {
     if (selectedOptions.length > 0 && selectedOptions[0].value) {
@@ -53,81 +68,84 @@ export const IndexDataStructureCreator: React.FC<DataStructureCreatorProps> = ({
       setSelectionMode(newMode);
 
       if (newMode === 'prefix') {
+        // Show all indices initially to help users see what's available
         setCustomPrefix('*');
       } else {
         setCustomPrefix('');
       }
 
-      setValidationError('');
-      setAppendedWildcard(false);
+      setWildcardPatterns([]);
     }
   };
 
-  const handlePrefixChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { target } = e;
-    let value = target.value;
+  const handleMultiIndexSelectionChange = (selectedIds: string[]) => {
+    setSelectedIndexIds(selectedIds);
 
-    // Auto-append wildcard when user types a single alphanumeric character
-    // Places cursor before the wildcard for continued typing
-    if (value.length === 1 && canAppendWildcard(value)) {
-      value += '*';
-      setAppendedWildcard(true);
-      setTimeout(() => target.setSelectionRange(1, 1));
+    if (selectedIds.length > 0) {
+      // Create a combined data structure for multiple indices
+      const dataSourceId = path.find((item) => item.type === 'DATA_SOURCE')?.id || 'local';
+      const selectedTitles = selectedIds
+        .map((id) => current.children?.find((child) => child.id === id)?.title)
+        .filter(Boolean);
+
+      const combinedDataStructure: DataStructure = {
+        id: `${dataSourceId}::${selectedTitles.join(',')}`,
+        title: selectedTitles.join(','),
+        type: 'INDEX',
+        meta: {
+          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+          isMultiIndex: true,
+          selectedIndices: selectedIds,
+          selectedTitles,
+        },
+      };
+
+      selectDataStructure(combinedDataStructure, path.slice(0, index + 1));
     } else {
-      if (value === '*' && appendedWildcard) {
-        value = '';
-        setAppendedWildcard(false);
-      }
-    }
-
-    setCustomPrefix(value);
-
-    const error = validatePrefix(value);
-    setValidationError(error);
-
-    if (!error && value.trim()) {
-      const children = current.children || [];
-      const pattern = value.replace(/\*/g, '.*');
-      const regex = new RegExp(`^${pattern}$`, 'i');
-      const matches = children.filter((child) => regex.test(child.title));
-
-      if (matches.length === 0) {
-        setValidationError(
-          i18n.translate('data.datasetService.indexDataStructureCreator.noIndicesMatchError', {
-            defaultMessage: 'No indices match this prefix pattern',
-          })
-        );
-      } else {
-        const dataSourceId = path.find((item) => item.type === 'DATA_SOURCE')?.id || 'local';
-        const customDataStructure: DataStructure = {
-          id: `${dataSourceId}::${value}`,
-          title: value,
-          type: 'INDEX',
-          meta: {
-            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-            isCustomPrefix: true,
-            matchingIndicesCount: matches.length,
-          },
-        };
-
-        selectDataStructure(customDataStructure, path.slice(0, index + 1));
-      }
+      // Clear selection when no indices selected
+      selectDataStructure(undefined, path.slice(0, index + 1));
     }
   };
 
-  const handleIndexSelectionChange = (selectedId: string | null) => {
-    if (selectedId) {
-      const item = current.children?.find((child) => child.id === selectedId);
-      if (item) {
-        if (isFinal) {
-          setSelectedIndexId(selectedId);
-        }
-        selectDataStructure(item, path.slice(0, index + 1));
-      }
+  const handleWildcardPatternsChange = (patterns: string[]) => {
+    setWildcardPatterns(patterns);
+
+    if (patterns.length > 0) {
+      // Create a combined wildcard data structure
+      const dataSourceId = path.find((item) => item.type === 'DATA_SOURCE')?.id || 'local';
+      const combinedPattern = patterns.join(',');
+
+      // Calculate all matching indices
+      const childrenList = current.children || [];
+      const allMatches = new Set<string>();
+
+      patterns.forEach((pattern) => {
+        const regexPattern = pattern.replace(/\*/g, '.*');
+        const regex = new RegExp(`^${regexPattern}$`, 'i');
+
+        childrenList
+          .filter((child) => regex.test(child.title))
+          .forEach((child) => allMatches.add(child.title));
+      });
+
+      const matchingTitles = Array.from(allMatches).sort();
+
+      const wildcardDataStructure: DataStructure = {
+        id: `${dataSourceId}::${combinedPattern}`,
+        title: combinedPattern,
+        type: 'INDEX',
+        meta: {
+          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+          isMultiWildcard: true,
+          wildcardPatterns: patterns,
+          matchingIndices: matchingTitles,
+        },
+      };
+
+      selectDataStructure(wildcardDataStructure, path.slice(0, index + 1));
     } else {
-      if (isFinal) {
-        setSelectedIndexId(null);
-      }
+      // Clear selection when no patterns
+      selectDataStructure(undefined, path.slice(0, index + 1));
     }
   };
 
@@ -145,19 +163,100 @@ export const IndexDataStructureCreator: React.FC<DataStructureCreatorProps> = ({
       <ModeSelectionRow
         selectionMode={selectionMode}
         onModeChange={handleModeChange}
-        customPrefix={customPrefix}
-        validationError={validationError}
-        onPrefixChange={handlePrefixChange}
+        wildcardPatterns={wildcardPatterns}
+        onWildcardPatternsChange={handleWildcardPatternsChange}
         children={current.children}
-        selectedIndexId={selectedIndexId}
-        isFinal={isFinal}
-        onIndexSelectionChange={handleIndexSelectionChange}
+        selectedIndexIds={selectedIndexIds}
+        onMultiIndexSelectionChange={handleMultiIndexSelectionChange}
       />
 
       <EuiSpacer size="s" />
 
+      {selectionMode === 'single' && selectedIndexIds.length > 0 && (
+        <>
+          <EuiText size="s">
+            <strong>
+              {i18n.translate('data.datasetService.indexSelector.selectedIndicesLabel', {
+                defaultMessage: 'Selected Indices:',
+              })}
+            </strong>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <div className="indexDataStructureCreator__selectedIndices">
+            {selectedIndexIds.map((indexId) => {
+              const indexTitle =
+                current.children?.find((child) => child.id === indexId)?.title || indexId;
+              return (
+                <div key={indexId} className="indexDataStructureCreator__badgeContainer">
+                  <EuiBadge
+                    color="primary"
+                    iconType="cross"
+                    iconSide="right"
+                    iconOnClick={() => {
+                      const newSelectedIds = selectedIndexIds.filter((id) => id !== indexId);
+                      handleMultiIndexSelectionChange(newSelectedIds);
+                    }}
+                    iconOnClickAriaLabel={i18n.translate(
+                      'data.datasetService.indexSelector.removeIndex',
+                      {
+                        defaultMessage: 'Remove index {indexTitle}',
+                        values: { indexTitle },
+                      }
+                    )}
+                  >
+                    {indexTitle}
+                  </EuiBadge>
+                </div>
+              );
+            })}
+          </div>
+          <EuiSpacer size="s" />
+        </>
+      )}
+
+      {selectionMode === 'prefix' && wildcardPatterns.length > 0 && (
+        <>
+          <EuiText size="s">
+            <strong>
+              {i18n.translate('data.datasetService.multiWildcard.patternsLabel', {
+                defaultMessage: 'Wildcard Patterns:',
+              })}
+            </strong>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiBadgeGroup gutterSize="s">
+            {wildcardPatterns.map((pattern) => (
+              <EuiBadge
+                key={pattern}
+                color="primary"
+                iconType="cross"
+                iconSide="right"
+                iconOnClick={() => {
+                  const newPatterns = wildcardPatterns.filter((p) => p !== pattern);
+                  setWildcardPatterns(newPatterns);
+                  handleWildcardPatternsChange(newPatterns);
+                }}
+                iconOnClickAriaLabel={i18n.translate(
+                  'data.datasetService.multiWildcard.removePattern',
+                  {
+                    defaultMessage: 'Remove pattern {pattern}',
+                    values: { pattern },
+                  }
+                )}
+              >
+                {pattern}
+              </EuiBadge>
+            ))}
+          </EuiBadgeGroup>
+          <EuiSpacer size="s" />
+        </>
+      )}
+
       {selectionMode === 'prefix' && (
-        <MatchingIndicesList matchingIndices={matchingIndices} customPrefix={customPrefix} />
+        <MatchingIndicesList
+          matchingIndices={matchingIndices}
+          customPrefix={wildcardPatterns.length > 0 ? wildcardPatterns.join(',') : customPrefix}
+        />
       )}
     </div>
   );
