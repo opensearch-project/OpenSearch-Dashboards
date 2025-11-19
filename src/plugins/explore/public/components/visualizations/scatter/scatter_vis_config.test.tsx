@@ -6,7 +6,7 @@
 import React from 'react';
 import { createScatterConfig, defaultScatterChartStyles } from './scatter_vis_config';
 import { ScatterVisStyleControls } from './scatter_vis_options';
-import { Positions, PointShape, AxisRole, ThresholdMode } from '../types';
+import { Positions, PointShape, ThresholdMode } from '../types';
 
 // Mock the React.createElement function
 jest.mock('react', () => ({

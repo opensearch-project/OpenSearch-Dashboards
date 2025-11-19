@@ -6,14 +6,7 @@
 import React from 'react';
 import { createLineConfig } from './line_vis_config';
 import { LineVisStyleControls } from './line_vis_options';
-import {
-  CategoryAxis,
-  GridOptions,
-  ThresholdMode,
-  ValueAxis,
-  Positions,
-  TooltipOptions,
-} from '../types';
+import { GridOptions, ThresholdMode, Positions, TooltipOptions } from '../types';
 import { LineStyle } from './line_exclusive_vis_options';
 
 // Mock the React.createElement function

@@ -3,15 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  getVegaInterpolation,
-  buildMarkConfig,
-  createTimeMarkerLayer,
-  applyAxisStyling,
-  ValueAxisPosition,
-} from './line_chart_utils';
-import { VisColumn, VisFieldType, Positions } from '../types';
-import { defaultLineChartStyles, LineChartStyle } from './line_vis_config';
+import { getVegaInterpolation, buildMarkConfig, createTimeMarkerLayer } from './line_chart_utils';
+import { defaultLineChartStyles } from './line_vis_config';
 
 describe('Line Chart Utils', () => {
   describe('getVegaInterpolation', () => {

@@ -4,7 +4,7 @@
  */
 import React from 'react';
 import { createHistogramConfig, defaultHistogramChartStyles } from './histogram_vis_config';
-import { Positions, ThresholdMode, AxisRole, AggregationType } from '../types';
+import { ThresholdMode, AxisRole, AggregationType } from '../types';
 import { HistogramVisStyleControls } from './histogram_vis_options';
 
 describe('bar_vis_config', () => {
