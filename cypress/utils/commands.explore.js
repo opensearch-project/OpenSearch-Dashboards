@@ -379,11 +379,15 @@ cy.explore.add(
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Indexes"]`).click();
     cy.get(`[title="${dataSourceName}"]`).click();
+    // Click the search field to open the index selector popover and type to filter
+    cy.get('.indexSelector input[type="text"]').should('be.visible').click().clear().type(index);
+
+    // Wait for popover to appear and select the filtered index
     cy.getElementByTestId('dataset-index-selector')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
-    // this element is sometimes dataSourceName masked by another element
-    cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
+      .should('be.visible')
+      .within(() => {
+        cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
+      });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
 
     if (language) {
