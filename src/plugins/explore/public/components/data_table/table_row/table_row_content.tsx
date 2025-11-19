@@ -123,6 +123,10 @@ export const TableRowContent: React.FC<TableRowContentProps> = ({
               colName={colName}
               className={getCellClassName(dataset.timeFieldName, colName)}
               sanitizedCellValue={sanitizedCellValue}
+              isTimeField={dataset.timeFieldName === colName}
+              index={index}
+              rowData={row}
+              columnId={colName}
             />
           );
         }

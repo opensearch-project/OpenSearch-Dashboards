@@ -41,6 +41,7 @@ export interface ChatWindowInstance{
 interface ChatWindowProps {
   layoutMode?: ChatLayoutMode;
   onToggleLayout?: () => void;
+  onClose: ()=>void;
 }
 
 /**
@@ -53,6 +54,7 @@ export const ChatWindow = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(({
   layoutMode = ChatLayoutMode.SIDECAR,
   onToggleLayout,
+  onClose,
 }, ref) => {
   const service = AssistantActionService.getInstance();
   const [availableTools, setAvailableTools] = useState<ToolDefinition[]>([]);
@@ -288,6 +290,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         isStreaming={isStreaming}
         onToggleLayout={onToggleLayout}
         onNewChat={handleNewChat}
+        onClose={onClose}
       />
 
       <ChatMessages
