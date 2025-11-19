@@ -203,6 +203,7 @@ export const MultiWildcardSelector: React.FC<MultiWildcardSelectorProps> = ({
       isInvalid={hasValidationErrors}
       error={hasValidationErrors ? errorMessage : undefined}
       fullWidth
+      data-test-subj="dataset-prefix-selector"
     >
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem>

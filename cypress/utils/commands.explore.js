@@ -466,12 +466,7 @@ cy.explore.add(
     // Step 7 - Enter index pattern
     cy.getElementByTestId('dataset-prefix-selector')
       .should('be.visible')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
-
-    cy.getElementByTestId('dataset-prefix-selector')
-      .should('be.visible')
-      .find('[data-test-subj="comboBoxSearchInput"]')
+      .find('[data-test-subj="multiWildcardPatternInput"]')
       .clear()
       .type(`${indexPattern}*{enter}`);
 
@@ -636,14 +631,9 @@ cy.explore.add(
     // Step 7 - Enter index pattern
     cy.getElementByTestId('dataset-prefix-selector')
       .should('be.visible')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
-
-    cy.getElementByTestId('dataset-prefix-selector')
-      .should('be.visible')
-      .find('[data-test-subj="comboBoxSearchInput"]')
+      .find('[data-test-subj="multiWildcardPatternInput"]')
       .clear()
-      .type(`${indexPattern}*{enter}`);
+      .type(`${indexPattern}{enter}`);
 
     // Step 8 - Click Next button
     cy.getElementByTestId('datasetSelectorNext')
