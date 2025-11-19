@@ -77,7 +77,7 @@ export const connectStorageToQueryState = (
       syncKeys.push('appFilters');
     }
 
-    const initialStateFromURL: QueryState = osdUrlStateStorage.get('_q') ?? {
+    const initialState: QueryState = osdUrlStateStorage.get('_q') ?? {
       query: queryString.getDefaultQuery(),
       // If caller specifies to skip filters from memory, use empty array
       filters: syncConfig.skipAppFiltersFromMemory ? [] : filterManager.getAppFilters(),
@@ -85,7 +85,7 @@ export const connectStorageToQueryState = (
 
     if (!osdUrlStateStorage.get('_q')) {
       // set up initial '_q' flag in the URL to sync query and filter changes
-      osdUrlStateStorage.set('_q', initialStateFromURL, {
+      osdUrlStateStorage.set('_q', initialState, {
         replace: true,
       });
       // clear existing query and apply default query
@@ -97,22 +97,22 @@ export const connectStorageToQueryState = (
       filterManager.setAppFilters([]);
     }
 
-    if (syncConfig.query && !_.isEqual(initialStateFromURL.query, queryString.getQuery())) {
-      if (initialStateFromURL.query) {
-        queryString.setQuery(_.cloneDeep(initialStateFromURL.query));
+    if (syncConfig.query && !_.isEqual(initialState.query, queryString.getQuery())) {
+      if (initialState.query) {
+        queryString.setQuery(_.cloneDeep(initialState.query));
       }
     }
 
     if (syncConfig.filters === FilterStateStore.APP_STATE) {
       if (
-        !initialStateFromURL.filters ||
-        !compareFilters(initialStateFromURL.filters, filterManager.getAppFilters(), {
+        !initialState.filters ||
+        !compareFilters(initialState.filters, filterManager.getAppFilters(), {
           ...COMPARE_ALL_OPTIONS,
           state: false,
         })
       ) {
-        if (initialStateFromURL.filters) {
-          filterManager.setAppFilters(_.cloneDeep(initialStateFromURL.filters));
+        if (initialState.filters) {
+          filterManager.setAppFilters(_.cloneDeep(initialState.filters));
         }
       }
 
