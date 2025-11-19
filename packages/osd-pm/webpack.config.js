@@ -29,6 +29,7 @@
  */
 
 const path = require('path');
+const { getSwcLoaderConfig } = require('@osd/utils');
 
 module.exports = {
   mode: 'none',
@@ -41,7 +42,7 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
     libraryTarget: 'commonjs2',
-    hashFunction: 'Xxh64',
+    hashFunction: 'xxhash64',
   },
 
   resolve: {
@@ -52,15 +53,7 @@ module.exports = {
     rules: [
       {
         test: /\.[jt]s$/,
-        use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              presets: [require.resolve('@osd/babel-preset/node_preset')],
-            },
-          },
-        ],
+        use: [getSwcLoaderConfig({ syntax: 'typescript', targets: ['node 22'] })],
         exclude: /node_modules/,
       },
     ],

@@ -97,7 +97,8 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           return;
         }
 
-        for (const { bundleId: id, type } of state.compilerStates) {
+        for (const compilerState of state.compilerStates) {
+          const { bundleId: id, type } = compilerState;
           const prevBundleState = bundleStates.get(id);
 
           if (type === prevBundleState) {
@@ -109,9 +110,16 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
           }
 
           bundleStates.set(id, type);
-          log.debug(
-            `[${id}] state = "${type}"${type !== 'running' ? ` after ${state.durSec} sec` : ''}`
-          );
+
+          if (type === 'compiler success') {
+            log.info(
+              `[${id}] compiled successfully after ${compilerState.durationSec.toFixed(3)}s`
+            );
+          } else {
+            log.debug(
+              `[${id}] state = "${type}"${type !== 'running' ? ` after ${state.durSec} sec` : ''}`
+            );
+          }
         }
 
         if (state.phase === 'running' || state.phase === 'initializing') {

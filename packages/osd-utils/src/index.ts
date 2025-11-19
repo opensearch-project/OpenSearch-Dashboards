@@ -30,4 +30,5 @@
 
 export * from './package_json';
 export * from './path';
+export * from './build/rspack';
 export { REPO_ROOT, REPO_ROOT_8_3, UPSTREAM_BRANCH } from '@osd/cross-platform';
