@@ -19,10 +19,9 @@ import { DebouncedFieldText, DebouncedFieldNumber } from '.././utils';
 import { StyleAccordion } from '../../style_panel/style_accordion';
 import { AXIS_LABEL_MAX_LENGTH } from '../../constants';
 import { getSchemaByAxis } from '../../utils/utils';
-import { getAxisConfigByColumnMapping } from '../../utils/axis';
 
 interface AllAxesOptionsProps {
-  standardAxes?: StandardAxes[];
+  standardAxes: StandardAxes[];
   onStandardAxesChange: (categoryAxes: StandardAxes[]) => void;
   axisColumnMappings: Partial<Record<AxisRole, VisColumn>>;
   disableGrid?: boolean;
@@ -54,12 +53,8 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
   onShowFullTimeRangeChange,
   initialIsOpen = false,
 }) => {
-  const allAxisConfig = useMemo(() => {
-    return getAxisConfigByColumnMapping(axisColumnMappings, standardAxes);
-  }, [axisColumnMappings, standardAxes]);
-
   const updateAxis = (index: number, updates: Partial<StandardAxes>) => {
-    const updatedAxes = [...allAxisConfig];
+    const updatedAxes = [...standardAxes];
     updatedAxes[index] = {
       ...updatedAxes[index],
       ...updates,
@@ -136,7 +131,7 @@ export const AllAxesOptions: React.FC<AllAxesOptionsProps> = ({
       initialIsOpen={initialIsOpen}
       data-test-subj="standardAxesPanel"
     >
-      {allAxisConfig.map((axis, index) => {
+      {standardAxes.map((axis, index) => {
         return (
           <EuiSplitPanel.Inner paddingSize="s" key={axis.axisRole} color="subdued">
             <EuiText size="s" style={{ fontWeight: 600 }}>

@@ -90,11 +90,13 @@ export const VisualizationRender = ({
     if (!rule || !rule.toSpec) {
       return;
     }
-    // const styles = { ...visConfig.styles, standardAxes: [] };
+
     const standardAxes = 'standardAxes' in visConfig.styles ? visConfig.styles.standardAxes : [];
     const axisColumnMappings = convertStringsToMappings(visConfig?.axesMapping ?? {}, columns);
+    // initialize axis config
     const allAxisConfig = getAxisConfigByColumnMapping(axisColumnMappings, standardAxes);
     const styles = { ...visConfig.styles, standardAxes: allAxisConfig };
+
     return rule.toSpec(
       visualizationData.transformedData,
       visualizationData.numericalColumns,
