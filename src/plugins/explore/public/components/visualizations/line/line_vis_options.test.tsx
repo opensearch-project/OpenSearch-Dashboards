@@ -158,7 +158,6 @@ jest.mock('../style_panel/title/title', () => ({
 
 describe('LineVisStyleControls', () => {
   const defaultCategoryAxis: StandardAxes = {
-    type: 'category',
     position: Positions.BOTTOM,
     show: true,
     labels: {
@@ -175,7 +174,6 @@ describe('LineVisStyleControls', () => {
   };
 
   const defaultValueAxis: StandardAxes = {
-    type: 'value',
     position: Positions.LEFT,
     show: true,
     labels: {

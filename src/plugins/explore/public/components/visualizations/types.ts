@@ -178,13 +178,8 @@ export interface Grid {
 }
 
 export interface StandardAxes {
-  id?: string;
-  name?: string;
-  field?: FieldSetting;
-  type?: 'value' | 'category';
   position: Positions;
   show: boolean;
-  style?: Record<string, any>;
   labels: AxisLabels;
   title: AxisTitle;
   axisRole: AxisRole;

@@ -66,10 +66,8 @@ jest.mock('../../style_panel/utils', () => ({
 describe('AllAxesOptions', () => {
   const mockStandardAxes: StandardAxes[] = [
     {
-      id: 'Axis-1',
       position: Positions.BOTTOM,
       show: true,
-      style: {},
       labels: {
         show: true,
         rotate: 0,
@@ -85,10 +83,8 @@ describe('AllAxesOptions', () => {
       axisRole: AxisRole.X,
     },
     {
-      id: 'Axis-2',
       position: Positions.LEFT,
       show: true,
-      style: {},
       labels: {
         show: true,
         rotate: 0,
