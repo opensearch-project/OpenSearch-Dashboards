@@ -221,7 +221,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             /* vega-lite and some of its dependencies don't have es5 builds
              * so we need to build from source and transpile for webpack v4
              */
-            /[\/\\]node_modules[\/\\](?!vega-(lite-next|label|functions)[\/\\])/,
+            /[\/\\]node_modules[\/\\](?!vega-(lite-next|lite|label|functions|scenegraph)[\/\\])/,
 
             // Don't attempt to look into release artifacts of the plugins
             /[\/\\]plugins[\/\\][^\/\\]+[\/\\]build[\/\\]/,
@@ -263,6 +263,22 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             loader: 'babel-loader',
             options: {
               presets: [BABEL_PRESET_PATH],
+            },
+          },
+        },
+        {
+          test: /\.m?js$/,
+          include: [/node_modules[\\/]fast-png/, /node_modules[\\/]iobuffer/],
+          use: {
+            loader: 'babel-loader',
+            options: {
+              presets: [BABEL_PRESET_PATH],
+              plugins: [
+                '@babel/plugin-transform-class-properties',
+                '@babel/plugin-transform-class-static-block',
+                '@babel/plugin-transform-private-methods',
+                '@babel/plugin-transform-private-property-in-object',
+              ],
             },
           },
         },
