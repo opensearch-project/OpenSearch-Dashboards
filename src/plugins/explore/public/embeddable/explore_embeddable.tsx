@@ -48,7 +48,7 @@ import { defaultPrepareQueryString } from '../application/utils/state_management
 import { convertStringsToMappings } from '../components/visualizations/visualization_builder_utils';
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
-import { getQueryWithSource } from '../application/utils/languages';
+import { prepareQueryForLanguage } from '../application/utils/languages';
 
 export interface SearchProps {
   description?: string;
@@ -198,7 +198,7 @@ export class ExploreEmbeddable
       if (activeTab === 'logs') {
         query.query = defaultPrepareQueryString(query);
       } else {
-        query.query = getQueryWithSource(query).query;
+        query.query = prepareQueryForLanguage(query).query;
       }
     }
     searchSource.setFields({
