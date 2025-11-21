@@ -1,0 +1,2 @@
+feat:
+- Integrate dynamic config to disable global settings updates for non-admin users ([#10959](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10959))
