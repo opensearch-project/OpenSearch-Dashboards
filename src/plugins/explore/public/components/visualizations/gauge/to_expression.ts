@@ -64,7 +64,7 @@ export const createGauge = (
     minBase,
     maxBase,
     // TODO: update to use the color from color palette
-    styleOptions?.thresholdOptions?.baseColor || colors.statusGreen,
+    styleOptions?.thresholdOptions?.baseColor,
     styleOptions?.thresholdOptions?.thresholds,
     calculatedValue
   );
