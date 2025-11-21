@@ -19,7 +19,7 @@ export const DelimiterSelect = ({ onDelimiterChange, initialDelimiter }: Delimit
       <EuiTitle size="xs">
         <span>
           {i18n.translate('dataImporter.delimiter', {
-            defaultMessage: 'Delimiter Options',
+            defaultMessage: 'Delimiter options',
           })}
         </span>
       </EuiTitle>
@@ -30,7 +30,6 @@ export const DelimiterSelect = ({ onDelimiterChange, initialDelimiter }: Delimit
         onChange={onDelimiterChange}
         value={initialDelimiter}
       />
-      <EuiSpacer size="m" />
     </div>
   );
 };

@@ -54,7 +54,7 @@ export const ImportTypeSelector = ({
           <EuiTitle size="xs">
             <span>
               {i18n.translate('dataImporter.importType', {
-                defaultMessage: 'Import Type',
+                defaultMessage: 'Import type',
               })}
             </span>
           </EuiTitle>
@@ -94,8 +94,6 @@ export const ImportTypeSelector = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
     </EuiFormFieldset>
   );
 };
