@@ -78,6 +78,17 @@ const traceTestSuite = () => {
 
   describe('Traces Test', () => {
     beforeEach(() => {
+      // Clear the explore URL state from sessionStorage to prevent logs column settings
+      // from persisting to traces page during test execution.
+      cy.window().then((win) => {
+        const workspaceKey = Object.keys(win.sessionStorage).find((key) =>
+          key.includes(':explore')
+        );
+        if (workspaceKey) {
+          win.sessionStorage.removeItem(workspaceKey);
+        }
+      });
+
       // mock AI mode disablement
       cy.intercept('GET', '**/enhancements/assist/languages*', {
         statusCode: 200,

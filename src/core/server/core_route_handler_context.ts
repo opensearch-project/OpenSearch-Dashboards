@@ -117,6 +117,9 @@ class CoreUiSettingsRouteHandlerContext {
 class CoreDynamicConfigRouteHandlerContext {
   #client?: IDynamicConfigurationClient;
   #asyncLocalStore?: AsyncLocalStorageContext;
+  #createStoreFromRequest?: (
+    req: OpenSearchDashboardsRequest
+  ) => AsyncLocalStorageContext | undefined;
 
   constructor(private readonly dynamicConfigServiceStart: InternalDynamicConfigServiceStart) {}
 
@@ -128,6 +131,11 @@ class CoreDynamicConfigRouteHandlerContext {
   public get asyncLocalStore() {
     this.#asyncLocalStore = this.dynamicConfigServiceStart.getAsyncLocalStore();
     return this.#asyncLocalStore;
+  }
+
+  public createStoreFromRequest(req: OpenSearchDashboardsRequest) {
+    this.#createStoreFromRequest = this.dynamicConfigServiceStart.createStoreFromRequest;
+    return this.#createStoreFromRequest(req);
   }
 }
 

@@ -33,6 +33,7 @@ export interface StateTimeLineChartStyleOptions {
   tooltipOptions?: TooltipOptions;
   addLegend?: boolean;
   legendPosition?: Positions;
+  legendTitle?: string;
   // Axes configuration
   standardAxes?: StandardAxes[];
 
@@ -54,6 +55,7 @@ export const defaultStateTimeLineChartStyles: StateTimeLineChartStyle = {
   },
   addLegend: true,
   legendPosition: Positions.RIGHT,
+  legendTitle: '',
 
   // exclusive
   exclusive: {

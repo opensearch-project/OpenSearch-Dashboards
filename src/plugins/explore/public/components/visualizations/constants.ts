@@ -19,6 +19,8 @@ export const CHART_METADATA: Record<ChartType, ChartMetadata> = {
   gauge: { type: 'gauge', name: 'Gauge', icon: 'visGauge' },
   state_timeline: { type: 'state_timeline', name: 'State timeline', icon: 'visBarHorizontal' },
   bar_gauge: { type: 'bar_gauge', name: 'Bar Gauge', icon: 'visBarHorizontal' },
+  // TODO add histogram icons
+  histogram: { type: 'histogram', name: 'Histogram', icon: 'visBarVertical' },
 };
 
 // Map both OSD_FIELD_TYPES and OPENSEARCH_FIELD_TYPES to VisFieldType
@@ -56,7 +58,7 @@ export const FIELD_TYPE_MAP: Partial<Record<string, VisFieldType>> = {
   [PPL_FIELD_TYPES.TIMESTAMP]: VisFieldType.Date,
   [PPL_FIELD_TYPES.TIME]: VisFieldType.Date,
   [PPL_FIELD_TYPES.INTERVAL]: VisFieldType.Unknown,
-  [PPL_FIELD_TYPES.IP]: VisFieldType.Unknown,
+  [PPL_FIELD_TYPES.IP]: VisFieldType.Categorical,
   [PPL_FIELD_TYPES.GEO_POINT]: VisFieldType.Unknown,
   [PPL_FIELD_TYPES.BINARY]: VisFieldType.Unknown,
   [PPL_FIELD_TYPES.STRUCT]: VisFieldType.Unknown,

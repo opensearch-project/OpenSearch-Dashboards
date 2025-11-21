@@ -28,6 +28,9 @@ export const toExpression = (
   spec.config = {
     ...spec.config,
     ...defaultTheme,
+    kibana: {
+      hideWarnings: true,
+    },
   };
 
   const opensearchDashboards = buildExpressionFunction<ExpressionFunctionOpenSearchDashboards>(

@@ -110,7 +110,7 @@ export const DataLinkModal: React.FC<DataLinkModalProps> = ({
                 defaultMessage: 'Edit Link',
               })
             : i18n.translate('explore.stylePanel.table.dataLinks.addModalTitle', {
-                defaultMessage: 'Add Link',
+                defaultMessage: 'Add link',
               })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -277,7 +277,7 @@ export const DataLinkOptions: React.FC<TableVisStyleControlsProps> = ({
       <StyleAccordion
         id="dataLinkSection"
         accordionLabel={i18n.translate('explore.stylePanel.table.dataLinks', {
-          defaultMessage: 'Data Links',
+          defaultMessage: 'Data links',
         })}
         initialIsOpen={true}
       >
@@ -289,7 +289,7 @@ export const DataLinkOptions: React.FC<TableVisStyleControlsProps> = ({
               data-test-subj="addDataLinkButton"
             >
               {i18n.translate('explore.stylePanel.table.dataLinks.addLinkButton', {
-                defaultMessage: 'Add Link',
+                defaultMessage: 'Add link',
               })}
             </EuiButton>
           </EuiFlexItem>

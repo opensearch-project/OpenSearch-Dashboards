@@ -116,7 +116,6 @@ export function HeaderBreadcrumbs({
         hideLastBreadCrumb={!renderFullLength}
         max={5}
         data-test-subj="breadcrumbs"
-        disableTrailingLink
         truncate={true}
         responsive={{
           xs: 1,

@@ -17,6 +17,7 @@ import {
   generateParams,
 } from './bar_gauge_utils';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
+import { mergeThresholdsWithBase } from '../style_panel/threshold/threshold_utils';
 
 export const createBarGaugeSpec = (
   transformedData: Array<Record<string, any>>,
@@ -47,7 +48,8 @@ export const createBarGaugeSpec = (
   const groups = catField ? groupBy(transformedData, (item) => item[catField]) : [];
 
   const newRecord = [];
-  let maxNumber: number = 0;
+  let maxNumber: number = -Infinity;
+  let minNumber: number = Infinity;
   let maxTextLength: number = 0;
 
   const selectedUnit = getUnitById(styleOptions?.unitId);
@@ -58,40 +60,58 @@ export const createBarGaugeSpec = (
         g1.map((d) => d[numericField]),
         styleOptions.valueCalculation
       );
-      if (calculate) {
-        maxNumber = Math.max(maxNumber, calculate);
-      }
-
       const isValidNumber =
         calculate !== undefined && typeof calculate === 'number' && !isNaN(calculate);
+
+      if (calculate) {
+        maxNumber = Math.max(maxNumber, isValidNumber ? calculate : -Infinity);
+        minNumber = Math.min(minNumber, isValidNumber ? calculate : Infinity);
+      }
 
       const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculate);
       maxTextLength = Math.max(maxTextLength, String(displayValue).length);
       newRecord.push({
         ...g1[0],
-        [numericField]: calculate,
+        [numericField]: isValidNumber ? calculate : null,
         displayValue,
       });
     }
   }
 
-  const validThresholds = [
-    { value: styleOptions?.min ?? 0, color: styleOptions.thresholdOptions.baseColor } as Threshold,
-    ...(styleOptions.thresholdOptions.thresholds?.filter(
-      (t) =>
-        t.value <= maxNumber &&
-        t.value >= (styleOptions.min ?? 0) &&
-        t.value <= (styleOptions.max ?? Infinity)
-    ) ?? []),
-  ] as Threshold[];
+  // To support negative values, when all the values are above 0, take minBase as 0 to start a bar.
+  // Similarly, when all values are below 0, take maxBase as 0 to end a bar
+
+  const maxBase = styleOptions?.max ?? Math.max(maxNumber, 0);
+  const minBase = styleOptions?.min ?? Math.min(minNumber, 0);
+
+  const invalidCase = minNumber === Infinity || minBase >= maxBase || minBase > maxNumber;
+
+  // text color only display the corresponding threshold color and ignore min/max control
+  const allThresholds =
+    !styleOptions?.thresholdOptions?.thresholds ||
+    styleOptions?.thresholdOptions?.thresholds?.length < 1
+      ? [
+          {
+            value: minBase,
+            color: styleOptions?.thresholdOptions?.baseColor ?? getColors().statusGreen,
+          },
+        ]
+      : styleOptions?.thresholdOptions?.thresholds;
+
+  const { textColor, mergedThresholds } = mergeThresholdsWithBase(
+    minBase,
+    maxBase,
+    styleOptions?.thresholdOptions?.baseColor,
+    styleOptions?.thresholdOptions?.thresholds
+  );
 
   // transfer value to threshold
   const valueToThreshold = [];
 
   for (const record of newRecord) {
-    for (let i = validThresholds.length - 1; i >= 0; i--) {
-      if (numericField && record[numericField] >= validThresholds[i].value) {
-        valueToThreshold.push({ value: record[numericField], color: validThresholds[i].color });
+    for (let i = mergedThresholds.length - 1; i >= 0; i--) {
+      if (numericField && record[numericField] >= mergedThresholds[i].value) {
+        valueToThreshold.push({ value: record[numericField], color: mergedThresholds[i].color });
         break;
       }
     }
@@ -100,46 +120,40 @@ export const createBarGaugeSpec = (
   // only use value-based thresholds in gradient mode
   const finalThreshold = styleOptions?.exclusive.displayMode === 'gradient' ? valueToThreshold : [];
 
-  const completeThreshold = [
-    ...validThresholds,
-    ...((styleOptions?.max && styleOptions?.min && styleOptions.max <= styleOptions.min) ||
-    (styleOptions?.min && styleOptions.min > maxNumber)
-      ? []
-      : finalThreshold),
-  ].sort((a, b) => a.value - b.value);
+  const completeThreshold = [...mergedThresholds, ...(invalidCase ? [] : finalThreshold)].sort(
+    (a, b) => a.value - b.value
+  );
 
-  const processedThresholds = processThresholds(completeThreshold);
+  // filter out value thresholds that are beyond maxBase, this ensures that the gradient mode on different bar is always aligned.
+  const processedThresholds = processThresholds(
+    completeThreshold.filter((t) => t.value <= maxBase)
+  );
 
   const gradientParams = generateParams(processedThresholds, styleOptions, isXaxisNumerical);
 
-  const maxBase = styleOptions?.max ?? maxNumber;
-  const minBase = styleOptions?.min ?? 0;
-
-  const invalidCase = minBase >= maxBase || minBase > maxNumber;
-
-  const scaleType = !invalidCase
-    ? {
-        scale: {
+  const scaleType = {
+    scale: !invalidCase
+      ? {
           domainMin: { expr: 'minBase' },
-        },
-      }
-    : {};
+        }
+      : { domain: [0, 100] }, // For invalid cases, use a fake domain to keep rendering consistent
+  };
 
   const params = [
     { name: 'fontColor', value: getColors().text },
     {
       name: 'maxBase',
-      value: maxBase,
+      value: invalidCase ? 100 : maxBase,
     },
     {
       name: 'minBase',
-      value: minBase,
+      value: invalidCase ? 0 : minBase,
     },
     {
       name: 'fontFactor',
       expr: !adjustEncoding
-        ? `width/${catCounts}/${maxTextLength}/8`
-        : `height/${catCounts}/${maxTextLength}/10`,
+        ? `width/${catCounts && catCounts === 1 ? catCounts * 3 : catCounts}/${maxTextLength}/8`
+        : `height/${catCounts && catCounts === 1 ? catCounts * 3 : catCounts}/${maxTextLength}/10`,
     },
     ...gradientParams,
   ];
@@ -198,6 +212,10 @@ export const createBarGaugeSpec = (
         [`${processedSymbol}`]: {
           type: 'quantitative',
           field: 'maxVal',
+        },
+        [`${processedSymbol}2`]: {
+          type: 'quantitative',
+          field: 'minVal',
         },
       },
     });
@@ -273,6 +291,10 @@ export const createBarGaugeSpec = (
             type: 'quantitative',
             field: 'barEnd',
           },
+          [`${processedSymbol}2`]: {
+            type: 'quantitative',
+            field: 'minVal',
+          },
           color: {
             value: {
               expr: generateTrans(processedThresholds),
@@ -296,6 +318,10 @@ export const createBarGaugeSpec = (
           [`${processedSymbol}`]: {
             type: 'quantitative',
             field: 'barEnd',
+          },
+          [`${processedSymbol}2`]: {
+            type: 'quantitative',
+            field: 'minVal',
           },
           color: {
             field: numericField,
@@ -328,7 +354,7 @@ export const createBarGaugeSpec = (
 
         dx: adjustEncoding ? { expr: 'fontFactor*3' } : 0,
         dy: adjustEncoding ? 0 : { expr: '-fontFactor*3' },
-        fontSize: { expr: 'fontFactor * 10' },
+        fontSize: { expr: 'min(fontFactor * 10, 100)' },
         ...(styleOptions.exclusive?.valueDisplay === 'textColor'
           ? { fill: { expr: 'fontColor' } }
           : {}),
@@ -346,8 +372,8 @@ export const createBarGaugeSpec = (
           type: 'quantitative',
           scale: {
             type: 'threshold',
-            domain: processedThresholds.map((t) => t.value),
-            range: [getColors().backgroundShade, ...processedThresholds.map((t) => t.color)],
+            domain: allThresholds.map((t) => t.value),
+            range: [getColors().backgroundShade, ...allThresholds.map((t) => t.color)],
           },
           legend: null,
         },
@@ -366,6 +392,11 @@ export const createBarGaugeSpec = (
     transform: transformLayer,
     encoding: encodingLayer,
     layer: layers,
+    resolve: {
+      scale: {
+        color: 'independent',
+      },
+    },
   };
 
   return baseSpec;

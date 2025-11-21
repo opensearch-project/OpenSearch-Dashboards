@@ -108,6 +108,45 @@ describe('AddCollaboratorButton', () => {
     ]);
   });
 
+  it('should trim collaborator IDs when adding collaborators', () => {
+    const mockOnAdd = jest.fn().mockImplementation(({ onAddCollaborators }) => {
+      onAddCollaborators([
+        {
+          accessLevel: 'readOnly',
+          collaboratorId: '  user-with-spaces  ',
+          permissionType: 'user',
+        },
+        {
+          accessLevel: 'admin',
+          collaboratorId: '\tgroup-with-tabs\t',
+          permissionType: 'group',
+        },
+      ]);
+    });
+    const displayedTypes = [
+      {
+        name: 'add user',
+        buttonLabel: 'add user',
+        onAdd: mockOnAdd,
+        id: 'user',
+      },
+    ];
+    const { getByTestId, getByText } = render(
+      <AddCollaboratorButton {...mockProps} displayedTypes={displayedTypes} />
+    );
+    const button = getByTestId('add-collaborator-button');
+    fireEvent.click(button);
+    const addUserButton = getByText('add user');
+    fireEvent.click(addUserButton);
+
+    expect(mockProps.handleSubmitPermissionSettings).toHaveBeenCalledWith([
+      { id: 0, modes: ['library_write', 'write'], type: 'user', userId: 'admin' },
+      { group: 'group', id: 1, modes: ['library_read', 'read'], type: 'group' },
+      { id: 2, modes: ['library_read', 'read'], type: 'user', userId: 'user-with-spaces' },
+      { id: 3, modes: ['library_write', 'write'], type: 'group', group: 'group-with-tabs' },
+    ]);
+  });
+
   it('should throw DuplicateCollaboratorError with consistent details', async () => {
     let errorCached: DuplicateCollaboratorError | undefined;
     const mockOnAdd = jest.fn(async ({ onAddCollaborators }) => {

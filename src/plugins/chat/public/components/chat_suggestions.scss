@@ -1,0 +1,34 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.chat-suggestion-bubble-panel {
+  padding: 4px;
+  border-radius: 4px;
+  text-align: left;
+
+  // Default suggestion styling
+  &.chat-suggestion-bubble-panel--default {
+    border: 1px solid transparent;
+    background-color: transparent;
+
+    &:hover {
+      background-color: $euiColorLightestShade;
+      cursor: pointer;
+    }
+  }
+
+  // Custom suggestion styling with visual distinction
+  .chat-suggestion-bubble-panel--custom {
+    /* stylelint-disable-next-line  @osd/stylelint/no_restricted_values */
+    background-color: rgba($euiColorPrimary, 0.05);
+    position: relative;
+
+    &:hover {
+      /* stylelint-disable-next-line  @osd/stylelint/no_restricted_values */
+      background-color: rgba($euiColorPrimary, 0.1);
+      cursor: pointer;
+    }
+  }
+}

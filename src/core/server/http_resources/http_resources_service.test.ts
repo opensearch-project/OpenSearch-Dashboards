@@ -54,6 +54,17 @@ describe('HttpResources service', () => {
       };
       service = new HttpResourcesService(coreContext);
       router = httpServiceMock.createRouter();
+
+      // TODO? createStoreFromRequest was mocked to reject, hence we are overriding that mock
+      // Mock dynamicConfig to prevent unhandled promise rejections
+      const mockDynamicConfigClient = {
+        getConfig: jest.fn().mockResolvedValue({}),
+      };
+      const mockDynamicConfig = {
+        client: mockDynamicConfigClient,
+        createStoreFromRequest: jest.fn().mockResolvedValue(null),
+      };
+      (context.core as any).dynamicConfig = mockDynamicConfig;
     });
 
     describe('register', () => {

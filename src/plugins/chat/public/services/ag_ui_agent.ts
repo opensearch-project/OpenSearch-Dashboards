@@ -20,13 +20,13 @@ export enum EventType {
 }
 
 export class AgUiAgent {
-  private serverUrl: string;
+  private proxyUrl: string;
   private abortController?: AbortController;
   private sseBuffer: string = '';
   private activeConnection: boolean = false;
 
-  constructor(serverUrl: string = 'http://localhost:3000') {
-    this.serverUrl = serverUrl;
+  constructor(proxyUrl: string = '/api/chat/proxy') {
+    this.proxyUrl = proxyUrl;
   }
 
   public runAgent(input: RunAgentInput): Observable<BaseEvent> {
@@ -46,12 +46,13 @@ export class AgUiAgent {
       // Set active connection flag
       this.activeConnection = true;
 
-      // Make request to AG-UI server
-      fetch(this.serverUrl, {
+      // Make request to OpenSearch Dashboards proxy endpoint
+      fetch(this.proxyUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Accept: 'text/event-stream',
+          'osd-xsrf': 'true', // Required for OpenSearch Dashboards API calls
         },
         body: JSON.stringify(input),
         signal: this.abortController.signal,
@@ -110,7 +111,7 @@ export class AgUiAgent {
           }
 
           // eslint-disable-next-line no-console
-          console.error('AG-UI request failed:', error.message);
+          console.error('Chat proxy request failed:', error.message);
 
           observer.next({
             type: EventType.RUN_ERROR,

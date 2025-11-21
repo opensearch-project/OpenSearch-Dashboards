@@ -28,7 +28,7 @@ interface Options {
 function createTooltip(fields: Field[]) {
   const tooltip = fields.map((f) => {
     return {
-      field: f.name,
+      field: `["${f.name}"]`,
       type: f.type,
       title: f.title,
       ...(f.format && { format: f.format }),
@@ -36,6 +36,9 @@ function createTooltip(fields: Field[]) {
   });
   return tooltip;
 }
+
+const MAX_DATA_POINTS_NUM = 1000;
+const MAX_LEGEND_NUM = 80;
 
 function createPointLayer(xField: Field, yFields: Field[], colorField?: Field) {
   let color = null;
@@ -90,21 +93,23 @@ function createPointLayer(xField: Field, yFields: Field[], colorField?: Field) {
     },
   ];
 
-  const pointLayers = marks.map((mark) => ({
+  // Create highlighted layer - only shows when hover param is active
+  const highlightedLayers = marks.map((mark) => ({
     mark,
-    transform: pointLayerTransform,
+    transform: [
+      ...pointLayerTransform,
+      {
+        filter: { param: 'hover', empty: false },
+      },
+    ],
     encoding: {
       x: { field: xField.name, type: xField.type },
       y,
       color,
-      opacity: {
-        condition: { param: 'hover', value: 1, empty: false },
-        value: 0,
-      },
     },
   }));
 
-  return { layer: pointLayers };
+  return { layer: highlightedLayers };
 }
 
 function createHiddenBarLayer(axisConfig: AxisConfig, options: Options & { barOpacity: number }) {
@@ -129,13 +134,19 @@ function createHiddenBarLayer(axisConfig: AxisConfig, options: Options & { barOp
       const uniqueColorFieldValues = new Set(
         (options.data ?? []).map((d) => d[axisConfig.color?.name ?? ''])
       );
-      tooltip = createTooltip([
-        axisConfig.x,
-        ...[...uniqueColorFieldValues].map((v) => ({
-          name: v,
-          type: (axisConfig.y as Field).type,
-        })),
-      ]);
+      // There is performance issue for tooltip to work with large amount of legends
+      // For short-term solution, we will not show tooltip if legend count > MAX_LEGEND_NUM
+      // TODO: seeking for long term solution to fix the performance issue.
+      if (uniqueColorFieldValues.size < MAX_LEGEND_NUM) {
+        tooltip = createTooltip([
+          axisConfig.x,
+          ...[...uniqueColorFieldValues].map((v) => ({
+            name: v,
+            title: v,
+            type: (axisConfig.y as Field).type,
+          })),
+        ]);
+      }
     } else {
       tooltip = createTooltip([
         axisConfig.x,
@@ -153,7 +164,7 @@ function createHiddenBarLayer(axisConfig: AxisConfig, options: Options & { barOp
         select: {
           type: 'point',
           encodings: ['x'],
-          on: 'mouseover',
+          on: { type: 'mouseover', throttle: 50 },
           clear: 'mouseout',
           nearest: axisConfig.x.type === 'temporal',
         },
@@ -170,13 +181,18 @@ function createHiddenBarLayer(axisConfig: AxisConfig, options: Options & { barOp
         condition: { param: 'hover', value: barOpacity, empty: false },
         value: 0,
       },
-      tooltip,
+      ...(tooltip ? { tooltip } : undefined),
     },
   };
   return hiddenBarLayer;
 }
 
 export function createCrosshairLayers(axisConfig: AxisConfig, options: Options) {
+  // For better performance, don't create crosshair layers if too many data points
+  if (options.data && options.data.length > MAX_DATA_POINTS_NUM) {
+    return [];
+  }
+
   const colors = getColors();
   const layers = [];
   const yFields = Array<Field>().concat(axisConfig.y);
@@ -192,12 +208,13 @@ export function createCrosshairLayers(axisConfig: AxisConfig, options: Options) 
   const ruleLayers = [];
   const xRuleLayer = {
     mark: { type: 'rule', color: colors.text, strokeDash: [3, 3] },
+    transform: [
+      {
+        filter: { param: 'hover', empty: false },
+      },
+    ],
     encoding: {
       x: { field: axisConfig.x.name, type: axisConfig.x.type },
-      opacity: {
-        condition: { param: 'hover', value: 1, empty: false },
-        value: 0,
-      },
     },
   };
   ruleLayers.push(xRuleLayer);
@@ -205,12 +222,13 @@ export function createCrosshairLayers(axisConfig: AxisConfig, options: Options) 
   if (!axisConfig.color && yFields.length === 1) {
     const yRuleLayer = {
       mark: { type: 'rule', color: colors.text, strokeDash: [3, 3] },
+      transform: [
+        {
+          filter: { param: 'hover', empty: false },
+        },
+      ],
       encoding: {
         y: { field: yFields[0].name, type: yFields[0].type, axis: { title: '' } },
-        opacity: {
-          condition: { param: 'hover', value: 1, empty: false },
-          value: 0,
-        },
       },
     };
     ruleLayers.push(yRuleLayer);
@@ -224,16 +242,18 @@ export function createCrosshairLayers(axisConfig: AxisConfig, options: Options) 
 }
 
 export function createHighlightBarLayers(axisConfig: AxisConfig, options: Options) {
+  // For better performance, don't create highlight bar layers if too many data points
+  if (options.data && options.data.length > MAX_DATA_POINTS_NUM) {
+    return [];
+  }
+
   const layers = [];
   const yFields = Array<Field>().concat(axisConfig.y);
   const y1Fields = Array<Field>().concat(axisConfig.y1 ? axisConfig.y1 : []);
 
-  const pointLayer = createPointLayer(axisConfig.x, yFields, axisConfig.color);
-  layers.push(pointLayer);
-
-  if (y1Fields.length > 0) {
-    const pointLayer1 = createPointLayer(axisConfig.x, y1Fields, axisConfig.color);
-    layers.push(pointLayer1);
+  if (y1Fields.length === 0) {
+    const pointLayer = createPointLayer(axisConfig.x, yFields, axisConfig.color);
+    layers.push(pointLayer);
   }
 
   layers.push(createHiddenBarLayer(axisConfig, { ...options, barOpacity: 0.1 }));

@@ -7,7 +7,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ColorGroupPanel } from './color_group_panel';
 
-jest.mock('../../../visualizations/theme/default_colors', () => ({
+jest.mock('../../../visualizations/theme/color_utils', () => ({
   getColorGroups: () => ({
     reds: {
       red1: '#ff0000',

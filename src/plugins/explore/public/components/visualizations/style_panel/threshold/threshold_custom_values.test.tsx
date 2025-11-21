@@ -34,7 +34,6 @@ describe('ThresholdCustomValues component', () => {
     const { handleChange } = setup([{ value: 0, color: '#f8f8f8ff' }]);
 
     fireEvent.click(screen.getByText('+ Add threshold'));
-
     expect(handleChange).toHaveBeenCalledWith([
       { value: 0, color: '#f8f8f8ff' },
       { value: 100, color: '#FF6A3D' },
@@ -47,7 +46,7 @@ describe('ThresholdCustomValues component', () => {
     fireEvent.change(valueInput, { target: { value: '5' } });
 
     // Wait for debounced update
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     expect(handleChange).toHaveBeenCalledWith([{ value: 5, color: '#f8f8f8ff' }]);
   });
 
@@ -68,7 +67,7 @@ describe('ThresholdCustomValues component', () => {
     fireEvent.change(valueInput, { target: { value: '12' } });
 
     // Wait for debounced update
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     expect(handleChange).toHaveBeenCalledWith([
       { value: 10, color: '#da1515ff' },
       { value: 12, color: '#f8f8f8ff' },

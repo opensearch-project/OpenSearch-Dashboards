@@ -394,6 +394,7 @@ export class VisualizationBuilder {
       searchContext,
       ExpressionRenderer,
       onSelectTimeRange,
+      onStyleChange: this.updateStyles.bind(this),
     });
   }
 
