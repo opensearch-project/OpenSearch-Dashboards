@@ -56,6 +56,7 @@ import {
   isNormalModule,
   isIgnoredModule,
   isConcatenatedModule,
+  isRuntimeModule,
   getModulePath,
 } from './webpack_helpers';
 import { getHashes } from '../optimizer/get_hashes';
@@ -141,9 +142,9 @@ const observeCompiler = (
             if (path.endsWith('.scss')) {
               workUnits += EXTRA_SCSS_WORK_UNITS;
 
-              for (const depPath of module.buildInfo.fileDependencies) {
+              /* for (const depPath of module.buildInfo.fileDependencies) {
                 referencedFiles.add(depPath);
-              }
+              } */
             }
 
             continue;
@@ -171,7 +172,7 @@ const observeCompiler = (
           continue;
         }
 
-        if (isExternalModule(module) || isIgnoredModule(module)) {
+        if (isExternalModule(module) || isIgnoredModule(module) || isRuntimeModule(module)) {
           continue;
         }
 

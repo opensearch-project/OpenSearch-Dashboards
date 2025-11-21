@@ -28,9 +28,7 @@
  * under the License.
  */
 
-import webpack from 'webpack';
-// @ts-ignore
-import Stats from 'webpack/lib/Stats';
+import webpack, { RuntimeModule } from 'webpack';
 
 export function isFailureStats(stats: webpack.Stats) {
   if (stats.hasErrors()) {
@@ -45,7 +43,8 @@ export function isFailureStats(stats: webpack.Stats) {
   // exported, typescript has no choice but to emit the export. Fortunately,
   // the extraneous export should not be harmful, so we just suppress these warnings
   // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
-  const filteredWarnings = Stats.filterWarnings(warnings, STATS_WARNINGS_FILTER);
+  const filteredWarnings =
+    warnings?.filter((warning) => !STATS_WARNINGS_FILTER.test(warning.message)) || [];
 
   return filteredWarnings.length > 0;
 }
@@ -54,9 +53,8 @@ const STATS_WARNINGS_FILTER = new RegExp(['(export .* was not found in)'].join('
 
 export function failedStatsToErrorMessage(stats: webpack.Stats) {
   const details = stats.toString({
-    ...Stats.presetToOptions('minimal'),
+    preset: 'minimal',
     colors: true,
-    warningsFilter: STATS_WARNINGS_FILTER,
     errors: true,
     errorDetails: true,
     moduleTrace: true,
@@ -131,7 +129,10 @@ export interface WebpackIgnoredModule {
 }
 
 export function isIgnoredModule(module: any): module is WebpackIgnoredModule {
-  return module?.constructor?.name === 'RawModule' && module.identifierStr?.startsWith('ignored ');
+  return (
+    module?.constructor?.name === 'RawModule' &&
+    (module.identifierStr?.startsWith('ignored ') || module.identifierStr?.startsWith('ignored|'))
+  );
 }
 
 /** module replacing imports for webpack externals */
@@ -159,6 +160,10 @@ export interface WebpackConcatenatedModule {
 
 export function isConcatenatedModule(module: any): module is WebpackConcatenatedModule {
   return module?.constructor?.name === 'ConcatenatedModule';
+}
+
+export function isRuntimeModule(module: any): module is RuntimeModule {
+  return module?.constructor?.name?.endsWith('RuntimeModule');
 }
 
 export function getModulePath(module: WebpackNormalModule) {

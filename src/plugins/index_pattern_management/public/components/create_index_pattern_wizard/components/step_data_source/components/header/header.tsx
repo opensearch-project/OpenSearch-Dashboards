@@ -28,7 +28,7 @@ import { useOpenSearchDashboards } from '../../../../../../../../../plugins/open
 import { getDataSources } from '../../../../../../components/utils';
 import { DataSourceTableItem, StepInfo } from '../../../../types';
 import { LoadingState } from '../../../loading_state';
-import * as pluginManifest from '../../../../../../../opensearch_dashboards.json';
+import pluginManifest from '../../../../../../../opensearch_dashboards.json';
 import { populateRemoteClusterConnectionForDatasources } from '../../../../lib/get_remote_connections';
 
 interface HeaderProps {
