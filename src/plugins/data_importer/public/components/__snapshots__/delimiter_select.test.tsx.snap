@@ -6,7 +6,7 @@ exports[`DelimiterSelect should render 1`] = `
     <span
       class="euiTitle euiTitle--xsmall"
     >
-      Delimiter Options
+      Delimiter options
     </span>
     <div
       class="euiFormControlLayout"
@@ -53,9 +53,6 @@ exports[`DelimiterSelect should render 1`] = `
         </div>
       </div>
     </div>
-    <div
-      class="euiSpacer euiSpacer--m"
-    />
   </div>
 </div>
 `;
