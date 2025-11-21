@@ -5129,19 +5129,19 @@
     uuid "^10.0.0"
     zod "^3.25.32"
 
-"@lhci/cli@^0.14.0":
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@lhci/cli/-/cli-0.14.0.tgz#5c78d3bc2303f16eebf89ab622d341f9ba2c7523"
-  integrity sha512-TxOH9pFBnmmN7Jmo2Aimxx5UhE8veqXpHfFJDMWsCVxkwh7mGxcAWchGl84mK139SZbbRmerqZ72c+h2nG9/QQ==
+"@lhci/cli@^0.15.0":
+  version "0.15.1"
+  resolved "https://registry.yarnpkg.com/@lhci/cli/-/cli-0.15.1.tgz#38dcbb1af1e4e2d735726d47635a08a621ed0781"
+  integrity sha512-yhC0oXnXqGHYy1xl4D8YqaydMZ/khFAnXGY/o2m/J3PqPa/D0nj3V6TLoH02oVMFeEF2AQim7UbmdXMiXx2tOw==
   dependencies:
-    "@lhci/utils" "0.14.0"
+    "@lhci/utils" "0.15.1"
     chrome-launcher "^0.13.4"
     compression "^1.7.4"
     debug "^4.3.1"
     express "^4.17.1"
     inquirer "^6.3.1"
     isomorphic-fetch "^3.0.0"
-    lighthouse "12.1.0"
+    lighthouse "12.6.1"
     lighthouse-logger "1.2.0"
     open "^7.1.0"
     proxy-agent "^6.4.0"
@@ -5150,15 +5150,15 @@
     yargs "^15.4.1"
     yargs-parser "^13.1.2"
 
-"@lhci/utils@0.14.0":
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@lhci/utils/-/utils-0.14.0.tgz#1f90251bdd9bb81667aee795da38d50ff62f2647"
-  integrity sha512-LyP1RbvYQ9xNl7uLnl5AO8fDRata9MG/KYfVFKFkYenlsVS6QJsNjLzWNEoMIaE4jOPdQQlSp4tO7dtnyDxzbQ==
+"@lhci/utils@0.15.1":
+  version "0.15.1"
+  resolved "https://registry.yarnpkg.com/@lhci/utils/-/utils-0.15.1.tgz#75279392a787c9d9f8f1c179cf73db9a88ca93fd"
+  integrity sha512-WclJnUQJeOMY271JSuaOjCv/aA0pgvuHZS29NFNdIeI14id8eiFsjith85EGKYhljgoQhJ2SiW4PsVfFiakNNw==
   dependencies:
     debug "^4.3.1"
     isomorphic-fetch "^3.0.0"
     js-yaml "^3.13.1"
-    lighthouse "12.1.0"
+    lighthouse "12.6.1"
     tree-kill "^1.2.1"
 
 "@lmdb/lmdb-darwin-arm64@2.8.5":
@@ -19642,7 +19642,7 @@ lighthouse-stack-packs@1.12.2:
   resolved "https://registry.yarnpkg.com/lighthouse-stack-packs/-/lighthouse-stack-packs-1.12.2.tgz#dbe0ccdbc381784ef176f4f8c2367ac5b077d6ca"
   integrity sha512-Ug8feS/A+92TMTCK6yHYLwaFMuelK/hAKRMdldYkMNwv+d9PtWxjXEg6rwKtsUXTADajhdrhXyuNCJ5/sfmPFw==
 
-lighthouse@12.1.0, lighthouse@^12.3.0:
+lighthouse@12.6.1, lighthouse@^12.3.0:
   version "12.6.0"
   resolved "https://registry.yarnpkg.com/lighthouse/-/lighthouse-12.6.0.tgz#09cb7a3569236a05c0f31bb0fa52bf03e9fbd040"
   integrity sha512-ufYw6dBR0PDEpO4pj45zRStatdTvBSi/LTXgs6ULmadSLTNXklP3XGGGuL7SA9pE/NltGbs5zQOA/ICQao1ywA==
