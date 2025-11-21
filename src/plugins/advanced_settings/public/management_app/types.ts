@@ -52,6 +52,7 @@ export interface FieldSetting {
     message: string;
     docLinksKey: string;
   };
+  isGlobalScopeEditable: boolean;
 }
 
 // until eui searchbar and query are typed

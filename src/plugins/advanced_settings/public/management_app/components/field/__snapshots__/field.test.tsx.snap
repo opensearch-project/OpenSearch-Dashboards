@@ -270,7 +270,7 @@ exports[`Field for array setting should render custom setting icon if it is cust
     <EuiCompressedFieldText
       aria-label="array test setting"
       data-test-subj="advancedSetting-editField-array:test:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       value="default_value"
@@ -321,7 +321,7 @@ exports[`Field for array setting should render default value if there is no user
     <EuiCompressedFieldText
       aria-label="array test setting"
       data-test-subj="advancedSetting-editField-array:test:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       value="default_value"
@@ -390,7 +390,7 @@ exports[`Field for array setting should render unsaved value if there are unsave
       aria-describedby="array:test:setting-group array:test:setting-unsaved"
       aria-label="array test setting"
       data-test-subj="advancedSetting-editField-array:test:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       value={
@@ -491,7 +491,7 @@ exports[`Field for array setting should render user value if there is user value
     <EuiCompressedFieldText
       aria-label="array test setting"
       data-test-subj="advancedSetting-editField-array:test:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       value="user, value"
@@ -789,7 +789,7 @@ exports[`Field for boolean setting should render custom setting icon if it is cu
       aria-label="boolean test setting"
       checked={true}
       data-test-subj="advancedSetting-editField-boolean:test:setting"
-      disabled={false}
+      disabled={true}
       label={
         <FormattedMessage
           defaultMessage="On"
@@ -846,7 +846,7 @@ exports[`Field for boolean setting should render default value if there is no us
       aria-label="boolean test setting"
       checked={true}
       data-test-subj="advancedSetting-editField-boolean:test:setting"
-      disabled={false}
+      disabled={true}
       label={
         <FormattedMessage
           defaultMessage="On"
@@ -921,7 +921,7 @@ exports[`Field for boolean setting should render unsaved value if there are unsa
       aria-label="boolean test setting"
       checked={false}
       data-test-subj="advancedSetting-editField-boolean:test:setting"
-      disabled={false}
+      disabled={true}
       label={
         <FormattedMessage
           defaultMessage="Off"
@@ -1024,7 +1024,7 @@ exports[`Field for boolean setting should render user value if there is user val
       aria-label="boolean test setting"
       checked={false}
       data-test-subj="advancedSetting-editField-boolean:test:setting"
-      disabled={false}
+      disabled={true}
       label={
         <FormattedMessage
           defaultMessage="Off"
@@ -1309,7 +1309,7 @@ exports[`Field for image setting should render custom setting icon if it is cust
       aria-label="image:test:setting"
       compressed={true}
       data-test-subj="advancedSetting-editField-image:test:setting"
-      disabled={false}
+      disabled={true}
       display="large"
       fullWidth={true}
       initialPromptText="Select or drag and drop a file"
@@ -1363,7 +1363,7 @@ exports[`Field for image setting should render default value if there is no user
       aria-label="image:test:setting"
       compressed={true}
       data-test-subj="advancedSetting-editField-image:test:setting"
-      disabled={false}
+      disabled={true}
       display="large"
       fullWidth={true}
       initialPromptText="Select or drag and drop a file"
@@ -1434,7 +1434,7 @@ exports[`Field for image setting should render unsaved value if there are unsave
       aria-label="image:test:setting"
       compressed={true}
       data-test-subj="advancedSetting-editField-image:test:setting"
-      disabled={false}
+      disabled={true}
       display="large"
       fullWidth={true}
       initialPromptText="Select or drag and drop a file"
@@ -1921,7 +1921,7 @@ exports[`Field for json setting should render custom setting icon if it is custo
           }
         }
         height="auto"
-        isReadOnly={false}
+        isReadOnly={true}
         maxLines={30}
         minLines={6}
         mode="json"
@@ -2034,7 +2034,7 @@ exports[`Field for json setting should render default value if there is no user 
           }
         }
         height="auto"
-        isReadOnly={false}
+        isReadOnly={true}
         maxLines={30}
         minLines={6}
         mode="json"
@@ -2123,7 +2123,7 @@ exports[`Field for json setting should render unsaved value if there are unsaved
           }
         }
         height="auto"
-        isReadOnly={false}
+        isReadOnly={true}
         maxLines={30}
         minLines={6}
         mode="json"
@@ -2247,7 +2247,7 @@ exports[`Field for json setting should render user value if there is user value 
           }
         }
         height="auto"
-        isReadOnly={false}
+        isReadOnly={true}
         maxLines={30}
         minLines={6}
         mode="json"
@@ -2606,7 +2606,7 @@ exports[`Field for markdown setting should render custom setting icon if it is c
           }
         }
         height="auto"
-        isReadOnly={false}
+        isReadOnly={true}
         maxLines={30}
         minLines={6}
         mode="markdown"
@@ -2677,7 +2677,7 @@ exports[`Field for markdown setting should render default value if there is no u
           }
         }
         height="auto"
-        isReadOnly={false}
+        isReadOnly={true}
         maxLines={30}
         minLines={6}
         mode="markdown"
@@ -2766,7 +2766,7 @@ exports[`Field for markdown setting should render unsaved value if there are uns
           }
         }
         height="auto"
-        isReadOnly={false}
+        isReadOnly={true}
         maxLines={30}
         minLines={6}
         mode="markdown"
@@ -2883,7 +2883,7 @@ exports[`Field for markdown setting should render user value if there is user va
           }
         }
         height="auto"
-        isReadOnly={false}
+        isReadOnly={true}
         maxLines={30}
         minLines={6}
         mode="markdown"
@@ -3174,7 +3174,7 @@ exports[`Field for number setting should render custom setting icon if it is cus
     <EuiCompressedFieldNumber
       aria-label="number test setting"
       data-test-subj="advancedSetting-editField-number:test:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       value={5}
@@ -3225,7 +3225,7 @@ exports[`Field for number setting should render default value if there is no use
     <EuiCompressedFieldNumber
       aria-label="number test setting"
       data-test-subj="advancedSetting-editField-number:test:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       value={5}
@@ -3294,7 +3294,7 @@ exports[`Field for number setting should render unsaved value if there are unsav
       aria-describedby="number:test:setting-group number:test:setting-unsaved"
       aria-label="number test setting"
       data-test-subj="advancedSetting-editField-number:test:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       value={1}
@@ -3391,7 +3391,7 @@ exports[`Field for number setting should render user value if there is user valu
     <EuiCompressedFieldNumber
       aria-label="number test setting"
       data-test-subj="advancedSetting-editField-number:test:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       value={10}
@@ -3718,7 +3718,7 @@ exports[`Field for select setting should render custom setting icon if it is cus
     <EuiCompressedSelect
       aria-label="select test setting"
       data-test-subj="advancedSetting-editField-select:test:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       options={
@@ -3785,7 +3785,7 @@ exports[`Field for select setting should render default value if there is no use
     <EuiCompressedSelect
       aria-label="select test setting"
       data-test-subj="advancedSetting-editField-select:test:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       options={
@@ -3870,7 +3870,7 @@ exports[`Field for select setting should render unsaved value if there are unsav
       aria-describedby="select:test:setting-group select:test:setting-unsaved"
       aria-label="select test setting"
       data-test-subj="advancedSetting-editField-select:test:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       options={
@@ -3983,7 +3983,7 @@ exports[`Field for select setting should render user value if there is user valu
     <EuiCompressedSelect
       aria-label="select test setting"
       data-test-subj="advancedSetting-editField-select:test:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       options={
@@ -4278,7 +4278,7 @@ exports[`Field for string setting should render custom setting icon if it is cus
     <EuiCompressedFieldText
       aria-label="string test setting"
       data-test-subj="advancedSetting-editField-string:test:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       value=""
@@ -4329,7 +4329,7 @@ exports[`Field for string setting should render default value if there is no use
     <EuiCompressedFieldText
       aria-label="string test setting"
       data-test-subj="advancedSetting-editField-string:test:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       value=""
@@ -4398,7 +4398,7 @@ exports[`Field for string setting should render unsaved value if there are unsav
       aria-describedby="string:test:setting-group string:test:setting-unsaved"
       aria-label="string test setting"
       data-test-subj="advancedSetting-editField-string:test:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       value="hello world"
@@ -4495,7 +4495,7 @@ exports[`Field for string setting should render user value if there is user valu
     <EuiCompressedFieldText
       aria-label="string test setting"
       data-test-subj="advancedSetting-editField-string:test:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       value="foo"
@@ -4774,7 +4774,7 @@ exports[`Field for stringWithValidation setting should render custom setting ico
     <EuiCompressedFieldText
       aria-label="string test validation setting"
       data-test-subj="advancedSetting-editField-string:test-validation:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       value="foo-default"
@@ -4825,7 +4825,7 @@ exports[`Field for stringWithValidation setting should render default value if t
     <EuiCompressedFieldText
       aria-label="string test validation setting"
       data-test-subj="advancedSetting-editField-string:test-validation:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       value="foo-default"
@@ -4894,7 +4894,7 @@ exports[`Field for stringWithValidation setting should render unsaved value if t
       aria-describedby="string:test-validation:setting-group string:test-validation:setting-unsaved"
       aria-label="string test validation setting"
       data-test-subj="advancedSetting-editField-string:test-validation:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       value="hello world"
@@ -4991,7 +4991,7 @@ exports[`Field for stringWithValidation setting should render user value if ther
     <EuiCompressedFieldText
       aria-label="string test validation setting"
       data-test-subj="advancedSetting-editField-string:test-validation:setting"
-      disabled={false}
+      disabled={true}
       fullWidth={true}
       onChange={[Function]}
       value="fooUserValue"

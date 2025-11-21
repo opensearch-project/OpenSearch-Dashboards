@@ -313,6 +313,7 @@ export class Field extends PureComponent<FieldProps> {
       preferBrowserSetting = false,
       defVal,
       ariaName,
+      isGlobalScopeEditable,
     } = setting;
     const a11yProps: { [key: string]: string } = ariaDescribedBy
       ? {
@@ -344,7 +345,8 @@ export class Field extends PureComponent<FieldProps> {
               isOverridden ||
               isPermissionControlled ||
               preferBrowserSetting ||
-              !enableSaving
+              !enableSaving ||
+              !isGlobalScopeEditable
             }
             data-test-subj={`advancedSetting-editField-${name}`}
             {...a11yProps}
@@ -365,7 +367,11 @@ export class Field extends PureComponent<FieldProps> {
               minLines={6}
               maxLines={30}
               isReadOnly={
-                isOverridden || isPermissionControlled || preferBrowserSetting || !enableSaving
+                isOverridden ||
+                isPermissionControlled ||
+                preferBrowserSetting ||
+                !enableSaving ||
+                !isGlobalScopeEditable
               }
               setOptions={{
                 showLineNumbers: false,
@@ -385,7 +391,13 @@ export class Field extends PureComponent<FieldProps> {
         } else {
           return (
             <EuiCompressedFilePicker
-              disabled={loading || isOverridden || isPermissionControlled || !enableSaving}
+              disabled={
+                loading ||
+                isOverridden ||
+                isPermissionControlled ||
+                !enableSaving ||
+                !isGlobalScopeEditable
+              }
               onChange={this.onImageChange}
               accept=".jpg,.jpeg,.png"
               ref={this.changeImageForm}
@@ -413,7 +425,8 @@ export class Field extends PureComponent<FieldProps> {
               isOverridden ||
               isPermissionControlled ||
               preferBrowserSetting ||
-              !enableSaving
+              !enableSaving ||
+              !isGlobalScopeEditable
             }
             fullWidth
             data-test-subj={`advancedSetting-editField-${name}`}
@@ -431,7 +444,8 @@ export class Field extends PureComponent<FieldProps> {
               isOverridden ||
               isPermissionControlled ||
               preferBrowserSetting ||
-              !enableSaving
+              !enableSaving ||
+              !isGlobalScopeEditable
             }
             fullWidth
             data-test-subj={`advancedSetting-editField-${name}`}
@@ -449,7 +463,8 @@ export class Field extends PureComponent<FieldProps> {
               isOverridden ||
               isPermissionControlled ||
               preferBrowserSetting ||
-              !enableSaving
+              !enableSaving ||
+              !isGlobalScopeEditable
             }
             fullWidth
             data-test-subj={`advancedSetting-editField-${name}`}
