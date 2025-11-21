@@ -199,6 +199,12 @@
   }
 }
 
+.osdQueryEditor__singleLineWrapper {
+  // Wrapper to contain both the editor and footer
+  display: flex;
+  flex-direction: column;
+}
+
 .osdQuerEditor__singleLine {
   padding: calc($euiSizeXS + 1px);
   overflow: initial !important; // needed for suggestion window, otherwise will be hidden in child
@@ -240,9 +246,8 @@
   gap: 4px;
   background: $euiColorLightestShade;
   padding: 2px 4px;
-  margin-top: 5px;
-  margin-left: -5px;
-  margin-right: -5px;
+  margin-top: 2px;
+  margin-bottom: 0;
   z-index: 1;
   position: relative;
   align-items: center;
