@@ -408,10 +408,16 @@
 
 # @experimental Set the enabled value to true and provide an AG-UI agent to enable chat
 # chat:
-  # enabled: true
-  # agUiUrl: "http://your-ai-agent-url:port"
-  # mlCommonsAgentId: "olly-chat-agent-id"
+# enabled: true
+# agUiUrl: "http://your-ai-agent-url:port"
+# mlCommonsAgentId: "olly-chat-agent-id"
 
 # @experimental Set the value to true to enable context provider
 # contextProvider:
 #   enabled: true
+
+workspace.enabled: false
+opensearch.ignoreVersionMismatch: true
+data_source.enabled: true
+data.savedQueriesNewUI.enabled: true
+data_importer.enabled: true

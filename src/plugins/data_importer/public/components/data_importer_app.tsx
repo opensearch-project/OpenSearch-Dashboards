@@ -73,9 +73,6 @@ export const DataImporterPluginApp = ({
   hideLocalCluster,
   dataSourceManagement,
 }: DataImporterPluginAppProps) => {
-  const DataSourceMenuComponent = dataSourceManagement?.ui.getDataSourceMenu<
-    DataSourceSelectableConfig
-  >();
   const [indexName, setIndexName] = useState<string>();
   const [importType, setImportType] = useState<ImportChoices>(IMPORT_CHOICE_FILE);
   const [disableImport, setDisableImport] = useState<boolean>();
@@ -332,22 +329,18 @@ export const DataImporterPluginApp = ({
   }, [inputText, inputFile, config.maxTextCount, config.maxFileSizeBytes, notifications.toasts]);
 
   const renderDataSourceComponent = useMemo(() => {
+    const DataSourceSelector = dataSourceManagement!.ui.DataSourceSelector;
     return (
-      <div>
-        {DataSourceMenuComponent && (
-          <>
-            <DataSourceMenuComponent
-              componentType={'DataSourceSelectable'}
-              componentConfig={{
-                fullWidth: true,
-                savedObjects: savedObjects.client,
-                notifications,
-                onSelectedDataSources: onDataSourceSelect,
-              }}
-              onManageDataSource={() => {}}
-            />
-          </>
-        )}
+      <div className="devAppDataSourceSelector">
+        {/* @ts-expect-error TS2604 TODO(ts-error): fixme */}
+        <DataSourceSelector
+          savedObjectsClient={savedObjects.client}
+          notifications={notifications.toasts}
+          onSelectedDataSource={onDataSourceSelect}
+          disabled={!dataSourceEnabled}
+          fullWidth={false}
+          compressed={false}
+        />
       </div>
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -391,7 +384,7 @@ export const DataImporterPluginApp = ({
                   </h1>
                 </EuiTitle>
               </EuiPageHeader>
-              <EuiPageContent>
+              <EuiPageContent className="data_importer_content" paddingSize="s">
                 <EuiFlexGroup>
                   <EuiFlexItem grow={1}>
                     <ImportTypeSelector

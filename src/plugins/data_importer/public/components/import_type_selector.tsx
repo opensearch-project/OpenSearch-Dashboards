@@ -9,7 +9,6 @@ import {
   EuiTitle,
   EuiCheckableCard,
   EuiText,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
