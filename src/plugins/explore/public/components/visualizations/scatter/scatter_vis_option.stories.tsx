@@ -125,10 +125,8 @@ ScatterWithField.args = {
     ...defaultScatterChartStyles,
     standardAxes: [
       {
-        id: '1',
         position: Positions.RIGHT,
         show: true,
-        style: {},
         labels: {
           show: true,
           rotate: 0,
@@ -144,10 +142,8 @@ ScatterWithField.args = {
         axisRole: AxisRole.X,
       },
       {
-        id: '3',
         position: Positions.RIGHT,
         show: true,
-        style: {},
         labels: {
           show: true,
           rotate: 0,

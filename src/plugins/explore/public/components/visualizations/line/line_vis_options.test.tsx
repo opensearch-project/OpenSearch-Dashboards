@@ -8,14 +8,13 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LineVisStyleControls, LineVisStyleControlsProps } from './line_vis_options';
 import {
-  CategoryAxis,
   ThresholdMode,
-  ValueAxis,
   Positions,
   VisFieldType,
   TooltipOptions,
   AxisRole,
   AxisColumnMappings,
+  StandardAxes,
 } from '../types';
 import { LineStyle } from './line_exclusive_vis_options';
 
@@ -92,46 +91,6 @@ jest.mock('../style_panel/tooltip/tooltip', () => ({
   )),
 }));
 
-jest.mock('../style_panel/axes/axes', () => ({
-  AxesOptions: jest.fn(
-    ({
-      categoryAxes,
-      valueAxes,
-      onCategoryAxesChange,
-      onValueAxesChange,
-      numericalColumns,
-      categoricalColumns,
-      dateColumns,
-      showFullTimeRange,
-      onShowFullTimeRangeChange,
-    }) => (
-      <div data-test-subj="mockAxesOptions">
-        <button
-          data-test-subj="mockUpdateCategoryAxes"
-          onClick={() => onCategoryAxesChange([...categoryAxes, { id: 'new-axis' }])}
-        >
-          Update Category Axes
-        </button>
-        <button
-          data-test-subj="mockUpdateValueAxes"
-          onClick={() => onValueAxesChange([...valueAxes, { id: 'new-axis' }])}
-        >
-          Update Value Axes
-        </button>
-        <button
-          data-test-subj="mockUpdateShowFullTimeRange"
-          onClick={() => onShowFullTimeRangeChange(!showFullTimeRange)}
-        >
-          Toggle Full Time Range
-        </button>
-        <div data-test-subj="numericalColumnsLength">{numericalColumns?.length || 0}</div>
-        <div data-test-subj="categoricalColumnsLength">{categoricalColumns?.length || 0}</div>
-        <div data-test-subj="dateColumnsLength">{dateColumns?.length || 0}</div>
-      </div>
-    )
-  ),
-}));
-
 jest.mock('./line_exclusive_vis_options', () => ({
   LineExclusiveVisOptions: jest.fn(
     ({
@@ -198,9 +157,7 @@ jest.mock('../style_panel/title/title', () => ({
 }));
 
 describe('LineVisStyleControls', () => {
-  const defaultCategoryAxis: CategoryAxis = {
-    id: 'CategoryAxis-1',
-    type: 'category',
+  const defaultCategoryAxis: StandardAxes = {
     position: Positions.BOTTOM,
     show: true,
     labels: {
@@ -213,12 +170,10 @@ describe('LineVisStyleControls', () => {
     title: {
       text: '',
     },
+    axisRole: AxisRole.X,
   };
 
-  const defaultValueAxis: ValueAxis = {
-    id: 'ValueAxis-1',
-    name: 'LeftAxis-1',
-    type: 'value',
+  const defaultValueAxis: StandardAxes = {
     position: Positions.LEFT,
     show: true,
     labels: {
@@ -231,6 +186,7 @@ describe('LineVisStyleControls', () => {
     title: {
       text: '',
     },
+    axisRole: AxisRole.Y,
   };
 
   const defaultTooltipOptions: TooltipOptions = {
@@ -285,8 +241,7 @@ describe('LineVisStyleControls', () => {
         thresholdStyle: ThresholdMode.Solid,
       },
       tooltipOptions: defaultTooltipOptions,
-      categoryAxes: [defaultCategoryAxis],
-      valueAxes: [defaultValueAxis],
+      standardAxes: [defaultCategoryAxis, defaultValueAxis],
       titleOptions: {
         show: true,
         titleName: '',
@@ -312,7 +267,6 @@ describe('LineVisStyleControls', () => {
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
     expect(screen.getByTestId('mockThresholdOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTooltipOptionsPanel')).toBeInTheDocument();
-    expect(screen.getByTestId('mockAxesOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockLineExclusiveVisOptions')).toBeInTheDocument();
     expect(screen.getByTestId('mockTitleOptionsPanel')).toBeInTheDocument();
   });
@@ -422,25 +376,6 @@ describe('LineVisStyleControls', () => {
     });
   });
 
-  test('calls onStyleChange with correct parameters for axes options', async () => {
-    render(<LineVisStyleControls {...mockProps} />);
-
-    await userEvent.click(screen.getByTestId('mockUpdateCategoryAxes'));
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      categoryAxes: [...mockProps.styleOptions.categoryAxes, { id: 'new-axis' }],
-    });
-
-    await userEvent.click(screen.getByTestId('mockUpdateValueAxes'));
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      valueAxes: [...mockProps.styleOptions.valueAxes, { id: 'new-axis' }],
-    });
-
-    await userEvent.click(screen.getByTestId('mockUpdateShowFullTimeRange'));
-    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
-      showFullTimeRange: !mockProps.styleOptions.showFullTimeRange,
-    });
-  });
-
   test('calls onStyleChange with correct parameters for line exclusive options', async () => {
     render(<LineVisStyleControls {...mockProps} />);
 
@@ -459,21 +394,6 @@ describe('LineVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('mockUpdateLineStyle'));
     expect(mockProps.onStyleChange).toHaveBeenCalledWith({ lineStyle: 'line' });
-  });
-
-  test('handles empty column arrays gracefully', () => {
-    const propsWithEmptyColumns = {
-      ...mockProps,
-      numericalColumns: undefined,
-      categoricalColumns: undefined,
-      dateColumns: undefined,
-    };
-
-    render(<LineVisStyleControls {...propsWithEmptyColumns} />);
-
-    expect(screen.getByTestId('numericalColumnsLength')).toHaveTextContent('0');
-    expect(screen.getByTestId('categoricalColumnsLength')).toHaveTextContent('0');
-    expect(screen.getByTestId('dateColumnsLength')).toHaveTextContent('0');
   });
 
   test('updates title show option correctly', async () => {

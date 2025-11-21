@@ -52,7 +52,7 @@ export const runCreateVisTests = () => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
         });
       // Open axes setting
-      cy.get('[aria-controls="axesSection"]').click();
+      cy.get('[aria-controls="allAxesSection"]').click();
       cy.getElementByTestId('showXAxisSwitch').click();
       // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {
