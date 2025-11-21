@@ -292,9 +292,9 @@ function isVersionCompatible(
     return false;
   }
 
-  return semver.eq(
-    coercedActualOpenSearchDashboardsVersion,
-    coercedExpectedOpenSearchDashboardsVersion
+  return (
+    coercedActualOpenSearchDashboardsVersion.major ===
+    coercedExpectedOpenSearchDashboardsVersion.major
   );
 }
 /**
