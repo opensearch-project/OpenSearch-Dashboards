@@ -44,6 +44,11 @@ export interface ISyncConfig {
   filters: FilterStateStore;
   query: boolean;
   dataset?: boolean;
+  /**
+   * When true, skips using existing filters from filterManager when initializing state from URL.
+   * This is useful when navigating to a saved search/explore to prevent filter persistence.
+   */
+  skipAppFiltersFromMemory?: boolean;
 }
 
 /**
@@ -72,36 +77,42 @@ export const connectStorageToQueryState = (
       syncKeys.push('appFilters');
     }
 
-    const initialStateFromURL: QueryState = osdUrlStateStorage.get('_q') ?? {
+    const initialState: QueryState = osdUrlStateStorage.get('_q') ?? {
       query: queryString.getDefaultQuery(),
-      filters: filterManager.getAppFilters(),
+      // If caller specifies to skip filters from memory, use empty array
+      filters: syncConfig.skipAppFiltersFromMemory ? [] : filterManager.getAppFilters(),
     };
 
     if (!osdUrlStateStorage.get('_q')) {
       // set up initial '_q' flag in the URL to sync query and filter changes
-      osdUrlStateStorage.set('_q', initialStateFromURL, {
+      osdUrlStateStorage.set('_q', initialState, {
         replace: true,
       });
       // clear existing query and apply default query
       queryString.clearQuery();
     }
 
-    if (syncConfig.query && !_.isEqual(initialStateFromURL.query, queryString.getQuery())) {
-      if (initialStateFromURL.query) {
-        queryString.setQuery(_.cloneDeep(initialStateFromURL.query));
+    // Clear app filters if caller requested to skip filters from memory
+    if (syncConfig.skipAppFiltersFromMemory && syncConfig.filters === FilterStateStore.APP_STATE) {
+      filterManager.setAppFilters([]);
+    }
+
+    if (syncConfig.query && !_.isEqual(initialState.query, queryString.getQuery())) {
+      if (initialState.query) {
+        queryString.setQuery(_.cloneDeep(initialState.query));
       }
     }
 
     if (syncConfig.filters === FilterStateStore.APP_STATE) {
       if (
-        !initialStateFromURL.filters ||
-        !compareFilters(initialStateFromURL.filters, filterManager.getAppFilters(), {
+        !initialState.filters ||
+        !compareFilters(initialState.filters, filterManager.getAppFilters(), {
           ...COMPARE_ALL_OPTIONS,
           state: false,
         })
       ) {
-        if (initialStateFromURL.filters) {
-          filterManager.setAppFilters(_.cloneDeep(initialStateFromURL.filters));
+        if (initialState.filters) {
+          filterManager.setAppFilters(_.cloneDeep(initialState.filters));
         }
       }
 
