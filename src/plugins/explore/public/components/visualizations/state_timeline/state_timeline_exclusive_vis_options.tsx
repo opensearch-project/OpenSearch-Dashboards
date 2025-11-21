@@ -9,13 +9,21 @@ import React from 'react';
 import { StateTimeLineChartStyle } from './state_timeline_config';
 import { DebouncedFieldNumber, DebouncedFieldText } from '../style_panel/utils';
 import { StyleAccordion } from '../style_panel/style_accordion';
-import { DisableMode, DisconnectValuesOption, ConnectNullValuesOption } from '../types';
+import {
+  DisableMode,
+  DisconnectValuesOption,
+  ConnectNullValuesOption,
+  FilterOption,
+} from '../types';
+import { FilterOptionsSelect } from '../style_panel/value_mapping/filter_options_select';
 
 interface StateTimeLineExclusiveVisOptionsProps {
   styles: StateTimeLineChartStyle['exclusive'];
   onChange: (styles: StateTimeLineChartStyle['exclusive']) => void;
   useThresholdColor?: boolean;
   onUseThresholdColorChange: (useThresholdColor: boolean) => void;
+  filterOption?: FilterOption | undefined;
+  onFilterOptionChange?: (option: FilterOption | undefined) => void;
 }
 
 const disconnectValuesOption = [
@@ -53,6 +61,8 @@ export const StateTimeLineExclusiveVisOptions = ({
   onChange,
   useThresholdColor,
   onUseThresholdColorChange,
+  filterOption,
+  onFilterOptionChange,
 }: StateTimeLineExclusiveVisOptionsProps) => {
   const updateStyle = <K extends keyof StateTimeLineChartStyle['exclusive']>(
     key: K,
@@ -72,6 +82,11 @@ export const StateTimeLineExclusiveVisOptions = ({
       })}
       initialIsOpen={true}
     >
+      <FilterOptionsSelect
+        filterOption={filterOption}
+        onFilterOptionChange={onFilterOptionChange}
+        disableSelect={useThresholdColor}
+      />
       <EuiFormRow>
         <EuiSwitch
           compressed
@@ -83,7 +98,6 @@ export const StateTimeLineExclusiveVisOptions = ({
           onChange={(e) => onUseThresholdColorChange(e.target.checked)}
         />
       </EuiFormRow>
-
       <EuiFormRow>
         <EuiSwitch
           compressed
@@ -95,7 +109,6 @@ export const StateTimeLineExclusiveVisOptions = ({
           data-test-subj="showValuesSwtich"
         />
       </EuiFormRow>
-
       <EuiFormRow
         label={i18n.translate('explore.vis.stateTimeline.exclusive.rowHeight', {
           defaultMessage: 'Row height',
@@ -108,7 +121,6 @@ export const StateTimeLineExclusiveVisOptions = ({
           max={1}
         />
       </EuiFormRow>
-
       <EuiFormRow
         label={i18n.translate('explore.vis.stateTimeline.exclusive.disconnectValues.disableMode', {
           defaultMessage: 'Disconnect values',
@@ -135,7 +147,6 @@ export const StateTimeLineExclusiveVisOptions = ({
           data-test-subj="disconnectValuesGroupButton"
         />
       </EuiFormRow>
-
       {styles?.disconnectValues?.disableMode === DisableMode.Threshold && (
         <EuiFormRow
           label={i18n.translate(
@@ -159,7 +170,6 @@ export const StateTimeLineExclusiveVisOptions = ({
           />
         </EuiFormRow>
       )}
-
       <EuiFormRow
         label={i18n.translate('explore.vis.stateTimeline.exclusive.connectValues.connectMode', {
           defaultMessage: 'Connect null values',
@@ -186,7 +196,6 @@ export const StateTimeLineExclusiveVisOptions = ({
           data-test-subj="connectValuesGroupButton"
         />
       </EuiFormRow>
-
       {styles?.connectNullValues?.connectMode === DisableMode.Threshold && (
         <EuiFormRow
           label={i18n.translate(

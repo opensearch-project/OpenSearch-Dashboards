@@ -16,7 +16,7 @@ import {
   VisColumn,
   AxisColumnMappings,
 } from '../types';
-import { defaultStateTimeLineChartStyles } from './state_timeline_config';
+import { defaultStateTimeLineChartStyles, StateTimeLineChartStyle } from './state_timeline_config';
 
 jest.mock('../utils/utils', () => ({
   getSwappedAxisRole: jest.fn(() => ({
@@ -67,6 +67,23 @@ jest.mock('./state_timeline_utils', () => ({
   convertThresholdsToValueMappings: jest.fn(),
 }));
 
+jest.mock('../style_panel/value_mapping/value_mapping_utils', () => ({
+  generateTransformLayer: jest.fn(() => [
+    {
+      lookup: 'field1',
+      from: {
+        data: {
+          values: [],
+        },
+        key: 'mappingValue',
+        fields: ['mappingValue', 'displayText'],
+      },
+    },
+  ]),
+  decideScale: jest.fn(),
+  generateLabelExpr: jest.fn(),
+}));
+
 const mockData = [
   { timestamp: '2023-01-01', c1: 'A', v1: 20 },
   { timestamp: '2023-01-03', c1: 'A', v1: 50 },
@@ -114,7 +131,10 @@ const mockTimeColumns: VisColumn[] = [
   },
 ];
 
-const mockStyleOptions = defaultStateTimeLineChartStyles;
+const mockStyleOptions = {
+  ...defaultStateTimeLineChartStyles,
+  filterOption: 'filterAll',
+} as StateTimeLineChartStyle;
 
 describe('to_expression', () => {
   describe('createNumericalStateTimeline', () => {
@@ -162,10 +182,10 @@ describe('to_expression', () => {
 
       expect(markLayer).toHaveProperty('encoding.y.field', 'category');
       expect(markLayer).toHaveProperty('encoding.y.type', 'nominal');
-      expect(markLayer).toHaveProperty('encoding.color.field', 'mergedLabel');
+      expect(markLayer).toHaveProperty('encoding.color.field', 'mappingValue');
     });
 
-    it('should fallback to categorical state timeline when no range mappings are provided', () => {
+    it('should fallback to categorical state timeline when no range mappings are provided or set filter option to none', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.COLOR]: mockNumericalColumns[0],
         [AxisRole.Y]: mockCateColumns[0],
@@ -209,6 +229,29 @@ describe('to_expression', () => {
       expect(markLayer).toHaveProperty('encoding.y.field', 'category');
       expect(markLayer).toHaveProperty('encoding.y.type', 'nominal');
       expect(markLayer).toHaveProperty('encoding.color.field', 'mappingValue');
+
+      const result2 = createNumericalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        { ...mockStyleOptions, filterOption: 'none' },
+        mockAxisColumnMappings
+      );
+      // Verify the mark layer
+      const markLayer2 = result2.layer[0];
+      expect(markLayer2).toHaveProperty('mark.type', 'rect');
+      expect(markLayer2).toHaveProperty('mark.tooltip', true);
+
+      // Verify encoding
+      expect(markLayer2).toHaveProperty('encoding.x.field', 'timestamp');
+      expect(markLayer2).toHaveProperty('encoding.x.type', 'temporal');
+      expect(markLayer2).toHaveProperty('encoding.x.type', 'temporal');
+      expect(markLayer2).toHaveProperty('encoding.x2.field', 'end');
+
+      expect(markLayer2).toHaveProperty('encoding.y.field', 'category');
+      expect(markLayer2).toHaveProperty('encoding.y.type', 'nominal');
+      expect(markLayer2).toHaveProperty('encoding.color.field', 'v1');
     });
 
     it('includes text layer when showValues is true', () => {

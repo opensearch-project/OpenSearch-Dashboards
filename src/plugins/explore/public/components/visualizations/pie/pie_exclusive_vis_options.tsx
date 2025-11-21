@@ -4,17 +4,27 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { EuiFormRow, EuiButtonGroup, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiButtonGroup, EuiSwitch, EuiSelect } from '@elastic/eui';
 import React from 'react';
 import { defaultPieChartStyles, PieChartStyle } from './pie_vis_config';
 import { DebouncedFieldNumber } from '../style_panel/utils';
 import { StyleAccordion } from '../style_panel/style_accordion';
+import { FilterOption } from '../types';
+import { FilterOptionsSelect } from '../style_panel/value_mapping/filter_options_select';
+
 interface PieVisOptionsProps {
   styles: PieChartStyle['exclusive'];
   onChange: (styles: PieChartStyle['exclusive']) => void;
+  filterOption?: FilterOption | undefined;
+  onFilterOptionChange?: (option: FilterOption | undefined) => void;
 }
 
-export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps) => {
+export const PieExclusiveVisOptions = ({
+  styles,
+  onChange,
+  filterOption,
+  onFilterOptionChange,
+}: PieVisOptionsProps) => {
   const updateStyle = <K extends keyof PieChartStyle['exclusive']>(
     key: K,
     value: PieChartStyle['exclusive'][K]
@@ -64,6 +74,11 @@ export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps)
           data-test-subj="donutButtonGroup"
         />
       </EuiFormRow>
+      <FilterOptionsSelect
+        filterOption={filterOption}
+        onFilterOptionChange={onFilterOptionChange}
+      />
+
       <EuiFormRow>
         <EuiSwitch
           compressed
