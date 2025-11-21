@@ -67,6 +67,28 @@ export class AdvancedSettingsServerPlugin implements Plugin<object, object> {
     const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
     const isPermissionControlEnabled = globalConfig.savedObjects.permission.enabled === true;
 
+    core.capabilities.registerSwitcher(async () => {
+      const dynamicConfigServiceStart = await core.dynamicConfigService.getStartService();
+      const store = dynamicConfigServiceStart.getAsyncLocalStore();
+      const client = dynamicConfigServiceStart.getClient();
+
+      try {
+        const dynamicConfig = await client.getConfig(
+          { pluginConfigPath: 'uiSettings' },
+          { asyncLocalStorageContext: store! }
+        );
+
+        return {
+          globalScopeEditable: {
+            enabled: dynamicConfig.globalScopeEditable.enabled,
+          },
+        };
+      } catch (e) {
+        this.logger.error(e);
+        return {};
+      }
+    });
+
     const userUiSettingsClientWrapper = new UserUISettingsClientWrapper(
       this.logger,
       isPermissionControlEnabled

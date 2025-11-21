@@ -52,6 +52,7 @@ export function toEditableConfig({
   isOverridden,
   isPermissionControlled,
   userSettingsEnabled,
+  isGlobalScopeEditable,
 }: {
   def: PublicUiSettingsParams & UserProvidedValues<any>;
   name: string;
@@ -60,6 +61,7 @@ export function toEditableConfig({
   isOverridden: boolean;
   isPermissionControlled: boolean;
   userSettingsEnabled: boolean;
+  isGlobalScopeEditable: boolean;
 }) {
   if (!def) {
     def = {};
@@ -92,6 +94,7 @@ export function toEditableConfig({
     optionLabels: def.optionLabels,
     requiresPageReload: !!def.requiresPageReload,
     preferBrowserSetting: userSettingsEnabled && def.preferBrowserSetting,
+    isGlobalScopeEditable,
   };
 
   return conf;
