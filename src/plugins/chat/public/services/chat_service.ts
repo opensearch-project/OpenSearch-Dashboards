@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
@@ -34,7 +34,7 @@ export type ChatWindowStateCallback = (
 
 export class ChatService {
   private agent: AgUiAgent;
-  private threadId: string;
+  private threadId$ = new BehaviorSubject<string>(this.generateThreadId());
   public availableTools: ToolDefinition[] = [];
   public events$: any;
   private activeRequests: Set<string> = new Set();
@@ -55,18 +55,28 @@ export class ChatService {
   // ChatWindow ref for delegating sendMessage calls to proper timeline management
   private chatWindowRef: React.RefObject<ChatWindowInstance> | null = null;
 
+  private get threadId() {
+    return this.threadId$.getValue();
+  }
+
   constructor() {
     // No need to pass URL anymore - agent will use the proxy endpoint
     this.agent = new AgUiAgent();
 
     // Try to restore existing state first
     const currentChatState = this.loadCurrentChatState();
-    this.threadId = currentChatState?.threadId || this.generateThreadId();
+    if (currentChatState?.threadId) {
+      this.threadId$.next(currentChatState.threadId);
+    }
     this.currentMessages = currentChatState?.messages || [];
   }
 
   public getThreadId = () => {
     return this.threadId;
+  };
+
+  public getThreadId$ = () => {
+    return this.threadId$.asObservable();
   };
 
   private generateThreadId(): string {
@@ -439,7 +449,7 @@ export class ChatService {
   }
 
   public newThread(): void {
-    this.threadId = this.generateThreadId();
+    this.threadId$.next(this.generateThreadId());
     this.currentMessages = [];
     this.clearCurrentChatState();
 
