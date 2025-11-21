@@ -27659,9 +27659,11 @@ vega-hierarchy@~4.1.3:
     vega-util "^1.17.3"
 
 vega-interpreter@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/vega-interpreter/-/vega-interpreter-1.0.5.tgz#19e1d1b5f84a4ea9cb25c4e90a05ce16cd058484"
-  integrity sha512-po6oTOmeQqr1tzTCdD15tYxAQLeUnOVirAysgVEemzl+vfmvcEP7jQmlc51jz0jMA+WsbmE6oJywisQPu/H0Bg==
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/vega-interpreter/-/vega-interpreter-1.2.1.tgz#54d6af77f45c0a8c0f0b3d11914a64b68a7f0dc9"
+  integrity sha512-EMHLGxJ+SWfh1K/fHDRlHEZtLA/2ZNAXItYb5e8CxuAIm/Ha/3DHX/8VlvbTGIciUpuwmcKx4tVhJWlKreQ/Yw==
+  dependencies:
+    vega-util "^1.17.4"
 
 vega-label@~1.3.1:
   version "1.3.1"
@@ -27830,6 +27832,11 @@ vega-util@^1.17.3, vega-util@~1.17.2:
   version "1.17.3"
   resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.17.3.tgz#8f24d867daae69580874dcf75de10c65ac9ede5d"
   integrity sha512-nSNpZLUrRvFo46M5OK4O6x6f08WD1yOcEzHNlqivF+sDLSsVpstaF6fdJYwrbf/debFi2L9Tkp4gZQtssup9iQ==
+
+vega-util@^1.17.4:
+  version "1.17.4"
+  resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.17.4.tgz#b35781fe8e8d030e6519746682843d7ef9ff6d27"
+  integrity sha512-+y3ZW7dEqM8Ck+KRsd+jkMfxfE7MrQxUyIpNjkfhIpGEreym+aTn7XUw1DKXqclr8mqTQvbilPo16B3lnBr0wA==
 
 vega-view-transforms@~4.6.1:
   version "4.6.1"
