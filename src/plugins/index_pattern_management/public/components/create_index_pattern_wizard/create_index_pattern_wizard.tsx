@@ -71,6 +71,7 @@ import { TopNavControlDescriptionData } from '../../../../navigation/public';
 interface CreateIndexPatternWizardState {
   step: StepType;
   indexPattern: string;
+  displayName?: string;
   allIndices: MatchedItem[];
   remoteClustersExist: boolean;
   isInitiallyLoadingIndices: boolean;
@@ -217,12 +218,13 @@ export class CreateIndexPatternWizard extends Component<
   createIndexPattern = async (timeFieldName: string | undefined, indexPatternId: string) => {
     let emptyPattern: IndexPattern;
     const { history } = this.props;
-    const { indexPattern, dataSourceRef } = this.state;
+    const { indexPattern, displayName, dataSourceRef } = this.state;
 
     try {
       emptyPattern = await this.context.services.data.indexPatterns.createAndSave({
         id: indexPatternId,
         title: indexPattern,
+        displayName: displayName || undefined, // Include displayName if provided
         timeFieldName,
         dataSourceRef,
         ...this.state.indexPatternCreationType.getIndexPatternMappings(),
@@ -389,6 +391,7 @@ export class CreateIndexPatternWizard extends Component<
           indexPatternCreationType={this.state.indexPatternCreationType}
           goToPreviousStep={this.goToPreviousStep}
           goToNextStep={this.goToNextFromIndexPattern}
+          onDisplayNameChange={(displayName) => this.setState({ displayName })}
           showSystemIndices={
             this.state.indexPatternCreationType.getShowSystemIndices() &&
             this.state.step === INDEX_PATTERN_STEP
