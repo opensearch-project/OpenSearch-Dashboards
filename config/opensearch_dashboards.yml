@@ -415,9 +415,3 @@
 # @experimental Set the value to true to enable context provider
 # contextProvider:
 #   enabled: true
-
-workspace.enabled: false
-opensearch.ignoreVersionMismatch: true
-data_source.enabled: true
-data.savedQueriesNewUI.enabled: true
-data_importer.enabled: true
