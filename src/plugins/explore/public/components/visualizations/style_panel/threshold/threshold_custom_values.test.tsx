@@ -36,7 +36,7 @@ describe('ThresholdCustomValues component', () => {
     fireEvent.click(screen.getByText('+ Add threshold'));
     expect(handleChange).toHaveBeenCalledWith([
       { value: 0, color: '#f8f8f8ff' },
-      { value: 100, color: '#FF6A3D' },
+      { value: 100, color: '#D76813' },
     ]);
   });
 

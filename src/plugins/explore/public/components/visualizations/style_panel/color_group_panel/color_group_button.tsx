@@ -35,7 +35,6 @@ export const ColorGroupButton: React.FC<ColorGroupButtonProps> = ({ buttonColor,
       closePopover={() => setPopover(false)}
       panelPaddingSize="s"
       anchorPosition="downLeft"
-      hasArrow={false}
     >
       <ColorGroupPanel color={buttonColor} onChange={onChange} onClose={() => setPopover(false)} />
     </EuiPopover>

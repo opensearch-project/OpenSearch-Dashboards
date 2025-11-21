@@ -48,7 +48,7 @@ describe('createScatterConfig', () => {
     expect(defaults.titleOptions.show).toBe(false);
     expect(defaults.titleOptions.titleName).toBe('');
     expect(defaults.thresholdOptions).toMatchObject({
-      baseColor: '#00BD6B',
+      baseColor: '#017D73',
       thresholds: [],
       thresholdStyle: ThresholdMode.Off,
     });
