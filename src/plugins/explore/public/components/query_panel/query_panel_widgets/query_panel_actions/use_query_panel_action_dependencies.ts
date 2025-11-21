@@ -9,7 +9,7 @@ import {
   selectQuery,
   selectOverallQueryStatus,
 } from '../../../../application/utils/state_management/selectors';
-import { getQueryWithSource } from '../../../../application/utils/languages';
+import { prepareQueryForLanguage } from '../../../../application/utils/languages';
 import { useEditorText } from '../../../../application/hooks/editor_hooks/use_editor_text/use_editor_text';
 
 /**
@@ -19,7 +19,7 @@ import { useEditorText } from '../../../../application/hooks/editor_hooks/use_ed
  * @returns QueryPanelActionDependencies object with 3 fields:
  *   - query: Last executed query (includes query string, language, dataset)
  *   - resultStatus: Query execution status
- *   - queryInEditor: Current query string in the editor with source clause added (ready to execute)
+ *   - queryInEditor: Current query string in the editor prepared for the language
  */
 export const useQueryPanelActionDependencies = (): QueryPanelActionDependencies => {
   // Get query state from Redux
@@ -32,16 +32,16 @@ export const useQueryPanelActionDependencies = (): QueryPanelActionDependencies 
   // Get current editor query text
   const editorQuery = getEditorText();
 
-  // Transform editor query to add source clause (same as executed query)
+  // Prepare editor query based on language (e.g., add "source = " for PPL)
   // This ensures external plugins receive ready-to-execute queries
-  const transformedEditorQuery = getQueryWithSource({
+  const transformedEditorQuery = prepareQueryForLanguage({
     query: editorQuery,
     language: executedQueryState.language,
     dataset: executedQueryState.dataset,
   });
 
   return {
-    query: getQueryWithSource(executedQueryState),
+    query: prepareQueryForLanguage(executedQueryState),
     resultStatus,
     queryInEditor: transformedEditorQuery.query, // Pass the transformed query string
   };

@@ -4,16 +4,16 @@
  */
 
 import { Query } from '../../../../../../../data/common';
-import { getQueryWithSource } from './get_query_with_source';
+import { addPPLSourceClause } from './get_query_with_source';
 
-describe('getQueryWithSource', () => {
+describe('addPPLSourceClause', () => {
   it('should handle undefined query by using empty string', () => {
     const query: Query = {
       query: undefined as any,
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual({
       ...query,
       query: 'source = `test-dataset`',
@@ -26,7 +26,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual({ ...query, query: 'source=`existing-index` | where field=value' });
   });
 
@@ -36,7 +36,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual({ ...query, query: 'SOURCE=`existing-index` | where field=value' });
   });
 
@@ -46,7 +46,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual({
       ...query,
       query: 'search source=`existing-index` | where field=value',
@@ -59,7 +59,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual({
       ...query,
       query: 'SEARCH SOURCE=`existing-index` | where field=value',
@@ -72,7 +72,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual({ ...query, query: 'source   =`existing-index` | where field=value' });
   });
 
@@ -82,7 +82,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual({ ...query, query: 'source=`existing-index` | where field=value' });
   });
 
@@ -92,7 +92,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual({ ...query, query: 'source=`existing-index`|where field=value' });
   });
 
@@ -102,7 +102,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual({
       ...query,
       query: 'search    source   =`existing-index` | where field=value',
@@ -115,7 +115,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual({
       ...query,
       query: 'search source=`existing-index` | where field=value',
@@ -128,7 +128,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual({
       ...query,
       query: 'source = `test-dataset`',
@@ -141,7 +141,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual({
       ...query,
       query: 'source = `test-dataset`',
@@ -154,7 +154,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual({
       ...query,
       query: 'source = `test-dataset` | where level="error"',
@@ -167,7 +167,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual({
       ...query,
       query: 'source = `test-dataset`   | where level="error"',
@@ -180,7 +180,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual({
       ...query,
       query: ' source = `data_logs_small_time_1*` | where unique_category = "Configuration"',
@@ -193,7 +193,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual({
       ...query,
       query: '  search source=`existing-index` | where field=value',
@@ -206,7 +206,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual(query);
   });
 
@@ -216,7 +216,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual(query);
   });
 
@@ -226,7 +226,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual(query);
   });
 
@@ -236,7 +236,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual(query);
   });
 
@@ -246,7 +246,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual(query);
   });
 
@@ -256,7 +256,7 @@ describe('getQueryWithSource', () => {
       dataset: { title: 'test-dataset', id: '123', type: 'INDEX_PATTERN' },
       language: 'ppl',
     };
-    const result = getQueryWithSource(query);
+    const result = addPPLSourceClause(query);
     expect(result).toEqual(query);
   });
 });

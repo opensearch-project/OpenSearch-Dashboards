@@ -10,7 +10,7 @@ import { ExploreServices } from '../../../../../types';
 import { defaultPrepareQueryString } from '../query_actions';
 import { normalizeResultRows } from '../../../../../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../../../../../components/visualizations/visualization_registry';
-import { getQueryWithSource } from '../../../languages';
+import { prepareQueryForLanguage } from '../../../languages';
 import { Query } from '../../../../../../../data/common';
 import { QueryExecutionStatus } from '../../types';
 import { EXPLORE_LOGS_TAB_ID, EXPLORE_VISUALIZATION_TAB_ID } from '../../../../../../common';
@@ -71,7 +71,7 @@ export const detectAndSetOptimalTab = createAsyncThunk<
   if (visualizationTab?.prepareQuery) {
     const prepareQuery = visualizationTab.prepareQuery;
     visualizationTabPrepareQuery = (queryParam: Query): string => {
-      return prepareQuery(getQueryWithSource(queryParam));
+      return prepareQuery(queryParam);
     };
   }
   const visualizationTabCacheKey = visualizationTabPrepareQuery(query);
