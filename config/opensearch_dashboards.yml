@@ -414,4 +414,4 @@
 
 # @experimental Set the value to true to enable context provider
 # contextProvider:
-#   enabled: true
+# enabled: true
