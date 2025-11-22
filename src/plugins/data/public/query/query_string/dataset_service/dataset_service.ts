@@ -194,6 +194,7 @@ export class DatasetService {
             id: cachedChild.id,
             title: cachedChild.title,
             type: cachedChild.type,
+            description: cachedChild.description,
             meta: cachedChild.meta,
           } as DataStructure;
         })
@@ -209,6 +210,7 @@ export class DatasetService {
       id: dataStructure.id,
       title: dataStructure.title,
       type: dataStructure.type,
+      description: dataStructure.description,
       parent: dataStructure.parent?.id || '',
       children: dataStructure.children?.map((child) => child.id) || [],
       hasNext: dataStructure.hasNext,
@@ -225,6 +227,7 @@ export class DatasetService {
         id: child.id,
         title: child.title,
         type: child.type,
+        description: child.description,
         parent: dataStructure.id,
         children: [],
         meta: child.meta,
