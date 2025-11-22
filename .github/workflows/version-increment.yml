@@ -1,0 +1,109 @@
+name: Auto Version Bump
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  version-bump:
+    if: github.repository == 'opensearch-project/OpenSearch-Dashboards'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: '.nvmrc'
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Parse tag and determine version bump
+      id: parse_tag
+      run: |
+        # Extract tag name without refs/tags/ prefix
+        TAG=${GITHUB_REF#refs/tags/}
+        VERSION=$TAG
+        
+        # Validate version format (x.y.z)
+        if [[ ! $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "Invalid version format: $VERSION"
+          exit 1
+        fi
+        
+        # Extract major, minor, patch
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+        
+        echo "current_version=$VERSION" >> $GITHUB_OUTPUT
+        echo "major=$MAJOR" >> $GITHUB_OUTPUT
+        echo "minor=$MINOR" >> $GITHUB_OUTPUT
+        echo "patch=$PATCH" >> $GITHUB_OUTPUT
+        
+        # Determine version type and next version
+        if [ "$PATCH" = "0" ] && [ "$MINOR" = "0" ]; then
+          # Major release (x.0.0) - bump to next major
+          NEXT_MAJOR=$((MAJOR + 1))
+          NEXT_VERSION="${NEXT_MAJOR}.0.0"
+          VERSION_TYPE="major"
+          TARGET_BRANCH="main"
+        elif [ "$PATCH" = "0" ]; then
+          # Minor release (x.y.0) - bump to next minor
+          NEXT_MINOR=$((MINOR + 1))
+          NEXT_VERSION="${MAJOR}.${NEXT_MINOR}.0"
+          VERSION_TYPE="minor"
+          TARGET_BRANCH="main"
+        else
+          # Patch release (x.y.z) - bump to next patch
+          NEXT_PATCH=$((PATCH + 1))
+          NEXT_VERSION="${MAJOR}.${MINOR}.${NEXT_PATCH}"
+          VERSION_TYPE="patch"
+          TARGET_BRANCH="${MAJOR}.${MINOR}"
+        fi
+        
+        echo "next_version=$NEXT_VERSION" >> $GITHUB_OUTPUT
+        echo "version_type=$VERSION_TYPE" >> $GITHUB_OUTPUT
+        echo "target_branch=$TARGET_BRANCH" >> $GITHUB_OUTPUT
+        
+        echo "Current version: $VERSION"
+        echo "Version type: $VERSION_TYPE"
+        echo "Next version: $NEXT_VERSION"
+        echo "Target branch: $TARGET_BRANCH"
+
+    - name: Checkout target branch
+      uses: actions/checkout@v4
+      with:
+        ref: "${{ steps.parse_tag.outputs.target_branch }}"
+
+    - name: Set environment variables for PR
+      run: |
+        TAG=${GITHUB_REF#refs/tags/}
+        
+        echo "TAG=$TAG" >> $GITHUB_ENV
+        echo "NEXT_VERSION=${{ steps.parse_tag.outputs.next_version }}" >> $GITHUB_ENV
+        echo "BASE_BRANCH=${{ steps.parse_tag.outputs.target_branch }}" >> $GITHUB_ENV
+
+    - name: Update package.json version
+      run: |
+        NEXT_VERSION="${{ steps.parse_tag.outputs.next_version }}"
+        
+        # Update version in package.json
+        npm version $NEXT_VERSION --no-git-tag-version
+        
+        echo "Updated package.json version to $NEXT_VERSION"
+
+    - name: Create PR for target branch
+      uses: peter-evans/create-pull-request@v7
+      with:
+        base: ${{ env.BASE_BRANCH }}
+        branch: 'create-pull-request/patch-${{ env.BASE_BRANCH }}'
+        commit-message: Increment version to ${{ env.NEXT_VERSION }}
+        signoff: true
+        delete-branch: true
+        title: '[AUTO] Increment version to ${{ env.NEXT_VERSION }}'
+        body: |
+          I've noticed that a new tag ${{ env.TAG }} was pushed, and incremented the version from ${{ env.CURRENT_VERSION }} to ${{ env.NEXT_VERSION }}.
