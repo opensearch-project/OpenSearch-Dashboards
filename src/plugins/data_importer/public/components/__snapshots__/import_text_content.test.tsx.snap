@@ -20,7 +20,7 @@ exports[`ImportTextContent should render 1`] = `
             <div
               class="euiText euiText--medium"
             >
-              File Format: 
+              File format: 
             </div>
           </div>
           <div
