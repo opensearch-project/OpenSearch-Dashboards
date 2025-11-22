@@ -1,0 +1,2 @@
+test:
+- Clear session storage in S3 integ test and update workflow ([#9490](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9490))
