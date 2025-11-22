@@ -379,11 +379,16 @@ cy.explore.add(
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Indexes"]`).click();
     cy.get(`[title="${dataSourceName}"]`).click();
+    // Click the search field to open the index selector popover and type to filter
+    cy.get('.indexSelector input[type="text"]').should('be.visible').click().clear().type(index);
+
+    // Wait for popover to appear and select the filtered index
+    cy.wait(1000);
     cy.getElementByTestId('dataset-index-selector')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
-    // this element is sometimes dataSourceName masked by another element
-    cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
+      .should('be.visible')
+      .within(() => {
+        cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
+      });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
 
     if (language) {
@@ -461,17 +466,13 @@ cy.explore.add(
       .find('[data-test-subj="comboBoxInput"]')
       .click();
 
+    cy.wait(1000);
     cy.get(`[title="Index wildcard"]`).should('be.visible').click({ force: true });
 
     // Step 7 - Enter index pattern
     cy.getElementByTestId('dataset-prefix-selector')
       .should('be.visible')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
-
-    cy.getElementByTestId('dataset-prefix-selector')
-      .should('be.visible')
-      .find('[data-test-subj="comboBoxSearchInput"]')
+      .find('[data-test-subj="multiWildcardPatternInput"]')
       .clear()
       .type(`${indexPattern}*{enter}`);
 
@@ -636,14 +637,9 @@ cy.explore.add(
     // Step 7 - Enter index pattern
     cy.getElementByTestId('dataset-prefix-selector')
       .should('be.visible')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
-
-    cy.getElementByTestId('dataset-prefix-selector')
-      .should('be.visible')
-      .find('[data-test-subj="comboBoxSearchInput"]')
+      .find('[data-test-subj="multiWildcardPatternInput"]')
       .clear()
-      .type(`${indexPattern}*{enter}`);
+      .type(`${indexPattern}{enter}`);
 
     // Step 8 - Click Next button
     cy.getElementByTestId('datasetSelectorNext')
