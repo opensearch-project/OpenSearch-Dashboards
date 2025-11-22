@@ -1,0 +1,2 @@
+feat:
+- Vega visualization with ppl now supports reading time field ([#9152](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9152))
