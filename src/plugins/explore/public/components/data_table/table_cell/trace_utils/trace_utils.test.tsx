@@ -132,10 +132,10 @@ describe('trace_utils', () => {
     it('should return true for duration columns', () => {
       expect(isDurationColumn('durationNano')).toBe(true);
       expect(isDurationColumn('durationInNanos')).toBe(true);
+      expect(isDurationColumn('duration')).toBe(true);
     });
 
     it('should return false for other column names', () => {
-      expect(isDurationColumn('duration')).toBe(false);
       expect(isDurationColumn('durationMs')).toBe(false);
       expect(isDurationColumn('spanId')).toBe(false);
       expect(isDurationColumn('traceId')).toBe(false);
@@ -299,14 +299,38 @@ describe('trace_utils', () => {
   });
 
   describe('DurationTableCell', () => {
-    it('should render duration in milliseconds', () => {
-      render(<DurationTableCell sanitizedCellValue="<span>2,000,000</span>" />);
+    it('should render DataPrepper duration (nanoseconds) in milliseconds', () => {
+      render(
+        <DurationTableCell sanitizedCellValue="<span>2,000,000</span>" columnId="durationInNanos" />
+      );
       expect(screen.getByText('2 ms')).toBeInTheDocument();
     });
 
     it('should handle negative values', () => {
-      render(<DurationTableCell sanitizedCellValue="-1000000" />);
+      render(<DurationTableCell sanitizedCellValue="-1000000" columnId="durationInNanos" />);
       expect(screen.getByText('0 ms')).toBeInTheDocument();
+    });
+
+    it('should render Jaeger duration (microseconds) correctly', () => {
+      render(<DurationTableCell sanitizedCellValue="8301" columnId="duration" />);
+      expect(screen.getByText('8.3 ms')).toBeInTheDocument();
+    });
+
+    it('should handle both DataPrepper and Jaeger duration fields', () => {
+      const { rerender } = render(
+        <DurationTableCell sanitizedCellValue="1000000" columnId="durationInNanos" />
+      );
+      expect(screen.getByText('1 ms')).toBeInTheDocument();
+
+      rerender(<DurationTableCell sanitizedCellValue="1000" columnId="duration" />);
+      expect(screen.getByText('1 ms')).toBeInTheDocument();
+    });
+
+    it('should strip HTML and handle commas', () => {
+      render(
+        <DurationTableCell sanitizedCellValue="<mark>1,500,000</mark>" columnId="durationInNanos" />
+      );
+      expect(screen.getByText('1.5 ms')).toBeInTheDocument();
     });
   });
 

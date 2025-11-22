@@ -82,10 +82,13 @@ function getColumnDisplayName(column: string): string {
       return 'Service Identifier';
     case 'durationNano':
     case 'durationInNanos':
+    case 'duration': // Jaeger duration field
       return 'Duration';
     case 'resource.attributes.service.name':
       return 'Service';
     case 'attributes.http.status_code':
+    case 'rpc.grpc.status_code': // Jaeger gRPC status code
+    case 'tags': // Jaeger tags array (contains http.status_code)
       return 'Status Code';
     case 'status.code':
       return 'Status';
@@ -93,6 +96,11 @@ function getColumnDisplayName(column: string): string {
       return 'SpanID';
     case 'kind':
       return 'Service Kind';
+    case 'tag.span@kind': // Jaeger span kind (server/client/etc.)
+    case 'tag': // Jaeger tag object (contains span@kind)
+      return 'Span Kind';
+    case 'tag.error': // Jaeger error indicator
+      return 'Error';
     default:
       return column;
   }

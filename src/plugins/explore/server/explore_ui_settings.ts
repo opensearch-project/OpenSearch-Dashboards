@@ -16,13 +16,23 @@ export const exploreUiSettings: Record<string, UiSettingsParams> = {
     }),
     value: [
       'spanId',
+      'spanID',
       'status.code',
+      'tag.error', // Jaeger error indicator
       'attributes.http.status_code',
+      'attributes.rpc.grpc.status_code', // DataPrepper gRPC status code
+      'tags', // Jaeger tags array (contains http.status_code)
+      'rpc.grpc.status_code', // Jaeger gRPC status code
       'resource.attributes.service.name',
+      'process.serviceName',
       'kind',
+      'tag.span@kind', // Jaeger span kind (server/client/etc.)
+      'tag', // Jaeger tag object (contains span@kind)
       'name',
+      'operationName',
       'durationNano',
       'durationInNanos',
+      'duration',
     ],
     description: i18n.translate('explore.advancedSettings.defaultTraceColumnsText', {
       defaultMessage: 'Experimental: Columns displayed by default in the Explore traces tab',

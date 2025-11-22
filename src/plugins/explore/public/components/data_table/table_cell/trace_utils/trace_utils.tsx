@@ -11,11 +11,15 @@ import { OpenSearchSearchHit } from '../../../../types/doc_views_types';
 import { DataView as Dataset } from '../../../../../../data/common';
 import './trace_utils.scss';
 import { useTraceFlyoutContext } from '../../../../application/pages/traces/trace_flyout/trace_flyout_context';
-import { validateRequiredTraceFields } from '../../../../utils/trace_field_validation';
-import { extractFieldFromRowData } from '../../../../utils/trace_field_validation';
+import {
+  validateRequiredTraceFields,
+  extractFieldFromRowData,
+  extractJaegerGrpcStatusCode,
+} from '../../../../utils/trace_field_validation';
 import {
   round,
   nanoToMilliSec,
+  microToMilliSec,
 } from '../../../../application/pages/traces/trace_details/public/utils/helper_functions';
 
 export const isOnTracesPage = (): boolean => {
@@ -30,7 +34,44 @@ export const isSpanIdColumn = (columnId: string): boolean => {
 };
 
 export const isDurationColumn = (columnId: string) => {
-  return columnId === 'durationNano' || columnId === 'durationInNanos';
+  return columnId === 'durationNano' || columnId === 'durationInNanos' || columnId === 'duration';
+};
+
+export const isStatusCodeColumn = (columnId: string): boolean => {
+  return (
+    columnId === 'tags' ||
+    columnId === 'attributes.http.status_code' ||
+    columnId === 'attributes.rpc.grpc.status_code' ||
+    columnId === 'rpc.grpc.status_code'
+  );
+};
+
+export const extractHttpStatusCodeFromTags = (tags: any): string => {
+  if (!Array.isArray(tags)) {
+    return '';
+  }
+
+  // Find the HTTP status code tag
+  const httpStatusTag = tags.find((tag: any) => tag?.key === 'http.status_code');
+  if (httpStatusTag?.value !== undefined) {
+    return String(httpStatusTag.value);
+  }
+
+  return '';
+};
+
+export const extractGrpcStatusCodeFromTags = (tags: any): string => {
+  if (!Array.isArray(tags)) {
+    return '';
+  }
+
+  // Find the gRPC status code tag
+  const grpcStatusTag = tags.find((tag: any) => tag?.key === 'rpc.grpc.status_code');
+  if (grpcStatusTag?.value !== undefined) {
+    return String(grpcStatusTag.value);
+  }
+
+  return '';
 };
 
 export const buildTraceDetailsUrl = (
@@ -235,19 +276,83 @@ export const getStatusCodeColor = (statusCode: number | undefined): string => {
 
 interface DurationTableCellProps {
   sanitizedCellValue: string;
+  columnId: string;
 }
 
-export const DurationTableCell: React.FC<DurationTableCellProps> = ({ sanitizedCellValue }) => {
+export const DurationTableCell: React.FC<DurationTableCellProps> = ({
+  sanitizedCellValue,
+  columnId,
+}) => {
   const duration = sanitizedCellValue
     .replace(/<[^>]*>/g, '')
     .replace(/,/g, '')
     .trim();
 
-  const durationLabel = `${round(nanoToMilliSec(Math.max(0, Number(duration))), 2)} ms`;
+  const numDuration = Math.max(0, Number(duration));
+
+  // Use appropriate conversion based on column type
+  const durationInMs =
+    columnId === 'duration'
+      ? microToMilliSec(numDuration) // Jaeger: microseconds → milliseconds
+      : nanoToMilliSec(numDuration); // DataPrepper: nanoseconds → milliseconds
+
+  const durationLabel = `${round(durationInMs, 2)} ms`;
 
   return (
     <span className="exploreDocTableCell__dataField" data-test-subj="osdDocTableCellDataField">
       <span>{durationLabel}</span>
+    </span>
+  );
+};
+
+interface StatusCodeTableCellProps {
+  sanitizedCellValue: string;
+  rowData?: OpenSearchSearchHit<Record<string, unknown>>;
+  columnId: string;
+}
+
+export const StatusCodeTableCell: React.FC<StatusCodeTableCellProps> = ({
+  sanitizedCellValue,
+  rowData,
+  columnId,
+}) => {
+  let statusCode = '';
+
+  if (columnId === 'tags' && rowData) {
+    // For Jaeger tags column, try both HTTP and gRPC status codes
+    const tags = rowData._source?.tags || (rowData as any).tags;
+    if (tags) {
+      // // First try HTTP status code
+      // statusCode = extractHttpStatusCodeFromTags(tags);
+
+      // If no HTTP status code, try gRPC status code
+      if (!statusCode) {
+        statusCode = extractGrpcStatusCodeFromTags(tags);
+      }
+    }
+  } else if (
+    (columnId === 'rpc.grpc.status_code' || columnId === 'attributes.rpc.grpc.status_code') &&
+    rowData
+  ) {
+    // For specific gRPC columns, use the extraction function
+    statusCode = extractJaegerGrpcStatusCode(rowData);
+  } else {
+    // For other status code fields, use the sanitized value directly
+    statusCode = sanitizedCellValue.replace(/<[^>]*>/g, '').trim();
+  }
+
+  // If no status code found, show empty
+  if (!statusCode) {
+    return (
+      <span className="exploreDocTableCell__dataField" data-test-subj="osdDocTableCellDataField">
+        <span>-</span>
+      </span>
+    );
+  }
+
+  return (
+    <span className="exploreDocTableCell__dataField" data-test-subj="osdDocTableCellDataField">
+      <span>{statusCode}</span>
     </span>
   );
 };

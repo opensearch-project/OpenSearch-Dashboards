@@ -35,7 +35,9 @@ export class TracePPLService extends PPLService {
     limit: number,
     filters: Array<{ field: string; value: any }> = []
   ): string {
-    let query = `source = ${dataset.title} | where traceId = "${traceId}"`;
+    const traceIdField = this.getTraceIdFieldName(dataset);
+
+    let query = `source = ${dataset.title} | where ${traceIdField} = "${traceId}"`;
 
     filters.forEach((filter) => {
       const escapedValue = escapePPLValue(filter.value);
@@ -44,6 +46,37 @@ export class TracePPLService extends PPLService {
 
     query += ` | head ${limit}`;
     return query;
+  }
+
+  private getTraceIdFieldName(dataset: Dataset): string {
+    if (dataset.schemaMappings?.otelTraces?.traceId) {
+      return dataset.schemaMappings.otelTraces.traceId;
+    }
+
+    const indexName = dataset.title.toLowerCase();
+
+    if (indexName.includes('jaeger')) {
+      return 'traceID';
+    }
+
+    return 'traceId';
+  }
+
+  private getSpanIdFieldName(dataset: Dataset): string {
+    // Check for explicit schema mappings first
+    if (dataset.schemaMappings?.otelTraces?.spanId) {
+      return dataset.schemaMappings.otelTraces.spanId;
+    }
+
+    // Auto-detect schema based on index name patterns
+    const indexName = dataset.title.toLowerCase();
+
+    if (indexName.includes('jaeger')) {
+      return 'spanID'; // Jaeger uses capital ID
+    }
+
+    // Default to lowercase for DataPrepper
+    return 'spanId';
   }
 
   // Execute a PPL query to fetch trace spans by trace ID with additional filters
@@ -85,8 +118,11 @@ export class TracePPLService extends PPLService {
     }
 
     try {
+      const traceIdField = this.getTraceIdFieldName(dataset);
+      const spanIdField = this.getSpanIdFieldName(dataset);
+
       // Construct the PPL query to filter by trace ID and span ID using the dataset title
-      const pplQuery = `source = ${dataset.title} | where traceId = "${traceId}" | where spanId = "${spanId}" | head ${limit}`;
+      const pplQuery = `source = ${dataset.title} | where ${traceIdField} = "${traceId}" | where ${spanIdField} = "${spanId}" | head ${limit}`;
 
       const queryRequest = buildPPLQueryRequest(dataset, pplQuery);
       return await executePPLQuery(this.dataService, queryRequest);

@@ -33,9 +33,15 @@ import { FieldFilterState, isFieldFiltered } from './field_filter';
 
 // TODO: Use data set defined faceted field
 const FACET_FIELDS = [
+  // DataPrepper fields
   'resource.attributes.service.name',
   'attributes.http.status_code',
+  'http.method',
   'status.code',
+
+  // Jaeger equivalent fields
+  'process.serviceName', // Jaeger service name
+  'tag.error', // Jaeger error field (essential for debugging)
 ] as const;
 
 function isFacetedField(fieldName: string): fieldName is typeof FACET_FIELDS[number] {
