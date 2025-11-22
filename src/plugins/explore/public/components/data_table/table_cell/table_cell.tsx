@@ -16,6 +16,8 @@ import {
   SpanIdLink,
   DurationTableCell,
   isDurationColumn,
+  StatusCodeTableCell,
+  isStatusCodeColumn,
 } from './trace_utils/trace_utils';
 import { LogActionMenu } from '../../log_action_menu';
 
@@ -56,7 +58,13 @@ export const TableCellUI = ({
         setIsRowSelected={setIsRowSelected}
       />
     ) : isOnTracesPage && isDurationColumn(columnId) ? (
-      <DurationTableCell sanitizedCellValue={sanitizedCellValue} />
+      <DurationTableCell sanitizedCellValue={sanitizedCellValue} columnId={columnId} />
+    ) : isOnTracesPage && isStatusCodeColumn(columnId) ? (
+      <StatusCodeTableCell
+        sanitizedCellValue={sanitizedCellValue}
+        rowData={rowData}
+        columnId={columnId}
+      />
     ) : (
       <span
         className="exploreDocTableCell__dataField"
