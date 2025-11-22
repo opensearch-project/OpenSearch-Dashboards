@@ -29,7 +29,6 @@
  */
 
 import sinon from 'sinon';
-import expect from '@osd/expect';
 
 import { createListStream, createPromiseFromStreams, createConcatStream } from '../streams';
 
@@ -47,7 +46,7 @@ describe('opensearchArchiver: createGenerateIndexRecordsStream()', () => {
       createGenerateIndexRecordsStream(client, stats),
     ]);
 
-    expect(stats.getTestSummary()).to.eql({
+    expect(stats.getTestSummary()).toEqual({
       archivedIndex: 4,
     });
 
@@ -67,12 +66,12 @@ describe('opensearchArchiver: createGenerateIndexRecordsStream()', () => {
     ]);
 
     const params = (client.indices.get as sinon.SinonSpy).args[0][0];
-    expect(params).to.have.property('filter_path');
+    expect(params).toHaveProperty('filter_path');
     const filters: string[] = params.filter_path;
-    expect(filters.some((path) => path.includes('index.creation_date'))).to.be(true);
-    expect(filters.some((path) => path.includes('index.uuid'))).to.be(true);
-    expect(filters.some((path) => path.includes('index.version'))).to.be(true);
-    expect(filters.some((path) => path.includes('index.provided_name'))).to.be(true);
+    expect(filters.some((path) => path.includes('index.creation_date'))).toBe(true);
+    expect(filters.some((path) => path.includes('index.uuid'))).toBe(true);
+    expect(filters.some((path) => path.includes('index.version'))).toBe(true);
+    expect(filters.some((path) => path.includes('index.provided_name'))).toBe(true);
   });
 
   it('produces one index record for each index name it receives', async () => {
@@ -85,19 +84,19 @@ describe('opensearchArchiver: createGenerateIndexRecordsStream()', () => {
       createConcatStream([]),
     ]);
 
-    expect(indexRecords).to.have.length(3);
+    expect(indexRecords).toHaveLength(3);
 
-    expect(indexRecords[0]).to.have.property('type', 'index');
-    expect(indexRecords[0]).to.have.property('value');
-    expect(indexRecords[0].value).to.have.property('index', 'index1');
+    expect(indexRecords[0]).toHaveProperty('type', 'index');
+    expect(indexRecords[0]).toHaveProperty('value');
+    expect(indexRecords[0].value).toHaveProperty('index', 'index1');
 
-    expect(indexRecords[1]).to.have.property('type', 'index');
-    expect(indexRecords[1]).to.have.property('value');
-    expect(indexRecords[1].value).to.have.property('index', 'index2');
+    expect(indexRecords[1]).toHaveProperty('type', 'index');
+    expect(indexRecords[1]).toHaveProperty('value');
+    expect(indexRecords[1].value).toHaveProperty('index', 'index2');
 
-    expect(indexRecords[2]).to.have.property('type', 'index');
-    expect(indexRecords[2]).to.have.property('value');
-    expect(indexRecords[2].value).to.have.property('index', 'index3');
+    expect(indexRecords[2]).toHaveProperty('type', 'index');
+    expect(indexRecords[2]).toHaveProperty('value');
+    expect(indexRecords[2].value).toHaveProperty('index', 'index3');
   });
 
   it('understands aliases', async () => {
@@ -110,7 +109,7 @@ describe('opensearchArchiver: createGenerateIndexRecordsStream()', () => {
       createConcatStream([]),
     ]);
 
-    expect(indexRecords).to.eql([
+    expect(indexRecords).toEqual([
       {
         type: 'index',
         value: {

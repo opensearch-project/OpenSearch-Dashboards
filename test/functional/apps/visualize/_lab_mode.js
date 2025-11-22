@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../src/plugins/visualizations/common/constants';
 
 export default function ({ getService, getPageObjects }) {
@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.saveSearch('visualize_lab_mode_test');
       await PageObjects.discover.openLoadSavedSearchPanel();
       const hasSaved = await PageObjects.discover.hasSavedSearch('visualize_lab_mode_test');
-      expect(hasSaved).to.be(true);
+      expect(hasSaved).toBe(true);
       await PageObjects.discover.closeLoadSaveSearchPanel();
 
       log.info('found saved search before toggling enableLabs mode');
@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.clickDiscover();
       await PageObjects.discover.openLoadSavedSearchPanel();
       const stillHasSaved = await PageObjects.discover.hasSavedSearch('visualize_lab_mode_test');
-      expect(stillHasSaved).to.be(true);
+      expect(stillHasSaved).toBe(true);
       log.info('found saved search after toggling enableLabs mode');
     });
 

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -63,7 +63,7 @@ export default function ({ getService }) {
           .send(BULK_REQUESTS)
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               saved_objects: [
                 {
                   type: 'visualization',
@@ -122,7 +122,7 @@ export default function ({ getService }) {
           .send(BULK_REQUESTS)
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               saved_objects: [
                 {
                   type: 'visualization',

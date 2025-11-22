@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -45,7 +45,7 @@ export default function ({ getService }) {
           .get(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
           .expect(200)
           .then((resp) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
               type: 'visualization',
               updated_at: '2017-09-21T18:51:23.794Z',
@@ -69,7 +69,7 @@ export default function ({ getService }) {
               ],
               namespaces: ['default'],
             });
-            expect(resp.body.migrationVersion).to.be.ok();
+            expect(resp.body.migrationVersion).toBeTruthy();
           }));
 
       describe('doc does not exist', () => {
@@ -78,7 +78,7 @@ export default function ({ getService }) {
             .get(`/api/saved_objects/visualization/foobar`)
             .expect(404)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 error: 'Not Found',
                 message: 'Saved object [visualization/foobar] not found',
                 statusCode: 404,
@@ -102,7 +102,7 @@ export default function ({ getService }) {
           .get('/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab')
           .expect(404)
           .then((resp) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               error: 'Not Found',
               message:
                 'Saved object [visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab] not found',

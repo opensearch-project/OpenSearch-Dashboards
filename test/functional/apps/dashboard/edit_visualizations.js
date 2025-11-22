@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common', 'visEditor']);
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.saveVisualizationAndReturn();
 
       const markdownText = await testSubjects.find('markdownBody');
-      expect(await markdownText.getVisibleText()).to.eql(modifiedMarkdownText);
+      expect(await markdownText.getVisibleText()).toEqual(modifiedMarkdownText);
     });
 
     it('cancel button returns to dashboard after editing visualization without saving', async () => {
@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.cancelAndReturn(true);
 
       const markdownText = await testSubjects.find('markdownBody');
-      expect(await markdownText.getVisibleText()).to.eql(originalMarkdownText);
+      expect(await markdownText.getVisibleText()).toEqual(originalMarkdownText);
     });
 
     it('cancel button returns to dashboard with no modal if there are no changes to apply', async () => {
@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.cancelAndReturn(false);
 
       const markdownText = await testSubjects.find('markdownBody');
-      expect(await markdownText.getVisibleText()).to.eql(originalMarkdownText);
+      expect(await markdownText.getVisibleText()).toEqual(originalMarkdownText);
     });
   });
 }

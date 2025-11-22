@@ -29,7 +29,6 @@
  */
 
 import { PublicUiSettingsParams, StringValidationRegex } from 'src/core/public';
-import expect from '@osd/expect';
 import { toEditableConfig } from './to_editable_config';
 
 const defDefault = {
@@ -60,17 +59,17 @@ describe('Settings', function () {
   describe('Advanced', function () {
     describe('toEditableConfig(def, name, value)', function () {
       it('sets name', function () {
-        expect(invoke({ name: 'who' }).name).to.equal('who');
+        expect(invoke({ name: 'who' }).name).toEqual('who');
       });
 
       it('sets value', function () {
-        expect(invoke({ value: 'what' }).value).to.equal('what');
+        expect(invoke({ value: 'what' }).value).toEqual('what');
       });
 
       it('sets type', function () {
-        expect(invoke({ value: 'what' }).type).to.be('string');
-        expect(invoke({ value: 0 }).type).to.be('number');
-        expect(invoke({ value: [] }).type).to.be('array');
+        expect(invoke({ value: 'what' }).type).toBe('string');
+        expect(invoke({ value: 0 }).type).toBe('number');
+        expect(invoke({ value: [] }).type).toBe('array');
       });
 
       describe('when given a setting definition object', function () {
@@ -84,32 +83,32 @@ describe('Settings', function () {
         });
 
         it('is not marked as custom', function () {
-          expect(invoke({ def }).isCustom).to.be(false);
+          expect(invoke({ def }).isCustom).toBe(false);
         });
 
         it('sets a default value', function () {
-          expect(invoke({ def }).defVal).to.equal(def.value);
+          expect(invoke({ def }).defVal).toEqual(def.value);
         });
 
         it('sets a description', function () {
-          expect(invoke({ def }).description).to.equal(def.description);
+          expect(invoke({ def }).description).toEqual(def.description);
         });
 
         it('sets options', function () {
-          expect(invoke({ def }).options).to.equal(def.options);
+          expect(invoke({ def }).options).toEqual(def.options);
         });
 
         describe('that contains a type', function () {
           it('sets that type', function () {
             def.type = 'string';
-            expect(invoke({ def }).type).to.equal(def.type);
+            expect(invoke({ def }).type).toEqual(def.type);
           });
         });
 
         describe('that contains a value of type array', function () {
           it('sets type to array', function () {
             def.value = [];
-            expect(invoke({ def }).type).to.equal('array');
+            expect(invoke({ def }).type).toEqual('array');
           });
         });
 
@@ -121,31 +120,31 @@ describe('Settings', function () {
             };
             const result = invoke({ def });
             const validationTyped = result.validation as StringValidationRegex;
-            expect(validationTyped.regex).to.be.a(RegExp);
-            expect(validationTyped.message).to.equal('must start with "foo"');
+            expect(validationTyped.regex).toBeInstanceOf(RegExp);
+            expect(validationTyped.message).toEqual('must start with "foo"');
           });
         });
       });
 
       describe('when not given a setting definition object', function () {
         it('is marked as custom', function () {
-          expect(invoke({}).isCustom).to.be(true);
+          expect(invoke({}).isCustom).toBe(true);
         });
 
         it('sets defVal to undefined', function () {
-          expect(invoke({}).defVal).to.be(undefined);
+          expect(invoke({}).defVal).toBe(undefined);
         });
 
         it('sets description to undefined', function () {
-          expect(invoke({}).description).to.be(undefined);
+          expect(invoke({}).description).toBe(undefined);
         });
 
         it('sets options to undefined', function () {
-          expect(invoke({}).options).to.be(undefined);
+          expect(invoke({}).options).toBe(undefined);
         });
 
         it('sets validation to undefined', function () {
-          expect(invoke({}).validation).to.be(undefined);
+          expect(invoke({}).validation).toBe(undefined);
         });
       });
     });

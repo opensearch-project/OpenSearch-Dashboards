@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
@@ -65,40 +65,40 @@ export default function ({ getService, getPageObjects }) {
         await testSubjects.click('addFilter');
         const fields = await filterBar.getFilterEditorFields();
         await filterBar.ensureFieldEditorModalIsClosed();
-        expect(fields.length).to.be.greaterThan(0);
+        expect(fields.length).toBeGreaterThan(0);
       });
     });
 
     describe('updateFiltersOnChange is false', () => {
       it('should contain dropdown with terms aggregation results as options', async () => {
         const menu = await comboBox.getOptionsList('listControlSelect0');
-        expect(menu.trim().split('\n').join()).to.equal('ios,osx,win 7,win 8,win xp');
+        expect(menu.trim().split('\n').join()).toEqual('ios,osx,win 7,win 8,win xp');
       });
 
       it('should display staging control buttons', async () => {
         const submitButtonExists = await testSubjects.exists('inputControlSubmitBtn');
         const cancelButtonExists = await testSubjects.exists('inputControlCancelBtn');
         const clearButtonExists = await testSubjects.exists('inputControlClearBtn');
-        expect(submitButtonExists).to.equal(true);
-        expect(cancelButtonExists).to.equal(true);
-        expect(clearButtonExists).to.equal(true);
+        expect(submitButtonExists).toEqual(true);
+        expect(cancelButtonExists).toEqual(true);
+        expect(clearButtonExists).toEqual(true);
       });
 
       it('should stage filter when item selected but not create filter pill', async () => {
         await comboBox.set('listControlSelect0', 'ios');
 
         const selectedOptions = await comboBox.getComboBoxSelectedOptions('listControlSelect0');
-        expect(selectedOptions[0].trim()).to.equal('ios');
+        expect(selectedOptions[0].trim()).toEqual('ios');
 
         const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilter).to.equal(false);
+        expect(hasFilter).toEqual(false);
       });
 
       it('should add filter pill when submit button is clicked', async () => {
         await PageObjects.visEditor.inputControlSubmit();
 
         const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilter).to.equal(true);
+        expect(hasFilter).toEqual(true);
       });
 
       it('should replace existing filter pill(s) when new item is selected', async () => {
@@ -109,8 +109,8 @@ export default function ({ getService, getPageObjects }) {
 
         const hasOldFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
         const hasNewFilter = await filterBar.hasFilter(FIELD_NAME, 'osx');
-        expect(hasOldFilter).to.equal(false);
-        expect(hasNewFilter).to.equal(true);
+        expect(hasOldFilter).toEqual(false);
+        expect(hasNewFilter).toEqual(true);
       });
 
       it('should clear dropdown when filter pill removed', async () => {
@@ -118,27 +118,27 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.common.sleep(500); // give time for filter to be removed and event handlers to fire
 
         const hasValue = await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0');
-        expect(hasValue).to.equal(false);
+        expect(hasValue).toEqual(false);
       });
 
       it('should clear form when Clear button is clicked but not remove filter pill', async () => {
         await comboBox.set('listControlSelect0', 'ios');
         await PageObjects.visEditor.inputControlSubmit();
         const hasFilterBeforeClearBtnClicked = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilterBeforeClearBtnClicked).to.equal(true);
+        expect(hasFilterBeforeClearBtnClicked).toEqual(true);
 
         await PageObjects.visEditor.inputControlClear();
         const hasValue = await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0');
-        expect(hasValue).to.equal(false);
+        expect(hasValue).toEqual(false);
 
         const hasFilterAfterClearBtnClicked = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilterAfterClearBtnClicked).to.equal(true);
+        expect(hasFilterAfterClearBtnClicked).toEqual(true);
       });
 
       it('should remove filter pill when cleared form is submitted', async () => {
         await PageObjects.visEditor.inputControlSubmit();
         const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilter).to.equal(false);
+        expect(hasFilter).toEqual(false);
       });
     });
 
@@ -161,19 +161,19 @@ export default function ({ getService, getPageObjects }) {
         const submitButtonExists = await testSubjects.exists('inputControlSubmitBtn');
         const cancelButtonExists = await testSubjects.exists('inputControlCancelBtn');
         const clearButtonExists = await testSubjects.exists('inputControlClearBtn');
-        expect(submitButtonExists).to.equal(false);
-        expect(cancelButtonExists).to.equal(false);
-        expect(clearButtonExists).to.equal(false);
+        expect(submitButtonExists).toEqual(false);
+        expect(cancelButtonExists).toEqual(false);
+        expect(clearButtonExists).toEqual(false);
       });
 
       it('should add filter pill when item selected', async () => {
         await comboBox.set('listControlSelect0', 'ios');
 
         const selectedOptions = await comboBox.getComboBoxSelectedOptions('listControlSelect0');
-        expect(selectedOptions[0].trim()).to.equal('ios');
+        expect(selectedOptions[0].trim()).toEqual('ios');
 
         const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilter).to.equal(true);
+        expect(hasFilter).toEqual(true);
       });
     });
 
@@ -186,7 +186,7 @@ export default function ({ getService, getPageObjects }) {
         // Expect control to be disabled because no terms could be gathered with time filter applied
         const input = await find.byCssSelector('[data-test-subj="inputControl0"] input');
         const isDisabled = await input.getAttribute('disabled');
-        expect(isDisabled).to.equal('true');
+        expect(isDisabled).toEqual('true');
       });
 
       it('should re-create control when global time filter is updated', async () => {
@@ -197,7 +197,7 @@ export default function ({ getService, getPageObjects }) {
 
         // Expect control to have values for selected time filter
         const menu = await comboBox.getOptionsList('listControlSelect0');
-        expect(menu.trim().split('\n').join()).to.equal('osx,win 7,win 8,win xp');
+        expect(menu.trim().split('\n').join()).toEqual('osx,win 7,win 8,win xp');
       });
     });
   });

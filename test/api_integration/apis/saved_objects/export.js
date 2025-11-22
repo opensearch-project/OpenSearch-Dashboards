@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -50,16 +50,16 @@ export default function ({ getService }) {
             .expect(200)
             .then((resp) => {
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.have.length(4);
-              expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
-              expect(objects[0]).to.have.property('type', 'index-pattern');
-              expect(objects[1]).to.have.property('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
-              expect(objects[1]).to.have.property('type', 'visualization');
-              expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
-              expect(objects[2]).to.have.property('type', 'dashboard');
-              expect(objects[3]).to.have.property('exportedCount', 3);
-              expect(objects[3]).to.have.property('missingRefCount', 0);
-              expect(objects[3].missingReferences).to.have.length(0);
+              expect(objects).toHaveLength(4);
+              expect(objects[0]).toHaveProperty('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[0]).toHaveProperty('type', 'index-pattern');
+              expect(objects[1]).toHaveProperty('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[1]).toHaveProperty('type', 'visualization');
+              expect(objects[2]).toHaveProperty('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
+              expect(objects[2]).toHaveProperty('type', 'dashboard');
+              expect(objects[3]).toHaveProperty('exportedCount', 3);
+              expect(objects[3]).toHaveProperty('missingRefCount', 0);
+              expect(objects[3].missingReferences).toHaveLength(0);
             });
         });
 
@@ -73,13 +73,13 @@ export default function ({ getService }) {
             .expect(200)
             .then((resp) => {
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.have.length(3);
-              expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
-              expect(objects[0]).to.have.property('type', 'index-pattern');
-              expect(objects[1]).to.have.property('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
-              expect(objects[1]).to.have.property('type', 'visualization');
-              expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
-              expect(objects[2]).to.have.property('type', 'dashboard');
+              expect(objects).toHaveLength(3);
+              expect(objects[0]).toHaveProperty('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[0]).toHaveProperty('type', 'index-pattern');
+              expect(objects[1]).toHaveProperty('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[1]).toHaveProperty('type', 'visualization');
+              expect(objects[2]).toHaveProperty('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
+              expect(objects[2]).toHaveProperty('type', 'dashboard');
             });
         });
 
@@ -98,16 +98,16 @@ export default function ({ getService }) {
             .expect(200)
             .then((resp) => {
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.have.length(4);
-              expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
-              expect(objects[0]).to.have.property('type', 'index-pattern');
-              expect(objects[1]).to.have.property('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
-              expect(objects[1]).to.have.property('type', 'visualization');
-              expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
-              expect(objects[2]).to.have.property('type', 'dashboard');
-              expect(objects[3]).to.have.property('exportedCount', 3);
-              expect(objects[3]).to.have.property('missingRefCount', 0);
-              expect(objects[3].missingReferences).to.have.length(0);
+              expect(objects).toHaveLength(4);
+              expect(objects[0]).toHaveProperty('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[0]).toHaveProperty('type', 'index-pattern');
+              expect(objects[1]).toHaveProperty('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[1]).toHaveProperty('type', 'visualization');
+              expect(objects[2]).toHaveProperty('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
+              expect(objects[2]).toHaveProperty('type', 'dashboard');
+              expect(objects[3]).toHaveProperty('exportedCount', 3);
+              expect(objects[3]).toHaveProperty('missingRefCount', 0);
+              expect(objects[3].missingReferences).toHaveLength(0);
             });
         });
 
@@ -121,16 +121,16 @@ export default function ({ getService }) {
             .expect(200)
             .then((resp) => {
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.have.length(4);
-              expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
-              expect(objects[0]).to.have.property('type', 'index-pattern');
-              expect(objects[1]).to.have.property('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
-              expect(objects[1]).to.have.property('type', 'visualization');
-              expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
-              expect(objects[2]).to.have.property('type', 'dashboard');
-              expect(objects[3]).to.have.property('exportedCount', 3);
-              expect(objects[3]).to.have.property('missingRefCount', 0);
-              expect(objects[3].missingReferences).to.have.length(0);
+              expect(objects).toHaveLength(4);
+              expect(objects[0]).toHaveProperty('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[0]).toHaveProperty('type', 'index-pattern');
+              expect(objects[1]).toHaveProperty('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[1]).toHaveProperty('type', 'visualization');
+              expect(objects[2]).toHaveProperty('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
+              expect(objects[2]).toHaveProperty('type', 'dashboard');
+              expect(objects[3]).toHaveProperty('exportedCount', 3);
+              expect(objects[3]).toHaveProperty('missingRefCount', 0);
+              expect(objects[3].missingReferences).toHaveLength(0);
             });
         });
 
@@ -145,16 +145,16 @@ export default function ({ getService }) {
             .expect(200)
             .then((resp) => {
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.have.length(4);
-              expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
-              expect(objects[0]).to.have.property('type', 'index-pattern');
-              expect(objects[1]).to.have.property('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
-              expect(objects[1]).to.have.property('type', 'visualization');
-              expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
-              expect(objects[2]).to.have.property('type', 'dashboard');
-              expect(objects[3]).to.have.property('exportedCount', 3);
-              expect(objects[3]).to.have.property('missingRefCount', 0);
-              expect(objects[3].missingReferences).to.have.length(0);
+              expect(objects).toHaveLength(4);
+              expect(objects[0]).toHaveProperty('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[0]).toHaveProperty('type', 'index-pattern');
+              expect(objects[1]).toHaveProperty('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[1]).toHaveProperty('type', 'visualization');
+              expect(objects[2]).toHaveProperty('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
+              expect(objects[2]).toHaveProperty('type', 'dashboard');
+              expect(objects[3]).toHaveProperty('exportedCount', 3);
+              expect(objects[3]).toHaveProperty('missingRefCount', 0);
+              expect(objects[3].missingReferences).toHaveLength(0);
             });
         });
 
@@ -171,7 +171,7 @@ export default function ({ getService }) {
             })
             .expect(400)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 statusCode: 400,
                 error: 'Bad Request',
                 message: 'Bad Request',
@@ -200,7 +200,7 @@ export default function ({ getService }) {
             })
             .expect(400)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 statusCode: 400,
                 error: 'Bad Request',
                 message: 'Trying to export non-exportable type(s): wigwags',
@@ -221,7 +221,7 @@ export default function ({ getService }) {
             })
             .expect(400)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 statusCode: 400,
                 error: 'Bad Request',
                 message: 'Trying to export object(s) with non-exportable types: wigwags:1',
@@ -239,7 +239,7 @@ export default function ({ getService }) {
             .post('/api/saved_objects/_export')
             .expect(400)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 statusCode: 400,
                 error: 'Bad Request',
                 message: '[request body]: expected a plain object value, but found [null] instead.',
@@ -256,12 +256,12 @@ export default function ({ getService }) {
             })
             .expect(200)
             .then((resp) => {
-              expect(resp.headers['content-disposition']).to.eql(
+              expect(resp.headers['content-disposition']).toEqual(
                 'attachment; filename="export.ndjson"'
               );
-              expect(resp.headers['content-type']).to.eql('application/ndjson');
+              expect(resp.headers['content-type']).toEqual('application/ndjson');
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.eql([
+              expect(objects).toEqual([
                 {
                   attributes: {
                     description: '',
@@ -297,12 +297,12 @@ export default function ({ getService }) {
                   version: objects[0].version,
                 },
               ]);
-              expect(objects[0].migrationVersion).to.be.ok();
+              expect(objects[0].migrationVersion).toBeTruthy();
               expect(() =>
                 JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
-              ).not.to.throwError();
-              expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
-              expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
+              ).not.toThrowError();
+              expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.toThrowError();
+              expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.toThrowError();
             });
         });
 
@@ -315,12 +315,12 @@ export default function ({ getService }) {
             })
             .expect(200)
             .then((resp) => {
-              expect(resp.headers['content-disposition']).to.eql(
+              expect(resp.headers['content-disposition']).toEqual(
                 'attachment; filename="export.ndjson"'
               );
-              expect(resp.headers['content-type']).to.eql('application/ndjson');
+              expect(resp.headers['content-type']).toEqual('application/ndjson');
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.eql([
+              expect(objects).toEqual([
                 {
                   attributes: {
                     description: '',
@@ -356,12 +356,12 @@ export default function ({ getService }) {
                   version: objects[0].version,
                 },
               ]);
-              expect(objects[0].migrationVersion).to.be.ok();
+              expect(objects[0].migrationVersion).toBeTruthy();
               expect(() =>
                 JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
-              ).not.to.throwError();
-              expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
-              expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
+              ).not.toThrowError();
+              expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.toThrowError();
+              expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.toThrowError();
             });
         });
 
@@ -379,12 +379,12 @@ export default function ({ getService }) {
             })
             .expect(200)
             .then((resp) => {
-              expect(resp.headers['content-disposition']).to.eql(
+              expect(resp.headers['content-disposition']).toEqual(
                 'attachment; filename="export.ndjson"'
               );
-              expect(resp.headers['content-type']).to.eql('application/ndjson');
+              expect(resp.headers['content-type']).toEqual('application/ndjson');
               const objects = resp.text.split('\n').map(JSON.parse);
-              expect(objects).to.eql([
+              expect(objects).toEqual([
                 {
                   attributes: {
                     description: '',
@@ -420,12 +420,12 @@ export default function ({ getService }) {
                   version: objects[0].version,
                 },
               ]);
-              expect(objects[0].migrationVersion).to.be.ok();
+              expect(objects[0].migrationVersion).toBeTruthy();
               expect(() =>
                 JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)
-              ).not.to.throwError();
-              expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
-              expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
+              ).not.toThrowError();
+              expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.toThrowError();
+              expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.toThrowError();
             });
         });
 
@@ -444,7 +444,7 @@ export default function ({ getService }) {
             })
             .expect(400)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 statusCode: 400,
                 error: 'Bad Request',
                 message: `Can't specify both "types" and "objects" properties when exporting`,
@@ -483,7 +483,7 @@ export default function ({ getService }) {
             })
             .expect(400)
             .then((resp) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 statusCode: 400,
                 error: 'Bad Request',
                 message: `Can't export more than 10000 objects`,
@@ -512,7 +512,7 @@ export default function ({ getService }) {
           })
           .expect(200)
           .then((resp) => {
-            expect(resp.text).to.eql('');
+            expect(resp.text).toEqual('');
           });
       });
     });

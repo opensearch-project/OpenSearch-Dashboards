@@ -31,8 +31,6 @@
 import Stream, { PassThrough, Readable, Writable, Transform } from 'stream';
 import { createGzip } from 'zlib';
 
-import expect from '@osd/expect';
-
 import { createConcatStream, createListStream, createPromiseFromStreams } from '../streams';
 
 import { createParseArchiveStreams } from './parse';
@@ -41,9 +39,9 @@ describe('opensearchArchiver createParseArchiveStreams', () => {
   describe('{ gzip: false }', () => {
     it('returns an array of streams', () => {
       const streams = createParseArchiveStreams({ gzip: false });
-      expect(streams).to.be.an('array');
-      expect(streams.length).to.be.greaterThan(0);
-      streams.forEach((s) => expect(s).to.be.a(Stream));
+      expect(Array.isArray(streams)).toBe(true);
+      expect(streams.length).toBeGreaterThan(0);
+      streams.forEach((s) => expect(s).toBeInstanceOf(Stream));
     });
 
     describe('streams', () => {
@@ -58,7 +56,7 @@ describe('opensearchArchiver createParseArchiveStreams', () => {
           ...createParseArchiveStreams({ gzip: false }),
         ]);
 
-        expect(output).to.eql({ a: 1 });
+        expect(output).toEqual({ a: 1 });
       });
       it('consume buffers of valid JSON separated by two newlines', async () => {
         const output = await createPromiseFromStreams([
@@ -75,7 +73,7 @@ describe('opensearchArchiver createParseArchiveStreams', () => {
           createConcatStream([]),
         ] as [Readable, ...Writable[]]);
 
-        expect(output).to.eql([{ a: 1 }, 1]);
+        expect(output).toEqual([{ a: 1 }, 1]);
       });
 
       it('provides each JSON object as soon as it is parsed', async () => {
@@ -99,10 +97,10 @@ describe('opensearchArchiver createParseArchiveStreams', () => {
         ] as [Readable, ...Writable[]]);
 
         input.write(Buffer.from('{"a": 1}\n\n{"a":'));
-        expect(await receivedPromise).to.eql({ a: 1 });
+        expect(await receivedPromise).toEqual({ a: 1 });
         input.write(Buffer.from('2}'));
         input.end();
-        expect(await finalPromise).to.eql([{ a: 1 }, { a: 2 }]);
+        expect(await finalPromise).toEqual([{ a: 1 }, { a: 2 }]);
       });
     });
 
@@ -121,7 +119,7 @@ describe('opensearchArchiver createParseArchiveStreams', () => {
           throw new Error('should have failed');
         } catch (err) {
           const { message } = err as Error;
-          expect(message).to.contain(`Expected property name or '}' in JSON at position 1`);
+          expect(message).toContain(`Expected property name or '}' in JSON at position 1`);
         }
       });
     });
@@ -130,9 +128,9 @@ describe('opensearchArchiver createParseArchiveStreams', () => {
   describe('{ gzip: true }', () => {
     it('returns an array of streams', () => {
       const streams = createParseArchiveStreams({ gzip: true });
-      expect(streams).to.be.an('array');
-      expect(streams.length).to.be.greaterThan(0);
-      streams.forEach((s) => expect(s).to.be.a(Stream));
+      expect(Array.isArray(streams)).toBe(true);
+      expect(streams.length).toBeGreaterThan(0);
+      streams.forEach((s) => expect(s).toBeInstanceOf(Stream));
     });
 
     describe('streams', () => {
@@ -148,7 +146,7 @@ describe('opensearchArchiver createParseArchiveStreams', () => {
           ...createParseArchiveStreams({ gzip: true }),
         ]);
 
-        expect(output).to.eql({ a: 1 });
+        expect(output).toEqual({ a: 1 });
       });
 
       it('parses valid gzipped JSON strings separated by two newlines', async () => {
@@ -159,7 +157,7 @@ describe('opensearchArchiver createParseArchiveStreams', () => {
           createConcatStream([]),
         ] as [Readable, ...Writable[]]);
 
-        expect(output).to.eql([{ a: 1 }, { a: 2 }]);
+        expect(output).toEqual([{ a: 1 }, { a: 2 }]);
       });
     });
 
@@ -171,7 +169,7 @@ describe('opensearchArchiver createParseArchiveStreams', () => {
         createConcatStream([]),
       ] as [Readable, ...Writable[]]);
 
-      expect(output).to.eql([]);
+      expect(output).toEqual([]);
     });
 
     describe('stream errors', () => {
@@ -185,7 +183,7 @@ describe('opensearchArchiver createParseArchiveStreams', () => {
           throw new Error('should have failed');
         } catch (err) {
           const { message } = err as Error;
-          expect(message).to.contain('incorrect header check');
+          expect(message).toContain('incorrect header check');
         }
       });
     });
@@ -197,7 +195,7 @@ describe('opensearchArchiver createParseArchiveStreams', () => {
         createListStream([Buffer.from('{"a": 1}')]),
         ...createParseArchiveStreams(),
       ]);
-      expect(output).to.eql({ a: 1 });
+      expect(output).toEqual({ a: 1 });
     });
   });
 });

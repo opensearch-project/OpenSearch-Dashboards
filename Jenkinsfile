@@ -40,7 +40,6 @@ pipeline {
         script {
           DOCKER_IMAGE.inside {
               sh 'yarn test:jest_integration -u --ci --verbose' // TODO::Need to remove -u and fix the CI
-              sh 'yarn test:mocha'
           }
         }
       }

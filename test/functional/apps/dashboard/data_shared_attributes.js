@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }) {
     it('should have time picker with data-shared-timefilter-duration', async () => {
       await retry.try(async () => {
         const sharedData = await PageObjects.timePicker.getTimeDurationForSharing();
-        expect(sharedData).to.not.be(null);
+        expect(sharedData).not.toBe(null);
       });
     });
 
@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async () => {
         const sharedItemsCount = await PageObjects.dashboard.getSharedItemsCount();
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(sharedItemsCount).to.eql(panelCount);
+        expect(sharedItemsCount).toEqual(panelCount);
       });
     });
 
@@ -70,14 +70,14 @@ export default function ({ getService, getPageObjects }) {
       await retry.try(async () => {
         const sharedData = await PageObjects.dashboard.getPanelSharedItemData();
         originalPanelTitles = await PageObjects.dashboard.getPanelTitles();
-        expect(sharedData.map((item) => item.title)).to.eql(originalPanelTitles);
+        expect(sharedData.map((item) => item.title)).toEqual(originalPanelTitles);
       });
     });
 
     it('data shared item container data has description and title set', async () => {
       const sharedContainerData = await PageObjects.dashboard.getSharedContainerData();
-      expect(sharedContainerData.title).to.be('dashboard with everything');
-      expect(sharedContainerData.description).to.be(
+      expect(sharedContainerData.title).toBe('dashboard with everything');
+      expect(sharedContainerData.description).toBe(
         'I have one of every visualization type since the last time I was created!'
       );
     });
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }) {
         const foundSharedItemTitle = !!sharedData.find((item) => {
           return item.title === CUSTOM_VIS_TITLE;
         });
-        expect(foundSharedItemTitle).to.be(true);
+        expect(foundSharedItemTitle).toBe(true);
       });
     });
 
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }) {
         const foundSharedItemTitle = !!sharedData.find((item) => {
           return item.title === '';
         });
-        expect(foundSharedItemTitle).to.be(true);
+        expect(foundSharedItemTitle).toBe(true);
       });
       await dashboardPanelActions.toggleHidePanelTitle();
     });
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }) {
         const foundOriginalSharedItemTitle = !!sharedData.find((item) => {
           return item.title === originalPanelTitles[0];
         });
-        expect(foundOriginalSharedItemTitle).to.be(true);
+        expect(foundOriginalSharedItemTitle).toBe(true);
       });
     });
 
@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }) {
         const foundSharedItemTitle = !!sharedData.find((item) => {
           return item.title === CUSTOM_SEARCH_TITLE;
         });
-        expect(foundSharedItemTitle).to.be(true);
+        expect(foundSharedItemTitle).toBe(true);
       });
     });
   });

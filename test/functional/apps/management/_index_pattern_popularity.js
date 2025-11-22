@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }) {
     it('should update the popularity input', async function () {
       const popularity = await PageObjects.settings.getPopularity();
       log.debug('popularity = ' + popularity);
-      expect(popularity).to.be('1');
+      expect(popularity).toBe('1');
     });
 
     it('should be reset on cancel', async function () {
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
       // check that it is 0 (previous increase was cancelled
       const popularity = await PageObjects.settings.getPopularity();
       log.debug('popularity = ' + popularity);
-      expect(popularity).to.be('0');
+      expect(popularity).toBe('0');
     });
 
     it('can be saved', async function () {
@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.openControlsByName(fieldName);
       const popularity = await PageObjects.settings.getPopularity();
       log.debug('popularity = ' + popularity);
-      expect(popularity).to.be('1');
+      expect(popularity).toBe('1');
     });
   }); // end 'change popularity'
 }

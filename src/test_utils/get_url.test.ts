@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
 import getUrl from './get_url';
 
 describe('getUrl', function () {
@@ -37,7 +36,7 @@ describe('getUrl', function () {
       pathname: 'foo',
     });
 
-    expect(url).to.be('http://localhost/foo');
+    expect(url).toBe('http://localhost/foo');
   });
 
   it('should convert to a url with port', function () {
@@ -45,7 +44,7 @@ describe('getUrl', function () {
       pathname: 'foo',
     });
 
-    expect(url).to.be('http://localhost:9220/foo');
+    expect(url).toBe('http://localhost:9220/foo');
   });
 
   it('should convert to a secure hashed url', function () {
@@ -54,6 +53,6 @@ describe('getUrl', function () {
         pathname: 'foo',
         hash: 'bar',
       })
-    ).to.be('https://localhost/foo#bar');
+    ).toBe('https://localhost/foo#bar');
   });
 });
