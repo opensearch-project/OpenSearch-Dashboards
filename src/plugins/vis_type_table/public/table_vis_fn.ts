@@ -12,7 +12,9 @@ import {
 } from '../../expressions/public';
 import { TableVisConfig } from './types';
 
-export type Input = OpenSearchDashboardsDatatable;
+export type Input = OpenSearchDashboardsDatatable & {
+  meta?: { sumOtherDocCount?: number };
+};
 
 interface Arguments {
   visConfig: string | null;
@@ -22,6 +24,7 @@ export interface TableVisRenderValue {
   visData: TableVisData;
   visType: 'table';
   visConfig: TableVisConfig;
+  meta?: { sumOtherDocCount?: number };
 }
 
 export type TableVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -56,6 +59,7 @@ export const createTableVisFn = (): TableVisExpressionFunctionDefinition => ({
         visData: convertedData,
         visType: 'table',
         visConfig,
+        meta: input.meta,
       },
     };
   },
