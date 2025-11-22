@@ -130,14 +130,16 @@ jobs:
           name: dashboards-cypress-screenshots-10
           path: cypress/screenshots
           retention-days: 1
+          overwrite: true
 
       - name: Upload Dashboards repo videos
         uses: actions/upload-artifact@v4
-        if: always()
+        if: failure()
         with:
           name: dashboards-cypress-videos-10
           path: cypress/videos
           retention-days: 1
+          overwrite: true
 
       - name: Upload Dashboards repo results
         uses: actions/upload-artifact@v4
@@ -146,3 +148,4 @@ jobs:
           name: dashboards-cypress-results-10
           path: cypress/results
           retention-days: 1
+          overwrite: true
