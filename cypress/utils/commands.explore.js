@@ -383,6 +383,7 @@ cy.explore.add(
     cy.get('.indexSelector input[type="text"]').should('be.visible').click().clear().type(index);
 
     // Wait for popover to appear and select the filtered index
+    cy.wait(1000);
     cy.getElementByTestId('dataset-index-selector')
       .should('be.visible')
       .within(() => {
@@ -465,6 +466,7 @@ cy.explore.add(
       .find('[data-test-subj="comboBoxInput"]')
       .click();
 
+    cy.wait(1000);
     cy.get(`[title="Index wildcard"]`).should('be.visible').click({ force: true });
 
     // Step 7 - Enter index pattern
