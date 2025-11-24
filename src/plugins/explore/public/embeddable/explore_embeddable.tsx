@@ -171,7 +171,6 @@ export class ExploreEmbeddable
   private initializeSearchProps() {
     const { searchSource } = this.savedExplore;
     const indexPattern = searchSource.getField('index');
-    if (!indexPattern) return;
     const searchProps: SearchProps = {
       inspectorAdapters: this.inspectorAdaptors,
       rows: [],
@@ -254,7 +253,7 @@ export class ExploreEmbeddable
         field,
         value,
         operator,
-        indexPattern.id!
+        indexPattern?.id!
       );
       filters = filters.map((filter) => ({
         ...filter,
@@ -421,6 +420,11 @@ export class ExploreEmbeddable
     // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
     this.searchProps.hits = resp.hits.hits.length;
     this.searchProps.isLoading = false;
+
+    // Render the component with updated data
+    if (this.node && this.searchProps) {
+      this.renderComponent(this.node, this.searchProps);
+    }
   };
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
@@ -466,6 +470,7 @@ export class ExploreEmbeddable
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = node;
+    this.node.style.height = '100%';
   }
 
   public getInspectorAdapters() {
