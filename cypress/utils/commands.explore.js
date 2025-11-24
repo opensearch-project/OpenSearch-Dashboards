@@ -380,10 +380,10 @@ cy.explore.add(
     cy.get(`[title="Indexes"]`).click();
     cy.get(`[title="${dataSourceName}"]`).click();
     // Click the search field to open the index selector popover and type to filter
+    cy.wait(2000);
     cy.get('.indexSelector input[type="text"]').should('be.visible').click().clear().type(index);
 
     // Wait for popover to appear and select the filtered index
-    cy.wait(1000);
     cy.getElementByTestId('dataset-index-selector')
       .should('be.visible')
       .within(() => {
