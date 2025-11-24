@@ -17,6 +17,7 @@ import {
   EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import './preview_table.scss';
 
 interface PreviewComponentProps {
@@ -68,7 +69,10 @@ export const PreviewComponent = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <EuiText>
           <h3>
-            Preview data ({loadedRows}/{totalRows})
+            {i18n.translate('dataImporter.previewData', {
+              defaultMessage: `Preview data`,
+            })}
+            ({loadedRows}/{totalRows})
           </h3>
         </EuiText>
         <EuiFieldSearch
@@ -113,13 +117,19 @@ export const PreviewComponent = ({
 
         {totalRows === 0 && (
           <EuiText textAlign="center" style={{ marginTop: '20px' }}>
-            <p>No data to display. Please upload a file to see the preview.</p>
+            <p>
+              {i18n.translate('dataImporter.noData', {
+                defaultMessage: `No data to display. Please upload a file to see the preview.`,
+              })}
+            </p>
           </EuiText>
         )}
       </div>
       {loadedRows < totalRows && (
         <EuiButton onClick={loadMoreRows} style={{ marginTop: '20px' }}>
-          Click to See More
+          {i18n.translate('dataImporter.seeMore', {
+            defaultMessage: `Click to See More`,
+          })}
         </EuiButton>
       )}
     </>
