@@ -4,25 +4,25 @@
  */
 
 import {
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
+  EuiCompressedSelect,
+  EuiCompressedTextArea,
+  EuiForm,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiLink,
-  EuiCompressedFormRow,
-  EuiCompressedFieldText,
-  EuiCompressedTextArea,
-  EuiCompressedSelect,
-  EuiForm,
 } from '@elastic/eui';
+import { FormattedMessage } from '@osd/i18n/react';
+import { ApplicationStart } from 'opensearch-dashboards/public';
 import React, { useState } from 'react';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import { ApplicationStart } from 'opensearch-dashboards/public';
-import { FormattedMessage } from '@osd/i18n/react';
-import { AuthMethod, OPENSEARCH_DOCUMENTATION_URL } from '../../../constants';
-import { QueryPermissionsConfiguration } from '../query_permissions';
-import { Role } from '../../../../types';
+import { DataSourceTableItem, Role } from '../../../../types';
+import { AuthMethod, LocalCluster, OPENSEARCH_DOCUMENTATION_URL } from '../../../constants';
 import { AuthDetails } from '../direct_query_data_source_auth_details';
 import { NameRow } from '../name_row';
+import { QueryPermissionsConfiguration } from '../query_permissions';
 
 interface ConfigurePrometheusDatasourceProps {
   useNewUX: boolean;
@@ -52,6 +52,10 @@ interface ConfigurePrometheusDatasourceProps {
   setStoreForRequest: React.Dispatch<React.SetStateAction<string>>;
   setNameForRequest: React.Dispatch<React.SetStateAction<string>>;
   setDetailsForRequest: React.Dispatch<React.SetStateAction<string>>;
+  dataSources: DataSourceTableItem[];
+  currentDataSourceId: string;
+  setDataSourceIdForRequest: React.Dispatch<React.SetStateAction<string>>;
+  hideLocalCluster: boolean;
 }
 
 export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDatasourceProps) => {
@@ -83,11 +87,16 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
     hasSecurityAccess,
     error,
     setError,
+    dataSources,
+    currentDataSourceId,
+    setDataSourceIdForRequest,
+    hideLocalCluster,
   } = props;
 
   const [details, setDetails] = useState(currentDetails);
   const [store, setStore] = useState(currentStore);
   const authOptions = [
+    { value: 'noauth', text: 'No authentication' },
     { value: 'basicauth', text: 'Basic authentication' },
     { value: 'awssigv4', text: 'AWS Signature Version 4' },
   ];
@@ -142,6 +151,30 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
               onChange={(e) => {
                 setDetails(e.target.value);
               }}
+            />
+          </EuiCompressedFormRow>
+          <EuiSpacer />
+
+          <EuiText size="s">
+            <h2>OpenSearch connection</h2>
+          </EuiText>
+          <EuiSpacer size="m" />
+
+          <EuiCompressedFormRow
+            label="Data source"
+            helpText="Select which OpenSearch cluster to associate this Prometheus connection with."
+          >
+            <EuiCompressedSelect
+              id="selectDataSource"
+              options={[
+                ...(!hideLocalCluster
+                  ? [{ value: LocalCluster.id, text: LocalCluster.label }]
+                  : []),
+                ...dataSources.map((ds) => ({ value: ds.id, text: ds.title || ds.id })),
+              ]}
+              value={currentDataSourceId}
+              onChange={(e) => setDataSourceIdForRequest(e.target.value)}
+              data-test-subj="dataSourceSelect"
             />
           </EuiCompressedFormRow>
           <EuiSpacer />
