@@ -186,15 +186,18 @@ describe('ChatService', () => {
       });
 
       expect(result.observable).toBeDefined();
-      expect(mockAgent.runAgent).toHaveBeenCalledWith({
-        threadId: expect.stringMatching(/^thread-\d+-[a-z0-9]{9}$/),
-        runId: expect.stringMatching(/^run-\d+-[a-z0-9]{9}$/),
-        messages: [result.userMessage],
-        tools: [],
-        context: [],
-        state: {},
-        forwardedProps: {},
-      });
+      expect(mockAgent.runAgent).toHaveBeenCalledWith(
+        {
+          threadId: expect.stringMatching(/^thread-\d+-[a-z0-9]{9}$/),
+          runId: expect.stringMatching(/^run-\d+-[a-z0-9]{9}$/),
+          messages: [result.userMessage],
+          tools: [],
+          context: [],
+          state: {},
+          forwardedProps: {},
+        },
+        undefined
+      ); // dataSourceId is undefined when no uiSettings provided
     });
 
     it('should trim message content', async () => {
@@ -228,7 +231,8 @@ describe('ChatService', () => {
       expect(mockAgent.runAgent).toHaveBeenCalledWith(
         expect.objectContaining({
           tools,
-        })
+        }),
+        undefined // dataSourceId is undefined when no uiSettings provided
       );
     });
 
@@ -243,15 +247,18 @@ describe('ChatService', () => {
 
       expect(result.userMessage.content).toBe('test');
       expect(result.observable).toBeDefined();
-      expect(mockAgent.runAgent).toHaveBeenCalledWith({
-        threadId: expect.stringMatching(/^thread-\d+-[a-z0-9]{9}$/),
-        runId: expect.stringMatching(/^run-\d+-[a-z0-9]{9}$/),
-        messages: [result.userMessage],
-        tools: [],
-        context: [],
-        state: {},
-        forwardedProps: {},
-      });
+      expect(mockAgent.runAgent).toHaveBeenCalledWith(
+        {
+          threadId: expect.stringMatching(/^thread-\d+-[a-z0-9]{9}$/),
+          runId: expect.stringMatching(/^run-\d+-[a-z0-9]{9}$/),
+          messages: [result.userMessage],
+          tools: [],
+          context: [],
+          state: {},
+          forwardedProps: {},
+        },
+        undefined
+      ); // dataSourceId is undefined when no uiSettings provided
     });
   });
 
@@ -287,15 +294,18 @@ describe('ChatService', () => {
       });
 
       expect(response.observable).toBeDefined();
-      expect(mockAgent.runAgent).toHaveBeenCalledWith({
-        threadId: expect.stringMatching(/^thread-\d+-[a-z0-9]{9}$/),
-        runId: expect.stringMatching(/^run-\d+-[a-z0-9]{9}$/),
-        messages: [response.toolMessage],
-        tools: [],
-        context: [],
-        state: {},
-        forwardedProps: {},
-      });
+      expect(mockAgent.runAgent).toHaveBeenCalledWith(
+        {
+          threadId: expect.stringMatching(/^thread-\d+-[a-z0-9]{9}$/),
+          runId: expect.stringMatching(/^run-\d+-[a-z0-9]{9}$/),
+          messages: [response.toolMessage],
+          tools: [],
+          context: [],
+          state: {},
+          forwardedProps: {},
+        },
+        undefined
+      ); // dataSourceId is undefined when no uiSettings provided
     });
 
     it('should handle string results directly', async () => {

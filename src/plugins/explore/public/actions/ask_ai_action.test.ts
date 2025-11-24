@@ -4,7 +4,7 @@
  */
 
 import { createAskAiAction } from './ask_ai_action';
-import { ChatService } from '../../../chat/public';
+import { ChatServiceStart } from '../../../../../core/public';
 
 // Mock the AskAIActionItem component
 jest.mock('../components/ask_ai_action_item', () => ({
@@ -12,20 +12,26 @@ jest.mock('../components/ask_ai_action_item', () => ({
 }));
 
 describe('createAskAiAction', () => {
-  let mockChatService: jest.Mocked<ChatService>;
+  let mockChatService: jest.Mocked<ChatServiceStart>;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Create a minimal mock of ChatService
+    // Create a minimal mock of ChatServiceStart
     mockChatService = {
+      isAvailable: jest.fn().mockReturnValue(true),
+      isWindowOpen: jest.fn().mockReturnValue(false),
+      sendMessageWithWindow: jest.fn().mockResolvedValue(undefined),
+      getThreadId$: jest.fn(),
+      getThreadId: jest.fn(),
+      openWindow: jest.fn(),
+      closeWindow: jest.fn(),
       sendMessage: jest.fn(),
-      sendMessageWithWindow: jest.fn(),
-      newThread: jest.fn(),
-      abort: jest.fn(),
-      resetConnection: jest.fn(),
-      availableTools: [],
-    } as any;
+      getWindowState$: jest.fn(),
+      onWindowOpen: jest.fn(),
+      onWindowClose: jest.fn(),
+      suggestedActionsService: undefined,
+    };
   });
 
   describe('action configuration', () => {
@@ -47,24 +53,23 @@ describe('createAskAiAction', () => {
       query: 'test query',
     };
 
-    it('should return true when chatService is provided', () => {
+    it('should return true when chatService is available', () => {
       const action = createAskAiAction(mockChatService);
       expect(action.isCompatible(mockContext)).toBe(true);
     });
 
-    it('should return false when chatService is undefined', () => {
-      const action = createAskAiAction(undefined);
-      expect(action.isCompatible(mockContext)).toBe(false);
-    });
-
-    it('should return false when chatService is null', () => {
-      const action = createAskAiAction(null as any);
+    it('should return false when chatService is not available', () => {
+      const unavailableChatService = {
+        ...mockChatService,
+        isAvailable: jest.fn().mockReturnValue(false),
+      };
+      const action = createAskAiAction(unavailableChatService);
       expect(action.isCompatible(mockContext)).toBe(false);
     });
   });
 
   describe('chatService availability', () => {
-    it('should create valid action with chatService', () => {
+    it('should create valid action with available chatService', () => {
       const action = createAskAiAction(mockChatService);
       const mockContext = { document: {} };
 
@@ -77,8 +82,12 @@ describe('createAskAiAction', () => {
       });
     });
 
-    it('should create action that is incompatible when chatService is undefined', () => {
-      const action = createAskAiAction(undefined);
+    it('should create action that is incompatible when chatService is not available', () => {
+      const unavailableChatService = {
+        ...mockChatService,
+        isAvailable: jest.fn().mockReturnValue(false),
+      };
+      const action = createAskAiAction(unavailableChatService);
       const mockContext = { document: {} };
 
       expect(action.isCompatible(mockContext)).toBe(false);

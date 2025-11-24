@@ -6,7 +6,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import { AskAIActionItem } from './ask_ai_action_item';
-import { ChatService } from '../../../../chat/public';
+import { ChatServiceStart } from '../../../../../../core/public';
 import { LogActionContext } from '../../types/log_actions';
 
 // Mock dependencies
@@ -23,7 +23,7 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => ({
 }));
 
 describe('AskAIActionItem', () => {
-  let mockChatService: jest.Mocked<ChatService>;
+  let mockChatService: jest.Mocked<ChatServiceStart>;
   let mockOnClose: jest.Mock;
   let mockOnResult: jest.Mock;
   let mockContext: LogActionContext;
@@ -32,16 +32,19 @@ describe('AskAIActionItem', () => {
     jest.clearAllMocks();
 
     mockChatService = {
-      sendMessageWithWindow: jest.fn().mockResolvedValue({
-        observable: {},
-        userMessage: { id: 'test', role: 'user', content: 'test' },
-      }),
+      isAvailable: jest.fn().mockReturnValue(true),
+      sendMessageWithWindow: jest.fn().mockResolvedValue(undefined),
       isWindowOpen: jest.fn().mockReturnValue(false),
-      newThread: jest.fn(),
-      abort: jest.fn(),
-      resetConnection: jest.fn(),
-      availableTools: [],
-    } as any;
+      getThreadId$: jest.fn(),
+      getThreadId: jest.fn(),
+      openWindow: jest.fn(),
+      closeWindow: jest.fn(),
+      sendMessage: jest.fn(),
+      getWindowState$: jest.fn(),
+      onWindowOpen: jest.fn(),
+      onWindowClose: jest.fn(),
+      suggestedActionsService: undefined,
+    };
 
     mockOnClose = jest.fn();
     mockOnResult = jest.fn();

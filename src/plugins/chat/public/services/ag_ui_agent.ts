@@ -24,12 +24,11 @@ export class AgUiAgent {
   private abortController?: AbortController;
   private sseBuffer: string = '';
   private activeConnection: boolean = false;
-
   constructor(proxyUrl: string = '/api/chat/proxy') {
     this.proxyUrl = proxyUrl;
   }
 
-  public runAgent(input: RunAgentInput): Observable<BaseEvent> {
+  public runAgent(input: RunAgentInput, dataSourceId?: string): Observable<BaseEvent> {
     return new Observable<BaseEvent>((observer) => {
       // Only abort if we're not in the middle of an active connection
       // This prevents tool result submissions from breaking the main SSE stream
@@ -46,8 +45,12 @@ export class AgUiAgent {
       // Set active connection flag
       this.activeConnection = true;
 
-      // Make request to OpenSearch Dashboards proxy endpoint
-      fetch(this.proxyUrl, {
+      // Build URL with optional dataSourceId query parameter
+      const url = dataSourceId
+        ? `${this.proxyUrl}?dataSourceId=${encodeURIComponent(dataSourceId)}`
+        : this.proxyUrl;
+
+      fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
