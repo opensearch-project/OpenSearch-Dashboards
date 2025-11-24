@@ -380,12 +380,19 @@ cy.explore.add(
     cy.get(`[title="Indexes"]`).click();
     cy.get(`[title="${dataSourceName}"]`).click();
 
-    // Ensure "Index name" mode is selected
+    // Ensure "Index name" mode is selected (not "Index wildcard")
     cy.getElementByTestId('index-scope-selector')
       .should('be.visible')
-      .within(() => {
-        cy.get('input').should('contain.value', 'Index name');
-      });
+      .find('[data-test-subj="comboBoxInput"]')
+      .click();
+
+    // Select "Index name" if not already selected
+    cy.get(`[title="Index name"]`).should('be.visible').click({ force: true });
+
+    // Verify selection
+    cy.getElementByTestId('index-scope-selector')
+      .find('[data-test-subj="comboBoxInput"]')
+      .should('contain.value', 'Index name');
 
     // Click the search field to open the index selector popover and type to filter
     cy.get('.indexSelector input[type="text"]').should('be.visible').click().clear().type(index);
