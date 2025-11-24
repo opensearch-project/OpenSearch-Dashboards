@@ -394,14 +394,21 @@ cy.explore.add(
       .find('[data-test-subj="comboBoxInput"]')
       .should('contain.value', 'Index name');
 
-    // Click the search field to open the index selector popover and type to filter
-    cy.get('.indexSelector input[type="text"]').should('be.visible').click().clear().type(index);
+    // Click the search field to open the popover (onFocus triggers isPopoverOpen = true)
+    cy.get('.indexSelector input[type="text"]')
+      .should('be.visible')
+      .click({ force: true }) // Use click instead of focus to ensure onFocus event fires
+      .clear()
+      .type(index);
 
-    // Wait for popover to appear and select the filtered index
-    cy.wait(1000);
-    cy.getElementByTestId('dataset-index-selector')
+    // Wait for the popover to fully render and dataset-index-selector to appear
+    cy.get('.indexSelector__popover', { timeout: 10000 }).should('be.visible');
+
+    // Now look for the dataset-index-selector within the popover
+    cy.getElementByTestId('dataset-index-selector', { timeout: 5000 })
       .should('be.visible')
       .within(() => {
+        // Look for the index by title attribute in the popover
         cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
       });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
