@@ -65,7 +65,7 @@ export const ImportTypeSelector = ({
           <EuiCheckableCard
             id={'file-selection'}
             label={createLabel({
-              text: i18n.translate('dataImporter.file', {
+              text: i18n.translate('dataImporter.file.upload', {
                 defaultMessage: 'Upload',
               }),
               tooltip: i18n.translate('dataImporter.fileTooltip.file', {
