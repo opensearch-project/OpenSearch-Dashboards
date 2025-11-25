@@ -18,9 +18,18 @@ import { AuthType } from '../../common/data_sources';
 import { opensearchClientMock } from '../../../../../src/core/server/opensearch/client/mocks';
 import { dynamicConfigServiceMock } from '../../../../../src/core/server/mocks';
 
+// Mock the endpoint validator
+jest.mock('../util/endpoint_validator', () => ({
+  isValidURL: jest.fn(),
+}));
+
+import { isValidURL } from '../util/endpoint_validator';
+const mockedIsValidURL = isValidURL as jest.MockedFunction<typeof isValidURL>;
+
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 const URL = '/internal/data-source-management/validate';
+const BLOCKED_IP_RANGES = ['127.0.0.0/8', '192.168.1.0/24'];
 
 describe(`Test connection ${URL}`, () => {
   let server: SetupServerReturn['server'];
@@ -159,22 +168,41 @@ describe(`Test connection ${URL}`, () => {
     customApiSchemaRegistryPromise = Promise.resolve(customApiSchemaRegistry);
     authRegistryPromiseMock = Promise.resolve(authenticationMethodRegistryMock.create());
     dataSourceClient = opensearchClientMock.createInternalClient();
+    cryptographyMock = {} as jest.Mocked<CryptographyServiceSetup>;
 
     dataSourceServiceSetupMock = {
       getDataSourceClient: jest.fn(() => Promise.resolve(dataSourceClient)),
       getDataSourceLegacyClient: jest.fn(),
     };
 
+    // Mock endpoint validator to return true by default
+    mockedIsValidURL.mockReturnValue({ valid: true });
+
     const router = httpSetup.createRouter('');
     dataSourceClient.info.mockImplementationOnce(() =>
       opensearchClientMock.createSuccessTransportRequestPromise({ cluster_name: 'testCluster' })
     );
+
+    // Create mock logger with error and info methods
+    const mockLogger: any = {
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+      debug: jest.fn(),
+      trace: jest.fn(),
+      fatal: jest.fn(),
+      log: jest.fn(),
+      get: jest.fn().mockReturnThis(),
+    };
+
     registerTestConnectionRoute(
       router,
       dataSourceServiceSetupMock,
       cryptographyMock,
       authRegistryPromiseMock,
-      customApiSchemaRegistryPromise
+      customApiSchemaRegistryPromise,
+      mockLogger as any,
+      BLOCKED_IP_RANGES
     );
 
     await server.start({ dynamicConfigService: dynamicConfigServiceStart });
@@ -343,5 +371,79 @@ describe(`Test connection ${URL}`, () => {
       })
       .expect(200);
     expect(result.body).toEqual({ success: true });
+  });
+
+  it('should fail when endpoint is invalid', async () => {
+    mockedIsValidURL.mockReturnValue({
+      valid: false,
+      error: 'Invalid URL format',
+      userMessage: 'Invalid URL format',
+    });
+
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: {
+          endpoint: 'invalid-endpoint',
+          auth: {
+            type: AuthType.NoAuth,
+            credentials: {},
+          },
+        },
+      })
+      .expect(400);
+
+    expect(result.body.message).toContain('Invalid URL format');
+    expect(mockedIsValidURL).toHaveBeenCalledWith('invalid-endpoint', BLOCKED_IP_RANGES, undefined);
+    expect(dataSourceServiceSetupMock.getDataSourceClient).not.toHaveBeenCalled();
+  });
+
+  it('should succeed when endpoint is valid', async () => {
+    mockedIsValidURL.mockReturnValue({ valid: true });
+
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr,
+      })
+      .expect(200);
+
+    expect(result.body).toEqual({ success: true });
+    expect(mockedIsValidURL).toHaveBeenCalledWith('https://test.com', BLOCKED_IP_RANGES, undefined);
+    expect(dataSourceServiceSetupMock.getDataSourceClient).toHaveBeenCalled();
+  });
+
+  it('should fail when endpoint is from blocked IP list', async () => {
+    mockedIsValidURL.mockReturnValue({
+      valid: false,
+      error: 'IP is blocked by denied range',
+      userMessage: 'Endpoint IP address is not allowed',
+    });
+
+    const blockedIpDataSourceAttr = {
+      endpoint: 'http://127.0.0.1:9200',
+      auth: {
+        type: AuthType.NoAuth,
+        credentials: {},
+      },
+    };
+
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        id: 'testId',
+        dataSourceAttr: blockedIpDataSourceAttr,
+      })
+      .expect(400);
+
+    expect(result.body.message).toContain('Endpoint IP address is not allowed');
+    expect(mockedIsValidURL).toHaveBeenCalledWith(
+      'http://127.0.0.1:9200',
+      BLOCKED_IP_RANGES,
+      undefined
+    );
+    expect(dataSourceServiceSetupMock.getDataSourceClient).not.toHaveBeenCalled();
   });
 });
