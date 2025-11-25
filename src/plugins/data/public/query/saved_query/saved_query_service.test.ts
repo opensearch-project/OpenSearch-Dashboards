@@ -32,6 +32,7 @@ import { createSavedQueryService } from './saved_query_service';
 import { FilterStateStore } from '../../../common';
 import { SavedQueryAttributes } from './types';
 import { applicationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { of } from 'rxjs';
 
 const savedQueryAttributes: SavedQueryAttributes = {
   title: 'foo',
@@ -412,6 +413,59 @@ describe('saved query service', () => {
 
       const response = await getSavedQuery('foo');
       expect(response.attributes.query.query).toEqual('"Men\'s Shoes"');
+    });
+
+    it('should keep saved queries for 3rd-party plugins when language declares supported app name as wildcard', async () => {
+      mockSavedObjectsClient.find.mockReturnValue({
+        savedObjects: [
+          {
+            id: 'foo',
+            attributes: {
+              ...savedQueryAttributes,
+              query: {
+                language: 'kuery',
+                query: 'response:200',
+              },
+            },
+          },
+        ],
+        total: 1,
+      });
+
+      const application = applicationServiceMock.createStartContract();
+      application.currentAppId$ = of('thirdPartyApp');
+      const queryStringManager = {
+        getLanguageService: () => ({
+          getLanguage: () => ({
+            supportedAppNames: ['*'],
+          }),
+        }),
+      };
+
+      const { findSavedQueries: findSavedQueriesWithLanguageFilter } = createSavedQueryService(
+        // @ts-ignore
+        mockSavedObjectsClient,
+        {
+          application,
+          uiSettings: uiSettingsServiceMock.createStartContract(),
+        },
+        // @ts-ignore
+        queryStringManager
+      );
+
+      const response = await findSavedQueriesWithLanguageFilter();
+      expect(response.queries).toEqual([
+        {
+          id: 'foo',
+          attributes: {
+            ...savedQueryAttributes,
+            query: {
+              language: 'kuery',
+              query: 'response:200',
+            },
+          },
+        },
+      ]);
     });
   });
 
