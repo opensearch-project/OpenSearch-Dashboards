@@ -313,6 +313,12 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
             vertical: contentHeight > maxHeight ? 'visible' : 'hidden',
           },
         });
+
+        // Automatically scroll to the bottom when new lines are added
+        if (contentHeight > finalHeight) {
+          const lastLine = editor.getModel()?.getLineCount() || 0;
+          editor.revealLine(lastLine);
+        }
       });
 
       return () => {
