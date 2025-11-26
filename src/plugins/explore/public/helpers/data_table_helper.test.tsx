@@ -180,7 +180,7 @@ describe('data_table_helper', () => {
     it('should handle _source column removability correctly', () => {
       const columns = ['_source'];
 
-      const result = getLegacyDisplayedColumns(columns, mockIndexPattern, true, false);
+      const result = getLegacyDisplayedColumns(columns, mockIndexPattern, false, true); // hide time column
 
       expect(result[0].isRemoveable).toBe(false); // _source is not removeable when it's the only column
     });
