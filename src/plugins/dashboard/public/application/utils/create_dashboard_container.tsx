@@ -50,6 +50,7 @@ import { DashboardConstants } from '../../dashboard_constants';
 import { SavedObjectDashboard } from '../../saved_dashboards';
 import { migrateLegacyQuery } from '../utils/migrate_legacy_query';
 import { Dashboard } from '../../dashboard';
+import { DashboardAnnotationsService } from '../services/dashboard_annotations_service';
 
 export const createDashboardContainer = async ({
   services,
@@ -119,6 +120,37 @@ export const createDashboardContainer = async ({
         );
       }
 
+      // Load annotations immediately when dashboard container is created
+      if (savedDashboard?.id) {
+        try {
+          const annotationsService = new DashboardAnnotationsService(services.savedObjects.client);
+          const annotations = await annotationsService.getAnnotations(savedDashboard.id);
+
+          // Set global annotations for visualization access
+          (window as any).__DASHBOARD_ANNOTATIONS__ = {
+            annotations,
+            timeRange: initialInput.timeRange,
+          };
+
+          // Also set global timeRange for easier access by visualizations
+          (window as any).__DASHBOARD_TIMERANGE__ = initialInput.timeRange;
+        } catch (error) {
+          // Ensure global variables are still set even if annotations fail to load
+          (window as any).__DASHBOARD_ANNOTATIONS__ = {
+            annotations: [],
+            timeRange: initialInput.timeRange,
+          };
+          (window as any).__DASHBOARD_TIMERANGE__ = initialInput.timeRange;
+        }
+      } else {
+        // For new/unsaved dashboards, still set empty global variables to prevent errors
+        (window as any).__DASHBOARD_ANNOTATIONS__ = {
+          annotations: [],
+          timeRange: initialInput.timeRange,
+        };
+        (window as any).__DASHBOARD_TIMERANGE__ = initialInput.timeRange;
+      }
+
       return dashboardContainerEmbeddable;
     }
   } catch (error) {
@@ -175,10 +207,10 @@ export const handleDashboardContainerOutputs = (
   const updateIndexPatternsOperator = pipe(
     filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
     map(setCurrentIndexPatterns),
-    distinctUntilChanged((a, b) =>
+    distinctUntilChanged((a: IndexPattern[], b: IndexPattern[]) =>
       deepEqual(
-        a.map((ip) => ip.id),
-        b.map((ip) => ip.id)
+        a.map((ip: IndexPattern) => ip.id),
+        b.map((ip: IndexPattern) => ip.id)
       )
     ),
     // using switchMap for previous task cancellation
@@ -385,6 +417,7 @@ const getDashboardInputFromAppState = (
     description: appStateData.description,
     expandedPanelId: appStateData.expandedPanelId,
     timeRestore: appStateData.timeRestore,
+    annotations: [],
   };
 };
 
@@ -525,6 +558,42 @@ export const refreshDashboardContainer = ({
     dashboardServices,
     savedDashboard.id
   );
+
+  // Load annotations synchronously and make them available globally for visualizations
+  if (savedDashboard.id) {
+    try {
+      const annotationsService = new DashboardAnnotationsService(
+        dashboardServices.savedObjects.client
+      );
+      const annotations = annotationsService.getAnnotations(savedDashboard.id);
+
+      // Set global annotations for visualization access (temporary solution)
+      (window as any).__DASHBOARD_ANNOTATIONS__ = {
+        annotations,
+        timeRange: currentDashboardInput.timeRange,
+      };
+
+      // Also set global timeRange for easier access by visualizations
+      (window as any).__DASHBOARD_TIMERANGE__ = currentDashboardInput.timeRange;
+
+      // Note: Avoiding updateInput({ annotations }) to prevent dashboard freezing issues
+      // Annotations are available via global variable for visualizations
+    } catch (error) {
+      // Ensure global variables are still set even if annotations fail to load
+      (window as any).__DASHBOARD_ANNOTATIONS__ = {
+        annotations: [],
+        timeRange: currentDashboardInput.timeRange,
+      };
+      (window as any).__DASHBOARD_TIMERANGE__ = currentDashboardInput.timeRange;
+    }
+  } else {
+    // For new/unsaved dashboards, still set empty global variables to prevent errors
+    (window as any).__DASHBOARD_ANNOTATIONS__ = {
+      annotations: [],
+      timeRange: currentDashboardInput.timeRange,
+    };
+    (window as any).__DASHBOARD_TIMERANGE__ = currentDashboardInput.timeRange;
+  }
 
   const changes = getChangesForContainerStateFromAppState(
     dashboardContainer,
