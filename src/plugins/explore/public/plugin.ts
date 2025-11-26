@@ -338,11 +338,6 @@ export class ExplorePlugin
             ...withNotifyOnErrors(coreStart.notifications.toasts),
           });
 
-          // clear URL state and QueryStringManager state before switching flavors
-          services.osdUrlStateStorage.set('_q', null, { replace: true });
-          services.osdUrlStateStorage.set('_a', null, { replace: true });
-          pluginsStart.data.query.queryString.clearQuery();
-
           // Add scopedHistory to services
           services.scopedHistory = this.currentHistory;
 
@@ -375,6 +370,7 @@ export class ExplorePlugin
             unmount();
             unsubscribeStore();
             resetStore();
+            pluginsStart.data.query.queryString.clearQuery();
           };
         },
         ...options,
