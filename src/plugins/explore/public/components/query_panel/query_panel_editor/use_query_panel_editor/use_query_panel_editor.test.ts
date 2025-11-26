@@ -144,6 +144,8 @@ describe('useQueryPanelEditor', () => {
       getOffsetAt: jest.fn(() => 10),
       getValue: jest.fn(() => 'test query'),
       getWordUntilPosition: jest.fn(() => ({ startColumn: 1, endColumn: 5 })),
+      getModel: jest.fn(() => ({ getLineCount: jest.fn() })),
+      revealLine: jest.fn(),
     };
 
     mockDataset = {
