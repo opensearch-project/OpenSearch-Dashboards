@@ -420,11 +420,6 @@ export class ExploreEmbeddable
     // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
     this.searchProps.hits = resp.hits.hits.length;
     this.searchProps.isLoading = false;
-
-    // Render the component with updated data
-    if (this.node && this.searchProps) {
-      this.renderComponent(this.node, this.searchProps);
-    }
   };
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
