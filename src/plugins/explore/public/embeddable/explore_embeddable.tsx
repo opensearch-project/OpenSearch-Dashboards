@@ -8,6 +8,7 @@ import { merge, Subscription } from 'rxjs';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@osd/i18n';
+import { DashboardAnnotation } from '../../../dashboard/public';
 import { RequestAdapter, Adapters } from '../../../inspector/public';
 import {
   opensearchFilters,
@@ -49,6 +50,7 @@ import { convertStringsToMappings } from '../components/visualizations/visualiza
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { getQueryWithSource } from '../application/utils/languages';
+import { ExploreAnnotationsService } from '../services/annotations_service';
 
 export interface SearchProps {
   description?: string;
@@ -111,6 +113,7 @@ export class ExploreEmbeddable
   private panelTitle: string = '';
   private filterManager: FilterManager;
   private services: ExploreServices;
+  private annotationsService: ExploreAnnotationsService;
   private prevState = {
     filters: undefined as Filter[] | undefined,
     query: undefined as Query | undefined,
@@ -148,6 +151,7 @@ export class ExploreEmbeddable
     this.services = services;
     this.filterManager = filterManager;
     this.savedExplore = savedExplore;
+    this.annotationsService = new ExploreAnnotationsService(services.savedObjects.client);
     this.inspectorAdaptors = {
       requests: new RequestAdapter(),
     };
@@ -401,6 +405,20 @@ export class ExploreEmbeddable
           };
           this.searchProps.searchContext = searchContext;
           const styleOptions = visualization.params;
+          const timeRange = searchContext.timeRange
+            ? {
+                from: searchContext.timeRange.from,
+                to: searchContext.timeRange.to,
+              }
+            : undefined;
+
+          // Load annotations from saved object if we're in a dashboard
+          let annotations: DashboardAnnotation[] = [];
+          if (this.parent && this.parent.id) {
+            const allAnnotations = await this.annotationsService.getAnnotations(this.parent.id);
+            annotations = this.filterAnnotationsForCurrentPanel(allAnnotations);
+          }
+
           const spec = matchedRule.toSpec(
             visualizationData.transformedData,
             numericalColumns,
@@ -408,7 +426,9 @@ export class ExploreEmbeddable
             dateColumns,
             styleOptions,
             selectedChartType,
-            axesMapping
+            axesMapping,
+            timeRange,
+            annotations
           );
           const exp = toExpression(searchContext, spec);
           this.searchProps.expression = exp;
@@ -427,6 +447,29 @@ export class ExploreEmbeddable
     if (!this.searchProps) return;
     const MemorizedExploreEmbeddableComponent = React.memo(ExploreEmbeddableComponent);
     ReactDOM.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />, node);
+  }
+
+  private filterAnnotationsForCurrentPanel(
+    annotations: DashboardAnnotation[]
+  ): DashboardAnnotation[] {
+    const currentPanelId = this.input.id;
+
+    return annotations.filter((annotation) => {
+      if (!annotation.enabled) {
+        return false;
+      }
+
+      switch (annotation.showIn) {
+        case 'all':
+          return true;
+        case 'selected':
+          return annotation.selectedVisualizations.includes(currentPanelId);
+        case 'except':
+          return !annotation.selectedVisualizations.includes(currentPanelId);
+        default:
+          return false;
+      }
+    });
   }
 
   public destroy() {

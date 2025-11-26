@@ -37,6 +37,7 @@ import { RefreshInterval, TimeRange, Query, Filter } from 'src/plugins/data/publ
 import { CoreStart, Logos } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import uuid from 'uuid';
+import { DashboardAnnotation } from '../types/dashboard_annotations';
 import {
   Container,
   ContainerInput,
@@ -78,6 +79,7 @@ export interface DashboardContainerInput extends ContainerInput {
     [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
   };
   isEmptyState?: boolean;
+  annotations?: DashboardAnnotation[];
 }
 
 interface IndexSignature {
@@ -92,6 +94,7 @@ export interface InheritedChildInput extends IndexSignature {
   viewMode: ViewMode;
   hidePanelTitles?: boolean;
   id: string;
+  annotations?: DashboardAnnotation[];
 }
 
 export interface DashboardContainerOptions {
@@ -252,7 +255,15 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {
-    const { viewMode, refreshConfig, timeRange, query, hidePanelTitles, filters } = this.input;
+    const {
+      viewMode,
+      refreshConfig,
+      timeRange,
+      query,
+      hidePanelTitles,
+      filters,
+      annotations,
+    } = this.input;
     return {
       filters,
       hidePanelTitles,
@@ -261,6 +272,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       refreshConfig,
       viewMode,
       id,
+      annotations,
     };
   }
 }
