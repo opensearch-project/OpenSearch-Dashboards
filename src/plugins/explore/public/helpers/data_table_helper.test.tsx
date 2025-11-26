@@ -99,7 +99,7 @@ describe('data_table_helper', () => {
     it('should return column properties without time field when hideTimeField is true', () => {
       const columns = ['field1', 'field2'];
 
-      const result = getLegacyDisplayedColumns(columns, mockIndexPattern, true, false);
+      const result = getLegacyDisplayedColumns(columns, mockIndexPattern, false, true);
 
       expect(result).toHaveLength(2);
       expect(result[0]).toEqual({
@@ -172,7 +172,7 @@ describe('data_table_helper', () => {
         sortable: false,
       });
 
-      const result = getLegacyDisplayedColumns(columns, mockIndexPattern, true, false);
+      const result = getLegacyDisplayedColumns(columns, mockIndexPattern, false, true);
 
       expect(result[0].isSortable).toBe(false); // Should use field.sortable when osdFieldOverrides.sortable is undefined
     });
@@ -188,7 +188,7 @@ describe('data_table_helper', () => {
     it('should make _source column removeable when there are multiple columns', () => {
       const columns = ['_source', 'field1'];
 
-      const result = getLegacyDisplayedColumns(columns, mockIndexPattern, true, false);
+      const result = getLegacyDisplayedColumns(columns, mockIndexPattern, false, true);
 
       expect(result[0].isRemoveable).toBe(true); // _source is removeable when there are other columns
       expect(result[1].isRemoveable).toBe(true);
@@ -205,7 +205,7 @@ describe('data_table_helper', () => {
         'spanId',
       ];
 
-      const result = getLegacyDisplayedColumns(columns, mockIndexPattern, true, false);
+      const result = getLegacyDisplayedColumns(columns, mockIndexPattern, false, true);
 
       expect(result[0].displayName).toBe('Service Identifier');
       expect(result[1].displayName).toBe('Duration');
