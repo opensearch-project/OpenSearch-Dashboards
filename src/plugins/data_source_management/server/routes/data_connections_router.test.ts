@@ -217,6 +217,53 @@ describe('data_connections_router', () => {
     });
   });
 
+  describe('POST /dataconnections with dataSourceEnabled=false', () => {
+    beforeEach(() => {
+      registerDataConnectionsRoute(router, false);
+    });
+
+    it('should not create saved object for Prometheus when dataSourceEnabled is false', async () => {
+      const mockCreateDataSourceResponse = { success: true, name: 'test-prometheus' };
+
+      mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+        query: {},
+        body: {
+          name: 'test-prometheus',
+          connector: 'prometheus',
+          allowedRoles: ['admin'],
+          properties: {
+            'prometheus.uri': 'http://localhost:9090',
+          },
+        },
+      });
+
+      const mockCallAsCurrentUser = jest.fn().mockResolvedValue(mockCreateDataSourceResponse);
+      mockContext.opensearch_data_source_management.dataSourceManagementClient.asScoped.mockReturnValue(
+        {
+          callAsCurrentUser: mockCallAsCurrentUser,
+        }
+      );
+
+      const postHandler = router.post.mock.calls[0][1];
+      await postHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockCallAsCurrentUser).toHaveBeenCalledWith('ppl.createDataSource', {
+        body: {
+          name: 'test-prometheus',
+          connector: 'prometheus',
+          allowedRoles: ['admin'],
+          properties: {
+            'prometheus.uri': 'http://localhost:9090',
+          },
+        },
+      });
+
+      // Should not create saved object when dataSourceEnabled is false
+      expect(mockContext.core.savedObjects.client.create).not.toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockCreateDataSourceResponse });
+    });
+  });
+
   describe('DELETE /dataconnections/:name/dataSourceMDSId=:dataSourceMDSId', () => {
     beforeEach(() => {
       registerDataConnectionsRoute(router, true);
@@ -372,6 +419,41 @@ describe('data_connections_router', () => {
           error: 'Failed to delete saved object',
           message: 'Failed to delete saved object',
         },
+      });
+    });
+  });
+
+  describe('DELETE /dataconnections/:name with dataSourceEnabled=false', () => {
+    beforeEach(() => {
+      registerDataConnectionsRoute(router, false);
+    });
+
+    it('should delete data connection but not attempt to delete saved object when dataSourceEnabled is false', async () => {
+      mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+        params: { name: 'test-prometheus', dataSourceMDSId: '' },
+      });
+
+      const mockDeleteResponse = { success: true };
+      const mockCallAsCurrentUser = jest.fn().mockResolvedValue(mockDeleteResponse);
+      mockContext.opensearch_data_source_management.dataSourceManagementClient.asScoped.mockReturnValue(
+        {
+          callAsCurrentUser: mockCallAsCurrentUser,
+        }
+      );
+
+      const deleteHandler = router.delete.mock.calls[0][1];
+      await deleteHandler(mockContext, mockRequest, mockResponse);
+
+      expect(mockCallAsCurrentUser).toHaveBeenCalledWith('ppl.deleteDataConnection', {
+        dataconnection: 'test-prometheus',
+      });
+
+      // Should not attempt to find or delete saved object when dataSourceEnabled is false
+      expect(mockContext.core.savedObjects.client.find).not.toHaveBeenCalled();
+      expect(mockContext.core.savedObjects.client.delete).not.toHaveBeenCalled();
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: mockDeleteResponse,
       });
     });
   });

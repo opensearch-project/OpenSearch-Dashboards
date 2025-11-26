@@ -90,6 +90,7 @@ const defaultProps = {
   currentDataSourceId: '',
   setDataSourceIdForRequest: mockSetDataSourceIdForRequest,
   hideLocalCluster: false,
+  featureFlagStatus: false,
 };
 
 // Mock createMemoryHistory to return a consistent key
@@ -166,6 +167,7 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
     const propsWithDataSources = {
       ...defaultProps,
       dataSources,
+      featureFlagStatus: true,
     };
     const wrapper = mount(
       <MemoryRouter>
@@ -187,6 +189,7 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
       ...defaultProps,
       dataSources,
       currentDataSourceId: 'ds-1',
+      featureFlagStatus: true,
     };
     const wrapper = mount(
       <MemoryRouter>
@@ -213,6 +216,7 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
       ...defaultProps,
       dataSources,
       hideLocalCluster: false,
+      featureFlagStatus: true,
     };
     const wrapper = mount(
       <MemoryRouter>
@@ -235,6 +239,7 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
       ...defaultProps,
       dataSources,
       hideLocalCluster: true,
+      featureFlagStatus: true,
     };
     const wrapper = mount(
       <MemoryRouter>
@@ -248,5 +253,63 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
 
     expect(options).toBeDefined();
     expect(options.every((opt) => opt.value !== '')).toBe(true);
+  });
+
+  it('hides OpenSearch connection section when featureFlagStatus is false', () => {
+    const wrapper = mount(
+      <MemoryRouter>
+        {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
+        <ConfigurePrometheusDatasourcePanel {...defaultProps} featureFlagStatus={false} />
+      </MemoryRouter>
+    );
+
+    const dataSourceSelect = wrapper.find('[data-test-subj="dataSourceSelect"]');
+    expect(dataSourceSelect.exists()).toBe(false);
+
+    // Verify "OpenSearch connection" heading is not present
+    const text = wrapper.text();
+    expect(text).not.toContain('OpenSearch connection');
+  });
+
+  it('shows OpenSearch connection section when featureFlagStatus is true', () => {
+    const dataSources = [{ id: 'ds-1', title: 'Data Source 1' }];
+    const propsWithFeatureFlag = {
+      ...defaultProps,
+      dataSources,
+      featureFlagStatus: true,
+    };
+    const wrapper = mount(
+      <MemoryRouter>
+        {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
+        <ConfigurePrometheusDatasourcePanel {...propsWithFeatureFlag} />
+      </MemoryRouter>
+    );
+
+    const dataSourceSelect = wrapper.find('[data-test-subj="dataSourceSelect"]');
+    expect(dataSourceSelect.exists()).toBe(true);
+
+    // Verify "OpenSearch connection" heading is present
+    const text = wrapper.text();
+    expect(text).toContain('OpenSearch connection');
+  });
+
+  it('respects hideLocalCluster when featureFlagStatus is false', () => {
+    const dataSources = [{ id: 'ds-1', title: 'Data Source 1' }];
+    const propsWithBothFlags = {
+      ...defaultProps,
+      dataSources,
+      hideLocalCluster: true,
+      featureFlagStatus: false,
+    };
+    const wrapper = mount(
+      <MemoryRouter>
+        {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
+        <ConfigurePrometheusDatasourcePanel {...propsWithBothFlags} />
+      </MemoryRouter>
+    );
+
+    // When featureFlagStatus is false, data source select should not exist
+    const dataSourceSelect = wrapper.find('[data-test-subj="dataSourceSelect"]');
+    expect(dataSourceSelect.exists()).toBe(false);
   });
 });

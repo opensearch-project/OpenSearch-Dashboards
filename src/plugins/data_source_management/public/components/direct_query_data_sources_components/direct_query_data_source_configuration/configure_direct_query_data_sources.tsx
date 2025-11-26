@@ -33,11 +33,13 @@ import { getDataSources, getHideLocalCluster } from '../../utils';
 interface ConfigureDatasourceProps extends RouteComponentProps {
   notifications: NotificationsStart;
   useNewUX: boolean;
+  featureFlagStatus: boolean;
 }
 
 export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({
   notifications,
   useNewUX,
+  featureFlagStatus,
   history,
 }) => {
   const { type: urlType } = useParams<{ type: string }>();
@@ -192,7 +194,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
       )
       .catch(() => setHasSecurityAccess(false));
 
-    if (urlType === 'Prometheus') {
+    if (urlType === 'Prometheus' && featureFlagStatus) {
       getDataSources(savedObjects.client)
         .then((fetchedDataSources) => {
           setDataSources(fetchedDataSources);
@@ -221,7 +223,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
         breadcrumbs = getCreateBreadcrumbs();
     }
     setBreadcrumbs(breadcrumbs);
-  }, [urlType, setBreadcrumbs, http, useNewUX, savedObjects, toasts]);
+  }, [urlType, setBreadcrumbs, http, useNewUX, savedObjects, toasts, featureFlagStatus]);
 
   const ConfigureDatasource = (configurationProps: {
     datasourceType: DirectQueryDatasourceType;
@@ -291,7 +293,8 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
             dataSources={dataSources}
             currentDataSourceId={dataSourceId}
             setDataSourceIdForRequest={setDataSourceId}
-            hideLocalCluster={getHideLocalCluster().enabled}
+            hideLocalCluster={featureFlagStatus ? getHideLocalCluster().enabled : false}
+            featureFlagStatus={featureFlagStatus}
           />
         );
       default:

@@ -211,7 +211,7 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
         });
 
         // Create data-connection saved object for Prometheus datasources
-        if (request.body.connector === 'prometheus') {
+        if (dataSourceEnabled && request.body.connector === 'prometheus') {
           await context.core.savedObjects.client.create(
             'data-connection',
             {
@@ -346,11 +346,16 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
           });
         } else {
           // @ts-expect-error TS2339 TODO(ts-error): fixme
-          await context.opensearch_data_source_management.dataSourceManagementClient
+          const dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
             .asScoped(request)
             .callAsCurrentUser('ppl.deleteDataConnection', {
               dataconnection: request.params.name,
             });
+          if (!dataSourceEnabled) {
+            return response.ok({
+              body: dataConnectionsresponse,
+            });
+          }
         }
       } catch (error: any) {
         const statusCode = error.statusCode || error.body?.statusCode || 500;

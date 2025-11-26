@@ -56,6 +56,7 @@ interface ConfigurePrometheusDatasourceProps {
   currentDataSourceId: string;
   setDataSourceIdForRequest: React.Dispatch<React.SetStateAction<string>>;
   hideLocalCluster: boolean;
+  featureFlagStatus: boolean;
 }
 
 export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDatasourceProps) => {
@@ -91,6 +92,7 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
     currentDataSourceId,
     setDataSourceIdForRequest,
     hideLocalCluster,
+    featureFlagStatus,
   } = props;
 
   const [details, setDetails] = useState(currentDetails);
@@ -155,29 +157,33 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
           </EuiCompressedFormRow>
           <EuiSpacer />
 
-          <EuiText size="s">
-            <h2>OpenSearch connection</h2>
-          </EuiText>
-          <EuiSpacer size="m" />
+          {featureFlagStatus && (
+            <>
+              <EuiText size="s">
+                <h2>OpenSearch connection</h2>
+              </EuiText>
+              <EuiSpacer size="m" />
 
-          <EuiCompressedFormRow
-            label="Data source"
-            helpText="Select which OpenSearch cluster to associate this Prometheus connection with."
-          >
-            <EuiCompressedSelect
-              id="selectDataSource"
-              options={[
-                ...(!hideLocalCluster
-                  ? [{ value: LocalCluster.id, text: LocalCluster.label }]
-                  : []),
-                ...dataSources.map((ds) => ({ value: ds.id, text: ds.title || ds.id })),
-              ]}
-              value={currentDataSourceId}
-              onChange={(e) => setDataSourceIdForRequest(e.target.value)}
-              data-test-subj="dataSourceSelect"
-            />
-          </EuiCompressedFormRow>
-          <EuiSpacer />
+              <EuiCompressedFormRow
+                label="Data source"
+                helpText="Select which OpenSearch cluster to associate this Prometheus connection with."
+              >
+                <EuiCompressedSelect
+                  id="selectDataSource"
+                  options={[
+                    ...(!hideLocalCluster
+                      ? [{ value: LocalCluster.id, text: LocalCluster.label }]
+                      : []),
+                    ...dataSources.map((ds) => ({ value: ds.id, text: ds.title || ds.id })),
+                  ]}
+                  value={currentDataSourceId}
+                  onChange={(e) => setDataSourceIdForRequest(e.target.value)}
+                  data-test-subj="dataSourceSelect"
+                />
+              </EuiCompressedFormRow>
+              <EuiSpacer />
+            </>
+          )}
 
           <EuiText size="s">
             <h2>Prometheus data location</h2>
