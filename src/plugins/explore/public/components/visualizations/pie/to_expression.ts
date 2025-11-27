@@ -10,6 +10,7 @@ import {
   generateTransformLayer,
   decideScale,
   generateLabelExpr,
+  processData,
 } from '../style_panel/value_mapping/value_mapping_utils';
 
 export const createPieSpec = (
@@ -36,28 +37,18 @@ export const createPieSpec = (
     (mapping) => mapping?.type === 'range'
   );
 
-  const numericalOptions = Array.from(new Set(transformedData.map((t) => t[numericField!])));
-
-  const validValues = valueMappings?.filter((r) => {
-    if (!r.value) return false;
-    return numericalOptions.includes(Number(r.value));
-  });
-
-  const validRanges = rangeMappings?.filter((r) => {
-    if (!r.range) return false;
-    if (r?.range?.min === undefined) return false;
-
-    return transformedData.some((s) => {
-      const value = Number(s[numericField!]);
-      return (
-        r.range?.min !== undefined && value >= r.range.min && value < (r.range.max ?? Infinity)
-      );
-    });
+  const { newRecord, validValues, validRanges } = processData({
+    transformedData,
+    categoricalColumn: categoryField,
+    numericalColumn: numericField,
+    transformedCalculationMethod: undefined,
+    valueMappings,
+    rangeMappings,
   });
 
   const canUseValueMapping =
     ((validRanges && validRanges.length > 0) || (validValues && validValues.length > 0)) &&
-    styleOptions.filterOption !== 'none';
+    styleOptions.colorModeOption !== 'none';
 
   const encodingBase = {
     theta: {
@@ -68,7 +59,7 @@ export const createPieSpec = (
     color: {
       field: canUseValueMapping ? 'mappingValue' : categoryField,
       ...(canUseValueMapping && {
-        scale: decideScale(styleOptions.filterOption, validRanges, validValues),
+        scale: decideScale(styleOptions.colorModeOption, validRanges, validValues),
       }),
       // if color mapping is numerical, also treat it as nominal
       type: 'nominal',
@@ -78,7 +69,7 @@ export const createPieSpec = (
               labelExpr: generateLabelExpr(
                 validRanges,
                 validValues,
-                styleOptions?.filterOption ?? 'none'
+                styleOptions?.colorModeOption ?? 'none'
               ),
             }),
             title: styleOptions.legendTitle,
@@ -160,13 +151,13 @@ export const createPieSpec = (
   const baseSpec = {
     $schema: VEGASCHEMA,
     params: [{ name: 'stepSize', expr: 'min(width, height) / 20' }],
-    data: { values: transformedData },
+    data: { values: newRecord },
     transform: generateTransformLayer(
       canUseValueMapping,
       numericField,
       validRanges,
       validValues,
-      styleOptions?.filterOption ?? 'none'
+      styleOptions?.colorModeOption
     ),
     layer: [
       markLayer,

@@ -9,21 +9,21 @@ import React from 'react';
 import { defaultPieChartStyles, PieChartStyle } from './pie_vis_config';
 import { DebouncedFieldNumber } from '../style_panel/utils';
 import { StyleAccordion } from '../style_panel/style_accordion';
-import { FilterOption } from '../types';
-import { FilterOptionsSelect } from '../style_panel/value_mapping/filter_options_select';
+import { ColorModeOption } from '../types';
+import { ColorModeOptionSelect } from '../style_panel/value_mapping/filter_options_select';
 
 interface PieVisOptionsProps {
   styles: PieChartStyle['exclusive'];
   onChange: (styles: PieChartStyle['exclusive']) => void;
-  filterOption?: FilterOption | undefined;
-  onFilterOptionChange?: (option: FilterOption | undefined) => void;
+  colorModeOption?: ColorModeOption | undefined;
+  onColorModeOptionChange?: (option: ColorModeOption | undefined) => void;
 }
 
 export const PieExclusiveVisOptions = ({
   styles,
   onChange,
-  filterOption,
-  onFilterOptionChange,
+  colorModeOption,
+  onColorModeOptionChange,
 }: PieVisOptionsProps) => {
   const updateStyle = <K extends keyof PieChartStyle['exclusive']>(
     key: K,
@@ -74,9 +74,10 @@ export const PieExclusiveVisOptions = ({
           data-test-subj="donutButtonGroup"
         />
       </EuiFormRow>
-      <FilterOptionsSelect
-        filterOption={filterOption}
-        onFilterOptionChange={onFilterOptionChange}
+      <ColorModeOptionSelect
+        colorModeOption={colorModeOption}
+        onColorModeOptionChange={onColorModeOptionChange}
+        disableThreshold={true}
       />
 
       <EuiFormRow>

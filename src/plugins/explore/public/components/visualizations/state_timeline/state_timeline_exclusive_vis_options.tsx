@@ -13,17 +13,17 @@ import {
   DisableMode,
   DisconnectValuesOption,
   ConnectNullValuesOption,
-  FilterOption,
+  ColorModeOption,
 } from '../types';
-import { FilterOptionsSelect } from '../style_panel/value_mapping/filter_options_select';
+import { ColorModeOptionSelect } from '../style_panel/value_mapping/filter_options_select';
 
 interface StateTimeLineExclusiveVisOptionsProps {
   styles: StateTimeLineChartStyle['exclusive'];
   onChange: (styles: StateTimeLineChartStyle['exclusive']) => void;
   useThresholdColor?: boolean;
   onUseThresholdColorChange: (useThresholdColor: boolean) => void;
-  filterOption?: FilterOption | undefined;
-  onFilterOptionChange?: (option: FilterOption | undefined) => void;
+  colorModeOption?: ColorModeOption | undefined;
+  onColorModeOptionChange?: (option: ColorModeOption | undefined) => void;
 }
 
 const disconnectValuesOption = [
@@ -61,8 +61,8 @@ export const StateTimeLineExclusiveVisOptions = ({
   onChange,
   useThresholdColor,
   onUseThresholdColorChange,
-  filterOption,
-  onFilterOptionChange,
+  colorModeOption,
+  onColorModeOptionChange,
 }: StateTimeLineExclusiveVisOptionsProps) => {
   const updateStyle = <K extends keyof StateTimeLineChartStyle['exclusive']>(
     key: K,
@@ -82,12 +82,11 @@ export const StateTimeLineExclusiveVisOptions = ({
       })}
       initialIsOpen={true}
     >
-      <FilterOptionsSelect
-        filterOption={filterOption}
-        onFilterOptionChange={onFilterOptionChange}
-        disableSelect={useThresholdColor}
+      <ColorModeOptionSelect
+        colorModeOption={colorModeOption}
+        onColorModeOptionChange={onColorModeOptionChange}
       />
-      <EuiFormRow>
+      {/* <EuiFormRow>
         <EuiSwitch
           compressed
           label={i18n.translate('explore.vis.statetimeline.useThresholdColor', {
@@ -97,7 +96,7 @@ export const StateTimeLineExclusiveVisOptions = ({
           checked={useThresholdColor ?? false}
           onChange={(e) => onUseThresholdColorChange(e.target.checked)}
         />
-      </EuiFormRow>
+      </EuiFormRow> */}
       <EuiFormRow>
         <EuiSwitch
           compressed

@@ -133,7 +133,7 @@ const mockTimeColumns: VisColumn[] = [
 
 const mockStyleOptions = {
   ...defaultStateTimeLineChartStyles,
-  filterOption: 'filterAll',
+  colorModeOption: 'useValueMapping',
 } as StateTimeLineChartStyle;
 
 describe('to_expression', () => {
@@ -197,7 +197,10 @@ describe('to_expression', () => {
         mockNumericalColumns,
         mockCateColumns,
         mockTimeColumns,
-        mockStyleOptions,
+        {
+          ...mockStyleOptions,
+          valueMappingOptions: { valueMappings: [{ type: 'value', value: 'A' }] },
+        },
         mockAxisColumnMappings
       );
 
@@ -235,7 +238,7 @@ describe('to_expression', () => {
         mockNumericalColumns,
         mockCateColumns,
         mockTimeColumns,
-        { ...mockStyleOptions, filterOption: 'none' },
+        { ...mockStyleOptions, colorModeOption: 'none' },
         mockAxisColumnMappings
       );
       // Verify the mark layer
@@ -251,7 +254,7 @@ describe('to_expression', () => {
 
       expect(markLayer2).toHaveProperty('encoding.y.field', 'category');
       expect(markLayer2).toHaveProperty('encoding.y.type', 'nominal');
-      expect(markLayer2).toHaveProperty('encoding.color.field', 'v1');
+      expect(markLayer2).toHaveProperty('encoding.color.field', 'mappingValue');
     });
 
     it('includes text layer when showValues is true', () => {

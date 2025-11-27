@@ -120,8 +120,8 @@ export const HistogramVisStyleControls: React.FC<HistogramVisStyleControlsProps>
                 updateStyleOption('useThresholdColor', useThresholdColor)
               }
               shouldDisableUseThresholdColor={hasColorMapping}
-              filterOption={styleOptions?.filterOption}
-              onFilterOptionChange={(option) => updateStyleOption('filterOption', option)}
+              colorModeOption={styleOptions?.colorModeOption}
+              onColorModeOptionChange={(option) => updateStyleOption('colorModeOption', option)}
             />
           </EuiFlexItem>
 

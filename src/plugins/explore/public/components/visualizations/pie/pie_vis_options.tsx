@@ -62,9 +62,9 @@ export const PieVisStyleControls: React.FC<PieVisStyleControlsProps> = ({
           <EuiFlexItem grow={false}>
             <PieExclusiveVisOptions
               styles={styleOptions.exclusive}
-              filterOption={styleOptions?.filterOption}
+              colorModeOption={styleOptions?.colorModeOption}
               onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
-              onFilterOptionChange={(option) => updateStyleOption('filterOption', option)}
+              onColorModeOptionChange={(option) => updateStyleOption('colorModeOption', option)}
             />
           </EuiFlexItem>
           <LegendOptionsWrapper

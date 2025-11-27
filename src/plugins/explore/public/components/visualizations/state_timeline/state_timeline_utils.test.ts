@@ -38,7 +38,7 @@ describe('state_timeline_utils', () => {
         mappings,
         undefined,
         undefined,
-        'filterAll'
+        'useValueMapping'
       );
 
       expect(validMappings).toMatchObject([
@@ -60,7 +60,7 @@ describe('state_timeline_utils', () => {
         mappings,
         undefined,
         undefined,
-        'filterAll'
+        'useValueMapping'
       );
 
       expect(validMappings).toEqual([]);
@@ -136,7 +136,7 @@ describe('state_timeline_utils', () => {
         mappings,
         undefined,
         undefined,
-        'filterAll'
+        'useValueMapping'
       );
 
       expect(validMappings).toMatchObject([
@@ -176,7 +176,7 @@ describe('state_timeline_utils', () => {
         mappings,
         '10m',
         undefined,
-        'filterAll'
+        'useValueMapping'
       );
 
       expect(validMappings).toMatchObject([
@@ -216,7 +216,7 @@ describe('state_timeline_utils', () => {
         mappings,
         undefined,
         '2h',
-        'filterAll'
+        'useValueMapping'
       );
 
       expect(validMappings).toMatchObject([
@@ -268,7 +268,7 @@ describe('state_timeline_utils', () => {
         mappings,
         undefined,
         undefined,
-        'filterAll'
+        'useValueMapping'
       );
 
       expect(validMappings).toHaveLength(2);
@@ -318,7 +318,7 @@ describe('state_timeline_utils', () => {
         mappings,
         undefined,
         undefined,
-        'filterAll'
+        'useValueMapping'
       );
 
       expect(validRanges).toHaveLength(1); // Only ranges that contain data values
@@ -352,7 +352,7 @@ describe('state_timeline_utils', () => {
         mappings,
         undefined,
         undefined,
-        'filterAll'
+        'useValueMapping'
       );
 
       expect(validRanges).toHaveLength(1); // Only ranges that contain data values
@@ -384,7 +384,7 @@ describe('state_timeline_utils', () => {
         mappings,
         undefined,
         undefined,
-        'filterAll'
+        'useValueMapping'
       );
 
       expect(validRanges).toEqual([]);

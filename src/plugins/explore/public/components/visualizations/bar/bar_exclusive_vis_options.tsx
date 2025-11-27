@@ -13,12 +13,12 @@ import {
   EuiColorPicker,
   EuiSwitch,
   EuiButtonGroup,
-  EuiSelect,
 } from '@elastic/eui';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { DebouncedFieldNumber } from '../style_panel/utils';
 import { defaultBarChartStyles } from './bar_vis_config';
-import { FilterOption } from '../types';
+import { ColorModeOption } from '../types';
+import { ColorModeOptionSelect } from '../style_panel/value_mapping/filter_options_select';
 
 interface BarExclusiveVisOptionsProps {
   type: 'bar' | 'histogram';
@@ -37,8 +37,9 @@ interface BarExclusiveVisOptionsProps {
   onBarBorderColorChange: (barBorderColor: string) => void;
   onUseThresholdColorChange: (useThresholdColor: boolean) => void;
   shouldDisableUseThresholdColor?: boolean;
-  filterOption?: FilterOption | undefined;
-  onFilterOptionChange?: (option: FilterOption | undefined) => void;
+  colorModeOption?: ColorModeOption | undefined;
+  onColorModeOptionChange?: (option: ColorModeOption | undefined) => void;
+  hasDate?: boolean;
 }
 
 export const BarExclusiveVisOptions = ({
@@ -58,8 +59,9 @@ export const BarExclusiveVisOptions = ({
   onBarBorderColorChange,
   onUseThresholdColorChange,
   shouldDisableUseThresholdColor = false,
-  filterOption,
-  onFilterOptionChange,
+  colorModeOption,
+  onColorModeOptionChange,
+  hasDate = false,
 }: BarExclusiveVisOptionsProps) => {
   const sizeModeOptions = [
     {
@@ -87,7 +89,7 @@ export const BarExclusiveVisOptions = ({
 
   return (
     <StyleAccordion id="barSection" accordionLabel={barAccordionMessage} initialIsOpen={true}>
-      {!shouldDisableUseThresholdColor && (
+      {/* {!shouldDisableUseThresholdColor && (
         <EuiFormRow>
           <EuiSwitch
             compressed
@@ -99,40 +101,14 @@ export const BarExclusiveVisOptions = ({
             onChange={(e) => onUseThresholdColorChange(e.target.checked)}
           />
         </EuiFormRow>
-      )}
+      )} */}
 
-      <EuiFormRow
-        label={i18n.translate('explore.vis.histogram.exclusive.filterOptions', {
-          defaultMessage: 'Filter Options',
-        })}
-      >
-        <EuiSelect
-          compressed
-          value={filterOption ? filterOption : 'filterAll'}
-          onChange={(e) => onFilterOptionChange?.(e.target.value as FilterOption)}
-          onMouseUp={(e) => e.stopPropagation()}
-          options={[
-            {
-              value: 'filterAll',
-              text: i18n.translate('explore.vis.histogram.exclusive.filterAll', {
-                defaultMessage: 'Use value mappings',
-              }),
-            },
-            {
-              value: 'filterButKeepOpposite',
-              text: i18n.translate('explore.vis.histogram.exclusive.filterButKeepOpposite', {
-                defaultMessage: 'Highlight value mappings',
-              }),
-            },
-            {
-              value: 'none',
-              text: i18n.translate('explore.vis.histogram.exclusive.none', {
-                defaultMessage: 'None',
-              }),
-            },
-          ]}
-        />
-      </EuiFormRow>
+      <ColorModeOptionSelect
+        colorModeOption={colorModeOption}
+        onColorModeOptionChange={onColorModeOptionChange}
+        disableThreshold={shouldDisableUseThresholdColor}
+        hasDate={hasDate}
+      />
 
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.bar.sizeMode', {
