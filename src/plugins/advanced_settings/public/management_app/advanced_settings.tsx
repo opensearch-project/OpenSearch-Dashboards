@@ -174,6 +174,9 @@ export class AdvancedSettingsComponent extends Component<
     const userSettingsEnabled = config.get('theme:enableUserControl');
     const isDashboardAdmin = !!this.props.application.capabilities.dashboards?.isDashboardAdmin;
 
+    const isGlobalScopeEditable =
+      isDashboardAdmin || !!this.props.application.capabilities.globalScopeEditable?.enabled;
+
     return Object.entries(all)
       .filter(([, setting]) => {
         const scope = setting.scope;
@@ -195,14 +198,16 @@ export class AdvancedSettingsComponent extends Component<
         return false;
       })
       .map((setting) => {
+        const isDashboardAdminSetting = all[setting[0]].scope === UiSettingScope.DASHBOARD_ADMIN;
         return toEditableConfig({
           def: setting[1],
           name: setting[0],
           value: setting[1].userValue,
           isCustom: config.isCustom(setting[0]),
           isOverridden: config.isOverridden(setting[0]),
-          isPermissionControlled:
-            all[setting[0]].scope === UiSettingScope.DASHBOARD_ADMIN && !isDashboardAdmin,
+          isPermissionControlled: isDashboardAdminSetting
+            ? !isDashboardAdmin
+            : !isGlobalScopeEditable,
           userSettingsEnabled,
         });
       })
