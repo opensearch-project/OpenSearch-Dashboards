@@ -411,6 +411,8 @@ export class ExploreEmbeddable
             axesMapping: visualization.axesMapping,
           })?.styles;
 
+          this.searchProps.styleOptions = styles;
+
           const spec = matchedRule.toSpec(
             visualizationData.transformedData,
             numericalColumns,
