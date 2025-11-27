@@ -18,7 +18,7 @@ import {
   ConnectNullValuesOption,
   DisableMode,
   ThresholdOptions,
-  FilterOption,
+  ColorModeOption,
 } from '../types';
 import { getColors } from '../theme/default_colors';
 
@@ -43,12 +43,20 @@ export interface StateTimeLineChartStyleOptions {
   titleOptions?: TitleOptions;
 
   valueMappingOptions?: ValueMappingOptions;
+
+  /**
+   * @deprecated - use colorModeOption instead
+   */
   useThresholdColor?: boolean;
+
   thresholdOptions?: ThresholdOptions;
-  filterOption?: FilterOption;
+  colorModeOption?: ColorModeOption;
 }
 
-export type StateTimeLineChartStyle = Required<StateTimeLineChartStyleOptions>;
+export type StateTimeLineChartStyle = Required<
+  Omit<StateTimeLineChartStyleOptions, 'useThresholdColor' | 'colorModeOption'>
+> &
+  Pick<StateTimeLineChartStyleOptions, 'colorModeOption'>;
 
 export const defaultStateTimeLineChartStyles: StateTimeLineChartStyle = {
   // Basic controls
@@ -77,7 +85,6 @@ export const defaultStateTimeLineChartStyles: StateTimeLineChartStyle = {
     valueMappings: [],
   },
 
-  useThresholdColor: false,
   thresholdOptions: {
     thresholds: [],
     baseColor: getColors().statusGreen,
@@ -128,7 +135,7 @@ export const defaultStateTimeLineChartStyles: StateTimeLineChartStyle = {
     show: false,
     titleName: '',
   },
-  filterOption: 'none',
+  colorModeOption: 'none',
 };
 
 export const createStateTimelineConfig = (): VisualizationType<'state_timeline'> => ({

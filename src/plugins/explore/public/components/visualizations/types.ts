@@ -341,4 +341,8 @@ export interface ConnectNullValuesOption {
   threshold: string;
 }
 
-export type FilterOption = 'filterAll' | 'filterButKeepOpposite' | 'none';
+export type ColorModeOption =
+  | 'useValueMapping'
+  | 'highlightValueMapping'
+  | 'none'
+  | 'useThresholdColor';

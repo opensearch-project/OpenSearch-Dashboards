@@ -92,7 +92,7 @@ describe('value_mapping_utils', () => {
     });
 
     it('should handle filterButKeepOpposite option by adding null to domain and grey color', () => {
-      const result = decideScale('filterButKeepOpposite', undefined, mockValidValues);
+      const result = decideScale('highlightValueMapping', undefined, mockValidValues);
 
       expect(result).toEqual({
         domain: [null, 'A', 'B'],
@@ -141,12 +141,12 @@ describe('value_mapping_utils', () => {
 
   describe('decideTransform', () => {
     it('should return undefined for filterButKeepOpposite', () => {
-      const result = decideTransform('filterButKeepOpposite');
+      const result = decideTransform('highlightValueMapping');
       expect(result).toBeUndefined();
     });
 
     it('should return filter transform for filterAll', () => {
-      const result = decideTransform('filterAll');
+      const result = decideTransform('useValueMapping');
       expect(result).toEqual({
         filter: 'datum.mappingValue !== null',
       });
@@ -184,13 +184,19 @@ describe('value_mapping_utils', () => {
         'field',
         mockValidRanges,
         mockValidValues,
-        'filterAll'
+        'useValueMapping'
       );
       expect(result).toMatchObject([]);
     });
 
     it('should generate range-based transform when validRanges exist and validValues is empty', () => {
-      const result = generateTransformLayer(true, 'numericField', mockValidRanges, [], 'filterAll');
+      const result = generateTransformLayer(
+        true,
+        'numericField',
+        mockValidRanges,
+        [],
+        'useValueMapping'
+      );
 
       expect(result[0]).toEqual({
         calculate:
@@ -200,7 +206,13 @@ describe('value_mapping_utils', () => {
     });
 
     it('should generate lookup-based transform when using validValues', () => {
-      const result = generateTransformLayer(true, 'field', undefined, mockValidValues, 'filterAll');
+      const result = generateTransformLayer(
+        true,
+        'field',
+        undefined,
+        mockValidValues,
+        'useValueMapping'
+      );
 
       expect(result).toEqual([
         {
@@ -230,7 +242,7 @@ describe('value_mapping_utils', () => {
         'field',
         undefined,
         mockValidValues,
-        'filterButKeepOpposite'
+        'highlightValueMapping'
       );
 
       expect(result).toEqual([
@@ -284,13 +296,13 @@ describe('value_mapping_utils', () => {
     ];
 
     it('should generate label expression for ranges with display text', () => {
-      const result = generateLabelExpr(mockValidRanges, [], 'filterAll');
+      const result = generateLabelExpr(mockValidRanges, [], 'useValueMapping');
 
       expect(result).toBe("{'[0,10)': 'Low Range', '[10,∞)': 'High Range'}[datum.label]");
     });
 
     it('should generate label expression for values with display text', () => {
-      const result = generateLabelExpr(undefined, mockValidValues, 'filterAll');
+      const result = generateLabelExpr(undefined, mockValidValues, 'useValueMapping');
 
       expect(result).toBe("{'A': 'Apple Display', 'B': 'B'}[datum.label]");
     });
@@ -309,19 +321,19 @@ describe('value_mapping_utils', () => {
         },
       ];
 
-      const result = generateLabelExpr(undefined, valuesWithoutDisplay, 'filterAll');
+      const result = generateLabelExpr(undefined, valuesWithoutDisplay, 'useValueMapping');
 
       expect(result).toBe("{'A': 'A', 'B': 'B'}[datum.label]");
     });
 
     it('should add unmatched entry for filterButKeepOpposite', () => {
-      const result = generateLabelExpr(undefined, mockValidValues, 'filterButKeepOpposite');
+      const result = generateLabelExpr(undefined, mockValidValues, 'highlightValueMapping');
 
       expect(result).toBe("{'A': 'Apple Display', 'B': 'B', null: 'unmatched'}[datum.label]");
     });
 
     it('should prefer values over ranges when both exist', () => {
-      const result = generateLabelExpr(mockValidRanges, mockValidValues, 'filterAll');
+      const result = generateLabelExpr(mockValidRanges, mockValidValues, 'useValueMapping');
 
       expect(result).toBe("{'A': 'Apple Display', 'B': 'B'}[datum.label]");
     });
@@ -336,7 +348,7 @@ describe('value_mapping_utils', () => {
         },
       ];
 
-      const result = generateLabelExpr(rangeWithoutMax, [], 'filterAll');
+      const result = generateLabelExpr(rangeWithoutMax, [], 'useValueMapping');
 
       expect(result).toBe("{'[5,∞)': 'Above 5'}[datum.label]");
     });

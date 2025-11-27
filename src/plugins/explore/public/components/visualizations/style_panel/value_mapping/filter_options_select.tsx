@@ -6,48 +6,63 @@
 import { i18n } from '@osd/i18n';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import React from 'react';
-import { FilterOption } from '../../types';
+import { ColorModeOption } from '../../types';
 
-export const FilterOptionsSelect = ({
-  filterOption,
-  onFilterOptionChange,
-  disableSelect = false,
+export const ColorModeOptionSelect = ({
+  colorModeOption,
+  onColorModeOptionChange,
+  disableThreshold = false,
+  hasDate = false,
 }: {
-  filterOption: FilterOption | undefined;
-  onFilterOptionChange?: (option: FilterOption | undefined) => void;
-  disableSelect?: boolean;
+  colorModeOption: ColorModeOption | undefined;
+  onColorModeOptionChange?: (option: ColorModeOption | undefined) => void;
+  disableThreshold?: boolean;
+  hasDate?: boolean;
 }) => {
   return (
     <EuiFormRow
-      label={i18n.translate('explore.vis.valueMapping.filterOptions', {
-        defaultMessage: 'Filter Options',
+      label={i18n.translate('explore.vis.valueMapping.colorModeOption', {
+        defaultMessage: 'Color mode options',
       })}
     >
       <EuiSelect
         compressed
-        value={filterOption ? filterOption : 'filterAll'}
-        onChange={(e) => onFilterOptionChange?.(e.target.value as FilterOption)}
+        value={colorModeOption ? colorModeOption : 'none'}
+        onChange={(e) => onColorModeOptionChange?.(e.target.value as ColorModeOption)}
         onMouseUp={(e) => e.stopPropagation()}
-        disabled={disableSelect}
         options={[
-          {
-            value: 'filterAll',
-            text: i18n.translate('explore.vis.valueMapping.filterAll', {
-              defaultMessage: 'Use value mappings',
-            }),
-          },
-          {
-            value: 'filterButKeepOpposite',
-            text: i18n.translate('explore.vis.valueMapping.filterButKeepOpposite', {
-              defaultMessage: 'Highlight value mappings',
-            }),
-          },
+          ...(hasDate
+            ? []
+            : [
+                {
+                  value: 'useValueMapping',
+                  text: i18n.translate('explore.vis.valueMapping.useValueMapping', {
+                    defaultMessage: 'Use value mappings',
+                  }),
+                },
+                {
+                  value: 'highlightValueMapping',
+                  text: i18n.translate('explore.vis.valueMapping.highlightValueMapping', {
+                    defaultMessage: 'Highlight value mappings',
+                  }),
+                },
+              ]),
           {
             value: 'none',
             text: i18n.translate('explore.vis.valueMapping.none', {
               defaultMessage: 'None',
             }),
           },
+          ...(!disableThreshold
+            ? [
+                {
+                  value: 'useThresholdColor',
+                  text: i18n.translate('explore.vis.valueMapping.useThresholdColor', {
+                    defaultMessage: 'Use Threshold Color',
+                  }),
+                },
+              ]
+            : []),
         ]}
       />
     </EuiFormRow>

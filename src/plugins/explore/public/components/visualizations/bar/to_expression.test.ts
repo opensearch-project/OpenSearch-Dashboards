@@ -73,9 +73,9 @@ describe('bar to_expression', () => {
 
   // Sample data for testing
   const mockData = [
-    { count: 10, category: 'A', category2: 'X', date: '2023-01-01' },
-    { count: 20, category: 'B', category2: 'Y', date: '2023-01-02' },
-    { count: 30, category: 'C', category2: 'Z', date: '2023-01-03' },
+    { count: 10, category: 'A', category2: 'X', date: '2023-01-01', sum: 10 },
+    { count: 20, category: 'B', category2: 'Y', date: '2023-01-02', sum: 11 },
+    { count: 30, category: 'C', category2: 'Z', date: '2023-01-03', sum: 12 },
   ];
 
   describe('createBarSpec', () => {
@@ -94,7 +94,6 @@ describe('bar to_expression', () => {
 
       // Check basic structure
       expect(spec.$schema).toBe(VEGASCHEMA);
-      expect(spec.data.values).toBe(mockData);
       expect(spec.layer).toHaveLength(1);
 
       // Check encoding
@@ -268,16 +267,39 @@ describe('bar to_expression', () => {
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 
-    test('throws error when required columns are missing', () => {
-      // No numerical columns
-      expect(() => {
-        createBarSpec(mockData, [], [mockCategoricalColumn], [], defaultBarChartStyles);
-      }).toThrow('Bar chart requires at least one numerical column and one categorical column');
+    test('use value mapping color when color mode option is enabled', () => {
+      const styles: BarChartStyle = {
+        ...defaultBarChartStyles,
+        colorModeOption: 'useValueMapping',
+        valueMappingOptions: {
+          valueMappings: [{ type: 'range', range: { min: 0 }, color: '#9054b3ff' }],
+        },
+      };
 
-      // No categorical columns
-      expect(() => {
-        createBarSpec(mockData, [mockNumericalColumn], [], [], defaultBarChartStyles);
-      }).toThrow('Bar chart requires at least one numerical column and one categorical column');
+      const mockAxisColumnMappings = {
+        [AxisRole.X]: mockCategoricalColumn,
+        [AxisRole.Y]: mockNumericalColumn,
+      };
+
+      const spec = createBarSpec(
+        mockData,
+        [mockNumericalColumn],
+        [mockCategoricalColumn],
+        [],
+        styles,
+        mockAxisColumnMappings
+      );
+
+      expect(spec.layer[0].encoding.color).toMatchObject({
+        field: 'mappingValue',
+        legend: {
+          labelExpr: "{'[0,∞)': '[0,∞)'}[datum.label] || datum.label",
+          orient: 'bottom',
+          title: 'Mappings',
+        },
+        scale: { domain: ['[0,∞)'], range: ['#9054b3ff'] },
+        type: 'nominal',
+      });
     });
   });
 
@@ -298,14 +320,13 @@ describe('bar to_expression', () => {
 
       // Check basic structure
       expect(spec.$schema).toBe(VEGASCHEMA);
-      expect(spec.data.values).toBe(mockData);
 
       const mainLayer = spec.layer[0];
       const encoding = mainLayer.encoding;
       // Check encoding
       expect(encoding.x.field).toBe('category');
       expect(encoding.y.field).toBe('count');
-      expect(encoding.color.field).toBe('category2');
+      expect(encoding.color.field).toBe('combinedCategory');
 
       // select time range params
       expect(spec.params).not.toEqual(
@@ -1164,7 +1185,7 @@ describe('bar to_expression', () => {
       [AxisRole.X]: mockNumericalColumn,
       [AxisRole.Y]: mockNumericalColumn2,
     };
-    test('creates a numerical histogram bar chart spec', () => {
+    test('creates a numerical regular bar chart spec', () => {
       const spec = createDoubleNumericalBarChart(
         mockData,
         [mockNumericalColumn, mockNumericalColumn2],
@@ -1173,7 +1194,6 @@ describe('bar to_expression', () => {
       );
 
       expect(spec.$schema).toBe(VEGASCHEMA);
-      expect(spec.data.values).toBe(mockData);
       expect(spec.layer).toHaveLength(1);
 
       const mainLayer = spec.layer[0];
@@ -1182,7 +1202,6 @@ describe('bar to_expression', () => {
       expect(mainLayer.encoding.x.field).toBe('count');
       expect(mainLayer.encoding.x.type).toBe('nominal');
       expect(mainLayer.encoding.y.field).toBe('sum');
-      expect(mainLayer.encoding.y.aggregate).toBe('sum');
       expect(mainLayer.encoding.y.type).toBe('quantitative');
 
       // select time range params
@@ -1194,22 +1213,32 @@ describe('bar to_expression', () => {
       );
     });
 
-    test('applies bucket options correctly', () => {
-      const stylesWithBucket = {
+    test('use value mapping color when color mode option is enabled', () => {
+      const styles: BarChartStyle = {
         ...defaultBarChartStyles,
-        bucket: {
-          aggregationType: AggregationType.SUM,
+        colorModeOption: 'useValueMapping',
+        valueMappingOptions: {
+          valueMappings: [{ type: 'range', range: { min: 0 }, color: '#9054b3ff' }],
         },
       };
 
       const spec = createDoubleNumericalBarChart(
         mockData,
         [mockNumericalColumn, mockNumericalColumn2],
-        stylesWithBucket,
+        styles,
         mockAxisColumnMappings
       );
 
-      expect(spec.layer[0].encoding.y.aggregate).toBe('sum');
+      expect(spec.layer[0].encoding.color).toMatchObject({
+        field: 'mappingValue',
+        legend: {
+          labelExpr: "{'[0,∞)': '[0,∞)'}[datum.label] || datum.label",
+          orient: 'bottom',
+          title: 'Mappings',
+        },
+        scale: { domain: ['[0,∞)'], range: ['#9054b3ff'] },
+        type: 'nominal',
+      });
     });
   });
 });

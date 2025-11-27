@@ -18,7 +18,7 @@ import {
   BucketOptions,
   ThresholdOptions,
   ValueMappingOptions,
-  FilterOption,
+  ColorModeOption,
 } from '../types';
 import { HistogramVisStyleControls } from './histogram_vis_options';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
@@ -47,7 +47,7 @@ export interface HistogramChartStyleOptions {
 
   useThresholdColor?: boolean;
   valueMappingOptions?: ValueMappingOptions;
-  filterOption?: FilterOption;
+  colorModeOption?: ColorModeOption;
 }
 
 export type HistogramChartStyle = Required<HistogramChartStyleOptions>;
@@ -122,7 +122,7 @@ export const defaultHistogramChartStyles: HistogramChartStyle = {
   valueMappingOptions: {
     valueMappings: [],
   },
-  filterOption: 'filterAll',
+  colorModeOption: 'none',
 };
 
 export const createHistogramConfig = (): VisualizationType<'histogram'> => ({

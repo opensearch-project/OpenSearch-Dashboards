@@ -14,7 +14,7 @@ import {
   TooltipOptions,
   VisFieldType,
   ValueMappingOptions,
-  FilterOption,
+  ColorModeOption,
 } from '../types';
 
 export interface PieExclusiveStyleOptions {
@@ -39,13 +39,13 @@ export interface PieChartStyleOptions {
 
   titleOptions?: TitleOptions;
   valueMappingOptions?: ValueMappingOptions;
-  filterOption?: FilterOption;
+  colorModeOption?: ColorModeOption;
 }
 
 export type PieChartStyle = Required<
-  Omit<PieChartStyleOptions, 'legendTitle' | 'valueMappingOptions' | 'filterOption'>
+  Omit<PieChartStyleOptions, 'legendTitle' | 'valueMappingOptions' | 'colorModeOption'>
 > &
-  Pick<PieChartStyleOptions, 'legendTitle' | 'valueMappingOptions' | 'filterOption'>;
+  Pick<PieChartStyleOptions, 'legendTitle' | 'valueMappingOptions' | 'colorModeOption'>;
 
 export const defaultPieChartStyles: PieChartStyle = {
   // Basic controls
@@ -69,7 +69,7 @@ export const defaultPieChartStyles: PieChartStyle = {
   valueMappingOptions: {
     valueMappings: [],
   },
-  filterOption: 'none',
+  colorModeOption: 'none',
 };
 
 export const createPieConfig = (): VisualizationType<'pie'> => ({
