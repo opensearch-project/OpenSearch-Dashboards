@@ -65,6 +65,9 @@ const configSchema = schema.object({
       })
     ),
   }),
+  globalScopeEditable: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 export type UiSettingsConfigType = TypeOf<typeof configSchema>;

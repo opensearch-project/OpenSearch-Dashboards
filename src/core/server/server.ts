@@ -202,6 +202,7 @@ export class Server {
     const uiSettingsSetup = await this.uiSettings.setup({
       http: httpSetup,
       savedObjects: savedObjectsSetup,
+      dynamicConfig: dynamicConfigServiceSetup,
     });
     const workspaceSetup = await this.workspace.setup();
 
