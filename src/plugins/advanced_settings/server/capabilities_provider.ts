@@ -36,4 +36,7 @@ export const capabilitiesProvider = () => ({
   userSettings: {
     enabled: false,
   },
+  globalScopeEditable: {
+    enabled: true,
+  },
 });

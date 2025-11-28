@@ -314,6 +314,9 @@ export class Field extends PureComponent<FieldProps> {
       defVal,
       ariaName,
     } = setting;
+
+    const disableField =
+      loading || isOverridden || isPermissionControlled || preferBrowserSetting || !enableSaving;
     const a11yProps: { [key: string]: string } = ariaDescribedBy
       ? {
           'aria-label': ariaName,
@@ -339,13 +342,7 @@ export class Field extends PureComponent<FieldProps> {
             }
             checked={!!currentValue}
             onChange={this.onFieldChangeSwitch}
-            disabled={
-              loading ||
-              isOverridden ||
-              isPermissionControlled ||
-              preferBrowserSetting ||
-              !enableSaving
-            }
+            disabled={disableField}
             data-test-subj={`advancedSetting-editField-${name}`}
             {...a11yProps}
           />
@@ -408,13 +405,7 @@ export class Field extends PureComponent<FieldProps> {
             })}
             onChange={this.onFieldChangeEvent}
             isLoading={loading}
-            disabled={
-              loading ||
-              isOverridden ||
-              isPermissionControlled ||
-              preferBrowserSetting ||
-              !enableSaving
-            }
+            disabled={disableField}
             fullWidth
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -426,13 +417,7 @@ export class Field extends PureComponent<FieldProps> {
             value={currentValue}
             onChange={this.onFieldChangeEvent}
             isLoading={loading}
-            disabled={
-              loading ||
-              isOverridden ||
-              isPermissionControlled ||
-              preferBrowserSetting ||
-              !enableSaving
-            }
+            disabled={disableField}
             fullWidth
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -444,13 +429,7 @@ export class Field extends PureComponent<FieldProps> {
             value={currentValue}
             onChange={this.onFieldChangeEvent}
             isLoading={loading}
-            disabled={
-              loading ||
-              isOverridden ||
-              isPermissionControlled ||
-              preferBrowserSetting ||
-              !enableSaving
-            }
+            disabled={disableField}
             fullWidth
             data-test-subj={`advancedSetting-editField-${name}`}
           />
