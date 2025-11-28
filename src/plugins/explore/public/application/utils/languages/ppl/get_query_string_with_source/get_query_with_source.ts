@@ -7,9 +7,10 @@ import { Query } from '../../../../../../../data/common';
 import { QueryWithQueryAsString } from '../../types';
 
 /**
- * Adds a source if query string does not have it
+ * Adds "source = <dataset>" clause to PPL query if not present
+ * Also handles backtick escaping for INDEXES and INDEX_PATTERN dataset types
  */
-export const getQueryWithSource = (query: Query): QueryWithQueryAsString => {
+export const addPPLSourceClause = (query: Query): QueryWithQueryAsString => {
   const queryString = typeof query.query === 'string' ? query.query : '';
   const lowerCaseQuery = queryString.toLowerCase();
   const hasSource = /^[^|]*\bsource\s*=/.test(lowerCaseQuery);

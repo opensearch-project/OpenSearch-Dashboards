@@ -17,7 +17,7 @@ import {
   ENABLE_EXPERIMENTAL_SETTING,
 } from '../../common';
 import { VisTab } from '../components/tabs/vis_tab';
-import { getQueryWithSource } from './utils/languages';
+import { prepareQueryForLanguage } from './utils/languages';
 import {
   brainPatternQuery,
   findDefaultPatternsField,
@@ -68,7 +68,7 @@ export const registerBuiltInTabs = (
         // Get the selected patterns field from the Redux state
         let patternsField = state.tab.patterns.patternsField;
 
-        const preparedQuery = getQueryWithSource(query);
+        const preparedQuery = prepareQueryForLanguage(query);
         if (!patternsField) {
           try {
             patternsField = findDefaultPatternsField(services);
@@ -107,7 +107,7 @@ export const registerBuiltInTabs = (
             patternsField = findDefaultPatternsField(services);
           }
           const query = state.query;
-          const preparedQuery = getQueryWithSource(query);
+          const preparedQuery = prepareQueryForLanguage(query);
           services.store.dispatch(setUsingRegexPatterns(true));
           services.store.dispatch(
             executeTabQuery({
@@ -148,10 +148,9 @@ export const registerBuiltInTabs = (
     order: 20,
     supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
-    // No query transformation for visualizations tab
-    // Visualization tab owner will implement their own prepareQuery
+    // Prepare query based on language
     prepareQuery: (query) => {
-      const preparedQuery = getQueryWithSource(query);
+      const preparedQuery = prepareQueryForLanguage(query);
       return preparedQuery.query;
     },
 

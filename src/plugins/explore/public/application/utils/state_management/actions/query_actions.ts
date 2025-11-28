@@ -38,7 +38,7 @@ import {
   HistogramDataProcessor,
   ProcessedSearchResults,
 } from '../../interfaces';
-import { defaultPreparePplQuery, getQueryWithSource } from '../../languages';
+import { defaultPreparePplQuery } from '../../languages';
 import {
   HistogramConfig,
   buildPPLHistogramQuery,
@@ -279,7 +279,7 @@ export const executeQueries = createAsyncThunk<
   if (visualizationTab?.prepareQuery) {
     const prepareQuery = visualizationTab.prepareQuery;
     visualizationTabPrepareQuery = (queryParam: Query): string => {
-      return prepareQuery(getQueryWithSource(queryParam));
+      return prepareQuery(queryParam);
     };
   }
   const visualizationTabCacheKey = visualizationTabPrepareQuery(query);
@@ -291,7 +291,7 @@ export const executeQueries = createAsyncThunk<
     if (activeTab?.prepareQuery) {
       const prepareQuery = activeTab.prepareQuery;
       activeTabPrepareQuery = (queryParam: Query): string => {
-        return prepareQuery(getQueryWithSource(queryParam));
+        return prepareQuery(queryParam);
       };
     }
     activeTabCacheKey = activeTabPrepareQuery(query);
@@ -430,7 +430,7 @@ const executeQueryBase = async (
       ...query,
       dataset,
       query:
-        isHistogramQuery && histogramConfig
+        query.language === 'PPL' && isHistogramQuery && histogramConfig
           ? buildPPLHistogramQuery(queryString, histogramConfig)
           : queryString,
     };
