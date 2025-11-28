@@ -7,35 +7,32 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataStructure } from '../../../../../../common';
+import './mode_selection_row.scss';
 import { IndexSelector } from './index_selector';
-import { PrefixSelector } from './prefix_selector';
+import { MultiWildcardSelector } from './multi_wildcard_selector';
 
 type SelectionMode = 'single' | 'prefix';
 
 interface ModeSelectionRowProps {
   selectionMode: SelectionMode;
   onModeChange: (selectedOptions: Array<{ label: string; value?: string }>) => void;
-  // Props for prefix mode
-  customPrefix: string;
-  validationError: string;
-  onPrefixChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  // Props for multi-wildcard mode
+  wildcardPatterns: string[];
+  onWildcardPatternsChange: (patterns: string[]) => void;
   // Props for index mode
   children: DataStructure[] | undefined;
-  selectedIndexId: string | null;
-  isFinal: boolean;
-  onIndexSelectionChange: (selectedId: string | null) => void;
+  selectedIndexIds: string[];
+  onMultiIndexSelectionChange: (selectedIds: string[]) => void;
 }
 
 export const ModeSelectionRow: React.FC<ModeSelectionRowProps> = ({
   selectionMode,
   onModeChange,
-  customPrefix,
-  validationError,
-  onPrefixChange,
+  wildcardPatterns,
+  onWildcardPatternsChange,
   children,
-  selectedIndexId,
-  isFinal,
-  onIndexSelectionChange,
+  selectedIndexIds,
+  onMultiIndexSelectionChange,
 }) => {
   const modeOptions = [
     {
@@ -56,7 +53,7 @@ export const ModeSelectionRow: React.FC<ModeSelectionRowProps> = ({
 
   return (
     <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem grow={false} style={{ flexBasis: '20%', minWidth: '170px' }}>
+      <EuiFlexItem grow={false} className="modeSelectionRow__selectorColumn">
         <EuiFormRow
           label={i18n.translate('data.datasetService.modeSelectionRow.selectScopeByLabel', {
             defaultMessage: 'Select scope by',
@@ -81,26 +78,21 @@ export const ModeSelectionRow: React.FC<ModeSelectionRowProps> = ({
           helpText={
             selectionMode === 'prefix'
               ? i18n.translate('data.datasetService.modeSelectionRow.wildcardHelpText', {
-                  defaultMessage:
-                    'Use an asterisk (*) to match multiple sources. Spaces and the characters /, ?, ", <, >, | are not allowed.',
+                  defaultMessage: 'Use an asterisk (*) to match multiple sources.',
                 })
               : undefined
           }
-          isInvalid={selectionMode === 'prefix' && !!validationError}
-          error={selectionMode === 'prefix' ? validationError : undefined}
         >
           {selectionMode === 'prefix' ? (
-            <PrefixSelector
-              customPrefix={customPrefix}
-              validationError={validationError}
-              onPrefixChange={onPrefixChange}
+            <MultiWildcardSelector
+              patterns={wildcardPatterns}
+              onPatternsChange={onWildcardPatternsChange}
             />
           ) : (
             <IndexSelector
               children={children}
-              selectedIndexId={selectedIndexId}
-              isFinal={isFinal}
-              onSelectionChange={onIndexSelectionChange}
+              selectedIndexIds={selectedIndexIds}
+              onMultiSelectionChange={onMultiIndexSelectionChange}
             />
           )}
         </EuiFormRow>
