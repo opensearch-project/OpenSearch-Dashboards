@@ -9,7 +9,6 @@ import {
   EuiTitle,
   EuiCheckableCard,
   EuiText,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -54,7 +53,7 @@ export const ImportTypeSelector = ({
           <EuiTitle size="xs">
             <span>
               {i18n.translate('dataImporter.importType', {
-                defaultMessage: 'Import Type',
+                defaultMessage: 'Import type',
               })}
             </span>
           </EuiTitle>
@@ -66,7 +65,7 @@ export const ImportTypeSelector = ({
           <EuiCheckableCard
             id={'file-selection'}
             label={createLabel({
-              text: i18n.translate('dataImporter.file', {
+              text: i18n.translate('dataImporter.file.upload', {
                 defaultMessage: 'Upload',
               }),
               tooltip: i18n.translate('dataImporter.fileTooltip.file', {
@@ -94,8 +93,6 @@ export const ImportTypeSelector = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
     </EuiFormFieldset>
   );
 };
