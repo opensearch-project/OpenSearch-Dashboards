@@ -19,6 +19,7 @@ import { AxisColumnMappings, RenderChartConfig } from './types';
 import { convertMappingsToStrings, convertStringsToMappings } from './visualization_builder_utils';
 import { visualizationRegistry } from './visualization_registry';
 import { VisData } from './visualization_builder.types';
+import { getAxisConfigByColumnMapping } from './utils/axis';
 
 interface StylePanelProps<T> {
   data$: Observable<VisData | undefined>;
@@ -59,6 +60,17 @@ export const StylePanelRender = <T extends ChartType>({
     ]);
   }, [axesMapping, visualizationData]);
 
+  const styleOptions = useMemo(() => {
+    if (chartConfig) {
+      const standardAxes =
+        'standardAxes' in chartConfig.styles ? chartConfig.styles.standardAxes : [];
+      // initialize axis config
+      const allAxisConfig = getAxisConfigByColumnMapping(axisColumnMappings, standardAxes);
+      return { ...chartConfig.styles, standardAxes: allAxisConfig };
+    }
+    return null;
+  }, [axisColumnMappings, chartConfig]);
+
   if (!visualizationData) {
     return null;
   }
@@ -75,7 +87,7 @@ export const StylePanelRender = <T extends ChartType>({
     visualizationData.dateColumns
   );
 
-  if (!chartConfig?.styles || !visConfig) {
+  if (!chartConfig?.styles || !visConfig || !styleOptions) {
     return null;
   }
 
@@ -88,7 +100,7 @@ export const StylePanelRender = <T extends ChartType>({
       />
       <EuiSpacer size="s" />
       {visConfig.ui.style.render({
-        styleOptions: chartConfig.styles as ChartStylesMapping[T],
+        styleOptions: styleOptions as ChartStylesMapping[T],
         onStyleChange,
         numericalColumns: visualizationData.numericalColumns,
         categoricalColumns: visualizationData.categoricalColumns,

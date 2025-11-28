@@ -10,11 +10,11 @@ import { AreaChartStyle, AreaChartStyleOptions } from './area_vis_config';
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
-import { AxesOptions } from '../style_panel/axes/axes';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 
 export type AreaVisStyleControlsProps = StyleControlsProps<AreaChartStyle>;
 
@@ -68,17 +68,12 @@ export const AreaVisStyleControls: React.FC<AreaVisStyleControlsProps> = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <AxesOptions
-              categoryAxes={styleOptions.categoryAxes}
-              valueAxes={styleOptions.valueAxes}
-              onCategoryAxesChange={(categoryAxes) =>
-                updateStyleOption('categoryAxes', categoryAxes)
-              }
-              onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
-              numericalColumns={numericalColumns}
-              categoricalColumns={categoricalColumns}
-              dateColumns={dateColumns}
+            <AllAxesOptions
               axisColumnMappings={axisColumnMappings}
+              standardAxes={styleOptions.standardAxes}
+              onStandardAxesChange={(standardAxes) =>
+                updateStyleOption('standardAxes', standardAxes)
+              }
               showFullTimeRange={styleOptions.showFullTimeRange}
               onShowFullTimeRangeChange={(showFullTimeRange) =>
                 updateStyleOption('showFullTimeRange', showFullTimeRange)

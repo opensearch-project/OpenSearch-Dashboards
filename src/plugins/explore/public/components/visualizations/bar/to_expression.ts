@@ -45,13 +45,7 @@ export const createBarSpec = (
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length === 0 || categoricalColumns.length === 0) {
-    throw new Error('Bar chart requires at least one numerical column and one categorical column');
-  }
-
   const styles = { ...defaultBarChartStyles, ...styleOptions };
-
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const layers: any[] = [];
@@ -142,11 +136,6 @@ export const createTimeBarChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length === 0 || dateColumns.length === 0) {
-    throw new Error('Time bar chart requires at least one numerical column and one date column');
-  }
-
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const timeAxis = xAxis?.schema === VisFieldType.Date ? xAxis : yAxis;
@@ -249,17 +238,6 @@ export const createGroupedTimeBarChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
-  // Check if we have the required columns
-  if (
-    numericalColumns.length === 0 ||
-    categoricalColumns.length === 0 ||
-    dateColumns.length === 0
-  ) {
-    throw new Error(
-      'Grouped time bar chart requires at least one numerical column, one categorical column, and one date column'
-    );
-  }
-
   const styles = { ...defaultBarChartStyles, ...styleOptions };
 
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
@@ -378,13 +356,6 @@ export const createFacetedTimeBarChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length === 0 || categoricalColumns.length < 2 || dateColumns.length === 0) {
-    throw new Error(
-      'Faceted time bar chart requires at least one numerical column, two categorical columns, and one date column'
-    );
-  }
-
   const styles = { ...defaultBarChartStyles, ...styleOptions };
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
@@ -599,11 +570,6 @@ export const createDoubleNumericalBarChart = (
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length < 2) {
-    throw new Error('Histogram bar chart requires at least two numerical column');
-  }
-
   const styles = { ...defaultBarChartStyles, ...styleOptions };
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
