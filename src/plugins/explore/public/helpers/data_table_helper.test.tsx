@@ -199,10 +199,16 @@ describe('data_table_helper', () => {
         'name',
         'durationNano',
         'durationInNanos',
+        'duration',
         'resource.attributes.service.name',
         'attributes.http.status_code',
+        'rpc.grpc.status_code',
+        'tags', // Jaeger tags array
         'status.code',
         'spanId',
+        'kind',
+        'tag.span@kind',
+        'tag', // Jaeger tag object
       ];
 
       const result = getLegacyDisplayedColumns(columns, mockIndexPattern, true, false);
@@ -210,10 +216,16 @@ describe('data_table_helper', () => {
       expect(result[0].displayName).toBe('Service Identifier');
       expect(result[1].displayName).toBe('Duration');
       expect(result[2].displayName).toBe('Duration');
-      expect(result[3].displayName).toBe('Service');
-      expect(result[4].displayName).toBe('Status Code');
-      expect(result[5].displayName).toBe('Status');
-      expect(result[6].displayName).toBe('SpanID');
+      expect(result[3].displayName).toBe('Duration');
+      expect(result[4].displayName).toBe('Service');
+      expect(result[5].displayName).toBe('Status Code');
+      expect(result[6].displayName).toBe('Status Code'); // Jaeger gRPC status code
+      expect(result[7].displayName).toBe('Status Code'); // Jaeger tags array
+      expect(result[8].displayName).toBe('Status');
+      expect(result[9].displayName).toBe('SpanID');
+      expect(result[10].displayName).toBe('Service Kind');
+      expect(result[11].displayName).toBe('Span Kind'); // Jaeger span kind
+      expect(result[12].displayName).toBe('Span Kind'); // Jaeger tag object
     });
   });
 });

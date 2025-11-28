@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Span } from '../traces/span_detail_table';
+import { Span } from '../traces/span_detail_tables/types';
 import { hasNanosecondPrecision } from '../traces/ppl_resolve_helpers';
 import { extractSpanDuration } from './span_data_utils';
 import { nanoToMilliSec, round } from './helper_functions';
@@ -75,6 +75,23 @@ export const parseHighPrecisionTimestamp = (timestampStr: string): number => {
   if (!timestampStr) return 0;
 
   try {
+    const numericMatch = timestampStr.match(/^\d+$/);
+    if (numericMatch) {
+      const timestamp = parseInt(timestampStr, 10);
+
+      // If it's a very large number (nanoseconds), convert to milliseconds
+      if (timestamp > 1e15) {
+        return timestamp / 1000000; // nanoseconds to milliseconds
+      }
+
+      // If it's a medium number (microseconds), convert to milliseconds
+      if (timestamp > 1e12) {
+        return timestamp / 1000; // microseconds to milliseconds
+      }
+
+      return timestamp;
+    }
+
     let normalizedTimestamp = timestampStr;
 
     if (timestampStr.includes(' ') && !timestampStr.includes('T')) {

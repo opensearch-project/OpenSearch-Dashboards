@@ -237,4 +237,108 @@ describe('ppl_request_trace', () => {
       await expect(tracePPLService.fetchSpanDetails(defaultParams)).rejects.toThrow(error);
     });
   });
+
+  describe('Jaeger Schema Detection', () => {
+    it('uses Jaeger field names for Jaeger indices', async () => {
+      const jaegerDataset: Dataset = {
+        id: 'jaeger-dataset-id',
+        title: 'jaeger-span-2025-11-19',
+        type: 'INDEX_PATTERN',
+      };
+
+      await tracePPLService.fetchTraceSpans({
+        traceId: 'test-trace-id',
+        dataset: jaegerDataset,
+      });
+
+      expect(mockBuildPPLQueryRequest).toHaveBeenCalledWith(
+        {
+          id: 'jaeger-dataset-id',
+          title: 'jaeger-span-2025-11-19',
+          type: 'INDEX_PATTERN',
+        },
+        'source = jaeger-span-2025-11-19 | where traceID = "test-trace-id" | head 100'
+      );
+    });
+
+    it('uses Jaeger field names for span details query', async () => {
+      const jaegerDataset: Dataset = {
+        id: 'jaeger-dataset-id',
+        title: 'jaeger-span*',
+        type: 'INDEX_PATTERN',
+      };
+
+      await tracePPLService.fetchSpanDetails({
+        traceId: 'test-trace-id',
+        spanId: 'test-span-id',
+        dataset: jaegerDataset,
+      });
+
+      expect(mockBuildPPLQueryRequest).toHaveBeenCalledWith(
+        {
+          id: 'jaeger-dataset-id',
+          title: 'jaeger-span*',
+          type: 'INDEX_PATTERN',
+        },
+        'source = jaeger-span* | where traceID = "test-trace-id" | where spanID = "test-span-id" | head 100'
+      );
+    });
+
+    it('uses DataPrepper field names for non-Jaeger indices', async () => {
+      const dataPrepperDataset: Dataset = {
+        id: 'dataprepper-dataset-id',
+        title: 'otel-traces-2025',
+        type: 'INDEX_PATTERN',
+      };
+
+      await tracePPLService.fetchTraceSpans({
+        traceId: 'test-trace-id',
+        dataset: dataPrepperDataset,
+      });
+
+      expect(mockBuildPPLQueryRequest).toHaveBeenCalledWith(
+        {
+          id: 'dataprepper-dataset-id',
+          title: 'otel-traces-2025',
+          type: 'INDEX_PATTERN',
+        },
+        'source = otel-traces-2025 | where traceId = "test-trace-id" | head 100'
+      );
+    });
+
+    it('respects explicit schema mappings over auto-detection', async () => {
+      const datasetWithMappings: Dataset = {
+        id: 'custom-dataset-id',
+        title: 'jaeger-span-custom', // Would normally trigger Jaeger detection
+        type: 'INDEX_PATTERN',
+        schemaMappings: {
+          otelTraces: {
+            traceId: 'custom_trace_field',
+            spanId: 'custom_span_field',
+          },
+        },
+      };
+
+      await tracePPLService.fetchSpanDetails({
+        traceId: 'test-trace-id',
+        spanId: 'test-span-id',
+        dataset: datasetWithMappings,
+      });
+
+      expect(mockBuildPPLQueryRequest).toHaveBeenCalledWith(
+        {
+          id: 'custom-dataset-id',
+          title: 'jaeger-span-custom',
+          type: 'INDEX_PATTERN',
+          schemaMappings: {
+            otelTraces: {
+              traceId: 'custom_trace_field',
+              spanId: 'custom_span_field',
+            },
+          },
+        },
+        'source = jaeger-span-custom | where custom_trace_field = "test-trace-id" | where custom_span_field = "test-span-id" | head 100'
+      );
+    });
+  });
 });
