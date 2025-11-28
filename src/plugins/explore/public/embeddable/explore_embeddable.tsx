@@ -171,7 +171,6 @@ export class ExploreEmbeddable
   private initializeSearchProps() {
     const { searchSource } = this.savedExplore;
     const indexPattern = searchSource.getField('index');
-    if (!indexPattern) return;
     const searchProps: SearchProps = {
       inspectorAdapters: this.inspectorAdaptors,
       rows: [],
@@ -254,7 +253,7 @@ export class ExploreEmbeddable
         field,
         value,
         operator,
-        indexPattern.id!
+        indexPattern?.id!
       );
       filters = filters.map((filter) => ({
         ...filter,
@@ -466,6 +465,7 @@ export class ExploreEmbeddable
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = node;
+    this.node.style.height = '100%';
   }
 
   public getInspectorAdapters() {
