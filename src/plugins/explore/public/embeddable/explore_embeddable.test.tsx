@@ -72,6 +72,12 @@ jest.mock('../components/visualizations/visualization_builder_utils', () => ({
   findRuleByIndex: jest.fn().mockReturnValue({
     toExpression: jest.fn(),
   }),
+  adaptLegacyData: jest.fn().mockReturnValue({ useThresholdColor: true }),
+  getColumnsByAxesMapping: jest.fn().mockReturnValue({
+    numericalColumns: [],
+    categoricalColumns: [],
+    dateColumns: [],
+  }),
 }));
 
 describe('ExploreEmbeddable', () => {
@@ -506,5 +512,32 @@ describe('ExploreEmbeddable', () => {
 
     expect(embeddable.getOutput().error).toBeUndefined();
     expect(embeddable.getOutput().loading).toBe(false);
+  });
+
+  test('should be able to adapt deprecated styles', async () => {
+    jest.spyOn(visualizationRegistry, 'findRuleByAxesMapping').mockReturnValueOnce({
+      id: 'test-rule',
+      name: 'Test Rule',
+      matches: jest.fn(),
+      chartTypes: [{ type: 'line', priority: 100, name: 'Line Chart', icon: '' }],
+      toSpec: jest.fn(),
+    });
+
+    const adaptLegacyDataSpy = jest.spyOn(
+      await import('../components/visualizations/visualization_builder_utils'),
+      'adaptLegacyData'
+    );
+
+    mockSavedExplore.visualization = JSON.stringify({
+      chartType: 'line',
+      axesMapping: { x: 'field1', y: 'field2' },
+      thresholdLines: [], // deprecated style
+    });
+    mockSavedExplore.uiState = JSON.stringify({ activeTab: 'visualization' });
+
+    // @ts-ignore
+    await embeddable.fetch();
+
+    expect(adaptLegacyDataSpy).toHaveBeenCalled();
   });
 });
