@@ -75,7 +75,7 @@ export const getCategoryNextColor = (index: number) => {
 
 // Resolve color name to hex value
 export const resolveColor = (colorName?: string) => {
-  if (!colorName) return undefined;
+  if (!colorName) return getColors().statusGreen;
 
   // Return hex color
   if (colorName.startsWith('#')) return colorName;

@@ -14,6 +14,7 @@ import {
 import { applyAxisStyling, getSchemaByAxis } from '../utils/utils';
 import { BarChartStyle } from './bar_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
+import { resolveColor } from '../theme/color_utils';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
@@ -146,7 +147,10 @@ export const buildThresholdColorEncoding = (
 
   const colorDomain = thresholdWithBase.reduce<number[]>((acc, val) => [...acc, val.value], []);
 
-  const colorRange = thresholdWithBase.reduce<string[]>((acc, val) => [...acc, val.color], []);
+  const colorRange = thresholdWithBase.reduce<string[]>(
+    (acc, val) => [...acc, resolveColor(val.color)],
+    []
+  );
 
   // exclusive for single numerical bucket bar
   if (!numericalField)

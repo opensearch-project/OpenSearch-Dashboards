@@ -14,7 +14,6 @@ import {
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { UnitsCollection, getUnitById } from './collection';
-import { StyleAccordion } from '../style_accordion';
 import './style.scss';
 
 export interface UnitPanelProps {

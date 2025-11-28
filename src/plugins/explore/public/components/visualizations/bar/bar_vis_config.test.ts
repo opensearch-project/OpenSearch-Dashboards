@@ -28,7 +28,7 @@ describe('bar_vis_config', () => {
 
         // Threshold and grid
         thresholdOptions: {
-          baseColor: '#00BD6B',
+          baseColor: '#017D73',
           thresholds: [],
           thresholdStyle: ThresholdMode.Off,
         },
