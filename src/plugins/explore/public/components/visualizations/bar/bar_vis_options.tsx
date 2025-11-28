@@ -17,6 +17,7 @@ import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole, VisFieldType } from '../types';
 import { BucketOptionsPanel } from './bucket_options';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { ValueMappingPanel } from '../style_panel/value_mapping/value_mapping_panel';
 
 export type BarVisStyleControlsProps = StyleControlsProps<BarChartStyle>;
 
@@ -52,6 +53,7 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
   // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
   const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -68,6 +70,42 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
       </EuiFlexItem>
       {hasMappingSelected && (
         <>
+          <EuiFlexItem>
+            <BucketOptionsPanel
+              styles={styleOptions?.bucket}
+              bucketType={bucketType}
+              onChange={(bucket) => updateStyleOption('bucket', bucket)}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <ValueMappingPanel
+              valueMappingOption={styleOptions?.valueMappingOptions}
+              onChange={(val) => updateStyleOption('valueMappingOptions', val)}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ThresholdPanel
+              thresholdsOptions={styleOptions.thresholdOptions}
+              onChange={(options) => updateStyleOption('thresholdOptions', options)}
+              showThresholdStyle={true}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AllAxesOptions
+              axisColumnMappings={axisColumnMappings}
+              standardAxes={styleOptions.standardAxes}
+              onStandardAxesChange={(standardAxes) =>
+                updateStyleOption('standardAxes', standardAxes)
+              }
+              switchAxes={styleOptions.switchAxes}
+              showFullTimeRange={styleOptions.showFullTimeRange}
+              onShowFullTimeRangeChange={(showFullTimeRange) =>
+                updateStyleOption('showFullTimeRange', showFullTimeRange)
+              }
+            />
+          </EuiFlexItem>
+
           <EuiFlexItem grow={false}>
             <BarExclusiveVisOptions
               type="bar"
@@ -94,35 +132,9 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
                 updateStyleOption('useThresholdColor', useThresholdColor)
               }
               shouldDisableUseThresholdColor={hasColorMapping}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem>
-            <BucketOptionsPanel
-              styles={styleOptions?.bucket}
-              bucketType={bucketType}
-              onChange={(bucket) => updateStyleOption('bucket', bucket)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <ThresholdPanel
-              thresholdsOptions={styleOptions.thresholdOptions}
-              onChange={(options) => updateStyleOption('thresholdOptions', options)}
-              showThresholdStyle={true}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AllAxesOptions
-              axisColumnMappings={axisColumnMappings}
-              standardAxes={styleOptions.standardAxes}
-              onStandardAxesChange={(standardAxes) =>
-                updateStyleOption('standardAxes', standardAxes)
-              }
-              switchAxes={styleOptions.switchAxes}
-              showFullTimeRange={styleOptions.showFullTimeRange}
-              onShowFullTimeRangeChange={(showFullTimeRange) =>
-                updateStyleOption('showFullTimeRange', showFullTimeRange)
-              }
+              hasDate={hasDate}
+              colorModeOption={styleOptions?.colorModeOption}
+              onColorModeOptionChange={(option) => updateStyleOption('colorModeOption', option)}
             />
           </EuiFlexItem>
 

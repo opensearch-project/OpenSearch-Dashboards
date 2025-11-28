@@ -18,6 +18,7 @@ import { AreaChartStyleOptions } from './area/area_vis_config';
 import { LineChartStyleOptions } from './line/line_vis_config';
 import { GaugeChartStyleOptions } from './gauge/gauge_vis_config';
 import { HeatmapChartStyleOptions } from './heatmap/heatmap_vis_config';
+import { StateTimeLineChartStyleOptions } from './state_timeline/state_timeline_config';
 
 export const convertMappingsToStrings = (mappings: AxisColumnMappings): Record<string, string> =>
   Object.fromEntries(Object.entries(mappings).map(([axis, column]) => [axis, column?.name]));
@@ -129,11 +130,7 @@ export const adaptLegacyData = (config?: ChartConfig) => {
       };
     }
   }
-  if (
-    transformedConfig.type === 'bar' ||
-    transformedConfig.type === 'line' ||
-    transformedConfig.type === 'area'
-  ) {
+  if (transformedConfig.type === 'line' || transformedConfig.type === 'area') {
     const styles = config.styles as
       | BarChartStyleOptions
       | LineChartStyleOptions
@@ -161,6 +158,40 @@ export const adaptLegacyData = (config?: ChartConfig) => {
       };
     }
   }
+
+  if (transformedConfig.type === 'bar') {
+    const styles = config.styles as BarChartStyleOptions | undefined;
+    const { thresholdOptions, thresholdLines, useThresholdColor, colorModeOption } = styles || {};
+    if (thresholdLines && !thresholdOptions) {
+      const thresholds = transformThresholdLinesToThreshold(thresholdLines);
+      const baseColor = getColors().statusGreen;
+      const thresholdStyle = thresholdLines[0].show
+        ? thresholdLines[0].style || ThresholdMode.Solid
+        : ThresholdMode.Off;
+
+      transformedConfig = {
+        ...transformedConfig,
+        styles: {
+          ...transformedConfig.styles,
+          thresholdOptions: {
+            thresholds,
+            baseColor,
+            thresholdStyle,
+          },
+        } as StyleOptions,
+      };
+    }
+
+    if (!colorModeOption) {
+      transformedConfig = {
+        ...transformedConfig,
+        styles: {
+          ...transformedConfig.styles,
+          colorModeOption: useThresholdColor ? 'useThresholdColor' : 'none',
+        } as StyleOptions,
+      };
+    }
+  }
   if (transformedConfig.type === 'gauge') {
     const styles = config.styles as GaugeChartStyleOptions | undefined;
     const { thresholdOptions, thresholds, baseColor } = styles || {};
@@ -175,6 +206,21 @@ export const adaptLegacyData = (config?: ChartConfig) => {
             thresholds,
             baseColor,
           },
+        } as StyleOptions,
+      };
+    }
+  }
+
+  if (transformedConfig.type === 'state_timeline') {
+    const styles = config.styles as StateTimeLineChartStyleOptions | undefined;
+    const { colorModeOption, useThresholdColor } = styles || {};
+
+    if (!colorModeOption) {
+      transformedConfig = {
+        ...transformedConfig,
+        styles: {
+          ...transformedConfig.styles,
+          colorModeOption: useThresholdColor ? 'useThresholdColor' : 'none',
         } as StyleOptions,
       };
     }

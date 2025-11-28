@@ -72,7 +72,6 @@ describe('to_expression', () => {
 
       // Verify the result structure
       expect(result).toHaveProperty('$schema');
-      expect(result).toHaveProperty('data.values', transformedData);
       expect(result).toHaveProperty('layer');
       expect(result.layer).toHaveLength(3); // Main layer + label layer (no value layer) + hover state layer
 

@@ -20,8 +20,11 @@ import {
   convertThresholdsToValueMappings,
 } from './state_timeline_utils';
 import { DEFAULT_OPACITY } from '../constants';
-import { getCategoryNextColor } from '../theme/color_utils';
-import { resolveColor } from '../theme/color_utils';
+import {
+  generateTransformLayer,
+  decideScale,
+  generateLabelExpr,
+} from '../style_panel/value_mapping/value_mapping_utils';
 
 export const createNumericalStateTimeline = (
   transformedData: Array<Record<string, any>>,
@@ -43,7 +46,11 @@ export const createNumericalStateTimeline = (
     (mapping) => mapping?.type === 'range'
   );
 
-  if (!rangeMappings?.length && !styleOptions?.useThresholdColor) {
+  const valueMappings = styleOptions?.valueMappingOptions?.valueMappings?.filter(
+    (mapping) => mapping?.type === 'value'
+  );
+
+  if (valueMappings?.length && styleOptions.colorModeOption !== 'useThresholdColor') {
     return createCategoricalStateTimeline(
       transformedData,
       numericalColumns,
@@ -63,13 +70,12 @@ export const createNumericalStateTimeline = (
       ? styleOptions?.exclusive?.connectNullValues?.threshold || '1h'
       : undefined;
 
-  const completeThreshold =
-    styleOptions.thresholdOptions.thresholds && styleOptions.thresholdOptions.thresholds?.length > 0
-      ? [
-          { value: 0, color: styleOptions.thresholdOptions.baseColor } as Threshold,
-          ...styleOptions.thresholdOptions.thresholds,
-        ]
-      : [];
+  const completeThreshold = styleOptions.thresholdOptions.thresholds
+    ? [
+        { value: 0, color: styleOptions.thresholdOptions.baseColor } as Threshold,
+        ...styleOptions.thresholdOptions.thresholds,
+      ]
+    : [];
 
   const convertedThresholds = convertThresholdsToValueMappings(completeThreshold);
 
@@ -78,32 +84,16 @@ export const createNumericalStateTimeline = (
     xAxis?.column,
     yAxis?.column,
     rangeField,
-    styleOptions.useThresholdColor ? convertedThresholds : rangeMappings,
+    styleOptions.colorModeOption === 'useThresholdColor' ? convertedThresholds : rangeMappings,
     disconnectThreshold,
-    connectThreshold
+    connectThreshold,
+    styleOptions?.colorModeOption
   );
 
   const canUseValueMapping = validRanges && validRanges?.length > 0;
 
   const rowHeight = 1 - (styleOptions?.exclusive?.rowHeight ?? 0);
 
-  const transformLayer = canUseValueMapping
-    ? [
-        {
-          lookup: 'mergedLabel',
-          from: {
-            data: {
-              values: rangeMappings?.map((mapping) => ({
-                mappingValue: `[${mapping?.range?.min},${mapping?.range?.max})`,
-                displayText: mapping?.displayText,
-              })),
-            },
-            key: 'mappingValue',
-            fields: ['displayText'],
-          },
-        },
-      ]
-    : null;
   const barLayer = {
     params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
     mark: {
@@ -131,20 +121,20 @@ export const createNumericalStateTimeline = (
       },
       x2: { field: 'end', type: 'temporal' },
       color: {
-        field: canUseValueMapping ? 'mergedLabel' : 'mergedCount',
+        field: canUseValueMapping ? 'mappingValue' : rangeField,
         type: 'nominal',
+        ...(canUseValueMapping && {
+          scale: decideScale(styleOptions.colorModeOption, validRanges, []),
+        }),
         legend: styleOptions.addLegend
           ? {
-              title: styleOptions?.legendTitle || (canUseValueMapping ? 'Ranges' : 'Counts'),
+              ...(canUseValueMapping && {
+                labelExpr: generateLabelExpr(validRanges, [], styleOptions?.colorModeOption),
+              }),
+              title: styleOptions?.legendTitle || (canUseValueMapping && 'Ranges'),
               orient: styleOptions.legendPosition?.toLowerCase() || 'bottom',
             }
           : null,
-        ...(canUseValueMapping && {
-          scale: {
-            domain: validRanges?.map((m) => `[${m.range?.min},${m.range?.max ?? Infinity})`),
-            range: validRanges?.map((m, i) => resolveColor(m.color) || getCategoryNextColor(i)),
-          },
-        }),
       },
       ...(styleOptions.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
@@ -166,6 +156,15 @@ export const createNumericalStateTimeline = (
             title: 'end',
           },
           {
+            ...(styleOptions?.colorModeOption === 'none'
+              ? {
+                  field: rangeField,
+                  type: 'nominal',
+                  title: rangeFieldColumn.name,
+                }
+              : {}),
+          },
+          {
             field: 'duration',
             type: 'nominal',
             title: 'duration',
@@ -181,7 +180,7 @@ export const createNumericalStateTimeline = (
   };
 
   const textLayer =
-    canUseValueMapping && styleOptions?.exclusive?.showValues && !styleOptions?.useThresholdColor
+    canUseValueMapping && styleOptions?.exclusive?.showValues
       ? {
           mark: { type: 'text', align: 'center', baseline: 'middle' },
           transform: [
@@ -189,6 +188,10 @@ export const createNumericalStateTimeline = (
               calculate: 'toDate(datum.start) + (toDate(datum.end) - toDate(datum.start)) / 2',
               as: 'midX',
             },
+            {
+              filter: 'datum.midX > toDate(datum.start)',
+            },
+            { filter: 'datum.displayText != null' },
           ],
           encoding: {
             y: {
@@ -208,7 +211,13 @@ export const createNumericalStateTimeline = (
         `${yAxis?.name} × ${xAxis?.name} × ${rangeFieldColumn?.name} State Timeline`
       : undefined,
     data: { values: processedData },
-    transform: transformLayer,
+    transform: generateTransformLayer(
+      canUseValueMapping,
+      undefined,
+      validRanges,
+      [],
+      styleOptions?.colorModeOption
+    ),
     layer: [barLayer, textLayer].filter(Boolean),
   };
 
@@ -254,33 +263,13 @@ export const createCategoricalStateTimeline = (
     categoryField2,
     validMappings,
     disconnectThreshold,
-    connectThreshold
+    connectThreshold,
+    styleOptions?.colorModeOption
   );
 
   const rowHeight = 1 - (styleOptions?.exclusive?.rowHeight ?? 0);
 
   const canUseValueMapping = validValues && validValues?.length > 0;
-
-  const transformLayer = canUseValueMapping
-    ? [
-        {
-          lookup: categoryField2,
-          from: {
-            data: {
-              values: validValues?.map((mapping) => ({
-                mappingValue: mapping?.value,
-                displayText: mapping?.displayText,
-              })),
-            },
-            key: 'mappingValue',
-            fields: ['mappingValue', 'displayText'],
-          },
-        },
-        {
-          filter: 'datum.mappingValue !== null',
-        },
-      ]
-    : null;
 
   const barLayer = {
     params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
@@ -313,13 +302,13 @@ export const createCategoricalStateTimeline = (
         field: canUseValueMapping ? 'mappingValue' : categoryField2,
         type: 'nominal',
         ...(canUseValueMapping && {
-          scale: {
-            domain: validValues?.map((m) => m.value),
-            range: validValues?.map((m, i) => resolveColor(m.color) || getCategoryNextColor(i)),
-          },
+          scale: decideScale(styleOptions.colorModeOption, [], validValues),
         }),
         legend: styleOptions.addLegend
           ? {
+              ...(canUseValueMapping && {
+                labelExpr: generateLabelExpr([], validValues, styleOptions?.colorModeOption),
+              }),
               title: styleOptions?.legendTitle,
               orient: styleOptions.legendPosition?.toLowerCase() || 'bottom',
             }
@@ -350,7 +339,7 @@ export const createCategoricalStateTimeline = (
             title: 'duration',
           },
           {
-            field: canUseValueMapping ? 'mappingValue' : categoryField2,
+            field: categoryField2,
             type: 'nominal',
             title: categoryName2,
           },
@@ -377,6 +366,10 @@ export const createCategoricalStateTimeline = (
               calculate: 'toDate(datum.start) + (toDate(datum.end) - toDate(datum.start)) / 2',
               as: 'midX',
             },
+            {
+              filter: 'datum.midX > toDate(datum.start)',
+            },
+            { filter: 'datum.displayText !== null' },
           ],
           encoding: {
             y: {
@@ -398,7 +391,13 @@ export const createCategoricalStateTimeline = (
         `${yAxis?.name} × ${xAxis?.name} × ${categoryName2} State Timeline`
       : undefined,
     data: { values: processedData },
-    transform: transformLayer,
+    transform: generateTransformLayer(
+      canUseValueMapping,
+      categoryField2,
+      [],
+      validValues,
+      styleOptions?.colorModeOption
+    ),
     layer,
   };
 
@@ -443,33 +442,13 @@ export const createSingleCategoricalStateTimeline = (
     categoryField,
     rangeMappings,
     disconnectThreshold,
-    connectThreshold
+    connectThreshold,
+    styleOptions?.colorModeOption
   );
 
   const canUseValueMapping = validValues && validValues?.length > 0;
 
   const rowHeight = 1 - (styleOptions?.exclusive?.rowHeight ?? 0);
-
-  const transformLayer = canUseValueMapping
-    ? [
-        {
-          lookup: categoryField,
-          from: {
-            data: {
-              values: validValues?.map((mapping) => ({
-                mappingValue: mapping?.value,
-                displayText: mapping?.displayText,
-              })),
-            },
-            key: 'mappingValue',
-            fields: ['mappingValue', 'displayText'],
-          },
-        },
-        {
-          filter: 'datum.mappingValue !== null',
-        },
-      ]
-    : [];
 
   const barLayer = {
     params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
@@ -511,13 +490,13 @@ export const createSingleCategoricalStateTimeline = (
         field: canUseValueMapping ? 'mappingValue' : categoryField,
         type: 'nominal',
         ...(canUseValueMapping && {
-          scale: {
-            domain: validValues?.map((m) => m.value),
-            range: validValues?.map((m, i) => resolveColor(m.color) || getCategoryNextColor(i)),
-          },
+          scale: decideScale(styleOptions.colorModeOption, [], validValues),
         }),
         legend: styleOptions.addLegend
           ? {
+              ...(canUseValueMapping && {
+                labelExpr: generateLabelExpr([], validValues, styleOptions?.colorModeOption),
+              }),
               title: styleOptions?.legendTitle,
               orient: styleOptions.legendPosition?.toLowerCase() || 'bottom',
             }
@@ -570,6 +549,10 @@ export const createSingleCategoricalStateTimeline = (
               calculate: 'toDate(datum.start) + (toDate(datum.end) - toDate(datum.start)) / 2',
               as: 'midX',
             },
+            {
+              filter: 'datum.midX > toDate(datum.start)',
+            },
+            { filter: 'datum.displayText !== null' },
           ],
           encoding: {
             y: {
@@ -588,7 +571,13 @@ export const createSingleCategoricalStateTimeline = (
       : undefined,
     data: { values: processedData },
     transform: [
-      ...transformLayer,
+      ...generateTransformLayer(
+        canUseValueMapping,
+        categoryField,
+        [],
+        validValues,
+        styleOptions?.colorModeOption
+      ),
       // This is a fake field intentionally created to force Vega-Lite to draw an axis.
       {
         calculate: "'Response'",
