@@ -106,6 +106,7 @@ export async function mountManagementSection(
             <ConfigureDirectQueryDataSourceWithRouter
               notifications={notifications}
               useNewUX={useNewUX}
+              featureFlagStatus={featureFlagStatus}
             />
           </Route>
         )}

@@ -9,6 +9,7 @@ import { DirectQueryDataSourceConfigure } from './configure_direct_query_data_so
 import { NotificationsStart } from '../../../../../../core/public';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
+import { getDataSources } from '../../utils';
 
 const mockSetBreadcrumbs = jest.fn();
 const mockToasts = {
@@ -19,14 +20,24 @@ const mockHttp = {
   get: jest.fn().mockResolvedValue({ data: { role1: {}, role2: {} } }),
   post: jest.fn().mockResolvedValue({}),
 };
+const mockSavedObjects = {
+  client: {},
+};
+const mockNavigation = {};
+const mockApplication = {};
+
+const mockServices = {
+  chrome: {},
+  setBreadcrumbs: mockSetBreadcrumbs,
+  notifications: { toasts: mockToasts },
+  http: mockHttp,
+  savedObjects: mockSavedObjects,
+  navigation: mockNavigation,
+  application: mockApplication,
+};
 
 const mockUseOpenSearchDashboards = jest.fn(() => ({
-  services: {
-    chrome: {},
-    setBreadcrumbs: mockSetBreadcrumbs,
-    notifications: { toasts: mockToasts },
-    http: mockHttp,
-  },
+  services: mockServices,
 }));
 
 jest.mock('../../../../../opensearch_dashboards_react/public', () => ({
@@ -40,8 +51,9 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('../../utils', () => ({
-  ...jest.requireActual('../utils'),
+  ...jest.requireActual('../../utils'),
   getDataSources: jest.fn().mockResolvedValue([]),
+  getHideLocalCluster: jest.fn().mockReturnValue({ enabled: false }),
 }));
 
 const mockContext = {
@@ -74,7 +86,7 @@ describe('ConfigureDirectQueryDataSourceWithRouter', () => {
   const mockMatch = { params: { type: 'AmazonS3AWSGlue' }, isExact: true, path: '', url: '' };
   const mockHistory = createMemoryHistory();
 
-  const mountComponent = (type: string) => {
+  const mountComponent = (type: string, featureFlagStatus: boolean = false) => {
     mockUseParams.mockReturnValue({ type });
     return mount(
       <DirectQueryDataSourceConfigure
@@ -83,6 +95,7 @@ describe('ConfigureDirectQueryDataSourceWithRouter', () => {
         location={mockLocation}
         match={{ ...mockMatch, params: { type } }}
         useNewUX={false}
+        featureFlagStatus={featureFlagStatus}
       />
     );
   };
@@ -131,5 +144,20 @@ describe('ConfigureDirectQueryDataSourceWithRouter', () => {
     });
 
     expect(pushSpy).toHaveBeenCalledWith('/');
+  });
+
+  it('does not fetch data sources for Prometheus when featureFlagStatus is false', () => {
+    mountComponent('Prometheus', false);
+    expect(getDataSources).not.toHaveBeenCalled();
+  });
+
+  it('fetches data sources for Prometheus when featureFlagStatus is true', () => {
+    mountComponent('Prometheus', true);
+    expect(getDataSources).toHaveBeenCalled();
+  });
+
+  it('does not fetch data sources for non-Prometheus type regardless of featureFlagStatus', () => {
+    mountComponent('AmazonS3AWSGlue', true);
+    expect(getDataSources).not.toHaveBeenCalled();
   });
 });

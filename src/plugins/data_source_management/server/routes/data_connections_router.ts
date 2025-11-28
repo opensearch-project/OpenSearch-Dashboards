@@ -10,6 +10,7 @@ import {
   IRouter,
   ResponseError,
 } from '../../../../../src/core/server';
+import { DataConnectionType } from '../../../data_source/common/data_connections';
 import {
   DATACONNECTIONS_BASE,
   DATACONNECTIONS_UPDATE_STATUS,
@@ -145,48 +146,6 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter) {
     }
   );
 
-  router.post(
-    {
-      path: `${DATACONNECTIONS_BASE}`,
-      validate: {
-        body: schema.object({
-          name: schema.string(),
-          connector: schema.string(),
-          allowedRoles: schema.arrayOf(schema.string()),
-          properties: schema.any(),
-        }),
-      },
-    },
-    async (
-      context,
-      request,
-      response
-    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      try {
-        // @ts-expect-error TS2339 TODO(ts-error): fixme
-        const dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
-          .asScoped(request)
-          .callAsCurrentUser('ppl.createDataSource', {
-            body: {
-              name: request.body.name,
-              connector: request.body.connector,
-              allowedRoles: request.body.allowedRoles,
-              properties: request.body.properties,
-            },
-          });
-        return response.ok({
-          body: dataConnectionsresponse,
-        });
-      } catch (error: any) {
-        console.error('Issue in creating data source:', error);
-        return response.custom({
-          statusCode: error.statusCode || 500,
-          body: error.response,
-        });
-      }
-    }
-  );
-
   router.get(
     {
       path: `${DATACONNECTIONS_BASE}`,
@@ -213,6 +172,69 @@ export function registerNonMdsDataConnectionsRoute(router: IRouter) {
 }
 
 export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled: boolean) {
+  router.post(
+    {
+      path: `${DATACONNECTIONS_BASE}`,
+      validate: {
+        query: schema.object({
+          dataSourceMDSId: schema.maybe(schema.string()),
+        }),
+        body: schema.object({
+          name: schema.string(),
+          connector: schema.string(),
+          allowedRoles: schema.arrayOf(schema.string()),
+          properties: schema.any(),
+        }),
+      },
+    },
+    async (
+      context,
+      request,
+      response
+    ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
+      const dataSourceMDSId = request.query.dataSourceMDSId;
+      try {
+        const client =
+          dataSourceEnabled && dataSourceMDSId
+            ? context.dataSource.opensearch.legacy.getClient(dataSourceMDSId).callAPI
+            : // @ts-expect-error TS2339 TODO(ts-error): fixme
+              context.opensearch_data_source_management.dataSourceManagementClient.asScoped(request)
+                .callAsCurrentUser;
+
+        const dataConnectionsresponse = await client('ppl.createDataSource', {
+          body: {
+            name: request.body.name,
+            connector: request.body.connector,
+            allowedRoles: request.body.allowedRoles,
+            properties: request.body.properties,
+          },
+        });
+
+        // Create data-connection saved object for Prometheus datasources
+        if (dataSourceEnabled && request.body.connector === 'prometheus') {
+          await context.core.savedObjects.client.create(
+            'data-connection',
+            {
+              connectionId: request.body.name,
+              type: DataConnectionType.Prometheus,
+              meta: JSON.stringify({ properties: request.body.properties }),
+            },
+            {
+              references: dataSourceMDSId
+                ? [{ id: dataSourceMDSId, type: 'data-source', name: 'dataSource' }]
+                : [],
+            }
+          );
+        }
+
+        return response.ok({ body: dataConnectionsresponse });
+      } catch (error: any) {
+        console.error('Issue in creating data source:', error);
+        return response.custom({ statusCode: error.statusCode || 500, body: error.response });
+      }
+    }
+  );
+
   router.get(
     {
       path: `${DATACONNECTIONS_BASE}/dataSourceMDSId={dataSourceMDSId?}`,
@@ -317,34 +339,68 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
     async (context, request, response): Promise<any> => {
       const dataSourceMDSId = request.params.dataSourceMDSId;
       try {
-        let dataConnectionsresponse;
         if (dataSourceEnabled && dataSourceMDSId) {
-          const client = await context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
-          dataConnectionsresponse = await client.callAPI('ppl.deleteDataConnection', {
+          const client = context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
+          await client.callAPI('ppl.deleteDataConnection', {
             dataconnection: request.params.name,
           });
         } else {
           // @ts-expect-error TS2339 TODO(ts-error): fixme
-          dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
+          const dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
             .asScoped(request)
             .callAsCurrentUser('ppl.deleteDataConnection', {
               dataconnection: request.params.name,
             });
+          if (!dataSourceEnabled) {
+            return response.ok({
+              body: dataConnectionsresponse,
+            });
+          }
         }
+      } catch (error: any) {
+        const statusCode = error.statusCode || error.body?.statusCode || 500;
+
+        if (statusCode !== 404) {
+          console.error('Issue in deleting data connection from backend:', error);
+          const errorBody = error.body ||
+            error.response || { message: error.message || 'Unknown error occurred' };
+
+          return response.custom({
+            statusCode,
+            body: {
+              error: errorBody,
+              message: errorBody.message || error.message,
+            },
+          });
+        }
+        console.log('Backend data connection not found, proceeding with saved object deletion');
+      }
+
+      try {
+        const savedObjects = await context.core.savedObjects.client.find({
+          type: 'data-connection',
+          search: request.params.name,
+          searchFields: ['connectionId'],
+          ...(dataSourceMDSId && { hasReference: { id: dataSourceMDSId, type: 'data-source' } }),
+        });
+
+        if (savedObjects.total > 0) {
+          await context.core.savedObjects.client.delete(
+            'data-connection',
+            savedObjects.saved_objects[0].id
+          );
+        }
+
         return response.ok({
-          body: dataConnectionsresponse,
+          body: { success: true, deleted: request.params.name },
         });
       } catch (error: any) {
-        console.error('Issue in deleting data sources:', error);
-        const statusCode = error.statusCode || error.body?.statusCode || 500;
-        const errorBody = error.body ||
-          error.response || { message: error.message || 'Unknown error occurred' };
-
+        console.error('Issue in deleting saved object:', error);
         return response.custom({
-          statusCode,
+          statusCode: error.statusCode || 500,
           body: {
-            error: errorBody,
-            message: errorBody.message || error.message,
+            error: error.message || 'Unknown error occurred',
+            message: error.message || 'Failed to delete saved object',
           },
         });
       }

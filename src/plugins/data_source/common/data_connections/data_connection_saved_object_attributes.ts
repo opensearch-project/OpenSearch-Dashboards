@@ -22,5 +22,6 @@ export interface DataConnectionSavedObjectAttributes extends SavedObjectAttribut
 export enum DataConnectionType {
   CloudWatch = 'AWS CloudWatch',
   SecurityLake = 'AWS Security Lake',
+  Prometheus = 'Prometheus',
   NA = 'None',
 }
