@@ -9,6 +9,8 @@ import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/t
 import type { ToolDefinition } from '../../../context_provider/public';
 import { ChatLayoutMode } from '../components/chat_header_button';
 import type { ChatWindowInstance } from '../components/chat_window';
+import { IUiSettingsClient, UiSettingScope } from '../../../../core/public';
+import { getDefaultDataSourceId, getWorkspaces } from '../../../data_source_management/public';
 
 export interface ChatState {
   messages: Message[];
@@ -39,6 +41,7 @@ export class ChatService {
   public events$: any;
   private activeRequests: Set<string> = new Set();
   private requestCounter: number = 0;
+  private uiSettings?: IUiSettingsClient;
 
   // Chat state persistence
   private readonly STORAGE_KEY = 'chat.currentState';
@@ -59,9 +62,10 @@ export class ChatService {
     return this.threadId$.getValue();
   }
 
-  constructor() {
+  constructor(uiSettings?: IUiSettingsClient) {
     // No need to pass URL anymore - agent will use the proxy endpoint
     this.agent = new AgUiAgent();
+    this.uiSettings = uiSettings;
 
     // Try to restore existing state first
     const currentChatState = this.loadCurrentChatState();
@@ -98,18 +102,10 @@ export class ChatService {
 
   private addActiveRequest(requestId: string): void {
     this.activeRequests.add(requestId);
-    // eslint-disable-next-line no-console
-    console.log(
-      `📊 [ChatService] Active requests: ${this.activeRequests.size} (added: ${requestId})`
-    );
   }
 
   private removeActiveRequest(requestId: string): void {
     this.activeRequests.delete(requestId);
-    // eslint-disable-next-line no-console
-    console.log(
-      `📊 [ChatService] Active requests: ${this.activeRequests.size} (removed: ${requestId})`
-    );
   }
 
   // Window state management public API
@@ -255,6 +251,44 @@ export class ChatService {
     return result;
   }
 
+  /**
+   * Get workspace-aware data source ID
+   * Determines the correct data source based on current workspace context
+   */
+  private async getWorkspaceAwareDataSourceId(): Promise<string | undefined> {
+    try {
+      if (!this.uiSettings) {
+        // eslint-disable-next-line no-console
+        console.warn('UI Settings not available, using default data source');
+        return undefined;
+      }
+
+      // Get workspace context
+      const workspaces = getWorkspaces();
+      if (!workspaces) {
+        // eslint-disable-next-line no-console
+        console.warn('Workspaces service not available, using global scope');
+        return undefined;
+      }
+
+      const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
+
+      // Determine scope based on workspace context
+      const scope: UiSettingScope = !!currentWorkspaceId
+        ? UiSettingScope.WORKSPACE
+        : UiSettingScope.GLOBAL;
+
+      // Get default data source with proper scope
+      const dataSourceId = await getDefaultDataSourceId(this.uiSettings, scope);
+
+      return dataSourceId || undefined;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to determine workspace-aware data source, proceeding without:', error);
+      return undefined; // Graceful fallback - undefined means local cluster
+    }
+  }
+
   public async sendMessage(
     content: string,
     messages: Message[]
@@ -270,6 +304,9 @@ export class ChatService {
       role: 'user',
       content: content.trim(),
     };
+
+    // Get workspace-aware data source ID
+    const dataSourceId = await this.getWorkspaceAwareDataSourceId();
 
     // Get all contexts from the assistant context store (static + dynamic)
     const contextStore = (window as any).assistantContextStore;
@@ -291,7 +328,7 @@ export class ChatService {
       forwardedProps: {},
     };
 
-    const observable = this.agent.runAgent(runInput);
+    const observable = this.agent.runAgent(runInput, dataSourceId);
 
     // Wrap observable to track completion
     const trackedObservable = new Observable((subscriber: any) => {
@@ -333,6 +370,9 @@ export class ChatService {
       toolCallId,
     };
 
+    // Get workspace-aware data source ID
+    const dataSourceId = await this.getWorkspaceAwareDataSourceId();
+
     // Get all contexts from the assistant context store (static + dynamic)
     const contextStore = (window as any).assistantContextStore;
     const allContexts = contextStore ? contextStore.getAllContexts() : [];
@@ -357,7 +397,7 @@ export class ChatService {
     };
 
     // Continue the conversation with the tool result
-    const observable = this.agent.runAgent(runInput);
+    const observable = this.agent.runAgent(runInput, dataSourceId);
 
     // Wrap observable to track completion
     const trackedObservable = new Observable((subscriber: any) => {
@@ -437,7 +477,9 @@ export class ChatService {
 
   private clearDynamicContextFromStore(): void {
     const contextStore = (window as any).assistantContextStore;
-    if (!contextStore) return;
+    if (!contextStore) {
+      return;
+    }
 
     // Get all contexts with IDs (dynamic contexts) and remove them
     const allContexts = contextStore.getAllContexts();
@@ -449,7 +491,10 @@ export class ChatService {
   }
 
   public newThread(): void {
-    this.threadId$.next(this.generateThreadId());
+    const oldThreadId = this.threadId;
+    const newThreadId = this.generateThreadId();
+
+    this.threadId$.next(newThreadId);
     this.currentMessages = [];
     this.clearCurrentChatState();
 

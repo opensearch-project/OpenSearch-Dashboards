@@ -10,5 +10,6 @@
     "contextProvider",
     "charts"
   ],
-  "optionalPlugins": []
+  "optionalPlugins": ["dataSourceManagement"],
+  "requiredBundles": ["dataSourceManagement"]
 }

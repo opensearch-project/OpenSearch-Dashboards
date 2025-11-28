@@ -39,7 +39,7 @@ interface GraphTimeseriesDataArgs {
   };
 }
 
-export function useGraphTimeseriesDataAction() {
+export function useGraphTimeseriesDataAction(enabled: boolean = true) {
   useAssistantAction<GraphTimeseriesDataArgs>({
     name: 'graph_timeseries_data',
     description: 'Create a timeseries graph visualization from provided data',
@@ -245,5 +245,6 @@ export function useGraphTimeseriesDataAction() {
         </EuiPanel>
       );
     },
+    enabled,
   });
 }

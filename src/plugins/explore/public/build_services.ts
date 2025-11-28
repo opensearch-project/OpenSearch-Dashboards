@@ -25,8 +25,8 @@ export function buildServices(
   tabRegistry: TabRegistryService,
   visualizationRegistry: VisualizationRegistryService,
   queryPanelActionsRegistry: QueryPanelActionsRegistryService,
-  isDatasetManagementEnabled: boolean,
-  slotRegistry: SlotRegistryService
+  isDatasetManagementEnabled: boolean = false,
+  slotRegistry?: SlotRegistryService
 ): ExploreServices {
   const config = context.config.get<ConfigSchema>();
   const supportedTypes = config.supportedTypes;

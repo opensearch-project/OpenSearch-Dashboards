@@ -206,6 +206,23 @@ describe('ChatEventHandler', () => {
 
       mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockResult);
 
+      // Mock sendToolResult to return the expected structure
+      const mockToolMessage: ToolMessage = {
+        id: `tool-result-${toolCallId}`,
+        role: 'tool',
+        content: JSON.stringify(mockResult),
+        toolCallId,
+      };
+
+      const mockObservable = {
+        subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+      };
+
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: mockObservable,
+        toolMessage: mockToolMessage,
+      });
+
       await chatEventHandler.handleEvent({
         type: EventType.TOOL_CALL_START,
         toolCallId,

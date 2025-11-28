@@ -5,6 +5,20 @@
 
 import { z } from 'zod';
 
+// Import interface types from core - these define the structure
+export type {
+  ToolCall,
+  FunctionCall,
+  Message,
+  DeveloperMessage,
+  SystemMessage,
+  AssistantMessage,
+  UserMessage,
+  ToolMessage,
+  Role,
+} from '../../../core/public/chat';
+
+// Zod schemas for runtime validation - these ensure the core types are followed
 export const FunctionCallSchema = z.object({
   name: z.string(),
   arguments: z.string(),
@@ -91,19 +105,11 @@ export const RunAgentInputSchema = z.object({
 
 export const StateSchema = z.any();
 
-export type ToolCall = z.infer<typeof ToolCallSchema>;
-export type FunctionCall = z.infer<typeof FunctionCallSchema>;
-export type DeveloperMessage = z.infer<typeof DeveloperMessageSchema>;
-export type SystemMessage = z.infer<typeof SystemMessageSchema>;
-export type AssistantMessage = z.infer<typeof AssistantMessageSchema>;
-export type UserMessage = z.infer<typeof UserMessageSchema>;
-export type ToolMessage = z.infer<typeof ToolMessageSchema>;
-export type Message = z.infer<typeof MessageSchema>;
+// Business logic types - stay in plugin
 export type Context = z.infer<typeof ContextSchema>;
 export type Tool = z.infer<typeof ToolSchema>;
 export type RunAgentInput = z.infer<typeof RunAgentInputSchema>;
 export type State = z.infer<typeof StateSchema>;
-export type Role = z.infer<typeof RoleSchema>;
 
 export class AGUIError extends Error {
   constructor(message: string) {

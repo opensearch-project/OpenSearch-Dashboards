@@ -38,6 +38,11 @@ describe('ChatPlugin', () => {
     mockCoreStart = {
       application: {
         currentAppId$: mockCurrentAppId$,
+        capabilities: {
+          investigation: {
+            agenticFeaturesEnabled: true,
+          },
+        },
       },
       chrome: {
         navControls: {
@@ -85,8 +90,8 @@ describe('ChatPlugin', () => {
     it('should initialize chat service when enabled', () => {
       plugin.start(mockCoreStart, mockDeps);
 
-      // ChatService is called without arguments (uses proxy endpoint)
-      expect(ChatService).toHaveBeenCalledWith();
+      // ChatService is called with uiSettings for workspace-aware data source logic
+      expect(ChatService).toHaveBeenCalledWith(mockCoreStart.uiSettings);
     });
 
     it('should register chat button in header nav controls', () => {
@@ -112,35 +117,18 @@ describe('ChatPlugin', () => {
 
       const startContract = testPlugin.start(mockCoreStart, mockDeps);
 
-      // ChatService should still be created (uses proxy endpoint)
-      expect(ChatService).toHaveBeenCalledWith();
+      // ChatService should still be created with uiSettings
+      expect(ChatService).toHaveBeenCalledWith(mockCoreStart.uiSettings);
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
     });
 
-    it('should not initialize when plugin is disabled', () => {
-      mockInitializerContext.config.get = jest.fn().mockReturnValue({
-        enabled: false,
-        agUiUrl: 'http://test-ag-ui:3000',
-      });
-
+    it('should always initialize chat service (core service handles enablement)', () => {
       const startContract = plugin.start(mockCoreStart, mockDeps);
 
-      expect(ChatService).not.toHaveBeenCalled();
-      expect(startContract.chatService).toBeUndefined();
-      expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).not.toHaveBeenCalled();
-    });
-
-    it('should not initialize when enabled is missing (defaults to false)', () => {
-      mockInitializerContext.config.get = jest.fn().mockReturnValue({
-        agUiUrl: 'http://test-ag-ui:3000',
-      });
-
-      const startContract = plugin.start(mockCoreStart, mockDeps);
-
-      expect(ChatService).not.toHaveBeenCalled();
-      expect(startContract.chatService).toBeUndefined();
-      expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).not.toHaveBeenCalled();
+      expect(ChatService).toHaveBeenCalledWith(mockCoreStart.uiSettings);
+      expect(startContract.chatService).toBeInstanceOf(ChatService);
+      expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
     });
   });
 
@@ -189,19 +177,15 @@ describe('ChatPlugin', () => {
         {}, // Missing both enabled and agUiUrl
       ];
 
-      configs.forEach((config, index) => {
+      configs.forEach((config) => {
         jest.clearAllMocks();
         mockInitializerContext.config.get = jest.fn().mockReturnValue(config);
         const testPlugin = new ChatPlugin(mockInitializerContext);
 
         expect(() => testPlugin.start(mockCoreStart, mockDeps)).not.toThrow();
 
-        // ChatService is initialized whenever enabled is true (regardless of agUiUrl)
-        if (config.enabled) {
-          expect(ChatService).toHaveBeenCalledWith();
-        } else {
-          expect(ChatService).not.toHaveBeenCalled();
-        }
+        // ChatService is always initialized - core service handles enablement logic
+        expect(ChatService).toHaveBeenCalledWith(mockCoreStart.uiSettings);
       });
     });
   });

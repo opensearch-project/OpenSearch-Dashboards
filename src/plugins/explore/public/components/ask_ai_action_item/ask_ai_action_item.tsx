@@ -15,13 +15,13 @@ import {
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../types';
 import { LogActionItemProps } from '../../types/log_actions';
-import { ChatService } from '../../../../chat/public';
+import { ChatServiceStart } from '../../../../../core/public';
 
 // Create stable NOOP hook reference outside component to avoid re-renders
 const NOOP_DYNAMIC_CONTEXT_HOOK = (_options: any, _shouldCleanup?: boolean): string => '';
 
 interface AskAIActionItemProps extends LogActionItemProps {
-  chatService: ChatService;
+  chatService: ChatServiceStart;
 }
 
 export const AskAIActionItem: React.FC<AskAIActionItemProps> = ({
@@ -64,7 +64,8 @@ export const AskAIActionItem: React.FC<AskAIActionItemProps> = ({
   const useDynamicContext =
     services.contextProvider?.hooks?.useDynamicContext || NOOP_DYNAMIC_CONTEXT_HOOK;
 
-  const dynamicContextResult = useDynamicContext(contextData, false);
+  // Register context with cleanup on unmount (true = cleanup when component unmounts)
+  useDynamicContext(contextData, false);
 
   const handleExecute = useCallback(async () => {
     if (!userInput.trim()) {
@@ -77,26 +78,9 @@ export const AskAIActionItem: React.FC<AskAIActionItemProps> = ({
     setIsLoading(true);
 
     try {
-      // Create user message to include in conversation history (fix Issue 2)
-      const userMessage = {
-        id: `msg-${Date.now()}`,
-        role: 'user' as const,
-        content: userInput.trim(),
-      };
-
-      // Check if chat window is open and handle accordingly
-      const isOpen = chatService.isWindowOpen();
-
-      if (isOpen) {
-        // Chat is open - send message to existing conversation
-        // Use sendMessageWithWindow to leverage ChatWindow delegation even when open
-        await chatService.sendMessageWithWindow(userInput.trim(), [userMessage]);
-      } else {
-        // Chat is closed - open it and send message (will start new conversation)
-        await chatService.sendMessageWithWindow(userInput.trim(), [userMessage], {
-          clearConversation: true,
-        });
-      }
+      // Always use sendMessageWithWindow since it works in both open and closed states
+      // It will handle opening the window if needed, and properly delegate when window is open
+      const result = await chatService.sendMessageWithWindow(userInput.trim(), []);
 
       onResult?.({
         success: true,

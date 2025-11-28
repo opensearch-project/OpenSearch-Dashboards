@@ -4,6 +4,7 @@
  */
 import React, { memo, useMemo } from 'react';
 import { useObservable } from 'react-use';
+import { of } from 'rxjs';
 import { DiscoverResultsActionBar } from './results_action_bar/results_action_bar';
 import { ExploreServices } from '../../../types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -27,7 +28,7 @@ const ActionBarComponent = () => {
   const savedSearch = useSelector(selectSavedSearch);
 
   const sortedSlotItems$ = useMemo(() => {
-    return slotRegistry.getSortedItems$('resultsActionBar');
+    return slotRegistry?.getSortedItems$('resultsActionBar') ?? of([]);
   }, [slotRegistry]);
   const slotItems = useObservable(sortedSlotItems$, []);
 

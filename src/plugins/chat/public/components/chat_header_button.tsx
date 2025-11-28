@@ -182,6 +182,13 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
       };
     });
 
+    // Use core chat service enablement logic
+    const isChatAvailable = core.chat.isAvailable();
+
+    if (!isChatAvailable) {
+      return null;
+    }
+
     return (
       <>
         {/* Text selection monitor - always active when chat UI is rendered */}
@@ -210,7 +217,7 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
             <div className="chatHeaderButton__content">
               <OpenSearchDashboardsContextProvider services={{ core, contextProvider, charts }}>
                 <GlobalAssistantProvider
-                  onToolsUpdated={(tools) => {
+                  onToolsUpdated={(_tools) => {
                     // Tools updated in chat
                   }}
                 >
