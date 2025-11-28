@@ -306,6 +306,45 @@ describe('useSearch', () => {
     expect(services.data.query.queryString.setQuery).toBeCalledWith(mockDefaultQuery);
   });
 
+  it('should clear filters when creating a new search (savedSearchId is undefined)', async () => {
+    const services = createMockServices();
+    (services.filterManager.getAppFilters as jest.Mock).mockReturnValue([mockFilterA, mockFilterB]);
+    services.getSavedSearchById = jest.fn().mockResolvedValue(mockSavedSearchEmptyQuery);
+    services.data.query.queryString.setQuery = jest.fn();
+
+    const newSearchStore = {
+      getState: () => ({
+        discover: {
+          savedSearch: undefined, // new search will have no savedSearchId
+          sort: [],
+          interval: 'auto',
+          savedQuery: undefined,
+        },
+      }),
+      subscribe: jest.fn(),
+      dispatch: jest.fn(),
+    };
+
+    const newSearchWrapper: React.FC = ({ children }) => {
+      return (
+        // @ts-expect-error TS2769 TODO(ts-error): fixme
+        <Provider store={newSearchStore}>
+          <Router history={history}>{children}</Router>
+        </Provider>
+      );
+    };
+
+    const { waitForNextUpdate } = renderHook(() => useSearch(services), {
+      wrapper: newSearchWrapper,
+    });
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+
+    expect(services.filterManager.setAppFilters).toBeCalledWith([]);
+  });
+
   it('should call fetch without long numerals support when configured not to', async () => {
     const services = createMockServices();
     (services.uiSettings.get as jest.Mock).mockImplementation((key) =>
