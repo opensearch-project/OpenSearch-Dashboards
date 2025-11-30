@@ -7,17 +7,18 @@ import { i18n } from '@osd/i18n';
 import { EuiSwitch, EuiButtonGroup, EuiColorPicker, EuiFormRow, EuiSelect } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { defaultHeatmapChartStyles, HeatmapChartStyle } from './heatmap_vis_config';
-import { ColorSchemas, ScaleType } from '../types';
+import { ColorSchemas, ScaleType, ColorModeOption } from '../types';
 import { getColorSchemas } from '../utils/collections';
 import { useDebouncedValue } from '../utils/use_debounced_value';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { DebouncedFieldNumber } from '../style_panel/utils';
+import { ColorModeOptionSelect } from '../style_panel/value_mapping/filter_options_select';
 
 interface HeatmapVisOptionsProps {
   styles: HeatmapChartStyle['exclusive'];
-  useThresholdColor?: boolean;
   onChange: (styles: HeatmapChartStyle['exclusive']) => void;
-  onUseThresholdColorChange: (useThresholdColor: boolean) => void;
+  colorModeOption?: ColorModeOption | undefined;
+  onColorModeOptionChange?: (option: ColorModeOption | undefined) => void;
 }
 
 interface HeatmapLabelVisOptionsProps {
@@ -27,9 +28,9 @@ interface HeatmapLabelVisOptionsProps {
 
 export const HeatmapExclusiveVisOptions = ({
   styles,
-  useThresholdColor,
   onChange,
-  onUseThresholdColorChange,
+  colorModeOption,
+  onColorModeOptionChange,
 }: HeatmapVisOptionsProps) => {
   const updateExclusiveOption = <K extends keyof HeatmapChartStyle['exclusive']>(
     key: K,
@@ -40,6 +41,10 @@ export const HeatmapExclusiveVisOptions = ({
       [key]: value,
     });
   };
+
+  const hasColorMode = colorModeOption !== 'none';
+  const hasValueMapping =
+    colorModeOption === 'highlightValueMapping' || colorModeOption === 'useValueMapping';
   const colorSchemas = useMemo(() => getColorSchemas(), []);
 
   return (
@@ -51,17 +56,11 @@ export const HeatmapExclusiveVisOptions = ({
       initialIsOpen={true}
       data-test-subj="heatmapExclusivePanel"
     >
-      <EuiFormRow>
-        <EuiSwitch
-          compressed
-          label={i18n.translate('explore.vis.heatmap.useThresholdColor', {
-            defaultMessage: 'Use threshold colors',
-          })}
-          data-test-subj="useThresholdColorButton"
-          checked={useThresholdColor ?? false}
-          onChange={(e) => onUseThresholdColorChange(e.target.checked)}
-        />
-      </EuiFormRow>
+      <ColorModeOptionSelect
+        colorModeOption={colorModeOption}
+        onColorModeOptionChange={onColorModeOptionChange}
+      />
+
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.heatmap.exclusive.colorSchema', {
           defaultMessage: 'Color schema',
@@ -70,6 +69,7 @@ export const HeatmapExclusiveVisOptions = ({
         <EuiSelect
           compressed
           options={colorSchemas}
+          disabled={hasColorMode}
           value={styles.colorSchema}
           onChange={(e) => updateExclusiveOption('colorSchema', e.target.value as ColorSchemas)}
           onMouseUp={(e) => e.stopPropagation()}
@@ -79,10 +79,12 @@ export const HeatmapExclusiveVisOptions = ({
       <EuiFormRow>
         <EuiSwitch
           compressed
+          data-test-subj="reverseColorSchemaSwitch"
           label={i18n.translate('explore.stylePanel.heatmap.exclusive.reverseColorSchema', {
             defaultMessage: 'Reverse schema',
           })}
           checked={styles.reverseSchema}
+          disabled={hasValueMapping}
           onChange={(e) => updateExclusiveOption('reverseSchema', e.target.checked)}
         />
       </EuiFormRow>
@@ -134,7 +136,7 @@ export const HeatmapExclusiveVisOptions = ({
             defaultMessage: 'Scale to data bounds',
           })}
           checked={styles.scaleToDataBounds}
-          disabled={styles.percentageMode || useThresholdColor}
+          disabled={styles.percentageMode || hasColorMode}
           onChange={(e) => updateExclusiveOption('scaleToDataBounds', e.target.checked)}
         />
       </EuiFormRow>
@@ -146,7 +148,7 @@ export const HeatmapExclusiveVisOptions = ({
           label={i18n.translate('explore.stylePanel.heatmap.exclusive.percentageMode', {
             defaultMessage: 'Percentage mode',
           })}
-          disabled={useThresholdColor || styles.scaleToDataBounds}
+          disabled={hasColorMode || styles.scaleToDataBounds}
           checked={styles.percentageMode}
           onChange={(e) => updateExclusiveOption('percentageMode', e.target.checked)}
         />
@@ -162,7 +164,7 @@ export const HeatmapExclusiveVisOptions = ({
           compressed
           min={2}
           max={20}
-          disabled={useThresholdColor}
+          disabled={hasColorMode}
           value={styles.maxNumberOfColors}
           defaultValue={defaultHeatmapChartStyles.exclusive.maxNumberOfColors}
           onChange={(value) =>

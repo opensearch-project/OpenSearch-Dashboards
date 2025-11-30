@@ -113,19 +113,28 @@ export const adaptLegacyData = (config?: ChartConfig) => {
 
   if (transformedConfig.type === 'heatmap') {
     const styles = transformedConfig.styles as HeatmapChartStyleOptions | undefined;
-    const { exclusive, thresholdOptions } = styles || {};
+    const { exclusive, thresholdOptions, colorModeOption, useThresholdColor } = styles || {};
     // customRanges can be undefined in old config, and will perform the adoption in transformToThreshold
     if (exclusive?.colorSchema && !thresholdOptions) {
       const thresholds = transformToThreshold(exclusive.colorSchema, exclusive.customRanges);
       const baseColor = Colors[exclusive?.colorSchema].baseColor;
-      const useThresholdColor = exclusive?.useCustomRanges ?? false;
 
       transformedConfig = {
         ...transformedConfig,
         styles: {
           ...transformedConfig.styles,
-          useThresholdColor,
+          useThresholdColor: exclusive?.useCustomRanges ?? false,
           thresholdOptions: { baseColor, thresholds },
+        } as StyleOptions,
+      };
+    }
+
+    if (!colorModeOption) {
+      transformedConfig = {
+        ...transformedConfig,
+        styles: {
+          ...transformedConfig.styles,
+          colorModeOption: useThresholdColor ? 'useThresholdColor' : 'none',
         } as StyleOptions,
       };
     }

@@ -173,8 +173,8 @@ export const createBarSpec = (
     transform: generateTransformLayer(
       canUseValueMapping,
       numericalColumn,
-      rangeMappings,
-      valueMappings,
+      validRanges,
+      validValues,
       styleOptions?.colorModeOption
     ),
     layer: layers,
@@ -616,8 +616,8 @@ export const createStackedBarSpec = (
     ...generateTransformLayer(
       canUseValueMapping,
       numericalColumn,
-      rangeMappings,
-      valueMappings,
+      validRanges,
+      validValues,
       styleOptions?.colorModeOption
     ),
     // create a new field for manual legend categories
@@ -826,8 +826,8 @@ export const createDoubleNumericalBarChart = (
     transform: generateTransformLayer(
       canUseValueMapping,
       yAxis?.column,
-      rangeMappings,
-      valueMappings,
+      validRanges,
+      validValues,
       styleOptions?.colorModeOption
     ),
     layer: layers,

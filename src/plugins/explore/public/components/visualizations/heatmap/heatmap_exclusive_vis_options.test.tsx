@@ -8,7 +8,7 @@ import {
   HeatmapExclusiveVisOptions,
   HeatmapLabelVisOptions,
 } from './heatmap_exclusive_vis_options';
-import { ColorSchemas, ScaleType, AggregationType } from '../types';
+import { ColorSchemas, ScaleType, AggregationType, ColorModeOption } from '../types';
 
 describe('HeatmapExclusiveVisOptions', () => {
   const defaultProps = {
@@ -27,10 +27,10 @@ describe('HeatmapExclusiveVisOptions', () => {
         color: 'black',
       },
     },
-    useThresholdColor: false,
     shouldShowType: true,
     onChange: jest.fn(),
-    onUseThresholdColorChange: jest.fn(),
+    colorModeOption: 'none' as ColorModeOption,
+    onColorModeOptionChange: jest.fn(),
   };
 
   beforeEach(() => {
@@ -48,7 +48,7 @@ describe('HeatmapExclusiveVisOptions', () => {
   });
   it('calls onChange when change is made(reverse schema)', () => {
     render(<HeatmapExclusiveVisOptions {...defaultProps} />);
-    const reverse = screen.getAllByRole('switch')[1];
+    const reverse = screen.getAllByRole('switch')[0];
     fireEvent.click(reverse);
     expect(defaultProps.onChange).toHaveBeenCalledWith({
       ...defaultProps.styles,
@@ -58,7 +58,9 @@ describe('HeatmapExclusiveVisOptions', () => {
 
   it('calls onChange when color schema is changed', () => {
     render(<HeatmapExclusiveVisOptions {...defaultProps} />);
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: ColorSchemas.GREENS } });
+    fireEvent.change(screen.getAllByRole('combobox')[1], {
+      target: { value: ColorSchemas.GREENS },
+    });
 
     expect(defaultProps.onChange).toHaveBeenCalledWith({
       ...defaultProps.styles,
@@ -98,7 +100,7 @@ describe('HeatmapExclusiveVisOptions', () => {
       styles: {
         ...defaultProps.styles,
       },
-      useThresholdColor: true,
+      colorModeOption: 'useThresholdColor' as ColorModeOption,
     };
 
     render(<HeatmapExclusiveVisOptions {...props} />);
@@ -112,11 +114,25 @@ describe('HeatmapExclusiveVisOptions', () => {
       styles: {
         ...defaultProps.styles,
       },
-      useThresholdColor: true,
+      colorModeOption: 'useThresholdColor' as ColorModeOption,
     };
 
     render(<HeatmapExclusiveVisOptions {...props} />);
     const input = screen.getByTestId('visHeatmapMaxNumberOfColors');
+    expect(input).toBeDisabled();
+  });
+
+  it('disables reverse color input when choose value mapping', () => {
+    const props = {
+      ...defaultProps,
+      styles: {
+        ...defaultProps.styles,
+      },
+      colorModeOption: 'highlightValueMapping' as ColorModeOption,
+    };
+
+    render(<HeatmapExclusiveVisOptions {...props} />);
+    const input = screen.getByTestId('reverseColorSchemaSwitch');
     expect(input).toBeDisabled();
   });
 

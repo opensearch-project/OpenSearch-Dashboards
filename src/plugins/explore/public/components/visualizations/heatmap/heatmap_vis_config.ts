@@ -18,6 +18,8 @@ import {
   VisFieldType,
   TitleOptions,
   ThresholdOptions,
+  ValueMappingOptions,
+  ColorModeOption,
 } from '../types';
 import { getColors } from '../theme/default_colors';
 
@@ -61,12 +63,20 @@ export interface HeatmapChartStyleOptions {
   switchAxes?: boolean;
 
   titleOptions?: TitleOptions;
+
+  /**
+   * @deprecated - use colorModeOption instead
+   */
   useThresholdColor?: boolean;
   thresholdOptions?: ThresholdOptions;
+  valueMappingOptions?: ValueMappingOptions;
+  colorModeOption?: ColorModeOption;
 }
 
-export type HeatmapChartStyle = Required<Omit<HeatmapChartStyleOptions, 'legendTitle'>> &
-  Pick<HeatmapChartStyleOptions, 'legendTitle'>;
+export type HeatmapChartStyle = Required<
+  Omit<HeatmapChartStyleOptions, 'legendTitle' | 'colorModeOption' | 'useThresholdColor'>
+> &
+  Pick<HeatmapChartStyleOptions, 'legendTitle' | 'colorModeOption'>;
 
 export const defaultHeatmapChartStyles: HeatmapChartStyle = {
   switchAxes: false,
@@ -95,7 +105,7 @@ export const defaultHeatmapChartStyles: HeatmapChartStyle = {
       color: 'black',
     },
   },
-  useThresholdColor: false,
+
   thresholdOptions: {
     baseColor: getColors().statusGreen,
     thresholds: [],
@@ -146,6 +156,11 @@ export const defaultHeatmapChartStyles: HeatmapChartStyle = {
     show: false,
     titleName: '',
   },
+
+  valueMappingOptions: {
+    valueMappings: [],
+  },
+  colorModeOption: 'none',
 };
 
 export const createHeatmapConfig = (): VisualizationType<'heatmap'> => ({

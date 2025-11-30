@@ -4,10 +4,12 @@
  */
 
 import type { Encoding } from 'vega-lite/build/src/encoding';
-import { AggregationType, VisColumn } from '../types';
+import { AggregationType, VisColumn, ValueMapping } from '../types';
 import { HeatmapChartStyle } from './heatmap_vis_config';
 
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
+import { generateTransformLayer } from '../style_panel/value_mapping/value_mapping_utils';
+import { decideScale, generateLabelExpr } from '../style_panel/value_mapping/value_mapping_utils';
 
 // isRegular=== true refers to 2 dimension and 1 metric heatmap.
 export const createLabelLayer = (
@@ -67,9 +69,24 @@ export const getDataBound = (
   return values.length > 0 ? [Math.min(...values), Math.max(...values)] : [];
 };
 
-export const addTransform = (styles: HeatmapChartStyle, numericFields: string) => {
+export const addTransform = (
+  styles: HeatmapChartStyle,
+  numericFields: string,
+  canUseValueMapping?: boolean,
+  validRanges?: ValueMapping[],
+  validValues?: ValueMapping[]
+) => {
+  const baseTransformLayer = generateTransformLayer(
+    canUseValueMapping,
+    numericFields,
+    validRanges,
+    validValues,
+    styles?.colorModeOption
+  );
+
   if (styles?.exclusive?.percentageMode) {
     return [
+      ...baseTransformLayer,
       {
         joinaggregate: [{ op: 'max', field: numericFields, as: 'max_value' }],
       },
@@ -79,14 +96,17 @@ export const addTransform = (styles: HeatmapChartStyle, numericFields: string) =
       },
     ];
   }
-  return [];
+  return [...baseTransformLayer];
 };
 
 export const enhanceStyle = (
   markLayer: any,
   styles: HeatmapChartStyle,
   transformedData: Array<Record<string, any>>,
-  colorField: string
+  colorField: string,
+  canUseValueMapping?: boolean,
+  valueMappings?: ValueMapping[],
+  rangeMappings?: ValueMapping[]
 ) => {
   // In percentageMode, set domain to [0, 1] and apply a transform layer to the percentage value.
   if (styles.exclusive?.percentageMode && styles.addLegend) {
@@ -99,7 +119,7 @@ export const enhanceStyle = (
     markLayer.encoding.color.scale.domain = getDataBound(transformedData, colorField);
   }
 
-  if (styles?.useThresholdColor && styles.thresholdOptions?.thresholds) {
+  if (styles?.colorModeOption === 'useThresholdColor' && styles.thresholdOptions?.thresholds) {
     const newThreshold = styles?.thresholdOptions?.thresholds ?? [];
 
     const thresholdWithBase = [
@@ -115,5 +135,21 @@ export const enhanceStyle = (
     markLayer.encoding.color.scale.domain = colorDomain;
     // require one more color for values below the first threshold(base)
     markLayer.encoding.color.scale.range = [DEFAULT_GREY, ...colorRange];
+  }
+
+  if (canUseValueMapping) {
+    markLayer.encoding.color.field = 'mappingValue';
+    markLayer.encoding.color.type = 'nominal';
+    markLayer.encoding.color.scale = decideScale(
+      styles?.colorModeOption,
+      rangeMappings,
+      valueMappings
+    );
+    delete markLayer.encoding.color.scale.type;
+    markLayer.encoding.color.legend.labelExpr = generateLabelExpr(
+      rangeMappings,
+      valueMappings,
+      styles?.colorModeOption
+    );
   }
 };

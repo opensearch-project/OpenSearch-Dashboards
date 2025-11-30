@@ -58,7 +58,9 @@ export interface BarChartStyleOptions {
 
   thresholdOptions?: ThresholdOptions;
 
-  // TODO deprecated useThresholdColor  - use colorModeOption insteads
+  /**
+   * @deprecated - use colorModeOption instead
+   */
   useThresholdColor?: boolean;
   showFullTimeRange?: boolean;
   valueMappingOptions?: ValueMappingOptions;
