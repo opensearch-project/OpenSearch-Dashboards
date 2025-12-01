@@ -58,19 +58,25 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
     }, [chatService]);
 
     const openSidecar = useCallback(() => {
-      if (!flyoutMountPoint.current) return;
+      if (!flyoutMountPoint.current) {
+        return;
+      }
 
-      sideCarRef.current = core.overlays.sidecar.open(flyoutMountPoint.current, {
-        className: `chat-sidecar chat-sidecar--${layoutMode}`,
-        config: {
-          dockedMode:
-            layoutMode === ChatLayoutMode.FULLSCREEN
-              ? SIDECAR_DOCKED_MODE.TAKEOVER
-              : SIDECAR_DOCKED_MODE.RIGHT,
-          paddingSize: chatService.getPaddingSize(),
-          isHidden: false,
-        },
-      });
+      try {
+        sideCarRef.current = core.overlays.sidecar.open(flyoutMountPoint.current, {
+          className: `chat-sidecar chat-sidecar--${layoutMode}`,
+          config: {
+            dockedMode:
+              layoutMode === ChatLayoutMode.FULLSCREEN
+                ? SIDECAR_DOCKED_MODE.TAKEOVER
+                : SIDECAR_DOCKED_MODE.RIGHT,
+            paddingSize: chatService.getPaddingSize(),
+            isHidden: false,
+          },
+        });
+      } catch (error) {
+        return;
+      }
 
       // Notify ChatService that window is now open
       chatService.setWindowState({ isWindowOpen: true });
@@ -138,19 +144,21 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
           }
         }
       );
-      return unsubscribe;
+      return () => {
+        unsubscribe();
+      };
     }, [chatService]);
 
     // Register callbacks for external window open/close requests
     useEffect(() => {
       const unsubscribeOpen = chatService.onWindowOpenRequest(() => {
-        if (!isOpen) {
+        if (!chatService.isWindowOpen()) {
           openSidecar();
         }
       });
 
       const unsubscribeClose = chatService.onWindowCloseRequest(() => {
-        if (isOpen) {
+        if (chatService.isWindowOpen()) {
           closeSidecar();
         }
       });
@@ -159,7 +167,7 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
         unsubscribeOpen();
         unsubscribeClose();
       };
-    }, [chatService, isOpen, openSidecar, closeSidecar]);
+    }, [chatService, openSidecar, closeSidecar]);
 
     // Cleanup on unmount
     useUnmount(() => {

@@ -3,13 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
 import { ChatLayoutMode } from '../components/chat_header_button';
 import type { ChatWindowInstance } from '../components/chat_window';
-import { IUiSettingsClient, UiSettingScope } from '../../../../core/public';
+import {
+  IUiSettingsClient,
+  UiSettingScope,
+  ChatServiceStart,
+  ChatWindowState,
+} from '../../../../core/public';
 import { getDefaultDataSourceId, getWorkspaces } from '../../../data_source_management/public';
 
 export interface ChatState {
@@ -23,12 +28,6 @@ export interface CurrentChatState {
   messages: Message[];
 }
 
-export interface ChatWindowState {
-  isWindowOpen: boolean;
-  windowMode: ChatLayoutMode;
-  paddingSize: number;
-}
-
 export type ChatWindowStateCallback = (
   newWindowState: ChatWindowState,
   changed: { [key in keyof ChatWindowState]: boolean }
@@ -36,56 +35,48 @@ export type ChatWindowStateCallback = (
 
 export class ChatService {
   private agent: AgUiAgent;
-  private threadId$ = new BehaviorSubject<string>(this.generateThreadId());
   public availableTools: ToolDefinition[] = [];
   public events$: any;
   private activeRequests: Set<string> = new Set();
   private requestCounter: number = 0;
   private uiSettings?: IUiSettingsClient;
+  private coreChatService?: ChatServiceStart;
 
   // Chat state persistence
   private readonly STORAGE_KEY = 'chat.currentState';
   private currentMessages: Message[] = [];
 
-  // Window state management
-  private _isWindowOpen: boolean = false;
-  private _windowMode: ChatLayoutMode = ChatLayoutMode.SIDECAR;
-  private _windowPaddingSize: number = 400;
-  private windowStateCallbacks: Set<ChatWindowStateCallback> = new Set();
-  private windowOpenCallbacks: Set<() => void> = new Set();
-  private windowCloseCallbacks: Set<() => void> = new Set();
-
   // ChatWindow ref for delegating sendMessage calls to proper timeline management
   private chatWindowRef: React.RefObject<ChatWindowInstance> | null = null;
 
-  private get threadId() {
-    return this.threadId$.getValue();
-  }
-
-  constructor(uiSettings?: IUiSettingsClient) {
+  constructor(uiSettings?: IUiSettingsClient, coreChatService?: ChatServiceStart) {
     // No need to pass URL anymore - agent will use the proxy endpoint
     this.agent = new AgUiAgent();
     this.uiSettings = uiSettings;
+    this.coreChatService = coreChatService;
 
     // Try to restore existing state first
     const currentChatState = this.loadCurrentChatState();
-    if (currentChatState?.threadId) {
-      this.threadId$.next(currentChatState.threadId);
+    if (currentChatState?.threadId && this.coreChatService) {
+      // Set thread ID in core service
+      this.coreChatService.setThreadId(currentChatState.threadId);
     }
     this.currentMessages = currentChatState?.messages || [];
   }
 
   public getThreadId = () => {
-    return this.threadId;
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    return this.coreChatService.getThreadId();
   };
 
   public getThreadId$ = () => {
-    return this.threadId$.asObservable();
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    return this.coreChatService.getThreadId$();
   };
-
-  private generateThreadId(): string {
-    return `thread-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-  }
 
   private generateRunId(): string {
     return `run-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
@@ -108,75 +99,88 @@ export class ChatService {
     this.activeRequests.delete(requestId);
   }
 
-  // Window state management public API
+  // Window state management - delegate to core service
   public isWindowOpen(): boolean {
-    return this._isWindowOpen;
-  }
-
-  public getWindowMode(): ChatLayoutMode {
-    return this._windowMode;
-  }
-
-  public getPaddingSize(): number {
-    return this._windowPaddingSize;
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    return this.coreChatService.isWindowOpen();
   }
 
   public getWindowState(): ChatWindowState {
-    return {
-      isWindowOpen: this._isWindowOpen,
-      windowMode: this._windowMode,
-      paddingSize: this._windowPaddingSize,
-    };
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    return this.coreChatService.getWindowState();
+  }
+
+  public getWindowMode(): ChatLayoutMode {
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    const windowMode = this.coreChatService.getWindowState().windowMode;
+    return windowMode === 'sidecar' ? ChatLayoutMode.SIDECAR : ChatLayoutMode.FULLSCREEN;
+  }
+
+  public getPaddingSize(): number {
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    const paddingSize = this.coreChatService.getWindowState().paddingSize;
+    // Fallback to default if undefined
+    return paddingSize ?? 400;
   }
 
   public setWindowState(newWindowState: Partial<ChatWindowState>): void {
-    const { isWindowOpen, windowMode, paddingSize } = newWindowState;
-    const previousWindowState = this.getWindowState();
-    const changed = {
-      isWindowOpen: false,
-      windowMode: false,
-      paddingSize: false,
-    };
-
-    if (isWindowOpen !== undefined && previousWindowState.isWindowOpen !== isWindowOpen) {
-      this._isWindowOpen = isWindowOpen;
-      changed.isWindowOpen = true;
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
     }
-
-    if (windowMode !== undefined && previousWindowState.windowMode !== windowMode) {
-      this._windowMode = windowMode;
-      changed.windowMode = true;
-    }
-
-    if (paddingSize !== undefined && previousWindowState.paddingSize !== paddingSize) {
-      this._windowPaddingSize = paddingSize;
-      changed.paddingSize = true;
-    }
-
-    // Notify listeners if state changed
-    if (changed.isWindowOpen || changed.windowMode || changed.paddingSize) {
-      this.windowStateCallbacks.forEach((callback) =>
-        callback({ ...previousWindowState, ...newWindowState }, changed)
-      );
-    }
+    this.coreChatService.setWindowState(newWindowState);
   }
 
   public onWindowStateChange(callback: ChatWindowStateCallback): () => void {
-    this.windowStateCallbacks.add(callback);
-    // Return unsubscribe function
-    return () => this.windowStateCallbacks.delete(callback);
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+
+    let previousState: ChatWindowState | null = null;
+
+    // Subscribe to core service observable and add change tracking logic
+    const subscription = this.coreChatService.getWindowState$().subscribe((newState) => {
+      if (previousState === null) {
+        previousState = { ...newState };
+        return;
+      }
+
+      // Compare with previous state to determine what changed
+      const changed = {
+        isWindowOpen: previousState.isWindowOpen !== newState.isWindowOpen,
+        windowMode: previousState.windowMode !== newState.windowMode,
+        paddingSize: previousState.paddingSize !== newState.paddingSize,
+      };
+
+      // Only notify if something actually changed
+      if (changed.isWindowOpen || changed.windowMode || changed.paddingSize) {
+        callback(newState, changed);
+        previousState = { ...newState };
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }
 
   public onWindowOpenRequest(callback: () => void): () => void {
-    this.windowOpenCallbacks.add(callback);
-    // Return unsubscribe function
-    return () => this.windowOpenCallbacks.delete(callback);
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    return this.coreChatService.onWindowOpen(callback);
   }
 
   public onWindowCloseRequest(callback: () => void): () => void {
-    this.windowCloseCallbacks.add(callback);
-    // Return unsubscribe function
-    return () => this.windowCloseCallbacks.delete(callback);
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    return this.coreChatService.onWindowClose(callback);
   }
 
   // ChatWindow ref management for proper timeline handling
@@ -189,17 +193,17 @@ export class ChatService {
   }
 
   public async openWindow(): Promise<void> {
-    if (!this._isWindowOpen) {
-      // Trigger callbacks to request window opening
-      this.windowOpenCallbacks.forEach((callback) => callback());
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
     }
+    await this.coreChatService.openWindow();
   }
 
   public async closeWindow(): Promise<void> {
-    if (this._isWindowOpen) {
-      // Trigger callbacks to request window closing
-      this.windowCloseCallbacks.forEach((callback) => callback());
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
     }
+    await this.coreChatService.closeWindow();
   }
 
   public async sendMessageWithWindow(
@@ -224,7 +228,7 @@ export class ChatService {
     }
 
     // If ChatWindow is available, delegate to its sendMessage for proper timeline management
-    if (this.chatWindowRef?.current && this._isWindowOpen) {
+    if (this.chatWindowRef?.current && this.isWindowOpen()) {
       try {
         await this.chatWindowRef.current.sendMessage({ content });
 
@@ -319,7 +323,7 @@ export class ChatService {
     }));
 
     const runInput: RunAgentInput = {
-      threadId: this.threadId,
+      threadId: this.getThreadId(),
       runId: this.generateRunId(),
       messages: [...messages, userMessage],
       tools: this.availableTools || [], // Pass available tools to AG-UI server
@@ -387,7 +391,7 @@ export class ChatService {
     const mappedMessages = [...messages, toolMessage];
 
     const runInput: RunAgentInput = {
-      threadId: this.threadId,
+      threadId: this.getThreadId(),
       runId: this.generateRunId(),
       messages: mappedMessages,
       tools: this.availableTools || [],
@@ -431,7 +435,7 @@ export class ChatService {
   // Chat state persistence methods
   private saveCurrentChatState(): void {
     const state: CurrentChatState = {
-      threadId: this.threadId,
+      threadId: this.getThreadId(),
       messages: this.currentMessages,
     };
     try {
@@ -491,10 +495,12 @@ export class ChatService {
   }
 
   public newThread(): void {
-    const oldThreadId = this.threadId;
-    const newThreadId = this.generateThreadId();
+    // Delegate to core service
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    this.coreChatService.newThread();
 
-    this.threadId$.next(newThreadId);
     this.currentMessages = [];
     this.clearCurrentChatState();
 

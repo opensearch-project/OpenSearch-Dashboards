@@ -17,6 +17,8 @@ const createStartContractMock = (): jest.Mocked<ChatServiceStart> => ({
   isWindowOpen: jest.fn().mockReturnValue(false),
   getThreadId$: jest.fn().mockReturnValue(new BehaviorSubject<string>('')),
   getThreadId: jest.fn().mockReturnValue(''),
+  setThreadId: jest.fn(),
+  newThread: jest.fn(),
   openWindow: jest.fn(),
   closeWindow: jest.fn(),
   getWindowState: jest.fn().mockReturnValue({
@@ -24,6 +26,7 @@ const createStartContractMock = (): jest.Mocked<ChatServiceStart> => ({
     windowMode: 'sidecar',
     paddingSize: 400,
   }),
+  setWindowState: jest.fn(),
   sendMessage: jest.fn().mockResolvedValue({
     observable: null,
     userMessage: { id: 'mock-id', role: 'user', content: 'mock-content' },

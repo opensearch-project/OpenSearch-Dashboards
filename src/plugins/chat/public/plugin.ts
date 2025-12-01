@@ -7,17 +7,17 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
-import { Subscription, Observable, BehaviorSubject } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import {
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
-  ChatImplementationFunctions,
+  ChatWindowState,
 } from '../../../core/public';
 import { ChatPluginSetup, ChatPluginStart, AppPluginStartDependencies } from './types';
-import { ChatService, ChatWindowState } from './services/chat_service';
+import { ChatService } from './services/chat_service';
 import { ChatHeaderButton, ChatLayoutMode } from './components/chat_header_button';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { SuggestedActionsService } from './services/suggested_action';
@@ -85,49 +85,6 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     // Store core setup reference for later use
     this.coreSetup = core;
 
-    // Set fallback implementation for when chat is disabled
-    if (core.chat?.setFallbackImplementation) {
-      const fallbackImplementation: ChatImplementationFunctions = {
-        // Message operations - return empty results when chat is disabled
-        sendMessage: async (content: string, messages: any[]) => ({
-          observable: null,
-          userMessage: { id: '', role: 'user' as const, content },
-        }),
-        sendMessageWithWindow: async (
-          content: string,
-          messages: any[],
-          options?: { clearConversation?: boolean }
-        ) => ({
-          observable: null,
-          userMessage: { id: '', role: 'user' as const, content },
-        }),
-
-        // Thread management - return empty values when disabled
-        getThreadId: () => '',
-        getThreadId$: () => new BehaviorSubject<string>('').asObservable(),
-
-        // Window management - return closed/default state when disabled
-        isWindowOpen: () => false,
-        openWindow: async () => {},
-        closeWindow: async () => {},
-        getWindowState: () => ({
-          isWindowOpen: false,
-          windowMode: 'sidecar' as const,
-          paddingSize: 400, // Plugin-defined business logic default
-        }),
-        getWindowState$: () =>
-          new BehaviorSubject({
-            isWindowOpen: false,
-            windowMode: 'sidecar' as const,
-            paddingSize: 400, // Plugin-defined business logic default
-          }).asObservable(),
-        onWindowOpen: (callback: () => void) => () => {}, // Return no-op unsubscribe
-        onWindowClose: (callback: () => void) => () => {}, // Return no-op unsubscribe
-      };
-
-      core.chat.setFallbackImplementation(fallbackImplementation);
-    }
-
     return {
       suggestedActionsService: this.suggestedActionsService.setup(),
     };
@@ -145,8 +102,8 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       core.application.capabilities
     );
 
-    // Always initialize chat service - core service handles enablement via NoOpChatService
-    this.chatService = new ChatService(core.uiSettings);
+    // Always initialize chat service - core service handles enablement
+    this.chatService = new ChatService(core.uiSettings, core.chat);
 
     if (!isEnabled) {
       return {
@@ -154,36 +111,14 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       };
     }
 
-    // Register all implementation functions with core chat service
+    // Register implementation functions with core chat service
     if (this.coreSetup?.chat?.setImplementation) {
       this.coreSetup.chat.setImplementation({
-        // Message operations
+        // Only business logic operations
         sendMessage: this.chatService.sendMessage.bind(this.chatService),
         sendMessageWithWindow: this.chatService.sendMessageWithWindow.bind(this.chatService),
-
-        // Thread management
-        getThreadId: this.chatService.getThreadId.bind(this.chatService),
-        getThreadId$: this.chatService.getThreadId$.bind(this.chatService),
-
-        // Window management
-        isWindowOpen: this.chatService.isWindowOpen.bind(this.chatService),
         openWindow: this.chatService.openWindow.bind(this.chatService),
         closeWindow: this.chatService.closeWindow.bind(this.chatService),
-        getWindowState: this.chatService.getWindowState.bind(this.chatService),
-        getWindowState$: () => {
-          // Create a mapped observable from the plugin's window state changes
-          // Since plugin uses onWindowStateChange callback pattern, we need to convert it to observable
-          return new Observable((subscriber) => {
-            const unsubscribe = this.chatService?.onWindowStateChange((newState) => {
-              subscriber.next(newState);
-            });
-            // Emit current state immediately
-            subscriber.next(this.chatService?.getWindowState());
-            return unsubscribe;
-          });
-        },
-        onWindowOpen: this.chatService.onWindowOpenRequest.bind(this.chatService),
-        onWindowClose: this.chatService.onWindowCloseRequest.bind(this.chatService),
       });
     }
 

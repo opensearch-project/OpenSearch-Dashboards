@@ -101,79 +101,50 @@ export interface ChatWindowState {
 }
 
 /**
- * Chat service interface - provides basic chat functionality
- * without UI dependencies to avoid circular dependencies
+ * Chat service interface - state managed by core, operations delegated to plugin
  */
 export interface ChatServiceInterface {
   /**
-   * Check if chat window is currently open
+   * Check if chat service is available
    */
-  isWindowOpen(): boolean;
+  isAvailable(): boolean;
 
   /**
-   * Get the current thread ID as observable
+   * Thread management - managed by core
    */
   getThreadId$(): Observable<string>;
-
-  /**
-   * Get the current thread ID
-   */
   getThreadId(): string;
+  setThreadId(threadId: string): void;
+  newThread(): void;
 
   /**
-   * Open the chat window
+   * Window state management - managed by core
+   */
+  isWindowOpen(): boolean;
+  getWindowState(): ChatWindowState;
+  getWindowState$(): Observable<ChatWindowState>;
+  setWindowState(state: Partial<ChatWindowState>): void;
+  onWindowOpen(callback: () => void): () => void;
+  onWindowClose(callback: () => void): () => void;
+
+  /**
+   * Operations - delegated to plugin (throws error if unavailable)
    */
   openWindow(): Promise<void>;
-
-  /**
-   * Close the chat window
-   */
   closeWindow(): Promise<void>;
-
-  /**
-   * Send a message through the chat service
-   * @param message The message text to send
-   * @param history Optional message history for context
-   * @param options Optional configuration for the message
-   */
   sendMessage(
     content: string,
     messages: Message[]
   ): Promise<{ observable: any; userMessage: UserMessage }>;
-
-  /**
-   * Send a message and ensure window is open
-   * This is the primary method used by plugins
-   */
   sendMessageWithWindow(
     content: string,
     messages: Message[],
     options?: { clearConversation?: boolean }
   ): Promise<{ observable: any; userMessage: UserMessage }>;
-
-  /**
-   * Get current window state
-   */
-  getWindowState(): ChatWindowState;
-
-  /**
-   * Get window state observable
-   */
-  getWindowState$(): Observable<ChatWindowState>;
-
-  /**
-   * Register a callback for when window opens
-   */
-  onWindowOpen(callback: () => void): () => void;
-
-  /**
-   * Register a callback for when window closes
-   */
-  onWindowClose(callback: () => void): () => void;
 }
 
 /**
- * Implementation functions provided by the chat plugin
+ * Implementation functions provided by the chat plugin - simplified to business logic only
  */
 export interface ChatImplementationFunctions {
   // Message operations
@@ -181,24 +152,16 @@ export interface ChatImplementationFunctions {
     content: string,
     messages: Message[]
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
+
   sendMessageWithWindow: (
     content: string,
     messages: Message[],
     options?: { clearConversation?: boolean }
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
 
-  // Thread management
-  getThreadId: () => string;
-  getThreadId$: () => Observable<string>;
-
-  // Window management
-  isWindowOpen: () => boolean;
+  // Window operations
   openWindow: () => Promise<void>;
   closeWindow: () => Promise<void>;
-  getWindowState: () => ChatWindowState;
-  getWindowState$: () => Observable<ChatWindowState>;
-  onWindowOpen: (callback: () => void) => () => void;
-  onWindowClose: (callback: () => void) => () => void;
 }
 
 /**
@@ -210,13 +173,6 @@ export interface ChatServiceSetup {
    * This will be called by the chat plugin
    */
   setImplementation(implementation: ChatImplementationFunctions): void;
-
-  /**
-   * Set the fallback implementation for when chat service is unavailable
-   * This allows the chat plugin to control "unavailable" behavior
-   * This will be called by the chat plugin
-   */
-  setFallbackImplementation(fallback: ChatImplementationFunctions): void;
 
   /**
    * Set the suggested actions service
@@ -237,11 +193,6 @@ export interface ChatServiceSetup {
  * Chat service start interface
  */
 export interface ChatServiceStart extends ChatServiceInterface {
-  /**
-   * Whether chat service is available
-   */
-  isAvailable(): boolean;
-
   /**
    * Suggested actions service for registering providers
    * Available at runtime after chat plugin has registered it

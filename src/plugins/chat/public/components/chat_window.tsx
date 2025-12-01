@@ -51,6 +51,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   onToggleLayout,
   onClose,
 }, ref) => {
+
   const service = AssistantActionService.getInstance();
   const { chatService } = useChatContext();
   const { services } = useOpenSearchDashboards<{
@@ -81,9 +82,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       ),
     [service, chatService]
   );
-
-  // Context is now handled by RFC hooks - no need for context manager
-  // The chat service will get context directly from assistantContextStore
 
   // Subscribe to tool updates from the service
   useEffect(() => {
@@ -138,15 +136,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       };
       setTimeline((prev) => [...prev, timelineUserMessage]);
 
-      // Start a new run group - we'll get the actual runId from the first event
-      const timestamp = new Date().toLocaleTimeString();
-      console.groupCollapsed(
-        `📊 Chat Run [${timestamp}] - "${messageContent.substring(0, 50)}${
-          messageContent.length > 50 ? '...' : ''
-        }"`
-      );
-
-      // Subscribe to streaming response - now much cleaner!
+      // Subscribe to streaming response
       const subscription = observable.subscribe({
         next: async (event: ChatEvent) => {
           // Update runId if we get it from the event
@@ -159,11 +149,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         },
         error: (error: any) => {
           console.error('Subscription error:', error);
-          console.groupEnd(); // Close the run group
           setIsStreaming(false);
         },
         complete: () => {
-          console.groupEnd(); // Close the run group
           setIsStreaming(false);
         },
       });
@@ -171,7 +159,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       return () => subscription.unsubscribe();
     } catch (error) {
       console.error('Failed to send message:', error);
-      console.groupEnd(); // Close the run group
       setIsStreaming(false);
     }
   };
@@ -220,15 +207,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       };
       setTimeline((prev) => [...prev, timelineUserMessage]);
 
-      // Start a new run group - we'll get the actual runId from the first event
-      const timestamp = new Date().toLocaleTimeString();
-      console.groupCollapsed(
-        `📊 Chat Run [${timestamp}] - "${message.content.substring(0, 50)}${
-          message.content.length > 50 ? '...' : ''
-        }"`
-      );
-
-      // Subscribe to streaming response - now using the event handler!
+      // Subscribe to streaming response
       const subscription = observable.subscribe({
         next: async (event: ChatEvent) => {
           // Update runId if we get it from the event
@@ -241,11 +220,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         },
         error: (error: any) => {
           console.error('Subscription error:', error);
-          console.groupEnd(); // Close the run group
           setIsStreaming(false);
         },
         complete: () => {
-          console.groupEnd(); // Close the run group
           setIsStreaming(false);
         },
       });
@@ -253,22 +230,17 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       return () => subscription.unsubscribe();
     } catch (error) {
       console.error('Failed to resend message:', error);
-      console.groupEnd(); // Close the run group
       setIsStreaming(false);
     }
   };
 
   const handleNewChat = useCallback(() => {
-    console.log('[DEBUG] ChatWindow - handleNewChat called, about to call chatService.newThread()');
     chatService.newThread();
     setTimeline([]);
     setCurrentRunId(null);
     setIsStreaming(false);
   }, [chatService]);
 
-  // No cleanup needed - RFC hooks handle their own lifecycle
-
-  // Pass enhanced props to child components
   const currentState = service.getCurrentState();
   const enhancedProps = {
     toolCallStates: currentState.toolCallStates,
