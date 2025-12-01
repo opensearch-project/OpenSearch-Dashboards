@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
+import { AssistantActionService } from '../../../context_provider/public';
 import { ChatLayoutMode } from '../components/chat_header_button';
 import type { ChatWindowInstance } from '../components/chat_window';
 import {
@@ -51,6 +52,9 @@ export class ChatService {
   // ChatWindow ref for delegating sendMessage calls to proper timeline management
   private chatWindowRef: React.RefObject<ChatWindowInstance> | null = null;
 
+  // Subscription to assistant action service for tool updates
+  private toolSubscription?: Subscription;
+
   constructor(
     uiSettings: IUiSettingsClient,
     coreChatService?: ChatServiceStart,
@@ -69,6 +73,12 @@ export class ChatService {
       this.coreChatService.setThreadId(currentChatState.threadId);
     }
     this.currentMessages = currentChatState?.messages || [];
+
+    // Subscribe to assistant action service to keep tools in sync
+    const assistantActionService = AssistantActionService.getInstance();
+    this.toolSubscription = assistantActionService.getState$().subscribe((state) => {
+      this.availableTools = state.toolDefinitions;
+    });
   }
 
   public getThreadId = () => {
@@ -513,5 +523,15 @@ export class ChatService {
 
     // Clear dynamic context from global store for fresh chat session
     this.clearDynamicContextFromStore();
+  }
+
+  /**
+   * Cleanup method to properly dispose of subscriptions
+   */
+  public destroy(): void {
+    if (this.toolSubscription) {
+      this.toolSubscription.unsubscribe();
+      this.toolSubscription = undefined;
+    }
   }
 }

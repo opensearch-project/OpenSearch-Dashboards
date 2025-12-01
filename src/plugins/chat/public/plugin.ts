@@ -188,5 +188,6 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   public stop() {
     this.paddingSizeSubscription?.unsubscribe();
     this.unsubscribeWindowStateChange?.();
+    this.chatService?.destroy();
   }
 }
