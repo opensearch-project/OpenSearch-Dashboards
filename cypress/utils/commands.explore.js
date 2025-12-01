@@ -392,7 +392,7 @@ cy.explore.add(
     // Verify selection
     cy.getElementByTestId('index-scope-selector')
       .find('[data-test-subj="comboBoxInput"]')
-      .should('contain.value', 'Index name');
+      .should('contain.text', 'Index name');
 
     // Click the search field to open the popover (onFocus triggers isPopoverOpen = true)
     cy.get('.indexSelector input[type="text"]')
@@ -485,14 +485,21 @@ cy.explore.add(
     // Step 6 - Select index scope (Index wildcard)
     cy.getElementByTestId('index-scope-selector')
       .should('be.visible')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
+      .find('[data-test-subj="comboBoxSearchInput"]')
+      .click()
+      .clear()
+      .type('Index wildcard{enter}');
 
+    // Wait for the selection to take effect
     cy.wait(1000);
-    cy.get(`[title="Index wildcard"]`).should('be.visible').click({ force: true });
+
+    // Verify that "Index wildcard" was selected
+    cy.getElementByTestId('index-scope-selector')
+      .find('[data-test-subj="comboBoxInput"]')
+      .should('contain.text', 'Index wildcard');
 
     // Step 7 - Enter index pattern
-    cy.getElementByTestId('dataset-prefix-selector')
+    cy.getElementByTestId('dataset-prefix-selector', { timeout: 10000 })
       .should('be.visible')
       .find('[data-test-subj="multiWildcardPatternInput"]')
       .clear()
@@ -648,16 +655,24 @@ cy.explore.add(
     cy.get(`[title="${dataSource}"]`).should('be.visible');
     cy.get(`[title="${dataSource}"]`).click();
 
-    // Step 6 - Select index scope (Index wildcard)
+    // Step 6 - Select index scope (Index wildcard) using typing approach
     cy.getElementByTestId('index-scope-selector')
       .should('be.visible')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
+      .find('[data-test-subj="comboBoxSearchInput"]')
+      .click()
+      .clear()
+      .type('Index wildcard{enter}');
 
-    cy.get(`[title="Index wildcard"]`).should('be.visible').click({ force: true });
+    // Wait for the selection to take effect
+    cy.wait(1000);
+
+    // Verify that "Index wildcard" was selected
+    cy.getElementByTestId('index-scope-selector')
+      .find('[data-test-subj="comboBoxInput"]')
+      .should('contain.text', 'Index wildcard');
 
     // Step 7 - Enter index pattern
-    cy.getElementByTestId('dataset-prefix-selector')
+    cy.getElementByTestId('dataset-prefix-selector', { timeout: 10000 })
       .should('be.visible')
       .find('[data-test-subj="multiWildcardPatternInput"]')
       .clear()
