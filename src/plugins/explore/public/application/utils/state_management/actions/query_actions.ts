@@ -540,7 +540,18 @@ const executeQueryBase = async (
       return;
     }
 
-    const parsedError = JSON.parse(error.body.message);
+    let parsedError;
+    try {
+      parsedError = JSON.parse(error.body.message);
+    } catch (parseError) {
+      parsedError = {
+        error: {
+          reason: error.body?.message || error.message || 'Unknown Error',
+          details: error.body?.error || 'An error occurred',
+          type: error.name,
+        },
+      };
+    }
 
     // if there is no avoidDispatchingError function, dispatch Error.
     // if there is that function, and it returns false, dispatch Error
@@ -556,14 +567,14 @@ const executeQueryBase = async (
             startTime: queryStartTime,
             elapsedMs: undefined,
             error: {
-              error: error.body.error || 'Unknown Error',
+              error: error.body?.error || 'Unknown Error',
               message: {
                 details: parsedError?.error?.details || 'Unknown Error',
                 reason: parsedError?.error?.reason || 'Unknown Error',
                 type: parsedError?.error?.type,
               },
-              statusCode: error.body.statusCode,
-              originalErrorMessage: error.body.message,
+              statusCode: error.body?.statusCode,
+              originalErrorMessage: error.body?.message,
             },
           },
         })
