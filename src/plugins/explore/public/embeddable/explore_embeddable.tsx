@@ -45,7 +45,10 @@ import {
   StyleOptions,
 } from '../components/visualizations/utils/use_visualization_types';
 import { defaultPrepareQueryString } from '../application/utils/state_management/actions/query_actions';
-import { convertStringsToMappings } from '../components/visualizations/visualization_builder_utils';
+import {
+  adaptLegacyData,
+  convertStringsToMappings,
+} from '../components/visualizations/visualization_builder_utils';
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { getQueryWithSource } from '../application/utils/languages';
@@ -401,12 +404,21 @@ export class ExploreEmbeddable
           };
           this.searchProps.searchContext = searchContext;
           const styleOptions = visualization.params;
+
+          const styles = adaptLegacyData({
+            type: selectedChartType,
+            styles: styleOptions,
+            axesMapping: visualization.axesMapping,
+          })?.styles;
+
+          this.searchProps.styleOptions = styles;
+
           const spec = matchedRule.toSpec(
             visualizationData.transformedData,
             numericalColumns,
             categoricalColumns,
             dateColumns,
-            styleOptions,
+            styles || styleOptions,
             selectedChartType,
             axesMapping
           );
