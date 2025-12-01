@@ -199,9 +199,17 @@ describe('value_mapping_utils', () => {
       );
 
       expect(result[0]).toEqual({
-        calculate:
-          "(datum['numericField'] >= 0 && datum['numericField'] < 10) ? '[0,10)' : (datum['numericField'] >= 10) ? '[10,∞)' : null",
-        as: 'mappingValue',
+        lookup: 'mergedLabel',
+        from: {
+          data: {
+            values: [
+              { mappingValue: '[0,10)', displayText: 'Low' },
+              { mappingValue: '[10,∞)', displayText: 'High' },
+            ],
+          },
+          key: 'mappingValue',
+          fields: ['mappingValue', 'displayText'],
+        },
       });
     });
 
@@ -298,13 +306,15 @@ describe('value_mapping_utils', () => {
     it('should generate label expression for ranges with display text', () => {
       const result = generateLabelExpr(mockValidRanges, [], 'useValueMapping');
 
-      expect(result).toBe("{'[0,10)': 'Low Range', '[10,∞)': 'High Range'}[datum.label]");
+      expect(result).toBe(
+        "{'[0,10)': 'Low Range', '[10,∞)': 'High Range'}[datum.label] || datum.label"
+      );
     });
 
     it('should generate label expression for values with display text', () => {
       const result = generateLabelExpr(undefined, mockValidValues, 'useValueMapping');
 
-      expect(result).toBe("{'A': 'Apple Display', 'B': 'B'}[datum.label]");
+      expect(result).toBe("{'A': 'Apple Display', 'B': 'B'}[datum.label] || datum.label");
     });
 
     it('should use default labels when displayText is not provided', () => {
@@ -323,19 +333,21 @@ describe('value_mapping_utils', () => {
 
       const result = generateLabelExpr(undefined, valuesWithoutDisplay, 'useValueMapping');
 
-      expect(result).toBe("{'A': 'A', 'B': 'B'}[datum.label]");
+      expect(result).toBe("{'A': 'A', 'B': 'B'}[datum.label] || datum.label");
     });
 
     it('should add unmatched entry for filterButKeepOpposite', () => {
       const result = generateLabelExpr(undefined, mockValidValues, 'highlightValueMapping');
 
-      expect(result).toBe("{'A': 'Apple Display', 'B': 'B', null: 'unmatched'}[datum.label]");
+      expect(result).toBe(
+        "{'A': 'Apple Display', 'B': 'B', null: 'unmatched'}[datum.label] || datum.label"
+      );
     });
 
     it('should prefer values over ranges when both exist', () => {
       const result = generateLabelExpr(mockValidRanges, mockValidValues, 'useValueMapping');
 
-      expect(result).toBe("{'A': 'Apple Display', 'B': 'B'}[datum.label]");
+      expect(result).toBe("{'A': 'Apple Display', 'B': 'B'}[datum.label] || datum.label");
     });
 
     it('should handle ranges without max value correctly', () => {
@@ -350,7 +362,7 @@ describe('value_mapping_utils', () => {
 
       const result = generateLabelExpr(rangeWithoutMax, [], 'useValueMapping');
 
-      expect(result).toBe("{'[5,∞)': 'Above 5'}[datum.label]");
+      expect(result).toBe("{'[5,∞)': 'Above 5'}[datum.label] || datum.label");
     });
   });
 });

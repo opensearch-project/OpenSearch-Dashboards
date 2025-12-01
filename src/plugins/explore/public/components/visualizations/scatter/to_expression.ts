@@ -7,7 +7,16 @@ import { ScatterChartStyle } from './scatter_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
-import { buildThresholdColorEncoding } from '../bar/bar_chart_utils';
+import {
+  buildThresholdColorEncoding,
+  buildValueMappingColorEncoding,
+  buildCombinedScale,
+} from '../bar/bar_chart_utils';
+import {
+  processData,
+  generateTransformLayer,
+  generateLabelExpr,
+} from '../style_panel/value_mapping/value_mapping_utils';
 
 const DEFAULT_POINTER_SIZE = 80;
 const DEFAULT_STROKE_OPACITY = 0.65;
@@ -44,7 +53,32 @@ export const createTwoMetricScatter = (
 ): any => {
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
-  const colorEncodingLayer = buildThresholdColorEncoding(yAxis, styles);
+  const valueMappings = styles?.valueMappingOptions?.valueMappings?.filter(
+    (mapping) => mapping?.type === 'value'
+  );
+
+  const rangeMappings = styles?.valueMappingOptions?.valueMappings?.filter(
+    (mapping) => mapping?.type === 'range'
+  );
+
+  const { newRecord, validValues, validRanges } = processData({
+    transformedData,
+    categoricalColumn: xAxis?.column,
+    numericalColumn: yAxis?.column,
+    transformedCalculationMethod: undefined,
+    valueMappings,
+    rangeMappings,
+  });
+
+  const colorEncodingLayer =
+    styles.colorModeOption === 'useThresholdColor'
+      ? buildThresholdColorEncoding(yAxis, styles, true)
+      : buildValueMappingColorEncoding(styles, validValues, validRanges);
+
+  const canUseValueMapping =
+    ((validRanges && validRanges.length > 0) || (validValues && validValues.length > 0)) &&
+    styles.colorModeOption !== 'none' &&
+    styles.colorModeOption !== 'useThresholdColor';
 
   const markLayer = {
     params: hoverParams,
@@ -69,7 +103,7 @@ export const createTwoMetricScatter = (
         axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
       },
       ...hoverStateEncoding,
-      color: styles?.useThresholdColor ? colorEncodingLayer : [],
+      color: colorEncodingLayer,
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -92,7 +126,14 @@ export const createTwoMetricScatter = (
 
   const baseSpec = {
     $schema: VEGASCHEMA,
-    data: { values: transformedData },
+    data: { values: newRecord },
+    transform: generateTransformLayer(
+      canUseValueMapping,
+      yAxis?.column,
+      validRanges,
+      validValues,
+      styles?.colorModeOption
+    ),
     layer: [markLayer, thresholdLayer].filter(Boolean),
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${xAxis?.name} with ${yAxis?.name}`
@@ -109,10 +150,47 @@ export const createTwoMetricOneCateScatter = (
   styles: ScatterChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const colorColumn = axisColumnMappings?.color;
   const categoryFields = axisColumnMappings?.color?.column!;
   const categoryNames = axisColumnMappings?.color?.name!;
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const valueMappings = styles?.valueMappingOptions?.valueMappings?.filter(
+    (mapping) => mapping?.type === 'value'
+  );
+
+  const rangeMappings = styles?.valueMappingOptions?.valueMappings?.filter(
+    (mapping) => mapping?.type === 'range'
+  );
+
+  const { newRecord, validValues, validRanges, categorical2Options } = processData({
+    transformedData,
+    categoricalColumn: xAxis?.column,
+    numericalColumn: yAxis?.column,
+    transformedCalculationMethod: undefined,
+    valueMappings,
+    rangeMappings,
+    categoricalColumn2: categoryFields,
+  });
+
+  const canUseValueMapping =
+    ((validRanges && validRanges.length > 0) || (validValues && validValues.length > 0)) &&
+    styles.colorModeOption !== 'none';
+
+  const transformLayer = [
+    ...generateTransformLayer(
+      canUseValueMapping,
+      yAxis?.column,
+      validRanges,
+      validValues,
+      styles?.colorModeOption
+    ),
+    // create a new field for manual legend categories
+    {
+      calculate: `datum.mappingValue ? datum.mappingValue : datum['${categoryFields}']`,
+      as: 'combinedCategory',
+    },
+  ];
+
   const markLayer = {
     params: hoverParams,
     mark: {
@@ -136,12 +214,22 @@ export const createTwoMetricOneCateScatter = (
         axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
       },
       color: {
-        field: categoryFields,
-        type: getSchemaByAxis(colorColumn),
-        legend: styles?.addLegend
+        field: 'combinedCategory',
+        type: 'nominal',
+        scale: buildCombinedScale(
+          canUseValueMapping,
+          categorical2Options,
+          validValues,
+          validRanges
+        ),
+        legend: styles.addLegend
           ? {
-              title: styles?.legendTitle,
-              orient: styles?.legendPosition,
+              ...(canUseValueMapping && {
+                labelExpr: generateLabelExpr(rangeMappings, valueMappings, styles?.colorModeOption),
+              }),
+
+              title: styles.legendTitle,
+              orient: styles.legendPosition?.toLowerCase() || 'bottom',
               symbolLimit: 10,
             }
           : null,
@@ -171,7 +259,8 @@ export const createTwoMetricOneCateScatter = (
   const baseSpec = {
     $schema: VEGASCHEMA,
     autosize: { type: 'fit', contains: 'padding' },
-    data: { values: transformedData },
+    data: { values: newRecord },
+    transform: transformLayer,
     layer: [markLayer, thresholdLayer].filter(Boolean),
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${xAxis?.name} with ${yAxis?.name} by ${categoryNames}`
@@ -192,6 +281,43 @@ export const createThreeMetricOneCateScatter = (
   const categoryFields = axisColumnMappings?.color?.column!;
   const categoryNames = axisColumnMappings?.color?.name!;
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const valueMappings = styles?.valueMappingOptions?.valueMappings?.filter(
+    (mapping) => mapping?.type === 'value'
+  );
+
+  const rangeMappings = styles?.valueMappingOptions?.valueMappings?.filter(
+    (mapping) => mapping?.type === 'range'
+  );
+
+  const { newRecord, validValues, validRanges, categorical2Options } = processData({
+    transformedData,
+    categoricalColumn: xAxis?.column,
+    numericalColumn: yAxis?.column,
+    transformedCalculationMethod: undefined,
+    valueMappings,
+    rangeMappings,
+    categoricalColumn2: categoryFields,
+  });
+
+  const canUseValueMapping =
+    ((validRanges && validRanges.length > 0) || (validValues && validValues.length > 0)) &&
+    styles.colorModeOption !== 'none';
+
+  const transformLayer = [
+    ...generateTransformLayer(
+      canUseValueMapping,
+      yAxis?.column,
+      validRanges,
+      validValues,
+      styles?.colorModeOption
+    ),
+    // create a new field for manual legend categories
+    {
+      calculate: `datum.mappingValue ? datum.mappingValue : datum['${categoryFields}']`,
+      as: 'combinedCategory',
+    },
+  ];
 
   const numericalSize = axisColumnMappings?.size;
   const markLayer = {
@@ -217,12 +343,22 @@ export const createThreeMetricOneCateScatter = (
         axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
       },
       color: {
-        field: categoryFields,
-        type: getSchemaByAxis(colorColumn),
-        legend: styles?.addLegend
+        field: 'combinedCategory',
+        type: 'nominal',
+        scale: buildCombinedScale(
+          canUseValueMapping,
+          categorical2Options,
+          validValues,
+          validRanges
+        ),
+        legend: styles.addLegend
           ? {
-              title: styles?.legendTitle,
-              orient: styles?.legendPosition,
+              ...(canUseValueMapping && {
+                labelExpr: generateLabelExpr(rangeMappings, valueMappings, styles?.colorModeOption),
+              }),
+
+              title: styles.legendTitle,
+              orient: styles.legendPosition?.toLowerCase() || 'bottom',
               symbolLimit: 10,
             }
           : null,
@@ -232,7 +368,7 @@ export const createThreeMetricOneCateScatter = (
         type: getSchemaByAxis(numericalSize),
         legend: styles?.addLegend
           ? {
-              title: styles?.legendTitleForSize,
+              title: styles?.legendTitleForSize ?? '',
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
@@ -263,7 +399,8 @@ export const createThreeMetricOneCateScatter = (
   const baseSpec = {
     $schema: VEGASCHEMA,
     autosize: { type: 'fit', contains: 'padding' },
-    data: { values: transformedData },
+    data: { values: newRecord },
+    transform: transformLayer,
     layer: [markLayer, thresholdLayer].filter(Boolean),
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName ||

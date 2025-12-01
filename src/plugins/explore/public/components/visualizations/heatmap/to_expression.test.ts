@@ -156,7 +156,7 @@ describe('createHeatmapWithBin', () => {
       exclusive: {
         ...baseStyles.exclusive,
       },
-      useThresholdColor: true,
+      colorModeOption: 'useThresholdColor',
       thresholdOptions: {},
     };
 
@@ -274,7 +274,7 @@ describe('createRegularHeatmap', () => {
       exclusive: {
         ...baseStyles.exclusive,
       },
-      useThresholdColor: true,
+      colorModeOption: 'useThresholdColor',
       thresholdOptions: {},
     };
 

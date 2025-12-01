@@ -19,6 +19,8 @@ import { LineChartStyleOptions } from './line/line_vis_config';
 import { GaugeChartStyleOptions } from './gauge/gauge_vis_config';
 import { HeatmapChartStyleOptions } from './heatmap/heatmap_vis_config';
 import { StateTimeLineChartStyleOptions } from './state_timeline/state_timeline_config';
+import { ScatterChartStyleOptions } from './scatter/scatter_vis_config';
+import { HistogramChartStyleOptions } from './histogram/histogram_vis_config';
 
 export const convertMappingsToStrings = (mappings: AxisColumnMappings): Record<string, string> =>
   Object.fromEntries(Object.entries(mappings).map(([axis, column]) => [axis, column?.name]));
@@ -220,8 +222,16 @@ export const adaptLegacyData = (config?: ChartConfig) => {
     }
   }
 
-  if (transformedConfig.type === 'state_timeline') {
-    const styles = config.styles as StateTimeLineChartStyleOptions | undefined;
+  if (
+    transformedConfig.type === 'state_timeline' ||
+    transformedConfig.type === 'scatter' ||
+    transformedConfig.type === 'histogram'
+  ) {
+    const styles = config.styles as
+      | StateTimeLineChartStyleOptions
+      | ScatterChartStyleOptions
+      | HistogramChartStyleOptions
+      | undefined;
     const { colorModeOption, useThresholdColor } = styles || {};
 
     if (!colorModeOption) {

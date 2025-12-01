@@ -86,17 +86,6 @@ export const StateTimeLineExclusiveVisOptions = ({
         colorModeOption={colorModeOption}
         onColorModeOptionChange={onColorModeOptionChange}
       />
-      {/* <EuiFormRow>
-        <EuiSwitch
-          compressed
-          label={i18n.translate('explore.vis.statetimeline.useThresholdColor', {
-            defaultMessage: 'Use threshold colors',
-          })}
-          data-test-subj="useThresholdColorButton"
-          checked={useThresholdColor ?? false}
-          onChange={(e) => onUseThresholdColorChange(e.target.checked)}
-        />
-      </EuiFormRow> */}
       <EuiFormRow>
         <EuiSwitch
           compressed

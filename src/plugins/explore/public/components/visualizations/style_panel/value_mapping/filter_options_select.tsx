@@ -12,12 +12,12 @@ export const ColorModeOptionSelect = ({
   colorModeOption,
   onColorModeOptionChange,
   disableThreshold = false,
-  hasDate = false,
+  disableValueMapping = false,
 }: {
   colorModeOption: ColorModeOption | undefined;
   onColorModeOptionChange?: (option: ColorModeOption | undefined) => void;
   disableThreshold?: boolean;
-  hasDate?: boolean;
+  disableValueMapping?: boolean;
 }) => {
   return (
     <EuiFormRow
@@ -27,11 +27,12 @@ export const ColorModeOptionSelect = ({
     >
       <EuiSelect
         compressed
+        data-test-subj="colorModeOptionsSelection"
         value={colorModeOption ? colorModeOption : 'none'}
         onChange={(e) => onColorModeOptionChange?.(e.target.value as ColorModeOption)}
         onMouseUp={(e) => e.stopPropagation()}
         options={[
-          ...(hasDate
+          ...(disableValueMapping
             ? []
             : [
                 {

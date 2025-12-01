@@ -83,7 +83,9 @@ export const runCreateVisTests = () => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
         });
 
-      cy.getElementByTestId('useThresholdColorButton').click();
+      cy.getElementByTestId('colorModeOptionsSelection')
+        .should('be.visible')
+        .select('Use Threshold Color');
 
       // Open thresholds setting
       cy.get('[aria-controls="thresholdSection"]').click();

@@ -45,12 +45,20 @@ export interface HistogramChartStyleOptions {
 
   thresholdOptions?: ThresholdOptions;
 
+  /**
+   * @deprecated - use colorModeOption instead
+   */
   useThresholdColor?: boolean;
   valueMappingOptions?: ValueMappingOptions;
   colorModeOption?: ColorModeOption;
 }
 
-export type HistogramChartStyle = Required<HistogramChartStyleOptions>;
+// export type HistogramChartStyle = Required<HistogramChartStyleOptions>;
+
+export type HistogramChartStyle = Required<
+  Omit<HistogramChartStyleOptions, 'colorModeOption' | 'useThresholdColor'>
+> &
+  Pick<HistogramChartStyleOptions, 'colorModeOption'>;
 
 export const defaultHistogramChartStyles: HistogramChartStyle = {
   tooltipOptions: {
@@ -71,7 +79,7 @@ export const defaultHistogramChartStyles: HistogramChartStyle = {
     thresholds: [],
     thresholdStyle: ThresholdMode.Off,
   },
-  useThresholdColor: false,
+  // useThresholdColor: false,
   standardAxes: [
     {
       id: 'Axis-1',

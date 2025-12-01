@@ -144,7 +144,7 @@ export const buildThresholdColorEncoding = (
   styleOptions: Partial<BarChartStyle>,
   disbaleAggregationType: boolean = false
 ) => {
-  if (!styleOptions?.useThresholdColor) return [];
+  if (styleOptions?.colorModeOption !== 'useThresholdColor') return [];
   const activeThresholds = styleOptions?.thresholdOptions?.thresholds ?? [];
 
   const thresholdWithBase = [

@@ -35,7 +35,7 @@ interface BarExclusiveVisOptionsProps {
   onShowBarBorderChange: (showBarBorder: boolean) => void;
   onBarBorderWidthChange: (barBorderWidth: number) => void;
   onBarBorderColorChange: (barBorderColor: string) => void;
-  onUseThresholdColorChange: (useThresholdColor: boolean) => void;
+  onUseThresholdColorChange?: (useThresholdColor: boolean) => void;
   shouldDisableUseThresholdColor?: boolean;
   colorModeOption?: ColorModeOption | undefined;
   onColorModeOptionChange?: (option: ColorModeOption | undefined) => void;
@@ -89,25 +89,11 @@ export const BarExclusiveVisOptions = ({
 
   return (
     <StyleAccordion id="barSection" accordionLabel={barAccordionMessage} initialIsOpen={true}>
-      {/* {!shouldDisableUseThresholdColor && (
-        <EuiFormRow>
-          <EuiSwitch
-            compressed
-            label={i18n.translate('explore.vis.bar.useThresholdColor', {
-              defaultMessage: 'Use threshold colors',
-            })}
-            data-test-subj="useThresholdColorButton"
-            checked={useThresholdColor ?? false}
-            onChange={(e) => onUseThresholdColorChange(e.target.checked)}
-          />
-        </EuiFormRow>
-      )} */}
-
       <ColorModeOptionSelect
         colorModeOption={colorModeOption}
         onColorModeOptionChange={onColorModeOptionChange}
         disableThreshold={shouldDisableUseThresholdColor}
-        hasDate={hasDate}
+        disableValueMapping={hasDate}
       />
 
       <EuiFormRow

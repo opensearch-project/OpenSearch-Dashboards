@@ -36,7 +36,7 @@ describe('bar_vis_config', () => {
         bucket: {
           aggregationType: AggregationType.SUM,
         },
-        useThresholdColor: false,
+        colorModeOption: 'none',
       });
 
       // Check axes configuration

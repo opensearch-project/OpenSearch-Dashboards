@@ -73,10 +73,7 @@ export type BarChartStyle = Required<
     'legendShape' | 'thresholdLines' | 'legendTitle' | 'colorModeOption' | 'useThresholdColor'
   >
 > &
-  Pick<
-    BarChartStyleOptions,
-    'legendShape' | 'legendTitle' | 'colorModeOption' | 'useThresholdColor'
-  >;
+  Pick<BarChartStyleOptions, 'legendShape' | 'legendTitle' | 'colorModeOption'>;
 
 export const defaultBarChartStyles: BarChartStyle = {
   // Basic controls

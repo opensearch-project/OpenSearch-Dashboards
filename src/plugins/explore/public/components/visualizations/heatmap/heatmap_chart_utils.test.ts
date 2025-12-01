@@ -219,7 +219,7 @@ describe('enhanceStyle', () => {
         maxNumberOfColors: 4,
         label: {} as HeatmapLabels,
       },
-      useThresholdColor: false,
+      colorModeOption: 'none',
       addLegend: true,
     };
 
@@ -243,7 +243,7 @@ describe('enhanceStyle', () => {
         maxNumberOfColors: 4,
         label: {} as HeatmapLabels,
       },
-      useThresholdColor: false,
+      colorModeOption: 'none',
     };
 
     const markLayer = JSON.parse(JSON.stringify(baseMarkLayer));
@@ -264,7 +264,7 @@ describe('enhanceStyle', () => {
         maxNumberOfColors: 4,
         label: {} as HeatmapLabels,
       },
-      useThresholdColor: true,
+      colorModeOption: 'useThresholdColor',
       thresholdOptions: {
         baseColor: '#00BD6B',
         thresholds: [
@@ -299,7 +299,7 @@ describe('enhanceStyle', () => {
         scaleToDataBounds: true,
         label: {} as HeatmapLabels,
       },
-      useThresholdColor: true,
+      colorModeOption: 'useThresholdColor',
       thresholdOptions: {
         baseColor: '#00BD6B',
         thresholds: [

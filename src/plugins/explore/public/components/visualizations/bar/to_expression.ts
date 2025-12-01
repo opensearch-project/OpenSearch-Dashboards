@@ -26,7 +26,6 @@ import {
   buildTooltipEncoding,
   buildThresholdColorEncoding,
   buildValueMappingColorEncoding,
-  // TODO use value_mapping_utils
   buildCombinedScale,
 } from './bar_chart_utils';
 import { DEFAULT_OPACITY } from '../constants';
@@ -243,7 +242,7 @@ export const createTimeBarChart = (
       y: {
         ...buildEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
       },
-      color: styles?.useThresholdColor ? colorEncodingLayer : [],
+      color: styles?.colorModeOption === 'useThresholdColor' ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {

@@ -16,6 +16,8 @@ import {
   TitleOptions,
   ThresholdMode,
   ThresholdOptions,
+  ValueMappingOptions,
+  ColorModeOption,
 } from '../types';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
 import { getColors } from '../theme/default_colors';
@@ -40,15 +42,22 @@ export interface ScatterChartStyleOptions {
   switchAxes?: boolean;
 
   titleOptions?: TitleOptions;
-
+  /**
+   * @deprecated - use colorModeOption instead
+   */
   useThresholdColor?: boolean;
   thresholdOptions?: ThresholdOptions;
+  valueMappingOptions?: ValueMappingOptions;
+  colorModeOption?: ColorModeOption;
 }
 
 export type ScatterChartStyle = Required<
-  Omit<ScatterChartStyleOptions, 'legendTitle' | 'legendTitleForSize'>
+  Omit<
+    ScatterChartStyleOptions,
+    'legendTitle' | 'legendTitleForSize' | 'colorModeOption' | 'useThresholdColor'
+  >
 > &
-  Pick<ScatterChartStyleOptions, 'legendTitle' | 'legendTitleForSize'>;
+  Pick<ScatterChartStyleOptions, 'legendTitle' | 'legendTitleForSize' | 'colorModeOption'>;
 
 export const defaultScatterChartStyles: ScatterChartStyle = {
   // Basic controls
@@ -66,7 +75,6 @@ export const defaultScatterChartStyles: ScatterChartStyle = {
     filled: true,
   },
 
-  useThresholdColor: false,
   // Threshold options
   thresholdOptions: {
     baseColor: getColors().statusGreen,
@@ -119,6 +127,10 @@ export const defaultScatterChartStyles: ScatterChartStyle = {
     show: false,
     titleName: '',
   },
+  valueMappingOptions: {
+    valueMappings: [],
+  },
+  colorModeOption: 'none',
 };
 
 export const createScatterConfig = (): VisualizationType<'scatter'> => ({

@@ -7,25 +7,26 @@ import { i18n } from '@osd/i18n';
 import { EuiRange, EuiSwitch, EuiFormRow, EuiSelect } from '@elastic/eui';
 import React from 'react';
 import { defaultScatterChartStyles, ScatterChartStyle } from './scatter_vis_config';
-import { PointShape } from '../types';
+import { PointShape, ColorModeOption } from '../types';
 import { getPointShapes } from '../utils/collections';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { useDebouncedNumber } from '../utils/use_debounced_value';
+import { ColorModeOptionSelect } from '../style_panel/value_mapping/filter_options_select';
 
-interface ScatterVisOptionsProps {
+export interface ScatterVisOptionsProps {
   styles: ScatterChartStyle['exclusive'];
   onChange: (styles: ScatterChartStyle['exclusive']) => void;
-  useThresholdColor?: boolean;
-  onUseThresholdColorChange: (useThresholdColor: boolean) => void;
   shouldDisableUseThresholdColor?: boolean;
+  colorModeOption?: ColorModeOption | undefined;
+  onColorModeOptionChange?: (option: ColorModeOption | undefined) => void;
 }
 
 export const ScatterExclusiveVisOptions = ({
   styles,
   onChange,
-  useThresholdColor,
-  onUseThresholdColorChange,
   shouldDisableUseThresholdColor = false,
+  colorModeOption,
+  onColorModeOptionChange,
 }: ScatterVisOptionsProps) => {
   const updateStyle = <K extends keyof ScatterChartStyle['exclusive']>(
     key: K,
@@ -56,19 +57,12 @@ export const ScatterExclusiveVisOptions = ({
       })}
       initialIsOpen={true}
     >
-      {!shouldDisableUseThresholdColor && (
-        <EuiFormRow>
-          <EuiSwitch
-            compressed
-            label={i18n.translate('explore.vis.scatter.useThresholdColor', {
-              defaultMessage: 'Use threshold colors',
-            })}
-            data-test-subj="useThresholdColorButton"
-            checked={useThresholdColor ?? false}
-            onChange={(e) => onUseThresholdColorChange(e.target.checked)}
-          />
-        </EuiFormRow>
-      )}
+      <ColorModeOptionSelect
+        colorModeOption={colorModeOption}
+        onColorModeOptionChange={onColorModeOptionChange}
+        disableThreshold={shouldDisableUseThresholdColor}
+      />
+
       <EuiFormRow
         label={i18n.translate('explore.vis.scatter.shape', {
           defaultMessage: 'Shape',

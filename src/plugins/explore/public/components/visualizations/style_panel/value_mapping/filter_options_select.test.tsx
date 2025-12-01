@@ -22,9 +22,13 @@ describe('ColorModeOptionSelect', () => {
     expect(screen.getByText('Color mode options')).toBeInTheDocument();
   });
 
-  it('renders all options when hasDate is false and disableThreshold is false', () => {
+  it('renders all options when disableValueMapping is false and disableThreshold is false', () => {
     render(
-      <ColorModeOptionSelect colorModeOption="none" hasDate={false} disableThreshold={false} />
+      <ColorModeOptionSelect
+        colorModeOption="none"
+        disableValueMapping={false}
+        disableThreshold={false}
+      />
     );
 
     const select = screen.getByRole('combobox');
@@ -44,9 +48,13 @@ describe('ColorModeOptionSelect', () => {
     ]);
   });
 
-  it('hides value mapping options when hasDate is true', () => {
+  it('hides value mapping options when disableValueMapping is true', () => {
     render(
-      <ColorModeOptionSelect colorModeOption="none" hasDate={true} disableThreshold={false} />
+      <ColorModeOptionSelect
+        colorModeOption="none"
+        disableValueMapping={true}
+        disableThreshold={false}
+      />
     );
 
     const options = screen.getAllByRole('option');
@@ -61,7 +69,11 @@ describe('ColorModeOptionSelect', () => {
 
   it('hides threshold option when disableThreshold is true', () => {
     render(
-      <ColorModeOptionSelect colorModeOption="none" hasDate={false} disableThreshold={true} />
+      <ColorModeOptionSelect
+        colorModeOption="none"
+        disableValueMapping={false}
+        disableThreshold={true}
+      />
     );
 
     const options = screen.getAllByRole('option');
@@ -73,8 +85,14 @@ describe('ColorModeOptionSelect', () => {
     expect(optionValues).not.toContain('useThresholdColor');
   });
 
-  it('hides both value mapping and threshold options when hasDate is true and disableThreshold is true', () => {
-    render(<ColorModeOptionSelect colorModeOption="none" hasDate={true} disableThreshold={true} />);
+  it('hides both value mapping and threshold options when disableValueMapping is true and disableThreshold is true', () => {
+    render(
+      <ColorModeOptionSelect
+        colorModeOption="none"
+        disableValueMapping={true}
+        disableThreshold={true}
+      />
+    );
 
     const options = screen.getAllByRole('option');
     const optionValues = options.map((option) => option.getAttribute('value'));
@@ -137,7 +155,11 @@ describe('ColorModeOptionSelect', () => {
 
   it('renders option text correctly for each language key', () => {
     render(
-      <ColorModeOptionSelect colorModeOption="none" hasDate={false} disableThreshold={false} />
+      <ColorModeOptionSelect
+        colorModeOption="none"
+        disableValueMapping={false}
+        disableThreshold={false}
+      />
     );
 
     // Check that all option texts are rendered correctly
