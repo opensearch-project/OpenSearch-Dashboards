@@ -57,6 +57,9 @@ describe('ChatPlugin', () => {
           getSidecarConfig$: jest.fn().mockReturnValue(of({ paddingSize: 400 })),
         },
       },
+      uiSettings: {},
+      chat: {},
+      workspaces: {},
     };
 
     // Mock dependencies
@@ -90,8 +93,12 @@ describe('ChatPlugin', () => {
     it('should initialize chat service when enabled', () => {
       plugin.start(mockCoreStart, mockDeps);
 
-      // ChatService is called with uiSettings and core chat service
-      expect(ChatService).toHaveBeenCalledWith(mockCoreStart.uiSettings, mockCoreStart.chat);
+      // ChatService is called with uiSettings, core chat service, and workspaces
+      expect(ChatService).toHaveBeenCalledWith(
+        mockCoreStart.uiSettings,
+        mockCoreStart.chat,
+        mockCoreStart.workspaces
+      );
     });
 
     it('should register chat button in header nav controls', () => {
@@ -117,8 +124,12 @@ describe('ChatPlugin', () => {
 
       const startContract = testPlugin.start(mockCoreStart, mockDeps);
 
-      // ChatService should still be created with uiSettings and core chat service
-      expect(ChatService).toHaveBeenCalledWith(mockCoreStart.uiSettings, mockCoreStart.chat);
+      // ChatService should still be created with uiSettings, core chat service, and workspaces
+      expect(ChatService).toHaveBeenCalledWith(
+        mockCoreStart.uiSettings,
+        mockCoreStart.chat,
+        mockCoreStart.workspaces
+      );
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
     });
@@ -126,7 +137,11 @@ describe('ChatPlugin', () => {
     it('should always initialize chat service (core service handles enablement)', () => {
       const startContract = plugin.start(mockCoreStart, mockDeps);
 
-      expect(ChatService).toHaveBeenCalledWith(mockCoreStart.uiSettings, mockCoreStart.chat);
+      expect(ChatService).toHaveBeenCalledWith(
+        mockCoreStart.uiSettings,
+        mockCoreStart.chat,
+        mockCoreStart.workspaces
+      );
       expect(startContract.chatService).toBeInstanceOf(ChatService);
       expect(mockCoreStart.chrome.navControls.registerPrimaryHeaderRight).toHaveBeenCalled();
     });
@@ -185,7 +200,11 @@ describe('ChatPlugin', () => {
         expect(() => testPlugin.start(mockCoreStart, mockDeps)).not.toThrow();
 
         // ChatService is always initialized - core service handles enablement logic
-        expect(ChatService).toHaveBeenCalledWith(mockCoreStart.uiSettings, mockCoreStart.chat);
+        expect(ChatService).toHaveBeenCalledWith(
+          mockCoreStart.uiSettings,
+          mockCoreStart.chat,
+          mockCoreStart.workspaces
+        );
       });
     });
   });

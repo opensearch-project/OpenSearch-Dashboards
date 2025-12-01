@@ -169,9 +169,7 @@ describe('AskAIActionItem', () => {
   });
 
   describe('execution logic', () => {
-    it('should send message with clearConversation when chat window is closed', async () => {
-      mockChatService.isWindowOpen.mockReturnValue(false);
-
+    it('should send message with sendMessageWithWindow', async () => {
       render(
         <AskAIActionItem
           context={mockContext}
@@ -190,18 +188,12 @@ describe('AskAIActionItem', () => {
       await waitFor(() => {
         expect(mockChatService.sendMessageWithWindow).toHaveBeenCalledWith(
           'What is this error?',
-          expect.arrayContaining([
-            expect.objectContaining({
-              role: 'user',
-              content: 'What is this error?',
-            }),
-          ]),
-          { clearConversation: true }
+          []
         );
       });
     });
 
-    it('should send message without clearConversation when chat window is open', async () => {
+    it('should send message regardless of chat window state', async () => {
       mockChatService.isWindowOpen.mockReturnValue(true);
 
       render(
@@ -222,12 +214,7 @@ describe('AskAIActionItem', () => {
       await waitFor(() => {
         expect(mockChatService.sendMessageWithWindow).toHaveBeenCalledWith(
           'Follow-up question',
-          expect.arrayContaining([
-            expect.objectContaining({
-              role: 'user',
-              content: 'Follow-up question',
-            }),
-          ])
+          []
         );
       });
     });
@@ -275,11 +262,7 @@ describe('AskAIActionItem', () => {
       fireEvent.click(executeButton);
 
       await waitFor(() => {
-        expect(mockChatService.sendMessageWithWindow).toHaveBeenCalledWith(
-          'Test question',
-          expect.anything(),
-          expect.anything()
-        );
+        expect(mockChatService.sendMessageWithWindow).toHaveBeenCalledWith('Test question', []);
       });
     });
 

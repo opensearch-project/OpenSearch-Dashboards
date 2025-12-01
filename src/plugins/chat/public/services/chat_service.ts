@@ -14,8 +14,9 @@ import {
   UiSettingScope,
   ChatServiceStart,
   ChatWindowState,
+  WorkspacesStart,
 } from '../../../../core/public';
-import { getDefaultDataSourceId, getWorkspaces } from '../../../data_source_management/public';
+import { getDefaultDataSourceId } from '../../../data_source_management/public';
 
 export interface ChatState {
   messages: Message[];
@@ -39,8 +40,9 @@ export class ChatService {
   public events$: any;
   private activeRequests: Set<string> = new Set();
   private requestCounter: number = 0;
-  private uiSettings?: IUiSettingsClient;
+  private uiSettings: IUiSettingsClient;
   private coreChatService?: ChatServiceStart;
+  private workspaces?: WorkspacesStart;
 
   // Chat state persistence
   private readonly STORAGE_KEY = 'chat.currentState';
@@ -49,11 +51,16 @@ export class ChatService {
   // ChatWindow ref for delegating sendMessage calls to proper timeline management
   private chatWindowRef: React.RefObject<ChatWindowInstance> | null = null;
 
-  constructor(uiSettings?: IUiSettingsClient, coreChatService?: ChatServiceStart) {
+  constructor(
+    uiSettings: IUiSettingsClient,
+    coreChatService?: ChatServiceStart,
+    workspaces?: WorkspacesStart
+  ) {
     // No need to pass URL anymore - agent will use the proxy endpoint
     this.agent = new AgUiAgent();
     this.uiSettings = uiSettings;
     this.coreChatService = coreChatService;
+    this.workspaces = workspaces;
 
     // Try to restore existing state first
     const currentChatState = this.loadCurrentChatState();
@@ -268,7 +275,7 @@ export class ChatService {
       }
 
       // Get workspace context
-      const workspaces = getWorkspaces();
+      const workspaces = this.workspaces;
       if (!workspaces) {
         // eslint-disable-next-line no-console
         console.warn('Workspaces service not available, using global scope');

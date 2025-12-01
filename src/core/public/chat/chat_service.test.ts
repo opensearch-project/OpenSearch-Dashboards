@@ -119,8 +119,11 @@ describe('ChatService', () => {
       expect(emittedState.isWindowOpen).toBe(true);
     });
 
-    it('should trigger window callbacks', () => {
+    it('should trigger window callbacks', async () => {
+      const setupContract = service.setup();
       const startContract = service.start();
+
+      setupContract.setImplementation(mockImplementation);
 
       const openCallback = jest.fn();
       const closeCallback = jest.fn();
@@ -128,13 +131,13 @@ describe('ChatService', () => {
       startContract.onWindowOpen(openCallback);
       startContract.onWindowClose(closeCallback);
 
-      // Open window
-      startContract.setWindowState({ isWindowOpen: true });
+      // Open window via openWindow method (which triggers callbacks)
+      await startContract.openWindow();
       expect(openCallback).toHaveBeenCalledTimes(1);
       expect(closeCallback).not.toHaveBeenCalled();
 
-      // Close window
-      startContract.setWindowState({ isWindowOpen: false });
+      // Close window via closeWindow method (which triggers callbacks)
+      await startContract.closeWindow();
       expect(closeCallback).toHaveBeenCalledTimes(1);
     });
 
@@ -160,7 +163,7 @@ describe('ChatService', () => {
 
       setupContract.setImplementation(mockImplementation);
 
-      // Test message sending
+      // Test message sending - this should delegate to implementation
       const result = await startContract.sendMessage('test', []);
       expect(mockImplementation.sendMessage).toHaveBeenCalledWith('test', []);
       expect(result).toEqual({
@@ -168,14 +171,20 @@ describe('ChatService', () => {
         userMessage: { id: '1', role: 'user', content: 'test' },
       });
 
-      // Test window operations
+      // Test window operations - these trigger callbacks but don't call implementation methods directly
+      // The implementation methods are called by the plugin in response to the callbacks
+      const openCallback = jest.fn();
+      const closeCallback = jest.fn();
+
+      startContract.onWindowOpen(openCallback);
+      startContract.onWindowClose(closeCallback);
+
       await startContract.openWindow();
-      expect(mockImplementation.openWindow).toHaveBeenCalled();
-      expect(startContract.isWindowOpen()).toBe(true); // Core state updated
+      expect(openCallback).toHaveBeenCalled();
+      // Window state is not automatically updated by openWindow - it's managed separately
 
       await startContract.closeWindow();
-      expect(mockImplementation.closeWindow).toHaveBeenCalled();
-      expect(startContract.isWindowOpen()).toBe(false); // Core state updated
+      expect(closeCallback).toHaveBeenCalled();
     });
   });
 

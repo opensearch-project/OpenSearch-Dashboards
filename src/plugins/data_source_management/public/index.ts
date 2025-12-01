@@ -26,6 +26,6 @@ export {
   createDataSourceMenu,
 } from './components/data_source_menu';
 export { DataSourceSelectionService } from './service/data_source_selection_service';
-export { getDefaultDataSourceId, getDefaultDataSourceId$, getWorkspaces } from './components/utils';
+export { getDefaultDataSourceId, getDefaultDataSourceId$ } from './components/utils';
 export { DATACONNECTIONS_BASE, DatasourceTypeToDisplayName } from './constants';
 export { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../common';
