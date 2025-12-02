@@ -141,7 +141,7 @@ export const mergeCategoricalData = (
   const allPossibleOptions = Object.keys(groupBy(sorted, (item) => item[groupField2]));
 
   const validValues = mappings?.filter((r) => {
-    if (!r.value) return false;
+    if (r.value === undefined || r.value === null) return false;
     return allPossibleOptions.includes(r.value);
   });
 

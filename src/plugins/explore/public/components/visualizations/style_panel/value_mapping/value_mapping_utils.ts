@@ -176,7 +176,7 @@ export const processData = ({
     : null;
 
   const validValues = valueMappings?.filter((r) => {
-    if (!r.value) return false;
+    if (r.value === undefined || r.value === null) return false;
     return numericalOptions.includes(Number(r.value));
   });
 

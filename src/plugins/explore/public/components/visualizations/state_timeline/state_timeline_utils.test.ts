@@ -7,7 +7,7 @@ import { ValueMapping } from '../types';
 import {
   mergeCategoricalData,
   mergeSingleCategoricalData,
-  mergeNumericalData,
+  mergeNumericalDataCore,
 } from './state_timeline_utils';
 
 const mockData = [
@@ -297,9 +297,9 @@ describe('state_timeline_utils', () => {
     });
   });
 
-  describe('mergeNumericalData', () => {
+  describe('mergeNumericalDataCore', () => {
     it('returns original data when required fields are missing', () => {
-      const [result, mappings] = mergeNumericalData(mockData);
+      const [result, mappings] = mergeNumericalDataCore(mockData);
       expect(result).toEqual(mockData);
       expect(mappings).toEqual([]);
     });
@@ -310,7 +310,7 @@ describe('state_timeline_utils', () => {
         { type: 'range', range: { min: 100, max: 200 }, displayText: 'High' },
       ];
 
-      const [result, validRanges] = mergeNumericalData(
+      const [result, validRanges] = mergeNumericalDataCore(
         mockData,
         'timestamp',
         'category',
@@ -345,7 +345,7 @@ describe('state_timeline_utils', () => {
         { type: 'range', range: { min: 100, max: 200 }, displayText: 'High' },
       ];
 
-      const [result, validRanges] = mergeNumericalData(
+      const [result, validRanges] = mergeNumericalDataCore(
         mockData,
         'timestamp',
         'category',
@@ -381,7 +381,7 @@ describe('state_timeline_utils', () => {
 
       const valueMappings: ValueMapping[] = [{ type: 'range', value: '15', displayText: 'low' }];
 
-      const [result, validRanges, validValues] = mergeNumericalData(
+      const [result, validRanges, validValues] = mergeNumericalDataCore(
         mockData,
         'timestamp',
         'category',
@@ -427,7 +427,7 @@ describe('state_timeline_utils', () => {
         { type: 'range', range: { min: 100, max: 200 }, displayText: 'High' },
       ];
 
-      const [result, validRanges] = mergeNumericalData(
+      const [result, validRanges] = mergeNumericalDataCore(
         mockData,
         'timestamp',
         'category',

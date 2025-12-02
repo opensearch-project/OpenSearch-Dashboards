@@ -73,7 +73,7 @@ export const runCreateVisTests = () => {
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
       });
     });
-    it('should add threshold for bar chart and reflect immediatly to the bar visualization', () => {
+    it('should use threshold for bar chart and reflect immediatly to the bar visualization', () => {
       const query = `source=${datasetName} | stats count() by category`;
       cy.explore.createVisualizationWithQuery(query, 'bar', datasetName);
       let beforeCanvasDataUrl;
@@ -87,10 +87,6 @@ export const runCreateVisTests = () => {
         .should('be.visible')
         .select('Use Threshold Color');
 
-      // Open thresholds setting
-      cy.get('[aria-controls="thresholdSection"]').click();
-      cy.getElementByTestId('exploreVisAddThreshold').click();
-      // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
