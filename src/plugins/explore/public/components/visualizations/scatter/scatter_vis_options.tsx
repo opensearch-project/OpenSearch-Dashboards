@@ -89,11 +89,7 @@ export const ScatterVisStyleControls: React.FC<ScatterVisStyleControlsProps> = (
           <EuiFlexItem grow={false}>
             <ScatterExclusiveVisOptions
               styles={styleOptions.exclusive}
-              useThresholdColor={styleOptions?.useThresholdColor}
               onChange={(exclusive) => updateStyleOption('exclusive', exclusive)}
-              onUseThresholdColorChange={(useThresholdColor) =>
-                updateStyleOption('useThresholdColor', useThresholdColor)
-              }
               shouldDisableUseThresholdColor={hasColorMapping}
               colorModeOption={styleOptions?.colorModeOption}
               onColorModeOptionChange={(option) => updateStyleOption('colorModeOption', option)}

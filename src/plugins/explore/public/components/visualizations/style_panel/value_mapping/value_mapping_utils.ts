@@ -14,17 +14,15 @@ export const decideScale = (
   validRanges: ValueMapping[] | undefined,
   validValues: ValueMapping[] | undefined
 ) => {
-  const usingRanges = validRanges && validRanges?.length > 0 && validValues?.length === 0;
-  const items = usingRanges ? validRanges : validValues;
+  const items = [...(validValues ?? []), ...(validRanges ?? [])];
+  if (items.length === 0) return null;
 
-  if (!items || items.length === 0) return null;
-
-  const labels = usingRanges
-    ? items.map((m) => `[${m.range?.min},${m.range?.max ?? '∞'})`)
-    : items.map((m) => m.value);
+  const labels = [
+    ...(validValues?.map((m) => m.value) ?? []),
+    ...(validRanges?.map((m) => `[${m.range?.min},${m.range?.max ?? '∞'})`) ?? []),
+  ];
 
   const colors = items.map((m, i) => resolveColor(m.color) || getCategoryNextColor(i));
-
   const keepNull = colorModeOption === 'highlightValueMapping';
 
   return {
@@ -49,27 +47,27 @@ export const generateTransformLayer = (
   numericField: string | undefined,
   validRanges: ValueMapping[] | undefined,
   validValues: ValueMapping[] | undefined,
-  colorModeOption: ColorModeOption | undefined
+  colorModeOption: ColorModeOption | undefined,
+  lookupCategory = false
 ) => {
   if (!canUseValueMapping) return [];
 
-  const useRangeMappings = validRanges && validRanges?.length > 0 && validValues?.length === 0;
+  const rangeChoices = validRanges?.map((mapping) => ({
+    mappingValue: `[${mapping?.range?.min},${mapping?.range?.max ?? '∞'})`,
+    displayText: mapping?.displayText,
+  }));
 
-  const valuesChoice = useRangeMappings
-    ? validRanges?.map((mapping) => ({
-        mappingValue: `[${mapping?.range?.min},${mapping?.range?.max ?? '∞'})`,
-        displayText: mapping?.displayText,
-      }))
-    : validValues?.map((mapping) => ({
-        mappingValue: mapping?.value,
-        displayText: mapping?.displayText,
-      }));
+  const valueChoices = validValues?.map((mapping) => ({
+    mappingValue: mapping?.value,
+    displayText: mapping?.displayText,
+  }));
+
   return [
     {
-      lookup: useRangeMappings ? 'mergedLabel' : numericField,
+      lookup: !lookupCategory ? 'mergedLabel' : numericField,
       from: {
         data: {
-          values: valuesChoice,
+          values: [...(valueChoices ?? []), ...(rangeChoices ?? [])],
         },
         key: 'mappingValue',
         fields: ['mappingValue', 'displayText'],
@@ -84,29 +82,22 @@ export const generateLabelExpr = (
   validValues: ValueMapping[] | undefined,
   colorModeOption: ColorModeOption | undefined
 ) => {
-  const usingRanges = validRanges && validRanges?.length > 0 && validValues?.length === 0;
-  const items = usingRanges ? validRanges : validValues;
+  const items = [...(validValues ?? []), ...(validRanges ?? [])];
+  if (items.length === 0) return null;
 
-  if (!items || items.length === 0) return null;
-
-  let mappingObject = items
-    .map(
-      (m) =>
-        `'${usingRanges ? `[${m.range?.min},${m.range?.max ?? '∞'})` : m.value}': '${
-          m.displayText
-            ? m.displayText
-            : usingRanges
-            ? `[${m.range?.min},${m.range?.max ?? '∞'})`
-            : m.value
-        }'`
-    )
-    .join(', ');
+  const mappings = [
+    ...(validValues?.map((m) => `'${m.value}': '${m.displayText || m.value}'`) ?? []),
+    ...(validRanges?.map((m) => {
+      const key = `[${m.range?.min},${m.range?.max ?? '∞'})`;
+      return `'${key}': '${m.displayText || key}'`;
+    }) ?? []),
+  ];
 
   if (colorModeOption === 'highlightValueMapping') {
-    mappingObject = mappingObject + `, null: 'unmatched'`;
+    mappings.push("null: 'unmatched'");
   }
 
-  return `{${mappingObject}}[datum.label] || datum.label`;
+  return `{${mappings.join(', ')}}[datum.label] || datum.label`;
 };
 
 export const generateConditions = (
@@ -193,20 +184,39 @@ export const processData = ({
 
   newRecord = newRecord.map((record) => {
     const value = record[numericalColumn!];
-    const matchingRange = rangeMappings?.find((r) => {
-      if (!r.range || r.range?.min === undefined) return false;
-      if (value && value >= r.range.min && value < (r.range.max ?? Infinity)) {
-        validRanges.add(r);
+    const matchingValue = validValues?.find((r) => {
+      if (value && value === Number(r.value)) {
         return true;
       }
       return false;
     });
 
+    let matchingRange;
+    if (!matchingValue) {
+      matchingRange = rangeMappings?.find((r) => {
+        if (!r.range || r.range?.min === undefined) return false;
+        if (
+          value !== null &&
+          value !== undefined &&
+          value >= r.range.min &&
+          value < (r.range.max ?? Infinity)
+        ) {
+          validRanges.add(r);
+          return true;
+        }
+        return false;
+      });
+    }
+
+    const label = matchingValue
+      ? matchingValue.value
+      : matchingRange
+      ? `[${matchingRange?.range?.min},${matchingRange?.range?.max ?? '∞'})`
+      : null;
+
     return {
       ...record,
-      mergedLabel: matchingRange
-        ? `[${matchingRange?.range?.min},${matchingRange?.range?.max ?? '∞'})`
-        : null,
+      mergedLabel: label,
     };
   });
 

@@ -8,8 +8,10 @@ import {
   decideTransform,
   generateTransformLayer,
   generateLabelExpr,
+  processData,
 } from './value_mapping_utils';
 import { ValueMapping } from '../../types';
+import { CalculationMethod } from '../../utils/calculation';
 
 // Mock the color utility functions
 jest.mock('../../theme/color_utils', () => ({
@@ -82,12 +84,12 @@ describe('value_mapping_utils', () => {
       });
     });
 
-    it('should prefer values over ranges when both exist', () => {
+    it('should accept both values and ranges when both exist', () => {
       const result = decideScale(undefined, mockValidRanges, mockValidValues);
 
       expect(result).toEqual({
-        domain: ['A', 'B'],
-        range: ['#ff0000', '#00ff00'],
+        domain: ['A', 'B', '[0,10)', '[10,20)', '[20,∞)'],
+        range: ['#ff0000', '#00ff00', '#ff0000', '#00ff00', '#0000ff'],
       });
     });
 
@@ -219,7 +221,8 @@ describe('value_mapping_utils', () => {
         'field',
         undefined,
         mockValidValues,
-        'useValueMapping'
+        'useValueMapping',
+        true
       );
 
       expect(result).toEqual([
@@ -250,7 +253,8 @@ describe('value_mapping_utils', () => {
         'field',
         undefined,
         mockValidValues,
-        'highlightValueMapping'
+        'highlightValueMapping',
+        true
       );
 
       expect(result).toEqual([
@@ -262,6 +266,43 @@ describe('value_mapping_utils', () => {
                 {
                   mappingValue: 'A',
                   displayText: 'Apple',
+                },
+              ],
+            },
+            key: 'mappingValue',
+            fields: ['mappingValue', 'displayText'],
+          },
+        },
+      ]);
+    });
+
+    it('should accept both values and ranges when both exist', () => {
+      const result = generateTransformLayer(
+        true,
+        'field',
+        mockValidRanges,
+        mockValidValues,
+        'highlightValueMapping',
+        true
+      );
+
+      expect(result).toEqual([
+        {
+          lookup: 'field',
+          from: {
+            data: {
+              values: [
+                {
+                  mappingValue: 'A',
+                  displayText: 'Apple',
+                },
+                {
+                  mappingValue: '[0,10)',
+                  displayText: 'Low',
+                },
+                {
+                  mappingValue: '[10,∞)',
+                  displayText: 'High',
                 },
               ],
             },
@@ -347,7 +388,9 @@ describe('value_mapping_utils', () => {
     it('should prefer values over ranges when both exist', () => {
       const result = generateLabelExpr(mockValidRanges, mockValidValues, 'useValueMapping');
 
-      expect(result).toBe("{'A': 'Apple Display', 'B': 'B'}[datum.label] || datum.label");
+      expect(result).toBe(
+        "{'A': 'Apple Display', 'B': 'B', '[0,10)': 'Low Range', '[10,∞)': 'High Range'}[datum.label] || datum.label"
+      );
     });
 
     it('should handle ranges without max value correctly', () => {
@@ -364,5 +407,143 @@ describe('value_mapping_utils', () => {
 
       expect(result).toBe("{'[5,∞)': 'Above 5'}[datum.label] || datum.label");
     });
+  });
+});
+
+describe('processData', () => {
+  const mockData = [
+    { category: 'A', value: 10 },
+    { category: 'A', value: 20 },
+    { category: 'B', value: 30 },
+    { category: 'B', value: 40 },
+  ];
+
+  const mockValueMappings: ValueMapping[] = [
+    { type: 'value', value: '15', displayText: 'Fifteen', color: '#ff0000' },
+    { type: 'value', value: '30', displayText: 'Thirty', color: '#00ff00' },
+  ];
+
+  const mockRangeMappings: ValueMapping[] = [
+    { type: 'range', range: { min: 0, max: 25 }, displayText: 'Low', color: '#0000ff' },
+    { type: 'range', range: { min: 25, max: 50 }, displayText: 'High', color: '#ffff00' },
+  ];
+
+  it('should process data without calculation method', () => {
+    const result = processData({
+      transformedData: mockData,
+      categoricalColumn: 'category',
+      numericalColumn: 'value',
+      transformedCalculationMethod: undefined,
+      valueMappings: mockValueMappings,
+      rangeMappings: mockRangeMappings,
+    });
+
+    expect(result.newRecord).toHaveLength(4);
+    expect(result.newRecord[0]).toHaveProperty('mergedLabel');
+    expect(result.validValues).toHaveLength(1);
+    expect(result.validRanges).toHaveLength(2);
+  });
+
+  it('should process data with total calculation method', () => {
+    const result = processData({
+      transformedData: mockData,
+      categoricalColumn: 'category',
+      numericalColumn: 'value',
+      transformedCalculationMethod: 'total' as CalculationMethod,
+      valueMappings: mockValueMappings,
+      rangeMappings: mockRangeMappings,
+    });
+
+    expect(result.newRecord).toHaveLength(2);
+    expect(result.newRecord[0].value).toBe(30);
+    expect(result.newRecord[1].value).toBe(70);
+  });
+
+  it('should handle value mappings correctly', () => {
+    const testData = [{ category: 'A', value: 30 }];
+
+    const result = processData({
+      transformedData: testData,
+      categoricalColumn: 'category',
+      numericalColumn: 'value',
+      transformedCalculationMethod: undefined,
+      valueMappings: mockValueMappings,
+      rangeMappings: undefined,
+    });
+
+    expect(result.newRecord[0].mergedLabel).toBe('30');
+    expect(result.validValues).toMatchObject([
+      {
+        type: 'value',
+        value: '30',
+        displayText: 'Thirty',
+        color: '#00ff00',
+      },
+    ]);
+  });
+
+  it('should handle range mappings correctly', () => {
+    const testData = [{ category: 'A', value: 15 }];
+
+    const result = processData({
+      transformedData: testData,
+      categoricalColumn: 'category',
+      numericalColumn: 'value',
+      transformedCalculationMethod: undefined,
+      valueMappings: undefined,
+      rangeMappings: mockRangeMappings,
+    });
+
+    expect(result.newRecord[0].mergedLabel).toBe('[0,25)');
+    expect(result.validRanges).toMatchObject([
+      { type: 'range', range: { min: 0, max: 25 }, displayText: 'Low', color: '#0000ff' },
+    ]);
+  });
+
+  it('should handle null values', () => {
+    const testData = [{ category: 'A', value: null }];
+
+    const result = processData({
+      transformedData: testData,
+      categoricalColumn: 'category',
+      numericalColumn: 'value',
+      transformedCalculationMethod: undefined,
+      valueMappings: mockValueMappings,
+      rangeMappings: mockRangeMappings,
+    });
+
+    expect(result.newRecord[0].mergedLabel).toBeNull();
+  });
+
+  it('should handle categoricalColumn2', () => {
+    const testData = [
+      { cat1: 'A', cat2: 'X', value: 10 },
+      { cat1: 'A', cat2: 'X', value: 30 },
+      { cat1: 'A', cat2: 'Y', value: 20 },
+    ];
+
+    const result = processData({
+      transformedData: testData,
+      categoricalColumn: 'cat1',
+      numericalColumn: 'value',
+      transformedCalculationMethod: 'total' as CalculationMethod,
+      valueMappings: [
+        {
+          type: 'value',
+          value: '40',
+          displayText: 'Thirty',
+          color: '#00ff00',
+        },
+      ],
+      rangeMappings: undefined,
+      categoricalColumn2: 'cat2',
+    });
+
+    expect(result.newRecord).toMatchObject([
+      { cat1: 'A', cat2: 'X', value: 40, mergedLabel: '40' },
+      { cat1: 'A', cat2: 'Y', value: 20, mergedLabel: null },
+    ]);
+    expect(result.newRecord[0].mergedLabel).toBe('40');
+    expect(result.categorical2Options).toEqual(['X', 'Y']);
   });
 });

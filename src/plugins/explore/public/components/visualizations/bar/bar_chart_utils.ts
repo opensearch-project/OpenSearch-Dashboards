@@ -234,15 +234,15 @@ export const buildCombinedScale = (
       range: (categorical2Options ?? []).map((c, i) => getCategoryNextColor(i)),
     };
   }
-  const usingRanges = validRanges && validRanges?.length > 0 && validValues?.length === 0;
-  const items = (usingRanges ? validRanges : validValues) ?? [];
 
-  const labels = [
-    ...(categorical2Options ?? []),
-    ...(usingRanges
-      ? items.map((m) => `[${m.range?.min},${m.range?.max ?? '∞'})`)
-      : items.map((m) => m.value)),
+  const items = [...(validValues ?? []), ...(validRanges ?? [])];
+
+  const mappinglabels = [
+    ...(validValues?.map((m) => m.value) ?? []),
+    ...(validRanges?.map((m) => `[${m.range?.min},${m.range?.max ?? '∞'})`) ?? []),
   ];
+
+  const labels = [...(categorical2Options ?? []), ...mappinglabels];
 
   const colors = [
     ...(categorical2Options ?? []).map((c, i) => getCategoryNextColor(i)),

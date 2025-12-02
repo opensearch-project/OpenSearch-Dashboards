@@ -10,10 +10,12 @@ import { defaultTableChartStyles, CellTypeConfig, TableChartStyle } from './tabl
 import { FilterConfig, TableColumnHeader } from './table_vis_filter';
 import { calculateValue } from '../utils/calculation';
 import { CellValue } from './cell_value';
-import { getThresholdByValue } from '../utils/utils';
+import { getThresholdByValue, getValueMappingByValue } from '../utils/utils';
 import { matchesFilter } from './table_vis_utils';
 
 import './table_vis.scss';
+import { DEFAULT_GREY } from '../theme/default_colors';
+import { resolveColor } from '../theme/color_utils';
 
 interface TableVisProps {
   rows: Array<Record<string, any>>;
@@ -231,7 +233,8 @@ export const TableVis = React.memo(
         if (
           columnCellType !== 'auto' &&
           styleOptions?.thresholds &&
-          styleOptions.thresholds.length > 0
+          styleOptions.thresholds.length > 0 &&
+          styleOptions?.colorModeOption === 'useThresholdColor'
         ) {
           const threshold = getThresholdByValue(cellValue, styleOptions.thresholds);
           if (threshold) {
@@ -241,11 +244,30 @@ export const TableVis = React.memo(
           }
         }
 
+        let displayText;
+        if (
+          columnCellType !== 'auto' &&
+          styleOptions?.valueMappingOptions?.valueMappings &&
+          styleOptions?.valueMappingOptions?.valueMappings.length > 0 &&
+          styleOptions.colorModeOption === 'highlightValueMapping'
+        ) {
+          const mapping = getValueMappingByValue(
+            cellValue,
+            styleOptions.valueMappingOptions.valueMappings
+          );
+          if (mapping) {
+            color = resolveColor(mapping.color);
+            displayText = mapping?.displayText;
+          } else {
+            color = DEFAULT_GREY;
+          }
+        }
+
         return (
           <CellValue
             setCellProps={setCellProps}
             textAlign={textAlign}
-            value={cellValue}
+            value={displayText || cellValue}
             colorMode={columnCellType}
             color={color}
             dataLinks={styleOptions?.dataLinks}
@@ -266,6 +288,8 @@ export const TableVis = React.memo(
         styleOptions?.globalAlignment,
         styleOptions?.dataLinks,
         popoverOpenCell,
+        styleOptions?.colorModeOption,
+        styleOptions?.valueMappingOptions.valueMappings,
       ]
     );
 

@@ -90,16 +90,17 @@ const mergeNumercialRecord = (
   records: Record<string, any>,
   timestampField: string,
   nextData?: string,
-  range?: RangeValue
+  range?: RangeValue | string
 ) => {
   const endTime = nextData ? nextData : records[records.length - 1][timestampField];
   const startTime = records[0][timestampField];
   const duration = new Date(endTime).getTime() - new Date(startTime).getTime();
+  const label = typeof range === 'string' ? range : `[${range?.min},${range?.max ?? '∞'})`;
   return {
     ...records[0],
     start: startTime,
     end: endTime,
-    ...(range ? { mergedLabel: `[${range?.min},${range?.max ?? '∞'})` } : {}),
+    ...(range ? { mergedLabel: label } : {}),
     duration: formatDuration(duration),
     mergedCount: records.length,
   };
@@ -267,15 +268,24 @@ export const mergeNumericalData = (
   groupField?: string,
   rangeField?: string,
   mappings?: ValueMapping[],
+  valueMappings?: ValueMapping[],
   disconnectThreshold?: string,
   connectThreshold?: string,
   colorModeOption: ColorModeOption = 'none'
-): [Array<Record<string, any>>, ValueMapping[] | undefined] => {
-  if (!timestampField || !groupField || !rangeField) return [data, []];
+): [Array<Record<string, any>>, ValueMapping[] | undefined, ValueMapping[] | undefined] => {
+  if (!timestampField || !groupField || !rangeField) return [data, [], []];
 
   const sorted = [...data].sort(
     (a, b) => new Date(a[timestampField]).getTime() - new Date(b[timestampField]).getTime()
   );
+
+  // Collect all possible values from the secondary categorical field
+  const allPossibleOptions = Array.from(new Set(sorted.map((t) => t[rangeField!])));
+
+  const validValues = valueMappings?.filter((r) => {
+    if (!r.value) return false;
+    return allPossibleOptions.includes(Number(r.value));
+  });
 
   // Filter ranges to only include those within data bounds
   const validRanges = mappings?.filter((r) => {
@@ -291,7 +301,7 @@ export const mergeNumericalData = (
   });
 
   // if validRange doesn't exist, fallback to categorical state timeline
-  if (validRanges?.length === 0 || colorModeOption === 'none') {
+  if ((validRanges?.length === 0 && validValues?.length === 0) || colorModeOption === 'none') {
     return [
       fallbackForCategorical(
         sorted,
@@ -302,26 +312,32 @@ export const mergeNumericalData = (
         connectThreshold
       ),
       [],
+      [],
     ];
   }
   const INVALID_RANGE = { min: Infinity, max: Infinity };
 
   const findRange = (value: string) => {
     // Handle empty value
+    // TODO handle special value mapping for null
     if (value === null || value === undefined) return undefined;
     const numberValue = Number(value);
-    const range = validRanges?.find(
-      (r) =>
-        r?.range?.min !== undefined &&
-        r.range.min <= numberValue &&
-        (r.range.max ?? Infinity) > numberValue
-    )?.range;
+    const matchingValue = validValues?.find((v) => v.value === `${value}`)?.value;
+    let matchingRange;
+    if (!matchingValue) {
+      matchingRange = validRanges?.find(
+        (r) =>
+          r?.range?.min !== undefined &&
+          r.range.min <= numberValue &&
+          (r.range.max ?? Infinity) > numberValue
+      )?.range;
+    }
 
     // if unmatched, return an invalid range as indentifier
-    return range ? range : INVALID_RANGE;
+    return matchingValue ? matchingValue : matchingRange ? matchingRange : INVALID_RANGE;
   };
 
-  const merged = mergeByGroup<RangeValue>({
+  const merged = mergeByGroup<RangeValue | string>({
     sorted,
     groupField,
     valueField: rangeField,
@@ -332,7 +348,7 @@ export const mergeNumericalData = (
     mergeFn: mergeNumercialRecord,
   });
 
-  return [merged, validRanges];
+  return [merged, validRanges, validValues];
 };
 
 // Fallback: when no valid values exist, group same values
@@ -351,77 +367,86 @@ const fallbackForCategorical = (
 
   for (const g1 of Object.values(groups)) {
     // Buffer for consecutive same-value entries
-    let buffer: Array<Record<string, any>> = [];
-    let firstNullValueTime: string | undefined;
+    const buffer: Array<Record<string, any>> = [];
 
-    const flushSavedBuffer = (nextTimestamp: string) => {
-      if (buffer.length === 0) return;
+    fallBackMerge(
+      g1,
+      buffer,
+      merged,
+      timestampField,
+      groupField2,
+      disconnectThreshold,
+      connectThreshold
+    );
 
-      const next = generatedDisconnectTimestamp(
-        nextTimestamp,
-        buffer[buffer.length - 1][timestampField],
-        disconnectThreshold
-      );
-      const rec = mergeRecords(buffer, timestampField, next);
-      merged.push(rec);
-      buffer = [];
-    };
+    // const flushSavedBuffer = (nextTimestamp: string) => {
+    //   if (buffer.length === 0) return;
 
-    for (let i = 0; i < g1.length; i++) {
-      const curr = g1[i];
+    //   const next = generatedDisconnectTimestamp(
+    //     nextTimestamp,
+    //     buffer[buffer.length - 1][timestampField],
+    //     disconnectThreshold
+    //   );
+    //   const rec = mergeRecords(buffer, timestampField, next);
+    //   merged.push(rec);
+    //   buffer = [];
+    // };
 
-      if (curr[groupField2] === undefined || curr[groupField2] === null) {
-        if (buffer.length > 0) {
-          firstNullValueTime ??= curr[timestampField];
-          if (connectThreshold && firstNullValueTime) {
-            const thresholdTime = addThresholdTime(firstNullValueTime, connectThreshold);
-            if (thresholdTime && new Date(curr[timestampField]).getTime() >= thresholdTime) {
-              continue;
-            }
-            buffer.push(curr);
-            continue;
-          }
-        }
-        flushSavedBuffer(curr[timestampField]);
-        continue;
-      }
+    // for (let i = 0; i < g1.length; i++) {
+    //   const curr = g1[i];
 
-      // Handle first non-null value after a series of nulls when connect threshold is enabled
-      // to check if last null can be connected or not
-      if (firstNullValueTime && connectThreshold && buffer.length > 0) {
-        const thresholdTime = addThresholdTime(firstNullValueTime, connectThreshold);
-        const shouldFlush =
-          thresholdTime && new Date(curr[timestampField]).getTime() >= thresholdTime;
+    //   if (curr[groupField2] === undefined || curr[groupField2] === null) {
+    //     if (buffer.length > 0) {
+    //       firstNullValueTime ??= curr[timestampField];
+    //       if (connectThreshold && firstNullValueTime) {
+    //         const thresholdTime = addThresholdTime(firstNullValueTime, connectThreshold);
+    //         if (thresholdTime && new Date(curr[timestampField]).getTime() >= thresholdTime) {
+    //           continue;
+    //         }
+    //         buffer.push(curr);
+    //         continue;
+    //       }
+    //     }
+    //     flushSavedBuffer(curr[timestampField]);
+    //     continue;
+    //   }
 
-        // If threshold exceeded(cannot connect the last null)flush the buffer and continue processing
-        if (shouldFlush) {
-          const lastTime = buffer[buffer.length - 1][timestampField];
-          flushSavedBuffer(lastTime);
-        }
+    //   // Handle first non-null value after a series of nulls when connect threshold is enabled
+    //   // to check if last null can be connected or not
+    //   if (firstNullValueTime && connectThreshold && buffer.length > 0) {
+    //     const thresholdTime = addThresholdTime(firstNullValueTime, connectThreshold);
+    //     const shouldFlush =
+    //       thresholdTime && new Date(curr[timestampField]).getTime() >= thresholdTime;
 
-        // Reset null tracking variables
-        firstNullValueTime = undefined;
-      }
+    //     // If threshold exceeded(cannot connect the last null)flush the buffer and continue processing
+    //     if (shouldFlush) {
+    //       const lastTime = buffer[buffer.length - 1][timestampField];
+    //       flushSavedBuffer(lastTime);
+    //     }
 
-      const prev = buffer.length ? buffer[0][groupField2] : null;
+    //     // Reset null tracking variables
+    //     firstNullValueTime = undefined;
+    //   }
 
-      if (curr[groupField2] === prev) {
-        buffer.push(curr);
-      } else {
-        // Value changed - merge buffered entries and start new buffer
-        if (buffer.length > 0) {
-          flushSavedBuffer(curr[timestampField]);
-        }
+    //   const prev = buffer.length ? buffer[0][groupField2] : null;
 
-        buffer = [curr];
-      }
-    }
+    //   if (curr[groupField2] === prev) {
+    //     buffer.push(curr);
+    //   } else {
+    //     // Value changed - merge buffered entries and start new buffer
+    //     if (buffer.length > 0) {
+    //       flushSavedBuffer(curr[timestampField]);
+    //     }
 
-    // Merge any remaining buffered entries
-    if (buffer.length) {
-      const rec = mergeRecords(buffer, timestampField);
-      if (rec) merged.push(rec);
-    }
+    //     buffer = [curr];
+    //   }
+    // }
+
+    // // Merge any remaining buffered entries
+    // if (buffer.length) {
+    //   const rec = mergeRecords(buffer, timestampField);
+    //   if (rec) merged.push(rec);
+    // }
   }
 
   return merged;
@@ -436,10 +461,95 @@ const fallbackForSingleCategorical = (
   connectThreshold?: string
 ) => {
   const merged: Array<Record<string, any>> = [];
-  let buffer: Array<Record<string, any>> = [];
+  const buffer: Array<Record<string, any>> = [];
 
-  let firstNullValueTime: string | undefined;
+  // const flushSavedBuffer = (nextTimestamp: string) => {
+  //   if (buffer.length === 0) return;
 
+  //   const next = generatedDisconnectTimestamp(
+  //     nextTimestamp,
+  //     buffer[buffer.length - 1][timestampField],
+  //     disconnectThreshold
+  //   );
+  //   const rec = mergeRecords(buffer, timestampField, next);
+  //   merged.push(rec);
+  //   buffer = [];
+  // };
+  // for (let i = 0; i < sorted.length; i++) {
+  //   const curr = sorted[i];
+  //   const prev = buffer.length ? buffer[0][groupField1] : null;
+
+  //   if (curr[groupField1] === undefined || curr[groupField1] === null) {
+  //     if (buffer.length > 0) {
+  //       firstNullValueTime ??= curr[timestampField];
+  //       if (connectThreshold && firstNullValueTime) {
+  //         const thresholdTime = addThresholdTime(firstNullValueTime, connectThreshold);
+  //         if (thresholdTime && new Date(curr[timestampField]).getTime() >= thresholdTime) {
+  //           continue;
+  //         }
+  //         buffer.push(curr);
+  //         continue;
+  //       }
+  //     }
+  //     flushSavedBuffer(curr[timestampField]);
+  //     continue;
+  //   }
+
+  //   // Handle first non-null value after a series of nulls when connect threshold is enabled
+  //   // to check if last null can be connected or not
+  //   if (firstNullValueTime && connectThreshold && buffer.length > 0) {
+  //     const thresholdTime = addThresholdTime(firstNullValueTime, connectThreshold);
+  //     const shouldFlush =
+  //       thresholdTime && new Date(curr[timestampField]).getTime() >= thresholdTime;
+
+  //     // If threshold exceeded(cannot connect the last null)flush the buffer and continue processing
+  //     if (shouldFlush) {
+  //       const lastTime = buffer[buffer.length - 1][timestampField];
+  //       flushSavedBuffer(lastTime);
+  //     }
+
+  //     // Reset null tracking variables
+  //     firstNullValueTime = undefined;
+  //   }
+
+  //   if (curr[groupField1] === prev) {
+  //     buffer.push(curr);
+  //   } else {
+  //     // Value changed - merge buffered entries and start new buffer
+  //     if (buffer.length > 0) {
+  //       flushSavedBuffer(curr[timestampField]);
+  //     }
+  //     buffer = [curr];
+  //   }
+  // }
+  // // Merge any remaining buffered entries
+  // if (buffer.length) {
+  //   const rec = mergeRecords(buffer, timestampField);
+  //   if (rec) merged.push(rec);
+  // }
+
+  fallBackMerge(
+    sorted,
+    buffer,
+    merged,
+    timestampField,
+    groupField1,
+    disconnectThreshold,
+    connectThreshold
+  );
+
+  return merged;
+};
+
+export const fallBackMerge = (
+  sorted: Array<Record<string, any>>,
+  buffer: Array<Record<string, any>>,
+  merged: Array<Record<string, any>>,
+  timestampField: string,
+  groupField1: string,
+  disconnectThreshold?: string,
+  connectThreshold?: string
+) => {
   const flushSavedBuffer = (nextTimestamp: string) => {
     if (buffer.length === 0) return;
 
@@ -452,6 +562,9 @@ const fallbackForSingleCategorical = (
     merged.push(rec);
     buffer = [];
   };
+
+  let firstNullValueTime: string | undefined;
+
   for (let i = 0; i < sorted.length; i++) {
     const curr = sorted[i];
     const prev = buffer.length ? buffer[0][groupField1] : null;
@@ -504,8 +617,6 @@ const fallbackForSingleCategorical = (
     const rec = mergeRecords(buffer, timestampField);
     if (rec) merged.push(rec);
   }
-
-  return merged;
 };
 
 type MergeFn<T extends string | RangeValue> = (
