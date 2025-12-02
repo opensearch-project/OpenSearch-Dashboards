@@ -40,6 +40,7 @@ jest.mock('./state_timeline_utils', () => ({
       },
     ],
     [{ range: { min: 0, max: 1000 }, color: '#ff0000' }],
+    [{ value: 'A', color: '#ff0000' }],
   ]),
   mergeCategoricalData: jest.fn(() => [
     [
@@ -185,7 +186,7 @@ describe('to_expression', () => {
       expect(markLayer).toHaveProperty('encoding.color.field', 'mappingValue');
     });
 
-    it('should fallback to categorical state timeline when no range mappings are provided or set filter option to none', () => {
+    it('should able to handle value mappings in numerical state timeline', () => {
       const mockAxisColumnMappings: AxisColumnMappings = {
         [AxisRole.COLOR]: mockNumericalColumns[0],
         [AxisRole.Y]: mockCateColumns[0],
@@ -211,8 +212,8 @@ describe('to_expression', () => {
           timestamp: '2023-01-01',
           start: '2023-01-01',
           end: '2023-01-02',
+          mergedLabel: '[200,400)',
           category: 'A',
-          category2: 'true',
         },
       ]);
       expect(result).toHaveProperty('layer');
@@ -254,7 +255,7 @@ describe('to_expression', () => {
 
       expect(markLayer2).toHaveProperty('encoding.y.field', 'category');
       expect(markLayer2).toHaveProperty('encoding.y.type', 'nominal');
-      expect(markLayer2).toHaveProperty('encoding.color.field', 'mappingValue');
+      expect(markLayer2).toHaveProperty('encoding.color.field', 'v1');
     });
 
     it('includes text layer when showValues is true', () => {

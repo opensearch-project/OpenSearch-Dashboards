@@ -27,7 +27,7 @@ import {
 } from '../style_panel/value_mapping/value_mapping_utils';
 
 export const createNumericalStateTimeline = (
-  transfsormedData: Array<Record<string, any>>,
+  transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
@@ -49,75 +49,6 @@ export const createNumericalStateTimeline = (
   const valueMappings = styleOptions?.valueMappingOptions?.valueMappings?.filter(
     (mapping) => mapping?.type === 'value'
   );
-
-  const transformedData = [
-    {
-      'field-0': '200',
-      'field-1': 1000,
-      'field-2': '2025-10-10 13:00:25.215',
-    },
-    {
-      'field-0': '200',
-      'field-1': 1200,
-      'field-2': '2025-10-10 13:09:58.196',
-    },
-    {
-      'field-0': '200',
-      'field-1': null,
-      'field-2': '2025-10-10 14:11:34.325',
-    },
-    {
-      'field-0': '200',
-      'field-1': null,
-      'field-2': '2025-10-10 15:08:42.43',
-    },
-    {
-      'field-0': '404',
-      'field-1': 1223,
-      'field-2': '2025-10-10 15:11:20.728',
-    },
-    {
-      'field-0': '200',
-      'field-1': 76,
-      'field-2': '2025-10-10 16:15:49.302',
-    },
-    {
-      'field-0': '200',
-      'field-1': 76,
-      'field-2': '2025-10-10 16:40:49.302',
-    },
-    {
-      'field-0': '404',
-      'field-1': 47,
-      'field-2': '2025-10-10 15:16:09.895',
-    },
-
-    {
-      'field-0': '200',
-      'field-1': 8884,
-      'field-2': '2025-10-10 17:19:22.088',
-    },
-    {
-      'field-0': '200',
-      'field-1': 3426,
-      'field-2': '2025-10-10 18:20:27.94',
-    },
-    {
-      'field-0': '200',
-      'field-1': 4604,
-      'field-2': '2025-10-10 19:21:15.848',
-    },
-    {
-      'field-0': '500',
-      'field-1': 6977,
-      'field-2': '2025-10-10 15:26:51.127',
-    },
-    {
-      'field-0': '500',
-      'field-1': 5636,
-      'field-2': '2025-10-11 03:17:31.634',
-    },
-  ];
 
   const disconnectThreshold =
     styleOptions?.exclusive?.disconnectValues?.disableMode === DisableMode.Threshold
@@ -291,7 +222,7 @@ export const createNumericalStateTimeline = (
 };
 
 export const createCategoricalStateTimeline = (
-  transformedsData: Array<Record<string, any>>,
+  transformedData: Array<Record<string, any>>,
   numericalColumns: VisColumn[],
   categoricalColumns: VisColumn[],
   dateColumns: VisColumn[],
@@ -322,59 +253,6 @@ export const createCategoricalStateTimeline = (
     (mapping) => mapping?.type === 'value'
   );
 
-  const transformedData = [
-    {
-      'field-0': '200',
-      'field-2': '2025-10-10 13:00:25.215',
-      'field-1': 'A',
-    },
-    {
-      'field-0': '200',
-      'field-1': 'A',
-      'field-2': '2025-10-10 13:09:58.196',
-    },
-    {
-      'field-0': '200',
-      'field-1': null,
-      'field-2': '2025-10-10 14:11:34.325',
-    },
-    {
-      'field-0': '200',
-      'field-1': 'C',
-      'field-2': '2025-10-10 15:08:42.43',
-    },
-    {
-      'field-0': '404',
-      'field-1': 'B',
-      'field-2': '2025-10-10 15:11:20.728',
-    },
-    {
-      'field-0': '200',
-      'field-1': 'C',
-      'field-2': '2025-10-10 16:15:49.302',
-    },
-    {
-      'field-0': '404',
-      'field-1': 'B',
-      'field-2': '2025-10-10 15:16:09.895',
-    },
-
-    {
-      'field-0': '200',
-      'field-1': 'B',
-      'field-2': '2025-10-10 17:19:22.088',
-    },
-    {
-      'field-0': '200',
-      'field-1': 'B',
-      'field-2': '2025-10-10 18:20:27.94',
-    },
-    {
-      'field-0': '200',
-      'field-1': 'C',
-      'field-2': '2025-10-10 19:21:15.848',
-    },
-  ];
   const [processedData, validValues] = mergeCategoricalData(
     transformedData,
     xAxis?.column,

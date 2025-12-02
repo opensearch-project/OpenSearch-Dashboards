@@ -334,6 +334,7 @@ export const mergeNumericalData = (
     }
 
     // if unmatched, return an invalid range as indentifier
+    // to merge un-matched entries together and get the merge count
     return matchingValue ? matchingValue : matchingRange ? matchingRange : INVALID_RANGE;
   };
 
@@ -378,75 +379,6 @@ const fallbackForCategorical = (
       disconnectThreshold,
       connectThreshold
     );
-
-    // const flushSavedBuffer = (nextTimestamp: string) => {
-    //   if (buffer.length === 0) return;
-
-    //   const next = generatedDisconnectTimestamp(
-    //     nextTimestamp,
-    //     buffer[buffer.length - 1][timestampField],
-    //     disconnectThreshold
-    //   );
-    //   const rec = mergeRecords(buffer, timestampField, next);
-    //   merged.push(rec);
-    //   buffer = [];
-    // };
-
-    // for (let i = 0; i < g1.length; i++) {
-    //   const curr = g1[i];
-
-    //   if (curr[groupField2] === undefined || curr[groupField2] === null) {
-    //     if (buffer.length > 0) {
-    //       firstNullValueTime ??= curr[timestampField];
-    //       if (connectThreshold && firstNullValueTime) {
-    //         const thresholdTime = addThresholdTime(firstNullValueTime, connectThreshold);
-    //         if (thresholdTime && new Date(curr[timestampField]).getTime() >= thresholdTime) {
-    //           continue;
-    //         }
-    //         buffer.push(curr);
-    //         continue;
-    //       }
-    //     }
-    //     flushSavedBuffer(curr[timestampField]);
-    //     continue;
-    //   }
-
-    //   // Handle first non-null value after a series of nulls when connect threshold is enabled
-    //   // to check if last null can be connected or not
-    //   if (firstNullValueTime && connectThreshold && buffer.length > 0) {
-    //     const thresholdTime = addThresholdTime(firstNullValueTime, connectThreshold);
-    //     const shouldFlush =
-    //       thresholdTime && new Date(curr[timestampField]).getTime() >= thresholdTime;
-
-    //     // If threshold exceeded(cannot connect the last null)flush the buffer and continue processing
-    //     if (shouldFlush) {
-    //       const lastTime = buffer[buffer.length - 1][timestampField];
-    //       flushSavedBuffer(lastTime);
-    //     }
-
-    //     // Reset null tracking variables
-    //     firstNullValueTime = undefined;
-    //   }
-
-    //   const prev = buffer.length ? buffer[0][groupField2] : null;
-
-    //   if (curr[groupField2] === prev) {
-    //     buffer.push(curr);
-    //   } else {
-    //     // Value changed - merge buffered entries and start new buffer
-    //     if (buffer.length > 0) {
-    //       flushSavedBuffer(curr[timestampField]);
-    //     }
-
-    //     buffer = [curr];
-    //   }
-    // }
-
-    // // Merge any remaining buffered entries
-    // if (buffer.length) {
-    //   const rec = mergeRecords(buffer, timestampField);
-    //   if (rec) merged.push(rec);
-    // }
   }
 
   return merged;
@@ -463,71 +395,6 @@ const fallbackForSingleCategorical = (
   const merged: Array<Record<string, any>> = [];
   const buffer: Array<Record<string, any>> = [];
 
-  // const flushSavedBuffer = (nextTimestamp: string) => {
-  //   if (buffer.length === 0) return;
-
-  //   const next = generatedDisconnectTimestamp(
-  //     nextTimestamp,
-  //     buffer[buffer.length - 1][timestampField],
-  //     disconnectThreshold
-  //   );
-  //   const rec = mergeRecords(buffer, timestampField, next);
-  //   merged.push(rec);
-  //   buffer = [];
-  // };
-  // for (let i = 0; i < sorted.length; i++) {
-  //   const curr = sorted[i];
-  //   const prev = buffer.length ? buffer[0][groupField1] : null;
-
-  //   if (curr[groupField1] === undefined || curr[groupField1] === null) {
-  //     if (buffer.length > 0) {
-  //       firstNullValueTime ??= curr[timestampField];
-  //       if (connectThreshold && firstNullValueTime) {
-  //         const thresholdTime = addThresholdTime(firstNullValueTime, connectThreshold);
-  //         if (thresholdTime && new Date(curr[timestampField]).getTime() >= thresholdTime) {
-  //           continue;
-  //         }
-  //         buffer.push(curr);
-  //         continue;
-  //       }
-  //     }
-  //     flushSavedBuffer(curr[timestampField]);
-  //     continue;
-  //   }
-
-  //   // Handle first non-null value after a series of nulls when connect threshold is enabled
-  //   // to check if last null can be connected or not
-  //   if (firstNullValueTime && connectThreshold && buffer.length > 0) {
-  //     const thresholdTime = addThresholdTime(firstNullValueTime, connectThreshold);
-  //     const shouldFlush =
-  //       thresholdTime && new Date(curr[timestampField]).getTime() >= thresholdTime;
-
-  //     // If threshold exceeded(cannot connect the last null)flush the buffer and continue processing
-  //     if (shouldFlush) {
-  //       const lastTime = buffer[buffer.length - 1][timestampField];
-  //       flushSavedBuffer(lastTime);
-  //     }
-
-  //     // Reset null tracking variables
-  //     firstNullValueTime = undefined;
-  //   }
-
-  //   if (curr[groupField1] === prev) {
-  //     buffer.push(curr);
-  //   } else {
-  //     // Value changed - merge buffered entries and start new buffer
-  //     if (buffer.length > 0) {
-  //       flushSavedBuffer(curr[timestampField]);
-  //     }
-  //     buffer = [curr];
-  //   }
-  // }
-  // // Merge any remaining buffered entries
-  // if (buffer.length) {
-  //   const rec = mergeRecords(buffer, timestampField);
-  //   if (rec) merged.push(rec);
-  // }
-
   fallBackMerge(
     sorted,
     buffer,
@@ -541,6 +408,7 @@ const fallbackForSingleCategorical = (
   return merged;
 };
 
+// TODO adapt mergeInAGroup
 export const fallBackMerge = (
   sorted: Array<Record<string, any>>,
   buffer: Array<Record<string, any>>,

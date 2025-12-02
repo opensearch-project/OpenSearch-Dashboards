@@ -249,7 +249,8 @@ export const TableVis = React.memo(
           columnCellType !== 'auto' &&
           styleOptions?.valueMappingOptions?.valueMappings &&
           styleOptions?.valueMappingOptions?.valueMappings.length > 0 &&
-          styleOptions.colorModeOption === 'highlightValueMapping'
+          (styleOptions.colorModeOption === 'highlightValueMapping' ||
+            styleOptions.colorModeOption === 'useValueMapping')
         ) {
           const mapping = getValueMappingByValue(
             cellValue,

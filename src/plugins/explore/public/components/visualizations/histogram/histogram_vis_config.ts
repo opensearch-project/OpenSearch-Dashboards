@@ -79,7 +79,6 @@ export const defaultHistogramChartStyles: HistogramChartStyle = {
     thresholds: [],
     thresholdStyle: ThresholdMode.Off,
   },
-  // useThresholdColor: false,
   standardAxes: [
     {
       id: 'Axis-1',

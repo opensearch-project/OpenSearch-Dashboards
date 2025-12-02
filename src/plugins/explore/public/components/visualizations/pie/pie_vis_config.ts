@@ -43,9 +43,9 @@ export interface PieChartStyleOptions {
 }
 
 export type PieChartStyle = Required<
-  Omit<PieChartStyleOptions, 'legendTitle' | 'valueMappingOptions' | 'colorModeOption'>
+  Omit<PieChartStyleOptions, 'legendTitle' | 'colorModeOption'>
 > &
-  Pick<PieChartStyleOptions, 'legendTitle' | 'valueMappingOptions' | 'colorModeOption'>;
+  Pick<PieChartStyleOptions, 'legendTitle' | 'colorModeOption'>;
 
 export const defaultPieChartStyles: PieChartStyle = {
   // Basic controls

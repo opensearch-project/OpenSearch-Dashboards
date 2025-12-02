@@ -316,6 +316,7 @@ describe('state_timeline_utils', () => {
         'category',
         'value',
         mappings,
+        [],
         undefined,
         undefined,
         'useValueMapping'
@@ -350,6 +351,7 @@ describe('state_timeline_utils', () => {
         'category',
         'value',
         mappings,
+        [],
         undefined,
         undefined,
         'useValueMapping'
@@ -366,6 +368,55 @@ describe('state_timeline_utils', () => {
         status: 'inactive',
         value: 25,
         mergedLabel: '[Infinity,Infinity)',
+        mergedCount: 1,
+        duration: '0s',
+      });
+    });
+
+    it('should handle both value mappings and range mappings', () => {
+      const mappings: ValueMapping[] = [
+        { type: 'range', range: { min: 0, max: 20 }, displayText: 'Medium' },
+        { type: 'range', range: { min: 100, max: 200 }, displayText: 'High' },
+      ];
+
+      const valueMappings: ValueMapping[] = [{ type: 'range', value: '15', displayText: 'low' }];
+
+      const [result, validRanges, validValues] = mergeNumericalData(
+        mockData,
+        'timestamp',
+        'category',
+        'value',
+        mappings,
+        valueMappings,
+        undefined,
+        undefined,
+        'useValueMapping'
+      );
+
+      expect(validRanges).toHaveLength(1); // Only ranges that contain data values
+      expect(validRanges?.[0].range?.min).toBe(0);
+      expect(validRanges?.[0].range?.max).toBe(20);
+      expect(validValues).toHaveLength(1);
+      expect(validValues?.[0].value).toBe('15');
+      expect(result[0]).toMatchObject({
+        timestamp: '2023-01-01T10:00:00Z',
+        start: '2023-01-01T10:00:00Z',
+        end: '2023-01-01T11:00:00Z',
+        category: 'A',
+        status: 'active',
+        value: 5,
+        mergedLabel: '[0,20)',
+        mergedCount: 1,
+        duration: '1h',
+      });
+      expect(result[1]).toMatchObject({
+        timestamp: '2023-01-01T11:00:00Z',
+        start: '2023-01-01T11:00:00Z',
+        end: '2023-01-01T11:00:00Z',
+        category: 'A',
+        status: 'active',
+        value: 15,
+        mergedLabel: '15',
         mergedCount: 1,
         duration: '0s',
       });
