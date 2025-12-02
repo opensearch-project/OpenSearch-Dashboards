@@ -1,0 +1,2 @@
+infra:
+- [CVE-2025-56200] Bump validator.js to 13.15.23+ to fix URL validation bypass> ([#11010](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11010))
