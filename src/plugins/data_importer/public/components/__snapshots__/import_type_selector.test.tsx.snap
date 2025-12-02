@@ -1,78 +1,71 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ImportTypeSelector should render 1`] = `
+exports[`ImportTextContent should render 1`] = `
 <div>
-  <fieldset>
-    <legend
-      class="euiFormLegend"
-    >
-      <span
-        class="euiTitle euiTitle--xsmall"
-      >
-        Import type
-      </span>
-    </legend>
+  <div
+    class="euiPageContentBody"
+  >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
     >
       <div
         class="euiFlexItem"
       >
         <div
-          class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder euiPanel--flexGrowZero euiSplitPanel euiSplitPanel--row euiCheckableCard euiCheckableCard-isChecked"
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
           <div
-            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--primary euiPanel--noShadow euiPanel--noBorder euiPanel--flexGrowZero euiPanel--isClickable euiSplitPanel__inner"
+            class="euiFlexItem euiFlexItem--flexGrowZero"
           >
             <div
-              class="euiRadio euiRadio--noLabel"
+              class="euiText euiText--medium"
             >
-              <input
-                checked=""
-                class="euiRadio__input"
-                id="file-selection"
-                type="radio"
-                value=""
-              />
-              <div
-                class="euiRadio__circle"
-              />
+              File format:
             </div>
           </div>
           <div
-            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+            class="euiFlexItem euiFlexItem--flexGrowZero"
           >
-            <label
-              class="euiCheckableCard__label"
-              for="file-selection"
+            <div
+              class="euiFormControlLayout"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                class="euiFormControlLayout__childrenWrapper"
               >
-                <div
-                  class="euiFlexItem"
+                <select
+                  class="euiSelect"
                 >
-                  <div
-                    class="euiText euiText--medium"
+                  <option
+                    value="csv"
                   >
-                    Upload
-                  </div>
-                </div>
+                    csv
+                  </option>
+                  <option
+                    value="json"
+                  >
+                    json
+                  </option>
+                  <option
+                    value="ndjson"
+                  >
+                    ndjson
+                  </option>
+                </select>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                 >
                   <span
-                    class="euiToolTipAnchor"
+                    class="euiFormControlLayoutCustomIcon"
                   >
                     <span
-                      aria-label="Info"
-                      data-euiicon-type="iInCircle"
-                      tabindex="0"
+                      aria-hidden="true"
+                      class="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="arrowDown"
                     />
                   </span>
                 </div>
               </div>
-            </label>
+            </div>
           </div>
         </div>
       </div>
@@ -80,63 +73,133 @@ exports[`ImportTypeSelector should render 1`] = `
         class="euiFlexItem"
       >
         <div
-          class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--hasBorder euiPanel--flexGrowZero euiSplitPanel euiSplitPanel--row euiCheckableCard"
+          class="euiCodeEditorWrapper"
+          data-test-subj="codeEditorContainer"
         >
-          <div
-            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPanel--flexGrowZero euiPanel--isClickable euiSplitPanel__inner"
+          <button
+            class="euiCodeEditorKeyboardHint"
+            data-test-subj="codeEditorHint"
           >
-            <div
-              class="euiRadio euiRadio--noLabel"
+            <p
+              class="euiText"
             >
-              <input
-                class="euiRadio__input"
-                id="text-selection"
-                type="radio"
-                value=""
+              Press Enter to start editing.
+            </p>
+            <p
+              class="euiText"
+            >
+              When you're done, press Escape to stop editing.
+            </p>
+          </button>
+          <div
+            class=" ace_editor ace-tm"
+            style="height: 500px;"
+          >
+            <textarea
+              autocapitalize="off"
+              autocorrect="off"
+              class="ace_text-input"
+              id="mocked-id"
+              spellcheck="false"
+              style="opacity: 0;"
+              tabindex="-1"
+              wrap="off"
+            />
+            <div
+              aria-hidden="true"
+              class="ace_gutter"
+            >
+              <div
+                class="ace_layer ace_gutter-layer ace_folding-enabled"
               />
               <div
-                class="euiRadio__circle"
+                class="ace_gutter-active-line"
               />
             </div>
-          </div>
-          <div
-            class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
-          >
-            <label
-              class="euiCheckableCard__label"
-              for="text-selection"
+            <div
+              class="ace_scroller"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                class="ace_content"
               >
                 <div
-                  class="euiFlexItem"
+                  class="ace_layer ace_print-margin-layer"
                 >
                   <div
-                    class="euiText euiText--medium"
-                  >
-                    Text
-                  </div>
+                    class="ace_print-margin"
+                    style="left: 4px; visibility: visible;"
+                  />
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                  class="ace_layer ace_marker-layer"
+                />
+                <div
+                  class="ace_layer ace_text-layer"
+                  style="padding: 0px 4px;"
+                />
+                <div
+                  class="ace_layer ace_marker-layer"
+                />
+                <div
+                  class="ace_layer ace_cursor-layer ace_hidden-cursors"
                 >
-                  <span
-                    class="euiToolTipAnchor"
-                  >
-                    <span
-                      aria-label="Info"
-                      data-euiicon-type="iInCircle"
-                      tabindex="0"
-                    />
-                  </span>
+                  <div
+                    class="ace_cursor"
+                  />
                 </div>
               </div>
-            </label>
+            </div>
+            <div
+              class="ace_scrollbar ace_scrollbar-v"
+              style="display: none; width: 20px;"
+            >
+              <div
+                class="ace_scrollbar-inner"
+                style="width: 20px;"
+              />
+            </div>
+            <div
+              class="ace_scrollbar ace_scrollbar-h"
+              style="display: none; height: 20px;"
+            >
+              <div
+                class="ace_scrollbar-inner"
+                style="height: 20px;"
+              />
+            </div>
+            <div
+              style="height: auto; width: auto; top: 0px; left: 0px; visibility: hidden; position: absolute; white-space: pre; overflow: hidden;"
+            >
+              <div
+                style="height: auto; width: auto; top: 0px; left: 0px; visibility: hidden; position: absolute; white-space: pre; overflow: visible;"
+              />
+              <div
+                style="height: auto; width: auto; top: 0px; left: 0px; visibility: hidden; position: absolute; white-space: pre; overflow: visible;"
+              >
+                XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiText euiText--medium"
+        >
+          <div
+            class="euiTextColor euiTextColor--default"
+          >
+            0
+            /
+            10000
+             
+            characters
           </div>
         </div>
       </div>
     </div>
-  </fieldset>
+  </div>
 </div>
 `;
