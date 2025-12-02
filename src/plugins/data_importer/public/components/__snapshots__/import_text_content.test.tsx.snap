@@ -194,6 +194,7 @@ exports[`ImportTextContent should render 1`] = `
             0
             /
             10000
+             
             characters
           </div>
         </div>
