@@ -7,6 +7,7 @@ import {
   createNumericalStateTimeline,
   createCategoricalStateTimeline,
   createSingleCategoricalStateTimeline,
+  createSingleNumericalStateTimeline,
 } from './to_expression';
 import {
   DisableMode,
@@ -29,7 +30,7 @@ jest.mock('../utils/utils', () => ({
 }));
 
 jest.mock('./state_timeline_utils', () => ({
-  mergeNumericalData: jest.fn(() => [
+  mergeNumericalDataCore: jest.fn(() => [
     [
       {
         timestamp: '2023-01-01',
@@ -37,6 +38,8 @@ jest.mock('./state_timeline_utils', () => ({
         mergedLabel: '[200,400)',
         start: '2023-01-01',
         end: '2023-01-02',
+        duration: '1h 30m',
+        mergedCount: 3,
       },
     ],
     [{ range: { min: 0, max: 1000 }, color: '#ff0000' }],
@@ -65,7 +68,10 @@ jest.mock('./state_timeline_utils', () => ({
     ],
     [{ value: 'A', color: '#ff0000' }],
   ]),
-  convertThresholdsToValueMappings: jest.fn(),
+  convertThresholdsToValueMappings: jest.fn(() => [
+    { range: { min: 0, max: 100 }, color: '#green' },
+    { range: { min: 100, max: 200 }, color: '#yellow' },
+  ]),
 }));
 
 jest.mock('../style_panel/value_mapping/value_mapping_utils', () => ({
@@ -161,10 +167,12 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('data.values', [
         {
           timestamp: '2023-01-01',
+          category: 'A',
           mergedLabel: '[200,400)',
           start: '2023-01-01',
           end: '2023-01-02',
-          category: 'A',
+          duration: '1h 30m',
+          mergedCount: 3,
         },
       ]);
       expect(result).toHaveProperty('layer');
@@ -210,10 +218,12 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('data.values', [
         {
           timestamp: '2023-01-01',
+          category: 'A',
+          mergedLabel: '[200,400)',
           start: '2023-01-01',
           end: '2023-01-02',
-          mergedLabel: '[200,400)',
-          category: 'A',
+          duration: '1h 30m',
+          mergedCount: 3,
         },
       ]);
       expect(result).toHaveProperty('layer');
@@ -410,6 +420,257 @@ describe('to_expression', () => {
       };
       const result = createSingleCategoricalStateTimeline(mockData, [], [], [], styleWithLegend);
       expect(result.layer[0].encoding.color.legend.title).toBe('default');
+    });
+  });
+
+  describe('createSingleNumericalStateTimeline', () => {
+    const mockAxisColumnMappings: AxisColumnMappings = {
+      [AxisRole.COLOR]: mockNumericalColumns[0],
+      [AxisRole.X]: mockTimeColumns[0],
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should create a single numerical state timeline with correct structure', () => {
+      const rangeMappings = [{ type: 'range', range: { min: 0, max: 100 }, color: '#ff0000' }];
+
+      const result = createSingleNumericalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        { ...mockStyleOptions, valueMappingOptions: { valueMappings: rangeMappings } },
+        mockAxisColumnMappings
+      );
+
+      // Verify the basic structure
+      expect(result).toHaveProperty('$schema', VEGASCHEMA);
+      expect(result).toHaveProperty('data.values', [
+        {
+          timestamp: '2023-01-01',
+          category: 'A',
+          mergedLabel: '[200,400)',
+          start: '2023-01-01',
+          end: '2023-01-02',
+          duration: '1h 30m',
+          mergedCount: 3,
+        },
+      ]);
+      expect(result).toHaveProperty('layer');
+      expect(Array.isArray(result.layer)).toBe(true);
+
+      // Verify the mark layer
+      const markLayer = result.layer[0];
+      expect(markLayer).toHaveProperty('mark.type', 'rect');
+      expect(markLayer).toHaveProperty('mark.tooltip', true);
+
+      // Verify encoding
+      expect(markLayer).toHaveProperty('encoding.x.field', 'timestamp');
+      expect(markLayer).toHaveProperty('encoding.x.type', 'temporal');
+      expect(markLayer).toHaveProperty('encoding.x2.field', 'end');
+      expect(markLayer).toHaveProperty('encoding.y.field', 'fakeYAxis');
+      expect(markLayer).toHaveProperty('encoding.color.field', 'mappingValue');
+
+      // Verify fake Y axis is added in transform
+      expect(result.transform).toContainEqual({
+        calculate: "'Response'",
+        as: 'fakeYAxis',
+      });
+    });
+
+    it('should handle none color mode', () => {
+      const styleWithoutColorMode = {
+        ...mockStyleOptions,
+        colorModeOption: 'none',
+      };
+
+      const result = createSingleNumericalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        styleWithoutColorMode,
+        mockAxisColumnMappings
+      );
+
+      expect(result.layer[0].encoding.color.field).toBe('v1');
+    });
+
+    it('should include text layer when showValues is true and value mapping exists', () => {
+      const styleWithText = {
+        ...mockStyleOptions,
+        exclusive: { ...mockStyleOptions.exclusive, showValues: true },
+        valueMappingOptions: { valueMappings: [{ type: 'range', range: { min: 0 } }] },
+      };
+
+      const result = createSingleNumericalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        styleWithText,
+        mockAxisColumnMappings
+      );
+
+      expect(result.layer).toHaveLength(2);
+
+      const textLayer = result.layer[1];
+      expect(textLayer.mark.type).toBe('text');
+      expect(textLayer.encoding.text.field).toBe('displayText');
+    });
+
+    it('should not include text layer when showValues is false', () => {
+      const styleWithoutText = {
+        ...mockStyleOptions,
+        exclusive: { ...mockStyleOptions.exclusive, showValues: false },
+      };
+
+      const result = createSingleNumericalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        styleWithoutText,
+        mockAxisColumnMappings
+      );
+
+      expect(result.layer).toHaveLength(1);
+    });
+
+    it('should display custom legend title when provided', () => {
+      const styleWithLegend = {
+        ...mockStyleOptions,
+        legendTitle: 'Custom Legend',
+        addLegend: true,
+      };
+
+      const result = createSingleNumericalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        styleWithLegend,
+        mockAxisColumnMappings
+      );
+
+      expect(result.layer[0].encoding.color.legend.title).toBe('Custom Legend');
+    });
+
+    it('should hide legend when addLegend is false', () => {
+      const styleWithoutLegend = {
+        ...mockStyleOptions,
+        addLegend: false,
+      };
+
+      const result = createSingleNumericalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        styleWithoutLegend,
+        mockAxisColumnMappings
+      );
+
+      expect(result.layer[0].encoding.color.legend).toBe(null);
+    });
+
+    it('should set legend position correctly', () => {
+      const styleWithLegendPosition = {
+        ...mockStyleOptions,
+        addLegend: true,
+        legendPosition: 'RIGHT',
+      };
+
+      const result = createSingleNumericalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        styleWithLegendPosition,
+        mockAxisColumnMappings
+      );
+
+      expect(result.layer[0].encoding.color.legend.orient).toBe('right');
+    });
+
+    it('should include tooltip when tooltipOptions mode is not hidden', () => {
+      const styleWithTooltip = {
+        ...mockStyleOptions,
+        tooltipOptions: { mode: 'show' },
+      };
+
+      const result = createSingleNumericalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        styleWithTooltip,
+        mockAxisColumnMappings
+      );
+
+      expect(result.layer[0].mark.tooltip).toBe(true);
+      expect(result.layer[0].encoding.tooltip).toBeDefined();
+      expect(Array.isArray(result.layer[0].encoding.tooltip)).toBe(true);
+    });
+
+    it('should hide tooltip when tooltipOptions mode is hidden', () => {
+      const styleWithoutTooltip = {
+        ...mockStyleOptions,
+        tooltipOptions: { mode: 'hidden' },
+      };
+
+      const result = createSingleNumericalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        styleWithoutTooltip,
+        mockAxisColumnMappings
+      );
+
+      expect(result.layer[0].mark.tooltip).toBe(false);
+      expect(result.layer[0].encoding.tooltip).toBeUndefined();
+    });
+
+    it('should include title when titleOptions show is true', () => {
+      const styleWithTitle = {
+        ...mockStyleOptions,
+        titleOptions: { show: true, titleName: 'Custom Timeline Title' },
+      };
+
+      const result = createSingleNumericalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        styleWithTitle,
+        mockAxisColumnMappings
+      );
+
+      expect(result.title).toBe('Custom Timeline Title');
+    });
+
+    it('should handle row height styling', () => {
+      const styleWithRowHeight = {
+        ...mockStyleOptions,
+        exclusive: {
+          ...mockStyleOptions.exclusive,
+          rowHeight: 0.3,
+        },
+      };
+
+      const result = createSingleNumericalStateTimeline(
+        mockData,
+        mockNumericalColumns,
+        mockCateColumns,
+        mockTimeColumns,
+        styleWithRowHeight,
+        mockAxisColumnMappings
+      );
+
+      expect(result.layer[0].encoding.y.scale.padding).toBe(0.7);
     });
   });
 });

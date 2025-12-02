@@ -6,6 +6,7 @@
 import { groupBy } from 'lodash';
 import { ColorModeOption, RangeValue, Threshold, ValueMapping } from '../types';
 
+const INVALID_RANGE = { min: Infinity, max: Infinity };
 const addThresholdTime = (currentTime: string, threshold: string): number | undefined => {
   const date = new Date(currentTime.replace(' ', 'T'));
   if (isNaN(date.getTime())) {
@@ -96,6 +97,7 @@ const mergeNumercialRecord = (
   const startTime = records[0][timestampField];
   const duration = new Date(endTime).getTime() - new Date(startTime).getTime();
   const label = typeof range === 'string' ? range : `[${range?.min},${range?.max ?? '∞'})`;
+
   return {
     ...records[0],
     start: startTime,
@@ -153,8 +155,8 @@ export const mergeCategoricalData = (
       fallbackForCategorical(
         sorted,
         timestampField,
-        groupField1,
         groupField2,
+        groupField1,
         disconnectThreshold,
         connectThreshold
       ),
@@ -212,10 +214,11 @@ export const mergeSingleCategoricalData = (
     colorModeOption === 'useThresholdColor'
   ) {
     return [
-      fallbackForSingleCategorical(
+      fallbackForCategorical(
         sorted,
         timestampField,
         groupField1,
+        undefined,
         disconnectThreshold,
         connectThreshold
       ),
@@ -262,7 +265,7 @@ export const mergeSingleCategoricalData = (
 /**
  * Merges consecutive data points by a field that fall within the same numerical range.
  */
-export const mergeNumericalData = (
+export const mergeNumericalDataCore = (
   data: Array<Record<string, any>>,
   timestampField?: string,
   groupField?: string,
@@ -273,17 +276,16 @@ export const mergeNumericalData = (
   connectThreshold?: string,
   colorModeOption: ColorModeOption = 'none'
 ): [Array<Record<string, any>>, ValueMapping[] | undefined, ValueMapping[] | undefined] => {
-  if (!timestampField || !groupField || !rangeField) return [data, [], []];
+  if (!timestampField || !rangeField) return [data, [], []];
 
   const sorted = [...data].sort(
     (a, b) => new Date(a[timestampField]).getTime() - new Date(b[timestampField]).getTime()
   );
 
-  // Collect all possible values from the secondary categorical field
   const allPossibleOptions = Array.from(new Set(sorted.map((t) => t[rangeField!])));
 
   const validValues = valueMappings?.filter((r) => {
-    if (!r.value) return false;
+    if (r.value === undefined || r.value === null) return false;
     return allPossibleOptions.includes(Number(r.value));
   });
 
@@ -299,23 +301,6 @@ export const mergeNumericalData = (
       );
     });
   });
-
-  // if validRange doesn't exist, fallback to categorical state timeline
-  if ((validRanges?.length === 0 && validValues?.length === 0) || colorModeOption === 'none') {
-    return [
-      fallbackForCategorical(
-        sorted,
-        timestampField,
-        groupField,
-        rangeField,
-        disconnectThreshold,
-        connectThreshold
-      ),
-      [],
-      [],
-    ];
-  }
-  const INVALID_RANGE = { min: Infinity, max: Infinity };
 
   const findRange = (value: string) => {
     // Handle empty value
@@ -338,72 +323,107 @@ export const mergeNumericalData = (
     return matchingValue ? matchingValue : matchingRange ? matchingRange : INVALID_RANGE;
   };
 
-  const merged = mergeByGroup<RangeValue | string>({
-    sorted,
-    groupField,
-    valueField: rangeField,
-    timestampField,
-    disconnectThreshold,
-    connectThreshold,
-    findTarget: findRange,
-    mergeFn: mergeNumercialRecord,
-  });
+  // if matched mapping doesn't exist, fallback to categorical state timeline
+  if ((validRanges?.length === 0 && validValues?.length === 0) || colorModeOption === 'none') {
+    return [
+      fallbackForCategorical(
+        sorted,
+        timestampField,
+        rangeField,
+        groupField,
+        disconnectThreshold,
+        connectThreshold
+      ),
+      [],
+      [],
+    ];
+  }
 
-  return [merged, validRanges, validValues];
+  if (groupField) {
+    const merged = mergeByGroup<RangeValue | string>({
+      sorted,
+      groupField,
+      valueField: rangeField,
+      timestampField,
+      disconnectThreshold,
+      connectThreshold,
+      findTarget: findRange,
+      mergeFn: mergeNumercialRecord,
+    });
+
+    return [merged, validRanges, validValues];
+  } else {
+    const merged: Array<Record<string, any>> = [];
+
+    const buffer: Array<Record<string, any>> = [];
+    let currentValue: string | undefined;
+
+    const storeState = { buffer, currentValue };
+
+    mergeInAGroup<RangeValue | string>({
+      sorted,
+      timestampField,
+      valueField: rangeField,
+      disconnectThreshold,
+      connectThreshold,
+      merged,
+      storeState,
+      findTarget: findRange,
+      mergeFn: mergeNumercialRecord,
+    });
+
+    // Merge any remaining buffered entries, no need to pass nextTime
+    if (storeState.buffer.length > 0) {
+      const rec = mergeNumercialRecord(buffer, timestampField, undefined, storeState.currentValue);
+      merged.push(rec);
+    }
+
+    return [merged, validRanges, validValues];
+  }
 };
 
-// Fallback: when no valid values exist, group same values
-// TODO exact fallback logic and re use it
+/**
+ * fallback function for categorical data merging
+ * Handles both grouped and single field scenarios
+ */
 const fallbackForCategorical = (
   sorted: Array<Record<string, any>>,
   timestampField: string,
   groupField1: string,
-  groupField2: string,
+  groupField2?: string,
   disconnectThreshold?: string,
   connectThreshold?: string
 ) => {
-  const groups = groupBy(sorted, (item) => item[groupField1]);
-
   const merged: Array<Record<string, any>> = [];
 
-  for (const g1 of Object.values(groups)) {
-    // Buffer for consecutive same-value entries
-    const buffer: Array<Record<string, any>> = [];
+  if (groupField2) {
+    const groups = groupBy(sorted, (item) => item[groupField2]);
 
+    for (const g1 of Object.values(groups)) {
+      const buffer: Array<Record<string, any>> = [];
+      fallBackMerge(
+        g1,
+        buffer,
+        merged,
+        timestampField,
+        groupField1,
+        disconnectThreshold,
+        connectThreshold
+      );
+    }
+  } else {
+    // Single field scenario - work directly with sorted data
+    const buffer: Array<Record<string, any>> = [];
     fallBackMerge(
-      g1,
+      sorted,
       buffer,
       merged,
       timestampField,
-      groupField2,
+      groupField1,
       disconnectThreshold,
       connectThreshold
     );
   }
-
-  return merged;
-};
-
-// Fallback: when no valid values exist, group same values
-const fallbackForSingleCategorical = (
-  sorted: Array<Record<string, any>>,
-  timestampField: string,
-  groupField1: string,
-  disconnectThreshold?: string,
-  connectThreshold?: string
-) => {
-  const merged: Array<Record<string, any>> = [];
-  const buffer: Array<Record<string, any>> = [];
-
-  fallBackMerge(
-    sorted,
-    buffer,
-    merged,
-    timestampField,
-    groupField1,
-    disconnectThreshold,
-    connectThreshold
-  );
 
   return merged;
 };
@@ -463,6 +483,8 @@ export const fallBackMerge = (
       // If threshold exceeded(cannot connect the last null)flush the buffer and continue processing
       if (shouldFlush) {
         const lastTime = buffer[buffer.length - 1][timestampField];
+        // in such case, the last null does not count(can not be connected), should pop it.
+        buffer.pop();
         flushSavedBuffer(lastTime);
       }
 
@@ -615,6 +637,7 @@ export const mergeInAGroup = <T extends string | RangeValue>({
       // If threshold exceeded(cannot connect the last null)flush the buffer and continue processing
       if (shouldFlush) {
         const lastTime = storeState.buffer[storeState.buffer.length - 1][timestampField];
+        storeState.buffer.pop();
         flushBuffer(lastTime);
       }
 

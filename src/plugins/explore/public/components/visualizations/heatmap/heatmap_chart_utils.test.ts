@@ -327,4 +327,20 @@ describe('enhanceStyle', () => {
 
     expect(markLayer).toEqual(baseMarkLayer);
   });
+
+  it('able to handle value mapping', () => {
+    const markLayer = JSON.parse(JSON.stringify(baseMarkLayer));
+    enhanceStyle(
+      markLayer,
+      ({} as unknown) as HeatmapChartStyle,
+      transformedData,
+      colorField,
+      true,
+      [{ type: 'value', value: '10' }]
+    );
+
+    expect(markLayer.encoding.color.field).toBe('mappingValue');
+    expect(markLayer.encoding.color.type).toBe('nominal');
+    expect(markLayer.encoding.color.scale.type).toBeUndefined();
+  });
 });
