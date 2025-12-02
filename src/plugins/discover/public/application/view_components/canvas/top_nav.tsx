@@ -69,6 +69,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     return {
       filters: opensearchFilters.FilterStateStore.APP_STATE,
       query: true,
+      skipAppFiltersFromMemory: true,
     };
   }, []);
 
