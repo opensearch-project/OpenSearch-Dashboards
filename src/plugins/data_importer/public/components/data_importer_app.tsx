@@ -329,7 +329,11 @@ export const DataImporterPluginApp = ({
   }, [inputText, inputFile, config.maxTextCount, config.maxFileSizeBytes, notifications.toasts]);
 
   const renderDataSourceComponent = useMemo(() => {
-    const DataSourceSelector = dataSourceManagement!.ui.DataSourceSelector as React.ComponentType<any>;
+    if (!dataSourceEnabled || !dataSourceManagement) return null;
+
+    const DataSourceSelector = dataSourceManagement!.ui.DataSourceSelector as React.ComponentType<
+      any
+    >;
     return (
       <div className="devAppDataSourceSelector">
         <DataSourceSelector
@@ -339,6 +343,7 @@ export const DataImporterPluginApp = ({
           disabled={!dataSourceEnabled}
           fullWidth={false}
           compressed={false}
+          hideLocalCluster={hideLocalCluster}
         />
       </div>
     );
@@ -449,13 +454,17 @@ export const DataImporterPluginApp = ({
                           isDisabled={disableImport}
                           onClick={previewData}
                         >
-                          Preview
+                          {i18n.translate('dataImporter.previewButton', {
+                            defaultMessage: 'Preview',
+                          })}
                         </EuiButton>
                       </>
                     )}
                     <EuiSpacer size="s" />
                     <EuiButton fullWidth={true} isDisabled={disableImport} onClick={importData}>
-                      Import
+                      {i18n.translate('dataImporter.importButton', {
+                        defaultMessage: 'Import',
+                      })}
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={2}>

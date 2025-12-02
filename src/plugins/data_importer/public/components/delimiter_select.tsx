@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiTitle, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { EuiTitle, EuiSelect } from '@elastic/eui';
 import { CSV_SUPPORTED_DELIMITERS } from '../../common/constants';
 
 export interface DelimiterSelectProps {

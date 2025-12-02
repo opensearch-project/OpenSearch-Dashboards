@@ -59,7 +59,10 @@ export const PreviewComponent = ({
     const predictedType = predictedMapping?.properties?.[field]?.type;
     const existingType = existingMapping?.properties?.[field]?.type;
     if (predictedType && existingType && predictedType !== existingType) {
-      return `Predicted type: ${predictedType}, Existing type: ${existingType}`;
+      return i18n.translate('dataImporter.typeMismatchTooltip', {
+        defaultMessage: 'Predicted type: {predictedType}, Existing type: {existingType}',
+        values: { predictedType, existingType },
+      });
     }
     return '';
   };
@@ -76,7 +79,9 @@ export const PreviewComponent = ({
           </h3>
         </EuiText>
         <EuiFieldSearch
-          placeholder="Search..."
+          placeholder={i18n.translate('dataImporter.searchPlaceholder', {
+            defaultMessage: 'Search...',
+          })}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           isClearable

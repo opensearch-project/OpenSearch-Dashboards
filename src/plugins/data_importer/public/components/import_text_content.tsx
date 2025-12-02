@@ -86,7 +86,7 @@ export const ImportTextContentBody = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText color={numCharacters > characterLimit ? 'danger' : 'default'}>
-            {numCharacters}/{characterLimit}
+            {numCharacters}/{characterLimit}{' '}
             {i18n.translate('dataImporter.file.characters', {
               defaultMessage: 'characters',
             })}
