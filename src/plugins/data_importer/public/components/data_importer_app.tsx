@@ -329,10 +329,9 @@ export const DataImporterPluginApp = ({
   }, [inputText, inputFile, config.maxTextCount, config.maxFileSizeBytes, notifications.toasts]);
 
   const renderDataSourceComponent = useMemo(() => {
-    const DataSourceSelector = dataSourceManagement!.ui.DataSourceSelector;
+    const DataSourceSelector = dataSourceManagement!.ui.DataSourceSelector as React.ComponentType<any>;
     return (
       <div className="devAppDataSourceSelector">
-        {/* @ts-expect-error TS2604 TODO(ts-error): fixme */}
         <DataSourceSelector
           savedObjectsClient={savedObjects.client}
           notifications={notifications.toasts}
