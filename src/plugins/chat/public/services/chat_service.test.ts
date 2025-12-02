@@ -59,6 +59,61 @@ describe('ChatService', () => {
     });
   });
 
+  describe('getThreadId$', () => {
+    it('should return an observable that emits the current thread ID', (done) => {
+      const threadId$ = chatService.getThreadId$();
+
+      threadId$.subscribe((threadId) => {
+        expect(threadId).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+        expect(typeof threadId).toBe('string');
+        done();
+      });
+    });
+
+    it('should emit new thread ID when newThread is called', (done) => {
+      const threadId$ = chatService.getThreadId$();
+      const emittedValues: string[] = [];
+
+      threadId$.subscribe((threadId) => {
+        emittedValues.push(threadId);
+
+        if (emittedValues.length === 2) {
+          // Verify we got two different thread IDs
+          expect(emittedValues[0]).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+          expect(emittedValues[1]).toMatch(/^thread-\d+-[a-z0-9]{9}$/);
+          expect(emittedValues[0]).not.toBe(emittedValues[1]);
+          done();
+        }
+      });
+
+      // Trigger a new thread after initial subscription
+      setTimeout(() => {
+        chatService.newThread();
+      }, 10);
+    });
+
+    it('should provide consistent thread ID across multiple subscriptions', () => {
+      const threadId$ = chatService.getThreadId$();
+      let threadId1: string | undefined;
+      let threadId2: string | undefined;
+
+      // First subscription
+      threadId$.subscribe((threadId) => {
+        threadId1 = threadId;
+      });
+
+      // Second subscription
+      threadId$.subscribe((threadId) => {
+        threadId2 = threadId;
+      });
+
+      // Both subscriptions should receive the same current thread ID
+      expect(threadId1).toBeDefined();
+      expect(threadId2).toBeDefined();
+      expect(threadId1).toBe(threadId2);
+    });
+  });
+
   describe('ID generation methods', () => {
     it('should generate unique thread IDs', () => {
       const service1 = new ChatService();

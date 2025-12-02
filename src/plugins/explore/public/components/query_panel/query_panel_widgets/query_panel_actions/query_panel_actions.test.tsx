@@ -24,7 +24,7 @@ jest.mock('../../../../application/utils/state_management/selectors', () => ({
 }));
 
 jest.mock('../../../../application/utils/languages', () => ({
-  getQueryWithSource: jest.fn((query) => query),
+  prepareQueryForLanguage: jest.fn((query) => query),
 }));
 
 jest.mock('../../../../application/hooks/editor_hooks/use_editor_text/use_editor_text', () => ({
