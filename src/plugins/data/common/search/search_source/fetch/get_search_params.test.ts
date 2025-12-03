@@ -30,7 +30,7 @@
 
 import { UI_SETTINGS } from '../../../constants';
 import { GetConfigFn } from '../../../types';
-import { getSearchParams } from './get_search_params';
+import { getSearchParams, getExternalSearchParamsFromRequest } from './get_search_params';
 
 function getConfigStub(config: any = {}): GetConfigFn {
   return (key) => config[key];
@@ -44,5 +44,45 @@ describe('getSearchParams', () => {
     });
     const searchParams = getSearchParams(config);
     expect(searchParams.preference).toBe('aaa');
+  });
+});
+
+describe('getExternalSearchParamsFromRequest', () => {
+  const getConfig = getConfigStub({});
+
+  test('handles index with title property', () => {
+    const searchRequest = {
+      index: { title: 'my-index' },
+      body: { query: {} },
+    };
+    const result = getExternalSearchParamsFromRequest(searchRequest as any, { getConfig });
+    expect(result.index).toBe('my-index');
+  });
+
+  test('handles index as string', () => {
+    const searchRequest = {
+      index: 'my-index-string',
+      body: { query: {} },
+    };
+    const result = getExternalSearchParamsFromRequest(searchRequest as any, { getConfig });
+    expect(result.index).toBe('my-index-string');
+  });
+
+  test('handles undefined index with optional chaining', () => {
+    const searchRequest = {
+      index: undefined,
+      body: { query: {} },
+    };
+    const result = getExternalSearchParamsFromRequest(searchRequest as any, { getConfig });
+    expect(result.index).toBeUndefined();
+  });
+
+  test('handles null index with optional chaining', () => {
+    const searchRequest = {
+      index: null,
+      body: { query: {} },
+    };
+    const result = getExternalSearchParamsFromRequest(searchRequest as any, { getConfig });
+    expect(result.index).toBeNull();
   });
 });
