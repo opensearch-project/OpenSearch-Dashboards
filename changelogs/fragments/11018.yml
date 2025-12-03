@@ -1,0 +1,2 @@
+fix:
+- Use variable for language placeholder in explore editor ([#11018](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11018))
