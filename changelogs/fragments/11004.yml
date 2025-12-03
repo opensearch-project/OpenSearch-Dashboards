@@ -1,2 +1,2 @@
 fix:
-- Fix cypress test issue of table vis ([#11004](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11004))
+- Fix cypress test issue of explore vis ([#11004](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11004))
