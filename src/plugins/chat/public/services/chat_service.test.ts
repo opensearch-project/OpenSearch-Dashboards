@@ -543,6 +543,12 @@ describe('ChatService', () => {
 
       expect(() => chatService.newThread()).not.toThrow();
     });
+
+    it('should call resetConnection to clear agent state', () => {
+      chatService.newThread();
+
+      expect(mockAgent.resetConnection).toHaveBeenCalled();
+    });
   });
 
   describe('chat state persistence methods', () => {
