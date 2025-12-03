@@ -513,5 +513,8 @@ export class ChatService {
 
     // Clear dynamic context from global store for fresh chat session
     this.clearDynamicContextFromStore();
+
+    // Reset AgUiAgent connection state to clear any aborted controllers
+    this.resetConnection();
   }
 }

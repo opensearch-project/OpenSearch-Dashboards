@@ -36,8 +36,8 @@ export class AgUiAgent {
         this.abortController.abort();
       }
 
-      // If there's already an active connection, reuse the existing controller
-      if (!this.abortController) {
+      // Create new controller if none exists OR if the existing one is aborted
+      if (!this.abortController || this.abortController.signal.aborted) {
         this.abortController = new AbortController();
         this.sseBuffer = ''; // Reset buffer for new request
       }
