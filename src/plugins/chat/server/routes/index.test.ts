@@ -4,7 +4,6 @@
  */
 
 import supertest from 'supertest';
-import { Readable } from 'stream';
 import { setupServer } from '../../../../core/server/test_utils';
 import { loggingSystemMock } from '../../../../core/server/mocks';
 import { defineRoutes } from './index';
@@ -16,13 +15,18 @@ describe('Chat Proxy Routes', () => {
   let server: any;
   let mockFetch: jest.MockedFunction<typeof fetch>;
   let mockLogger: any;
+  let mockCapabilitiesResolver: jest.Mock;
 
-  const testSetup = async (agUiUrl?: string) => {
+  const testSetup = async (
+    agUiUrl?: string,
+    getCapabilitiesResolver?: () => ((request: any) => Promise<any>) | undefined,
+    mlCommonsAgentId?: string
+  ) => {
     const { server: testServer, httpSetup } = await setupServer();
     const router = httpSetup.createRouter('');
     mockLogger = loggingSystemMock.create().get();
 
-    defineRoutes(router, mockLogger, agUiUrl);
+    defineRoutes(router, mockLogger, agUiUrl, getCapabilitiesResolver, mlCommonsAgentId);
 
     // Mock dynamicConfigService required by server.start()
     const dynamicConfigService = {
@@ -37,6 +41,14 @@ describe('Chat Proxy Routes', () => {
 
   beforeEach(() => {
     mockFetch = fetch as jest.MockedFunction<typeof fetch>;
+
+    // Mock capabilities resolver
+    mockCapabilitiesResolver = jest.fn().mockResolvedValue({
+      investigation: {
+        agenticFeaturesEnabled: false, // Default to false
+      },
+    });
+
     jest.clearAllMocks();
   });
 
@@ -156,7 +168,7 @@ describe('Chat Proxy Routes', () => {
 
       expect(response.body.message).toBe('Network connection failed');
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error proxying request to AG-UI')
+        expect.stringContaining('AI agent routing error')
       );
     });
 
@@ -234,6 +246,188 @@ describe('Chat Proxy Routes', () => {
 
       // Verify the stream was attempted to be read
       expect(mockReader.read).toHaveBeenCalled();
+    });
+
+    describe('Generic ML Integration', () => {
+      it('should fallback to AG-UI when agenticFeaturesEnabled is true but ML context is not available', async () => {
+        // Enable agentic features but no ML context available
+        mockCapabilitiesResolver.mockResolvedValue({
+          investigation: {
+            agenticFeaturesEnabled: true,
+          },
+        });
+
+        // Mock successful AG-UI response
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          () => mockCapabilitiesResolver,
+          'test-agent-id'
+        );
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(200);
+
+        // Verify capabilities were checked
+        expect(mockCapabilitiesResolver).toHaveBeenCalled();
+
+        // Verify AG-UI was called as fallback
+        expect(mockFetch).toHaveBeenCalledWith('http://test-agui:3000', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'text/event-stream',
+          },
+          body: JSON.stringify(validRequest),
+        });
+      });
+
+      it('should fallback to AG-UI when agenticFeaturesEnabled is true but ML client is disabled', async () => {
+        // Enable agentic features but disable ML client
+        mockCapabilitiesResolver.mockResolvedValue({
+          investigation: {
+            agenticFeaturesEnabled: true,
+          },
+        });
+        // ML client disabled via missing context ML client
+
+        // Mock successful AG-UI response
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          () => mockCapabilitiesResolver,
+          'test-agent-id'
+        );
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(200);
+
+        // Verify capabilities were checked
+        expect(mockCapabilitiesResolver).toHaveBeenCalled();
+
+        // Verify AG-UI was called as fallback
+        expect(mockFetch).toHaveBeenCalledWith('http://test-agui:3000', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'text/event-stream',
+          },
+          body: JSON.stringify(validRequest),
+        });
+      });
+
+      it('should fallback to AG-UI when agenticFeaturesEnabled is false', async () => {
+        // Disable agentic features
+        mockCapabilitiesResolver.mockResolvedValue({
+          investigation: {
+            agenticFeaturesEnabled: false,
+          },
+        });
+
+        // Mock successful AG-UI response
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          () => mockCapabilitiesResolver,
+          'test-agent-id'
+        );
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(200);
+
+        // Verify capabilities were checked
+        expect(mockCapabilitiesResolver).toHaveBeenCalled();
+
+        // Verify AG-UI was called
+        expect(mockFetch).toHaveBeenCalled();
+      });
+
+      it('should return 503 when ML Commons agent ID is not configured', async () => {
+        // Enable agentic features
+        mockCapabilitiesResolver.mockResolvedValue({
+          investigation: {
+            agenticFeaturesEnabled: true,
+          },
+        });
+
+        const httpSetup = await testSetup(
+          undefined, // No AG-UI URL
+          () => mockCapabilitiesResolver,
+          undefined // No ML Commons agent ID
+        );
+
+        const response = await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(503);
+
+        expect(response.body.message).toContain(
+          'No AI agent available: ML Commons agent not enabled and AG-UI URL not configured'
+        );
+
+        // Verify AG-UI was not called since ML router handled the error
+        expect(mockFetch).not.toHaveBeenCalled();
+      });
+
+      it('should fallback to AG-UI when capabilities resolver is not available', async () => {
+        // Mock successful AG-UI response
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+
+        const httpSetup = await testSetup(
+          'http://test-agui:3000',
+          undefined, // No capabilities resolver
+          'test-agent-id'
+        );
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(200);
+
+        // Verify AG-UI was called as fallback
+        expect(mockFetch).toHaveBeenCalled();
+      });
     });
   });
 });
