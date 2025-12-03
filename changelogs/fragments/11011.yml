@@ -1,2 +1,2 @@
 infra:
-- [CVE-2025-56200] Bump validator.js to 13.15.23+ to fix URL validation bypass ([#11011](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11011))
+- [CVE-2025-56200] Removed the validator from yarn lock ([#11011](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11011))
