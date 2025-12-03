@@ -58,6 +58,7 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setHistoricalDataRange();
+      await PageObjects.discover.switchDiscoverTable('new');
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
@@ -166,7 +167,7 @@ export default function ({ getService, getPageObjects }) {
       await browser.get(newUrl.toString(), false);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const headers = await testSubjects.findAll('docTableHeaderField');
+      const headers = await PageObjects.discover.getColumnHeaders();
       // will be zero because the query inserted in the url doesn't match anything
       expect(headers.length).to.be(0);
     });

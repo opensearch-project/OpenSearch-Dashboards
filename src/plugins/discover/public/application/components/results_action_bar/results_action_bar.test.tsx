@@ -8,6 +8,10 @@ import { DiscoverResultsActionBar, DiscoverResultsActionBarProps } from './resul
 import { render, screen } from '@testing-library/react';
 import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 
+jest.mock('../discover_options/discover_options', () => ({
+  DiscoverOptions: () => <div data-test-subj="discoverOptionsButton" />,
+}));
+
 jest.mock('../download_csv', () => ({
   DiscoverDownloadCsv: () => <div data-test-subj="discoverDownloadCsvButton" />,
 }));
@@ -28,7 +32,6 @@ const mockRow1: OpenSearchSearchHit<Record<string, number | string>> = {
   _type: '',
   _score: 1,
 };
-
 const props: DiscoverResultsActionBarProps = {
   hits: 5,
   showResetButton: false,
@@ -48,6 +51,16 @@ describe('ResultsActionBar', () => {
   test('renders the HitCounter component', () => {
     render(<DiscoverResultsActionBar {...props} />);
     expect(screen.getByTestId('dscResultCount')).toBeInTheDocument();
+  });
+
+  test('does not render the DiscoverOptions component when isEnhancementEnabled', () => {
+    render(<DiscoverResultsActionBar {...props} isEnhancementsEnabled={true} />);
+    expect(screen.queryByTestId('discoverOptionsButton')).toBeFalsy();
+  });
+
+  test('renders the DiscoverOptions component when !isEnhancementEnabled', () => {
+    render(<DiscoverResultsActionBar {...props} isEnhancementsEnabled={false} />);
+    expect(screen.getByTestId('discoverOptionsButton')).toBeInTheDocument();
   });
 
   test('renders the DownloadCsv component when !!indexPattern and !!rows.length', () => {

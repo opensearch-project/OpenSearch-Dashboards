@@ -28,36 +28,33 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
-
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects, loadTestFile }) {
+  const browser = getService('browser');
   const opensearchArchiver = getService('opensearchArchiver');
+  const PageObjects = getPageObjects(['common']);
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
-  const pieChart = getService('pieChart');
-  const queryBar = getService('queryBar');
-  const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'discover']);
 
-  describe('dashboard query bar', () => {
-    before(async () => {
-      await opensearchArchiver.load('dashboard/current/opensearch_dashboards');
+  describe('context app', function () {
+    this.tags('ciGroup1');
+
+    before(async function () {
+      await browser.setWindowSize(1200, 800);
+      await opensearchArchiver.loadIfNeeded('logstash_functional');
+      await opensearchArchiver.load('visualize');
       await opensearchDashboardsServer.uiSettings.replace({
-        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+        defaultIndex: 'logstash-*',
       });
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('dashboard with filter');
+      await PageObjects.common.navigateToApp('discover');
     });
 
-    it('causes panels to reload when refresh is clicked', async () => {
-      await opensearchArchiver.unload('dashboard/current/data');
-
-      await queryBar.clickQuerySubmitButton();
-      await retry.tryForTime(5000, async () => {
-        const headers = await PageObjects.discover.getColumnHeaders();
-        expect(headers.length).to.be(0);
-        await pieChart.expectPieSliceCount(0);
-      });
+    after(function unloadMakelogs() {
+      return opensearchArchiver.unload('logstash_functional');
     });
+
+    loadTestFile(require.resolve('./_context_navigation'));
+    loadTestFile(require.resolve('./_discover_navigation'));
+    loadTestFile(require.resolve('./_filters'));
+    loadTestFile(require.resolve('./_size'));
+    loadTestFile(require.resolve('./_date_nanos'));
   });
 }

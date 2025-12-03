@@ -8,14 +8,19 @@ import React, { Fragment } from 'react';
 import dompurify from 'dompurify';
 
 import {
+  EuiDataGridCellValueElementProps,
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
 import { stringify } from '@osd/std';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
+import { OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { shortenDottedString } from '../../helpers';
 
+/**
+ * @deprecated - use DefaultDiscoverTable
+ */
 export function fetchSourceTypeDataCell(
   idxPattern: IndexPattern,
   row: Record<string, unknown>,
@@ -49,3 +54,46 @@ export function fetchSourceTypeDataCell(
     </EuiDescriptionList>
   );
 }
+
+/**
+ * @deprecated - use DefaultDiscoverTable
+ */
+export const fetchTableDataCell = (
+  idxPattern: IndexPattern,
+  dataRows: OpenSearchSearchHit[] | undefined,
+  isShortDots: boolean
+) => ({ rowIndex, columnId, isDetails }: EuiDataGridCellValueElementProps) => {
+  const singleRow = dataRows ? (dataRows[rowIndex] as Record<string, unknown>) : undefined;
+  const flattenedRows = dataRows ? dataRows.map((hit) => idxPattern.flattenHit(hit)) : [];
+  const flattenedRow = flattenedRows
+    ? (flattenedRows[rowIndex] as Record<string, unknown>)
+    : undefined;
+  const fieldInfo = idxPattern.fields.getByName(columnId);
+
+  if (typeof singleRow === 'undefined' || typeof flattenedRow === 'undefined') {
+    return <span>-</span>;
+  }
+
+  if (!fieldInfo?.type && typeof flattenedRow?.[columnId] === 'object') {
+    if (isDetails) {
+      return <span>{stringify(flattenedRow[columnId], null, 2)}</span>;
+    }
+
+    return <span>{stringify(flattenedRow[columnId])}</span>;
+  }
+
+  if (fieldInfo?.type === '_source') {
+    return fetchSourceTypeDataCell(idxPattern, singleRow, columnId, isDetails, isShortDots);
+  }
+
+  const formattedValue = idxPattern.formatField(singleRow, columnId);
+  if (typeof formattedValue === 'undefined') {
+    return <span>-</span>;
+  } else {
+    const sanitizedCellValue = dompurify.sanitize(formattedValue);
+    return (
+      // eslint-disable-next-line react/no-danger
+      <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
+    );
+  }
+};
