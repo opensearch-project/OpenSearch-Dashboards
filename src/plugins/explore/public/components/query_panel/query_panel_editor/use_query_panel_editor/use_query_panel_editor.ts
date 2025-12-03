@@ -37,30 +37,6 @@ type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
 type IEditorConstructionOptions = monaco.editor.IEditorConstructionOptions;
 
-const enabledPromptPlaceholder = i18n.translate(
-  'explore.queryPanel.queryPanelEditor.enabledPromptPlaceholder',
-  {
-    defaultMessage: 'Press `space` to Ask AI with natural language, or search with PPL',
-  }
-);
-
-const disabledPromptPlaceholder = i18n.translate(
-  'explore.queryPanel.queryPanelEditor.disabledPromptPlaceholder',
-  {
-    defaultMessage: 'Search using {symbol} PPL',
-    values: {
-      symbol: '</>',
-    },
-  }
-);
-
-const promptModePlaceholder = i18n.translate(
-  'explore.queryPanel.queryPanelEditor.promptPlaceholder',
-  {
-    defaultMessage: 'Ask AI with natural language. `Esc` to clear and search with PPL',
-  }
-);
-
 const TRIGGER_CHARACTERS = [' ', '=', "'", '"', '`'];
 
 const languageConfiguration: LanguageConfiguration = {
@@ -333,12 +309,41 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   }, [isQueryMode]);
 
   const placeholder = useMemo(() => {
+    const enabledPromptPlaceholder = i18n.translate(
+      'explore.queryPanel.queryPanelEditor.enabledPromptPlaceholder',
+      {
+        defaultMessage: 'Press `space` to Ask AI with natural language, or search with {language}',
+        values: {
+          language: queryLanguage,
+        },
+      }
+    );
+    const disabledPromptPlaceholder = i18n.translate(
+      'explore.queryPanel.queryPanelEditor.disabledPromptPlaceholder',
+      {
+        defaultMessage: 'Search using {symbol} {language}',
+        values: {
+          symbol: '</>',
+          language: queryLanguage,
+        },
+      }
+    );
+    const promptModePlaceholder = i18n.translate(
+      'explore.queryPanel.queryPanelEditor.promptPlaceholder',
+      {
+        defaultMessage: 'Ask AI with natural language. `Esc` to clear and search with {language}',
+        values: {
+          language: queryLanguage,
+        },
+      }
+    );
+
     if (!promptModeIsAvailable) {
       return disabledPromptPlaceholder;
     }
 
     return isPromptMode ? promptModePlaceholder : enabledPromptPlaceholder;
-  }, [isPromptMode, promptModeIsAvailable]);
+  }, [isPromptMode, promptModeIsAvailable, queryLanguage]);
 
   const onEditorClick = useCallback(() => {
     editorRef.current?.focus();
