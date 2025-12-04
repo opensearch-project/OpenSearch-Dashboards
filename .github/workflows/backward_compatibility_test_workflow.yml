@@ -163,11 +163,30 @@ jobs:
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
 
-      - name: Build OpenSearch Dashboards for testing
+      - name: Build minimal OpenSearch Dashboards for testing
         run: |
-          yarn build --skip-os-packages
-          OSD_BUILD_DIR=$(ls -d build/opensearch-dashboards-*-SNAPSHOT | head -1)
+          # Build only core platform without creating archives
+          yarn build:platform --linux --skip-archives || yarn build --skip-os-packages --skip-archives || {
+            echo "Standard build options failed, trying minimal build approach"
+            # Fallback: build only what's needed and clean aggressively
+            yarn build --skip-os-packages
+            # Clean up build artifacts to save space
+            rm -rf build/opensearch-dashboards/optimize/bundles/*.map
+            rm -rf build/opensearch-dashboards/node_modules/@types
+            rm -rf build/opensearch-dashboards/node_modules/typescript
+            find build/opensearch-dashboards/node_modules -name "*.d.ts" -delete
+            find build/opensearch-dashboards/node_modules -name "__tests__" -type d -exec rm -rf {} + 2>/dev/null || true
+            find build/opensearch-dashboards/node_modules -name "test" -type d -exec rm -rf {} + 2>/dev/null || true
+          }
+
+          # Find the built directory
+          OSD_BUILD_DIR=$(ls -d build/opensearch-dashboards* | head -1)
           echo "OSD_INSTALL_DIR=$(pwd)/$OSD_BUILD_DIR" >> $GITHUB_ENV
+          echo "Built OpenSearch Dashboards in: $OSD_BUILD_DIR"
+
+          # Check disk usage
+          df -h
+          du -sh build/
 
       - name: Run CI test group ${{ matrix.group }}
         id: ftr-tests
