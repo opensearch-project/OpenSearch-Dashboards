@@ -5,20 +5,36 @@
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { EuiTitle, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiTitle,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiToolTip,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiPagination,
+} from '@elastic/eui';
 import dompurify from 'dompurify';
 import { orderBy } from 'lodash';
 import { i18n } from '@osd/i18n';
+import './table_vis_dynamic_table.scss';
 import { FormattedTableContext } from '../table_vis_response_handler';
 import { TableVisConfig, ColumnSort } from '../types';
 import { TableUiState } from '../utils';
-import { usePagination } from '../utils';
 import { TableVisControl } from './table_vis_control';
 
 // Constants for dynamic sizing
 const MIN_COLUMN_WIDTH = 80;
 const COLUMN_BUFFER = 32;
 const HEADER_BUTTON_SPACE = 64;
+
+// Pagination constants
+const DEFAULT_PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 interface DynamicTableProps {
   title?: string;
@@ -28,17 +44,175 @@ interface DynamicTableProps {
   uiState: TableUiState;
 }
 
-const createMeasuringElement = (): HTMLDivElement => {
+const createMeasuringElement = (tableElement?: HTMLTableElement): HTMLDivElement => {
   const measuringDiv = document.createElement('div');
-  measuringDiv.style.position = 'absolute';
-  measuringDiv.style.visibility = 'hidden';
-  measuringDiv.style.whiteSpace = 'normal';
-  measuringDiv.style.wordBreak = 'break-word';
-  measuringDiv.style.width = 'auto';
-  measuringDiv.style.height = 'auto';
-  measuringDiv.style.fontSize = '14px';
+  measuringDiv.className = 'column-width-measuring-element';
+
+  // Copy actual table font styles for accurate measurement
+  if (tableElement) {
+    const cellStyles = tableElement.querySelector('tbody td');
+    if (cellStyles) {
+      const computedCellStyles = window.getComputedStyle(cellStyles);
+      measuringDiv.style.fontSize = computedCellStyles.fontSize;
+      measuringDiv.style.fontFamily = computedCellStyles.fontFamily;
+      measuringDiv.style.fontWeight = computedCellStyles.fontWeight;
+    }
+  }
+
   document.body.appendChild(measuringDiv);
   return measuringDiv;
+};
+
+const TableCell = ({
+  sanitizedContent,
+  filterable,
+  rowIndex,
+  colIndex,
+  filterBucket,
+  columnId,
+  fieldMapping,
+}: {
+  sanitizedContent: string;
+  filterable?: boolean;
+  rowIndex: number;
+  colIndex: number;
+  filterBucket: (rowIndex: number, columnIndex: number, negate: boolean) => void;
+  columnId: string;
+  fieldMapping?: any;
+}) => {
+  return (
+    <div className="tableVisCell">
+      <span
+        className="tableVisCell__dataField"
+        data-test-subj="tableVisCellDataField"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+      />
+      {filterable && (
+        <span className="tableVisCell__filter" data-test-subj="tableVisCellFilter">
+          <EuiToolTip
+            content={i18n.translate('visTypeTable.tableVisFilter.filterForValue', {
+              defaultMessage: 'Filter for value',
+            })}
+          >
+            <EuiButtonIcon
+              size="xs"
+              onClick={() => filterBucket(rowIndex, colIndex, false)}
+              iconType="magnifyWithPlus"
+              aria-label={i18n.translate('visTypeTable.tableVisFilter.filterForValue', {
+                defaultMessage: 'Filter for value',
+              })}
+              data-test-subj="tableVisFilterForValue"
+              className="tableVisCell__filterButton"
+            />
+          </EuiToolTip>
+          <EuiToolTip
+            content={i18n.translate('visTypeTable.tableVisFilter.filterOutValue', {
+              defaultMessage: 'Filter out value',
+            })}
+          >
+            <EuiButtonIcon
+              size="xs"
+              onClick={() => filterBucket(rowIndex, colIndex, true)}
+              iconType="magnifyWithMinus"
+              aria-label={i18n.translate('visTypeTable.tableVisFilter.filterOutValue', {
+                defaultMessage: 'Filter out value',
+              })}
+              data-test-subj="tableVisFilterOutValue"
+              className="tableVisCell__filterButton"
+            />
+          </EuiToolTip>
+        </span>
+      )}
+    </div>
+  );
+};
+
+const TablePaginationControls = ({
+  activePage,
+  pageCount,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
+}: {
+  activePage: number;
+  pageCount: number;
+  pageSize: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
+}) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const onButtonClick = () => setIsPopoverOpen((prev) => !prev);
+  const closePopover = () => setIsPopoverOpen(false);
+
+  const getIconType = (size: number) => (size === pageSize ? 'check' : 'empty');
+
+  const button = (
+    <EuiButtonEmpty
+      size="s"
+      color="text"
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={onButtonClick}
+      data-test-subj="tableVisRowsPerPageButton"
+    >
+      {i18n.translate('visTypeTable.pagination.rowsPerPage', {
+        defaultMessage: 'Rows per page: {pageSize}',
+        values: { pageSize },
+      })}
+    </EuiButtonEmpty>
+  );
+
+  const items = PAGE_SIZE_OPTIONS.map((size) => (
+    <EuiContextMenuItem
+      key={`${size} rows`}
+      icon={getIconType(size)}
+      onClick={() => {
+        closePopover();
+        onPageSizeChange(size);
+      }}
+      data-test-subj={`tableVisRowsPerPage-${size}`}
+    >
+      {i18n.translate('visTypeTable.pagination.rowsOption', {
+        defaultMessage: '{size} rows',
+        values: { size },
+      })}
+    </EuiContextMenuItem>
+  ));
+
+  return (
+    <EuiFlexGroup
+      justifyContent="spaceBetween"
+      alignItems="center"
+      className="tableVisPagination"
+      data-test-subj="tableVisPaginationControls"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          button={button}
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+          anchorPosition="upLeft"
+        >
+          <EuiContextMenuPanel items={items} />
+        </EuiPopover>
+      </EuiFlexItem>
+
+      <EuiFlexItem grow={false}>
+        <EuiPagination
+          aria-label={i18n.translate('visTypeTable.pagination.ariaLabel', {
+            defaultMessage: 'Table pagination',
+          })}
+          pageCount={pageCount}
+          activePage={activePage}
+          onPageClick={onPageChange}
+          data-test-subj="tableVisPagination"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };
 
 export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
@@ -51,14 +225,25 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
   const { rows, columns, formattedColumns } = table;
   const tableRef = useRef<HTMLTableElement>(null);
   const [columnWidths, setColumnWidths] = useState<number[]>([]);
-  const [hoveredCell, setHoveredCell] = useState<{ rowIndex: number; colIndex: number } | null>(
-    null
-  );
-  const pagination = usePagination(visConfig, rows.length) || {
-    pageIndex: 0,
-    pageSize: rows.length,
-    totalPages: 1,
-  };
+
+  // Pagination state
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(visConfig.perPage || DEFAULT_PAGE_SIZE);
+
+  // Calculate total pages
+  const pageCount = Math.ceil(rows.length / pageSize);
+
+  // Reset to first page when page size changes or data changes
+  useEffect(() => {
+    setPageIndex(0);
+  }, [pageSize, rows.length]);
+
+  // Ensure pageIndex is valid when pageCount changes
+  useEffect(() => {
+    if (pageIndex >= pageCount && pageCount > 0) {
+      setPageIndex(pageCount - 1);
+    }
+  }, [pageCount, pageIndex]);
 
   // Sorting logic
   const sortedRows = useMemo(() => {
@@ -74,12 +259,19 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
     }
   }, [formattedColumns, rows, sort]);
 
+  // Paginated rows
+  const paginatedRows = useMemo(() => {
+    const startIndex = pageIndex * pageSize;
+    const endIndex = startIndex + pageSize;
+    return sortedRows.slice(startIndex, endIndex);
+  }, [sortedRows, pageIndex, pageSize]);
+
   useEffect(() => {
     if (!tableRef.current) return;
 
     const measuringDiv = createMeasuringElement();
     const tableElement = tableRef.current;
-    const tableContainer = tableElement.closest('.table-vis-container');
+    const tableContainer = tableElement.closest('.tableVisContainer');
     const containerWidth = tableContainer
       ? tableContainer.getBoundingClientRect().width
       : window.innerWidth * 0.7;
@@ -112,12 +304,57 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
     const newWidths = calculateColumnWidths();
     setColumnWidths(newWidths);
 
-    // Clean up measuring div
-    document.body.removeChild(measuringDiv);
-  }, [formattedColumns, rows]);
+    // Apply header truncation after widths are calculated
+    requestAnimationFrame(() => {
+      const headerCells = tableElement.querySelectorAll('thead th');
+      headerCells.forEach((th, index) => {
+        const headerTextElement = th.querySelector('.header-text');
+        if (headerTextElement && newWidths[index]) {
+          const headerElement = headerTextElement as HTMLElement;
+          const columnWidth = newWidths[index];
+          // Reserve space for sort icon and padding
+          const availableHeaderWidth = columnWidth - HEADER_BUTTON_SPACE;
+
+          // Measure header text width
+          measuringDiv.textContent = headerElement.textContent || '';
+          const headerTextWidth = measuringDiv.offsetWidth;
+
+          if (headerTextWidth > availableHeaderWidth) {
+            // Apply truncation styles
+            headerElement.style.maxWidth = `${availableHeaderWidth}px`;
+            headerElement.style.overflow = 'hidden';
+            headerElement.style.textOverflow = 'ellipsis';
+            headerElement.style.whiteSpace = 'nowrap';
+            headerElement.style.display = 'inline-block';
+          } else {
+            // Header fits, clear any truncation styles
+            headerElement.style.maxWidth = '';
+            headerElement.style.overflow = '';
+            headerElement.style.textOverflow = '';
+            headerElement.style.whiteSpace = '';
+            headerElement.style.display = '';
+          }
+        }
+      });
+
+      // Clean up measuring div after truncation is applied
+      if (document.body.contains(measuringDiv)) {
+        document.body.removeChild(measuringDiv);
+      }
+    });
+
+    return () => {
+      // Cleanup in case component unmounts before RAF executes
+      if (document.body.contains(measuringDiv)) {
+        document.body.removeChild(measuringDiv);
+      }
+    };
+  }, [formattedColumns, rows, columnWidths.length]);
 
   // Filter bucket function
   const filterBucket = (rowIndex: number, columnIndex: number, negate: boolean) => {
+    // Calculate the actual row index in the full dataset
+    const actualRowIndex = pageIndex * pageSize + rowIndex;
     const formattedColumnIds = formattedColumns.map((column) => column.id);
     event({
       name: 'filterBucket',
@@ -128,7 +365,7 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
               columns: columns.filter((column) => formattedColumnIds.includes(column.id)),
               rows,
             },
-            row: rowIndex,
+            row: actualRowIndex,
             column: columnIndex,
           },
         ],
@@ -151,10 +388,22 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
           };
 
     setSort(newSort);
+    // Reset to first page when sorting changes
+    setPageIndex(0);
   };
 
   const handleColumnResize = (columnIndex: number, width: number) => {
     setWidth({ colIndex: columnIndex, width });
+  };
+
+  const handlePageChange = (newPageIndex: number) => {
+    setPageIndex(newPageIndex);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    // Reset to first page when page size changes
+    setPageIndex(0);
   };
 
   // Footer total calculation
@@ -164,15 +413,6 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
     return column?.formattedTotal || null;
   };
 
-  // Paginated rows
-  const paginatedRows =
-    pagination.pageIndex === 0
-      ? sortedRows
-      : sortedRows.slice(
-          pagination.pageIndex * pagination.pageSize,
-          (pagination.pageIndex + 1) * pagination.pageSize
-        );
-
   return (
     <EuiFlexItem>
       {title && (
@@ -180,51 +420,61 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
           <h3>{title}</h3>
         </EuiTitle>
       )}
-      <div className="table-vis-container">
+      <div className="tableVisContainer">
         <TableVisControl filename={visConfig.title} rows={sortedRows} columns={formattedColumns} />
-        <table
-          ref={tableRef}
-          style={{
-            width: '100%',
-            tableLayout: 'fixed',
-            borderCollapse: 'separate',
-            borderSpacing: '0',
-          }}
-        >
+        <table ref={tableRef}>
           <thead>
             <tr>
-              {formattedColumns.map((col, index) => (
-                <th
-                  key={col.id}
-                  style={{
-                    width: `${columnWidths[index] || 'auto'}px`,
-                    cursor: 'pointer',
-                    padding: '8px',
-                    borderBottom: '1px solid #d3d3d3',
-                  }}
-                  onClick={() => handleSort(index)}
-                  onMouseDown={(e) => {
-                    const initialWidth = columnWidths[index];
-                    const startX = e.clientX;
+              {formattedColumns.map((col, index) => {
+                const headerWidth = columnWidths[index] || 'auto';
 
-                    const onMouseMove = (moveEvent: MouseEvent) => {
-                      const delta = moveEvent.clientX - startX;
-                      const newWidth = Math.max(initialWidth + delta, MIN_COLUMN_WIDTH);
-                      handleColumnResize(index, newWidth);
-                    };
+                return (
+                  <th
+                    key={col.id}
+                    className={`tableVisHeaderField ${
+                      sort.colIndex === index ? 'tableVisHeaderField-isSorted' : ''
+                    }`}
+                    style={{
+                      width: typeof headerWidth === 'number' ? `${headerWidth}px` : headerWidth,
+                    }}
+                    onClick={() => handleSort(index)}
+                    onMouseDown={(e) => {
+                      const initialWidth = columnWidths[index];
+                      const startX = e.clientX;
 
-                    const onMouseUp = () => {
-                      document.removeEventListener('mousemove', onMouseMove);
-                      document.removeEventListener('mouseup', onMouseUp);
-                    };
+                      const onMouseMove = (moveEvent: MouseEvent) => {
+                        const delta = moveEvent.clientX - startX;
+                        const newWidth = Math.max(initialWidth + delta, MIN_COLUMN_WIDTH);
+                        handleColumnResize(index, newWidth);
+                      };
 
-                    document.addEventListener('mousemove', onMouseMove);
-                    document.addEventListener('mouseup', onMouseUp);
-                  }}
-                >
-                  {col.title}
-                </th>
-              ))}
+                      const onMouseUp = () => {
+                        document.removeEventListener('mousemove', onMouseMove);
+                        document.removeEventListener('mouseup', onMouseUp);
+                      };
+
+                      document.addEventListener('mousemove', onMouseMove);
+                      document.addEventListener('mouseup', onMouseUp);
+                    }}
+                  >
+                    <span className="tableVisHeaderField__content">
+                      <EuiToolTip content={col.title} position="top">
+                        <span className="header-text">{col.title}</span>
+                      </EuiToolTip>
+                      <EuiIcon
+                        type={
+                          sort.colIndex === index && sort.direction
+                            ? sort.direction === 'asc'
+                              ? 'sortUp'
+                              : 'sortDown'
+                            : 'sortDown'
+                        }
+                        className="tableVisHeaderField__sortIcon"
+                      />
+                    </span>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
@@ -240,102 +490,39 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
                       <td
                         key={col.id}
                         style={{
-                          width: `${columnWidths[colIndex] || 'auto'}px`,
+                          width:
+                            typeof columnWidths[colIndex] === 'number'
+                              ? `${columnWidths[colIndex]}px`
+                              : 'auto',
                           padding: '8px',
                           verticalAlign: 'top',
                           wordBreak: 'break-word',
-                          position: 'relative',
                         }}
                       >
-                        {/* Cell content */}
-                        <div
-                          // eslint-disable-next-line react/no-danger
-                          dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-                          onMouseEnter={() => {
-                            if (col.filterable) {
-                              setHoveredCell({ rowIndex, colIndex });
-                            }
-                          }}
-                          onMouseLeave={() => {
-                            setHoveredCell(null);
-                          }}
+                        <TableCell
+                          sanitizedContent={sanitizedContent}
+                          filterable={col.filterable}
+                          rowIndex={rowIndex}
+                          colIndex={colIndex}
+                          filterBucket={filterBucket}
+                          columnId={col.id}
                         />
-
-                        {/* Filter buttons */}
-                        {col.filterable &&
-                          hoveredCell?.rowIndex === rowIndex &&
-                          hoveredCell?.colIndex === colIndex && (
-                            <div
-                              style={{
-                                position: 'absolute',
-                                top: '4px',
-                                right: '4px',
-                                display: 'flex',
-                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                                border: '1px solid #d3d3d3',
-                                borderRadius: '4px',
-                                padding: '2px',
-                              }}
-                            >
-                              <button
-                                onClick={() => filterBucket(rowIndex, colIndex, false)}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  marginRight: '4px',
-                                  padding: 0,
-                                  color: '#0077cc',
-                                  fontSize: '14px',
-                                }}
-                                title={i18n.translate(
-                                  'visTypeTable.tableVisFilter.filterForValue',
-                                  {
-                                    defaultMessage: 'Filter for value',
-                                  }
-                                )}
-                              >
-                                <span role="img" aria-label="Filter for value">
-                                  ➕
-                                </span>
-                              </button>
-                              <button
-                                onClick={() => filterBucket(rowIndex, colIndex, true)}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  cursor: 'pointer',
-                                  padding: 0,
-                                  color: '#cc0000',
-                                  fontSize: '14px',
-                                }}
-                                title={i18n.translate(
-                                  'visTypeTable.tableVisFilter.filterOutValue',
-                                  {
-                                    defaultMessage: 'Filter out value',
-                                  }
-                                )}
-                              >
-                                <span role="img" aria-label="Filter out value">
-                                  ➖
-                                </span>
-                              </button>
-                            </div>
-                          )}
                       </td>
                     );
                   })}
                 </tr>
-                <tr>
-                  <td
-                    colSpan={formattedColumns.length}
-                    style={{
-                      borderBottom: '1px solid #e0e0e0',
-                      height: '1px',
-                      padding: 0,
-                    }}
-                  />
-                </tr>
+                {rowIndex < paginatedRows.length - 1 && (
+                  <tr>
+                    <td
+                      colSpan={formattedColumns.length}
+                      style={{
+                        borderBottom: '1px solid #e0e0e0',
+                        height: '1px',
+                        padding: 0,
+                      }}
+                    />
+                  </tr>
+                )}
               </React.Fragment>
             ))}
           </tbody>
@@ -349,6 +536,16 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
             </tfoot>
           )}
         </table>
+
+        {rows.length > 0 && (
+          <TablePaginationControls
+            activePage={pageIndex}
+            pageCount={pageCount}
+            pageSize={pageSize}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
+        )}
       </div>
     </EuiFlexItem>
   );
