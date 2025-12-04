@@ -12,6 +12,7 @@ import {
   Plugin,
   Logger,
   OpenSearchDashboardsRequest,
+  Capabilities,
 } from '../../../core/server';
 
 import { ChatPluginSetup, ChatPluginStart } from './types';

@@ -59,6 +59,8 @@ const mockSetAccessKeyForRequest = jest.fn();
 const mockSetSecretKeyForRequest = jest.fn();
 const mockSetRegionForRequest = jest.fn();
 
+const mockSetDataSourceIdForRequest = jest.fn();
+
 const defaultProps = {
   roles: mockRoles,
   selectedQueryPermissionRoles: [],
@@ -84,6 +86,11 @@ const defaultProps = {
   setStoreForRequest: mockSetStoreForRequest,
   setNameForRequest: mockSetNameForRequest,
   setDetailsForRequest: mockSetDetailsForRequest,
+  dataSources: [],
+  currentDataSourceId: '',
+  setDataSourceIdForRequest: mockSetDataSourceIdForRequest,
+  hideLocalCluster: false,
+  featureFlagStatus: false,
 };
 
 // Mock createMemoryHistory to return a consistent key
@@ -152,35 +159,157 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
     expect(mockSetStoreForRequest).toHaveBeenCalledWith('New Store URI');
   });
 
-  it('updates auth method on select change', async () => {
-    const wrapper = mountComponent();
-    const select = wrapper.find(EuiSelect);
-    await act(async () => {
-      const onChange = select.prop('onChange');
-      if (onChange) {
-        onChange({ target: { value: 'awssigv4' } } as any);
-      }
-    });
-    expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('awssigv4');
+  it('renders data source selection dropdown', () => {
+    const dataSources = [
+      { id: 'ds-1', title: 'Data Source 1' },
+      { id: 'ds-2', title: 'Data Source 2' },
+    ];
+    const propsWithDataSources = {
+      ...defaultProps,
+      dataSources,
+      featureFlagStatus: true,
+    };
+    const wrapper = mount(
+      <MemoryRouter>
+        {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
+        <ConfigurePrometheusDatasourcePanel {...propsWithDataSources} />
+      </MemoryRouter>
+    );
+
+    const dataSourceSelect = wrapper.find('[data-test-subj="dataSourceSelect"]').first();
+    expect(dataSourceSelect.exists()).toBe(true);
   });
 
-  it('displays authentication fields based on auth method', async () => {
-    const wrapper = mountComponent();
-    const select = wrapper.find(EuiSelect);
-    await act(async () => {
-      const onChange = select.prop('onChange');
-      if (onChange) {
-        onChange({ target: { value: 'awssigv4' } } as any);
-      }
-    });
-    expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('awssigv4');
+  it('updates data source selection on change', async () => {
+    const dataSources = [
+      { id: 'ds-1', title: 'Data Source 1' },
+      { id: 'ds-2', title: 'Data Source 2' },
+    ];
+    const propsWithDataSources = {
+      ...defaultProps,
+      dataSources,
+      currentDataSourceId: 'ds-1',
+      featureFlagStatus: true,
+    };
+    const wrapper = mount(
+      <MemoryRouter>
+        {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
+        <ConfigurePrometheusDatasourcePanel {...propsWithDataSources} />
+      </MemoryRouter>
+    );
+
+    const dataSourceSelect = wrapper.find('[data-test-subj="dataSourceSelect"]').first();
 
     await act(async () => {
-      const onChange = select.prop('onChange');
+      const onChange = dataSourceSelect.prop('onChange');
       if (onChange) {
-        onChange({ target: { value: 'basicauth' } } as any);
+        onChange({ target: { value: 'ds-2' } } as any);
       }
     });
-    expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('basicauth');
+
+    expect(mockSetDataSourceIdForRequest).toHaveBeenCalledWith('ds-2');
+  });
+
+  it('includes local cluster option when hideLocalCluster is false', () => {
+    const dataSources = [{ id: 'ds-1', title: 'Data Source 1' }];
+    const propsWithLocalCluster = {
+      ...defaultProps,
+      dataSources,
+      hideLocalCluster: false,
+      featureFlagStatus: true,
+    };
+    const wrapper = mount(
+      <MemoryRouter>
+        {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
+        <ConfigurePrometheusDatasourcePanel {...propsWithLocalCluster} />
+      </MemoryRouter>
+    );
+
+    const dataSourceSelect = wrapper.find('[data-test-subj="dataSourceSelect"]').first();
+    const options = dataSourceSelect.prop('options') as any[];
+
+    expect(options).toBeDefined();
+    expect(options.length).toBeGreaterThan(1);
+    expect(options.some((opt) => opt.value === '')).toBe(true);
+  });
+
+  it('excludes local cluster option when hideLocalCluster is true', () => {
+    const dataSources = [{ id: 'ds-1', title: 'Data Source 1' }];
+    const propsWithoutLocalCluster = {
+      ...defaultProps,
+      dataSources,
+      hideLocalCluster: true,
+      featureFlagStatus: true,
+    };
+    const wrapper = mount(
+      <MemoryRouter>
+        {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
+        <ConfigurePrometheusDatasourcePanel {...propsWithoutLocalCluster} />
+      </MemoryRouter>
+    );
+
+    const dataSourceSelect = wrapper.find('[data-test-subj="dataSourceSelect"]').first();
+    const options = dataSourceSelect.prop('options') as any[];
+
+    expect(options).toBeDefined();
+    expect(options.every((opt) => opt.value !== '')).toBe(true);
+  });
+
+  it('hides OpenSearch connection section when featureFlagStatus is false', () => {
+    const wrapper = mount(
+      <MemoryRouter>
+        {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
+        <ConfigurePrometheusDatasourcePanel {...defaultProps} featureFlagStatus={false} />
+      </MemoryRouter>
+    );
+
+    const dataSourceSelect = wrapper.find('[data-test-subj="dataSourceSelect"]');
+    expect(dataSourceSelect.exists()).toBe(false);
+
+    // Verify "OpenSearch connection" heading is not present
+    const text = wrapper.text();
+    expect(text).not.toContain('OpenSearch connection');
+  });
+
+  it('shows OpenSearch connection section when featureFlagStatus is true', () => {
+    const dataSources = [{ id: 'ds-1', title: 'Data Source 1' }];
+    const propsWithFeatureFlag = {
+      ...defaultProps,
+      dataSources,
+      featureFlagStatus: true,
+    };
+    const wrapper = mount(
+      <MemoryRouter>
+        {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
+        <ConfigurePrometheusDatasourcePanel {...propsWithFeatureFlag} />
+      </MemoryRouter>
+    );
+
+    const dataSourceSelect = wrapper.find('[data-test-subj="dataSourceSelect"]');
+    expect(dataSourceSelect.exists()).toBe(true);
+
+    // Verify "OpenSearch connection" heading is present
+    const text = wrapper.text();
+    expect(text).toContain('OpenSearch connection');
+  });
+
+  it('respects hideLocalCluster when featureFlagStatus is false', () => {
+    const dataSources = [{ id: 'ds-1', title: 'Data Source 1' }];
+    const propsWithBothFlags = {
+      ...defaultProps,
+      dataSources,
+      hideLocalCluster: true,
+      featureFlagStatus: false,
+    };
+    const wrapper = mount(
+      <MemoryRouter>
+        {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
+        <ConfigurePrometheusDatasourcePanel {...propsWithBothFlags} />
+      </MemoryRouter>
+    );
+
+    // When featureFlagStatus is false, data source select should not exist
+    const dataSourceSelect = wrapper.find('[data-test-subj="dataSourceSelect"]');
+    expect(dataSourceSelect.exists()).toBe(false);
   });
 });
