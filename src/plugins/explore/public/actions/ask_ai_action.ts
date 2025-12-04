@@ -5,12 +5,12 @@
 
 import { LogActionDefinition } from '../types/log_actions';
 import { AskAIActionItem } from '../components/ask_ai_action_item';
-import { ChatService } from '../../../chat/public';
+import { ChatServiceStart } from '../../../../core/public';
 
 /**
  * Creates the Ask AI action that uses the AskAIActionItem component
  */
-export function createAskAiAction(chatService: ChatService | undefined): LogActionDefinition {
+export function createAskAiAction(chatService: ChatServiceStart): LogActionDefinition {
   return {
     id: 'ask_ai',
     displayName: 'Ask AI',
@@ -18,13 +18,12 @@ export function createAskAiAction(chatService: ChatService | undefined): LogActi
     order: 1,
 
     isCompatible: () => {
-      // Only show if chat service is available (chat plugin is enabled)
-      return !!chatService;
+      return chatService.isAvailable();
     },
 
     component: (props) => {
-      // chatService is guaranteed to be defined here because isCompatible checks it
-      return AskAIActionItem({ ...props, chatService: chatService! });
+      // chatService is always defined since we're using core service
+      return AskAIActionItem({ ...props, chatService });
     },
   };
 }

@@ -36,10 +36,8 @@ import { Tooltip } from '../components/tooltip';
 import { Chart } from './_chart';
 import { TimeMarker } from './time_marker';
 import { seriesTypes } from './point_series/series_types';
-import touchdownTmplHtml from '../partials/touchdown.tmpl.html';
 
 const seriTypes = seriesTypes;
-const touchdownTmpl = _.template(touchdownTmplHtml);
 /**
  * Line Chart Visualization
  *
@@ -191,7 +189,14 @@ export class PointSeries extends Chart {
     }
 
     function textFormatter() {
-      return touchdownTmpl(callPlay(d3.event));
+      const { wholeBucket } = callPlay(d3.event);
+      return `<p class="visTooltip__header">
+        <i class="fa fa-info-circle visTooltip__headerIcon"></i>
+        <span class="visTooltip__headerText">
+          ${wholeBucket ? 'Part of this bucket' : 'This area'}
+          may contain partial data. The selected time range does not fully cover it.
+        </span>
+      </p>`;
     }
 
     const endzoneTT = new Tooltip('endzones', this.handler.el, textFormatter, null);

@@ -525,8 +525,7 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName, o
 
   // Ensure chart type is correct
   cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
-  cy.getElementByTestId(`exploreChartTypeSelector-${chartType}`).should('be.visible');
-
+  cy.get(`#${chartType}`).should('match', '[role="option"][aria-selected="true"]');
   cy.get('body').click(0, 0);
 });
 
