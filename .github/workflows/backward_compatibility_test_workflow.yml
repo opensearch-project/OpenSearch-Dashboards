@@ -66,17 +66,26 @@ jobs:
     runs-on: ${{ matrix.os }}
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
-      options: --user 1001
+      options: --user 1001 --privileged
     steps:
       - run: echo Running functional tests for ciGroup${{ matrix.group }}
 
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set Java version
+        run: |
+          if [[ "${{ matrix.version }}" == 1.* ]] || [[ "${{ matrix.version }}" == 2.* ]]; then
+            echo "JAVA_VERSION=17" >> $GITHUB_ENV
+          else
+            echo "JAVA_VERSION=21" >> $GITHUB_ENV
+          fi
+          echo "Using Java $JAVA_VERSION for OpenSearch ${{ matrix.version }}"
+
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ (startsWith(matrix.version, '1.') || startsWith(matrix.version, '2.')) && '17' || '21' }}
+          java-version: ${{ env.JAVA_VERSION }}
           distribution: 'adopt'
 
       - name: Setup Node
@@ -238,17 +247,26 @@ jobs:
     runs-on: ${{ matrix.os }}
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
-      options: --user 1001
+      options: --user 1001 --privileged
     steps:
       - run: echo Running plugin functional tests
 
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set Java version
+        run: |
+          if [[ "${{ matrix.version }}" == 1.* ]] || [[ "${{ matrix.version }}" == 2.* ]]; then
+            echo "JAVA_VERSION=17" >> $GITHUB_ENV
+          else
+            echo "JAVA_VERSION=21" >> $GITHUB_ENV
+          fi
+          echo "Using Java $JAVA_VERSION for OpenSearch ${{ matrix.version }}"
+
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ (startsWith(matrix.version, '1.') || startsWith(matrix.version, '2.')) && '17' || '21' }}
+          java-version: ${{ env.JAVA_VERSION }}
           distribution: 'adopt'
 
       - name: Setup Node
