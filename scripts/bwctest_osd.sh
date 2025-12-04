@@ -12,20 +12,20 @@ set -e
 
 # For every release, add sample data and new version below:
 DEFAULT_VERSIONS=(
-  "odfe-0.10.0"
-  "odfe-1.0.2"
-  "odfe-1.1.0"
-  "odfe-1.2.1"
-  "odfe-1.3.0"
-  "odfe-1.4.0"
-  "odfe-1.7.0"
-  "odfe-1.8.0"
-  "odfe-1.9.0"
-  "odfe-1.11.0"
-  "odfe-1.13.2"
-  "osd-1.0.0"
-  "osd-1.1.0"
-  "osd-2.0.0"
+  "odfe_0.10.0"
+  "odfe_1.0.2"
+  "odfe_1.1.0"
+  "odfe_1.2.1"
+  "odfe_1.3.0"
+  "odfe_1.4.0"
+  "odfe_1.7.0"
+  "odfe_1.8.0"
+  "odfe_1.9.0"
+  "odfe_1.11.0"
+  "odfe_1.13.2"
+  "osd_1.0.0"
+  "osd_1.1.0"
+  "osd_2.0.0"
 )
 
 # Define test groups
@@ -156,20 +156,20 @@ fi
 # define test groups to test suites
 declare -A TEST_SUITES
 TEST_SUITES=(
-  ["odfe-0.10.0"]=$TEST_GROUP_1
-  ["odfe-1.0.2"]=$TEST_GROUP_2
-  ["odfe-1.1.0"]=$TEST_GROUP_2
-  ["odfe-1.2.1"]=$TEST_GROUP_2
-  ["odfe-1.3.0"]=$TEST_GROUP_2
-  ["odfe-1.4.0"]=$TEST_GROUP_3
-  ["odfe-1.7.0"]=$TEST_GROUP_3
-  ["odfe-1.8.0"]=$TEST_GROUP_3
-  ["odfe-1.9.0"]=$TEST_GROUP_3
-  ["odfe-1.11.0"]=$TEST_GROUP_3
-  ["odfe-1.13.2"]=$TEST_GROUP_4
-  ["osd-1.0.0"]=$TEST_GROUP_4
-  ["osd-1.1.0"]=$TEST_GROUP_4
-  ["osd-2.0.0"]=$TEST_GROUP_4
+  ["odfe_0.10.0"]=$TEST_GROUP_1
+  ["odfe_1.0.2"]=$TEST_GROUP_2
+  ["odfe_1.1.0"]=$TEST_GROUP_2
+  ["odfe_1.2.1"]=$TEST_GROUP_2
+  ["odfe_1.3.0"]=$TEST_GROUP_2
+  ["odfe_1.4.0"]=$TEST_GROUP_3
+  ["odfe_1.7.0"]=$TEST_GROUP_3
+  ["odfe_1.8.0"]=$TEST_GROUP_3
+  ["odfe_1.9.0"]=$TEST_GROUP_3
+  ["odfe_1.11.0"]=$TEST_GROUP_3
+  ["odfe_1.13.2"]=$TEST_GROUP_4
+  ["osd_1.0.0"]=$TEST_GROUP_4
+  ["osd_1.1.0"]=$TEST_GROUP_4
+  ["osd_2.0.0"]=$TEST_GROUP_4
 )
 
 # this function sets up the cypress env

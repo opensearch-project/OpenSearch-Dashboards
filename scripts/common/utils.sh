@@ -74,7 +74,7 @@ function check_status() {
 function upload_data() {
   rm -rf "$OPENSEARCH_DIR/data"
   cd $OPENSEARCH_DIR
-  cp "$CWD/cypress/test-data/$DASHBOARDS_TYPE/$1.tar.gz" .
+  cp "$CWD/cypress/test_data/$DASHBOARDS_TYPE/$1.tar.gz" .
   tar -xvf "$OPENSEARCH_DIR/$1.tar.gz" >> /dev/null 2>&1
   rm "$1.tar.gz"
   echo "Data has been uploaded and ready to test"
