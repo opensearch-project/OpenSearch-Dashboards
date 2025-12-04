@@ -16,7 +16,7 @@ import {
 } from '../../../application/utils/state_management/selectors';
 import { ExploreServices } from '../../../types';
 import { SAMPLE_SIZE_SETTING } from '../../../../common';
-import { getQueryWithSource } from '../../../application/utils/languages';
+import { prepareQueryForLanguage } from '../../../application/utils/languages';
 import { createSearchPatternQueryWithSlice } from '../utils/utils';
 
 interface PatternsFlyoutEventTableProps {
@@ -66,7 +66,7 @@ export const PatternsFlyoutEventTable = ({
       const filters = services.data.query.filterManager.getFilters();
       const size = services.uiSettings.get(SAMPLE_SIZE_SETTING);
 
-      const querySource = getQueryWithSource(query);
+      const querySource = prepareQueryForLanguage(query);
 
       const modifiedQuerySource = {
         ...querySource,

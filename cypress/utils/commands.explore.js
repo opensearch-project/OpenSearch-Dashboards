@@ -519,8 +519,15 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName, o
 
   // for pie and area, it needs manual chart type switch
   if (options && options.shouldManualSelectChartType) {
-    cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
-    cy.getElementByTestId(`exploreChartTypeSelector-${chartType}`).should('be.visible').click();
+    cy.getElementByTestId('exploreChartTypeSelector').then(($button) => {
+      const hasTargetType =
+        $button.find(`[data-test-subj="exploreChartTypeSelector-${chartType}"]`).length > 0;
+
+      if (!hasTargetType) {
+        cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
+        cy.getElementByTestId(`exploreChartTypeSelector-${chartType}`).should('be.visible').click();
+      }
+    });
   }
 
   // Ensure chart type is correct
