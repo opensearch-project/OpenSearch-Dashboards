@@ -280,21 +280,21 @@ describe('BottomRightContainer', () => {
     expect(screen.getByTestId('no-results')).toBeInTheDocument();
   });
 
-  // it('should not render chart container when flavor is traces', () => {
-  //   mockUseDatasetContext.mockReturnValue({
-  //     dataset: { timeFieldName: 'timestamp' } as any,
-  //     isLoading: false,
-  //     error: null,
-  //   });
-  //   mockUseFlavorId.mockReturnValue(ExploreFlavor.Traces);
+  it('should render chart container when flavor is traces', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: 'timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
+    mockUseFlavorId.mockReturnValue(ExploreFlavor.Traces);
 
-  //   renderComponent(QueryExecutionStatus.READY);
+    renderComponent(QueryExecutionStatus.READY);
 
-  //   expect(screen.queryByTestId('chart-container')).not.toBeInTheDocument();
-  //   expect(screen.getByTestId('explore-tabs-vis-style-panel')).toBeInTheDocument();
-  // });
+    expect(screen.getByTestId('chart-container')).toBeInTheDocument();
+    expect(screen.getByTestId('explore-tabs-vis-style-panel')).toBeInTheDocument();
+  });
 
-  it('should render chart container when flavor is not traces', () => {
+  it('should render chart container when flavor is logs', () => {
     mockUseDatasetContext.mockReturnValue({
       dataset: { timeFieldName: 'timestamp' } as any,
       isLoading: false,
