@@ -259,7 +259,7 @@ export const createHistogramConfigWithInterval = (
     effectiveInterval,
     services.data,
     services.uiSettings,
-    undefined,
+    breakdownField,
     customBarTarget
   );
   const aggs = histogramConfigs?.toDsl();
