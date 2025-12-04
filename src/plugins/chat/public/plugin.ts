@@ -84,6 +84,12 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   public setup(core: CoreSetup): ChatPluginSetup {
     // Store core setup reference for later use
     this.coreSetup = core;
+    const suggestedActionsSetup = this.suggestedActionsService.setup();
+
+    // Register suggested actions service with core chat service
+    if (this.coreSetup?.chat?.setSuggestedActionsService) {
+      this.coreSetup.chat.setSuggestedActionsService(suggestedActionsSetup);
+    }
 
     return {
       suggestedActionsService: this.suggestedActionsService.setup(),
@@ -120,12 +126,6 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         openWindow: this.chatService.openWindow.bind(this.chatService),
         closeWindow: this.chatService.closeWindow.bind(this.chatService),
       });
-    }
-
-    // Register suggested actions service with core chat service
-    if (this.coreSetup?.chat?.setSuggestedActionsService) {
-      const suggestedActionsServiceStart = this.suggestedActionsService.start();
-      this.coreSetup.chat.setSuggestedActionsService(suggestedActionsServiceStart);
     }
 
     // Register chat button in header with conditional visibility
