@@ -57,7 +57,11 @@ module.exports = defineConfig({
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
-    specPattern: 'cypress/integration/**/*.spec.{js,jsx,ts,tsx}',
+    specPattern: [
+      'cypress/integration/**/*.spec.{js,jsx,ts,tsx}',
+      'cypress/integration/with_security/*.js',
+      'cypress/integration/without_security/*.js',
+    ],
     testIsolation: false,
     setupNodeEvents,
     chromeWebSecurity: false,
