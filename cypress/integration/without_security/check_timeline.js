@@ -42,7 +42,7 @@ describe('check timeline visualization', () => {
       cy.waitForLoader();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
-        .contains('Timeline request error: undefined Error: Unknown argument to es: kibana1');
+        .contains('Unknown argument to es: kibana1');
     });
 
     it('.es(*, kibana=true) should not report search error', () => {
@@ -69,7 +69,7 @@ describe('check timeline visualization', () => {
       cy.waitForLoader();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
-        .contains('Timeline request error: undefined Error: Unknown argument to es: kibana1');
+        .contains('Unknown argument to es: kibana1');
     });
 
     it('.elasticsearch(*, kibana=true) should not report search error', () => {
@@ -96,7 +96,7 @@ describe('check timeline visualization', () => {
       cy.waitForLoader();
       cy.get('[data-test-subj="globalToastList"]')
         .find('[data-test-subj="errorToastMessage"]')
-        .contains('Timeline request error: undefined Error: Unknown argument to es: kibana1');
+        .contains('Unknown argument to es: kibana1');
     });
 
     it('.opensearch(*, kibana=true) should not report search error', () => {
