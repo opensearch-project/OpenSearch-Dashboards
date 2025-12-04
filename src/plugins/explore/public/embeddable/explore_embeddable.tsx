@@ -52,7 +52,7 @@ import {
 } from '../components/visualizations/visualization_builder_utils';
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
-import { prepareQueryForLanguage} from '../application/utils/languages';
+import { prepareQueryForLanguage } from '../application/utils/languages';
 import { ExploreAnnotationsService } from '../services/annotations_service';
 
 export interface SearchProps {
@@ -123,6 +123,8 @@ export class ExploreEmbeddable
     timeRange: undefined as TimeRange | undefined,
   };
   private node?: HTMLElement;
+  private pplAnnotationsCache: Map<string, DashboardAnnotation> = new Map();
+  private isInitialLoad = true;
 
   constructor(
     {
@@ -323,6 +325,9 @@ export class ExploreEmbeddable
 
   public reload() {
     if (this.searchProps) {
+      // Clear PPL annotations cache and set initial load flag for reload
+      this.pplAnnotationsCache.clear();
+      this.isInitialLoad = true;
       this.updateHandler(this.searchProps, true);
     }
   }
@@ -426,7 +431,8 @@ export class ExploreEmbeddable
           let annotations: DashboardAnnotation[] = [];
           if (this.parent && this.parent.id) {
             const allAnnotations = await this.annotationsService.getAnnotations(this.parent.id);
-            annotations = this.filterAnnotationsForCurrentPanel(allAnnotations);
+            const filteredAnnotations = this.filterAnnotationsForCurrentPanel(allAnnotations);
+            annotations = await this.processAnnotations(filteredAnnotations);
           }
 
           const spec = matchedRule.toSpec(
@@ -451,6 +457,8 @@ export class ExploreEmbeddable
     // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
     this.searchProps.hits = resp.hits.hits.length;
     this.searchProps.isLoading = false;
+
+    this.isInitialLoad = false;
   };
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
@@ -480,6 +488,211 @@ export class ExploreEmbeddable
           return false;
       }
     });
+  }
+
+  private async processAnnotations(
+    annotations: DashboardAnnotation[]
+  ): Promise<DashboardAnnotation[]> {
+    const processedAnnotations: DashboardAnnotation[] = [];
+
+    for (const annotation of annotations) {
+      if (annotation.query.queryType === 'ppl-query') {
+        // For PPL query annotations, only execute on initial load or reload
+        if (this.isInitialLoad) {
+          // Execute PPL query and cache the result
+          const pplAnnotation = await this.processPPLAnnotation(annotation);
+          if (pplAnnotation) {
+            this.pplAnnotationsCache.set(annotation.id, pplAnnotation);
+            processedAnnotations.push(pplAnnotation);
+          }
+        } else {
+          // Use cached result if available
+          const cachedAnnotation = this.pplAnnotationsCache.get(annotation.id);
+          if (cachedAnnotation) {
+            processedAnnotations.push(cachedAnnotation);
+          } else {
+            // If no cache available, use the original annotation without PPL results
+            processedAnnotations.push(annotation);
+          }
+        }
+      } else {
+        // Keep time-regions annotations as they are
+        processedAnnotations.push(annotation);
+      }
+    }
+
+    return processedAnnotations;
+  }
+
+  private async processPPLAnnotation(
+    annotation: DashboardAnnotation
+  ): Promise<DashboardAnnotation | null> {
+    if (!annotation.query.pplQuery || !annotation.query.pplDataset) {
+      return annotation;
+    }
+
+    try {
+      await this.services.data.dataViews.ensureDefaultDataView();
+      const dataView = await this.services.data.dataViews.get(annotation.query.pplDataset);
+      if (!dataView) {
+        return annotation;
+      }
+
+      const dataset = await this.services.data.dataViews.convertToDataset(dataView);
+
+      const queryObject = {
+        query: annotation.query.pplQuery,
+        language: 'PPL' as const,
+        dataset,
+      };
+
+      const getQuery = (query: typeof queryObject) => {
+        const queryString = typeof query.query === 'string' ? query.query : '';
+        const lowerCaseQuery = queryString.toLowerCase();
+        const hasSource = /^[^|]*\bsource\s*=/.test(lowerCaseQuery);
+        const hasDescribe = /^\s*describe\s+/.test(lowerCaseQuery);
+        const hasShow = /^\s*show\s+/.test(lowerCaseQuery);
+
+        let datasetTitle: string;
+        if (query.dataset && ['INDEXES', 'INDEX_PATTERN'].includes(query.dataset.type)) {
+          if (hasSource) {
+            // Replace source=anything with source=`anything`
+            const updatedQuery = queryString.replace(
+              /(\bsource\s*=\s*)([^`\s][^\s|]*)/gi,
+              '$1`$2`'
+            );
+            return { ...query, query: updatedQuery };
+          }
+          datasetTitle = `\`${query.dataset.title}\``;
+        } else {
+          datasetTitle = query.dataset?.title || '';
+        }
+
+        if (hasSource || hasDescribe || hasShow) {
+          return { ...query, query: queryString };
+        }
+
+        let queryStringWithSource: string;
+        if (queryString.trim() === '') {
+          queryStringWithSource = `source = ${datasetTitle}`;
+        } else {
+          queryStringWithSource = `source = ${datasetTitle} ${queryString}`;
+        }
+
+        return {
+          ...query,
+          query: queryStringWithSource,
+        };
+      };
+
+      const queryWithSource = getQuery(queryObject);
+      const searchSource = await this.services.data.search.searchSource.create();
+      const filters = this.services.data.query.filterManager.getFilters();
+      const timeRangeSearchSource = await this.services.data.search.searchSource.create();
+      const timefilter = this.services.data.query.timefilter.timefilter;
+      const timeFilter = timefilter.createFilter(dataView);
+
+      timeRangeSearchSource.setField('filter', () => {
+        return timeFilter;
+      });
+
+      searchSource.setParent(timeRangeSearchSource);
+
+      const queryStringWithExecutedQuery = {
+        ...this.services.data.query.queryString.getQuery(),
+        query: queryWithSource.query,
+        language: 'PPL',
+      };
+
+      searchSource.setFields({
+        index: dataView,
+        size: 10000,
+        query: queryStringWithExecutedQuery || null,
+        highlightAll: true,
+        version: true,
+        filter: filters,
+      });
+
+      const languageConfig = this.services.data.query.queryString
+        .getLanguageService()
+        .getLanguage('PPL');
+
+      const fetchOptions = {
+        withLongNumeralsSupport: false,
+        ...(languageConfig &&
+          languageConfig.fields?.formatter && {
+            formatter: languageConfig.fields.formatter,
+          }),
+      };
+
+      const response = await searchSource.fetch(fetchOptions);
+      let timestamps: any[] = [];
+
+      if (response && (response as any).datarows && (response as any).schema) {
+        const schema = (response as any).schema;
+        const datarows = (response as any).datarows;
+
+        const fieldIndexMap = new Map<string, number>();
+        schema.forEach((field: any, index: number) => {
+          fieldIndexMap.set(field.name, index);
+        });
+
+        const timeFieldIndex = schema.findIndex((field: any) => {
+          const fieldType = field.type;
+          return (
+            fieldType === 'TIMESTAMP' ||
+            fieldType === 'TIME' ||
+            fieldType === 'DATE' ||
+            fieldType === 'DATE_NANOS' ||
+            fieldType === 'date' ||
+            fieldType === 'timestamp'
+          );
+        });
+
+        if (timeFieldIndex >= 0) {
+          timestamps = datarows.map((row: any[]) => row[timeFieldIndex]).filter(Boolean);
+        } else {
+          timestamps = datarows
+            .map((row: any[]) => {
+              const getValueByName = (name: string) => {
+                const index = fieldIndexMap.get(name);
+                return index !== undefined ? row[index] : undefined;
+              };
+
+              return (
+                getValueByName('@timestamp') ||
+                getValueByName('timestamp') ||
+                getValueByName('time') ||
+                getValueByName('startTime') ||
+                row[0]
+              );
+            })
+            .filter(Boolean);
+        }
+      } else if (response && response.hits && response.hits.hits) {
+        timestamps =
+          response.hits.hits
+            ?.map((hit: any) => {
+              return hit._source?.timestamp || hit._source?.['@timestamp'];
+            })
+            .filter(Boolean) || [];
+      }
+
+      if (timestamps.length > 0) {
+        return {
+          ...annotation,
+          query: {
+            ...annotation.query,
+            pplResultTimestamps: timestamps,
+            pplResultCount: timestamps.length,
+          },
+        };
+      }
+
+      return annotation;
+    } catch (error) {
+      return annotation;
+    }
   }
 
   public destroy() {

@@ -250,11 +250,12 @@ export const getNavActions = (
 
     showAnnotationsModal(
       overlays,
-      I18nContext as React.ComponentType,
       dashboardId,
       annotationsService,
       appState.panels,
       savedObjects,
+      services.http,
+      services.data,
       (annotations) => {
         notifications.toasts.addSuccess({
           title: i18n.translate('dashboard.annotations.saved', {

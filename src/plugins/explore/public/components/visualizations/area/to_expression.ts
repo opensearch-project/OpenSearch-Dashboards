@@ -42,8 +42,58 @@ const createAnnotationLayers = (
   const endTime = endMoment.valueOf();
   const annotationLayers: any[] = [];
 
-  annotations.forEach((annotation, index) => {
+  annotations.forEach((annotation) => {
     if (!annotation.enabled || !annotation.showAnnotations) {
+      return;
+    }
+
+    // Handle PPL query annotations
+    if (annotation.query.queryType === 'ppl-query' && annotation.query.pplResultTimestamps) {
+      annotation.query.pplResultTimestamps.forEach((timestamp: any) => {
+        // Convert timestamp to milliseconds if needed
+        let timestampMs: number;
+        if (typeof timestamp === 'string') {
+          timestampMs = new Date(timestamp).getTime();
+        } else if (typeof timestamp === 'number') {
+          // Handle both seconds and milliseconds timestamps
+          timestampMs = timestamp > 10000000000 ? timestamp : timestamp * 1000;
+        } else {
+          return;
+        }
+
+        // Check if timestamp is within the visible time range
+        if (timestampMs >= startTime && timestampMs <= endTime) {
+          annotationLayers.push({
+            data: { values: [{}] },
+            mark: {
+              type: 'rule',
+              color: annotation.defaultColor || '#FF6B6B',
+              strokeWidth: 2,
+              strokeDash: [5, 5],
+              opacity: 0.8,
+              tooltip: true,
+            },
+            encoding: {
+              x: {
+                datum: timestampMs,
+                type: 'temporal',
+                scale: { type: 'time' },
+              },
+              tooltip: {
+                value: `${annotation.name}: ${new Date(timestampMs).toLocaleString()}`,
+              },
+            },
+          });
+        }
+      });
+      return;
+    }
+
+    if (
+      annotation.query.queryType !== 'time-regions' ||
+      !annotation.query.fromTime ||
+      !annotation.query.toTime
+    ) {
       return;
     }
 

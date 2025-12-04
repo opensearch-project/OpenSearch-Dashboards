@@ -37,18 +37,24 @@ export interface DashboardAnnotation {
 
   // Query configuration
   query: {
-    queryType: 'time-regions';
+    queryType: 'time-regions' | 'ppl-query';
     fromType: 'everyday' | 'weekdays';
     fromWeekdays: string[];
-    fromTime: string;
+    fromTime?: string;
     toType: 'everyday' | 'weekdays';
     toWeekdays: string[];
-    toTime: string;
+    toTime?: string;
 
     recurrence?: {
       schedule: string;
       duration: number;
     };
+
+    // PPL query specific fields
+    pplQuery?: string;
+    pplResultCount?: number;
+    pplResultTimestamps?: any[];
+    pplDataset?: string;
   };
 
   // Metadata

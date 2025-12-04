@@ -10,21 +10,23 @@
  */
 
 import React from 'react';
-import { OverlayRef } from '../../../../../../../core/public';
+import { HttpStart, OverlayRef } from '../../../../../../../core/public';
 import { toMountPoint } from '../../../../../../opensearch_dashboards_react/public';
 import { AnnotationsModal } from './annotations_modal';
 import { DashboardAnnotation } from '../../../types/dashboard_annotations';
 import { DashboardAnnotationsService } from '../../../services/dashboard_annotations_service';
+import { DataPublicPluginStart } from '../../../../../../data/public';
 
 let currentModal: OverlayRef | null = null;
 
 export function showAnnotationsModal(
   overlays: any,
-  i18nContext: React.ComponentType,
   dashboardId: string,
   annotationsService: DashboardAnnotationsService,
   dashboardPanels: any[],
   savedObjects: any,
+  http: HttpStart,
+  data: DataPublicPluginStart,
   onSave?: (annotations: DashboardAnnotation[]) => void
 ) {
   if (currentModal) {
@@ -53,6 +55,8 @@ export function showAnnotationsModal(
         annotationsService={annotationsService}
         dashboardPanels={dashboardPanels}
         savedObjects={savedObjects}
+        http={http}
+        data={data}
       />
     ),
     {

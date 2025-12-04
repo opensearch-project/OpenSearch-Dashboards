@@ -9,7 +9,7 @@
  * GitHub history for details.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiModal,
@@ -38,10 +38,14 @@ import {
   EuiConfirmModal,
   EuiAccordion,
   EuiCheckboxGroup,
+  EuiTextArea,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import { DashboardAnnotation } from '../../../types/dashboard_annotations';
 import { DashboardAnnotationsService } from '../../../services/dashboard_annotations_service';
+import { HttpStart } from '../../../../../../../core/public';
+import { DataPublicPluginStart } from '../../../../../../data/public';
 
 interface AnnotationsModalProps {
   onClose: () => void;
@@ -50,6 +54,8 @@ interface AnnotationsModalProps {
   annotationsService: DashboardAnnotationsService;
   dashboardPanels?: any[];
   savedObjects?: any;
+  http: HttpStart;
+  data: DataPublicPluginStart;
 }
 
 interface FormData {
@@ -58,11 +64,14 @@ interface FormData {
   color: string;
   showIn: 'all' | 'selected' | 'except';
   selectedVisualizations: string[];
-  queryType: 'time-regions';
+  queryType: 'time-regions' | 'ppl-query';
   fromWeekday: string; // 'everyday' or weekday id (0-6)
   fromTime: string;
   toWeekday: string; // 'everyday' or weekday id (0-6)
   toTime: string;
+  pplQuery: string;
+  pplResultCount: number;
+  pplDataset: string;
 }
 
 const SHOW_IN_OPTIONS = [
@@ -71,7 +80,10 @@ const SHOW_IN_OPTIONS = [
   { value: 'except', text: 'All visualizations except' },
 ];
 
-const QUERY_TYPE_OPTIONS = [{ value: 'time-regions', text: 'Time regions' }];
+const QUERY_TYPE_OPTIONS = [
+  { value: 'time-regions', text: 'Time regions' },
+  { value: 'ppl-query', text: 'PPL Query' },
+];
 
 const TIME_OPTIONS = Array.from({ length: 24 * 60 }, (_, i) => {
   const hours = Math.floor(i / 60);
@@ -110,12 +122,16 @@ export const AnnotationsModal: React.FC<AnnotationsModalProps> = ({
   annotationsService,
   dashboardPanels = [],
   savedObjects,
+  http,
+  data,
 }) => {
   const [annotations, setAnnotations] = useState<DashboardAnnotation[]>([]);
   const [loading, setLoading] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [testingPPL, setTestingPPL] = useState(false);
+  const [pplTestResult, setPplTestResult] = useState<string | null>(null);
   const [formData, setFormData] = useState<FormData>({
     name: '',
     enabled: true,
@@ -127,10 +143,14 @@ export const AnnotationsModal: React.FC<AnnotationsModalProps> = ({
     fromTime: '09:00',
     toWeekday: 'everyday',
     toTime: '17:00',
+    pplQuery: '',
+    pplResultCount: 0,
+    pplDataset: '',
   });
 
   const accordionId = 'annotationForm';
   const [visualizationTitles, setVisualizationTitles] = useState<Record<string, string>>({});
+  const [dataViews, setDataViews] = useState<Array<{ value: string; text: string }>>([]);
 
   const visualizationOptions = React.useMemo(() => {
     return dashboardPanels.map((panel, index) => {
@@ -204,7 +224,7 @@ export const AnnotationsModal: React.FC<AnnotationsModalProps> = ({
     }
   }, [dashboardId, annotationsService]);
 
-  const handleFormChange = (field: keyof FormData, value: any) => {
+  const handleFormChange = useCallback((field: keyof FormData, value: any) => {
     setFormData((prev) => {
       const newData = { ...prev, [field]: value };
 
@@ -216,7 +236,28 @@ export const AnnotationsModal: React.FC<AnnotationsModalProps> = ({
 
       return newData;
     });
-  };
+  }, []);
+
+  // Load data views for PPL dataset selection
+  useEffect(() => {
+    const loadDataViews = async () => {
+      const allDataViews = await data.dataViews.getIdsWithTitle();
+      const options = allDataViews.map((dv) => ({
+        value: dv.id,
+        text: dv.title,
+      }));
+      setDataViews(options);
+    };
+
+    loadDataViews();
+  }, [data.dataViews]);
+
+  // Set default dataset when dataViews are loaded and no dataset is selected
+  useEffect(() => {
+    if (dataViews.length > 0 && !formData.pplDataset) {
+      handleFormChange('pplDataset', dataViews[0].value);
+    }
+  }, [dataViews, formData.pplDataset, handleFormChange]);
 
   const resetForm = () => {
     setFormData({
@@ -230,6 +271,9 @@ export const AnnotationsModal: React.FC<AnnotationsModalProps> = ({
       fromTime: '09:00',
       toWeekday: 'everyday',
       toTime: '17:00',
+      pplQuery: '',
+      pplResultCount: 0,
+      pplDataset: '',
     });
     setEditingId(null);
   };
@@ -244,15 +288,32 @@ export const AnnotationsModal: React.FC<AnnotationsModalProps> = ({
       defaultColor: formData.color,
       showIn: formData.showIn,
       selectedVisualizations: formData.selectedVisualizations,
-      query: {
-        queryType: formData.queryType,
-        fromType: formData.fromWeekday === 'everyday' ? 'everyday' : 'weekdays',
-        fromWeekdays: formData.fromWeekday === 'everyday' ? [] : [formData.fromWeekday],
-        fromTime: formData.fromTime,
-        toType: formData.toWeekday === 'everyday' ? 'everyday' : 'weekdays',
-        toWeekdays: formData.toWeekday === 'everyday' ? [] : [formData.toWeekday],
-        toTime: formData.toTime,
-      },
+      query:
+        formData.queryType === 'ppl-query'
+          ? {
+              // PPL query - only include PPL-specific fields
+              queryType: formData.queryType,
+              pplQuery: formData.pplQuery,
+              pplResultCount: formData.pplResultCount,
+              pplDataset: formData.pplDataset,
+              // Add dummy values for required fields to satisfy TypeScript, but they won't be used
+              fromType: 'everyday' as const,
+              fromWeekdays: [],
+              toType: 'everyday' as const,
+              toWeekdays: [],
+            }
+          : {
+              // Time regions query - include time-related fields
+              queryType: formData.queryType,
+              fromType:
+                formData.fromWeekday === 'everyday' ? ('everyday' as const) : ('weekdays' as const),
+              fromWeekdays: formData.fromWeekday === 'everyday' ? [] : [formData.fromWeekday],
+              fromTime: formData.fromTime,
+              toType:
+                formData.toWeekday === 'everyday' ? ('everyday' as const) : ('weekdays' as const),
+              toWeekdays: formData.toWeekday === 'everyday' ? [] : [formData.toWeekday],
+              toTime: formData.toTime,
+            },
       createdAt: editingId
         ? annotations.find((a) => a.id === editingId)?.createdAt || new Date().toISOString()
         : new Date().toISOString(),
@@ -283,12 +344,15 @@ export const AnnotationsModal: React.FC<AnnotationsModalProps> = ({
         annotation.query.fromType === 'everyday'
           ? 'everyday'
           : annotation.query.fromWeekdays[0] || 'everyday',
-      fromTime: annotation.query.fromTime,
+      fromTime: annotation.query.fromTime || '',
       toWeekday:
         annotation.query.toType === 'everyday'
           ? 'everyday'
           : annotation.query.toWeekdays[0] || 'everyday',
-      toTime: annotation.query.toTime,
+      toTime: annotation.query.toTime || '',
+      pplQuery: annotation.query.pplQuery || '',
+      pplResultCount: annotation.query.pplResultCount || 0,
+      pplDataset: annotation.query.pplDataset || '',
     });
     setEditingId(annotation.id);
     setShowAddForm(true);
@@ -301,6 +365,149 @@ export const AnnotationsModal: React.FC<AnnotationsModalProps> = ({
 
   const handleToggleAnnotation = (id: string, enabled: boolean) => {
     setAnnotations((prev) => prev.map((ann) => (ann.id === id ? { ...ann, enabled } : ann)));
+  };
+
+  const handleTestPPLQuery = async () => {
+    if (!formData.pplQuery || !formData.pplQuery.trim()) {
+      setPplTestResult('Please enter a PPL query');
+      return;
+    }
+
+    if (!formData.pplDataset) {
+      setPplTestResult('Please select a dataset');
+      return;
+    }
+
+    setTestingPPL(true);
+    setPplTestResult(null);
+
+    try {
+      // Get the selected DataView
+      await data.dataViews.ensureDefaultDataView();
+      const dataView = await data.dataViews.get(formData.pplDataset);
+      if (!dataView) {
+        throw new Error('Dataset not found');
+      }
+
+      // Convert DataView to dataset format
+      const dataset = await data.dataViews.convertToDataset(dataView);
+
+      // Create query object with dataset
+      const queryObject = {
+        query: formData.pplQuery,
+        language: 'PPL' as const,
+        dataset,
+      };
+
+      // Apply getQueryWithSource logic
+      const getQueryWithSource = (query: typeof queryObject) => {
+        const queryString = typeof query.query === 'string' ? query.query : '';
+        const lowerCaseQuery = queryString.toLowerCase();
+        const hasSource = /^[^|]*\bsource\s*=/.test(lowerCaseQuery);
+        const hasDescribe = /^\s*describe\s+/.test(lowerCaseQuery);
+        const hasShow = /^\s*show\s+/.test(lowerCaseQuery);
+
+        let datasetTitle: string;
+        if (query.dataset && ['INDEXES', 'INDEX_PATTERN'].includes(query.dataset.type)) {
+          if (hasSource) {
+            // Replace source=anything with source=`anything`
+            const updatedQuery = queryString.replace(
+              /(\bsource\s*=\s*)([^`\s][^\s|]*)/gi,
+              '$1`$2`'
+            );
+            return { ...query, query: updatedQuery };
+          }
+          datasetTitle = `\`${query.dataset.title}\``;
+        } else {
+          datasetTitle = query.dataset?.title || '';
+        }
+
+        if (hasSource || hasDescribe || hasShow) {
+          return { ...query, query: queryString };
+        }
+
+        let queryStringWithSource: string;
+        if (queryString.trim() === '') {
+          queryStringWithSource = `source = ${datasetTitle}`;
+        } else {
+          queryStringWithSource = `source = ${datasetTitle} ${queryString}`;
+        }
+
+        return {
+          ...query,
+          query: queryStringWithSource,
+        };
+      };
+
+      const queryWithSource = getQueryWithSource(queryObject);
+
+      // Create search source
+      const searchSource = await data.search.searchSource.create();
+      const filters = data.query.filterManager.getFilters();
+
+      // Set up time range filter
+      const timeRangeSearchSource = await data.search.searchSource.create();
+      const timefilter = data.query.timefilter.timefilter;
+      timeRangeSearchSource.setField('filter', () => {
+        return timefilter.createFilter(dataView);
+      });
+
+      searchSource.setParent(timeRangeSearchSource);
+
+      // Prepare query
+      const queryStringWithExecutedQuery = {
+        ...data.query.queryString.getQuery(),
+        query: queryWithSource.query,
+        language: 'PPL',
+      };
+
+      // Set fields
+      searchSource.setFields({
+        index: dataView,
+        size: 100,
+        query: queryStringWithExecutedQuery || null,
+        highlightAll: true,
+        version: true,
+        filter: filters,
+      });
+
+      // Execute
+      const response = await searchSource.fetch({
+        withLongNumeralsSupport: false,
+      });
+
+      // Handle response
+      if (response && (response as any).datarows) {
+        const resultCount = (response as any).datarows.length;
+        handleFormChange('pplResultCount', resultCount);
+        setPplTestResult(`Query executed successfully. Found ${resultCount} results.`);
+      } else if (response && response.hits && response.hits.hits) {
+        const resultCount = response.hits.hits.length;
+        handleFormChange('pplResultCount', resultCount);
+        setPplTestResult(`Query executed successfully. Found ${resultCount} results.`);
+      } else {
+        setPplTestResult('Query executed successfully but no results found.');
+        handleFormChange('pplResultCount', 0);
+      }
+    } catch (error: any) {
+      let errorMessage = 'Unknown error occurred';
+      if (error?.body?.message) {
+        try {
+          const parsedError = JSON.parse(error.body.message);
+          errorMessage =
+            parsedError?.error?.details || parsedError?.error?.reason || error.body.message;
+        } catch {
+          errorMessage = error.body.message;
+        }
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      setPplTestResult(`Query failed: ${errorMessage}`);
+      handleFormChange('pplResultCount', 0);
+    } finally {
+      setTestingPPL(false);
+    }
   };
 
   const handleSaveAll = async () => {
@@ -434,6 +641,73 @@ export const AnnotationsModal: React.FC<AnnotationsModalProps> = ({
     );
   };
 
+  const renderPPLQuerySection = () => {
+    return (
+      <>
+        <EuiFormRow
+          label={i18n.translate('dashboard.annotations.modal.pplDataset', {
+            defaultMessage: 'Dataset',
+          })}
+          helpText={i18n.translate('dashboard.annotations.modal.pplDatasetHelp', {
+            defaultMessage: 'Select the dataset to query for annotations.',
+          })}
+        >
+          <EuiSelect
+            options={[{ value: '', text: 'Select a dataset...' }, ...dataViews]}
+            value={formData.pplDataset}
+            onChange={(e) => handleFormChange('pplDataset', e.target.value)}
+            disabled={dataViews.length === 0}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={i18n.translate('dashboard.annotations.modal.pplQuery', {
+            defaultMessage: 'PPL Query',
+          })}
+          helpText={i18n.translate('dashboard.annotations.modal.pplQueryHelp', {
+            defaultMessage:
+              'Enter a PPL query that returns timestamp data for annotations. Example: | WHERE Carrier = "BeatsWest" | FIELDS timestamp',
+          })}
+        >
+          <EuiTextArea
+            value={formData.pplQuery}
+            onChange={(e) => handleFormChange('pplQuery', e.target.value)}
+            placeholder="| WHERE your_condition | FIELDS timestamp"
+            rows={3}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow>
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={handleTestPPLQuery}
+                isLoading={testingPPL}
+                disabled={!formData.pplQuery.trim() || !formData.pplDataset || testingPPL}
+                size="s"
+              >
+                {testingPPL ? 'Testing...' : 'Test Query'}
+              </EuiButton>
+            </EuiFlexItem>
+            {testingPPL && (
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFormRow>
+
+        {pplTestResult && (
+          <EuiFormRow>
+            <EuiText size="s" color={pplTestResult.includes('failed') ? 'danger' : 'success'}>
+              <p>{pplTestResult}</p>
+            </EuiText>
+          </EuiFormRow>
+        )}
+      </>
+    );
+  };
+
   // Annotations table columns
   const columns = [
     {
@@ -465,10 +739,11 @@ export const AnnotationsModal: React.FC<AnnotationsModalProps> = ({
       ),
     },
     {
-      field: 'queryType',
+      field: 'query',
       name: 'Type',
       width: '120px',
-      render: () => 'Time regions',
+      render: (query: DashboardAnnotation['query']) =>
+        query.queryType === 'ppl-query' ? 'PPL Query' : 'Time regions',
     },
     {
       name: 'Actions',
@@ -595,6 +870,8 @@ export const AnnotationsModal: React.FC<AnnotationsModalProps> = ({
             </EuiFormRow>
           </>
         )}
+
+        {formData.queryType === 'ppl-query' && renderPPLQuerySection()}
 
         <EuiSpacer size="m" />
 
