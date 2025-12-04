@@ -103,7 +103,7 @@ import * as fieldCalculatorModule from '../../../../components/fields_selector/l
 
 jest.mock('../../languages', () => ({
   defaultPreparePplQuery: jest.fn(),
-  getQueryWithSource: jest.fn((query) => query),
+  prepareQueryForLanguage: jest.fn((query) => query),
 }));
 
 jest.mock('../../../../../../data/public', () => ({

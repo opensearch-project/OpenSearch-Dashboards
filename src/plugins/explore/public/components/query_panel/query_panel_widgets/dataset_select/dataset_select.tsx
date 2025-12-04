@@ -228,6 +228,7 @@ export const DatasetSelectWidget = () => {
     <div ref={containerRef} className="exploreDatasetSelectWrapper">
       <DatasetSelect
         onSelect={handleDatasetSelect}
+        appName="explore"
         supportedTypes={supportedTypes}
         signalType={flavorId}
       />
