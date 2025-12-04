@@ -193,11 +193,14 @@ export const DatasetSelector = ({
       return 'Select data';
     }
 
+    // Use displayName if available, otherwise fall back to title
+    const displayLabel = selectedDataset.displayName || selectedDataset.title;
+
     if (selectedDataset.dataSource) {
-      return `${selectedDataset.dataSource.title}::${selectedDataset.title}`;
+      return `${selectedDataset.dataSource.title}::${displayLabel}`;
     }
 
-    return selectedDataset.title;
+    return displayLabel;
   }, [selectedDataset]);
 
   return (
@@ -206,7 +209,7 @@ export const DatasetSelector = ({
         <EuiToolTip
           display="block"
           content={`${
-            selectedDataset?.title ??
+            (selectedDataset?.displayName || selectedDataset?.title) ??
             i18n.translate('data.dataSelector.defaultTitle', {
               defaultMessage: 'Select data',
             })
