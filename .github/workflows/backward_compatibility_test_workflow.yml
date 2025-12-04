@@ -36,12 +36,11 @@ env:
 
 jobs:
   functional-tests:
-    name: Run functional tests on ${{ matrix.name }} against OpenSearch ${{ matrix.version }} (ciGroup${{ matrix.group }})
+    name: Run functional tests on ${{ matrix.name }} against OpenSearch ${{ matrix.version }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
-        group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
         version:
           [
             3.3.0,
@@ -68,7 +67,7 @@ jobs:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001 --privileged
     steps:
-      - run: echo Running functional tests for ciGroup${{ matrix.group }}
+      - run: echo Running functional tests for ${{ matrix.version }}
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -197,20 +196,18 @@ jobs:
           df -h
           du -sh build/
 
-      - name: Run CI test group ${{ matrix.group }}
+      - name: Run CI test ${{ matrix.version }}
         id: ftr-tests
-        run: node scripts/functional_tests.js --config test/functional/config.js --include ciGroup${{ matrix.group }} --opensearch-dashboards-install-dir ${{ env.OSD_INSTALL_DIR }}
+        run: node scripts/functional_tests.js --config test/functional/config.js --opensearch-dashboards-install-dir ${{ env.OSD_INSTALL_DIR }}
         env:
-          CI_GROUP: ciGroup${{ matrix.group }}
-          CI_PARALLEL_PROCESS_NUMBER: ciGroup${{ matrix.group }}
-          JOB: ci${{ matrix.group }}
-          CACHE_DIR: ciGroup${{ matrix.group }}
+          JOB: compatibility-test
+          CACHE_DIR: compatibility-${{ matrix.version }}
           TEST_OPENSEARCH_URL: http://localhost:9200
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: failure-artifacts-opensearch-${{ matrix.version }}-ci${{ matrix.group }}
+          name: failure-artifacts-opensearch-${{ matrix.version }}
           path: |
             test/*/failure_debug/
             test/*/screenshots/
