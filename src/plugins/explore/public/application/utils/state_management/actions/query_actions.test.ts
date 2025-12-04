@@ -56,6 +56,7 @@ import {
   defaultResultsProcessor,
   histogramResultsProcessor,
   prepareHistogramCacheKey,
+  prepareTraceCacheKeys,
   executeQueries,
   executeHistogramQuery,
   executeTabQuery,
@@ -1222,6 +1223,29 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'query/executeQueries/fulfilled' })
       );
+    });
+
+    it('should correctly prepare query string for RED metrics (regression test)', () => {
+      mockDefaultPreparePplQuery.mockReturnValue({
+        query: 'source=traces | where service="api"',
+        language: 'PPL',
+        dataset: { id: 'traces-dataset', title: 'traces-dataset', type: 'INDEX_PATTERN' },
+      });
+
+      const query: Query = {
+        query: 'where service="api"',
+        language: 'PPL',
+        dataset: { id: 'traces-dataset', title: 'traces-dataset', type: 'INDEX_PATTERN' },
+      };
+
+      const preparedQuery = defaultPrepareQueryString(query);
+
+      expect(preparedQuery).toBe('source=traces | where service="api"');
+
+      const cacheKeys = prepareTraceCacheKeys(query);
+      expect(cacheKeys.requestCacheKey).toContain('source=traces');
+      expect(cacheKeys.errorCacheKey).toContain('source=traces');
+      expect(cacheKeys.latencyCacheKey).toContain('source=traces');
     });
   });
 

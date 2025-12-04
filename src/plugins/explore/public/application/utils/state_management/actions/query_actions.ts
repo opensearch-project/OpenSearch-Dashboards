@@ -319,7 +319,7 @@ export const executeQueries = createAsyncThunk<
 
       const { requestCacheKey, errorCacheKey, latencyCacheKey } = prepareTraceCacheKeys(query);
 
-      const baseQuery = getQueryWithSource(query).query;
+      const baseQuery = defaultPrepareQueryString(query);
 
       const config = createTraceAggregationConfig(
         dataset.timeFieldName || 'endTime',
