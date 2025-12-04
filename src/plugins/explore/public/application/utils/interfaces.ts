@@ -142,6 +142,7 @@ export type HistogramDataProcessor = (
   dataset: Dataset,
   data: DataPublicPluginStart,
   interval: string,
+  uiSettings: any,
   breakdownField?: string
 ) => ProcessedSearchResults;
 

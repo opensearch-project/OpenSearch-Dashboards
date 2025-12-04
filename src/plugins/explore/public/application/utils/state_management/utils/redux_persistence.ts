@@ -102,7 +102,14 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     const finalUIState = appState?.ui || getPreloadedUIState(services);
     const finalResultsState = appState?.results || getPreloadedResultsState(services);
     const finalTabState = appState?.tab || getPreloadedTabState(services);
-    const finalLegacyState = appState?.legacy || (await getPreloadedLegacyState(services));
+
+    // Handle legacy state with special logic for columns
+    let finalLegacyState = appState?.legacy;
+    if (!finalLegacyState || !finalLegacyState.columns || finalLegacyState.columns.length === 0) {
+      // If no legacy state or columns are empty/missing, load defaults
+      finalLegacyState = await getPreloadedLegacyState(services);
+    }
+
     const finalQueryEditorState = await getPreloadedQueryEditorState(services, finalQueryState);
     const finalMetaState = appState?.meta || getPreloadedMetaState(services);
 
