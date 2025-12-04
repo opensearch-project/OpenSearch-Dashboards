@@ -580,8 +580,9 @@ export const useSearch = (services: DiscoverViewServices) => {
       // sync initial app filters from savedObject to filterManager
       const filters = cloneDeep(savedSearchInstance.searchSource.getOwnField('filter'));
 
-      // merge filters in saved search with exisiting filters in filterManager
-      const actualFilters = cloneDeep(filterManager.getAppFilters());
+      // merge filters in saved search with existing filters in filterManager
+      // only preserve existing filters when loading a saved search (savedSearchId exists)
+      const actualFilters = savedSearchId ? cloneDeep(filterManager.getAppFilters()) : [];
 
       if (savedQuery) {
         actualFilters.push.apply(actualFilters, data.query.filterManager.getFilters());
