@@ -1155,4 +1155,77 @@ describe('ChatService', () => {
       expect(completed).toBe(true);
     });
   });
+
+  describe('removeTrailingErrorMessages', () => {
+    it('should remove trailing network error messages', () => {
+      const messages = [
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: '2', role: 'assistant', content: 'Hi there!' },
+        { id: 'error-123', role: 'system', content: 'Error: network error' },
+        { id: 'error-456', role: 'system', content: 'Error: network error' },
+      ];
+
+      const result = (chatService as any).removeTrailingErrorMessages(messages);
+
+      expect(result).toEqual([
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: '2', role: 'assistant', content: 'Hi there!' },
+      ]);
+    });
+
+    it('should preserve other system messages', () => {
+      const messages = [
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: '2', role: 'system', content: 'Connection restored' },
+        { id: 'error-123', role: 'system', content: 'Error: network error' },
+      ];
+
+      const result = (chatService as any).removeTrailingErrorMessages(messages);
+
+      expect(result).toEqual([
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: '2', role: 'system', content: 'Connection restored' },
+      ]);
+    });
+
+    it('should preserve other error messages', () => {
+      const messages = [
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: 'error-123', role: 'system', content: 'Error: Server timeout' },
+        { id: 'error-456', role: 'system', content: 'Error: network error' },
+      ];
+
+      const result = (chatService as any).removeTrailingErrorMessages(messages);
+
+      expect(result).toEqual([
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: 'error-123', role: 'system', content: 'Error: Server timeout' },
+      ]);
+    });
+
+    it('should handle empty message array', () => {
+      const result = (chatService as any).removeTrailingErrorMessages([]);
+      expect(result).toEqual([]);
+    });
+
+    it('should handle messages with no trailing errors', () => {
+      const messages = [
+        { id: '1', role: 'user', content: 'Hello' },
+        { id: '2', role: 'assistant', content: 'Hi there!' },
+      ];
+
+      const result = (chatService as any).removeTrailingErrorMessages(messages);
+      expect(result).toEqual(messages);
+    });
+
+    it('should handle all messages being network errors', () => {
+      const messages = [
+        { id: 'error-123', role: 'system', content: 'Error: network error' },
+        { id: 'error-456', role: 'system', content: 'Error: network error' },
+      ];
+
+      const result = (chatService as any).removeTrailingErrorMessages(messages);
+      expect(result).toEqual([]);
+    });
+  });
 });
