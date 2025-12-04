@@ -4,7 +4,6 @@
  */
 
 import React from 'react';
-import { EuiFlexItem } from '@elastic/eui';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { FormattedTableContext } from '../table_vis_response_handler';
