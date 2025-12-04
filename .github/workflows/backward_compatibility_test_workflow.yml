@@ -76,7 +76,7 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: ${{ (startsWith(matrix.version, '1.') || startsWith(matrix.version, '2.')) && '17' || '21' }}
           distribution: 'adopt'
 
       - name: Setup Node
@@ -248,7 +248,7 @@ jobs:
       - name: Setup JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: ${{ (startsWith(matrix.version, '1.') || startsWith(matrix.version, '2.')) && '17' || '21' }}
           distribution: 'adopt'
 
       - name: Setup Node
