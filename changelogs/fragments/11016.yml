@@ -1,0 +1,2 @@
+fix:
+- [chat]Pass empty object as argument for agent tool ([#11016](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11016))

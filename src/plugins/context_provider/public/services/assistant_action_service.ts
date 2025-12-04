@@ -168,4 +168,8 @@ export class AssistantActionService {
   getRegisteredActions = () => {
     return Array.from(this.state$.getValue().actions.keys());
   };
+
+  hasAction = (name: string) => {
+    return this.getRegisteredActions().includes(name);
+  };
 }

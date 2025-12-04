@@ -272,8 +272,10 @@ export class ChatEventHandler {
     }
 
     try {
+      const isAgentTool = !this.assistantActionService.hasAction(toolCall.function.name);
       // Parse arguments
-      const args = toolCall.function.arguments ? JSON.parse(toolCall.function.arguments) : {};
+      const args =
+        toolCall.function.arguments && !isAgentTool ? JSON.parse(toolCall.function.arguments) : {};
 
       // Update state to executing
       this.assistantActionService.updateToolCallState(toolCallId, {

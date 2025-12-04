@@ -22,6 +22,7 @@ import type { Message, AssistantMessage, ToolMessage } from '../../common/types'
 const mockAssistantActionService = ({
   updateToolCallState: jest.fn(),
   executeAction: jest.fn(),
+  hasAction: jest.fn().mockReturnValue(true),
 } as unknown) as jest.Mocked<AssistantActionService>;
 
 const mockChatService = ({
@@ -302,6 +303,7 @@ describe('ChatEventHandler', () => {
       const toolCallId = 'tool-123';
       const notFoundError = new Error('Action not found');
 
+      mockAssistantActionService.hasAction.mockReturnValueOnce(false);
       mockAssistantActionService.executeAction = jest.fn().mockRejectedValue(notFoundError);
 
       await chatEventHandler.handleEvent({
