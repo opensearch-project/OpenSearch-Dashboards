@@ -602,7 +602,7 @@ jobs:
         id: verify-opensearch-exists
         run: |
           if curl -I -L ${{ env.OPENSEARCH_URL }}; then
-            echo "name=version-exists::true" >> $GITHUB_OUTPUT
+            echo "version-exists=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Skipping tests
