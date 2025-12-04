@@ -40,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest-8-cores]
+        os: [ubuntu-latest]
         version:
           [
             3.3.0,
@@ -60,7 +60,7 @@ jobs:
             1.0.0,
           ]
         include:
-          - os: ubuntu-latest-8-cores
+          - os: ubuntu-latest
             name: Linux
     runs-on: ${{ matrix.os }}
     container:
@@ -71,6 +71,26 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Free up disk space
+        run: |
+          echo "Disk usage before cleanup:"
+          df -h
+
+          # Remove pre-installed software to free up space
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/share/powershell
+          sudo rm -rf /usr/share/swift
+          sudo rm -rf /var/lib/gems
+
+          # Clean package cache
+          sudo apt-get clean
+
+          echo "Disk usage after cleanup:"
+          df -h
 
       - name: Set Java version
         run: |
@@ -219,7 +239,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest-8-cores]
+        os: [ubuntu-latest]
         version:
           [
             3.3.0,
@@ -239,7 +259,7 @@ jobs:
             1.0.0,
           ]
         include:
-          - os: ubuntu-latest-8-cores
+          - os: ubuntu-latest
             name: Linux
     runs-on: ${{ matrix.os }}
     container:
@@ -250,6 +270,26 @@ jobs:
 
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Free up disk space
+        run: |
+          echo "Disk usage before cleanup:"
+          df -h
+
+          # Remove pre-installed software to free up space
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/share/powershell
+          sudo rm -rf /usr/share/swift
+          sudo rm -rf /var/lib/gems
+
+          # Clean package cache
+          sudo apt-get clean
+
+          echo "Disk usage after cleanup:"
+          df -h
 
       - name: Set Java version
         run: |
