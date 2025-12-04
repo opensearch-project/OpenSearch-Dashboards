@@ -12,20 +12,20 @@ set -e
 
 # For every release, add sample data and new version below:
 DEFAULT_VERSIONS=(
-  "odfe-0.10.0"
-  "odfe-1.0.2"
-  "odfe-1.1.0"
-  "odfe-1.2.1"
-  "odfe-1.3.0"
-  "odfe-1.4.0"
-  "odfe-1.7.0"
-  "odfe-1.8.0"
-  "odfe-1.9.0"
-  "odfe-1.11.0"
-  "odfe-1.13.2"
-  "osd-1.0.0"
-  "osd-1.1.0"
-  "osd-2.0.0"
+  "odfe_0.10.0"
+  "odfe_1.0.2"
+  "odfe_1.1.0"
+  "odfe_1.2.1"
+  "odfe_1.3.0"
+  "odfe_1.4.0"
+  "odfe_1.7.0"
+  "odfe_1.8.0"
+  "odfe_1.9.0"
+  "odfe_1.11.0"
+  "odfe_1.13.2"
+  "osd_1.0.0"
+  "osd_1.1.0"
+  "osd_2.0.0"
 )
 
 # Define test groups
@@ -69,7 +69,7 @@ while getopts ":h:b:p:s:c:v:r:g:o:d:" arg; do
             ;;
         p)
             BIND_PORT=$OPTARG
-            ;;    
+            ;;
         s)
             SECURITY_ENABLED=$OPTARG
             ;;
@@ -87,10 +87,10 @@ while getopts ":h:b:p:s:c:v:r:g:o:d:" arg; do
             ;;
         o)
             OPENSEARCH=$OPTARG
-            ;;    
+            ;;
         d)
             DASHBOARDS=$OPTARG
-            ;;     
+            ;;
         :)
             echo "-${OPTARG} requires an argument"
             usage
@@ -107,7 +107,7 @@ done
 [ -z "$BIND_PORT" ] && BIND_PORT="5601"
 [ -z "$VERSIONS" ] && TEST_VERSIONS=("${DEFAULT_VERSIONS[@]}") || IFS=',' read -r -a TEST_VERSIONS <<<"$VERSIONS"
 [ -z "$SECURITY_ENABLED" ] && SECURITY_ENABLED="false"
-[ $SECURITY_ENABLED == "false" ] && DASHBOARDS_TYPE="without-security" || DASHBOARDS_TYPE="with-security"
+[ $SECURITY_ENABLED == "false" ] && DASHBOARDS_TYPE="without_security" || DASHBOARDS_TYPE="with_security"
 [ $SECURITY_ENABLED == "false" ] && RELEASES_ARRAY=() || IFS=',' read -r -a RELEASES_ARRAY <<<"$RELEASES"
 [ -z "$CREDENTIAL" ] && CREDENTIAL="admin:admin"
 [ -z $GENERATE_DATA ] && GENERATE_DATA="false"
@@ -142,12 +142,12 @@ OPENSEARCH_PATH="$DIR/$OPENSEARCH_FILE"
 DASHBOARDS_PATH="$DIR/$DASHBOARDS_FILE"
 DASHBOARDS_MSG="\"state\":\"green\",\"title\":\"Green\",\"nickname\":\"Looking good\",\"icon\":\"success\""
 DASHBOARDS_URL="http://$BIND_ADDRESS:$BIND_PORT/api/status"
-if [ $SECURITY_ENABLED == "false" ]; 
-then 
+if [ $SECURITY_ENABLED == "false" ];
+then
   OPENSEARCH_MSG="\"status\":\"green\""
   OPENSEARCH_URL="http://$BIND_ADDRESS:9200/_cluster/health"
   OPENSEARCH_ARGS=""
-else 
+else
   OPENSEARCH_MSG="\"status\":\"yellow\""
   OPENSEARCH_URL="https://$BIND_ADDRESS:9200/_cluster/health"
   OPENSEARCH_ARGS="-u $CREDENTIAL --insecure"
@@ -156,25 +156,25 @@ fi
 # define test groups to test suites
 declare -A TEST_SUITES
 TEST_SUITES=(
-  ["odfe-0.10.0"]=$TEST_GROUP_1 
-  ["odfe-1.0.2"]=$TEST_GROUP_2 
-  ["odfe-1.1.0"]=$TEST_GROUP_2
-  ["odfe-1.2.1"]=$TEST_GROUP_2
-  ["odfe-1.3.0"]=$TEST_GROUP_2
-  ["odfe-1.4.0"]=$TEST_GROUP_3
-  ["odfe-1.7.0"]=$TEST_GROUP_3
-  ["odfe-1.8.0"]=$TEST_GROUP_3
-  ["odfe-1.9.0"]=$TEST_GROUP_3
-  ["odfe-1.11.0"]=$TEST_GROUP_3
-  ["odfe-1.13.2"]=$TEST_GROUP_4
-  ["osd-1.0.0"]=$TEST_GROUP_4
-  ["osd-1.1.0"]=$TEST_GROUP_4
-  ["osd-2.0.0"]=$TEST_GROUP_4
+  ["odfe_0.10.0"]=$TEST_GROUP_1
+  ["odfe_1.0.2"]=$TEST_GROUP_2
+  ["odfe_1.1.0"]=$TEST_GROUP_2
+  ["odfe_1.2.1"]=$TEST_GROUP_2
+  ["odfe_1.3.0"]=$TEST_GROUP_2
+  ["odfe_1.4.0"]=$TEST_GROUP_3
+  ["odfe_1.7.0"]=$TEST_GROUP_3
+  ["odfe_1.8.0"]=$TEST_GROUP_3
+  ["odfe_1.9.0"]=$TEST_GROUP_3
+  ["odfe_1.11.0"]=$TEST_GROUP_3
+  ["odfe_1.13.2"]=$TEST_GROUP_4
+  ["osd_1.0.0"]=$TEST_GROUP_4
+  ["osd_1.1.0"]=$TEST_GROUP_4
+  ["osd_2.0.0"]=$TEST_GROUP_4
 )
 
 # this function sets up the cypress env
 # it first clones the opensearch-dashboards-functional-test library
-# then it removes the tests into the cypress integration folder 
+# then it removes the tests into the cypress integration folder
 # and copies the backwards compatibility tests into the folder
 function setup_cypress() {
   echo "[ Setup the cypress test environment ]"
@@ -207,7 +207,7 @@ function run_cypress() {
 }
 
 # Runs the backwards compatibility test using cypress for the required version
-# $1 is the requested version 
+# $1 is the requested version
 function run_bwc() {
   cd "$TEST_DIR"
   [ -z "${TEST_SUITES[$1]}" ] && test_suite=$TEST_GROUP_DEFAULT || test_suite="${TEST_SUITES[$1]}"
@@ -216,7 +216,7 @@ function run_bwc() {
   # Check if $DASHBOARDS_TYPE/plugins has tests in them to execute
   if [ "$(ls -A $TEST_DIR/cypress/integration/$DASHBOARDS_TYPE/plugins | wc -l)" -gt 1 ]; then
     run_cypress "plugins"
-  else 
+  else
     run_cypress "core" "${tests[@]}"
   fi
 }
@@ -233,9 +233,9 @@ function generate_test_data() {
 
   run_generate_data_spec
   archive_data
-  
+
   # kill the running OpenSearch process
-  clean  
+  clean
 }
 
 # Main function
@@ -252,18 +252,18 @@ function execute_tests() {
     # copy and un-tar data into the OpenSearch data folder
     echo "[ Setting up the OpenSearch environment for $version ]"
     upload_data $version
-    
+
     run_opensearch
     check_opensearch_status
     run_dashboards
     check_dashboards_status
-    
+
     echo "[ Run the backwards compatibility tests for $version ]"
     run_bwc $version
-  
+
     # kill the running OpenSearch process
     clean
-  done  
+  done
 }
 
 # Executes the main function with different versions of OpenSearch downloaded
@@ -281,7 +281,7 @@ function execute_mismatch_tests() {
     execute_tests
   done
 }
- 
+
 # setup the cypress test env
 [ ! -d "$TEST_DIR/cypress" ] && setup_cypress
 if [ $GENERATE_DATA == "true" ]; then
