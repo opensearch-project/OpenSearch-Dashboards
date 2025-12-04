@@ -77,20 +77,22 @@ jobs:
           echo "Disk usage before cleanup:"
           df -h
 
-          # Remove pre-installed software to free up space
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo rm -rf /usr/local/share/powershell
-          sudo rm -rf /usr/share/swift
-          sudo rm -rf /var/lib/gems
+          # Clean up what we can without sudo in the container
+          # Clear any existing build artifacts and caches
+          rm -rf ~/.cache/* 2>/dev/null || true
+          rm -rf ~/.npm/_cacache/* 2>/dev/null || true
+          rm -rf /tmp/* 2>/dev/null || true
 
-          # Clean package cache
-          sudo apt-get clean
+          # Clean up any yarn/npm global caches if they exist
+          yarn cache clean 2>/dev/null || true
+          npm cache clean --force 2>/dev/null || true
 
           echo "Disk usage after cleanup:"
           df -h
+
+          # List largest directories to understand disk usage
+          echo "Largest directories:"
+          du -h --max-depth=2 / 2>/dev/null | sort -hr | head -10 || true
 
       - name: Set Java version
         run: |
@@ -276,20 +278,22 @@ jobs:
           echo "Disk usage before cleanup:"
           df -h
 
-          # Remove pre-installed software to free up space
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo rm -rf /usr/local/share/powershell
-          sudo rm -rf /usr/share/swift
-          sudo rm -rf /var/lib/gems
+          # Clean up what we can without sudo in the container
+          # Clear any existing build artifacts and caches
+          rm -rf ~/.cache/* 2>/dev/null || true
+          rm -rf ~/.npm/_cacache/* 2>/dev/null || true
+          rm -rf /tmp/* 2>/dev/null || true
 
-          # Clean package cache
-          sudo apt-get clean
+          # Clean up any yarn/npm global caches if they exist
+          yarn cache clean 2>/dev/null || true
+          npm cache clean --force 2>/dev/null || true
 
           echo "Disk usage after cleanup:"
           df -h
+
+          # List largest directories to understand disk usage
+          echo "Largest directories:"
+          du -h --max-depth=2 / 2>/dev/null | sort -hr | head -10 || true
 
       - name: Set Java version
         run: |
