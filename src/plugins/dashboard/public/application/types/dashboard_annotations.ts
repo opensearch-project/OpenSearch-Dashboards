@@ -38,11 +38,11 @@ export interface DashboardAnnotation {
   // Query configuration
   query: {
     queryType: 'time-regions' | 'ppl-query';
-    fromType: 'everyday' | 'weekdays';
-    fromWeekdays: string[];
+    fromType?: 'everyday' | 'weekdays';
+    fromWeekdays?: string[];
     fromTime?: string;
-    toType: 'everyday' | 'weekdays';
-    toWeekdays: string[];
+    toType?: 'everyday' | 'weekdays';
+    toWeekdays?: string[];
     toTime?: string;
 
     recurrence?: {

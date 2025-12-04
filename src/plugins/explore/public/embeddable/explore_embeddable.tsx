@@ -628,54 +628,28 @@ export class ExploreEmbeddable
       const response = await searchSource.fetch(fetchOptions);
       let timestamps: any[] = [];
 
-      if (response && (response as any).datarows && (response as any).schema) {
-        const schema = (response as any).schema;
-        const datarows = (response as any).datarows;
+      if (response && response.hits && response.hits.hits && response.hits.hits.length > 0) {
+        const firstHit = response.hits.hits[0];
+        let timeField: string | null = null;
 
-        const fieldIndexMap = new Map<string, number>();
-        schema.forEach((field: any, index: number) => {
-          fieldIndexMap.set(field.name, index);
-        });
+        if (firstHit._source) {
+          for (const [fieldName, fieldValue] of Object.entries(firstHit._source)) {
+            // Check if field value looks like a timestamp
+            if (
+              typeof fieldValue === 'string' &&
+              fieldValue.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
+            ) {
+              timeField = fieldName;
+              break;
+            }
+          }
+        }
 
-        const timeFieldIndex = schema.findIndex((field: any) => {
-          const fieldType = field.type;
-          return (
-            fieldType === 'TIMESTAMP' ||
-            fieldType === 'TIME' ||
-            fieldType === 'DATE' ||
-            fieldType === 'DATE_NANOS' ||
-            fieldType === 'date' ||
-            fieldType === 'timestamp'
-          );
-        });
-
-        if (timeFieldIndex >= 0) {
-          timestamps = datarows.map((row: any[]) => row[timeFieldIndex]).filter(Boolean);
-        } else {
-          timestamps = datarows
-            .map((row: any[]) => {
-              const getValueByName = (name: string) => {
-                const index = fieldIndexMap.get(name);
-                return index !== undefined ? row[index] : undefined;
-              };
-
-              return (
-                getValueByName('@timestamp') ||
-                getValueByName('timestamp') ||
-                getValueByName('time') ||
-                getValueByName('startTime') ||
-                row[0]
-              );
-            })
+        if (timeField) {
+          timestamps = response.hits.hits
+            .map((hit: any) => hit._source?.[timeField])
             .filter(Boolean);
         }
-      } else if (response && response.hits && response.hits.hits) {
-        timestamps =
-          response.hits.hits
-            ?.map((hit: any) => {
-              return hit._source?.timestamp || hit._source?.['@timestamp'];
-            })
-            .filter(Boolean) || [];
       }
 
       if (timestamps.length > 0) {

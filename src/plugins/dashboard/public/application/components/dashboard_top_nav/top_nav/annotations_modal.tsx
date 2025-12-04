@@ -296,11 +296,6 @@ export const AnnotationsModal: React.FC<AnnotationsModalProps> = ({
               pplQuery: formData.pplQuery,
               pplResultCount: formData.pplResultCount,
               pplDataset: formData.pplDataset,
-              // Add dummy values for required fields to satisfy TypeScript, but they won't be used
-              fromType: 'everyday' as const,
-              fromWeekdays: [],
-              toType: 'everyday' as const,
-              toWeekdays: [],
             }
           : {
               // Time regions query - include time-related fields
@@ -343,12 +338,12 @@ export const AnnotationsModal: React.FC<AnnotationsModalProps> = ({
       fromWeekday:
         annotation.query.fromType === 'everyday'
           ? 'everyday'
-          : annotation.query.fromWeekdays[0] || 'everyday',
+          : annotation.query.fromWeekdays?.[0] || 'everyday',
       fromTime: annotation.query.fromTime || '',
       toWeekday:
         annotation.query.toType === 'everyday'
           ? 'everyday'
-          : annotation.query.toWeekdays[0] || 'everyday',
+          : annotation.query.toWeekdays?.[0] || 'everyday',
       toTime: annotation.query.toTime || '',
       pplQuery: annotation.query.pplQuery || '',
       pplResultCount: annotation.query.pplResultCount || 0,

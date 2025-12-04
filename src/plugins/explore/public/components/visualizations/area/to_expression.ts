@@ -111,7 +111,7 @@ const createAnnotationLayers = (
         shouldAnnotate = true;
       } else if (
         annotation.query.fromType === 'weekdays' &&
-        annotation.query.fromWeekdays.includes(dayOfWeek)
+        annotation.query.fromWeekdays?.includes(dayOfWeek)
       ) {
         shouldAnnotate = true;
       }
@@ -124,7 +124,11 @@ const createAnnotationLayers = (
         annotationEnd.setHours(toHour, toMinute, 0, 0);
 
         // Handle cross-day annotations
-        if (annotation.query.toType === 'weekdays' && annotation.query.toWeekdays.length > 0) {
+        if (
+          annotation.query.toType === 'weekdays' &&
+          annotation.query.toWeekdays &&
+          annotation.query.toWeekdays.length > 0
+        ) {
           const currentToDay = currentDate.getDay().toString();
           if (!annotation.query.toWeekdays.includes(currentToDay)) {
             // Find next valid day
@@ -133,7 +137,7 @@ const createAnnotationLayers = (
             for (let i = 1; i <= 7 && !found; i++) {
               searchDate.setDate(searchDate.getDate() + 1);
               if (
-                annotation.query.toWeekdays.includes(searchDate.getDay().toString()) &&
+                annotation.query.toWeekdays?.includes(searchDate.getDay().toString()) &&
                 searchDate.getTime() <= endTime
               ) {
                 annotationEnd = new Date(searchDate);
