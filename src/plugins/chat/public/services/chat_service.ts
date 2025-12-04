@@ -273,11 +273,48 @@ export class ChatService {
   }
 
   /**
+   * Extract data source ID from page context
+   * Looks for page contexts with appId and dataset.dataSource.id structure
+   */
+  private extractDataSourceIdFromPageContext(allContexts: any[]): string | undefined {
+    // Find page context by checking for appId in value (reliable identifier)
+    const pageContext = allContexts.find((ctx) => {
+      if (ctx.id) return false; // Skip contexts with IDs
+
+      try {
+        const value = typeof ctx.value === 'string' ? JSON.parse(ctx.value) : ctx.value;
+        return value?.appId; // Page contexts have appId
+      } catch {
+        return false;
+      }
+    });
+
+    if (!pageContext) return undefined;
+
+    const contextValue =
+      typeof pageContext.value === 'string' ? JSON.parse(pageContext.value) : pageContext.value;
+
+    // TODO: Consider adding more robust nested field search for dataSource.id
+    // if the standard dataset.dataSource.id pattern is not found
+    return contextValue?.dataset?.dataSource?.id;
+  }
+
+  /**
    * Get workspace-aware data source ID
    * Determines the correct data source based on current workspace context
    */
   private async getWorkspaceAwareDataSourceId(): Promise<string | undefined> {
     try {
+      // Try to get data source from page context first
+      const contextStore = (window as any).assistantContextStore;
+      const allContexts = contextStore ? contextStore.getAllContexts() : [];
+
+      const pageDataSourceId = this.extractDataSourceIdFromPageContext(allContexts);
+      if (pageDataSourceId) {
+        return pageDataSourceId;
+      }
+
+      // Fallback to existing workspace-aware logic
       if (!this.uiSettings) {
         // eslint-disable-next-line no-console
         console.warn('UI Settings not available, using default data source');
@@ -305,7 +342,7 @@ export class ChatService {
       return dataSourceId || undefined;
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.warn('Failed to determine workspace-aware data source, proceeding without:', error);
+      console.warn('Failed to determine data source, proceeding without:', error);
       return undefined; // Graceful fallback - undefined means local cluster
     }
   }
