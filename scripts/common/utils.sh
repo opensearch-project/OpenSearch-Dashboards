@@ -12,7 +12,7 @@ function open_artifact() {
 
   # check if artifact provided is URL or attempt if passing by absolute path
   if curl -I -L "$artifact"; then
-    curl -L $artifact | tar -xz --strip-components=1
+    curl -L "$artifact" | tar -xz --strip-components=1
   else
     echo "Artifact is not a URL; attempting to unarchive a local file..."
     tar -xf $artifact --strip-components=1
