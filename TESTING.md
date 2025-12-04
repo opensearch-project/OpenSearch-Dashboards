@@ -44,7 +44,7 @@ Additionally there are a few more types of tests and checks:
 # Requirements
 
 - Install the latest NodeJS, [NPM](https://www.npmjs.com/get-npm) and [Yarn](https://classic.yarnpkg.com/en/docs/install/#mac-stable)
-  - `nvm install v20.18.3`
+  - `nvm install v20.19.5`
   - `npm install -g yarn`
 
 # Test guidelines
