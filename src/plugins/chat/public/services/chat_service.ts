@@ -280,9 +280,10 @@ export class ChatService {
    * Looks for page contexts with appId and dataset.dataSource.id structure
    */
   private extractDataSourceIdFromPageContext(allContexts: any[]): string | undefined {
-    // Find page context by checking for appId in value (reliable identifier)
+    // Find page context by checking for 'page' category and appId in value
     const pageContext = allContexts.find((ctx) => {
-      if (ctx.id) return false; // Skip contexts with IDs
+      // Look for contexts in 'page' category instead of filtering by ID existence
+      if (!ctx.categories?.includes('page')) return false;
 
       try {
         const value = typeof ctx.value === 'string' ? JSON.parse(ctx.value) : ctx.value;
@@ -570,9 +571,11 @@ export class ChatService {
       return;
     }
 
-    // Get all contexts with IDs (dynamic contexts) and remove them
+    // Get all contexts with IDs that are NOT page contexts (dynamic contexts) and remove them
     const allContexts = contextStore.getAllContexts();
-    const dynamicContexts = allContexts.filter((ctx: any) => ctx.id);
+    const dynamicContexts = allContexts.filter(
+      (ctx: any) => ctx.id && !ctx.categories?.includes('page')
+    );
 
     dynamicContexts.forEach((ctx: any) => {
       contextStore.removeContextById(ctx.id);

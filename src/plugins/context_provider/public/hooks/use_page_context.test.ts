@@ -86,6 +86,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           description: 'Page context for /app/explore',
           label: 'Page: /app/explore',
           categories: ['page', 'static'],
@@ -114,6 +115,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: expect.objectContaining({
             pathname: '/app/explore',
             _g: null,
@@ -135,6 +137,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           description: 'Custom page context',
         })
       );
@@ -149,6 +152,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           categories: ['custom', 'test'],
         })
       );
@@ -170,6 +174,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: { converted: true },
         })
       );
@@ -184,6 +189,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           description: 'Disabled page context',
           value: null,
           label: 'Disabled',
@@ -262,6 +268,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: expect.objectContaining({
             hash: '#/new-path',
           }),
@@ -335,6 +342,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: expect.objectContaining({
             _g: globalState,
           }),
@@ -353,6 +361,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: expect.objectContaining({
             _a: appState,
           }),
@@ -371,6 +380,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: expect.objectContaining({
             _q: queryState,
           }),
@@ -395,6 +405,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: expect.objectContaining({
             search: '?tab=logs&mode=advanced',
             searchParams: expect.any(Object),
@@ -502,6 +513,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: expect.objectContaining({
             hash: '',
           }),
@@ -522,6 +534,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: expect.objectContaining({
             pathname: '/app/explore',
             search: '',
@@ -540,6 +553,7 @@ describe('usePageContext', () => {
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: expect.stringMatching(/^page-context-\d+-[a-z0-9]+$/),
           value: null,
         })
       );
