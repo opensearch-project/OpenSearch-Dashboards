@@ -75,7 +75,7 @@ describe('PromQLConnectionClient', () => {
       expect(result).toEqual({
         status: 'failed',
         data: [],
-        type: 'promq',
+        type: 'promql',
       });
     });
 
