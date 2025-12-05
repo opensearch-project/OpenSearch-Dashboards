@@ -1,0 +1,2 @@
+fix:
+- [Chat][Context] Fix page context cleanup when navigating to pages without page context ([#11036](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11036))
