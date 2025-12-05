@@ -513,11 +513,7 @@ export const AnnotationsModal: React.FC<AnnotationsModalProps> = ({
     setLoading(true);
     try {
       await annotationsService.saveAnnotations(dashboardId, annotations);
-
-      // Use setTimeout to ensure onSave callback doesn't block the modal close
-      setTimeout(() => {
-        onSave(annotations);
-      }, 100);
+      onSave(annotations);
 
       onClose();
     } catch (error) {

@@ -237,7 +237,9 @@ export const getNavActions = (
   };
 
   navActions[TopNavIds.ANNOTATIONS] = () => {
-    const annotationsService = new DashboardAnnotationsService(services.savedObjects.client);
+    const annotationsService = DashboardAnnotationsService.getInstance(
+      services.savedObjects.client
+    );
     const dashboardId = savedDashboard.id;
 
     if (!dashboardId) {
@@ -259,11 +261,11 @@ export const getNavActions = (
       (annotations) => {
         notifications.toasts.addSuccess({
           title: i18n.translate('dashboard.annotations.saved', {
-            defaultMessage: 'Annotations saved: {count} items',
+            defaultMessage: 'Annotations updated: {count} items',
             values: { count: annotations.length },
           }),
-          text: i18n.translate('dashboard.annotations.refreshRequired', {
-            defaultMessage: 'Refresh the page to see the annotations applied to visualizations.',
+          text: i18n.translate('dashboard.annotations.appliedAutomatically', {
+            defaultMessage: 'Annotations have been applied to visualizations automatically.',
           }),
         });
       }

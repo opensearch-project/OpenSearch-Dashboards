@@ -54,6 +54,7 @@ import { normalizeResultRows } from '../components/visualizations/utils/normaliz
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { prepareQueryForLanguage } from '../application/utils/languages';
 import { ExploreAnnotationsService } from '../services/annotations_service';
+import { DashboardAnnotationsService } from '../../../dashboard/public';
 
 export interface SearchProps {
   description?: string;
@@ -117,6 +118,8 @@ export class ExploreEmbeddable
   private filterManager: FilterManager;
   private services: ExploreServices;
   private annotationsService: ExploreAnnotationsService;
+  private dashboardAnnotationsService?: DashboardAnnotationsService;
+  private annotationSubscription?: Subscription;
   private prevState = {
     filters: undefined as Filter[] | undefined,
     query: undefined as Query | undefined,
@@ -157,10 +160,14 @@ export class ExploreEmbeddable
     this.filterManager = filterManager;
     this.savedExplore = savedExplore;
     this.annotationsService = new ExploreAnnotationsService(services.savedObjects.client);
+    this.dashboardAnnotationsService = DashboardAnnotationsService.getInstance(
+      services.savedObjects.client
+    );
     this.inspectorAdaptors = {
       requests: new RequestAdapter(),
     };
     this.initializeSearchProps();
+    this.setupAnnotationSubscription();
 
     this.subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
       this.panelTitle = this.output.title || '';
@@ -330,6 +337,33 @@ export class ExploreEmbeddable
       this.isInitialLoad = true;
       this.updateHandler(this.searchProps, true);
     }
+  }
+
+  private setupAnnotationSubscription() {
+    if (!this.dashboardAnnotationsService || !this.parent) {
+      return;
+    }
+
+    const dashboardId = this.parent.id;
+    if (!dashboardId) {
+      return;
+    }
+
+    // Subscribe to annotation changes for this dashboard
+    this.annotationSubscription = this.dashboardAnnotationsService
+      .subscribeToAnnotationChanges(dashboardId)
+      .subscribe((annotations) => {
+        // Clear PPL annotations cache when annotations change
+        this.pplAnnotationsCache.clear();
+
+        // Set initial load flag to trigger PPL query re-execution
+        this.isInitialLoad = true;
+
+        // Trigger a re-render with updated annotations
+        if (this.searchProps) {
+          this.updateHandler(this.searchProps, true);
+        }
+      });
   }
 
   private fetch = async () => {
@@ -677,6 +711,10 @@ export class ExploreEmbeddable
 
     if (this.autoRefreshFetchSubscription) {
       this.autoRefreshFetchSubscription.unsubscribe();
+    }
+
+    if (this.annotationSubscription) {
+      this.annotationSubscription.unsubscribe();
     }
 
     if (this.abortController) {
