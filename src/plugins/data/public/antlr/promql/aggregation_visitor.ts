@@ -32,7 +32,6 @@ export class AggregationVisitor extends PromQLParserVisitor<string | null> {
   };
 
   public aggregateResult = (aggregate: string | null, nextResult: string | null) => {
-    // keeping the last metricName we find
     return aggregate ?? nextResult;
   };
 
