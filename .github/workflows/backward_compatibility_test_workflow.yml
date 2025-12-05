@@ -151,42 +151,6 @@ jobs:
           curl -L "${{ env.OPENSEARCH_URL }}" | tar -xz --strip-components=1
           echo "OPENSEARCH_DIR=$(pwd)" >> $GITHUB_ENV
 
-      - name: Start OpenSearch
-        run: |
-          cd ${{ env.OPENSEARCH_DIR }}
-          # Configure OpenSearch for CI
-          echo "cluster.name: opensearch-ci" >> config/opensearch.yml
-          echo "network.host: localhost" >> config/opensearch.yml
-          echo "http.port: 9200" >> config/opensearch.yml
-          echo "transport.tcp.port: 9300" >> config/opensearch.yml
-          echo "discovery.type: single-node" >> config/opensearch.yml
-          echo "action.auto_create_index: true" >> config/opensearch.yml
-          echo "cluster.routing.allocation.disk.threshold_enabled: false" >> config/opensearch.yml
-
-          # Only disable security if the security plugin exists
-          if [ -d "plugins/opensearch-security" ]; then
-            echo "plugins.security.disabled: true" >> config/opensearch.yml
-            echo "Security plugin found, disabling it"
-          else
-            echo "No security plugin found, skipping security.disabled setting"
-          fi
-          # Start OpenSearch in background
-          nohup ./bin/opensearch > opensearch.log 2>&1 &
-          # Wait for OpenSearch to be ready
-          for i in {1..60}; do
-            if curl -s http://localhost:9200 >/dev/null; then
-              echo "OpenSearch is ready"
-              break
-            fi
-            echo "Waiting for OpenSearch... ($i/60)"
-            sleep 5
-          done
-          if ! curl -s http://localhost:9200 >/dev/null; then
-            echo "OpenSearch failed to start"
-            cat opensearch.log
-            exit 1
-          fi
-
       - name: Run bootstrap
         run: yarn osd bootstrap
 
@@ -195,7 +159,7 @@ jobs:
 
       - name: Run CI test ${{ matrix.version }}
         id: ftr-tests
-        run: node scripts/functional_tests.js --config test/functional/config.js
+        run: node scripts/functional_tests.js --config test/functional/config.js --opensearchFrom ${{ env.OPENSEARCH_DIR }}
         env:
           JOB: compatibility-test
           CACHE_DIR: compatibility-${{ matrix.version }}
@@ -327,42 +291,6 @@ jobs:
           curl -L "${{ env.OPENSEARCH_URL }}" | tar -xz --strip-components=1
           echo "OPENSEARCH_DIR=$(pwd)" >> $GITHUB_ENV
 
-      - name: Start OpenSearch
-        run: |
-          cd ${{ env.OPENSEARCH_DIR }}
-          # Configure OpenSearch for CI
-          echo "cluster.name: opensearch-ci" >> config/opensearch.yml
-          echo "network.host: localhost" >> config/opensearch.yml
-          echo "http.port: 9200" >> config/opensearch.yml
-          echo "transport.tcp.port: 9300" >> config/opensearch.yml
-          echo "discovery.type: single-node" >> config/opensearch.yml
-          echo "action.auto_create_index: true" >> config/opensearch.yml
-          echo "cluster.routing.allocation.disk.threshold_enabled: false" >> config/opensearch.yml
-
-          # Only disable security if the security plugin exists
-          if [ -d "plugins/opensearch-security" ]; then
-            echo "plugins.security.disabled: true" >> config/opensearch.yml
-            echo "Security plugin found, disabling it"
-          else
-            echo "No security plugin found, skipping security.disabled setting"
-          fi
-          # Start OpenSearch in background
-          nohup ./bin/opensearch > opensearch.log 2>&1 &
-          # Wait for OpenSearch to be ready
-          for i in {1..60}; do
-            if curl -s http://localhost:9200 >/dev/null; then
-              echo "OpenSearch is ready"
-              break
-            fi
-            echo "Waiting for OpenSearch... ($i/60)"
-            sleep 5
-          done
-          if ! curl -s http://localhost:9200 >/dev/null; then
-            echo "OpenSearch failed to start"
-            cat opensearch.log
-            exit 1
-          fi
-
       - name: Run bootstrap
         run: yarn osd bootstrap
 
@@ -371,7 +299,7 @@ jobs:
 
       - name: Run functional plugin tests
         id: plugin-ftr-tests
-        run: node scripts/functional_tests.js --config test/plugin_functional/config.ts
+        run: node scripts/functional_tests.js --config test/plugin_functional/config.ts --opensearchFrom ${{ env.OPENSEARCH_DIR }}
         env:
           TEST_OPENSEARCH_PORT: 9200
 
