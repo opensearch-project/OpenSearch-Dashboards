@@ -31,7 +31,7 @@ export interface UsePageContextOptions {
 }
 
 // Constants for stable references
-const DEFAULT_CATEGORIES = ['page', 'url', 'static'];
+const DEFAULT_CATEGORIES = ['page', 'static'];
 
 /**
  * Capture current URL state using direct browser URL monitoring

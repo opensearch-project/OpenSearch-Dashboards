@@ -13,6 +13,11 @@ import { ChatServiceStart } from '../../../../core/public';
 // Mock AgUiAgent
 jest.mock('./ag_ui_agent');
 
+// Mock data source management
+jest.mock('../../../data_source_management/public', () => ({
+  getDefaultDataSourceId: jest.fn(),
+}));
+
 describe('ChatService', () => {
   let chatService: ChatService;
   let mockAgent: jest.Mocked<AgUiAgent>;
@@ -1153,6 +1158,261 @@ describe('ChatService', () => {
       });
 
       expect(completed).toBe(true);
+    });
+  });
+
+  describe('extractDataSourceIdFromPageContext', () => {
+    it('should extract data source ID from valid page context', () => {
+      const contexts = [
+        {
+          // Context with ID - should be skipped
+          id: 'some-id',
+          description: 'Some other context',
+          value: { appId: 'other-app', dataset: { dataSource: { id: 'wrong-id' } } },
+        },
+        {
+          // Valid page context without ID
+          description: 'Explore application page context',
+          value: {
+            appId: 'explore',
+            dataset: { dataSource: { id: 'correct-data-source-id' } },
+          },
+        },
+      ];
+
+      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      expect(result).toBe('correct-data-source-id');
+    });
+
+    it('should handle page context with stringified value', () => {
+      const contexts = [
+        {
+          description: 'Investigation page context',
+          value: JSON.stringify({
+            appId: 'investigation-notebooks',
+            dataset: { dataSource: { id: 'investigation-data-source' } },
+          }),
+        },
+      ];
+
+      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      expect(result).toBe('investigation-data-source');
+    });
+
+    it('should return undefined when no page context found', () => {
+      const contexts = [
+        {
+          id: 'text-selection',
+          description: 'Selected text context',
+          value: 'some text',
+        },
+        {
+          id: 'document-expansion',
+          description: 'Expanded document',
+          value: { documentData: 'test' },
+        },
+      ];
+
+      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when page context lacks appId', () => {
+      const contexts = [
+        {
+          description: 'Invalid page context',
+          value: { dataset: { dataSource: { id: 'some-id' } } }, // Missing appId
+        },
+      ];
+
+      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when page context lacks dataset.dataSource.id', () => {
+      const contexts = [
+        {
+          description: 'Page context without data source',
+          value: { appId: 'explore' }, // Missing dataset
+        },
+      ];
+
+      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle malformed JSON gracefully', () => {
+      const contexts = [
+        {
+          description: 'Malformed context',
+          value: 'invalid-json-{',
+        },
+      ];
+
+      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      expect(result).toBeUndefined();
+    });
+
+    it('should skip contexts with IDs and find first valid page context', () => {
+      const contexts = [
+        {
+          id: 'context-with-id',
+          description: 'Context with ID',
+          value: { appId: 'explore', dataset: { dataSource: { id: 'wrong-id' } } },
+        },
+        {
+          description: 'First page context',
+          value: { appId: 'explore', dataset: { dataSource: { id: 'first-id' } } },
+        },
+        {
+          description: 'Second page context',
+          value: { appId: 'investigation', dataset: { dataSource: { id: 'second-id' } } },
+        },
+      ];
+
+      const result = (chatService as any).extractDataSourceIdFromPageContext(contexts);
+      expect(result).toBe('first-id'); // Should return first valid page context
+    });
+
+    it('should handle empty contexts array', () => {
+      const result = (chatService as any).extractDataSourceIdFromPageContext([]);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('getWorkspaceAwareDataSourceId with page context priority', () => {
+    let mockUiSettings: any;
+    let mockWorkspaces: any;
+
+    beforeEach(() => {
+      mockUiSettings = {
+        get: jest.fn(),
+      };
+      mockWorkspaces = {
+        currentWorkspaceId$: {
+          getValue: jest.fn().mockReturnValue(null),
+        },
+      };
+
+      // Set default return value for getDefaultDataSourceId mock
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('workspace-data-source-id');
+    });
+
+    it('should prioritize page context data source over workspace data source', async () => {
+      // Set up page context with data source
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          {
+            description: 'Explore page context',
+            value: {
+              appId: 'explore',
+              dataset: { dataSource: { id: 'page-data-source-id' } },
+            },
+          },
+        ]),
+      };
+
+      // Create service with uiSettings and workspaces
+      const serviceWithSettings = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces
+      );
+
+      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+
+      expect(result).toBe('page-data-source-id');
+    });
+
+    it('should fallback to workspace data source when no page context', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('workspace-fallback-id');
+
+      // Set up context store without page context
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          {
+            id: 'text-selection',
+            description: 'Selected text',
+            value: 'some text',
+          },
+        ]),
+      };
+
+      const serviceWithSettings = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces
+      );
+
+      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+
+      expect(result).toBe('workspace-fallback-id');
+    });
+
+    it('should fallback to workspace data source when page context has invalid data', async () => {
+      const { getDefaultDataSourceId } = jest.requireMock('../../../data_source_management/public');
+      getDefaultDataSourceId.mockResolvedValue('workspace-fallback-id');
+
+      // Set up page context without data source
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockReturnValue([
+          {
+            description: 'Invalid page context',
+            value: { appId: 'explore' }, // Missing dataset
+          },
+        ]),
+      };
+
+      const serviceWithSettings = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces
+      );
+
+      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+
+      expect(result).toBe('workspace-fallback-id');
+    });
+
+    it('should return undefined when no context store available', async () => {
+      // Remove context store
+      delete (global as any).window.assistantContextStore;
+
+      const serviceWithSettings = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces
+      );
+
+      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+
+      // Should still fallback to workspace data source even without context store
+      expect(result).toBe('workspace-data-source-id');
+    });
+
+    it('should handle context store errors gracefully', async () => {
+      // Set up context store that throws error
+      (global as any).window.assistantContextStore = {
+        getAllContexts: jest.fn().mockImplementation(() => {
+          throw new Error('Context store error');
+        }),
+      };
+
+      const serviceWithSettings = new (ChatService as any)(
+        mockUiSettings,
+        mockCoreChatService,
+        mockWorkspaces
+      );
+
+      const result = await serviceWithSettings.getWorkspaceAwareDataSourceId();
+
+      expect(result).toBeUndefined();
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
     });
   });
 
