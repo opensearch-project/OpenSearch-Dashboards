@@ -79,6 +79,7 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
         type: queryState.dataset.type,
         timeFieldName: queryState.dataset.timeFieldName,
         dataSource: queryState.dataset.dataSource,
+        signalType: queryState.dataset.signalType,
       };
     }
 
@@ -86,10 +87,17 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     const resolvedQueryState = await getPreloadedQueryState(services, urlDataset);
 
     // Use the resolved dataset but preserve other query state from URL if available
+    // When the dataset changes (due to signal type filtering), also update the language
+    const datasetChanged =
+      queryState?.dataset?.id !== resolvedQueryState.dataset?.id ||
+      queryState?.dataset?.type !== resolvedQueryState.dataset?.type;
+
     const finalQueryState: QueryState = queryState
       ? {
           ...queryState,
           dataset: resolvedQueryState.dataset,
+          language: datasetChanged ? resolvedQueryState.language : queryState.language,
+          query: datasetChanged ? '' : queryState.query,
         }
       : resolvedQueryState;
     services.data.query.queryString.setQuery(finalQueryState);
@@ -184,15 +192,21 @@ const fetchFirstAvailableDataset = async (
             dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
           );
 
+          // Get effective signal type from dataView or dataset (for Prometheus which sets signalType directly)
+          const effectiveSignalType = dataView?.signalType || dataset.signalType;
+
           // If requiredSignalType is specified, dataset must match it
           if (requiredSignalType) {
-            if (dataView?.signalType === requiredSignalType) {
+            if (effectiveSignalType === requiredSignalType) {
               return dataset;
             }
           } else {
-            // If requiredSignalType is not specified (i.e., not Traces),
-            // dataset should not have signalType equal to Traces
-            if (dataView?.signalType !== CORE_SIGNAL_TYPES.TRACES) {
+            // If requiredSignalType is not specified (i.e., Logs flavor),
+            // dataset should not have signalType equal to Traces or Metrics
+            if (
+              effectiveSignalType !== CORE_SIGNAL_TYPES.TRACES &&
+              effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS
+            ) {
               return dataset;
             }
           }
@@ -220,7 +234,11 @@ const resolveDataset = async (
   const currentAppId = await getCurrentAppId(services);
   const flavorFromAppId = getFlavorFromAppId(currentAppId);
   const requiredSignalType =
-    flavorFromAppId === ExploreFlavor.Traces ? CORE_SIGNAL_TYPES.TRACES : undefined;
+    flavorFromAppId === ExploreFlavor.Traces
+      ? CORE_SIGNAL_TYPES.TRACES
+      : flavorFromAppId === ExploreFlavor.Metrics
+      ? CORE_SIGNAL_TYPES.METRICS
+      : undefined;
 
   // Get existing dataset from QueryStringManager or use preferred dataset
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
@@ -235,15 +253,21 @@ const resolveDataset = async (
         existingDataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
       );
 
+      // Get effective signal type from dataView or preferredDataset (for Prometheus which sets signalType directly)
+      const effectiveSignalType = dataView?.signalType || preferredDataset?.signalType;
+
       // If requiredSignalType is specified, dataset must match it
       if (requiredSignalType) {
-        if (dataView?.signalType === requiredSignalType) {
+        if (effectiveSignalType === requiredSignalType) {
           return existingDataset;
         }
       } else {
-        // If requiredSignalType is not specified (i.e., not Traces),
-        // dataset should not have signalType equal to Traces
-        if (dataView?.signalType !== CORE_SIGNAL_TYPES.TRACES) {
+        // If requiredSignalType is not specified (i.e., Logs flavor),
+        // dataset should not have signalType equal to Traces or Metrics
+        if (
+          effectiveSignalType !== CORE_SIGNAL_TYPES.TRACES &&
+          effectiveSignalType !== CORE_SIGNAL_TYPES.METRICS
+        ) {
           return existingDataset;
         }
       }
@@ -280,6 +304,7 @@ const getPreloadedQueryState = async (
         type: selectedDataset.type,
         timeFieldName: selectedDataset.timeFieldName,
         dataSource: selectedDataset.dataSource,
+        signalType: selectedDataset.signalType,
       };
     }
   }

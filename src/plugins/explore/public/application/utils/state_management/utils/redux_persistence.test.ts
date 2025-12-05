@@ -767,4 +767,91 @@ describe('redux_persistence', () => {
       });
     });
   });
+
+  describe('Metrics flavor SignalType handling', () => {
+    it('should accept Metrics datasets for Metrics flavor', async () => {
+      const metricsServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/metrics') } },
+        data: {
+          ...mockServices.data,
+          dataViews: {
+            get: jest.fn(() => Promise.resolve({ signalType: CORE_SIGNAL_TYPES.METRICS })),
+          },
+        },
+      } as any;
+
+      (metricsServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn(() => ({
+          fetch: jest.fn(() => Promise.resolve({ children: [{ id: 'prometheus-test' }] })),
+          toDataset: jest.fn(() => ({
+            id: 'prometheus-test',
+            title: 'Prometheus',
+            type: 'PROMETHEUS',
+            language: 'PROMQL',
+            signalType: CORE_SIGNAL_TYPES.METRICS,
+          })),
+        })),
+      });
+
+      const result = await getPreloadedState(metricsServices);
+      expect(result.query.dataset).toBeDefined();
+      expect(result.query.dataset?.id).toBe('prometheus-test');
+    });
+
+    it('should reject non-Metrics datasets for Metrics flavor', async () => {
+      const metricsServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/metrics') } },
+        data: {
+          ...mockServices.data,
+          dataViews: {
+            get: jest.fn(() => Promise.resolve({ signalType: CORE_SIGNAL_TYPES.LOGS })),
+          },
+        },
+      } as any;
+
+      (metricsServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn(() => ({
+          fetch: jest.fn(() => Promise.resolve({ children: [{ id: 'logs-test' }] })),
+          toDataset: jest.fn(() => ({
+            id: 'logs-test',
+            title: 'Logs',
+            type: 'INDEX_PATTERN',
+          })),
+        })),
+      });
+
+      const result = await getPreloadedState(metricsServices);
+      expect(result.query.dataset).toBeUndefined();
+    });
+
+    it('should reject Metrics datasets for Logs flavor', async () => {
+      const logsServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/logs') } },
+        data: {
+          ...mockServices.data,
+          dataViews: {
+            get: jest.fn(() => Promise.resolve({ signalType: CORE_SIGNAL_TYPES.METRICS })),
+          },
+        },
+      } as any;
+
+      (logsServices.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+        getType: jest.fn(() => ({
+          fetch: jest.fn(() => Promise.resolve({ children: [{ id: 'prometheus-test' }] })),
+          toDataset: jest.fn(() => ({
+            id: 'prometheus-test',
+            title: 'Prometheus',
+            type: 'PROMETHEUS',
+            signalType: CORE_SIGNAL_TYPES.METRICS,
+          })),
+        })),
+      });
+
+      const result = await getPreloadedState(logsServices);
+      expect(result.query.dataset).toBeUndefined();
+    });
+  });
 });
