@@ -29,12 +29,11 @@
  */
 
 import _ from 'lodash';
-import { safeGet } from './safe_get';
 
 export const getSiblingAggValue = (row, metric) => {
   let key = metric.type.replace(/_bucket$/, '');
   if (key === 'std_deviation' && _.includes(['upper', 'lower'], metric.mode)) {
     key = `std_deviation_bounds.${metric.mode}`;
   }
-  return safeGet(row, `${metric.id}.${key}`);
+  return _.get(row, `${metric.id}.${key}`);
 };
