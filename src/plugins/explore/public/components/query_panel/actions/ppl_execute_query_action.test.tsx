@@ -3,14 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { render, screen } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
-import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
-import { usePPLExecuteQueryAction } from './ppl_execute_query_action';
+import {
+  usePPLExecuteQueryAction,
+  PPL_QUERY_EXECUTION_TIMEOUT_MS,
+  PPL_QUERY_POLL_INTERVAL_MS,
+} from './ppl_execute_query_action';
+import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { loadQueryActionCreator } from '../../../application/utils/state_management/actions/query_editor/load_query';
+import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
 import { useDispatch } from 'react-redux';
 
 // Mock dependencies
@@ -24,29 +26,65 @@ jest.mock('../../../application/utils/state_management/actions/query_editor/load
   loadQueryActionCreator: jest.fn(),
 }));
 
+jest.mock('../../../application/utils/state_management/actions/query_actions', () => ({
+  defaultPrepareQueryString: jest.fn(),
+}));
+
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
   useDispatch: jest.fn(),
 }));
 
+jest.mock('../../../application/utils/state_management/types', () => ({
+  QueryExecutionStatus: {
+    UNINITIALIZED: 'uninitialized',
+    LOADING: 'loading',
+    READY: 'ready',
+    ERROR: 'error',
+    NO_RESULTS: 'no_results',
+  },
+}));
+
+jest.mock('../../../application/hooks', () => ({
+  useSetEditorTextWithQuery: jest.fn(),
+}));
+
+// Mock timers
+jest.useFakeTimers();
+
 describe('usePPLExecuteQueryAction', () => {
   let mockSetEditorTextWithQuery: jest.Mock;
   let mockServices: any;
-  let store: any;
+  let mockStore: any;
   let mockUseOpenSearchDashboards: jest.Mock;
   let mockLoadQueryActionCreator: jest.Mock;
   let mockUseDispatch: jest.Mock;
+  let mockDefaultPrepareQueryString: jest.Mock;
+  let mockDispatch: jest.Mock;
 
   beforeEach(() => {
     // Get the mocked functions
     mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.Mock;
     mockLoadQueryActionCreator = loadQueryActionCreator as jest.Mock;
+    mockDefaultPrepareQueryString = defaultPrepareQueryString as jest.Mock;
     mockUseDispatch = useDispatch as jest.Mock;
+    mockDispatch = jest.fn();
 
-    // Mock services with contextProvider dependency injection
+    // Mock store state
+    mockStore = {
+      getState: jest.fn(() => ({
+        query: { dataSource: 'test-source' },
+        queryEditor: {
+          queryStatusMap: {},
+        },
+      })),
+    };
+
+    // Mock services with contextProvider dependency injection and store
     mockServices = {
       data: { query: { queryString: { getQuery: jest.fn() } } },
       notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
+      store: mockStore,
       contextProvider: {
         hooks: {
           useAssistantAction: mockUseAssistantAction,
@@ -57,25 +95,19 @@ describe('usePPLExecuteQueryAction', () => {
     // Setup mocks
     mockUseOpenSearchDashboards.mockReturnValue({ services: mockServices });
     mockLoadQueryActionCreator.mockReturnValue({ type: 'LOAD_QUERY' });
+    mockDefaultPrepareQueryString.mockReturnValue('test-cache-key');
     mockSetEditorTextWithQuery = jest.fn();
-    mockUseDispatch.mockReturnValue(jest.fn());
+    mockUseDispatch.mockReturnValue(mockDispatch);
     mockUseAssistantAction.mockClear();
 
-    // Create mock store
-    store = configureStore({
-      reducer: {
-        query: (state = {}, action: any) => state,
-      },
-    });
+    // Clear timers before each test
+    jest.clearAllTimers();
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    jest.clearAllTimers();
   });
-
-  const renderWithProvider = (component: React.ReactElement) => {
-    return render(<Provider store={store}>{component}</Provider>);
-  };
 
   it('should register assistant action with correct configuration', () => {
     renderHook(() => usePPLExecuteQueryAction(mockSetEditorTextWithQuery));
@@ -102,8 +134,12 @@ describe('usePPLExecuteQueryAction', () => {
         required: ['query'],
       },
       handler: expect.any(Function),
-      render: expect.any(Function),
     });
+  });
+
+  it('should export correct constants', () => {
+    expect(PPL_QUERY_EXECUTION_TIMEOUT_MS).toBe(10000);
+    expect(PPL_QUERY_POLL_INTERVAL_MS).toBe(1000);
   });
 
   describe('handler function', () => {
@@ -117,12 +153,28 @@ describe('usePPLExecuteQueryAction', () => {
       }
     });
 
-    it('should execute query by default (autoExecute: true)', async () => {
+    it('should execute query by default (autoExecute: true) and wait for successful completion', async () => {
       const args = { query: 'source=logs | head 10' };
 
-      const result = await handler(args);
+      // Mock successful query execution
+      mockStore.getState.mockReturnValue({
+        query: { dataSource: 'test-source' },
+        queryEditor: {
+          queryStatusMap: {
+            'test-cache-key': {
+              status: QueryExecutionStatus.READY,
+            },
+          },
+        },
+      });
 
-      expect(mockUseDispatch()).toHaveBeenCalledWith({ type: 'LOAD_QUERY' });
+      const resultPromise = handler(args);
+
+      // Simulate immediate completion
+      jest.runAllTimers();
+      const result = await resultPromise;
+
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'LOAD_QUERY' });
       expect(mockLoadQueryActionCreator).toHaveBeenCalledWith(
         mockServices,
         mockSetEditorTextWithQuery,
@@ -132,21 +184,43 @@ describe('usePPLExecuteQueryAction', () => {
         success: true,
         executed: true,
         query: 'source=logs | head 10',
-        message: 'Query updated and executed',
+        message: 'Query updated and executed successfully',
       });
     });
 
-    it('should execute query when autoExecute is explicitly true', async () => {
+    it('should execute query when autoExecute is explicitly true and handle query errors', async () => {
       const args = { query: 'source=logs | head 10', autoExecute: true };
 
-      const result = await handler(args);
+      // Mock failed query execution
+      mockStore.getState.mockReturnValue({
+        query: { dataSource: 'test-source' },
+        queryEditor: {
+          queryStatusMap: {
+            'test-cache-key': {
+              status: QueryExecutionStatus.ERROR,
+              error: {
+                message: {
+                  details: 'Invalid syntax',
+                  reason: 'Parse error',
+                  type: 'SyntaxError',
+                },
+              },
+            },
+          },
+        },
+      });
 
-      expect(mockUseDispatch()).toHaveBeenCalledWith({ type: 'LOAD_QUERY' });
+      const resultPromise = handler(args);
+      jest.runAllTimers();
+      const result = await resultPromise;
+
+      expect(mockDispatch).toHaveBeenCalledWith({ type: 'LOAD_QUERY' });
       expect(result).toEqual({
-        success: true,
-        executed: true,
+        success: false,
+        executed: false,
         query: 'source=logs | head 10',
-        message: 'Query updated and executed',
+        message: 'Query execution failed: Parse error',
+        error: 'SyntaxError: Invalid syntax',
       });
     });
 
@@ -155,13 +229,43 @@ describe('usePPLExecuteQueryAction', () => {
 
       const result = await handler(args);
 
-      expect(mockUseDispatch()).not.toHaveBeenCalled();
+      expect(mockDispatch).not.toHaveBeenCalled();
       expect(mockSetEditorTextWithQuery).toHaveBeenCalledWith('source=logs | head 10');
       expect(result).toEqual({
         success: true,
         executed: false,
         query: 'source=logs | head 10',
         message: 'Query updated',
+      });
+    });
+
+    it('should handle query execution timeout', async () => {
+      const args = { query: 'source=logs | head 10' };
+
+      // Mock query that stays in loading state
+      mockStore.getState.mockReturnValue({
+        query: { dataSource: 'test-source' },
+        queryEditor: {
+          queryStatusMap: {
+            'test-cache-key': {
+              status: QueryExecutionStatus.LOADING,
+            },
+          },
+        },
+      });
+
+      const resultPromise = handler(args);
+
+      // Fast-forward past the timeout
+      jest.advanceTimersByTime(PPL_QUERY_EXECUTION_TIMEOUT_MS + 1000);
+      const result = await resultPromise;
+
+      expect(result).toEqual({
+        success: false,
+        executed: false,
+        query: 'source=logs | head 10',
+        message: 'Query execution timed out',
+        error: 'Query execution took too long to complete',
       });
     });
 
@@ -186,6 +290,65 @@ describe('usePPLExecuteQueryAction', () => {
       mockLoadQueryActionCreator.mockReturnValue({ type: 'LOAD_QUERY' });
     });
 
+    it('should handle query with NO_RESULTS status as success', async () => {
+      const args = { query: 'source=logs | head 10' };
+
+      // Mock query that completes with no results
+      mockStore.getState.mockReturnValue({
+        query: { dataSource: 'test-source' },
+        queryEditor: {
+          queryStatusMap: {
+            'test-cache-key': {
+              status: QueryExecutionStatus.NO_RESULTS,
+            },
+          },
+        },
+      });
+
+      const resultPromise = handler(args);
+      jest.runAllTimers();
+      const result = await resultPromise;
+
+      expect(result).toEqual({
+        success: true,
+        executed: true,
+        query: 'source=logs | head 10',
+        message: 'Query updated and executed successfully',
+      });
+    });
+
+    it('should wait for query status to appear in the store', async () => {
+      const args = { query: 'source=logs | head 10' };
+
+      // Initially no status, then becomes ready
+      let callCount = 0;
+      mockStore.getState.mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return {
+            query: { dataSource: 'test-source' },
+            queryEditor: { queryStatusMap: {} },
+          };
+        }
+        return {
+          query: { dataSource: 'test-source' },
+          queryEditor: {
+            queryStatusMap: {
+              'test-cache-key': {
+                status: QueryExecutionStatus.READY,
+              },
+            },
+          },
+        };
+      });
+
+      const resultPromise = handler(args);
+      jest.runAllTimers();
+      const result = await resultPromise;
+
+      expect(result.success).toBe(true);
+    });
+
     it('should handle non-Error exceptions', async () => {
       const args = { query: 'source=logs | head 10' };
 
@@ -206,180 +369,178 @@ describe('usePPLExecuteQueryAction', () => {
       // Reset the mock
       mockLoadQueryActionCreator.mockReturnValue({ type: 'LOAD_QUERY' });
     });
-  });
 
-  describe('render function', () => {
-    let renderFunction: (props: any) => React.ReactElement | null;
+    describe('waitForQueryExecution behavior', () => {
+      it('should handle UNINITIALIZED status as timeout', async () => {
+        const args = { query: 'source=logs | head 10' };
 
-    beforeEach(() => {
-      renderHook(() => usePPLExecuteQueryAction(mockSetEditorTextWithQuery));
-      // Get the render function from the mock call
-      if (mockUseAssistantAction.mock.calls.length > 0) {
-        renderFunction = mockUseAssistantAction.mock.calls[0][0].render;
-      }
-    });
+        // Mock query with UNINITIALIZED status
+        mockStore.getState.mockReturnValue({
+          query: { dataSource: 'test-source' },
+          queryEditor: {
+            queryStatusMap: {
+              'test-cache-key': {
+                status: QueryExecutionStatus.UNINITIALIZED,
+              },
+            },
+          },
+        });
 
-    it('should return null when args is not provided', () => {
-      const result = renderFunction({ status: 'complete', args: null, result: null });
-      expect(result).toBeNull();
-    });
+        const resultPromise = handler(args);
+        jest.runAllTimers();
+        const result = await resultPromise;
 
-    it('should render executing status', () => {
-      const props = {
-        status: 'executing',
-        args: { query: 'source=logs | head 10' },
-        result: null,
-      };
-
-      const component = renderFunction(props);
-      renderWithProvider(component!);
-
-      expect(screen.getByText('⟳')).toBeInTheDocument();
-      expect(screen.getByText('Updating query...')).toBeInTheDocument();
-      expect(screen.getByText('source=logs | head 10')).toBeInTheDocument();
-    });
-
-    it('should render complete status with execution', () => {
-      const props = {
-        status: 'complete',
-        args: { query: 'source=logs | head 10' },
-        result: { success: true, executed: true, message: 'Query updated and executed' },
-      };
-
-      const component = renderFunction(props);
-      renderWithProvider(component!);
-
-      expect(screen.getByText('✓')).toBeInTheDocument();
-      expect(screen.getByText('Query updated and executed')).toBeInTheDocument();
-      expect(screen.getByText('source=logs | head 10')).toBeInTheDocument();
-    });
-
-    it('should render complete status without execution', () => {
-      const props = {
-        status: 'complete',
-        args: { query: 'source=logs | head 10' },
-        result: { success: true, executed: false, message: 'Query updated' },
-      };
-
-      const component = renderFunction(props);
-      renderWithProvider(component!);
-
-      expect(screen.getByText('✓')).toBeInTheDocument();
-      expect(screen.getByText('Query updated')).toBeInTheDocument();
-    });
-
-    it('should render failed status', () => {
-      const props = {
-        status: 'failed',
-        args: { query: 'source=logs | head 10' },
-        result: { success: false, error: 'Test error' },
-      };
-
-      const component = renderFunction(props);
-      renderWithProvider(component!);
-
-      expect(screen.getByText('✗')).toBeInTheDocument();
-      expect(screen.getByText('Test error')).toBeInTheDocument();
-    });
-
-    it('should render failed status with default message when no error', () => {
-      const props = {
-        status: 'failed',
-        args: { query: 'source=logs | head 10' },
-        result: null,
-      };
-
-      const component = renderFunction(props);
-      renderWithProvider(component!);
-
-      expect(screen.getByText('✗')).toBeInTheDocument();
-      expect(screen.getByText('Failed to update query')).toBeInTheDocument();
-    });
-
-    it('should render description when provided', () => {
-      const props = {
-        status: 'complete',
-        args: {
+        expect(result).toEqual({
+          success: false,
+          executed: false,
           query: 'source=logs | head 10',
-          description: 'Get the first 10 log entries',
-        },
-        result: { success: true, executed: true, message: 'Query updated and executed' },
-      };
-
-      const component = renderFunction(props);
-      renderWithProvider(component!);
-
-      expect(screen.getByText('Get the first 10 log entries')).toBeInTheDocument();
-    });
-
-    it('should not render description when not provided', () => {
-      const props = {
-        status: 'complete',
-        args: { query: 'source=logs | head 10' },
-        result: { success: true, executed: true, message: 'Query updated and executed' },
-      };
-
-      const component = renderFunction(props);
-      renderWithProvider(component!);
-
-      expect(screen.queryByText('Get the first 10 log entries')).not.toBeInTheDocument();
-    });
-
-    describe('status colors and icons', () => {
-      it('should use danger color for failed status', () => {
-        const props = {
-          status: 'failed',
-          args: { query: 'source=logs | head 10' },
-          result: null,
-        };
-
-        const component = renderFunction(props);
-        renderWithProvider(component!);
-
-        const panel = screen.getByText('✗').closest('.euiPanel');
-        expect(panel).toHaveClass('euiPanel--danger');
+          message: 'Query execution timed out',
+          error: 'Query execution took too long to complete',
+        });
       });
 
-      it('should use success color for completed execution', () => {
-        const props = {
-          status: 'complete',
-          args: { query: 'source=logs | head 10' },
-          result: { success: true, executed: true, message: 'Query updated and executed' },
-        };
+      it('should handle missing error details in error status', async () => {
+        const args = { query: 'source=logs | head 10' };
 
-        const component = renderFunction(props);
-        renderWithProvider(component!);
+        // Mock query with error but minimal error info
+        mockStore.getState.mockReturnValue({
+          query: { dataSource: 'test-source' },
+          queryEditor: {
+            queryStatusMap: {
+              'test-cache-key': {
+                status: QueryExecutionStatus.ERROR,
+                error: {},
+              },
+            },
+          },
+        });
 
-        const panel = screen.getByText('✓').closest('.euiPanel');
-        expect(panel).toHaveClass('euiPanel--success');
+        const resultPromise = handler(args);
+        jest.runAllTimers();
+        const result = await resultPromise;
+
+        expect(result).toEqual({
+          success: false,
+          executed: false,
+          query: 'source=logs | head 10',
+          message: 'Query execution failed: Unknown error',
+          error: 'undefined: Query execution failed',
+        });
       });
 
-      it('should use primary color for completed without execution', () => {
-        const props = {
-          status: 'complete',
-          args: { query: 'source=logs | head 10' },
-          result: { success: true, executed: false, message: 'Query updated' },
-        };
+      it('should use defaultPrepareQueryString to generate cache key', async () => {
+        const args = { query: 'source=logs | where status="error"' };
 
-        const component = renderFunction(props);
-        renderWithProvider(component!);
+        // Mock successful execution
+        mockStore.getState.mockReturnValue({
+          query: { dataSource: 'test-source', timeRange: { from: 'now-1h', to: 'now' } },
+          queryEditor: {
+            queryStatusMap: {
+              'test-cache-key': {
+                status: QueryExecutionStatus.READY,
+              },
+            },
+          },
+        });
 
-        const panel = screen.getByText('✓').closest('.euiPanel');
-        expect(panel).toHaveClass('euiPanel--primary');
+        const resultPromise = handler(args);
+        jest.runAllTimers();
+        await resultPromise;
+
+        // Verify that defaultPrepareQueryString was called with the correct query object
+        expect(mockDefaultPrepareQueryString).toHaveBeenCalledWith({
+          dataSource: 'test-source',
+          timeRange: { from: 'now-1h', to: 'now' },
+          query: 'source=logs | where status="error"',
+        });
       });
 
-      it('should use subdued color for other statuses', () => {
-        const props = {
-          status: 'idle',
-          args: { query: 'source=logs | head 10' },
-          result: null,
-        };
+      it('should respect polling interval when waiting for query status', async () => {
+        const args = { query: 'source=logs | head 10' };
 
-        const component = renderFunction(props);
-        renderWithProvider(component!);
+        let pollCount = 0;
+        mockStore.getState.mockImplementation(() => {
+          pollCount++;
+          if (pollCount <= 2) {
+            // First 2 calls return no status (still waiting)
+            return {
+              query: { dataSource: 'test-source' },
+              queryEditor: { queryStatusMap: {} },
+            };
+          }
+          // Third call returns ready status
+          return {
+            query: { dataSource: 'test-source' },
+            queryEditor: {
+              queryStatusMap: {
+                'test-cache-key': {
+                  status: QueryExecutionStatus.READY,
+                },
+              },
+            },
+          };
+        });
 
-        const panel = screen.getByText('✓').closest('.euiPanel');
-        expect(panel).toHaveClass('euiPanel--subdued');
+        const resultPromise = handler(args);
+
+        // Advance time by polling intervals to trigger the polling
+        jest.advanceTimersByTime(PPL_QUERY_POLL_INTERVAL_MS * 2);
+        const result = await resultPromise;
+
+        expect(result.success).toBe(true);
+        expect(pollCount).toBeGreaterThan(1); // Verify multiple polls occurred
+      });
+
+      it('should handle query status transitions correctly', async () => {
+        const args = { query: 'source=logs | head 10' };
+
+        let callCount = 0;
+        mockStore.getState.mockImplementation(() => {
+          callCount++;
+          switch (callCount) {
+            case 1:
+              // Initially no status
+              return {
+                query: { dataSource: 'test-source' },
+                queryEditor: { queryStatusMap: {} },
+              };
+            case 2:
+              // Then loading
+              return {
+                query: { dataSource: 'test-source' },
+                queryEditor: {
+                  queryStatusMap: {
+                    'test-cache-key': {
+                      status: QueryExecutionStatus.LOADING,
+                    },
+                  },
+                },
+              };
+            default:
+              // Finally ready
+              return {
+                query: { dataSource: 'test-source' },
+                queryEditor: {
+                  queryStatusMap: {
+                    'test-cache-key': {
+                      status: QueryExecutionStatus.READY,
+                    },
+                  },
+                },
+              };
+          }
+        });
+
+        const resultPromise = handler(args);
+        jest.runAllTimers();
+        const result = await resultPromise;
+
+        expect(result).toEqual({
+          success: true,
+          executed: true,
+          query: 'source=logs | head 10',
+          message: 'Query updated and executed successfully',
+        });
       });
     });
   });
