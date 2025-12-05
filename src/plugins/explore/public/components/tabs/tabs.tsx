@@ -94,7 +94,7 @@ export const ExploreTabs = () => {
   const activeTab =
     tabs.find((tab) => {
       return tab.id === activeTabId;
-    }) || tabs.find((tab) => tab.id === 'logs');
+    }) || tabs[0];
 
   return (
     <EuiTabbedContent
