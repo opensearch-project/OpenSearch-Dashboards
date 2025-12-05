@@ -47,9 +47,14 @@ export const promqlSearchStrategyProvider = (
     search: async (context, request: any, options) => {
       try {
         const { body: requestBody } = request;
+        const parsedFrom = dateMath.parse(requestBody.timeRange.from);
+        const parsedTo = dateMath.parse(requestBody.timeRange.to, { roundUp: true });
+        if (!parsedFrom || !parsedTo) {
+          throw new Error('Invalid time range format');
+        }
         const timeRange = {
-          start: dateMath.parse(requestBody.timeRange.from)!.unix(),
-          end: dateMath.parse(requestBody.timeRange.to, { roundUp: true })!.unix(),
+          start: parsedFrom.unix(),
+          end: parsedTo.unix(),
         };
         const duration = (timeRange.end - timeRange.start) * 1000;
         // round to nearest ms step >= 1ms
@@ -103,7 +108,7 @@ export const promqlSearchStrategyProvider = (
  * and stores raw instant format (Time, labels..., Value) in meta for the metrics table
  */
 function createDataFrame(rawResponse: PrometheusResponse, datasetId: string): IDataFrame {
-  const series = rawResponse.results[datasetId].result || [];
+  const series = rawResponse.results[datasetId]?.result || [];
 
   const allLabelKeys = new Set<string>();
   series.forEach((metricResult, i) => {

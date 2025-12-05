@@ -37,7 +37,7 @@ export class PromQLConnectionClient extends BaseConnectionClient<OpenSearchClien
       return {
         status: 'failed',
         data: ([] as unknown) as R,
-        type: 'promq',
+        type: 'promql',
       };
     }
   }

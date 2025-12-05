@@ -97,24 +97,32 @@ class PrometheusManager extends BaseConnectionManager<OpenSearchClient> {
   private getResourceURI(query: PrometheusResourceQuery): string {
     const { resourceType, resourceName } = query;
     switch (resourceType) {
-      case PROMETHEUS_RESOURCE_TYPES.LABELS:
+      case PROMETHEUS_RESOURCE_TYPES.LABELS: {
         const labelsQueryString = resourceName ? `?match[]=${resourceName}` : '';
         return `${BASE_RESOURCE_API}/labels${labelsQueryString}`;
-      case PROMETHEUS_RESOURCE_TYPES.ALERTS:
+      }
+      case PROMETHEUS_RESOURCE_TYPES.ALERTS: {
         return `${BASE_RESOURCE_API}/alerts`;
-      case PROMETHEUS_RESOURCE_TYPES.LABEL_VALUES:
+      }
+      case PROMETHEUS_RESOURCE_TYPES.LABEL_VALUES: {
         return `${BASE_RESOURCE_API}/label/${resourceName}/values`;
-      case PROMETHEUS_RESOURCE_TYPES.METRICS:
+      }
+      case PROMETHEUS_RESOURCE_TYPES.METRICS: {
         return `${BASE_RESOURCE_API}/label/__name__/values`;
-      case PROMETHEUS_RESOURCE_TYPES.METRIC_METADATA:
+      }
+      case PROMETHEUS_RESOURCE_TYPES.METRIC_METADATA: {
         const metricMetadataQueryString = resourceName ? `?metric=${resourceName}` : '';
         return `${BASE_RESOURCE_API}/metadata${metricMetadataQueryString}`;
-      case PROMETHEUS_RESOURCE_TYPES.ALERTS_GROUPS:
+      }
+      case PROMETHEUS_RESOURCE_TYPES.ALERTS_GROUPS: {
         return `${BASE_ALERT_MANAGER_API}/alerts/groups`;
-      case PROMETHEUS_RESOURCE_TYPES.RULES:
+      }
+      case PROMETHEUS_RESOURCE_TYPES.RULES: {
         return `${BASE_RESOURCE_API}/rules`;
-      default:
+      }
+      default: {
         throw Error(`unknown resource type: ${resourceType}`);
+      }
     }
   }
 
