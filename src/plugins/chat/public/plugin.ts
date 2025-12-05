@@ -92,7 +92,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     }
 
     return {
-      suggestedActionsService: this.suggestedActionsService.setup(),
+      suggestedActionsService: suggestedActionsSetup,
     };
   }
 
