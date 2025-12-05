@@ -314,6 +314,44 @@ describe('AgUiAgent', () => {
       subscription1.unsubscribe();
       subscription2.unsubscribe();
     });
+
+    it('should create new AbortController when previous one is aborted', (done) => {
+      const mockResponse = {
+        ok: true,
+        body: {
+          getReader: () => ({
+            read: () => Promise.resolve({ done: true, value: undefined }),
+            releaseLock: () => {},
+          }),
+        },
+      };
+
+      mockFetch.mockResolvedValue(mockResponse as any);
+
+      // Start first request
+      const observable1 = agent.runAgent(mockInput);
+      observable1.subscribe({
+        complete: () => {
+          // Abort the agent (simulates the bug scenario)
+          agent.abort();
+
+          // Start new request - should create new controller, not reuse aborted one
+          const observable2 = agent.runAgent(mockInput);
+          const subscription2 = observable2.subscribe({
+            error: () => {
+              // Should NOT get immediate AbortError due to reused controller
+              done.fail('Should not get AbortError for new request after abort');
+            },
+            complete: () => {
+              // Should successfully complete instead of immediate abort
+              expect(mockFetch).toHaveBeenCalledTimes(2);
+              subscription2.unsubscribe();
+              done();
+            },
+          });
+        },
+      });
+    });
   });
 
   describe('abort', () => {

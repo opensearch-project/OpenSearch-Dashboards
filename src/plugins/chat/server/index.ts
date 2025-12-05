@@ -13,6 +13,7 @@ import { configSchema, ChatConfigType } from './config';
 export const config: PluginConfigDescriptor<ChatConfigType> = {
   schema: configSchema,
   exposeToBrowser: {
+    enabled: true,
     agUiUrl: true,
   },
 };
