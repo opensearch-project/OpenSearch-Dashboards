@@ -111,7 +111,7 @@ export class OpenSearchDashboardsMigrator {
       log: this.log,
     });
     this.opensearchDashboardsRawConfig = opensearchDashboardsRawConfig;
-    // Building the active mappings (and associated md5sums) is an expensive
+    // Building the active mappings (and associated sha256sums) is an expensive
     // operation so we cache the result
     this.activeMappings = buildActiveMappings(
       this.mappingProperties,
