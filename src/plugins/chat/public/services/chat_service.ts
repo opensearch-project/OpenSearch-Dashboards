@@ -72,7 +72,10 @@ export class ChatService {
       // Set thread ID in core service
       this.coreChatService.setThreadId(currentChatState.threadId);
     }
-    this.currentMessages = currentChatState?.messages || [];
+
+    // Clean up trailing error messages from interrupted sessions (e.g., page refresh)
+    const messages = currentChatState?.messages || [];
+    this.currentMessages = this.removeTrailingErrorMessages(messages);
 
     // Subscribe to assistant action service to keep tools in sync
     const assistantActionService = AssistantActionService.getInstance();
@@ -481,6 +484,34 @@ export class ChatService {
       // eslint-disable-next-line no-console
       console.warn('Failed to clear chat state from sessionStorage:', error);
     }
+  }
+
+  /**
+   * Remove trailing system error messages from restored chat sessions.
+   * This prevents stale "network error" messages from interrupted connections (page refresh)
+   * from appearing when the user returns to the chat.
+   */
+  private removeTrailingErrorMessages(messages: any[]): any[] {
+    if (!messages.length) {
+      return messages;
+    }
+
+    // Work backwards from the end, removing trailing system error messages
+    let endIndex = messages.length;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const message = messages[i];
+
+      // Check if this is the specific network error from page refresh
+      if (message.role === 'system' && message.content === 'Error: network error') {
+        endIndex = i; // Mark for removal
+      } else {
+        // Stop when we hit a non-error message
+        break;
+      }
+    }
+
+    // Return array without trailing error messages
+    return messages.slice(0, endIndex);
   }
 
   public saveCurrentChatStatePublic(): void {
