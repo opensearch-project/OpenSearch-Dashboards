@@ -19,7 +19,7 @@ import {
 import { RootState } from '../../application/utils/state_management/store';
 import { selectShowHistogram } from '../../application/utils/state_management/selectors';
 import { CanvasPanel } from '../panel/canvas_panel';
-import { Chart } from './utils';
+import { Chart, createHistogramConfigs } from './utils';
 import { useFlavorId } from '../../helpers/use_flavor_id';
 import { processTraceAggregationResults } from '../../application/utils/state_management/actions/processors/trace_aggregation_processor';
 import { ExploreTracesChart } from './explore_traces_chart';
@@ -27,7 +27,6 @@ import {
   ProcessedSearchResults,
   TracesChartProcessedResults,
 } from '../../application/utils/interfaces';
-import { createHistogramConfigWithInterval } from '../../application/utils/state_management/actions/utils';
 import { TRACES_CHART_BAR_TARGET } from '../../application/utils/state_management/constants';
 
 export const DiscoverChartContainer = () => {
@@ -40,7 +39,6 @@ export const DiscoverChartContainer = () => {
   const results = useSelector((state: RootState) => state.results);
   const breakdownField = useSelector((state: RootState) => state.queryEditor.breakdownField);
   const queryStatusMap = useSelector((state: RootState) => state.queryEditor.queryStatusMap);
-  const dateRange = useSelector((state: RootState) => state.queryEditor.dateRange);
   const showHistogram = useSelector(selectShowHistogram);
 
   // Get dataset early since it's needed for cache key calculations
@@ -73,21 +71,18 @@ export const DiscoverChartContainer = () => {
 
   const actualInterval = useMemo(() => {
     if (flavorId === ExploreFlavor.Traces && dataset && services?.data && interval) {
-      // Create a minimal getState function for createHistogramConfigWithInterval
-      const getState = () =>
-        ({
-          legacy: { interval },
-          queryEditor: { breakdownField },
-        } as RootState);
-
-      const histogramConfig = createHistogramConfigWithInterval(
+      const histogramConfigs = createHistogramConfigs(
         dataset,
         interval,
-        services,
-        getState,
+        services.data,
+        services.uiSettings,
+        breakdownField,
         TRACES_CHART_BAR_TARGET
       );
-      return histogramConfig?.finalInterval || interval || 'auto';
+      // Extract interval from configs if available
+      const bucketAggConfig = histogramConfigs?.aggs?.[1] as any;
+      const finalInterval = bucketAggConfig?.buckets?.getInterval()?.expression;
+      return finalInterval || interval || 'auto';
     }
     return interval || 'auto';
   }, [flavorId, dataset, services, interval, breakdownField]);

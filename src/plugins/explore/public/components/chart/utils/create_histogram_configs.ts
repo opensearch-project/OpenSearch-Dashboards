@@ -8,10 +8,20 @@ import {
   DataView as Dataset,
   UI_SETTINGS,
   search,
+  IAggConfig,
 } from '../../../../../data/public';
 import { IUiSettingsClient } from '../../../../../../core/public';
 
 const { TimeBuckets } = search.aggs;
+
+/**
+ * Interface for date histogram aggregation config with buckets property.
+ * This interface is used for type safety when overriding the buckets property
+ * on date histogram aggregations.
+ */
+interface IDateHistogramAggConfig extends IAggConfig {
+  buckets: typeof TimeBuckets.prototype;
+}
 
 export function createHistogramConfigs(
   dataset: Dataset,
@@ -43,7 +53,7 @@ export function createHistogramConfigs(
 
     // If a custom barTarget is specified and we're using auto interval, override the buckets
     if (histogramConfigs && customBarTarget && histogramInterval === 'auto') {
-      const dateHistogramAgg = histogramConfigs.aggs[1] as any;
+      const dateHistogramAgg = histogramConfigs.aggs[1] as IDateHistogramAggConfig;
 
       if (dateHistogramAgg) {
         // Create custom TimeBuckets with the desired barTarget, using date formats from UI settings
@@ -60,7 +70,10 @@ export function createHistogramConfigs(
         customBuckets.setBounds(bounds);
         customBuckets.setInterval(histogramInterval);
 
-        // Delete the existing property and redefine with our custom buckets
+        // Note: We use delete + Object.defineProperty to override the buckets property
+        // because the original buckets property is defined as a getter on the prototype,
+        // so simple assignment won't work. This allows us to inject custom TimeBuckets
+        // with a different barTarget for traces charts (~20 buckets instead of default).
         delete dateHistogramAgg.buckets;
 
         Object.defineProperty(dateHistogramAgg, 'buckets', {

@@ -159,15 +159,11 @@ jest.mock('./trace_aggregation_builder', () => ({
   buildLatencyQuery: jest.fn(
     (baseQuery) => `${baseQuery} | stats avg(durationInNanos) by span(endTime, 5m)`
   ),
-  createTraceAggregationConfig: jest.fn(
-    (timeField, interval, fromDate, toDate, breakdownField) => ({
-      timeField,
-      interval,
-      fromDate,
-      toDate,
-      breakdownField,
-    })
-  ),
+  createTraceAggregationConfig: jest.fn((timeField, interval, breakdownField) => ({
+    timeField,
+    interval,
+    breakdownField,
+  })),
 }));
 
 jest.mock('../../../../helpers/get_flavor_from_app_id', () => ({

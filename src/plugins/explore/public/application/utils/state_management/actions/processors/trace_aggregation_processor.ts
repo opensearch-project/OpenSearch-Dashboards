@@ -8,7 +8,7 @@ import { DataView } from '../../../../../../../data/common';
 import { DataPublicPluginStart } from '../../../../../../../data/public';
 import { IUiSettingsClient } from '../../../../../../../../core/public';
 import { ISearchResult } from '../../slices';
-import { TracesChartProcessedResults, ChartData } from '../../../interfaces';
+import { TracesChartProcessedResults, ChartData, BucketInterval } from '../../../interfaces';
 import { defaultResultsProcessor } from '../query_actions';
 import { createHistogramConfigs, getDimensions } from '../../../../../components/chart/utils';
 
@@ -16,7 +16,7 @@ export interface TraceAggregationResults {
   requestChartData: ChartData;
   errorChartData: ChartData;
   latencyChartData: ChartData;
-  bucketInterval: any;
+  bucketInterval: BucketInterval | undefined;
 }
 
 export const processTraceAggregationResults = (
@@ -72,7 +72,7 @@ export const processTraceAggregationResults = (
       id: 'date',
       params: { pattern: 'HH:mm:ss' },
     };
-    let bucketInterval: any = {
+    let bucketInterval: BucketInterval = {
       interval: 'auto',
       scale: 1,
     };

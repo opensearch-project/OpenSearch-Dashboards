@@ -6,6 +6,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
+import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import {
   IBucketDateHistogramAggConfig,
   Query,
@@ -198,7 +199,7 @@ export const histogramResultsProcessor: HistogramDataProcessor = (
   dataset: DataView,
   data: DataPublicPluginStart,
   interval: string,
-  uiSettings: any
+  uiSettings: IUiSettingsClient
 ): ProcessedSearchResults => {
   const result = defaultResultsProcessor(rawResults, dataset);
 
@@ -301,11 +302,6 @@ export const executeQueries = createAsyncThunk<
       : await services.data.dataViews.getDefault();
 
     if (dataset?.timeFieldName) {
-      const timefilter = services.data?.query?.timefilter?.timefilter;
-      const timefilterRange = timefilter?.getTime();
-      const dateRange = state.queryEditor?.dateRange;
-      const fromDate = dateRange?.from || timefilterRange?.from || '';
-      const toDate = dateRange?.to || timefilterRange?.to || '';
       const rawInterval = state.legacy?.interval || 'auto';
 
       const histogramConfig = createHistogramConfigWithInterval(
@@ -322,10 +318,9 @@ export const executeQueries = createAsyncThunk<
       const baseQuery = defaultPrepareQueryString(query);
 
       const config = createTraceAggregationConfig(
-        dataset.timeFieldName || 'endTime',
+        dataset.timeFieldName,
         calculatedInterval,
-        fromDate,
-        toDate
+        breakdownField
       );
 
       promises.push(

@@ -22,11 +22,6 @@ import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { useDispatch, useSelector } from 'react-redux';
 import { euiThemeVars } from '@osd/ui-shared-deps/theme';
 import { DataPublicPluginStart, search } from '../../../../data/public';
-
-const tracesIntervalOptions = search.aggs.intervalOptions.filter((option) => {
-  // Only exclude milliseconds (ms) - PPL doesn't support it, all others work
-  return option.val !== 'ms';
-});
 import { TimechartHeader, TimechartHeaderBucketInterval } from './timechart_header';
 import { DiscoverHistogram } from './histogram/histogram';
 import { ExploreServices } from '../../types';
@@ -49,6 +44,11 @@ import {
   defaultPrepareQueryString,
   prepareHistogramCacheKey,
 } from '../../application/utils/state_management/actions/query_actions';
+
+const tracesIntervalOptions = search.aggs.intervalOptions.filter((option) => {
+  // Only exclude milliseconds (ms) - PPL doesn't support it, all others work
+  return option.val !== 'ms';
+});
 
 const isFieldMissingError = (error: any): boolean => {
   return (
@@ -102,41 +102,25 @@ const getFieldMissingMessage = (
   );
 };
 
+interface ChartQueryError {
+  statusCode: number;
+  error: string;
+  message: {
+    details: string;
+    reason: string;
+    type?: string;
+  };
+  originalErrorMessage: string;
+}
+
 interface ExploreTracesChartProps {
   bucketInterval?: TimechartHeaderBucketInterval;
   requestChartData?: Chart;
   errorChartData?: Chart;
   latencyChartData?: Chart;
-  requestError?: {
-    statusCode: number;
-    error: string;
-    message: {
-      details: string;
-      reason: string;
-      type?: string;
-    };
-    originalErrorMessage: string;
-  } | null;
-  errorQueryError?: {
-    statusCode: number;
-    error: string;
-    message: {
-      details: string;
-      reason: string;
-      type?: string;
-    };
-    originalErrorMessage: string;
-  } | null;
-  latencyError?: {
-    statusCode: number;
-    error: string;
-    message: {
-      details: string;
-      reason: string;
-      type?: string;
-    };
-    originalErrorMessage: string;
-  } | null;
+  requestError?: ChartQueryError | null;
+  errorQueryError?: ChartQueryError | null;
+  latencyError?: ChartQueryError | null;
   timeFieldName?: string;
   config: IUiSettingsClient;
   data: DataPublicPluginStart;
@@ -360,7 +344,10 @@ export const ExploreTracesChart = ({
                       {requestError.originalErrorMessage ||
                         requestError.message?.details ||
                         requestError.error ||
-                        'Failed to load request count data. Please try again or check your query.'}
+                        i18n.translate('explore.traces.error.requestChartFallback', {
+                          defaultMessage:
+                            'Failed to load request count data. Please try again or check your query.',
+                        })}
                     </p>
                   </EuiCallOut>
                 ) : (
@@ -428,7 +415,10 @@ export const ExploreTracesChart = ({
                       {errorQueryError.originalErrorMessage ||
                         errorQueryError.message?.details ||
                         errorQueryError.error ||
-                        'Failed to load error count data. Please try again or check your query.'}
+                        i18n.translate('explore.traces.error.errorChartFallback', {
+                          defaultMessage:
+                            'Failed to load error count data. Please try again or check your query.',
+                        })}
                     </p>
                   </EuiCallOut>
                 ) : (
@@ -491,7 +481,10 @@ export const ExploreTracesChart = ({
                       {latencyError.originalErrorMessage ||
                         latencyError.message?.details ||
                         latencyError.error ||
-                        'Failed to load latency data. Please try again or check your query.'}
+                        i18n.translate('explore.traces.error.latencyChartFallback', {
+                          defaultMessage:
+                            'Failed to load latency data. Please try again or check your query.',
+                        })}
                     </p>
                   </EuiCallOut>
                 ) : (

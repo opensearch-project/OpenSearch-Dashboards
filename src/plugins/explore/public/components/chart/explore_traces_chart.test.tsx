@@ -45,12 +45,6 @@ jest.mock('./timechart_header', () => ({
   TimechartHeader: () => <div data-test-subj="timechart-header">Timechart Header</div>,
 }));
 
-jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
-  executeRequestCountQuery: jest.fn(),
-  executeErrorCountQuery: jest.fn(),
-  executeLatencyQuery: jest.fn(),
-}));
-
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   EuiCallOut: ({ title, children, color }: any) => (

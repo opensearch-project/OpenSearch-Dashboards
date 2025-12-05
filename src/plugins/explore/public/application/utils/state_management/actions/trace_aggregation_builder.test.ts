@@ -19,31 +19,25 @@ describe('TraceAggregationBuilder', () => {
     baseConfig = {
       timeField: 'endTime',
       interval: '1m',
-      fromDate: '2023-01-01T00:00:00Z',
-      toDate: '2023-01-01T01:00:00Z',
     };
   });
 
   describe('createTraceAggregationConfig', () => {
     it('should create a basic config object', () => {
-      const config = createTraceAggregationConfig('endTime', '5m', 'from', 'to');
+      const config = createTraceAggregationConfig('endTime', '5m');
 
       expect(config).toEqual({
         timeField: 'endTime',
         interval: '5m',
-        fromDate: 'from',
-        toDate: 'to',
       });
     });
 
     it('should create a config with breakdown field', () => {
-      const config = createTraceAggregationConfig('endTime', '1h', 'from', 'to', 'service');
+      const config = createTraceAggregationConfig('endTime', '1h', 'service');
 
       expect(config).toEqual({
         timeField: 'endTime',
         interval: '1h',
-        fromDate: 'from',
-        toDate: 'to',
         breakdownField: 'service',
       });
     });
