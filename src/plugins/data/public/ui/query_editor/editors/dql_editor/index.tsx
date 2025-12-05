@@ -12,4 +12,5 @@ interface DQLBodyProps extends React.JSX.IntrinsicAttributes {
 
 export const DQLBody: React.FC<DQLBodyProps> = ({ filterBar }) => <div>{filterBar}</div>;
 
+// @ts-expect-error TS2554 TODO(ts-error): fixme
 export const createDQLEditor = createEditor(SingleLineInput, SingleLineInput, DQLBody);

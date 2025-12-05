@@ -58,7 +58,11 @@ export function SearchEmbeddableComponent({ searchProps }: SearchEmbeddableProps
           className="eui-xScrollWithShadows eui-yScrollWithShadows"
         >
           {discoverEmbeddableProps.hits !== 0 ? (
-            <EuiFlexItem style={{ minHeight: 0 }} className="osdDocTable__container">
+            <EuiFlexItem
+              style={{ minHeight: 0 }}
+              className="osdDocTable__container"
+              data-test-subj="osdDocTableContainer"
+            >
               <DataGridTableMemoized {...discoverEmbeddableProps} />
             </EuiFlexItem>
           ) : (

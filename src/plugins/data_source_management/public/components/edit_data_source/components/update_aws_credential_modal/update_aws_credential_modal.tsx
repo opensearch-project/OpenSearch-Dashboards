@@ -100,6 +100,7 @@ export const UpdateAwsCredentialModal = ({
               })}
             >
               <EuiText size="s" data-test-subj="data-source-update-credential-service-name">
+                {/* @ts-expect-error TS2339 TODO(ts-error): fixme */}
                 {sigV4ServiceOptions.find((option) => option.value === service)?.text}
               </EuiText>
             </EuiCompressedFormRow>
@@ -188,7 +189,7 @@ export const UpdateAwsCredentialModal = ({
             disabled={!isFormValid()}
           >
             {i18n.translate('dataSourcesManagement.editDataSource.updateStoredAwsCredential', {
-              defaultMessage: 'Update stored aws credential',
+              defaultMessage: 'Update stored AWS credential',
             })}
           </EuiSmallButton>
         </EuiModalFooter>

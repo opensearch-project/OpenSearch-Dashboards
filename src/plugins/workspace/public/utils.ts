@@ -3,54 +3,63 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
-import { combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import React from 'react';
 import {
-  NavGroupType,
-  SavedObjectsStart,
-  NavGroupItemInMap,
   ALL_USE_CASE_ID,
-  CoreStart,
-  ChromeBreadcrumb,
-  ApplicationStart,
-  HttpSetup,
-  NotificationsStart,
-  DEFAULT_NAV_GROUPS,
-} from '../../../core/public';
-import {
   App,
   AppCategory,
+  ApplicationStart,
   AppNavLinkStatus,
+  ChromeBreadcrumb,
+  CoreStart,
   DEFAULT_APP_CATEGORIES,
+  DEFAULT_NAV_GROUPS,
+  HttpSetup,
+  NavGroupItemInMap,
+  NavGroupType,
+  NotificationsStart,
   PublicAppInfo,
-  WorkspaceObject,
+  SavedObjectsStart,
+  WORKSPACE_USE_CASE_PREFIX,
   WorkspaceAvailability,
+  WorkspaceObject,
 } from '../../../core/public';
 
-import { WORKSPACE_DETAIL_APP_ID, USE_CASE_PREFIX } from '../common/constants';
-import { getUseCaseFeatureConfig } from '../common/utils';
+import {
+  AssociationDataSourceModalMode,
+  WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
+  WORKSPACE_DETAIL_APP_ID,
+} from '../common/constants';
 import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
-import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
 import {
-  DirectQueryDatasourceDetails,
+  DataSourceEngineType,
+  SigV4ServiceName,
+} from '../../../plugins/data_source/common/data_sources';
+import {
   DATACONNECTIONS_BASE,
   DatasourceTypeToDisplayName,
+  DirectQueryDatasourceDetails,
 } from '../../data_source_management/public';
-import { DataSource, DataSourceConnection, DataSourceConnectionType } from '../common/types';
 import {
-  ANALYTICS_ALL_OVERVIEW_PAGE_ID,
-  ESSENTIAL_OVERVIEW_PAGE_ID,
-  OBSERVABILITY_OVERVIEW_PAGE_ID,
-  SEARCH_OVERVIEW_PAGE_ID,
-  SECURITY_ANALYTICS_OVERVIEW_PAGE_ID,
-} from '../../../plugins/content_management/public';
+  DataConnection,
+  DataSource,
+  DataSourceConnection,
+  DataSourceConnectionType,
+} from '../common/types';
+import {
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+  DATA_SOURCE_SAVED_OBJECT_TYPE,
+} from '../../data_source/common';
+import { WorkspaceTitleDisplay } from './components/workspace_name/workspace_name';
 
 export const isUseCaseFeatureConfig = (featureConfig: string) =>
-  featureConfig.startsWith(USE_CASE_PREFIX);
+  featureConfig.startsWith(WORKSPACE_USE_CASE_PREFIX);
 
 export const getUseCaseFromFeatureConfig = (featureConfig: string) => {
   if (isUseCaseFeatureConfig(featureConfig)) {
-    return featureConfig.substring(USE_CASE_PREFIX.length);
+    return featureConfig.substring(WORKSPACE_USE_CASE_PREFIX.length);
   }
   return null;
 };
@@ -63,9 +72,6 @@ export const isFeatureIdInsideUseCase = (
   const availableFeatures = useCases.find(({ id }) => id === useCaseId)?.features ?? [];
   return availableFeatures.some((feature) => feature.id === featureId);
 };
-
-export const isNavGroupInFeatureConfigs = (navGroupId: string, featureConfigs: string[]) =>
-  featureConfigs.includes(getUseCaseFeatureConfig(navGroupId));
 
 /**
  * Checks if a given feature matches the provided feature configuration.
@@ -202,8 +208,8 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
         navLinkStatus !== AppNavLinkStatus.hidden &&
         !chromeless &&
         workspaceAvailability !== WorkspaceAvailability.outsideWorkspace;
-      // If the category is management, only retain Dashboards Management which contains saved objets and index patterns.
-      // Saved objets can show all saved objects in the current workspace and index patterns is at workspace level.
+      // If the category is management, only retain Dashboards Management which contains saved objects and index patterns.
+      // Saved objects can show all saved objects in the current workspace and index patterns is at workspace level.
       if (category?.id === DEFAULT_APP_CATEGORIES.management.id) {
         return filterCondition && id === 'management';
       }
@@ -216,25 +222,40 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
 
 export const getDataSourcesList = (
   client: SavedObjectsStart['client'],
-  targetWorkspaces: string[]
+  targetWorkspaces?: string[]
 ) => {
   return client
-    .find({
-      type: 'data-source',
-      fields: ['id', 'title', 'auth', 'description', 'dataSourceEngineType'],
-      perPage: 10000,
-      workspaces: targetWorkspaces,
-    })
+    .find(
+      {
+        type: WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
+        fields: [
+          'id',
+          'title',
+          'auth',
+          'description',
+          'dataSourceEngineType',
+          'type',
+          'connectionId',
+        ],
+        perPage: 10000,
+        workspaces: targetWorkspaces,
+      },
+      { withoutClientBasePath: true }
+    )
     .then((response) => {
       const objects = response?.savedObjects;
       if (objects) {
         return objects.map((source) => {
           const id = source.id;
-          const title = source.get('title');
+          // Data connection doesn't have title for now, would use connectionId instead to display.
+          const title = source.get('title') ?? source.get('connectionId') ?? '';
           const workspaces = source.workspaces ?? [];
           const auth = source.get('auth');
           const description = source.get('description');
           const dataSourceEngineType = source.get('dataSourceEngineType');
+          const type = source.type;
+          // This is a field only for detail type of data connection in order not to mix with saved object type.
+          const connectionType = source.get('type');
           return {
             id,
             title,
@@ -242,6 +263,8 @@ export const getDataSourcesList = (
             description,
             dataSourceEngineType,
             workspaces,
+            type,
+            connectionType,
           };
         });
       } else {
@@ -252,7 +275,9 @@ export const getDataSourcesList = (
 
 export const getDirectQueryConnections = async (dataSourceId: string, http: HttpSetup) => {
   const endpoint = `${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceId}`;
-  const res = await http.get(endpoint);
+  const res = await http.get(endpoint, {
+    prependOptions: { withoutClientBasePath: true },
+  });
   const directQueryConnections: DataSourceConnection[] = res.map(
     (dataConnection: DirectQueryDatasourceDetails) => ({
       id: `${dataSourceId}-${dataConnection.name}`,
@@ -266,19 +291,52 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
   return directQueryConnections;
 };
 
-export const convertDataSourcesToOpenSearchConnections = (
-  dataSources: DataSource[]
-): DataSourceConnection[] =>
-  dataSources.map((ds) => {
+export const mapDataSourceConnectionToOpensearchDataSource = (
+  dataSourceConnections: DataSourceConnection[]
+) => {
+  return dataSourceConnections.map((ds) => {
     return {
       id: ds.id,
-      type: ds.dataSourceEngineType,
+      type: ds.type,
       connectionType: DataSourceConnectionType.OpenSearchConnection,
-      name: ds.title,
+      name: ds.name,
       description: ds.description,
       relatedConnections: [],
     };
   });
+};
+
+export const convertDataSourcesToOpenSearchAndDataConnections = (
+  dataSources: Array<DataSource | DataConnection>
+): Record<'openSearchConnections' | 'dataConnections', DataSourceConnection[]> => {
+  const openSearchConnections = dataSources
+    .filter((ds: DataConnection | DataSource) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE)
+    .map((ds: DataConnection | DataSource) => {
+      return {
+        id: ds.id,
+        type: (ds as DataSource).dataSourceEngineType,
+        connectionType: DataSourceConnectionType.OpenSearchConnection,
+        name: ds.title,
+        description: ds.description,
+        relatedConnections: [],
+      };
+    });
+  const dataConnections = dataSources
+    .filter((ds) => ds.type === DATA_CONNECTION_SAVED_OBJECT_TYPE)
+    .map((ds) => {
+      return {
+        id: ds.id,
+        type: (ds as DataConnection).connectionType,
+        connectionType: DataSourceConnectionType.DataConnection,
+        name: ds.title,
+        description: ds.description,
+      };
+    });
+  return {
+    openSearchConnections,
+    dataConnections,
+  };
+};
 
 export const fulfillRelatedConnections = (
   connections: DataSourceConnection[],
@@ -297,20 +355,52 @@ export const fulfillRelatedConnections = (
 
 // Helper function to merge data sources with direct query connections
 export const mergeDataSourcesWithConnections = (
-  dataSources: DataSource[],
-  directQueryConnections: DataSourceConnection[]
+  dataSources: DataSource[] | DataConnection[],
+  directQueryConnections: DataSourceConnection[],
+  mode: AssociationDataSourceModalMode,
+  remoteClusterConnections?: DataSourceConnection[]
 ): DataSourceConnection[] => {
-  const openSearchConnections = convertDataSourcesToOpenSearchConnections(dataSources);
+  const {
+    openSearchConnections,
+    dataConnections,
+  } = convertDataSourcesToOpenSearchAndDataConnections(dataSources);
+  let result;
+  // if the mode is set to OpenSearchConnections, then only display OpenSearch connections
+  if (mode === AssociationDataSourceModalMode.OpenSearchConnections) {
+    result = openSearchConnections.sort((a, b) => a.name.localeCompare(b.name));
 
-  return [
-    ...fulfillRelatedConnections(openSearchConnections, directQueryConnections),
-    ...directQueryConnections,
-  ].sort((a, b) => a.name.localeCompare(b.name));
+    // Adding the remote clusters connections to result
+    if (remoteClusterConnections) {
+      result = result.map((ds) => {
+        const relatedRemoteConnections = remoteClusterConnections.filter(
+          (remoteConnection) => remoteConnection.parentId === ds.id
+        );
+
+        return {
+          ...ds,
+          relatedConnections: ds.relatedConnections
+            ? ds.relatedConnections.concat(relatedRemoteConnections)
+            : relatedRemoteConnections,
+        };
+      });
+    }
+  } else {
+    // if the mode is set to DirectQueryConnections, then will display Direct Query connections and data connections
+    result = [
+      ...fulfillRelatedConnections(openSearchConnections, directQueryConnections),
+      ...directQueryConnections,
+      ...dataConnections,
+    ].sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  return result;
 };
 
-// If all connected data sources are serverless, will only allow to select essential use case.
-export const getIsOnlyAllowEssentialUseCase = async (client: SavedObjectsStart['client']) => {
-  const allDataSources = await getDataSourcesList(client, ['*']);
+// If all connected data sources are serverless, will use the list of registered use cases specifically for serverless collections.
+export const areAllDataSourcesOpenSearchServerless = async (
+  client: SavedObjectsStart['client']
+) => {
+  const allDataSources = await getDataSourcesList(client);
   if (allDataSources.length > 0) {
     return allDataSources.every(
       (ds) => ds?.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless
@@ -327,15 +417,17 @@ export const convertNavGroupToWorkspaceUseCase = ({
   type,
   order,
   icon,
-}: NavGroupItemInMap): WorkspaceUseCase => ({
-  id,
-  title,
-  description,
-  features: navLinks.map((item) => ({ id: item.id, title: item.title })),
-  systematic: type === NavGroupType.SYSTEM || id === ALL_USE_CASE_ID,
-  order,
-  icon,
-});
+}: NavGroupItemInMap): WorkspaceUseCase => {
+  return {
+    id,
+    title,
+    description,
+    features: navLinks.map((navLink) => ({ id: navLink.id, title: navLink.title })),
+    systematic: type === NavGroupType.SYSTEM || id === ALL_USE_CASE_ID,
+    order,
+    icon,
+  };
+};
 
 const compareFeatures = (
   features1: WorkspaceUseCaseFeature[],
@@ -376,16 +468,35 @@ const isNotNull = <T extends unknown>(value: T | null): value is T => !!value;
 export const getFirstUseCaseOfFeatureConfigs = (featureConfigs: string[]): string | undefined =>
   featureConfigs.map(getUseCaseFromFeatureConfig).filter(isNotNull)[0];
 
-export function enrichBreadcrumbsWithWorkspace(core: CoreStart) {
+export function enrichBreadcrumbsWithWorkspace(
+  core: CoreStart,
+  registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>
+) {
   return combineLatest([
     core.workspaces.currentWorkspace$,
-    core.application.currentAppId$,
-    core.chrome.navGroup.getCurrentNavGroup$(),
     core.chrome.navGroup.getNavGroupsMap$(),
-  ]).subscribe(([currentWorkspace, appId, currentNavGroup, navGroupsMap]) => {
-    prependWorkspaceToBreadcrumbs(core, currentWorkspace, appId, currentNavGroup, navGroupsMap);
+    registeredUseCases$,
+  ]).subscribe(([currentWorkspace, navGroupsMap, registeredUseCases]) => {
+    prependWorkspaceToBreadcrumbs(core, currentWorkspace, navGroupsMap, registeredUseCases);
   });
 }
+
+export const extractUseCaseTitleFromFeatures = (
+  registeredUseCases: WorkspaceUseCase[],
+  features: string[]
+) => {
+  if (!features || features.length === 0) {
+    return '';
+  }
+  const useCaseId = getFirstUseCaseOfFeatureConfigs(features);
+  const usecase =
+    useCaseId === DEFAULT_NAV_GROUPS.all.id
+      ? DEFAULT_NAV_GROUPS.all
+      : registeredUseCases?.find(({ id }) => id === useCaseId);
+  if (usecase) {
+    return usecase.title;
+  }
+};
 
 /**
  * prepend workspace or its use case to breadcrumbs
@@ -394,23 +505,9 @@ export function enrichBreadcrumbsWithWorkspace(core: CoreStart) {
 export function prependWorkspaceToBreadcrumbs(
   core: CoreStart,
   currentWorkspace: WorkspaceObject | null,
-  appId: string | undefined,
-  currentNavGroup: NavGroupItemInMap | undefined,
-  navGroupsMap: Record<string, NavGroupItemInMap>
+  navGroupsMap: Record<string, NavGroupItemInMap>,
+  availableUseCases: WorkspaceUseCase[]
 ) {
-  if (appId === WORKSPACE_DETAIL_APP_ID) {
-    core.chrome.setBreadcrumbsEnricher(undefined);
-    return;
-  }
-
-  const homeBreadcrumb: ChromeBreadcrumb & { home: boolean } = {
-    text: 'Home',
-    home: true,
-    onClick: () => {
-      core.application.navigateToApp('home');
-    },
-  };
-
   /**
    * There has 3 cases
    * nav group is enable + workspace enable + in a workspace -> workspace enricher
@@ -421,37 +518,12 @@ export function prependWorkspaceToBreadcrumbs(
    * so we don't need to have reset logic for workspace
    */
   if (currentWorkspace) {
-    // use case overview page only show workspace name
-    if (
-      appId === SEARCH_OVERVIEW_PAGE_ID ||
-      appId === OBSERVABILITY_OVERVIEW_PAGE_ID ||
-      appId === SECURITY_ANALYTICS_OVERVIEW_PAGE_ID ||
-      appId === ESSENTIAL_OVERVIEW_PAGE_ID ||
-      appId === ANALYTICS_ALL_OVERVIEW_PAGE_ID
-    ) {
-      core.chrome.setBreadcrumbsEnricher((breadcrumbs) => [
-        homeBreadcrumb,
-        { text: currentWorkspace.name },
-      ]);
-      return;
-    }
     const useCase = getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features || []);
-    // get workspace the only use case
-    if (useCase && useCase !== ALL_USE_CASE_ID) {
-      currentNavGroup = navGroupsMap[useCase];
-    }
-    const navGroupBreadcrumb: ChromeBreadcrumb = {
-      text: currentNavGroup?.title,
-      onClick: () => {
-        // current nav group links are sorted, we don't need to sort it again here
-        if (currentNavGroup?.navLinks[0].id) {
-          core.application.navigateToApp(currentNavGroup?.navLinks[0].id);
-        }
-      },
-    };
-
     const workspaceBreadcrumb: ChromeBreadcrumb = {
-      text: currentWorkspace.name,
+      text: React.createElement(WorkspaceTitleDisplay, {
+        workspace: currentWorkspace,
+        availableUseCases,
+      }),
       onClick: () => {
         if (useCase) {
           const allNavGroups = navGroupsMap[useCase];
@@ -462,32 +534,23 @@ export function prependWorkspaceToBreadcrumbs(
 
     core.chrome.setBreadcrumbsEnricher((breadcrumbs) => {
       if (!breadcrumbs || !breadcrumbs.length) return breadcrumbs;
-
-      if (useCase === ALL_USE_CASE_ID) {
-        if (currentNavGroup && currentNavGroup.id !== DEFAULT_NAV_GROUPS.all.id) {
-          return [homeBreadcrumb, workspaceBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
-        } else {
-          return [homeBreadcrumb, workspaceBreadcrumb, ...breadcrumbs];
-        }
-      } else {
-        return [homeBreadcrumb, workspaceBreadcrumb, ...breadcrumbs];
-      }
+      return [workspaceBreadcrumb, ...breadcrumbs];
     });
   }
 }
 
 export const getUseCaseUrl = (
   useCase: WorkspaceUseCase | undefined,
-  workspace: WorkspaceObject,
+  workspaceId: string,
   application: ApplicationStart,
   http: HttpSetup
 ): string => {
-  const appId = useCase?.features?.[0].id || WORKSPACE_DETAIL_APP_ID;
+  const appId = useCase?.features?.[0]?.id || WORKSPACE_DETAIL_APP_ID;
   const useCaseURL = formatUrlWithWorkspaceId(
     application.getUrlForApp(appId, {
       absolute: false,
     }),
-    workspace.id,
+    workspaceId,
     http.basePath
   );
   return useCaseURL;
@@ -504,17 +567,57 @@ export const fetchDataSourceConnectionsByDataSourceIds = async (
   return directQueryConnectionsResult.flat();
 };
 
+export const getRemoteClusterConnections = async (dataSourceId: string, http: HttpSetup) => {
+  const response = await http.get(`/api/enhancements/remote_cluster/list`, {
+    query: {
+      dataSourceId,
+    },
+  });
+
+  const remoteClusterConnections: DataSourceConnection[] = response.map(
+    (remoteClusterConnection: { connectionAlias: string }) => ({
+      id: `${dataSourceId}-${remoteClusterConnection.connectionAlias}`,
+      title: remoteClusterConnection.connectionAlias,
+      name: remoteClusterConnection.connectionAlias,
+      type: DataSourceEngineType.OpenSearchCrossCluster,
+      connectionType: DataSourceConnectionType.OpenSearchConnection,
+      description: 'OpenSearch (Cross cluster connection)',
+      parentId: dataSourceId,
+    })
+  );
+
+  return remoteClusterConnections;
+};
+
 export const fetchDataSourceConnections = async (
-  assignedDataSources: DataSource[],
+  dataSources: DataSource[],
   http: HttpSetup | undefined,
-  notifications: NotificationsStart | undefined
+  notifications: NotificationsStart | undefined,
+  mode: AssociationDataSourceModalMode
 ) => {
   try {
-    const directQueryConnections = await fetchDataSourceConnectionsByDataSourceIds(
-      assignedDataSources.map((ds) => ds.id),
-      http
+    const directQueryConnections =
+      mode === AssociationDataSourceModalMode.DirectQueryConnections
+        ? await fetchDataSourceConnectionsByDataSourceIds(
+            // Only data source saved object type needs to fetch data source connections, data connection type object not.
+            dataSources
+              .filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE)
+              .map((ds) => ds.id),
+            http
+          )
+        : [];
+
+    const remoteClusterConnections =
+      mode === AssociationDataSourceModalMode.OpenSearchConnections
+        ? await fetchRemoteClusterConnections(dataSources, http)
+        : [];
+
+    return mergeDataSourcesWithConnections(
+      dataSources,
+      directQueryConnections,
+      mode,
+      remoteClusterConnections
     );
-    return mergeDataSourcesWithConnections(assignedDataSources, directQueryConnections);
   } catch (error) {
     notifications?.toasts.addDanger(
       i18n.translate('workspace.detail.dataSources.error.message', {
@@ -523,4 +626,34 @@ export const fetchDataSourceConnections = async (
     );
     return [];
   }
+};
+
+export const fetchRemoteClusterConnections = async (
+  dataSources: DataSource[],
+  http: HttpSetup | undefined
+): Promise<DataSourceConnection[]> => {
+  if (!http) {
+    return [];
+  }
+
+  const remoteClusterConnectionsPromises = dataSources.map((ds) => {
+    if (
+      ds.dataSourceEngineType === DataSourceEngineType.OpenSearch ||
+      ds.dataSourceEngineType === DataSourceEngineType.Elasticsearch
+    ) {
+      return getRemoteClusterConnections(ds.id, http).catch(() => []); // Incase of error, return empty array
+    }
+    return [];
+  });
+  const remoteClusterConnections = (await Promise.all(remoteClusterConnectionsPromises)).flat();
+
+  return remoteClusterConnections;
+};
+
+export const getUseCase = (workspace: WorkspaceObject, availableUseCases: WorkspaceUseCase[]) => {
+  if (!workspace.features) {
+    return;
+  }
+  const useCaseId = getFirstUseCaseOfFeatureConfigs(workspace.features);
+  return availableUseCases.find((useCase) => useCase.id === useCaseId);
 };

@@ -39,11 +39,13 @@ describe('getDimensions', () => {
       toSerializedFieldFormat: jest.fn(() => 'agg-format'),
     };
     const aggs: IAggConfigs = {
+      // @ts-expect-error TS2740 TODO(ts-error): fixme
       aggs: [metric, agg],
     };
 
     // Mocking external dependencies
     dateMath.parse = jest.fn((date, options) => moment(date));
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     search.aggs.isDateHistogramBucketAggConfig = jest.fn(
       (bucketAgg: any): bucketAgg is IBucketDateHistogramAggConfig => true
     );

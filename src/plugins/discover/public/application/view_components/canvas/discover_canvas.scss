@@ -1,13 +1,17 @@
 .dscCanvas {
-  @include euiYScrollWithShadows;
+  @include euiYScroll;
 
   /* stylelint-disable-next-line */
   container-type: inline-size; // containment context
   /* stylelint-disable-next-line */
   container-name: canvas;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 
   &_results {
+    border: none;
+    border-top: $ouiBorderThin;
     margin-left: $euiSizeM;
     position: relative;
   }

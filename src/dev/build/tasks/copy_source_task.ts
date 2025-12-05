@@ -61,7 +61,6 @@ export const CopySource: Task = {
         'config/opensearch_dashboards.yml',
         'config/node.options',
         'tsconfig*.json',
-        '.i18nrc.json',
         'opensearch_dashboards.d.ts',
       ],
     });
@@ -79,6 +78,7 @@ export const copyYarnLock = async (repoRoot: string, buildRoot: string) => {
   const writeStream = createWriteStream(join(buildRoot, 'yarn.lock'));
   const writeLine = (line: string) =>
     new Promise((resolve) => {
+      // @ts-expect-error TS2794 TODO(ts-error): fixme
       if (writeStream.write(line + '\n')) return resolve();
       writeStream.once('drain', resolve);
     });

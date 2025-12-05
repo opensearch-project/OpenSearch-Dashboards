@@ -4,3 +4,6 @@
 
 ## max size of old space in megabytes
 #--max-old-space-size=4096
+
+## max size of semi space in megabytes
+#--max-semi-space-size=64

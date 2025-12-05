@@ -325,18 +325,25 @@ class HeaderHelpMenuUI extends Component<Props, State> {
     }
 
     const button = useUpdatedAppearance ? (
-      <EuiButtonIcon
-        iconType="iInCircle"
-        color="primary"
-        size="xs"
-        aria-expanded={this.state.isOpen}
-        aria-haspopup="true"
-        aria-label={intl.formatMessage({
-          id: 'core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel',
-          defaultMessage: 'Help menu',
+      <EuiToolTip
+        content={intl.formatMessage({
+          id: 'core.ui.chrome.headerGlobalNav.helpMenuButtonTitle',
+          defaultMessage: 'Help',
         })}
-        onClick={this.onMenuButtonClick}
-      />
+      >
+        <EuiButtonIcon
+          iconType="iInCircle"
+          color="text"
+          size="xs"
+          aria-expanded={this.state.isOpen}
+          aria-haspopup="true"
+          aria-label={intl.formatMessage({
+            id: 'core.ui.chrome.headerGlobalNav.helpMenuButtonAriaLabel',
+            defaultMessage: 'Help menu',
+          })}
+          onClick={this.onMenuButtonClick}
+        />
+      </EuiToolTip>
     ) : (
       <EuiToolTip
         content={intl.formatMessage({

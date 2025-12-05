@@ -33,8 +33,6 @@ import { i18n } from '@osd/i18n';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { OsdError } from '../../../../opensearch_dashboards_utils/common';
 
-export const TIMEOUT_MESSAGE: string =
-  'Your query has timed out. Contact your system administrator to review your index strategy or increase the run time.';
 /**
  * Request Failure - When an entire multi request fails
  * @param {Error} err - the Error that came back
@@ -46,7 +44,12 @@ export class SearchTimeoutError extends OsdError {
 
   public getErrorMessage(application: ApplicationStart) {
     return (
-      <>{i18n.translate('data.search.timeoutContactAdmin', { defaultMessage: TIMEOUT_MESSAGE })}</>
+      <>
+        {i18n.translate('data.search.timeoutContactAdmin', {
+          defaultMessage:
+            'Your query has timed out. Contact your system administrator to review your index strategy or increase the run time.',
+        })}
+      </>
     );
   }
 }

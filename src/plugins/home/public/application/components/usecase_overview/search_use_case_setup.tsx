@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { EuiI18n, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiI18n, EuiIcon, EuiLink, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
   ContentManagementPluginSetup,
@@ -13,21 +13,26 @@ import {
   SEARCH_OVERVIEW_PAGE_ID,
   SECTIONS,
   SEARCH_OVERVIEW_CONTENT_AREAS,
+  Section,
 } from '../../../../../content_management/public';
+
+const DISCOVER_APP_ID = 'discover';
+
+export const getStartedSection: Section = {
+  id: SECTIONS.GET_STARTED,
+  order: 1000,
+  title: i18n.translate('home.searchOverview.setupSection.title', {
+    defaultMessage: 'Set up search',
+  }),
+  kind: 'card',
+};
 
 export const setupSearchUseCase = (contentManagement: ContentManagementPluginSetup) => {
   contentManagement.registerPage({
     id: SEARCH_OVERVIEW_PAGE_ID,
     title: 'Overview',
     sections: [
-      {
-        id: SECTIONS.GET_STARTED,
-        order: 1000,
-        title: i18n.translate('home.searchOverview.setupSection.title', {
-          defaultMessage: 'Set up search',
-        }),
-        kind: 'card',
-      },
+      getStartedSection,
       {
         id: SECTIONS.DIFFERENT_SEARCH_TYPES,
         order: 2000,
@@ -56,39 +61,64 @@ export const registerContentToSearchUseCasePage = (
   contentManagement: ContentManagementPluginStart,
   core: CoreStart
 ) => {
+  // Replicate external EuiLink icon as doc links can't use EuiLink for visual consistency
+  const externalLinkIcon = (
+    <>
+      {' '}
+      <EuiIcon size="s" type="popout" />
+    </>
+  );
   const getStartedCards = [
     {
       id: 'access_search_functionality',
       order: 10,
-      title: i18n.translate('home.searchOverview.setup.accessSearch.title', {
-        defaultMessage: 'Access search functionality',
-      }),
+      icon: <EuiIcon type="bookOpen" size="l" color="primary" />,
+      title: '',
       description: i18n.translate('home.searchOverview.setup.accessSearch.description', {
-        defaultMessage:
-          'You can run a search using REST API or language client. For experimentation, you can also run queries interactively.',
+        defaultMessage: 'Explore search capabilities and functionality of OpenSearch.',
       }),
       footer: (
-        <EuiI18n token="home.searchOverview.setup.accessSearch.footer" default="Documentation" />
+        <EuiTextColor color="subdued">
+          <EuiI18n token="home.searchOverview.setup.accessSearch.footer" default="Documentation" />
+          {externalLinkIcon}
+        </EuiTextColor>
       ),
       documentURL: 'https://opensearch.org/docs/latest/search-plugins/',
     },
     {
       id: 'create_document_index',
       order: 20,
-      title: i18n.translate('home.searchOverview.setup.createDocumentIndex.title', {
-        defaultMessage: 'Create a document index',
-      }),
+      icon: <EuiIcon type="bookOpen" size="l" color="primary" />,
+      title: '',
       description: i18n.translate('home.searchOverview.setup.createDocumentIndex.description', {
-        defaultMessage:
-          'You can create a document collection (an index) by adding documents to a new index.',
+        defaultMessage: 'Create a document collection (an index) to query your data.',
       }),
       footer: (
-        <EuiI18n
-          token="home.search_overview.createDocumentIndex.card.footer"
-          default="Documentation"
-        />
+        <EuiTextColor color="subdued">
+          <EuiI18n
+            token="home.search_overview.createDocumentIndex.card.footer"
+            default="Documentation"
+          />
+          {externalLinkIcon}
+        </EuiTextColor>
       ),
       documentURL: 'https://opensearch.org/docs/latest/getting-started/intro/',
+    },
+    {
+      id: 'get_start_discover',
+      order: 30,
+      icon: <EuiIcon type="compass" size="l" color="primary" />,
+      title: '',
+      description: i18n.translate('home.searchOverview.setup.discover.description', {
+        defaultMessage: 'Explore data to uncover and discover insights.',
+      }),
+      footer: (
+        <EuiTextColor color="subdued">
+          <EuiI18n token="workspace.essential_overview.discover.card.footer" default="Discover" />
+        </EuiTextColor>
+      ),
+      documentURL: 'https://opensearch.org/docs/latest/getting-started/intro/',
+      navigateAppId: DISCOVER_APP_ID,
     },
   ];
 
@@ -101,21 +131,24 @@ export const registerContentToSearchUseCasePage = (
         order: card.order,
         title: card.title,
         description: card.description,
+        onClick: () => {
+          if (card.navigateAppId) {
+            core.application.navigateToApp(card.navigateAppId);
+          } else {
+            window.open(card.documentURL, '_blank');
+          }
+        },
+        getFooter: () => card.footer,
+        getIcon: () => card.icon,
         cardProps: {
-          selectable: {
-            onClick: () => {
-              window.open(card.documentURL, '_blank');
-            },
-            children: card.footer,
-            isSelected: false,
-          },
+          className: 'usecaseOverviewGettingStartedCard',
         },
       }),
       getTargetArea: () => SEARCH_OVERVIEW_CONTENT_AREAS.GET_STARTED,
     });
   });
 
-  const searchIcon = <EuiIcon color="subdued" size="l" type="search" />;
+  const searchIcon = <EuiIcon className="searchIcon" size="l" type="search" />;
 
   const searchTypeCards = [
     {
@@ -133,7 +166,7 @@ export const registerContentToSearchUseCasePage = (
         <EuiLink
           external
           target="_blank"
-          href="https://opensearch.org/docs/latest/query-dsl/full-text/query-string/"
+          href="https://opensearch.org/docs/latest/query-dsl/full-text/"
         >
           View Documentation
         </EuiLink>
@@ -194,7 +227,7 @@ export const registerContentToSearchUseCasePage = (
         'home.searchOverview.searchTypes.neuralSparseSearch.description',
         {
           defaultMessage:
-            'Neural sparse search combines many of the advantages of Lexical and semantic search.',
+            'Neural sparse search combines many of the advantages of lexical and semantic search.',
         }
       ),
       icon: searchIcon,
@@ -216,7 +249,7 @@ export const registerContentToSearchUseCasePage = (
       }),
       description: i18n.translate('home.searchOverview.searchTypes.hybridSearch.description', {
         defaultMessage:
-          'For many uses, lexical and semantic search are complementary: Lexical search performs better on highly specific queries, while semantic search performs better on broader queries. Hybrid search runs both search types and combines the results, generally producing better results than either one separately.',
+          'For many uses, lexical and semantic search are complementary: lexical search performs better on highly specific queries, while semantic search performs better on broader queries. Hybrid search runs both search types and combines the results, generally producing better results than either one separately.',
       }),
       icon: searchIcon,
       footer: (
@@ -244,6 +277,8 @@ export const registerContentToSearchUseCasePage = (
         cardProps: {
           children: <div className="euiCard__footer">{card.footer}</div>,
           layout: 'horizontal',
+          titleElement: 'h3',
+          titleSize: 's',
         },
       }),
       getTargetArea: () => SEARCH_OVERVIEW_CONTENT_AREAS.DIFFERENT_SEARCH_TYPES,

@@ -49,19 +49,24 @@ export const AccelerationDetailsTab = ({
   dataSourceMDSId,
 }: AccelerationDetailsTabProps) => {
   const isSkippingIndex =
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.kind === 'skipping';
   const refreshIntervalDescription = acceleration.autoRefresh ? 'Auto refresh' : 'Manual';
   const showRefreshTime =
     acceleration.autoRefresh ||
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options.incremental_refresh;
   const refreshTime = showRefreshTime
-    ? mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options.refresh_interval ??
+    ? // @ts-expect-error TS2339 TODO(ts-error): fixme
+      mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options.refresh_interval ??
       '-'
     : '-';
   const creationDate = new Date(
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     parseInt(settings?.settings?.index?.creation_date, 10)
   ).toLocaleString();
   const checkpointName =
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.options?.checkpoint_location;
   const DetailComponent = ({
     title,
@@ -97,6 +102,7 @@ export const AccelerationDetailsTab = ({
         />
         <DetailComponent
           title="Acceleration Type"
+          // @ts-expect-error TS2339 TODO(ts-error): fixme
           description={mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.kind}
         />
         <DetailComponent title="Creation Date" description={creationDate} />

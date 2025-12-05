@@ -47,6 +47,7 @@ export const metricsVisDefinition = {
     defaultMessage: 'Build time-series using a visual pipeline interface',
   }),
   icon: 'visVisualBuilder',
+  isClassic: true,
   visConfig: {
     defaults: {
       id: '61ca57f0-469d-11e7-af02-69e470af7417',
@@ -65,6 +66,7 @@ export const metricsVisDefinition = {
           ],
           separate_axis: 0,
           axis_position: 'right',
+          axis_scale: 'normal',
           formatter: 'number',
           chart_type: 'line',
           line_width: 1,

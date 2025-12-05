@@ -46,6 +46,20 @@ const overrides = {
   overrideBaz: 'baz',
 };
 
+const permission = {
+  enabled: true,
+};
+
+const adminUiSettings = {
+  adminFoo: {
+    name: 'adminFoo',
+    value: 'adminBar',
+    category: [],
+    description: '',
+    schema: schema.string(),
+  },
+};
+
 const defaults: Record<string, any> = {
   foo: {
     name: 'foo',
@@ -63,12 +77,15 @@ describe('uiSettings', () => {
 
   beforeEach(() => {
     const coreContext = mockCoreContext.create();
-    coreContext.configService.atPath.mockReturnValue(new BehaviorSubject({ overrides }));
+    coreContext.configService.atPath.mockReturnValue(
+      new BehaviorSubject({ overrides, permission })
+    );
     const httpSetup = httpServiceMock.createInternalSetupContract();
     const savedObjectsSetup = savedObjectsServiceMock.createInternalSetupContract();
     setupDeps = { http: httpSetup, savedObjects: savedObjectsSetup };
     savedObjectsClient = savedObjectsClientMock.create();
     service = new UiSettingsService(coreContext);
+    jest.spyOn(service as any, 'register');
   });
 
   afterEach(() => {
@@ -81,6 +98,14 @@ describe('uiSettings', () => {
       await service.setup(setupDeps);
       expect(setupDeps.savedObjects.registerType).toHaveBeenCalledTimes(1);
       expect(setupDeps.savedObjects.registerType).toHaveBeenCalledWith(uiSettingsType);
+    });
+
+    it('register adminUiSettings', async () => {
+      const setup = await service.setup(setupDeps);
+      setup.register(adminUiSettings);
+      expect(setupDeps.savedObjects.addClientWrapper).toHaveBeenCalledTimes(1);
+
+      expect((service as any).register).toHaveBeenCalledWith(adminUiSettings);
     });
 
     it('calls `getCoreSettings`', async () => {
@@ -132,11 +157,12 @@ describe('uiSettings', () => {
 
       it('validates overrides', async () => {
         const coreContext = mockCoreContext.create();
-        coreContext.configService.atPath.mockReturnValueOnce(
+        coreContext.configService.atPath.mockReturnValue(
           new BehaviorSubject({
             overrides: {
               custom: 42,
             },
+            permission,
           })
         );
         const customizedService = new UiSettingsService(coreContext);
@@ -176,12 +202,17 @@ describe('uiSettings', () => {
       it('passes a copy of set defaults to UiSettingsClient', async () => {
         const setup = await service.setup(setupDeps);
         setup.register(defaults);
+        setup.register(adminUiSettings);
         const start = await service.start();
         start.asScopedToClient(savedObjectsClient);
 
         expect(MockUiSettingsClientConstructor).toBeCalledTimes(1);
-        expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toEqual(defaults);
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toMatchObject(defaults);
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).toMatchObject(
+          adminUiSettings
+        );
         expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).not.toBe(defaults);
+        expect(MockUiSettingsClientConstructor.mock.calls[0][0].defaults).not.toBe(adminUiSettings);
       });
 
       it('passes configured defaults to UiSettingsClient', async () => {
@@ -192,11 +223,12 @@ describe('uiSettings', () => {
 
         getCoreSettingsMock.mockReturnValue(defaultsClone);
         const coreContext = mockCoreContext.create();
-        coreContext.configService.atPath.mockReturnValueOnce(
+        coreContext.configService.atPath.mockReturnValue(
           new BehaviorSubject({
             defaults: {
               foo: 'configured',
             },
+            permission,
           })
         );
         const customizedService = new UiSettingsService(coreContext);

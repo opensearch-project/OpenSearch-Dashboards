@@ -29,6 +29,21 @@
  */
 
 import { load } from 'cheerio';
+import { i18nLoader } from '@osd/i18n';
+
+jest.mock('@osd/i18n', () => {
+  const originalModule = jest.requireActual('@osd/i18n');
+  return {
+    ...originalModule,
+    i18nLoader: {
+      getRegisteredLocales: jest.fn(),
+      getTranslationsByLocale: jest.fn(),
+      isRegisteredLocale: jest.fn(),
+    },
+  };
+});
+
+const i18nLoaderMock = jest.mocked(i18nLoader, true);
 
 import { httpServerMock } from '../http/http_server.mocks';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
@@ -161,13 +176,41 @@ describe('RenderingService', () => {
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
+
+      it('renders "core" page driven by overridden locale', async () => {
+        i18nLoaderMock.isRegisteredLocale.mockReturnValue(true);
+        const content = await render(
+          createOpenSearchDashboardsRequest({ query: { locale: 'TR-tr' } }),
+          uiSettings,
+          {}
+        );
+        const dom = load(content);
+        const $elStyle = dom('html');
+
+        expect(i18nLoader.isRegisteredLocale).toHaveBeenCalledWith('tr-TR');
+        expect($elStyle.attr('lang')).toBe('tr-TR');
+      });
+
+      it('renders "core" page driven by invalid overridden locale', async () => {
+        i18nLoaderMock.isRegisteredLocale.mockReturnValue(false);
+        const content = await render(
+          createOpenSearchDashboardsRequest({ query: { locale: 'xx-XX' } }),
+          uiSettings,
+          {}
+        );
+        const dom = load(content);
+        const $elStyle = dom('html');
+
+        expect(i18nLoader.isRegisteredLocale).toHaveBeenCalledWith('xx-XX');
+        expect($elStyle.attr('lang')).toBe('en');
+      });
     });
   });
 
   describe('isUrlValid()', () => {
     it('checks valid SVG URL', async () => {
       const result = await service.isUrlValid(
-        'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg',
+        'https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.svg',
         'config'
       );
       expect(result).toEqual(true);
@@ -175,7 +218,7 @@ describe('RenderingService', () => {
 
     it('checks valid PNG URL', async () => {
       const result = await service.isUrlValid(
-        'https://opensearch.org/assets/brand/PNG/Mark/opensearch_mark_default.png',
+        'https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.png',
         'config'
       );
       expect(result).toEqual(true);

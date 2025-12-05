@@ -1,0 +1,2 @@
+fix:
+- Traces code block scrollbar to scroll on edge ([#10651](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10651))

@@ -1,0 +1,706 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import {
+  applyAxisStyling,
+  getAxisByRole,
+  generateColorBySchema,
+  swapAxes,
+  getSwappedAxisRole,
+  getSchemaByAxis,
+  inferTimeUnitFromTimestamps,
+  getTooltipFormat,
+  mergeStyles,
+  applyTimeRangeToEncoding,
+} from './utils';
+import { AxisRole, Positions, ColorSchemas, VisFieldType, StandardAxes } from '../types';
+import { ChartStyles, StyleOptions } from './use_visualization_types';
+
+describe('applyAxisStyling', () => {
+  const defaultAxis = {
+    id: 1,
+    name: 'X Value',
+    schema: VisFieldType.Numerical,
+    column: 'x',
+    validValuesCount: 6,
+    uniqueValuesCount: 6,
+  };
+
+  const defaultAxisStyle = {
+    id: 'Axis-1',
+    position: Positions.LEFT,
+    show: true,
+    style: {},
+    labels: {
+      show: true,
+      rotate: 45,
+      filter: false,
+      truncate: 10,
+    },
+    title: {
+      text: 'Custom Title',
+    },
+    grid: {
+      showLines: true,
+    },
+    axisRole: AxisRole.X,
+  };
+
+  it('returns default config with title and labels when style is provided', () => {
+    const config = applyAxisStyling({ axis: defaultAxis, axisStyle: defaultAxisStyle });
+    expect(config.grid).toBe(true);
+    expect(config.orient).toBe(Positions.LEFT);
+    expect(config.title).toBe('Custom Title');
+    expect(config.labelAngle).toBe(45);
+    expect(config.labelLimit).toBe(10);
+    expect(config.labelOverlap).toBe('greedy');
+  });
+
+  it('disables axis when show is false', () => {
+    const config = applyAxisStyling({
+      axis: defaultAxis,
+      axisStyle: { ...defaultAxisStyle, show: false },
+    });
+    expect(config.title).toBeNull();
+    expect(config.labels).toBe(false);
+    expect(config.ticks).toBe(false);
+    expect(config.domain).toBe(false);
+  });
+
+  it('disables grid when disableGrid is true', () => {
+    const config = applyAxisStyling({
+      axis: defaultAxis,
+      axisStyle: defaultAxisStyle,
+      disableGrid: true,
+    });
+    expect(config.grid).toBe(false);
+  });
+
+  it('disables grid when showLines is false', () => {
+    const config = applyAxisStyling({
+      axis: defaultAxis,
+      axisStyle: {
+        ...defaultAxisStyle,
+        grid: { showLines: false },
+      },
+    });
+    expect(config.grid).toBe(false);
+  });
+
+  it('disables labels when labels.show is false', () => {
+    const config = applyAxisStyling({
+      axis: defaultAxis,
+      axisStyle: {
+        ...defaultAxisStyle,
+        labels: { show: false, filter: false, rotate: 0, truncate: 0 },
+      },
+    });
+    expect(config.labels).toBe(false);
+    expect(config.labelAngle).toBeUndefined();
+    expect(config.labelLimit).toBeUndefined();
+  });
+
+  it('uses default label settings when labels.show is true with default rotate and truncate', () => {
+    const config = applyAxisStyling({
+      axis: defaultAxis,
+      axisStyle: {
+        ...defaultAxisStyle,
+        labels: { show: true, filter: false, rotate: 0, truncate: 0 },
+      },
+    });
+    expect(config.labels).toBe(true);
+    expect(config.labelAngle).toBe(0);
+    expect(config.labelLimit).toBe(100);
+  });
+
+  it('preserves existing labelAngle and labelLimit when rotate and truncate are provided', () => {
+    const config = applyAxisStyling({
+      axis: defaultAxis,
+      axisStyle: {
+        ...defaultAxisStyle,
+        labels: { show: true, filter: false, rotate: 30, truncate: 20 },
+      },
+    });
+    expect(config.labels).toBe(true);
+    expect(config.labelAngle).toBe(30);
+    expect(config.labelLimit).toBe(20);
+  });
+});
+
+describe('getAxisByRole', () => {
+  it('returns the axis with specified role', () => {
+    const axes = [{ axisRole: AxisRole.X }, { axisRole: AxisRole.Y }];
+    const result = getAxisByRole(axes as any, AxisRole.X);
+    expect(result && result.axisRole).toBe(AxisRole.X);
+  });
+
+  it('returns undefined when no axis matches', () => {
+    const axes = [{ axisRole: AxisRole.Y }];
+    expect(getAxisByRole(axes as any, AxisRole.X)).toBeUndefined();
+  });
+});
+
+describe('generateColorBySchema', () => {
+  it('generates correct number of colors', () => {
+    const colors = generateColorBySchema(3, ColorSchemas.BLUES);
+    expect(colors).toHaveLength(3);
+    expect(colors[0]).toMatch(/^#/);
+  });
+
+  it('returns empty array for unknown schema', () => {
+    const colors = generateColorBySchema(3, 'UNKNOWN' as any);
+    expect(colors).toEqual([]);
+  });
+});
+
+describe('swapAxes', () => {
+  it('correctly swaps X and Y axes and their positions', () => {
+    const axes = [
+      { axisRole: AxisRole.X, position: Positions.BOTTOM },
+      { axisRole: AxisRole.Y, position: Positions.LEFT },
+    ];
+
+    const swapped = swapAxes(axes as any);
+    expect(swapped[0].axisRole).toBe(AxisRole.Y);
+    expect(swapped[0].position).toBe(Positions.LEFT);
+    expect(swapped[1].axisRole).toBe(AxisRole.X);
+    expect(swapped[1].position).toBe(Positions.BOTTOM);
+  });
+});
+
+describe('getSwappedAxisRole', () => {
+  it('returns undefined when axes are missing', () => {
+    const { xAxis, yAxis } = getSwappedAxisRole({}, {});
+    expect(xAxis).toBeUndefined();
+    expect(yAxis).toBeUndefined();
+  });
+
+  it('returns swapped roles if switchAxes is true', () => {
+    const { xAxis, yAxis } = getSwappedAxisRole(
+      {
+        standardAxes: [
+          { axisRole: AxisRole.X, position: Positions.BOTTOM } as StandardAxes,
+          { axisRole: AxisRole.Y, position: Positions.LEFT } as StandardAxes,
+        ],
+        switchAxes: true,
+      },
+      {
+        x: {
+          id: 1,
+          name: 'X Value',
+          schema: VisFieldType.Categorical,
+          column: 'x',
+          validValuesCount: 6,
+          uniqueValuesCount: 6,
+        },
+        y: {
+          id: 2,
+          name: 'Y Value',
+          schema: VisFieldType.Numerical,
+          column: 'y',
+          validValuesCount: 6,
+          uniqueValuesCount: 6,
+        },
+      }
+    );
+
+    expect(xAxis?.schema).toBe(VisFieldType.Numerical);
+    expect(yAxis?.schema).toBe(VisFieldType.Categorical);
+  });
+});
+
+describe('getSchemaByAxis', () => {
+  const baseAxis = {
+    id: 1,
+    name: 'Test Axis',
+    column: 'test',
+    validValuesCount: 10,
+    uniqueValuesCount: 10,
+  };
+
+  it('returns quantitative for Numerical schema', () => {
+    const axis = { ...baseAxis, schema: VisFieldType.Numerical };
+    expect(getSchemaByAxis(axis)).toBe('quantitative');
+  });
+
+  it('returns nominal for Categorical schema', () => {
+    const axis = { ...baseAxis, schema: VisFieldType.Categorical };
+    expect(getSchemaByAxis(axis)).toBe('nominal');
+  });
+
+  it('returns temporal for Date schema', () => {
+    const axis = { ...baseAxis, schema: VisFieldType.Date };
+    expect(getSchemaByAxis(axis)).toBe('temporal');
+  });
+
+  it('returns unknown for undefined or invalid schema', () => {
+    expect(getSchemaByAxis(undefined)).toBe('unknown');
+    const axis = { ...baseAxis, schema: 'invalid' as any };
+    expect(getSchemaByAxis(axis)).toBe('unknown');
+  });
+});
+
+describe('inferTimeUnitFromTimestamps', () => {
+  const field = 'timestamp';
+
+  it('returns null for undefined data', () => {
+    expect(inferTimeUnitFromTimestamps(undefined as any, field)).toBeNull();
+  });
+
+  it('returns null for empty data array', () => {
+    expect(inferTimeUnitFromTimestamps([], field)).toBeNull();
+  });
+
+  it('returns null for empty field', () => {
+    const data = [{ timestamp: '2023-01-01' }];
+    expect(inferTimeUnitFromTimestamps(data, '')).toBeNull();
+  });
+
+  it('returns null for less than 2 valid timestamps', () => {
+    const data = [{ timestamp: '2023-01-01' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBeNull();
+  });
+
+  it('returns null for all invalid timestamps', () => {
+    const data = [{ timestamp: 'invalid' }, { timestamp: 'invalid' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBeNull();
+  });
+
+  it('returns second for differences less than 60 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-01T00:00:30' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('second');
+  });
+
+  it('returns minute for differences less than 3600 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-01T00:01:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('minute');
+  });
+
+  it('returns hour for differences less than 86400 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-01T01:00:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('hour');
+  });
+
+  it('returns day for differences less than 604800 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-02T00:00:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('day');
+  });
+
+  it('returns week for differences less than 2678400 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-08T00:00:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('week');
+  });
+
+  it('returns month for differences less than 31536000 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-02-01T00:00:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('month');
+  });
+
+  it('returns year for differences greater than or equal to 31536000 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2024-01-01T00:00:00' }];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('year');
+  });
+
+  it('handles invalid timestamps with some valid ones', () => {
+    const data = [
+      { timestamp: 'invalid' },
+      { timestamp: '2023-01-01T00:00:00' },
+      { timestamp: '2023-01-01T00:00:30' },
+    ];
+    expect(inferTimeUnitFromTimestamps(data, field)).toBe('second');
+  });
+});
+
+describe('getTooltipFormat', () => {
+  const field = 'timestamp';
+  const defaultFallback = '%b %d, %Y %H:%M:%S';
+
+  it('returns fallback format when field is empty', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }];
+    expect(getTooltipFormat(data, '', defaultFallback)).toBe(defaultFallback);
+  });
+
+  it('returns fallback format when data is undefined', () => {
+    expect(getTooltipFormat(undefined as any, field, defaultFallback)).toBe(defaultFallback);
+  });
+
+  it('returns fallback format when data is empty', () => {
+    expect(getTooltipFormat([], field, defaultFallback)).toBe(defaultFallback);
+  });
+
+  it('returns fallback format for less than 2 valid timestamps', () => {
+    const data = [{ timestamp: '2023-01-01' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe(defaultFallback);
+  });
+
+  it('returns fallback format for all invalid timestamps', () => {
+    const data = [{ timestamp: 'invalid' }, { timestamp: 'invalid' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe(defaultFallback);
+  });
+
+  it('returns second format for differences less than 60 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-01T00:00:30' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe('%b %d, %Y %H:%M:%S');
+  });
+
+  it('returns minute format for differences less than 3600 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-01T00:01:00' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe('%b %d, %Y %H:%M');
+  });
+
+  it('returns hour format for differences less than 86400 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-01T01:00:00' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe('%b %d, %Y %H:%M');
+  });
+
+  it('returns day format for differences less than 604800 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-02T00:00:00' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe('%b %d, %Y');
+  });
+
+  it('returns week format for differences less than 2678400 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-01-08T00:00:00' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe('%b %d, %Y');
+  });
+
+  it('returns month format for differences less than 31536000 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2023-02-01T00:00:00' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe('%b %Y');
+  });
+
+  it('returns year format for differences greater than or equal to 31536000 seconds', () => {
+    const data = [{ timestamp: '2023-01-01T00:00:00' }, { timestamp: '2024-01-01T00:00:00' }];
+    expect(getTooltipFormat(data, field, defaultFallback)).toBe('%Y');
+  });
+
+  it('uses custom fallback format when provided with invalid timestamps', () => {
+    const customFallback = '%Y-%m-%d';
+    const data = [{ timestamp: 'invalid' }, { timestamp: 'invalid' }];
+    expect(getTooltipFormat(data, field, customFallback)).toBe(customFallback);
+  });
+
+  it('uses custom fallback format when only one valid timestamp is provided', () => {
+    const customFallback = '%Y-%m-%d';
+    const data = [{ timestamp: '2023-01-01T00:00:00' }];
+    expect(getTooltipFormat(data, field, customFallback)).toBe(customFallback);
+  });
+});
+
+describe('mergeStyles', () => {
+  it('should return a copy of dest when source is undefined', () => {
+    const dest = ({ color: 'red', size: 10 } as unknown) as ChartStyles;
+    const result = mergeStyles(dest, undefined);
+
+    // Result should equal dest but not be the same object
+    expect(result).toEqual(dest);
+    expect(result).not.toBe(dest);
+  });
+
+  it('should merge top-level properties', () => {
+    const dest = ({ color: 'red', size: 10 } as unknown) as ChartStyles;
+    const source = ({ color: 'blue', weight: 'bold' } as unknown) as StyleOptions;
+    const result = mergeStyles(dest, source);
+
+    expect(result).toEqual({
+      color: 'blue',
+      size: 10,
+      weight: 'bold',
+    });
+  });
+
+  it('should merge nested objects by replacing properties', () => {
+    const dest = ({
+      font: {
+        family: 'Arial',
+        size: 12,
+        style: 'normal',
+      },
+    } as unknown) as ChartStyles;
+
+    const source = ({
+      font: {
+        size: 14,
+        weight: 'bold',
+      },
+    } as unknown) as StyleOptions;
+
+    const result = mergeStyles(dest, source);
+
+    // The nested object should have properties from both objects
+    expect(result).toEqual({
+      font: {
+        family: 'Arial',
+        size: 14,
+        style: 'normal',
+        weight: 'bold',
+      },
+    });
+  });
+
+  describe('applyTimeRangeToEncoding', () => {
+    const baseAxis = {
+      id: 1,
+      name: 'Test Axis',
+      column: 'test',
+      validValuesCount: 10,
+      uniqueValuesCount: 10,
+    };
+
+    const timeRange = { from: '2023-01-01', to: '2023-12-31' };
+
+    it('does nothing when axisColumnMappings is undefined', () => {
+      const encoding = { x: { field: 'test' } };
+      const result = applyTimeRangeToEncoding(encoding, undefined, timeRange);
+      expect(result).toBeUndefined();
+      expect(encoding).toEqual({ x: { field: 'test' } }); // unchanged
+    });
+
+    it('does nothing when timeRange is undefined', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Date },
+      };
+      const encoding = { x: { field: 'test' } };
+      const result = applyTimeRangeToEncoding(encoding, axisColumnMappings, undefined);
+      expect(result).toBeUndefined();
+      expect(encoding).toEqual({ x: { field: 'test' } }); // unchanged
+    });
+
+    it('does nothing when no temporal axis is found', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Numerical },
+        y: { ...baseAxis, schema: VisFieldType.Categorical },
+      };
+      const encoding = { x: { field: 'test' } };
+      const result = applyTimeRangeToEncoding(encoding, axisColumnMappings, timeRange);
+      expect(result).toBeUndefined();
+      expect(encoding).toEqual({ x: { field: 'test' } }); // unchanged
+    });
+
+    it('does nothing when mainLayerEncoding is undefined', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Date, column: 'date_x' },
+        y: { ...baseAxis, schema: VisFieldType.Numerical },
+      };
+      const result = applyTimeRangeToEncoding(undefined, axisColumnMappings, timeRange, false);
+      expect(result).toBeUndefined();
+    });
+
+    it('should replace arrays instead of merging them', () => {
+      const dest = ({
+        colors: ['red', 'green', 'blue'],
+      } as unknown) as ChartStyles;
+
+      const source = ({
+        colors: ['yellow', 'purple'],
+      } as unknown) as StyleOptions;
+
+      const result = mergeStyles(dest, source);
+
+      // Arrays should be replaced, not merged
+      expect(result).toEqual({
+        colors: ['yellow', 'purple'],
+      });
+    });
+
+    it('should handle complex nested structures', () => {
+      const dest = ({
+        title: 'Chart',
+        axes: {
+          x: {
+            title: 'X Axis',
+            labels: {
+              show: true,
+              rotate: 0,
+            },
+          },
+          y: {
+            title: 'Y Axis',
+            labels: {
+              show: true,
+              rotate: 0,
+            },
+          },
+        },
+        legend: {
+          show: true,
+          position: 'right',
+        },
+      } as unknown) as ChartStyles;
+
+      const source = ({
+        title: 'Updated Chart',
+        axes: {
+          x: {
+            labels: {
+              rotate: 45,
+            },
+          },
+          y: {
+            title: 'Updated Y Axis',
+          },
+        },
+        legend: {
+          position: 'bottom',
+        },
+      } as unknown) as StyleOptions;
+
+      const result = mergeStyles(dest, source);
+
+      expect(result).toEqual({
+        title: 'Updated Chart',
+        axes: {
+          x: {
+            title: 'X Axis',
+            labels: {
+              show: true,
+              rotate: 45,
+            },
+          },
+          y: {
+            title: 'Updated Y Axis',
+            labels: {
+              show: true,
+              rotate: 0,
+            },
+          },
+        },
+        legend: {
+          show: true,
+          position: 'bottom',
+        },
+      });
+    });
+    it('applies scale to mainLayerEncoding when provided', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Date, column: 'date_x' },
+        y: { ...baseAxis, schema: VisFieldType.Numerical },
+      };
+      const mainLayerEncoding: any = {
+        x: { field: 'date_x', type: 'temporal' },
+        y: { field: 'value', type: 'quantitative' },
+      };
+      const result = applyTimeRangeToEncoding(
+        mainLayerEncoding,
+        axisColumnMappings,
+        timeRange,
+        false
+      );
+
+      expect(result).toBeUndefined(); // Function returns undefined when modifying encoding directly
+      expect(mainLayerEncoding.x.scale).toEqual({
+        domain: ['2023-01-01', '2023-12-31'],
+      });
+    });
+
+    it('should handle null values', () => {
+      const dest = ({
+        title: 'Chart',
+        subtitle: 'Subtitle',
+      } as unknown) as ChartStyles;
+
+      const source = ({
+        title: null,
+        description: 'Description',
+      } as unknown) as StyleOptions;
+
+      const result = mergeStyles(dest, source);
+
+      expect(result).toEqual({
+        title: null,
+        subtitle: 'Subtitle',
+        description: 'Description',
+      });
+    });
+
+    it('should handle empty objects', () => {
+      const dest = ({
+        title: 'Chart',
+        config: {
+          showGrid: true,
+          showLabels: true,
+        },
+      } as unknown) as ChartStyles;
+
+      const source = ({
+        config: {},
+      } as unknown) as StyleOptions;
+
+      const result = mergeStyles(dest, source);
+
+      // Empty object should not override properties
+      expect(result).toEqual({
+        title: 'Chart',
+        config: {
+          showGrid: true,
+          showLabels: true,
+        },
+      });
+    });
+    it('applies scale to y axis when temporal axis is on Y', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Numerical },
+        y: { ...baseAxis, schema: VisFieldType.Date, column: 'date_y' },
+      };
+      const mainLayerEncoding: any = {
+        x: { field: 'value', type: 'quantitative' },
+        y: { field: 'date_y', type: 'temporal' },
+      };
+      const result = applyTimeRangeToEncoding(
+        mainLayerEncoding,
+        axisColumnMappings,
+        timeRange,
+        false
+      );
+
+      expect(result).toBeUndefined();
+      expect(mainLayerEncoding.y.scale).toEqual({
+        domain: ['2023-01-01', '2023-12-31'],
+      });
+    });
+
+    it('should not override with undefined values in source', () => {
+      const dest = ({
+        title: 'Chart',
+        subtitle: 'Subtitle',
+      } as unknown) as ChartStyles;
+
+      const source = ({
+        title: undefined,
+        description: 'Description',
+      } as unknown) as StyleOptions;
+
+      const result = mergeStyles(dest, source);
+
+      // Undefined values should not override
+      expect(result).toEqual({
+        title: 'Chart',
+        subtitle: 'Subtitle',
+        description: 'Description',
+      });
+    });
+    it('applies scale with switchAxes correctly', () => {
+      const axisColumnMappings = {
+        x: { ...baseAxis, schema: VisFieldType.Numerical },
+        y: { ...baseAxis, schema: VisFieldType.Date, column: 'date_y' },
+      };
+      const mainLayerEncoding: any = {
+        x: { field: 'value', type: 'quantitative' },
+        y: { field: 'date_y', type: 'temporal' },
+      };
+      const result = applyTimeRangeToEncoding(
+        mainLayerEncoding,
+        axisColumnMappings,
+        timeRange,
+        true
+      );
+
+      expect(result).toBeUndefined();
+      // When switchAxes is true, Y temporal axis should apply scale to x encoding
+      expect(mainLayerEncoding.x.scale).toEqual({
+        domain: ['2023-01-01', '2023-12-31'],
+      });
+    });
+  });
+});

@@ -12,6 +12,7 @@ import { loggingSystemMock, dynamicConfigServiceMock } from '../../../../core/se
 import { workspaceClientMock } from '../workspace_client.mock';
 
 import { registerRoutes, WORKSPACES_API_BASE_URL } from './index';
+import { IWorkspaceClientImpl } from '../types';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 const mockDynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
@@ -19,18 +20,22 @@ const mockDynamicConfigService = dynamicConfigServiceMock.createInternalStartCon
 describe(`Workspace routes`, () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
+  let mockedWorkspaceClient: IWorkspaceClientImpl;
 
   beforeEach(async () => {
     ({ server, httpSetup } = await setupServer());
 
     const router = httpSetup.createRouter('');
 
+    mockedWorkspaceClient = workspaceClientMock.create();
+
     registerRoutes({
       router,
-      client: workspaceClientMock,
+      client: mockedWorkspaceClient,
       logger: loggingSystemMock.create().get(),
       maxImportExportSize: Number.MAX_SAFE_INTEGER,
       isPermissionControlEnabled: false,
+      isDataSourceEnabled: true,
     });
 
     await server.start({ dynamicConfigService: mockDynamicConfigService });
@@ -51,7 +56,7 @@ describe(`Workspace routes`, () => {
       })
       .expect(200);
     expect(result.body).toEqual({ id: expect.any(String) });
-    expect(workspaceClientMock.create).toHaveBeenCalledWith(
+    expect(mockedWorkspaceClient.create).toHaveBeenCalledWith(
       expect.any(Object),
       expect.objectContaining({
         name: 'Observability',

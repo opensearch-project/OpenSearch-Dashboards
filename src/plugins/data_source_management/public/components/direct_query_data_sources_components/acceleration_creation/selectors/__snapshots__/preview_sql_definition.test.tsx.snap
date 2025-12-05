@@ -1,0 +1,339 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PreviewSQLDefinition renders component correctly 1`] = `
+<PreviewSQLDefinition
+  accelerationFormData={
+    Object {
+      "dataSource": "test_source",
+      "formErrors": Object {},
+    }
+  }
+  application={
+    Object {
+      "applications$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Map {},
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "capabilities": Object {
+        "catalogue": Object {},
+        "management": Object {},
+        "navLinks": Object {},
+        "workspaces": Object {},
+      },
+      "currentAppId$": Observable {
+        "_isScalar": false,
+        "source": Subject {
+          "_isScalar": false,
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+      },
+      "getUrlForApp": [MockFunction],
+      "navigateToApp": [MockFunction],
+      "navigateToUrl": [MockFunction],
+      "registerMountContext": [MockFunction],
+      "setAppBadgeControls": [MockFunction],
+      "setAppBottomControls": [MockFunction],
+      "setAppCenterControls": [MockFunction],
+      "setAppDescriptionControls": [MockFunction],
+      "setAppLeftControls": [MockFunction],
+      "setAppRightControls": [MockFunction],
+    }
+  }
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "anonymousPaths": Object {
+        "isAnonymous": [MockFunction],
+        "register": [MockFunction],
+      },
+      "basePath": BasePath {
+        "basePath": "",
+        "clientBasePath": "",
+        "get": [Function],
+        "getBasePath": [Function],
+        "prepend": [Function],
+        "remove": [Function],
+        "serverBasePath": "",
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction] {
+        "calls": Array [
+          Array [
+            "/api/status",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      },
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+    }
+  }
+  notifications={
+    Object {
+      "toasts": Object {
+        "add": [MockFunction],
+        "addDanger": [MockFunction],
+        "addError": [MockFunction],
+        "addInfo": [MockFunction],
+        "addSuccess": [MockFunction],
+        "addWarning": [MockFunction],
+        "get$": [MockFunction],
+        "remove": [MockFunction],
+      },
+    }
+  }
+  resetFlyout={[MockFunction]}
+  setAccelerationFormData={[MockFunction]}
+>
+  <EuiAccordion
+    arrowDisplay="left"
+    buttonContent={
+      <EuiText
+        data-test-subj="preview-sql-header"
+      >
+        <h3>
+          Preview SQL definition
+        </h3>
+      </EuiText>
+    }
+    id="accordion1"
+    initialIsOpen={false}
+    isLoading={false}
+    isLoadingMessage={false}
+    paddingSize="l"
+  >
+    <div
+      className="euiAccordion"
+    >
+      <div
+        className="euiAccordion__triggerWrapper"
+      >
+        <button
+          aria-controls="accordion1"
+          aria-expanded={false}
+          className="euiAccordion__button"
+          id="generated-id"
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="euiAccordion__iconWrapper"
+          >
+            <EuiIcon
+              className="euiAccordion__icon"
+              size="m"
+              type="arrowRight"
+            >
+              <span
+                className="euiAccordion__icon"
+                data-euiicon-type="arrowRight"
+                size="m"
+              />
+            </EuiIcon>
+          </span>
+          <span
+            className="euiIEFlexWrapFix"
+          >
+            <EuiText
+              data-test-subj="preview-sql-header"
+            >
+              <div
+                className="euiText euiText--medium"
+                data-test-subj="preview-sql-header"
+              >
+                <h3>
+                  Preview SQL definition
+                </h3>
+              </div>
+            </EuiText>
+          </span>
+        </button>
+      </div>
+      <div
+        aria-labelledby="generated-id"
+        className="euiAccordion__childWrapper"
+        id="accordion1"
+        role="region"
+        tabIndex={-1}
+      >
+        <EuiResizeObserver
+          onResize={[Function]}
+        >
+          <div>
+            <div
+              className="euiAccordion__padding--l"
+            >
+              <EuiFlexGroup>
+                <div
+                  className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <EuiButton
+                        color="success"
+                        onClick={[Function]}
+                      >
+                        <EuiButtonDisplay
+                          baseClassName="euiButton"
+                          color="success"
+                          disabled={false}
+                          element="button"
+                          isDisabled={false}
+                          onClick={[Function]}
+                          type="button"
+                        >
+                          <button
+                            className="euiButton euiButton--success"
+                            disabled={false}
+                            onClick={[Function]}
+                            style={
+                              Object {
+                                "minWidth": undefined,
+                              }
+                            }
+                            type="button"
+                          >
+                            <EuiButtonContent
+                              className="euiButton__content"
+                              iconGap="m"
+                              iconSide="left"
+                              textProps={
+                                Object {
+                                  "className": "euiButton__text",
+                                }
+                              }
+                            >
+                              <span
+                                className="euiButtonContent euiButton__content"
+                              >
+                                <span
+                                  className="euiButton__text"
+                                >
+                                  Generate preview
+                                </span>
+                              </span>
+                            </EuiButtonContent>
+                          </button>
+                        </EuiButtonDisplay>
+                      </EuiButton>
+                    </div>
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    grow={false}
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <EuiButton
+                        data-test-subj="workbenchButton"
+                        iconSide="right"
+                        onClick={[Function]}
+                      >
+                        <EuiButtonDisplay
+                          baseClassName="euiButton"
+                          data-test-subj="workbenchButton"
+                          disabled={false}
+                          element="button"
+                          iconSide="right"
+                          isDisabled={false}
+                          onClick={[Function]}
+                          type="button"
+                        >
+                          <button
+                            className="euiButton euiButton--primary"
+                            data-test-subj="workbenchButton"
+                            disabled={false}
+                            onClick={[Function]}
+                            style={
+                              Object {
+                                "minWidth": undefined,
+                              }
+                            }
+                            type="button"
+                          >
+                            <EuiButtonContent
+                              className="euiButton__content"
+                              iconGap="m"
+                              iconSide="right"
+                              textProps={
+                                Object {
+                                  "className": "euiButton__text",
+                                }
+                              }
+                            >
+                              <span
+                                className="euiButtonContent euiButtonContent--iconRight euiButton__content"
+                              >
+                                <span
+                                  className="euiButton__text"
+                                >
+                                  Edit in Query Workbench
+                                </span>
+                              </span>
+                            </EuiButtonContent>
+                          </button>
+                        </EuiButtonDisplay>
+                      </EuiButton>
+                    </div>
+                  </EuiFlexItem>
+                </div>
+              </EuiFlexGroup>
+              <EuiSpacer
+                size="l"
+              >
+                <div
+                  className="euiSpacer euiSpacer--l"
+                />
+              </EuiSpacer>
+              <EuiCodeBlock
+                fontSize="m"
+                isCopyable={true}
+                language="sql"
+                paddingSize="m"
+              >
+                <EuiCodeBlockImpl
+                  fontSize="m"
+                  inline={false}
+                  isCopyable={true}
+                  language="sql"
+                  paddingSize="m"
+                >
+                  <div>
+                    <pre>
+                      <code />
+                    </pre>
+                  </div>
+                </EuiCodeBlockImpl>
+              </EuiCodeBlock>
+            </div>
+          </div>
+        </EuiResizeObserver>
+      </div>
+    </div>
+  </EuiAccordion>
+</PreviewSQLDefinition>
+`;

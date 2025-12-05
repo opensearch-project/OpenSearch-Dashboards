@@ -186,6 +186,7 @@ export abstract class Container<
         // If we hit this, the panel was removed before the embeddable finished loading.
         if (this.input.panels[id] === undefined) {
           subscription.unsubscribe();
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           resolve(undefined);
         }
       });

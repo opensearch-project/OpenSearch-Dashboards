@@ -37,6 +37,7 @@ import { AdvancedSettingsVoiceAnnouncement } from './advanced_settings_voice_ann
 const settingPartial = {
   name: 'name',
   isOverridden: false,
+  isPermissionControlled: false,
   type: 'string' as UiSettingsType,
   value: 'value',
   defVal: 'defVal',

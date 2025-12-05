@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { Plugin, IndexPatternsContract } from '.';
+import { Plugin, IndexPatternsContract, DataViewsContract } from '.';
 import { fieldFormatsServiceMock } from './field_formats/mocks';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
@@ -83,7 +83,26 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
           fetchForWildcard: jest.fn(),
         },
       }),
-      get: jest.fn().mockReturnValue(Promise.resolve({})),
+      getByTitle: jest.fn().mockReturnValue({
+        id: 'id',
+        name: 'name',
+        dataSourceRef: {
+          id: 'id',
+          type: 'datasource',
+          name: 'datasource',
+        },
+      }),
+      get: jest.fn().mockReturnValue(
+        Promise.resolve({
+          id: 'id',
+          name: 'name',
+          dataSourceRef: {
+            id: 'id',
+            type: 'datasource',
+            name: 'datasource',
+          },
+        })
+      ),
       getDefault: jest.fn().mockReturnValue(
         Promise.resolve({
           name: 'Default name',
@@ -91,7 +110,50 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
         })
       ),
       clearCache: jest.fn(),
+      create: jest.fn().mockResolvedValue({
+        id: 'test-index-pattern',
+        title: 'Test Index Pattern',
+        type: 'INDEX_PATTERN',
+      }),
+      saveToCache: jest.fn(),
     } as unknown) as IndexPatternsContract,
+    dataViews: ({
+      find: jest.fn((search) => [{ id: search, title: search }]),
+      createField: jest.fn(() => {}),
+      createFieldList: jest.fn(() => []),
+      ensureDefaultDataView: jest.fn(),
+      make: () => ({
+        fieldsFetcher: {
+          fetchForWildcard: jest.fn(),
+        },
+      }),
+      get: jest.fn().mockReturnValue(
+        Promise.resolve({
+          id: 'id',
+          name: 'name',
+          dataSourceRef: {
+            id: 'id',
+            type: 'datasource',
+            name: 'datasource',
+          },
+        })
+      ),
+      getIds: jest.fn().mockReturnValue(Promise.resolve(['id'])),
+      getDefault: jest.fn().mockReturnValue(
+        Promise.resolve({
+          name: 'Default name',
+          id: 'id',
+        })
+      ),
+      clearCache: jest.fn(),
+      create: jest.fn().mockResolvedValue({
+        id: 'test-index-pattern',
+        title: 'Test Index Pattern',
+        type: 'INDEX_PATTERN',
+      }),
+      saveToCache: jest.fn(),
+      convertToDataset: jest.fn(),
+    } as unknown) as DataViewsContract,
     dataSources: dataSourceServiceMock.createStartContract(),
   };
 };

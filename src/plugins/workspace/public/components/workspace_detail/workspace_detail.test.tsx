@@ -3,24 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { MemoryRouter } from 'react-router-dom';
-import { PublicAppInfo, WorkspaceObject } from 'opensearch-dashboards/public';
-import { coreMock } from '../../../../../core/public/mocks';
+import { WorkspaceObject } from 'opensearch-dashboards/public';
+import { coreMock, workspacesServiceMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 import { createMockedRegisteredUseCases$ } from '../../mocks';
 import { WorkspaceDetail } from './workspace_detail';
 import { WorkspaceFormProvider, WorkspaceOperationType } from '../workspace_form';
 import { DataSourceConnectionType } from '../../../common/types';
-import * as utilsExports from '../../utils';
-
-// all applications
-const PublicAPPInfoMap = new Map([
-  ['alerting', { id: 'alerting', title: 'alerting' }],
-  ['home', { id: 'home', title: 'home' }],
-]);
+import { IntlProvider } from 'react-intl';
+import { DEFAULT_WORKSPACE } from '../../../common/constants';
 
 const mockCoreStart = coreMock.createStart();
 
@@ -29,8 +24,9 @@ const workspaceObject = {
   name: 'foo',
   description: 'this is my foo workspace description',
   features: ['use-case-observability', 'workspace_detail'],
-  color: '',
+  color: '#54B399',
   reserved: false,
+  lastUpdatedTime: '1000',
   permissions: { write: { users: ['user1', 'user2'] } },
 };
 
@@ -65,13 +61,13 @@ const defaultValues = {
   ],
 };
 
-const createWorkspacesSetupContractMockWithValue = (workspace?: WorkspaceObject) => {
-  const currentWorkspace = workspace ? workspace : workspaceObject;
-  const currentWorkspaceId$ = new BehaviorSubject<string>(currentWorkspace.id);
-  const workspaceList$ = new BehaviorSubject<WorkspaceObject[]>([currentWorkspace]);
-  const currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(currentWorkspace);
+const createWorkspacesSetupContractMockWithValue = () => {
+  const currentWorkspaceId$ = new BehaviorSubject<string>(workspaceObject.id);
+  const workspaceList$ = new BehaviorSubject<WorkspaceObject[]>([workspaceObject]);
+  const currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(workspaceObject);
   const initialized$ = new BehaviorSubject<boolean>(true);
   return {
+    ...workspacesServiceMock.createStartContract(),
     currentWorkspaceId$,
     workspaceList$,
     currentWorkspace$,
@@ -83,34 +79,35 @@ const deleteFn = jest.fn().mockReturnValue({
   success: true,
 });
 
-const WorkspaceDetailPage = (props: any) => {
-  const workspacesService = props.workspacesService || createWorkspacesSetupContractMockWithValue();
-  const values = props.defaultValues || defaultValues;
-  const permissionEnabled = props.permissionEnabled ?? true;
-  const dataSourceManagement =
-    props.dataSourceEnabled !== false
-      ? {
-          ui: {
-            getDataSourceMenu: jest.fn(),
-          },
-        }
-      : undefined;
+const submitFn = jest.fn();
+const onAppLeaveFn = jest.fn();
+const navigateToAppFn = jest.fn();
 
+const WorkspaceDetailPage = (props: any) => {
+  const values = props.defaultValues || defaultValues;
+  const mockHeaderControl =
+    (props.header as Function) ||
+    (() => {
+      return null;
+    });
+
+  mockCoreStart.uiSettings.set(DEFAULT_WORKSPACE, 'notFoo');
   const { Provider } = createOpenSearchDashboardsReactContext({
     ...mockCoreStart,
     ...{
       application: {
         ...mockCoreStart.application,
-        applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(PublicAPPInfoMap as any),
+        // applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(PublicAPPInfoMap as any),
+        navigateToApp: navigateToAppFn,
         capabilities: {
           ...mockCoreStart.application.capabilities,
-          workspaces: {
-            permissionEnabled,
-          },
           dashboards: { isDashboardAdmin: true },
+          workspaces: {
+            permissionEnabled: true,
+          },
         },
       },
-      workspaces: workspacesService,
+      workspaces: createWorkspacesSetupContractMockWithValue(),
       savedObjects: {
         ...mockCoreStart.savedObjects,
         client: {
@@ -121,14 +118,8 @@ const WorkspaceDetailPage = (props: any) => {
           delete: deleteFn,
         },
       },
-      dataSourceManagement,
       navigationUI: {
-        HeaderControl: ({ controls }) => {
-          if (props.showDeleteModal) {
-            controls?.[0]?.run?.();
-          }
-          return null;
-        },
+        HeaderControl: mockHeaderControl,
       },
     },
   });
@@ -136,21 +127,24 @@ const WorkspaceDetailPage = (props: any) => {
   const registeredUseCases$ = createMockedRegisteredUseCases$();
 
   return (
-    <MemoryRouter>
-      <WorkspaceFormProvider
-        application={mockCoreStart.application}
-        savedObjects={mockCoreStart.savedObjects}
-        operationType={WorkspaceOperationType.Update}
-        permissionEnabled={true}
-        onSubmit={jest.fn()}
-        defaultValues={values}
-        availableUseCases={[]}
-      >
-        <Provider>
-          <WorkspaceDetail registeredUseCases$={registeredUseCases$} {...props} />
-        </Provider>
-      </WorkspaceFormProvider>
-    </MemoryRouter>
+    <IntlProvider locale="en">
+      <MemoryRouter>
+        <WorkspaceFormProvider
+          application={mockCoreStart.application}
+          savedObjects={mockCoreStart.savedObjects}
+          operationType={WorkspaceOperationType.Update}
+          permissionEnabled={true}
+          onSubmit={submitFn}
+          defaultValues={values}
+          availableUseCases={[]}
+          onAppLeave={onAppLeaveFn}
+        >
+          <Provider>
+            <WorkspaceDetail registeredUseCases$={registeredUseCases$} {...props} />
+          </Provider>
+        </WorkspaceFormProvider>
+      </MemoryRouter>
+    </IntlProvider>
   );
 };
 
@@ -184,108 +178,91 @@ describe('WorkspaceDetail', () => {
     expect(container).toMatchSnapshot();
   });
 
-  it('default selected tab is Details', async () => {
-    const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
-    render(WorkspaceDetailPage({ workspacesService: workspaceService }));
-    expect(document.querySelector('#details')).toHaveClass('euiTab-isSelected');
-    expect(screen.queryByTestId('workspaceTabs')).not.toBeNull();
+  it('should show current workspace information', async () => {
+    const { getByText, getAllByText, getByDisplayValue } = render(WorkspaceDetailPage({}));
+    expect(getAllByText('Observability').length).toEqual(2);
+    expect(getByText(workspaceObject.id)).toBeInTheDocument();
+    expect(getByText('Details')).toBeInTheDocument();
+    expect(getByDisplayValue(workspaceObject.name)).toBeInTheDocument();
+    expect(getByText(workspaceObject.description)).toBeInTheDocument();
+    expect(getByDisplayValue(workspaceObject.color)).toBeInTheDocument();
   });
 
-  it('click on Collaborators tab when permission control enabled', async () => {
-    const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
-    const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
-    fireEvent.click(getByText('Collaborators'));
-    expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
-  });
+  it('can edit current workspace', async () => {
+    const { getByTestId } = render(WorkspaceDetailPage({}));
+    const editButton = getByTestId('workspaceForm-workspaceDetails-edit');
+    expect(editButton).toBeInTheDocument();
+    fireEvent.click(editButton);
 
-  it('click on Data sources tab when dataSource enabled', async () => {
-    const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
-    const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
-    fireEvent.click(getByText('Data sources'));
-    expect(document.querySelector('#dataSources')).toHaveClass('euiTab-isSelected');
-    await waitFor(() => {
-      expect(getByText('Loading data sources...')).toBeInTheDocument();
+    expect(getByTestId('workspaceForm-workspaceDetails-discardChanges')).toBeInTheDocument();
+
+    const input = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.change(input, {
+      target: { value: 'newName' },
+    });
+
+    const saveButton = getByTestId('workspaceForm-bottomBar-updateButton');
+    expect(saveButton).toBeInTheDocument();
+    fireEvent.click(editButton);
+    waitFor(() => {
+      expect(submitFn).toHaveBeenCalled();
     });
   });
 
+  it('should show navigate modal when number of changes > 1 and leave current page', async () => {
+    const { getByText, getByTestId } = render(WorkspaceDetailPage({}));
+    fireEvent.click(getByText('Edit'));
+    const input = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.change(input, {
+      target: { value: 'newName' },
+    });
+    expect(getByText('1 Unsaved change(s)')).toBeInTheDocument();
+
+    // Leave current page
+    fireEvent(window, new Event('beforeunload'));
+    expect(onAppLeaveFn).toHaveBeenCalled();
+  });
+
   it('delete button will been shown at page header', async () => {
-    const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
+    const mockHeaderControl = ({ controls }: any) => {
+      return controls?.[0]?.run?.() ?? null;
+    };
     const { getByText, getByTestId } = render(
       WorkspaceDetailPage({
-        workspacesService: workspaceService,
         showDeleteModal: true,
+        header: mockHeaderControl,
       })
     );
     expect(getByText('Delete workspace')).toBeInTheDocument();
     const input = getByTestId('delete-workspace-modal-input');
     fireEvent.change(input, {
-      target: { value: 'delete' },
+      target: { value: workspaceObject.name },
     });
     const confirmButton = getByTestId('delete-workspace-modal-confirm');
     fireEvent.click(confirmButton);
   });
 
-  it('click on Collaborators tab when permission control and dataSource disabled', async () => {
-    const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
-    const { queryByText } = render(
-      WorkspaceDetailPage({
-        workspacesService: workspaceService,
-        permissionEnabled: false,
-        dataSourceEnabled: false,
-      })
-    );
-    expect(queryByText('Collaborators')).toBeNull();
-    expect(queryByText('Data Sources')).toBeNull();
+  it('set default workspace button will been shown at page header', async () => {
+    const mockHeaderControl = ({ controls }: any) => {
+      return controls?.[1]?.label ?? null;
+    };
+    const { getByText } = render(WorkspaceDetailPage({ header: mockHeaderControl }));
+    expect(getByText('Set as default')).toBeInTheDocument();
   });
 
-  it('click on tab button will show navigate modal when number of changes > 1', async () => {
-    const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
-    const { getByText, getByTestId, queryByText } = render(
-      WorkspaceDetailPage({ workspacesService: workspaceService })
-    );
-    fireEvent.click(getByText('Edit'));
-    expect(getByTestId('workspaceForm-workspaceDetails-discardChanges')).toBeInTheDocument();
-    const input = getByTestId('workspaceForm-workspaceDetails-nameInputText');
-    fireEvent.change(input, {
-      target: { value: 'newName' },
-    });
-    fireEvent.click(getByText('Collaborators'));
-    expect(getByText('Any unsaved changes will be lost.')).toBeInTheDocument();
-    fireEvent.click(getByText('Cancel'));
-    expect(queryByText('Any unsaved changes will be lost.')).toBeNull();
-    fireEvent.click(getByText('Collaborators'));
-    const button = getByText('Navigate away');
-    fireEvent.click(button);
-    expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
-  });
+  it('Workspace overview button will been shown at page header', async () => {
+    const mockHeaderControlLabel = ({ controls }: any) => {
+      return controls?.[2]?.label ?? null;
+    };
+    const { getByText } = render(WorkspaceDetailPage({ header: mockHeaderControlLabel }));
+    expect(getByText('Workspace overview')).toBeInTheDocument();
 
-  it('click on badge button will navigate to Collaborators tab when number of changes > 0', async () => {
-    const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
-    const { getByText, getByTestId } = render(
-      WorkspaceDetailPage({ workspacesService: workspaceService })
-    );
-    expect(getByText('+1 more')).toBeInTheDocument();
-
-    fireEvent.click(getByText('Edit'));
-    expect(getByTestId('workspaceForm-workspaceDetails-discardChanges')).toBeInTheDocument();
-    const input = getByTestId('workspaceForm-workspaceDetails-nameInputText');
-    fireEvent.change(input, {
-      target: { value: 'newName' },
-    });
-
-    fireEvent.click(getByText('+1 more'));
-    expect(getByText('Any unsaved changes will be lost.')).toBeInTheDocument();
-
-    fireEvent.click(getByText('Navigate away'));
-    expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
-  });
-
-  it('click on badge button will navigate to Collaborators tab when number of changes = 0', async () => {
-    const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
-    const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
-    expect(getByText('+1 more')).toBeInTheDocument();
-    fireEvent.click(getByText('+1 more'));
-    expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
+    const windowOpenSpy = jest.spyOn(window, 'open').mockImplementation(jest.fn());
+    const mockHeaderControl = ({ controls }: any) => {
+      return controls?.[2]?.run?.() ?? null;
+    };
+    render(WorkspaceDetailPage({ header: mockHeaderControl }));
+    expect(windowOpenSpy).toBeCalled();
   });
 
   it('will not render xss content', async () => {
@@ -297,40 +274,17 @@ describe('WorkspaceDetail', () => {
         defaultValues: { ...defaultValues, description: '<script>alert("description")</script>' },
       })
     );
-    expect(getByTestId('workspaceForm-workspaceDetails-descriptionInputText').value).toEqual(
-      '<script>alert("description")</script>'
-    );
+    expect(
+      (getByTestId('workspaceForm-workspaceDetails-descriptionInputText') as HTMLInputElement).value
+    ).toEqual('<script>alert("description")</script>');
     expect(alertSpy).toBeCalledTimes(0);
     alertSpy.mockRestore();
   });
 
-  it('should show loaded data sources', async () => {
-    jest.spyOn(utilsExports, 'fetchDataSourceConnectionsByDataSourceIds').mockResolvedValue([
-      {
-        id: 'dqc-1',
-        name: 'dqc-1-title',
-        description: 'dqc-1-description',
-        type: 'Amazon S3',
-        parentId: 'ds-1',
-        connectionType: DataSourceConnectionType.DirectQueryConnection,
-      },
-      {
-        id: 'dqc-2',
-        name: 'dqc-1-title',
-        description: 'dqc-1-description',
-        type: 'Amazon S3',
-        parentId: 'ds-1',
-        connectionType: DataSourceConnectionType.DirectQueryConnection,
-      },
-    ]);
-    const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
-    const { getByText, getByRole } = render(
-      WorkspaceDetailPage({ workspacesService: workspaceService })
-    );
-    fireEvent.click(getByText('Data sources'));
-    await waitFor(() => {
-      expect(getByText('ds-1-title')).toBeInTheDocument();
-      expect(getByRole('button', { name: '2' })).toBeInTheDocument();
-    });
+  it('should navigate to collaborators page when clicking the collaborators link', async () => {
+    const { getByText } = render(WorkspaceDetailPage({}));
+    fireEvent.click(getByText('Collaborators'));
+
+    expect(navigateToAppFn).toHaveBeenCalledWith('workspace_collaborators');
   });
 });

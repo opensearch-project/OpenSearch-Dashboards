@@ -40,7 +40,3 @@ export const s3DataSourceMetadata = {
     },
   },
 };
-
-export const DATA_SELECTOR_REFRESHER_POPOVER_TEXT = 'Refresh data selector';
-export const DATA_SELECTOR_DEFAULT_PLACEHOLDER = 'Select a data source';
-export const DATA_SELECTOR_S3_DATA_SOURCE_GROUP_HINT_LABEL = ' - Opens in Log Explorer';

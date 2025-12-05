@@ -64,7 +64,7 @@ export function getLegacyPlatformLogsFromMock(stdoutMock: jest.SpyInstance<strin
 }
 
 export async function getPlatformLogsFromFile(path: string) {
-  const fileContent = await readFile(path, 'utf-8');
+  const fileContent = await readFile(path, 'utf8');
   return fileContent
     .split('\n')
     .map((s) => normalizePlatformLogging(s))
@@ -72,7 +72,7 @@ export async function getPlatformLogsFromFile(path: string) {
 }
 
 export async function getLegacyPlatformLogsFromFile(path: string) {
-  const fileContent = await readFile(path, 'utf-8');
+  const fileContent = await readFile(path, 'utf8');
   return fileContent
     .split('\n')
     .map((s) => normalizeLegacyPlatformLogging(s))

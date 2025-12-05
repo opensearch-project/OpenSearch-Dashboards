@@ -78,7 +78,8 @@ export async function getNonExistingReferenceAsKeys(
 
   // Error handling
   const erroredObjects = bulkGetResponse.saved_objects.filter(
-    (obj) => obj.error && obj.error.statusCode !== 404
+    // BulkGet objects across workspaces will throw 403
+    (obj) => obj.error && ![403, 404].includes(obj.error.statusCode)
   );
   if (erroredObjects.length) {
     const err = Boom.badRequest();

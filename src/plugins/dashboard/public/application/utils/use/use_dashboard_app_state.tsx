@@ -54,6 +54,7 @@ export const useDashboardAppAndGlobalState = ({
         usageCollection,
         opensearchDashboardsVersion,
         osdUrlStateStorage,
+        scopedHistory,
       } = services;
       const hideWriteControls = dashboardConfig.getHideWriteControls();
       const stateDefaults = migrateAppState(
@@ -68,7 +69,7 @@ export const useDashboardAppAndGlobalState = ({
         stopSyncingQueryServiceStateWithUrl,
       } = createDashboardGlobalAndAppState({
         stateDefaults,
-        osdUrlStateStorage: services.osdUrlStateStorage,
+        osdUrlStateStorage,
         services,
         savedDashboardInstance,
       });
@@ -136,6 +137,7 @@ export const useDashboardAppAndGlobalState = ({
           const updated = updateStateUrl({
             osdUrlStateStorage,
             state: stateContainer.getState(),
+            scopedHistory,
             replace,
           });
 

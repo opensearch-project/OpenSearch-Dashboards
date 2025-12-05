@@ -166,6 +166,7 @@ export const IndexSettingOptions = ({
         helpText="Specify how often the index should refresh, which publishes the most recent changes and make them available for search."
       >
         <EuiSuperSelect
+          // @ts-expect-error TS2769 TODO(ts-error): fixme
           options={refreshOptions}
           valueOfSelected={refreshTypeSelected}
           onChange={onChangeRefreshType}

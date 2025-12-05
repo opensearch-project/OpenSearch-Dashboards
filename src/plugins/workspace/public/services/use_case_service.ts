@@ -15,8 +15,13 @@ import {
   WorkspacesSetup,
   DEFAULT_NAV_GROUPS,
   ALL_USE_CASE_ID,
+  UseCaseId,
 } from '../../../../core/public';
-import { WORKSPACE_DETAIL_APP_ID, WORKSPACE_USE_CASES } from '../../common/constants';
+import {
+  WORKSPACE_DETAIL_APP_ID,
+  WORKSPACE_USE_CASES,
+  WORKSPACE_COLLABORATORS_APP_ID,
+} from '../../common/constants';
 import {
   convertNavGroupToWorkspaceUseCase,
   getFirstUseCaseOfFeatureConfigs,
@@ -32,6 +37,14 @@ export interface UseCaseServiceSetupDeps {
 
 export class UseCaseService {
   private workspaceAndManageWorkspaceCategorySubscription?: Subscription;
+  private supportedUseCasesForServerlessCollections = new Set<UseCaseId>([
+    UseCaseId.ESSENTIAL_USE_CASE_ID,
+  ]);
+
+  public get supportedUseCasesForServerless(): UseCaseId[] {
+    return Array.from(this.supportedUseCasesForServerlessCollections);
+  }
+
   constructor() {}
 
   /**
@@ -41,6 +54,8 @@ export class UseCaseService {
    */
   private async registerManageWorkspaceCategory(setupDeps: UseCaseServiceSetupDeps) {
     const [coreStart] = await setupDeps.getStartServices();
+    const isPermissionEnabled = coreStart?.application?.capabilities.workspaces.permissionEnabled;
+
     this.workspaceAndManageWorkspaceCategorySubscription?.unsubscribe();
     this.workspaceAndManageWorkspaceCategorySubscription = combineLatest([
       setupDeps.workspaces.currentWorkspace$,
@@ -65,34 +80,51 @@ export class UseCaseService {
         if (navGroupInfo) {
           setupDeps.chrome.navGroup.addNavLinksToGroup(navGroupInfo, [
             {
-              id: 'objects',
+              id: WORKSPACE_DETAIL_APP_ID,
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 100,
+              title: i18n.translate('workspace.settings.workspaceDetails', {
+                defaultMessage: 'Workspace details',
+              }),
             },
+            ...(isPermissionEnabled
+              ? [
+                  {
+                    id: WORKSPACE_COLLABORATORS_APP_ID,
+                    category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+                    order: 200,
+                    title: i18n.translate('workspace.settings.workspaceCollaborators', {
+                      defaultMessage: 'Collaborators',
+                    }),
+                  },
+                ]
+              : []),
             {
               id: 'dataSources',
-              category: DEFAULT_APP_CATEGORIES.manageWorkspace,
-              order: 200,
-            },
-            {
-              id: 'indexPatterns',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 300,
             },
             {
-              id: 'import_sample_data',
+              id: 'indexPatterns',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 400,
-              title: i18n.translate('workspace.left.sampleData.label', {
-                defaultMessage: 'Sample data',
-              }),
             },
             {
-              id: WORKSPACE_DETAIL_APP_ID,
+              id: 'datasets',
+              category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+              order: 400,
+            },
+            {
+              id: 'objects',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 500,
-              title: i18n.translate('workspace.settings.workspaceSettings', {
-                defaultMessage: 'Workspace settings',
+            },
+            {
+              id: 'import_sample_data',
+              category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+              order: 600,
+              title: i18n.translate('workspace.left.sampleData.label', {
+                defaultMessage: 'Sample data',
               }),
             },
           ]);
@@ -121,9 +153,9 @@ export class UseCaseService {
           return chrome.navGroup
             .getNavGroupsMap$()
             .pipe(
-              map((navGroupsMap) =>
-                Object.values(navGroupsMap).map(convertNavGroupToWorkspaceUseCase)
-              )
+              map((navGroupsMap) => {
+                return Object.values(navGroupsMap).map(convertNavGroupToWorkspaceUseCase);
+              })
             )
             .pipe(
               distinctUntilChanged((useCases, anotherUseCases) => {
@@ -169,17 +201,23 @@ export class UseCaseService {
               .filter((useCase) => {
                 return useCase.features.some((featureId) => configurableAppsId.includes(featureId));
               })
-              .map((item) => ({
-                ...item,
-                features: item.features.map((featureId) => ({
-                  title: configurableApps.find((app) => app.id === featureId)?.title,
-                  id: featureId,
-                })),
-              }))
+              .map(
+                (item) =>
+                  ({
+                    ...item,
+                    features: item.features.map((featureId) => ({
+                      title: configurableApps.find((app) => app.id === featureId)?.title,
+                      id: featureId,
+                    })),
+                  } as WorkspaceUseCase)
+              )
               .concat({
                 ...DEFAULT_NAV_GROUPS.all,
-                features: configurableApps.map((app) => ({ id: app.id, title: app.title })),
-              }) as WorkspaceUseCase[];
+                features: configurableApps.map((app) => ({
+                  id: app.id,
+                  title: app.title,
+                })),
+              } as WorkspaceUseCase);
           })
         );
       },
@@ -189,4 +227,8 @@ export class UseCaseService {
   stop() {
     this.workspaceAndManageWorkspaceCategorySubscription?.unsubscribe();
   }
+
+  registerSupportedUseCasesForServerlessCollections = (useCaseIds: UseCaseId[]) => {
+    useCaseIds.forEach((id) => this.supportedUseCasesForServerlessCollections.add(id));
+  };
 }

@@ -27,10 +27,12 @@ describe('dashboard listing table with no item', () => {
       registerMountContext: jest.fn(),
       currentAppId$: {} as Observable<string | undefined>,
     };
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const component = mountWithIntl(getNoItemsMessage(false, jest.fn(), application));
 
     expect(component).toMatchSnapshot();
     component.find(EuiLink).simulate('click');
-    expect(application.navigateToApp).toHaveBeenCalledTimes(1);
+
+    expect(application.navigateToApp).toHaveBeenCalledWith('import_sample_data');
   });
 });

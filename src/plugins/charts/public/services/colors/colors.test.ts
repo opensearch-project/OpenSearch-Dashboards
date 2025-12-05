@@ -41,6 +41,7 @@ describe('Vislib Color Service', () => {
   const colors = new ColorsService();
   const mockUiSettings = coreMock.createSetup().uiSettings;
   mockUiSettings.get.mockImplementation((a) => config.get(a));
+  // @ts-expect-error TS2554 TODO(ts-error): fixme
   mockUiSettings.set.mockImplementation((...a) => config.set(...a) as any);
   colors.init(mockUiSettings);
 

@@ -305,14 +305,14 @@ test('it should create section with a dashboard as content', async () => {
     savedObjectsClient: clientMock,
   });
   expect(input.panels).toEqual({
-    'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2': {
+    '1': {
       explicitInput: {
-        id: 'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2',
+        id: '1',
         savedObjectId: 'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2',
       },
       gridData: {
         h: 5,
-        i: 'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2',
+        i: '1',
         w: 48,
         x: 0,
         y: 0,
@@ -351,18 +351,90 @@ test('it should create section with a dynamic dashboard as content', async () =>
     savedObjectsClient: clientMock,
   });
   expect(input.panels).toEqual({
-    'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2': {
+    '1': {
       explicitInput: {
-        id: 'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2',
+        id: '1',
         savedObjectId: 'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2',
       },
       gridData: {
         h: 5,
-        i: 'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2',
+        i: '1',
         w: 48,
         x: 0,
         y: 0,
       },
+      type: 'visualization',
+    },
+  });
+});
+
+test('it should create section with a dashboard which has duplicate visualization', async () => {
+  const section: Section = { id: 'section1', kind: 'dashboard', order: 10 };
+  const staticDashboard: Content = {
+    id: 'content1',
+    kind: 'dashboard',
+    order: 0,
+    input: {
+      kind: 'static',
+      id: 'dashboard-id-static',
+    },
+  };
+  const clientMock = {
+    ...coreMock.createStart().savedObjects.client,
+    // all three visualization referenced to same object
+    get: jest.fn().mockResolvedValue({
+      id: 'dashboard-id-static',
+      attributes: {
+        panelsJSON:
+          '[{"version":"3.0.0","gridData":{"x":24,"y":0,"w":24,"h":15,"i":"909ee211-fab3-400f-858a-734e6fb52326"},"panelIndex":"909ee211-fab3-400f-858a-734e6fb52326","embeddableConfig":{},"panelRefName":"panel_0"},{"version":"3.0.0","gridData":{"x":0,"y":0,"w":24,"h":15,"i":"d61bbd24-be5d-4422-a522-096be0d5e711"},"panelIndex":"d61bbd24-be5d-4422-a522-096be0d5e711","embeddableConfig":{},"panelRefName":"panel_1"},{"version":"3.0.0","gridData":{"x":24,"y":15,"w":24,"h":15,"i":"111d18c7-788f-4276-b54c-bd7f78ea768d"},"panelIndex":"111d18c7-788f-4276-b54c-bd7f78ea768d","embeddableConfig":{},"panelRefName":"panel_2"}]',
+      },
+      references: [
+        {
+          name: 'panel_0',
+          type: 'visualization',
+          id: '_Chk-0_10f1a240-b891-11e8-a6d9-e546fe2bba5f',
+        },
+        {
+          name: 'panel_1',
+          type: 'visualization',
+          id: '_Chk-0_10f1a240-b891-11e8-a6d9-e546fe2bba5f',
+        },
+        {
+          name: 'panel_2',
+          type: 'visualization',
+          id: '_Chk-0_10f1a240-b891-11e8-a6d9-e546fe2bba5f',
+        },
+      ],
+    }),
+  };
+
+  const input = await createDashboardInput(section, [staticDashboard], {
+    savedObjectsClient: clientMock,
+  });
+  // expect we still have 3 panels with same content
+  expect(input.panels).toEqual({
+    '111d18c7-788f-4276-b54c-bd7f78ea768d': {
+      explicitInput: {
+        id: '111d18c7-788f-4276-b54c-bd7f78ea768d',
+        savedObjectId: '_Chk-0_10f1a240-b891-11e8-a6d9-e546fe2bba5f',
+      },
+      gridData: { h: 15, i: '111d18c7-788f-4276-b54c-bd7f78ea768d', w: 24, x: 24, y: 15 },
+      type: 'visualization',
+    },
+    '909ee211-fab3-400f-858a-734e6fb52326': {
+      explicitInput: {
+        id: '909ee211-fab3-400f-858a-734e6fb52326',
+        savedObjectId: '_Chk-0_10f1a240-b891-11e8-a6d9-e546fe2bba5f',
+      },
+      gridData: { h: 15, i: '909ee211-fab3-400f-858a-734e6fb52326', w: 24, x: 24, y: 0 },
+      type: 'visualization',
+    },
+    'd61bbd24-be5d-4422-a522-096be0d5e711': {
+      explicitInput: {
+        id: 'd61bbd24-be5d-4422-a522-096be0d5e711',
+        savedObjectId: '_Chk-0_10f1a240-b891-11e8-a6d9-e546fe2bba5f',
+      },
+      gridData: { h: 15, i: 'd61bbd24-be5d-4422-a522-096be0d5e711', w: 24, x: 0, y: 0 },
       type: 'visualization',
     },
   });

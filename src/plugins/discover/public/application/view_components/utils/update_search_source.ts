@@ -20,6 +20,10 @@ interface Props {
   sort: SortOrder[] | undefined;
   searchSource?: ISearchSource;
   histogramConfigs?: AggConfigs;
+  /**
+   * Optionally configure the number of rows you get back. This will override the SAMPLE_SIZE_SETTING in uiSettings
+   */
+  size?: number;
 }
 
 export const updateSearchSource = async ({
@@ -28,21 +32,18 @@ export const updateSearchSource = async ({
   searchSource,
   sort,
   histogramConfigs,
+  size: sizeParam,
 }: Props) => {
   const { uiSettings, data } = services;
-  const queryDataset = data.query.queryString.getQuery().dataset;
 
-  const dataset =
-    indexPattern.id === queryDataset?.id
-      ? await data.indexPatterns.get(queryDataset?.id!)
-      : indexPattern;
+  const dataset = indexPattern;
 
   const sortForSearchSource = getSortForSearchSource(
     sort,
     dataset,
     uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
   );
-  const size = uiSettings.get(SAMPLE_SIZE_SETTING);
+  const size = sizeParam || uiSettings.get(SAMPLE_SIZE_SETTING);
   const filters = data.query.filterManager.getFilters();
 
   const searchSourceInstance = searchSource || (await data.search.searchSource.create());

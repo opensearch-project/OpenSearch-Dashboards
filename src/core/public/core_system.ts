@@ -29,6 +29,7 @@
  */
 
 import { pick } from '@osd/std';
+import { setBuildHash } from '@osd/monaco';
 import { CoreSetup, CoreStart } from '.';
 import { CoreId } from '../server';
 import { EnvironmentMode, PackageInfo } from '../server/types';
@@ -55,6 +56,8 @@ import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { UiSettingsService } from './ui_settings';
 import { WorkspacesService } from './workspace';
+import { KeyboardShortcutService } from './keyboard_shortcut';
+import { ChatService } from './chat';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -108,10 +111,12 @@ export class CoreSystem {
   private readonly context: ContextService;
   private readonly integrations: IntegrationsService;
   private readonly coreApp: CoreApp;
+  private readonly keyboardShortcut: KeyboardShortcutService;
 
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
   private readonly workspaces: WorkspacesService;
+  private readonly chat: ChatService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
@@ -141,12 +146,14 @@ export class CoreSystem {
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
     this.workspaces = new WorkspacesService();
+    this.chat = new ChatService();
 
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
 
     this.context = new ContextService(this.coreContext);
     this.plugins = new PluginsService(this.coreContext, injectedMetadata.uiPlugins);
     this.coreApp = new CoreApp(this.coreContext);
+    this.keyboardShortcut = new KeyboardShortcutService();
   }
 
   public async setup() {
@@ -158,12 +165,17 @@ export class CoreSystem {
         injectedMetadata,
         i18n: this.i18n.getContext(),
       });
+
+      // Initialize Monaco environment with build hash for worker URLs
+      setBuildHash(injectedMetadata.getOpenSearchDashboardsBuildNumber());
+
       await this.integrations.setup();
       this.docLinks.setup();
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
       const workspaces = this.workspaces.setup();
+      const chat = this.chat.setup();
 
       const pluginDependencies = this.plugins.getOpaqueIds();
       const context = this.context.setup({
@@ -172,6 +184,7 @@ export class CoreSystem {
       const application = this.application.setup({ context, http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
       const chrome = this.chrome.setup({ uiSettings });
+      const keyboardShortcut = this.keyboardShortcut.setup();
 
       const core: InternalCoreSetup = {
         application,
@@ -183,6 +196,8 @@ export class CoreSystem {
         notifications,
         uiSettings,
         workspaces,
+        keyboardShortcut,
+        chat,
       };
 
       // Services that do not expose contracts at setup
@@ -228,6 +243,18 @@ export class CoreSystem {
       });
       const workspaces = this.workspaces.start();
       const application = await this.application.start({ http, overlays, workspaces });
+
+      // Start chat service - enablement logic is now handled by the plugin
+      const chat = this.chat.start();
+
+      // Only enable keyboard shortcuts when both the configuration is enabled AND workspaces are enabled
+      const keyboardShortcutsConfigEnabled = injectedMetadata.getKeyboardShortcuts().enabled;
+      const workspacesEnabled = application.capabilities.workspaces.enabled;
+      const keyboardShortcutsEnabled = keyboardShortcutsConfigEnabled && workspacesEnabled;
+
+      const keyboardShortcut = keyboardShortcutsEnabled
+        ? this.keyboardShortcut.start({ enabled: true })
+        : undefined;
       const chrome = await this.chrome.start({
         application,
         docLinks,
@@ -237,6 +264,7 @@ export class CoreSystem {
         uiSettings,
         overlays,
         workspaces,
+        keyboardShortcut,
       });
 
       this.coreApp.start({ application, http, notifications, uiSettings });
@@ -253,6 +281,7 @@ export class CoreSystem {
         savedObjects,
         uiSettings,
         workspaces,
+        chat,
       }));
 
       const core: InternalCoreStart = {
@@ -268,6 +297,8 @@ export class CoreSystem {
         uiSettings,
         fatalErrors,
         workspaces,
+        keyboardShortcut: keyboardShortcut || undefined,
+        chat,
       };
 
       await this.plugins.start(core);
@@ -320,6 +351,8 @@ export class CoreSystem {
     this.i18n.stop();
     this.application.stop();
     this.workspaces.stop();
+    this.chat.stop();
+    this.keyboardShortcut.stop();
     this.rootDomElement.textContent = '';
   }
 }

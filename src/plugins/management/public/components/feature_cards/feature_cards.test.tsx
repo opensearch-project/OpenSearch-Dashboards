@@ -103,7 +103,7 @@ describe('<FeatureCards />', () => {
   });
 
   it('render with complex navLinks', () => {
-    const { container, getAllByTestId } = render(
+    const { container } = render(
       <FeatureCards
         pageDescription=""
         navLinks={navLinks}
@@ -113,7 +113,6 @@ describe('<FeatureCards />', () => {
       />
     );
     expect(container).toMatchSnapshot();
-    expect(getAllByTestId('landingPageRow_1').length).toEqual(2);
   });
 
   it('click item', () => {

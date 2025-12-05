@@ -11,7 +11,8 @@ export enum RightSidebarScrollField {
   Color = 'color',
   UseCase = 'useCase',
   DataSource = 'dataSource',
-  Member = 'member',
+  Collaborators = 'collaborators',
+  PrivacyType = 'privacyType',
 }
 
 export const generateRightSidebarScrollProps = (key: RightSidebarScrollField) => {

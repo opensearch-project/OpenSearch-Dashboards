@@ -41,7 +41,7 @@ import { UsageCollectionSetup } from '../../usage_collection/server';
 import { capabilitiesProvider } from './capabilities_provider';
 import { sampleDataTelemetry, homepageSavedObjectType } from './saved_objects';
 import { registerRoutes } from './routes';
-import { uiSettings } from './ui_settings';
+import { uiSettings, searchOverviewPageUISetting } from './ui_settings';
 
 interface HomeServerPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
@@ -50,6 +50,7 @@ interface HomeServerPluginSetupDependencies {
 export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServerPluginStart> {
   constructor(private readonly initContext: PluginInitializerContext) {}
   private readonly tutorialsRegistry = new TutorialsRegistry();
+  // @ts-expect-error TS2729 TODO(ts-error): fixme
   private readonly sampleDataRegistry = new SampleDataRegistry(this.initContext);
 
   public setup(core: CoreSetup, plugins: HomeServerPluginSetupDependencies): HomeServerPluginSetup {
@@ -60,6 +61,7 @@ export class HomeServerPlugin implements Plugin<HomeServerPluginSetup, HomeServe
     const router = core.http.createRouter();
     registerRoutes(router);
     core.uiSettings.register(uiSettings);
+    core.uiSettings.register(searchOverviewPageUISetting);
 
     return {
       tutorials: { ...this.tutorialsRegistry.setup(core) },

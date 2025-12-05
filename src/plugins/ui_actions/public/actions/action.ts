@@ -65,6 +65,7 @@ export type ActionDefinitionContext<Context extends BaseContext = BaseContext> =
   | Context
   | ActionExecutionContext<Context>;
 
+// @ts-expect-error TS2430 TODO(ts-error): fixme
 export interface Action<Context extends BaseContext = {}, T = ActionType>
   extends Partial<Presentable<ActionExecutionContext<Context>>> {
   /**
@@ -82,6 +83,10 @@ export interface Action<Context extends BaseContext = {}, T = ActionType>
    * The action type is what determines the context shape.
    */
   readonly type: T;
+
+  isDisabled?(context: ActionExecutionContext<Context>): boolean;
+
+  getTooltip?(context: ActionExecutionContext<Context>): string;
 
   /**
    * Optional EUI icon type that can be displayed along with the title.
@@ -157,6 +162,9 @@ export interface ActionDefinition<Context extends BaseContext = {}>
    * without first showing up in context menu.
    * false by default.
    */
+  isDisabled?(context: ActionExecutionContext<Context>): boolean;
+
+  getTooltip?(context: ActionExecutionContext<Context>): string;
   shouldAutoExecute?(context: ActionDefinitionContext<Context>): Promise<boolean>;
 
   /**

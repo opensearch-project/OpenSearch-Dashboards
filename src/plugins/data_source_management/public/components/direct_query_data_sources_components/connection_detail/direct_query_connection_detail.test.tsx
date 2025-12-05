@@ -3,18 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { MemoryRouter, Route } from 'react-router-dom';
-import { DirectQueryDataConnectionDetail } from './direct_query_connection_detail';
+import { render, screen, waitFor } from '@testing-library/react';
 import {
   ApplicationStart,
   HttpStart,
   NotificationsStart,
   SavedObjectsStart,
 } from 'opensearch-dashboards/public';
+import React from 'react';
+import { MemoryRouter, Route } from 'react-router-dom';
+import { coreMock } from '../../../../../../core/public/mocks';
+import { DataSourceSelectionService } from '../../../service/data_source_selection_service';
 import * as utils from '../../utils';
+import { DirectQueryDataConnectionDetail } from './direct_query_connection_detail';
 
 jest.mock('../../../constants', () => ({
   DATACONNECTIONS_BASE: '/api/dataconnections',
@@ -64,12 +66,22 @@ jest.mock('../associated_object_management/associated_objects_tab', () => ({
 }));
 
 jest.mock('../associated_object_management/utils/associated_objects_tab_utils', () => ({
-  redirectToExplorerS3: jest.fn(),
+  redirectToDiscover: jest.fn(),
 }));
+
+const mockApplication = coreMock.createSetup().application;
+const mockUiSettings = coreMock.createSetup().uiSettings;
+const mockWorkspaces = coreMock.createSetup().workspaces;
+const mockdataSourceSelection = new DataSourceSelectionService();
 
 jest.mock('../../utils', () => ({
   isPluginInstalled: jest.fn(),
   getDataSourcesWithFields: jest.fn(),
+  getApplication: () => mockApplication,
+  getUiSettings: () => mockUiSettings,
+  getWorkspaces: () => mockWorkspaces,
+  getHideLocalCluster: () => ({ enabled: true }),
+  getDataSourceSelection: () => mockdataSourceSelection,
 }));
 
 const renderComponent = ({
@@ -87,6 +99,7 @@ const renderComponent = ({
       find: jest.fn().mockResolvedValue({ saved_objects: [] }),
     },
   },
+  setHeaderActionMenu = jest.fn(),
 }) => {
   return render(
     <MemoryRouter initialEntries={['/dataconnections/test?dataSourceMDSId=test-mdsid']}>
@@ -94,10 +107,14 @@ const renderComponent = ({
         <DirectQueryDataConnectionDetail
           featureFlagStatus={featureFlagStatus}
           http={http as HttpStart}
+          // @ts-expect-error TS2352 TODO(ts-error): fixme
           notifications={notifications as NotificationsStart}
           application={application as ApplicationStart}
           setBreadcrumbs={setBreadcrumbs}
+          // @ts-expect-error TS2352 TODO(ts-error): fixme
           savedObjects={savedObjects as SavedObjectsStart}
+          useNewUX={false}
+          setHeaderActionMenu={setHeaderActionMenu}
         />
       </Route>
     </MemoryRouter>

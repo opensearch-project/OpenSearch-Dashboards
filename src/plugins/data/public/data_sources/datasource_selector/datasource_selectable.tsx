@@ -3,17 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useCallback, useMemo } from 'react';
 import { EuiCompressedComboBox } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { DataSource, DataSetWithDataSource, IndexPatternOption } from '../datasource';
-import { DataSourceGroup, DataSourceOption, DataSourceSelectableProps } from './types';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import { DataSetWithDataSource, DataSource, IndexPatternOption } from '../datasource';
 import { DataSelectorRefresher } from './data_selector_refresher';
-import {
-  DATA_SELECTOR_DEFAULT_PLACEHOLDER,
-  DATA_SELECTOR_REFRESHER_POPOVER_TEXT,
-  DATA_SELECTOR_S3_DATA_SOURCE_GROUP_HINT_LABEL,
-} from '../constants';
+import { DataSourceGroup, DataSourceOption, DataSourceSelectableProps } from './types';
 
 // Asynchronously retrieves and formats dataset from a given data source.
 const getAndFormatDataSetFromDataSource = async (
@@ -47,8 +42,11 @@ const mapToOption = (
   if (dataSet && 'title' in dataSet && 'id' in dataSet && isIndexPatterns(dataSet)) {
     return {
       ...baseOption,
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       label: dataSet.title as string,
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       value: dataSet.id as string,
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       key: dataSet.id as string,
     };
   }
@@ -70,13 +68,13 @@ const addOrUpdateGroup = (
   const groupType = metadata.ui.groupType;
   let groupName =
     metadata.ui.typeLabel ||
-    i18n.translate('dataExplorer.dataSourceSelector.defaultGroupTitle', {
+    i18n.translate('data.dataSourceSelector.defaultGroupTitle', {
       defaultMessage: 'Default Group',
     });
 
   if (dataSource.getType() !== 'DEFAULT_INDEX_PATTERNS') {
-    groupName += i18n.translate('dataExplorer.dataSourceSelector.redirectionHint', {
-      defaultMessage: DATA_SELECTOR_S3_DATA_SOURCE_GROUP_HINT_LABEL,
+    groupName += i18n.translate('data.dataSourceSelector.redirectionHint', {
+      defaultMessage: ' - Opens in Log Explorer',
     });
   }
 
@@ -100,6 +98,7 @@ const consolidateDataSourceGroups = (
   return [...dataSets, ...dataSources].reduce((dsGroup, item) => {
     if ('list' in item && item.ds) {
       // Confirm item is a DataSet
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       const options = item.list.map((dataset) => mapToOption(item.ds, dataset));
       options.forEach((option) => addOrUpdateGroup(dsGroup, item.ds, option));
     } else {
@@ -165,7 +164,7 @@ export const DataSourceSelectable = ({
       className="dataExplorerDSSelect"
       data-test-subj="dataExplorerDSSelect"
       placeholder={i18n.translate('data.datasource.selectADatasource', {
-        defaultMessage: DATA_SELECTOR_DEFAULT_PLACEHOLDER,
+        defaultMessage: 'Select a data source',
       })}
       options={memorizedDataSourceOptionList as any}
       selectedOptions={selectedSources as any}
@@ -174,7 +173,9 @@ export const DataSourceSelectable = ({
       isClearable={false}
       append={
         <DataSelectorRefresher
-          tooltipText={DATA_SELECTOR_REFRESHER_POPOVER_TEXT}
+          tooltipText={i18n.translate('data.datasource.selector.refreshDataSources', {
+            defaultMessage: 'Refresh data selector',
+          })}
           onRefresh={onRefresh}
         />
       }

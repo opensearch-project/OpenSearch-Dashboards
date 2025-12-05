@@ -4,8 +4,8 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { WorkspacePermissionMode } from '../../../common/constants';
-import { PermissionModeId } from '../../../../../core/public';
+import { PermissionModeId, WorkspacePermissionMode } from '../../../../../core/public';
+import { WORKSPACE_ACCESS_LEVEL_NAMES } from '../../constants';
 
 export enum WorkspaceOperationType {
   Create = 'create',
@@ -15,6 +15,12 @@ export enum WorkspaceOperationType {
 export enum WorkspacePermissionItemType {
   User = 'user',
   Group = 'group',
+}
+
+export enum WorkspacePrivacyItemType {
+  PrivateToCollaborators = 'private-to-collaborators',
+  AnyoneCanView = 'anyone-can-view',
+  AnyoneCanEdit = 'anyone-can-edit',
 }
 
 export const optionIdToWorkspacePermissionModesMap: {
@@ -41,7 +47,7 @@ export const selectDataSourceTitle = i18n.translate('workspace.form.selectDataSo
 });
 
 export const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndPermissions.title', {
-  defaultMessage: 'Workspaces access',
+  defaultMessage: 'Workspace access',
 });
 
 export const usersAndPermissionsCreatePageTitle = i18n.translate(
@@ -101,24 +107,84 @@ export const detailsColorHelpText = i18n.translate(
   }
 );
 
-export enum DetailTab {
-  Details = 'details',
-  DataSources = 'dataSources',
-  Collaborators = 'collaborators',
-}
+export const workspacePrivacyTitle = i18n.translate(
+  'workspace.form.collaborators.panels.privacy.title',
+  {
+    defaultMessage: 'Workspace privacy',
+  }
+);
 
-export const DetailTabTitles: { [key in DetailTab]: string } = {
-  [DetailTab.Details]: i18n.translate('workspace.detail.tabTitle.details', {
-    defaultMessage: 'Details',
-  }),
-  [DetailTab.DataSources]: i18n.translate('workspace.detail.tabTitle.dataSources', {
-    defaultMessage: 'Data sources',
-  }),
-  [DetailTab.Collaborators]: i18n.translate('workspace.detail.tabTitle.collaborators', {
-    defaultMessage: 'Collaborators',
-  }),
+export const privacyType2TextMap = {
+  [WorkspacePrivacyItemType.PrivateToCollaborators]: {
+    title: i18n.translate('workspace.privacy.privateToCollaborators.title', {
+      defaultMessage: 'Private to collaborators',
+    }),
+    description: i18n.translate('workspace.privacy.privateToCollaborators.description', {
+      defaultMessage: 'Only collaborators can access the workspace.',
+    }),
+    additionalDescription: i18n.translate(
+      'workspace.privacy.privateToCollaborators.additionalDescription',
+      {
+        defaultMessage:
+          'You can add collaborators who can view or edit workspace and assign workspace administrators once the workspace is created.',
+      }
+    ),
+  },
+  [WorkspacePrivacyItemType.AnyoneCanView]: {
+    title: i18n.translate('workspace.privacy.anyoneCanView.title', {
+      defaultMessage: 'Anyone can view',
+    }),
+    description: i18n.translate('workspace.privacy.anyoneCanView.description', {
+      defaultMessage: 'Anyone can view workspace assets.',
+    }),
+    additionalDescription: i18n.translate('workspace.privacy.anyoneCanView.additionalDescription', {
+      defaultMessage:
+        'You can add collaborators who can edit workspace and assign workspace administrators once the workspace is created.',
+    }),
+  },
+  [WorkspacePrivacyItemType.AnyoneCanEdit]: {
+    title: i18n.translate('workspace.privacy.anyoneCanEdit.title', {
+      defaultMessage: 'Anyone can edit',
+    }),
+    description: i18n.translate('workspace.privacy.anyoneCanEdit.description', {
+      defaultMessage: 'Anyone can view and edit workspace assets.',
+    }),
+    additionalDescription: i18n.translate('workspace.privacy.anyoneCanEdit.additionalDescription', {
+      defaultMessage: 'You can assign workspace administrators once the workspace is created.',
+    }),
+  },
 };
 
 export const PERMISSION_TYPE_LABEL_ID = 'workspace-form-permission-type-label';
 export const PERMISSION_COLLABORATOR_LABEL_ID = 'workspace-form-permission-collaborator-label';
 export const PERMISSION_ACCESS_LEVEL_LABEL_ID = 'workspace-form-permission-access-level-label';
+
+export const permissionModeOptions = [
+  {
+    value: PermissionModeId.Read,
+    inputDisplay: WORKSPACE_ACCESS_LEVEL_NAMES.readOnly,
+  },
+  {
+    value: PermissionModeId.ReadAndWrite,
+    inputDisplay: WORKSPACE_ACCESS_LEVEL_NAMES.readAndWrite,
+  },
+  {
+    value: PermissionModeId.Owner,
+    inputDisplay: WORKSPACE_ACCESS_LEVEL_NAMES.admin,
+  },
+];
+
+export const typeOptions = [
+  {
+    value: WorkspacePermissionItemType.User,
+    inputDisplay: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.user', {
+      defaultMessage: 'User',
+    }),
+  },
+  {
+    value: WorkspacePermissionItemType.Group,
+    inputDisplay: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.group', {
+      defaultMessage: 'Group',
+    }),
+  },
+];

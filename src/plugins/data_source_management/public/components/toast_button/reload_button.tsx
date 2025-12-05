@@ -12,7 +12,7 @@ export const getReloadButton = () => {
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButton size="s" onClick={() => window.location.reload()}>
-            {i18n.translate('dataSourceMenu.requiresPageReloadToastButtonLabel', {
+            {i18n.translate('dataSourcesManagement.requiresPageReloadToastButtonLabel', {
               defaultMessage: 'Refresh the page',
             })}
           </EuiButton>

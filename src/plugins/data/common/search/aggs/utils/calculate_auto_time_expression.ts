@@ -45,7 +45,7 @@ export function getCalculateAutoTimeExpression(getConfig: (key: string) => any) 
     const buckets = new TimeBuckets({
       'histogram:maxBars': getConfig(UI_SETTINGS.HISTOGRAM_MAX_BARS),
       'histogram:barTarget': getConfig(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
-      dateFormat: getConfig('dateFormat'),
+      dateFormat: getConfig(UI_SETTINGS.DATE_FORMAT),
       'dateFormat:scaled': getConfig('dateFormat:scaled'),
     });
 

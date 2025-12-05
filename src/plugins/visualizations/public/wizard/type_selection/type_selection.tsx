@@ -198,7 +198,10 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
       .all()
       .filter(filterExperimental)
       .filter((type) => !type.hidden); // Filter out hidden visualizations
-    const aliasedTypes = visTypes.getAliases().filter(filterExperimental);
+    const aliasedTypes = visTypes
+      .getAliases()
+      .filter(filterExperimental)
+      .filter((type) => !type.hidden);
     const allTypes = [...types, ...aliasedTypes];
 
     let entries: VisTypeListEntry[];

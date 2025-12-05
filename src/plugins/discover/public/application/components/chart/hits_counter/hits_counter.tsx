@@ -28,17 +28,18 @@
  * under the License.
  */
 
+import './hits_counter.scss';
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import { formatNumWithCommas } from '../../../helpers';
+import { OpenSearchSearchHit } from '../../../doc_views/doc_views_types';
 
 export interface HitsCounterProps {
   /**
    * the number of query hits
    */
-  hits: number;
+  hits?: number;
   /**
    * displays the reset button
    */
@@ -47,28 +48,59 @@ export interface HitsCounterProps {
    * resets the query
    */
   onResetQuery: () => void;
+  /**
+   * the row data of the table
+   */
+  rows?: OpenSearchSearchHit[];
 }
 
-export function HitsCounter({ hits, showResetButton, onResetQuery }: HitsCounterProps) {
+export function HitsCounter({ hits, showResetButton, onResetQuery, rows }: HitsCounterProps) {
+  const rowsCount = rows?.length || 0;
+
   return (
     <I18nProvider>
       <EuiFlexGroup
-        gutterSize="s"
+        gutterSize="none"
         className="dscResultCount"
+        data-test-subj="dscResultCount"
         responsive={false}
         justifyContent="center"
         alignItems="center"
       >
         <EuiFlexItem grow={false}>
           <EuiText size="s">
-            <strong data-test-subj="discoverQueryHits">{formatNumWithCommas(hits)}</strong>{' '}
-            <FormattedMessage
-              id="discover.hitsPluralTitle"
-              defaultMessage="{hits, plural, one {hit} other {hits}}"
-              values={{
-                hits,
-              }}
-            />
+            <strong>
+              <FormattedMessage
+                id="discover.hitsResultTitle"
+                defaultMessage="{rowsCount, plural, one {Result} other {Results}}"
+                values={{ rowsCount }}
+              />{' '}
+              (
+              <span
+                data-test-subj="discoverQueryRowsCount"
+                aria-label={i18n.translate('discover.hitsCounterRowsCount', {
+                  defaultMessage: '{rowsCount} {rowsCount, plural, one {row} other {rows}} shown',
+                  values: { rowsCount },
+                })}
+              >
+                {rowsCount.toLocaleString()}
+              </span>
+              {hits ? (
+                <>
+                  /
+                  <span
+                    data-test-subj="discoverQueryHits"
+                    aria-label={i18n.translate('discover.hitsCounterHitsCount', {
+                      defaultMessage: '{hits} {hits, plural, one {hit} other {hits}}',
+                      values: { hits },
+                    })}
+                  >
+                    {hits.toLocaleString()}
+                  </span>
+                </>
+              ) : null}
+              )
+            </strong>
           </EuiText>
         </EuiFlexItem>
         {showResetButton && (

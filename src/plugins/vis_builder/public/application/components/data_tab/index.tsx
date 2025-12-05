@@ -20,6 +20,7 @@ import { addFieldToConfiguration } from './drag_drop/add_field_to_configuration'
 import { replaceFieldInConfiguration } from './drag_drop/replace_field_in_configuration';
 import { reorderFieldsWithinSchema } from './drag_drop/reorder_fields_within_schema';
 import { moveFieldBetweenSchemas } from './drag_drop/move_field_between_schemas';
+import { validateAggregations } from '../../utils/validations';
 
 export const DATA_TAB_ID = 'data_tab';
 
@@ -39,12 +40,14 @@ export const DataTab = () => {
       data: {
         search: { aggs: aggService },
       },
+      notifications: { toasts },
     },
   } = useOpenSearchDashboards<VisBuilderServices>();
 
   const aggProps = useAggs();
   const [activeSchemaFields, setActiveSchemaFields] = useState<SchemaDisplayStates>(() => {
     return schemas.all.reduce((acc, schema) => {
+      // @ts-expect-error TS7053 TODO(ts-error): fixme
       acc[schema.name] = [];
       return acc;
     }, {});
@@ -54,6 +57,7 @@ export const DataTab = () => {
 
   useEffect(() => {
     const newState = schemas.all.reduce((acc, schema) => {
+      // @ts-expect-error TS7053 TODO(ts-error): fixme
       acc[schema.name] = [];
       return acc;
     }, {});
@@ -77,6 +81,17 @@ export const DataTab = () => {
       }
 
       const panelGroups = Array.from(schemas.all.map((schema) => schema.name));
+      // Check schema order
+      if (destinationSchemaName === 'split') {
+        const validationResult = validateAggregations(aggProps.aggs, schemas.all);
+        if (!validationResult.valid) {
+          toasts.addWarning({
+            title: 'vb_invalid_schema',
+            text: validationResult.errorMsg,
+          });
+          return;
+        }
+      }
 
       if (destinationSchemaName.startsWith(ADD_PANEL_PREFIX)) {
         const updatedDestinationSchemaName = destinationSchemaName.split(ADD_PANEL_PREFIX)[1];

@@ -3,18 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { LanguageConfig } from './types';
+import { EditorEnhancements, LanguageConfig } from './types';
 import { getDQLLanguageConfig, getLuceneLanguageConfig } from './lib';
 import { ISearchInterceptor } from '../../../search';
-import {
-  createEditor,
-  DQLBody,
-  QueryEditorExtensionConfig,
-  SingleLineInput,
-  UiEnhancements,
-} from '../../../ui';
+import { createEditor, DQLBody, QueryEditorExtensionConfig, SingleLineInput } from '../../../ui';
 import { DataStorage, setOverrides as setFieldOverrides } from '../../../../common';
-import { createDefaultLanguageReference } from './lib/default_language_reference';
+import { dqlLanguageReference } from './lib/dql_language_reference';
+import { luceneLanguageReference } from './lib/lucene_language_reference';
 
 export class LanguageService {
   private languages: Map<string, LanguageConfig> = new Map();
@@ -28,29 +23,29 @@ export class LanguageService {
     this.queryEditorExtensionMap = {};
   }
 
-  public __enhance = (enhancements: UiEnhancements) => {
+  public __enhance = (enhancements: EditorEnhancements) => {
     if (enhancements.queryEditorExtension) {
       this.queryEditorExtensionMap[enhancements.queryEditorExtension.id] =
         enhancements.queryEditorExtension;
     }
   };
 
-  public createDefaultLanguageReference = () => {
-    return createDefaultLanguageReference();
-  };
-
   /**
    * Registers default handlers for index patterns and indices.
    */
   private registerDefaultLanguages() {
-    const defaultEditor = createEditor(
-      SingleLineInput,
-      SingleLineInput,
-      [this.createDefaultLanguageReference()],
-      DQLBody
+    this.registerLanguage(
+      getDQLLanguageConfig(
+        this.defaultSearchInterceptor,
+        createEditor(SingleLineInput, SingleLineInput, [dqlLanguageReference()], DQLBody)
+      )
     );
-    this.registerLanguage(getDQLLanguageConfig(this.defaultSearchInterceptor, defaultEditor));
-    this.registerLanguage(getLuceneLanguageConfig(this.defaultSearchInterceptor, defaultEditor));
+    this.registerLanguage(
+      getLuceneLanguageConfig(
+        this.defaultSearchInterceptor,
+        createEditor(SingleLineInput, SingleLineInput, [luceneLanguageReference()], DQLBody)
+      )
+    );
   }
 
   public registerLanguage(config: LanguageConfig): void {
@@ -65,7 +60,7 @@ export class LanguageService {
     return Array.from(this.languages.values());
   }
 
-  public getDefaultLanguage(): LanguageConfig {
+  public getDefaultLanguage(): LanguageConfig | undefined {
     return this.languages.get('kuery') || this.languages.values().next().value;
   }
 

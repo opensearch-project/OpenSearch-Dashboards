@@ -22,7 +22,7 @@
     width: 100% !important;
   }
 
-  @include euiBreakpoint("l", "xl") {
+  @include euiBreakpoint("l", "xl", "xxl", "xxxl") {
     max-width: 75%;
   }
 }

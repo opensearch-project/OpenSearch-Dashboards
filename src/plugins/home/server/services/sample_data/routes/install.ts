@@ -30,17 +30,18 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter, LegacyCallAPIOptions, Logger } from 'src/core/server';
+import { SavedObjectsErrorHelpers } from '../../../../../../core/server';
 import { getWorkspaceState } from '../../../../../../core/server/utils';
-import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
+import { getFinalSavedObjects, getNestedField, setNestedField } from '../data_sets/util';
 import { createIndexName } from '../lib/create_index_name';
+import { loadData } from '../lib/load_data';
+import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import {
   dateToIso8601IgnoringTime,
   translateTimeRelativeToDifference,
   translateTimeRelativeToWeek,
 } from '../lib/translate_timestamp';
-import { loadData } from '../lib/load_data';
 import { SampleDataUsageTracker } from '../usage/usage';
-import { getFinalSavedObjects } from '../data_sets/util';
 
 const insertDataIntoIndex = (
   dataIndexConfig: any,
@@ -53,21 +54,20 @@ const insertDataIntoIndex = (
   ) => Promise<any>,
   logger: Logger
 ) => {
+  // Function to update timestamps
   function updateTimestamps(doc: any) {
     dataIndexConfig.timeFields
-      .filter((timeFieldName: string) => doc[timeFieldName])
+      .filter((timeFieldName: string) => getNestedField(doc, timeFieldName))
       .forEach((timeFieldName: string) => {
-        doc[timeFieldName] = dataIndexConfig.preserveDayOfWeekTimeOfDay
-          ? translateTimeRelativeToWeek(
-              doc[timeFieldName],
-              dataIndexConfig.currentTimeMarker,
-              nowReference
-            )
+        const timeValue = getNestedField(doc, timeFieldName);
+        const updatedTime = dataIndexConfig.preserveDayOfWeekTimeOfDay
+          ? translateTimeRelativeToWeek(timeValue, dataIndexConfig.currentTimeMarker, nowReference)
           : translateTimeRelativeToDifference(
-              doc[timeFieldName],
+              timeValue,
               dataIndexConfig.currentTimeMarker,
               nowReference
             );
+        setNestedField(doc, timeFieldName, updatedTime);
       });
     return doc;
   }
@@ -157,7 +157,8 @@ export function createInstallRoute(
 
       for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
         const dataIndexConfig = sampleDataset.dataIndices[i];
-        const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
+        const index =
+          dataIndexConfig.indexName ?? createIndexName(sampleDataset.id, dataIndexConfig.id);
 
         // clean up any old installation of dataset
         try {
@@ -217,6 +218,9 @@ export function createInstallRoute(
       } catch (err) {
         const errMsg = `bulkCreate failed, error: ${err.message}`;
         logger.warn(errMsg);
+        if (workspaceId && SavedObjectsErrorHelpers.isForbiddenError(err)) {
+          return res.forbidden({ body: errMsg });
+        }
         return res.internalError({ body: errMsg });
       }
       const errors = createResults.saved_objects.filter((savedObjectCreateResult) => {

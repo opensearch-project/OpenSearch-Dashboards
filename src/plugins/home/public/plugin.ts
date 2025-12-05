@@ -59,6 +59,7 @@ import {
 import { DataPublicPluginStart } from '../../data/public';
 import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
+import { NavigationPublicPluginStart } from '../../navigation/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { AppNavLinkStatus, WorkspaceAvailability } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH, IMPORT_SAMPLE_DATA_APP_ID } from '../common/constants';
@@ -87,6 +88,7 @@ export interface HomePluginStartDependencies {
   urlForwarding: UrlForwardingStart;
   dataSource?: DataSourcePluginStart;
   contentManagement: ContentManagementPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -154,6 +156,7 @@ export class HomePublicPlugin
         injectedMetadata: coreStart.injectedMetadata,
         dataSource,
         sectionTypes: this.sectionTypeService,
+        workspaces: core.workspaces,
         ...homeOpenSearchDashboardsServices,
       });
     };
@@ -163,13 +166,25 @@ export class HomePublicPlugin
       title: 'Home',
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, { navigation }] = await core.getStartServices();
+        if (!!coreStart.application.capabilities.workspaces?.enabled) {
+          coreStart.application.navigateToApp('workspace_initial');
+          return () => {};
+        }
         setCommonService();
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
         );
         const { renderApp } = await import('./application');
-        return await renderApp(params.element, coreStart, params.history);
+        return await renderApp(
+          params.element,
+          {
+            ...coreStart,
+            navigation,
+            setHeaderActionMenu: params.setHeaderActionMenu,
+          },
+          params.history
+        );
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
@@ -182,7 +197,7 @@ export class HomePublicPlugin
         mount: async (params: AppMountParameters) => {
           const [
             coreStart,
-            { contentManagement: contentManagementStart },
+            { contentManagement: contentManagementStart, navigation },
           ] = await core.getStartServices();
           setCommonService();
 
@@ -190,7 +205,8 @@ export class HomePublicPlugin
           return await renderSearchUseCaseOverviewApp(
             params.element,
             coreStart,
-            contentManagementStart
+            contentManagementStart,
+            navigation
           );
         },
       });
@@ -202,6 +218,18 @@ export class HomePublicPlugin
           order: -1,
         },
       ]);
+
+      // add search overview to all nav group
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+        {
+          id: SEARCH_OVERVIEW_PAGE_ID,
+          order: -1,
+          category: {
+            id: DEFAULT_NAV_GROUPS.search.id,
+            label: DEFAULT_NAV_GROUPS.search.title,
+          },
+        },
+      ]);
     }
 
     // Register import sample data as a standalone app so that it is available inside workspace.
@@ -210,11 +238,14 @@ export class HomePublicPlugin
       title: i18n.translate('home.tutorialDirectory.featureCatalogueTitle', {
         defaultMessage: 'Add sample data',
       }),
+      description: i18n.translate('home.tutorialDirectory.featureCatalogueDescription', {
+        defaultMessage: 'Get started with sample data, visualizations, and dashboards.',
+      }),
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.default
         : AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, { navigation }] = await core.getStartServices();
         setCommonService();
         coreStart.chrome.docTitle.change(
           i18n.translate('home.tutorialDirectory.featureCatalogueTitle', {
@@ -222,9 +253,22 @@ export class HomePublicPlugin
           })
         );
         const { renderImportSampleDataApp } = await import('./application');
-        return await renderImportSampleDataApp(params.element, coreStart);
+        return await renderImportSampleDataApp(params.element, {
+          ...coreStart,
+          navigation,
+          setHeaderActionMenu: params.setHeaderActionMenu,
+        });
       },
     });
+
+    core.getStartServices().then(([coreStart]) => {
+      if (!coreStart.application.capabilities.workspaces.enabled) {
+        core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+          { id: IMPORT_SAMPLE_DATA_APP_ID },
+        ]);
+      }
+    });
+
     urlForwarding.forwardApp('home', 'home');
 
     const featureCatalogue = { ...this.featuresCatalogueRegistry.setup() };
@@ -276,7 +320,7 @@ export class HomePublicPlugin
     registerContentToSearchUseCasePage(contentManagement, core);
 
     // register what's new learn opensearch card to use case overview page
-    registerHomeListCardToPage(contentManagement);
+    registerHomeListCardToPage(contentManagement, core.docLinks);
 
     this.featuresCatalogueRegistry.start({ capabilities });
     this.sectionTypeService.start({ core, data });

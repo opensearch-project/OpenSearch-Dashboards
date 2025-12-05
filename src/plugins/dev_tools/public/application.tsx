@@ -31,7 +31,7 @@
 import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
-import { EuiTab, EuiTabs, EuiToolTip, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiToolTip } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
@@ -39,12 +39,16 @@ import {
   ApplicationStart,
   ChromeStart,
   CoreStart,
+  MountPoint,
   NotificationsStart,
   SavedObjectsStart,
   ScopedHistory,
 } from 'src/core/public';
 
-import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
+import {
+  DataSourceManagementPluginSetup,
+  DataSourceOption,
+} from 'src/plugins/data_source_management/public';
 import { DevToolApp } from './dev_tool';
 import { DevToolsSetupDependencies } from './plugin';
 import { addHelpMenuToAppChrome } from './utils/util';
@@ -56,6 +60,9 @@ interface DevToolsWrapperProps {
   notifications: NotificationsStart;
   dataSourceEnabled: boolean;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  useUpdatedUX?: boolean;
+  setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
+  onManageDataSource: () => void;
 }
 
 interface MountedDevToolDescriptor {
@@ -65,14 +72,18 @@ interface MountedDevToolDescriptor {
 }
 
 function DevToolsWrapper({
+  onManageDataSource,
   devTools,
   activeDevTool,
   updateRoute,
   savedObjects,
-  notifications: { toasts },
+  notifications,
   dataSourceEnabled,
   dataSourceManagement,
+  useUpdatedUX,
+  setMenuMountPoint,
 }: DevToolsWrapperProps) {
+  const { toasts } = notifications;
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
@@ -85,7 +96,7 @@ function DevToolsWrapper({
     []
   );
 
-  const onChange = async (e: Array<EuiComboBoxOptionOption<any>>) => {
+  const onChange = async (e: Array<DataSourceOption<any>>) => {
     const dataSourceId = e[0] ? e[0].id : undefined;
     await remount(mountedTool.current!.mountpoint, dataSourceId);
   };
@@ -104,6 +115,7 @@ function DevToolsWrapper({
       history: {} as any,
       dataSourceId,
     };
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     const unmountHandler = await activeDevTool.mount(params);
 
     mountedTool.current = {
@@ -115,9 +127,26 @@ function DevToolsWrapper({
   };
 
   const renderDataSourceSelector = () => {
+    if (useUpdatedUX) {
+      const DataSourceMenu = dataSourceManagement!.ui.getDataSourceMenu();
+      return (
+        <DataSourceMenu
+          onManageDataSource={onManageDataSource}
+          setMenuMountPoint={setMenuMountPoint}
+          componentType={'DataSourceSelectable'}
+          componentConfig={{
+            savedObjects: savedObjects.client,
+            notifications,
+            fullWidth: false,
+            onSelectedDataSources: onChange,
+          }}
+        />
+      );
+    }
     const DataSourceSelector = dataSourceManagement!.ui.DataSourceSelector;
     return (
       <div className="devAppDataSourceSelector">
+        {/* @ts-expect-error TS2604 TODO(ts-error): fixme */}
         <DataSourceSelector
           savedObjectsClient={savedObjects.client}
           notifications={toasts}
@@ -176,6 +205,7 @@ function DevToolsWrapper({
 }
 
 function redirectOnMissingCapabilities(application: ApplicationStart) {
+  // @ts-expect-error TS2532 TODO(ts-error): fixme
   if (!application.capabilities.dev_tools.show) {
     application.navigateToApp('home');
     return true;
@@ -184,6 +214,7 @@ function redirectOnMissingCapabilities(application: ApplicationStart) {
 }
 
 function setBadge(application: ApplicationStart, chrome: ChromeStart) {
+  // @ts-expect-error TS2532 TODO(ts-error): fixme
   if (application.capabilities.dev_tools.save) {
     return;
   }
@@ -218,6 +249,72 @@ function setBreadcrumbs(chrome: ChromeStart) {
   ]);
 }
 
+export function MainApp(
+  props: {
+    onManageDataSource: () => void;
+    devTools: readonly DevToolApp[];
+    RouterComponent?: React.ComponentClass;
+    defaultRoute?: string;
+  } & Pick<
+    DevToolsWrapperProps,
+    | 'savedObjects'
+    | 'notifications'
+    | 'dataSourceEnabled'
+    | 'dataSourceManagement'
+    | 'useUpdatedUX'
+    | 'setMenuMountPoint'
+  >
+) {
+  const {
+    onManageDataSource,
+    devTools,
+    savedObjects,
+    notifications,
+    dataSourceEnabled,
+    dataSourceManagement,
+    useUpdatedUX,
+    setMenuMountPoint,
+    RouterComponent = Router,
+    defaultRoute,
+  } = props;
+  const defaultTool = devTools.find((devTool) => devTool.id === defaultRoute) || devTools[0];
+  return (
+    <I18nProvider>
+      <RouterComponent>
+        <Switch>
+          {devTools
+            // Only create routes for devtools that are not disabled
+            .filter((devTool) => !devTool.isDisabled())
+            .map((devTool) => (
+              <Route
+                key={devTool.id}
+                path={`/${devTool.id}`}
+                exact={!devTool.enableRouting}
+                render={(routeProps) => (
+                  <DevToolsWrapper
+                    onManageDataSource={onManageDataSource}
+                    updateRoute={routeProps.history.push}
+                    activeDevTool={devTool}
+                    devTools={devTools}
+                    savedObjects={savedObjects}
+                    notifications={notifications}
+                    dataSourceEnabled={dataSourceEnabled}
+                    dataSourceManagement={dataSourceManagement}
+                    useUpdatedUX={useUpdatedUX}
+                    setMenuMountPoint={setMenuMountPoint}
+                  />
+                )}
+              />
+            ))}
+          <Route path="/">
+            <Redirect to={`/${defaultTool.id}`} />
+          </Route>
+        </Switch>
+      </RouterComponent>
+    </I18nProvider>
+  );
+}
+
 export function renderApp(
   { application, chrome, docLinks, savedObjects, notifications }: CoreStart,
   element: HTMLElement,
@@ -236,36 +333,14 @@ export function renderApp(
   setTitle(chrome);
 
   ReactDOM.render(
-    <I18nProvider>
-      <Router>
-        <Switch>
-          {devTools
-            // Only create routes for devtools that are not disabled
-            .filter((devTool) => !devTool.isDisabled())
-            .map((devTool) => (
-              <Route
-                key={devTool.id}
-                path={`/${devTool.id}`}
-                exact={!devTool.enableRouting}
-                render={(props) => (
-                  <DevToolsWrapper
-                    updateRoute={props.history.push}
-                    activeDevTool={devTool}
-                    devTools={devTools}
-                    savedObjects={savedObjects}
-                    notifications={notifications}
-                    dataSourceEnabled={dataSourceEnabled}
-                    dataSourceManagement={dataSourceManagement}
-                  />
-                )}
-              />
-            ))}
-          <Route path="/">
-            <Redirect to={`/${devTools[0].id}`} />
-          </Route>
-        </Switch>
-      </Router>
-    </I18nProvider>,
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
+    <MainApp
+      devTools={devTools}
+      dataSourceEnabled={dataSourceEnabled}
+      savedObjects={savedObjects}
+      notifications={notifications}
+      dataSourceManagement={dataSourceManagement}
+    />,
     element
   );
 

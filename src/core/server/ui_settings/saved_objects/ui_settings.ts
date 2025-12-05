@@ -44,6 +44,7 @@ export const uiSettingsType: SavedObjectsType = {
     },
   },
   management: {
+    icon: 'gear',
     importableAndExportable: true,
     getInAppUrl() {
       return {

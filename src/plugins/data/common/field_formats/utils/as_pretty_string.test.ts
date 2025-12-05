@@ -42,7 +42,11 @@ describe('asPrettyString', () => {
   });
 
   test('Converts objects values into presentable strings', () => {
-    expect(asPrettyString({ key: 'value' })).toBe('{\n  "key": "value"\n}');
+    const longPositive = BigInt(Number.MAX_SAFE_INTEGER) * 2n;
+    const longNegative = BigInt(Number.MIN_SAFE_INTEGER) * 2n;
+    expect(asPrettyString({ key: 'value', longPositive, longNegative })).toBe(
+      `{\n  "key": "value",\n  "longPositive": ${longPositive.toString()},\n  "longNegative": ${longNegative.toString()}\n}`
+    );
   });
 
   test('Converts other non-string values into strings', () => {

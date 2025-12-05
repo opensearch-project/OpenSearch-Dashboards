@@ -22,7 +22,6 @@ export interface DataConnectionSavedObjectAttributes extends SavedObjectAttribut
 export enum DataConnectionType {
   CloudWatch = 'AWS CloudWatch',
   SecurityLake = 'AWS Security Lake',
+  Prometheus = 'Prometheus',
   NA = 'None',
 }
-
-export const DATA_CONNECTION_ID_LENGTH_LIMIT = 32;

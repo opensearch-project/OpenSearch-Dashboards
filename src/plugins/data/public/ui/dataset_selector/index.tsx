@@ -3,10 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import React from 'react';
 import { Dataset, Query, TimeRange } from '../../../common';
-import { DatasetSelector } from './dataset_selector';
+import {
+  DatasetSelector,
+  DatasetSelectorUsingButtonEmptyProps,
+  DatasetSelectorUsingButtonProps,
+  DatasetSelectorAppearance,
+} from './dataset_selector';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IDataPluginServices } from '../../types';
 
@@ -14,36 +19,52 @@ interface ConnectedDatasetSelectorProps {
   onSubmit: ((query: Query, dateRange?: TimeRange | undefined) => void) | undefined;
 }
 
-const ConnectedDatasetSelector = ({ onSubmit }: ConnectedDatasetSelectorProps) => {
+const ConnectedDatasetSelector = ({
+  onSubmit,
+  ...datasetSelectorProps
+}: ConnectedDatasetSelectorProps &
+  (DatasetSelectorUsingButtonProps | DatasetSelectorUsingButtonEmptyProps)) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const queryString = services.data.query.queryString;
-  const initialDataset = queryString.getQuery().dataset || queryString.getDefaultQuery().dataset;
-  const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(initialDataset);
+  const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(
+    () => queryString.getQuery().dataset || queryString.getDefaultQuery().dataset
+  );
 
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query) => {
       setSelectedDataset(query.dataset);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [queryString]);
 
-  const handleDatasetChange = (dataset?: Dataset) => {
-    setSelectedDataset(dataset);
-    if (dataset) {
-      const query = queryString.getInitialQueryByDataset(dataset);
+  const onSelect = useCallback(
+    (partialQuery: Partial<Query>) => {
+      const query = queryString.getInitialQuery(partialQuery);
+      const languageService = queryString.getLanguageService();
+      setSelectedDataset(query.dataset);
       queryString.setQuery(query);
-      onSubmit!(queryString.getQuery());
-    }
-  };
+      languageService.setUserQueryLanguage(query.language);
+      queryString.getInitialQueryByLanguage(query.language);
+      onSubmit!(query);
+    },
+    [onSubmit, queryString]
+  );
 
   return (
     <DatasetSelector
+      {...datasetSelectorProps}
       selectedDataset={selectedDataset}
-      setSelectedDataset={handleDatasetChange}
+      onSelect={onSelect}
       services={services}
     />
   );
 };
 
-export { ConnectedDatasetSelector as DatasetSelector };
+export {
+  ConnectedDatasetSelector as DatasetSelector,
+  ConnectedDatasetSelectorProps as DatasetSelectorProps,
+  DatasetSelectorAppearance,
+};

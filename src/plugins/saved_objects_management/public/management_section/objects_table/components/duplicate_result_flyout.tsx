@@ -5,14 +5,19 @@
 
 import './import_summary.scss';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiIcon,
   EuiIconTip,
+  EuiLink,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -25,6 +30,7 @@ import { SavedObjectsImportError, SavedObjectsImportSuccess } from 'opensearch-d
 import { FormattedMessage } from '@osd/i18n/react';
 import { getSavedObjectLabel } from '../../..';
 import { getDefaultTitle } from '../../../lib';
+import { DuplicateObject } from '../../types';
 
 interface CopyItem {
   type: string;
@@ -45,6 +51,15 @@ export interface DuplicateResultFlyoutProps {
   failedCopies: SavedObjectsImportError[];
   successfulCopies: SavedObjectsImportSuccess[];
   onClose: () => void;
+  onCopy: (
+    savedObjects: DuplicateObject[],
+    includeReferencesDeep: boolean,
+    targetWorkspace: string,
+    targetWorkspaceName: string
+  ) => Promise<void>;
+  targetWorkspace: string;
+  useUpdatedUX: boolean;
+  dataSourceUrlForTargetWorkspace: string;
 }
 
 interface State {
@@ -63,13 +78,93 @@ const getErrorMessage = ({ error }: SavedObjectsImportError) => {
     return error.message;
   } else if (error.type === 'unsupported_type') {
     return unsupportedTypeErrorMessage;
+  } else if (error.type === 'missing_data_source') {
+    return i18n.translate('savedObjectsManagement.objectsTable.copyResult.missingDataSourceError', {
+      defaultMessage: 'Missing data source: {ds}',
+      values: { ds: error.dataSource },
+    });
+  } else if (error.type === 'missing_references') {
+    return i18n.translate('savedObjectsManagement.objectsTable.copyResult.missingReferencesError', {
+      defaultMessage: 'Missing references.',
+    });
   }
 };
 
 export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyoutProps, State> {
   constructor(props: DuplicateResultFlyoutProps) {
     super(props);
-    this.state = { isLoading: false };
+    this.state = {
+      isLoading: false,
+    };
+  }
+
+  indexPatternConflictsWarning = (
+    <EuiCallOut
+      data-test-subj="importSavedObjectsConflictsWarning"
+      title={
+        <FormattedMessage
+          id="savedObjectsManagement.objectsTable.copyResult.indexPatternConflictsTitle"
+          defaultMessage="Index Pattern Conflicts"
+        />
+      }
+      color="danger"
+      iconType="alert"
+    >
+      <p>
+        <FormattedMessage
+          id="savedObjectsManagement.objectsTable.copyResult.indexPatternConflictsDescription"
+          defaultMessage="The following {useUpdatedUX, select, true {assets} other {saved objects}} use index patterns that do not exist.
+              Please select the index patterns you'd like re-associated with
+              them. You can create a new index pattern if necessary."
+          values={{
+            useUpdatedUX: this.props.useUpdatedUX,
+          }}
+        />
+      </p>
+    </EuiCallOut>
+  );
+
+  missingDataSourceWarning = (
+    <EuiCallOut
+      data-test-subj="missingDataSourceWarning"
+      title={
+        <FormattedMessage
+          id="savedObjectsManagement.objectsTable.copyResult.missingDataSourceTitle"
+          defaultMessage="Missing Data Source"
+        />
+      }
+      color="danger"
+      iconType="alert"
+    >
+      <p>
+        <FormattedMessage
+          id="savedObjectsManagement.objectsTable.copyResult.missingDataSourceDescription"
+          defaultMessage="The following {useUpdatedUX, select, true {assets} other {saved objects}} can not be copied,
+          some of the data sources they use are not associated with {targetWorkspaceDataSourceLink}."
+          values={{
+            useUpdatedUX: this.props.useUpdatedUX,
+            targetWorkspaceDataSourceLink: (
+              <EuiLink href={this.props.dataSourceUrlForTargetWorkspace} target="_blank">
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.copyResult.missingDataSourceCalloutLinkText"
+                  defaultMessage="{targetWorkspace}"
+                  values={{ targetWorkspace: this.props.workspaceName }}
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    </EuiCallOut>
+  );
+
+  private get isShowRemainingButton() {
+    return (
+      this.props.successfulCopies.length > 0 &&
+      !!this.props.failedCopies.find(
+        ({ error }) => error.type === 'missing_references' || error.type === 'missing_data_source'
+      )
+    );
   }
 
   getCountIndicators(copyItems: CopyItem[]) {
@@ -89,7 +184,7 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
         {copiedCount && (
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
-              <h4 className="savedObjectsManagementImportSummary__copiedCountCount">
+              <h4 className="savedObjectsManagementImportSummary__createdCount">
                 <FormattedMessage
                   id="savedObjectsManagement.copyResult.copiedCountHeader"
                   defaultMessage="{copiedCount} Successful"
@@ -157,30 +252,10 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
     return { type, id, title, icon, outcome: 'copied' };
   }
 
-  copyResult({ failedCopies, successfulCopies }: CopyResultProps) {
-    const copyItems: CopyItem[] = _.sortBy(
-      [
-        ...failedCopies.map((object) => this.mapFailedCopy(object)),
-        ...successfulCopies.map((object) => this.mapCopySuccess(object)),
-      ],
-      ['type', 'title']
-    );
-
+  renderItems(items: CopyItem[]) {
     return (
       <Fragment>
-        <EuiTitle size="s" data-test-subj="copySavedObjectsSuccess">
-          <h3>
-            <FormattedMessage
-              id="savedObjectsManagement.copyResult.headerLabelPlural"
-              defaultMessage="{itemsCount, plural, one {# saved object} other {# saved objects}} copied"
-              values={{ itemsCount: copyItems.length }}
-            />
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        {this.getCountIndicators(copyItems)}
-        <EuiHorizontalRule />
-        {copyItems.map((item, index) => {
+        {items.map((item, index) => {
           const { type, title, icon } = item;
           return (
             <EuiFlexGroup
@@ -212,20 +287,129 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
     );
   }
 
+  copyResult({ failedCopies, successfulCopies }: CopyResultProps) {
+    const missingDataSourceItems = failedCopies
+      .filter(({ error }) => error.type === 'missing_data_source')
+      .map((object) => this.mapFailedCopy(object));
+
+    const missingReferencesItems = failedCopies
+      .filter(({ error }) => error.type === 'missing_references')
+      .map((object) => this.mapFailedCopy(object));
+
+    if (missingReferencesItems.length > 0 || missingDataSourceItems.length > 0) {
+      return (
+        <Fragment>
+          {missingReferencesItems.length > 0 && (
+            <>
+              {this.indexPatternConflictsWarning}
+              <EuiSpacer size="s" />
+              {this.renderItems(missingReferencesItems)}
+              <EuiHorizontalRule />
+            </>
+          )}
+          {missingDataSourceItems.length > 0 && (
+            <>
+              {this.missingDataSourceWarning}
+              <EuiSpacer size="s" />
+              {this.renderItems(missingDataSourceItems)}
+            </>
+          )}
+        </Fragment>
+      );
+    }
+
+    const copyItems: CopyItem[] = _.sortBy(
+      [
+        ...failedCopies.map((object) => this.mapFailedCopy(object)),
+        ...successfulCopies.map((object) => this.mapCopySuccess(object)),
+      ],
+      ['type', 'title']
+    );
+
+    return (
+      <Fragment>
+        <EuiTitle size="s" data-test-subj="copySavedObjectsSuccess">
+          <h3>
+            <FormattedMessage
+              id="savedObjectsManagement.copyResult.headerLabelPlural"
+              defaultMessage="{itemsCount, plural, one {# {useUpdatedUX, select, true {asset} other {saved object}}} 
+              other {# {useUpdatedUX, select, true {assets} other {saved objects}}}} copied"
+              values={{ itemsCount: copyItems.length, useUpdatedUX: this.props.useUpdatedUX }}
+            />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        {this.getCountIndicators(copyItems)}
+        <EuiHorizontalRule />
+        {this.renderItems(copyItems)}
+      </Fragment>
+    );
+  }
+
+  duplicateSavedObjects = async () => {
+    const { successfulCopies, workspaceName, onCopy, targetWorkspace } = this.props;
+
+    const savedObjects: DuplicateObject[] = successfulCopies.map(({ id, meta, type }) => {
+      return { id, meta, type };
+    });
+
+    this.setState({
+      isLoading: true,
+    });
+
+    await onCopy(savedObjects, false, targetWorkspace, workspaceName);
+
+    this.setState({
+      isLoading: false,
+    });
+  };
+
   render() {
-    const { onClose, failedCopies, successfulCopies, workspaceName } = this.props;
+    const { onClose, failedCopies, successfulCopies, workspaceName, useUpdatedUX } = this.props;
+    const { isLoading } = this.state;
+
     return (
       <EuiFlyout ownFocus onClose={onClose} size="s">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
-            <FormattedMessage
-              id="savedObjectsManagement.copyResult.title"
-              defaultMessage="Copy saved objects to {workspaceName}"
-              values={{ workspaceName }}
-            />
+            <h2>
+              <FormattedMessage
+                id="savedObjectsManagement.copyResult.title"
+                defaultMessage="Copy {useUpdatedUX, select, true {assets} other {saved objects}} to {workspaceName}"
+                values={{ workspaceName, useUpdatedUX }}
+              />
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{this.copyResult({ failedCopies, successfulCopies })}</EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiSmallButtonEmpty onClick={onClose} flush="left">
+                <FormattedMessage
+                  id="savedObjectsManagement.copyResult.closeButton"
+                  defaultMessage="Close"
+                />
+              </EuiSmallButtonEmpty>
+            </EuiFlexItem>
+            {this.isShowRemainingButton && (
+              <EuiFlexItem grow={false}>
+                <EuiSmallButton
+                  fill
+                  onClick={() => this.duplicateSavedObjects()}
+                  isLoading={isLoading}
+                >
+                  <FormattedMessage
+                    id="savedObjectsManagement.copyResult.copyRemainingButton"
+                    defaultMessage="Copy remaining {itemsCount, plural, one {# {useUpdatedUX, select, true {asset} other {saved object}}} 
+              other {# {useUpdatedUX, select, true {assets} other {saved objects}}}}"
+                    values={{ useUpdatedUX, itemsCount: successfulCopies.length }}
+                  />
+                </EuiSmallButton>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
       </EuiFlyout>
     );
   }

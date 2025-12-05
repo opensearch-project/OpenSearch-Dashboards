@@ -20,7 +20,7 @@ import { ConfigurePrometheusDatasourcePanel } from './prometheus/configure_prome
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext, DirectQueryDatasourceType, Role } from '../../../types';
 import { DatasourceTypeToDisplayName, UrlToDatasourceType } from '../../../constants';
-import { AuthMethod } from '../../../types';
+import { AuthMethod, DataSourceTableItem } from '../../../types';
 import { NotificationsStart } from '../../../../../../core/public';
 import {
   getCreateAmazonS3DataSourceBreadcrumbs,
@@ -28,25 +28,30 @@ import {
   getCreateBreadcrumbs,
 } from '../../breadcrumbs';
 import { DATACONNECTIONS_BASE } from '../../../constants';
+import { getDataSources, getHideLocalCluster } from '../../utils';
 
 interface ConfigureDatasourceProps extends RouteComponentProps {
   notifications: NotificationsStart;
   useNewUX: boolean;
+  featureFlagStatus: boolean;
 }
 
 export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({
   notifications,
   useNewUX,
+  featureFlagStatus,
   history,
 }) => {
   const { type: urlType } = useParams<{ type: string }>();
   const {
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     chrome,
     setBreadcrumbs,
     notifications: { toasts },
     http,
     navigation,
     application,
+    savedObjects,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   const [error, setError] = useState<string>('');
@@ -63,6 +68,8 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
   const [roles, setRoles] = useState<Role[]>([]);
   const [hasSecurityAccess, setHasSecurityAccess] = useState(true);
   const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<Role[]>([]);
+  const [dataSources, setDataSources] = useState<DataSourceTableItem[]>([]);
+  const [dataSourceId, setDataSourceId] = useState<string>('');
   const type = UrlToDatasourceType[urlType];
 
   const formatError = (errorName: string, errorMessage: string, errorDetails: string) => {
@@ -113,7 +120,11 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
         break;
       case 'PROMETHEUS':
         const prometheusProperties =
-          authMethod === 'basicauth'
+          authMethod === 'noauth'
+            ? {
+                'prometheus.uri': storeURI,
+              }
+            : authMethod === 'basicauth'
             ? {
                 'prometheus.uri': storeURI,
                 'prometheus.auth.type': authMethod,
@@ -128,6 +139,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
                 'prometheus.auth.region': region,
               };
         response = http!.post(`${DATACONNECTIONS_BASE}`, {
+          query: dataSourceId ? { dataSourceMDSId: dataSourceId } : {},
           body: JSON.stringify({
             name,
             allowedRoles: selectedQueryPermissionRoles.map((role) => role.label),
@@ -142,7 +154,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
     response
       .then(() => {
         toasts.addSuccess(`Data source ${name} created`);
-        history.push('/manage');
+        history.push('/');
       })
       .catch((err) => {
         const formattedError = formatError(err.name, err.message, err.body.message);
@@ -166,6 +178,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
     secretKey,
     region,
     history,
+    dataSourceId,
   ]);
 
   useEffect(() => {
@@ -181,6 +194,22 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
       )
       .catch(() => setHasSecurityAccess(false));
 
+    if (urlType === 'Prometheus' && featureFlagStatus) {
+      getDataSources(savedObjects.client)
+        .then((fetchedDataSources) => {
+          setDataSources(fetchedDataSources);
+          const hideLocalCluster = getHideLocalCluster().enabled;
+          if (hideLocalCluster && fetchedDataSources.length > 0) {
+            setDataSourceId(fetchedDataSources[0].id);
+          } else {
+            setDataSourceId('');
+          }
+        })
+        .catch(() => {
+          toasts.addDanger('Failed to fetch data sources');
+        });
+    }
+
     // Set breadcrumbs based on the urlType
     let breadcrumbs;
     switch (urlType) {
@@ -194,7 +223,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
         breadcrumbs = getCreateBreadcrumbs();
     }
     setBreadcrumbs(breadcrumbs);
-  }, [urlType, setBreadcrumbs, http, useNewUX]);
+  }, [urlType, setBreadcrumbs, http, useNewUX, savedObjects, toasts, featureFlagStatus]);
 
   const ConfigureDatasource = (configurationProps: {
     datasourceType: DirectQueryDatasourceType;
@@ -203,6 +232,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
     switch (datasourceType) {
       case 'S3GLUE':
         return (
+          // @ts-expect-error TS2739 TODO(ts-error): fixme
           <ConfigureS3DatasourcePanel
             useNewUX={useNewUX}
             navigation={navigation}
@@ -260,6 +290,11 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
             hasSecurityAccess={hasSecurityAccess}
             error={error}
             setError={setError}
+            dataSources={dataSources}
+            currentDataSourceId={dataSourceId}
+            setDataSourceIdForRequest={setDataSourceId}
+            hideLocalCluster={featureFlagStatus ? getHideLocalCluster().enabled : false}
+            featureFlagStatus={featureFlagStatus}
           />
         );
       default:

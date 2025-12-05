@@ -12,6 +12,7 @@ import { I18nStart } from '../../i18n';
 import { MountPoint } from '../../types';
 import { OverlayRef } from '../types';
 import { Sidecar } from './components/sidecar';
+import { calculateNewPaddingSize } from './helper';
 /**
  * A SidecarRef is a reference to an opened sidecar panel. It offers methods to
  * close the sidecar panel again. If you open a sidecar panel you should make
@@ -128,12 +129,29 @@ export class SidecarService {
     const getSidecarConfig$ = () => sidecarConfig$.pipe(takeUntil(this.stop$));
 
     const setSidecarConfig = (config: Partial<ISidecarConfig>) => {
-      if (
-        sidecarConfig$.value ||
-        // init
-        (!sidecarConfig$.value && config.dockedMode && config.paddingSize)
-      ) {
-        sidecarConfig$.next({ ...sidecarConfig$.value, ...config } as ISidecarConfig);
+      let newSidecarConfig: ISidecarConfig | undefined;
+      if (sidecarConfig$.value) {
+        // Handle exsiting config
+        newSidecarConfig = {
+          ...sidecarConfig$.value,
+          ...config,
+        };
+      } else if (config.dockedMode && config.paddingSize) {
+        // Handle inital config
+        newSidecarConfig = {
+          dockedMode: config.dockedMode,
+          paddingSize: config.paddingSize,
+          isHidden: config.isHidden,
+        };
+      }
+      if (newSidecarConfig) {
+        sidecarConfig$.next({
+          ...newSidecarConfig,
+          paddingSize: calculateNewPaddingSize(
+            newSidecarConfig.dockedMode,
+            newSidecarConfig.paddingSize
+          ),
+        });
       }
     };
 
@@ -145,7 +163,7 @@ export class SidecarService {
         if (this.activeSidecar) {
           setSidecarConfig({ paddingSize: 0 });
           this.activeSidecar.close();
-          this.cleanupDom();
+          this.cleanupDom(sidecarConfig$);
         }
 
         const sidecar = new SidecarRef();
@@ -154,7 +172,7 @@ export class SidecarService {
         // If a sidecar gets closed through it's SidecarRef, remove it from the dom
         sidecar.onClose.then(() => {
           if (this.activeSidecar === sidecar) {
-            this.cleanupDom();
+            this.cleanupDom(sidecarConfig$);
           }
         });
 
@@ -188,11 +206,14 @@ export class SidecarService {
    * or their children. To avoid potential subtle bugs in child components that rely on
    * unmounting for cleanup behavior, this function ensures proper cleanup of the DOM.
    */
-  private cleanupDom(): void {
+  private cleanupDom(sidecarConfig$?: BehaviorSubject<ISidecarConfig | undefined>): void {
     if (this.targetDomElement != null) {
       unmountComponentAtNode(this.targetDomElement);
-      this.targetDomElement.innerHTML = '';
     }
     this.activeSidecar = null;
+    // Reset the sidecar configuration to remove any padding from the main window
+    if (sidecarConfig$) {
+      sidecarConfig$.next(undefined);
+    }
   }
 }

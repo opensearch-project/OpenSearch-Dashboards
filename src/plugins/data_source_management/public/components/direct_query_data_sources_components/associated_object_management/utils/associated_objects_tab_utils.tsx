@@ -5,11 +5,13 @@
 
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { DirectQueryLoadingStatus } from '../../../../../framework/types';
+// @ts-expect-error TS6192 TODO(ts-error): fixme
 import {
   DATA_SOURCE_TYPES,
   DEFAULT_DATA_SOURCE_NAME,
   DEFAULT_DATA_SOURCE_TYPE,
 } from '../../../../../framework/constants';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { observabilityLogsID } from '../../../../../framework/utils/shared';
 
 export const ASSC_OBJ_TABLE_SUBJ = 'associatedObjectsTable';
@@ -31,12 +33,6 @@ export const ASSC_OBJ_REFRESH_BTN = 'Refresh';
 
 export const ASSC_OBJ_FRESH_MSG = 'Last updated at:';
 
-export const ACCE_NO_DATA_TITLE = 'You have no accelerations';
-
-export const ACCE_NO_DATA_DESCRIPTION = 'Accelerate query performing through OpenSearch Indexing';
-
-export const CREATE_ACCELERATION_DESCRIPTION = 'Create Acceleration';
-
 const catalogCacheFetchingStatus = [
   DirectQueryLoadingStatus.RUNNING,
   DirectQueryLoadingStatus.WAITING,
@@ -49,49 +45,38 @@ export const isCatalogCacheFetching = (...statuses: DirectQueryLoadingStatus[]) 
   );
 };
 
-export const redirectToExplorerWithDataSrc = (
+export const redirectToDiscoverWithDataSrc = (
   datasourceName: string,
-  datasourceType: string,
+  datasourceMDSId: string | undefined,
   databaseName: string,
   tableName: string,
   application: ApplicationStart
 ) => {
-  const queryIndex = `${datasourceName}.${databaseName}.${tableName}`;
-  redirectToExplorerWithQuery(datasourceName, datasourceType, queryIndex, application);
-};
-
-export const redirectToExplorerOSIdx = (indexName: string, application: ApplicationStart) => {
-  redirectToExplorerWithQuery(
-    DEFAULT_DATA_SOURCE_NAME,
-    DEFAULT_DATA_SOURCE_TYPE,
-    indexName,
-    application
-  );
-};
-
-export const redirectToExplorerS3 = (datasourceName: string, application: ApplicationStart) => {
-  application.navigateToApp(observabilityLogsID, {
-    path: `#/explorer`,
-    state: {
-      datasourceName,
-      datasourceType: DATA_SOURCE_TYPES.S3Glue,
-    },
+  application.navigateToApp('data-explorer', {
+    path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
+      datasourceMDSId ?? ''
+    }',meta:(name:${datasourceName},type:CUSTOM),title:'',type:DATA_SOURCE),id:'${
+      datasourceMDSId ?? ''
+    }::${datasourceName}.${databaseName}.${tableName}',title:${datasourceName}.${databaseName}.${tableName},type:S3),language:SQL,query:'SELECT%20*%20FROM%20${datasourceName}.${databaseName}.${tableName}%20LIMIT%2010'))`,
   });
 };
 
-const redirectToExplorerWithQuery = (
-  datasourceName: string,
-  datasourceType: string,
-  queriedIndex: string,
+export const redirectToDiscoverOSIdx = (
+  indexName: string,
+  datasourceMDSId: string | undefined,
   application: ApplicationStart
 ) => {
-  // navigate to explorer
-  application.navigateToApp(observabilityLogsID, {
-    path: `#/explorer`,
-    state: {
-      datasourceName,
-      datasourceType,
-      queryToRun: `source = ${queriedIndex} | head 10`,
-    },
+  application.navigateToApp('data-explorer', {
+    path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
+      datasourceMDSId ?? ''
+    }',title:'',type:DATA_SOURCE),id:'${
+      datasourceMDSId ?? ''
+    }::${indexName}',title:${indexName},type:INDEXES),language:SQL,query:'SELECT%20*%20FROM%20${indexName}%20LIMIT%2010'))`,
+  });
+};
+
+export const redirectToDiscover = (application: ApplicationStart) => {
+  application.navigateToApp('data-explorer', {
+    path: `discover#`,
   });
 };

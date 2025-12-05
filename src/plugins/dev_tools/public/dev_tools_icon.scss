@@ -1,0 +1,32 @@
+.devToolsOverlayMask {
+  padding-bottom: 0;
+
+  .devApp__container {
+    overflow-y: auto;
+    flex-shrink: 1;
+  }
+
+  // Make the parents of devApp__container as overflow hidden
+  // so that devApp__container can be scrollable
+  .devAppWrapper,
+  .devApp {
+    overflow: hidden;
+  }
+
+  .devToolsCloseButton {
+    align-self: flex-end;
+  }
+}
+
+.devToolsModalContent {
+  padding-left: $euiSize;
+  padding-right: $euiSize;
+  margin-top: 0;
+}
+
+// When there are multiple maskOverlays in the page and once a focused overlay get unmounted
+// it will remove the hasOverlay class in the root element, making the whole page scrollable.
+// This class is used for keep the root element unscrollable when the dev tools model is mount.
+.noScrollByDevTools {
+  overflow: hidden;
+}

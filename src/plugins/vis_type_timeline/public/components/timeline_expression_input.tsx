@@ -137,7 +137,9 @@ function TimelineExpressionInput({ value, setValue }: TimelineExpressionInputPro
               minimap: {
                 enabled: false,
               },
-              wordBasedSuggestions: false,
+              suggest: {
+                showWords: false,
+              },
               wordWrap: 'on',
               wrappingIndent: 'indent',
             }}

@@ -11,6 +11,7 @@ export enum VIEW_EVENTS_FLYOUT_STATE {
 }
 
 export const [getFlyoutState, setFlyoutState] = createGetterSetter<
+  // @ts-expect-error TS2344 TODO(ts-error): fixme
   keyof typeof VIEW_EVENTS_FLYOUT_STATE
 >(VIEW_EVENTS_FLYOUT_STATE.CLOSED);
 

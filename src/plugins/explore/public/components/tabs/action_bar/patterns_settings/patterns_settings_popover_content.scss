@@ -1,0 +1,13 @@
+.patternsSettingsPopoverContent {
+  min-width: 260px;
+
+  &__titleWrapper {
+    text-transform: uppercase;
+    padding: $ouiSizeM $ouiSizeS;
+    border-bottom: $ouiBorderThin;
+  }
+
+  &__form {
+    padding: $ouiSizeS;
+  }
+}

@@ -1,0 +1,72 @@
+.exploreDocViewerTable {
+  margin-top: $euiSizeS;
+}
+
+.exploreDocViewer {
+  pre,
+  .exploreDocViewer__value {
+    display: inline-block;
+    word-break: break-all;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    color: $euiColorFullShade;
+    vertical-align: top;
+    padding-top: 2px;
+  }
+
+  .exploreDocViewer__field {
+    padding-top: 8px;
+  }
+
+  .dscFieldName {
+    color: $euiColorDarkShade;
+  }
+
+  td,
+  pre {
+    font-family: $euiCodeFontFamily;
+  }
+
+  tr:first-child td {
+    border-top-color: transparent;
+  }
+
+  tr:hover {
+    .exploreDocViewer__actionButton {
+      opacity: 1;
+    }
+  }
+}
+
+.exploreDocViewer__buttons,
+.exploreDocViewer__field {
+  white-space: nowrap;
+}
+
+.exploreDocViewer__buttons {
+  width: 60px;
+
+  // Show all icons if one is focused,
+  // IE doesn't support, but the fallback is just the focused button becomes visible
+  &:focus-within {
+    .exploreDocViewer__actionButton {
+      opacity: 1;
+    }
+  }
+}
+
+.exploreDocViewer__field {
+  width: 160px;
+}
+
+.exploreDocViewer__actionButton {
+  opacity: 0;
+
+  &:focus {
+    opacity: 1;
+  }
+}
+
+.exploreDocViewer__warning {
+  margin-right: $euiSizeS;
+}

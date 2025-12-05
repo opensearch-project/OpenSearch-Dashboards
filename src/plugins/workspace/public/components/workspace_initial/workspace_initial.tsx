@@ -3,41 +3,96 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import './workspace_initial.scss';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
 import {
   EuiLink,
   EuiPage,
   EuiIcon,
   EuiText,
-  EuiCard,
-  EuiImage,
-  EuiPanel,
   EuiTitle,
   EuiSpacer,
+  EuiPopover,
   EuiPageBody,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiPageContent,
   EuiSmallButton,
-  EuiSmallButtonEmpty,
+  EuiContextMenu,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import BackgroundLightSVG from '../../assets/background_light.svg';
-import BackgroundDarkSVG from '../../assets/background_light.svg';
-import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
+import { BehaviorSubject } from 'rxjs';
+import { useObservable } from 'react-use';
+import { ALL_USE_CASE_ID } from '../../../../../core/public';
+import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { WorkspaceUseCase } from '../../types';
+import { WorkspaceUseCaseCard } from './workspace_use_case_card';
+import { WorkspaceUseCaseFlyout } from '../workspace_form';
+import { navigateToWorkspacePageWithUseCase } from '../utils/workspace';
 
-export const WorkspaceInitial = () => {
+export interface WorkspaceInitialProps {
+  registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
+}
+
+export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps) => {
   const {
-    services: { application, chrome, uiSettings },
+    services: { application, chrome, workspaces, http, docLinks },
   } = useOpenSearchDashboards<CoreStart>();
-  const isDashboardAdmin = application.capabilities.dashboards?.isDashboardAdmin;
-  const logos = chrome.logos;
-  const createWorkspaceUrl = application.getUrlForApp(WORKSPACE_CREATE_APP_ID, { absolute: true });
-  const settingsAndSetupUrl = application.getUrlForApp('settings_landing', { absolute: true });
-  const isDarkTheme = uiSettings.get('theme:darkMode');
-  const backGroundUrl = isDarkTheme ? BackgroundDarkSVG : BackgroundLightSVG;
+  const isDashboardAdmin = !!application.capabilities.dashboards?.isDashboardAdmin;
+  const availableUseCases = registeredUseCases$
+    .getValue()
+    .filter((item) => !item.systematic || item.id === ALL_USE_CASE_ID);
+  const workspaceList = workspaces.workspaceList$.getValue();
+  const [isUseCaseFlyoutVisible, setIsUseCaseFlyoutVisible] = useState(false);
+  const [defaultExpandedUseCaseId, setDefaultExpandedUseCaseId] = useState(availableUseCases[0].id);
+
+  const handleClickUseCaseInformation = useCallback((useCaseId: string) => {
+    setIsUseCaseFlyoutVisible(true);
+    setDefaultExpandedUseCaseId(useCaseId);
+  }, []);
+  const handleFlyoutClose = useCallback(() => {
+    setIsUseCaseFlyoutVisible(false);
+  }, []);
+
+  const useCaseCards = availableUseCases.map((useCase) => {
+    return (
+      <EuiFlexItem key={useCase.id}>
+        <WorkspaceUseCaseCard
+          useCase={useCase}
+          workspaces={workspaceList}
+          application={application}
+          http={http}
+          isDashboardAdmin={isDashboardAdmin}
+          handleClickUseCaseInformation={handleClickUseCaseInformation}
+        />
+      </EuiFlexItem>
+    );
+  });
+  const [isCreateWorkspacePopoverOpen, setIsCreateWorkspacePopoverOpen] = useState(false);
+  const mountUserAccountRef = useRef<HTMLDivElement>(null);
+  const mountSettingRef = useRef<HTMLDivElement>(null);
+  const mountDevToolsRef = useRef<HTMLDivElement>(null);
+
+  const leftBottom$Ref = useRef(chrome.navControls.getLeftBottom$());
+  const leftBottomNavItems = useObservable(leftBottom$Ref.current);
+
+  useEffect(() => {
+    // TODO: We will refactor ChromeNavControl in the future and obtain mount through ID.
+    const settingMount = leftBottomNavItems?.find((item) => item.order === 3)?.mount;
+    const devToolsMount = leftBottomNavItems?.find((item) => item.order === 4)?.mount;
+    const userAccountMount = leftBottomNavItems?.find((item) => item.order === 10000)?.mount;
+
+    if (settingMount && mountSettingRef.current) {
+      settingMount(mountSettingRef.current);
+    }
+    if (devToolsMount && mountDevToolsRef.current) {
+      devToolsMount(mountDevToolsRef.current);
+    }
+    if (userAccountMount && mountUserAccountRef.current) {
+      userAccountMount(mountUserAccountRef.current);
+    }
+  }, [chrome.navControls, leftBottomNavItems]);
 
   const createButton = (
     <EuiSmallButton
@@ -45,142 +100,143 @@ export const WorkspaceInitial = () => {
       iconType="plus"
       key={WORKSPACE_CREATE_APP_ID}
       data-test-subj="workspace-initial-card-createWorkspace-button"
-      href={createWorkspaceUrl}
+      onClick={() => setIsCreateWorkspacePopoverOpen((isPopoverOpen) => !isPopoverOpen)}
     >
       {i18n.translate('workspace.initial.card.createWorkspace.button', {
         defaultMessage: 'Create Workspace',
       })}
+      &nbsp;&nbsp;
+      <EuiIcon type="arrowDown" />
     </EuiSmallButton>
   );
 
-  const noAdminText = (
-    <EuiText style={{ maxWidth: '340px' }} size="s">
-      {i18n.translate('workspace.initial.card.createWorkspace.text', {
-        defaultMessage:
-          'Contact your administrator to create a workspace or to be added to an existing one.',
-      })}
-    </EuiText>
-  );
-
-  const cards = (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        <EuiCard
-          style={{ width: '270px', height: '137px' }}
-          layout="horizontal"
-          icon={<EuiIcon color="subdued" size="xl" type="wsObservability" />}
-          title={i18n.translate('workspace.initial.card.observability.title', {
-            defaultMessage: 'Observability',
-          })}
-          description={i18n.translate('workspace.initial.card.observability.description', {
-            defaultMessage: 'Gain visibility into your applications and infrastructure',
-          })}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiCard
-          style={{ width: '270px', height: '137px' }}
-          layout="horizontal"
-          icon={<EuiIcon color="subdued" size="xl" type="wsSecurityAnalytics" />}
-          title={i18n.translate('workspace.initial.card.securityAnalytics.title', {
-            defaultMessage: 'Security Analytics',
-          })}
-          description={i18n.translate('workspace.initial.card.securityAnalytics.description', {
-            defaultMessage: 'Enhance your security posture with advanced analytics',
-          })}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiCard
-          style={{ width: '270px', height: '137px' }}
-          layout="horizontal"
-          icon={<EuiIcon color="subdued" size="xl" type="wsSearch" />}
-          title={i18n.translate('workspace.initial.card.search.title', {
-            defaultMessage: 'Search',
-          })}
-          description={i18n.translate('workspace.initial.card.search.description', {
-            defaultMessage: 'Discover and query your data with ease',
-          })}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiCard
-          style={{ width: '270px', height: '137px' }}
-          layout="horizontal"
-          icon={<EuiIcon color="subdued" size="xl" type="wsEssentials" />}
-          title={i18n.translate('workspace.initial.card.essentials.title', {
-            defaultMessage: 'Essentials',
-          })}
-          description={i18n.translate('workspace.initial.card.essentials.description', {
-            defaultMessage: 'Just the basics for exploring and analyzing data',
-          })}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+  const createWorkspacePopover = (
+    <EuiPopover
+      button={createButton}
+      isOpen={isCreateWorkspacePopoverOpen}
+      closePopover={() => setIsCreateWorkspacePopoverOpen(false)}
+      panelPaddingSize="none"
+    >
+      <EuiContextMenu
+        size="s"
+        initialPanelId={0}
+        panels={[
+          {
+            id: 0,
+            width: 190,
+            items: availableUseCases.map((useCase) => {
+              return {
+                'data-test-subj': `workspace-initial-button-create-${useCase.id}-workspace`,
+                name: useCase.title,
+                icon: useCase.icon,
+                onClick: () => {
+                  navigateToWorkspacePageWithUseCase(
+                    application,
+                    useCase.title,
+                    WORKSPACE_CREATE_APP_ID
+                  );
+                },
+              };
+            }),
+          },
+        ]}
+      />
+    </EuiPopover>
   );
 
   const content = (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
         <EuiTitle size="l">
           <h1>
             {i18n.translate('workspace.initial.title', {
-              defaultMessage: 'Create a workspace to get started',
+              defaultMessage: 'Welcome to OpenSearch',
             })}
           </h1>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ maxWidth: '730px' }}>
-        <EuiText size="s">
-          {i18n.translate('workspace.initial.description', {
-            defaultMessage:
-              'Welcome to OpenSearch! This interface supports you to easily explore, enrich and visualize your data with developer-friendly tools and powerful integrations for machine learning, data process, and more. To begin, create a workspace for your use case.',
-          })}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} className="eui-displayInline">
-        <EuiSmallButtonEmpty
-          href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html"
-          iconType="popout"
-          iconSide="right"
-          flush="left"
-          data-test-subj="workspace-initial-button-openSearch"
+      <EuiSpacer size="l" />
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup
+          direction="row"
+          justifyContent="spaceBetween"
+          alignItems="center"
+          gutterSize="m"
         >
-          <EuiText size="s">
-            {i18n.translate('workspace.initial.button.openSearch', {
-              defaultMessage: 'Learn more from documentation',
-            })}
-          </EuiText>
-        </EuiSmallButtonEmpty>
+          <EuiFlexItem grow={false}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <EuiIcon type="wsSelector" size="m" />
+              &nbsp;
+              <EuiTitle size="m">
+                <h2>
+                  {i18n.translate('workspace.initial.workspace.title', {
+                    defaultMessage: 'My workspaces',
+                  })}
+                </h2>
+              </EuiTitle>
+            </div>
+            <EuiText size="s">
+              {i18n.translate('workspace.initial.createWorkspace.describe', {
+                defaultMessage:
+                  'Collaborate on use-case based projects with workspaces. {hasWorkspace, select, true { Select a workspace to get started.} false {}}',
+                values: { hasWorkspace: workspaceList.length > 0 },
+              })}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{isDashboardAdmin && createWorkspacePopover}</EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiTitle size="m">
-          <h2>
-            {i18n.translate('workspace.initial.createWorkspace.title', {
-              defaultMessage: 'Create a workspace',
-            })}
-          </h2>
-        </EuiTitle>
-        <EuiText size="s">
-          {i18n.translate('workspace.initial.createWorkspace.describe', {
-            defaultMessage: 'Organize projects by use case in a collaborative workspace',
-          })}
-        </EuiText>
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m" className="eui-xScroll">
+          {useCaseCards}
+        </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{cards}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>{isDashboardAdmin ? createButton : noAdminText}</EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ maxWidth: '540px' }}>
-            <EuiPanel color="subdued" paddingSize="s" hasShadow={false} hasBorder={false}>
-              <EuiText size="s">
-                <EuiIcon type="dashboardApp" size="l" />
-                &nbsp;&nbsp;Explore live demo environment at{' '}
-                <EuiLink href="https://playground.opensearch.org/">
-                  playground.opensearch.org
-                </EuiLink>
-              </EuiText>
-            </EuiPanel>
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" style={{ display: 'flex', alignItems: 'center' }}>
+              <EuiIcon type="reporter" size="s" color="primary" />
+              &nbsp;
+              <EuiLink
+                href={docLinks.links.opensearch.introduction}
+                target="_blank"
+                style={{ fontWeight: 'normal' }}
+              >
+                {i18n.translate('workspace.initial.link.documentation', {
+                  defaultMessage: 'Learn more from documentation',
+                })}
+              </EuiLink>
+              <EuiIcon
+                type="dashboardApp"
+                size="s"
+                color="primary"
+                style={{ marginLeft: '16px' }}
+              />
+              &nbsp;
+              <EuiLink
+                href="https://playground.opensearch.org/"
+                target="_blank"
+                style={{ fontWeight: 'normal' }}
+              >
+                {i18n.translate('workspace.initial.link.playground', {
+                  defaultMessage: 'Explore live demo environment at playground.opensearch.org',
+                })}
+              </EuiLink>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
+              <EuiLink
+                style={{ fontWeight: 'normal' }}
+                onClick={() => {
+                  application.navigateToApp(WORKSPACE_LIST_APP_ID);
+                }}
+              >
+                {i18n.translate('workspace.initial.button.view', {
+                  defaultMessage: 'View all workspaces',
+                })}
+              </EuiLink>
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -190,38 +246,34 @@ export const WorkspaceInitial = () => {
   return (
     <EuiPage style={{ minHeight: '100vh' }}>
       <EuiPageBody>
-        <EuiFlexGroup direction="column" justifyContent="center" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiImage size="l" alt="OpenSearch" src={logos.OpenSearch.url} />
-          </EuiFlexItem>
-          <EuiSpacer />
-          <EuiFlexItem grow={false} style={{ width: '1200px' }} className="eui-displayInline">
-            <EuiPageContent
-              style={{
-                backgroundImage: `url(${backGroundUrl})`,
-                backgroundSize: '490px 380px',
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 10px top 20px',
-              }}
-            >
-              {content}
-            </EuiPageContent>
-            <EuiSmallButtonEmpty
-              iconType="gear"
-              iconSide="left"
-              flush="left"
-              href={settingsAndSetupUrl}
-              data-test-subj="workspace-initial-button-settingsAndSetup"
-            >
-              <EuiText size="s">
-                {i18n.translate('workspace.initial.button.settingsAndSetup', {
-                  defaultMessage: 'Settings and setup',
-                })}
-              </EuiText>
-            </EuiSmallButtonEmpty>
+        <EuiIcon type="logoOpenSearch" size="xl" style={{ position: 'fixed' }} />
+        <EuiSpacer size="xl" />
+        <EuiSpacer size="l" />
+        <EuiFlexGroup
+          direction="column"
+          alignItems="center"
+          className="workspace-initial__flex-group-responsive"
+        >
+          <EuiFlexItem grow={false} style={{ maxWidth: '1264px', width: '100%' }}>
+            {content}
           </EuiFlexItem>
         </EuiFlexGroup>
+
+        <div className="workspace-initial__fixed-left-bottom-icon">
+          <div ref={mountSettingRef} />
+          <EuiSpacer size="s" />
+          <div ref={mountDevToolsRef} />
+          <EuiSpacer size="s" />
+          <div ref={mountUserAccountRef} />
+        </div>
       </EuiPageBody>
+      {isUseCaseFlyoutVisible && (
+        <WorkspaceUseCaseFlyout
+          availableUseCases={availableUseCases}
+          onClose={handleFlyoutClose}
+          defaultExpandUseCase={defaultExpandedUseCaseId}
+        />
+      )}
     </EuiPage>
   );
 };

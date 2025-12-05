@@ -29,4 +29,4 @@
  */
 
 // @internal
-export { SavedQueryMeta, SaveQueryForm } from '../saved_query_form/save_query_form';
+export { SavedQueryMeta, SaveQueryForm } from './save_query_form';

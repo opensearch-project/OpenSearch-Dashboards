@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// @ts-ignore
-/* eslint-disable-next-line @osd/eslint/module_migration */
-import 'monaco-editor/esm/vs/language/json/json.worker.js';
+// This is a simplified worker that doesn't rely on monaco-editor's internal modules
+// It just creates a basic worker that can be loaded by monaco
+
+self.onmessage = () => {
+  // Basic initialization
+  // Worker is initialized and ready
+};

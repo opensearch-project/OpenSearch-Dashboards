@@ -37,13 +37,14 @@ export class VisBuilderPlugin implements Plugin<VisBuilderPluginSetup, VisBuilde
     // Register settings
     uiSettings.register({
       [VISBUILDER_ENABLE_VEGA_SETTING]: {
-        name: i18n.translate('visbuilder.advancedSettings.visbuilderEnableVegaTitle', {
+        name: i18n.translate('visBuilder.advancedSettings.visbuilderEnableVegaTitle', {
           defaultMessage: 'Enable vega transformation in visbuilder',
         }),
         value: false,
-        description: i18n.translate('visbuilder.advancedSettings.visbuilderEnableVegaText', {
+        description: i18n.translate('visBuilder.advancedSettings.visbuilderEnableVegaText', {
           defaultMessage: `Allow visbuilder to render visualizations via vega.`,
         }),
+        requiresPageReload: true,
         category: ['visbuilder'],
         schema: schema.boolean(),
       },

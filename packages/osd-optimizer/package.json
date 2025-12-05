@@ -31,7 +31,7 @@
     "lmdb": "^2.8.0",
     "normalize-path": "^3.0.0",
     "pirates": "^4.0.1",
-    "postcss": "^8.4.5",
+    "postcss": "^8.4.31",
     "rxjs": "^6.5.5",
     "source-map-support": "^0.5.19",
     "terser-webpack-plugin": "^2.1.2",

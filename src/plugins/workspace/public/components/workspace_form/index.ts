@@ -3,26 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { WorkspaceDetailForm } from './workspace_detail_form';
 export { SelectDataSourcePanel } from './select_data_source_panel';
 export { WorkspaceFormErrorCallout } from './workspace_form_error_callout';
 export { WorkspaceUseCase } from './workspace_use_case';
 export { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
 export { WorkspaceCancelModal } from './workspace_cancel_modal';
 export { WorkspaceNameField, WorkspaceDescriptionField } from './fields';
-export { DirectQueryConnectionIcon } from './direct_query_connection_icon';
+export { ConnectionTypeIcon } from './connection_type_icon';
 export { DataSourceConnectionTable } from './data_source_connection_table';
+export { WorkspaceUseCaseFlyout } from './workspace_use_case_flyout';
 
-export { WorkspaceFormSubmitData, WorkspaceFormProps, WorkspaceFormDataState } from './types';
+export {
+  WorkspaceFormSubmitData,
+  WorkspaceFormProps,
+  WorkspaceFormDataState,
+  WorkspacePermissionSetting,
+  WorkspaceFormErrors,
+} from './types';
 export {
   WorkspaceOperationType,
-  DetailTab,
-  DetailTabTitles,
   WorkspacePermissionItemType,
   usersAndPermissionsCreatePageTitle,
   selectDataSourceTitle,
   workspaceDetailsTitle,
   workspaceUseCaseTitle,
+  permissionModeOptions,
 } from './constants';
 export {
   convertPermissionsToPermissionSettings,

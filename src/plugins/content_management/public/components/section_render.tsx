@@ -62,26 +62,28 @@ const CardSection = ({ section, embeddable, contents$ }: Props) => {
   const factory = embeddable.getEmbeddableFactory(CARD_CONTAINER);
 
   if (section.kind === 'card' && factory && input) {
+    const isCardCollapsible = section.collapsible;
     return (
       <>
         {section.title ? (
-          <EuiTitle size="s">
-            <h2>
-              <EuiButtonIcon
-                iconType={isCardVisible ? 'arrowDown' : 'arrowUp'}
-                onClick={() => setIsCardVisible(!isCardVisible)}
-                color="text"
-                aria-label={isCardVisible ? 'Show panel' : 'Hide panel'}
-              />
-              {section.title}
-            </h2>
-          </EuiTitle>
-        ) : null}
-        {isCardVisible && (
           <>
-            <EuiSpacer size="s" /> <EmbeddableRenderer factory={factory} input={input} />
+            <EuiTitle size="s">
+              <h2>
+                {isCardCollapsible ? (
+                  <EuiButtonIcon
+                    iconType={isCardVisible ? 'arrowDown' : 'arrowRight'}
+                    onClick={() => setIsCardVisible(!isCardVisible)}
+                    color="text"
+                    aria-label={isCardVisible ? 'Show panel' : 'Hide panel'}
+                  />
+                ) : null}
+                {section.title}
+              </h2>
+            </EuiTitle>
+            <EuiSpacer size="m" />
           </>
-        )}
+        ) : null}
+        {isCardVisible && <EmbeddableRenderer factory={factory} input={input} />}
       </>
     );
   }

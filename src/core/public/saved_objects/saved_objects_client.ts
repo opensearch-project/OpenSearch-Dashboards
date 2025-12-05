@@ -42,7 +42,7 @@ import {
 } from '../../server';
 
 import { SimpleSavedObject } from './simple_saved_object';
-import { HttpFetchOptions, HttpSetup } from '../http';
+import { HttpFetchOptions, HttpSetup, PrependOptions } from '../http';
 
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
@@ -373,7 +373,8 @@ export class SavedObjectsClient {
    * @returns A find result with objects matching the specified search.
    */
   public find = <T = unknown>(
-    options: SavedObjectsFindOptions
+    options: SavedObjectsFindOptions,
+    prependOptions?: PrependOptions
   ): Promise<SavedObjectsFindResponsePublic<T>> => {
     const path = this.getPath(['_find']);
     const renameMap = {
@@ -407,6 +408,7 @@ export class SavedObjectsClient {
     const request: ReturnType<SavedObjectsApi['find']> = this.savedObjectsFetch(path, {
       method: 'GET',
       query,
+      prependOptions,
     });
     return request.then((resp) => {
       return renameKeys<
@@ -548,8 +550,16 @@ export class SavedObjectsClient {
    * the old kfetch error format of `{res: {status: number}}` whereas `http.fetch`
    * uses `{response: {status: number}}`.
    */
-  private savedObjectsFetch(path: string, { method, query, body }: HttpFetchOptions) {
-    return this.http.fetch(path, { method, query, body });
+  private savedObjectsFetch(
+    path: string,
+    { method, query, body, prependOptions }: HttpFetchOptions
+  ) {
+    return this.http.fetch(path, {
+      method,
+      query,
+      body,
+      ...(prependOptions && { prependOptions }),
+    });
   }
 }
 

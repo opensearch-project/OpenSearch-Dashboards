@@ -27,6 +27,11 @@ export class Page {
     this.setSection(section);
   }
 
+  removeSection(id: string) {
+    this.sections.delete(id);
+    this.sections$.next(this.getSections());
+  }
+
   getSections() {
     return [...this.sections.values()].sort((a, b) => a.order - b.order);
   }

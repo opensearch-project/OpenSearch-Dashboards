@@ -4,6 +4,7 @@
  */
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { i18n } from '@osd/i18n';
 import { DataSourceAttributes } from '../../../../../../data_source/common/data_sources';
 import {
   DEFAULT_DATA,
@@ -24,16 +25,19 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
   meta: {
     icon: { type: 'indexPatternApp' },
     tooltip: 'OpenSearch Index Patterns',
+    searchOnLoad: true,
   },
 
   toDataset: (path) => {
     const pattern = path[path.length - 1];
     const patternMeta = pattern.meta as DataStructureCustomMeta;
+
     return {
       id: pattern.id,
       title: pattern.title,
       type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       timeFieldName: patternMeta?.timeFieldName,
+      isRemoteDataset: pattern?.title?.includes(':') ?? false,
       dataSource: pattern.parent
         ? {
             id: pattern.parent.id,
@@ -64,10 +68,31 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
   },
 
   supportedLanguages: (dataset): string[] => {
-    if (dataset.dataSource?.type === 'OpenSearch Serverless') {
-      return ['kuery', 'lucene'];
-    }
     return ['kuery', 'lucene', 'PPL', 'SQL'];
+  },
+
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
+  getSampleQueries: (dataset: Dataset, language: string) => {
+    switch (language) {
+      case 'PPL':
+        return [
+          {
+            title: i18n.translate('data.indexPatternType.sampleQuery.basicPPLQuery', {
+              defaultMessage: 'Sample query for PPL',
+            }),
+            query: `source = ${dataset.title}`,
+          },
+        ];
+      case 'SQL':
+        return [
+          {
+            title: i18n.translate('data.indexPatternType.sampleQuery.basicSQLQuery', {
+              defaultMessage: 'Sample query for SQL',
+            }),
+            query: `SELECT * FROM ${dataset.title} LIMIT 10`,
+          },
+        ];
+    }
   },
 };
 
@@ -80,12 +105,23 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
     perPage: 100,
   });
 
-  // Get all unique data source ids
+  // Get all unique data source ids from both references and index pattern IDs
   const datasourceIds = Array.from(
     new Set(
       resp.savedObjects
-        .filter((savedObject) => savedObject.references.length > 0)
-        .map((savedObject) => savedObject.references.find((ref) => ref.type === 'data-source')?.id)
+        .map((savedObject) => {
+          // First try to get from references
+          const refDataSourceId = savedObject.references.find((ref) => ref.type === 'data-source')
+            ?.id;
+          if (refDataSourceId) {
+            return refDataSourceId;
+          }
+          // If not in references, check if the ID contains :: (namespaced format)
+          if (savedObject.id.includes('::')) {
+            return savedObject.id.split('::')[0];
+          }
+          return undefined;
+        })
         .filter(Boolean)
     )
   ) as string[];
@@ -103,7 +139,14 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
 
   const dataStructures = resp.savedObjects.map(
     (savedObject): DataStructure => {
-      const dataSourceId = savedObject.references.find((ref) => ref.type === 'data-source')?.id;
+      // First try to get dataSourceId from references
+      let dataSourceId = savedObject.references.find((ref) => ref.type === 'data-source')?.id;
+
+      // If not in references, check if the ID contains :: (namespaced format)
+      if (!dataSourceId && savedObject.id.includes('::')) {
+        dataSourceId = savedObject.id.split('::')[0];
+      }
+
       const dataSource = dataSourceId ? dataSourceMap[dataSourceId] : undefined;
 
       const indexPatternDataStructure: DataStructure = {

@@ -26,9 +26,7 @@ export const pathToString = (configIdentifier: ConfigIdentifier) => {
   return _.snakeCase(name);
 };
 
-export const createApiResponse = <TResponse = Record<string, any>>(
-  opts: Partial<ApiResponse> = {}
-): ApiResponse<TResponse> => {
+export const createApiResponse = (opts: Partial<ApiResponse> = {}): ApiResponse => {
   return {
     body: {} as any,
     statusCode: 200,

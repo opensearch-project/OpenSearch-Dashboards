@@ -1,17 +1,43 @@
-.deSidebar_panel {
-  border-left: 0;
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
+.deSidebar_panel {
   .dscSideBar_searchContainer {
-    padding: $euiSizeXS;
     border-bottom: $euiBorderThin;
 
     .toggleFieldFilterButton {
       border: none;
+      background-color: $euiFormInputGroupLabelBackground;
     }
 
     .dscSideBar_searchInput {
       box-shadow: none;
-      border-right: $euiBorderThin;
+      border: $euiBorderThin;
+      background-color: $euiFormBackgroundColor;
+    }
+  }
+
+  .dscSideBar_fieldListContainer {
+    padding-top: $euiSizeS;
+  }
+
+  .deSidebar_dataSource {
+    padding-bottom: 0;
+  }
+
+  .datasetSelector__button {
+    border-radius: $euiFormControlCompressedBorderRadius;
+    border-color: $euiFormBorderColor;
+    background-color: $euiFormBackgroundColor;
+
+    & > .euiButtonContent {
+      justify-content: space-between;
+
+      .euiIcon {
+        fill: $euiTextSubduedColor;
+      }
     }
   }
 }
@@ -22,7 +48,8 @@
   .euiButtonEmpty__content {
     font-size: $euiFontSizeXS;
     font-weight: $euiFontWeightSemiBold;
-    justify-content: flex-end;
+    justify-content: flex-start;
+    padding-left: $euiSizeM + 2px;
   }
 }
 

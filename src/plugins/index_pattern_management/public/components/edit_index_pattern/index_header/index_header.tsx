@@ -32,6 +32,7 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiFlexGroup, EuiToolTip, EuiFlexItem, EuiSmallButtonIcon, EuiText } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/public';
+import { useObservable } from 'react-use';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { TopNavControlButtonData, TopNavControlIconData } from '../../../../../navigation/public';
@@ -85,7 +86,12 @@ export function IndexHeader({
     uiSettings,
     navigationUI: { HeaderControl },
     application,
+    workspaces,
   } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
+
+  const currentWorkspace = useObservable(workspaces.currentWorkspace$);
+  const hideSetDefaultIndexPatternButton =
+    application.capabilities.workspaces?.enabled && !currentWorkspace;
 
   const useUpdatedUX = uiSettings.get('home:useNewHomePage');
 
@@ -106,7 +112,7 @@ export function IndexHeader({
               } as TopNavControlIconData,
             ]
           : []),
-        ...(defaultIndex !== indexPattern.id && setDefault
+        ...(defaultIndex !== indexPattern.id && setDefault && !hideSetDefaultIndexPatternButton
           ? [
               {
                 run: setDefault,

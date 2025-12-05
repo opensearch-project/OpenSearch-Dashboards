@@ -4,10 +4,15 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter, Logger, PrincipalType, ACL, DEFAULT_NAV_GROUPS } from '../../../../core/server';
-import { getUseCaseFeatureConfig } from '../../common/utils';
 import {
+  IRouter,
+  Logger,
+  PrincipalType,
+  ACL,
+  DEFAULT_NAV_GROUPS,
   WorkspacePermissionMode,
+} from '../../../../core/server';
+import {
   MAX_WORKSPACE_NAME_LENGTH,
   MAX_WORKSPACE_DESCRIPTION_LENGTH,
 } from '../../common/constants';
@@ -16,6 +21,7 @@ import { SavedObjectsPermissionControlContract } from '../permission_control/cli
 import { registerDuplicateRoute } from './duplicate';
 import { transferCurrentUserInPermissions, translatePermissionsToRole } from '../utils';
 import { validateWorkspaceColor } from '../../common/utils';
+import { getUseCaseFeatureConfig } from '../../../../core/server';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -114,6 +120,7 @@ export function registerRoutes({
   maxImportExportSize,
   permissionControlClient,
   isPermissionControlEnabled,
+  isDataSourceEnabled,
 }: {
   client: IWorkspaceClientImpl;
   logger: Logger;
@@ -121,6 +128,7 @@ export function registerRoutes({
   maxImportExportSize: number;
   permissionControlClient?: SavedObjectsPermissionControlContract;
   isPermissionControlEnabled: boolean;
+  isDataSourceEnabled: boolean;
 }) {
   router.post(
     {
@@ -141,7 +149,6 @@ export function registerRoutes({
       const result = await client.list(
         {
           request: req,
-          logger,
         },
         req.body
       );
@@ -180,7 +187,6 @@ export function registerRoutes({
       const result = await client.get(
         {
           request: req,
-          logger,
         },
         id
       );
@@ -225,7 +231,6 @@ export function registerRoutes({
       const result = await client.create(
         {
           request: req,
-          logger,
         },
         createPayload
       );
@@ -252,7 +257,6 @@ export function registerRoutes({
       const result = await client.update(
         {
           request: req,
-          logger,
         },
         id,
         {
@@ -280,7 +284,6 @@ export function registerRoutes({
       const result = await client.delete(
         {
           request: req,
-          logger,
         },
         id
       );
@@ -288,6 +291,58 @@ export function registerRoutes({
     })
   );
 
+  router.post(
+    {
+      path: `${WORKSPACES_API_BASE_URL}/_associate`,
+      validate: {
+        body: schema.object({
+          workspaceId: schema.string(),
+          savedObjects: schema.arrayOf(
+            schema.object({ id: schema.string(), type: schema.string() })
+          ),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const { workspaceId, savedObjects } = req.body;
+
+      const result = await client.associate(
+        {
+          request: req,
+        },
+        workspaceId,
+        savedObjects
+      );
+      return res.ok({ body: result });
+    })
+  );
+
+  router.post(
+    {
+      path: `${WORKSPACES_API_BASE_URL}/_dissociate`,
+      validate: {
+        body: schema.object({
+          workspaceId: schema.string(),
+          savedObjects: schema.arrayOf(
+            schema.object({ id: schema.string(), type: schema.string() })
+          ),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const { workspaceId, savedObjects } = req.body;
+
+      const result = await client.dissociate(
+        {
+          request: req,
+        },
+        workspaceId,
+        savedObjects
+      );
+      return res.ok({ body: result });
+    })
+  );
+
   // duplicate saved objects among workspaces
-  registerDuplicateRoute(router, logger, client, maxImportExportSize);
+  registerDuplicateRoute(router, logger, client, maxImportExportSize, isDataSourceEnabled);
 }

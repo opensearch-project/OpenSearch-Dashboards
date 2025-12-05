@@ -9,6 +9,7 @@ import {
   MAX_WORKSPACE_DESCRIPTION_LENGTH,
   MAX_WORKSPACE_NAME_LENGTH,
 } from '../../../common/constants';
+import { DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
 
 const mockApplication = applicationServiceMock.createStartContract();
@@ -18,6 +19,14 @@ describe('WorkspaceCreateActionPanel', () => {
   const formData = {
     name: 'Test Workspace',
     description: 'This is a test workspace',
+    selectedDataSourceConnections: [
+      {
+        id: 'data-source-1',
+        name: 'Data Source 1',
+        type: '',
+        connectionType: DataSourceConnectionType.OpenSearchConnection,
+      },
+    ],
   };
 
   it('should disable the "Create Workspace" button when name exceeds the maximum length', () => {
@@ -25,7 +34,10 @@ describe('WorkspaceCreateActionPanel', () => {
     render(
       <WorkspaceCreateActionPanel
         formId={formId}
-        formData={{ name: longName, description: formData.description }}
+        formData={{
+          ...formData,
+          name: longName,
+        }}
         application={mockApplication}
         isSubmitting={false}
       />
@@ -39,7 +51,10 @@ describe('WorkspaceCreateActionPanel', () => {
     render(
       <WorkspaceCreateActionPanel
         formId={formId}
-        formData={{ name: formData.name, description: longDescription }}
+        formData={{
+          ...formData,
+          description: longDescription,
+        }}
         application={mockApplication}
         isSubmitting={false}
       />
@@ -65,7 +80,7 @@ describe('WorkspaceCreateActionPanel', () => {
     render(
       <WorkspaceCreateActionPanel
         formId={formId}
-        formData={{ name: 'test' }}
+        formData={formData}
         application={mockApplication}
         isSubmitting
       />

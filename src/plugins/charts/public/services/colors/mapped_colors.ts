@@ -81,6 +81,7 @@ export class MappedColors {
   mapKeys(keys: Array<string | number>) {
     const configMapping = this.getConfigColorMapping();
     const configColors = _.values(configMapping);
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     const oldColors = _.values(this._oldMap);
 
     const alreadyUsedColors: string[] = [];
@@ -89,6 +90,7 @@ export class MappedColors {
       // If this key is mapped in the config, it's unnecessary to have it mapped here
       if (configMapping[key as any]) {
         delete this._mapping[key];
+        // @ts-expect-error TS7015 TODO(ts-error): fixme
         alreadyUsedColors.push(configMapping[key]);
       }
 

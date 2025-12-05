@@ -5,8 +5,13 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiComboBox } from '@elastic/eui';
-import { SavedObjectsClientContract, ToastsStart, SavedObject } from 'opensearch-dashboards/public';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import {
+  SavedObjectsClientContract,
+  ToastsStart,
+  SavedObject,
+  UiSettingScope,
+} from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
 import {
   getDataSourcesWithFields,
@@ -15,6 +20,7 @@ import {
   generateComponentId,
   getDataSourceSelection,
   getDefaultDataSourceId,
+  getWorkspaces,
 } from '../utils';
 import { DataSourceAttributes } from '../../types';
 import { DataSourceItem } from '../data_source_item';
@@ -22,7 +28,7 @@ import './data_source_selector.scss';
 import { DataSourceOption } from '../data_source_menu/types';
 
 export const LocalCluster: DataSourceOption = {
-  label: i18n.translate('dataSource.localCluster', {
+  label: i18n.translate('dataSourcesManagement.localCluster', {
     defaultMessage: 'Local cluster',
   }),
   id: '',
@@ -92,8 +98,9 @@ export class DataSourceSelector extends React.Component<
     // Invalid/filtered out datasource
     if (!dataSource) {
       this.props.notifications.addWarning(
-        i18n.translate('dataSource.fetchDataSourceError', {
-          defaultMessage: 'Data source with id is not available',
+        i18n.translate('dataSourcesManagement.error.fetchDataSourceById', {
+          defaultMessage: 'Data source with ID "{id}" is not available',
+          values: { id },
         })
       );
     }
@@ -167,7 +174,13 @@ export class DataSourceSelector extends React.Component<
         return;
       }
 
-      const defaultDataSource = getDefaultDataSourceId(this.props.uiSettings) ?? null;
+      const currentWorkspaceId = getWorkspaces().currentWorkspaceId$.getValue();
+      const scope: UiSettingScope = !!currentWorkspaceId
+        ? UiSettingScope.WORKSPACE
+        : UiSettingScope.GLOBAL;
+
+      const defaultDataSource =
+        (await getDefaultDataSourceId(this.props.uiSettings, scope)) ?? null;
       // 5.1 Empty default option, [], just want to show placeholder
       if (this.props.defaultOption?.length === 0) {
         this.setState({
@@ -190,7 +203,7 @@ export class DataSourceSelector extends React.Component<
       this.handleDefaultDataSource(dataSourceOptions, fetchedDataSources, defaultDataSource);
     } catch (err) {
       this.props.notifications.addWarning(
-        i18n.translate('dataSource.fetchDataSourceError', {
+        i18n.translate('dataSourcesManagement.error.fetchExisting', {
           defaultMessage: 'Unable to fetch existing data sources',
         })
       );
@@ -206,9 +219,15 @@ export class DataSourceSelector extends React.Component<
   }
 
   render() {
+    const defaultPlaceholderText = i18n.translate(
+      'dataSourcesManagement.dataSourceSelector.placeholder',
+      {
+        defaultMessage: 'Select a data source',
+      }
+    );
     const placeholderText =
       this.props.placeholderText === undefined
-        ? 'Select a data source'
+        ? defaultPlaceholderText
         : this.props.placeholderText;
 
     // The filter condition can be changed, thus we filter again here to make sure each time we will get the filtered data sources before rendering
@@ -221,28 +240,17 @@ export class DataSourceSelector extends React.Component<
     return (
       <EuiComboBox
         isClearable={this.props.isClearable}
-        aria-label={
-          placeholderText
-            ? i18n.translate('dataSourceSelectorComboBoxAriaLabel', {
-                defaultMessage: placeholderText,
-              })
-            : 'dataSourceSelectorCombobox'
-        }
-        placeholder={
-          placeholderText
-            ? i18n.translate('dataSourceSelectorComboBoxPlaceholder', {
-                defaultMessage: placeholderText,
-              })
-            : ''
-        }
+        aria-label={defaultPlaceholderText}
+        placeholder={placeholderText}
         singleSelection={{ asPlainText: true }}
-        options={options}
-        selectedOptions={this.state.selectedOption}
+        options={options as EuiComboBoxOptionOption[]}
+        selectedOptions={this.state.selectedOption as EuiComboBoxOptionOption[]}
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         onChange={(e) => this.onChange(e)}
         prepend={
           this.props.removePrepend
             ? undefined
-            : i18n.translate('dataSourceSelectorComboBoxPrepend', {
+            : i18n.translate('dataSourcesManagement.dataSourceSelectorComboBoxPrepend', {
                 defaultMessage: 'Data source',
               })
         }
@@ -250,9 +258,11 @@ export class DataSourceSelector extends React.Component<
         isDisabled={this.props.disabled}
         fullWidth={this.props.fullWidth || false}
         data-test-subj={'dataSourceSelectorComboBox'}
+        // @ts-expect-error TS2749 TODO(ts-error): fixme
         renderOption={(option: EuiComboBoxOptionOption<DataSourceItem>) => (
           <DataSourceItem
             className={'dataSourceSelector'}
+            // @ts-expect-error TS2740 TODO(ts-error): fixme
             option={option}
             defaultDataSource={this.state.defaultDataSource}
           />

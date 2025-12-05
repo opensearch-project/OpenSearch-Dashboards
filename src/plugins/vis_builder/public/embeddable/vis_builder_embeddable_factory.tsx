@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { i18n } from '@osd/i18n';
 import {
   EmbeddableFactoryDefinition,
@@ -109,8 +110,6 @@ export class VisBuilderEmbeddableFactory
   }
 
   public getDisplayName() {
-    return i18n.translate('visBuilder.displayName', {
-      defaultMessage: PLUGIN_ID,
-    });
+    return PLUGIN_ID;
   }
 }

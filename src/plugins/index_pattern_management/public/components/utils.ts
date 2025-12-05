@@ -90,7 +90,7 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
     savedObjectsClient
       .find<DataSourceAttributes>({
         type: 'data-source',
-        fields: ['title', 'type', 'dataSourceVersion', 'installedPlugins'],
+        fields: ['title', 'type', 'dataSourceVersion', 'installedPlugins', 'dataSourceEngineType'],
         perPage: 10000,
       })
       .then((response) =>
@@ -101,6 +101,7 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
             const title = dataSource.get('title');
             const datasourceversion = dataSource.get('dataSourceVersion');
             const installedplugins = dataSource.get('installedPlugins');
+            const dataSourceEngineType = dataSource.get('dataSourceEngineType');
 
             return {
               id,
@@ -110,6 +111,7 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
               sort: `${title}`,
               datasourceversion,
               installedplugins,
+              engine: dataSourceEngineType,
             };
           })
           .sort((a, b) => a.sort.localeCompare(b.sort))

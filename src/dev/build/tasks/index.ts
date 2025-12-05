@@ -33,6 +33,7 @@ export * from './build_opensearch_dashboards_platform_plugins';
 export * from './build_packages_task';
 export * from './clean_tasks';
 export * from './copy_source_task';
+export * from './copy_translations_task';
 export * from './create_archives_sources_task';
 export * from './create_archives_task';
 export * from './create_empty_dirs_and_files_task';

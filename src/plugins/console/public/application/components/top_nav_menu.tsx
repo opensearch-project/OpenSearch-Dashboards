@@ -29,7 +29,18 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
+interface CommonProps {
+  disabled: boolean;
+  onClick: () => void;
+  ['data-test-subj']: string;
+}
+
+export enum MenuItemPosition {
+  LEFT = 'left',
+  RIGHT = 'right',
+}
 
 export interface TopNavMenuItem {
   id: string;
@@ -37,14 +48,60 @@ export interface TopNavMenuItem {
   description: string;
   onClick: () => void;
   testId: string;
+  render?: (commonProps: CommonProps) => React.JSX.Element;
+  position: MenuItemPosition;
 }
 
 interface Props {
   disabled?: boolean;
   items: TopNavMenuItem[];
+  useUpdatedUX?: boolean;
+  rightContainerChildren?: React.ReactNode;
 }
 
-export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled }) => {
+export const TopNavMenu: FunctionComponent<Props> = ({
+  items,
+  disabled,
+  useUpdatedUX,
+  rightContainerChildren,
+}) => {
+  if (useUpdatedUX) {
+    const leftMenus = items.filter((item) => item.position === MenuItemPosition.LEFT);
+    const rightMenus = items.filter((item) => item.position === MenuItemPosition.RIGHT);
+    const renderMenus = (item: TopNavMenuItem, idx: number) => {
+      const commonProps: CommonProps = {
+        disabled: !!disabled,
+        onClick: item.onClick,
+        ['data-test-subj']: item.testId,
+      };
+
+      return (
+        <EuiFlexItem grow={false} key={idx}>
+          {item.render?.(commonProps) || null}
+        </EuiFlexItem>
+      );
+    };
+    return (
+      <>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="m">
+              {leftMenus.map((item, index) => renderMenus(item, index))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="m">
+              {rightContainerChildren}
+              {rightMenus.map((item, index) => renderMenus(item, index))}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer />
+      </>
+    );
+  }
+
   return (
     <EuiTabs size="s">
       {items.map((item, idx) => {

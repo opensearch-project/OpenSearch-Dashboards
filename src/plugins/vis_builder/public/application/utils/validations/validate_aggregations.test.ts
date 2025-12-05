@@ -96,4 +96,80 @@ describe('validateAggregations', () => {
     expect(valid).toBe(true);
     expect(errorMsg).not.toBeDefined();
   });
+
+  test('Split chart should be first in the configuration', () => {
+    const aggConfigs = dataStart.search.aggs.createAggConfigs(indexPattern as IndexPattern, [
+      {
+        id: '0',
+        enabled: true,
+        type: BUCKET_TYPES.TERMS,
+        schema: 'group',
+        params: {},
+      },
+      {
+        id: '1',
+        enabled: true,
+        type: BUCKET_TYPES.TERMS,
+        schema: 'split',
+        params: {},
+      },
+    ]);
+
+    const schemas = [{ name: 'split', mustBeFirst: true }, { name: 'group' }];
+
+    const { valid, errorMsg } = validateAggregations(aggConfigs.aggs, schemas);
+
+    expect(valid).toBe(false);
+    expect(errorMsg).toMatchInlineSnapshot(`"Split chart must be first in the configuration."`);
+  });
+
+  test('Valid configuration with split chart first', () => {
+    const aggConfigs = dataStart.search.aggs.createAggConfigs(indexPattern as IndexPattern, [
+      {
+        id: '0',
+        enabled: true,
+        type: BUCKET_TYPES.TERMS,
+        schema: 'split',
+        params: {},
+      },
+      {
+        id: '2',
+        enabled: true,
+        type: METRIC_TYPES.COUNT,
+        schema: 'metric',
+        params: {},
+      },
+    ]);
+
+    const schemas = [{ name: 'split', mustBeFirst: true }, { name: 'metric' }];
+
+    const { valid, errorMsg } = validateAggregations(aggConfigs.aggs, schemas);
+
+    expect(valid).toBe(true);
+    expect(errorMsg).toBeUndefined();
+  });
+
+  test('Valid configuration when schemas are not provided', () => {
+    const aggConfigs = dataStart.search.aggs.createAggConfigs(indexPattern as IndexPattern, [
+      {
+        id: '0',
+        enabled: true,
+        type: BUCKET_TYPES.TERMS,
+        schema: 'group',
+        params: {},
+      },
+      {
+        id: '1',
+        enabled: true,
+        type: BUCKET_TYPES.TERMS,
+        schema: 'split',
+        params: {},
+      },
+    ]);
+
+    const { valid, errorMsg } = validateAggregations(aggConfigs.aggs);
+
+    expect(valid).toBe(true);
+    expect(errorMsg).not.toBeDefined();
+  });
 });

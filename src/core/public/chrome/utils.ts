@@ -216,8 +216,66 @@ export const getSortedNavLinks = (
   return acc;
 };
 
+export const isUseCaseGroup = (navGroup: NavGroupItemInMap) => {
+  return navGroup.type === undefined;
+};
+
 export const getVisibleUseCases = (navGroupMap: Record<string, NavGroupItemInMap>) => {
   return Object.values(navGroupMap).filter(
-    (navGroup) => navGroup.status !== NavGroupStatus.Hidden && navGroup.type === undefined
+    (navGroup) => navGroup.status !== NavGroupStatus.Hidden && isUseCaseGroup(navGroup)
   );
 };
+
+function getCategoryLocalStorageKey(id: string) {
+  return `core.navGroup.${id}`;
+}
+
+export function getIsCategoryOpen(id: string, storage: Storage) {
+  const value = storage.getItem(getCategoryLocalStorageKey(id)) ?? 'true';
+
+  return value === 'true';
+}
+
+export function setIsCategoryOpen(id: string, isOpen: boolean, storage: Storage) {
+  storage.setItem(getCategoryLocalStorageKey(id), `${isOpen}`);
+}
+
+export function searchNavigationLinks(
+  allAvailableCaseId: string[],
+  navGroupMap: Record<string, NavGroupItemInMap>,
+  query: string
+) {
+  return allAvailableCaseId.flatMap((useCaseId) => {
+    const navGroup = navGroupMap[useCaseId];
+    if (!navGroup) return [];
+
+    const links = navGroup.navLinks as Array<ChromeRegistrationNavLink & ChromeNavLink>;
+    // parent nav links are not clickable
+    const parentNavLinkIds = links.map((link) => link.parentNavLinkId).filter((link) => !!link);
+
+    return links
+      .filter((link) => {
+        const title = link.title;
+        let parentNavLinkTitle;
+        // parent title also taken into consideration for search its sub items
+        if (link.parentNavLinkId) {
+          parentNavLinkTitle = navGroup.navLinks.find(
+            (navLink) => navLink.id === link.parentNavLinkId
+          )?.title;
+        }
+        const titleMatch = title && title.toLowerCase().includes(query.toLowerCase());
+        const parentTitleMatch =
+          parentNavLinkTitle && parentNavLinkTitle.toLowerCase().includes(query.toLowerCase());
+        return (
+          !link.hidden &&
+          !link.disabled &&
+          (titleMatch || parentTitleMatch) &&
+          !parentNavLinkIds.includes(link.id)
+        );
+      })
+      .map((link) => ({
+        ...link,
+        navGroup,
+      }));
+  });
+}

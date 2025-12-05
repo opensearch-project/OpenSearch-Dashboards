@@ -14,22 +14,18 @@ import {
   EuiText,
   PopoverAnchorPosition,
 } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
 import classNames from 'classnames';
-import { isEqual } from 'lodash';
-import React, { Component, createRef, RefObject } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { monaco } from '@osd/monaco';
 import {
   IDataPluginServices,
-  IFieldType,
-  IIndexPattern,
   Query,
-  QuerySuggestion,
   TimeRange,
   QueryControls,
   RecentQueriesTable,
   QueryResult,
   QueryStatus,
+  useQueryStringManager,
 } from '../..';
 import { OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
@@ -37,9 +33,9 @@ import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { getQueryService, getIndexPatterns } from '../../services';
-import { DatasetSelector } from '../dataset_selector';
 import { DefaultInputProps } from './editors';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
+import { getEffectiveLanguageForAutoComplete } from './utils';
 
 export interface QueryEditorProps {
   query: Query;
@@ -71,221 +67,191 @@ interface Props extends QueryEditorProps {
   opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
 }
 
-interface State {
-  isSuggestionsVisible: boolean;
-  index: number | null;
-  suggestions: QuerySuggestion[];
-  indexPatterns: IIndexPattern[];
-  isCollapsed: boolean;
-  timeStamp: IFieldType | null;
-  lineCount: number | undefined;
-  isRecentQueryVisible: boolean;
-}
+export const QueryEditorUI: React.FC<Props> = (props) => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [lineCount, setLineCount] = useState<number | undefined>(undefined);
+  const [isRecentQueryVisible, setIsRecentQueryVisible] = useState(false);
+  const [currentAppId, setCurrentAppId] = useState<string>(''); // Add app ID state
 
-// Needed for React.lazy
-// TODO: MQL export this and let people extended this
-// eslint-disable-next-line import/no-default-export
-export default class QueryEditorUI extends Component<Props, State> {
-  public state: State = {
-    isSuggestionsVisible: false,
-    index: null,
-    suggestions: [],
-    indexPatterns: [],
-    isCollapsed: false, // default to expand mode
-    timeStamp: null,
-    lineCount: undefined,
-    isRecentQueryVisible: false,
-  };
+  const inputRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const bannerRef = useRef<HTMLDivElement>(null);
+  const bottomPanelRef = useRef<HTMLDivElement>(null);
+  const queryControlsContainer = useRef<HTMLDivElement>(null);
+  // TODO: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8801
+  const editorQuery = props.query; // local query state managed by the editor. Not to be confused by the app query state.
 
-  public inputRef: monaco.editor.IStandaloneCodeEditor | null = null;
+  const queryString = getQueryService().queryString;
+  const timefilter = getQueryService().timefilter.timefilter;
+  const languageManager = queryString.getLanguageService();
+  const extensionMap = languageManager.getQueryEditorExtensionMap();
+  const services = props.opensearchDashboards.services;
+  const { query } = useQueryStringManager({
+    queryString,
+  });
+  const queryRef = useRef(query);
 
-  private queryString = getQueryService().queryString;
-  private languageManager = this.queryString.getLanguageService();
+  // Monaco commands are registered once at startup, we need a ref to access the latest query state inside command callbacks
+  useEffect(() => {
+    queryRef.current = query;
+  }, [query]);
 
-  private persistedLog: PersistedLog | undefined;
-  private abortController?: AbortController;
-  private services = this.props.opensearchDashboards.services;
-  private headerRef: RefObject<HTMLDivElement> = createRef();
-  private bannerRef: RefObject<HTMLDivElement> = createRef();
-  private extensionMap = this.languageManager.getQueryEditorExtensionMap();
+  const persistedLogRef = useRef<PersistedLog>(
+    props.persistedLog ||
+      getQueryLog(services.uiSettings, services.storage, services.appName, query.language)
+  );
+  const abortControllerRef = useRef<AbortController>();
 
-  private getQueryString = () => {
-    return toUser(this.props.query.query);
-  };
+  useEffect(() => {
+    const abortController = abortControllerRef.current;
+    return () => {
+      if (abortController) {
+        abortController.abort();
+      }
+    };
+  }, []);
 
-  private setIsCollapsed = (isCollapsed: boolean) => {
-    this.setState({ isCollapsed });
-  };
+  useEffect(() => {
+    services.application?.currentAppId$?.subscribe?.((appId) => {
+      setCurrentAppId(appId || '');
+    });
+  }, [services.application?.currentAppId$]);
 
-  private renderQueryEditorExtensions() {
+  const renderQueryEditorExtensions = () => {
     if (
       !(
-        this.headerRef.current &&
-        this.bannerRef.current &&
-        this.props.query.language &&
-        this.extensionMap &&
-        Object.keys(this.extensionMap).length > 0
+        headerRef.current &&
+        bannerRef.current &&
+        queryControlsContainer.current &&
+        bottomPanelRef.current &&
+        query.language &&
+        extensionMap &&
+        Object.keys(extensionMap).length > 0
       )
     ) {
       return null;
     }
     return (
       <QueryEditorExtensions
-        language={this.props.query.language}
-        onSelectLanguage={this.onSelectLanguage}
-        isCollapsed={this.state.isCollapsed}
-        setIsCollapsed={this.setIsCollapsed}
-        configMap={this.extensionMap}
-        componentContainer={this.headerRef.current}
-        bannerContainer={this.bannerRef.current}
+        language={query.language}
+        onSelectLanguage={onSelectLanguage}
+        isCollapsed={isCollapsed}
+        setIsCollapsed={setIsCollapsed}
+        configMap={extensionMap}
+        componentContainer={headerRef.current}
+        bannerContainer={bannerRef.current}
+        queryControlsContainer={queryControlsContainer.current}
+        bottomPanelContainer={bottomPanelRef.current}
+        query={query}
+        fetchStatus={props.queryStatus?.status}
       />
     );
-  }
-
-  private onSubmit = (query: Query, dateRange?: TimeRange) => {
-    if (this.props.onSubmit) {
-      if (this.persistedLog) {
-        this.persistedLog.add(query.query);
-      }
-
-      this.props.onSubmit({
-        query: fromUser(query.query),
-        language: query.language,
-        dataset: query.dataset,
-      });
-    }
   };
 
-  private onChange = (query: Query, dateRange?: TimeRange) => {
-    if (this.props.onChange) {
-      this.props.onChange(
-        { query: fromUser(query.query), language: query.language, dataset: query.dataset },
+  const onSubmit = (currentQuery: Query, dateRange?: TimeRange) => {
+    if (props.onSubmit) {
+      if (persistedLogRef.current) {
+        persistedLogRef.current.add(currentQuery.query);
+      }
+
+      props.onSubmit(
+        {
+          ...currentQuery,
+          query: fromUser(currentQuery.query),
+        },
         dateRange
       );
     }
   };
 
-  private onQueryStringChange = (value: string) => {
-    this.setState({
-      isSuggestionsVisible: true,
-      index: null,
-    });
+  const onChange = (currentQuery: Query, dateRange?: TimeRange) => {
+    if (props.onChange) {
+      props.onChange(
+        {
+          ...currentQuery,
+          query: fromUser(currentQuery.query),
+        },
+        dateRange
+      );
+    }
+  };
 
-    this.onChange({
+  const onQueryStringChange = (value: string) => {
+    onChange({
       query: value,
-      language: this.props.query.language,
-      dataset: this.props.query.dataset,
+      language: query.language,
+      dataset: query.dataset,
     });
   };
 
-  private onClickRecentQuery = (query: Query, timeRange?: TimeRange) => {
-    this.onSubmit(query, timeRange);
+  const onClickRecentQuery = (currentQuery: Query, timeRange?: TimeRange) => {
+    onSubmit(currentQuery, timeRange);
   };
 
-  private onInputChange = (value: string) => {
-    this.onQueryStringChange(value);
+  const onInputChange = (value: string) => {
+    onQueryStringChange(value);
 
-    if (!this.inputRef) return;
+    if (!inputRef.current) return;
 
-    const currentLineCount = this.inputRef.getModel()?.getLineCount();
-    if (this.state.lineCount === currentLineCount) return;
-    this.setState({ lineCount: currentLineCount });
+    const currentLineCount = inputRef.current.getModel()?.getLineCount();
+    if (lineCount === currentLineCount) return;
+    setLineCount(currentLineCount);
   };
 
-  // TODO: MQL consider moving language select language of setting search source here
-  private onSelectLanguage = (languageId: string) => {
-    // Send telemetry info every time the user opts in or out of kuery
-    // As a result it is important this function only ever gets called in the
-    // UI component's change handler.
-    this.services.http.post('/api/opensearch-dashboards/dql_opt_in_stats', {
-      body: JSON.stringify({ opt_in: languageId === 'kuery' }),
-    });
+  const onSelectLanguage = (languageId: string) => {
+    const newQuery = queryString.getInitialQueryByLanguage(languageId);
 
-    const newQuery = this.queryString.getInitialQueryByLanguage(languageId);
-
-    this.onChange(newQuery);
-    this.onSubmit(newQuery);
+    onChange(newQuery);
+    onSubmit(newQuery);
   };
 
-  private initPersistedLog = () => {
-    const { uiSettings, storage, appName } = this.services;
-    this.persistedLog = this.props.persistedLog
-      ? this.props.persistedLog
-      : getQueryLog(uiSettings, storage, appName, this.props.query.language);
+  const toggleRecentQueries = () => {
+    setIsRecentQueryVisible(!isRecentQueryVisible);
   };
 
-  public onMouseEnterSuggestion = (index: number) => {
-    this.setState({ index });
+  const renderToggleIcon = () => {
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType={isCollapsed ? 'expand' : 'minimize'}
+          aria-label={i18n.translate('data.queryControls.languageToggle', {
+            defaultMessage: `Language Toggle`,
+          })}
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          data-test-subj="osdQueryEditorLanguageToggle"
+        />
+      </EuiFlexItem>
+    );
   };
 
-  private toggleRecentQueries = () => {
-    this.setState((prevState) => ({
-      ...prevState,
-      isRecentQueryVisible: !prevState.isRecentQueryVisible,
-    }));
+  const renderQueryControls = (queryControls: React.ReactElement[]) => {
+    return <QueryControls queryControls={queryControls} />;
   };
 
-  public componentDidMount() {
-    const parsedQuery = fromUser(toUser(this.props.query.query));
-    if (!isEqual(this.props.query.query, parsedQuery)) {
-      this.onChange({ ...this.props.query, query: parsedQuery });
-    }
-
-    this.initPersistedLog();
-  }
-
-  public componentDidUpdate(prevProps: Props) {
-    const prevQuery = prevProps.query;
-
-    if (!isEqual(this.props.query.dataset, prevQuery.dataset)) {
-      if (this.inputRef) {
-        const newQuery = this.queryString.getInitialQuery();
-        const newQueryString = newQuery.query;
-        if (this.inputRef.getValue() !== newQueryString) {
-          this.inputRef.setValue(newQueryString);
-          this.onSubmit(newQuery);
-        }
-      }
-    }
-
-    const parsedQuery = fromUser(toUser(this.props.query.query));
-    if (!isEqual(this.props.query.query, parsedQuery)) {
-      this.onChange({ ...this.props.query, query: parsedQuery });
-    }
-
-    this.initPersistedLog();
-  }
-
-  public componentWillUnmount() {
-    if (this.abortController) this.abortController.abort();
-  }
-
-  handleOnFocus = () => {
-    if (this.props.onChangeQueryEditorFocus) {
-      this.props.onChangeQueryEditorFocus(true);
-    }
-  };
-
-  private fetchIndexPattern = async () => {
-    const dataset = this.queryString.getQuery().dataset;
-    if (!dataset) return undefined;
-    const indexPattern = await getIndexPatterns().get(dataset.id);
-    return indexPattern;
-  };
-
-  provideCompletionItems = async (
+  const provideCompletionItems = async (
     model: monaco.editor.ITextModel,
-    position: monaco.Position
+    position: monaco.Position,
+    context: monaco.languages.CompletionContext,
+    token: monaco.CancellationToken
   ): Promise<monaco.languages.CompletionList> => {
-    const indexPattern = await this.fetchIndexPattern();
-    const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
-      query: this.getQueryString(),
-      selectionStart: model.getOffsetAt(position),
+    if (token.isCancellationRequested) {
+      return { suggestions: [], incomplete: false };
+    }
+
+    const dataset = queryString.getQuery().dataset;
+    const indexPattern = dataset ? await getIndexPatterns().get(dataset.id) : undefined;
+
+    const language = getEffectiveLanguageForAutoComplete(queryRef.current.language, currentAppId);
+
+    const suggestions = await services.data.autocomplete.getQuerySuggestions({
+      query: inputRef.current?.getValue() ?? '',
+      selectionStart: model.getOffsetAt(position), // not needed, position handles same thing. remove
       selectionEnd: model.getOffsetAt(position),
-      language: this.props.query.language,
+      language,
       indexPattern,
+      datasetType: dataset?.type,
       position,
-      services: this.services,
+      services,
     });
 
     // current completion item range being given as last 'word' at pos
@@ -300,182 +266,228 @@ export default class QueryEditorUI extends Component<Props, State> {
     return {
       suggestions:
         suggestions && suggestions.length > 0
-          ? suggestions
-              .filter((s) => 'detail' in s) // designed to remove suggestion not of type MonacoCompatible
-              .map((s: MonacoCompatibleQuerySuggestion) => {
-                return {
-                  label: s.text,
-                  kind: s.type as monaco.languages.CompletionItemKind,
-                  insertText: s.insertText ?? s.text,
-                  insertTextRules: s.insertTextRules ?? undefined,
-                  range: s.replacePosition ?? defaultRange,
-                  detail: s.detail,
-                  command: { id: 'editor.action.triggerSuggest', title: 'Trigger Next Suggestion' },
-                  sortText: s.sortText, // when undefined, the falsy value will default to the label
-                };
-              })
+          ? (suggestions.filter((s) => 'detail' in s) as MonacoCompatibleQuerySuggestion[]) // Cast the filtered array
+              .map(
+                (
+                  s: MonacoCompatibleQuerySuggestion,
+                  _index: number,
+                  _array: MonacoCompatibleQuerySuggestion[]
+                ) => {
+                  return {
+                    label: s.text,
+                    kind: s.type as monaco.languages.CompletionItemKind,
+                    insertText: s.insertText ?? s.text,
+                    insertTextRules: s.insertTextRules ?? undefined,
+                    range: s.replacePosition ?? defaultRange,
+                    detail: s.detail,
+                    command: {
+                      id: 'editor.action.triggerSuggest',
+                      title: 'Trigger Next Suggestion',
+                    },
+                    sortText: s.sortText ?? s.text, // when undefined, the falsy value will default to the label
+                  };
+                }
+              )
           : [],
       incomplete: false,
     };
   };
 
-  private renderToggleIcon = () => {
-    return (
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType={this.state.isCollapsed ? 'expand' : 'minimize'}
-          aria-label={i18n.translate('discover.queryControls.languageToggle', {
-            defaultMessage: `Language Toggle`,
-          })}
-          onClick={() => this.setIsCollapsed(!this.state.isCollapsed)}
-        />
-      </EuiFlexItem>
-    );
+  const useQueryEditor = query.language !== 'kuery' && query.language !== 'lucene';
+
+  const languageSelector = (
+    <QueryLanguageSelector
+      anchorPosition={props.languageSwitcherPopoverAnchorPosition}
+      onSelectLanguage={onSelectLanguage}
+      appName={services.appName}
+    />
+  );
+
+  const baseInputProps = {
+    languageId: query.language,
+    value: toUser(editorQuery.query),
   };
 
-  private renderQueryControls = (queryControls: React.ReactElement[]) => {
-    return <QueryControls queryControls={queryControls} />;
+  const defaultInputProps: DefaultInputProps = {
+    ...baseInputProps,
+    onChange: onInputChange,
+    editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
+      setLineCount(editor.getModel()?.getLineCount());
+      inputRef.current = editor;
+      // eslint-disable-next-line no-bitwise
+      editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+        const newQuery = {
+          ...queryRef.current,
+          query: editor.getValue(),
+        };
+
+        onSubmit(newQuery, timefilter.getTime());
+      });
+
+      return () => {
+        if (abortControllerRef.current) abortControllerRef.current.abort();
+      };
+    },
+    footerItems: {
+      start: [
+        <EuiText
+          size="xs"
+          color="subdued"
+          className="queryEditor__footerItem"
+          data-test-subj="queryEditorFooterLineCount"
+        >
+          {`${lineCount} ${lineCount === 1 ? 'line' : 'lines'}`}
+        </EuiText>,
+        <EuiText
+          size="xs"
+          color="subdued"
+          data-test-subj="queryEditorFooterTimestamp"
+          className="queryEditor__footerItem"
+        >
+          {query.dataset?.timeFieldName || ''}
+        </EuiText>,
+        <QueryResult queryStatus={props.queryStatus!} />,
+      ],
+      end: [
+        <EuiButtonEmpty
+          iconSide="left"
+          iconType="clock"
+          size="xs"
+          onClick={toggleRecentQueries}
+          className="queryEditor__footerItem"
+          data-test-subj="queryEditorFooterToggleRecentQueriesButton"
+        >
+          <EuiText size="xs" color="subdued">
+            {'Recent queries'}
+          </EuiText>
+        </EuiButtonEmpty>,
+      ],
+    },
+    provideCompletionItems,
+    queryStatus: props.queryStatus,
   };
 
-  public render() {
-    const className = classNames(this.props.className);
+  const singleLineInputProps = {
+    ...baseInputProps,
+    onChange: (value: string) => {
+      // Replace new lines with an empty string to prevent multi-line input
+      onQueryStringChange(value.replace(/[\r\n]+/gm, ''));
+      setLineCount(undefined);
+    },
+    editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
+      inputRef.current = editor;
 
-    const useQueryEditor =
-      this.props.query.language !== 'kuery' && this.props.query.language !== 'lucene';
-
-    const languageSelector = (
-      <QueryLanguageSelector
-        query={this.props.query}
-        anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-        onSelectLanguage={this.onSelectLanguage}
-        appName={this.services.appName}
-      />
-    );
-
-    const baseInputProps = {
-      languageId: this.props.query.language,
-      value: this.getQueryString(),
-    };
-
-    const defaultInputProps: DefaultInputProps = {
-      ...baseInputProps,
-      onChange: this.onInputChange,
-      editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
-        editor.setValue(`\n`.repeat(10));
-        this.setState({ lineCount: editor.getModel()?.getLineCount() });
-        this.inputRef = editor;
-      },
-      footerItems: {
-        start: [
-          <EuiText size="xs" color="subdued">
-            {`${this.state.lineCount} ${this.state.lineCount === 1 ? 'line' : 'lines'}`}
-          </EuiText>,
-          <EuiText size="xs" color="subdued">
-            {this.props.query.dataset?.timeFieldName || ''}
-          </EuiText>,
-          <QueryResult queryStatus={this.props.queryStatus!} />,
-        ],
-        end: [
-          <EuiButtonEmpty
-            iconSide="left"
-            iconType="clock"
-            size="xs"
-            onClick={this.toggleRecentQueries}
-          >
-            <EuiText size="xs" color="subdued">
-              {'Recent queries'}
-            </EuiText>
-          </EuiButtonEmpty>,
-        ],
-      },
-      provideCompletionItems: this.provideCompletionItems,
-    };
-
-    const singleLineInputProps = {
-      ...baseInputProps,
-      onChange: (value: string) => {
-        // Replace new lines with an empty string to prevent multi-line input
-        this.onQueryStringChange(value.replace(/[\r\n]+/gm, ''));
-        this.setState({ lineCount: undefined });
-      },
-      editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
-        this.inputRef = editor;
-
-        const handleEnterPress = () => {
-          this.onSubmit(this.props.query);
+      editor.addCommand(monaco.KeyCode.Enter, () => {
+        const newQuery = {
+          ...queryRef.current,
+          query: editor.getValue(),
         };
 
-        const disposable = editor.onKeyDown((e) => {
-          if (e.keyCode === monaco.KeyCode.Enter) {
-            // Prevent default Enter key behavior
-            e.preventDefault();
-            handleEnterPress();
-          }
-        });
+        onSubmit(newQuery, timefilter.getTime());
+      });
+    },
+    provideCompletionItems,
+    prepend: props.prepend,
+    footerItems: {
+      start: [
+        <EuiText
+          size="xs"
+          color="subdued"
+          className="queryEditor__footerItem"
+          data-test-subj="queryEditorFooterLineCount"
+        >
+          {`${lineCount ?? 1} ${lineCount === 1 || !lineCount ? 'line' : 'lines'}`}
+        </EuiText>,
+        <EuiText
+          size="xs"
+          color="subdued"
+          className="queryEditor__footerItem"
+          data-test-subj="queryEditorFooterTimestamp"
+        >
+          {query.dataset?.timeFieldName || ''}
+        </EuiText>,
+        <QueryResult queryStatus={props.queryStatus!} />,
+      ],
+      end: [
+        <EuiButtonEmpty
+          iconSide="left"
+          iconType="clock"
+          iconGap="s"
+          size="xs"
+          onClick={toggleRecentQueries}
+          className="queryEditor__footerItem"
+          data-test-subj="queryEditorFooterToggleRecentQueriesButton"
+          flush="both"
+        >
+          <EuiText size="xs" color="subdued">
+            {'Recent queries'}
+          </EuiText>
+        </EuiButtonEmpty>,
+      ],
+    },
+    queryStatus: props.queryStatus,
+  };
 
-        // Optional: Cleanup on component unmount
-        return () => {
-          disposable.dispose();
-        };
-      },
-      provideCompletionItems: this.provideCompletionItems,
-      prepend: this.props.prepend,
-    };
+  const languageEditorFunc = languageManager.getLanguage(query.language)!.editor;
 
-    const languageEditorFunc = this.languageManager.getLanguage(this.props.query.language)!.editor;
+  const languageEditor = useQueryEditor
+    ? languageEditorFunc(singleLineInputProps, {}, defaultInputProps)
+    : languageEditorFunc(singleLineInputProps, singleLineInputProps, {
+        filterBar: props.filterBar,
+      });
 
-    const languageEditor = useQueryEditor
-      ? languageEditorFunc(singleLineInputProps, {}, defaultInputProps)
-      : languageEditorFunc(singleLineInputProps, singleLineInputProps, {
-          filterBar: this.props.filterBar,
-        });
-
-    return (
+  return (
+    <div
+      className={classNames(
+        props.className,
+        'osdQueryEditor',
+        isCollapsed ? 'collapsed' : 'expanded',
+        !languageEditor.TopBar.Expanded && 'emptyExpanded'
+      )}
+    >
       <div
-        className={classNames(
-          className,
-          'osdQueryEditor',
-          this.state.isCollapsed ? 'collapsed' : 'expanded',
-          !languageEditor.TopBar.Expanded && 'emptyExpanded'
-        )}
-      >
-        <div
-          ref={this.bannerRef}
-          className={classNames('osdQueryEditor__banner', this.props.bannerClassName)}
-        />
-        <div className="osdQueryEditor__topBar">
-          <DatasetSelector onSubmit={this.props.onSubmit} />
-          <div className="osdQueryEditor__input">
-            {this.state.isCollapsed
-              ? languageEditor.TopBar.Collapsed()
-              : languageEditor.TopBar.Expanded && languageEditor.TopBar.Expanded()}
-          </div>
-          {languageSelector}
-          <div className="osdQueryEditor__querycontrols">
-            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-              {this.renderQueryControls(languageEditor.TopBar.Controls)}
-              {!languageEditor.TopBar.Expanded && this.renderToggleIcon()}
-              {this.props.savedQueryManagement}
-            </EuiFlexGroup>
-          </div>
+        ref={bannerRef}
+        className={classNames('osdQueryEditor__banner', props.bannerClassName)}
+      />
+      <div className="osdQueryEditor__topBar" data-test-subj="osdQueryEditorTopBar">
+        <div className="osdQueryEditor__input" data-test-subj="osdQueryEditorInput">
+          {isCollapsed
+            ? languageEditor.TopBar.Collapsed()
+            : languageEditor.TopBar.Expanded && languageEditor.TopBar.Expanded()}
         </div>
-        <div
-          ref={this.headerRef}
-          className={classNames('osdQueryEditor__header', this.props.headerClassName)}
-        />
-        {!this.state.isCollapsed && (
-          <>
-            <div className="osdQueryEditor__body">{languageEditor.Body()}</div>
-            <RecentQueriesTable
-              isVisible={this.state.isRecentQueryVisible && useQueryEditor}
-              queryString={this.queryString}
-              onClickRecentQuery={this.onClickRecentQuery}
+        {languageSelector}
+        <div className="osdQueryEditor__querycontrols" data-test-subj="osdQueryEditorQueryControls">
+          <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+            <div
+              ref={queryControlsContainer}
+              className="osdQueryEditor__extensionQueryControls"
+              data-test-subj="osdQueryEditorExtensionQueryControls"
             />
-          </>
-        )}
-
-        {this.renderQueryEditorExtensions()}
+            {renderQueryControls(languageEditor.TopBar.Controls)}
+            {!languageEditor.TopBar.Expanded && renderToggleIcon()}
+            {props.savedQueryManagement}
+          </EuiFlexGroup>
+        </div>
       </div>
-    );
-  }
-}
+      <div
+        ref={headerRef}
+        className={classNames('osdQueryEditor__header', props.headerClassName)}
+      />
+      {!isCollapsed && (
+        <>
+          <div className="osdQueryEditor__body">{languageEditor.Body()}</div>
+        </>
+      )}
+      <RecentQueriesTable
+        isVisible={isRecentQueryVisible && useQueryEditor}
+        queryString={queryString}
+        onClickRecentQuery={onClickRecentQuery}
+      />
+      <div ref={bottomPanelRef} />
+      {renderQueryEditorExtensions()}
+    </div>
+  );
+};
+
+// eslint-disable-next-line import/no-default-export
+export default QueryEditorUI;

@@ -190,6 +190,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       basePath: deps.http.basePath,
       auth: { get: deps.http.auth.get, isAuthenticated: deps.http.auth.isAuthenticated },
       csp: deps.http.csp,
+      cspReportOnly: deps.http.cspReportOnly,
       getServerInfo: deps.http.getServerInfo,
     },
     logging: {
@@ -226,6 +227,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerAsyncLocalStoreRequestHeader: deps.dynamicConfig.registerAsyncLocalStoreRequestHeader,
       getStartService: deps.dynamicConfig.getStartService,
     },
+    workspace: deps.workspace,
   };
 }
 
@@ -282,5 +284,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       getClient: deps.dynamicConfig.getClient,
       createStoreFromRequest: deps.dynamicConfig.createStoreFromRequest,
     },
+    workspace: deps.workspace,
   };
 }

@@ -55,7 +55,7 @@ export const render: ExpressionTypeDefinition<'render', ExpressionValueRender<un
   name: 'render',
   from: {
     '*': <T>(v: T): ExpressionValueRender<T> => ({
-      type: name,
+      type: 'render',
       as: 'debug',
       value: v,
     }),

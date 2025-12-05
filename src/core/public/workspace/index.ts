@@ -7,6 +7,7 @@ export {
   WorkspacesStart,
   WorkspacesService,
   WorkspacesSetup,
-  WorkspaceObject,
-  IWorkspaceClient,
+  WorkspaceError,
 } from './workspaces_service';
+
+export { IWorkspaceClient, IWorkspaceResponse, WorkspaceObject } from './types';

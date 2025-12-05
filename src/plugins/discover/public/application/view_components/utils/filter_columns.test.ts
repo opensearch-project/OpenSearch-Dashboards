@@ -41,4 +41,13 @@ describe('filterColumns', () => {
     const result = filterColumns(columns, undefined, ['a'], true);
     expect(result).toEqual(['_source']);
   });
+
+  it('should include unknown columns if included in fieldCounts regardless of MODIFY_COLUMN_ON_SWITCH', () => {
+    const columns = ['a', 'b', 'c'];
+    const fieldCounts = { a: 1, b: 1, c: 1 };
+    const resultWhenFalse = filterColumns(columns, indexPatternMock, ['a'], false, fieldCounts);
+    const resultWhenTrue = filterColumns(columns, indexPatternMock, ['a'], true, fieldCounts);
+    expect(resultWhenFalse).toEqual(['a', 'b', 'c']);
+    expect(resultWhenTrue).toEqual(['a', 'b', 'c']);
+  });
 });

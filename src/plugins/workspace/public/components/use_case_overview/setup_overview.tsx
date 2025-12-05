@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiTextColor } from '@elastic/eui';
 import { first } from 'rxjs/operators';
 import {
   ContentManagementPluginSetup,
@@ -15,6 +15,7 @@ import {
   ESSENTIAL_OVERVIEW_CONTENT_AREAS,
   ESSENTIAL_OVERVIEW_PAGE_ID,
   SECTIONS,
+  Section,
 } from '../../../../content_management/public';
 import { getStartedCards } from './get_started_cards';
 import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
@@ -35,6 +36,12 @@ const recentlyViewSectionRender = (contents: Content[]) => {
   );
 };
 
+export const getStartedSection: Section = {
+  id: SECTIONS.GET_STARTED,
+  order: 1000,
+  kind: 'card',
+};
+
 // Essential overview part
 export const setEssentialOverviewSection = (contentManagement: ContentManagementPluginSetup) => {
   contentManagement.registerPage({
@@ -53,11 +60,7 @@ export const setEssentialOverviewSection = (contentManagement: ContentManagement
         kind: 'custom',
         render: recentlyViewSectionRender,
       },
-      {
-        id: SECTIONS.GET_STARTED,
-        order: 1000,
-        kind: 'card',
-      },
+      getStartedSection,
     ],
   });
 };
@@ -76,14 +79,13 @@ export const registerEssentialOverviewContent = (
         order: card.order,
         description: card.description,
         title: card.title,
+        onClick: () => {
+          core.application.navigateToApp(card.navigateAppId);
+        },
+        getFooter: () => card.footer,
+        getIcon: () => card.icon,
         cardProps: {
-          selectable: {
-            onClick: () => {
-              core.application.navigateToApp(card.navigateAppId);
-            },
-            children: card.footer,
-            isSelected: false,
-          },
+          className: 'usecaseOverviewGettingStartedCard',
         },
       }),
     });
@@ -108,11 +110,7 @@ export const setAnalyticsAllOverviewSection = (contentManagement: ContentManagem
         kind: 'custom',
         render: recentlyViewSectionRender,
       },
-      {
-        id: SECTIONS.GET_STARTED,
-        order: 1000,
-        kind: 'card',
-      },
+      getStartedSection,
     ],
   });
 };
@@ -133,17 +131,13 @@ export const registerAnalyticsAllOverviewContent = (
       getContent: () => ({
         id: card.id,
         kind: 'card',
-        getIcon: () =>
-          React.createElement(EuiIcon, {
-            size: 'xl',
-            type: card.icon || 'wsSelector',
-            className: 'analyticsGettingStartedWorkspaceCardsIcon',
-          }),
+        getIcon: () => <EuiIcon type={card.icon || 'wsSelector'} size="l" color="primary" />,
         order: card.order || index,
         description: card.description,
-        title: card.title,
+        title: '',
+        getFooter: () => <EuiTextColor color="subdued">{card.title}</EuiTextColor>,
         cardProps: {
-          layout: 'horizontal',
+          className: 'usecaseOverviewGettingStartedCard',
         },
         onClick: async () => {
           const navGroups = await core.chrome.navGroup.getNavGroupsMap$().pipe(first()).toPromise();

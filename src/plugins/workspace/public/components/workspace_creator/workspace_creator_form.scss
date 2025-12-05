@@ -1,4 +1,4 @@
-$workspaceCreateRightSideBarTopOffset: 116px;
+$workspaceCreateRightSideBarTopOffset: $euiSizeL;
 $workspaceCreateRightSideBarBottomOffset: 100px;
 
 .workspaceCreateRightSidebar {
@@ -8,7 +8,7 @@ $workspaceCreateRightSideBarBottomOffset: 100px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  width: 280px;
+  width: 360px;
 
   @include ouiBreakpoint("xs","s") {
     position: static;

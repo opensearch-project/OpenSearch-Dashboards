@@ -282,8 +282,7 @@ export interface HttpFetchOptions extends HttpRequestInit {
    */
   withLongNumeralsSupport?: boolean;
 
-  /** @deprecated use {@link withLongNumeralsSupport} instead */
-  withLongNumerals?: boolean;
+  prependOptions?: PrependOptions;
 }
 
 /**

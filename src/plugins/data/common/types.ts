@@ -34,6 +34,7 @@ import { BucketAggType, MetricAggType } from './search';
 
 export * from './query/types';
 export * from './osd_field_types/types';
+export * from './data_views/types';
 export * from './index_patterns/types';
 export * from './data_frames/types';
 export * from './datasets/types';

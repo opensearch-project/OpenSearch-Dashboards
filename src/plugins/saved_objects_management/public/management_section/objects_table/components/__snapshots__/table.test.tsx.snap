@@ -8,6 +8,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
         "data-test-subj": "savedObjectSearchBar",
       }
     }
+    compressed={true}
     filters={
       Array [
         Object {
@@ -84,9 +85,13 @@ exports[`Table prevents saved objects from being deleted 1`] = `
               checked={true}
               label={
                 <FormattedMessage
-                  defaultMessage="Include related objects"
+                  defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                  values={Object {}}
+                  values={
+                    Object {
+                      "useUpdatedUX": false,
+                    }
+                  }
                 />
               }
               name="includeReferencesDeep"
@@ -236,6 +241,7 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
         "data-test-subj": "savedObjectSearchBar",
       }
     }
+    compressed={true}
     filters={
       Array [
         Object {
@@ -324,9 +330,13 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
               checked={true}
               label={
                 <FormattedMessage
-                  defaultMessage="Include related objects"
+                  defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                  values={Object {}}
+                  values={
+                    Object {
+                      "useUpdatedUX": false,
+                    }
+                  }
                 />
               }
               name="includeReferencesDeep"
@@ -485,6 +495,7 @@ exports[`Table should render normally 1`] = `
         "data-test-subj": "savedObjectSearchBar",
       }
     }
+    compressed={true}
     filters={
       Array [
         Object {
@@ -560,9 +571,13 @@ exports[`Table should render normally 1`] = `
               checked={true}
               label={
                 <FormattedMessage
-                  defaultMessage="Include related objects"
+                  defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                  values={Object {}}
+                  values={
+                    Object {
+                      "useUpdatedUX": false,
+                    }
+                  }
                 />
               }
               name="includeReferencesDeep"
@@ -712,6 +727,7 @@ exports[`Table should render normally when use updated UX 1`] = `
         "data-test-subj": "savedObjectSearchBar",
       }
     }
+    compressed={true}
     filters={
       Array [
         Object {
@@ -731,12 +747,18 @@ exports[`Table should render normally when use updated UX 1`] = `
     toolsRight={
       Array [
         <React.Fragment>
-          <EuiButtonIcon
-            display="base"
-            iconType="refresh"
-            size="s"
-            type="base"
-          />
+          <EuiToolTip
+            content="Refresh"
+            delay="regular"
+            position="top"
+          >
+            <EuiButtonIcon
+              display="base"
+              iconType="refresh"
+              size="s"
+              type="base"
+            />
+          </EuiToolTip>
         </React.Fragment>,
         <React.Fragment />,
         <EuiSmallButton
@@ -794,9 +816,13 @@ exports[`Table should render normally when use updated UX 1`] = `
               checked={true}
               label={
                 <FormattedMessage
-                  defaultMessage="Include related objects"
+                  defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                  values={Object {}}
+                  values={
+                    Object {
+                      "useUpdatedUX": true,
+                    }
+                  }
                 />
               }
               name="includeReferencesDeep"
@@ -828,7 +854,7 @@ exports[`Table should render normally when use updated UX 1`] = `
     }
   />
   <EuiSpacer
-    size="s"
+    size="m"
   />
   <div
     data-test-subj="savedObjectsTable"

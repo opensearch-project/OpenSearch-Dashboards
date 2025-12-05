@@ -5,8 +5,9 @@
 
 import { StyleState } from '../../application/utils/state_management';
 import { flattenDataHandler } from './utils/helpers';
-import { generateVegaLiteSpec } from './vega_lite_spec_builder';
-import { generateVegaSpec } from './vega_spec_builder';
+import { generateVegaLiteSpecForSeries } from './vega_lite_spec_series_builder';
+import { generateVegaSpecForSeries } from './vega_spec_series_builder';
+import { generateVegaSpecForSlices } from './vega_spec_slices_builder';
 import { VegaLiteSpec, VegaSpec } from './utils/types';
 
 /**
@@ -25,15 +26,28 @@ export const createVegaSpec = (
   const { dimensions } = visConfig;
 
   // Transform the data using the flattenDataHandler
-  const transformedData = flattenDataHandler(context, dimensions, 'series');
+  const handler = style.type !== 'pie' ? 'series' : 'slices';
+  const transformedData = flattenDataHandler(context, dimensions, handler);
 
+  return handler === 'series'
+    ? createVegaSpecForSeriesData(dimensions, transformedData, visConfig, style)
+    : createVegaSpecForSlicesData(dimensions, transformedData, visConfig, style);
+};
+
+// @ts-expect-error TS7006 TODO(ts-error): fixme
+const createVegaSpecForSeriesData = (dimensions, transformedData, visConfig, style) => {
   // Determine whether to use Vega or Vega-Lite based on the presence of split dimensions
   // TODO: Summarize the cases to use Vega. Change this to a better determine function.
   if (dimensions.splitRow || dimensions.splitColumn) {
     // Use Vega for more complex, split visualizations
-    return generateVegaSpec(transformedData, visConfig, style);
+    return generateVegaSpecForSeries(transformedData, visConfig, style);
   } else {
     // Use Vega-Lite for simpler visualizations
-    return generateVegaLiteSpec(transformedData, visConfig, style);
+    return generateVegaLiteSpecForSeries(transformedData, visConfig, style);
   }
+};
+
+// @ts-expect-error TS7006 TODO(ts-error): fixme
+const createVegaSpecForSlicesData = (dimensions, transformedData, visConfig, style) => {
+  return generateVegaSpecForSlices(transformedData, visConfig, style);
 };

@@ -29,6 +29,16 @@ export const themeVersionLabelMap: Record<string, string>;
 export const themeVersionValueMap: Record<string, string>;
 
 /**
+ * List of theme schema values
+ */
+export const themeSchemaValues: string[];
+
+/**
+ * List of theme options
+ */
+export const themeOptions: string[];
+
+/**
  * Theme CSS distributable filenames by themeVersion and themeMode
  * Note: used by bootstrap template
  */

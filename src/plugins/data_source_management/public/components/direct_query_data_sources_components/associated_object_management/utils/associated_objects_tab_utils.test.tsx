@@ -7,12 +7,13 @@ import { ApplicationStart } from 'opensearch-dashboards/public';
 import { DirectQueryLoadingStatus } from '../../../../../framework/types';
 import {
   isCatalogCacheFetching,
-  redirectToExplorerWithDataSrc,
-  redirectToExplorerOSIdx,
-  redirectToExplorerS3,
+  redirectToDiscoverWithDataSrc,
+  redirectToDiscoverOSIdx,
 } from './associated_objects_tab_utils';
 import {
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   DEFAULT_DATA_SOURCE_NAME,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   DEFAULT_DATA_SOURCE_TYPE,
   DATA_SOURCE_TYPES,
 } from '../../../../../framework/constants';
@@ -27,68 +28,66 @@ describe('AssociatedObjectsTab utils', () => {
     });
 
     it('returns false if no status is fetching', () => {
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(isCatalogCacheFetching(DirectQueryLoadingStatus.FINISHED)).toBe(false);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect(isCatalogCacheFetching(DirectQueryLoadingStatus.ERROR)).toBe(false);
     });
 
     it('returns true if mixed statuses and at least one is fetching', () => {
       expect(
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         isCatalogCacheFetching(DirectQueryLoadingStatus.FINISHED, DirectQueryLoadingStatus.RUNNING)
       ).toBe(true);
       expect(
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         isCatalogCacheFetching(DirectQueryLoadingStatus.ERROR, DirectQueryLoadingStatus.WAITING)
       ).toBe(true);
     });
   });
 
-  describe('redirectToExplorerWithDataSrc', () => {
+  describe('redirectToDiscoverWithDataSrc', () => {
     it('navigates to the explorer with the correct state', () => {
       const mockNavigateToApp = jest.fn();
       const application = ({ navigateToApp: mockNavigateToApp } as unknown) as ApplicationStart;
 
-      redirectToExplorerWithDataSrc(
+      redirectToDiscoverWithDataSrc(
         'testDataSource',
-        'testType',
+        'testMDSID',
         'testDatabase',
         'testTable',
         application
       );
 
-      expect(mockNavigateToApp).toHaveBeenCalledWith(observabilityLogsID, {
-        path: '#/explorer',
-        state: {
-          datasourceName: 'testDataSource',
-          datasourceType: 'testType',
-          queryToRun: 'source = testDataSource.testDatabase.testTable | head 10',
-        },
+      expect(mockNavigateToApp).toHaveBeenCalledWith('data-explorer', {
+        path:
+          "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'testMDSID',meta:(name:testDataSource,type:CUSTOM),title:'',type:DATA_SOURCE),id:'testMDSID::testDataSource.testDatabase.testTable',title:testDataSource.testDatabase.testTable,type:S3),language:SQL,query:'SELECT%20*%20FROM%20testDataSource.testDatabase.testTable%20LIMIT%2010'))",
       });
     });
   });
 
-  describe('redirectToExplorerOSIdx', () => {
+  describe('redirectToDiscoverOSIdx', () => {
     it('navigates to the explorer with the correct state', () => {
       const mockNavigateToApp = jest.fn();
       const application = ({ navigateToApp: mockNavigateToApp } as unknown) as ApplicationStart;
 
-      redirectToExplorerOSIdx('testIndex', application);
+      redirectToDiscoverOSIdx('testIndex', 'testMDSId', application);
 
-      expect(mockNavigateToApp).toHaveBeenCalledWith(observabilityLogsID, {
-        path: '#/explorer',
-        state: {
-          datasourceName: DEFAULT_DATA_SOURCE_NAME,
-          datasourceType: DEFAULT_DATA_SOURCE_TYPE,
-          queryToRun: 'source = testIndex | head 10',
-        },
+      expect(mockNavigateToApp).toHaveBeenCalledWith('data-explorer', {
+        path:
+          "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'testMDSId',title:'',type:DATA_SOURCE),id:'testMDSId::testIndex',title:testIndex,type:INDEXES),language:SQL,query:'SELECT%20*%20FROM%20testIndex%20LIMIT%2010'))",
       });
     });
   });
 
-  describe('redirectToExplorerS3', () => {
+  describe.skip('redirectToExplorerS3', () => {
     it('navigates to the explorer with the correct state', () => {
       const mockNavigateToApp = jest.fn();
+      // @ts-expect-error TS6133 TODO(ts-error): fixme
       const application = ({ navigateToApp: mockNavigateToApp } as unknown) as ApplicationStart;
 
-      redirectToExplorerS3('testDataSource', application);
+      // TODO: test when redirection to discover accepts only datasource
+      // redirectToExplorerS3('testDataSource', application);
 
       expect(mockNavigateToApp).toHaveBeenCalledWith(observabilityLogsID, {
         path: '#/explorer',

@@ -62,7 +62,18 @@ import {
 } from '../common';
 
 import { FilterLabel } from './ui';
-export { createEditor, DefaultInput, DQLBody, SingleLineInput } from './ui';
+export {
+  ACTION_BAR_BUTTONS_CONTAINER_ID,
+  createEditor,
+  DefaultInput,
+  DQLBody,
+  SingleLineInput,
+  DatasetSelector,
+  DatasetSelectorAppearance,
+  DetailedDataset,
+  AdvancedSelector,
+  ConfiguratorV2,
+} from './ui';
 
 import {
   generateFilters,
@@ -224,6 +235,66 @@ export {
   FieldFormat,
   DATA_FRAME_TYPES,
 } from '../common';
+
+/*
+ * Data views:
+ */
+
+import {
+  isDataViewFieldNested,
+  isDataViewFieldFilterable,
+  setDataViewFieldOverrides,
+  getDataViewOverrides,
+} from '../common';
+
+import {
+  ILLEGAL_CHARACTERS_KEY as DATA_VIEWS_ILLEGAL_CHARACTERS_KEY,
+  CONTAINS_SPACES_KEY as DATA_VIEWS_CONTAINS_SPACES_KEY,
+  ILLEGAL_CHARACTERS_VISIBLE as DATA_VIEWS_ILLEGAL_CHARACTERS_VISIBLE,
+  ILLEGAL_CHARACTERS as DATA_VIEWS_ILLEGAL_CHARACTERS,
+  isDefault as isDefaultDataView,
+  validateDataView,
+  getFromSavedObject as getDataViewFromSavedObject,
+  flattenHitWrapper as flattenHitWrapperDataView,
+  formatHitProvider as formatHitProviderDataView,
+} from './data_views';
+
+export type { DataViewsService } from './data_views';
+
+// Data views namespace:
+export const dataViews = {
+  DATA_VIEWS_ILLEGAL_CHARACTERS_KEY,
+  DATA_VIEWS_CONTAINS_SPACES_KEY,
+  DATA_VIEWS_ILLEGAL_CHARACTERS_VISIBLE,
+  DATA_VIEWS_ILLEGAL_CHARACTERS,
+  isDefault: isDefaultDataView,
+  isFilterable: isDataViewFieldFilterable,
+  setOverrides: setDataViewFieldOverrides,
+  getOverrides: getDataViewOverrides,
+  isNestedField: isDataViewFieldNested,
+  validate: validateDataView,
+  getFromSavedObject: getDataViewFromSavedObject,
+  flattenHitWrapper: flattenHitWrapperDataView,
+  formatHitProvider: formatHitProviderDataView,
+};
+
+export { DataViewsContract, DataView, IDataViewFieldList, DataViewField } from './data_views';
+
+export {
+  IDataView,
+  IDataViewFieldType,
+  IDataViewFieldSubType,
+  OPENSEARCH_FIELD_TYPES as OPENSEARCH_DATA_VIEW_FIELD_TYPES,
+  OSD_FIELD_TYPES as OSD_DATA_VIEW_FIELD_TYPES,
+  DataViewAttributes,
+  UI_SETTINGS as UI_SETTINGS_DATA_VIEWS,
+  TypeMeta as DataViewTypeMeta,
+  AggregationRestrictions as DataViewAggRestrictions,
+  DataViewSpec,
+  dataViewFieldList,
+} from '../common';
+
+export { DuplicateDataViewError } from '../common/data_views/errors';
 
 /*
  * Index patterns:
@@ -435,6 +506,7 @@ export {
   SearchBar,
   SearchBarProps,
   StatefulSearchBarProps,
+  DatasetSelectProps,
   IndexPatternSelectProps,
   QueryStringInput,
   QueryStringInputProps,
@@ -447,6 +519,8 @@ export {
   // for BWC, keeping the old name
   IUiStart as DataPublicPluginStartUi,
   useQueryStringManager,
+  getEffectiveLanguageForAutoComplete,
+  useCancelButtonTiming,
 } from './ui';
 
 /**
@@ -458,8 +532,10 @@ export { Filter, Query, RefreshInterval, TimeRange } from '../common';
 export {
   createSavedQueryService,
   connectStorageToQueryState,
+  useConnectStorageToQueryState,
   connectToQueryState,
   syncQueryStateWithUrl,
+  useSyncQueryStateWithUrl,
   QueryState,
   getDefaultQuery,
   FilterManager,
@@ -475,6 +551,7 @@ export {
   QueryControls,
   QueryResult,
   QueryStatus,
+  ResultStatus,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
@@ -485,7 +562,12 @@ export {
   QueryStateChange,
   QueryStart,
   PersistedLog,
+  LanguageReference,
+  DatasetIndexedViewsService,
+  validateTimeRange,
 } from './query';
+
+export { useSavedQuery } from './ui/search_bar';
 
 export { AggsStart } from './search/aggs';
 
@@ -547,3 +629,11 @@ export {
   DataSourceGroup,
   DataSourceOption,
 } from './data_sources/datasource_selector';
+
+export { SavedQueryManagementComponent } from './ui/saved_query_management';
+export { SaveQueryForm, SavedQueryMeta } from './ui/saved_query_form';
+export {
+  getSchemaConfigs,
+  SchemaConfig,
+  SchemaAttributeConfig,
+} from './ui/dataset_selector/configurator/schema_config';

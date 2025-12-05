@@ -1,3 +1,7 @@
 @import "@elastic/eui/src/global_styling/variables/header";
 
-$osdHeaderOffset: $euiHeaderHeightCompensation;
+// Base header offset including the banner height
+$osdHeaderOffset: calc(#{$euiHeaderHeightCompensation} + var(--global-banner-height, 0px));
+
+// Double header offset for expanded state
+$osdHeaderOffsetExpanded: calc((#{$euiHeaderHeightCompensation} * 2) + var(--global-banner-height, 0px));

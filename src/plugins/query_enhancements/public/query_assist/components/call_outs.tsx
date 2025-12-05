@@ -26,13 +26,13 @@ const EmptyIndexCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
     data-test-subj="query-assist-empty-index-callout"
     title={
       <FormattedMessage
-        id="queryAssist.callOut.emptyIndex.title"
+        id="queryEnhancements.callOut.emptyIndex.title"
         defaultMessage="Select a data source or index to ask a question."
       />
     }
     size="s"
     color="warning"
-    iconType="iInCircle"
+    iconType="help"
     dismissible
     onDismiss={props.onDismiss}
   />
@@ -44,7 +44,7 @@ const ProhibitedQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
     data-test-subj="query-assist-guard-callout"
     title={
       <FormattedMessage
-        id="queryAssist.callOut.prohibitedQuery.title"
+        id="queryEnhancements.callOut.prohibitedQuery.title"
         defaultMessage="I am unable to respond to this query. Try another question."
       />
     }
@@ -62,13 +62,13 @@ const EmptyQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
     data-test-subj="query-assist-empty-query-callout"
     title={
       <FormattedMessage
-        id="queryAssist.callOut.emptyQuery.title"
+        id="queryEnhancements.callOut.emptyQuery.title"
         defaultMessage="Enter a natural language question to automatically generate a query to view results."
       />
     }
     size="s"
     color="warning"
-    iconType="iInCircle"
+    iconType="help"
     dismissible
     onDismiss={props.onDismiss}
   />
@@ -80,7 +80,7 @@ const QueryGeneratedCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
     data-test-subj="query-assist-query-generated-callout"
     title={
       <FormattedMessage
-        id="queryAssist.callOut.queryGenerated.title"
+        id="queryEnhancements.callOut.queryGenerated.title"
         defaultMessage="{language} query generated. If there are any issues with the response, try adding more context to the question or a new question to submit."
         values={{ language: props.language }}
       />

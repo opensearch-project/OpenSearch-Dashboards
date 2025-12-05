@@ -90,6 +90,7 @@ export const AddData: FC<Props> = ({ addBasePath, features }) => {
 
 AddData.propTypes = {
   addBasePath: PropTypes.func.isRequired,
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   features: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,

@@ -28,7 +28,8 @@
  * under the License.
  */
 
-import { schema, TypeOf } from '@osd/config-schema';
+import { schema, TypeOf, Type } from '@osd/config-schema';
+import { themeOptions } from '@osd/ui-shared-deps';
 import { ConfigDeprecationProvider } from 'src/core/server';
 import { ServiceConfigDescriptor } from '../internal_types';
 
@@ -59,7 +60,7 @@ const configSchema = schema.object({
   defaults: schema.object({
     'theme:darkMode': schema.maybe(schema.boolean({ defaultValue: false })),
     'theme:version': schema.maybe(
-      schema.oneOf([schema.literal('v7'), schema.literal('Next (preview)')], {
+      schema.oneOf(themeOptions.map((option) => schema.literal(option)) as [Type<string>], {
         defaultValue: 'Next (preview)',
       })
     ),

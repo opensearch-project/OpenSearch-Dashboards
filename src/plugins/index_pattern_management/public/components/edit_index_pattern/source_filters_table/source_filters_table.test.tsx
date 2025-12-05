@@ -73,6 +73,7 @@ describe('SourceFiltersTable', () => {
         fieldWildcardMatcher={() => {}}
         filterFilter={''}
         saveIndexPattern={async () => {}}
+        useUpdatedUX={false}
       />
     );
 
@@ -86,6 +87,7 @@ describe('SourceFiltersTable', () => {
         fieldWildcardMatcher={() => {}}
         filterFilter={''}
         saveIndexPattern={async () => {}}
+        useUpdatedUX={false}
       />
     );
 
@@ -102,6 +104,7 @@ describe('SourceFiltersTable', () => {
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
         saveIndexPattern={async () => {}}
+        useUpdatedUX={false}
       />
     );
 
@@ -120,6 +123,7 @@ describe('SourceFiltersTable', () => {
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
         saveIndexPattern={async () => {}}
+        useUpdatedUX={false}
       />
     );
 
@@ -140,6 +144,7 @@ describe('SourceFiltersTable', () => {
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
         saveIndexPattern={saveIndexPattern}
+        useUpdatedUX={false}
       />
     );
 
@@ -162,6 +167,7 @@ describe('SourceFiltersTable', () => {
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
         saveIndexPattern={saveIndexPattern}
+        useUpdatedUX={false}
       />
     );
 
@@ -184,6 +190,7 @@ describe('SourceFiltersTable', () => {
         filterFilter={''}
         fieldWildcardMatcher={() => {}}
         saveIndexPattern={saveIndexPattern}
+        useUpdatedUX={false}
       />
     );
 

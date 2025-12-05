@@ -1,0 +1,12 @@
+.dataScopeCell {
+  display: flex;
+  flex-direction: column;
+
+  &__dataSource {
+    margin-bottom: $euiSizeXS;
+  }
+
+  &__icon {
+    margin-right: $euiSizeS;
+  }
+}

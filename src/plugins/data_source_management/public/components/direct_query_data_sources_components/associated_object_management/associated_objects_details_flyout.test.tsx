@@ -9,9 +9,11 @@ import '@testing-library/jest-dom';
 import { AssociatedObjectsDetailsFlyout } from './associated_objects_details_flyout';
 import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import {
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   getRenderAccelerationDetailsFlyout,
   getRenderCreateAccelerationFlyout,
 } from '../../../plugin';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { CatalogCacheManager } from '../../../../framework/catalog_cache/cache_manager';
 import { DirectQueryLoadingStatus } from '../../../../framework/types';
 import { useLoadTableColumnsToCache } from '../../../../framework/catalog_cache/cache_loader';
@@ -33,6 +35,7 @@ jest.mock('../../../../framework/catalog_cache/cache_manager', () => ({
 
 const mockHttp: Partial<HttpStart> = {};
 const mockNotifications: Partial<NotificationsStart> = {
+  // @ts-expect-error TS2740 TODO(ts-error): fixme
   toasts: {
     addWarning: jest.fn(),
   },
@@ -52,6 +55,7 @@ const tableDetail = {
 const renderComponent = (props = {}) => {
   return render(
     <AssociatedObjectsDetailsFlyout
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
       tableDetail={tableDetail}
       datasourceName="testDatasource"
       resetFlyout={jest.fn()}
@@ -106,13 +110,9 @@ describe('AssociatedObjectsDetailsFlyout', () => {
     renderComponent();
     fireEvent.click(screen.getAllByRole('button')[0]);
     await waitFor(() => {
-      expect(mockApplication.navigateToApp).toHaveBeenCalledWith('observability-logs', {
-        path: '#/explorer',
-        state: {
-          datasourceName: 'testDatasource',
-          datasourceType: 's3glue',
-          queryToRun: 'source = testDatasource.testDatabase.testTable | head 10',
-        },
+      expect(mockApplication.navigateToApp).toHaveBeenCalledWith('data-explorer', {
+        path:
+          "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'',meta:(name:testDatasource,type:CUSTOM),title:'',type:DATA_SOURCE),id:'::testDatasource.testDatabase.testTable',title:testDatasource.testDatabase.testTable,type:S3),language:SQL,query:'SELECT%20*%20FROM%20testDatasource.testDatabase.testTable%20LIMIT%2010'))",
       });
     });
   });

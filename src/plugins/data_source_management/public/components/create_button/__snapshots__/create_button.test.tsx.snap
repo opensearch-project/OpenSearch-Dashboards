@@ -8,7 +8,7 @@ exports[`CreateButton should render normally 1`] = `
 >
   <FormattedMessage
     defaultMessage="Create data source connection"
-    id="dataSourcesManagement.dataSourceListing.createButton"
+    id="dataSourcesManagement.dataSourceListing.createDataSourceButton"
     values={Object {}}
   />
 </EuiSmallButton>

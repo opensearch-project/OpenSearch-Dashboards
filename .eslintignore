@@ -12,6 +12,7 @@
 /test/fixtures/scenarios
 node_modules
 target
+cypress/fixtures
 
 !/.eslintrc.js
 

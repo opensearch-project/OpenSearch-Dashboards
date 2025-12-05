@@ -22,21 +22,20 @@ export const useCanSave = () => {
 };
 
 // TODO: Need to finalize the error messages
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 const getErrorMsg = (isEmpty, hasNoChange, hasDraftAgg) => {
-  const i18nTranslate = (key: string, defaultMessage: string) =>
-    i18n.translate(`visBuilder.saveVisualizationTooltip.${key}`, {
-      defaultMessage,
-    });
-
   if (isEmpty) {
-    return i18nTranslate('empty', 'The canvas is empty. Add some aggregations before saving.');
+    return i18n.translate('visBuilder.saveVisualizationTooltip.empty', {
+      defaultMessage: 'The canvas is empty. Add some aggregations before saving.',
+    });
   } else if (hasNoChange) {
-    return i18nTranslate('noChange', 'Add some changes before saving.');
+    return i18n.translate('visBuilder.saveVisualizationTooltip.noChange', {
+      defaultMessage: 'Add some changes before saving.',
+    });
   } else if (hasDraftAgg) {
-    return i18nTranslate(
-      'hasDraftAgg',
-      'Has unapplied aggregations changes, update them before saving.'
-    );
+    return i18n.translate('visBuilder.saveVisualizationTooltip.hasDraftAgg', {
+      defaultMessage: 'Update unapplied aggregation changes before saving.',
+    });
   } else {
     return undefined;
   }

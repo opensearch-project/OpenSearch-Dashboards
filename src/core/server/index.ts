@@ -58,7 +58,7 @@ import {
   OpenSearchServiceStart,
   IScopedClusterClient,
 } from './opensearch';
-import { HttpServiceSetup, HttpServiceStart } from './http';
+import { HttpServiceSetup, HttpServiceStart, OpenSearchDashboardsRequest } from './http';
 import { HttpResources } from './http_resources';
 
 import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
@@ -93,6 +93,7 @@ import {
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
+import { WorkspaceSetup, WorkspaceStart } from './workspace';
 
 export { CoreUsageData, CoreConfigUsageData, CoreEnvironmentUsageData, CoreServicesUsageData };
 
@@ -360,6 +361,7 @@ export {
   StringValidationRegexString,
   CURRENT_USER_PLACEHOLDER,
   UiSettingScope,
+  CURRENT_WORKSPACE_PLACEHOLDER,
 } from './ui_settings';
 
 export {
@@ -371,8 +373,21 @@ export {
   MetricsServiceStart,
 } from './metrics';
 
-export { AppCategory, WorkspaceAttribute, PermissionModeId } from '../types';
-export { DEFAULT_APP_CATEGORIES, WORKSPACE_TYPE, DEFAULT_NAV_GROUPS } from '../utils';
+export {
+  AppCategory,
+  WorkspaceAttribute,
+  PermissionModeId,
+  WorkspaceFindOptions,
+  WorkspacePermissionMode,
+} from '../types';
+export {
+  DEFAULT_APP_CATEGORIES,
+  WORKSPACE_TYPE,
+  DEFAULT_NAV_GROUPS,
+  WORKSPACE_PATH_PREFIX,
+  WORKSPACE_USE_CASE_PREFIX,
+  getUseCaseFeatureConfig,
+} from '../utils';
 
 export {
   SavedObject,
@@ -436,6 +451,9 @@ export interface RequestHandlerContext {
     dynamicConfig: {
       client: IDynamicConfigurationClient;
       asyncLocalStore: AsyncLocalStorageContext | undefined;
+      createStoreFromRequest: (
+        req: OpenSearchDashboardsRequest
+      ) => AsyncLocalStorageContext | undefined;
     };
     auditor: Auditor;
   };
@@ -480,6 +498,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   auditTrail: AuditTrailSetup;
   /** {@link DynamicConfigServiceSetup} */
   dynamicConfigService: DynamicConfigServiceSetup;
+  /** {@link WorkspaceSetup} */
+  workspace: WorkspaceSetup;
 }
 
 /**
@@ -521,6 +541,8 @@ export interface CoreStart {
   crossCompatibility: CrossCompatibilityServiceStart;
   /** {@link DynamicConfigServiceStart} */
   dynamicConfig: DynamicConfigServiceStart;
+  /** {@link WorkspaceStart} */
+  workspace: WorkspaceStart;
 }
 
 export {

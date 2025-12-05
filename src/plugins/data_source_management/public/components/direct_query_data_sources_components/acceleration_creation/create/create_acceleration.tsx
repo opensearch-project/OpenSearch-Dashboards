@@ -36,7 +36,7 @@ import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cach
 import { IndexAdvancedSettings } from '../selectors/index_advanced_settings';
 import { IndexSettingOptions } from '../selectors/index_setting_options';
 import { IndexTypeSelector } from '../selectors/index_type_selector';
-import { PreviewSQLDefinition } from '../selectors/preview_sql_defintion';
+import { PreviewSQLDefinition } from '../selectors/preview_sql_definition';
 import { AccelerationDataSourceSelector } from '../selectors/source_selector';
 import { QueryVisualEditor } from '../visual_editors/query_visual_editor';
 import { CreateAccelerationButton } from './create_acceleration_button';
@@ -277,6 +277,7 @@ export const CreateAcceleration = ({
               resetFlyout={resetFlyout}
               notifications={notifications}
               application={application}
+              http={http}
             />
           </EuiForm>
         </EuiFlyoutBody>

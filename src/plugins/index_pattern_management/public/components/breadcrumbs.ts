@@ -34,9 +34,13 @@ import { IndexPattern } from '../../../data/public';
 export function getListBreadcrumbs(currentWorkspaceName?: string) {
   return [
     {
-      text: i18n.translate('indexPatternManagement.indexPatterns.listBreadcrumb', {
-        defaultMessage: currentWorkspaceName ? 'Workspace index patterns' : 'Index patterns',
-      }),
+      text: currentWorkspaceName
+        ? i18n.translate('indexPatternManagement.inWorkspace.indexPatterns.listBreadcrumb', {
+            defaultMessage: 'Workspace index patterns',
+          })
+        : i18n.translate('indexPatternManagement.indexPatterns.listBreadcrumb', {
+            defaultMessage: 'Index patterns',
+          }),
       href: `/`,
     },
   ];

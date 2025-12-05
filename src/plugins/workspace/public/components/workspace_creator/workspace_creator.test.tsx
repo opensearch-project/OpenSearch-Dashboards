@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { PublicAppInfo } from 'opensearch-dashboards/public';
+import { PublicAppInfo, UseCaseId } from 'opensearch-dashboards/public';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
@@ -18,6 +18,17 @@ import {
 import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
 import { DataSourceConnectionType } from '../../../common/types';
 import * as utils from '../../utils';
+import * as workspaceUtilsExports from '../utils/workspace';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({
+    search: '',
+    pathname: '',
+    hash: '',
+    state: undefined,
+  }),
+}));
 
 const workspaceClientCreate = jest
   .fn()
@@ -55,8 +66,20 @@ const dataSourcesList = [
       return 'ds2';
     },
   },
+  {
+    id: 'id3',
+    title: 'dqs1',
+    description: 'Description of data connection 1',
+    auth: '',
+    dataSourceEngineType: '' as DataSourceEngineType,
+    workspaces: [],
+    type: 'data-connection',
+    connectionType: 'AWS Security Lake',
+    get: () => {
+      return 'ds2';
+    },
+  },
 ];
-
 const dataSourceConnectionsList = [
   {
     id: 'id1',
@@ -71,9 +94,17 @@ const dataSourceConnectionsList = [
     connectionType: DataSourceConnectionType.OpenSearchConnection,
     type: 'OpenSearch',
   },
+  {
+    id: 'id3',
+    name: 'dqs1',
+    description: 'Description of data connection 1',
+    connectionType: DataSourceConnectionType.DataConnection,
+    type: 'AWS Security Lake',
+  },
 ];
 
 const mockCoreStart = coreMock.createStart();
+
 jest.spyOn(utils, 'fetchDataSourceConnections').mockImplementation(async (passedDataSources) => {
   return dataSourceConnectionsList.filter(({ id }) =>
     passedDataSources.some((dataSource) => dataSource.id === id)
@@ -82,8 +113,16 @@ jest.spyOn(utils, 'fetchDataSourceConnections').mockImplementation(async (passed
 
 const WorkspaceCreator = ({
   isDashboardAdmin = false,
+  dataSourceEnabled = false,
+  isPermissionEnabled = true,
   ...props
-}: Partial<WorkspaceCreatorProps & { isDashboardAdmin: boolean }>) => {
+}: Partial<
+  WorkspaceCreatorProps & {
+    isDashboardAdmin: boolean;
+    dataSourceEnabled?: boolean;
+    isPermissionEnabled?: boolean;
+  }
+>) => {
   const { Provider } = createOpenSearchDashboardsReactContext({
     ...mockCoreStart,
     ...{
@@ -92,7 +131,7 @@ const WorkspaceCreator = ({
         capabilities: {
           ...mockCoreStart.application.capabilities,
           workspaces: {
-            permissionEnabled: true,
+            permissionEnabled: isPermissionEnabled,
           },
           dashboards: {
             isDashboardAdmin,
@@ -123,9 +162,12 @@ const WorkspaceCreator = ({
           }),
         },
       },
-      dataSourceManagement: {},
+      dataSourceManagement: dataSourceEnabled ? {} : undefined,
       navigationUI: {
         HeaderControl: () => null,
+      },
+      useCaseService: {
+        supportedUseCasesForServerless: [UseCaseId.ESSENTIAL_USE_CASE_ID],
       },
     },
   });
@@ -133,6 +175,7 @@ const WorkspaceCreator = ({
 
   return (
     <Provider>
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <WorkspaceCreatorComponent {...props} registeredUseCases$={registeredUseCases$} />
     </Provider>
   );
@@ -162,11 +205,11 @@ describe('WorkspaceCreator', () => {
   });
 
   afterAll(() => {
-    window.location = location;
+    window.location = location as Location;
   });
 
   it('should not create workspace when name is empty', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId, getByText } = render(<WorkspaceCreator />);
 
     // Ensure workspace create form rendered
     await waitFor(() => {
@@ -180,6 +223,7 @@ describe('WorkspaceCreator', () => {
       },
     });
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    expect(getByText('Name is required. Enter a name.')).toBeInTheDocument();
     expect(workspaceClientCreate).not.toHaveBeenCalled();
   });
 
@@ -212,7 +256,7 @@ describe('WorkspaceCreator', () => {
   });
 
   it('create workspace with detailed information', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId, getByRole } = render(<WorkspaceCreator />);
 
     // Ensure workspace create form rendered
     await waitFor(() => {
@@ -226,26 +270,28 @@ describe('WorkspaceCreator', () => {
     fireEvent.input(descriptionInput, {
       target: { value: 'test workspace description' },
     });
-    const colorSelector = getByTestId(
-      'euiColorPickerAnchor workspaceForm-workspaceDetails-colorPicker'
-    );
-    fireEvent.input(colorSelector, {
-      target: { value: '#000000' },
-    });
+    const colorSelector = getByTestId('euiColorPickerAnchor');
+    fireEvent.click(colorSelector);
+    fireEvent.click(getByRole('option', { name: 'Select #54B399 as the color' }));
     fireEvent.click(getByTestId('workspaceUseCase-observability'));
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'test workspace name',
-        color: '#000000',
+        color: '#54B399',
         description: 'test workspace description',
         features: expect.arrayContaining(['use-case-observability']),
       }),
       {
         dataSources: [],
+        dataConnections: [],
         permissions: {
-          library_write: { users: ['%me%'] },
-          write: { users: ['%me%'] },
+          library_write: {
+            users: ['%me%'],
+          },
+          write: {
+            users: ['%me%'],
+          },
         },
       }
     );
@@ -299,42 +345,6 @@ describe('WorkspaceCreator', () => {
     expect(notificationToastsAddSuccess).not.toHaveBeenCalled();
   });
 
-  it('create workspace with customized permissions', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
-
-    // Ensure workspace create form rendered
-    await waitFor(() => {
-      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
-    });
-    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
-    fireEvent.input(nameInput, {
-      target: { value: 'test workspace name' },
-    });
-    fireEvent.click(getByTestId('workspaceUseCase-observability'));
-    fireEvent.click(getByTestId('workspaceForm-permissionSettingPanel-addNew'));
-    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    expect(workspaceClientCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'test workspace name',
-      }),
-      {
-        dataSources: [],
-        permissions: {
-          write: {
-            users: ['%me%'],
-          },
-          library_write: {
-            users: ['%me%'],
-          },
-        },
-      }
-    );
-    await waitFor(() => {
-      expect(notificationToastsAddSuccess).toHaveBeenCalled();
-    });
-    expect(notificationToastsAddDanger).not.toHaveBeenCalled();
-  });
-
   it('create workspace with customized selected dataSources', async () => {
     Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
       configurable: true,
@@ -345,7 +355,7 @@ describe('WorkspaceCreator', () => {
       value: 600,
     });
     const { getByTestId, getAllByText, getByText } = render(
-      <WorkspaceCreator isDashboardAdmin={true} />
+      <WorkspaceCreator isDashboardAdmin={true} dataSourceEnabled />
     );
 
     // Ensure workspace create form rendered
@@ -361,7 +371,7 @@ describe('WorkspaceCreator', () => {
     await waitFor(() => {
       expect(
         getByText(
-          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
+          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
         )
       ).toBeInTheDocument();
       expect(getByText(dataSourcesList[0].title)).toBeInTheDocument();
@@ -374,16 +384,91 @@ describe('WorkspaceCreator', () => {
       expect.objectContaining({
         name: 'test workspace name',
       }),
-      {
+      expect.objectContaining({
+        dataConnections: [],
         dataSources: ['id1'],
-        permissions: {
-          library_write: {
-            users: ['%me%'],
-          },
-          write: {
-            users: ['%me%'],
-          },
-        },
+      })
+    );
+    await waitFor(() => {
+      expect(notificationToastsAddSuccess).toHaveBeenCalled();
+    });
+    expect(notificationToastsAddDanger).not.toHaveBeenCalled();
+  });
+
+  it('create workspace with customized selected data connections', async () => {
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+      configurable: true,
+      value: 600,
+    });
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      value: 600,
+    });
+    const { getByTestId, getAllByText, getByText } = render(
+      <WorkspaceCreator isDashboardAdmin={true} dataSourceEnabled />
+    );
+
+    // Ensure workspace create form rendered
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceUseCase-observability'));
+    fireEvent.click(getByTestId('workspace-creator-dqc-assign-button'));
+
+    await waitFor(() => {
+      expect(
+        getByText(
+          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
+        )
+      ).toBeInTheDocument();
+      expect(getByText(dataSourcesList[2].title)).toBeInTheDocument();
+    });
+    fireEvent.click(getByText(dataSourcesList[2].title));
+    fireEvent.click(getAllByText('Associate data sources')[1]);
+
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    expect(workspaceClientCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'test workspace name',
+      }),
+      expect.objectContaining({
+        dataConnections: ['id3'],
+        dataSources: [],
+      })
+    );
+    await waitFor(() => {
+      expect(notificationToastsAddSuccess).toHaveBeenCalled();
+    });
+    expect(notificationToastsAddDanger).not.toHaveBeenCalled();
+  });
+
+  it('should not include permissions parameter if permissions not enabled', async () => {
+    const { getByTestId } = render(
+      <WorkspaceCreator isDashboardAdmin={true} isPermissionEnabled={false} />
+    );
+
+    // Ensure workspace create form rendered
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceUseCase-observability'));
+
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    expect(workspaceClientCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'test workspace name',
+      }),
+      {
+        dataConnections: [],
+        dataSources: [],
       }
     );
     await waitFor(() => {
@@ -404,6 +489,10 @@ describe('WorkspaceCreator', () => {
     await waitFor(() => {
       expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
     });
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).toHaveBeenCalledTimes(1);
 
@@ -417,12 +506,65 @@ describe('WorkspaceCreator', () => {
     });
   });
 
-  it('should redirect to workspace use case landing page after created successfully', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+  it('should redirect to workspace use case landing page if permission not enabled', async () => {
+    const { getByTestId } = render(<WorkspaceCreator isPermissionEnabled={false} />);
 
     // Ensure workspace create form rendered
     await waitFor(() => {
       expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    jest.useFakeTimers();
+    jest.runAllTimers();
+    await waitFor(() => {
+      expect(setHrefSpy).toHaveBeenCalledWith(expect.stringContaining('/app/discover'));
+    });
+    jest.useRealTimers();
+  });
+
+  it('should redirect to workspace setting collaborators page if jump to collaborators checked', async () => {
+    const { getByTestId } = render(<WorkspaceCreator isDashboardAdmin />);
+    const navigateToCollaboratorsMock = jest.fn();
+    jest
+      .spyOn(workspaceUtilsExports, 'navigateToAppWithinWorkspace')
+      .mockImplementation(navigateToCollaboratorsMock);
+
+    // Ensure workspace create form rendered
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('jumpToCollaboratorsCheckbox'));
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    jest.useFakeTimers();
+    jest.runAllTimers();
+    await waitFor(() => {
+      expect(navigateToCollaboratorsMock).toHaveBeenCalledWith(
+        expect.anything(),
+        'successResult',
+        'workspace_collaborators'
+      );
+    });
+    jest.useRealTimers();
+  });
+
+  it('should redirect to workspace use case landing page if jump to collaborators not checked', async () => {
+    const { getByTestId } = render(<WorkspaceCreator isDashboardAdmin />);
+
+    // Ensure workspace create form rendered
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
     });
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     jest.useFakeTimers();

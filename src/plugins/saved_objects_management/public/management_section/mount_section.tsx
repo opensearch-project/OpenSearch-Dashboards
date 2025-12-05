@@ -47,12 +47,19 @@ interface MountParams {
   mountParams: ManagementAppMountParams & { wrapInPage?: boolean };
   dataSourceEnabled: boolean;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  isDatasetManagementEnabled: boolean;
 }
 
 let allowedObjectTypes: string[] | undefined;
 
-const title = i18n.translate('savedObjectsManagement.objects.savedObjectsTitle', {
+const savedObjectsTitle = i18n.translate('savedObjectsManagement.objects.savedObjectsTitle', {
   defaultMessage: 'Saved Objects',
+});
+const workspaceAssetsTitle = i18n.translate('savedObjectsManagement.objects.workspaceAssetsTitle', {
+  defaultMessage: 'Workspace assets',
+});
+const assetsTitle = i18n.translate('savedObjectsManagement.objects.assetsTitle', {
+  defaultMessage: 'Assets',
 });
 
 const SavedObjectsEditionPage = lazy(() => import('./saved_objects_edition_page'));
@@ -63,6 +70,7 @@ export const mountManagementSection = async ({
   serviceRegistry,
   dataSourceEnabled,
   dataSourceManagement,
+  isDatasetManagementEnabled,
 }: MountParams) => {
   const [coreStart, { data, uiActions, navigation }, pluginStart] = await core.getStartServices();
   const { element, history, setBreadcrumbs } = mountParams;
@@ -75,7 +83,19 @@ export const mountManagementSection = async ({
     ? allowedObjectTypes
     : allowedObjectTypes.filter((type) => type !== 'data-source');
 
-  coreStart.chrome.docTitle.change(title);
+  const useUpdatedUX = coreStart.uiSettings.get('home:useNewHomePage');
+  const currentWorkspaceId = coreStart.workspaces.currentWorkspaceId$.getValue();
+  const getDocTitle = () => {
+    if (currentWorkspaceId) {
+      return workspaceAssetsTitle;
+    }
+    if (useUpdatedUX) {
+      return assetsTitle;
+    }
+    return savedObjectsTitle;
+  };
+
+  coreStart.chrome.docTitle.change(getDocTitle());
 
   const capabilities = coreStart.application.capabilities;
 
@@ -88,8 +108,6 @@ export const mountManagementSection = async ({
     }
     return children! as React.ReactElement;
   };
-
-  const useUpdatedUX = coreStart.uiSettings.get('home:useNewHomePage');
 
   const content = (
     <Router history={history}>
@@ -125,6 +143,7 @@ export const mountManagementSection = async ({
                 dataSourceManagement={dataSourceManagement}
                 navigation={navigation}
                 useUpdatedUX={useUpdatedUX}
+                isDatasetManagementEnabled={isDatasetManagementEnabled}
               />
             </Suspense>
           </RedirectToHomeIfUnauthorized>

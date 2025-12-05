@@ -2,23 +2,32 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import { i18n } from '@osd/i18n';
+import { BehaviorSubject, Subscription } from 'rxjs';
+import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
+import { DataStorage, OSD_FIELD_TYPES } from '../../data/common';
+import {
+  createEditor,
+  DefaultInput,
+  LanguageConfig,
+  Query,
+  SingleLineInput,
+} from '../../data/public';
 import { ConfigSchema } from '../common/config';
-import { setData, setStorage } from './services';
+import { s3TypeConfig } from './datasets';
 import { createQueryAssistExtension } from './query_assist';
+import { pplLanguageReference, sqlLanguageReference } from './query_editor_extensions';
 import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
+import { setData, setStorage, setUiActions } from './services';
 import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
-import { LanguageConfig, Query } from '../../data/public';
-import { s3TypeConfig } from './datasets';
-import { createEditor, DefaultInput, SingleLineInput } from '../../data/public';
-import { QueryLanguageReference } from './query_editor/query_language_reference';
-import { DataStorage } from '../../data/common';
+import { PPLFilterUtils } from './search/filters';
+import { NaturalLanguageFilterUtils } from './search/filters/natural_language_filter_utils';
 
 export class QueryEnhancementsPlugin
   implements
@@ -30,6 +39,11 @@ export class QueryEnhancementsPlugin
     > {
   private readonly storage: DataStorage;
   private readonly config: ConfigSchema;
+  private isQuerySummaryCollapsed$ = new BehaviorSubject<boolean>(false);
+  private resultSummaryEnabled$ = new BehaviorSubject<boolean>(false);
+  private isSummaryAgentAvailable$ = new BehaviorSubject<boolean>(false);
+  private currentAppId$ = new BehaviorSubject<string | undefined>(undefined);
+  private appIdSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -38,90 +52,208 @@ export class QueryEnhancementsPlugin
 
   public setup(
     core: CoreSetup<QueryEnhancementsPluginStartDependencies>,
-    { data }: QueryEnhancementsPluginSetupDependencies
+    { data, usageCollection }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
     const { queryString } = data.query;
-    const pplSearchInterceptor = new PPLSearchInterceptor({
-      toasts: core.notifications.toasts,
-      http: core.http,
-      uiSettings: core.uiSettings,
-      startServices: core.getStartServices(),
-      usageCollector: data.search.usageCollector,
-    });
+    const { currentAppId$ } = this;
 
-    const sqlSearchInterceptor = new SQLSearchInterceptor({
-      toasts: core.notifications.toasts,
-      http: core.http,
-      uiSettings: core.uiSettings,
-      startServices: core.getStartServices(),
-      usageCollector: data.search.usageCollector,
-    });
+    // Define controls once for each language and register language configurations outside of `getUpdates$`
+    const pplControls = [pplLanguageReference('PPL')];
+    const sqlControls = [sqlLanguageReference('SQL')];
 
-    const queryLanguageReference = new QueryLanguageReference(core.getStartServices());
-    const pplControls = [queryLanguageReference.createPPLLanguageReference()];
-    const sqlControls = [queryLanguageReference.createPPLLanguageReference()];
-
-    const enhancedPPLQueryEditor = createEditor(SingleLineInput, null, pplControls, DefaultInput);
-
-    const enhancedSQLQueryEditor = createEditor(SingleLineInput, null, sqlControls, DefaultInput);
-
-    // Register PPL language
+    // Register PPL language configuration
     const pplLanguageConfig: LanguageConfig = {
       id: 'PPL',
       title: 'PPL',
-      search: pplSearchInterceptor,
-      getQueryString: (query: Query) => {
-        return `source = ${query.dataset?.title}`;
-      },
+      search: new PPLSearchInterceptor({
+        toasts: core.notifications.toasts,
+        http: core.http,
+        uiSettings: core.uiSettings,
+        startServices: core.getStartServices(),
+        usageCollector: data.search.usageCollector,
+      }),
+      getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
+      addFiltersToQuery: PPLFilterUtils.addFiltersToQuery,
+      addFiltersToPrompt: NaturalLanguageFilterUtils.addFiltersToPrompt,
       fields: {
-        filterable: false,
+        sortable: false,
+        get filterable() {
+          const currentAppId = currentAppId$.getValue();
+          // PPL filters are only supported in explore and dashboards, return
+          // undefined to use `filterable` value from field definitions.
+          if (currentAppId?.startsWith('explore/') || currentAppId === 'dashboards')
+            return undefined;
+          return false;
+        },
         visualizable: false,
+        formatter: (value: string, type: OSD_FIELD_TYPES) => {
+          switch (type) {
+            case OSD_FIELD_TYPES.DATE:
+              return moment.utc(value).format('YYYY-MM-DDTHH:mm:ss.SSSZ'); // PPL date fields need special formatting in order for discover table formatter to render in the correct time zone
+
+            default:
+              return value;
+          }
+        },
+      },
+      docLink: {
+        title: i18n.translate('queryEnhancements.pplLanguage.docLink', {
+          defaultMessage: 'PPL documentation',
+        }),
+        url: 'https://opensearch.org/docs/latest/search-plugins/sql/ppl/syntax/',
       },
       showDocLinks: false,
-      editor: enhancedPPLQueryEditor,
-      editorSupportedAppNames: ['discover'],
-      supportedAppNames: ['discover', 'data-explorer'],
+      editor: createEditor(SingleLineInput, null, pplControls, DefaultInput),
+      editorSupportedAppNames: ['discover', 'explore'],
+      supportedAppNames: ['discover', 'data-explorer', 'explore', 'dataset_management'],
+      sampleQueries: [
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWind', {
+            defaultMessage: 'The title field contains the word wind.',
+          }),
+          query: `SOURCE = your_table | WHERE LIKE(title, '%wind%')`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWindOrWindy', {
+            defaultMessage: 'The title field contains the word wind or the word windy.',
+          }),
+          query: `SOURCE = your_table | WHERE LIKE(title, '%wind%') OR LIKE(title, '%windy%')`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleContainsPhraseWindRises', {
+            defaultMessage: 'The title field contains the phrase wind rises.',
+          }),
+          query: `SOURCE = your_table | WHERE LIKE(title, '%wind rises%')`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleExactMatchWindRises', {
+            defaultMessage: 'The title.keyword field exactly matches The wind rises.',
+          }),
+          query: `SOURCE = your_table | WHERE title = 'The wind rises'`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleFieldsContainWind', {
+            defaultMessage:
+              'Any field that starts with title (for example, title and title.keyword) contains the word wind',
+          }),
+          query: `SOURCE = your_table | WHERE LIKE(title, '%wind%') OR title = 'wind'`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.descriptionFieldExists', {
+            defaultMessage: 'Documents in which the field description exists.',
+          }),
+          query: `SOURCE = your_table | WHERE ISNOTNULL(description) AND description != '';`,
+        },
+      ],
     };
     queryString.getLanguageService().registerLanguage(pplLanguageConfig);
 
-    // Register SQL language
+    // Register SQL language configuration
     const sqlLanguageConfig: LanguageConfig = {
       id: 'SQL',
-      title: 'SQL',
-      search: sqlSearchInterceptor,
-      getQueryString: (query: Query) => {
-        return `SELECT * FROM ${queryString.getQuery().dataset?.title} LIMIT 10`;
-      },
-      fields: {
-        filterable: false,
-        visualizable: false,
+      title: 'OpenSearch SQL',
+      search: new SQLSearchInterceptor({
+        toasts: core.notifications.toasts,
+        http: core.http,
+        uiSettings: core.uiSettings,
+        startServices: core.getStartServices(),
+        usageCollector: data.search.usageCollector,
+      }),
+      getQueryString: (currentQuery: Query) =>
+        `SELECT * FROM ${currentQuery.dataset?.title} LIMIT 10`,
+      fields: { sortable: false, filterable: false, visualizable: false },
+      docLink: {
+        title: i18n.translate('queryEnhancements.sqlLanguage.docLink', {
+          defaultMessage: 'SQL documentation',
+        }),
+        url: 'https://opensearch.org/docs/latest/search-plugins/sql/sql/basic/',
       },
       showDocLinks: false,
-      editor: enhancedSQLQueryEditor,
+      editor: createEditor(SingleLineInput, null, sqlControls, DefaultInput),
       editorSupportedAppNames: ['discover'],
       supportedAppNames: ['discover', 'data-explorer'],
+      hideDatePicker: true,
+      sampleQueries: [
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWind', {
+            defaultMessage: 'The title field contains the word wind.',
+          }),
+          query: `SELECT * FROM your_table WHERE title LIKE '%wind%'`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWindOrWindy', {
+            defaultMessage: 'The title field contains the word wind or the word windy.',
+          }),
+          query: `SELECT * FROM your_table WHERE title LIKE '%wind%' OR title LIKE '%windy%';`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleContainsPhraseWindRises', {
+            defaultMessage: 'The title field contains the phrase wind rises.',
+          }),
+          query: `SELECT * FROM your_table WHERE title LIKE '%wind rises%'`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleExactMatchWindRises', {
+            defaultMessage: 'The title.keyword field exactly matches The wind rises.',
+          }),
+          query: `SELECT * FROM your_table WHERE title = 'The wind rises'`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleFieldsContainWind', {
+            defaultMessage:
+              'Any field that starts with title (for example, title and title.keyword) contains the word wind',
+          }),
+          query: `SELECT * FROM your_table WHERE title LIKE '%wind%' OR title = 'wind'`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.descriptionFieldExists', {
+            defaultMessage: 'Documents in which the field description exists.',
+          }),
+          query: `SELECT * FROM your_table WHERE description IS NOT NULL AND description != '';`,
+        },
+      ],
     };
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
-
     data.__enhance({
       editor: {
-        queryEditorExtension: createQueryAssistExtension(core.http, data, this.config.queryAssist),
+        queryEditorExtension: createQueryAssistExtension(
+          core,
+          data,
+          this.config.queryAssist,
+          this.isQuerySummaryCollapsed$,
+          this.isSummaryAgentAvailable$,
+          this.resultSummaryEnabled$,
+          usageCollection
+        ),
       },
     });
 
     queryString.getDatasetService().registerType(s3TypeConfig);
 
-    return {};
+    return {
+      isQuerySummaryCollapsed$: this.isQuerySummaryCollapsed$,
+      resultSummaryEnabled$: this.resultSummaryEnabled$,
+      isSummaryAgentAvailable$: this.isSummaryAgentAvailable$,
+    };
   }
 
   public start(
     core: CoreStart,
-    deps: QueryEnhancementsPluginStartDependencies
+    { data, uiActions }: QueryEnhancementsPluginStartDependencies
   ): QueryEnhancementsPluginStart {
     setStorage(this.storage);
-    setData(deps.data);
+    setData(data);
+    setUiActions(uiActions);
+    this.appIdSubscription = core.application.currentAppId$.subscribe((appId) => {
+      this.currentAppId$.next(appId);
+    });
+
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    if (this.appIdSubscription) {
+      this.appIdSubscription.unsubscribe();
+    }
+  }
 }

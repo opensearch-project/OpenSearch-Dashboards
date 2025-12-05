@@ -40,6 +40,7 @@ export const tagCloudVisTypeDefinition = {
   name: 'tagcloud',
   title: i18n.translate('visTypeTagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag Cloud' }),
   icon: 'visTagCloud',
+  isClassic: true,
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.filter];
   },

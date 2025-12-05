@@ -62,7 +62,12 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
                 </p>
               }
               actions={
-                <EuiSmallButton color="primary" fill onClick={onRefresh}>
+                <EuiSmallButton
+                  color="primary"
+                  fill
+                  onClick={onRefresh}
+                  data-test-subj="discover-refreshDataButton"
+                >
                   <FormattedMessage
                     id="discover.uninitializedRefreshButtonText"
                     defaultMessage="Refresh data"

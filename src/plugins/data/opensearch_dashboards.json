@@ -5,11 +5,18 @@
   "ui": true,
   "requiredPlugins": ["expressions", "uiActions"],
   "optionalPlugins": ["usageCollection", "dataSource"],
-  "extraPublicDirs": ["common", "common/utils/abort_utils", "common/index_patterns/utils.ts"],
+  "extraPublicDirs": [
+    "common", 
+    "common/utils/abort_utils", 
+    "common/index_patterns/utils.ts", 
+    "common/data_frames", 
+    "common/datasets"
+  ],
   "requiredBundles": [
     "usageCollection",
     "opensearchDashboardsUtils",
     "opensearchDashboardsReact",
-    "inspector"
+    "inspector",
+    "dataSource"
   ]
 }

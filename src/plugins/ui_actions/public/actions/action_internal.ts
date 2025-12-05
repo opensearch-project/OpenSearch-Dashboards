@@ -43,11 +43,16 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   implements Action<Context<A>>, Presentable<Context<A>> {
   constructor(public readonly definition: A) {}
 
+  // @ts-expect-error TS2729 TODO(ts-error): fixme
   public readonly id: string = this.definition.id;
+  // @ts-expect-error TS2729 TODO(ts-error): fixme
   public readonly type: ActionType = this.definition.type || '';
+  // @ts-expect-error TS2729 TODO(ts-error): fixme
   public readonly order: number = this.definition.order || 0;
+  // @ts-expect-error TS2729 TODO(ts-error): fixme
   public readonly MenuItem? = this.definition.MenuItem;
   public readonly ReactMenuItem? = this.MenuItem ? uiToReactComponent(this.MenuItem) : undefined;
+  // @ts-expect-error TS2729 TODO(ts-error): fixme
   public readonly grouping?: PresentableGrouping<Context<A>> = this.definition.grouping;
 
   public execute(context: Context<A>) {
@@ -59,6 +64,7 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
     return this.definition.getIconType(context);
   }
 
+  // @ts-expect-error TS2416 TODO(ts-error): fixme
   public getDisplayName(context: Context<A>): JSX.Element | string {
     if (!this.definition.getDisplayName) return `Action: ${this.id}`;
     return this.definition.getDisplayName(context);
@@ -72,6 +78,18 @@ export class ActionInternal<A extends ActionDefinition = ActionDefinition>
   public async isCompatible(context: Context<A>): Promise<boolean> {
     if (!this.definition.isCompatible) return true;
     return await this.definition.isCompatible(context);
+  }
+
+  public isDisabled(context: Context<A>): boolean {
+    if (!this.definition.isDisabled) return false;
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
+    return this.definition.isDisabled(context);
+  }
+
+  public getTooltip(context: Context<A>): string {
+    if (!this.definition.getTooltip) return '';
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
+    return this.definition.getTooltip(context);
   }
 
   public async getHref(context: Context<A>): Promise<string | undefined> {

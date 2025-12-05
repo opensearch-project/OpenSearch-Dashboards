@@ -3,15 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiPanel } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 import { CreateDataSourcePanelHeader } from './create_data_source_panel_header';
 import { CreateDataSourceCardView } from './create_data_source_card_view';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { DataSourceManagementContext } from '../../types';
+import { TopNavControlDescriptionData } from '../../../../navigation/public';
 
 interface CreateDataSourcePanelProps extends RouteComponentProps {
   featureFlagStatus: boolean;
@@ -24,10 +25,13 @@ export const CreateDataSourcePanel: React.FC<CreateDataSourcePanelProps> = ({
   ...props
 }) => {
   const {
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     chrome,
     application,
     setBreadcrumbs,
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     notifications: { toasts },
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     uiSettings,
     navigation,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
@@ -39,15 +43,10 @@ export const CreateDataSourcePanel: React.FC<CreateDataSourcePanelProps> = ({
   const { HeaderControl } = navigation.ui;
   const description = [
     {
-      renderComponent: (
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="dataSourcesManagement.createDataSourcePanel.description"
-            defaultMessage="Select a data source type to get started. "
-          />
-        </EuiText>
-      ),
-    },
+      description: i18n.translate('dataSourcesManagement.createDataSourcePanel.description', {
+        defaultMessage: 'Select a data source type to get started.',
+      }),
+    } as TopNavControlDescriptionData,
   ];
 
   return useNewUX ? (

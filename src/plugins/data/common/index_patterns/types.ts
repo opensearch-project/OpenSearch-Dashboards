@@ -28,22 +28,33 @@
  * under the License.
  */
 
-import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
+import { ErrorToastOptions, ToastInputFields } from 'src/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
-import { IFieldType } from './fields';
+import { FieldFormat, IndexPatternField, OSD_FIELD_TYPES } from '..';
 import { SerializedFieldFormat } from '../../../expressions/common';
-import { OSD_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
+import { IFieldType } from './fields';
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
+
+// Core known signal types - plugins can extend with custom strings
+export const CORE_SIGNAL_TYPES = {
+  LOGS: 'logs',
+  METRICS: 'metrics',
+  TRACES: 'traces',
+} as const;
 
 export interface IIndexPattern {
   fields: IFieldType[];
   title: string;
+  displayName?: string;
+  description?: string;
   id?: string;
   type?: string;
   timeFieldName?: string;
   intervalName?: string | null;
+  signalType?: string;
+  schemaMappings?: Record<string, Record<string, string>>;
   getTimeField?(): IFieldType | undefined;
   fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
   getFormatterForField?: (
@@ -55,11 +66,15 @@ export interface IndexPatternAttributes {
   type: string;
   fields: string;
   title: string;
+  displayName?: string;
+  description?: string;
+  signalType?: string;
   typeMeta: string;
   timeFieldName?: string;
   intervalName?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
+  schemaMappings?: string;
 }
 
 export type OnNotification = (toastInputFields: ToastInputFields) => void;
@@ -181,6 +196,15 @@ export interface FieldSpec {
   readFromDocValues?: boolean;
   subType?: IFieldSubType;
   indexed?: boolean;
+
+  /**
+   * @experimental These fields are experimental and are subject to change
+   * TODO: Refactor and move them into DataViewField
+   */
+  suggestions?: {
+    values?: string[]; // fetched from the dataset
+    topValues?: string[]; // computed from the query result
+  };
 }
 
 export type IndexPatternFieldMap = Record<string, FieldSpec>;
@@ -189,11 +213,15 @@ export interface SavedObjectReference {
   name?: string;
   id: string;
   type: string;
+  version: string;
 }
 export interface IndexPatternSpec {
   id?: string;
   version?: string;
   title?: string;
+  displayName?: string;
+  description?: string;
+  signalType?: string;
   intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
@@ -201,6 +229,8 @@ export interface IndexPatternSpec {
   typeMeta?: TypeMeta;
   type?: string;
   dataSourceRef?: SavedObjectReference;
+  fieldsLoading?: boolean;
+  schemaMappings?: Record<string, Record<string, string>>;
 }
 
 export interface SourceFilter {

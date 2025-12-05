@@ -35,6 +35,7 @@ import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'src/core/publi
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { ContentManagementPluginStart } from 'src/plugins/content_management/public';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
+import { DatasetManagementSetup } from 'src/plugins/dataset_management/public';
 import { VisBuilderStart } from '../../vis_builder/public';
 import { ManagementSetup } from '../../management/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
@@ -72,6 +73,7 @@ import {
 } from '../../../plugins/content_management/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
+import { ExplorePluginStart } from '../../explore/public';
 
 /**
  * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
@@ -97,6 +99,7 @@ export interface SetupDependencies {
   uiActions: UiActionsSetup;
   dataSource?: DataSourcePluginSetup;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  datasetManagement?: DatasetManagementSetup;
 }
 
 export interface StartDependencies {
@@ -106,6 +109,7 @@ export interface StartDependencies {
   visualizations?: VisualizationsStart;
   visAugmenter?: VisAugmenterStart;
   discover?: DiscoverStart;
+  explore?: ExplorePluginStart;
   visBuilder?: VisBuilderStart;
   uiActions: UiActionsStart;
   contentManagement?: ContentManagementPluginStart;
@@ -127,11 +131,19 @@ export class SavedObjectsManagementPlugin
 
   public setup(
     core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
-    { home, management, uiActions, dataSource, dataSourceManagement }: SetupDependencies
+    {
+      home,
+      management,
+      uiActions,
+      dataSource,
+      dataSourceManagement,
+      datasetManagement,
+    }: SetupDependencies
   ): SavedObjectsManagementPluginSetup {
     const actionSetup = this.actionService.setup();
     const columnSetup = this.columnService.setup();
     const namespaceSetup = this.namespaceService.setup();
+    const isDatasetManagementEnabled = !!datasetManagement;
 
     if (home) {
       home.featureCatalogue.register({
@@ -165,6 +177,7 @@ export class SavedObjectsManagementPlugin
           mountParams,
           dataSourceEnabled: !!dataSource,
           dataSourceManagement,
+          isDatasetManagementEnabled,
         });
       },
     });
@@ -194,6 +207,7 @@ export class SavedObjectsManagementPlugin
             },
             dataSourceEnabled: !!dataSource,
             dataSourceManagement,
+            isDatasetManagementEnabled,
           });
         },
       });

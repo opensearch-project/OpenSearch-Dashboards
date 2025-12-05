@@ -9,16 +9,16 @@
  * GitHub history for details.
  */
 
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSmallButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useState, useCallback } from 'react';
-import { EuiSmallButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import dompurify from 'dompurify';
-import { TableCell } from './table_cell';
-import { DocViewerLinks } from '../doc_viewer_links/doc_viewer_links';
-import { DocViewer } from '../doc_viewer/doc_viewer';
-import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
+import React, { useCallback, useState } from 'react';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
+import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
 import { fetchSourceTypeDataCell } from '../data_grid/data_grid_table_cell_value';
+import { DocViewer } from '../doc_viewer/doc_viewer';
+import { DocViewerLinks } from '../doc_viewer_links/doc_viewer_links';
+import { TableCell } from './table_cell';
 
 export interface TableRowProps {
   row: OpenSearchSearchHit;
@@ -106,12 +106,16 @@ const TableRowUI = ({
 
         const sanitizedCellValue = dompurify.sanitize(formattedValue);
 
-        if (!fieldInfo?.filterable) {
+        if (fieldInfo?.filterable === false) {
           return (
             <td
               key={colName}
               data-test-subj="docTableField"
-              className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
+              className={`osdDocTableCell ${
+                indexPattern.timeFieldName === colName
+                  ? 'eui-textNoWrap'
+                  : 'eui-textBreakAll eui-textBreakWord'
+              }`}
             >
               <div className="truncate-by-height">
                 {/* eslint-disable-next-line react/no-danger */}
@@ -137,9 +141,17 @@ const TableRowUI = ({
 
   const expandedTableRow = (
     <tr key={'x' + row._id}>
-      <td className="osdDocTable__detailsParent" colSpan={columns.length + 1}>
+      <td
+        className="osdDocTable__detailsParent"
+        colSpan={columns.length + 1}
+        data-test-subj="osdDocTableDetailsParent"
+      >
         <EuiFlexGroup gutterSize="m" alignItems="center">
-          <EuiFlexItem grow={false} className="osdDocTable__detailsIconContainer">
+          <EuiFlexItem
+            grow={false}
+            className="osdDocTable__detailsIconContainer"
+            data-test-subj="osdDocTableDetailsIconContainer"
+          >
             <EuiIcon type="folderOpen" />
           </EuiFlexItem>
           <EuiFlexItem>

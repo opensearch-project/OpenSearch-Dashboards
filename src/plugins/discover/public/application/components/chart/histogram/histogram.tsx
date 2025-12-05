@@ -198,6 +198,7 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
           <EuiFlexGroup
             alignItems="center"
             className="dscHistogram__header--partial"
+            data-test-subj="dscHistogramHeader"
             responsive={false}
             gutterSize="xs"
           >
@@ -315,6 +316,8 @@ export class DiscoverHistogram extends Component<DiscoverHistogramProps, Discove
     chartsTheme.axes!.axisTitle = {
       fill: euiThemeVars.euiTextColor,
     };
+    chartsTheme.colors = chartsTheme.colors ?? {};
+    chartsTheme.colors.vizColors = [euiThemeVars.euiColorVis1_behindText];
 
     return (
       <Chart size="100%">

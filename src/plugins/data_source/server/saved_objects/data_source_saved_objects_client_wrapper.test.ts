@@ -218,7 +218,32 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         });
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributes, {})
-        ).rejects.toThrowError(`"endpoint" attribute is not valid or allowed`);
+        ).rejects.toThrowError(`Invalid URL format`);
+      });
+
+      it('should throw error when endpoint is blocked by IP restrictions', async () => {
+        const wrapperInstanceWithBlockedIPs = new DataSourceSavedObjectsClientWrapper(
+          cryptographyMock,
+          logger,
+          authRegistryPromise,
+          ['127.0.0.0/8', '192.168.1.0/24'] // blocked IPs
+        );
+        const wrapperClientWithBlockedIPs = wrapperInstanceWithBlockedIPs.wrapperFactory({
+          client: mockedClient,
+          typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+          request: httpServerMock.createOpenSearchDashboardsRequest(),
+        });
+
+        const mockDataSourceAttributes = attributes({
+          endpoint: 'http://127.0.0.1:9200',
+        });
+        await expect(
+          wrapperClientWithBlockedIPs.create(
+            DATA_SOURCE_SAVED_OBJECT_TYPE,
+            mockDataSourceAttributes,
+            {}
+          )
+        ).rejects.toThrowError(`Endpoint IP address is not allowed`);
       });
 
       it('should throw error when auth is not present', async () => {

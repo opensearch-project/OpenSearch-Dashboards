@@ -4,7 +4,9 @@
  */
 
 import React from 'react';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { render } from '@testing-library/react';
+// @ts-expect-error TS2305, TS6133 TODO(ts-error): fixme
 import { Header, useEffectOnce } from '../header';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
@@ -136,6 +138,7 @@ describe('Header', () => {
         isNextStepDisabled={true}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
         hideLocalCluster={false}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         getDataSources={mockGetDataSourcesCompatible}
       />
     );
@@ -165,6 +168,7 @@ describe('Header', () => {
         isNextStepDisabled={true}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
         hideLocalCluster={false}
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         getDataSources={mockGetDataSourcesNotCompatible}
       />
     );

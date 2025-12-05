@@ -1,9 +1,38 @@
 .defaultEditor {
   border: $euiBorderThin;
   border-radius: $euiSizeXS;
-  margin: 0 $euiSizeXS $euiSizeXS;
 
   &__footer {
-    margin-left: $euiSizeXS;
+    padding-left: $euiSizeXS;
+    background-color: $euiColorLightestShade;
   }
+
+  &__progress {
+    position: relative;
+  }
+
+  .monaco-editor {
+    border-radius: $euiSizeXS $euiSizeXS 0 0;
+
+    .margin {
+      border-radius: $euiSizeXS 0 0 0;
+      background-color: $euiFormBackgroundColor;
+      padding: 0 $euiSizeXS;
+    }
+
+    .monaco-scrollable-element {
+      border-radius: 0 $euiSizeXS 0 0;
+    }
+  }
+
+  .monaco-editor,
+  .monaco-editor-background,
+  .monaco-editor .inputarea.ime-input,
+  .monaco-editor .decorationsOverviewRuler {
+    background-color: $euiColorEmptyShade;
+  }
+}
+
+.defaultEditor__footerRow {
+  gap: $euiSizeM;
 }

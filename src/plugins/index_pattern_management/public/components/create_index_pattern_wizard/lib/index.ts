@@ -40,4 +40,6 @@ export { containsIllegalCharacters } from './contains_illegal_characters';
 
 export { extractTimeFields } from './extract_time_fields';
 
+export { populateRemoteClusterConnectionForDatasources } from './get_remote_connections';
+
 export * from './creation_flow';

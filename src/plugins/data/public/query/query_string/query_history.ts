@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import uuid from 'uuid';
 import { BehaviorSubject } from 'rxjs';
 import { DataStorage } from '../../../common';
 import { Query, TimeRange } from '../..';
@@ -61,6 +62,7 @@ export class QueryHistory {
       time: timestamp,
       query,
       dateRange,
+      id: uuid.v4(),
     };
     this.storage.set(newKey, newItem);
 

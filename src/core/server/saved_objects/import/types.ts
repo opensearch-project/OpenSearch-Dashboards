@@ -106,6 +106,15 @@ export interface SavedObjectsImportMissingReferencesError {
 }
 
 /**
+ * Represents an error that occurs when an import fails due to a missing data source in the target workspace.
+ * @public
+ */
+export interface SavedObjectsImportMissingDataSourceError {
+  type: 'missing_data_source';
+  dataSource: string;
+}
+
+/**
  * Represents a failure to import.
  * @public
  */
@@ -126,7 +135,8 @@ export interface SavedObjectsImportError {
     | SavedObjectsImportAmbiguousConflictError
     | SavedObjectsImportUnsupportedTypeError
     | SavedObjectsImportMissingReferencesError
-    | SavedObjectsImportUnknownError;
+    | SavedObjectsImportUnknownError
+    | SavedObjectsImportMissingDataSourceError;
 }
 
 /**
@@ -191,6 +201,7 @@ export interface SavedObjectsImportOptions {
   dataSourceTitle?: string;
   dataSourceEnabled?: boolean;
   workspaces?: SavedObjectsBaseOptions['workspaces'];
+  isCopy?: boolean;
 }
 
 /**

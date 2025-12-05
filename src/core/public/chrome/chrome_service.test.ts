@@ -43,9 +43,11 @@ import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
 import { overlayServiceMock, workspacesServiceMock } from '../mocks';
 import { HeaderVariant } from './constants';
+import { keyboardShortcutServiceMock } from '../keyboard_shortcut/keyboard_shortcut_service.mock';
 
 class FakeApp implements App {
   public title: string;
+  public appRoute: string;
   public mount = () => () => {};
 
   constructor(
@@ -54,6 +56,7 @@ class FakeApp implements App {
     public headerVariant?: HeaderVariant
   ) {
     this.title = `${this.id} App`;
+    this.appRoute = this.id;
   }
 }
 const store = new Map();
@@ -78,12 +81,19 @@ function defaultStartDeps(availableApps?: App[]) {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
     workspaces: workspacesServiceMock.createStartContract(),
+    keyboardShortcut: keyboardShortcutServiceMock.createStart(),
+    updateApplications: (() => {}) as (applications?: App[]) => void,
   };
 
   if (availableApps) {
-    deps.application.applications$ = new Rx.BehaviorSubject<Map<string, PublicAppInfo>>(
+    const applications$ = new Rx.BehaviorSubject<Map<string, PublicAppInfo>>(
       new Map(availableApps.map((app) => [app.id, getAppInfo(app) as PublicAppInfo]))
     );
+    deps.application.applications$ = applications$;
+    deps.updateApplications = (applications?: App[]) =>
+      applications$.next(
+        new Map(applications?.map((app) => [app.id, getAppInfo(app) as PublicAppInfo]))
+      );
   }
 
   return deps;
@@ -156,6 +166,24 @@ describe('setup', () => {
       '[ChromeService] An existing custom collapsible navigation bar header render has been overridden.'
     );
   });
+
+  it('should register page search', () => {
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    const chrome = new ChromeService({ browserSupportsCsp: true });
+
+    const registerSearchCommandSpy = jest.fn();
+    jest.spyOn((chrome as any).globalSearch, 'setup').mockReturnValue({
+      registerSearchCommand: registerSearchCommandSpy,
+    });
+
+    chrome.setup({ uiSettings });
+
+    expect(registerSearchCommandSpy).toHaveBeenCalledWith({
+      id: 'pagesSearch',
+      type: 'PAGES',
+      run: expect.any(Function),
+    });
+  });
 });
 
 describe('start', () => {
@@ -195,6 +223,13 @@ describe('start', () => {
       // Have to do some fanagling to get the type system and enzyme to accept this.
       // Don't capture the snapshot because it's 600+ lines long.
       expect(shallow(React.createElement(() => chrome.getHeaderComponent()))).toBeDefined();
+    });
+
+    it('renders the Header component correctly', async () => {
+      const { chrome } = await start();
+      const headerComponent = shallow(React.createElement(() => chrome.getHeaderComponent()));
+      // Verify that the Header component renders without errors
+      expect(headerComponent).toBeDefined();
     });
   });
 
@@ -284,6 +319,30 @@ describe('start', () => {
                         false,
                       ]
                   `);
+    });
+
+    it('should use correct current app id to tell if hidden', async () => {
+      const apps = [new FakeApp('alpha', true), new FakeApp('beta', false)];
+      const startDeps = defaultStartDeps(apps);
+      const { navigateToApp } = startDeps.application;
+      const { chrome } = await start({ startDeps });
+      const visibleChangedArray: boolean[] = [];
+      const visible$ = chrome.getIsVisible$();
+      visible$.subscribe((visible) => visibleChangedArray.push(visible));
+
+      await navigateToApp('alpha');
+
+      await navigateToApp('beta');
+      startDeps.updateApplications(apps);
+
+      expect(visibleChangedArray).toMatchInlineSnapshot(`
+        Array [
+          false,
+          false,
+          true,
+          true,
+        ]
+      `);
     });
   });
 

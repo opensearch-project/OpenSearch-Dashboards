@@ -80,6 +80,7 @@ describe('DefineIndexOptions', () => {
       />
     );
     act(() => {
+      // @ts-expect-error TS2722, TS2322 TODO(ts-error): fixme
       wrapper.find(EuiFieldText).prop('onChange')({ target: { value: 'new_index_name' } });
     });
     wrapper.update();
@@ -97,6 +98,7 @@ describe('DefineIndexOptions', () => {
       />
     );
     act(() => {
+      // @ts-expect-error TS2722, TS2554 TODO(ts-error): fixme
       wrapper.find(EuiLink).prop('onClick')();
     });
     wrapper.update();
@@ -119,6 +121,7 @@ describe('DefineIndexOptions', () => {
     const prepend = wrapper.find(EuiFieldText).prop('prepend');
     const append = wrapper.find(EuiFieldText).prop('append');
 
+    // @ts-expect-error TS2532, TS7053 TODO(ts-error): fixme
     expect(prepend[0]).toBe('flint_test_source_test_database_test_table_');
     expect(append).toBe('_index');
   });

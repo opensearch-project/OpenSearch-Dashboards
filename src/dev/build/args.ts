@@ -60,6 +60,7 @@ export function readCliArgs(argv: string[]) {
       'silent',
       'debug',
       'help',
+      'with-translations',
     ],
     alias: {
       v: 'verbose',
@@ -139,6 +140,7 @@ export function readCliArgs(argv: string[]) {
       linuxArm: Boolean(flags['linux-arm']),
     },
     targetAllPlatforms: Boolean(flags['all-platforms']),
+    withTranslations: Boolean(flags['with-translations']),
   };
 
   return {

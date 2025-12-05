@@ -45,6 +45,7 @@ import './field.scss';
 
 export interface FieldProps {
   field: IndexPatternField;
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   getDetails: (field) => FieldDetails;
   id: number;
 }

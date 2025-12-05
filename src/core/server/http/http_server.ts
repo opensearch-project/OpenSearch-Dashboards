@@ -68,6 +68,7 @@ export interface HttpServerSetup {
   registerStaticDir: (path: string, dirPath: string) => void;
   basePath: HttpServiceSetup['basePath'];
   csp: HttpServiceSetup['csp'];
+  cspReportOnly: HttpServiceSetup['cspReportOnly'];
   createCookieSessionStorageFactory: HttpServiceSetup['createCookieSessionStorageFactory'];
   registerOnPreRouting: HttpServiceSetup['registerOnPreRouting'];
   registerOnPreAuth: HttpServiceSetup['registerOnPreAuth'];
@@ -128,7 +129,7 @@ export class HttpServer {
     const serverOptions = getServerOptions(config);
     const listenerOptions = getListenerOptions(config);
     this.server = createServer(serverOptions, listenerOptions);
-    await this.server.register([HapiStaticFiles]);
+    await this.server.register([HapiStaticFiles as any]);
     this.config = config;
 
     const basePathService = new BasePath(config.basePath);
@@ -148,6 +149,7 @@ export class HttpServer {
         this.createCookieSessionStorageFactory(cookieOptions, config.basePath),
       basePath: basePathService,
       csp: config.csp,
+      cspReportOnly: config.cspReportOnly,
       auth: {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,
@@ -440,6 +442,8 @@ export class HttpServer {
       path,
       method: 'GET',
       handler: {
+        // eslint-disable-next-line @typescript-eslint/prefer-ts-expect-error
+        // @ts-ignore: directory handler comes from @hapi/inert plugin
         directory: {
           path: dirPath,
           listing: false,

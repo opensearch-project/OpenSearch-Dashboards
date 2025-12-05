@@ -43,12 +43,12 @@ function flattenHit(indexPattern: IndexPattern, hit: Record<string, any>, deep: 
     keyPrefix = keyPrefix ? keyPrefix + '.' : '';
     _.forOwn(obj, function (val, key) {
       key = keyPrefix + key;
-
       if (deep) {
         const field = fields(key);
         const isNestedField = field && field.type === 'nested';
         const isArrayOfObjects = Array.isArray(val) && _.isPlainObject(_.first(val));
         if (isArrayOfObjects && !isNestedField) {
+          flat[key] = val;
           _.each(val, (v) => flatten(v, key));
           return;
         }
@@ -62,7 +62,8 @@ function flattenHit(indexPattern: IndexPattern, hit: Record<string, any>, deep: 
 
       if (hasValidMapping || isValue) {
         if (!flat[key]) {
-          flat[key] = val;
+          // Create a new array to avoid modifying the original array when pushing elements
+          flat[key] = Array.isArray(val) ? [...val] : val;
         } else if (Array.isArray(flat[key])) {
           flat[key].push(val);
         } else {

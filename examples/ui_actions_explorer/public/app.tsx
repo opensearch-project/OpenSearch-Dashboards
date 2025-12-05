@@ -85,7 +85,7 @@ const ActionsExplorer = () => {
             <EuiTitle size="l">
               <h1>
                 <FormattedMessage
-                  id="uiAsctionsExample.appTitle"
+                  id="uiActionsExplorer.appTitle"
                   defaultMessage="{name}"
                   values={{ name: 'UI Actions' }}
                 />

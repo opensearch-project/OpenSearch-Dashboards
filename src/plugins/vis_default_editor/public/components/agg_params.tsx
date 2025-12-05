@@ -228,6 +228,7 @@ function DefaultEditorAggParams({
         };
 
         return (
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           <DefaultEditorAggParam
             key={`${param.aggParam.name}${agg.type ? agg.type.name : ''}`}
             disabled={disabledParams && disabledParams.includes(param.aggParam.name)}
@@ -258,6 +259,7 @@ function DefaultEditorAggParams({
               };
 
               return (
+                // @ts-expect-error TS2322 TODO(ts-error): fixme
                 <DefaultEditorAggParam
                   key={`${param.aggParam.name}${agg.type ? agg.type.name : ''}`}
                   disabled={disabledParams && disabledParams.includes(param.aggParam.name)}

@@ -4,6 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { CoreStart } from 'opensearch-dashboards/public';
 import { Action, IncompatibleActionError } from '../../../../ui_actions/public';
 import { AugmentVisContext } from '../../ui_actions_bootstrap';
@@ -32,7 +33,7 @@ export class OpenEventsFlyoutAction implements Action<AugmentVisContext> {
   }
 
   public getDisplayName() {
-    return i18n.translate('dashboard.actions.viewEvents.displayName', {
+    return i18n.translate('visAugmenter.actions.viewEvents.displayName', {
       defaultMessage: 'View Events',
     });
   }

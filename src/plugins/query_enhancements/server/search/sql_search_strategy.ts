@@ -13,7 +13,7 @@ import {
   Query,
   createDataFrame,
 } from '../../../data/common';
-import { getFields } from '../../common/utils';
+import { getFields, throwFacetError } from '../../common/utils';
 import { Facet } from '../utils';
 
 export const sqlSearchStrategyProvider = (
@@ -36,11 +36,7 @@ export const sqlSearchStrategyProvider = (
         const query: Query = request.body.query;
         const rawResponse: any = await sqlFacet.describeQuery(context, request);
 
-        if (!rawResponse.success) {
-          const error = new Error(rawResponse.data.body);
-          error.name = rawResponse.data.status;
-          throw error;
-        }
+        if (!rawResponse.success) throwFacetError(rawResponse);
 
         const dataFrame = createDataFrame({
           name: query.dataset?.id,

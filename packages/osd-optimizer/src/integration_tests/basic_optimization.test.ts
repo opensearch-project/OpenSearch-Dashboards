@@ -260,14 +260,14 @@ const expectFileMatchesSnapshotWithCompression = (filePath: string, snapshotLabe
   expect(raw).toMatchSnapshot(snapshotLabel);
 
   // Verify the brotli variant matches
-  expect(
-    Zlib.brotliDecompressSync(
-      Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.br`))
-    ).toString()
-  ).toEqual(raw);
+  const brotliCompressedData = Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.br`));
+  const brotliDecompressedData = Zlib.brotliDecompressSync(
+    new Uint8Array(brotliCompressedData)
+  ).toString('utf8');
+  expect(brotliDecompressedData).toEqual(raw);
 
   // Verify the gzip variant matches
-  expect(
-    Zlib.gunzipSync(Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.gz`))).toString()
-  ).toEqual(raw);
+  const gzipCompressedData = Fs.readFileSync(Path.resolve(MOCK_REPO_DIR, `${filePath}.gz`));
+  const gzipDecompressedData = Zlib.gunzipSync(new Uint8Array(gzipCompressedData)).toString('utf8');
+  expect(gzipDecompressedData).toEqual(raw);
 };

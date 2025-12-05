@@ -1,0 +1,43 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// This is for the animation colors
+/* stylelint-disable  @osd/stylelint/no_restricted_values */
+
+.exploreLanguageToggle {
+  // create a new stacking context to allow for gradient border
+  isolation: isolate;
+
+  &__button {
+    background: $ouiColorEmptyShade;
+    border: 1px solid $ouiBorderColor;
+    box-shadow: none; // override the badge's box-shadow with border
+    margin-right: $ouiSizeXS;
+    width: 56px; // have it fixed width so layout shifting does not occur when changing languages
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      z-index: -1;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #00d0ff 0%, #1034d4 50%, #9b1fa8 100%);
+      opacity: 0;
+    }
+
+    &--aiMode {
+      background:
+        linear-gradient(180deg, rgba(87, 196, 251, 10%) 0%, rgba(165, 20, 255, 10%) 100%),
+        $ouiColorEmptyShade;
+      border-color: transparent;
+
+      &::before {
+        opacity: 1;
+        transition: opacity 0.3s ease;
+      }
+    }
+  }
+}

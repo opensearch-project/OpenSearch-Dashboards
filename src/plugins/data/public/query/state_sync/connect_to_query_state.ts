@@ -31,7 +31,6 @@
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import _ from 'lodash';
-import { CoreStart } from 'opensearch-dashboards/public';
 import {
   BaseStateContainer,
   IOsdUrlStateStorage,
@@ -41,27 +40,33 @@ import { QueryState, QueryStateChange } from './types';
 import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';
 import { validateTimeRange } from '../timefilter';
 
+export interface ISyncConfig {
+  filters: FilterStateStore;
+  query: boolean;
+  dataset?: boolean;
+  /**
+   * When true, skips using existing filters from filterManager when initializing state from URL.
+   * This is useful when navigating to a saved search/explore to prevent filter persistence.
+   */
+  skipAppFiltersFromMemory?: boolean;
+}
+
 /**
  * Helper function to sync up filter and query services in data plugin
  * with a URL state storage so plugins can persist the app filter and query
  * values across refresh
- * @param QueryService: either setup or start
- * @param  OsdUrlStateStorage to use for syncing and store data
+ * @param queryService: either setup or start
+ * @param osdUrlStateStorage to use for syncing and store data
  * @param syncConfig app filter and query
  */
-export const connectStorageToQueryState = async (
+export const connectStorageToQueryState = (
   {
     filterManager,
     queryString,
     state$,
   }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'queryString' | 'state$'>,
-  OsdUrlStateStorage: IOsdUrlStateStorage,
-  syncConfig: {
-    filters: FilterStateStore;
-    query: boolean;
-    dataSet?: boolean;
-  },
-  uiSettings?: CoreStart['uiSettings']
+  osdUrlStateStorage: IOsdUrlStateStorage,
+  syncConfig: ISyncConfig
 ) => {
   try {
     const syncKeys: Array<keyof QueryStateChange> = [];
@@ -72,34 +77,42 @@ export const connectStorageToQueryState = async (
       syncKeys.push('appFilters');
     }
 
-    const initialStateFromURL: QueryState = OsdUrlStateStorage.get('_q') ?? {
+    const initialState: QueryState = osdUrlStateStorage.get('_q') ?? {
       query: queryString.getDefaultQuery(),
-      filters: filterManager.getAppFilters(),
+      // If caller specifies to skip filters from memory, use empty array
+      filters: syncConfig.skipAppFiltersFromMemory ? [] : filterManager.getAppFilters(),
     };
 
-    // set up initial '_q' flag in the URL to sync query and filter changes
-    if (!OsdUrlStateStorage.get('_q')) {
-      OsdUrlStateStorage.set('_q', initialStateFromURL, {
+    if (!osdUrlStateStorage.get('_q')) {
+      // set up initial '_q' flag in the URL to sync query and filter changes
+      osdUrlStateStorage.set('_q', initialState, {
         replace: true,
       });
+      // clear existing query and apply default query
+      queryString.clearQuery();
     }
 
-    if (syncConfig.query && !_.isEqual(initialStateFromURL.query, queryString.getQuery())) {
-      if (initialStateFromURL.query) {
-        queryString.setQuery(_.cloneDeep(initialStateFromURL.query));
+    // Clear app filters if caller requested to skip filters from memory
+    if (syncConfig.skipAppFiltersFromMemory && syncConfig.filters === FilterStateStore.APP_STATE) {
+      filterManager.setAppFilters([]);
+    }
+
+    if (syncConfig.query && !_.isEqual(initialState.query, queryString.getQuery())) {
+      if (initialState.query) {
+        queryString.setQuery(_.cloneDeep(initialState.query));
       }
     }
 
     if (syncConfig.filters === FilterStateStore.APP_STATE) {
       if (
-        !initialStateFromURL.filters ||
-        !compareFilters(initialStateFromURL.filters, filterManager.getAppFilters(), {
+        !initialState.filters ||
+        !compareFilters(initialState.filters, filterManager.getAppFilters(), {
           ...COMPARE_ALL_OPTIONS,
           state: false,
         })
       ) {
-        if (initialStateFromURL.filters) {
-          filterManager.setAppFilters(_.cloneDeep(initialStateFromURL.filters));
+        if (initialState.filters) {
+          filterManager.setAppFilters(_.cloneDeep(initialState.filters));
         }
       }
 
@@ -126,7 +139,7 @@ export const connectStorageToQueryState = async (
             })
           )
           .subscribe((newState) => {
-            OsdUrlStateStorage.set('_q', newState, {
+            osdUrlStateStorage.set('_q', newState, {
               replace: true,
             });
           }),

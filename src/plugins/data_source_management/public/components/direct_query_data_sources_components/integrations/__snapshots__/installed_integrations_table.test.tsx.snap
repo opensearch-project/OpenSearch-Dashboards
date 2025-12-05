@@ -100,51 +100,57 @@ exports[`Installed Integrations Table test Renders the empty installed integrati
                 <AddIntegrationButton
                   toggleFlyout={[Function]}
                 >
-                  <EuiButton
+                  <EuiSmallButton
                     onClick={[Function]}
                   >
-                    <EuiButtonDisplay
-                      baseClassName="euiButton"
-                      disabled={false}
-                      element="button"
-                      isDisabled={false}
+                    <EuiButton
                       onClick={[Function]}
-                      type="button"
+                      size="s"
                     >
-                      <button
-                        className="euiButton euiButton--primary"
+                      <EuiButtonDisplay
+                        baseClassName="euiButton"
                         disabled={false}
+                        element="button"
+                        isDisabled={false}
                         onClick={[Function]}
-                        style={
-                          Object {
-                            "minWidth": undefined,
-                          }
-                        }
+                        size="s"
                         type="button"
                       >
-                        <EuiButtonContent
-                          className="euiButton__content"
-                          iconGap="m"
-                          iconSide="left"
-                          textProps={
+                        <button
+                          className="euiButton euiButton--primary euiButton--small"
+                          disabled={false}
+                          onClick={[Function]}
+                          style={
                             Object {
-                              "className": "euiButton__text",
+                              "minWidth": undefined,
                             }
                           }
+                          type="button"
                         >
-                          <span
-                            className="euiButtonContent euiButton__content"
+                          <EuiButtonContent
+                            className="euiButton__content"
+                            iconGap="m"
+                            iconSide="left"
+                            textProps={
+                              Object {
+                                "className": "euiButton__text",
+                              }
+                            }
                           >
                             <span
-                              className="euiButton__text"
+                              className="euiButtonContent euiButton__content"
                             >
-                              Add Integrations
+                              <span
+                                className="euiButton__text"
+                              >
+                                Add Integrations
+                              </span>
                             </span>
-                          </span>
-                        </EuiButtonContent>
-                      </button>
-                    </EuiButtonDisplay>
-                  </EuiButton>
+                          </EuiButtonContent>
+                        </button>
+                      </EuiButtonDisplay>
+                    </EuiButton>
+                  </EuiSmallButton>
                 </AddIntegrationButton>
               </div>
             </EuiFlexItem>
@@ -312,53 +318,60 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                 fill={true}
                 toggleFlyout={[Function]}
               >
-                <EuiButton
+                <EuiSmallButton
                   fill={true}
                   onClick={[Function]}
                 >
-                  <EuiButtonDisplay
-                    baseClassName="euiButton"
-                    disabled={false}
-                    element="button"
+                  <EuiButton
                     fill={true}
-                    isDisabled={false}
                     onClick={[Function]}
-                    type="button"
+                    size="s"
                   >
-                    <button
-                      className="euiButton euiButton--primary euiButton--fill"
+                    <EuiButtonDisplay
+                      baseClassName="euiButton"
                       disabled={false}
+                      element="button"
+                      fill={true}
+                      isDisabled={false}
                       onClick={[Function]}
-                      style={
-                        Object {
-                          "minWidth": undefined,
-                        }
-                      }
+                      size="s"
                       type="button"
                     >
-                      <EuiButtonContent
-                        className="euiButton__content"
-                        iconGap="m"
-                        iconSide="left"
-                        textProps={
+                      <button
+                        className="euiButton euiButton--primary euiButton--small euiButton--fill"
+                        disabled={false}
+                        onClick={[Function]}
+                        style={
                           Object {
-                            "className": "euiButton__text",
+                            "minWidth": undefined,
                           }
                         }
+                        type="button"
                       >
-                        <span
-                          className="euiButtonContent euiButton__content"
+                        <EuiButtonContent
+                          className="euiButton__content"
+                          iconGap="m"
+                          iconSide="left"
+                          textProps={
+                            Object {
+                              "className": "euiButton__text",
+                            }
+                          }
                         >
                           <span
-                            className="euiButton__text"
+                            className="euiButtonContent euiButton__content"
                           >
-                            Add Integrations
+                            <span
+                              className="euiButton__text"
+                            >
+                              Add Integrations
+                            </span>
                           </span>
-                        </span>
-                      </EuiButtonContent>
-                    </button>
-                  </EuiButtonDisplay>
-                </EuiButton>
+                        </EuiButtonContent>
+                      </button>
+                    </EuiButtonDisplay>
+                  </EuiButton>
+                </EuiSmallButton>
               </AddIntegrationButton>
             </div>
           </EuiFlexItem>

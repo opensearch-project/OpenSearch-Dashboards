@@ -3,9 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getSavedObjectsWithDataSource, getFinalSavedObjects } from './util';
 import { SavedObject, updateDataSourceNameInVegaSpec } from '../../../../../../core/server';
 import visualizationObjects from './test_utils/visualization_objects.json';
+import {
+  getFinalSavedObjects,
+  getNestedField,
+  getSavedObjectsWithDataSource,
+  setNestedField,
+} from './util';
 
 describe('getSavedObjectsWithDataSource()', () => {
   const getVisualizationSavedObjects = (): Array<SavedObject<any>> => {
@@ -172,10 +177,25 @@ describe('getSavedObjectsWithDataSource()', () => {
 });
 
 describe('getFinalSavedObjects()', () => {
-  const savedObjects = [
-    { id: 'saved-object-1', type: 'test', attributes: { title: 'Saved object 1' }, references: [] },
-  ];
-  const generateTestDataSet = () => {
+  const generateTestDataSet = (
+    savedObjects: Array<
+      SavedObject<{
+        title: string;
+        kibanaSavedObjectMeta?: {
+          searchSourceJSON: Record<string, unknown>;
+        };
+        visState?: string;
+      }>
+    > = [
+      {
+        id: 'saved-object-1',
+        type: 'search',
+        attributes: { title: 'Saved object 1' },
+        references: [],
+      },
+    ]
+  ) => {
+    const getSavedObjects = () => JSON.parse(JSON.stringify(savedObjects));
     return {
       id: 'foo',
       name: 'Foo',
@@ -187,20 +207,12 @@ describe('getFinalSavedObjects()', () => {
       appLinks: [],
       defaultIndex: '',
       getDataSourceIntegratedDefaultIndex: () => '',
-      savedObjects,
+      savedObjects: getSavedObjects(),
       getDataSourceIntegratedSavedObjects: (dataSourceId?: string, dataSourceTitle?: string) =>
-        savedObjects.map((item) => ({
-          ...item,
-          ...(dataSourceId ? { id: `${dataSourceId}_${item.id}` } : {}),
-          attributes: {
-            ...item.attributes,
-            title: dataSourceTitle
-              ? `${item.attributes.title}_${dataSourceTitle}`
-              : item.attributes.title,
-          },
-        })),
+        getSavedObjectsWithDataSource(getSavedObjects(), dataSourceId, dataSourceTitle),
       getWorkspaceIntegratedSavedObjects: (workspaceId?: string) =>
-        savedObjects.map((item) => ({
+        // @ts-expect-error TS7006 TODO(ts-error): fixme
+        getSavedObjects().map((item) => ({
           ...item,
           ...(workspaceId ? { id: `${workspaceId}_${item.id}` } : {}),
         })),
@@ -264,6 +276,139 @@ describe('getFinalSavedObjects()', () => {
       getFinalSavedObjects({
         dataset,
       })
-    ).toBe(dataset.savedObjects);
+    ).toEqual(dataset.savedObjects);
+  });
+
+  it('should update index in searchSource for visualization and search saved objects', () => {
+    const dataset = generateTestDataSet([
+      {
+        id: 'saved-object-1',
+        type: 'visualization',
+        attributes: {
+          title: 'Saved object 1',
+          kibanaSavedObjectMeta: {
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
+            searchSourceJSON: JSON.stringify({
+              index: 'index-pattern',
+              filter: [{ meta: { index: 'index-pattern' } }],
+            }),
+          },
+          visState: JSON.stringify({}),
+        },
+        references: [],
+      },
+      {
+        id: 'saved-object-2',
+        type: 'search',
+        attributes: {
+          title: 'Saved object 2',
+          kibanaSavedObjectMeta: {
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
+            searchSourceJSON: JSON.stringify({
+              index: 'index-pattern',
+              filter: [{ meta: { index: 'index-pattern' } }],
+            }),
+          },
+        },
+        references: [],
+      },
+    ]);
+    const UPDATED_SEARCH_JSON = JSON.stringify({
+      index: 'workspace-1_datasource-1_index-pattern',
+      filter: [{ meta: { index: 'workspace-1_datasource-1_index-pattern' } }],
+    });
+    expect(
+      getFinalSavedObjects({
+        dataset,
+        workspaceId: 'workspace-1',
+        dataSourceId: 'datasource-1',
+        dataSourceTitle: 'data source 1',
+      })
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'workspace-1_datasource-1_saved-object-1',
+          type: 'visualization',
+          attributes: expect.objectContaining({
+            kibanaSavedObjectMeta: expect.objectContaining({
+              searchSourceJSON: UPDATED_SEARCH_JSON,
+            }),
+          }),
+        }),
+        expect.objectContaining({
+          id: 'workspace-1_datasource-1_saved-object-2',
+          type: 'search',
+          attributes: expect.objectContaining({
+            kibanaSavedObjectMeta: expect.objectContaining({
+              searchSourceJSON: UPDATED_SEARCH_JSON,
+            }),
+          }),
+        }),
+      ])
+    );
+  });
+});
+
+describe('getNestedField', () => {
+  it('should return the value of a top-level field', () => {
+    const doc = { field1: 'value1', field2: 'value2' };
+    const result = getNestedField(doc, 'field1');
+    expect(result).toBe('value1');
+  });
+
+  it('should return the value of a nested field', () => {
+    const doc = { field1: { nestedField: 'nestedValue' } };
+    const result = getNestedField(doc, 'field1.nestedField');
+    expect(result).toBe('nestedValue');
+  });
+
+  it('should return undefined for a non-existent field', () => {
+    const doc = { field1: 'value1' };
+    const result = getNestedField(doc, 'nonExistentField');
+    expect(result).toBeUndefined();
+  });
+
+  it('should handle fields with dots in their names', () => {
+    const doc = { 'field.with.dot': 'valueWithDot' };
+    const result = getNestedField(doc, 'field.with.dot');
+    expect(result).toBe('valueWithDot');
+  });
+
+  it('should return undefined for a non-existent nested field', () => {
+    const doc = { field1: { nestedField: 'nestedValue' } };
+    const result = getNestedField(doc, 'field1.nonExistentField');
+    expect(result).toBeUndefined();
+  });
+});
+
+describe('setNestedField', () => {
+  it('should set the value of a top-level field', () => {
+    const doc = { field1: 'value1', field2: 'value2' };
+    setNestedField(doc, 'field1', 'newValue1');
+    expect(doc.field1).toBe('newValue1');
+  });
+
+  it('should set the value of a nested field', () => {
+    const doc = { field1: { nestedField: 'nestedValue' } };
+    setNestedField(doc, 'field1.nestedField', 'newNestedValue');
+    expect(doc.field1.nestedField).toBe('newNestedValue');
+  });
+
+  it('should create nested fields if they do not exist', () => {
+    const doc: any = {}; // Allow dynamic properties
+    setNestedField(doc, 'field1.nestedField', 'newNestedValue');
+    expect(doc.field1).toEqual({ nestedField: 'newNestedValue' });
+  });
+
+  it('should handle fields with dots in their names', () => {
+    const doc = { 'field.with.dot': 'valueWithDot' };
+    setNestedField(doc, 'field.with.dot', 'newValueWithDot');
+    expect(doc['field.with.dot']).toBe('newValueWithDot');
+  });
+
+  it('should set a value in deeply nested structures', () => {
+    const doc = { level1: { level2: { level3: { level4: 'oldValue' } } } };
+    setNestedField(doc, 'level1.level2.level3.level4', 'newValue');
+    expect(doc.level1.level2.level3.level4).toBe('newValue');
   });
 });

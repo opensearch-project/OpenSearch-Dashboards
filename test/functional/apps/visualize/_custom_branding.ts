@@ -17,13 +17,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   const expectedFullLogo =
-    'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg';
+    'https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.svg';
   const expectedFullLogoDarkMode =
-    'https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg';
+    'https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_darkmode.svg';
   const expectedMarkLogo =
-    'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg';
+    'https://opensearch.org/wp-content/uploads/2025/01/opensearch_mark_default.svg';
   const expectedMarkLogoDarkMode =
-    'https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg';
+    'https://opensearch.org/wp-content/uploads/2025/01/opensearch_mark_darkmode.svg';
   const applicationTitle = 'OpenSearch';
   const expectedWelcomeMessage = 'Welcome to OpenSearch';
 

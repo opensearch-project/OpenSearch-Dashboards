@@ -41,6 +41,7 @@ const getPromiseState = (promise: Promise<unknown>): Promise<'resolved' | 'rejec
         () => resolve('rejected')
       )
     ),
+    // @ts-expect-error TS2794 TODO(ts-error): fixme
     new Promise<'pending'>((resolve) => resolve()).then(() => 'pending'),
   ]);
 

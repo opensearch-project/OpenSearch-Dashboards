@@ -40,6 +40,7 @@ export const createMetricVisTypeDefinition = (): BaseVisTypeOptions => ({
   name: 'metric',
   title: i18n.translate('visTypeMetric.metricTitle', { defaultMessage: 'Metric' }),
   icon: 'visMetric',
+  isClassic: true,
   description: i18n.translate('visTypeMetric.metricDescription', {
     defaultMessage: 'Display a calculation as a single number',
   }),

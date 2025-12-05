@@ -4,7 +4,6 @@
  */
 
 import {
-  EuiButton,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,6 +12,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSmallButton,
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiText,
@@ -42,6 +42,7 @@ import {
   getRenderAccelerationDetailsFlyout,
   getRenderCreateAccelerationFlyout,
 } from '../../../plugin';
+import { getUiSettings } from '../../utils';
 
 interface AccelerationTableProps {
   dataSourceName: string;
@@ -132,15 +133,15 @@ export const AccelerationTable = ({
 
   const RefreshButton = () => {
     return (
-      <EuiButton
+      <EuiSmallButton
         onClick={handleRefresh}
         isLoading={
           isRefreshing ||
           isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus)
         }
       >
-        Refresh
-      </EuiButton>
+        Update
+      </EuiSmallButton>
     );
   };
 
@@ -164,7 +165,7 @@ export const AccelerationTable = ({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="rowReverse" alignItems="flexEnd">
+            <EuiFlexGroup direction="rowReverse" alignItems="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <CreateAccelerationFlyoutButton
                   dataSourceName={dataSourceName}
@@ -206,11 +207,18 @@ export const AccelerationTable = ({
   const tableActions = [
     {
       name: 'Query Data',
-      description: 'Query in Observability Logs',
+      description: 'Query in Discover',
       icon: 'discoverApp',
       type: 'icon',
       onClick: (acc: CachedAcceleration) => {
-        onDiscoverIconClick(acc, dataSourceName, application);
+        onDiscoverIconClick(acc, dataSourceName, dataSourceMDSId, application);
+      },
+      enabled: () => {
+        try {
+          return getUiSettings().get('query:enhancements:enabled');
+        } catch (e) {
+          return false;
+        }
       },
     },
     {
@@ -360,6 +368,7 @@ export const AccelerationTable = ({
             items={accelerations}
             columns={accelerationTableColumns}
             pagination={pagination}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             sorting={sorting}
           />
         )}

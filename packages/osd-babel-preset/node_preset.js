@@ -28,6 +28,8 @@
  * under the License.
  */
 
+const pathAliasPlugin = require('./path_alias');
+
 module.exports = (_, options = {}) => {
   return {
     presets: [
@@ -60,5 +62,6 @@ module.exports = (_, options = {}) => {
       ],
       require('./common_preset'),
     ],
+    plugins: [pathAliasPlugin(options['babel-plugin-module-resolver'])],
   };
 };

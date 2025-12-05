@@ -82,7 +82,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
               </div>
             </div>
             <table
-              class="euiTable euiTable--compressed euiTable--responsive"
+              class="euiTable euiTable--responsive"
               id="__table_generated-id"
               tabindex="-1"
             >
@@ -159,24 +159,6 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                   </th>
                   <th
                     class="euiTableHeaderCell"
-                    data-test-subj="tableHeaderCell_permissionMode_3"
-                    role="columnheader"
-                    scope="col"
-                    style="width: 10%;"
-                  >
-                    <span
-                      class="euiTableCellContent"
-                    >
-                      <span
-                        class="euiTableCellContent__text"
-                        title="Permissions"
-                      >
-                        Permissions
-                      </span>
-                    </span>
-                  </th>
-                  <th
-                    class="euiTableHeaderCell"
                     role="columnheader"
                     scope="col"
                   >
@@ -212,9 +194,10 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                       <span
                         class=""
                       >
-                        <button
+                        <a
                           class="euiLink euiLink--primary"
-                          type="button"
+                          href="http://localhost/w/id1/undefined"
+                          rel="noreferrer"
                         >
                           <div
                             class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -229,7 +212,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                               </div>
                             </div>
                           </div>
-                        </button>
+                        </a>
                       </span>
                     </div>
                   </td>
@@ -248,7 +231,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                       <span
                         class="euiTableCellContent__text"
                       >
-                        Analytics (All)
+                        Analytics
                       </span>
                     </div>
                   </td>
@@ -268,33 +251,10 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--extraSmall eui-textTruncate"
+                          class="euiText euiText--small eui-textTruncate"
                           style="max-width: 150px;"
                         >
                           should be able to see the description tooltip when hovering over the description
-                        </div>
-                      </span>
-                    </div>
-                  </td>
-                  <td
-                    class="euiTableRowCell"
-                    style="width: 10%;"
-                  >
-                    <div
-                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                    >
-                      Permissions
-                    </div>
-                    <div
-                      class="euiTableCellContent euiTableCellContent--overflowingContent"
-                    >
-                      <span
-                        class="euiToolTipAnchor"
-                      >
-                        <div
-                          class="euiText euiText--extraSmall"
-                        >
-                          Admin
                         </div>
                       </span>
                     </div>
@@ -380,9 +340,10 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                       <span
                         class=""
                       >
-                        <button
+                        <a
                           class="euiLink euiLink--primary"
-                          type="button"
+                          href="http://localhost/w/id2/undefined"
+                          rel="noreferrer"
                         >
                           <div
                             class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -397,7 +358,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                               </div>
                             </div>
                           </div>
-                        </button>
+                        </a>
                       </span>
                     </div>
                   </td>
@@ -436,33 +397,10 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--extraSmall eui-textTruncate"
+                          class="euiText euiText--small eui-textTruncate"
                           style="max-width: 150px;"
                         >
                           should be able to see the description tooltip when hovering over the description
-                        </div>
-                      </span>
-                    </div>
-                  </td>
-                  <td
-                    class="euiTableRowCell"
-                    style="width: 10%;"
-                  >
-                    <div
-                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                    >
-                      Permissions
-                    </div>
-                    <div
-                      class="euiTableCellContent euiTableCellContent--overflowingContent"
-                    >
-                      <span
-                        class="euiToolTipAnchor"
-                      >
-                        <div
-                          class="euiText euiText--extraSmall"
-                        >
-                          Admin
                         </div>
                       </span>
                     </div>
@@ -548,9 +486,10 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                       <span
                         class=""
                       >
-                        <button
+                        <a
                           class="euiLink euiLink--primary"
-                          type="button"
+                          href="http://localhost/w/id3/undefined"
+                          rel="noreferrer"
                         >
                           <div
                             class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -565,7 +504,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                               </div>
                             </div>
                           </div>
-                        </button>
+                        </a>
                       </span>
                     </div>
                   </td>
@@ -604,31 +543,10 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--extraSmall eui-textTruncate"
+                          class="euiText euiText--small eui-textTruncate"
                           style="max-width: 150px;"
-                        />
-                      </span>
-                    </div>
-                  </td>
-                  <td
-                    class="euiTableRowCell"
-                    style="width: 10%;"
-                  >
-                    <div
-                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                    >
-                      Permissions
-                    </div>
-                    <div
-                      class="euiTableCellContent euiTableCellContent--overflowingContent"
-                    >
-                      <span
-                        class="euiToolTipAnchor"
-                      >
-                        <div
-                          class="euiText euiText--extraSmall"
                         >
-                          Admin
+                          —
                         </div>
                       </span>
                     </div>
@@ -733,7 +651,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                         >
                           Rows per page
                           : 
-                          10
+                          20
                         </span>
                       </span>
                     </button>

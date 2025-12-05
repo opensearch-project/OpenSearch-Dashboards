@@ -11,19 +11,20 @@ import {
   ChromeNavLink,
   WorkspacesStart,
 } from 'opensearch-dashboards/public';
-import { map, switchMap, takeUntil } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
+import { map, switchMap, takeUntil } from 'rxjs/operators';
 import { IUiSettingsClient } from '../../ui_settings';
 import {
   fulfillRegistrationLinksToChromeNavLinks,
   getSortedNavLinks,
   getVisibleUseCases,
+  isUseCaseGroup,
 } from '../utils';
 import { ChromeNavLinks } from '../nav_links';
 import { InternalApplicationStart } from '../../application';
-import { NavGroupStatus } from '../../../../core/types';
+import { NavGroupStatus, NavGroupType } from '../../../../core/types';
 import { ChromeBreadcrumb, ChromeBreadcrumbEnricher } from '../chrome_service';
-import { ALL_USE_CASE_ID } from '../../../utils';
+import { ALL_USE_CASE_ID, DEFAULT_APP_CATEGORIES } from '../../../utils';
 
 export const CURRENT_NAV_GROUP_ID = 'core.chrome.currentNavGroupId';
 
@@ -40,7 +41,10 @@ export interface ChromeRegistrationNavLink {
   parentNavLinkId?: string;
 
   /**
-   * If the nav link should be shown in 'all' nav group
+   * @deprecated
+   * If the nav link should be shown in 'all' nav group, previously 'all' use case is a derived use case
+   * so we use this property to decide if the feature should be shown in `all` use case. Going forward we should
+   * use addNavLinksToGroup to keep the interfaces consistent.
    */
   showInAllNavGroup?: boolean;
 }
@@ -74,6 +78,14 @@ export interface ChromeNavGroupServiceStartContract {
    */
   setCurrentNavGroup: (navGroupId: string | undefined) => void;
 }
+
+// Custom category is used for those features not belong to any of use cases in all use case.
+// and the custom category should always sit after manage category
+const customCategory: AppCategory = {
+  id: 'custom',
+  label: i18n.translate('core.ui.customNavList.label', { defaultMessage: 'Custom' }),
+  order: (DEFAULT_APP_CATEGORIES.manage.order || 0) + 500,
+};
 
 /** @internal */
 export class ChromeNavGroupService {
@@ -115,12 +127,104 @@ export class ChromeNavGroupService {
   }
 
   private sortNavGroupNavLinks(
-    navGroup: NavGroupItemInMap,
+    navLinks: NavGroupItemInMap['navLinks'],
     allValidNavLinks: Array<Readonly<ChromeNavLink>>
   ) {
-    return getSortedNavLinks(
-      fulfillRegistrationLinksToChromeNavLinks(navGroup.navLinks, allValidNavLinks)
-    );
+    return getSortedNavLinks(fulfillRegistrationLinksToChromeNavLinks(navLinks, allValidNavLinks));
+  }
+
+  private getNavLinksForAllUseCase(
+    navGroupsMap: Record<string, NavGroupItemInMap>,
+    navLinks: Array<Readonly<ChromeNavLink>>
+  ) {
+    const dedupNavLinks = (
+      navLinkWaitedToAppend: ChromeRegistrationNavLink[],
+      alreadyAppendedNavLinks: ChromeRegistrationNavLink[]
+    ) => {
+      return navLinkWaitedToAppend.filter((navLink) => {
+        return !alreadyAppendedNavLinks.find(
+          (alreadyAppendedNavLink) => alreadyAppendedNavLink.id === navLink.id
+        );
+      });
+    };
+
+    // Note: we need to use a new pointer when `assign navGroupsMap[ALL_USE_CASE_ID]?.navLinks`
+    // because we will mutate the array directly in the following code.
+    const navLinksResult: ChromeRegistrationNavLink[] = [
+      ...(navGroupsMap[ALL_USE_CASE_ID]?.navLinks || []),
+    ];
+
+    const linksAddedIntoAllNavGroup = [...navGroupsMap[ALL_USE_CASE_ID].navLinks];
+
+    // Append all the links that do not have use case info to keep backward compatible
+    const linkIdsWithNavGroupInfo = Object.values(navGroupsMap).reduce((accumulator, navGroup) => {
+      // Nav groups without type will be regarded as use case,
+      // we should transform use cases to a category and append links with `showInAllNavGroup: true` under the category
+      if (!navGroup.type && navGroup.id !== ALL_USE_CASE_ID) {
+        // Append use case section into left navigation
+        const categoryInfo = {
+          id: navGroup.id,
+          label: navGroup.title,
+          order: navGroup.order,
+        };
+
+        const fulfilledLinksOfNavGroup = fulfillRegistrationLinksToChromeNavLinks(
+          navGroup.navLinks,
+          navLinks
+        );
+
+        const linksForAllUseCaseWithinNavGroup: ChromeRegistrationNavLink[] = [];
+
+        fulfilledLinksOfNavGroup.forEach((navLink) => {
+          if (navLink.showInAllNavGroup) {
+            linksAddedIntoAllNavGroup.push(navLink);
+          }
+
+          if (!linksAddedIntoAllNavGroup.find((link) => link.id === navLink.id)) {
+            return;
+          }
+
+          linksForAllUseCaseWithinNavGroup.push({
+            ...navLink,
+            category: categoryInfo,
+          });
+        });
+
+        navLinksResult.push(...dedupNavLinks(linksForAllUseCaseWithinNavGroup, navLinksResult));
+
+        if (!linksForAllUseCaseWithinNavGroup.length) {
+          /**
+           * Find if there are any links inside a use case but without a `see all` entry.
+           * If so, append these features into custom category as a fallback
+           */
+          fulfillRegistrationLinksToChromeNavLinks(navGroup.navLinks, navLinks).forEach(
+            (navLink) => {
+              // Links that already exists in all use case do not need to reappend
+              if (navLinksResult.find((navLinkInAll) => navLinkInAll.id === navLink.id)) {
+                return;
+              }
+              navLinksResult.push({
+                ...navLink,
+                category: customCategory,
+              });
+            }
+          );
+        }
+      }
+
+      return [...accumulator, ...navGroup.navLinks.map((navLink) => navLink.id)];
+    }, [] as string[]);
+    navLinks.forEach((navLink) => {
+      if (linkIdsWithNavGroupInfo.includes(navLink.id)) {
+        return;
+      }
+      navLinksResult.push({
+        ...navLink,
+        category: customCategory,
+      });
+    });
+
+    return navLinksResult;
   }
 
   private getSortedNavGroupsMap$() {
@@ -130,10 +234,20 @@ export class ChromeNavGroupService {
         map(([navGroupsMap, navLinks]) => {
           return Object.keys(navGroupsMap).reduce((sortedNavGroupsMap, navGroupId) => {
             const navGroup = navGroupsMap[navGroupId];
-            sortedNavGroupsMap[navGroupId] = {
-              ...navGroup,
-              navLinks: this.sortNavGroupNavLinks(navGroup, navLinks),
-            };
+            if (navGroupId === ALL_USE_CASE_ID) {
+              sortedNavGroupsMap[navGroupId] = {
+                ...navGroup,
+                navLinks: this.sortNavGroupNavLinks(
+                  this.getNavLinksForAllUseCase(navGroupsMap, navLinks),
+                  navLinks
+                ),
+              };
+            } else {
+              sortedNavGroupsMap[navGroupId] = {
+                ...navGroup,
+                navLinks: this.sortNavGroupNavLinks(navGroup.navLinks, navLinks),
+              };
+            }
             return sortedNavGroupsMap;
           }, {} as Record<string, NavGroupItemInMap>);
         })
@@ -270,14 +384,24 @@ export class ChromeNavGroupService {
             appIdNavGroupMap.set(navLinkId, navGroupSet);
           });
         };
-        if (visibleUseCases.length === 1 && visibleUseCases[0].id === ALL_USE_CASE_ID) {
-          // If the only visible use case is all use case
-          // All the other nav groups will be visible because all use case can visit all of the nav groups.
-          Object.values(navGroupMap).forEach((navGroup) => mapAppIdToNavGroup(navGroup));
+        if (visibleUseCases.length === 1) {
+          // The length will be 1 if inside a workspace
+          // as workspace plugin will register a filter to only make the selected nav group visible.
+          // In order to tell which nav group we are in, we should use the only visible use case if the visibleUseCases.length equals 1.
+          visibleUseCases.forEach((navGroup) => mapAppIdToNavGroup(navGroup));
         } else {
-          // Nav group of Hidden status should be filtered out when counting navGroups the currentApp belongs to
           Object.values(navGroupMap).forEach((navGroup) => {
+            // Nav group of Hidden status should be filtered out when counting navGroups the currentApp belongs to
             if (navGroup.status === NavGroupStatus.Hidden) {
+              return;
+            }
+
+            // Use cases except "analytics" should be filtered out when workspace is disabled
+            if (
+              !application.capabilities.workspaces.enabled &&
+              isUseCaseGroup(navGroup) &&
+              navGroup.id !== ALL_USE_CASE_ID
+            ) {
               return;
             }
 
@@ -287,7 +411,26 @@ export class ChromeNavGroupService {
 
         const navGroups = appIdNavGroupMap.get(appId);
         if (navGroups && navGroups.size === 1) {
-          setCurrentNavGroup(navGroups.values().next().value);
+          const navGroupId = navGroups.values().next().value as string;
+          /**
+           * If
+           * 1. workspace enabled
+           * 2. outside of workspace: visibleUseCases.length > 1
+           * 3. the matched nav group is a use case nav group
+           *
+           * It means a workspace application is incorrectly opened in global place.
+           * We need to set current nav group to undefined to not show the use case nav.
+           */
+          const navGroupInfo = navGroupMap[navGroupId];
+          if (
+            application.capabilities.workspaces.enabled &&
+            visibleUseCases.length > 1 &&
+            navGroupInfo.type !== NavGroupType.SYSTEM
+          ) {
+            setCurrentNavGroup(undefined);
+          } else {
+            setCurrentNavGroup(navGroupId);
+          }
         } else if (!navGroups) {
           setCurrentNavGroup(undefined);
         }
@@ -324,13 +467,7 @@ export class ChromeNavGroupService {
         }
       },
     };
-    const homeBreadcrumb: ChromeBreadcrumb = {
-      text: i18n.translate('core.breadcrumbs.homeTitle', { defaultMessage: 'Home' }),
-      onClick: () => {
-        navigateToApp('home');
-      },
-    };
-    return [homeBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
+    return [navGroupBreadcrumb, ...breadcrumbs];
   }
 
   async stop() {

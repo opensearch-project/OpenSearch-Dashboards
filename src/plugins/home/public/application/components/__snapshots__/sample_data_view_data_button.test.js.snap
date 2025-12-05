@@ -39,7 +39,7 @@ exports[`should render popover when appLinks is not empty 1`] = `
               "onClick": [Function],
             },
             Object {
-              "href": "rootapp/myAppPath",
+              "href": "rootundefined",
               "icon": <EuiIcon
                 size="m"
                 type="inputOutput"

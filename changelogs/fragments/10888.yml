@@ -1,0 +1,2 @@
+fix:
+- Explore embeddable not render due to explore services not set ([#10888](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10888))

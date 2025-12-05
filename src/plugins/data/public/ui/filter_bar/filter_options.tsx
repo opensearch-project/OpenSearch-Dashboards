@@ -55,12 +55,13 @@ import {
   unpinFilter,
   UI_SETTINGS,
   IIndexPattern,
-  isQueryStringFilter,
 } from '../../../common';
 import { FilterEditor } from './filter_editor';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { SavedQueryManagementComponent } from '../saved_query_management';
 import { SavedQuery, SavedQueryService } from '../../query';
+import { SavedQueryMeta } from '../saved_query_form';
+import { getUseNewSavedQueriesUI } from '../../services';
 
 interface Props {
   intl: InjectedIntl;
@@ -69,14 +70,15 @@ interface Props {
   savedQueryService: SavedQueryService;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
-  onSave: () => void;
-  onSaveAsNew: () => void;
+  onInitiateSave: () => void;
+  onInitiateSaveAsNew: () => void;
   onLoad: (savedQuery: SavedQuery) => void;
   onClearSavedQuery: () => void;
   onFiltersUpdated?: (filters: Filter[]) => void;
   loadedSavedQuery?: SavedQuery;
   useSaveQueryMenu: boolean;
   isQueryEditorControl: boolean;
+  saveQuery: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
 }
 const maxFilterWidth = 600;
 
@@ -88,8 +90,7 @@ const FilterOptionsUI = (props: Props) => {
   const uiSettings = opensearchDashboards.services.uiSettings;
   const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
   const useNewHeader = Boolean(uiSettings!.get(UI_SETTINGS.NEW_HOME_PAGE));
-  const [indexPattern] = props.indexPatterns;
-  const index = indexPattern && indexPattern.id;
+  const index = Array.isArray(props.indexPatterns) ? props.indexPatterns[0]?.id : undefined;
   const newFilter = buildEmptyFilter(isPinned, index);
 
   const togglePopover = () => {
@@ -286,8 +287,8 @@ const FilterOptionsUI = (props: Props) => {
   ];
 
   const handleSave = () => {
-    if (props.onSave) {
-      props.onSave();
+    if (props.onInitiateSave) {
+      props.onInitiateSave();
     }
     setIsPopoverOpen(false);
   };
@@ -298,8 +299,8 @@ const FilterOptionsUI = (props: Props) => {
         <SavedQueryManagementComponent
           showSaveQuery={props.showSaveQuery}
           loadedSavedQuery={props.loadedSavedQuery}
-          onSave={handleSave}
-          onSaveAsNew={props.onSaveAsNew!}
+          onInitiateSave={handleSave}
+          onInitiateSaveAsNew={props.onInitiateSaveAsNew!}
           onLoad={props.onLoad!}
           savedQueryService={props.savedQueryService!}
           onClearSavedQuery={props.onClearSavedQuery!}
@@ -307,6 +308,8 @@ const FilterOptionsUI = (props: Props) => {
             setIsPopoverOpen(false);
           }}
           key={'savedQueryManagement'}
+          useNewSavedQueryUI={getUseNewSavedQueriesUI()}
+          saveQuery={props.saveQuery}
         />,
       ]}
       data-test-subj="save-query-panel"
@@ -365,6 +368,10 @@ const FilterOptionsUI = (props: Props) => {
     defaultMessage: 'See saved queries',
   });
 
+  const iconForQueryEditorControlPopoverBtn = getUseNewSavedQueriesUI()
+    ? 'boxesHorizontal'
+    : 'folderOpen';
+
   const savedQueryPopoverButton = (
     <EuiSmallButtonEmpty
       onClick={togglePopover}
@@ -374,7 +381,7 @@ const FilterOptionsUI = (props: Props) => {
       title={label}
     >
       <EuiIcon
-        type={props.isQueryEditorControl ? 'folderOpen' : 'save'}
+        type={props.isQueryEditorControl ? iconForQueryEditorControlPopoverBtn : 'save'}
         className="euiQuickSelectPopover__buttonText"
       />
     </EuiSmallButtonEmpty>
@@ -407,7 +414,6 @@ const FilterOptionsUI = (props: Props) => {
     return (
       <EuiPopover
         id="popoverForAllFilters"
-        className="globalFilterGroup__allFiltersPopover"
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         button={savedQueryPopoverButton}
@@ -425,7 +431,7 @@ const FilterOptionsUI = (props: Props) => {
   return (
     <EuiPopover
       id="popoverForAllFilters"
-      className="globalFilterGroup__allFiltersPopover"
+      className={useNewHeader ? 'globalFilterGroup__allFiltersPopover' : undefined}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       button={props.useSaveQueryMenu ? savedQueryPopoverButton : filterPopoverButton}

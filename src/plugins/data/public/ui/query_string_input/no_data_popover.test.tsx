@@ -45,6 +45,7 @@ describe('NoDataPopover', () => {
   it('should hide popover if showNoDataPopover is set to false', () => {
     const Child = () => <span />;
     const instance = mount(
+      // @ts-expect-error TS2740 TODO(ts-error): fixme
       <NoDataPopover storage={createMockStorage()} showNoDataPopover={false}>
         <Child />
       </NoDataPopover>
@@ -58,6 +59,7 @@ describe('NoDataPopover', () => {
     const storage = createMockStorage();
     storage.get.mockReturnValue(true);
     const instance = mount(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <NoDataPopover storage={storage} showNoDataPopover={false}>
         {child}
       </NoDataPopover>
@@ -68,6 +70,7 @@ describe('NoDataPopover', () => {
   it('should render popover if showNoDataPopover is set to true and local storage flag is not set', () => {
     const child = <span />;
     const instance = mount(
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       <NoDataPopover storage={createMockStorage()} showNoDataPopover={true}>
         {child}
       </NoDataPopover>
@@ -81,6 +84,7 @@ describe('NoDataPopover', () => {
       showNoDataPopover: true,
       storage: createMockStorage(),
     };
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const instance = mount(<NoDataPopover {...props} />);
     act(() => {
       instance.find(EuiTourStep).prop('closePopover')!();
@@ -95,6 +99,7 @@ describe('NoDataPopover', () => {
       showNoDataPopover: true,
       storage: createMockStorage(),
     };
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const instance = mount(<NoDataPopover {...props} />);
     act(() => {
       instance.find(EuiTourStep).prop('footerAction')!.props.onClick();

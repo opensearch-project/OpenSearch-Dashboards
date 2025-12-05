@@ -13,7 +13,8 @@
   "dependencies": {
     "@osd/dev-utils": "1.0.0",
     "@osd/std": "1.0.0",
-    "@opensearch-project/opensearch": "^2.9.0"
+    "@osd/test": "1.0.0",
+    "@opensearch-project/opensearch": "^2.13.0"
   },
   "devDependencies": {}
 }

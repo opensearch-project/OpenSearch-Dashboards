@@ -32,7 +32,6 @@ import { OpenSearchDashboardsRequest, RequestHandler } from 'opensearch-dashboar
 import { trimStart } from 'lodash';
 import { Readable } from 'stream';
 import { stringify } from '@osd/std';
-import { ApiResponse } from '@opensearch-project/opensearch';
 
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../../../../core/server/http/router';
@@ -88,10 +87,6 @@ export const createHandler = ({
 }: RouteDependencies): RequestHandler<unknown, Query, Body> => async (ctx, request, response) => {
   const { body, query } = request;
   const { path, method, dataSourceId } = query;
-  const client = dataSourceId
-    ? await ctx.dataSource.opensearch.getClient(dataSourceId)
-    : ctx.core.opensearch.client.asCurrentUserWithLongNumeralsSupport;
-  let opensearchResponse: ApiResponse;
 
   if (!pathFilters.some((re) => re.test(path))) {
     return response.forbidden({
@@ -103,6 +98,10 @@ export const createHandler = ({
   }
 
   try {
+    const client = dataSourceId
+      ? await ctx.dataSource.opensearch.getClient(dataSourceId)
+      : ctx.core.opensearch.client.asCurrentUserWithLongNumeralsSupport;
+
     // TODO: proxy header will fail sigv4 auth type in data source, need create issue in opensearch-js repo to track
     const requestHeaders = dataSourceId
       ? {}
@@ -111,7 +110,7 @@ export const createHandler = ({
         };
 
     const bufferedBody = await buildBufferedBody(body);
-    opensearchResponse = await client.transport.request(
+    const opensearchResponse = await client.transport.request(
       { path: toUrlPath(path), method, body: bufferedBody },
       { headers: requestHeaders }
     );
@@ -148,7 +147,7 @@ export const createHandler = ({
     });
   } catch (e: any) {
     const isResponseErrorFlag = isResponseError(e);
-    if (!isResponseError) log.error(e);
+    if (!isResponseErrorFlag) log.error(e);
     const errorMessage = isResponseErrorFlag ? stringify(e.meta.body) : e.message;
     // core http route handler has special logic that asks for stream readable input to pass error opaquely
     const errorResponseBody = new Readable({
@@ -158,7 +157,8 @@ export const createHandler = ({
       },
     });
     return response.customError({
-      statusCode: isResponseErrorFlag ? e.statusCode : 502,
+      statusCode: e.statusCode || 502,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       body: errorResponseBody,
       headers: {
         'Content-Type': 'application/json',

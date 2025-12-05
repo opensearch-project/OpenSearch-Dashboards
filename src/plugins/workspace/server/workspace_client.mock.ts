@@ -4,13 +4,17 @@
  */
 
 export const workspaceClientMock = {
-  setup: jest.fn(),
-  setSavedObjects: jest.fn(),
-  setUiSettings: jest.fn(),
-  create: jest.fn().mockResolvedValue({ id: 'mock-workspace-id' }),
-  list: jest.fn(),
-  get: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  destroy: jest.fn(),
+  create: () => ({
+    setup: jest.fn(),
+    setSavedObjects: jest.fn(),
+    setUiSettings: jest.fn(),
+    create: jest.fn().mockResolvedValue({ id: 'mock-workspace-id' }),
+    list: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    destroy: jest.fn(),
+    associate: jest.fn(),
+    dissociate: jest.fn(),
+  }),
 };

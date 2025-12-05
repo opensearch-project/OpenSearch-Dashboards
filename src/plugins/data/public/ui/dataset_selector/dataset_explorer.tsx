@@ -7,7 +7,10 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiModalBody,
   EuiModalFooter,
@@ -19,9 +22,16 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import { BaseDataset, DATA_STRUCTURE_META_TYPES, DataStructure } from '../../../common';
-import { QueryStringContract } from '../../query';
+import moment from 'moment';
+import {
+  BaseDataset,
+  DATA_STRUCTURE_META_TYPES,
+  DataStructure,
+  DataStructureCustomMeta,
+} from '../../../common';
+import { DataStructureFetchOptions, QueryStringContract } from '../../query';
 import { IDataPluginServices } from '../../types';
+import { DatasetTable } from './dataset_table';
 
 export const DatasetExplorer = ({
   services,
@@ -38,14 +48,26 @@ export const DatasetExplorer = ({
   onNext: (dataset: BaseDataset) => void;
   onCancel: () => void;
 }) => {
+  const uiSettings = services.uiSettings;
   const [explorerDataset, setExplorerDataset] = useState<BaseDataset | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
+  const datasetService = queryString.getDatasetService();
 
-  const selectDataStructure = async (item: DataStructure, newPath: DataStructure[]) => {
+  const fetchNextDataStructure = async (
+    nextPath: DataStructure[],
+    dataType: string,
+    options?: DataStructureFetchOptions
+  ) => datasetService.fetchOptions(services, nextPath, dataType, options);
+
+  const selectDataStructure = async (item: DataStructure | undefined, newPath: DataStructure[]) => {
+    if (!item) {
+      setExplorerDataset(undefined);
+      return;
+    }
     const lastPathItem = newPath[newPath.length - 1];
     const nextPath = [...newPath, item];
 
-    const typeConfig = queryString.getDatasetService().getType(nextPath[1].id);
+    const typeConfig = datasetService.getType(nextPath[1].id);
     if (!typeConfig) return;
 
     if (!lastPathItem.hasNext) {
@@ -55,9 +77,7 @@ export const DatasetExplorer = ({
     }
 
     setLoading(true);
-    const nextDataStructure = await queryString
-      .getDatasetService()
-      .fetchOptions(services, nextPath, typeConfig.id);
+    const nextDataStructure = await fetchNextDataStructure(nextPath, typeConfig.id);
     setLoading(false);
 
     setPath([...newPath, nextDataStructure]);
@@ -68,35 +88,77 @@ export const DatasetExplorer = ({
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <h1>
-            <FormattedMessage
-              id="data.explorer.datasetSelector.advancedSelector.title.step1"
-              defaultMessage="Step 1: Select data"
-            />
-          </h1>
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="data.explorer.datasetSelector.advancedSelector.description"
-                defaultMessage="Select from those available to you. "
-              />
-              <EuiLink
-                href={`${services.http.basePath.get()}/app/management/opensearch-dashboards/dataSources`}
-                target="_blank"
-              >
+        <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={true}>
+            <EuiModalHeaderTitle>
+              <h1>
                 <FormattedMessage
-                  id="data.explorer.datasetSelector.advancedSelector.dataSourceManagement.title"
-                  defaultMessage="Manage data sources"
+                  id="data.explorer.datasetSelector.advancedSelector.title.step1"
+                  defaultMessage="Step 1: Select data"
                 />
-              </EuiLink>
-            </p>
-          </EuiText>
-        </EuiModalHeaderTitle>
+              </h1>
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="data.explorer.datasetSelector.advancedSelector.description"
+                    defaultMessage="Select from those available to you. "
+                  />
+                  <EuiLink
+                    href={`${services.http.basePath.get()}/app/management/opensearch-dashboards/dataSources`}
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="data.explorer.datasetSelector.advancedSelector.dataSourceManagement.title"
+                      defaultMessage="Manage data sources"
+                    />
+                  </EuiLink>
+                </p>
+              </EuiText>
+            </EuiModalHeaderTitle>
+          </EuiFlexItem>
+          {queryString.getDatasetService().getLastCacheTime() && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <FormattedMessage
+                      id="data.explorer.datasetSelector.advancedSelector.lastUpdatedTime"
+                      defaultMessage="Last updated at: {timestamp}."
+                      values={{
+                        timestamp: moment(queryString.getDatasetService().getLastCacheTime())
+                          .format(uiSettings.get('dateFormat'))
+                          .toString(),
+                      }}
+                    />{' '}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => {
+                      queryString.getDatasetService().clearCache();
+                      onCancel();
+                    }}
+                    size="xs"
+                    iconSide="left"
+                    iconType="refresh"
+                    iconGap="s"
+                    flush="both"
+                  >
+                    <FormattedMessage
+                      id="data.explorer.datasetSelector.advancedSelector.refreshCacheButton"
+                      defaultMessage="Refresh Cache"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
       </EuiModalHeader>
       <EuiModalBody>
         <div
           className="datasetExplorer"
+          data-test-subj="datasetExplorerWindow"
           style={{
             gridTemplateColumns: `repeat(${
               columnCount - 1
@@ -113,44 +175,69 @@ export const DatasetExplorer = ({
                   isFinal ? ' datasetExplorer__column--leaf' : ''
                 }`}
               >
-                <EuiTitle size="xxs" className="datasetExplorer__columnTitle">
+                <EuiTitle
+                  size="xxs"
+                  className="datasetExplorer__columnTitle"
+                  data-test-subj="datasetExplorerColumnTitle"
+                >
                   <h3>{current.columnHeader}</h3>
                 </EuiTitle>
-                <EuiSelectable
-                  options={(current.children || []).map((child) => ({
-                    label: child.parent ? `${child.parent.title}::${child.title}` : child.title,
-                    value: child.id,
-                    prepend: child.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE &&
-                      child.meta?.icon && <EuiIcon {...child.meta.icon} />,
-                    append: appendIcon(child),
-                    checked: isChecked(child, index, path, explorerDataset),
-                  }))}
-                  onChange={(options) => {
-                    const selected = options.find((option) => option.checked);
-                    if (selected) {
-                      const item = current.children?.find((child) => child.id === selected.value);
-                      if (item) {
-                        selectDataStructure(item, path.slice(0, index + 1));
+                {current.DataStructureCreator ? (
+                  <current.DataStructureCreator
+                    path={path}
+                    setPath={setPath}
+                    index={index}
+                    selectDataStructure={selectDataStructure}
+                    // @ts-ignore custom component can have their own fetch options
+                    fetchDataStructure={fetchNextDataStructure}
+                  />
+                ) : current.multiSelect ? (
+                  <DatasetTable
+                    services={services}
+                    path={path}
+                    setPath={setPath}
+                    index={index}
+                    selectDataStructure={selectDataStructure}
+                    fetchDataStructure={fetchNextDataStructure}
+                  />
+                ) : (
+                  <EuiSelectable
+                    options={(current.children || []).map((child) => ({
+                      label: child.parent ? `${child.parent.title}::${child.title}` : child.title,
+                      value: child.id,
+                      prepend: child.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE &&
+                        child.meta?.icon && <EuiIcon {...child.meta.icon} />,
+                      append: appendIcon(child),
+                      checked: isChecked(child, index, path, explorerDataset),
+                    }))}
+                    onChange={(options) => {
+                      const selected = options.find((option) => option.checked);
+                      if (selected) {
+                        const item = current.children?.find((child) => child.id === selected.value);
+                        if (item) {
+                          selectDataStructure(item, path.slice(0, index + 1));
+                        }
                       }
-                    }
-                  }}
-                  singleSelection
-                  {...(isFinal && {
-                    searchProps: {
-                      compressed: true,
-                    },
-                    searchable: true,
-                  })}
-                  height="full"
-                  className="datasetExplorer__selectable"
-                >
-                  {(list, search) => (
-                    <>
-                      {isFinal && search}
-                      {list}
-                    </>
-                  )}
-                </EuiSelectable>
+                    }}
+                    singleSelection
+                    {...(isFinal && {
+                      searchProps: {
+                        compressed: true,
+                      },
+                      searchable: true,
+                    })}
+                    height="full"
+                    className="datasetExplorer__selectable"
+                    data-test-subj="datasetExplorerSelectable"
+                  >
+                    {(list, search) => (
+                      <>
+                        {isFinal && search}
+                        {list}
+                      </>
+                    )}
+                  </EuiSelectable>
+                )}
               </div>
             );
           })}
@@ -158,7 +245,7 @@ export const DatasetExplorer = ({
         </div>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>
+        <EuiButtonEmpty data-test-subj="datasetSelectorCancel" onClick={onCancel}>
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.cancel"
             defaultMessage="Cancel"
@@ -170,6 +257,7 @@ export const DatasetExplorer = ({
           iconType="arrowRight"
           iconSide="right"
           fill
+          data-test-subj="datasetSelectorNext"
         >
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.next"
@@ -182,23 +270,37 @@ export const DatasetExplorer = ({
 };
 
 const EmptyColumn = () => (
-  <div className="datasetExplorer__column datasetExplorer__column--empty" />
+  <div
+    className="datasetExplorer__column datasetExplorer__column--empty"
+    data-test-subj="datasetExplorerEmptyColumn"
+  />
 );
 
 const LoadingEmptyColumn = ({ isLoading }: { isLoading: boolean }) =>
   isLoading ? (
-    <div className="datasetExplorer__column">
-      <EuiTitle size="xxs" className="datasetExplorer__columnTitle">
+    <div className="datasetExplorer__column" data-test-subj="datasetExplorerLoadingColumn">
+      <EuiTitle
+        size="xxs"
+        className="datasetExplorer__columnTitle"
+        data-test-subj="datasetExplorerLoadingColumnTitle"
+      >
         <h3>...</h3>
       </EuiTitle>
-      <EuiSelectable options={[]} singleSelection className="datasetExplorer__selectable" isLoading>
+      <EuiSelectable
+        options={[]}
+        singleSelection
+        className="datasetExplorer__selectable"
+        isLoading
+        data-test-subj="datasetExplorerSelectable"
+      >
         {(list) => <>{list}</>}
       </EuiSelectable>
     </div>
   ) : (
     <EmptyColumn />
   );
-const appendIcon = (item: DataStructure) => {
+
+const getMetaIcon = (item: DataStructure) => {
   if (item.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE) {
     return (
       <EuiToolTip content={item.meta.tooltip}>
@@ -218,6 +320,33 @@ const appendIcon = (item: DataStructure) => {
   }
 
   return null;
+};
+
+const appendIcon = (item: DataStructure) => {
+  const metaIcon = getMetaIcon(item);
+
+  const additionalIcons = (item.meta as DataStructureCustomMeta)?.additionalAppendIcons?.map(
+    (icon: { tooltip: string; type: string }) => {
+      return (
+        <EuiFlexItem grow={false} key={icon.tooltip}>
+          <EuiIconTip key={icon.tooltip} content={icon.tooltip} type={icon.type} />
+        </EuiFlexItem>
+      );
+    }
+  );
+
+  return (
+    <EuiToolTip>
+      <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={true}>
+        {additionalIcons}
+        {metaIcon && (
+          <EuiFlexItem grow={false} key="metaIcon">
+            {metaIcon}
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </EuiToolTip>
+  );
 };
 
 const isChecked = (

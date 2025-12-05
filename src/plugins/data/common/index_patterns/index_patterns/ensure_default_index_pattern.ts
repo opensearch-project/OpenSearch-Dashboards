@@ -30,20 +30,25 @@
 
 import { includes } from 'lodash';
 import { IndexPatternsContract } from './index_patterns';
-import { UiSettingsCommon } from '../types';
+import { SavedObjectsClientCommon, UiSettingsCommon } from '../types';
 
-export type EnsureDefaultIndexPattern = () => Promise<unknown> | undefined;
+export type EnsureDefaultIndexPattern = () => Promise<unknown | void> | undefined;
 
 export const createEnsureDefaultIndexPattern = (
   uiSettings: UiSettingsCommon,
-  onRedirectNoIndexPattern: () => Promise<unknown> | void
+  onRedirectNoIndexPattern: () => Promise<unknown> | void,
+  canUpdateUiSetting?: boolean,
+  savedObjectsClient?: SavedObjectsClientCommon
 ) => {
   /**
    * Checks whether a default index pattern is set and exists and defines
    * one otherwise.
    */
   return async function ensureDefaultIndexPattern(this: IndexPatternsContract) {
-    const patterns = await this.getIds();
+    if (canUpdateUiSetting === false) {
+      return;
+    }
+    let patterns = await this.getIds();
     let defaultId = await uiSettings.get('defaultIndex');
     let defined = !!defaultId;
     const exists = includes(patterns, defaultId);
@@ -54,7 +59,62 @@ export const createEnsureDefaultIndexPattern = (
     }
 
     if (defined) {
-      return;
+      const indexPattern = await this.get(defaultId);
+      const dataSourceRef = indexPattern?.dataSourceRef;
+      if (!dataSourceRef) {
+        return;
+      }
+      let isDefaultIndexPatternReferenceValid = true;
+
+      if (!dataSourceRef.id) {
+        isDefaultIndexPatternReferenceValid = false;
+      } else {
+        try {
+          const result = await this.getDataSource(dataSourceRef.id);
+          isDefaultIndexPatternReferenceValid = !(
+            result.error?.statusCode === 403 || result.error?.statusCode === 404
+          );
+        } catch (e) {
+          // The logic below for updating the default index pattern only handles cases where the data source is not found or the user lacks access permissions
+          // For other unexpected errors, we simply return to prevent infinite loops when updating the default index pattern.
+          return;
+        }
+      }
+
+      if (!isDefaultIndexPatternReferenceValid) {
+        try {
+          if (savedObjectsClient) {
+            const datasources = await savedObjectsClient.find({ type: 'data-source' });
+            const indexPatterns = await savedObjectsClient.find({ type: 'index-pattern' });
+            const existDataSources = datasources.map((item) => item.id);
+            patterns = [];
+            indexPatterns.forEach((item) => {
+              const sourceRef = item.references?.find((ref) => ref.type === 'data-source');
+              let isDataSourceReferenceValid = false;
+              /**
+               * The reference is valid when either:
+               * 1. No data source is referenced (using local cluster, which must be available for OpenSearch Dashboards to function)
+               * 2. A data source is referenced with a valid ID
+               */
+              if (!sourceRef) {
+                isDataSourceReferenceValid = true;
+              }
+
+              if (sourceRef?.id && existDataSources.includes(sourceRef.id)) {
+                isDataSourceReferenceValid = true;
+              }
+
+              if (isDataSourceReferenceValid) {
+                patterns.push(item.id);
+              }
+            });
+          }
+        } catch (e) {
+          return;
+        }
+      } else {
+        return;
+      }
     }
 
     // If there is any index pattern created, set the first as default
@@ -62,7 +122,10 @@ export const createEnsureDefaultIndexPattern = (
       defaultId = patterns[0];
       await uiSettings.set('defaultIndex', defaultId);
     } else {
-      return onRedirectNoIndexPattern();
+      const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
+      const shouldRedirect = !isEnhancementsEnabled;
+      if (shouldRedirect) return onRedirectNoIndexPattern();
+      else return;
     }
   };
 };

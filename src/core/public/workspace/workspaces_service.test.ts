@@ -3,12 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  WorkspacesService,
-  WorkspacesSetup,
-  WorkspacesStart,
-  IWorkspaceClient,
-} from './workspaces_service';
+import { IWorkspaceClient } from './types';
+import { WorkspacesService, WorkspacesSetup, WorkspacesStart } from './workspaces_service';
 
 describe('WorkspacesService', () => {
   let workspaces: WorkspacesService;
@@ -43,7 +39,20 @@ describe('WorkspacesService', () => {
   });
 
   it('client is updated when set client', () => {
-    const client: IWorkspaceClient = { copy: jest.fn() };
+    const client: IWorkspaceClient = {
+      copy: jest.fn(),
+      associate: jest.fn(),
+      dissociate: jest.fn(),
+      ui: jest.fn(),
+      list: jest.fn(),
+      get: jest.fn(),
+      getCurrentWorkspace: jest.fn(),
+      getCurrentWorkspaceId: jest.fn(),
+      update: jest.fn(),
+      create: jest.fn(),
+      delete: jest.fn(),
+      batchDelete: jest.fn(),
+    };
     workspacesSetUp.setClient(client);
     expect(workspacesStart.client$.value).toEqual(client);
   });
@@ -68,14 +77,14 @@ describe('WorkspacesService', () => {
   });
 
   it('should return error if the specified workspace id cannot be found', () => {
-    expect(workspacesStart.currentWorkspace$.hasError).toBe(false);
+    expect(workspacesSetUp.workspaceError$.value).toBeFalsy();
     workspacesStart.initialized$.next(true);
     workspacesStart.workspaceList$.next([
       { id: 'workspace-1', name: 'workspace 1' },
       { id: 'workspace-2', name: 'workspace 2' },
     ]);
     workspacesStart.currentWorkspaceId$.next('workspace-3');
-    expect(workspacesStart.currentWorkspace$.hasError).toBe(true);
+    expect(workspacesSetUp.workspaceError$.value).not.toBeFalsy();
   });
 
   it('should stop all observables when workspace service stopped', () => {

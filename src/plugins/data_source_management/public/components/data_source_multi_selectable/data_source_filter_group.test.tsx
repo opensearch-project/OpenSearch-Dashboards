@@ -46,6 +46,7 @@ describe('DataSourceFilterGroup', () => {
   it('should toggle all when clicking on button and should search', async () => {
     const mockCallBack = jest.fn();
     const container = render(
+      // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataSourceFilterGroup
         selectedOptions={[{ id: '1', label: 'name1', checked: 'on', visible: true }]}
         setSelectedOptions={(items) => mockCallBack(items)}

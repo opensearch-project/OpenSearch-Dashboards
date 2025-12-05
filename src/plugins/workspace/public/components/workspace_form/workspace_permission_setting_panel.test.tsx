@@ -10,7 +10,7 @@ import {
   WorkspacePermissionSettingPanelProps,
 } from './workspace_permission_setting_panel';
 import { WorkspacePermissionItemType } from './constants';
-import { WorkspacePermissionMode } from '../../../common/constants';
+import { WorkspacePermissionMode } from '../../../../../core/public';
 
 const setup = (options?: Partial<WorkspacePermissionSettingPanelProps>) => {
   const onChangeMock = jest.fn();
@@ -77,10 +77,10 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult } = setup();
 
     expect(renderResult.getByDisplayValue('foo')).toBeInTheDocument();
-    expect(renderResult.getByText('Read')).toBeInTheDocument();
+    expect(renderResult.getByText('Read only')).toBeInTheDocument();
 
     expect(renderResult.getByDisplayValue('bar')).toBeInTheDocument();
-    expect(renderResult.getByText('Read & Write')).toBeInTheDocument();
+    expect(renderResult.getByText('Read and write')).toBeInTheDocument();
   });
 
   it('should call onChange with new user permission modes', () => {
@@ -88,7 +88,7 @@ describe('WorkspacePermissionSettingInput', () => {
 
     expect(onChangeMock).not.toHaveBeenCalled();
     fireEvent.click(renderResult.getAllByTestId('workspace-permissionModeOptions')[0]);
-    fireEvent.click(renderResult.getAllByText('Read & Write')[1]);
+    fireEvent.click(renderResult.getAllByText('Read and write')[1]);
     expect(onChangeMock).toHaveBeenCalledWith([
       {
         id: 0,
@@ -110,7 +110,7 @@ describe('WorkspacePermissionSettingInput', () => {
     expect(onChangeMock).not.toHaveBeenCalled();
 
     fireEvent.click(renderResult.getAllByTestId('workspace-permissionModeOptions')[1]);
-    fireEvent.click(renderResult.getByText('Owner'));
+    fireEvent.click(renderResult.getByText('Admin'));
     expect(onChangeMock).toHaveBeenCalledWith([
       {
         id: 0,

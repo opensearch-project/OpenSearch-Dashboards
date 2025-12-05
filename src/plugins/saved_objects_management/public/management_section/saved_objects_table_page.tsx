@@ -43,6 +43,7 @@ import {
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
 import { NavigationPublicPluginStart } from '../../../navigation/public';
+import { formatInspectUrl } from '../utils';
 
 const SavedObjectsTablePage = ({
   coreStart,
@@ -57,6 +58,7 @@ const SavedObjectsTablePage = ({
   dataSourceManagement,
   navigation,
   useUpdatedUX,
+  isDatasetManagementEnabled,
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
@@ -70,6 +72,7 @@ const SavedObjectsTablePage = ({
   dataSourceManagement?: DataSourceManagementPluginSetup;
   navigation: NavigationPublicPluginStart;
   useUpdatedUX: boolean;
+  isDatasetManagementEnabled: boolean;
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
@@ -116,15 +119,9 @@ const SavedObjectsTablePage = ({
       workspaces={coreStart.workspaces}
       perPageConfig={itemsPerPage}
       goInspectObject={(savedObject) => {
-        const { editUrl } = savedObject.meta;
-        let finalEditUrl = editUrl;
-        if (useUpdatedUX && finalEditUrl) {
-          finalEditUrl = finalEditUrl.replace(/^\/management\/opensearch-dashboards/, '');
-        }
-        if (finalEditUrl) {
-          return coreStart.application.navigateToUrl(
-            coreStart.http.basePath.prepend(`/app${finalEditUrl}`)
-          );
+        const inAppUrl = formatInspectUrl(savedObject, coreStart);
+        if (inAppUrl) {
+          return coreStart.application.navigateToUrl(inAppUrl);
         }
       }}
       dateFormat={dateFormat}
@@ -136,6 +133,7 @@ const SavedObjectsTablePage = ({
       dataSourceManagement={dataSourceManagement}
       navigationUI={navigation.ui}
       useUpdatedUX={useUpdatedUX}
+      isDatasetManagementEnabled={isDatasetManagementEnabled}
     />
   );
 };

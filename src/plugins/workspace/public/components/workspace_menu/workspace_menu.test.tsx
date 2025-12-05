@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-
+import moment from 'moment';
 import { WorkspaceMenu } from './workspace_menu';
 import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart, DEFAULT_NAV_GROUPS } from '../../../../../core/public';
@@ -44,6 +44,7 @@ describe('<WorkspaceMenu />', () => {
   const WorkspaceMenuCreatorComponent = () => {
     return (
       <IntlProvider locale="en">
+        {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
         <WorkspaceMenu coreStart={coreStartMock} registeredUseCases$={registeredUseCases$} />
       </IntlProvider>
     );
@@ -64,16 +65,14 @@ describe('<WorkspaceMenu />', () => {
     const selectButton = screen.getByTestId('workspace-select-button');
     fireEvent.click(selectButton);
 
-    expect(screen.getByText(/all workspaces/i)).toBeInTheDocument();
-    expect(screen.getByTestId('workspace-menu-item-all-workspace-1')).toBeInTheDocument();
-    expect(screen.getByTestId('workspace-menu-item-all-workspace-2')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-item-workspace-1')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-item-workspace-2')).toBeInTheDocument();
   });
 
-  it('should display a list of recent workspaces in the dropdown', () => {
-    jest.spyOn(recentWorkspaceManager, 'getRecentWorkspaces').mockReturnValue([
-      { id: 'workspace-1', timestamp: 1234567890 },
-      { id: 'workspace-2', timestamp: 1234567899 },
-    ]);
+  it('should display viewed xx ago for recent workspaces', () => {
+    jest
+      .spyOn(recentWorkspaceManager, 'getRecentWorkspaces')
+      .mockReturnValue([{ id: 'workspace-1', timestamp: 1234567890 }]);
 
     coreStartMock.workspaces.workspaceList$.next([
       { id: 'workspace-1', name: 'workspace 1', features: [] },
@@ -85,9 +84,7 @@ describe('<WorkspaceMenu />', () => {
     const selectButton = screen.getByTestId('workspace-select-button');
     fireEvent.click(selectButton);
 
-    expect(screen.getByText(/recent workspaces/i)).toBeInTheDocument();
-    expect(screen.getByTestId('workspace-menu-item-recent-workspace-1')).toBeInTheDocument();
-    expect(screen.getByTestId('workspace-menu-item-recent-workspace-2')).toBeInTheDocument();
+    expect(screen.getByText(`Viewed ${moment(1234567890).fromNow()}`)).toBeInTheDocument();
   });
 
   it('should be able to display empty state when the workspace list is empty', () => {
@@ -98,7 +95,7 @@ describe('<WorkspaceMenu />', () => {
     expect(screen.getByText(/no workspace available/i)).toBeInTheDocument();
   });
 
-  it('should be able to perform search and filter and the results will be shown in both all and recent section', () => {
+  it('should be able to perform search and filter and the results will be shown', () => {
     coreStartMock.workspaces.workspaceList$.next([
       { id: 'workspace-1', name: 'workspace 1', features: [] },
       { id: 'test-2', name: 'test 2', features: [] },
@@ -113,8 +110,8 @@ describe('<WorkspaceMenu />', () => {
 
     const searchInput = screen.getByRole('searchbox');
     fireEvent.change(searchInput, { target: { value: 'works' } });
-    expect(screen.getByTestId('workspace-menu-item-recent-workspace-1')).toBeInTheDocument();
-    expect(screen.getByTestId('workspace-menu-item-recent-workspace-1')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-item-workspace-1')).toBeInTheDocument();
+    expect(screen.queryByText('workspace-menu-item-workspace-1')).not.toBeInTheDocument();
   });
 
   it('should be able to display empty state when seach is not found', () => {
@@ -145,7 +142,7 @@ describe('<WorkspaceMenu />', () => {
 
     fireEvent.click(screen.getByTestId('workspace-select-button'));
     expect(screen.getByTestId('workspace-menu-current-workspace-name')).toBeInTheDocument();
-    expect(screen.getByTestId('workspace-menu-current-use-case')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-current-workspace-use-case')).toBeInTheDocument();
     expect(screen.getByTestId('current-workspace-icon-wsObservability')).toBeInTheDocument();
     expect(screen.getByText('Observability')).toBeInTheDocument();
   });

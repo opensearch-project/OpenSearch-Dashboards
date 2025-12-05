@@ -18,6 +18,7 @@ describe('DiscoverPlugin', () => {
     const initializerContext = coreMock.createPluginInitializerContext();
     const pluginInstance = new DiscoverPlugin(initializerContext);
     expect(() =>
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       pluginInstance.setup(setupMock, {
         data: dataPluginMock.createSetupContract(),
         embeddable: embeddablePluginMock.createSetupContract(),

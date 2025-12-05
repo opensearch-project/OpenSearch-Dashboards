@@ -350,6 +350,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     if (!this.inputRef) {
       return;
     }
+    // @ts-expect-error TS2339 TODO(ts-error): fixme
     const { type, text, start, end, cursorIndex } = suggestion;
 
     this.handleNestedFieldSyntaxNotification(suggestion);
@@ -469,7 +470,9 @@ export default class QueryStringInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
+    // Update local storage
     this.services.storage.set('userQueryLanguage', language);
+    this.services.data.query.queryString.getInitialQueryByLanguage(language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
@@ -527,6 +530,27 @@ export default class QueryStringInputUI extends Component<Props, State> {
     this.fetchIndexPatterns().then(this.updateSuggestions);
     this.handleListUpdate();
 
+    // Register keyboard shortcut for focusing query input using direct service registration
+    const { keyboardShortcut } = this.services;
+    if (keyboardShortcut) {
+      keyboardShortcut.register({
+        id: 'focus_query_bar',
+        pluginId: 'data',
+        name: i18n.translate('data.query.queryStringInput.focusQueryBarShortcut', {
+          defaultMessage: 'Focus query bar',
+        }),
+        category: i18n.translate('data.query.queryStringInput.searchCategory', {
+          defaultMessage: 'Search',
+        }),
+        keys: '/',
+        execute: () => {
+          if (this.inputRef) {
+            this.inputRef.focus();
+          }
+        },
+      });
+    }
+
     window.addEventListener('resize', this.handleAutoHeight);
     window.addEventListener('scroll', this.handleListUpdate, {
       passive: true, // for better performance as we won't call preventDefault
@@ -568,6 +592,15 @@ export default class QueryStringInputUI extends Component<Props, State> {
     if (this.abortController) this.abortController.abort();
     if (this.updateSuggestions.cancel) this.updateSuggestions.cancel();
     this.componentIsUnmounting = true;
+
+    const { keyboardShortcut } = this.services;
+    if (keyboardShortcut) {
+      keyboardShortcut.unregister({
+        id: 'focus_query_bar',
+        pluginId: 'data',
+      });
+    }
+
     window.removeEventListener('resize', this.handleAutoHeight);
     window.removeEventListener('scroll', this.handleListUpdate, { capture: true });
   }
@@ -638,6 +671,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
             <div
               role="search"
               className="euiFormControlLayout__childrenWrapper osdQueryBar__textareaWrap"
+              data-test-subj="queryBarInputContainer"
               ref={this.queryBarInputDivRefInstance}
             >
               <EuiCompressedTextArea

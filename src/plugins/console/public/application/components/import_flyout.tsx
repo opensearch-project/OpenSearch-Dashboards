@@ -215,7 +215,7 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
       } else {
         setStatus('error');
         setError(
-          i18n.translate('console.ImportFlyout.importFileErrorMessage', {
+          i18n.translate('console.ImportFlyout.importFileErrorMessage.notJSON', {
             defaultMessage: 'The selected file is not valid. Please select a valid JSON file.',
           })
         );

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { useUnmount } from 'react-use';
@@ -20,9 +20,10 @@ import { setEditorState } from '../utils/state_management/metadata_slice';
 import { useCanSave } from '../utils/use/use_can_save';
 import { saveStateToSavedObject } from '../../saved_visualizations/transforms';
 import { TopNavMenuData, TopNavMenuItemRenderType } from '../../../../navigation/public';
-import { opensearchFilters, connectStorageToQueryState } from '../../../../data/public';
+import { opensearchFilters, useConnectStorageToQueryState } from '../../../../data/public';
 import { RootState } from '../../../../data_explorer/public';
 
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 function useDeepEffect(callback, dependencies) {
   const currentDepsRef = useRef(dependencies);
 
@@ -56,15 +57,20 @@ export const TopNav = () => {
 
   const saveDisabledReason = useCanSave();
   const savedVisBuilderVis = useSavedVisBuilderVis(visualizationIdFromUrl);
-  connectStorageToQueryState(services.data.query, services.osdUrlStateStorage, {
-    filters: opensearchFilters.FilterStateStore.APP_STATE,
-    query: true,
-  });
   const { selected: indexPattern } = useIndexPatterns();
   const [config, setConfig] = useState<TopNavMenuData[] | undefined>();
   const originatingApp = useTypedSelector((state) => {
     return state.metadata.originatingApp;
   });
+
+  const syncConfig = useMemo(() => {
+    return {
+      filters: opensearchFilters.FilterStateStore.APP_STATE,
+      query: true,
+    };
+  }, []);
+
+  useConnectStorageToQueryState(services.data.query, services.osdUrlStateStorage, syncConfig);
 
   useEffect(() => {
     const getConfig = () => {
@@ -73,6 +79,7 @@ export const TopNav = () => {
       const navActions = getNavActions(
         {
           visualizationIdFromUrl,
+          // @ts-expect-error TS2345 TODO(ts-error): fixme
           savedVisBuilderVis: saveStateToSavedObject(savedVisBuilderVis, rootState, indexPattern),
           saveDisabledReason,
           dispatch,
@@ -87,6 +94,7 @@ export const TopNav = () => {
               visualizationIdFromUrl,
               savedVisBuilderVis: saveStateToSavedObject(
                 savedVisBuilderVis,
+                // @ts-expect-error TS2345 TODO(ts-error): fixme
                 rootState,
                 indexPattern
               ),
@@ -102,6 +110,7 @@ export const TopNav = () => {
               visualizationIdFromUrl,
               savedVisBuilderVis: saveStateToSavedObject(
                 savedVisBuilderVis,
+                // @ts-expect-error TS2345 TODO(ts-error): fixme
                 rootState,
                 indexPattern
               ),
@@ -153,7 +162,7 @@ export const TopNav = () => {
         groupActions={showActionsInGroup}
         screenTitle={
           savedVisBuilderVis?.title ||
-          i18n.translate('discover.savedSearch.newTitle', {
+          i18n.translate('visBuilder.savedSearch.newTitle', {
             defaultMessage: 'New visualization',
           })
         }

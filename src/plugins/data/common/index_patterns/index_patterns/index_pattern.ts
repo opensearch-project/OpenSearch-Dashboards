@@ -29,28 +29,25 @@
  */
 
 import _, { each, reject } from 'lodash';
-import { SavedObjectsClientCommon } from '../..';
+import { FieldFormatsContentType, SavedObjectsClientCommon } from '../..';
 import { DuplicateField } from '../../../../opensearch_dashboards_utils/common';
 
-import {
-  OPENSEARCH_FIELD_TYPES,
-  OSD_FIELD_TYPES,
-  IIndexPattern,
-  FieldFormatNotFoundError,
-  IFieldType,
-} from '../../../common';
-import { IndexPatternField, IIndexPatternFieldList, fieldList } from '../fields';
-import { formatHitProvider } from './format_hit';
-import { flattenHitWrapper } from './flatten_hit';
-import { FieldFormatsStartCommon, FieldFormat } from '../../field_formats';
-import {
-  IndexPatternSpec,
-  TypeMeta,
-  SourceFilter,
-  IndexPatternFieldMap,
-  SavedObjectReference,
-} from '../types';
 import { SerializedFieldFormat } from '../../../../expressions/common';
+import { FieldFormatNotFoundError } from '../../field_formats';
+import { IFieldType } from '../fields/types';
+import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from '../../osd_field_types/types';
+import { IIndexPattern } from '../types';
+import { FieldFormat, FieldFormatsStartCommon } from '../../field_formats';
+import { IIndexPatternFieldList, IndexPatternField, fieldList } from '../fields';
+import {
+  IndexPatternFieldMap,
+  IndexPatternSpec,
+  SavedObjectReference,
+  SourceFilter,
+  TypeMeta,
+} from '../types';
+import { flattenHitWrapper } from './flatten_hit';
+import { formatHitProvider } from './format_hit';
 
 interface IndexPatternDeps {
   spec?: IndexPatternSpec;
@@ -62,6 +59,9 @@ interface IndexPatternDeps {
 
 interface SavedObjectBody {
   title?: string;
+  displayName?: string;
+  description?: string;
+  signalType?: string;
   timeFieldName?: string;
   intervalName?: string;
   fields?: string;
@@ -69,14 +69,22 @@ interface SavedObjectBody {
   fieldFormatMap?: string;
   typeMeta?: string;
   type?: string;
+  schemaMappings?: string;
 }
 
-type FormatFieldFn = (hit: Record<string, any>, fieldName: string) => any;
+type FormatFieldFn = (
+  hit: Record<string, any>,
+  fieldName: string,
+  type?: FieldFormatsContentType
+) => any;
 
 const DATA_SOURCE_REFERNECE_NAME = 'dataSource';
 export class IndexPattern implements IIndexPattern {
   public id?: string;
   public title: string = '';
+  public displayName?: string;
+  public description?: string;
+  public signalType?: string;
   public fieldFormatMap: Record<string, any>;
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
@@ -84,7 +92,7 @@ export class IndexPattern implements IIndexPattern {
   public intervalName: string | undefined;
   public type: string | undefined;
   public formatHit: {
-    (hit: Record<string, any>, type?: string): any;
+    (hit: Record<string, any>, type?: FieldFormatsContentType): any;
     formatField: FormatFieldFn;
   };
   public formatField: FormatFieldFn;
@@ -94,6 +102,8 @@ export class IndexPattern implements IIndexPattern {
   public version: string | undefined;
   public sourceFilters?: SourceFilter[];
   public dataSourceRef?: SavedObjectReference;
+  public fieldsLoading?: boolean;
+  public schemaMappings?: Record<string, Record<string, string>>;
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
@@ -126,8 +136,13 @@ export class IndexPattern implements IIndexPattern {
     this.version = spec.version;
 
     this.title = spec.title || '';
+    this.displayName = spec.displayName;
+    this.description = spec.description;
+    this.signalType = spec.signalType;
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
+    this.signalType = spec.signalType;
+    this.schemaMappings = spec.schemaMappings;
 
     this.fields.replaceAll(Object.values(spec.fields || {}));
     this.type = spec.type;
@@ -137,6 +152,7 @@ export class IndexPattern implements IIndexPattern {
       return this.deserializeFieldFormatMap(mapping);
     });
     this.dataSourceRef = spec.dataSourceRef;
+    this.fieldsLoading = spec.fieldsLoading;
   }
 
   /**
@@ -225,13 +241,25 @@ export class IndexPattern implements IIndexPattern {
       id: this.id,
       version: this.version,
       title: this.title,
+      displayName: this.displayName,
+      description: this.description,
+      signalType: this.signalType,
       timeFieldName: this.timeFieldName,
       sourceFilters: this.sourceFilters,
       fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
       typeMeta: this.typeMeta,
       type: this.type,
       dataSourceRef: this.dataSourceRef,
+      schemaMappings: this.schemaMappings,
     };
+  }
+
+  /**
+   * The display name of the index pattern. If the index pattern has a name, it will return that;
+   * otherwise, it will return the title.
+   */
+  getDisplayName(): string {
+    return this.displayName || this.title;
   }
 
   /**
@@ -249,7 +277,6 @@ export class IndexPattern implements IIndexPattern {
    * @param name field name
    * @param script script code
    * @param fieldType
-   * @param lang
    */
   async addScriptedField(name: string, script: string, fieldType: string = 'string') {
     const scriptedFields = this.getScriptedFields();
@@ -276,7 +303,6 @@ export class IndexPattern implements IIndexPattern {
    * Remove scripted field from field list
    * @param fieldName
    */
-
   removeScriptedField(fieldName: string) {
     const field = this.fields.getByName(fieldName);
     if (field) {
@@ -356,6 +382,9 @@ export class IndexPattern implements IIndexPattern {
 
     return {
       title: this.title,
+      displayName: this.displayName,
+      description: this.description,
+      signalType: this.signalType,
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
@@ -363,6 +392,7 @@ export class IndexPattern implements IIndexPattern {
       fieldFormatMap,
       type: this.type,
       typeMeta: this.typeMeta ? JSON.stringify(this.typeMeta) : undefined,
+      schemaMappings: this.schemaMappings ? JSON.stringify(this.schemaMappings) : undefined,
     };
   }
 
@@ -378,6 +408,11 @@ export class IndexPattern implements IIndexPattern {
       : [];
   };
 
+  setFieldsLoading = (status: boolean) => {
+    return (this.fieldsLoading = status);
+  };
+
+  // DQL and Lucene already calling this formatter, we should add ppl formatter in the language config
   /**
    * Provide a field, get its formatter
    * @param field

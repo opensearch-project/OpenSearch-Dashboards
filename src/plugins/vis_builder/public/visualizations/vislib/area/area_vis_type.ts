@@ -29,7 +29,7 @@ export const createAreaConfig = (): VisualizationTypeOptions<AreaOptionsDefaults
           {
             group: AggGroupNames.Metrics,
             name: 'metric',
-            title: i18n.translate('visTypeVislib.area.metricTitle', {
+            title: i18n.translate('visBuilder.area.metricTitle', {
               defaultMessage: 'Y-axis',
             }),
             min: 1,
@@ -40,7 +40,7 @@ export const createAreaConfig = (): VisualizationTypeOptions<AreaOptionsDefaults
           {
             group: AggGroupNames.Buckets,
             name: 'segment',
-            title: i18n.translate('visTypeVislib.area.segmentTitle', {
+            title: i18n.translate('visBuilder.area.segmentTitle', {
               defaultMessage: 'X-axis',
             }),
             min: 0,
@@ -51,7 +51,7 @@ export const createAreaConfig = (): VisualizationTypeOptions<AreaOptionsDefaults
           {
             group: AggGroupNames.Buckets,
             name: 'group',
-            title: i18n.translate('visTypeVislib.area.groupTitle', {
+            title: i18n.translate('visBuilder.area.groupTitle', {
               defaultMessage: 'Split series',
             }),
             min: 0,
@@ -62,7 +62,7 @@ export const createAreaConfig = (): VisualizationTypeOptions<AreaOptionsDefaults
           {
             group: AggGroupNames.Buckets,
             name: 'split',
-            title: i18n.translate('visTypeVislib.area.splitTitle', {
+            title: i18n.translate('visBuilder.area.splitTitle', {
               defaultMessage: 'Split chart',
             }),
             min: 0,

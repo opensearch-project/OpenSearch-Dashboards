@@ -50,6 +50,7 @@ describe('CreateDataSourcePanel', () => {
     match: {} as any,
   };
 
+  // @ts-expect-error TS2741 TODO(ts-error): fixme
   const shallowComponent = (props = defaultProps) => shallow(<CreateDataSourcePanel {...props} />);
 
   test('renders correctly', () => {

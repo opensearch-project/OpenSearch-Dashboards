@@ -31,6 +31,7 @@ export class ContentManagementPublicPlugin
     > {
   private readonly contentManagementService = new ContentManagementService();
 
+  // @ts-expect-error TS6138 TODO(ts-error): fixme
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(
@@ -66,6 +67,7 @@ export class ContentManagementPublicPlugin
     return {
       registerContentProvider: this.contentManagementService.registerContentProvider,
       updatePageSection: this.contentManagementService.updatePageSection,
+      getPage: (id: string) => this.contentManagementService.getPage(id),
       renderPage: (id: string, renderOptions?: RenderOptions) => {
         const page = this.contentManagementService.getPage(id);
         if (page) {

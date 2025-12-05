@@ -3,9 +3,11 @@
 exports[`Render <DocViewer/> with 3 different tabs 1`] = `
 <div
   className="osdDocViewer"
+  data-test-subj="osdDocViewer"
 >
   <EuiTabbedContent
     autoFocus="initial"
+    preserveTabContent={false}
     size="s"
     tabs={
       Array [

@@ -59,7 +59,11 @@ export default function FilterLabel({ filter, valueLabel, filterLabelStatus }: F
     );
 
   const getValue = (text?: string) => {
-    return <span className="globalFilterLabel__value">{text}</span>;
+    return (
+      <span className="globalFilterLabel__value" data-test-subj="globalFilterLabelValue">
+        {text}
+      </span>
+    );
   };
 
   if (filter.meta.alias !== null) {

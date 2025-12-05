@@ -32,6 +32,7 @@ import { setImmediate } from 'timers';
 
 import { AbortError, toPromise, getCombinedSignal } from './abort_utils';
 
+// @ts-expect-error TS2559 TODO(ts-error): fixme
 jest.useFakeTimers('legacy');
 setImmediate(() => {});
 

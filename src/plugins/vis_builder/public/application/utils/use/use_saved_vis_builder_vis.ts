@@ -45,7 +45,7 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
     } = services;
     const toastNotification = (message: string) => {
       toastNotifications.addDanger({
-        title: i18n.translate('visualize.createVisualization.failedToLoadErrorMessage', {
+        title: i18n.translate('visBuilder.createVisualization.failedToLoadErrorMessage', {
           defaultMessage: 'Failed to load the visualization',
         }),
         text: message,
@@ -77,11 +77,13 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
           const filters = savedVisBuilderVis.searchSourceFields.filter;
           const query =
             savedVisBuilderVis.searchSourceFields.query || data.query.queryString.getDefaultQuery();
+          // @ts-expect-error TS7034 TODO(ts-error): fixme
           const actualFilters = [];
           const tempFilters = typeof filters === 'function' ? filters() : filters;
           (Array.isArray(tempFilters) ? tempFilters : [tempFilters]).forEach((filter) => {
             if (filter) actualFilters.push(filter);
           });
+          // @ts-expect-error TS7005 TODO(ts-error): fixme
           data.query.filterManager.setAppFilters(actualFilters);
           data.query.queryString.setQuery(query);
 

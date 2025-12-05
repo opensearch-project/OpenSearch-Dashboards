@@ -38,6 +38,8 @@ import {
   EuiText,
   EuiBadgeGroup,
   EuiPageContent,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
@@ -115,6 +117,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   const [remoteClustersExist, setRemoteClustersExist] = useState<boolean>(false);
   const [isLoadingSources, setIsLoadingSources] = useState<boolean>(!dataSourceEnabled);
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const [isColumnDataLoaded, setIsColumnDataLoaded] = useState(false);
 
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
@@ -199,7 +202,11 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         }
       ) => (
         <>
-          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
+          <EuiButtonEmpty
+            size="xs"
+            {...reactRouterNavigate(history, `patterns/${index.id}`)}
+            {...(useUpdatedUX ? { textProps: { style: { fontWeight: 600 } } } : {})}
+          >
             {name}
           </EuiButtonEmpty>
           &emsp;
@@ -245,21 +252,21 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     );
   })();
 
-  const description = i18n.translate(
-    'indexPatternManagement.indexPatternTable.indexPatternExplanation',
-    currentWorkspace
-      ? {
+  const description = currentWorkspace
+    ? i18n.translate(
+        'indexPatternManagement.indexPatternTable.indexPatternExplanationWithWorkspace',
+        {
           defaultMessage:
             'Create and manage the index patterns that help you retrieve your data from OpenSearch for {name} workspace.',
           values: {
             name: currentWorkspace.name,
           },
         }
-      : {
-          defaultMessage:
-            'Create and manage the index patterns that help you retrieve your data from OpenSearch.',
-        }
-  );
+      )
+    : i18n.translate('indexPatternManagement.indexPatternTable.indexPatternExplanation', {
+        defaultMessage:
+          'Create and manage the index patterns that help you retrieve your data from OpenSearch.',
+      });
   const pageTitleAndDescription = useUpdatedUX ? (
     <HeaderControl
       controls={[{ description }]}
@@ -309,7 +316,12 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
 
   return (
     <>
-      <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
+      <EuiPageContent
+        data-test-subj="indexPatternTable"
+        role="region"
+        aria-label={ariaRegion}
+        {...(useUpdatedUX ? { paddingSize: 'm' } : {})}
+      >
         <EuiFlexGroup justifyContent="spaceBetween">
           {pageTitleAndDescription}
           {createButton}
@@ -320,6 +332,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
           itemId="id"
           isSelectable={false}
           items={indexPatterns}
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           columns={columns}
           pagination={pagination}
           sorting={sorting}

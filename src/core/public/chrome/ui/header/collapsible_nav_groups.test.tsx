@@ -43,8 +43,8 @@ describe('<NavGroups />', () => {
             },
           }),
           getMockedNavLink({
-            id: 'link-in-category-2',
-            title: 'link-in-category-2',
+            id: 'link-2-in-category',
+            title: 'link-2-in-category',
             category: {
               id: 'category-1',
               label: 'category-1',
@@ -68,7 +68,7 @@ describe('<NavGroups />', () => {
     expect(container.querySelectorAll('.nav-link-item-btn').length).toEqual(5);
     fireEvent.click(getByTestId('collapsibleNavAppLink-pure'));
     expect(navigateToApp).toBeCalledTimes(0);
-    // The accordion is collapsed
+    // The accordion is collapsed by default
     expect(queryByTestId('collapsibleNavAppLink-subLink')).toBeNull();
 
     // Expand the accordion

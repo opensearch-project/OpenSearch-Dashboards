@@ -30,6 +30,125 @@ import {
   SkippingIndexRowType,
 } from '../framework/types';
 import { AvailableIntegrationsTableProps } from './components/direct_query_data_sources_components/integrations/available_integration_table';
+import { navigationPluginMock } from '../../navigation/public/mocks';
+import packageInfo from '../../../../package.json';
+import { ConfigSchema } from '../config';
+
+export const mockInitializerContext = {
+  config: {
+    get: jest.fn(
+      (): ConfigSchema => ({
+        manageableBy: 'all',
+        dataSourceAdmin: { groups: [] as string[] },
+        directQuerySyncEnabled: false,
+      })
+    ),
+  },
+};
+
+export const managementMock = {
+  sections: {
+    register: jest.fn(),
+    section: {
+      ingest: {
+        registerApp: jest.fn(),
+        apps: [],
+        getApp: jest.fn(),
+        getAppsEnabled: jest.fn(),
+        id: 'ingest',
+        title: 'Ingest',
+        order: 0,
+        showExperimentalBadge: false,
+        enabled: true,
+        disable: jest.fn(),
+        enable: jest.fn(),
+      },
+      data: {
+        registerApp: jest.fn(),
+        apps: [],
+        getApp: jest.fn(),
+        getAppsEnabled: jest.fn(),
+        id: 'data',
+        title: 'Data',
+        order: 0,
+        showExperimentalBadge: false,
+        enabled: true,
+        disable: jest.fn(),
+        enable: jest.fn(),
+      },
+      insightsAndAlerting: {
+        registerApp: jest.fn(),
+        apps: [],
+        getApp: jest.fn(),
+        getAppsEnabled: jest.fn(),
+        id: 'insightsAndAlerting',
+        title: 'Insights and Alerting',
+        order: 0,
+        showExperimentalBadge: false,
+        enabled: true,
+        disable: jest.fn(),
+        enable: jest.fn(),
+      },
+      security: {
+        registerApp: jest.fn(),
+        apps: [],
+        getApp: jest.fn(),
+        getAppsEnabled: jest.fn(),
+        id: 'security',
+        title: 'Security',
+        order: 0,
+        showExperimentalBadge: false,
+        enabled: true,
+        disable: jest.fn(),
+        enable: jest.fn(),
+      },
+      stack: {
+        registerApp: jest.fn(),
+        apps: [],
+        getApp: jest.fn(),
+        getAppsEnabled: jest.fn(),
+        id: 'stack',
+        title: 'Stack',
+        order: 0,
+        showExperimentalBadge: false,
+        enabled: true,
+        disable: jest.fn(),
+        enable: jest.fn(),
+      },
+      opensearchDashboards: {
+        registerApp: jest.fn(),
+        apps: [],
+        getApp: jest.fn(),
+        getAppsEnabled: jest.fn(),
+        id: 'opensearchDashboards',
+        title: 'OpenSearch Dashboards',
+        order: 0,
+        showExperimentalBadge: false,
+        enabled: true,
+        disable: jest.fn(),
+        enable: jest.fn(),
+      },
+    },
+  },
+};
+
+export const indexPatternManagementMock = {
+  creation: {
+    addCreationConfig: jest.fn(),
+  },
+  list: {
+    addListConfig: jest.fn(),
+  },
+  fieldFormatEditors: {
+    register: jest.fn(),
+  },
+  environment: {
+    update: jest.fn(),
+  },
+  columns: {
+    register: jest.fn(),
+  },
+};
 
 /* Mock Types */
 
@@ -54,6 +173,7 @@ const createDataSourceManagementContext = () => {
     uiSettings,
     notifications,
     overlays,
+    workspaces,
   } = coreMock.createStart();
   const { http } = coreMock.createSetup();
 
@@ -64,10 +184,12 @@ const createDataSourceManagementContext = () => {
     uiSettings,
     notifications,
     overlays,
+    workspaces,
     http,
     docLinks,
     setBreadcrumbs: () => {},
     authenticationMethodRegistry,
+    navigation: navigationPluginMock.createStartContract(),
   };
 };
 
@@ -101,6 +223,7 @@ export const getDataSource = [
       endpoint: '',
       auth: { type: AuthType.NoAuth, credentials: undefined },
       name: AuthType.NoAuth,
+      dataSourceVersion: packageInfo.version,
     },
   },
   {
@@ -112,6 +235,7 @@ export const getDataSource = [
       endpoint: '',
       auth: { type: AuthType.NoAuth, credentials: undefined },
       name: AuthType.NoAuth,
+      dataSourceVersion: packageInfo.version,
     },
   },
   {
@@ -123,6 +247,7 @@ export const getDataSource = [
       endpoint: '',
       auth: { type: AuthType.NoAuth, credentials: undefined },
       name: AuthType.NoAuth,
+      dataSourceVersion: packageInfo.version,
     },
   },
 ];
@@ -225,6 +350,52 @@ export const getDataSourcesWithFieldsResponse = {
   ],
 };
 
+export const remoteClusterConnections: DataSourceTableItem[] = [
+  {
+    id: 'connectionAlias1',
+    type: 'OpenSearch(Cross-cluster search)',
+    title: 'connectionAlias1',
+    parentId: 'test1',
+    description: '',
+    connectionType: 0,
+  },
+  {
+    id: 'connectionAlias2',
+    type: 'OpenSearch(Cross-cluster search)',
+    title: 'connectionAlias2',
+    parentId: 'test1',
+    description: '',
+    connectionType: 0,
+  },
+];
+
+export const getDataSourcesWithCrossClusterConnections = [
+  {
+    id: 'test1',
+    type: 'OpenSearch',
+    title: 'test1',
+    connectionType: 'OpenSearchConnection',
+    description: 'test datasource1',
+    relatedConnections: remoteClusterConnections,
+  },
+  {
+    id: 'test2',
+    type: 'OpenSearch',
+    description: 'test datasource2',
+    title: 'test',
+    connectionType: 'OpenSearchConnection',
+    sort: 'test',
+  },
+  {
+    id: 'alpha-test',
+    type: 'OpenSearch',
+    description: 'alpha test datasource',
+    title: 'alpha-test',
+    connectionType: 'OpenSearchConnection',
+    sort: 'alpha-test',
+  },
+];
+
 export const existingDatasourceNamesList = [
   'test123',
   'testTest20',
@@ -285,6 +456,33 @@ export const getMappedDataSources = [
   },
 ];
 
+export const getMappedDataSourcesWithEmptyDescription = [
+  {
+    id: 'test-null',
+    type: 'OpenSearch',
+    title: 'test-null',
+    connectionType: 'OpenSearchConnection',
+    description: null,
+    relatedConnections: directQueryConnections,
+  },
+  {
+    id: 'test-undefined',
+    type: 'OpenSearch',
+    title: 'test-undefined',
+    connectionType: 'OpenSearchConnection',
+    description: undefined,
+    relatedConnections: directQueryConnections,
+  },
+  {
+    id: 'test-no-description',
+    type: 'OpenSearch',
+    title: 'test-no-description',
+    connectionType: 'OpenSearchConnection',
+    // no description
+    relatedConnections: directQueryConnections,
+  },
+];
+
 export const fetchDataSourceMetaData = {
   dataSourceVersion: '2.11.0',
   installedPlugins: ['opensearch-ml', 'opensearch-sql'],
@@ -302,6 +500,7 @@ export const mockDataSourceAttributesWithAuth = {
       password: 'test123',
     },
   },
+  dataSourceVersion: packageInfo.version,
 };
 
 export const mockDataSourceAttributesWithSigV4Auth = {
@@ -340,6 +539,7 @@ export const mockDataSourceAttributesWithRegisteredAuth = {
     type: 'Some Auth Type',
     credentials: {} as { [key: string]: string },
   },
+  dataSourceVersion: packageInfo.version,
 } as DataSourceAttributes;
 
 export const getDataSourceByIdWithCredential = {
@@ -408,7 +608,7 @@ export const mockErrorResponseForSavedObjectsCalls = (
 
 export const mockUiSettingsCalls = (
   uiSettings: IUiSettingsClient,
-  uiSettingsMethodName: 'get' | 'set' | 'get$',
+  uiSettingsMethodName: 'get' | 'set' | 'get$' | 'getUserProvidedWithScope',
   response: any
 ) => {
   (uiSettings[uiSettingsMethodName] as jest.Mock).mockReturnValue(response);
@@ -423,7 +623,7 @@ export const testDataSourceManagementPlugin = (
   coreSetup: any,
   coreStart: any
 ): TestPluginReturn => {
-  const plugin = new DataSourceManagementPlugin();
+  const plugin = new DataSourceManagementPlugin(mockInitializerContext);
   const setup = plugin.setup(coreSetup, {
     management: managementPluginMock.createSetupContract(),
     indexPatternManagement: indexPatternManagementPluginMock.createSetupContract(),
@@ -446,6 +646,7 @@ export const createAuthenticationMethod = (
   authMethod: Partial<AuthenticationMethod>
 ): AuthenticationMethod => ({
   name: 'unknown',
+  // @ts-expect-error TS2322 TODO(ts-error): fixme
   credentialForm: React.createElement('div', {}, 'Hello, world!'),
   credentialSourceOption: {
     value: 'unknown',
@@ -923,6 +1124,7 @@ export const mockDatasourcesQuery = {
 
 // direct query data source integration mocks
 export const mockHttp: Partial<HttpStart> = {
+  // @ts-expect-error TS2739 TODO(ts-error): fixme
   basePath: {
     prepend: (url: string) => url,
   },
@@ -993,6 +1195,7 @@ export const TEST_INTEGRATION_CONFIG: IntegrationConfig = {
   ],
 };
 
+// @ts-expect-error TS2304 TODO(ts-error): fixme
 export const TEST_INTEGRATION_SETUP_INPUTS: IntegrationSetupInputs = {
   displayName: 'Test Instance Name',
   connectionType: 'index',

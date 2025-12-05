@@ -9,7 +9,6 @@ import { htmlIdGenerator, EuiColorPickerProps } from '@elastic/eui';
 import { useApplications } from '../../hooks';
 import { getFirstUseCaseOfFeatureConfigs, isUseCaseFeatureConfig } from '../../utils';
 import { DataSourceConnection } from '../../../common/types';
-import { getUseCaseFeatureConfig } from '../../../common/utils';
 import {
   WorkspaceFormProps,
   WorkspaceFormErrors,
@@ -17,21 +16,22 @@ import {
   WorkspaceFormDataState,
 } from './types';
 import {
-  generatePermissionSettingsState,
+  convertPermissionsToPrivacyType,
   getNumberOfChanges,
   getNumberOfErrors,
+  getPermissionSettingsWithPrivacyType,
   validateWorkspaceForm,
 } from './utils';
 import { WorkspacePermissionItemType } from './constants';
+import { getUseCaseFeatureConfig } from '../../../../../core/public';
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
 export const useWorkspaceForm = ({
   application,
   defaultValues,
-  operationType,
   onSubmit,
-  permissionEnabled,
+  onAppLeave,
 }: WorkspaceFormProps) => {
   const applications = useApplications(application);
   const [name, setName] = useState(defaultValues?.name ?? '');
@@ -39,9 +39,6 @@ export const useWorkspaceForm = ({
   const [color, setColor] = useState(defaultValues?.color);
   const defaultValuesRef = useRef(defaultValues);
   const [isEditing, setIsEditing] = useState(false);
-  const initialPermissionSettingsRef = useRef(
-    generatePermissionSettingsState(operationType, defaultValues?.permissionSettings)
-  );
 
   const [featureConfigs, setFeatureConfigs] = useState<string[]>(defaultValues?.features ?? []);
   const selectedUseCase = useMemo(() => getFirstUseCaseOfFeatureConfigs(featureConfigs), [
@@ -49,7 +46,7 @@ export const useWorkspaceForm = ({
   ]);
   const [permissionSettings, setPermissionSettings] = useState<
     WorkspaceFormDataState['permissionSettings']
-  >(initialPermissionSettingsRef.current);
+  >(defaultValues?.permissionSettings ?? []);
 
   const [selectedDataSourceConnections, setSelectedDataSourceConnections] = useState<
     DataSourceConnection[]
@@ -76,12 +73,12 @@ export const useWorkspaceForm = ({
   getFormDataRef.current = getFormData;
   const formData = getFormData();
   const numberOfChanges = defaultValuesRef.current
-    ? getNumberOfChanges(formData, {
-        ...defaultValuesRef.current,
-        // The user form will insert some empty permission rows, should ignore these rows not treated as user new added.
-        permissionSettings: initialPermissionSettingsRef.current,
-      })
+    ? getNumberOfChanges(formData, defaultValuesRef.current)
     : 0;
+
+  const privacyType = useMemo(() => convertPermissionsToPrivacyType(permissionSettings), [
+    permissionSettings,
+  ]);
 
   if (!formIdRef.current) {
     formIdRef.current = workspaceHtmlIdGenerator();
@@ -101,8 +98,19 @@ export const useWorkspaceForm = ({
     [setFeatureConfigs]
   );
 
+  const getSubmitFormData = (submitFormData: WorkspaceFormDataState) => {
+    return {
+      name: submitFormData.name!,
+      description: submitFormData.description,
+      color: submitFormData.color || '#FFFFFF',
+      features: submitFormData.features,
+      permissionSettings: submitFormData.permissionSettings as WorkspacePermissionSetting[],
+      selectedDataSourceConnections: submitFormData.selectedDataSourceConnections,
+    };
+  };
+
   const handleFormSubmit = useCallback<FormEventHandler>(
-    (e) => {
+    async (e) => {
       e.preventDefault();
       const currentFormData = getFormDataRef.current();
       currentFormData.permissionSettings = currentFormData.permissionSettings.filter(
@@ -110,29 +118,44 @@ export const useWorkspaceForm = ({
           (item.type === WorkspacePermissionItemType.User && !!item.userId) ||
           (item.type === WorkspacePermissionItemType.Group && !!item.group)
       );
-      const currentFormErrors: WorkspaceFormErrors = validateWorkspaceForm(
-        currentFormData,
-        !!permissionEnabled
-      );
+      const currentFormErrors: WorkspaceFormErrors = validateWorkspaceForm(currentFormData);
       setFormErrors(currentFormErrors);
       if (getNumberOfErrors(currentFormErrors) > 0) {
         return;
       }
 
-      onSubmit?.({
-        name: currentFormData.name!,
-        description: currentFormData.description,
-        color: currentFormData.color || '#FFFFFF',
-        features: currentFormData.features,
-        permissionSettings: currentFormData.permissionSettings as WorkspacePermissionSetting[],
-        selectedDataSourceConnections: currentFormData.selectedDataSourceConnections,
-      });
+      const submitFormData = getSubmitFormData(currentFormData);
+      const result = await onSubmit?.(submitFormData);
+      if (result?.success) {
+        defaultValuesRef.current = submitFormData;
+        setIsEditing(false);
+      }
     },
-    [onSubmit, permissionEnabled]
+    [onSubmit]
   );
+
+  const handleSubmitPermissionSettings = async (settings: WorkspacePermissionSetting[]) => {
+    const currentFormData = getFormDataRef.current();
+    const result = await onSubmit?.({
+      ...getSubmitFormData(currentFormData),
+      permissionSettings: settings,
+    });
+    if (result) {
+      setPermissionSettings(settings);
+    }
+  };
 
   const handleColorChange = useCallback<Required<EuiColorPickerProps>['onChange']>((text) => {
     setColor(text);
+  }, []);
+
+  const setPrivacyType = useCallback((newPrivacyType) => {
+    setPermissionSettings((prevPermissionSettings) => {
+      if (convertPermissionsToPrivacyType(prevPermissionSettings) === newPrivacyType) {
+        return prevPermissionSettings;
+      }
+      return getPermissionSettingsWithPrivacyType(prevPermissionSettings, newPrivacyType);
+    });
   }, []);
 
   const handleResetForm = useCallback(() => {
@@ -140,8 +163,8 @@ export const useWorkspaceForm = ({
     setName(resetValues?.name ?? '');
     setDescription(resetValues?.description ?? '');
     setColor(resetValues?.color);
+    setPermissionSettings(resetValues?.permissionSettings ?? []);
     setFeatureConfigs(resetValues?.features ?? []);
-    setPermissionSettings(initialPermissionSettingsRef.current);
     setFormErrors({});
     setIsEditing(false);
   }, []);
@@ -151,17 +174,21 @@ export const useWorkspaceForm = ({
     formData,
     isEditing,
     formErrors,
+    privacyType,
     setIsEditing,
     applications,
     numberOfErrors,
     numberOfChanges,
     handleResetForm,
     setName,
+    setPrivacyType,
     setDescription,
     handleFormSubmit,
     handleColorChange,
     handleUseCaseChange,
     setPermissionSettings,
     setSelectedDataSourceConnections,
+    onAppLeave,
+    handleSubmitPermissionSettings,
   };
 };

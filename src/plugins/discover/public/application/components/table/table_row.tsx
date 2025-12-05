@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
 import React, { ReactNode } from 'react';
@@ -81,7 +82,7 @@ export function DocViewTableRow({
   return (
     <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
       {typeof onFilter === 'function' && (
-        <td className="osdDocViewer__buttons">
+        <td className="osdDocViewer__buttons" data-test-subj="osdDocViewerButtons">
           <DocViewTableRowBtnFilterAdd
             disabled={!fieldMapping || !fieldMapping.filterable}
             onClick={() => onFilter(fieldMapping, valueRaw, '+')}
@@ -100,7 +101,7 @@ export function DocViewTableRow({
           />
         </td>
       )}
-      <td className="osdDocViewer__field">
+      <td className="osdDocViewer__field" data-test-subj="osdDocViewerField">
         <FieldName
           fieldName={field}
           fieldType={fieldType}

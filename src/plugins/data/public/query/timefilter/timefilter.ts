@@ -164,7 +164,7 @@ export class Timefilter {
     }
 
     // Clear the previous auto refresh interval and start a new one (if not paused)
-    clearInterval(this._autoRefreshIntervalId);
+    clearInterval((this._autoRefreshIntervalId as unknown) as NodeJS.Timeout);
     if (!newRefreshInterval.pause) {
       this._autoRefreshIntervalId = window.setInterval(
         () => this.autoRefreshFetch$.next(),

@@ -44,7 +44,7 @@ export const DEFAULT_DATA = {
     } as DataStructure,
     LOCAL_DATASOURCE: {
       id: '',
-      title: 'Local Cluster',
+      title: 'Default Cluster',
       type: 'DATA_SOURCE',
     },
   },
@@ -72,6 +72,16 @@ export const DEFAULT_QUERY = {
   },
 };
 
+export const EMPTY_QUERY = {
+  QUERY: '',
+  DATASET: {
+    TYPE: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+    DATASOURCE: {
+      TYPE: DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+    },
+  },
+};
+
 export const UI_SETTINGS = {
   META_FIELDS: 'metaFields',
   DOC_HIGHLIGHT: 'doc_table:highlight',
@@ -87,6 +97,7 @@ export const UI_SETTINGS = {
   SEARCH_INCLUDE_FROZEN: 'search:includeFrozen',
   SEARCH_TIMEOUT: 'search:timeout',
   SEARCH_INCLUDE_ALL_FIELDS: 'search:includeAllFields',
+  SEARCH_MAX_RECENT_DATASETS: 'search:maxRecentDatasets',
   HISTOGRAM_BAR_TARGET: 'histogram:barTarget',
   HISTOGRAM_MAX_BARS: 'histogram:maxBars',
   HISTORY_LIMIT: 'history:limit',
@@ -104,7 +115,12 @@ export const UI_SETTINGS = {
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
   QUERY_ENHANCEMENTS_ENABLED: 'query:enhancements:enabled',
+  QUERY_ENHANCEMENTS_SUGGEST_VALUES: 'query:enhancements:suggestValues',
+  QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT: 'query:enhancements:suggestValuesLimit',
   QUERY_DATAFRAME_HYDRATION_STRATEGY: 'query:dataframe:hydrationStrategy',
   SEARCH_QUERY_LANGUAGE_BLOCKLIST: 'search:queryLanguageBlocklist',
   NEW_HOME_PAGE: 'home:useNewHomePage',
+  DATA_WITH_LONG_NUMERALS: 'data:withLongNumerals',
+  DATE_FORMAT: 'dateFormat',
+  DATE_FORMAT_TIMEZONE: 'dateFormat:tz',
 } as const;

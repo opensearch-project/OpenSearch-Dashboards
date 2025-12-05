@@ -1,0 +1,136 @@
+name: Lighthouse Testing
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+  issues: write
+
+env:
+  NODE_OPTIONS: '--max-old-space-size=6144 --dns-result-order=ipv4first'
+  LATEST_VERSION: '2.17.0'
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Yarn
+        run: |
+          npm uninstall -g yarn
+          npm i -g yarn@1.22.10
+
+      - name: Run bootstrap
+        run: yarn osd bootstrap
+
+      - name: Download OpenSearch
+        uses: suisei-cn/actions-download-file@v1.4.0
+        with:
+          url: https://artifacts.opensearch.org/releases/bundle/opensearch/${{ env.LATEST_VERSION }}/opensearch-${{ env.LATEST_VERSION }}-linux-x64.tar.gz
+
+      - name: Extract OpenSearch
+        run: |
+          tar -xzf opensearch-*.tar.gz
+          rm -f opensearch-*.tar.gz
+        shell: bash
+
+      - name: Remove security plugin
+        run: |
+          /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-security"
+        shell: bash
+
+      - name: Run OpenSearch
+        run: |
+          /bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"
+          sleep 30
+        shell: bash
+
+      - name: Install Lighthouse CI
+        run: yarn add --dev @lhci/cli
+
+      - name: Build plugins
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
+
+      - name: Wait for OpenSearch to be ready
+        run: |
+          until curl -s http://localhost:9200 >/dev/null; do
+            echo "Waiting for OpenSearch..."
+            sleep 10
+          done
+
+      - name: Start OpenSearch Dashboards
+        run: |
+          yarn start --no-base-path --opensearch.ignoreVersionMismatch=true &
+          until curl -s http://localhost:5601 >/dev/null; do
+            echo "Waiting for OpenSearch Dashboards..."
+            sleep 10
+          done
+
+      - name: Mock data
+        run: |
+          curl 'http://localhost:5601/api/sample_data/ecommerce' -X 'POST' -H 'osd-version: ${{ env.VERSION }}' -H 'osd-xsrf: osd-fetch'
+
+      - name: Run Lighthouse CI
+        run: yarn lhci autorun --verbose
+        continue-on-error: true
+
+      - name: Ensure Lighthouse Reports Exist
+        run: |
+          if [ ! -d ".lighthouseci" ] || [ -z "$(ls -A .lighthouseci)" ]; then
+            echo "⚠️ No Lighthouse results found. Generating an empty report..."
+            mkdir -p .lighthouseci
+            echo "[]" > .lighthouseci/assertion-results.json
+          fi
+
+      - name: List contents of .lighthouseci
+        run: ls -R .lighthouseci || echo "Directory not found"
+
+      - name: Verify Lighthouse Results
+        id: verify_lighthouse
+        run: |
+          if [ ! -s ".lighthouseci/assertion-results.json" ]; then
+            echo "❌ Lighthouse assertion-results.json is empty. Skipping further steps."
+            echo "should_continue=false" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Valid Lighthouse results found."
+            echo "should_continue=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Save Lighthouse Results as Artifact
+        if: steps.verify_lighthouse.outputs.should_continue == 'true'
+        run: |
+          mkdir -p artifacts
+          cp .lighthouseci/assertion-results.json artifacts/
+
+      - name: Upload Lighthouse Results Artifact
+        if: steps.verify_lighthouse.outputs.should_continue == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-results
+          path: artifacts/assertion-results.json
+
+      - name: Fail CI if Lighthouse assertion results indicate failures
+        if: steps.verify_lighthouse.outputs.should_continue == 'true'
+        run: |
+          if jq -e '[.[] | select(.passed==false)] | length > 0' .lighthouseci/assertion-results.json > /dev/null; then
+            echo "❌ Lighthouse CI detected performance issues. Failing the job."
+            exit 1
+          else
+            echo "✅ All Lighthouse metrics passed."
+          fi
+
+      - name: Cleanup
+        run: rm -rf .lighthouseci

@@ -1,0 +1,2 @@
+fix:
+- Delete debounce for add threshold and deletion ([#10880](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10880))

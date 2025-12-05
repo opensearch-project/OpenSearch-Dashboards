@@ -39,8 +39,8 @@ import expect from '@osd/expect';
 describe('All configs should use a single version of Node', () => {
   it('should compare .node-version and .nvmrc', async () => {
     const [nodeVersion, nvmrc] = await Promise.all([
-      readFile('./.node-version', { encoding: 'utf-8' }),
-      readFile('./.nvmrc', { encoding: 'utf-8' }),
+      readFile('./.node-version', { encoding: 'utf8' }),
+      readFile('./.nvmrc', { encoding: 'utf8' }),
     ]);
 
     expect(nodeVersion.trim()).to.be(nvmrc.trim());
@@ -48,7 +48,7 @@ describe('All configs should use a single version of Node', () => {
 
   it('should compare .node-version and engines.node from package.json', async () => {
     const nodeVersion = await readFile('./.node-version', {
-      encoding: 'utf-8',
+      encoding: 'utf8',
     });
     expect(semver.satisfies(nodeVersion.trim(), engines.node)).to.be(true);
   });

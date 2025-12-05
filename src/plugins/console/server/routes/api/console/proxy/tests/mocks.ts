@@ -64,6 +64,7 @@ export const getProxyRouteHandlerDeps = ({
   router = httpServiceMock.createSetupContract().createRouter(),
 }: MockDepsArgument): RouteDependencies => {
   const services: RouteDependencies['services'] = {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     OpenSearchLegacyConfigService: new OpenSearchLegacyConfigService(),
     specDefinitionService: new SpecDefinitionsService(),
   };

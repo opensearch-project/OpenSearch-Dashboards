@@ -7,6 +7,7 @@ export const PLUGIN_ID = 'queryEnhancements';
 export const PLUGIN_NAME = 'queryEnhancements';
 
 export const BASE_API = '/api/enhancements';
+export const BASE_API_ASSISTANT = '/api/assistant';
 
 export const DATASET = {
   S3: 'S3',
@@ -17,6 +18,7 @@ export const SEARCH_STRATEGY = {
   PPL_RAW: 'pplraw',
   SQL: 'sql',
   SQL_ASYNC: 'sqlasync',
+  PPL_ASYNC: 'pplasync',
 };
 
 export const API = {
@@ -24,14 +26,21 @@ export const API = {
   PPL_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.PPL}`,
   SQL_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.SQL}`,
   SQL_ASYNC_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.SQL_ASYNC}`,
+  PPL_ASYNC_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.PPL_ASYNC}`,
   QUERY_ASSIST: {
     LANGUAGES: `${BASE_API}/assist/languages`,
     GENERATE: `${BASE_API}/assist/generate`,
   },
   DATA_SOURCE: {
-    EXTERNAL: `${BASE_API}/datasource/external`,
-    ASYNC_JOBS: `${BASE_API}/datasource/jobs`,
-    CONNECTIONS: `${BASE_API}/datasource/connections`,
+    ASYNC_JOBS: `${BASE_API}/jobs`,
+    CONNECTIONS: `${BASE_API}/connections`,
+    REMOTE_CLUSTER: {
+      LIST: `${BASE_API}/remote_cluster/list`,
+      INDEXES: `${BASE_API}/remote_cluster/indexes`,
+    },
+  },
+  AGENT_API: {
+    CONFIG_EXISTS: `${BASE_API_ASSISTANT}/agent_config/_exists`,
   },
 };
 
@@ -55,3 +64,5 @@ export const UI_SETTINGS = {
 };
 
 export const ERROR_DETAILS = { GUARDRAILS_TRIGGERED: 'guardrails triggered' };
+
+export const S3_PARTITION_INFO_COLUMN = '# Partition Information';

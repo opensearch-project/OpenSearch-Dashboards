@@ -1,0 +1,76 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// This is for the animation colors
+/* stylelint-disable  @osd/stylelint/no_restricted_values */
+
+.exploreQueryPanelEditor {
+  border: 1px solid $ouiBorderColor;
+  border-radius: $ouiBorderRadius;
+  cursor: text;
+  padding: $ouiSizeS $ouiSizeXS;
+  position: relative;
+
+  &--focused {
+    border-bottom-width: 2px;
+    border-bottom-color: $ouiColorPrimary;
+    margin-bottom: -1px; // prevent layout shifting due to increase in border width;
+  }
+
+  &__placeholder {
+    position: absolute;
+    left: 29px; // hard-code to match where the text is in editor
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: $ouiFontSizeXS;
+    color: $ouiColorDisabledText;
+  }
+
+  &--promptMode {
+    padding-left: 27px; // hard-coding to match the start position of query mode. There must be a better way
+
+    &.exploreQueryPanelEditor--focused {
+      border-bottom-color: transparent;
+      position: relative;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background:
+          linear-gradient(
+            90deg,
+            #00d4ff 0%,
+            #05f 25%,
+            #6c00ff 50%,
+            #ff006c 75%,
+            #00d4ff 100%
+          );
+        background-size: 300% 100%;
+        animation: aiMode 8s ease-in-out infinite;
+        filter: brightness(1);
+        transition: filter 0.3s ease-out;
+      }
+
+      &.exploreQueryPanelEditor--promptIsTyping::after {
+        filter: brightness(1.3) saturate(1.2);
+      }
+    }
+  }
+}
+
+@keyframes aiMode {
+  0%,
+  100% {
+    background-position: 0 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}

@@ -4,13 +4,20 @@
  */
 
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useEffectOnce } from 'react-use';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
+import { c } from 'tar';
+import { UiSettingScope } from '../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { DataSourceManagementContext, DataSourceTableItem, ToastMessageItem } from '../../types';
+import {
+  DataSourceManagementContext,
+  DataSourceManagementToastMessageItem,
+  DataSourceTableItem,
+} from '../../types';
 import {
   deleteDataSourceById,
   getDataSourceById,
@@ -26,6 +33,7 @@ import { LoadingMask } from '../loading_mask';
 import { AuthType, DataSourceAttributes } from '../../types';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../constants';
 
+// @ts-expect-error TS2741 TODO(ts-error): fixme
 const defaultDataSource: DataSourceAttributes = {
   title: '',
   description: '',
@@ -48,14 +56,22 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     notifications: { toasts },
     application,
     navigation,
+    workspaces,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
-  const dataSourceID: string = props.match.params.id;
+  const dataSourceID: string = props.match.params.id.split(':')[0];
+  const crossClusterConnectionAlias = props.match.params.id.includes(':')
+    ? props.match.params.id.split(':')[1]
+    : undefined;
 
   /* State Variables */
   const [dataSource, setDataSource] = useState<DataSourceAttributes>(defaultDataSource);
   const [existingDatasourceNamesList, setExistingDatasourceNamesList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isGetingDefaultDataSource, setIsGetingDefaultDataSource] = useState<boolean>(false);
+  const [defaultDataSourceId, setDefaultDataSourceId] = useState<string | null>(null);
   const useNewUX = uiSettings.get('home:useNewHomePage');
+  const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
+  const scope = currentWorkspaceId ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL;
 
   /* Fetch data source by id*/
   useEffectOnce(() => {
@@ -64,13 +80,32 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     })();
   });
 
+  const loadDefaultDataSourceId = useCallback(async () => {
+    try {
+      setIsGetingDefaultDataSource(true);
+      const id = await getDefaultDataSourceId(uiSettings, scope);
+      setDefaultDataSourceId(id);
+    } catch (error) {
+      toasts.addWarning(error.message);
+    } finally {
+      setIsGetingDefaultDataSource(false);
+    }
+  }, [uiSettings, scope, toasts]);
+
+  /* fetch current default data source id*/
+  useEffect(() => {
+    loadDefaultDataSourceId();
+  }, [loadDefaultDataSourceId]);
+
   const fetchDataSourceDetailsByID = async () => {
     setIsLoading(true);
     try {
       const fetchDataSourceById = await getDataSourceById(dataSourceID, savedObjects.client);
       const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjects.client);
       if (fetchDataSourceById) {
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         setDataSource(fetchDataSourceById);
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         setBreadcrumbs(getEditBreadcrumbs(fetchDataSourceById));
       }
       if (Array.isArray(listOfDataSources) && listOfDataSources.length) {
@@ -81,8 +116,9 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     } catch (e) {
       setDataSource(defaultDataSource);
       handleDisplayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.fetchDataSourceFailMsg',
-        defaultMessage: 'Unable to find the Data Source.',
+        message: i18n.translate('dataSourcesManagement.editDataSource.fetchDataSourceFailMsg', {
+          defaultMessage: 'Unable to find the Data Source.',
+        }),
       });
       props.history.push('');
     } finally {
@@ -91,10 +127,15 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   };
 
   const handleSetDefault = async () => {
-    await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSourceID);
+    // default data source has 2 scopes
+    // if in a workspace, then update workspace level setting
+    // or update global level setting
+    const result = await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSourceID, scope);
+    if (result) {
+      await loadDefaultDataSourceId();
+    }
+    return result;
   };
-
-  const isDefaultDataSource = getDefaultDataSourceId(uiSettings) === dataSourceID;
 
   /* Handle submit - create data source*/
   const handleSubmit = async (attributes: DataSourceAttributes) => {
@@ -102,11 +143,14 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     await fetchDataSourceDetailsByID();
   };
 
-  const handleDisplayToastMessage = ({ id, defaultMessage, success }: ToastMessageItem) => {
+  const handleDisplayToastMessage = ({
+    message,
+    success,
+  }: DataSourceManagementToastMessageItem) => {
     if (success) {
-      toasts.addSuccess(i18n.translate(id, { defaultMessage }));
+      toasts.addSuccess(message);
     } else {
-      toasts.addWarning(i18n.translate(id, { defaultMessage }));
+      toasts.addWarning(message);
     }
   };
 
@@ -118,27 +162,35 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
 
       // If deleted datasource is the default datasource, then set the first existing
       // datasource as default datasource.
-      setDefaultDataSource();
+      await setDefaultDataSource();
+      await loadDefaultDataSourceId();
       props.history.push('');
     } catch (e) {
       setIsLoading(false);
       handleDisplayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.deleteDataSourceFailMsg',
-        defaultMessage: 'Unable to delete the Data Source due to some errors. Please try it again.',
+        message: i18n.translate('dataSourcesManagement.editDataSource.deleteDataSourceFailMsg', {
+          defaultMessage:
+            'Unable to delete the Data Source due to some errors. Please try it again.',
+        }),
       });
     }
   };
 
   const setDefaultDataSource = async () => {
     try {
-      if (getDefaultDataSourceId(uiSettings) === dataSourceID) {
-        await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      if (defaultDataSourceId === dataSourceID) {
+        await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true, scope);
       }
     } catch (e) {
       setIsLoading(false);
       handleDisplayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.setDefaultDataSourceFailMsg',
-        defaultMessage: 'Unable to find a default datasource. Please set a new default datasource.',
+        message: i18n.translate(
+          'dataSourcesManagement.editDataSource.setDefaultDataSourceFailMsg',
+          {
+            defaultMessage:
+              'Unable to find a default datasource. Please set a new default datasource.',
+          }
+        ),
       });
     }
   };
@@ -150,6 +202,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
 
   /* Render the edit wizard */
   const renderContent = () => {
+    const isDefaultDataSource = defaultDataSourceId === dataSourceID;
     if (!isLoading && (!dataSource || !dataSource.id)) {
       return <h1 data-test-subj="dataSourceNotFound">Data Source not found!</h1>;
     }
@@ -169,9 +222,10 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
             displayToastMessage={handleDisplayToastMessage}
             handleTestConnection={handleTestConnection}
             canManageDataSource={!!application.capabilities?.dataSource?.canManage}
+            crossClusterConnectionAlias={crossClusterConnectionAlias}
           />
         ) : null}
-        {isLoading || !dataSource?.endpoint ? <LoadingMask /> : null}
+        {isLoading || isGetingDefaultDataSource || !dataSource?.endpoint ? <LoadingMask /> : null}
       </>
     );
   };

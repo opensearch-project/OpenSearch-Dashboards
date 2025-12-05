@@ -4,6 +4,7 @@
  */
 
 import { configure, mount } from 'enzyme';
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import Adapter from 'enzyme-adapter-react-16';
 import { waitFor } from '@testing-library/react';
 import { AvailableIntegrationsTable } from './available_integration_table';

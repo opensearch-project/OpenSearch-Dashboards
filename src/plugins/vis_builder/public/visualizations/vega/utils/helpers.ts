@@ -37,7 +37,7 @@ interface Series {
   values: SeriesValue[];
 }
 
-interface FlattenedSeriesItem extends SeriesValue {
+export interface FlattenedSeriesItem extends SeriesValue {
   series: string;
   split?: string;
 }
@@ -79,30 +79,95 @@ const flattenSeries = (
   });
 };
 
+export interface FlattenedSliceItem {
+  [key: string]: any;
+  value: number;
+  split?: string;
+}
+
+export interface FlattenHierarchyResult {
+  flattenedData: FlattenedSliceItem[];
+  levels: string[];
+}
+
+/**
+ * Flattens hierarchical slice data into a single array of data points
+ * @param {any} data - The hierarchical data to flatten
+ * @param {any[]} group - The group data (rows or columns) if split dimensions exist
+ * @returns {FlattenedSliceItem[]} Flattened array of data points
+ */
+// @ts-expect-error TS7006 TODO(ts-error): fixme
+const flattenHierarchy = (data, group): FlattenHierarchyResult => {
+  const flattenedData: FlattenedSliceItem[] = [];
+  const levelSet = new Set<string>();
+
+  const flattenSlices = (
+    slices: any,
+    split?: string,
+    level = 1,
+    parentLabels: { [key: string]: string } = {}
+  ) => {
+    slices.children.forEach((child: any) => {
+      const currentLabels = { ...parentLabels, [`level${level}`]: child.name };
+      levelSet.add(`level${level}`);
+
+      if (Array.isArray(child.children) && child.children.length > 0) {
+        flattenSlices(child, split, level + 1, currentLabels);
+      } else {
+        const dataPoint: FlattenedSliceItem = {
+          ...currentLabels,
+          value: child.size !== undefined ? child.size : null,
+        };
+        if (split !== undefined) {
+          dataPoint.split = split;
+        }
+        flattenedData.push(dataPoint);
+      }
+    });
+  };
+
+  if (Array.isArray(group) && group.length !== 0) {
+    group.forEach((splitData) => {
+      flattenSlices(splitData.slices, splitData.label);
+    });
+  } else {
+    flattenSlices(data.slices, undefined);
+  }
+
+  return { flattenedData, levels: Array.from(levelSet) };
+};
+
+/**
+ * Handles the flattening of data for different chart types
+ * @param {any} context - The context object containing the data
+ * @param {any} dimensions - The dimensions object defining the chart structure
+ * @param {'series' | 'slices'} handlerType - The type of chart data to handle
+ * @returns {any} Converted and flattened data suitable for visualization
+ */
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 export const flattenDataHandler = (context, dimensions, handlerType = 'series') => {
-  // Currently, our vislib only supports 'series' or 'slices' response types.
-  // This will need to be updated if more types are added in the future.
+  // TODO: Update this func if more types are added in the future.
   const handler =
     handlerType === 'series' ? vislibSeriesResponseHandler : vislibSlicesResponseHandler;
   const converted = handler(context, dimensions);
+  const group = dimensions.splitRow
+    ? converted.rows
+    : dimensions.splitColumn
+    ? converted.columns
+    : [];
 
   if (handlerType === 'series') {
     // Determine the group based on split dimensions
-    const group = dimensions.splitRow
-      ? converted.rows
-      : dimensions.splitColumn
-      ? converted.columns
-      : [];
-
-    if (group && group.length !== 0) {
+    if (Array.isArray(group) && group.length !== 0) {
       converted.series = group.flatMap((split) => flattenSeries(split.series, split.label));
       setAxisProperties(converted, group);
     } else {
       converted.series = flattenSeries(converted.series);
     }
   } else if (handlerType === 'slices') {
-    // TODO: Handle slices data, such as pie charts
-    // This section should be implemented when support for slice-based charts is added
+    const { flattenedData, levels } = flattenHierarchy(converted, group);
+    converted.slices = flattenedData;
+    converted.levels = levels;
   }
 
   return converted;
@@ -113,6 +178,7 @@ export const flattenDataHandler = (context, dimensions, handlerType = 'series') 
  * @param {string} fieldType - The OpenSearch field type
  * @returns {string} The corresponding Vega data type
  */
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 export const mapFieldTypeToVegaType = (fieldType) => {
   const typeMap = {
     number: 'quantitative',
@@ -126,6 +192,7 @@ export const mapFieldTypeToVegaType = (fieldType) => {
   };
 
   // Default to 'nominal' if the field type is not recognized
+  // @ts-expect-error TS7053 TODO(ts-error): fixme
   return typeMap[fieldType] || 'nominal';
 };
 
@@ -134,5 +201,6 @@ export const mapFieldTypeToVegaType = (fieldType) => {
  * @param {string} chartType - The chart type
  * @returns {string} The corresponding Vega mark type
  */
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 export const mapChartTypeToVegaType = (chartType) =>
   chartType === 'histogram' ? 'bar' : chartType;

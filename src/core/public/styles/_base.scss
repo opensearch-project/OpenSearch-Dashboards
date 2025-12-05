@@ -63,3 +63,33 @@ $euiCollapsibleNavWidth: $euiSize * 20;
   height: auto;
   width: auto;
 }
+
+// Temporary fix for a bug with Chrome 129 when handling mask-image
+// OUI provides the mask-image used in these which Chrome 129 fails to render correctly.
+// It is not known if or when Chrome will fix this. Since almost all of these classes
+// are applied to elements with scrollbars where their content contained, containing the
+// paint is a safe solution.
+// This can be achieved with various tricks like transform: translate?(0) or
+// transform-style: preserve-3d but they add to the browsers workload; contain doesn't.
+// ToDo: Remove these when most used versions of Chrome no longer suffer from the bug.
+// From OUI: any ruleset containing mask-image
+.eui-yScrollWithShadows,
+.eui-xScrollWithShadows,
+.euiYScrollWithShadows,
+.euiDataGrid__controlScroll,
+.euiDataGridColumnSelector__columnList,
+.euiDataGridColumnSorting__fieldList,
+.euiFlyoutBody .euiFlyoutBody__overflow,
+.euiFlyoutBody .euiFlyoutBody__overflow.euiFlyoutBody__overflow--hasBanner,
+.euiModalBody .euiModalBody__overflow,
+.euiSelectableList__list,
+// From @elastic/charts: any ruleset containing mask-image
+.echLegend .echLegendListContainer,
+// For OSD: consumers of eui?ScrollWithShadows
+.osdQueryBar__textarea:not(:focus):not(:invalid),
+.osdSavedQueryManagement__list,
+.dscCanvas,
+.vbConfig,
+.vbSidenav__style {
+  contain: paint;
+}

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiListGroupItemProps, EuiLink } from '@elastic/eui';

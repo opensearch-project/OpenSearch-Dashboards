@@ -23,8 +23,9 @@ export class SavedObjectDeleteAction implements Action<SavedObjectDeleteContext>
   }
 
   public getDisplayName() {
-    return i18n.translate('dashboard.actions.deleteSavedObject.name', {
-      defaultMessage: 'Clean up augment-vis saved objects associated to a deleted vis',
+    return i18n.translate('visAugmenter.actions.deleteSavedObject.name', {
+      defaultMessage:
+        'Clean up all augment-vis saved objects associated to the deleted visualization',
     });
   }
 
@@ -48,7 +49,9 @@ export class SavedObjectDeleteAction implements Action<SavedObjectDeleteContext>
     try {
       const loader = getSavedAugmentVisLoader();
       const augmentVisObjs = await getAugmentVisSavedObjs(savedObjectId, loader);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       const augmentVisIdsToDelete = augmentVisObjs.map(
+        // @ts-expect-error TS7006 TODO(ts-error): fixme
         (augmentVisObj) => augmentVisObj.id as string
       );
 

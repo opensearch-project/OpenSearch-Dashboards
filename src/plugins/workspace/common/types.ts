@@ -4,6 +4,8 @@
  */
 
 import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
+import { DataConnectionSavedObjectAttributes } from 'src/plugins/data_source/common/data_connections';
+import { DataConnectionType } from '../../data_source/common';
 
 export type DataSource = Pick<
   DataSourceAttributes,
@@ -11,6 +13,14 @@ export type DataSource = Pick<
 > & {
   // Id defined in SavedObjectAttribute could be single or array, here only should be single string.
   id: string;
+};
+
+export type DataConnection = Pick<DataConnectionSavedObjectAttributes, 'title'> & {
+  type: string;
+  id: string;
+  connectionType: DataConnectionType;
+  description?: string;
+  title: string;
 };
 
 export enum DataSourceConnectionType {

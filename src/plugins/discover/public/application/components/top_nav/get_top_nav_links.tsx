@@ -13,6 +13,7 @@ import { ISearchSource, unhashUrl } from '../../../opensearch_dashboards_service
 import {
   OnSaveProps,
   SavedObjectSaveModal,
+  SaveResult,
   showSaveModal,
 } from '../../../../../saved_objects/public';
 import {
@@ -23,13 +24,13 @@ import { DiscoverState, setSavedSearchId } from '../../utils/state_management';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { getSortForSearchSource } from '../../view_components/utils/get_sort_for_search_source';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
-import { syncQueryStateWithUrl } from '../../../../../data/public';
 import { OpenSearchPanel } from './open_search_panel';
 
 const getLegacyTopNavLinks = (
   services: DiscoverViewServices,
   inspectorAdapters: Adapters,
   savedSearch: SavedSearch,
+  startSyncingQueryStateWithUrl: () => void,
   isEnhancementEnabled: boolean = false
 ) => {
   const {
@@ -41,8 +42,6 @@ const getLegacyTopNavLinks = (
     toastNotifications,
     chrome,
     store,
-    data: { query },
-    osdUrlStateStorage,
   } = services;
 
   const newSearch: TopNavMenuData = {
@@ -83,7 +82,7 @@ const getLegacyTopNavLinks = (
         newCopyOnSave,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
-      }: OnSaveProps) => {
+      }: OnSaveProps): Promise<SaveResult | undefined> => {
         const currentTitle = savedSearch.title;
         savedSearch.title = newTitle;
         savedSearch.copyOnSave = newCopyOnSave;
@@ -124,7 +123,7 @@ const getLegacyTopNavLinks = (
             store!.dispatch({ type: setSavedSearchId.type, payload: id });
 
             // starts syncing `_g` portion of url with query services
-            syncQueryStateWithUrl(query, osdUrlStateStorage);
+            startSyncingQueryStateWithUrl();
 
             return { id };
           }
@@ -208,6 +207,7 @@ const getLegacyTopNavLinks = (
     ariaLabel: i18n.translate('discover.topNav.discoverShareButtonLabel', {
       defaultMessage: `Share search`,
     }),
+    // @ts-expect-error TS7006 TODO(ts-error): fixme
     run: async (anchorElement) => {
       const state: DiscoverState = store!.getState().discover; // store is defined before the view is loaded
       const sharingData = await getSharingData({
@@ -277,7 +277,9 @@ export const getTopNavLinks = (
   services: DiscoverViewServices,
   inspectorAdapters: Adapters,
   savedSearch: SavedSearch,
-  isEnhancementEnabled: boolean = false
+  startSyncingQueryStateWithUrl: () => void,
+  isEnhancementEnabled: boolean = false,
+  useNoIndexPatternsTopNav: boolean = false
 ) => {
   const {
     history,
@@ -288,14 +290,18 @@ export const getTopNavLinks = (
     toastNotifications,
     chrome,
     store,
-    data: { query },
-    osdUrlStateStorage,
     uiSettings,
   } = services;
 
   const showActionsInGroup = uiSettings.get('home:useNewHomePage');
   if (!showActionsInGroup)
-    return getLegacyTopNavLinks(services, inspectorAdapters, savedSearch, isEnhancementEnabled);
+    return getLegacyTopNavLinks(
+      services,
+      inspectorAdapters,
+      savedSearch,
+      startSyncingQueryStateWithUrl,
+      isEnhancementEnabled
+    );
 
   const topNavLinksMap = new Map<string, TopNavMenuData>();
 
@@ -360,7 +366,7 @@ export const getTopNavLinks = (
           newCopyOnSave,
           isTitleDuplicateConfirmed,
           onTitleDuplicate,
-        }: OnSaveProps) => {
+        }: OnSaveProps): Promise<SaveResult | undefined> => {
           const currentTitle = savedSearch.title;
           savedSearch.title = newTitle;
           savedSearch.copyOnSave = newCopyOnSave;
@@ -401,7 +407,7 @@ export const getTopNavLinks = (
               store!.dispatch({ type: setSavedSearchId.type, payload: id });
 
               // starts syncing `_g` portion of url with query services
-              syncQueryStateWithUrl(query, osdUrlStateStorage);
+              startSyncingQueryStateWithUrl();
 
               return { id };
             }
@@ -503,8 +509,18 @@ export const getTopNavLinks = (
   // Order their appearance
   return ['save', 'open', 'new', 'inspect', 'share'].reduce((acc, item) => {
     const itemDef = topNavLinksMap.get(item);
-    if (itemDef) acc.push(itemDef);
-
+    if (itemDef) {
+      if (useNoIndexPatternsTopNav && item !== 'open') {
+        // Disable all buttons except 'open' when in no index patterns mode
+        acc.push({
+          ...itemDef,
+          disabled: true,
+          run: () => {}, // Empty function for disabled buttons
+        });
+      } else {
+        acc.push(itemDef);
+      }
+    }
     return acc;
   }, [] as TopNavMenuData[]);
 };

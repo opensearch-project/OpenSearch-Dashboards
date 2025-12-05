@@ -56,6 +56,7 @@ import { SecurityService } from './security/security_service';
 import { CrossCompatibilityService } from './cross_compatibility';
 
 import { config as cspConfig } from './csp';
+import { config as cspReportOnlyConfig } from './csp_report_only';
 import { config as opensearchConfig } from './opensearch';
 import { config as httpConfig } from './http';
 import { config as loggingConfig } from './logging';
@@ -71,6 +72,7 @@ import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from '.
 import { CoreUsageDataService } from './core_usage_data';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { DynamicConfigService } from './config/dynamic_config_service';
+import { WorkspaceService } from './workspace/workspace_service';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
@@ -88,6 +90,7 @@ export class Server {
   private readonly plugins: PluginsService;
   private readonly savedObjects: SavedObjectsService;
   private readonly uiSettings: UiSettingsService;
+  private readonly workspace: WorkspaceService;
   private readonly environment: EnvironmentService;
   private readonly metrics: MetricsService;
   private readonly httpResources: HttpResourcesService;
@@ -130,6 +133,7 @@ export class Server {
     this.opensearch = new OpenSearchService(core);
     this.savedObjects = new SavedObjectsService(core);
     this.uiSettings = new UiSettingsService(core);
+    this.workspace = new WorkspaceService(core);
     this.capabilities = new CapabilitiesService(core);
     this.environment = new EnvironmentService(core);
     this.metrics = new MetricsService(core);
@@ -199,6 +203,7 @@ export class Server {
       http: httpSetup,
       savedObjects: savedObjectsSetup,
     });
+    const workspaceSetup = await this.workspace.setup();
 
     const metricsSetup = await this.metrics.setup({ http: httpSetup });
 
@@ -247,6 +252,7 @@ export class Server {
       metrics: metricsSetup,
       security: securitySetup,
       dynamicConfig: dynamicConfigServiceSetup,
+      workspace: workspaceSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -285,6 +291,7 @@ export class Server {
     soStartSpan?.end();
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
+    const workspaceStart = await this.workspace.start();
     const metricsStart = await this.metrics.start();
     const httpStart = this.http.getStartContract();
     const coreUsageDataStart = this.coreUsageData.start({
@@ -308,6 +315,7 @@ export class Server {
       coreUsageData: coreUsageDataStart,
       crossCompatibility: crossCompatibilityServiceStart,
       dynamicConfig: dynamicConfigServiceStart,
+      workspace: workspaceStart,
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);
@@ -359,6 +367,7 @@ export class Server {
     const configDescriptors: Array<ServiceConfigDescriptor<unknown>> = [
       pathConfig,
       cspConfig,
+      cspReportOnlyConfig,
       opensearchConfig,
       loggingConfig,
       httpConfig,

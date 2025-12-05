@@ -4,6 +4,6 @@
   "server": false,
   "ui": true,
   "optionalPlugins": ["dataSource", "managementOverview", "dataSourceManagement"],
-  "requiredPlugins": ["urlForwarding"],
+  "requiredPlugins": ["urlForwarding", "uiActions"],
   "requiredBundles": ["opensearchDashboardsReact"]
 }

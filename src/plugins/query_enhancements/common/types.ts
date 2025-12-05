@@ -4,6 +4,7 @@
  */
 
 import { CoreSetup } from 'opensearch-dashboards/public';
+import { PollQueryResultsParams, TimeRange } from '../../data/common';
 
 export interface QueryAggConfig {
   [key: string]: {
@@ -25,6 +26,11 @@ export interface EnhancedFetchContext {
   http: CoreSetup['http'];
   path: string;
   signal?: AbortSignal;
+  body?: {
+    pollQueryResultsParams?: PollQueryResultsParams;
+    timeRange?: TimeRange;
+    options?: Record<string, unknown>;
+  };
 }
 
 export interface QueryStatusOptions<T> {
@@ -34,3 +40,39 @@ export interface QueryStatusOptions<T> {
 }
 
 export type FetchFunction<T, P = void> = (params?: P) => Promise<T>;
+
+export interface SQLQueryResponse {
+  status: string;
+  schema: Array<{ name: string; type: string }>;
+  datarows: unknown[][];
+  total: number;
+  size: number;
+}
+
+export enum S3_FIELD_TYPES {
+  BOOLEAN = 'boolean',
+  BYTE = 'byte',
+  SHORT = 'short',
+  INTEGER = 'integer',
+  INT = 'int',
+  LONG = 'long',
+  FLOAT = 'float',
+  DOUBLE = 'double',
+  TINYINT = 'tinyint',
+  SMALLINT = 'smallint',
+  BIGINT = 'bigint',
+  KEYWORD = 'keyword',
+  TEXT = 'text',
+  STRING = 'string',
+  TIMESTAMP = 'timestamp',
+  DATE = 'date',
+  DATE_NANOS = 'date_nanos',
+  TIME = 'time',
+  INTERVAL = 'interval',
+  IP = 'ip',
+  GEO_POINT = 'geo_point',
+  BINARY = 'binary',
+  STRUCT = 'struct',
+  ARRAY = 'array',
+  UNKNOWN = 'unknown', // For unmapped or unsupported types
+}

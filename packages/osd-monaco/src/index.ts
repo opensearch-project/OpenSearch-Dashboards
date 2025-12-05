@@ -30,10 +30,11 @@
 
 export { monaco } from './monaco';
 export { XJsonLang } from './xjson';
-import './json';
+export { PPLLang } from './ppl';
 
 /* eslint-disable-next-line @osd/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
 export { BarePluginApi };
 import './monaco_environment';
-export * from './worker_store';
+export { setBuildHash } from './monaco_environment';
+export { WORKER_FILES, getWorkerUrl, getWorkerUrls, WorkerId } from './worker_config';

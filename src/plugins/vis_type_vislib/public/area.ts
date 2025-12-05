@@ -61,6 +61,7 @@ export const createAreaVisTypeDefinition = (deps: VisTypeVislibDependencies) => 
     defaultMessage: 'Emphasize the quantity beneath a line chart',
   }),
   visualization: createVislibVisController(deps),
+  isClassic: true,
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
   },

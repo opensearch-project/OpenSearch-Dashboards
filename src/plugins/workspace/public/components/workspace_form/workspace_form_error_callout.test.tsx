@@ -58,7 +58,7 @@ describe('WorkspaceFormErrorCallout', () => {
       },
     });
 
-    expect(renderResult.getByText('Color: Enter a valid color.')).toBeInTheDocument();
+    expect(renderResult.getByText('Color: Choose a valid color.')).toBeInTheDocument();
   });
 
   it('should render use case suggestion', () => {
@@ -72,89 +72,6 @@ describe('WorkspaceFormErrorCallout', () => {
     });
 
     expect(renderResult.getByText('Use case: Select a use case.')).toBeInTheDocument();
-  });
-
-  it('should combine user permission settings suggestions', () => {
-    const { renderResult } = setup({
-      errors: {
-        permissionSettings: {
-          fields: {
-            0: {
-              code: WorkspaceFormErrorCode.PermissionUserIdMissing,
-              message: '',
-            },
-            1: {
-              code: WorkspaceFormErrorCode.PermissionUserIdMissing,
-              message: '',
-            },
-            2: {
-              code: WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting,
-              message: '',
-            },
-            3: {
-              code: WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting,
-              message: '',
-            },
-          },
-        },
-      },
-    });
-
-    expect(renderResult.getByText('User: Enter a user.')).toBeInTheDocument();
-    expect(renderResult.getAllByText('User: Enter a user.')).toHaveLength(1);
-
-    expect(renderResult.getByText('User: Enter a unique user.')).toBeInTheDocument();
-    expect(renderResult.getAllByText('User: Enter a unique user.')).toHaveLength(1);
-  });
-
-  it('should combine user group permission settings suggestions', () => {
-    const { renderResult } = setup({
-      errors: {
-        permissionSettings: {
-          fields: {
-            0: {
-              code: WorkspaceFormErrorCode.PermissionUserGroupMissing,
-              message: '',
-            },
-            1: {
-              code: WorkspaceFormErrorCode.PermissionUserGroupMissing,
-              message: '',
-            },
-            2: {
-              code: WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting,
-              message: '',
-            },
-            3: {
-              code: WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting,
-              message: '',
-            },
-          },
-        },
-      },
-    });
-
-    expect(renderResult.getByText('User Group: Enter a user group.')).toBeInTheDocument();
-    expect(renderResult.getAllByText('User Group: Enter a user group.')).toHaveLength(1);
-
-    expect(renderResult.getByText('User Group: Enter a unique user group.')).toBeInTheDocument();
-    expect(renderResult.getAllByText('User Group: Enter a unique user group.')).toHaveLength(1);
-  });
-
-  it('should render permission settings overall suggestions', () => {
-    const { renderResult } = setup({
-      errors: {
-        permissionSettings: {
-          overall: {
-            code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
-            message: '',
-          },
-        },
-      },
-    });
-
-    expect(
-      renderResult.getByText('Manage access and permissions: Add a workspace owner.')
-    ).toBeInTheDocument();
   });
 
   it('should render original message if code not recognized', () => {

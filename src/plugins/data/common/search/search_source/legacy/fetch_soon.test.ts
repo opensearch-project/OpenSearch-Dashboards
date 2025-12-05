@@ -57,6 +57,7 @@ const mockResponses: Record<string, SearchResponse<any>> = {
   } as SearchResponse<any>,
 };
 
+// @ts-expect-error TS2559 TODO(ts-error): fixme
 jest.useFakeTimers('legacy');
 setImmediate(() => {});
 
@@ -118,6 +119,34 @@ describe('fetchSoon', () => {
     expect(callClient).toBeCalledTimes(1);
     expect((callClient as jest.Mock).mock.calls[0][0]).toEqual(requests);
     expect((callClient as jest.Mock).mock.calls[0][1]).toEqual(options);
+  });
+
+  test('should group search requests by data source and send separate batches of requests to callClient for each data source', () => {
+    const getConfig = getConfigStub({ [UI_SETTINGS.COURIER_BATCH_SEARCHES]: true });
+    const requests = [
+      { foo: 1, dataSourceId: 'ds-1' },
+      { foo: 2, dataSourceId: 'ds-2' },
+      { foo: 3, dataSourceId: 'ds-1' },
+    ];
+    const options = [{ bar: 1 }, { bar: 2 }, { bar: 3 }];
+
+    requests.forEach((request, i) => {
+      fetchSoon(request, options[i] as ISearchOptions, { getConfig } as FetchHandlers);
+    });
+
+    jest.advanceTimersByTime(50);
+    expect(callClient).toBeCalledTimes(2);
+    expect((callClient as jest.Mock).mock.calls[0]).toEqual(
+      expect.arrayContaining([
+        [{ foo: 1 }, { foo: 3 }],
+        [{ bar: 1 }, { bar: 3 }],
+        expect.anything(),
+        'ds-1',
+      ])
+    );
+    expect((callClient as jest.Mock).mock.calls[1]).toEqual(
+      expect.arrayContaining([[{ foo: 2 }], [{ bar: 2 }], expect.anything(), 'ds-2'])
+    );
   });
 
   test('should return the response to the corresponding call for multiple batched requests', (done) => {

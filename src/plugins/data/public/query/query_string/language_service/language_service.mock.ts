@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { createEditor, DQLBody, SingleLineInput } from '../../../ui';
 import { LanguageServiceContract } from './language_service';
 import { LanguageConfig } from './types';
 
@@ -14,7 +15,7 @@ const createSetupLanguageServiceMock = (): jest.Mocked<LanguageServiceContract> 
     title: 'DQL',
     search: {} as any,
     getQueryString: jest.fn(),
-    editor: {} as any,
+    editor: createEditor(SingleLineInput, SingleLineInput, [], DQLBody),
     fields: {
       filterable: true,
       visualizable: true,
@@ -28,7 +29,7 @@ const createSetupLanguageServiceMock = (): jest.Mocked<LanguageServiceContract> 
     title: 'Lucene',
     search: {} as any,
     getQueryString: jest.fn(),
-    editor: {} as any,
+    editor: createEditor(SingleLineInput, SingleLineInput, [], DQLBody),
     fields: {
       filterable: true,
       visualizable: true,
@@ -42,7 +43,9 @@ const createSetupLanguageServiceMock = (): jest.Mocked<LanguageServiceContract> 
 
   return {
     __enhance: jest.fn(),
-    registerLanguage: jest.fn(),
+    registerLanguage: jest.fn((language: LanguageConfig) => {
+      languages.set(language.id, language);
+    }),
     getLanguage: jest.fn((id: string) => languages.get(id)),
     getLanguages: jest.fn(() => Array.from(languages.values())),
     getDefaultLanguage: jest.fn(() => languages.get('kuery') || languages.values().next().value),
@@ -60,6 +63,7 @@ const createSetupLanguageServiceMock = (): jest.Mocked<LanguageServiceContract> 
     setUserQuerySessionId: jest.fn(),
     setUserQuerySessionIdByObj: jest.fn(),
     getUserQuerySessionId: jest.fn().mockReturnValue(null),
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     createDefaultLanguageReference: jest.fn(),
   };
 };

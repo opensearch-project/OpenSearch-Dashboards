@@ -32,6 +32,7 @@ import { Capabilities } from '../../../../core/public';
 import { canViewInApp } from './in_app_url';
 
 const createCapabilities = (sections: Record<string, any>): Capabilities => {
+  // @ts-expect-error TS2741 TODO(ts-error): fixme
   return {
     navLinks: {},
     management: {},

@@ -22,6 +22,7 @@ describe('DataExplorerApp', () => {
     });
   };
 
+  // @ts-expect-error TS2740 TODO(ts-error): fixme
   const params: AppMountParameters = {
     element: document.createElement('div'),
     history: {} as any,

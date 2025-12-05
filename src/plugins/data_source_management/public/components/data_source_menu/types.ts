@@ -9,6 +9,7 @@ import {
   SavedObject,
   IUiSettingsClient,
   ApplicationStart,
+  WorkspacesStart,
 } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
 
@@ -40,6 +41,8 @@ export interface DataSourceMenuProps<T = any> {
   uiSettings?: IUiSettingsClient;
   application?: ApplicationStart;
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
+  onManageDataSource?: () => void;
+  workspaces?: WorkspacesStart;
 }
 
 export const DataSourceComponentType = {

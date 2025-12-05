@@ -115,6 +115,7 @@ export const canPreselectTimeField = (indices: MatchedItem[]) => {
 export class StepIndexPattern extends Component<StepIndexPatternProps, StepIndexPatternState> {
   static contextType = contextType;
 
+  // @ts-expect-error TS2612 TODO(ts-error): fixme
   public readonly context!: IndexPatternManagmentContextValue;
 
   state = {

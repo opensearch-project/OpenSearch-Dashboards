@@ -30,6 +30,7 @@ import {
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { OpenSearchDashboardsResponse } from '../../../../../../core/server/http/router';
 import { DSL_BASE } from '../../../../framework/utils/shared';
+import { getUiSettings } from '../../utils';
 
 export interface AccelerationDetailsFlyoutProps {
   acceleration: CachedAcceleration;
@@ -150,6 +151,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
 
   const onConfirmOperation = () => {
     if (operationType && props.acceleration) {
+      // @ts-expect-error TS2554 TODO(ts-error): fixme
       performOperation(props.acceleration, operationType, featureFlagStatus, dataSourceMDSId);
       setShowConfirmationOverlay(false);
     }
@@ -174,14 +176,17 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   const [mappings, setMappings] = useState();
   const [indexInfo, setIndexInfo] = useState();
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const updateMapping = (result) => {
     setMappings(result);
   };
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const updateSetting = (result, slectedIndex: string) => {
     setSettings(result.data[slectedIndex]);
   };
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const updateIndexInfo = (result) => {
     setIndexInfo(result);
   };
@@ -231,8 +236,15 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   const DiscoverIcon = () => {
     return (
       <EuiButtonEmpty
+        isDisabled={(() => {
+          try {
+            return !getUiSettings().get('query:enhancements:enabled');
+          } catch (e) {
+            return false;
+          }
+        })()}
         onClick={() => {
-          onDiscoverIconClick(acceleration, dataSourceName, application);
+          onDiscoverIconClick(acceleration, dataSourceName, dataSourceMDSId, application);
           resetFlyout();
         }}
       >

@@ -31,6 +31,8 @@ import {
 } from '../../opensearch_dashboards_utils/public';
 import { getPreloadedStore } from './utils/state_management';
 import { opensearchFilters } from '../../data/public';
+import { setUsageCollector } from './services';
+import { WorkspaceAvailability } from '../../../../src/core/public';
 
 export class DataExplorerPlugin
   implements
@@ -47,10 +49,11 @@ export class DataExplorerPlugin
 
   public setup(
     core: CoreSetup<DataExplorerPluginStartDependencies, DataExplorerPluginStart>,
-    { data }: DataExplorerPluginSetupDependencies
+    { data, usageCollection }: DataExplorerPluginSetupDependencies
   ): DataExplorerPluginSetup {
     const viewService = this.viewService;
 
+    setUsageCollector(usageCollection);
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
       baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
       defaultSubUrl: '#/',
@@ -84,6 +87,7 @@ export class DataExplorerPlugin
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');

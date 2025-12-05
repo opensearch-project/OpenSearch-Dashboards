@@ -97,12 +97,14 @@ export function processImportResponse(
   }
 
   return {
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     failedImports,
     successfulImports: response.successResults ?? [],
     unmatchedReferences: Array.from(unmatchedReferences.values()),
     // Import won't be successful in the scenario unmatched references exist, import API returned errors of type unknown or import API
     // returned errors of type missing_references.
     status:
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       unmatchedReferences.size === 0 && !failedImports.some((issue) => isAnyConflict(issue.error))
         ? 'success'
         : 'idle',

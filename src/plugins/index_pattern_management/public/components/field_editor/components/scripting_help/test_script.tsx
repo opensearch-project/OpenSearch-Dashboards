@@ -73,6 +73,7 @@ interface TestScriptState {
 export class TestScript extends Component<TestScriptProps, TestScriptState> {
   static contextType = contextType;
 
+  // @ts-expect-error TS2612 TODO(ts-error): fixme
   public readonly context!: IndexPatternManagmentContextValue;
 
   defaultProps = {
@@ -122,6 +123,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
       query,
       additionalFields: this.state.additionalFields.map((option: AdditionalField) => option.value),
       http: this.context.services.http,
+      dataSourceId: indexPattern.dataSourceRef?.id,
     });
 
     if (scriptResponse.status !== 200) {

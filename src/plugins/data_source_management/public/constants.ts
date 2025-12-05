@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import { DirectQueryDatasourceType } from './types';
 
 export const QUERY_RESTRICTED = 'query-restricted';
@@ -29,3 +30,15 @@ export const EDIT = '/edit';
 export const DATACONNECTIONS_UPDATE_STATUS = '/status';
 export const INTEGRATIONS_BASE = '/api/integrations';
 export const observabilityMetricsID = 'observability-metrics';
+
+export function intervalAsMinutes(interval: number): string {
+  const minutes = Math.floor(interval / 60000);
+  return minutes === 1
+    ? i18n.translate('dataSourcesManagement.directQuerySync.intervalAsMinutes.oneMinute', {
+        defaultMessage: '1 minute',
+      })
+    : i18n.translate('dataSourcesManagement.directQuerySync.intervalAsMinutes.multipleMinutes', {
+        defaultMessage: '{minutes} minutes',
+        values: { minutes },
+      });
+}

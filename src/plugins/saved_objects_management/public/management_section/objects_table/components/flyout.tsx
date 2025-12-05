@@ -103,6 +103,7 @@ export interface FlyoutProps {
   savedObjects: SavedObjectsClientContract;
   notifications: NotificationsStart;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  useUpdatedUX?: boolean;
 }
 
 export interface FlyoutState {
@@ -144,6 +145,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   constructor(props: FlyoutProps) {
     super(props);
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     this.state = {
       conflictedIndexPatterns: undefined,
       conflictedSavedObjectsLinkedToSavedSearches: undefined,
@@ -281,7 +283,14 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   legacyImport = async () => {
-    const { serviceRegistry, indexPatterns, overlays, http, allowedTypes } = this.props;
+    const {
+      serviceRegistry,
+      indexPatterns,
+      overlays,
+      http,
+      allowedTypes,
+      useUpdatedUX,
+    } = this.props;
     const { file, importMode } = this.state;
 
     this.setState({ status: 'loading', error: undefined });
@@ -308,7 +317,11 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         status: 'error',
         error: i18n.translate(
           'savedObjectsManagement.objectsTable.flyout.invalidFormatOfImportedFileErrorMessage',
-          { defaultMessage: 'Saved objects file format is invalid and cannot be imported.' }
+          {
+            defaultMessage:
+              '{useUpdatedUX, select, true {Assets} other {Saved objects}} file format is invalid and cannot be imported.',
+            values: { useUpdatedUX },
+          }
         ),
       });
       return;
@@ -405,7 +418,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       failedImports,
     } = this.state;
 
-    const { serviceRegistry, indexPatterns, search } = this.props;
+    const { serviceRegistry, indexPatterns, search, useUpdatedUX } = this.props;
 
     this.setState({
       error: undefined,
@@ -459,7 +472,11 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         this.setState({
           loadingMessage: i18n.translate(
             'savedObjectsManagement.objectsTable.flyout.confirmLegacyImport.retryingFailedObjectsLoadingMessage',
-            { defaultMessage: 'Retrying failed objects…' }
+            {
+              defaultMessage:
+                'Retrying failed {useUpdatedUX, select, true {assets} other {objects}}…',
+              values: { useUpdatedUX },
+            }
           ),
         });
         importCount += await saveObjects(
@@ -530,7 +547,11 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         ),
         description: i18n.translate(
           'savedObjectsManagement.objectsTable.flyout.renderConflicts.columnCountDescription',
-          { defaultMessage: 'How many affected objects' }
+          {
+            defaultMessage:
+              'How many affected {useUpdatedUX, select, true {assets} other {objects}}',
+            values: { useUpdatedUX: this.props.useUpdatedUX },
+          }
         ),
         render: (list: any[]) => {
           return <Fragment>{list.length}</Fragment>;
@@ -540,11 +561,19 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         field: 'list',
         name: i18n.translate(
           'savedObjectsManagement.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsName',
-          { defaultMessage: 'Sample of affected objects' }
+          {
+            defaultMessage:
+              'Sample of affected {useUpdatedUX, select, true {assets} other {objects}}',
+            values: { useUpdatedUX: this.props.useUpdatedUX },
+          }
         ),
         description: i18n.translate(
           'savedObjectsManagement.objectsTable.flyout.renderConflicts.columnSampleOfAffectedObjectsDescription',
-          { defaultMessage: 'Sample of affected objects' }
+          {
+            defaultMessage:
+              'Sample of affected {useUpdatedUX, select, true {assets} other {objects}}',
+            values: { useUpdatedUX: this.props.useUpdatedUX },
+          }
         ),
         render: (list: any[]) => {
           return (
@@ -637,7 +666,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       importMode,
     } = this.state;
 
-    const { dataSourceEnabled } = this.props;
+    const { dataSourceEnabled, useUpdatedUX } = this.props;
 
     if (status === 'loading') {
       return (
@@ -654,7 +683,13 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     }
 
     if (isLegacyFile === false && status === 'success') {
-      return <ImportSummary failedImports={failedImports} successfulImports={successfulImports} />;
+      return (
+        <ImportSummary
+          failedImports={failedImports}
+          successfulImports={successfulImports}
+          useUpdatedUX={useUpdatedUX}
+        />
+      );
     }
 
     // Import summary for failed legacy import
@@ -674,10 +709,11 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           <p>
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.flyout.importFailedDescription"
-              defaultMessage="Failed to import {failedImportCount} of {totalImportCount} objects. Import failed"
+              defaultMessage="Failed to import {failedImportCount} of {totalImportCount} {useUpdatedUX, select, true {assets} other {objects}}. Import failed"
               values={{
                 failedImportCount: failedImports.length,
                 totalImportCount: importCount + failedImports.length,
+                useUpdatedUX,
               }}
             />
           </p>
@@ -728,7 +764,10 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             title={
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.flyout.importSuccessfulCallout.noObjectsImportedTitle"
-                defaultMessage="No objects imported"
+                defaultMessage="No {useUpdatedUX, select, true {assets} other {objects}} imported"
+                values={{
+                  useUpdatedUX,
+                }}
               />
             }
             color="primary"
@@ -751,8 +790,8 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           <p>
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.flyout.importSuccessfulDescription"
-              defaultMessage="Successfully imported {importCount} objects."
-              values={{ importCount }}
+              defaultMessage="Successfully imported {importCount} {useUpdatedUX, select, true {assets} other {objects}}."
+              values={{ importCount, useUpdatedUX }}
             />
           </p>
         </EuiCallOut>
@@ -792,6 +831,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     );
   }
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   onSelectedDataSourceChange = (e) => {
     const dataSourceId = e[0] ? e[0].id : undefined;
     this.setState({ selectedDataSourceId: dataSourceId });
@@ -830,6 +870,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             ),
           }}
         >
+          {/* @ts-expect-error TS2604 TODO(ts-error): fixme */}
           <DataSourceSelector
             savedObjectsClient={this.props.savedObjects}
             notifications={this.props.notifications.toasts}
@@ -847,9 +888,10 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             isLegacyFile={isLegacyFile}
             updateSelection={(newValues: ImportMode) => this.changeImportMode(newValues)}
             optionLabel={i18n.translate(
-              'savedObjectsManagement.objectsTable.importModeControl.importOptionsTitle',
+              'savedObjectsManagement.objectsTable.importModeControl.conflictManagementTitle',
               { defaultMessage: 'Conflict management' }
             )}
+            useUpdatedUX={this.props.useUpdatedUX}
           />
         </EuiCompressedFormRow>
       </div>
@@ -979,7 +1021,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           <p>
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
-              defaultMessage="The following saved objects use index patterns that do not exist.
+              defaultMessage="The following {useUpdatedUX, select, true {assets} other {saved objects}} use index patterns that do not exist.
               Please select the index patterns you'd like re-associated with
               them. You can {indexPatternLink} if necessary."
               values={{
@@ -991,6 +1033,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
                     />
                   </EuiLink>
                 ),
+                useUpdatedUX: this.props.useUpdatedUX,
               }}
             />
           </p>
@@ -1013,7 +1056,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   render() {
-    const { close } = this.props;
+    const { close, useUpdatedUX } = this.props;
 
     let confirmOverwriteModal: ReactNode;
     const { conflictingRecord } = this.state;
@@ -1031,7 +1074,8 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             <h2>
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
-                defaultMessage="Import saved objects"
+                defaultMessage="Import {useUpdatedUX, select, true {assets} other {saved objects}}"
+                values={{ useUpdatedUX }}
               />
             </h2>
           </EuiText>

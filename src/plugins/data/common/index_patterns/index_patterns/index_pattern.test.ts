@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { map, last } from 'lodash';
+import { map, last, cloneDeep } from 'lodash';
 
 import { IndexPattern } from './index_pattern';
 
@@ -82,7 +82,15 @@ function create(id: string) {
   } = stubbedSavedObjectIndexPattern(id);
 
   return new IndexPattern({
-    spec: { id, type, version, timeFieldName, fields, title },
+    spec: {
+      id,
+      type,
+      version,
+      timeFieldName,
+      fields,
+      title,
+      schemaMappings: { otelLogs: { traceId: 'trace.id', spanId: 'span.id' } },
+    },
     savedObjectsClient: {} as any,
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
@@ -100,7 +108,16 @@ function createWithDataSource(id: string) {
 
   const dataSourceRef = { id: reference[0].id, type: reference[0].type };
   return new IndexPattern({
-    spec: { id, type, version, timeFieldName, fields, title, dataSourceRef },
+    spec: {
+      id,
+      type,
+      version,
+      timeFieldName,
+      fields,
+      title,
+      dataSourceRef,
+      schemaMappings: { otelLogs: { serviceName: 'service.name' } },
+    },
     savedObjectsClient: {} as any,
     fieldFormats: fieldFormatsMock,
     shortDotsEnable: false,
@@ -317,6 +334,79 @@ describe('IndexPatternWithDataSource', () => {
         indexPattern.dataSourceRef?.type
       );
       expect(indexPattern.getSaveObjectReference()[0]?.name).toEqual('dataSource');
+    });
+  });
+
+  describe('flattenHit', () => {
+    test('should not modify original hit', () => {
+      const nestedArrayIndexPattern = new IndexPattern({
+        spec: {
+          id: 'test-nested-array',
+          type: 'index-pattern',
+          fields: {
+            'nested_test1.d_values': {
+              count: 0,
+              name: 'nested_test1.d_values',
+              type: 'number',
+              esTypes: ['double'],
+              scripted: false,
+              searchable: true,
+              aggregatable: true,
+              readFromDocValues: true,
+              subType: {
+                nested: {
+                  path: 'nested_test1',
+                },
+              },
+            },
+            'nested_test1.s_entry': {
+              count: 0,
+              name: 'nested_test1.s_entry',
+              type: 'string',
+              esTypes: ['keyword'],
+              scripted: false,
+              searchable: true,
+              aggregatable: true,
+              readFromDocValues: true,
+              subType: {
+                nested: {
+                  path: 'nested_test1',
+                },
+              },
+            },
+          },
+        },
+        savedObjectsClient: {} as any,
+        fieldFormats: fieldFormatsMock,
+        shortDotsEnable: false,
+        metaFields: [],
+      });
+
+      const hit = {
+        _index: 'test-nested-array',
+        _id: 'JPas2pQBluzwIEYCwD0y',
+        _score: 1,
+        _source: {
+          nested_test1: [
+            {
+              d_values: [0.1, 0.2],
+              s_entry: '4',
+            },
+            {
+              d_values: [0.3, 0.4],
+              s_entry: '5',
+            },
+            {
+              d_values: [0.5, 0.6],
+              s_entry: '6',
+            },
+          ],
+        },
+      };
+      const hitClone = cloneDeep(hit);
+      nestedArrayIndexPattern.flattenHit(hit);
+
+      expect(hit).toEqual(hitClone);
     });
   });
 });

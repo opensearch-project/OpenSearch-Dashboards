@@ -19,7 +19,9 @@ exports[`QueryAssistBar matches snapshot 1`] = `
           <div
             class="euiFlexItem"
           >
-            <input />
+            <input
+              placeholder="Ask a natural language question about Default Index Pattern to generate a query"
+            />
             <div />
           </div>
           <div

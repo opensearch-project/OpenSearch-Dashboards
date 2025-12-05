@@ -3,14 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiHealth } from '@elastic/eui';
+import { EuiHealth, EuiSmallButton } from '@elastic/eui';
 import React from 'react';
 import { ApplicationStart } from 'opensearch-dashboards/public';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { DATA_SOURCE_TYPES } from '../../../../framework/constants';
 import { CachedAcceleration, RenderAccelerationFlyoutParams } from '../../../../framework/types';
 import {
-  redirectToExplorerOSIdx,
-  redirectToExplorerWithDataSrc,
+  redirectToDiscoverOSIdx,
+  redirectToDiscoverWithDataSrc,
 } from '../associated_object_management/utils/associated_objects_tab_utils';
 export const ACC_PANEL_TITLE = 'Accelerations';
 export const ACC_PANEL_DESC =
@@ -103,7 +104,7 @@ export const CreateAccelerationFlyoutButton = ({
   dataSourceMDSId?: string;
 }) => {
   return (
-    <EuiButton
+    <EuiSmallButton
       onClick={() =>
         renderCreateAccelerationFlyout({
           dataSourceName,
@@ -114,7 +115,7 @@ export const CreateAccelerationFlyoutButton = ({
       fill
     >
       Create acceleration
-    </EuiButton>
+    </EuiSmallButton>
   );
 };
 
@@ -168,19 +169,20 @@ export const AccelerationHealth = ({ health }: { health: string }) => {
 export const onDiscoverIconClick = (
   acceleration: CachedAcceleration,
   dataSourceName: string,
+  dataSourceMDSId: string | undefined,
   application: ApplicationStart
 ) => {
   // boolean determining whether its a skipping index table or mv/ci
   if (acceleration.type === undefined) return;
   if (acceleration.type === 'skipping') {
-    redirectToExplorerWithDataSrc(
+    redirectToDiscoverWithDataSrc(
       dataSourceName,
-      DATA_SOURCE_TYPES.S3Glue,
+      dataSourceMDSId,
       acceleration.database,
       acceleration.table,
       application
     );
   } else {
-    redirectToExplorerOSIdx(acceleration.flintIndexName, application);
+    redirectToDiscoverOSIdx(acceleration.flintIndexName, dataSourceMDSId, application);
   }
 };

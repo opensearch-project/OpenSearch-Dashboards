@@ -1,0 +1,412 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WorkspacePrivacyFlyout should render normally 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        data-eui="EuiFlyout"
+        role="dialog"
+      >
+        <button
+          data-test-subj="euiFlyoutCloseButton"
+          type="button"
+        />
+        <div
+          class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+        >
+          <h2
+            class="euiTitle euiTitle--medium"
+            id="workspacePrivacyFlyoutTitle"
+          >
+            Workspace access
+          </h2>
+        </div>
+        <div
+          class="euiFlyoutBody"
+        >
+          <div
+            class="euiFlyoutBody__overflow"
+            tabindex="0"
+          >
+            <div
+              class="euiFlyoutBody__overflowContent"
+            >
+              <div
+                class="euiAccordion euiAccordion-isOpen"
+              >
+                <div
+                  class="euiAccordion__triggerWrapper"
+                >
+                  <button
+                    aria-controls="workspacePrivacy"
+                    aria-expanded="true"
+                    class="euiAccordion__button"
+                    id="generated-id"
+                    type="button"
+                  >
+                    <span
+                      class="euiAccordion__iconWrapper"
+                    >
+                      <span
+                        class="euiAccordion__icon euiAccordion__icon-isOpen"
+                        data-euiicon-type="arrowRight"
+                      />
+                    </span>
+                    <span
+                      class="euiIEFlexWrapFix"
+                    >
+                      <div
+                        class="euiText euiText--small"
+                      >
+                        <h3>
+                          Workspace privacy
+                        </h3>
+                      </div>
+                    </span>
+                  </button>
+                </div>
+                <div
+                  aria-labelledby="generated-id"
+                  class="euiAccordion__childWrapper"
+                  id="workspacePrivacy"
+                  role="region"
+                  tabindex="-1"
+                >
+                  <div>
+                    <div
+                      class="euiAccordion__padding--l"
+                    >
+                      <div
+                        class="euiText euiText--small"
+                        style="white-space: pre-line;"
+                      >
+                        Workspace privacy is the default access level configured for all. Collaborators will have permissions based on their individual level access and user group participation. Workspace permissions are resolved by the least restrictive option.
+
+For example, if workspace privacy is set to "Anyone can edit", any collaborator with "Read only" permission will also be able to edit the workspace assets as if their permission is "Read and write", since "Anyone can edit" is the least restrictive permission.
+
+Similarly, if a workspace collaborator is added with individual permissions, but they belong to a group with less restrictive access, the least restrictive access permission will take precedence.
+
+For example, if "userA' is added as a collaborator with "read and write" permissions, but they belong to "userGroupB", which has "Admin" permissions, the permissions granted to "userGroupB" will take precedence.
+                      </div>
+                      <div
+                        class="euiSpacer euiSpacer--l"
+                      />
+                      <button
+                        class="euiLink euiLink--primary"
+                        style="font-weight: normal;"
+                        type="button"
+                      >
+                        Learn more in documentation
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--s"
+              />
+              <div
+                class="euiAccordion euiAccordion-isOpen"
+              >
+                <div
+                  class="euiAccordion__triggerWrapper"
+                >
+                  <button
+                    aria-controls="collaborators"
+                    aria-expanded="true"
+                    class="euiAccordion__button"
+                    id="generated-id"
+                    type="button"
+                  >
+                    <span
+                      class="euiAccordion__iconWrapper"
+                    >
+                      <span
+                        class="euiAccordion__icon euiAccordion__icon-isOpen"
+                        data-euiicon-type="arrowRight"
+                      />
+                    </span>
+                    <span
+                      class="euiIEFlexWrapFix"
+                    >
+                      <div
+                        class="euiText euiText--small"
+                      >
+                        <h3>
+                          Collaborators
+                        </h3>
+                      </div>
+                    </span>
+                  </button>
+                </div>
+                <div
+                  aria-labelledby="generated-id"
+                  class="euiAccordion__childWrapper"
+                  id="collaborators"
+                  role="region"
+                  tabindex="-1"
+                >
+                  <div>
+                    <div
+                      class="euiAccordion__padding--l"
+                    >
+                      <div
+                        class="euiText euiText--small"
+                        style="white-space: pre-line;"
+                      >
+                        Workspace collaborators include individual users and user groups who have been granted permission to access and interact with the workspace. The collaborators can have Read-only, Read and write, and Admin permission levels within the workspace. Access level to the workspace is defined by each collaborator's individual permission level, their group participation access level, and workspace privacy level. The least restrictive access permission will take precedence.
+                      </div>
+                      <div
+                        class="euiSpacer euiSpacer--l"
+                      />
+                      <button
+                        class="euiLink euiLink--primary"
+                        style="font-weight: normal;"
+                        type="button"
+                      >
+                        Learn more in documentation
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--s"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      data-eui="EuiFlyout"
+      role="dialog"
+    >
+      <button
+        data-test-subj="euiFlyoutCloseButton"
+        type="button"
+      />
+      <div
+        class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+      >
+        <h2
+          class="euiTitle euiTitle--medium"
+          id="workspacePrivacyFlyoutTitle"
+        >
+          Workspace access
+        </h2>
+      </div>
+      <div
+        class="euiFlyoutBody"
+      >
+        <div
+          class="euiFlyoutBody__overflow"
+          tabindex="0"
+        >
+          <div
+            class="euiFlyoutBody__overflowContent"
+          >
+            <div
+              class="euiAccordion euiAccordion-isOpen"
+            >
+              <div
+                class="euiAccordion__triggerWrapper"
+              >
+                <button
+                  aria-controls="workspacePrivacy"
+                  aria-expanded="true"
+                  class="euiAccordion__button"
+                  id="generated-id"
+                  type="button"
+                >
+                  <span
+                    class="euiAccordion__iconWrapper"
+                  >
+                    <span
+                      class="euiAccordion__icon euiAccordion__icon-isOpen"
+                      data-euiicon-type="arrowRight"
+                    />
+                  </span>
+                  <span
+                    class="euiIEFlexWrapFix"
+                  >
+                    <div
+                      class="euiText euiText--small"
+                    >
+                      <h3>
+                        Workspace privacy
+                      </h3>
+                    </div>
+                  </span>
+                </button>
+              </div>
+              <div
+                aria-labelledby="generated-id"
+                class="euiAccordion__childWrapper"
+                id="workspacePrivacy"
+                role="region"
+                tabindex="-1"
+              >
+                <div>
+                  <div
+                    class="euiAccordion__padding--l"
+                  >
+                    <div
+                      class="euiText euiText--small"
+                      style="white-space: pre-line;"
+                    >
+                      Workspace privacy is the default access level configured for all. Collaborators will have permissions based on their individual level access and user group participation. Workspace permissions are resolved by the least restrictive option.
+
+For example, if workspace privacy is set to "Anyone can edit", any collaborator with "Read only" permission will also be able to edit the workspace assets as if their permission is "Read and write", since "Anyone can edit" is the least restrictive permission.
+
+Similarly, if a workspace collaborator is added with individual permissions, but they belong to a group with less restrictive access, the least restrictive access permission will take precedence.
+
+For example, if "userA' is added as a collaborator with "read and write" permissions, but they belong to "userGroupB", which has "Admin" permissions, the permissions granted to "userGroupB" will take precedence.
+                    </div>
+                    <div
+                      class="euiSpacer euiSpacer--l"
+                    />
+                    <button
+                      class="euiLink euiLink--primary"
+                      style="font-weight: normal;"
+                      type="button"
+                    >
+                      Learn more in documentation
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--s"
+            />
+            <div
+              class="euiAccordion euiAccordion-isOpen"
+            >
+              <div
+                class="euiAccordion__triggerWrapper"
+              >
+                <button
+                  aria-controls="collaborators"
+                  aria-expanded="true"
+                  class="euiAccordion__button"
+                  id="generated-id"
+                  type="button"
+                >
+                  <span
+                    class="euiAccordion__iconWrapper"
+                  >
+                    <span
+                      class="euiAccordion__icon euiAccordion__icon-isOpen"
+                      data-euiicon-type="arrowRight"
+                    />
+                  </span>
+                  <span
+                    class="euiIEFlexWrapFix"
+                  >
+                    <div
+                      class="euiText euiText--small"
+                    >
+                      <h3>
+                        Collaborators
+                      </h3>
+                    </div>
+                  </span>
+                </button>
+              </div>
+              <div
+                aria-labelledby="generated-id"
+                class="euiAccordion__childWrapper"
+                id="collaborators"
+                role="region"
+                tabindex="-1"
+              >
+                <div>
+                  <div
+                    class="euiAccordion__padding--l"
+                  >
+                    <div
+                      class="euiText euiText--small"
+                      style="white-space: pre-line;"
+                    >
+                      Workspace collaborators include individual users and user groups who have been granted permission to access and interact with the workspace. The collaborators can have Read-only, Read and write, and Admin permission levels within the workspace. Access level to the workspace is defined by each collaborator's individual permission level, their group participation access level, and workspace privacy level. The least restrictive access permission will take precedence.
+                    </div>
+                    <div
+                      class="euiSpacer euiSpacer--l"
+                    />
+                    <button
+                      class="euiLink euiLink--primary"
+                      style="font-weight: normal;"
+                      type="button"
+                    >
+                      Learn more in documentation
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiSpacer euiSpacer--s"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

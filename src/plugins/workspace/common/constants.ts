@@ -8,12 +8,14 @@ import {
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
   DATA_SOURCE_SAVED_OBJECT_TYPE,
 } from '../../data_source/common';
+
 export const WORKSPACE_FATAL_ERROR_APP_ID = 'workspace_fatal_error';
 export const WORKSPACE_CREATE_APP_ID = 'workspace_create';
 export const WORKSPACE_LIST_APP_ID = 'workspace_list';
 export const WORKSPACE_DETAIL_APP_ID = 'workspace_detail';
 export const WORKSPACE_INITIAL_APP_ID = 'workspace_initial';
 export const WORKSPACE_NAVIGATION_APP_ID = 'workspace_navigation';
+export const WORKSPACE_COLLABORATORS_APP_ID = 'workspace_collaborators';
 
 export const WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID = 'workspace';
 export const WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID =
@@ -23,13 +25,8 @@ export const WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID = 'workspace_ui_settings';
  * UI setting for user default workspace
  */
 export const DEFAULT_WORKSPACE = 'defaultWorkspace';
-
-export enum WorkspacePermissionMode {
-  Read = 'read',
-  Write = 'write',
-  LibraryRead = 'library_read',
-  LibraryWrite = 'library_write',
-}
+export const ESSENTIAL_WORKSPACE_DISMISS_GET_STARTED = 'essentialWorkspace:dismissGetStarted';
+export const ANALYTICS_WORKSPACE_DISMISS_GET_STARTED = 'analyticsWorkspace:dismissGetStarted';
 
 export const WORKSPACE_ID_CONSUMER_WRAPPER_ID = 'workspace_id_consumer';
 
@@ -43,6 +40,12 @@ export const PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER = -3;
 export const PRIORITY_FOR_WORKSPACE_UI_SETTINGS_WRAPPER = -2;
 export const PRIORITY_FOR_WORKSPACE_CONFLICT_CONTROL_WRAPPER = -1;
 export const PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER = 0;
+
+/**
+ * The repository wrapper should be the wrapper closest to the repository client,
+ * so we give a large number to the wrapper
+ */
+export const PRIORITY_FOR_REPOSITORY_WRAPPER = Number.MAX_VALUE;
 
 /**
  *
@@ -160,10 +163,14 @@ export enum AssociationDataSourceModalMode {
   OpenSearchConnections = 'opensearch-connections',
   DirectQueryConnections = 'direction-query-connections',
 }
-export const USE_CASE_PREFIX = 'use-case-';
+export const OPENSEARCHDASHBOARDS_CONFIG_PATH = 'opensearchDashboards';
 
 // Workspace will handle both data source and data connection type saved object.
 export const WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES = [
   DATA_SOURCE_SAVED_OBJECT_TYPE,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
 ];
+
+export const USE_CASE_CARD_GRADIENT_PREFIX = 'workspace-initial-use-case-card';
+
+export const OSD_ADMIN_WILDCARD_MATCH_ALL = '*';

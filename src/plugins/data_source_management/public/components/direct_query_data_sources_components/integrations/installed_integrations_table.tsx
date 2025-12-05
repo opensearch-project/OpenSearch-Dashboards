@@ -13,7 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldSearch,
-  EuiButton,
+  EuiSmallButton,
   EuiIcon,
   EuiText,
   EuiFlyout,
@@ -73,9 +73,9 @@ const AddIntegrationButton = ({
   toggleFlyout: () => void;
 }) => {
   return (
-    <EuiButton fill={fill} onClick={toggleFlyout}>
+    <EuiSmallButton fill={fill} onClick={toggleFlyout}>
       Add Integrations
-    </EuiButton>
+    </EuiSmallButton>
   );
 };
 
@@ -158,6 +158,7 @@ export const InstallIntegrationFlyout = ({
           http={http}
         />
       ) : (
+        // @ts-expect-error TS2786 TODO(ts-error): fixme
         <SetupIntegrationForm
           selectedClusterName={selectedClusterName}
           selectedDataSourceId={selectedDataSourceId}
@@ -265,6 +266,7 @@ export const InstalledIntegrationsTable = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
+      {/* @ts-expect-error TS2322 TODO(ts-error): fixme */}
       <EuiInMemoryTable items={filteredIntegrations} columns={INSTALLED_INTEGRATIONS_COLUMNS} />
     </>
   );

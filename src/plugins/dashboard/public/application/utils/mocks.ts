@@ -9,6 +9,8 @@ import { dashboardPluginMock } from '../../../../dashboard/public/mocks';
 import { usageCollectionPluginMock } from '../../../../usage_collection/public/mocks';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { DashboardServices } from '../../types';
+import { scopedHistoryMock } from '../../../../../core/public/mocks';
+import { ScopedHistory } from '../../../../../core/public';
 
 export const createDashboardServicesMock = () => {
   const coreStartMock = coreMock.createStart();
@@ -18,6 +20,7 @@ export const createDashboardServicesMock = () => {
   const usageCollection = usageCollectionPluginMock.createSetupContract();
   const embeddable = embeddablePluginMock.createStartContract();
   const opensearchDashboardsVersion = '3.0.0';
+  const scopedHistory = (scopedHistoryMock.create() as unknown) as ScopedHistory;
 
   return ({
     ...coreStartMock,
@@ -27,6 +30,7 @@ export const createDashboardServicesMock = () => {
       replace: jest.fn(),
       location: { pathname: '' },
     },
+    scopedHistory,
     dashboardConfig: {
       getHideWriteControls: jest.fn(),
     },

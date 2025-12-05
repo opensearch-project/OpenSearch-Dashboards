@@ -29,7 +29,6 @@
  */
 
 import { i18n, i18nLoader } from '@osd/i18n';
-import { basename } from 'path';
 import { Server } from '@hapi/hapi';
 import { fromRoot } from '../../../core/server/utils';
 import type { UsageCollectionSetup } from '../../../plugins/usage_collection/server';

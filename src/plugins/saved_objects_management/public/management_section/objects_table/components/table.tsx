@@ -52,6 +52,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
+import { convertIndexPatternTerminology } from '../../../../../opensearch_dashboards_utils/public';
 import { SavedObjectWithMetadata } from '../../../types';
 import {
   SavedObjectsManagementActionServiceStart,
@@ -64,6 +65,7 @@ export interface TableProps {
   basePath: IBasePath;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
+  // @ts-expect-error TS2304 TODO(ts-error): fixme
   namespaceRegistry: SavedObjectsManagementNamespaceServiceStart;
   selectedSavedObjects: SavedObjectWithMetadata[];
   selectionConfig: {
@@ -75,6 +77,7 @@ export interface TableProps {
   onDuplicate: () => void;
   onDuplicateSingle: (object: SavedObjectWithMetadata) => void;
   onActionRefresh: (object: SavedObjectWithMetadata) => void;
+  isDatasetManagementEnabled: boolean;
   onExport: (includeReferencesDeep: boolean) => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
   pageIndex: number;
@@ -140,6 +143,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       isSearchTextValid: true,
       parseErrorMessage: null,
     });
+    // @ts-expect-error TS2554 TODO(ts-error): fixme
     this.props.onQueryChange({ query });
   };
 
@@ -174,6 +178,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       items,
       totalItemCount,
       isSearching,
+      columnRegistry,
       filters,
       selectionConfig: selection,
       onDelete,
@@ -186,8 +191,6 @@ export class Table extends PureComponent<TableProps, TableState> {
       onShowRelationships,
       basePath,
       actionRegistry,
-      columnRegistry,
-      namespaceRegistry,
       dateFormat,
       availableWorkspaces,
       currentWorkspaceId,
@@ -220,10 +223,14 @@ export class Table extends PureComponent<TableProps, TableState> {
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowType',
         render: (type: string, object: SavedObjectWithMetadata) => {
+          const typeLabel = convertIndexPatternTerminology(
+            getSavedObjectLabel(type),
+            this.props.isDatasetManagementEnabled
+          );
           return (
-            <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
+            <EuiToolTip position="top" content={typeLabel}>
               <EuiIcon
-                aria-label={getSavedObjectLabel(type)}
+                aria-label={typeLabel}
                 type={object.meta.icon || 'apps'}
                 size="s"
                 data-test-subj="objectType"
@@ -253,6 +260,12 @@ export class Table extends PureComponent<TableProps, TableState> {
           let finalPath = path;
           if (this.props.useUpdatedUX && finalPath) {
             finalPath = finalPath.replace(/^\/app\/management\/opensearch-dashboards/, '/app');
+          }
+          // Decode the path
+          try {
+            finalPath = decodeURIComponent(finalPath);
+          } catch (e) {
+            // If decoding fails, use the original path
           }
           let inAppUrl = basePath.prepend(finalPath);
           if (object.workspaces?.length) {
@@ -423,18 +436,28 @@ export class Table extends PureComponent<TableProps, TableState> {
         {activeActionContents}
         <EuiSearchBar
           box={{ 'data-test-subj': 'savedObjectSearchBar' }}
+          compressed
           filters={filters}
           onChange={this.onChange}
           toolsRight={[
             <>
               {useUpdatedUX && (
-                <EuiButtonIcon
-                  iconType="refresh"
-                  size="s"
-                  display="base"
-                  type="base"
-                  onClick={onRefresh}
-                />
+                <EuiToolTip
+                  content={i18n.translate(
+                    'savedObjectsManagement.objectsTable.table.refreshButtonTooltip',
+                    {
+                      defaultMessage: 'Refresh',
+                    }
+                  )}
+                >
+                  <EuiButtonIcon
+                    iconType="refresh"
+                    size="s"
+                    display="base"
+                    type="base"
+                    onClick={onRefresh}
+                  />
+                </EuiToolTip>
               )}
             </>,
             <>{showDuplicate && duplicateButton}</>,
@@ -478,7 +501,10 @@ export class Table extends PureComponent<TableProps, TableState> {
                   label={
                     <FormattedMessage
                       id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                      defaultMessage="Include related objects"
+                      defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
+                      values={{
+                        useUpdatedUX: this.props.useUpdatedUX,
+                      }}
                     />
                   }
                   checked={this.state.isIncludeReferencesDeepChecked}
@@ -502,7 +528,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           ]}
         />
         {queryParseError}
-        <EuiSpacer size="s" />
+        <EuiSpacer size={useUpdatedUX ? 'm' : 's'} />
         <div data-test-subj="savedObjectsTable">
           <EuiBasicTable
             loading={isSearching}

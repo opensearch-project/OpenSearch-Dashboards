@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import JSON11 from 'json11';
 import { stringify, parse } from './json';
 
 describe('json', () => {
@@ -90,9 +91,55 @@ describe('json', () => {
     expect(stringify(input, replacer, 2)).toEqual(JSON.stringify(input, replacer, 2));
   });
 
-  it('can handle long numerals while parsing', () => {
-    const longPositive = BigInt(Number.MAX_SAFE_INTEGER) * 2n;
-    const longNegative = BigInt(Number.MIN_SAFE_INTEGER) * 2n;
+  it('can handle positive long numerals while parsing', () => {
+    const longPositiveA = BigInt(Number.MAX_SAFE_INTEGER) * 2n;
+    const longPositiveB = BigInt(Number.MAX_SAFE_INTEGER) * 2n + 1n;
+    const text =
+      `{` +
+      // The space before and after the values, and the lack of spaces before comma are intentional
+      `"\\":${longPositiveA}": "[ ${longPositiveB.toString()}, ${longPositiveA.toString()} ]", ` +
+      `"positive": ${longPositiveA.toString()}, ` +
+      `"array": [ ${longPositiveB.toString()}, ${longPositiveA.toString()} ], ` +
+      `"negative": ${longPositiveB.toString()},` +
+      `"number": 102931203123987` +
+      `}`;
+
+    const result = parse(text);
+    expect(result.positive).toBe(longPositiveA);
+    expect(result.negative).toBe(longPositiveB);
+    expect(result.array).toEqual([longPositiveB, longPositiveA]);
+    expect(result['":' + longPositiveA]).toBe(
+      `[ ${longPositiveB.toString()}, ${longPositiveA.toString()} ]`
+    );
+    expect(result.number).toBe(102931203123987);
+  });
+
+  it('can handle negative long numerals while parsing', () => {
+    const longNegativeA = BigInt(Number.MIN_SAFE_INTEGER) * 2n;
+    const longNegativeB = BigInt(Number.MIN_SAFE_INTEGER) * 2n - 1n;
+    const text =
+      `{` +
+      // The space before and after the values, and the lack of spaces before comma are intentional
+      `"\\":${longNegativeA}": "[ ${longNegativeB.toString()}, ${longNegativeA.toString()} ]", ` +
+      `"positive": ${longNegativeA.toString()}, ` +
+      `"array": [ ${longNegativeB.toString()}, ${longNegativeA.toString()} ], ` +
+      `"negative": ${longNegativeB.toString()},` +
+      `"number": 102931203123987` +
+      `}`;
+
+    const result = parse(text);
+    expect(result.positive).toBe(longNegativeA);
+    expect(result.negative).toBe(longNegativeB);
+    expect(result.array).toEqual([longNegativeB, longNegativeA]);
+    expect(result['":' + longNegativeA]).toBe(
+      `[ ${longNegativeB.toString()}, ${longNegativeA.toString()} ]`
+    );
+    expect(result.number).toBe(102931203123987);
+  });
+
+  it('can handle mixed long numerals while parsing', () => {
+    const longPositive = BigInt(Number.MAX_SAFE_INTEGER) * 2n + 1n;
+    const longNegative = BigInt(Number.MIN_SAFE_INTEGER) * 2n - 1n;
     const text =
       `{` +
       // The space before and after the values, and the lack of spaces before comma are intentional
@@ -111,6 +158,37 @@ describe('json', () => {
       `[ ${longNegative.toString()}, ${longPositive.toString()} ]`
     );
     expect(result.number).toBe(102931203123987);
+  });
+
+  it('does not use JSON11 when not needed', () => {
+    const spyParse = jest.spyOn(JSON11, 'parse');
+
+    const longPositive = BigInt(Number.MAX_SAFE_INTEGER) * 2n + 1n;
+    const longNegative = BigInt(Number.MIN_SAFE_INTEGER) * 2n - 1n;
+    const text =
+      `{` +
+      `"\\":${longPositive}": "[ ${longNegative.toString()}, ${longPositive.toString()} ]", ` +
+      `"number": 102931203123987` +
+      `}`;
+    parse(text);
+
+    expect(spyParse).not.toHaveBeenCalled();
+  });
+
+  it('uses JSON11 when dealing with long numerals', () => {
+    const spyParse = jest.spyOn(JSON11, 'parse');
+
+    const longPositive = BigInt(Number.MAX_SAFE_INTEGER) * 2n + 1n;
+    const longNegative = BigInt(Number.MIN_SAFE_INTEGER) * 2n - 1n;
+    const text =
+      `{` +
+      `"\\":${longPositive}": "[ ${longNegative.toString()}, ${longPositive.toString()} ]", ` +
+      `"positive": ${longPositive.toString()}, ` +
+      `"number": 102931203123987` +
+      `}`;
+    parse(text);
+
+    expect(spyParse).toHaveBeenCalled();
   });
 
   it('can handle BigInt values while stringifying', () => {

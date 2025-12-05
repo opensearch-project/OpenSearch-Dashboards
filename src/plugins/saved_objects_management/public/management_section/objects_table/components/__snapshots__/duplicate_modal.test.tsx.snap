@@ -80,24 +80,12 @@ HTMLCollection [
                         class="euiFormLabel euiFormRow__label"
                         for="generated-id"
                       >
-                        Workspace
+                        Target workspace
                       </label>
                     </div>
                     <div
                       class="euiFormRow__fieldWrapper"
                     >
-                      <div
-                        class="euiText euiText--small"
-                      >
-                        <div
-                          class="euiTextColor euiTextColor--subdued"
-                        >
-                          Move copied saved  objects to the selected workspace.
-                        </div>
-                      </div>
-                      <div
-                        class="euiSpacer euiSpacer--s"
-                      />
                       <div
                         aria-expanded="false"
                         aria-haspopup="listbox"

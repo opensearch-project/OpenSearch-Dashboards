@@ -13,6 +13,7 @@ import { registerDuplicateRoute } from '../routes/duplicate';
 import { createListStream } from '../../../../core/server/utils/streams';
 import Boom from '@hapi/boom';
 import { dynamicConfigServiceMock } from '../../../../core/server/mocks';
+import { workspaceClientMock } from '../workspace_client.mock';
 
 jest.mock('../../../../core/server/saved_objects/export', () => ({
   exportSavedObjectsToStream: jest.fn(),
@@ -24,21 +25,7 @@ const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
 const URL = '/api/workspaces/_duplicate_saved_objects';
 const exportSavedObjectsToStream = exportMock.exportSavedObjectsToStream as jest.Mock;
 const logger = loggingSystemMock.create();
-const clientMock = {
-  init: jest.fn(),
-  enterWorkspace: jest.fn(),
-  getCurrentWorkspaceId: jest.fn(),
-  getCurrentWorkspace: jest.fn(),
-  create: jest.fn(),
-  delete: jest.fn(),
-  list: jest.fn(),
-  get: jest.fn(),
-  update: jest.fn(),
-  stop: jest.fn(),
-  setup: jest.fn(),
-  destroy: jest.fn(),
-  setSavedObjects: jest.fn(),
-};
+const clientMock = workspaceClientMock.create();
 
 export const createExportableType = (name: string): exportMock.SavedObjectsType => {
   return {
@@ -85,6 +72,18 @@ describe(`duplicate saved objects among workspaces`, () => {
     attributes: { title: 'Look at my dashboard' },
     references: [],
   };
+  const mockIndexPatternWithDataSourceReference = {
+    type: 'index-pattern',
+    id: 'my-pattern',
+    attributes: { title: 'my-pattern-*' },
+    references: [
+      {
+        name: 'dataSource',
+        type: 'data-source',
+        id: 'my-data-source',
+      },
+    ],
+  };
   const mockDynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
 
   beforeEach(async () => {
@@ -104,7 +103,7 @@ describe(`duplicate saved objects among workspaces`, () => {
 
     const router = httpSetup.createRouter('');
 
-    registerDuplicateRoute(router, logger.get(), clientMock, 10000);
+    registerDuplicateRoute(router, logger.get(), clientMock, 10000, true);
 
     await server.start({ dynamicConfigService: mockDynamicConfigService });
   });
@@ -197,9 +196,7 @@ describe(`duplicate saved objects among workspaces`, () => {
       })
       .expect(400);
 
-    expect(result.body.message).toMatchInlineSnapshot(
-      `"Get target workspace non-existen-workspace error: undefined"`
-    );
+    expect(result.body.message).toMatchInlineSnapshot(`"Get target workspace error: undefined"`);
   });
 
   it('duplicate unsupported objects', async () => {
@@ -321,6 +318,65 @@ describe(`duplicate saved objects among workspaces`, () => {
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
       [{ fields: ['id'], id: 'my-pattern', type: 'index-pattern' }],
+      expect.any(Object) // options
+    );
+    expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('copy a saved object failed if its data source in target workspace is missing', async () => {
+    const targetWorkspace = 'target_workspace_id';
+    const savedObjects = [mockIndexPatternWithDataSourceReference];
+    clientMock.get.mockResolvedValueOnce({ success: true });
+    savedObjectsClient.find.mockResolvedValueOnce({
+      saved_objects: [],
+      total: 0,
+      per_page: 5,
+      page: 1,
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          id: 'my-data-source',
+          type: 'data-source',
+          attributes: {},
+          references: [],
+        },
+      ],
+    });
+    exportSavedObjectsToStream.mockResolvedValueOnce(createListStream(savedObjects));
+
+    const result = await supertest(httpSetup.server.listener)
+      .post(URL)
+      .send({
+        objects: [
+          {
+            type: 'index-pattern',
+            id: 'my-pattern',
+          },
+        ],
+        includeReferencesDeep: true,
+        targetWorkspace,
+      })
+      .expect(200);
+    expect(result.body).toEqual({
+      success: false,
+      successCount: 0,
+      errors: [
+        {
+          id: 'my-pattern',
+          type: 'index-pattern',
+          title: 'my-pattern-*',
+          meta: { title: 'my-pattern-*', icon: 'index-pattern-icon' },
+          error: {
+            type: 'missing_data_source',
+            dataSource: 'my-data-source',
+          },
+        },
+      ],
+    });
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith(
+      [{ id: 'my-data-source', type: 'data-source' }],
       expect.any(Object) // options
     );
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled();

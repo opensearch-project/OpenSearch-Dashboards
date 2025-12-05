@@ -67,7 +67,7 @@ function watchFileUntil(path: string, matcher: RegExp, timeout: number) {
 
     Fs.watchFile(path, () => {
       try {
-        const contents = Fs.readFileSync(path, 'utf-8');
+        const contents = Fs.readFileSync(path, 'utf8');
 
         if (matcher.test(contents)) {
           clearTimeout(timeoutHandle);
@@ -133,6 +133,7 @@ describe('Server logging configuration', function () {
           '--verbose',
         ]);
 
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         const message$ = Rx.fromEvent(child.stdout, 'data').pipe(
           map((messages) => String(messages).split('\n').filter(Boolean))
         );
@@ -204,6 +205,7 @@ describe('Server logging configuration', function () {
           configFilePath,
         ]);
 
+        // @ts-expect-error TS2345 TODO(ts-error): fixme
         const message$ = Rx.fromEvent(child.stdout, 'data').pipe(
           map((messages) => String(messages).split('\n').filter(Boolean))
         );

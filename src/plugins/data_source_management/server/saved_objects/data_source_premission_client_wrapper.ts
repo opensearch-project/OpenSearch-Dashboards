@@ -162,7 +162,7 @@ export class DataSourcePermissionClientWrapper {
   private generatePermissionError = () =>
     SavedObjectsErrorHelpers.decorateForbiddenError(
       new Error(
-        i18n.translate('dashboard.admin.permission.invalidate', {
+        i18n.translate('dataSourcesManagement.admin.permission.invalid', {
           defaultMessage: 'You have no permission to perform this operation',
         })
       )

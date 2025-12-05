@@ -5,6 +5,7 @@
 
 import { waitFor } from '@testing-library/dom';
 import { configure, mount } from 'enzyme';
+// @ts-expect-error TS7016 TODO(ts-error): fixme
 import Adapter from 'enzyme-adapter-react-16';
 import toJson from 'enzyme-to-json';
 import React from 'react';
@@ -24,6 +25,7 @@ describe('Visual builder components', () => {
     const accelerationFormData = createAccelerationEmptyDataMock;
     const setAccelerationFormData = jest.fn();
     const wrapper = mount(
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
       <QueryVisualEditor
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
@@ -49,6 +51,7 @@ describe('Visual builder components', () => {
     };
     const setAccelerationFormData = jest.fn();
     const wrapper = mount(
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
       <QueryVisualEditor
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
@@ -74,6 +77,7 @@ describe('Visual builder components', () => {
     };
     const setAccelerationFormData = jest.fn();
     const wrapper = mount(
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
       <QueryVisualEditor
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}
@@ -98,6 +102,7 @@ describe('Visual builder components', () => {
     };
     const setAccelerationFormData = jest.fn();
     const wrapper = mount(
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
       <QueryVisualEditor
         accelerationFormData={accelerationFormData}
         setAccelerationFormData={setAccelerationFormData}

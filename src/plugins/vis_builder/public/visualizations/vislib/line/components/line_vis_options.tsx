@@ -27,7 +27,7 @@ function LineVisOptions() {
   return (
     <>
       <Option
-        title={i18n.translate('visTypeVislib.line.params.settingsTitle', {
+        title={i18n.translate('visBuilder.line.params.settingsTitle', {
           defaultMessage: 'Settings',
         })}
         initialIsOpen

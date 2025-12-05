@@ -15,6 +15,7 @@ export const QueryEditorExtensions = (props: ComponentProps<typeof LazyQueryEdit
 );
 
 export {
+  ACTION_BAR_BUTTONS_CONTAINER_ID,
   QueryEditorExtensionDependencies,
   QueryEditorExtensionConfig,
 } from './query_editor_extension';

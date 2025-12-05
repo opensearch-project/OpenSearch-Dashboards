@@ -89,9 +89,14 @@ import { fieldWildcardFilter } from '../../../../opensearch_dashboards_utils/com
 import { IIndexPattern } from '../../index_patterns';
 import {
   DATA_FRAME_TYPES,
+  FetchStatusResponse,
   IDataFrame,
+  IDataFrameDefaultResponse,
   IDataFrameError,
+  IDataFramePollingResponse,
   IDataFrameResponse,
+  QueryStartedResponse,
+  QuerySuccessStatusResponse,
   convertResult,
   createDataFrame,
 } from '../../data_frames';
@@ -115,10 +120,11 @@ import {
 import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from './legacy';
 import { extractReferences } from './extract_references';
+import { handleQueryResults } from '../../utils/helpers';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
-  'dateFormat:tz',
+  UI_SETTINGS.DATE_FORMAT_TIMEZONE,
   UI_SETTINGS.COURIER_BATCH_SEARCHES,
   UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE,
   UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX,
@@ -321,7 +327,7 @@ export class SearchSource {
    */
   async createDataFrame(searchRequest: SearchRequest) {
     const dataFrame = createDataFrame({
-      name: searchRequest.index.title || searchRequest.index,
+      name: searchRequest.index?.title || searchRequest.index,
       fields: [],
     });
     await this.setDataFrame(dataFrame);
@@ -346,16 +352,16 @@ export class SearchSource {
 
     const searchRequest = await this.flatten();
     this.history = [searchRequest];
+    const indexPattern = this.getField('index');
 
     let response;
     if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
+      searchRequest.dataSourceId = indexPattern?.dataSourceRef?.id;
       response = await this.legacyFetch(searchRequest, options);
     } else if (this.isUnsupportedRequest(searchRequest)) {
       response = await this.fetchExternalSearch(searchRequest, options);
     } else {
-      const indexPattern = this.getField('index');
       searchRequest.dataSourceId = indexPattern?.dataSourceRef?.id;
-
       response = await this.fetchSearch(searchRequest, options);
     }
 
@@ -431,20 +437,61 @@ export class SearchSource {
 
     const params = getExternalSearchParamsFromRequest(searchRequest, {
       getConfig,
-      getDataFrame: this.getDataFrame.bind(this),
     });
 
     return search({ params }, options).then(async (response: any) => {
       if (response.hasOwnProperty('type')) {
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.DEFAULT) {
-          const dataFrameResponse = response as IDataFrameResponse;
+          const dataFrameResponse = response as IDataFrameDefaultResponse;
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
-          return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+          return onResponse(
+            searchRequest,
+            convertResult({
+              response: response as IDataFrameResponse,
+              fields: this.getFields(),
+              options,
+            })
+          );
         }
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
-          const dataFrameResponse = response as IDataFrameResponse;
-          await this.setDataFrame(dataFrameResponse.body as IDataFrame);
-          return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+          const startTime = Date.now();
+          const { status } = response as IDataFramePollingResponse;
+          let results;
+          if (status === 'success') {
+            results = response as QuerySuccessStatusResponse;
+          } else if (status === 'started') {
+            const {
+              body: { queryStatusConfig },
+            } = response as QueryStartedResponse;
+
+            if (!queryStatusConfig) {
+              throw new Error('Cannot poll results for undefined query status config');
+            }
+
+            results = await handleQueryResults({
+              pollQueryResults: async () =>
+                search(
+                  { params: { ...params, pollQueryResultsParams: { ...queryStatusConfig } } },
+                  options
+                ) as Promise<FetchStatusResponse>,
+              queryId: queryStatusConfig.queryId,
+            });
+          } else {
+            throw new Error('Invalid query state');
+          }
+
+          const elapsedMs = Date.now() - startTime;
+          (results as any).took = elapsedMs;
+
+          await this.setDataFrame((results as QuerySuccessStatusResponse).body as IDataFrame);
+          return onResponse(
+            searchRequest,
+            convertResult({
+              response: results as IDataFrameResponse,
+              fields: this.getFields(),
+              options,
+            })
+          );
         }
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.ERROR) {
           const dataFrameError = response as IDataFrameError;
@@ -593,7 +640,7 @@ export class SearchSource {
     const { body, index, fields, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
 
-    const computedFields = index ? index.getComputedFields() : {};
+    const computedFields = index && index.getComputedFields ? index.getComputedFields() : {};
 
     body.stored_fields = computedFields.storedFields;
     body.script_fields = body.script_fields || {};
@@ -607,7 +654,7 @@ export class SearchSource {
       : [];
     body.docvalue_fields = body.docvalue_fields || defaultDocValueFields;
 
-    if (!body.hasOwnProperty('_source') && index) {
+    if (!body.hasOwnProperty('_source') && index && index.getSourceFiltering) {
       body._source = index.getSourceFiltering();
     }
 

@@ -89,6 +89,7 @@ describe('AccelerationSchemaTab', () => {
     const emptyMappings = {
       data: {},
     };
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const wrapper = shallowComponent({ mappings: emptyMappings, indexInfo });
     const items = wrapper.find(EuiInMemoryTable).prop('items');
     expect(items).toEqual([]);

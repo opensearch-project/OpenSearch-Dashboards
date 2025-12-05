@@ -35,6 +35,7 @@ import {
   SavedObjectsType,
   SavedObject,
   SavedObjectsImportError,
+  SavedObjectsBaseOptions,
 } from '../types';
 import { savedObjectsClientMock } from '../../mocks';
 import { SavedObjectsImportOptions, ISavedObjectTypeRegistry } from '..';
@@ -48,14 +49,17 @@ import { checkConflicts } from './check_conflicts';
 import { checkOriginConflicts } from './check_origin_conflicts';
 import { createSavedObjects } from './create_saved_objects';
 import { checkConflictsForDataSource } from './check_conflict_for_data_source';
+import { validateDataSources } from './validate_data_sources';
 
 jest.mock('./collect_saved_objects');
 jest.mock('./regenerate_ids');
 jest.mock('./validate_references');
+jest.mock('./validate_data_sources');
 jest.mock('./check_conflicts');
 jest.mock('./check_origin_conflicts');
 jest.mock('./create_saved_objects');
 jest.mock('./check_conflict_for_data_source');
+jest.mock('./utils');
 
 const getMockFn = <T extends (...args: any[]) => any, U>(fn: (...args: Parameters<T>) => U) =>
   fn as jest.MockedFunction<(...args: Parameters<T>) => U>;
@@ -71,6 +75,7 @@ describe('#importSavedObjectsFromStream', () => {
     });
     getMockFn(regenerateIds).mockReturnValue(new Map());
     getMockFn(validateReferences).mockResolvedValue([]);
+    getMockFn(validateDataSources).mockResolvedValue([]);
     getMockFn(checkConflicts).mockResolvedValue({
       errors: [],
       filteredObjects: [],
@@ -101,7 +106,9 @@ describe('#importSavedObjectsFromStream', () => {
   const setupOptions = (
     createNewCopies: boolean = false,
     dataSourceId: string | undefined = undefined,
-    dataSourceEnabled: boolean | undefined = false
+    dataSourceEnabled: boolean | undefined = false,
+    workspaces: SavedObjectsBaseOptions['workspaces'] = undefined,
+    isCopy: boolean = false
   ): SavedObjectsImportOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
@@ -122,6 +129,9 @@ describe('#importSavedObjectsFromStream', () => {
       namespace,
       createNewCopies,
       dataSourceId,
+      workspaces,
+      isCopy,
+      dataSourceEnabled,
     };
   };
   const createObject = (
@@ -192,6 +202,25 @@ describe('#importSavedObjectsFromStream', () => {
         collectedObjects,
         savedObjectsClient,
         namespace
+      );
+    });
+
+    test('validates data sources', async () => {
+      const options = setupOptions(true, undefined, true, ['workspace-1'], true);
+      const collectedObjects = [createObject()];
+      const errorAccumulator: SavedObjectsImportError[] = [];
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [],
+        collectedObjects,
+        importIdMap: new Map(),
+      });
+
+      await importSavedObjectsFromStream(options);
+      expect(validateDataSources).toHaveBeenCalledWith(
+        collectedObjects,
+        savedObjectsClient,
+        errorAccumulator,
+        ['workspace-1']
       );
     });
 
@@ -596,6 +625,37 @@ describe('#importSavedObjectsFromStream', () => {
         pendingOverwrites: new Set(),
       });
       getMockFn(createSavedObjects).mockResolvedValue({ errors: [errors[4]], createdObjects: [] });
+
+      const result = await importSavedObjectsFromStream(options);
+      const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
+      expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
+    });
+
+    test('performs a copy operation accumulates multiple errors', async () => {
+      const options = setupOptions(true, undefined, true, ['workspace-1'], true);
+      const errors = [createError(), createError(), createError(), createError()];
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [errors[0]],
+        collectedObjects: [],
+        importIdMap: new Map(), // doesn't matter
+      });
+      getMockFn(validateReferences).mockResolvedValue([errors[1]]);
+      getMockFn(validateDataSources).mockResolvedValue([errors[2]]);
+      getMockFn(createSavedObjects).mockResolvedValue({ errors: [errors[3]], createdObjects: [] });
+
+      // it will not accumulate
+      getMockFn(checkConflicts).mockResolvedValue({
+        errors: [errors[2]],
+        filteredObjects: [],
+        importIdMap: new Map(), // doesn't matter
+        pendingOverwrites: new Set(),
+      });
+      // it will not accumulate
+      getMockFn(checkOriginConflicts).mockResolvedValue({
+        errors: [errors[3]],
+        importIdMap: new Map(), // doesn't matter
+        pendingOverwrites: new Set(),
+      });
 
       const result = await importSavedObjectsFromStream(options);
       const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));

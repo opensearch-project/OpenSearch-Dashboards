@@ -124,13 +124,15 @@ export const createDashboardInput = async (
                 if (!panel.panelRefName) {
                   return;
                 }
+                // panelIndex should be unique
+                const panelIndex = panel.panelIndex || panel.panelRefName;
                 const reference = references.find((ref) => ref.name === panel.panelRefName);
                 if (reference) {
-                  panels[reference.id] = {
-                    gridData: { ...panel.gridData, i: reference.id },
+                  panels[panelIndex] = {
+                    gridData: { ...panel.gridData, i: panelIndex },
                     type: reference.type,
                     explicitInput: {
-                      id: reference.id,
+                      id: panelIndex,
                       savedObjectId: reference.id,
                     },
                   };

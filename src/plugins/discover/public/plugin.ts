@@ -34,6 +34,7 @@ import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from 
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { url } from '../../opensearch_dashboards_utils/public';
 import { DEFAULT_APP_CATEGORIES, DEFAULT_NAV_GROUPS } from '../../../core/public';
+import { WorkspaceAvailability } from '../../../../src/core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { generateDocViewsUrl } from './application/components/doc_views/generate_doc_views_url';
@@ -51,6 +52,7 @@ import {
   setScopedHistory,
   syncHistoryLocations,
   getServices,
+  setUsageCollector,
 } from './opensearch_dashboards_services';
 import { createSavedSearchesLoader } from './saved_searches';
 import { buildServices } from './build_services';
@@ -75,6 +77,8 @@ declare module '../../share/public' {
     [DISCOVER_APP_URL_GENERATOR]: UrlGeneratorState<DiscoverUrlGeneratorState>;
   }
 }
+import { UsageCollectionSetup } from '../../usage_collection/public';
+import { ExplorePluginSetup } from '../../explore/public';
 
 /**
  * @public
@@ -128,6 +132,8 @@ export interface DiscoverSetupPlugins {
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
   dataExplorer: DataExplorerPluginSetup;
+  usageCollection: UsageCollectionSetup;
+  explore?: ExplorePluginSetup;
 }
 
 /**
@@ -174,6 +180,7 @@ export class DiscoverPlugin
       );
     }
 
+    setUsageCollector(plugins.usageCollection);
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
     this.docViewsRegistry.addDocView({
@@ -202,9 +209,10 @@ export class DiscoverPlugin
       generateCb: (renderProps: any) => {
         const globalFilters: any = getServices().filterManager.getGlobalFilters();
         const appFilters: any = getServices().filterManager.getAppFilters();
-        const showDocLinks = getServices()
-          .data.query.queryString.getLanguageService()
-          .getUiOverrides().showDocLinks;
+        const queryString = getServices().data.query.queryString;
+        const showDocLinks =
+          queryString.getLanguageService().getLanguage(queryString.getQuery().language)
+            ?.showDocLinks ?? undefined;
 
         const hash = stringify(
           url.encodeQuery({
@@ -238,9 +246,10 @@ export class DiscoverPlugin
         defaultMessage: 'View single document',
       }),
       generateCb: (renderProps) => {
-        const showDocLinks = getServices()
-          .data.query.queryString.getLanguageService()
-          .getUiOverrides().showDocLinks;
+        const queryString = getServices().data.query.queryString;
+        const showDocLinks =
+          queryString.getLanguageService().getLanguage(queryString.getQuery().language)
+            ?.showDocLinks ?? undefined;
 
         const docUrl = `#/doc/${renderProps.indexPattern.id}/${
           renderProps.hit._index
@@ -259,6 +268,7 @@ export class DiscoverPlugin
       title: 'Discover',
       updater$: this.appStateUpdater.asObservable(),
       order: 1000,
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       euiIconType: 'inputOutput',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
@@ -295,13 +305,17 @@ export class DiscoverPlugin
       },
     });
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-      {
-        id: PLUGIN_ID,
-        category: undefined,
-        order: 300,
-      },
-    ]);
+    // If Explore plugin is enabled, it will register a Discover menu to the
+    // side nav in observability workspaces, we should skip registration here.
+    if (!plugins.explore) {
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+        {
+          id: PLUGIN_ID,
+          category: undefined,
+          order: 300,
+        },
+      ]);
+    }
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
       {
@@ -403,7 +417,6 @@ export class DiscoverPlugin
 
   start(core: CoreStart, plugins: DiscoverStartPlugins) {
     setUiActions(plugins.uiActions);
-
     this.initializeServices = () => {
       if (this.servicesInitialized) {
         return { core, plugins };
@@ -414,6 +427,30 @@ export class DiscoverPlugin
 
       return { core, plugins };
     };
+
+    // Register discover navigation shortcuts only when workspace is available
+    if (core.keyboardShortcut) {
+      // Check if workspaces are initialized and available
+      const isInitialized = core.workspaces.initialized$.getValue();
+      const currentWorkspace = core.workspaces.currentWorkspace$.getValue();
+
+      if (isInitialized && currentWorkspace) {
+        core.keyboardShortcut.register({
+          id: 'nav.discover',
+          name: i18n.translate('discover.keyboardShortcut.goToDiscover.name', {
+            defaultMessage: 'Go to discover',
+          }),
+          pluginId: 'discover',
+          category: i18n.translate('discover.keyboardShortcut.category.navigation', {
+            defaultMessage: 'Navigation',
+          }),
+          keys: 'g d',
+          execute: () => {
+            core.application.navigateToApp('explore/logs');
+          },
+        });
+      }
+    }
 
     this.initializeServices();
 

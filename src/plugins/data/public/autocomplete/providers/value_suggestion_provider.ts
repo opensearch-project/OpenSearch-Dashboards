@@ -30,7 +30,7 @@
 
 import { memoize } from 'lodash';
 import { CoreSetup } from 'src/core/public';
-import { IIndexPattern, IFieldType, UI_SETTINGS } from '../../../common';
+import { IIndexPattern, IFieldType, UI_SETTINGS, IndexPattern } from '../../../common';
 
 function resolver(title: string, field: IFieldType, query: string, boolFilter: any) {
   // Only cache results for a minute
@@ -53,10 +53,17 @@ export const getEmptyValueSuggestions = (() => Promise.resolve([])) as ValueSugg
 
 export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsGetFn => {
   const requestSuggestions = memoize(
-    (index: string, field: IFieldType, query: string, boolFilter: any = [], signal?: AbortSignal) =>
+    (
+      index: string,
+      field: IFieldType,
+      query: string,
+      boolFilter: any = [],
+      signal?: AbortSignal,
+      dataSourceId?: string
+    ) =>
       core.http.fetch(`/api/opensearch-dashboards/suggestions/values/${index}`, {
         method: 'POST',
-        body: JSON.stringify({ query, field: field.name, boolFilter }),
+        body: JSON.stringify({ query, field: field.name, boolFilter, dataSourceId }),
         signal,
       }),
     resolver
@@ -79,7 +86,13 @@ export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsG
     } else if (!shouldSuggestValues || !field.aggregatable || field.type !== 'string') {
       return [];
     }
-
-    return await requestSuggestions(title, field, query, boolFilter, signal);
+    return await requestSuggestions(
+      title,
+      field,
+      query,
+      boolFilter,
+      signal,
+      (indexPattern as IndexPattern).dataSourceRef?.id
+    );
   };
 };

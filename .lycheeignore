@@ -1,6 +1,11 @@
 # Copyright OpenSearch Contributors
 # SPDX-License-Identifier: Apache-2.0
 
+node_modules/
+dist/
+build/
+.git/
+
 # Local or predefined end points
 localhost
 //opensearch
@@ -51,7 +56,15 @@ http://www.creedthoughts.gov
 http://not-your-opensearch-dashboards.com/
 my(other)?domain\.com
 
-
+# Test mock URLs that should be ignored by link checker
+//custom-server:
+//remote-server:
+//test-server:
+//other\.com/\$
+http://custom-server:
+https://remote-server:
+http://test-server:
+http://other\.com/\$
 
 # External urls
 adobe.com
@@ -90,3 +103,10 @@ https://www.quandl.com/api/v1/datasets/
 https://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
 http:/adomas.org/javascript-mouse-wheel/
 site.com
+http://sites.google.com/site/murmurhash/
+helpmenow.com
+http://dev.w3.org/
+https://qntm.org/cmd
+http://fakenews.co/
+http://blond-winner.biz/
+https://www.iso.org/*

@@ -211,6 +211,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             searchSourceRequiredUiSettings
           );
 
+          // @ts-expect-error TS2741 TODO(ts-error): fixme
           const dfService: DataFrameService = {
             get: () => this.dfCache.get(),
             set: (dataFrame: IDataFrame) => {
@@ -223,6 +224,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           };
 
           const searchSourceDependencies: SearchSourceDependencies = {
+            // @ts-expect-error TS7053 TODO(ts-error): fixme
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: (searchRequest, options) => {
               /**

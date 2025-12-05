@@ -29,6 +29,7 @@
  */
 
 import React from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import PropTypes from 'prop-types';
 import {
   EuiCard,
@@ -46,62 +47,63 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 
 import { SampleDataViewDataButton } from './sample_data_view_data_button';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
-export class SampleDataSetCard extends React.Component {
-  isInstalled = () => {
-    if (this.props.status === INSTALLED_STATUS) {
-      return true;
-    }
+export const SampleDataSetCard = (props) => {
+  const {
+    services: { workspaces },
+  } = useOpenSearchDashboards();
+  const isInstalled = props.status === INSTALLED_STATUS;
+  const currentWorkspace = useObservable(workspaces.currentWorkspace$);
+  const isReadOnly = !!(currentWorkspace && currentWorkspace.readonly);
 
-    return false;
+  const install = () => {
+    props.onInstall(props.id, props.dataSourceId);
   };
 
-  install = () => {
-    this.props.onInstall(this.props.id, this.props.dataSourceId);
+  const uninstall = () => {
+    props.onUninstall(props.id, props.dataSourceId);
   };
 
-  uninstall = () => {
-    this.props.onUninstall(this.props.id, this.props.dataSourceId);
-  };
-
-  renderBtn = () => {
-    const dataSourceEnabled = this.props.isDataSourceEnabled;
-    const hideLocalCluster = this.props.isLocalClusterHidden;
-    const dataSourceId = this.props.dataSourceId;
+  const renderBtn = () => {
+    const dataSourceEnabled = props.isDataSourceEnabled;
+    const hideLocalCluster = props.isLocalClusterHidden;
+    const dataSourceId = props.dataSourceId;
 
     let buttonDisabled = false;
     if (dataSourceEnabled && hideLocalCluster) {
       buttonDisabled = dataSourceId === undefined;
     }
 
-    switch (this.props.status) {
+    switch (props.status) {
       case INSTALLED_STATUS:
         return (
           <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiSmallButtonEmpty
-                isLoading={this.props.isProcessing}
-                onClick={this.uninstall}
+                isDisabled={isReadOnly}
+                isLoading={props.isProcessing}
+                onClick={uninstall}
                 color="danger"
-                data-test-subj={`removeSampleDataSet${this.props.id}`}
+                data-test-subj={`removeSampleDataSet${props.id}`}
                 flush="left"
                 aria-label={
-                  this.props.isProcessing
+                  props.isProcessing
                     ? i18n.translate('home.sampleDataSetCard.removingButtonAriaLabel', {
                         defaultMessage: 'Removing {datasetName}',
                         values: {
-                          datasetName: this.props.name,
+                          datasetName: props.name,
                         },
                       })
                     : i18n.translate('home.sampleDataSetCard.removeButtonAriaLabel', {
                         defaultMessage: 'Remove {datasetName}',
                         values: {
-                          datasetName: this.props.name,
+                          datasetName: props.name,
                         },
                       })
                 }
               >
-                {this.props.isProcessing ? (
+                {props.isProcessing ? (
                   <FormattedMessage
                     id="home.sampleDataSetCard.removingButtonLabel"
                     defaultMessage="Removing"
@@ -116,10 +118,11 @@ export class SampleDataSetCard extends React.Component {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <SampleDataViewDataButton
-                id={this.props.id}
-                name={this.props.name}
-                overviewDashboard={this.props.overviewDashboard}
-                appLinks={this.props.appLinks}
+                id={props.id}
+                dataSourceId={props.dataSourceId}
+                name={props.name}
+                overviewDashboard={props.overviewDashboard}
+                appLinks={props.appLinks}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -130,27 +133,27 @@ export class SampleDataSetCard extends React.Component {
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiSmallButton
-                isDisabled={buttonDisabled}
-                isLoading={this.props.isProcessing}
-                onClick={this.install}
-                data-test-subj={`addSampleDataSet${this.props.id}`}
+                isDisabled={buttonDisabled || isReadOnly}
+                isLoading={props.isProcessing}
+                onClick={install}
+                data-test-subj={`addSampleDataSet${props.id}`}
                 aria-label={
-                  this.props.isProcessing
+                  props.isProcessing
                     ? i18n.translate('home.sampleDataSetCard.addingButtonAriaLabel', {
                         defaultMessage: 'Adding {datasetName}',
                         values: {
-                          datasetName: this.props.name,
+                          datasetName: props.name,
                         },
                       })
                     : i18n.translate('home.sampleDataSetCard.addButtonAriaLabel', {
                         defaultMessage: 'Add {datasetName}',
                         values: {
-                          datasetName: this.props.name,
+                          datasetName: props.name,
                         },
                       })
                 }
               >
-                {this.props.isProcessing ? (
+                {props.isProcessing ? (
                   <FormattedMessage
                     id="home.sampleDataSetCard.addingButtonLabel"
                     defaultMessage="Adding"
@@ -177,18 +180,18 @@ export class SampleDataSetCard extends React.Component {
                     <FormattedMessage
                       id="home.sampleDataSetCard.default.unableToVerifyErrorMessage"
                       defaultMessage="Unable to verify dataset status, error: {statusMsg}"
-                      values={{ statusMsg: this.props.statusMsg }}
+                      values={{ statusMsg: props.statusMsg }}
                     />
                   </p>
                 }
               >
                 <EuiSmallButton
-                  isDisabled={buttonDisabled}
-                  data-test-subj={`addSampleDataSet${this.props.id}`}
+                  isDisabled={buttonDisabled || isReadOnly}
+                  data-test-subj={`addSampleDataSet${props.id}`}
                   aria-label={i18n.translate('home.sampleDataSetCard.default.addButtonAriaLabel', {
                     defaultMessage: 'Add {datasetName}',
                     values: {
-                      datasetName: this.props.name,
+                      datasetName: props.name,
                     },
                   })}
                 >
@@ -205,21 +208,19 @@ export class SampleDataSetCard extends React.Component {
     }
   };
 
-  render() {
-    return (
-      <EuiCard
-        textAlign="left"
-        className="homSampleDataSetCard"
-        image={this.props.previewUrl}
-        title={this.props.name}
-        description={this.props.description}
-        betaBadgeLabel={this.isInstalled() ? 'INSTALLED' : null}
-        footer={this.renderBtn()}
-        data-test-subj={`sampleDataSetCard${this.props.id}`}
-      />
-    );
-  }
-}
+  return (
+    <EuiCard
+      textAlign="left"
+      className="homSampleDataSetCard"
+      image={props.previewUrl}
+      title={props.name}
+      description={props.description}
+      betaBadgeLabel={isInstalled ? 'INSTALLED' : null}
+      footer={renderBtn()}
+      data-test-subj={`sampleDataSetCard${props.id}`}
+    />
+  );
+};
 
 SampleDataSetCard.propTypes = {
   id: PropTypes.string.isRequired,

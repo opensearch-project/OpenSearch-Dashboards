@@ -15,7 +15,7 @@
   "dependencies": {
     "@babel/core": "^7.22.9",
     "@osd/utils": "1.0.0",
-    "axios": "^1.6.1",
+    "axios": "^1.8.2",
     "chalk": "^4.1.0",
     "cheerio": "1.0.0-rc.1",
     "dedent": "^0.7.0",
@@ -24,7 +24,7 @@
     "getopts": "^2.2.5",
     "globby": "^11.1.0",
     "load-json-file": "^6.2.0",
-    "markdown-it": "^12.3.2",
+    "markdown-it": "^13.0.2",
     "moment": "^2.24.0",
     "normalize-path": "^3.0.0",
     "rxjs": "^6.5.5",
@@ -37,6 +37,6 @@
     "@osd/expect": "1.0.0",
     "@types/vinyl": "^2.0.4",
     "chance": "1.0.18",
-    "typescript": "4.0.2"
+    "typescript": "4.5.5"
   }
 }

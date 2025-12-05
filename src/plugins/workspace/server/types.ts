@@ -4,7 +4,6 @@
  */
 
 import {
-  Logger,
   OpenSearchDashboardsRequest,
   SavedObjectsFindResponse,
   CoreSetup,
@@ -12,27 +11,16 @@ import {
   SavedObjectsServiceStart,
   Permissions,
   UiSettingsServiceStart,
+  WorkspaceFindOptions,
 } from '../../../core/server';
 import { PermissionModeId } from '../../../core/server';
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
   permissionMode?: PermissionModeId;
 }
-import { WorkspacePermissionMode } from '../common/constants';
-
-export interface WorkspaceFindOptions {
-  page?: number;
-  perPage?: number;
-  search?: string;
-  searchFields?: string[];
-  sortField?: string;
-  sortOrder?: string;
-  permissionModes?: WorkspacePermissionMode[];
-}
 
 export interface IRequestDetail {
   request: OpenSearchDashboardsRequest;
-  logger: Logger;
 }
 
 export interface IWorkspaceClientImpl {
@@ -123,6 +111,46 @@ export interface IWorkspaceClientImpl {
    * @public
    */
   destroy(): Promise<IResponse<boolean>>;
+
+  /**
+   * Associates a list of objects with the given workspace ID.
+   *
+   * This method takes a workspace ID and an array of objects, where each object contains
+   * an `id` and `type`. It attempts to associate each object with the specified workspace.
+   * If the association succeeds, the object is included in the result without an error.
+   * If there is an issue associating an object, an error message is returned for that object.
+   *
+   * @returns A promise that resolves to a response object containing an array of results for each object.
+   *          Each result will include the object's `id` and, if there was an error during association, an `error` field
+   *          with the error message.
+   *
+   * @public
+   */
+  associate(
+    requestDetail: IRequestDetail,
+    workspaceId: string,
+    objects: Array<{ id: string; type: string }>
+  ): Promise<IResponse<Array<{ id: string; error?: string }>>>;
+
+  /**
+   * Dissociates a list of objects from the given workspace ID.
+   *
+   * This method takes a workspace ID and an array of objects, where each object contains
+   * an `id` and `type`. It attempts to dissociate each object from the specified workspace.
+   * If the dissociation succeeds, the object is included in the result without an error.
+   * If there is an issue dissociating an object, an error message is returned for that object.
+   *
+   * @returns A promise that resolves to a response object containing an array of results for each object.
+   *          Each result will include the object's `id` and, if there was an error during dissociation, an `error` field
+   *          with the error message.
+   *
+   * @public
+   */
+  dissociate(
+    requestDetail: IRequestDetail,
+    workspaceId: string,
+    objects: Array<{ id: string; type: string }>
+  ): Promise<IResponse<Array<{ id: string; error?: string }>>>;
 }
 
 export type IResponse<T> =

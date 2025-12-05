@@ -39,12 +39,7 @@ import { AssociatedObjectsRefreshButton } from './utils/associated_objects_refre
 import { AssociatedObjectsTabEmpty } from './utils/associated_objects_tab_empty';
 import { AssociatedObjectsTabFailure } from './utils/associated_objects_tab_failure';
 import { AssociatedObjectsTabLoading } from './utils/associated_objects_tab_loading';
-import {
-  ASSC_OBJ_FRESH_MSG,
-  ASSC_OBJ_PANEL_DESCRIPTION,
-  ASSC_OBJ_PANEL_TITLE,
-  isCatalogCacheFetching,
-} from './utils/associated_objects_tab_utils';
+import { ASSC_OBJ_FRESH_MSG, isCatalogCacheFetching } from './utils/associated_objects_tab_utils';
 
 export interface AssociatedObjectsTabProps {
   datasource: DatasourceDetails;
@@ -65,6 +60,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     setSelectedDatabase,
     notifications,
     application,
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     http,
     dataSourceMDSId,
   } = props;
@@ -117,13 +113,16 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   };
 
   const AssociatedObjectsHeader = () => {
-    const panelTitle = i18n.translate('datasources.associatedObjectsTab.panelTitle', {
-      defaultMessage: ASSC_OBJ_PANEL_TITLE,
+    const panelTitle = i18n.translate('dataSourcesManagement.associatedObjectsTab.panelTitle', {
+      defaultMessage: 'Associated objects',
     });
 
-    const panelDescription = i18n.translate('datasources.associatedObjectsTab.panelDescription', {
-      defaultMessage: ASSC_OBJ_PANEL_DESCRIPTION,
-    });
+    const panelDescription = i18n.translate(
+      'dataSourcesManagement.associatedObjectsTab.panelDescription',
+      {
+        defaultMessage: 'Manage objects associated with this data sources.',
+      }
+    );
 
     const LastUpdatedText = () => {
       return (
@@ -139,7 +138,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     };
 
     return (
-      <EuiFlexGroup direction="row" alignItems="center">
+      <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
         <EuiFlexItem>
           <EuiText size="s">
             <h2 className="panel-title">{panelTitle}</h2>
@@ -365,6 +364,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         columns: table.columns,
       };
     });
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const accelerationObjects: AssociatedObject[] = cachedAccelerations
       .filter((acceleration: CachedAcceleration) => acceleration.database === selectedDatabase)
       .map((acceleration: CachedAcceleration) => ({
@@ -414,6 +414,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
                       searchable={true}
                       singleSelection="always"
                       searchProps={{ placeholder: 'Search for databases' }}
+                      // @ts-expect-error TS2322 TODO(ts-error): fixme
                       options={databaseSelectorOptions}
                       onChange={(newOptions) => setDatabaseSelectorOptions(newOptions)}
                     >

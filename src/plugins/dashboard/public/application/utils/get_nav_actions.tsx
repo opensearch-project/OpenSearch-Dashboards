@@ -33,6 +33,7 @@ import { DashboardContainer } from '../embeddable/dashboard_container';
 import { DashboardConstants, createDashboardEditUrl } from '../../dashboard_constants';
 import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
 import { Dashboard } from '../../dashboard';
+import { showAddPanelPopover } from '../components/dashboard_top_nav/top_nav/show_add_panel_popover';
 
 interface UrlParamsSelectedMap {
   [UrlParams.SHOW_TOP_MENU]: boolean;
@@ -166,23 +167,49 @@ export const getNavActions = (
     showCloneModal(onClone, currentTitle);
   };
 
-  navActions[TopNavIds.ADD_EXISTING] = () => {
-    if (currentContainer && !isErrorEmbeddable(currentContainer)) {
-      openAddPanelFlyout({
-        embeddable: currentContainer,
-        getAllFactories: embeddable.getEmbeddableFactories,
-        getFactory: embeddable.getEmbeddableFactory,
-        notifications,
-        overlays,
-        SavedObjectFinder: getSavedObjectFinder(
-          savedObjects,
-          uiSettings,
-          services.data,
-          services.application
-        ),
-      });
-    }
-  };
+  if (uiSettings.get('home:useNewHomePage')) {
+    navActions[TopNavIds.ADD_EXISTING] = (anchorElement) => {
+      if (currentContainer && !isErrorEmbeddable(currentContainer)) {
+        showAddPanelPopover({
+          anchorElement,
+          uiActions: services.uiActions,
+          onAddExistingPanelFlyout: () => {
+            openAddPanelFlyout({
+              embeddable: currentContainer,
+              getAllFactories: embeddable.getEmbeddableFactories,
+              getFactory: embeddable.getEmbeddableFactory,
+              notifications,
+              overlays,
+              SavedObjectFinder: getSavedObjectFinder(
+                savedObjects,
+                uiSettings,
+                services.data,
+                services.application
+              ),
+            });
+          },
+        });
+      }
+    };
+  } else {
+    navActions[TopNavIds.ADD_EXISTING] = () => {
+      if (currentContainer && !isErrorEmbeddable(currentContainer)) {
+        openAddPanelFlyout({
+          embeddable: currentContainer,
+          getAllFactories: embeddable.getEmbeddableFactories,
+          getFactory: embeddable.getEmbeddableFactory,
+          notifications,
+          overlays,
+          SavedObjectFinder: getSavedObjectFinder(
+            savedObjects,
+            uiSettings,
+            services.data,
+            services.application
+          ),
+        });
+      }
+    };
+  }
 
   navActions[TopNavIds.VISUALIZE] = async () => {
     const type = 'visualization';

@@ -176,6 +176,7 @@ describe('OpenSearch search strategy', () => {
     mockOpenSearchServiceSetup.legacy.client = {
       callAsInternalUser: jest.fn(),
       asScoped: jest.fn(),
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       config: {
         hosts: ['some host'],
       },
@@ -205,6 +206,7 @@ describe('OpenSearch search strategy', () => {
     mockOpenSearchServiceSetup.legacy.client = {
       callAsInternalUser: jest.fn(),
       asScoped: jest.fn(),
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       config: {
         hosts: ['some host'],
       },
@@ -243,6 +245,7 @@ describe('OpenSearch search strategy', () => {
         mockOpenSearchServiceSetup.legacy.client = {
           callAsInternalUser: jest.fn(),
           asScoped: jest.fn(),
+          // @ts-expect-error TS2322 TODO(ts-error): fixme
           config: {
             hosts: [],
           },

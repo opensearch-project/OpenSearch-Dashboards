@@ -4,34 +4,61 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
+
 import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
+import { coreMock } from '../../../../../core/public/mocks';
+import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { WorkspaceUseCase, WorkspaceUseCaseProps } from './workspace_use_case';
 import { WorkspaceFormErrors } from './types';
 
 const setup = (options?: Partial<WorkspaceUseCaseProps>) => {
+  const coreStartMock = coreMock.createStart();
   const onChangeMock = jest.fn();
   const formErrors: WorkspaceFormErrors = {};
-  const renderResult = render(
-    <WorkspaceUseCase
-      availableUseCases={[
-        { ...DEFAULT_NAV_GROUPS.observability, features: [] },
-        { ...DEFAULT_NAV_GROUPS['security-analytics'], features: [] },
-        { ...DEFAULT_NAV_GROUPS.essentials, features: [] },
-        { ...DEFAULT_NAV_GROUPS.search, features: [] },
-        {
-          id: 'system-use-case',
-          title: 'System use case',
-          description: 'System use case description',
-          systematic: true,
-          features: [],
+  coreStartMock.chrome.navGroup.getNavGroupsMap$.mockImplementation(
+    () =>
+      new BehaviorSubject({
+        [DEFAULT_NAV_GROUPS.observability.id]: {
+          ...DEFAULT_NAV_GROUPS.observability,
+          navLinks: [
+            { id: 'feature1', title: 'Feature 1' },
+            { id: 'feature2', title: 'Feature 2' },
+          ],
         },
-      ]}
-      value=""
-      onChange={onChangeMock}
-      formErrors={formErrors}
-      {...options}
-    />
+      })
+  );
+
+  coreStartMock.chrome.navLinks.getNavLinks$.mockImplementation(
+    () =>
+      new BehaviorSubject([
+        { id: 'feature1', title: 'Feature 1', baseUrl: '', href: '' },
+        { id: 'feature2', title: 'Feature 2', baseUrl: '', href: '' },
+      ])
+  );
+  const renderResult = render(
+    <OpenSearchDashboardsContextProvider services={coreStartMock}>
+      <WorkspaceUseCase
+        availableUseCases={[
+          { ...DEFAULT_NAV_GROUPS.observability, features: [] },
+          { ...DEFAULT_NAV_GROUPS['security-analytics'], features: [] },
+          { ...DEFAULT_NAV_GROUPS.essentials, features: [] },
+          { ...DEFAULT_NAV_GROUPS.search, features: [] },
+          {
+            id: 'system-use-case',
+            title: 'System use case',
+            description: 'System use case description',
+            systematic: true,
+            features: [],
+          },
+        ]}
+        value=""
+        onChange={onChangeMock}
+        formErrors={formErrors}
+        {...options}
+      />
+    </OpenSearchDashboardsContextProvider>
   );
   return {
     renderResult,
@@ -76,13 +103,13 @@ describe('WorkspaceUseCase', () => {
       ],
     });
     await waitFor(() => {
-      expect(renderResult.getByText('Essentials')).toHaveClass(
+      expect(renderResult.getByText('Essentials').closest('label')).toHaveClass(
         'euiCheckableCard__label-isDisabled'
       );
     });
   });
 
-  it('should be able to toggle use case features', async () => {
+  it('should open flyout and expanded selected use cases', async () => {
     const { renderResult } = setup({
       availableUseCases: [
         {
@@ -93,58 +120,46 @@ describe('WorkspaceUseCase', () => {
           ],
         },
       ],
-    });
-    await waitFor(() => {
-      expect(renderResult.getByText('See more....')).toBeInTheDocument();
-      expect(renderResult.queryByText('Feature 1')).toBe(null);
-      expect(renderResult.queryByText('Feature 2')).toBe(null);
+      value: DEFAULT_NAV_GROUPS.observability.id,
     });
 
-    fireEvent.click(renderResult.getByText('See more....'));
+    fireEvent.click(renderResult.getByText('Learn more.'));
 
     await waitFor(() => {
-      expect(renderResult.getByText('See less....')).toBeInTheDocument();
-      expect(renderResult.getByText('Feature 1')).toBeInTheDocument();
-      expect(renderResult.getByText('Feature 2')).toBeInTheDocument();
-    });
-
-    fireEvent.click(renderResult.getByText('See less....'));
-
-    await waitFor(() => {
-      expect(renderResult.getByText('See more....')).toBeInTheDocument();
-      expect(renderResult.queryByText('Feature 1')).toBe(null);
-      expect(renderResult.queryByText('Feature 2')).toBe(null);
+      expect(within(renderResult.getByRole('dialog')).getByText('Use cases')).toBeInTheDocument();
+      expect(
+        within(renderResult.getByRole('dialog')).getByText('Observability')
+      ).toBeInTheDocument();
+      expect(within(renderResult.getByRole('dialog')).getByText('Feature 1')).toBeInTheDocument();
+      expect(within(renderResult.getByRole('dialog')).getByText('Feature 2')).toBeInTheDocument();
     });
   });
 
-  it('should show static all use case features', async () => {
+  it('should close flyout after close button clicked', async () => {
+    const { renderResult } = setup({});
+
+    fireEvent.click(renderResult.getByText('Learn more.'));
+    await waitFor(() => {
+      expect(within(renderResult.getByRole('dialog')).getByText('Use cases')).toBeInTheDocument();
+    });
+
+    fireEvent.click(renderResult.getByTestId('euiFlyoutCloseButton'));
+
+    await waitFor(() => {
+      expect(renderResult.queryByText('dialog')).toBeNull();
+    });
+  });
+
+  it('should render "(all features)" suffix for "all use case"', () => {
     const { renderResult } = setup({
       availableUseCases: [
         {
           ...DEFAULT_NAV_GROUPS.all,
-          features: [
-            { id: 'feature1', title: 'Feature 1' },
-            { id: 'feature2', title: 'Feature 2' },
-          ],
+          features: [],
         },
       ],
     });
 
-    fireEvent.click(renderResult.getByText('See more....'));
-
-    await waitFor(() => {
-      expect(renderResult.getByText('Discover')).toBeInTheDocument();
-      expect(renderResult.getByText('Dashboards')).toBeInTheDocument();
-      expect(renderResult.getByText('Visualize')).toBeInTheDocument();
-      expect(
-        renderResult.getByText('Observability services, metrics, traces, and more')
-      ).toBeInTheDocument();
-      expect(
-        renderResult.getByText('Security analytics threat alerts, findings, correlations, and more')
-      ).toBeInTheDocument();
-      expect(
-        renderResult.getByText('Search studio, relevance tuning, vector search, and more')
-      ).toBeInTheDocument();
-    });
+    expect(renderResult.getByText('(all features)')).toBeInTheDocument();
   });
 });

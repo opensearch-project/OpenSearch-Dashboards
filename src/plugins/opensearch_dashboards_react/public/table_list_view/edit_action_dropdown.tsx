@@ -90,7 +90,9 @@ export const EditActionDropdown: React.FC<EditActionDropdownProps> = ({
       }}
       data-test-subj="dashboardEditDashboard"
     >
-      {i18n.translate('editActionDropdown.edit', { defaultMessage: 'Edit' })}
+      {i18n.translate('opensearch-dashboards-react.editActionDropdown.edit', {
+        defaultMessage: 'Edit',
+      })}
     </EuiContextMenuItem>,
   ];
   if (isVisBuilderCompatible) {
@@ -101,7 +103,7 @@ export const EditActionDropdown: React.FC<EditActionDropdownProps> = ({
         onClick={handleImportToVisBuilder}
         data-test-subj="dashboardImportToVisBuilder"
       >
-        {i18n.translate('editActionDropdown.importToVisBuilder', {
+        {i18n.translate('opensearch-dashboards-react.editActionDropdown.importToVisBuilder', {
           defaultMessage: 'Import to VisBuilder',
         })}
       </EuiContextMenuItem>

@@ -39,6 +39,7 @@ import { CoreService } from '../../types';
 import { Config } from '../config';
 import { CoreContext } from '../core_context';
 import { CspConfigType, config as cspConfig } from '../csp';
+import { CspReportOnlyConfigType, config as cspReportOnlyConfig } from '../csp_report_only';
 import { DevConfig, DevConfigType, config as devConfig } from '../dev';
 import { BasePathProxyServer, HttpConfig, HttpConfigType, config as httpConfig } from '../http';
 import { Logger } from '../logging';
@@ -95,8 +96,9 @@ export class LegacyService implements CoreService {
       .pipe(map((rawConfig) => new DevConfig(rawConfig)));
     this.httpConfig$ = combineLatest(
       configService.atPath<HttpConfigType>(httpConfig.path),
-      configService.atPath<CspConfigType>(cspConfig.path)
-    ).pipe(map(([http, csp]) => new HttpConfig(http, csp)));
+      configService.atPath<CspConfigType>(cspConfig.path),
+      configService.atPath<CspReportOnlyConfigType>(cspReportOnlyConfig.path)
+    ).pipe(map(([http, csp, cspReportOnly]) => new HttpConfig(http, csp, cspReportOnly)));
   }
 
   public async setupLegacyConfig() {
@@ -239,6 +241,7 @@ export class LegacyService implements CoreService {
         getAsyncLocalStore: startDeps.core.dynamicConfig.getAsyncLocalStore,
         createStoreFromRequest: startDeps.core.dynamicConfig.createStoreFromRequest,
       },
+      workspace: startDeps.core.workspace,
     };
 
     const router = setupDeps.core.http.createRouter('', this.legacyId);
@@ -267,6 +270,7 @@ export class LegacyService implements CoreService {
           isAuthenticated: setupDeps.core.http.auth.isAuthenticated,
         },
         csp: setupDeps.core.http.csp,
+        cspReportOnly: setupDeps.core.http.cspReportOnly,
         getServerInfo: setupDeps.core.http.getServerInfo,
       },
       logging: {
@@ -308,6 +312,7 @@ export class LegacyService implements CoreService {
       auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
       security: setupDeps.core.security,
+      workspace: setupDeps.core.workspace,
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires

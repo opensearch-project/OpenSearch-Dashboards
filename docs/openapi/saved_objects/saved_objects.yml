@@ -423,7 +423,7 @@ paths:
               schema:
                 type: object
   /api/saved_objects/_bulk_update:
-    post:
+    put:
       tags:
         - saved objects
       summary: Bulk update saved objects
@@ -489,7 +489,7 @@ paths:
               schema:
                 type: object
   /api/saved_objects/_bulk_get:
-    get:
+    post:
       tags:
         - saved objects
       summary: Bulk get saved objects

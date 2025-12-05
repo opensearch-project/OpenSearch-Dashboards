@@ -42,4 +42,5 @@ export { generateTicksProvider } from './helpers/tick_generator';
 
 export { DEFAULT_TIME_FORMAT, calculateInterval } from '../common/lib';
 
+// @ts-expect-error TS2724 TODO(ts-error): fixme
 export { VisTypeTimelinePluginStart, VisTypeTimelinePluginSetup } from './plugin';

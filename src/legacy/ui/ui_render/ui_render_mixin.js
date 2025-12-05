@@ -55,7 +55,8 @@ import { getApmConfig } from '../apm';
  */
 export function uiRenderMixin(osdServer, server, config) {
   const translationsCache = { translations: null, hash: null };
-  const defaultLocale = i18n.getLocale() || 'en'; // Fallback to 'en' if no default locale is set
+  // `i18n.getLocale` will always return a value; the 'en' is just to accommodate tests
+  const defaultLocale = i18n.getLocale() || 'en';
 
   // Route handler for serving translation files.
   // This handler supports two scenarios:
@@ -67,8 +68,7 @@ export function uiRenderMixin(osdServer, server, config) {
     config: { auth: false },
     handler: async (request, h) => {
       const { locale } = request.params;
-      const normalizedLocale = locale.toLowerCase();
-      const registeredLocales = i18nLoader.getRegisteredLocales().map((l) => l.toLowerCase());
+      const normalizedLocale = i18n.normalizeLocale(locale);
       let warning = null;
 
       // Function to get or create cached translations
@@ -85,12 +85,12 @@ export function uiRenderMixin(osdServer, server, config) {
 
       let cachedTranslations;
 
-      if (normalizedLocale === defaultLocale.toLowerCase()) {
+      if (normalizedLocale === defaultLocale) {
         // Default locale
         cachedTranslations = await getCachedTranslations(defaultLocale, () =>
           i18n.getTranslation()
         );
-      } else if (registeredLocales.includes(normalizedLocale)) {
+      } else if (i18nLoader.isRegisteredLocale(normalizedLocale)) {
         // Other registered locales
         cachedTranslations = await getCachedTranslations(normalizedLocale, () =>
           i18nLoader.getTranslationsByLocale(locale)
@@ -261,7 +261,7 @@ export function uiRenderMixin(osdServer, server, config) {
       const fontCode = JSON.stringify({
         v7: 'Roboto Mono',
         v8: 'Source Code Pro',
-        v9: 'Fira Code',
+        v9: 'Source Code Pro',
       });
 
       const startup = new AppBootstrap(
@@ -306,6 +306,7 @@ export function uiRenderMixin(osdServer, server, config) {
 
   async function renderApp(h) {
     const { http } = osdServer.newPlatform.setup.core;
+    const { dynamicConfig } = osdServer.newPlatform.start.core;
     const { savedObjects } = osdServer.newPlatform.start.core;
     const { rendering } = osdServer.newPlatform.__internals;
     const req = OpenSearchDashboardsRequest.from(h.request);
@@ -320,7 +321,34 @@ export function uiRenderMixin(osdServer, server, config) {
       vars,
     });
 
-    return h.response(content).type('text/html').header('content-security-policy', http.csp.header);
+    const output = h
+      .response(content)
+      .type('text/html')
+      .header('content-security-policy', http.csp.header);
+
+    let cspReportOnlyIsEmitting;
+    try {
+      const dynamicConfigClient = dynamicConfig.getClient();
+      const dynamicConfigStore = dynamicConfig.createStoreFromRequest(req);
+      const cspReportOnlyDynamicConfig = await dynamicConfigClient.getConfig(
+        { pluginConfigPath: 'csp-report-only' },
+        dynamicConfigStore ? { asyncLocalStorageContext: dynamicConfigStore } : undefined
+      );
+      cspReportOnlyIsEmitting =
+        cspReportOnlyDynamicConfig.isEmitting ?? http.cspReportOnly.isEmitting;
+    } catch (e) {
+      cspReportOnlyIsEmitting = http.cspReportOnly.isEmitting;
+    }
+
+    if (cspReportOnlyIsEmitting) {
+      output.header('content-security-policy-report-only', http.cspReportOnly.cspReportOnlyHeader);
+
+      if (http.cspReportOnly.reportingEndpointsHeader) {
+        output.header('reporting-endpoints', http.cspReportOnly.reportingEndpointsHeader);
+      }
+    }
+
+    return output;
   }
 
   server.decorate('toolkit', 'renderApp', function () {

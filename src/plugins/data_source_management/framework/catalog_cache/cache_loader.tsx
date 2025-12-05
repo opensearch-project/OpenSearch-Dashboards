@@ -8,6 +8,7 @@ import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { ASYNC_POLLING_INTERVAL, SPARK_HIVE_TABLE_REGEX, SPARK_PARTITION_INFO } from '../constants';
 import {
   AsyncPollingResult,
+  // @ts-expect-error TS2724 TODO(ts-error): fixme
   CachedAccelerations,
   CachedColumn,
   CachedDataSourceStatus,
@@ -182,6 +183,7 @@ export const updateTableColumnsToCache = (
     );
     const currentTime = new Date().toUTCString();
 
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     const combinedData: Array<{ col_name: string; data_type: string }> = combineSchemaAndDatarows(
       pollingResult.schema,
       pollingResult.datarows

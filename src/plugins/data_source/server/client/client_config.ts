@@ -23,7 +23,6 @@ type DataSourceSSLConfigOptions = Partial<{
  * @param endpoint endpoint url of data source
  */
 export function parseClientOptions(
-  // TODO: will use client configs, that comes from a merge result of user config and default opensearch client config,
   config: DataSourcePluginConfigType,
   endpoint: string,
   registeredSchema: any[]
@@ -59,10 +58,14 @@ export function parseClientOptions(
     sslConfig.ca = certificateAuthorities;
   }
 
+  // for now, we only use part of the default opensearch client configs, may onboard more in the future
   const clientOptions: ClientOptions = {
     node: endpoint,
     ssl: sslConfig,
+    // @ts-expect-error TS2322 TODO(ts-error): fixme
     plugins: registeredSchema,
+    requestTimeout: config.globalOpenSearchConfig.requestTimeout.asMilliseconds(),
+    pingTimeout: config.globalOpenSearchConfig.pingTimeout.asMilliseconds(),
   };
 
   return clientOptions;

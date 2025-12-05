@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import { UI_SETTINGS } from '../../../../../data/common';
+
 jest.mock('./send_request_to_opensearch', () => ({ sendRequestToOpenSearch: jest.fn() }));
 jest.mock('../../contexts/editor_context/editor_registry', () => ({
   instance: { getInputEditor: jest.fn() },
@@ -74,9 +76,63 @@ describe('useSendCurrentRequestToOpenSearch', () => {
 
     const { result } = renderHook(() => useSendCurrentRequestToOpenSearch(), { wrapper: contexts });
     await act(() => result.current());
+
     expect(sendRequestToOpenSearch).toHaveBeenCalledWith({
       requests: ['test'],
       http: mockContextValue.services.http,
+    });
+
+    // Second call should be the request success
+    const [, [requestSucceededCall]] = (dispatch as jest.Mock).mock.calls;
+    expect(requestSucceededCall).toEqual({ type: 'requestSuccess', payload: { data: [] } });
+  });
+
+  it('calls sendRequestToOpenSearch turning withLongNumeralsSupport on when long-numerals is enabled', async () => {
+    // Set up mocks
+    (mockContextValue.services.settings.toJSON as jest.Mock).mockReturnValue({});
+    (mockContextValue.services.uiSettings.get as jest.Mock).mockImplementation((key: string) =>
+      Promise.resolve(key === UI_SETTINGS.DATA_WITH_LONG_NUMERALS ? true : undefined)
+    );
+
+    // This request should succeed
+    (sendRequestToOpenSearch as jest.Mock).mockResolvedValue([]);
+    (editorRegistry.getInputEditor as jest.Mock).mockImplementation(() => ({
+      getRequestsInRange: () => ['test'],
+    }));
+
+    const { result } = renderHook(() => useSendCurrentRequestToOpenSearch(), { wrapper: contexts });
+    await act(() => result.current());
+    expect(sendRequestToOpenSearch).toHaveBeenCalledWith({
+      requests: ['test'],
+      http: mockContextValue.services.http,
+      withLongNumeralsSupport: true,
+    });
+
+    // Second call should be the request success
+    const [, [requestSucceededCall]] = (dispatch as jest.Mock).mock.calls;
+    expect(requestSucceededCall).toEqual({ type: 'requestSuccess', payload: { data: [] } });
+  });
+
+  it('calls sendRequestToOpenSearch turning withLongNumeralsSupport off when long-numerals is disabled', async () => {
+    // Set up mocks
+    (mockContextValue.services.settings.toJSON as jest.Mock).mockReturnValue({});
+    (mockContextValue.services.uiSettings.get as jest.Mock).mockImplementation((key: string) =>
+      Promise.resolve(key === UI_SETTINGS.DATA_WITH_LONG_NUMERALS ? false : undefined)
+    );
+
+    // This request should succeed
+    (sendRequestToOpenSearch as jest.Mock).mockResolvedValue([]);
+    (editorRegistry.getInputEditor as jest.Mock).mockImplementation(() => ({
+      getRequestsInRange: () => ['test'],
+    }));
+
+    const { result } = renderHook(() => useSendCurrentRequestToOpenSearch(), { wrapper: contexts });
+    await act(() => result.current());
+
+    expect(sendRequestToOpenSearch).toHaveBeenCalledWith({
+      requests: ['test'],
+      http: mockContextValue.services.http,
+      withLongNumeralsSupport: false,
     });
 
     // Second call should be the request success

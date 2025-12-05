@@ -325,14 +325,14 @@ describe('Options', () => {
           if (i < body.length) {
             request.write(body[i++]);
           } else {
-            clearInterval(intervalId);
+            clearInterval((intervalId as unknown) as NodeJS.Timeout);
             request.end((err, res) => {
               resolve(res);
             });
           }
         }, interval);
         request.on('error', (err) => {
-          clearInterval(intervalId);
+          clearInterval((intervalId as unknown) as NodeJS.Timeout);
           reject(err);
         });
       });

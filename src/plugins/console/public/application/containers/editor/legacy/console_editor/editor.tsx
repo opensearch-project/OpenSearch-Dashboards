@@ -189,6 +189,7 @@ function EditorUI({ initialTextValue, dataSourceId }: EditorProps) {
       http,
       settingsService,
       settingsService.getAutocomplete(),
+      // @ts-expect-error TS2345 TODO(ts-error): fixme
       dataSourceId
     );
 
@@ -228,10 +229,14 @@ function EditorUI({ initialTextValue, dataSourceId }: EditorProps) {
     });
   }, [sendCurrentRequestToOpenSearch, openDocumentation]);
 
-  const tooltipDefaultMessage =
-    dataSourceId === undefined ? `Select a data source` : `Click to send request`;
-
-  const toolTipButtonDiasbled = dataSourceId === undefined;
+  const toolTipButtonDisabled = dataSourceId === undefined;
+  const sendLabel = toolTipButtonDisabled
+    ? i18n.translate('console.sendRequestButtonTooltip.withoutDataSourceId', {
+        defaultMessage: 'Select a data source',
+      })
+    : i18n.translate('console.sendRequestButtonTooltip', {
+        defaultMessage: 'Send request',
+      });
 
   return (
     <div style={abs} className="conApp">
@@ -243,19 +248,13 @@ function EditorUI({ initialTextValue, dataSourceId }: EditorProps) {
           responsive={false}
         >
           <EuiFlexItem>
-            <EuiToolTip
-              content={i18n.translate('console.sendRequestButtonTooltip', {
-                defaultMessage: tooltipDefaultMessage,
-              })}
-            >
+            <EuiToolTip content={sendLabel}>
               <button
                 onClick={sendCurrentRequestToOpenSearch}
                 data-test-subj="sendRequestButton"
-                aria-label={i18n.translate('console.sendRequestButtonTooltip', {
-                  defaultMessage: tooltipDefaultMessage,
-                })}
+                aria-label={sendLabel}
                 className="conApp__editorActionButton conApp__editorActionButton--success"
-                disabled={toolTipButtonDiasbled}
+                disabled={toolTipButtonDisabled}
               >
                 <EuiIcon type="play" />
               </button>

@@ -13,18 +13,19 @@ import {
   EuiText,
   EuiTextColor,
   EuiLink,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { ApplicationStart } from 'opensearch-dashboards/public';
 import { WorkspaceFormDataState } from '../workspace_form';
 import { WorkspaceUseCase } from '../../types';
 import { RightSidebarScrollField, RIGHT_SIDEBAR_SCROLL_KEY } from './utils';
+import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
+import { privacyType2TextMap, WorkspacePrivacyItemType } from '../workspace_form/constants';
 
 const SCROLL_FIELDS = {
-  [RightSidebarScrollField.UseCase]: i18n.translate('workspace.form.summary.panel.useCase.title', {
-    defaultMessage: 'Use case',
-  }),
   [RightSidebarScrollField.Name]: i18n.translate('workspace.form.summary.panel.name.title', {
-    defaultMessage: 'Name',
+    defaultMessage: 'Workspace name',
   }),
   [RightSidebarScrollField.Description]: i18n.translate(
     'workspace.form.summary.panel.description.title',
@@ -32,8 +33,11 @@ const SCROLL_FIELDS = {
       defaultMessage: 'Description',
     }
   ),
-  [RightSidebarScrollField.Color]: i18n.translate('workspace.form.summary.panel.color.title', {
-    defaultMessage: 'Workspace icon',
+  [RightSidebarScrollField.UseCase]: i18n.translate('workspace.form.summary.panel.useCase.title', {
+    defaultMessage: 'Use case',
+  }),
+  [RightSidebarScrollField.Color]: i18n.translate('workspace.form.summary.panel.color', {
+    defaultMessage: 'Color',
   }),
   [RightSidebarScrollField.DataSource]: i18n.translate(
     'workspace.form.summary.panel.dataSources.title',
@@ -41,9 +45,18 @@ const SCROLL_FIELDS = {
       defaultMessage: 'Data sources',
     }
   ),
-  [RightSidebarScrollField.Member]: i18n.translate('workspace.form.summary.panel.members.title', {
-    defaultMessage: 'Members',
-  }),
+  [RightSidebarScrollField.Collaborators]: i18n.translate(
+    'workspace.form.summary.panel.collaborators.title',
+    {
+      defaultMessage: 'Collaborators',
+    }
+  ),
+  [RightSidebarScrollField.PrivacyType]: i18n.translate(
+    'workspace.form.summary.panel.privacyType.title',
+    {
+      defaultMessage: 'Workspace privacy',
+    }
+  ),
 };
 
 export const FieldSummaryItem = ({
@@ -86,35 +99,39 @@ export const FieldSummaryItem = ({
 };
 
 export const ExpandableTextList = ({
-  texts,
+  items,
   collapseDisplayCount,
 }: {
-  texts: string[];
+  items: React.JSX.Element[];
   collapseDisplayCount: number;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const uniqueTexts = Array.from(new Set(texts));
-  const displayedTexts = isExpanded ? uniqueTexts : uniqueTexts.slice(0, collapseDisplayCount);
+  const displayedItems = isExpanded ? items : items.slice(0, collapseDisplayCount);
   return (
     <>
-      {displayedTexts.map((text) => (
-        <EuiText size="xs" key={text}>
-          {text}
-        </EuiText>
-      ))}
-      {uniqueTexts.length > collapseDisplayCount && (
+      {displayedItems}
+      {items.length > collapseDisplayCount && (
         <EuiLink
           onClick={() => {
             setIsExpanded((flag) => !flag);
           }}
         >
-          {isExpanded
-            ? i18n.translate('workspace.form.summary.members.showLess', {
+          <EuiSpacer size="xs" />
+
+          {isExpanded ? (
+            <EuiBadge>
+              {i18n.translate('workspace.form.summary.items.showLess', {
                 defaultMessage: 'Show less',
-              })
-            : i18n.translate('workspace.form.summary.members.showAll', {
-                defaultMessage: 'Show all',
               })}
+            </EuiBadge>
+          ) : (
+            <EuiBadge>
+              {i18n.translate('workspace.form.summary.items.showAll', {
+                defaultMessage: '+{itemsOfNumber} more',
+                values: { itemsOfNumber: items.length - collapseDisplayCount },
+              })}
+            </EuiBadge>
+          )}
         </EuiLink>
       )}
     </>
@@ -122,74 +139,79 @@ export const ExpandableTextList = ({
 };
 
 interface WorkspaceFormSummaryPanelProps {
-  formData: WorkspaceFormDataState;
+  formData: Omit<WorkspaceFormDataState, 'permissionSettings'>;
   availableUseCases: WorkspaceUseCase[];
-  permissionEnabled?: boolean;
+  formId: string;
+  application: ApplicationStart;
+  isSubmitting: boolean;
+  dataSourceEnabled: boolean;
+  privacyType: WorkspacePrivacyItemType;
 }
 
 export const WorkspaceFormSummaryPanel = ({
   formData,
   availableUseCases,
-  permissionEnabled,
+  formId,
+  application,
+  isSubmitting,
+  dataSourceEnabled,
+  privacyType,
 }: WorkspaceFormSummaryPanelProps) => {
   const useCase = availableUseCases.find((item) => item.id === formData.useCase);
-  const userAndGroups = formData.permissionSettings.flatMap((setting) => {
-    if ('userId' in setting && !!setting.userId) {
-      return [setting.userId];
-    }
-    if ('group' in setting && !!setting.group) {
-      return [setting.group];
-    }
-    return [];
-  });
+  const useCaseIcon = useCase?.icon || 'logoOpenSearch';
+  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   return (
     <EuiCard
       title={i18n.translate('workspace.form.summary.panel.title', { defaultMessage: 'Summary' })}
       textAlign="left"
-      titleSize="xs"
+      titleSize="s"
     >
-      <FieldSummaryItem field={RightSidebarScrollField.UseCase}>
-        {useCase && (
-          <>
-            <EuiText size="xs">{useCase.title}</EuiText>
-            <EuiText size="xs">{useCase.description}</EuiText>
-          </>
-        )}
-      </FieldSummaryItem>
-      <FieldSummaryItem field={RightSidebarScrollField.Name}>{formData.name}</FieldSummaryItem>
-      <FieldSummaryItem field={RightSidebarScrollField.Description}>
-        {formData.description?.trim()}
-      </FieldSummaryItem>
-      <FieldSummaryItem field={RightSidebarScrollField.Color}>
-        {formData.color && (
+      <EuiSpacer size="s" />
+      <FieldSummaryItem field={RightSidebarScrollField.Name}>
+        {formData.name && (
           <EuiFlexGroup gutterSize="xs" alignItems="center">
-            {useCase?.icon && (
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={useCase.icon} color={formData.color} />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={useCaseIcon} color={formData.color} size="l" />
+            </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText size="xs">{formData.color}</EuiText>
+              <EuiText size="xs">{formData.name}</EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
       </FieldSummaryItem>
-      <FieldSummaryItem field={RightSidebarScrollField.DataSource}>
-        {formData.selectedDataSourceConnections.length > 0 && (
-          <ExpandableTextList
-            texts={formData.selectedDataSourceConnections.map(({ name }) => name)}
-            collapseDisplayCount={2}
-          />
-        )}
+      <FieldSummaryItem field={RightSidebarScrollField.Description}>
+        {formData.description?.trim()}
       </FieldSummaryItem>
-      {permissionEnabled && (
-        <FieldSummaryItem bottomGap={false} field={RightSidebarScrollField.Member}>
-          {userAndGroups.length > 0 && (
-            <ExpandableTextList texts={userAndGroups} collapseDisplayCount={2} />
+      <FieldSummaryItem field={RightSidebarScrollField.UseCase}>
+        {useCase && <EuiText size="xs">{useCase.title}</EuiText>}
+      </FieldSummaryItem>
+      {dataSourceEnabled && (
+        <FieldSummaryItem field={RightSidebarScrollField.DataSource}>
+          {formData.selectedDataSourceConnections.length > 0 && (
+            <ExpandableTextList
+              items={formData.selectedDataSourceConnections.map((connection) => (
+                <ul key={connection.id} style={{ marginBottom: 0 }}>
+                  <li>{connection.name}</li>
+                </ul>
+              ))}
+              collapseDisplayCount={3}
+            />
           )}
         </FieldSummaryItem>
       )}
+      {isPermissionEnabled && (
+        <FieldSummaryItem field={RightSidebarScrollField.PrivacyType}>
+          {privacyType && <EuiText size="xs">{privacyType2TextMap[privacyType].title}</EuiText>}
+        </FieldSummaryItem>
+      )}
+
+      <WorkspaceCreateActionPanel
+        formData={formData}
+        formId={formId}
+        application={application}
+        isSubmitting={isSubmitting}
+      />
     </EuiCard>
   );
 };

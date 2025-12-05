@@ -31,6 +31,7 @@
 import { chain } from 'lodash';
 import moment from 'moment';
 
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { LegacyAPICaller, OpenSearchClient } from 'opensearch-dashboards/server';
 
 import { timePatternToWildcard } from './time_pattern_to_wildcard';

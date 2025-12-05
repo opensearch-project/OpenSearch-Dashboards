@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import { Duration } from 'moment';
 import { schema, TypeOf } from '@osd/config-schema';
 import { fileAppenderSchema } from './audit_config';
 
@@ -41,13 +41,14 @@ export const configSchema = schema.object({
     ),
   }),
   clientPool: schema.object({
-    size: schema.number({ defaultValue: 5 }),
+    size: schema.number({ defaultValue: 10 }),
   }),
   audit: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
     appender: fileAppenderSchema,
   }),
   endpointDeniedIPs: schema.maybe(schema.arrayOf(schema.string())),
+  endpointAllowlistedSuffixes: schema.maybe(schema.arrayOf(schema.string())),
   authTypes: schema.object({
     NoAuthentication: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
@@ -61,4 +62,11 @@ export const configSchema = schema.object({
   }),
 });
 
-export type DataSourcePluginConfigType = TypeOf<typeof configSchema>;
+export type ConfigSchema = TypeOf<typeof configSchema>;
+
+export type DataSourcePluginConfigType = ConfigSchema & {
+  globalOpenSearchConfig: {
+    requestTimeout: Duration;
+    pingTimeout: Duration;
+  };
+};

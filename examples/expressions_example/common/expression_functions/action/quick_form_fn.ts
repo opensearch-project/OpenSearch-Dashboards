@@ -20,7 +20,7 @@ export const quickFormFn = (): ExpressionFunctionDefinition<
 > => ({
   name: 'quick-form',
   type: 'render',
-  help: i18n.translate('expressionsExample.function.avatar.help', {
+  help: i18n.translate('expressionsExample.function.form.help', {
     defaultMessage: 'Render a simple form that sends the value back as an event on click',
   }),
   args: {

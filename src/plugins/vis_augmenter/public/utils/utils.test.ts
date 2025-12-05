@@ -296,6 +296,7 @@ describe('utils', () => {
       originPlugin,
       pluginResource
     );
+    // @ts-expect-error TS6133 TODO(ts-error): fixme
     const obj3 = generateAugmentVisSavedObject(
       'valid-obj-id-3',
       fn,
@@ -308,6 +309,7 @@ describe('utils', () => {
       const loader = createSavedAugmentVisLoader({
         savedObjectsClient: getMockAugmentVisSavedObjectClient([]),
       } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect((await getAugmentVisSavedObjs(visId1, loader)).length).toEqual(0);
     });
     it('throws error when feature setting is disabled', async () => {
@@ -328,6 +330,7 @@ describe('utils', () => {
       }
     });
     it('returns no matching saved objs when loader throws error', async () => {
+      // @ts-expect-error TS2352 TODO(ts-error): fixme
       const loader = createSavedAugmentVisLoader({
         savedObjectsClient: {
           findAll: () => {
@@ -335,24 +338,28 @@ describe('utils', () => {
           },
         },
       } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect((await getAugmentVisSavedObjs(visId3, loader)).length).toEqual(0);
     });
     it('returns one matching saved obj', async () => {
       const loader = createSavedAugmentVisLoader({
         savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1]),
       } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect((await getAugmentVisSavedObjs(visId1, loader)).length).toEqual(1);
     });
     it('returns multiple matching saved objs', async () => {
       const loader = createSavedAugmentVisLoader({
         savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2]),
       } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect((await getAugmentVisSavedObjs(visId1, loader)).length).toEqual(2);
     });
     it('undefined plugin resource list has no effect', async () => {
       const loader = createSavedAugmentVisLoader({
         savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2]),
       } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect((await getAugmentVisSavedObjs(visId1, loader, undefined, undefined)).length).toEqual(
         2
       );
@@ -361,6 +368,7 @@ describe('utils', () => {
       const loader = createSavedAugmentVisLoader({
         savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2]),
       } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect((await getAugmentVisSavedObjs(visId1, loader, undefined, [])).length).toEqual(2);
     });
     it('empty / undefined plugin resource list passes correct findAll() params', async () => {
@@ -368,6 +376,7 @@ describe('utils', () => {
         savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2]),
       } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
       loader.findAll = jest.fn().mockImplementation(loader.findAll);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
       expect((await getAugmentVisSavedObjs(visId1, loader, undefined, [])).length).toEqual(2);
       expect(loader.findAll).toHaveBeenCalledWith(
         '',
@@ -386,6 +395,7 @@ describe('utils', () => {
       } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
       loader.findAll = jest.fn().mockImplementation(loader.findAll);
       expect(
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
         (await getAugmentVisSavedObjs(visId1, loader, undefined, ['resource-1'])).length
       ).toEqual(2);
       expect(loader.findAll).toHaveBeenCalledWith(
@@ -404,10 +414,12 @@ describe('utils', () => {
         savedObjectsClient: getMockAugmentVisSavedObjectClient([obj1, obj2]),
       } as SavedObjectOpenSearchDashboardsServicesWithAugmentVis);
       loader.findAll = jest.fn().mockImplementation(loader.findAll);
-      expect(
-        (await getAugmentVisSavedObjs(visId1, loader, undefined, ['resource-1', 'resource-2']))
-          .length
-      ).toEqual(2);
+      const resp = await getAugmentVisSavedObjs(visId1, loader, undefined, [
+        'resource-1',
+        'resource-2',
+      ]);
+      // @ts-expect-error TS2339 TODO(ts-error): fixme
+      expect(resp.length).toEqual(2);
       expect(loader.findAll).toHaveBeenCalledWith(
         'resource-1|resource-2',
         100,

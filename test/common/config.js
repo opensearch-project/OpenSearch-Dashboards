@@ -44,7 +44,17 @@ export default function () {
     opensearchTestCluster: {
       license: 'oss',
       from: 'snapshot',
-      serverArgs: [],
+      serverArgs: [
+        'search.concurrent_segment_search.mode=none',
+        // Disable disk-based shard allocation to prevent index creation blocks in CI
+        'cluster.routing.allocation.disk.threshold_enabled=false',
+        // Set very low disk watermarks for testing
+        'cluster.routing.allocation.disk.watermark.low=1gb',
+        'cluster.routing.allocation.disk.watermark.high=500mb',
+        'cluster.routing.allocation.disk.watermark.flood_stage=100mb',
+        // Disable read-only index block when disk space is low
+        'cluster.blocks.read_only_allow_delete=false',
+      ],
     },
 
     osdTestServer: {
@@ -58,7 +68,7 @@ export default function () {
         `--opensearch.username=${opensearchDashboardsServerTestUser.username}`,
         `--opensearch.password=${opensearchDashboardsServerTestUser.password}`,
         `--home.disableWelcomeScreen=false`,
-        `--home.disableNewThemeModal=true`,
+        `--home.disableExperienceModal=true`, // Disable experience modal for tests
         // Needed for async search functional tests to introduce a delay
         `--data.search.aggs.shardDelay.enabled=true`,
         //`--security.showInsecureClusterWarning=false`,
@@ -73,10 +83,10 @@ export default function () {
         // `--newsfeed.service.urlRoot=${servers.opensearchDashboards.protocol}://${servers.opensearchDashboards.hostname}:${servers.opensearchDashboards.port}`,
         // `--newsfeed.service.pathTemplate=/api/_newsfeed-FTS-external-service-simulators/opensearch-dashboards/v{VERSION}.json`,
         // Custom branding config
-        `--opensearchDashboards.branding.logo.defaultUrl=https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_default.svg`,
-        `--opensearchDashboards.branding.logo.darkModeUrl=https://opensearch.org/assets/brand/SVG/Logo/opensearch_logo_darkmode.svg`,
-        `--opensearchDashboards.branding.mark.defaultUrl=https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_default.svg`,
-        `--opensearchDashboards.branding.mark.darkModeUrl=https://opensearch.org/assets/brand/SVG/Mark/opensearch_mark_darkmode.svg`,
+        `--opensearchDashboards.branding.logo.defaultUrl=https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_default.svg`,
+        `--opensearchDashboards.branding.logo.darkModeUrl=https://opensearch.org/wp-content/uploads/2025/01/opensearch_logo_darkmode.svg`,
+        `--opensearchDashboards.branding.mark.defaultUrl=https://opensearch.org/wp-content/uploads/2025/01/opensearch_mark_default.svg`,
+        `--opensearchDashboards.branding.mark.darkModeUrl=https://opensearch.org/wp-content/uploads/2025/01/opensearch_mark_darkmode.svg`,
         `--opensearchDashboards.branding.applicationTitle=OpenSearch`,
         `--uiSettings.overrides['query:enhancements:enabled']=false`,
       ],

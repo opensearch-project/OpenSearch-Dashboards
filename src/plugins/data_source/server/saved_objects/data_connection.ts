@@ -13,6 +13,9 @@ export const dataConnection: SavedObjectsType = {
     icon: 'apps',
     defaultSearchField: 'connectionId',
     importableAndExportable: true,
+    getTitle(obj) {
+      return obj.attributes.connectionId;
+    },
   },
   mappings: {
     dynamic: false,

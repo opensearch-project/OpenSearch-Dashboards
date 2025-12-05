@@ -20,7 +20,6 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
 
 import webpack from 'webpack';
 
@@ -28,20 +27,6 @@ import { Bundle, BundleRefs, BundleRef } from '../common';
 import { BundleRefModule } from './bundle_ref_module';
 
 const RESOLVE_EXTENSIONS = ['.js', '.ts', '.tsx'];
-
-function safeStat(path: string): Promise<Fs.Stats | undefined> {
-  return new Promise((resolve, reject) => {
-    Fs.stat(path, (error, stat) => {
-      if (error?.code === 'ENOENT') {
-        resolve(undefined);
-      } else if (error) {
-        reject(error);
-      } else {
-        resolve(stat);
-      }
-    });
-  });
-}
 
 interface RequestData {
   context: string;
@@ -80,7 +65,7 @@ export class BundleRefsPlugin {
           const context = data.context;
           const dep = data.dependencies[0];
 
-          this.maybeReplaceImport(context, dep.request).then(
+          this.maybeReplaceImport(context, dep.request, compiler).then(
             (module) => {
               if (!module) {
                 wrappedFactory(data, callback);
@@ -134,64 +119,17 @@ export class BundleRefsPlugin {
     });
   }
 
-  private cachedResolveRefEntry(ref: BundleRef) {
-    const cached = this.resolvedRefEntryCache.get(ref);
-
-    if (cached) {
-      return cached;
-    }
-
-    const absoluteRequest = Path.resolve(ref.contextDir, ref.entry);
-    const promise = this.cachedResolveRequest(absoluteRequest).then((resolved) => {
-      if (!resolved) {
-        throw new Error(`Unable to resolve request [${ref.entry}] relative to [${ref.contextDir}]`);
-      }
-
-      return resolved;
-    });
-    this.resolvedRefEntryCache.set(ref, promise);
-    return promise;
-  }
-
-  private cachedResolveRequest(absoluteRequest: string) {
-    const cached = this.resolvedRequestCache.get(absoluteRequest);
-
-    if (cached) {
-      return cached;
-    }
-
-    const promise = this.resolveRequest(absoluteRequest);
-    this.resolvedRequestCache.set(absoluteRequest, promise);
-    return promise;
-  }
-
-  private async resolveRequest(absoluteRequest: string) {
-    const stats = await safeStat(absoluteRequest);
-    if (stats && stats.isFile()) {
-      return absoluteRequest;
-    }
-
-    // look for an index file in directories
-    if (stats?.isDirectory()) {
-      for (const ext of RESOLVE_EXTENSIONS) {
-        const indexPath = Path.resolve(absoluteRequest, `index${ext}`);
-        const indexStats = await safeStat(indexPath);
-        if (indexStats?.isFile()) {
-          return indexPath;
+  private async resolve(request: string, startPath: string, compiler: webpack.Compiler) {
+    const resolver = compiler.resolverFactory.get('normal');
+    return new Promise<string | undefined>((resolve, reject) => {
+      resolver.resolve({}, startPath, request, {}, (err: unknown | null, resolvedPath: string) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(resolvedPath);
         }
-      }
-    }
-
-    // look for a file with one of the supported extensions
-    for (const ext of RESOLVE_EXTENSIONS) {
-      const filePath = `${absoluteRequest}${ext}`;
-      const fileStats = await safeStat(filePath);
-      if (fileStats?.isFile()) {
-        return filePath;
-      }
-    }
-
-    return;
+      });
+    });
   }
 
   /**
@@ -200,9 +138,12 @@ export class BundleRefsPlugin {
    * then an error is thrown. If the request does not resolve to a bundleRef then
    * undefined is returned. Otherwise it returns the referenced bundleRef.
    */
-  private async maybeReplaceImport(context: string, request: string) {
-    // ignore imports that have loaders defined or are not relative seeming
-    if (request.includes('!') || !request.startsWith('.')) {
+  private async maybeReplaceImport(context: string, request: string, compiler: webpack.Compiler) {
+    const alias = Object.keys(compiler.options.resolve?.alias ?? {});
+    const isAliasRequest = alias.some((a) => request.startsWith(a));
+
+    // For non-alias import path, ignore imports that have loaders defined or are not relative seeming
+    if (!isAliasRequest && (request.includes('!') || !request.startsWith('.'))) {
       return;
     }
 
@@ -211,13 +152,12 @@ export class BundleRefsPlugin {
       return;
     }
 
-    const absoluteRequest = Path.resolve(context, request);
-    if (absoluteRequest.startsWith(this.ignorePrefix)) {
+    const resolved = await this.resolve(request, context, compiler);
+    if (!resolved) {
       return;
     }
 
-    const resolved = await this.cachedResolveRequest(absoluteRequest);
-    if (!resolved) {
+    if (resolved.startsWith(this.ignorePrefix)) {
       return;
     }
 
@@ -228,7 +168,7 @@ export class BundleRefsPlugin {
     }
 
     for (const ref of possibleRefs) {
-      const resolvedEntry = await this.cachedResolveRefEntry(ref);
+      const resolvedEntry = await this.resolve(`./${ref.entry}`, ref.contextDir, compiler);
       if (resolved !== resolvedEntry) {
         continue;
       }

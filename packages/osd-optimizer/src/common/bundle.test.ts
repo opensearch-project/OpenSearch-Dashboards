@@ -55,7 +55,7 @@ it('creates cache keys', () => {
     )
   ).toMatchInlineSnapshot(`
     Object {
-      "mtimes": Object {
+      "hashes": Object {
         "/foo/bar/a": 123,
         "/foo/bar/c": 789,
       },

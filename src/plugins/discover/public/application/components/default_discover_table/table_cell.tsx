@@ -36,10 +36,11 @@ const TableCellUI = ({
     <>
       <span
         className="osdDocTableCell__dataField"
+        data-test-subj="osdDocTableCellDataField"
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: sanitizedCellValue }}
       />
-      <span className="osdDocTableCell__filter">
+      <span className="osdDocTableCell__filter" data-test-subj="osdDocTableCellFilter">
         <EuiToolTip
           content={i18n.translate('discover.filterForValue', {
             defaultMessage: 'Filter for value',
@@ -48,8 +49,8 @@ const TableCellUI = ({
           <EuiButtonIcon
             size="xs"
             onClick={() => onFilter?.(columnId, fieldMapping, '+')}
-            iconType="plusInCircle"
-            aria-label={i18n.translate('discover.filterForValueLabel', {
+            iconType="magnifyWithPlus"
+            aria-label={i18n.translate('discover.filterForValue', {
               defaultMessage: 'Filter for value',
             })}
             data-test-subj="filterForValue"
@@ -64,8 +65,8 @@ const TableCellUI = ({
           <EuiButtonIcon
             size="xs"
             onClick={() => onFilter?.(columnId, fieldMapping, '-')}
-            iconType="minusInCircle"
-            aria-label={i18n.translate('discover.filterOutValueLabel', {
+            iconType="magnifyWithMinus"
+            aria-label={i18n.translate('discover.filterOutValue', {
               defaultMessage: 'Filter out value',
             })}
             data-test-subj="filterOutValue"

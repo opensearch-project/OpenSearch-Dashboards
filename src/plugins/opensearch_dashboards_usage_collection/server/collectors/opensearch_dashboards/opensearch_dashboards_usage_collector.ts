@@ -59,6 +59,7 @@ export function getOpenSearchDashboardsUsageCollector(
       search: { total: { type: 'long' } },
       index_pattern: { total: { type: 'long' } },
       graph_workspace: { total: { type: 'long' } },
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       timelion_sheet: { total: { type: 'long' } },
     },
     async fetch(callCluster) {

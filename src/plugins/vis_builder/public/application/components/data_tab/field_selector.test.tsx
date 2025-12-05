@@ -28,6 +28,7 @@ const mockGetDetailsByField = jest.fn(() => ({
   total: 150,
 }));
 
+// @ts-expect-error TS7006 TODO(ts-error): fixme
 const getFields = (name) => {
   return new IndexPatternField(
     {

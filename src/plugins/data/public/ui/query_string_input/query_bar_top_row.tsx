@@ -30,7 +30,7 @@
 
 import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { i18n } from '@osd/i18n';
 
 import {
@@ -90,11 +90,58 @@ export interface QueryBarTopRowProps {
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default function QueryBarTopRow(props: QueryBarTopRowProps) {
+  const datePickerRef = useRef<EuiSuperDatePicker | null>(null);
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
 
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
-  const { uiSettings, notifications, storage, appName, docLinks } = opensearchDashboards.services;
+  const {
+    uiSettings,
+    notifications,
+    storage,
+    appName,
+    docLinks,
+    keyboardShortcut,
+  } = opensearchDashboards.services;
+
+  const handleOpenDatePicker = useCallback(() => {
+    if (datePickerRef.current) {
+      const datePicker = datePickerRef.current;
+      if (datePicker.onStartDatePopoverToggle) {
+        datePicker.onStartDatePopoverToggle();
+      } else if (datePicker.onEndDatePopoverToggle) {
+        datePicker.onEndDatePopoverToggle();
+      }
+    }
+  }, []);
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'date_picker',
+    pluginId: 'data',
+    name: i18n.translate('data.query.queryBar.openDatePickerShortcut', {
+      defaultMessage: 'Open date picker',
+    }),
+    category: i18n.translate('data.query.queryBar.searchCategory', {
+      defaultMessage: 'Search',
+    }),
+    keys: 'shift+d',
+    execute: handleOpenDatePicker,
+  });
+
+  keyboardShortcut?.useKeyboardShortcut({
+    id: 'refresh_query',
+    pluginId: 'data',
+    name: i18n.translate('data.query.queryBar.refreshResultsShortcut', {
+      defaultMessage: 'Refresh results',
+    }),
+    category: i18n.translate('data.query.queryBar.searchCategory', {
+      defaultMessage: 'Search',
+    }),
+    keys: 'r',
+    execute: () => {
+      onClickSubmitButton({ preventDefault: () => {} } as React.MouseEvent<HTMLButtonElement>);
+    },
+  });
 
   const osdDQLDocs: string = docLinks!.links.opensearchDashboards.dql.base;
 
@@ -265,7 +312,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
 
     return (
       <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
-        <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
+        <EuiFlexGroup responsive={false} gutterSize="s" justifyContent="flexStart">
           {renderDatePicker()}
           <EuiFlexItem grow={false}>{button}</EuiFlexItem>
         </EuiFlexGroup>
@@ -306,8 +353,9 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     });
 
     return (
-      <EuiFlexItem className={wrapperClasses}>
+      <EuiFlexItem className={wrapperClasses} grow={false}>
         <EuiSuperDatePicker
+          ref={datePickerRef}
           start={props.dateRangeFrom}
           end={props.dateRangeTo}
           isPaused={props.isRefreshPaused}
@@ -321,6 +369,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           dateFormat={uiSettings!.get('dateFormat')}
           isAutoRefreshOnly={props.showAutoRefreshOnly}
           className="osdQueryBar__datePicker"
+          data-test-subj="osdQueryBarDatePicker"
           compressed={true}
         />
       </EuiFlexItem>
@@ -402,7 +451,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
       >
         {renderQueryInput()}
         {renderSharingMetaFields()}
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} className="osdQueryBar--hideEmpty" data-test-subj="osdQueryBar">
           {shouldUseDatePickerRef
             ? createPortal(renderUpdateButton(), props.datePickerRef!.current!)
             : renderUpdateButton()}

@@ -172,6 +172,7 @@ class EditorErrorBoundary extends Component<{}, { error?: any }> {
     return { error };
   }
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   componentDidCatch(error) {
     // eslint-disable-next-line no-console
     console.error(error);

@@ -32,6 +32,7 @@ import { migrateLegacyQuery } from './migrate_legacy_query';
 import { SearchSource, SearchSourceDependencies } from './search_source';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { SearchSourceFields } from './types';
+import { DEFAULT_DATA } from '../../constants';
 
 /**
  * Deserializes a json string and a set of referenced objects to a `SearchSource` instance.
@@ -57,8 +58,13 @@ export const createSearchSource = (
   const fields = { ...searchSourceFields };
 
   // hydrating index pattern
-  if (fields.index && typeof fields.index === 'string') {
-    fields.index = await indexPatterns.get(searchSourceFields.index as any);
+  if (
+    fields.index &&
+    typeof fields.index === 'string' &&
+    (!fields.query?.dataset?.type ||
+      fields.query.dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN)
+  ) {
+    fields.index = await indexPatterns.get(fields.index as string);
   }
 
   const searchSource = new SearchSource(fields, searchSourceDependencies);

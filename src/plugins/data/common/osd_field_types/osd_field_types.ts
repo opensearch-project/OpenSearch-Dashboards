@@ -78,7 +78,7 @@ export const getFilterableOsdTypeNames = (): string[] =>
   registeredOsdTypes.filter((type) => type.filterable).map((type) => type.name);
 
 export const setOsdFieldOverrides = (newOverrides: { [key: string]: any } | undefined) => {
-  osdFieldOverrides = newOverrides ? Object.assign({}, osdFieldOverrides, newOverrides) : {};
+  osdFieldOverrides = { ...newOverrides };
 };
 
 export const getOsdFieldOverrides = (): { [key: string]: any } => {

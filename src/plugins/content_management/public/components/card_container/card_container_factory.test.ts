@@ -15,6 +15,7 @@ test('CardContainerFactoryDefinition', async () => {
   expect(factory.type).toBe(CARD_CONTAINER);
   expect(factory.isContainerType).toBe(true);
   expect(await factory.isEditable()).toBe(false);
+  expect(factory.canCreateNew()).toBe(false);
   expect(factory.getDisplayName()).toBe('Card container');
   expect(await factory.create({ id: 'card-id', panels: {} })).toBeInstanceOf(CardContainer);
 });

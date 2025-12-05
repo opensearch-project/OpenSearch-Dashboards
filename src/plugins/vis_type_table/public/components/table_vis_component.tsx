@@ -85,6 +85,7 @@ export const TableVisComponent = ({
   const onSort = useCallback(
     (sortingCols: EuiDataGridSorting['columns'] | []) => {
       const nextSortValue = sortingCols[sortingCols.length - 1];
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       const nextSort: ColumnSort =
         sortingCols.length > 0
           ? {

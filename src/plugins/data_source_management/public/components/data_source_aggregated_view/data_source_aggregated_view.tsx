@@ -10,6 +10,7 @@ import {
   IUiSettingsClient,
   SavedObjectsClientContract,
   ToastsStart,
+  UiSettingScope,
 } from 'opensearch-dashboards/public';
 import {
   getApplication,
@@ -36,6 +37,7 @@ interface DataSourceAggregatedViewProps {
   notifications: ToastsStart;
   hideLocalCluster: boolean;
   fullWidth: boolean;
+  scope: UiSettingScope;
   activeDataSourceIds?: string[];
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   displayAllCompatibleDataSources: boolean;
@@ -87,6 +89,7 @@ export class DataSourceAggregatedView extends React.Component<
     this.setState({ ...this.state, isPopoverOpen: !this.state.isPopoverOpen });
   }
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   onSwitchClick(e) {
     this.setState({ ...this.state, switchChecked: e.target.checked });
   }
@@ -95,7 +98,7 @@ export class DataSourceAggregatedView extends React.Component<
     this.setState({ ...this.state, isPopoverOpen: false });
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     this._isMounted = true;
     getDataSourcesWithFields(this.props.savedObjectsClient, [
       'id',
@@ -104,7 +107,7 @@ export class DataSourceAggregatedView extends React.Component<
       'dataSourceVersion',
       'installedPlugins',
     ])
-      .then((fetchedDataSources) => {
+      .then(async (fetchedDataSources) => {
         const allDataSourcesIdToTitleMap = new Map();
 
         if (fetchedDataSources?.length) {
@@ -135,11 +138,11 @@ export class DataSourceAggregatedView extends React.Component<
           });
           return;
         }
-
         this.setState({
           ...this.state,
           allDataSourcesIdToTitleMap,
-          defaultDataSource: getDefaultDataSourceId(this.props.uiSettings) ?? null,
+          defaultDataSource:
+            (await getDefaultDataSourceId(this.props.uiSettings, this.props.scope)) ?? null,
           showEmptyState: allDataSourcesIdToTitleMap.size === 0,
         });
       })
@@ -247,6 +250,7 @@ export class DataSourceAggregatedView extends React.Component<
                 borderRadius="none"
               >
                 <EuiSelectable
+                  // @ts-expect-error TS2322 TODO(ts-error): fixme
                   options={items}
                   renderOption={(option) => (
                     <DataSourceItem

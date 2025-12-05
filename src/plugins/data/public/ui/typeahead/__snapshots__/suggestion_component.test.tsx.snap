@@ -15,6 +15,7 @@ exports[`SuggestionComponent Should display the suggestion and use the provided 
   >
     <div
       className="osdSuggestionItem__type"
+      data-test-subj="osdSuggestionType"
     >
       <EuiIcon
         type="kqlValue"
@@ -28,6 +29,7 @@ exports[`SuggestionComponent Should display the suggestion and use the provided 
     </div>
     <div
       className="osdSuggestionItem__description"
+      data-test-subj="osdSuggestionDescription"
     >
       This is not a helpful suggestion
     </div>
@@ -50,6 +52,7 @@ exports[`SuggestionComponent Should make the element active if the selected prop
   >
     <div
       className="osdSuggestionItem__type"
+      data-test-subj="osdSuggestionType"
     >
       <EuiIcon
         type="kqlValue"
@@ -63,6 +66,7 @@ exports[`SuggestionComponent Should make the element active if the selected prop
     </div>
     <div
       className="osdSuggestionItem__description"
+      data-test-subj="osdSuggestionDescription"
     >
       This is not a helpful suggestion
     </div>

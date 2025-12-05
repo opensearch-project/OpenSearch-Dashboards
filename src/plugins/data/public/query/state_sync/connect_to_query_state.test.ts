@@ -92,6 +92,8 @@ setupMock.uiSettings.get.mockImplementation((key: string) => {
       return { pause: false, value: 0 };
     case UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED:
       return false;
+    case UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS:
+      return 4;
     default:
       throw new Error(`sync_query test: not mocked uiSetting: ${key}`);
   }
@@ -109,6 +111,7 @@ describe('connect_storage_to_query_state', () => {
   let indexPatternsMock: IndexPatternsService;
   let history: History;
   let gF1: Filter;
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   let gF2: Filter;
   let aF1: Filter;
   let aF2: Filter;
@@ -121,13 +124,18 @@ describe('connect_storage_to_query_state', () => {
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
+      sessionStorage: new DataStorage(window.sessionStorage, 'opensearch_dashboards.'),
       defaultSearchInterceptor: mockSearchInterceptor,
+      application: setupMock.application,
+      notifications: setupMock.notifications,
     });
     queryServiceStart = queryService.start({
-      uiSettings: setupMock.uiSettings,
+      uiSettings: startMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       savedObjectsClient: startMock.savedObjects.client,
       indexPatterns: indexPatternsMock,
+      application: startMock.application,
+      notifications: startMock.notifications,
     });
     indexPatternsMock = ({
       get: jest.fn(),
@@ -207,6 +215,108 @@ describe('connect_storage_to_query_state', () => {
     const updatedStorage = osdUrlStateStorage.get('_q');
     expect(previousStorage).not.toStrictEqual(updatedStorage);
   });
+
+  test('when skipAppFiltersFromMemory is true, state initializes with empty filters even if filterManager has app filters', () => {
+    // Set some app filters in filterManager
+    filterManager.setFilters([aF1, aF2]);
+    expect(filterManager.getAppFilters().length).toBe(2);
+
+    expect(osdUrlStateStorage.get('_q')).toBeNull();
+
+    // Connect with skipAppFiltersFromMemory enabled
+    connectStorageToQueryState(queryServiceStart, osdUrlStateStorage, {
+      filters: FilterStateStore.APP_STATE,
+      query: true,
+      skipAppFiltersFromMemory: true,
+    });
+
+    // State should have empty filters, not filters from filterManager
+    expect(osdUrlStateStorage.get('_q')).toEqual({
+      query: queryString.getDefaultQuery(),
+      filters: [],
+    });
+  });
+
+  test('when skipAppFiltersFromMemory is true, app filters are cleared from filterManager', () => {
+    // Set some app filters in filterManager
+    filterManager.setFilters([aF1, aF2]);
+    expect(filterManager.getAppFilters().length).toBe(2);
+
+    // Connect with skipAppFiltersFromMemory enabled
+    connectStorageToQueryState(queryServiceStart, osdUrlStateStorage, {
+      filters: FilterStateStore.APP_STATE,
+      query: true,
+      skipAppFiltersFromMemory: true,
+    });
+
+    // App filters should be cleared
+    expect(filterManager.getAppFilters()).toEqual([]);
+  });
+
+  test('when skipAppFiltersFromMemory is false, state initializes with filters from filterManager', () => {
+    // Set some app filters in filterManager
+    filterManager.setFilters([aF1, aF2]);
+
+    expect(osdUrlStateStorage.get('_q')).toBeNull();
+
+    // Connect with skipAppFiltersFromMemory disabled (default behavior)
+    connectStorageToQueryState(queryServiceStart, osdUrlStateStorage, {
+      filters: FilterStateStore.APP_STATE,
+      query: true,
+      skipAppFiltersFromMemory: false,
+    });
+
+    // State should have filters from filterManager
+    expect(osdUrlStateStorage.get('_q')).toEqual({
+      query: queryString.getDefaultQuery(),
+      filters: [aF1, aF2],
+    });
+  });
+
+  test('when skipAppFiltersFromMemory is true but URL has filters, URL filters take precedence', () => {
+    // Set some app filters in filterManager
+    filterManager.setFilters([aF1, aF2]);
+
+    // Set different filters in URL
+    const urlFilters = [aF1];
+    osdUrlStateStorage.set(
+      '_q',
+      {
+        filters: urlFilters,
+        query: q1,
+      },
+      {
+        replace: true,
+      }
+    );
+
+    // Connect with skipAppFiltersFromMemory enabled
+    connectStorageToQueryState(queryServiceStart, osdUrlStateStorage, {
+      filters: FilterStateStore.APP_STATE,
+      query: true,
+      skipAppFiltersFromMemory: true,
+    });
+
+    // URL filters should be used, not empty array or filterManager filters
+    expect(filterManager.getFilters().length).toBe(1);
+    expect(queryString.getQuery()).toStrictEqual(q1);
+  });
+
+  test('when skipAppFiltersFromMemory is true with GLOBAL_STATE filters, app filters should not be cleared', () => {
+    // Set both global and app filters
+    filterManager.setFilters([gF1, aF1, aF2]);
+    expect(filterManager.getAppFilters().length).toBe(2);
+
+    // Connect with skipAppFiltersFromMemory enabled but for GLOBAL_STATE
+    connectStorageToQueryState(queryServiceStart, osdUrlStateStorage, {
+      filters: FilterStateStore.GLOBAL_STATE,
+      query: true,
+      skipAppFiltersFromMemory: true,
+    });
+
+    // App filters should NOT be cleared because we're syncing GLOBAL_STATE
+    expect(filterManager.getAppFilters().length).toBe(2);
+  });
 });
 
 describe('connect_to_global_state', () => {
@@ -229,16 +339,21 @@ describe('connect_to_global_state', () => {
   beforeEach(() => {
     const queryService = new QueryService();
     mockSearchInterceptor = {} as jest.Mocked<ISearchInterceptor>;
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
+      sessionStorage: new DataStorage(window.sessionStorage, 'opensearch_dashboards.'),
       defaultSearchInterceptor: mockSearchInterceptor,
+      application: setupMock.application,
     });
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       savedObjectsClient: startMock.savedObjects.client,
       indexPatterns: indexPatternsMock,
+      application: startMock.application,
     });
     filterManager = queryServiceStart.filterManager;
     timeFilter = queryServiceStart.timefilter.timefilter;
@@ -470,16 +585,21 @@ describe('connect_to_app_state', () => {
   beforeEach(() => {
     const queryService = new QueryService();
     mockSearchInterceptor = {} as jest.Mocked<ISearchInterceptor>;
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
+      sessionStorage: new DataStorage(window.sessionStorage, 'opensearch_dashboards.'),
       defaultSearchInterceptor: mockSearchInterceptor,
+      application: setupMock.application,
     });
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       savedObjectsClient: startMock.savedObjects.client,
       indexPatterns: indexPatternsMock,
+      application: startMock.application,
     });
     filterManager = queryServiceStart.filterManager;
     indexPatternsMock = ({
@@ -656,16 +776,21 @@ describe('filters with different state', () => {
   beforeEach(() => {
     const queryService = new QueryService();
     mockSearchInterceptor = {} as jest.Mocked<ISearchInterceptor>;
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
+      sessionStorage: new DataStorage(window.sessionStorage, 'opensearch_dashboards.'),
       defaultSearchInterceptor: mockSearchInterceptor,
+      application: setupMock.application,
     });
+    // @ts-expect-error TS2345 TODO(ts-error): fixme
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       savedObjectsClient: startMock.savedObjects.client,
       indexPatterns: indexPatternsMock,
+      application: startMock.application,
     });
     filterManager = queryServiceStart.filterManager;
     indexPatternsMock = ({

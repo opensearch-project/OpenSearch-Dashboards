@@ -47,7 +47,6 @@ export function registerDqlTelemetryRoute(
     },
     async (context, request, response) => {
       const [{ savedObjects }] = await getStartServices();
-      const internalRepository = savedObjects.createScopedRepository(request);
 
       const {
         body: { opt_in: optIn },
@@ -56,11 +55,12 @@ export function registerDqlTelemetryRoute(
       const counterName = optIn ? 'optInCount' : 'optOutCount';
 
       try {
+        const internalRepository = savedObjects.createScopedRepository(request);
         await internalRepository.incrementCounter('dql-telemetry', 'dql-telemetry', counterName);
       } catch (error) {
         logger.warn(`Unable to increment counter: ${error}`);
         return response.customError({
-          statusCode: error.status,
+          statusCode: error.status || 403,
           body: {
             message: 'Something went wrong',
             attributes: {

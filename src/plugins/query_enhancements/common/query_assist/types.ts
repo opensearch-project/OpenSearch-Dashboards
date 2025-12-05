@@ -14,6 +14,20 @@ export interface QueryAssistParameters {
   question: string;
   index: string;
   language: string;
+  currentTime?: string;
+  timeField?: string;
   // for MDS
   dataSourceId?: string;
+}
+
+export enum QueryAssistContextType {
+  QUESTION,
+  QUERY,
+  DATA,
+}
+
+export enum FeedbackStatus {
+  NONE = 'none',
+  THUMB_UP = 'thumbup',
+  THUMB_DOWN = 'thumbdown',
 }

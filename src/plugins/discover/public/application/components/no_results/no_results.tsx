@@ -28,185 +28,287 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
-import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
+import './no_results.scss';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import { I18nProvider } from '@osd/i18n/react';
 
 import {
-  EuiCallOut,
-  EuiCode,
-  EuiDescriptionList,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
+  EuiEmptyPrompt,
   EuiText,
+  EuiTabbedContent,
+  EuiCodeBlock,
+  EuiSpacer,
+  EuiPanel,
 } from '@elastic/eui';
-import { getServices } from '../../../opensearch_dashboards_services';
+import { i18n } from '@osd/i18n';
+import {
+  Query,
+  QueryStringContract,
+  SavedQuery,
+  SavedQueryService,
+} from '../../../../../data/public/';
 
 interface Props {
+  queryString: QueryStringContract;
+  savedQuery: SavedQueryService;
+  query: Query | undefined;
   timeFieldName?: string;
-  queryLanguage?: string;
 }
 
-export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
-  let timeFieldMessage;
+export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldName }: Props) => {
+  // Commented out due to no usage in code
+  // See: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8149
+  //
+  // let luceneQueryMessage;
+  //
+  // if (queryLanguage === 'lucene') {
+  //   const searchExamples = [
+  //     {
+  //       description: <EuiCode>200</EuiCode>,
+  //       title: (
+  //         <EuiText size="s">
+  //           <strong>
+  //             <FormattedMessage
+  //               id="discover.noResults.searchExamples.anyField200StatusCodeExampleTitle"
+  //               defaultMessage="Find requests that contain the number 200, in any field"
+  //             />
+  //           </strong>
+  //         </EuiText>
+  //       ),
+  //     },
+  //     {
+  //       description: <EuiCode>status:200</EuiCode>,
+  //       title: (
+  //         <EuiText size="s">
+  //           <strong>
+  //             <FormattedMessage
+  //               id="discover.noResults.searchExamples.statusField200StatusCodeExampleTitle"
+  //               defaultMessage="Find 200 in the status field"
+  //             />
+  //           </strong>
+  //         </EuiText>
+  //       ),
+  //     },
+  //     {
+  //       description: <EuiCode>status:[400 TO 499]</EuiCode>,
+  //       title: (
+  //         <EuiText size="s">
+  //           <strong>
+  //             <FormattedMessage
+  //               id="discover.noResults.searchExamples.400to499StatusCodeExampleTitle"
+  //               defaultMessage="Find all status codes between 400-499"
+  //             />
+  //           </strong>
+  //         </EuiText>
+  //       ),
+  //     },
+  //     {
+  //       description: <EuiCode>status:[400 TO 499] AND extension:PHP</EuiCode>,
+  //       title: (
+  //         <EuiText size="s">
+  //           <strong>
+  //             <FormattedMessage
+  //               id="discover.noResults.searchExamples.400to499StatusCodeWithPhpExtensionExampleTitle"
+  //               defaultMessage="Find status codes 400-499 with the extension php"
+  //             />
+  //           </strong>
+  //         </EuiText>
+  //       ),
+  //     },
+  //     {
+  //       description: <EuiCode>status:[400 TO 499] AND (extension:php OR extension:html)</EuiCode>,
+  //       title: (
+  //         <EuiText size="s">
+  //           <strong>
+  //             <FormattedMessage
+  //               id="discover.noResults.searchExamples.400to499StatusCodeWithPhpOrHtmlExtensionExampleTitle"
+  //               defaultMessage="Find status codes 400-499 with the extension php or html"
+  //             />
+  //           </strong>
+  //         </EuiText>
+  //       ),
+  //     },
+  //   ];
+  //
+  //   luceneQueryMessage = (
+  //     <Fragment>
+  //       <EuiSpacer size="xl" />
+  //
+  //       <EuiText size="s">
+  //         <h3>
+  //           <FormattedMessage
+  //             id="discover.noResults.searchExamples.refineYourQueryTitle"
+  //             defaultMessage="Refine your query"
+  //           />
+  //         </h3>
+  //
+  //         <p>
+  //           <FormattedMessage
+  //             id="discover.noResults.searchExamples.howTosearchForWebServerLogsDescription"
+  //             defaultMessage="The search bar at the top uses OpenSearch&rsquo;s support for Lucene {queryStringSyntaxLink}.
+  //               Here are some examples of how you can search for web server logs that have been parsed into a few fields."
+  //             values={{
+  //               queryStringSyntaxLink: (
+  //                 <EuiLink
+  //                   target="_blank"
+  //                   href={getServices().docLinks.links.opensearch.queryDSL.base}
+  //                 >
+  //                   <FormattedMessage
+  //                     id="discover.noResults.searchExamples.queryStringSyntaxLinkText"
+  //                     defaultMessage="Query String syntax"
+  //                   />
+  //                 </EuiLink>
+  //               ),
+  //             }}
+  //           />
+  //         </p>
+  //       </EuiText>
+  //
+  //       <EuiSpacer size="m" />
+  //
+  //       <EuiDescriptionList type="column" listItems={searchExamples} />
+  //
+  //       <EuiSpacer size="xl" />
+  //     </Fragment>
+  //   );
+  // }
 
-  if (timeFieldName) {
-    timeFieldMessage = (
-      <Fragment>
-        <EuiSpacer size="xl" />
+  const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
+  const [sampleQueries, setSampleQueries] = useState<any>([]);
 
-        <EuiText size="s">
-          <h2 data-test-subj="discoverNoResultsTimefilter">
-            <FormattedMessage
-              id="discover.noResults.expandYourTimeRangeTitle"
-              defaultMessage="Expand your time range"
-            />
-          </h2>
+  useEffect(() => {
+    const fetchSavedQueries = async () => {
+      const { queries: savedQueryItems } = await savedQuery.findSavedQueries('', 1000);
+      setSavedQueries(
+        savedQueryItems.filter((sq) => query?.language === sq.attributes.query.language)
+      );
+    };
 
-          <p>
-            <FormattedMessage
-              id="discover.noResults.queryMayNotMatchTitle"
-              defaultMessage="One or more of the indices you&rsquo;re looking at contains a date field. Your query may
-                  not match anything in the current time range, or there may not be any data at all in
-                  the currently selected time range. You can try changing the time range to one which contains data."
-            />
-          </p>
-        </EuiText>
-      </Fragment>
-    );
-  }
+    fetchSavedQueries();
+  }, [setSavedQueries, query, savedQuery]);
 
-  let luceneQueryMessage;
+  useEffect(() => {
+    // Samples for the language
+    const newSampleQueries: any = [];
+    if (query?.language) {
+      const languageSampleQueries = queryString.getLanguageService()?.getLanguage(query.language)
+        ?.sampleQueries;
+      if (Array.isArray(languageSampleQueries)) {
+        newSampleQueries.push(...languageSampleQueries);
+      }
+    }
 
-  if (queryLanguage === 'lucene') {
-    const searchExamples = [
-      {
-        description: <EuiCode>200</EuiCode>,
-        title: (
-          <EuiText size="s">
-            <strong>
-              <FormattedMessage
-                id="discover.noResults.searchExamples.anyField200StatusCodeExampleTitle"
-                defaultMessage="Find requests that contain the number 200, in any field"
-              />
-            </strong>
-          </EuiText>
-        ),
-      },
-      {
-        description: <EuiCode>status:200</EuiCode>,
-        title: (
-          <EuiText size="s">
-            <strong>
-              <FormattedMessage
-                id="discover.noResults.searchExamples.statusField200StatusCodeExampleTitle"
-                defaultMessage="Find 200 in the status field"
-              />
-            </strong>
-          </EuiText>
-        ),
-      },
-      {
-        description: <EuiCode>status:[400 TO 499]</EuiCode>,
-        title: (
-          <EuiText size="s">
-            <strong>
-              <FormattedMessage
-                id="discover.noResults.searchExamples.400to499StatusCodeExampleTitle"
-                defaultMessage="Find all status codes between 400-499"
-              />
-            </strong>
-          </EuiText>
-        ),
-      },
-      {
-        description: <EuiCode>status:[400 TO 499] AND extension:PHP</EuiCode>,
-        title: (
-          <EuiText size="s">
-            <strong>
-              <FormattedMessage
-                id="discover.noResults.searchExamples.400to499StatusCodeWithPhpExtensionExampleTitle"
-                defaultMessage="Find status codes 400-499 with the extension php"
-              />
-            </strong>
-          </EuiText>
-        ),
-      },
-      {
-        description: <EuiCode>status:[400 TO 499] AND (extension:php OR extension:html)</EuiCode>,
-        title: (
-          <EuiText size="s">
-            <strong>
-              <FormattedMessage
-                id="discover.noResults.searchExamples.400to499StatusCodeWithPhpOrHtmlExtensionExampleTitle"
-                defaultMessage="Find status codes 400-499 with the extension php or html"
-              />
-            </strong>
-          </EuiText>
-        ),
-      },
+    // Samples for the dataset type
+    if (query?.dataset?.type) {
+      const datasetType = queryString.getDatasetService()?.getType(query.dataset.type);
+      if (datasetType?.getSampleQueries) {
+        const sampleQueriesResponse = datasetType.getSampleQueries(query.dataset, query.language);
+        if (Array.isArray(sampleQueriesResponse)) {
+          setSampleQueries([...sampleQueriesResponse, ...newSampleQueries]);
+        } else if (sampleQueriesResponse instanceof Promise) {
+          sampleQueriesResponse
+            .then((datasetSampleQueries: any) => {
+              if (Array.isArray(datasetSampleQueries)) {
+                setSampleQueries([...datasetSampleQueries, ...newSampleQueries]);
+              }
+            })
+            .catch((error: any) => {
+              // noop
+            });
+        }
+      }
+    }
+  }, [queryString, query]);
+
+  const tabs = useMemo(() => {
+    const buildSampleQueryBlock = (sampleTitle: string, sampleQuery: string) => {
+      return (
+        <>
+          <EuiText size="s">{sampleTitle}</EuiText>
+          <EuiSpacer size="s" />
+          <EuiCodeBlock isCopyable>{sampleQuery}</EuiCodeBlock>
+          <EuiSpacer size="s" />
+        </>
+      );
+    };
+    return [
+      ...(sampleQueries.length > 0
+        ? [
+            {
+              id: 'sample_queries',
+              name: i18n.translate('discover.emptyPrompt.sampleQueries.title', {
+                defaultMessage: 'Sample Queries',
+              }),
+              content: (
+                <EuiPanel hasBorder={false} hasShadow={false}>
+                  <EuiSpacer size="s" />
+                  {sampleQueries
+                    .slice(0, 5)
+                    .map((sampleQuery: any) =>
+                      buildSampleQueryBlock(sampleQuery.title, sampleQuery.query)
+                    )}
+                </EuiPanel>
+              ),
+            },
+          ]
+        : []),
+      ...(savedQueries.length > 0
+        ? [
+            {
+              id: 'saved_queries',
+              name: i18n.translate('discover.emptyPrompt.savedQueries.title', {
+                defaultMessage: 'Saved Queries',
+              }),
+              content: (
+                <Fragment>
+                  <EuiSpacer />
+                  {savedQueries.map((sq) =>
+                    buildSampleQueryBlock(sq.id, sq.attributes.query.query as string)
+                  )}
+                </Fragment>
+              ),
+            },
+          ]
+        : []),
     ];
-
-    luceneQueryMessage = (
-      <Fragment>
-        <EuiSpacer size="xl" />
-
-        <EuiText size="s">
-          <h3>
-            <FormattedMessage
-              id="discover.noResults.searchExamples.refineYourQueryTitle"
-              defaultMessage="Refine your query"
-            />
-          </h3>
-
-          <p>
-            <FormattedMessage
-              id="discover.noResults.searchExamples.howTosearchForWebServerLogsDescription"
-              defaultMessage="The search bar at the top uses OpenSearch&rsquo;s support for Lucene {queryStringSyntaxLink}.
-                Here are some examples of how you can search for web server logs that have been parsed into a few fields."
-              values={{
-                queryStringSyntaxLink: (
-                  <EuiLink
-                    target="_blank"
-                    href={getServices().docLinks.links.opensearch.queryDSL.base}
-                  >
-                    <FormattedMessage
-                      id="discover.noResults.searchExamples.queryStringSyntaxLinkText"
-                      defaultMessage="Query String syntax"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </EuiText>
-
-        <EuiSpacer size="m" />
-
-        <EuiDescriptionList type="column" listItems={searchExamples} />
-
-        <EuiSpacer size="xl" />
-      </Fragment>
-    );
-  }
+  }, [savedQueries, sampleQueries]);
 
   return (
     <I18nProvider>
-      <EuiPanel hasBorder={false} hasShadow={false} color="transparent">
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
-              defaultMessage="No results match your search criteria"
-            />
-          }
-          color="warning"
-          iconType="help"
+      <>
+        <EuiEmptyPrompt
+          iconType="editorCodeBlock"
+          iconColor="default"
           data-test-subj="discoverNoResults"
+          title={
+            <EuiText size="s">
+              <h2>
+                {i18n.translate('discover.emptyPrompt.title', {
+                  defaultMessage: 'No Results',
+                })}
+              </h2>
+            </EuiText>
+          }
+          body={
+            <EuiText size="s" data-test-subj="discoverNoResultsTimefilter">
+              <p>
+                {i18n.translate('discover.emptyPrompt.body', {
+                  defaultMessage:
+                    'Try selecting a different data source, expanding your time range or modifying the query & filters.',
+                })}
+              </p>
+            </EuiText>
+          }
         />
-        {timeFieldMessage}
-        {luceneQueryMessage}
-      </EuiPanel>
+        {tabs.length > 0 && (
+          <div
+            className="discoverNoResults-sampleContainer"
+            data-test-subj="discoverNoResultsSampleContainer"
+          >
+            <EuiTabbedContent tabs={tabs} />
+          </div>
+        )}
+      </>
     </I18nProvider>
   );
 };

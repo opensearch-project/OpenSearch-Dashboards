@@ -25,11 +25,20 @@ const THEME_VERSION_VALUE_MAP = {
 const THEME_VERSIONS = Object.keys(THEME_VERSION_LABEL_MAP);
 const THEME_TAGS = THEME_VERSIONS.flatMap((v) => THEME_MODES.map((m) => `${v}${m}`));
 
+// Setup theme options to be backwards compatible with the fact that v8 was persisted with its
+// label rather than with the correct themeVersion value
+const THEME_SCHEMA_VALUES = THEME_VERSIONS.concat(THEME_VERSION_LABEL_MAP.v8);
+const THEME_OPTIONS = THEME_VERSIONS.map((v) => (v !== 'v8' ? v : THEME_VERSION_LABEL_MAP.v8));
+
 exports.themeVersionLabelMap = THEME_VERSION_LABEL_MAP;
 
 exports.themeVersionValueMap = THEME_VERSION_VALUE_MAP;
 
 exports.themeTags = THEME_TAGS;
+
+exports.themeSchemaValues = THEME_SCHEMA_VALUES;
+
+exports.themeOptions = THEME_OPTIONS;
 
 exports.themeCssDistFilenames = THEME_VERSIONS.reduce((map, v) => {
   map[v] = THEME_MODES.reduce((acc, m) => {

@@ -74,11 +74,11 @@ export const getLegacyTopNavConfig = (
       className: savedVisBuilderVis?.id && originatingApp ? 'saveAsButton' : '',
       label:
         savedVisBuilderVis?.id && originatingApp
-          ? i18n.translate('visBuilder.topNavMenu.saveVisualizationAsButtonLabel', {
-              defaultMessage: 'save as',
+          ? i18n.translate('visBuilder.topNavMenu.saveAsVisualizationAsButtonLabel', {
+              defaultMessage: 'Save as',
             })
           : i18n.translate('visBuilder.topNavMenu.saveVisualizationButtonLabel', {
-              defaultMessage: 'save',
+              defaultMessage: 'Save',
             }),
       testId: 'visBuilderSaveButton',
       disableButton: !!saveDisabledReason,
@@ -89,7 +89,7 @@ export const getLegacyTopNavConfig = (
       ? [
           {
             id: 'saveAndReturn',
-            label: i18n.translate('visualize.topNavMenu.saveAndReturnVisualizationButtonLabel', {
+            label: i18n.translate('visBuilder.topNavMenu.saveAndReturnVisualizationButtonLabel', {
               defaultMessage: 'Save and return',
             }),
             emphasize: true,
@@ -128,14 +128,14 @@ export const getTopNavConfig = (
       tooltip: !!saveDisabledReason
         ? saveDisabledReason
         : savedVisBuilderVis?.id && originatingApp
-        ? i18n.translate('visBuilder.topNavMenu.saveVisualizationAsButtonLabel', {
-            defaultMessage: 'save as',
+        ? i18n.translate('visBuilder.topNavMenu.saveAsVisualizationAsButtonLabel', {
+            defaultMessage: 'Save as',
           })
         : i18n.translate('visBuilder.topNavMenu.saveVisualizationButtonLabel', {
-            defaultMessage: 'save',
+            defaultMessage: 'Save',
           }),
       ariaLabel: i18n.translate('visBuilder.topNavMenu.saveVisualizationAsButtonLabel', {
-        defaultMessage: 'save',
+        defaultMessage: 'Save',
       }),
       testId: 'visBuilderSaveButton',
       run: navActions.save,
@@ -146,7 +146,7 @@ export const getTopNavConfig = (
     ...(originatingApp && savedVisBuilderVis && savedVisBuilderVis.id
       ? [
           {
-            tooltip: i18n.translate('visualize.topNavMenu.openInspectorTooltip', {
+            tooltip: i18n.translate('visBuilder.topNavMenu.openInspectorTooltip', {
               defaultMessage: 'Save and return',
             }),
             ariaLabel: i18n.translate(
@@ -168,10 +168,15 @@ export const getTopNavConfig = (
 };
 
 export const getOnSave = (
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   savedVisBuilderVis,
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   originatingApp,
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   visualizationIdFromUrl,
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   dispatch,
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   services
 ) => {
   const onSave = async ({
@@ -321,6 +326,7 @@ export const getNavActions = (
   };
   navActions.saveAndReturn = saveAndReturnNavAction;
 
+  // @ts-expect-error TS7006 TODO(ts-error): fixme
   const saveNavAction = (_anchorElement) => {
     const saveModal = (
       <SavedObjectSaveModalOrigin

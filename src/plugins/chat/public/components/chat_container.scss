@@ -1,0 +1,17 @@
+.chatContainer {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  grid-template-areas:
+    "header"
+    "context"
+    "messages"
+    "input";
+  padding: 0 8px 8px 0;
+
+  &--fullscreen {
+    padding: 0 8px 8px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}

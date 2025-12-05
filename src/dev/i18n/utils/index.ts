@@ -54,6 +54,7 @@ export {
   arrayify,
   // classes
   ErrorReporter, // @ts-ignore
+  FailReporter, // @ts-ignore
 } from './utils';
 
 export { verifyICUMessage } from './verify_icu_message';

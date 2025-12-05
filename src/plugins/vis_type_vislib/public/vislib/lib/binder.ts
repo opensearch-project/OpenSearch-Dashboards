@@ -58,6 +58,7 @@ export class Binder {
   jqOn(el: HTMLElement, ...args: [string, (event: JQueryEventObject) => void]) {
     const $el = $(el);
     $el.on(...args);
+    // @ts-expect-error TS2769 TODO(ts-error): fixme
     this.disposal.push(() => $el.off(...args));
   }
 

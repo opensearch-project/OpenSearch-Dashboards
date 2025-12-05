@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ScopedHistory } from 'src/core/public';
 import { migrateAppState } from '../utils/migrate_app_state';
 import {
   IOsdUrlStateStorage,
@@ -40,13 +41,14 @@ export const createDashboardGlobalAndAppState = ({
     opensearchDashboardsVersion,
     usageCollection,
     history,
+    scopedHistory,
     data: { query },
   } = services;
 
-  /* 
+  /*
   Function migrateAppState() does two things
   1. Migrate panel before version 7.3.0 to the 7.3.0 panel structure.
-     There are no changes to the panel structure after version 7.3.0 to the current 
+     There are no changes to the panel structure after version 7.3.0 to the current
      OpenSearch version so no need to migrate panels that are version 7.3.0 or higher
   2. Update the version number on each panel to the current version.
   */
@@ -131,7 +133,7 @@ export const createDashboardGlobalAndAppState = ({
     osdUrlStateStorage
   );
 
-  updateStateUrl({ osdUrlStateStorage, state: initialState, replace: true });
+  updateStateUrl({ osdUrlStateStorage, state: initialState, scopedHistory, replace: true });
   // start syncing the appState with the ('_a') url
   startStateSync();
   return { stateContainer, stopStateSync, stopSyncingQueryServiceStateWithUrl };
@@ -147,15 +149,26 @@ export const createDashboardGlobalAndAppState = ({
 export const updateStateUrl = ({
   osdUrlStateStorage,
   state,
+  scopedHistory,
   replace,
 }: {
   osdUrlStateStorage: IOsdUrlStateStorage;
   state: DashboardAppState;
+  scopedHistory: ScopedHistory;
   replace: boolean;
 }) => {
   osdUrlStateStorage.set(APP_STATE_STORAGE_KEY, toUrlState(state), { replace });
   // immediately forces scheduled updates and changes location
-  return osdUrlStateStorage.flush({ replace });
+  // scoped history state is preserved to allow embeddable state transfer
+  const previousState = scopedHistory.location.state;
+  const changed = osdUrlStateStorage.flush({ replace });
+  if (changed) {
+    scopedHistory.replace({
+      ...scopedHistory.location,
+      state: previousState,
+    });
+  }
+  return changed;
 };
 
 const toUrlState = (state: DashboardAppState): DashboardAppStateInUrl => {

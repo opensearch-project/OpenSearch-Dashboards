@@ -172,8 +172,28 @@ export class AdvancedSettingsComponent extends Component<
   mapConfig(config: IUiSettingsClient) {
     const all = config.getAll();
     const userSettingsEnabled = config.get('theme:enableUserControl');
+    const isDashboardAdmin = !!this.props.application.capabilities.dashboards?.isDashboardAdmin;
+
     return Object.entries(all)
-      .filter(([, setting]) => setting.scope !== UiSettingScope.USER)
+      .filter(([, setting]) => {
+        const scope = setting.scope;
+        // if scope is not defined, then it's a global ui setting
+        if (!scope) {
+          return true;
+        }
+
+        if (typeof scope === 'string') {
+          return scope === UiSettingScope.GLOBAL || scope === UiSettingScope.DASHBOARD_ADMIN;
+        }
+
+        if (Array.isArray(scope)) {
+          return (
+            scope.includes(UiSettingScope.GLOBAL) || scope.includes(UiSettingScope.DASHBOARD_ADMIN)
+          );
+        }
+
+        return false;
+      })
       .map((setting) => {
         return toEditableConfig({
           def: setting[1],
@@ -181,6 +201,8 @@ export class AdvancedSettingsComponent extends Component<
           value: setting[1].userValue,
           isCustom: config.isCustom(setting[0]),
           isOverridden: config.isOverridden(setting[0]),
+          isPermissionControlled:
+            all[setting[0]].scope === UiSettingScope.DASHBOARD_ADMIN && !isDashboardAdmin,
           userSettingsEnabled,
         });
       })
@@ -241,7 +263,6 @@ export class AdvancedSettingsComponent extends Component<
       if (!this.props.useUpdatedUX) {
         return (
           <>
-            <EuiSpacer size="m" />
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem>
                 <PageTitle />
@@ -257,6 +278,7 @@ export class AdvancedSettingsComponent extends Component<
             <PageSubtitle />
             <EuiSpacer size="m" />
             <CallOuts />
+            <EuiSpacer size="m" />
           </>
         );
       } else {
@@ -272,7 +294,7 @@ export class AdvancedSettingsComponent extends Component<
               ]}
             />
             <Search query={query} categories={this.categories} onQueryChange={this.onQueryChange} />
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
           </>
         );
       }

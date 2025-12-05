@@ -1,0 +1,50 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+$hoverIconSize: $euiSizeXS * 2 + $euiSizeL;
+
+.exploreSidebarItem__fieldPopoverPanel {
+  min-width: 260px;
+  max-width: 300px;
+}
+
+.osdDiscoverSideBar__wrap {
+  max-width: 100%;
+  z-index: $euiZContentMenu;
+}
+
+.toggleFieldFilterButton {
+  span:is([class$="__textShift"]) {
+    min-width: 0;
+  }
+}
+
+.exploreSidebarField {
+  min-height: $hoverIconSize;
+  position: relative;
+
+  @include ouiBreakpoint("xs", "s", "m") {
+    // adding padding as action buttons will always be visible in small viewport
+    padding-right: 52px;
+  }
+
+  &__actionButtons {
+    background-color: $euiColorLightestShade;
+    position: absolute;
+    right: $euiSizeS;
+    display: flex;
+    gap: $euiSizeXS;
+    opacity: 0;
+
+    @include ouiBreakpoint("xs", "s", "m") {
+      background-color: transparent;
+      opacity: 1;
+    }
+  }
+
+  &:hover .exploreSidebarField__actionButtons {
+    opacity: 1;
+  }
+}

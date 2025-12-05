@@ -4,9 +4,9 @@
  */
 
 import { trimEnd } from 'lodash';
-import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
 import { CoreStart } from 'opensearch-dashboards/public';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -36,16 +36,21 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     signal?: AbortSignal,
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
-    const isAsync = strategy === SEARCH_STRATEGY.SQL_ASYNC;
     const context: EnhancedFetchContext = {
       http: this.deps.http,
       path: trimEnd(`${API.SEARCH}/${strategy}`),
       signal,
+      body: {
+        pollQueryResultsParams: request.params?.pollQueryResultsParams,
+        timeRange: request.params?.body?.timeRange,
+      },
     };
 
-    if (isAsync) this.notifications.toasts.add('Fetching data...');
-    return fetch(context, this.queryService.queryString.getQuery()).pipe(
-      tap(() => isAsync && this.notifications.toasts.addSuccess('Fetch complete...')),
+    // Use query from request if available, otherwise fall back to queryStringManager
+    const query =
+      request.params?.body?.query?.queries?.[0] || this.queryService.queryString.getQuery();
+
+    return fetch(context, query).pipe(
       catchError((error) => {
         return throwError(error);
       })
@@ -61,7 +66,17 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       const datasetTypeConfig = this.queryService.queryString
         .getDatasetService()
         .getType(datasetType);
-      strategy = datasetTypeConfig?.getSearchOptions?.().strategy ?? strategy;
+      strategy = datasetTypeConfig?.getSearchOptions?.(dataset).strategy ?? strategy;
+
+      if (datasetTypeConfig?.languageOverrides?.SQL?.hideDatePicker === false) {
+        request.params = {
+          ...request.params,
+          body: {
+            ...request.params.body,
+            timeRange: this.queryService.timefilter.timefilter.getTime(),
+          },
+        };
+      }
     }
 
     return this.runSearch(request, options.abortSignal, strategy);

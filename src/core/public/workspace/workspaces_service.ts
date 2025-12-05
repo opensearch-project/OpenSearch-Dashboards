@@ -6,13 +6,8 @@
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { isEqual } from 'lodash';
 
-import { CoreService, WorkspaceAttribute } from '../../types';
-
-export type WorkspaceObject = WorkspaceAttribute & { readonly?: boolean };
-
-export interface IWorkspaceClient {
-  copy(objects: any[], targetWorkspace: string, includeReferencesDeep?: boolean): Promise<any>;
-}
+import { CoreService } from '../../types';
+import { IWorkspaceClient, WorkspaceObject } from './types';
 
 interface WorkspaceObservables {
   /**
@@ -41,9 +36,15 @@ interface WorkspaceObservables {
    * for consuming by others. For example, the `workspaceList` has been set, etc
    */
   initialized$: BehaviorSubject<boolean>;
+
+  /**
+   * The subject that use to emit workspace error during initialization, for exmaple,
+   * workspace stale state and workspace ID not found, which triggers the error page
+   */
+  workspaceError$: BehaviorSubject<string>;
 }
 
-enum WORKSPACE_ERROR {
+export enum WorkspaceError {
   WORKSPACE_IS_STALE = 'WORKSPACE_IS_STALE',
 }
 
@@ -61,6 +62,7 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
   private currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(null);
   private initialized$ = new BehaviorSubject<boolean>(false);
   private client$ = new BehaviorSubject<IWorkspaceClient | null>(null);
+  private workspaceError$ = new BehaviorSubject<string>('');
 
   constructor() {
     combineLatest([this.initialized$, this.workspaceList$, this.currentWorkspaceId$]).subscribe(
@@ -79,12 +81,7 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
             /**
              * Current workspace is stale
              */
-            this.currentWorkspaceId$.error({
-              reason: WORKSPACE_ERROR.WORKSPACE_IS_STALE,
-            });
-            this.currentWorkspace$.error({
-              reason: WORKSPACE_ERROR.WORKSPACE_IS_STALE,
-            });
+            this.workspaceError$.next(WorkspaceError.WORKSPACE_IS_STALE);
           }
         }
       }
@@ -97,6 +94,7 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
       currentWorkspace$: this.currentWorkspace$,
       workspaceList$: this.workspaceList$,
       initialized$: this.initialized$,
+      workspaceError$: this.workspaceError$,
       setClient: (client: IWorkspaceClient) => {
         this.client$.next(client);
       },
@@ -110,6 +108,7 @@ export class WorkspacesService implements CoreService<WorkspacesSetup, Workspace
       workspaceList$: this.workspaceList$,
       initialized$: this.initialized$,
       client$: this.client$,
+      workspaceError$: this.workspaceError$,
     };
   }
 

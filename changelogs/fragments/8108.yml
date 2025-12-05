@@ -1,2 +1,0 @@
-fix:
-- Correct the size of disabled ValidatedDualRange components in InputControl visualizations ([#8108](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8108))

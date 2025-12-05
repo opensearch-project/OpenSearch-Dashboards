@@ -11,9 +11,13 @@ import {
   WorkspaceAttribute,
   WorkspacesSetup,
   IWorkspaceClient,
+  IWorkspaceResponse as IResponse,
+  SavedObjectsImportResponse,
+  WorkspaceFindOptions,
+  WorkspacePermissionMode,
 } from '../../../core/public';
-import { WorkspacePermissionMode } from '../common/constants';
 import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
+import { DataSourceAssociation } from './components/data_source_association/data_source_association';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -22,26 +26,6 @@ const join = (...uriComponents: Array<string | undefined>) =>
     .filter((comp): comp is string => Boolean(comp))
     .map(encodeURIComponent)
     .join('/');
-
-type IResponse<T> =
-  | {
-      result: T;
-      success: true;
-    }
-  | {
-      success: false;
-      error?: string;
-    };
-
-interface WorkspaceFindOptions {
-  page?: number;
-  perPage?: number;
-  search?: string;
-  searchFields?: string[];
-  sortField?: string;
-  sortOrder?: string;
-  permissionModes?: WorkspacePermissionMode[];
-}
 
 /**
  * Workspaces is OpenSearchDashboards's visualize mechanism allowing admins to
@@ -72,7 +56,7 @@ export class WorkspaceClient implements IWorkspaceClient {
    * Add a non-throw-error fetch method,
    * so that consumers only need to care about
    * if the success is false instead of wrapping the call with a try catch
-   * and judge the error both in catch clause and if(!success) cluase.
+   * and judge the error both in catch clause and if(!success) clause.
    */
   private safeFetch = async <T = any>(
     path: string,
@@ -121,17 +105,27 @@ export class WorkspaceClient implements IWorkspaceClient {
     });
 
     if (result?.success) {
-      const resultWithWritePermission = await this.list({
-        perPage: 999,
-        permissionModes: [WorkspacePermissionMode.LibraryWrite],
-      });
-      if (resultWithWritePermission?.success) {
+      const [resultWithWritePermission, resultWithOwnerPermission] = await Promise.all([
+        this.list({
+          perPage: 999,
+          permissionModes: [WorkspacePermissionMode.LibraryWrite],
+        }),
+        this.list({
+          perPage: 999,
+          permissionModes: [WorkspacePermissionMode.Write],
+        }),
+      ]);
+      if (resultWithWritePermission?.success && resultWithOwnerPermission?.success) {
         const workspaceIdsWithWritePermission = resultWithWritePermission.result.workspaces.map(
+          (workspace: WorkspaceAttribute) => workspace.id
+        );
+        const workspaceIdsWithOwnerPermission = resultWithOwnerPermission.result.workspaces.map(
           (workspace: WorkspaceAttribute) => workspace.id
         );
         const workspaces = result.result.workspaces.map((workspace: WorkspaceAttribute) => ({
           ...workspace,
           readonly: !workspaceIdsWithWritePermission.includes(workspace.id),
+          owner: workspaceIdsWithOwnerPermission.includes(workspace.id),
         }));
         this.workspaces.workspaceList$.next(workspaces);
       }
@@ -143,8 +137,10 @@ export class WorkspaceClient implements IWorkspaceClient {
   /**
    * This method will check if a valid workspace can be found by the given workspace id,
    * If so, perform a side effect of updating the core.workspace.currentWorkspaceId$.
+   * If not, trigger the workspace client-sider error.
    *
    * @param id workspace id
+   * @param workspaceError$ a stream to emit workspace error
    * @returns {Promise<IResponse<null>>} result for this operation
    */
   public async enterWorkspace(id: string): Promise<IResponse<null>> {
@@ -156,6 +152,7 @@ export class WorkspaceClient implements IWorkspaceClient {
         result: null,
       };
     } else {
+      this.workspaces.workspaceError$.next(workspaceResp.error!);
       return workspaceResp;
     }
   }
@@ -244,6 +241,42 @@ export class WorkspaceClient implements IWorkspaceClient {
   }
 
   /**
+   * Deletes multiple workspaces by a list of workspace id
+   *
+   * @param id
+   * @returns {Promise<IResponse<null>>} result for this operation
+   */
+  public async batchDelete(
+    ids: string[]
+  ): Promise<{ success: number; fail: number; failedIds: string[] }> {
+    const result: { success: number; fail: number; failedIds: string[] } = {
+      success: 0,
+      fail: 0,
+      failedIds: [],
+    };
+
+    for (const id of ids) {
+      try {
+        const response = await this.safeFetch<null>(this.getPath(id), { method: 'DELETE' });
+        if (response?.success) {
+          result.success += 1;
+        } else {
+          result.fail += 1;
+          result.failedIds.push(id);
+        }
+      } catch (error) {
+        result.fail += 1;
+        result.failedIds.push(id);
+      }
+    }
+
+    this.workspaces.currentWorkspaceId$.next('');
+    await this.updateWorkspaceList();
+
+    return result;
+  }
+
+  /**
    * Search for workspaces
    *
    * @param {object} [options={}]
@@ -326,13 +359,13 @@ export class WorkspaceClient implements IWorkspaceClient {
    * @param {Array<{ id: string; type: string }>} objects
    * @param {string} targetWorkspace
    * @param {boolean} includeReferencesDeep
-   * @returns {Promise<IResponse<any>>} result for this operation
+   * @returns {Promise<SavedObjectsImportResponse>} result for this operation
    */
   public async copy(
     objects: Array<{ id: string; type: string }>,
     targetWorkspace: string,
     includeReferencesDeep: boolean = true
-  ): Promise<IResponse<any>> {
+  ): Promise<SavedObjectsImportResponse> {
     const path = this.getPath('_duplicate_saved_objects');
     const body = {
       objects,
@@ -340,12 +373,46 @@ export class WorkspaceClient implements IWorkspaceClient {
       includeReferencesDeep,
     };
 
-    const result = await this.safeFetch(path, {
+    const result = await this.http.fetch<SavedObjectsImportResponse>(path, {
       method: 'POST',
       body: JSON.stringify(body),
     });
 
     return result;
+  }
+
+  public async associate(savedObjects: Array<{ id: string; type: string }>, workspaceId: string) {
+    const path = this.getPath('_associate');
+    const body = {
+      savedObjects,
+      workspaceId,
+    };
+    const result = await this.safeFetch<Array<{ id: string; type: string }>>(path, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+
+    return result;
+  }
+
+  public async dissociate(savedObjects: Array<{ id: string; type: string }>, workspaceId: string) {
+    const path = this.getPath('_dissociate');
+    const body = {
+      savedObjects,
+      workspaceId,
+    };
+    const result = await this.safeFetch<Array<{ id: string; type: string }>>(path, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+
+    return result;
+  }
+
+  ui() {
+    return {
+      DataSourceAssociation,
+    };
   }
 
   public stop() {

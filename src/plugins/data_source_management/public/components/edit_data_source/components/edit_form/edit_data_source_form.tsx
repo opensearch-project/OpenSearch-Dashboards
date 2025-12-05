@@ -22,6 +22,11 @@ import {
   EuiSpacer,
   EuiText,
   EuiSuperSelectOption,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
+  EuiSplitPanel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -35,8 +40,8 @@ import {
   AuthType,
   DataSourceAttributes,
   DataSourceManagementContextValue,
+  DataSourceManagementToastMessageItem,
   sigV4ServiceOptions,
-  ToastMessageItem,
   UsernamePasswordTypedContent,
 } from '../../../../types';
 import { context as contextType } from '../../../../../../opensearch_dashboards_react/public';
@@ -49,6 +54,7 @@ import {
 import { UpdatePasswordModal } from '../update_password_modal';
 import { UpdateAwsCredentialModal } from '../update_aws_credential_modal';
 import { extractRegisteredAuthTypeCredentials, getDefaultAuthMethod } from '../../../utils';
+import { DataSourceOptionalLabelSuffix } from '../../../data_source_optional_label_suffix';
 
 export interface EditDataSourceProps {
   navigation: NavigationPublicPluginStart;
@@ -60,9 +66,10 @@ export interface EditDataSourceProps {
   handleSubmit: (formValues: DataSourceAttributes) => Promise<void>;
   handleTestConnection: (formValues: DataSourceAttributes) => Promise<void>;
   onDeleteDataSource?: () => Promise<void>;
-  onSetDefaultDataSource: () => Promise<void>;
-  displayToastMessage: (info: ToastMessageItem) => void;
+  onSetDefaultDataSource: () => Promise<boolean>;
+  displayToastMessage: (info: DataSourceManagementToastMessageItem) => void;
   canManageDataSource: boolean;
+  crossClusterConnectionAlias?: string;
 }
 export interface EditDataSourceState {
   formErrorsByField: CreateEditDataSourceValidation;
@@ -85,6 +92,7 @@ export interface EditDataSourceState {
 
 export class EditDataSourceForm extends React.Component<EditDataSourceProps, EditDataSourceState> {
   static contextType = contextType;
+  // @ts-expect-error TS2612 TODO(ts-error): fixme
   public readonly context!: DataSourceManagementContextValue;
   maskedPassword: string = '********';
   authOptions: Array<EuiSuperSelectOption<string>> = [];
@@ -108,6 +116,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       description: '',
       endpoint: '',
       auth: {
+        // @ts-expect-error TS2322 TODO(ts-error): fixme
         type: initialSelectedAuthMethod?.name,
         credentials: {
           ...initialSelectedAuthMethod?.credentialFormField,
@@ -229,6 +238,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   validateUsername = () => {
+    // @ts-expect-error TS2532, TS2339 TODO(ts-error): fixme
     const isValid = !!this.state.auth.credentials.username?.trim().length;
     this.setState({
       formErrorsByField: {
@@ -242,6 +252,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   validatePassword = () => {
+    // @ts-expect-error TS2532 TODO(ts-error): fixme
     const isValid = !!this.state.auth.credentials.password;
     this.setState({
       formErrorsByField: {
@@ -288,6 +299,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   validateRegion = () => {
+    // @ts-expect-error TS2532, TS2339 TODO(ts-error): fixme
     const isValid = !!this.state.auth.credentials.region?.trim().length;
     this.setState({
       formErrorsByField: {
@@ -347,6 +359,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   onClickUpdateDataSource = async () => {
     if (this.isFormValid()) {
       // update data source endpoint is currently not supported/allowed
+      // @ts-expect-error TS2739 TODO(ts-error): fixme
       const formValues: DataSourceAttributes = {
         title: this.state.title,
         description: this.state.description,
@@ -394,8 +407,9 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         this.setFormValuesForEditMode();
       } catch (e) {
         this.props.displayToastMessage({
-          id: 'dataSourcesManagement.editDataSource.editDataSourceFailMsg',
-          defaultMessage: 'Updating the Data Source failed with some errors.',
+          message: i18n.translate('dataSourcesManagement.editDataSource.editDataSourceFailMsg', {
+            defaultMessage: 'Updating the Data Source failed with some errors.',
+          }),
         });
       } finally {
         this.setState({ isLoading: false });
@@ -410,9 +424,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   setDefaultDataSource = async () => {
-    if (this.props.onSetDefaultDataSource) {
-      await this.props.onSetDefaultDataSource();
-    }
+    return await this.props.onSetDefaultDataSource();
   };
 
   onClickTestConnection = async () => {
@@ -452,6 +464,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         break;
     }
 
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     const formValues: DataSourceAttributes = {
       title: this.state.title,
       description: this.state.description,
@@ -463,16 +476,18 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       await this.props.handleTestConnection(formValues);
 
       this.props.displayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.testConnectionSuccessMsg',
-        defaultMessage:
-          'Connecting to the endpoint using the provided authentication method was successful.',
+        message: i18n.translate('dataSourcesManagement.editDataSource.testConnectionSuccessMsg', {
+          defaultMessage:
+            'Connecting to the endpoint using the provided authentication method was successful.',
+        }),
         success: true,
       });
     } catch (e) {
       this.props.displayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.testConnectionFailMsg',
-        defaultMessage:
-          'Failed Connecting to the endpoint using the provided authentication method.',
+        message: i18n.translate('dataSourcesManagement.editDataSource.testConnectionFailMsg', {
+          defaultMessage:
+            'Failed Connecting to the endpoint using the provided authentication method.',
+        }),
       });
     } finally {
       this.setState({ isLoading: false });
@@ -500,6 +515,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     const updateAttributes: DataSourceAttributes = {
       title,
       description,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       endpoint: undefined,
       auth: {
         type: auth.type,
@@ -514,14 +530,16 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     try {
       await this.props.handleSubmit(updateAttributes);
       this.props.displayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.updatePasswordSuccessMsg',
-        defaultMessage: 'Password updated successfully.',
+        message: i18n.translate('dataSourcesManagement.editDataSource.updatePasswordSuccessMsg', {
+          defaultMessage: 'Password updated successfully.',
+        }),
         success: true,
       });
     } catch (e) {
       this.props.displayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.updatePasswordFailMsg',
-        defaultMessage: 'Updating the stored password failed with some errors.',
+        message: i18n.translate('dataSourcesManagement.editDataSource.updatePasswordFailMsg', {
+          defaultMessage: 'Updating the stored password failed with some errors.',
+        }),
       });
     }
   };
@@ -532,6 +550,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     const updateAttributes: DataSourceAttributes = {
       title,
       description,
+      // @ts-expect-error TS2322 TODO(ts-error): fixme
       endpoint: undefined,
       auth: {
         type: auth.type,
@@ -547,14 +566,16 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     try {
       await this.props.handleSubmit(updateAttributes);
       this.props.displayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.updatePasswordSuccessMsg',
-        defaultMessage: 'Password updated successfully.',
+        message: i18n.translate('dataSourcesManagement.editDataSource.updatePasswordSuccessMsg', {
+          defaultMessage: 'Password updated successfully.',
+        }),
         success: true,
       });
     } catch (e) {
       this.props.displayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.updatePasswordFailMsg',
-        defaultMessage: 'Updating the stored password failed with some errors.',
+        message: i18n.translate('dataSourcesManagement.editDataSource.updatePasswordFailMsg', {
+          defaultMessage: 'Updating the stored password failed with some errors.',
+        }),
       });
     }
   };
@@ -605,6 +626,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
         {this.state.showUpdatePasswordModal ? (
           <UpdatePasswordModal
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             username={this.state.auth?.credentials?.username || ''}
             handleUpdatePassword={this.updatePassword}
             closeUpdatePasswordModal={this.closePasswordModal}
@@ -633,7 +655,9 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
         {this.state.showUpdateAwsCredentialModal ? (
           <UpdateAwsCredentialModal
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             region={this.state.auth.credentials!.region}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             service={this.state.auth.credentials!.service}
             handleUpdateAwsCredential={this.updateAwsCredential}
             closeUpdateAwsCredentialModal={this.closeAwsCredentialModal}
@@ -663,24 +687,6 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     );
   };
 
-  /* Render field label with Optional text*/
-  renderFieldLabelAsOptional = (i18nId: string, defaultMessage: string) => {
-    return (
-      <>
-        {<FormattedMessage id={i18nId} defaultMessage={defaultMessage} />}{' '}
-        <i style={{ fontWeight: 'normal' }}>
-          -{' '}
-          {
-            <FormattedMessage
-              id="dataSourcesManagement.editDataSource.optionalText"
-              defaultMessage="optional"
-            />
-          }
-        </i>
-      </>
-    );
-  };
-
   /* Render Connection Details Panel */
   renderConnectionDetailsSection = () => {
     return (
@@ -697,75 +703,148 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         </EuiText>
 
         <EuiHorizontalRule margin="m" />
+        {this.props.crossClusterConnectionAlias
+          ? this.renderCrossClusterConnectionAlias()
+          : this.renderConnectionObjectDetails()}
+      </EuiPanel>
+    );
+  };
 
-        <EuiDescribedFormGroup
-          title={
-            <EuiText size="s">
-              <h3>
-                {
-                  <FormattedMessage
-                    id="dataSourcesManagement.editDataSource.objectDetailsText"
-                    defaultMessage="Object Details"
-                  />
-                }
-              </h3>
-            </EuiText>
-          }
-          description={
-            <p>
+  renderConnectionObjectDetails = () => {
+    return (
+      <EuiDescribedFormGroup
+        title={
+          <EuiText size="s">
+            <h3>
               {
                 <FormattedMessage
-                  id="dataSourcesManagement.editDataSource.objectDetailsDescription"
-                  defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+                  id="dataSourcesManagement.editDataSource.objectDetailsText"
+                  defaultMessage="Object Details"
                 />
               }
-            </p>
-          }
+            </h3>
+          </EuiText>
+        }
+        description={
+          <p>
+            {
+              <FormattedMessage
+                id="dataSourcesManagement.editDataSource.objectDetailsDescription"
+                defaultMessage="This connection information is used for reference in tables and when adding to a data source connection"
+              />
+            }
+          </p>
+        }
+      >
+        {/* Title */}
+        <EuiCompressedFormRow
+          label={i18n.translate('dataSourcesManagement.editDataSource.title', {
+            defaultMessage: 'Title',
+          })}
+          isInvalid={!!this.state.formErrorsByField.title.length}
+          error={this.state.formErrorsByField.title}
+          data-test-subj="editDataSourceTitleFormRow"
         >
-          {/* Title */}
-          <EuiCompressedFormRow
-            label={i18n.translate('dataSourcesManagement.editDataSource.title', {
+          <EuiCompressedFieldText
+            name="dataSourceTitle"
+            value={this.state.title || ''}
+            placeholder={i18n.translate('dataSourcesManagement.editDataSource.titlePlaceHolder', {
               defaultMessage: 'Title',
             })}
             isInvalid={!!this.state.formErrorsByField.title.length}
-            error={this.state.formErrorsByField.title}
-            data-test-subj="editDataSourceTitleFormRow"
-          >
-            <EuiCompressedFieldText
-              name="dataSourceTitle"
-              value={this.state.title || ''}
-              placeholder={i18n.translate('dataSourcesManagement.editDataSource.titlePlaceHolder', {
-                defaultMessage: 'Title',
-              })}
-              isInvalid={!!this.state.formErrorsByField.title.length}
-              onChange={this.onChangeTitle}
-              onBlur={this.validateTitle}
-              disabled={!this.props.canManageDataSource}
+            onChange={this.onChangeTitle}
+            onBlur={this.validateTitle}
+            disabled={!this.props.canManageDataSource}
+          />
+        </EuiCompressedFormRow>
+        {/* Description */}
+        <EuiCompressedFormRow
+          label={
+            <FormattedMessage
+              id="dataSourcesManagement.editDataSource.descriptionOptional"
+              defaultMessage="Description {optionalLabel}"
+              values={{ optionalLabel: <DataSourceOptionalLabelSuffix /> }}
             />
-          </EuiCompressedFormRow>
-          {/* Description */}
-          <EuiCompressedFormRow
-            label={this.renderFieldLabelAsOptional(
-              'dataSourceManagement.editDataSource.description',
-              'Description'
+          }
+          data-test-subj="editDataSourceDescriptionFormRow"
+        >
+          <EuiCompressedFieldText
+            name="dataSourceDescription"
+            value={this.state.description || ''}
+            placeholder={i18n.translate(
+              'dataSourcesManagement.editDataSource.descriptionPlaceholder',
+              {
+                defaultMessage: 'Description of the data source',
+              }
             )}
-            data-test-subj="editDataSourceDescriptionFormRow"
-          >
-            <EuiCompressedFieldText
-              name="dataSourceDescription"
-              value={this.state.description || ''}
-              placeholder={i18n.translate(
-                'dataSourcesManagement.editDataSource.descriptionPlaceholder',
-                {
-                  defaultMessage: 'Description of the data source',
-                }
-              )}
-              onChange={this.onChangeDescription}
-              disabled={!this.props.canManageDataSource}
-            />
-          </EuiCompressedFormRow>
-        </EuiDescribedFormGroup>
-      </EuiPanel>
+            onChange={this.onChangeDescription}
+            disabled={!this.props.canManageDataSource}
+          />
+        </EuiCompressedFormRow>
+      </EuiDescribedFormGroup>
+    );
+  };
+
+  renderCrossClusterConnectionAlias = () => {
+    return (
+      <div>
+        <EuiFlexGroup gutterSize="xl">
+          <EuiFlexItem>
+            <EuiDescriptionList>
+              <EuiDescriptionListTitle>
+                {i18n.translate('dataSourcesManagement.editDataSource.crossclustersearch.type', {
+                  defaultMessage: 'Type',
+                })}
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {i18n.translate(
+                  'dataSourcesManagement.editDataSource.crossclustersearch.type.value',
+                  {
+                    defaultMessage: 'OpenSearch (Cross cluster search)',
+                  }
+                )}{' '}
+              </EuiDescriptionListDescription>
+            </EuiDescriptionList>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiDescriptionList>
+              <EuiDescriptionListTitle>
+                {i18n.translate(
+                  'dataSourcesManagement.editDataSource.crossclustersearch.connectionalias',
+                  {
+                    defaultMessage: 'Connection alias',
+                  }
+                )}
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {i18n.translate(
+                  'dataSourcesManagement.editDataSource.crossclustersearch.connectionalias.value',
+                  {
+                    defaultMessage: '{alias}',
+                    values: { alias: this.props.crossClusterConnectionAlias },
+                  }
+                )}
+              </EuiDescriptionListDescription>
+            </EuiDescriptionList>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiDescriptionList>
+              <EuiDescriptionListTitle>
+                {i18n.translate(
+                  'dataSourcesManagement.editDataSource.crossclustersearch.sourcecluster',
+                  {
+                    defaultMessage: 'Source cluster',
+                  }
+                )}
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>{this.state.title}</EuiDescriptionListDescription>
+            </EuiDescriptionList>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="xl" />
+      </div>
     );
   };
 
@@ -855,6 +934,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
           <EuiCompressedSuperSelect
             options={this.authOptions}
             valueOfSelected={this.state.auth.type}
+            // @ts-expect-error TS2345 TODO(ts-error): fixme
             onChange={(value) => this.onChangeAuthType(value)}
             disabled={this.authOptions.length <= 1 || !this.props.canManageDataSource}
             name="Credential"
@@ -863,6 +943,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         </EuiCompressedFormRow>
 
         <EuiSpacer />
+        {/* @ts-expect-error TS2345 TODO(ts-error): fixme */}
         {this.renderSelectedAuthType(this.state.auth.type)}
       </>
     );
@@ -899,6 +980,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               }
             )}
             isInvalid={!!this.state.formErrorsByField.awsCredential.region.length}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             value={this.state.auth.credentials?.region || ''}
             onChange={this.onChangeRegion}
             onBlur={this.validateRegion}
@@ -914,8 +996,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         >
           <EuiCompressedSuperSelect
             options={sigV4ServiceOptions}
+            // @ts-expect-error TS2769 TODO(ts-error): fixme
             valueOfSelected={this.state.auth.credentials?.service}
             disabled={!this.props.canManageDataSource}
+            // @ts-expect-error TS2345 TODO(ts-error): fixme
             onChange={(value) => this.onChangeSigV4ServiceName(value)}
             name="ServiceName"
             data-test-subj="editDataSourceFormSigV4ServiceTypeSelect"
@@ -937,6 +1021,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               }
             )}
             type={'dual'}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             value={
               this.props.existingDataSource.auth.type === AuthType.SigV4
                 ? this.maskedPassword
@@ -966,6 +1051,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               }
             )}
             type={'dual'}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             value={
               this.props.existingDataSource.auth.type === AuthType.SigV4
                 ? this.maskedPassword
@@ -1006,6 +1092,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                 defaultMessage: 'Username to connect to data source',
               }
             )}
+            // @ts-expect-error TS2322 TODO(ts-error): fixme
             value={this.state.auth.credentials?.username || ''}
             isInvalid={!!this.state.formErrorsByField.createCredential?.username?.length}
             onChange={this.onChangeUsername}
@@ -1031,6 +1118,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                   }
                 )}
                 type={'dual'}
+                // @ts-expect-error TS2322 TODO(ts-error): fixme
                 value={
                   this.props.existingDataSource.auth.type === AuthType.UsernamePasswordType
                     ? this.maskedPassword
@@ -1057,6 +1145,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   didFormValuesChange = () => {
+    // @ts-expect-error TS2741 TODO(ts-error): fixme
     const formValues: DataSourceAttributes = {
       title: this.state.title,
       description: this.state.description,
@@ -1180,14 +1269,16 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
           <EuiSpacer size="m" />
 
-          {this.renderEndpointSection()}
+          {!this.props.crossClusterConnectionAlias && this.renderEndpointSection()}
 
           <EuiSpacer size="m" />
 
-          {this.renderAuthenticationSection()}
+          {!this.props.crossClusterConnectionAlias && this.renderAuthenticationSection()}
         </EuiForm>
 
-        {this.state.showUpdateOptions ? this.renderBottomBar() : null}
+        {this.state.showUpdateOptions && !this.props.crossClusterConnectionAlias
+          ? this.renderBottomBar()
+          : null}
 
         <EuiSpacer size="xl" />
         <EuiSpacer size="xl" />

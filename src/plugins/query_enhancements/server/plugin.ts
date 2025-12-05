@@ -15,12 +15,13 @@ import {
 } from '../../../core/server';
 import { SEARCH_STRATEGY } from '../common';
 import { ConfigSchema } from '../common/config';
-import { defineRoutes } from './routes';
+import { defineRoutes, defineSearchStrategyRouteProvider } from './routes';
 import {
-  pplSearchStrategyProvider,
+  pplAsyncSearchStrategyProvider,
   pplRawSearchStrategyProvider,
-  sqlSearchStrategyProvider,
+  pplSearchStrategyProvider,
   sqlAsyncSearchStrategyProvider,
+  sqlSearchStrategyProvider,
 } from './search';
 import {
   QueryEnhancementsPluginSetup,
@@ -28,6 +29,8 @@ import {
   QueryEnhancementsPluginStart,
 } from './types';
 import { OpenSearchEnhancements } from './utils';
+import { resourceManagerService } from './connections/resource_manager_service';
+import { BaseConnectionManager } from './connections/managers/base_connection_manager';
 
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
@@ -58,12 +61,19 @@ export class QueryEnhancementsPlugin
       this.logger,
       client
     );
+    const pplAsyncSearchStrategy = pplAsyncSearchStrategyProvider(
+      this.config$,
+      this.logger,
+      client
+    );
 
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL, pplSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL_RAW, pplRawSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL, sqlSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL_ASYNC, sqlAsyncSearchStrategy);
+    data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL_ASYNC, pplAsyncSearchStrategy);
 
+    // @ts-ignore https://github.com/opensearch-project/openSearch-Dashboards/issues/4274
     core.http.registerRouteHandlerContext('query_assist', () => ({
       logger: this.logger,
       configPromise: this.initializerContext.config
@@ -73,6 +83,7 @@ export class QueryEnhancementsPlugin
       dataSourceEnabled: !!dataSource,
     }));
 
+    // @ts-ignore https://github.com/opensearch-project/openSearch-Dashboards/issues/4274
     core.http.registerRouteHandlerContext('data_source_connection', () => ({
       logger: this.logger,
       configPromise: this.initializerContext.config
@@ -86,10 +97,15 @@ export class QueryEnhancementsPlugin
       ppl: pplSearchStrategy,
       sql: sqlSearchStrategy,
       sqlasync: sqlAsyncSearchStrategy,
+      pplasync: pplAsyncSearchStrategy,
     });
 
     this.logger.info('queryEnhancements: Setup complete');
-    return {};
+    return {
+      defineSearchStrategyRoute: defineSearchStrategyRouteProvider(this.logger, router),
+      registerResourceManager: (dataConnectionType: string, manager: BaseConnectionManager) =>
+        resourceManagerService.register(dataConnectionType, manager),
+    };
   }
 
   public start(core: CoreStart) {

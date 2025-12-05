@@ -48,8 +48,8 @@ const { OPENSEARCH_KEY_PATH, OPENSEARCH_CERT_PATH } = require('@osd/dev-utils');
     {
       // Note: the integration uses the OPENSEARCH_P12_PATH, but that keystore contains
       // the same key/cert as OPENSEARCH_KEY_PATH and OPENSEARCH_CERT_PATH
-      key: ssl ? fs.readFileSync(OPENSEARCH_KEY_PATH) : undefined,
-      cert: ssl ? fs.readFileSync(OPENSEARCH_CERT_PATH) : undefined,
+      key: ssl ? fs.readFileSync(OPENSEARCH_KEY_PATH, 'utf8') : undefined,
+      cert: ssl ? fs.readFileSync(OPENSEARCH_CERT_PATH, 'utf8') : undefined,
     },
     (req, res) => {
       const url = new URL(req.url, serverUrl);
@@ -74,11 +74,11 @@ const { OPENSEARCH_KEY_PATH, OPENSEARCH_CERT_PATH } = require('@osd/dev-utils');
     }
   );
 
-  // setup server auto close after 1 second of silence
+  // setup server auto close after 3 seconds of silence
   let serverCloseTimer;
   const delayServerClose = () => {
     clearTimeout(serverCloseTimer);
-    serverCloseTimer = setTimeout(() => server.close(), 1000);
+    serverCloseTimer = setTimeout(() => server.close(), 3000);
   };
   server.on('request', delayServerClose);
   server.on('listening', delayServerClose);

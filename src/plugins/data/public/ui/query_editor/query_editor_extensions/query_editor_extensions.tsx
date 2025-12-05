@@ -5,19 +5,30 @@
 
 import React, { useMemo } from 'react';
 import {
+  ACTION_BAR_BUTTONS_CONTAINER_ID,
   QueryEditorExtension,
   QueryEditorExtensionConfig,
   QueryEditorExtensionDependencies,
 } from './query_editor_extension';
+import { createOrGetExtensionContainer } from './utils';
 
 interface QueryEditorExtensionsProps extends QueryEditorExtensionDependencies {
   configMap?: Record<string, QueryEditorExtensionConfig>;
   componentContainer: Element;
   bannerContainer: Element;
+  bottomPanelContainer: Element;
+  queryControlsContainer: Element;
 }
 
 const QueryEditorExtensions: React.FC<QueryEditorExtensionsProps> = React.memo((props) => {
-  const { configMap, componentContainer, bannerContainer, ...dependencies } = props;
+  const {
+    configMap,
+    componentContainer,
+    bannerContainer,
+    bottomPanelContainer,
+    queryControlsContainer,
+    ...dependencies
+  } = props;
 
   const sortedConfigs = useMemo(() => {
     if (!configMap || Object.keys(configMap).length === 0) return [];
@@ -27,23 +38,35 @@ const QueryEditorExtensions: React.FC<QueryEditorExtensionsProps> = React.memo((
   return (
     <>
       {sortedConfigs.map((config) => {
-        const id = `osdQueryEditorExtensionComponent-${config.id}`;
+        const extensionComponentContainer = createOrGetExtensionContainer({
+          extensionConfigId: config.id,
+          containerName: 'osdQueryEditorExtensionComponent',
+          parentContainer: componentContainer,
+        });
 
-        let container = document.getElementById(id);
-        if (!container) {
-          container = document.createElement('div');
-          container.className = `osdQueryEditorExtensionComponent osdQueryEditorExtensionComponent__${config.id}`;
-          container.id = id;
-          componentContainer.appendChild(container);
-        }
+        const extensionQueryControlsContainer = createOrGetExtensionContainer({
+          extensionConfigId: config.id,
+          containerName: 'osdQueryEditorExtensionQueryControls',
+          parentContainer: queryControlsContainer,
+        });
+
+        // osdQueryEditorExtensionActionBarContainer styling is within Discovers results_action_bar.scss
+        const extensionActionBarContainer = createOrGetExtensionContainer({
+          extensionConfigId: config.id,
+          containerName: 'osdQueryEditorExtensionActionBarContainer',
+          parentContainer: document.getElementById(ACTION_BAR_BUTTONS_CONTAINER_ID),
+        });
 
         return (
           <QueryEditorExtension
             key={config.id}
             config={config}
             dependencies={dependencies}
-            componentContainer={container}
+            componentContainer={extensionComponentContainer}
             bannerContainer={bannerContainer}
+            bottomPanelContainer={bottomPanelContainer}
+            queryControlsContainer={extensionQueryControlsContainer}
+            actionBarContainer={extensionActionBarContainer}
           />
         );
       })}

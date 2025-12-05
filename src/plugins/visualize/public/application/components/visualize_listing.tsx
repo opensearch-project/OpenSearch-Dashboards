@@ -44,6 +44,7 @@ import { VisualizeConstants } from '../visualize_constants';
 import { getTableColumns, getNoItemsMessage } from '../utils';
 import { getUiActions } from '../../services';
 import { SAVED_OBJECT_DELETE_TRIGGER } from '../../../../saved_objects_management/public';
+// @ts-expect-error TS6133 TODO(ts-error): fixme
 import { HeaderVariant } from '../../../../../core/public/index';
 import { constructVisBuilderPath } from '../utils/construct_vis_builder_path';
 
@@ -89,7 +90,7 @@ export const VisualizeListing = () => {
     if (showUpdatedUx) {
       chrome.setBreadcrumbs([
         {
-          text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
+          text: i18n.translate('visualize.listingBreadcrumbsTitle', {
             defaultMessage: 'Visualizations',
           }),
         },
@@ -97,7 +98,7 @@ export const VisualizeListing = () => {
     } else {
       chrome.setBreadcrumbs([
         {
-          text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
+          text: i18n.translate('visualize.legacy.listingBreadcrumbsTitle', {
             defaultMessage: 'Visualize',
           }),
         },

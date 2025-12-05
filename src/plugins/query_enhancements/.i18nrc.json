@@ -1,7 +1,0 @@
-{
-  "prefix": "queryEnhancements",
-  "paths": {
-    "queryEnhancements": "."
-  },
-  "translations": ["translations/ja-JP.json"]
-}

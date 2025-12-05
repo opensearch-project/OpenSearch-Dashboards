@@ -47,6 +47,7 @@ describe('ensureMinimumTime', () => {
 
   it('resolves in the amount of time provided, at minimum', async () => {
     const startTime = new Date().getTime();
+    // @ts-expect-error TS2794 TODO(ts-error): fixme
     const promise = new Promise((resolve) => resolve());
     await ensureMinimumTime(promise, 100);
     const endTime = new Date().getTime();

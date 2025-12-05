@@ -128,9 +128,11 @@ export const EditIndexPattern = withRouter(
       setTags(indexPatternTags);
     }, [defaultIndex, indexPattern, indexPatternManagementStart.list]);
 
-    const setDefaultPattern = useCallback(() => {
-      uiSettings.set('defaultIndex', indexPattern.id);
-      setDefaultIndex(indexPattern.id || '');
+    const setDefaultPattern = useCallback(async () => {
+      const isSuccess = await uiSettings.set('defaultIndex', indexPattern.id);
+      if (isSuccess) {
+        setDefaultIndex(indexPattern.id || '');
+      }
     }, [uiSettings, indexPattern.id]);
 
     const refreshFields = () => {
@@ -162,6 +164,9 @@ export const EditIndexPattern = withRouter(
         }
         if (indexPattern.id) {
           Promise.resolve(data.indexPatterns.delete(indexPattern.id)).then(function () {
+            const datasetService = data.query.queryString.getDatasetService();
+            // @ts-expect-error TS2345 TODO(ts-error): fixme
+            datasetService.removeFromRecentDatasets(indexPattern.id);
             history.push('');
           });
         }

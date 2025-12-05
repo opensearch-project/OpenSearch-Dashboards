@@ -173,7 +173,8 @@ export function TableHeaderColumn({
       className="docTableHeaderField"
       role="columnheader"
       aria-label={i18n.translate('discover.defaultTable.docTableHeaderLabel', {
-        defaultMessage: `Discover table column: ${name}`,
+        defaultMessage: 'Discover table column: {name}',
+        values: { name },
       })}
     >
       <span data-test-subj={`docTableHeader-${name}`}>

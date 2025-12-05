@@ -70,6 +70,7 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
     } as TopNavControlButtonData,
   ];
 
+  // @ts-expect-error TS6133 TODO(ts-error): fixme
   const connectionTypeButton = [
     {
       renderComponent: (
@@ -103,11 +104,13 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
   ];
 
   const description = {
-    description: i18n.translate('dataSourcesManagement.dataSourcesTable.description', {
-      defaultMessage: featureFlagStatus
-        ? 'Create and manage data source connections.'
-        : 'Manage direct query data source connections.',
-    }),
+    description: featureFlagStatus
+      ? i18n.translate('dataSourcesManagement.dataSourcesTable.descriptionWithDataSource', {
+          defaultMessage: 'Create and manage data source connections.',
+        })
+      : i18n.translate('dataSourcesManagement.dataSourcesTable.description', {
+          defaultMessage: 'Manage direct query data source connections.',
+        }),
     links: [
       {
         href: docLinks.links.opensearchDashboards.dataSource.guide,
@@ -134,15 +137,9 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
   };
 
   return (
-    <EuiPanel>
+    <>
       {useNewUX && (
         <>
-          {featureFlagStatus && (
-            <HeaderControl
-              setMountPoint={application.setAppCenterControls}
-              controls={connectionTypeButton}
-            />
-          )}
           {canManageDataSource && (
             <HeaderControl
               setMountPoint={application.setAppRightControls}
@@ -167,52 +164,57 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
                 : description,
             ]}
           />
+          <EuiTabs size="s">{renderTabs()}</EuiTabs>
+          <EuiSpacer size="m" />
         </>
       )}
-      <EuiFlexGroup direction="column">
-        {!useNewUX && (
-          <>
-            <EuiFlexItem>
-              <EuiPageHeader>
-                <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <DataSourceHeader
-                      history={props.history}
-                      featureFlagStatus={featureFlagStatus}
-                    />
-                  </EuiFlexItem>
-                  {canManageDataSource ? (
+      <EuiPanel>
+        <EuiFlexGroup direction="column">
+          {!useNewUX && (
+            <>
+              <EuiFlexItem>
+                <EuiPageHeader>
+                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                     <EuiFlexItem grow={false}>
-                      <CreateButton
+                      {/* @ts-expect-error TS2739 TODO(ts-error): fixme */}
+                      <DataSourceHeader
                         history={props.history}
                         featureFlagStatus={featureFlagStatus}
-                        dataTestSubj="createDataSourceButton"
                       />
                     </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
-              </EuiPageHeader>
-            </EuiFlexItem>
-            {featureFlagStatus && (
-              <EuiFlexItem>
-                <EuiSpacer size="s" />
-                <EuiTabs size="s">{renderTabs()}</EuiTabs>
+                    {canManageDataSource ? (
+                      <EuiFlexItem grow={false}>
+                        <CreateButton
+                          history={props.history}
+                          featureFlagStatus={featureFlagStatus}
+                          dataTestSubj="createDataSourceButton"
+                        />
+                      </EuiFlexItem>
+                    ) : null}
+                  </EuiFlexGroup>
+                </EuiPageHeader>
               </EuiFlexItem>
+              {featureFlagStatus && (
+                <EuiFlexItem>
+                  <EuiSpacer size="s" />
+                  <EuiTabs size="s">{renderTabs()}</EuiTabs>
+                </EuiFlexItem>
+              )}
+            </>
+          )}
+          <EuiFlexItem>
+            {selectedTabId === 'manageOpensearchDataSources' && featureFlagStatus && (
+              <DataSourceTableWithRouter {...props} />
             )}
-          </>
-        )}
-        <EuiFlexItem>
-          {selectedTabId === 'manageOpensearchDataSources' && featureFlagStatus && (
-            <DataSourceTableWithRouter {...props} />
-          )}
-          {(!featureFlagStatus || selectedTabId === 'manageDirectQueryDataSources') && (
-            <ManageDirectQueryDataConnectionsTableWithRouter
-              featureFlagStatus={featureFlagStatus}
-              {...props}
-            />
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+            {(!featureFlagStatus || selectedTabId === 'manageDirectQueryDataSources') && (
+              <ManageDirectQueryDataConnectionsTableWithRouter
+                featureFlagStatus={featureFlagStatus}
+                {...props}
+              />
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </>
   );
 };

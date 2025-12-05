@@ -35,7 +35,7 @@ export function WorkspaceFatalError(props: { error?: string }) {
             title={
               <h2>
                 <FormattedMessage
-                  id="core.fatalErrors.somethingWentWrongTitle"
+                  id="workspace.fatalErrors.somethingWentWrongTitle"
                   defaultMessage="Something went wrong"
                 />
               </h2>
@@ -43,7 +43,7 @@ export function WorkspaceFatalError(props: { error?: string }) {
             body={
               <p>
                 <FormattedMessage
-                  id="core.fatalErrors.tryGoBackToDefaultWorkspaceDescription"
+                  id="workspace.fatalErrors.tryGoBackToDefaultWorkspaceDescription"
                   defaultMessage="The workspace you are trying to access cannot be found. Please return to the homepage and try again."
                 />
               </p>
@@ -51,7 +51,7 @@ export function WorkspaceFatalError(props: { error?: string }) {
             actions={[
               <EuiSmallButton color="primary" fill onClick={goBackToHome}>
                 <FormattedMessage
-                  id="core.fatalErrors.goBackToHome"
+                  id="workspace.fatalErrors.goBackToHome"
                   defaultMessage="Go back to homepage"
                 />
               </EuiSmallButton>,
