@@ -57,7 +57,7 @@ export function getExternalSearchParamsFromRequest(
 ): ISearchRequestParams {
   const { getConfig } = dependencies;
   const searchParams = getSearchParams(getConfig);
-  const indexTitle = searchRequest.index.title || searchRequest.index;
+  const indexTitle = searchRequest.index?.title || searchRequest.index;
 
   return {
     index: indexTitle,

@@ -86,11 +86,136 @@ describe('ExploreEmbeddableFactory', () => {
     expect(mockStartServices.isEditable).toHaveBeenCalled();
   });
 
-  test('create returns an error object', async () => {
+  test('create returns an error when attributes are missing', async () => {
     const input = { id: 'test', timeRange: { from: 'now-15m', to: 'now' } };
     const result = await factory.create(input as any);
-    // Check that the result is an error object (has an error property)
-    expect(result).toHaveProperty('error');
+    // Check that the result is an ErrorEmbeddable
+    expect(result).toBeInstanceOf(ErrorEmbeddable);
+  });
+
+  test('create successfully creates by-value embeddable with attributes', async () => {
+    const mockSearchSource = {
+      getField: jest.fn((field) => {
+        if (field === 'index') return { id: 'test-index' };
+        return null;
+      }),
+    };
+
+    jest.spyOn(OsdServices, 'getServices').mockReturnValue({
+      ...mockedGetServicesResults,
+      data: {
+        search: {
+          searchSource: {
+            create: jest.fn().mockResolvedValue(mockSearchSource),
+          },
+        },
+      },
+    } as any);
+
+    const input = {
+      id: 'test',
+      timeRange: { from: 'now-15m', to: 'now' },
+      attributes: {
+        title: 'Test Explore',
+        description: 'Test description',
+        type: 'logs',
+        columns: ['column1'],
+        sort: [['column1', 'asc']],
+        visualization: JSON.stringify({ chartType: 'bar' }),
+        uiState: JSON.stringify({ activeTab: 'visualization' }),
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({ query: { query: '', language: 'PPL' } }),
+        },
+      },
+      references: [],
+    };
+
+    const result = await factory.create(input as any);
+
+    expect(ExploreEmbeddable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        savedExplore: expect.objectContaining({
+          id: 'test',
+          title: 'Test Explore',
+        }),
+        editUrl: '',
+        editPath: '',
+        editable: false,
+      }),
+      input,
+      mockStartServices.executeTriggerActions,
+      undefined
+    );
+  });
+
+  test('create handles undefined index pattern in by-value embeddable', async () => {
+    const mockSearchSource = {
+      getField: jest.fn(() => null),
+    };
+
+    jest.spyOn(OsdServices, 'getServices').mockReturnValue({
+      ...mockedGetServicesResults,
+      data: {
+        search: {
+          searchSource: {
+            create: jest.fn().mockResolvedValue(mockSearchSource),
+          },
+        },
+      },
+    } as any);
+
+    const input = {
+      id: 'test',
+      timeRange: { from: 'now-15m', to: 'now' },
+      attributes: {
+        title: 'Test Explore',
+        type: 'logs',
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({ query: { query: '', language: 'PPL' } }),
+        },
+      },
+      references: [],
+    };
+
+    const result = await factory.create(input as any);
+
+    expect(ExploreEmbeddable).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexPatterns: [],
+      }),
+      input,
+      mockStartServices.executeTriggerActions,
+      undefined
+    );
+  });
+
+  test('create returns error embeddable on exception', async () => {
+    jest.spyOn(OsdServices, 'getServices').mockReturnValue({
+      ...mockedGetServicesResults,
+      data: {
+        search: {
+          searchSource: {
+            create: jest.fn().mockRejectedValue(new Error('Test error')),
+          },
+        },
+      },
+    } as any);
+
+    const input = {
+      id: 'test',
+      timeRange: { from: 'now-15m', to: 'now' },
+      attributes: {
+        title: 'Test Explore',
+        type: 'logs',
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify({ query: { query: '', language: 'PPL' } }),
+        },
+      },
+      references: [],
+    };
+
+    const result = await factory.create(input as any);
+    expect(result).toBeInstanceOf(ErrorEmbeddable);
   });
 
   test('createFromSavedObject creates an ExploreEmbeddable', async () => {

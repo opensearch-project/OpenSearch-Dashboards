@@ -1,0 +1,2 @@
+fix:
+- [Chat][BUG] Remove stale network error messages after page refresh in chat ([#11025](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11025))

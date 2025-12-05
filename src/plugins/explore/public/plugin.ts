@@ -370,6 +370,7 @@ export class ExplorePlugin
             unmount();
             unsubscribeStore();
             resetStore();
+            pluginsStart.data.query.queryString.clearQuery();
           };
         },
         ...options,

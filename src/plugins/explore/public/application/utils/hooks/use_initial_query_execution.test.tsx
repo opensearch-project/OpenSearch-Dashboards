@@ -111,6 +111,9 @@ describe('useInitialQueryExecution', () => {
         query: {
           queryString: {
             addToQueryHistory: jest.fn(),
+            getDatasetService: jest.fn().mockReturnValue({
+              getType: jest.fn().mockReturnValue(undefined),
+            }),
           },
           timefilter: {
             timefilter: {
@@ -405,6 +408,41 @@ describe('useInitialQueryExecution', () => {
       renderHookWithProvider(newServices);
 
       expect(newServices.uiSettings.get).toHaveBeenCalledWith('discover:searchOnPageLoad', true);
+    });
+  });
+
+  describe('dataset-specific searchOnLoad', () => {
+    it('should use dataset type config searchOnLoad when available and set to false', () => {
+      const servicesWithDatasetConfig = {
+        ...mockServices,
+        data: {
+          ...mockServices.data,
+          query: {
+            ...mockServices.data.query,
+            queryString: {
+              ...mockServices.data.query.queryString,
+              getDatasetService: jest.fn().mockReturnValue({
+                getType: jest.fn().mockReturnValue({
+                  meta: {
+                    searchOnLoad: false,
+                  },
+                }),
+              }),
+            },
+          },
+        },
+        uiSettings: {
+          ...mockServices.uiSettings,
+          get: jest.fn().mockReturnValue(true), // UI setting is true, but dataset config is false
+        },
+      } as any;
+
+      const { result } = renderHookWithProvider(servicesWithDatasetConfig);
+
+      // Should NOT execute query because dataset config searchOnLoad is false
+      expect(mockExecuteQueries).not.toHaveBeenCalled();
+      expect(mockClearResults).not.toHaveBeenCalled();
+      expect(result.current.isInitialized).toBe(false);
     });
   });
 
