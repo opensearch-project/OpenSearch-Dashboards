@@ -18,15 +18,14 @@
 
   &__sortIcon {
     margin-left: $euiSizeXS;
-    color: $euiColorMediumShade;
-    opacity: 0;
+    opacity: 0 !important;
     transition: opacity $euiAnimSpeedFast;
   }
 
   // Show sort icon on hover of the th element
   &:hover &__sortIcon,
   &:focus &__sortIcon {
-    opacity: 1;
+    opacity: 1 !important;
   }
 
   &__actionButton {
