@@ -229,12 +229,31 @@ function processRequestCountData(
 ): ChartData {
   const chartValues: Array<{ x: number; y: number }> = [];
   const xAxisOrderedValues: number[] = [];
+  let actualIntervalMs = intervalMs;
 
   if (results.hits?.hits) {
     const dataMap = new Map<number, number>();
     let totalCount = 0;
 
-    const actualIntervalMs = extractPPLIntervalMs(results, intervalMs);
+    actualIntervalMs = extractPPLIntervalMs(results, intervalMs);
+
+    if (!Number.isFinite(actualIntervalMs) || actualIntervalMs <= 0) {
+      return {
+        values: chartValues,
+        xAxisOrderedValues,
+        xAxisFormat,
+        xAxisLabel: timeField,
+        yAxisLabel: 'Request Count',
+        ordered: {
+          date: true,
+          interval: moment.duration(intervalMs),
+          intervalOpenSearchUnit: 'ms',
+          intervalOpenSearchValue: intervalMs,
+          min: moment(minTime),
+          max: moment(maxTime),
+        },
+      };
+    }
 
     for (const hit of results.hits.hits) {
       // Look for span() field or direct time field
@@ -272,9 +291,9 @@ function processRequestCountData(
     yAxisLabel: 'Request Count',
     ordered: {
       date: true,
-      interval: moment.duration(intervalMs),
+      interval: moment.duration(actualIntervalMs),
       intervalOpenSearchUnit: 'ms',
-      intervalOpenSearchValue: intervalMs,
+      intervalOpenSearchValue: actualIntervalMs,
       min: moment(minTime),
       max: moment(maxTime),
     },
@@ -292,11 +311,30 @@ function processErrorCountData(
 ): ChartData {
   const chartValues: Array<{ x: number; y: number }> = [];
   const xAxisOrderedValues: number[] = [];
+  let actualIntervalMs = intervalMs; // Default to fallback interval
 
   if (results.hits?.hits) {
     const dataMap = new Map<number, number>();
 
-    const actualIntervalMs = extractPPLIntervalMs(results, intervalMs);
+    actualIntervalMs = extractPPLIntervalMs(results, intervalMs);
+
+    if (!Number.isFinite(actualIntervalMs) || actualIntervalMs <= 0) {
+      return {
+        values: chartValues,
+        xAxisOrderedValues,
+        xAxisFormat,
+        xAxisLabel: timeField,
+        yAxisLabel: 'Error Count',
+        ordered: {
+          date: true,
+          interval: moment.duration(intervalMs),
+          intervalOpenSearchUnit: 'ms',
+          intervalOpenSearchValue: intervalMs,
+          min: moment(minTime),
+          max: moment(maxTime),
+        },
+      };
+    }
 
     for (const hit of results.hits.hits) {
       const spanTimeKey = Object.keys(hit._source || {}).find((key) => key.startsWith('span('));
@@ -307,7 +345,7 @@ function processErrorCountData(
         const timestamp = new Date(timeValue).getTime();
         if (!isNaN(timestamp)) {
           const bucketKey = Math.floor(timestamp / actualIntervalMs) * actualIntervalMs;
-          dataMap.set(bucketKey, errorCount);
+          dataMap.set(bucketKey, (dataMap.get(bucketKey) || 0) + errorCount);
         }
       }
     }
@@ -331,9 +369,9 @@ function processErrorCountData(
     yAxisLabel: 'Error Count',
     ordered: {
       date: true,
-      interval: moment.duration(intervalMs),
+      interval: moment.duration(actualIntervalMs),
       intervalOpenSearchUnit: 'ms',
-      intervalOpenSearchValue: intervalMs,
+      intervalOpenSearchValue: actualIntervalMs,
       min: moment(minTime),
       max: moment(maxTime),
     },
@@ -351,11 +389,30 @@ function processLatencyData(
 ): ChartData {
   const chartValues: Array<{ x: number; y: number }> = [];
   const xAxisOrderedValues: number[] = [];
+  let actualIntervalMs = intervalMs; // Default to fallback interval
 
   if (results.hits?.hits) {
-    const dataMap = new Map<number, number>();
+    const dataMap = new Map<number, { sum: number; count: number }>();
 
-    const actualIntervalMs = extractPPLIntervalMs(results, intervalMs);
+    actualIntervalMs = extractPPLIntervalMs(results, intervalMs);
+
+    if (!Number.isFinite(actualIntervalMs) || actualIntervalMs <= 0) {
+      return {
+        values: chartValues,
+        xAxisOrderedValues,
+        xAxisFormat,
+        xAxisLabel: timeField,
+        yAxisLabel: 'Avg Latency (ms)',
+        ordered: {
+          date: true,
+          interval: moment.duration(intervalMs),
+          intervalOpenSearchUnit: 'ms',
+          intervalOpenSearchValue: intervalMs,
+          min: moment(minTime),
+          max: moment(maxTime),
+        },
+      };
+    }
 
     for (const hit of results.hits.hits) {
       const spanTimeKey = Object.keys(hit._source || {}).find((key) => key.startsWith('span('));
@@ -368,7 +425,8 @@ function processLatencyData(
         const timestamp = new Date(timeValue).getTime();
         if (!isNaN(timestamp)) {
           const bucketKey = Math.floor(timestamp / actualIntervalMs) * actualIntervalMs;
-          dataMap.set(bucketKey, avgLatencyMs);
+          const existing = dataMap.get(bucketKey) || { sum: 0, count: 0 };
+          dataMap.set(bucketKey, { sum: existing.sum + avgLatencyMs, count: existing.count + 1 });
         }
       }
     }
@@ -378,7 +436,8 @@ function processLatencyData(
     const endBucket = Math.floor(maxTime / actualIntervalMs) * actualIntervalMs;
 
     for (let bucketKey = startBucket; bucketKey <= endBucket; bucketKey += actualIntervalMs) {
-      const value = dataMap.get(bucketKey) || 0;
+      const bucket = dataMap.get(bucketKey);
+      const value = bucket ? bucket.sum / bucket.count : 0;
       chartValues.push({ x: bucketKey, y: value });
       xAxisOrderedValues.push(bucketKey);
     }
@@ -392,9 +451,9 @@ function processLatencyData(
     yAxisLabel: 'Avg Latency (ms)',
     ordered: {
       date: true,
-      interval: moment.duration(intervalMs),
+      interval: moment.duration(actualIntervalMs),
       intervalOpenSearchUnit: 'ms',
-      intervalOpenSearchValue: intervalMs,
+      intervalOpenSearchValue: actualIntervalMs,
       min: moment(minTime),
       max: moment(maxTime),
     },
