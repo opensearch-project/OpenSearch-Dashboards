@@ -313,6 +313,23 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
             vertical: contentHeight > maxHeight ? 'visible' : 'hidden',
           },
         });
+
+        // Automatically scroll to the bottom when new lines are added
+        if (contentHeight > finalHeight) {
+          const cursorLine = editor.getPosition()?.lineNumber || 0;
+          const visibleRanges = editor.getVisibleRanges();
+
+          if (visibleRanges.length > 0) {
+            // use index 0 since we did not introduce code folding in our monaco editor
+            const firstVisibleLine = visibleRanges[0].startLineNumber;
+            const lastVisibleLine = visibleRanges[0].endLineNumber;
+
+            // Only reveal if cursor is outside the visible range
+            if (cursorLine < firstVisibleLine || cursorLine > lastVisibleLine) {
+              editor.revealLine(cursorLine);
+            }
+          }
+        }
       });
 
       return () => {
