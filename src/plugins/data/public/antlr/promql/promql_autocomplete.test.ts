@@ -57,15 +57,78 @@ describe('processVisitedRules', () => {
     expect(result.shouldSuggestLabels).toBe(0); // LabelOrigin.LabelMatcher = 0
   });
 
-  describe.skip('Test Specific Rules', () => {
-    // TODO: follow format below
-    // it('RULE_columnName - should suggest values for column when rule is present', () => {
-    //   const mockRules = new Map();
-    //   mockRules.set(PromQLParser.RULE_columnName, { ruleList: [] });
-    //   const tokenStream = createTokenStream([1]);
-    //   const result = processVisitedRules(mockRules, 0, tokenStream);
-    //   expect(result.shouldSuggestColumns).toBe(true);
-    // });
+  it('should suggest aggregation operators and functions when RULE_aggregationOperators is present', () => {
+    const mockRules = new Map();
+    mockRules.set(PromQLParser.RULE_aggregationOperators, { ruleList: [] });
+    const tokenStream = createTokenStream([1]);
+
+    const result = processVisitedRules(mockRules, 2, tokenStream);
+    expect(result.suggestAggregationOperators).toBe(true);
+    expect(result.suggestFunctionNames).toBe(true);
+    expect(result.suggestMetrics).toBe(true);
+  });
+
+  it('should suggest functions when RULE_functionNames is present', () => {
+    const mockRules = new Map();
+    mockRules.set(PromQLParser.RULE_functionNames, { ruleList: [] });
+    const tokenStream = createTokenStream([1]);
+
+    const result = processVisitedRules(mockRules, 2, tokenStream);
+    expect(result.suggestFunctionNames).toBe(true);
+    expect(result.suggestMetrics).toBe(true);
+  });
+
+  it('should suggest time range units when RULE_duration is present and last char is decimal', () => {
+    const mockRules = new Map();
+    mockRules.set(PromQLParser.RULE_duration, { ruleList: [] });
+    const tokenStream = createTokenStream([{ type: 1, text: '5' }]);
+
+    const result = processVisitedRules(mockRules, 0, tokenStream);
+    expect(result.suggestTimeRangeUnits).toBe(true);
+  });
+
+  it('should not suggest time range units when RULE_duration is present but last char is not decimal', () => {
+    const mockRules = new Map();
+    mockRules.set(PromQLParser.RULE_duration, { ruleList: [] });
+    const tokenStream = createTokenStream([{ type: 1, text: 'm' }]);
+
+    const result = processVisitedRules(mockRules, 0, tokenStream);
+    expect(result.suggestTimeRangeUnits).toBe(false);
+  });
+
+  it('should suggest labels for aggregation list when RULE_labelName with RULE_aggregation context', () => {
+    const mockRules = new Map();
+    mockRules.set(PromQLParser.RULE_labelName, {
+      ruleList: [PromQLParser.RULE_aggregation, 0, PromQLParser.RULE_labelNameList],
+    });
+    const tokenStream = createTokenStream([1]);
+
+    const result = processVisitedRules(mockRules, 2, tokenStream);
+    expect(result.shouldSuggestLabels).toBe(1); // LabelOrigin.AggregationList = 1
+  });
+
+  it('should suggest labels for vector match grouping when RULE_labelName with RULE_grouping context', () => {
+    const mockRules = new Map();
+    mockRules.set(PromQLParser.RULE_labelName, {
+      ruleList: [PromQLParser.RULE_grouping, 0, PromQLParser.RULE_labelNameList],
+    });
+    const tokenStream = createTokenStream([1]);
+
+    const result = processVisitedRules(mockRules, 2, tokenStream);
+    expect(result.shouldSuggestLabels).toBe(2); // LabelOrigin.VectorMatchGrouping = 2
+  });
+
+  it('should return empty/false suggestions when no rules are provided', () => {
+    const mockRules = new Map();
+    const tokenStream = createTokenStream([1]);
+
+    const result = processVisitedRules(mockRules, 2, tokenStream);
+    expect(result.suggestMetrics).toBe(false);
+    expect(result.suggestAggregationOperators).toBe(false);
+    expect(result.suggestFunctionNames).toBe(false);
+    expect(result.suggestTimeRangeUnits).toBe(false);
+    expect(result.shouldSuggestLabels).toBeUndefined();
+    expect(result.shouldSuggestLabelValues).toBe(false);
   });
 });
 
