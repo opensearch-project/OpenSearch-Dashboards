@@ -193,38 +193,16 @@ jobs:
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
 
-      - name: Build minimal OpenSearch Dashboards for testing
-        run: |
-          # Build only core platform without creating archives
-          yarn build:platform --linux --skip-archives || yarn build --skip-os-packages --skip-archives || {
-            echo "Standard build options failed, trying minimal build approach"
-            # Fallback: build only what's needed and clean aggressively
-            yarn build --skip-os-packages
-            # Clean up build artifacts to save space
-            rm -rf build/opensearch-dashboards/optimize/bundles/*.map
-            rm -rf build/opensearch-dashboards/node_modules/@types
-            rm -rf build/opensearch-dashboards/node_modules/typescript
-            find build/opensearch-dashboards/node_modules -name "*.d.ts" -delete
-            find build/opensearch-dashboards/node_modules -name "__tests__" -type d -exec rm -rf {} + 2>/dev/null || true
-            find build/opensearch-dashboards/node_modules -name "test" -type d -exec rm -rf {} + 2>/dev/null || true
-          }
-
-          # Find the built directory
-          OSD_BUILD_DIR=$(ls -d build/opensearch-dashboards* | head -1)
-          echo "OSD_INSTALL_DIR=$(pwd)/$OSD_BUILD_DIR" >> $GITHUB_ENV
-          echo "Built OpenSearch Dashboards in: $OSD_BUILD_DIR"
-
-          # Check disk usage
-          df -h
-          du -sh build/
-
       - name: Run CI test ${{ matrix.version }}
         id: ftr-tests
-        run: node scripts/functional_tests.js --config test/functional/config.js --opensearch-dashboards-install-dir ${{ env.OSD_INSTALL_DIR }}
+        run: node scripts/functional_tests.js --config test/functional/config.js
         env:
           JOB: compatibility-test
           CACHE_DIR: compatibility-${{ matrix.version }}
           TEST_OPENSEARCH_URL: http://localhost:9200
+          # Tell FTR to use our existing OpenSearch instead of starting its own
+          TEST_OPENSEARCH_FROM: external
+          TEST_OPENSEARCH_EXTERNAL_URL: http://localhost:9200
 
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -399,6 +377,9 @@ jobs:
         run: node scripts/functional_tests.js --config test/plugin_functional/config.ts
         env:
           TEST_OPENSEARCH_URL: http://localhost:9200
+          # Tell FTR to use our existing OpenSearch instead of starting its own
+          TEST_OPENSEARCH_FROM: external
+          TEST_OPENSEARCH_EXTERNAL_URL: http://localhost:9200
 
       - uses: actions/upload-artifact@v4
         if: failure()
