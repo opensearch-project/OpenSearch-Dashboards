@@ -1520,6 +1520,56 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       );
     });
 
+    it('should handle search errors with non-JSON error message', async () => {
+      const error = {
+        name: 'SearchError',
+        message: 'Connection timeout',
+        body: {
+          error: 'Connection failed',
+          message: 'This is a plain text error message, not JSON',
+          statusCode: 500,
+        },
+      };
+      mockSearchSource.fetch.mockRejectedValue(error);
+
+      const params = {
+        services: mockServices,
+        cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
+        interval: '1h',
+      };
+
+      const thunk = executeHistogramQuery(params);
+
+      try {
+        await thunk(mockDispatch, mockGetState, undefined);
+      } catch (e) {
+        expect(e).toBe(error);
+      }
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            cacheKey: 'test-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.ERROR,
+              error: expect.objectContaining({
+                error: 'Connection failed',
+                message: {
+                  details: 'Connection failed',
+                  reason: 'This is a plain text error message, not JSON',
+                  type: 'SearchError',
+                },
+                statusCode: 500,
+                originalErrorMessage: 'This is a plain text error message, not JSON',
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
     it('should handle AbortError gracefully', async () => {
       const abortError = new Error('Aborted');
       abortError.name = 'AbortError';

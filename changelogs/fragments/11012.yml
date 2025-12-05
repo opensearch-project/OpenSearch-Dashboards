@@ -1,0 +1,2 @@
+fix:
+- Avoid hard coded logs tab in explore ([#11012](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11012))
