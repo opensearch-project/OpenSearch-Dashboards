@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useDynamicContext } from './use_dynamic_context';
 import { getStateFromOsdUrl } from '../../../opensearch_dashboards_utils/public';
 
@@ -66,6 +66,11 @@ function captureCurrentURLState(): URLState {
 export function usePageContext(options?: UsePageContextOptions): string {
   const [urlState, setUrlState] = useState<URLState | null>(null);
 
+  // Generate unique ID for proper cleanup on component unmount
+  const contextIdRef = useRef<string>(
+    `page-context-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+  );
+
   useEffect(() => {
     if (options?.enabled === false) return;
 
@@ -118,6 +123,7 @@ export function usePageContext(options?: UsePageContextOptions): string {
   const contextOptions = useMemo(() => {
     if (options?.enabled === false) {
       return {
+        id: contextIdRef.current,
         description: 'Disabled page context',
         value: null,
         label: 'Disabled',
@@ -133,6 +139,7 @@ export function usePageContext(options?: UsePageContextOptions): string {
     const processedValue = options?.convert ? options.convert(urlState) : urlState;
 
     return {
+      id: contextIdRef.current,
       description: options?.description || `Page context for ${urlState.pathname}`,
       value: processedValue,
       label: `Page: ${urlState.pathname}`,

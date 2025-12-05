@@ -482,9 +482,9 @@ describe('ChatService', () => {
       // Mock context store
       mockContextStore = {
         getAllContexts: jest.fn(() => [
-          { id: 'ctx1', description: 'Context 1', value: 'data1' },
-          { id: 'ctx2', description: 'Context 2', value: 'data2' },
-          { description: 'Page Context', value: 'page-data' }, // No ID = page context
+          { id: 'ctx1', categories: ['dynamic'], description: 'Context 1', value: 'data1' },
+          { id: 'ctx2', categories: ['dynamic'], description: 'Context 2', value: 'data2' },
+          { categories: ['page', 'static'], description: 'Page Context', value: 'page-data' }, // Page context with categories
         ]),
         removeContextById: jest.fn(),
       };
@@ -537,10 +537,11 @@ describe('ChatService', () => {
       // Should get all contexts
       expect(mockContextStore.getAllContexts).toHaveBeenCalled();
 
-      // Should remove only contexts with IDs (dynamic contexts)
+      // Should remove only contexts with IDs that are NOT page contexts (dynamic contexts)
       expect(mockContextStore.removeContextById).toHaveBeenCalledWith('ctx1');
       expect(mockContextStore.removeContextById).toHaveBeenCalledWith('ctx2');
       expect(mockContextStore.removeContextById).toHaveBeenCalledTimes(2);
+      // Page context should not be removed as it has 'page' category
     });
 
     it('should handle missing context store gracefully', () => {
@@ -1165,13 +1166,15 @@ describe('ChatService', () => {
     it('should extract data source ID from valid page context', () => {
       const contexts = [
         {
-          // Context with ID - should be skipped
+          // Context without page category - should be skipped
           id: 'some-id',
+          categories: ['dynamic'],
           description: 'Some other context',
           value: { appId: 'other-app', dataset: { dataSource: { id: 'wrong-id' } } },
         },
         {
-          // Valid page context without ID
+          // Valid page context with page category
+          categories: ['page', 'static'],
           description: 'Explore application page context',
           value: {
             appId: 'explore',
@@ -1187,6 +1190,7 @@ describe('ChatService', () => {
     it('should handle page context with stringified value', () => {
       const contexts = [
         {
+          categories: ['page', 'static'],
           description: 'Investigation page context',
           value: JSON.stringify({
             appId: 'investigation-notebooks',
@@ -1203,11 +1207,13 @@ describe('ChatService', () => {
       const contexts = [
         {
           id: 'text-selection',
+          categories: ['dynamic'],
           description: 'Selected text context',
           value: 'some text',
         },
         {
           id: 'document-expansion',
+          categories: ['dynamic'],
           description: 'Expanded document',
           value: { documentData: 'test' },
         },
@@ -1220,6 +1226,7 @@ describe('ChatService', () => {
     it('should return undefined when page context lacks appId', () => {
       const contexts = [
         {
+          categories: ['page', 'static'],
           description: 'Invalid page context',
           value: { dataset: { dataSource: { id: 'some-id' } } }, // Missing appId
         },
@@ -1232,6 +1239,7 @@ describe('ChatService', () => {
     it('should return undefined when page context lacks dataset.dataSource.id', () => {
       const contexts = [
         {
+          categories: ['page', 'static'],
           description: 'Page context without data source',
           value: { appId: 'explore' }, // Missing dataset
         },
@@ -1244,6 +1252,7 @@ describe('ChatService', () => {
     it('should handle malformed JSON gracefully', () => {
       const contexts = [
         {
+          categories: ['page', 'static'],
           description: 'Malformed context',
           value: 'invalid-json-{',
         },
@@ -1253,18 +1262,21 @@ describe('ChatService', () => {
       expect(result).toBeUndefined();
     });
 
-    it('should skip contexts with IDs and find first valid page context', () => {
+    it('should skip contexts without page category and find first valid page context', () => {
       const contexts = [
         {
           id: 'context-with-id',
-          description: 'Context with ID',
+          categories: ['dynamic'],
+          description: 'Context without page category',
           value: { appId: 'explore', dataset: { dataSource: { id: 'wrong-id' } } },
         },
         {
+          categories: ['page', 'static'],
           description: 'First page context',
           value: { appId: 'explore', dataset: { dataSource: { id: 'first-id' } } },
         },
         {
+          categories: ['page', 'static'],
           description: 'Second page context',
           value: { appId: 'investigation', dataset: { dataSource: { id: 'second-id' } } },
         },
@@ -1304,6 +1316,7 @@ describe('ChatService', () => {
       (global as any).window.assistantContextStore = {
         getAllContexts: jest.fn().mockReturnValue([
           {
+            categories: ['page', 'static'],
             description: 'Explore page context',
             value: {
               appId: 'explore',
@@ -1334,6 +1347,7 @@ describe('ChatService', () => {
         getAllContexts: jest.fn().mockReturnValue([
           {
             id: 'text-selection',
+            categories: ['dynamic'],
             description: 'Selected text',
             value: 'some text',
           },
@@ -1359,6 +1373,7 @@ describe('ChatService', () => {
       (global as any).window.assistantContextStore = {
         getAllContexts: jest.fn().mockReturnValue([
           {
+            categories: ['page', 'static'],
             description: 'Invalid page context',
             value: { appId: 'explore' }, // Missing dataset
           },
