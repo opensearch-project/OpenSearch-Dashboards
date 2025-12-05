@@ -32,6 +32,7 @@ import {
   executeHistogramQuery,
   prepareHistogramCacheKey,
   defaultPrepareQueryString,
+  executeDataTableQuery,
 } from '../../application/utils/state_management/actions/query_actions';
 import { ResultsSummary } from '../results_summary/results_summary';
 import { selectSummaryAgentIsAvailable } from '../../application/utils/state_management/selectors';
@@ -69,17 +70,25 @@ export const ExploreLogsChart = ({
   const query = useSelector((state: RootState) => state.query);
   const breakdownField = useSelector((state: RootState) => state.queryEditor.breakdownField);
   const dispatch = useDispatch();
-  const cacheKey = prepareHistogramCacheKey(query, !!breakdownField);
+  const histogramCacheKey = prepareHistogramCacheKey(query, !!breakdownField);
+  const dataTableCacheKey = defaultPrepareQueryString(query);
   const onChangeInterval = (newInterval: string) => {
     dispatch(setInterval(newInterval));
-    dispatch(clearResultsByKey(cacheKey));
-    dispatch(clearQueryStatusMapByKey(cacheKey));
+    dispatch(clearResultsByKey(histogramCacheKey));
+    dispatch(clearQueryStatusMapByKey(histogramCacheKey));
     dispatch(
       executeHistogramQuery({
         services,
-        cacheKey,
+        cacheKey: histogramCacheKey,
         interval: newInterval,
         queryString: defaultPrepareQueryString(query),
+      })
+    );
+    dispatch(
+      executeDataTableQuery({
+        services,
+        cacheKey: dataTableCacheKey,
+        queryString: dataTableCacheKey,
       })
     );
   };
