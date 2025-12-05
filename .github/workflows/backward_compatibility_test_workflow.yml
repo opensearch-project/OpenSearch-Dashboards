@@ -41,6 +41,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest]
+        group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
         version:
           [
             3.3.0,
@@ -67,7 +68,7 @@ jobs:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001 --privileged
     steps:
-      - run: echo Running functional tests for ${{ matrix.version }}
+      - run: echo Running functional tests for ${{ matrix.version }} for ciGroup${{ matrix.group }}
 
       - name: Checkout code
         uses: actions/checkout@v4
@@ -157,18 +158,19 @@ jobs:
       - name: Build plugins
         run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 10
 
-      - name: Run CI test ${{ matrix.version }}
+      - name: Run CI test ${{ matrix.version }} for group ${{ matrix.group }}
         id: ftr-tests
-        run: node scripts/functional_tests.js --config test/functional/config.js --opensearchFrom ${{ env.OPENSEARCH_DIR }}
+        run: node scripts/functional_tests.js --config test/functional/config.js --include ciGroup${{ matrix.group }} --opensearchFrom ${{ env.OPENSEARCH_DIR }}
         env:
+          CI_GROUP: ciGroup${{ matrix.group }}
           JOB: compatibility-test
-          CACHE_DIR: compatibility-${{ matrix.version }}
+          CACHE_DIR: compatibility-${{ matrix.version }}-${{ matrix.group }}
           TEST_OPENSEARCH_PORT: 9200
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: failure-artifacts-opensearch-${{ matrix.version }}
+          name: failure-artifacts-opensearch-${{ matrix.version }}-ci${{ matrix.group }}
           path: |
             test/*/failure_debug/
             test/*/screenshots/
