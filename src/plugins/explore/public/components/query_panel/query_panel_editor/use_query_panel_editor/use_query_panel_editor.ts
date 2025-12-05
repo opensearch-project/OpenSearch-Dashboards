@@ -37,7 +37,7 @@ type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
 type IEditorConstructionOptions = monaco.editor.IEditorConstructionOptions;
 
-const TRIGGER_CHARACTERS = [' ', '=', "'", '"', '`'];
+const DEFAULT_TRIGGER_CHARACTERS = [' ', '=', "'", '"', '`'];
 
 const languageConfiguration: LanguageConfiguration = {
   autoClosingPairs: [
@@ -215,10 +215,6 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
                 isTrusted: true,
               }
             : '',
-          command: {
-            id: 'editor.action.triggerSuggest',
-            title: 'Trigger Next Suggestion',
-          },
         }));
 
         return {
@@ -233,11 +229,16 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   );
 
   const suggestionProvider = useMemo(() => {
+    const languageTriggerCharacters = services?.data?.autocomplete?.getTriggerCharacters(
+      queryLanguage
+    );
     return {
-      triggerCharacters: isPromptMode ? ['='] : TRIGGER_CHARACTERS,
+      triggerCharacters: isPromptMode
+        ? ['=']
+        : languageTriggerCharacters ?? DEFAULT_TRIGGER_CHARACTERS,
       provideCompletionItems,
     };
-  }, [isPromptMode, provideCompletionItems]);
+  }, [isPromptMode, provideCompletionItems, queryLanguage, services]);
 
   const handleRun = useCallback(() => {
     dispatch(onEditorRunActionCreator(services, editorTextRef.current));
