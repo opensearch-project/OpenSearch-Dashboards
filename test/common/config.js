@@ -45,7 +45,7 @@ export default function () {
       license: 'oss',
       from: 'snapshot',
       serverArgs: [
-        'search.concurrent_segment_search.mode=none',
+        // NOTE: search.concurrent_segment_search.mode=none removed for OpenSearch 1.0.0 compatibility
         // Disable disk-based shard allocation to prevent index creation blocks in CI
         'cluster.routing.allocation.disk.threshold_enabled=false',
         // Set very low disk watermarks for testing
@@ -67,6 +67,7 @@ export default function () {
         `--opensearch.hosts=${servers.opensearch.serverUrl}`,
         `--opensearch.username=${opensearchDashboardsServerTestUser.username}`,
         `--opensearch.password=${opensearchDashboardsServerTestUser.password}`,
+        '--opensearch.ignoreVersionMismatch=true', // Enable backward compatibility for testing
         `--home.disableWelcomeScreen=false`,
         `--home.disableExperienceModal=true`, // Disable experience modal for tests
         // Needed for async search functional tests to introduce a delay
