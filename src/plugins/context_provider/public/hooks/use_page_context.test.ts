@@ -88,7 +88,7 @@ describe('usePageContext', () => {
         expect.objectContaining({
           description: 'Page context for /app/explore',
           label: 'Page: /app/explore',
-          categories: ['page', 'url', 'static'],
+          categories: ['page', 'static'],
           value: expect.objectContaining({
             pathname: '/app/explore',
             _g: { time: { from: 'now-15m', to: 'now' } },
