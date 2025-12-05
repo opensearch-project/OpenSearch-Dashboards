@@ -1,0 +1,16 @@
+name: "CodeQL Config for OpenSearch Dashboards"
+
+# Use built-in security queries with focus on prototype pollution
+queries:
+  - uses: security-extended
+
+# Focus scanning on source code, ignore test files for speed
+paths-ignore:
+  - "**/*.test.js"
+  - "**/*.test.ts"
+  - "**/test/**"
+  - "**/tests/**"
+  - "**/node_modules/**"
+  - "build/**"
+  - "dist/**"
+  - "target/**"
