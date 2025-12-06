@@ -66,11 +66,18 @@ export const MatchingIndicesList: React.FC<MatchingIndicesListProps> = ({
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
           <strong>
-            <FormattedMessage
-              id="data.datasetService.matchingIndicesList.matchingIndicesCount"
-              defaultMessage="{count, plural, one {# matching index:} other {# matching indices:}}"
-              values={{ count: matchingIndices.length }}
-            />
+            {customPrefix === '*' ? (
+              <FormattedMessage
+                id="data.datasetService.matchingIndicesList.allIndicesPreview"
+                defaultMessage="All indices:"
+              />
+            ) : (
+              <FormattedMessage
+                id="data.datasetService.matchingIndicesList.matchingIndicesCount"
+                defaultMessage="{count, plural, one {# matching index:} other {# matching indices:}}"
+                values={{ count: matchingIndices.length }}
+              />
+            )}
           </strong>
         </EuiText>
         <EuiSpacer size="xs" />
