@@ -1,0 +1,2 @@
+chore:
+- Add an eslint rule to disallow mathjs usage ([#11014](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11014))
