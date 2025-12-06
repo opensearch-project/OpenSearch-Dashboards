@@ -92,12 +92,36 @@ jest.mock('../../application/utils/state_management/actions/query_actions', () =
   })),
   defaultPrepareQueryString: jest.fn(() => 'test-cache-key'),
   prepareHistogramCacheKey: jest.fn(() => 'histogram:test-cache-key'),
+  prepareTraceCacheKeys: jest.fn(() => ({
+    requestCacheKey: 'trace-requests:test-query',
+    errorCacheKey: 'trace-errors:test-query',
+    latencyCacheKey: 'trace-latency:test-query',
+  })),
+  defaultResultsProcessor: jest.fn(() => ({
+    hits: { hits: [], total: 10, max_score: 1.0 },
+    fieldCounts: {},
+  })),
+  executeRequestCountQuery: jest.fn(() => ({
+    type: 'query/executeRequestCountQuery/pending',
+    payload: undefined,
+    meta: { requestId: 'test', arg: {} },
+  })),
+  executeErrorCountQuery: jest.fn(() => ({
+    type: 'query/executeErrorCountQuery/pending',
+    payload: undefined,
+    meta: { requestId: 'test', arg: {} },
+  })),
+  executeLatencyQuery: jest.fn(() => ({
+    type: 'query/executeLatencyQuery/pending',
+    payload: undefined,
+    meta: { requestId: 'test', arg: {} },
+  })),
 }));
 
 jest.mock(
-  '../../application/utils/state_management/actions/processors/trace_chart_data_processor',
+  '../../application/utils/state_management/actions/processors/trace_aggregation_processor',
   () => ({
-    tracesHistogramResultsProcessor: jest.fn(() => ({
+    processTraceAggregationResults: jest.fn(() => ({
       requestChartData: { values: [], xAxisOrderedValues: [] },
       errorChartData: { values: [], xAxisOrderedValues: [] },
       latencyChartData: { values: [], xAxisOrderedValues: [] },
@@ -106,6 +130,18 @@ jest.mock(
     })),
   })
 );
+
+jest.mock('../../application/utils/state_management/actions/utils', () => ({
+  createHistogramConfigWithInterval: jest.fn(() => ({
+    histogramConfigs: undefined,
+    aggs: {},
+    effectiveInterval: '5m',
+    finalInterval: '5m',
+    fromDate: '2023-01-01 00:00:00.000',
+    toDate: '2023-01-01 01:00:00.000',
+    timeFieldName: 'endTime',
+  })),
+}));
 
 describe('DiscoverChartContainer', () => {
   const createMockStore = (hasResults = true, breakdownField?: string, queryStatusMap = {}) => {
@@ -156,6 +192,7 @@ describe('DiscoverChartContainer', () => {
           lastExecutedTranslatedQuery: '',
           queryExecutionButtonStatus: 'REFRESH',
           isQueryEditorDirty: false,
+          hasUserInitiatedQuery: false,
         },
         results: hasResults
           ? {
@@ -168,6 +205,30 @@ describe('DiscoverChartContainer', () => {
                 fieldSchema: [],
               },
               'histogram:test-cache-key': {
+                elapsedMs: 100,
+                took: 10,
+                timed_out: false,
+                _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+                hits: { hits: [], total: 10, max_score: 1.0 },
+                fieldSchema: [],
+              },
+              'trace-requests:test-query': {
+                elapsedMs: 100,
+                took: 10,
+                timed_out: false,
+                _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+                hits: { hits: [], total: 10, max_score: 1.0 },
+                fieldSchema: [],
+              },
+              'trace-errors:test-query': {
+                elapsedMs: 100,
+                took: 10,
+                timed_out: false,
+                _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+                hits: { hits: [], total: 5, max_score: 1.0 },
+                fieldSchema: [],
+              },
+              'trace-latency:test-query': {
                 elapsedMs: 100,
                 took: 10,
                 timed_out: false,
@@ -250,11 +311,11 @@ describe('DiscoverChartContainer', () => {
   });
 
   it('returns null when traces flavor has no request chart data', () => {
-    // Mock tracesHistogramResultsProcessor to return null requestChartData
-    const { tracesHistogramResultsProcessor } = jest.requireMock(
-      '../../application/utils/state_management/actions/processors/trace_chart_data_processor'
+    // Mock processTraceAggregationResults to return null requestChartData
+    const { processTraceAggregationResults } = jest.requireMock(
+      '../../application/utils/state_management/actions/processors/trace_aggregation_processor'
     );
-    tracesHistogramResultsProcessor.mockReturnValueOnce({
+    processTraceAggregationResults.mockReturnValueOnce({
       requestChartData: null,
       errorChartData: { values: [], xAxisOrderedValues: [] },
       latencyChartData: { values: [], xAxisOrderedValues: [] },
@@ -417,6 +478,7 @@ describe('DiscoverChartContainer', () => {
             lastExecutedTranslatedQuery: '',
             queryExecutionButtonStatus: 'REFRESH',
             isQueryEditorDirty: false,
+            hasUserInitiatedQuery: false,
           },
           results: {
             'histogram:test-cache-key': {
@@ -527,6 +589,7 @@ describe('DiscoverChartContainer', () => {
             lastExecutedTranslatedQuery: '',
             queryExecutionButtonStatus: 'REFRESH',
             isQueryEditorDirty: false,
+            hasUserInitiatedQuery: false,
           },
           results: {
             'histogram:test-cache-key': {
@@ -635,6 +698,7 @@ describe('DiscoverChartContainer', () => {
             lastExecutedTranslatedQuery: '',
             queryExecutionButtonStatus: 'REFRESH',
             isQueryEditorDirty: false,
+            hasUserInitiatedQuery: false,
           },
           results: {
             'histogram:breakdown-cache-key': {
@@ -733,6 +797,7 @@ describe('DiscoverChartContainer', () => {
             lastExecutedTranslatedQuery: '',
             queryExecutionButtonStatus: 'REFRESH',
             isQueryEditorDirty: false,
+            hasUserInitiatedQuery: false,
           },
           results: {
             'histogram:breakdown-cache-key': {

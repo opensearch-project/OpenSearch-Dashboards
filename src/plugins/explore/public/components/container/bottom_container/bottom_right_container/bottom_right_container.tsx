@@ -93,7 +93,7 @@ export const BottomRightContainer = () => {
   ) {
     return (
       <>
-        {flavorId !== ExploreFlavor.Traces && <DiscoverChartContainer />}
+        <DiscoverChartContainer />
         <CanvasPanel>
           <ResizableVisControlAndTabs />
         </CanvasPanel>

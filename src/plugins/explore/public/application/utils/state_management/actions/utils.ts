@@ -239,14 +239,12 @@ export const processRawResultsForHistogram = (
   }
 };
 
-/**
- * Creates histogram configuration with computed interval and time range
- */
 export const createHistogramConfigWithInterval = (
   dataView: DataView,
   interval: string | undefined,
   services: ExploreServices,
-  getState: () => RootState
+  getState: () => RootState,
+  customBarTarget?: number
 ): HistogramConfig | null => {
   if (!dataView.timeFieldName || !interval) {
     return null;
@@ -256,7 +254,14 @@ export const createHistogramConfigWithInterval = (
   const effectiveInterval = interval || state.legacy?.interval || 'auto';
   const breakdownField = state.queryEditor.breakdownField;
 
-  const histogramConfigs = createHistogramConfigs(dataView, effectiveInterval, services.data);
+  const histogramConfigs = createHistogramConfigs(
+    dataView,
+    effectiveInterval,
+    services.data,
+    services.uiSettings,
+    breakdownField,
+    customBarTarget
+  );
   const aggs = histogramConfigs?.toDsl();
 
   if (!aggs) {
