@@ -25,6 +25,16 @@ describe('App', () => {
   };
 
   it('should render without MDS', () => {
+    const dataSourceManagementMock = {
+      registerAuthenticationMethod: jest.fn(),
+      ui: {
+        DataSourceSelector: () => <div>Mock DataSourceSelector</div>,
+        getDataSourceMenu: jest.fn(),
+      },
+      dataSourceSelection: {} as any,
+      getDefaultDataSourceId: jest.fn(),
+      getDefaultDataSourceId$: jest.fn(),
+    };
     const container = shallow(
       // @ts-expect-error TS2741 TODO(ts-error): fixme
       <DataImporterPluginApp
@@ -35,7 +45,7 @@ describe('App', () => {
         navigation={navigationMock}
         config={mockConfig}
         dataSourceEnabled={false}
-        dataSourceManagement={undefined}
+        dataSourceManagement={dataSourceManagementMock}
       />
     );
     expect(container).toMatchSnapshot();

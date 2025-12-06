@@ -26,7 +26,10 @@ exports[`App should render with MDS 1`] = `
             </h1>
           </EuiTitle>
         </EuiPageHeader>
-        <EuiPageContent>
+        <EuiPageContent
+          className="data_importer_content"
+          paddingSize="s"
+        >
           <EuiFlexGroup>
             <EuiFlexItem
               grow={1}
@@ -35,6 +38,9 @@ exports[`App should render with MDS 1`] = `
                 initialSelection="file"
                 updateSelection={[Function]}
               />
+              <EuiSpacer
+                size="s"
+              />
               <EuiTitle
                 size="xs"
               >
@@ -42,42 +48,39 @@ exports[`App should render with MDS 1`] = `
                   Select target data source
                 </span>
               </EuiTitle>
-              <div>
-                <[object Object]
-                  componentConfig={
+              <div
+                className="devAppDataSourceSelector"
+              >
+                <Component
+                  compressed={false}
+                  disabled={false}
+                  fullWidth={false}
+                  notifications={
                     Object {
-                      "fullWidth": true,
-                      "notifications": Object {
-                        "toasts": Object {
-                          "add": [MockFunction],
-                          "addDanger": [MockFunction],
-                          "addError": [MockFunction],
-                          "addInfo": [MockFunction],
-                          "addSuccess": [MockFunction],
-                          "addWarning": [MockFunction],
-                          "get$": [MockFunction],
-                          "remove": [MockFunction],
-                        },
-                      },
-                      "onSelectedDataSources": [Function],
-                      "savedObjects": Object {
-                        "bulkCreate": [MockFunction],
-                        "bulkGet": [MockFunction],
-                        "bulkUpdate": [MockFunction],
-                        "create": [MockFunction],
-                        "delete": [MockFunction],
-                        "find": [MockFunction],
-                        "get": [MockFunction],
-                        "setCurrentWorkspace": [MockFunction],
-                        "update": [MockFunction],
-                      },
+                      "add": [MockFunction],
+                      "addDanger": [MockFunction],
+                      "addError": [MockFunction],
+                      "addInfo": [MockFunction],
+                      "addSuccess": [MockFunction],
+                      "addWarning": [MockFunction],
+                      "get$": [MockFunction],
+                      "remove": [MockFunction],
                     }
                   }
-                  componentType="DataSourceSelectable"
-                  onManageDataSource={[Function]}
-                />
-                <EuiSpacer
-                  size="m"
+                  onSelectedDataSource={[Function]}
+                  savedObjectsClient={
+                    Object {
+                      "bulkCreate": [MockFunction],
+                      "bulkGet": [MockFunction],
+                      "bulkUpdate": [MockFunction],
+                      "create": [MockFunction],
+                      "delete": [MockFunction],
+                      "find": [MockFunction],
+                      "get": [MockFunction],
+                      "setCurrentWorkspace": [MockFunction],
+                      "update": [MockFunction],
+                    }
+                  }
                 />
               </div>
               <EuiSpacer
@@ -87,7 +90,7 @@ exports[`App should render with MDS 1`] = `
                 size="xs"
               >
                 <span>
-                  Create/Select Index Name
+                  Select an existing index or create new
                 </span>
               </EuiTitle>
               <EuiFormRow
@@ -128,6 +131,9 @@ exports[`App should render with MDS 1`] = `
                   ]
                 }
                 onFileUpdate={[Function]}
+              />
+              <EuiSpacer
+                size="s"
               />
               <EuiButton
                 fullWidth={true}
@@ -192,7 +198,10 @@ exports[`App should render without MDS 1`] = `
             </h1>
           </EuiTitle>
         </EuiPageHeader>
-        <EuiPageContent>
+        <EuiPageContent
+          className="data_importer_content"
+          paddingSize="s"
+        >
           <EuiFlexGroup>
             <EuiFlexItem
               grow={1}
@@ -204,11 +213,14 @@ exports[`App should render without MDS 1`] = `
               <EuiSpacer
                 size="s"
               />
+              <EuiSpacer
+                size="s"
+              />
               <EuiTitle
                 size="xs"
               >
                 <span>
-                  Create/Select Index Name
+                  Select an existing index or create new
                 </span>
               </EuiTitle>
               <EuiFormRow
@@ -249,6 +261,9 @@ exports[`App should render without MDS 1`] = `
                   ]
                 }
                 onFileUpdate={[Function]}
+              />
+              <EuiSpacer
+                size="s"
               />
               <EuiButton
                 fullWidth={true}
