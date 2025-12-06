@@ -286,7 +286,12 @@ export const TraceDetails: React.FC<TraceDetailsProps> = ({
     hits = hits.filter((hit) => {
       const hasUnixNano = !!hit.startTimeUnixNano && !!hit.endTimeUnixNano;
       const hasRegularTime = !!hit.startTime && !!hit.endTime;
-      return hasUnixNano || hasRegularTime;
+      const hasJaegerTime =
+        !!hit.startTime && hit.durationInNanos !== undefined && hit.durationInNanos !== null;
+
+      const isValidTimeData = hasUnixNano || hasRegularTime || hasJaegerTime;
+
+      return isValidTimeData;
     });
 
     setTransformedHits(hits);
