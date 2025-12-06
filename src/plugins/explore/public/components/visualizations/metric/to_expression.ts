@@ -74,7 +74,7 @@ export const createSingleMetric = (
 
     const newBaseColor = baseColor ?? getColors().statusGreen;
 
-    const { textColor, mergedThresholds } = mergeThresholdsWithBase(
+    const { textColor } = mergeThresholdsWithBase(
       minBase,
       maxBase,
       newBaseColor,
