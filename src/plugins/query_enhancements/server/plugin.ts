@@ -20,6 +20,7 @@ import {
   pplAsyncSearchStrategyProvider,
   pplRawSearchStrategyProvider,
   pplSearchStrategyProvider,
+  promqlSearchStrategyProvider,
   sqlAsyncSearchStrategyProvider,
   sqlSearchStrategyProvider,
 } from './search';
@@ -31,6 +32,7 @@ import {
 import { OpenSearchEnhancements } from './utils';
 import { resourceManagerService } from './connections/resource_manager_service';
 import { BaseConnectionManager } from './connections/managers/base_connection_manager';
+import { prometheusManager } from './connections/managers/prometheus_manager';
 
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
@@ -55,6 +57,7 @@ export class QueryEnhancementsPlugin
 
     const pplSearchStrategy = pplSearchStrategyProvider(this.config$, this.logger, client);
     const pplRawSearchStrategy = pplRawSearchStrategyProvider(this.config$, this.logger, client);
+    const promqlSearchStrategy = promqlSearchStrategyProvider(this.config$, this.logger, client);
     const sqlSearchStrategy = sqlSearchStrategyProvider(this.config$, this.logger, client);
     const sqlAsyncSearchStrategy = sqlAsyncSearchStrategyProvider(
       this.config$,
@@ -72,6 +75,7 @@ export class QueryEnhancementsPlugin
     data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL, sqlSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL_ASYNC, sqlAsyncSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL_ASYNC, pplAsyncSearchStrategy);
+    data.search.registerSearchStrategy(SEARCH_STRATEGY.PROMQL, promqlSearchStrategy);
 
     // @ts-ignore https://github.com/opensearch-project/openSearch-Dashboards/issues/4274
     core.http.registerRouteHandlerContext('query_assist', () => ({
@@ -96,15 +100,19 @@ export class QueryEnhancementsPlugin
     defineRoutes(this.logger, router, client, {
       ppl: pplSearchStrategy,
       sql: sqlSearchStrategy,
+      promql: promqlSearchStrategy,
       sqlasync: sqlAsyncSearchStrategy,
       pplasync: pplAsyncSearchStrategy,
     });
+
+    resourceManagerService.register('prometheus', prometheusManager);
 
     this.logger.info('queryEnhancements: Setup complete');
     return {
       defineSearchStrategyRoute: defineSearchStrategyRouteProvider(this.logger, router),
       registerResourceManager: (dataConnectionType: string, manager: BaseConnectionManager) =>
         resourceManagerService.register(dataConnectionType, manager),
+      prometheusManager,
     };
   }
 
