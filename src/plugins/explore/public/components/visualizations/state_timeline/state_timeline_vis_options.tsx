@@ -85,6 +85,8 @@ export const StateTimeLineVisStyleControls: React.FC<StateTimeLineVisStyleContro
               onUseThresholdColorChange={(useThresholdColor) =>
                 updateStyleOption('useThresholdColor', useThresholdColor)
               }
+              colorModeOption={styleOptions?.colorModeOption}
+              onColorModeOptionChange={(option) => updateStyleOption('colorModeOption', option)}
             />
           </EuiFlexItem>
 

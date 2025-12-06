@@ -4,7 +4,10 @@
  */
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { ScatterExclusiveVisOptions } from './scatter_exclusive_vis_options';
+import {
+  ScatterExclusiveVisOptions,
+  ScatterVisOptionsProps,
+} from './scatter_exclusive_vis_options';
 import { PointShape } from '../types';
 
 jest.mock('@osd/i18n', () => ({
@@ -20,10 +23,10 @@ describe('ScatterExclusiveVisOptions', () => {
       angle: 0,
       filled: false,
     },
-    useThresholdColor: false,
     onChange: jest.fn(),
-    onUseThresholdColorChange: jest.fn(),
-  };
+    colorModeOption: 'none',
+    onColorModeOptionChange: jest.fn(),
+  } as ScatterVisOptionsProps;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -41,7 +44,7 @@ describe('ScatterExclusiveVisOptions', () => {
 
   it('calls onChange when filled switch is toggled', () => {
     render(<ScatterExclusiveVisOptions {...defaultProps} />);
-    const filledSwitch = screen.getAllByRole('switch')[1];
+    const filledSwitch = screen.getAllByRole('switch')[0];
     fireEvent.click(filledSwitch);
     expect(defaultProps.onChange).toHaveBeenCalledWith({
       ...defaultProps.styles,
@@ -53,13 +56,13 @@ describe('ScatterExclusiveVisOptions', () => {
     render(<ScatterExclusiveVisOptions {...defaultProps} />);
     expect(screen.getByText('Shape')).toBeInTheDocument();
 
-    const shapeSelector = screen.getByRole('combobox');
+    const shapeSelector = screen.getAllByRole('combobox')[1];
     expect(shapeSelector).toBeInTheDocument();
   });
 
   it('calls onChange when shape is changed', () => {
     render(<ScatterExclusiveVisOptions {...defaultProps} />);
-    const shapeSelector = screen.getByRole('combobox');
+    const shapeSelector = screen.getAllByRole('combobox')[1];
 
     fireEvent.change(shapeSelector, { target: { value: PointShape.SQUARE } });
 
@@ -125,15 +128,15 @@ describe('ScatterExclusiveVisOptions', () => {
     expect(screen.getByText('Angle')).toBeInTheDocument();
 
     // Check for specific controls
-    expect(screen.getByRole('combobox')).toBeInTheDocument(); // Shape selector
-    expect(screen.getAllByRole('switch')).toHaveLength(2); // Filled switch and useThresholdcolor
+    expect(screen.getAllByRole('combobox')).toHaveLength(2); // Shape selector
+    expect(screen.getAllByRole('switch')).toHaveLength(1); // Filled switch and useThresholdcolor
     expect(screen.getByRole('spinbutton')).toBeInTheDocument(); // Angle input
   });
 
   it('calls stopPropagation on mouseUp for shape selector', () => {
     render(<ScatterExclusiveVisOptions {...defaultProps} />);
 
-    const shapeSelector = screen.getByRole('combobox');
+    const shapeSelector = screen.getAllByRole('combobox')[1];
     expect(shapeSelector).toBeInTheDocument(); // Verify element exists
 
     const stopPropagation = jest.fn();

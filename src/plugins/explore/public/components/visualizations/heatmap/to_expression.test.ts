@@ -88,7 +88,6 @@ describe('createHeatmapWithBin', () => {
     expect(layer.mark.type).toBe('rect');
     expect(layer.encoding.x.bin).toBe(true);
     expect(layer.encoding.y.bin).toBe(true);
-    expect(layer.encoding.color.bin).toEqual({ maxbins: 7 });
     expect(layer.encoding.color.scale).toEqual({
       type: 'linear',
       scheme: 'blues',
@@ -157,7 +156,7 @@ describe('createHeatmapWithBin', () => {
       exclusive: {
         ...baseStyles.exclusive,
       },
-      useThresholdColor: true,
+      colorModeOption: 'useThresholdColor',
       thresholdOptions: {},
     };
 
@@ -275,7 +274,7 @@ describe('createRegularHeatmap', () => {
       exclusive: {
         ...baseStyles.exclusive,
       },
-      useThresholdColor: true,
+      colorModeOption: 'useThresholdColor',
       thresholdOptions: {},
     };
 

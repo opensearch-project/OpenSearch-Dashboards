@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSwitch } from '@el
 import { StyleControlsProps } from '../utils/use_visualization_types';
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { TableFooterOptions } from './table_vis_footer_options';
-import { CellAlignment, Threshold } from '../types';
+import { CellAlignment, ColorModeOption, Threshold } from '../types';
 import { ThresholdCustomValues } from '../style_panel/threshold/threshold_custom_values';
 import { TableCellTypeOptions } from './table_cell_type_options';
 import {
@@ -19,6 +19,8 @@ import {
 } from './table_vis_config';
 import { DebouncedFieldNumber } from '../style_panel/utils';
 import { DataLinkOptions } from './data_link_options';
+import { ValueMappingPanel } from '../style_panel/value_mapping/value_mapping_panel';
+import { ColorModeOptionSelect } from '../style_panel/value_mapping/filter_options_select';
 
 export type TableVisStyleControlsProps = StyleControlsProps<TableChartStyle>;
 
@@ -73,6 +75,13 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
     [updateStyleOption]
   );
 
+  const onColorModeOptionChange = useCallback(
+    (colorMode: ColorModeOption | undefined) => {
+      updateStyleOption('colorModeOption', colorMode);
+    },
+    [updateStyleOption]
+  );
+
   const onBaseColorChange = useCallback(
     (color: string) => {
       updateStyleOption('baseColor', color);
@@ -122,6 +131,10 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
               data-test-subj="visTableGlobalAlignment"
             />
           </EuiFormRow>
+          <ColorModeOptionSelect
+            colorModeOption={styleOptions?.colorModeOption}
+            onColorModeOptionChange={onColorModeOptionChange}
+          />
           <EuiFormRow
             label={i18n.translate('explore.stylePanel.table.cellStyle', {
               defaultMessage: 'Cell style',
@@ -145,6 +158,12 @@ export const TableVisStyleControls: React.FC<TableVisStyleControlsProps> = ({
             />
           </EuiFormRow>
         </StyleAccordion>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <ValueMappingPanel
+          valueMappingOption={styleOptions?.valueMappingOptions}
+          onChange={(val) => updateStyleOption('valueMappingOptions', val)}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <StyleAccordion

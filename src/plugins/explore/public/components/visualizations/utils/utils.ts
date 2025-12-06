@@ -15,6 +15,7 @@ import {
   AxisSupportedStyles,
   Threshold,
   AxisConfig,
+  ValueMapping,
 } from '../types';
 import { ChartStyles, StyleOptions } from './use_visualization_types';
 
@@ -312,6 +313,39 @@ export function getThresholdByValue<T>(
   for (const threshold of sortedThresholds) {
     if (numValue >= threshold.value) {
       return threshold;
+    }
+  }
+
+  return undefined;
+}
+
+export function getValueMappingByValue<T>(
+  value: any,
+  valueMappings: ValueMapping[] = []
+): ValueMapping | undefined {
+  const numValue = Number(value);
+  if (isNaN(numValue)) {
+    return undefined;
+  }
+
+  const values = valueMappings?.filter((mapping) => mapping?.type === 'value');
+  const ranges = valueMappings?.filter((mapping) => mapping?.type === 'range');
+
+  // First try to match value mappings
+  for (const mapping of values) {
+    if (numValue === Number(mapping.value)) {
+      return mapping;
+    }
+  }
+
+  // If no value match found, try range mappings
+  for (const mapping of ranges) {
+    if (
+      mapping.range?.min !== undefined &&
+      numValue >= mapping.range.min &&
+      numValue < (mapping.range.max ?? Infinity)
+    ) {
+      return mapping;
     }
   }
 

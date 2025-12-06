@@ -362,7 +362,32 @@ describe('visualization_container_utils', () => {
       const value = adaptLegacyData(config);
 
       expect(value?.styles).toMatchObject({
-        useThresholdColor: false,
+        colorModeOption: 'none',
+        thresholdOptions: {
+          thresholds: [{ value: 20, color: '#blue' }],
+          baseColor: '#green',
+          thresholdStyle: ThresholdMode.Dashed,
+        },
+      });
+    });
+
+    it('transforms bar chart with color mode option', () => {
+      const config: ChartConfig = {
+        type: 'bar',
+        styles: {
+          thresholdOptions: {
+            thresholds: [{ value: 20, color: '#blue' }],
+            baseColor: '#green',
+            thresholdStyle: ThresholdMode.Dashed,
+          },
+          useThresholdColor: true,
+        } as BarChartStyleOptions,
+      };
+
+      const value = adaptLegacyData(config);
+
+      expect(value?.styles).toMatchObject({
+        colorModeOption: 'useThresholdColor',
         thresholdOptions: {
           thresholds: [{ value: 20, color: '#blue' }],
           baseColor: '#green',

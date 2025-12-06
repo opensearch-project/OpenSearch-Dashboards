@@ -10,8 +10,11 @@ import {
   adjustBucketBins,
   buildEncoding,
   buildTooltipEncoding,
+  buildValueMappingColorEncoding,
+  buildCombinedScale,
 } from './bar_chart_utils';
 import { TimeUnit, VisFieldType, AggregationType, VisColumn, StandardAxes } from '../types';
+import { BarChartStyle } from './bar_vis_config';
 
 jest.mock('../utils/utils', () => ({
   applyAxisStyling: jest.fn(() => ({ grid: true })),
@@ -113,6 +116,55 @@ describe('bar_chart_utils', () => {
     it('uses default title format for aggregated fields without custom title', () => {
       const result = buildTooltipEncoding(axis, undefined, undefined, AggregationType.MEAN);
       expect(result.title).toBe('Test(mean)');
+    });
+  });
+
+  describe('buildValueMappingColorEncoding', () => {
+    it('returns empty array when colorModeOption is none', () => {
+      const styleOptions = { colorModeOption: 'none' } as BarChartStyle;
+      expect(buildValueMappingColorEncoding(styleOptions)).toEqual([]);
+    });
+
+    it('returns empty array when no mappings provided', () => {
+      const styleOptions = { colorModeOption: 'useValueMapping' } as BarChartStyle;
+      expect(buildValueMappingColorEncoding(styleOptions)).toEqual([]);
+    });
+
+    it('builds color encoding with value mappings', () => {
+      const styleOptions = { colorModeOption: 'useValueMapping', addLegend: true } as BarChartStyle;
+      const valueMappings = [{ value: 'test', color: '#ff0000' }];
+      const result = buildValueMappingColorEncoding(styleOptions, valueMappings);
+
+      expect(result.field).toBe('mappingValue');
+      expect(result.type).toBe('nominal');
+      expect(result.legend.title).toBe('Mappings');
+    });
+  });
+
+  describe('buildCombinedScale', () => {
+    it('returns categorical scale when value mapping disabled', () => {
+      const categorical2Options = ['A', 'B'];
+      const result = buildCombinedScale(false, categorical2Options);
+
+      expect(result.domain).toEqual(['A', 'B']);
+      expect(result.range).toHaveLength(2);
+    });
+
+    it('combines categorical and value mappings', () => {
+      const categorical2Options = ['A'];
+      const validValues = [{ value: 'test', color: '#ff0000' }];
+      const result = buildCombinedScale(true, categorical2Options, validValues);
+
+      expect(result.domain).toEqual(['A', 'test']);
+      expect(result.range).toHaveLength(2);
+    });
+
+    it('handles range mappings', () => {
+      const validRanges = [{ range: { min: 0, max: 10 }, color: '#00ff00' }];
+      const result = buildCombinedScale(true, undefined, undefined, validRanges);
+
+      expect(result.domain).toEqual(['[0,10)']);
+      expect(result.range).toHaveLength(1);
     });
   });
 });

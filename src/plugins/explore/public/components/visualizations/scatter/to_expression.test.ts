@@ -146,7 +146,6 @@ describe('Scatter Chart to_expression', () => {
 
       // Verify the basic structure
       expect(result).toHaveProperty('$schema', VEGASCHEMA);
-      expect(result).toHaveProperty('data.values', mockTransformedData);
       expect(result).toHaveProperty('layer');
       expect(Array.isArray(result.layer)).toBe(true);
 
@@ -333,7 +332,6 @@ describe('Scatter Chart to_expression', () => {
 
       // Verify the basic structure
       expect(result).toHaveProperty('$schema', VEGASCHEMA);
-      expect(result).toHaveProperty('data.values', mockTransformedData);
       expect(result).toHaveProperty('layer');
       expect(Array.isArray(result.layer)).toBe(true);
 
@@ -347,7 +345,7 @@ describe('Scatter Chart to_expression', () => {
       expect(markLayer).toHaveProperty('encoding.x.type', 'quantitative');
       expect(markLayer).toHaveProperty('encoding.y.field', 'y');
       expect(markLayer).toHaveProperty('encoding.y.type', 'quantitative');
-      expect(markLayer).toHaveProperty('encoding.color.field', 'category');
+      expect(markLayer).toHaveProperty('encoding.color.field', 'combinedCategory');
       expect(markLayer).toHaveProperty('encoding.color.type', 'nominal');
     });
 
@@ -484,7 +482,6 @@ describe('Scatter Chart to_expression', () => {
 
       // Verify the basic structure
       expect(result).toHaveProperty('$schema', VEGASCHEMA);
-      expect(result).toHaveProperty('data.values', mockTransformedData);
       expect(result).toHaveProperty('layer');
       expect(Array.isArray(result.layer)).toBe(true);
 
@@ -498,7 +495,7 @@ describe('Scatter Chart to_expression', () => {
       expect(markLayer).toHaveProperty('encoding.x.type', 'quantitative');
       expect(markLayer).toHaveProperty('encoding.y.field', 'y');
       expect(markLayer).toHaveProperty('encoding.y.type', 'quantitative');
-      expect(markLayer).toHaveProperty('encoding.color.field', 'category');
+      expect(markLayer).toHaveProperty('encoding.color.field', 'combinedCategory');
       expect(markLayer).toHaveProperty('encoding.color.type', 'nominal');
       expect(markLayer).toHaveProperty('encoding.size.field', 'size');
       expect(markLayer).toHaveProperty('encoding.size.type', 'quantitative');

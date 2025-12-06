@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { AggregationType } from '../types';
+
 /**
  * Type definition for the calculation methods supported by calculateValue
  */
@@ -20,6 +22,15 @@ export type CalculationMethod =
   | 'distinct_count'
   | 'total';
 
+export const transformBucketToCalculationMethod = (
+  type: AggregationType | undefined
+): CalculationMethod | undefined => {
+  if (type === AggregationType.SUM) {
+    return 'total';
+  }
+  if (type === AggregationType.NONE) return undefined;
+  return type as CalculationMethod;
+};
 /**
  * Calculates a single value from an array of values based on the specified calculation method.
  * @param values Array of numeric values to calculate from

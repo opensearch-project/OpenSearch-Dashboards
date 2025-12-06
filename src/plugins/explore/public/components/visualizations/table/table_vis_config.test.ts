@@ -61,6 +61,10 @@ describe('table_vis_config', () => {
         baseColor: '#000000',
         dataLinks: [],
         visibleColumns: [],
+        colorModeOption: 'none',
+        valueMappingOptions: {
+          valueMappings: [],
+        },
       });
     });
   });
