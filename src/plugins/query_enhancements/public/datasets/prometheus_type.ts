@@ -20,7 +20,6 @@ export const prometheusTypeConfig: DatasetTypeConfig = {
   meta: {
     icon: { type: PROMETHEUS_ICON },
     tooltip: 'Prometheus',
-    searchOnLoad: false,
   },
 
   toDataset: (path) => {

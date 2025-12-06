@@ -4,6 +4,7 @@
  */
 
 import { EuiDataGrid, EuiDataGridCellProps } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -58,7 +59,9 @@ export const MetricsDataTable: React.FC<MetricsDataTableProps> = ({ searchResult
 
   return (
     <EuiDataGrid
-      aria-label="Metrics data table"
+      aria-label={i18n.translate('explore.metricsDataTable.ariaLabel', {
+        defaultMessage: 'Metrics data table',
+      })}
       columns={columns}
       columnVisibility={{ visibleColumns, setVisibleColumns }}
       rowCount={rows.length}

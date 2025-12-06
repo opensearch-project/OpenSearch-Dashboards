@@ -94,7 +94,12 @@ export const ResizableVisControlAndTabs = () => {
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon
                         color="text"
-                        aria-label={'Toggle visualization style panel'}
+                        aria-label={i18n.translate(
+                          'explore.visualization.stylePanel.toggleAriaLabel',
+                          {
+                            defaultMessage: 'Toggle visualization style panel',
+                          }
+                        )}
                         iconType="menuRight"
                         onClick={() => onChange('vis_style_panel')}
                       />

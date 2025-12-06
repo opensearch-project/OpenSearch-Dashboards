@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
@@ -94,7 +95,9 @@ export const DatasetSelectWidget = () => {
         clearEditors();
       } catch (error) {
         services.notifications?.toasts.addError(error, {
-          title: 'Error selecting dataset',
+          title: i18n.translate('explore.datasetSelect.errorSelectingDataset', {
+            defaultMessage: 'Error selecting dataset',
+          }),
         });
       }
     },

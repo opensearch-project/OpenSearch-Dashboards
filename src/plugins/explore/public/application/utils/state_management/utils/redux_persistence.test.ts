@@ -669,8 +669,8 @@ describe('redux_persistence', () => {
         timeFieldName: undefined,
         dataSource: undefined,
       });
-      // Should preserve other URL query state
-      expect(result.query.query).toBe(mockQueryState.query); // Preserves original query
+      // When dataset changes, query is cleared since it may be incompatible
+      expect(result.query.query).toBe('');
     });
 
     it('should reject traces dataset for logs flavor and fetch compatible one', async () => {
