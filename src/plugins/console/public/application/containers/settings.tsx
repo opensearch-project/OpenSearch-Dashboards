@@ -51,21 +51,23 @@ const refreshAutocompleteSettings = (
   selectedSettings: any,
   dataSourceId?: string
 ) => {
-  // @ts-expect-error TS2345 TODO(ts-error): fixme
-  retrieveAutoCompleteInfo(http, settings, selectedSettings, dataSourceId);
+  if (dataSourceId) {
+    retrieveAutoCompleteInfo(http, settings, selectedSettings, dataSourceId);
+  }
 };
 
 const fetchAutocompleteSettingsIfNeeded = (
   http: HttpSetup,
   settings: SettingsService,
   newSettings: DevToolsSettings,
-  prevSettings: DevToolsSettings
+  prevSettings: DevToolsSettings,
+  dataSourceId?: string
 ) => {
   // We'll only retrieve settings if polling is on. The expectation here is that if the user
   // disables polling it's because they want manual control over the fetch request (possibly
   // because it's a very expensive request given their cluster and bandwidth). In that case,
   // they would be unhappy with any request that's sent automatically.
-  if (newSettings.polling) {
+  if (newSettings.polling && dataSourceId) {
     const autocompleteDiff = getAutocompleteDiff(newSettings, prevSettings);
 
     const isSettingsChanged = autocompleteDiff.length > 0;
@@ -81,11 +83,8 @@ const fetchAutocompleteSettingsIfNeeded = (
         },
         {}
       );
-      // @ts-expect-error TS2304 TODO(ts-error): fixme
       retrieveAutoCompleteInfo(http, settings, changedSettings, dataSourceId);
     } else if (isPollingChanged && newSettings.polling) {
-      // If the user has turned polling on, then we'll fetch all selected autocomplete settings.
-      // @ts-expect-error TS2304 TODO(ts-error): fixme
       retrieveAutoCompleteInfo(http, settings, settings.getAutocomplete(), dataSourceId);
     }
   }
@@ -105,7 +104,7 @@ export function Settings({ onClose, dataSourceId }: Props) {
 
   const onSaveSettings = (newSettings: DevToolsSettings) => {
     const prevSettings = settings.toJSON();
-    fetchAutocompleteSettingsIfNeeded(http, settings, newSettings, prevSettings);
+    fetchAutocompleteSettingsIfNeeded(http, settings, newSettings, prevSettings, dataSourceId);
 
     // Update the new settings in localStorage
     settings.updateSettings(newSettings);
