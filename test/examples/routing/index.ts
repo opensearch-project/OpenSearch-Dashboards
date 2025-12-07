@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -46,10 +46,10 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await retry.try(async () => {
         await testSubjects.click('routingExampleFetchRandomNumber');
         const numberAsString = await testSubjects.getVisibleText('routingExampleRandomNumber');
-        expect(numberAsString).to.not.be(undefined);
+        expect(numberAsString).not.toBe(undefined);
         const number = parseFloat(numberAsString);
-        expect(number).to.be.lessThan(10);
-        expect(number).to.be.greaterThan(0);
+        expect(number).toBeLessThan(10);
+        expect(number).toBeGreaterThan(0);
       });
     });
 
@@ -60,10 +60,10 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
         const numberAsString = await testSubjects.getVisibleText(
           'routingExampleRandomNumberBetween'
         );
-        expect(numberAsString).to.not.be(undefined);
+        expect(numberAsString).not.toBe(undefined);
         const number = parseFloat(numberAsString);
-        expect(number).to.be.lessThan(3);
-        expect(number).to.be.greaterThan(0);
+        expect(number).toBeLessThan(3);
+        expect(number).toBeGreaterThan(0);
       });
     });
 
@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
       await retry.try(async () => {
         const message = await testSubjects.getVisibleText('routingExampleGetMessage');
-        expect(message).to.be('hello!');
+        expect(message).toBe('hello!');
       });
     });
   });

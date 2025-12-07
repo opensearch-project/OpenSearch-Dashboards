@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const DEFAULT_REQUEST = `
@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         const actualRequest = await PageObjects.console.getRequest();
         log.debug(actualRequest);
-        expect(actualRequest.trim()).to.eql(DEFAULT_REQUEST);
+        expect(actualRequest.trim()).toEqual(DEFAULT_REQUEST);
       });
 
       await visualTesting.snapshot();
@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         const actualResponse = await PageObjects.console.getResponse();
         log.debug(actualResponse);
-        expect(actualResponse).to.contain(expectedResponseContains);
+        expect(actualResponse).toContain(expectedResponseContains);
       });
     });
 
@@ -80,13 +80,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.setFontSizeSetting(20);
       await retry.try(async () => {
         // the settings are not applied synchronously, so we retry for a time
-        expect(await PageObjects.console.getRequestFontSize()).to.be('20px');
+        expect(await PageObjects.console.getRequestFontSize()).toBe('20px');
       });
 
       await PageObjects.console.setFontSizeSetting(24);
       await retry.try(async () => {
         // the settings are not applied synchronously, so we retry for a time
-        expect(await PageObjects.console.getRequestFontSize()).to.be('24px');
+        expect(await PageObjects.console.getRequestFontSize()).toBe('24px');
       });
     });
   });

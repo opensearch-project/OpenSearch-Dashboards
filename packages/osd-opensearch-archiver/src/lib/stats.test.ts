@@ -30,7 +30,6 @@
 
 import { uniq } from 'lodash';
 import sinon from 'sinon';
-import expect from '@osd/expect';
 import { ToolingLog } from '@osd/dev-utils';
 
 import { createStats } from './';
@@ -51,12 +50,12 @@ function assertDeepClones(a: any, b: any) {
   try {
     (function recurse(one, two) {
       if (typeof one !== 'object' || typeof two !== 'object') {
-        expect(one).to.be(two);
+        expect(one).toBe(two);
         return;
       }
 
-      expect(one).to.eql(two);
-      expect(one).to.not.be(two);
+      expect(one).toEqual(two);
+      expect(one).not.toBe(two);
       const keys = uniq(Object.keys(one).concat(Object.keys(two)));
       keys.forEach((k) => {
         path.push(k);
@@ -80,14 +79,14 @@ describe('opensearchArchiver: Stats', () => {
       const stats = createStats('name', new ToolingLog());
       stats.skippedIndex('index-name');
       const indexStats = stats.toJSON()['index-name'];
-      expect(indexStats).to.have.property('skipped', true);
+      expect(indexStats).toHaveProperty('skipped', true);
     });
 
     it('logs that the index was skipped', async () => {
       const log = createBufferedLog();
       const stats = createStats('name', log);
       stats.skippedIndex('index-name');
-      expect(log.buffer).to.contain('Skipped');
+      expect(log.buffer).toContain('Skipped');
     });
   });
 
@@ -96,13 +95,13 @@ describe('opensearchArchiver: Stats', () => {
       const stats = createStats('name', new ToolingLog());
       stats.deletedIndex('index-name');
       const indexStats = stats.toJSON()['index-name'];
-      expect(indexStats).to.have.property('deleted', true);
+      expect(indexStats).toHaveProperty('deleted', true);
     });
     it('logs that the index was deleted', async () => {
       const log = createBufferedLog();
       const stats = createStats('name', log);
       stats.deletedIndex('index-name');
-      expect(log.buffer).to.contain('Deleted');
+      expect(log.buffer).toContain('Deleted');
     });
   });
 
@@ -111,13 +110,13 @@ describe('opensearchArchiver: Stats', () => {
       const stats = createStats('name', new ToolingLog());
       stats.createdIndex('index-name');
       const indexStats = stats.toJSON()['index-name'];
-      expect(indexStats).to.have.property('created', true);
+      expect(indexStats).toHaveProperty('created', true);
     });
     it('logs that the index was created', async () => {
       const log = createBufferedLog();
       const stats = createStats('name', log);
       stats.createdIndex('index-name');
-      expect(log.buffer).to.contain('Created');
+      expect(log.buffer).toContain('Created');
     });
     describe('with metadata', () => {
       it('debug-logs each key from the metadata', async () => {
@@ -126,8 +125,8 @@ describe('opensearchArchiver: Stats', () => {
         stats.createdIndex('index-name', {
           foo: 'bar',
         });
-        expect(log.buffer).to.contain('debg');
-        expect(log.buffer).to.contain('foo "bar"');
+        expect(log.buffer).toContain('debg');
+        expect(log.buffer).toContain('foo "bar"');
       });
     });
     describe('without metadata', () => {
@@ -135,7 +134,7 @@ describe('opensearchArchiver: Stats', () => {
         const log = createBufferedLog();
         const stats = createStats('name', log);
         stats.createdIndex('index-name');
-        expect(log.buffer).to.not.contain('debg');
+        expect(log.buffer).not.toContain('debg');
       });
     });
   });
@@ -145,13 +144,13 @@ describe('opensearchArchiver: Stats', () => {
       const stats = createStats('name', new ToolingLog());
       stats.archivedIndex('index-name');
       const indexStats = stats.toJSON()['index-name'];
-      expect(indexStats).to.have.property('archived', true);
+      expect(indexStats).toHaveProperty('archived', true);
     });
     it('logs that the index was archived', async () => {
       const log = createBufferedLog();
       const stats = createStats('name', log);
       stats.archivedIndex('index-name');
-      expect(log.buffer).to.contain('Archived');
+      expect(log.buffer).toContain('Archived');
     });
     describe('with metadata', () => {
       it('debug-logs each key from the metadata', async () => {
@@ -160,8 +159,8 @@ describe('opensearchArchiver: Stats', () => {
         stats.archivedIndex('index-name', {
           foo: 'bar',
         });
-        expect(log.buffer).to.contain('debg');
-        expect(log.buffer).to.contain('foo "bar"');
+        expect(log.buffer).toContain('debg');
+        expect(log.buffer).toContain('foo "bar"');
       });
     });
     describe('without metadata', () => {
@@ -169,7 +168,7 @@ describe('opensearchArchiver: Stats', () => {
         const log = createBufferedLog();
         const stats = createStats('name', log);
         stats.archivedIndex('index-name');
-        expect(log.buffer).to.not.contain('debg');
+        expect(log.buffer).not.toContain('debg');
       });
     });
   });
@@ -178,10 +177,10 @@ describe('opensearchArchiver: Stats', () => {
     it('increases the docs.indexed count for the index', () => {
       const stats = createStats('name', new ToolingLog());
       stats.indexedDoc('index-name');
-      expect(stats.toJSON()['index-name'].docs.indexed).to.be(1);
+      expect(stats.toJSON()['index-name'].docs.indexed).toBe(1);
       stats.indexedDoc('index-name');
       stats.indexedDoc('index-name');
-      expect(stats.toJSON()['index-name'].docs.indexed).to.be(3);
+      expect(stats.toJSON()['index-name'].docs.indexed).toBe(3);
     });
   });
 
@@ -189,10 +188,10 @@ describe('opensearchArchiver: Stats', () => {
     it('increases the docs.archived count for the index', () => {
       const stats = createStats('name', new ToolingLog());
       stats.archivedDoc('index-name');
-      expect(stats.toJSON()['index-name'].docs.archived).to.be(1);
+      expect(stats.toJSON()['index-name'].docs.archived).toBe(1);
       stats.archivedDoc('index-name');
       stats.archivedDoc('index-name');
-      expect(stats.toJSON()['index-name'].docs.archived).to.be(3);
+      expect(stats.toJSON()['index-name'].docs.archived).toBe(3);
     });
   });
 
@@ -201,7 +200,7 @@ describe('opensearchArchiver: Stats', () => {
       const stats = createStats('name', new ToolingLog());
       stats.archivedIndex('index1');
       stats.archivedIndex('index2');
-      expect(Object.keys(stats.toJSON())).to.eql(['index1', 'index2']);
+      expect(Object.keys(stats.toJSON())).toEqual(['index1', 'index2']);
     });
     it('returns a deep clone of the stats', () => {
       const stats = createStats('name', new ToolingLog());

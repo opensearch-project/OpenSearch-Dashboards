@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
@@ -73,13 +73,13 @@ export default function ({ getService, getPageObjects }) {
         it('should sort ascending', async function () {
           await PageObjects.settings.sortBy(col.heading);
           const rowText = await col.selector();
-          expect(rowText).to.be(col.first);
+          expect(rowText).toBe(col.first);
         });
 
         it('should sort descending', async function () {
           await PageObjects.settings.sortBy(col.heading);
           const getText = await col.selector();
-          expect(getText).to.be(col.last);
+          expect(getText).toBe(col.last);
         });
       });
     });
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }) {
       it('makelogs data should have expected number of fields', async function () {
         await retry.try(async function () {
           const TabCount = await PageObjects.settings.getFieldsTabCount();
-          expect(TabCount).to.be('' + EXPECTED_FIELD_COUNT);
+          expect(TabCount).toBe('' + EXPECTED_FIELD_COUNT);
         });
       });
     }); // end describe pagination

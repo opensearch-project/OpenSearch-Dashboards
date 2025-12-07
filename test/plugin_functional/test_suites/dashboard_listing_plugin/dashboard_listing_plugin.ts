@@ -10,7 +10,7 @@
  */
 
 import url from 'url';
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 const getPathWithHash = (absoluteUrl: string) => {
   const parsed = url.parse(absoluteUrl);
@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
     it('should be able to navigate to create a test dashboard', async () => {
       await testSubjects.click('createMenuDropdown');
       await testSubjects.click('contextMenuItem-dashboard_listing_test_plugin');
-      expect(getPathWithHash(await browser.getCurrentUrl())).to.eql(
+      expect(getPathWithHash(await browser.getCurrentUrl())).toEqual(
         '/app/dashboard_listing_test_plugin#/create'
       );
     });

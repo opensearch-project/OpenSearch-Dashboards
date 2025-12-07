@@ -29,7 +29,6 @@
  */
 
 import { unset } from './unset';
-import expect from '@osd/expect';
 
 describe('unset(obj, key)', function () {
   describe('invalid input', function () {
@@ -37,20 +36,20 @@ describe('unset(obj, key)', function () {
       const obj = 'hello';
       // @ts-ignore bad args
       unset(obj, 'e');
-      expect(obj).to.equal('hello');
+      expect(obj).toEqual('hello');
     });
 
     it('should do nothing if not given a key', function () {
       const obj = { one: 1 };
       // @ts-ignore missing args
       unset(obj);
-      expect(obj).to.eql({ one: 1 });
+      expect(obj).toEqual({ one: 1 });
     });
 
     it('should do nothing if given an empty string as a key', function () {
       const obj = { one: 1 };
       unset(obj, '');
-      expect(obj).to.eql({ one: 1 });
+      expect(obj).toEqual({ one: 1 });
     });
   });
 
@@ -63,12 +62,12 @@ describe('unset(obj, key)', function () {
 
     it('should remove the param using a string key', function () {
       unset(obj, 'two');
-      expect(obj).to.eql({ one: 1, deep: { three: 3, four: 4 } });
+      expect(obj).toEqual({ one: 1, deep: { three: 3, four: 4 } });
     });
 
     it('should remove the param using an array key', function () {
       unset(obj, ['two']);
-      expect(obj).to.eql({ one: 1, deep: { three: 3, four: 4 } });
+      expect(obj).toEqual({ one: 1, deep: { three: 3, four: 4 } });
     });
   });
 
@@ -81,12 +80,12 @@ describe('unset(obj, key)', function () {
 
     it('should remove the param using a string key', function () {
       unset(obj, 'deep.three');
-      expect(obj).to.eql({ one: 1, two: 2, deep: { four: 4 } });
+      expect(obj).toEqual({ one: 1, two: 2, deep: { four: 4 } });
     });
 
     it('should remove the param using an array key', function () {
       unset(obj, ['deep', 'three']);
-      expect(obj).to.eql({ one: 1, two: 2, deep: { four: 4 } });
+      expect(obj).toEqual({ one: 1, two: 2, deep: { four: 4 } });
     });
   });
 
@@ -94,22 +93,22 @@ describe('unset(obj, key)', function () {
     it('should clear object if only value is removed', function () {
       const obj = { one: { two: { three: 3 } } };
       unset(obj, 'one.two.three');
-      expect(obj).to.eql({});
+      expect(obj).toEqual({});
     });
 
     it('should clear object if no props are left', function () {
       const obj = { one: { two: { three: 3 } } };
       unset(obj, 'one.two');
-      expect(obj).to.eql({});
+      expect(obj).toEqual({});
     });
 
     it('should remove deep property, then clear the object', function () {
       const obj = { one: { two: { three: 3, four: 4 } } };
       unset(obj, 'one.two.three');
-      expect(obj).to.eql({ one: { two: { four: 4 } } });
+      expect(obj).toEqual({ one: { two: { four: 4 } } });
 
       unset(obj, 'one.two.four');
-      expect(obj).to.eql({});
+      expect(obj).toEqual({});
     });
   });
 });

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { Response } from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -52,9 +52,9 @@ export default function ({ getService }: FtrProviderContext) {
           .then((resp: Response) => {
             const { body } = resp;
             const { type, id, meta } = body;
-            expect(type).to.eql('visualization');
-            expect(id).to.eql('dd7caf20-9efd-11e7-acb3-3dab96693fab');
-            expect(meta).to.not.equal(undefined);
+            expect(type).toEqual('visualization');
+            expect(id).toEqual('dd7caf20-9efd-11e7-acb3-3dab96693fab');
+            expect(meta).not.toEqual(undefined);
           }));
 
       it('should return 404 for object that does not exist', async () =>

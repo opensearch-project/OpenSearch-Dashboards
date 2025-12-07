@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 import { TelemetrySavedObjectAttributes } from 'src/plugins/telemetry/server/telemetry_repository';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -50,8 +50,8 @@ export default function optInTest({ getService }: FtrProviderContext) {
           throw err;
         })) || {};
 
-      expect(typeof opensearchDashboardsVersion).to.eql('string');
-      expect(opensearchDashboardsVersion.length).to.be.greaterThan(0);
+      expect(typeof opensearchDashboardsVersion).toEqual('string');
+      expect(opensearchDashboardsVersion.length).toBeGreaterThan(0);
     });
 
     afterEach(async () => {
@@ -65,8 +65,8 @@ export default function optInTest({ getService }: FtrProviderContext) {
       });
       await postTelemetryV2Optin(supertest, false, 200);
       const { enabled, lastVersionChecked } = await getSavedObjectAttributes(supertest);
-      expect(enabled).to.be(false);
-      expect(lastVersionChecked).to.be(opensearchDashboardsVersion);
+      expect(enabled).toBe(false);
+      expect(lastVersionChecked).toBe(opensearchDashboardsVersion);
     });
 
     it('should support sending true with allowChangingOptInStatus true', async () => {
@@ -76,8 +76,8 @@ export default function optInTest({ getService }: FtrProviderContext) {
       });
       await postTelemetryV2Optin(supertest, true, 200);
       const { enabled, lastVersionChecked } = await getSavedObjectAttributes(supertest);
-      expect(enabled).to.be(true);
-      expect(lastVersionChecked).to.be(opensearchDashboardsVersion);
+      expect(enabled).toBe(true);
+      expect(lastVersionChecked).toBe(opensearchDashboardsVersion);
     });
 
     it('should not support sending false with allowChangingOptInStatus false', async () => {

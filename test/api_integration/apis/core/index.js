@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -40,7 +40,7 @@ export default function ({ getService }) {
           .get('/app/opensearch-dashboards')
           .set('accept-encoding', 'gzip')
           .then((response) => {
-            expect(response.headers).to.have.property('content-encoding', 'gzip');
+            expect(response.headers).toHaveProperty('content-encoding', 'gzip');
           });
       });
 
@@ -50,7 +50,7 @@ export default function ({ getService }) {
           .set('accept-encoding', 'gzip')
           .set('referer', 'https://some-host.com')
           .then((response) => {
-            expect(response.headers).to.have.property('content-encoding', 'gzip');
+            expect(response.headers).toHaveProperty('content-encoding', 'gzip');
           });
       });
 
@@ -60,7 +60,7 @@ export default function ({ getService }) {
           .set('accept-encoding', 'gzip')
           .set('referer', 'https://other.some-host.com')
           .then((response) => {
-            expect(response.headers).not.to.have.property('content-encoding');
+            expect(response.headers).not.toHaveProperty('content-encoding');
           });
       });
     });
