@@ -9,8 +9,7 @@ import {
   contextContainsCursor,
   getNamesFromInstantSelector,
 } from './instant_selector_visitor';
-import { PromQLParser } from './.generated/PromQLParser';
-import { PromQLLexer } from './.generated/PromQLLexer';
+import { PromQLParser, PromQLLexer } from '@osd/antlr-grammar';
 
 describe('InstantSelectorVisitor result aggregation', () => {
   it('results in nextResult', () => {

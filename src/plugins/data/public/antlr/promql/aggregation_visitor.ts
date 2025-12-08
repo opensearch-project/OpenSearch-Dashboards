@@ -4,14 +4,14 @@
  */
 
 import { ParserRuleContext, ParseTree } from 'antlr4ng';
-import { PromQLParserVisitor } from './.generated/PromQLParserVisitor';
 import {
   AggregationContext,
   LabelNameListContext,
   MetricNameContext,
   ParameterListContext,
   PromQLParser,
-} from './.generated/PromQLParser';
+  PromQLParserVisitor,
+} from '@osd/antlr-grammar';
 
 /**
 TODO: Explain how we're getting metric from aggregation

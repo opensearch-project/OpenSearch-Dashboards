@@ -5,6 +5,7 @@
 
 import { ParseTree, TokenStream } from 'antlr4ng';
 import * as c3 from 'antlr4-c3';
+import { PromQLLexer, PromQLParser } from '@osd/antlr-grammar';
 import {
   AutocompleteData,
   AutocompleteResultBase,
@@ -13,8 +14,6 @@ import {
   ProcessPromQLVisitedRulesResult,
   LabelOrigin,
 } from '../shared/types';
-import { PromQLLexer } from './.generated/PromQLLexer';
-import { PromQLParser } from './.generated/PromQLParser';
 import { getNamesFromInstantSelector } from './instant_selector_visitor';
 import { getMetricFromAggregation } from './aggregation_visitor';
 
