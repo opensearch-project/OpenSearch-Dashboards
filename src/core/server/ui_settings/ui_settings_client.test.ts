@@ -1089,6 +1089,121 @@ describe('ui settings', () => {
         ]
       `);
     });
+
+    it('should check scope first and avoid getting unnecessary configs in ui setting client', async () => {
+      const defaults = {
+        globalSetting: { value: 'global', scope: 'global' },
+        workspaceSetting: { value: 'workspace', scope: 'workspace' },
+      };
+
+      const { uiSettings, savedObjectsClient } = setup({ defaults });
+
+      await uiSettings.get('workspaceSetting');
+
+      // Verify it fetched the appropriate configs based on scope
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`
+      );
+
+      expect(savedObjectsClient.get).not.toHaveBeenCalledWith(TYPE, ID);
+    });
+
+    it('should return the config with higher scope priority', async () => {
+      const defaults = {
+        multiSetting: { value: 'default', scope: ['global', 'workspace'] },
+      };
+
+      const { uiSettings, savedObjectsClient } = setup({ defaults });
+
+      savedObjectsClient.get.mockImplementation((_type, id, _options) => {
+        if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {
+              multiSetting: 'workspace-value',
+            },
+          } as any);
+        } else {
+          return Promise.resolve({
+            attributes: {
+              multiSetting: 'global-value',
+            },
+          } as any);
+        }
+      });
+
+      const result = await uiSettings.get('multiSetting');
+
+      expect(result).toBe('workspace-value');
+
+      // Should fetch workspace config
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`
+      );
+
+      // Should not fetch global config since workspace has higher priority
+      expect(savedObjectsClient.get).not.toHaveBeenCalledWith(TYPE, ID);
+    });
+
+    it('should return config following scope priority', async () => {
+      const defaults = {
+        multiSetting: { value: 'default', scope: ['global', 'workspace'] },
+      };
+
+      const { uiSettings, savedObjectsClient } = setup({ defaults });
+
+      savedObjectsClient.get.mockImplementation((_type, id, _options) => {
+        if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {},
+          } as any);
+        } else {
+          return Promise.resolve({
+            attributes: {
+              multiSetting: 'global-value',
+            },
+          } as any);
+        }
+      });
+
+      const result = await uiSettings.get('multiSetting');
+
+      expect(result).toBe('global-value');
+
+      // Should fetch workspace config first
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`
+      );
+
+      // Should fetch global config since workspace scope doesn't have this setting
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
+    });
+
+    it('should return default config if there are not user provided values', async () => {
+      const defaults = {
+        multiSetting: { value: 'default', scope: ['global', 'workspace'] },
+      };
+
+      const { uiSettings, savedObjectsClient } = setup({ defaults });
+
+      savedObjectsClient.get.mockImplementation((_type, id, _options) => {
+        if (id === `${CURRENT_WORKSPACE_PLACEHOLDER}_${ID}`) {
+          return Promise.resolve({
+            attributes: {},
+          } as any);
+        } else {
+          return Promise.resolve({
+            attributes: {},
+          } as any);
+        }
+      });
+
+      const result = await uiSettings.get('multiSetting');
+
+      expect(result).toBe('default');
+    });
   });
 
   describe('#isOverridden()', () => {
