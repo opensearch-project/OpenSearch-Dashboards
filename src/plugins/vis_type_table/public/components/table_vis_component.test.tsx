@@ -5,28 +5,35 @@
 
 import React from 'react';
 import { shallow, mount } from 'enzyme';
-import { TableVisConfig, ColumnSort } from '../types';
+import { TableVisConfig, ColumnSort, AggTypes } from '../types';
 import { TableVisComponent } from './table_vis_component';
 import { FormattedColumn } from '../types';
 import { FormattedTableContext } from '../table_vis_response_handler';
 import { TableVisDynamicTable } from './table_vis_dynamic_table';
+import { TableUiState } from '../utils/get_table_ui_state';
+
+const mockFormatter = {
+  convert: jest.fn((val) => val),
+  getConverterFor: jest.fn(),
+  getParamDefaults: jest.fn(),
+  param: jest.fn(),
+  params: jest.fn(),
+  type: { id: 'string' },
+  toJSON: jest.fn(),
+} as any;
 
 const table = {
   formattedColumns: [
     {
       id: 'col-0-2',
       title: 'name.keyword: Descending',
-      formatter: {
-        convert: jest.fn((val) => val),
-      },
+      formatter: mockFormatter,
       filterable: true,
     },
     {
       id: 'col-1-1',
       title: 'Count',
-      formatter: {
-        convert: jest.fn((val) => val),
-      },
+      formatter: mockFormatter,
       filterable: false,
       sumTotal: 5,
       formattedTotal: 5,
@@ -83,7 +90,7 @@ const visConfig = {
   showPartialRows: false,
   showTotal: false,
   title: '',
-  totalFunc: 'sum',
+  totalFunc: AggTypes.SUM,
 } as TableVisConfig;
 
 const uiState = {
