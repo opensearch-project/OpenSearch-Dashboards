@@ -12,11 +12,12 @@ import {
   EuiFlexItem,
   EuiSwitch,
   EuiSpacer,
+  EuiTablePagination,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { IPrometheusSearchResult } from '../../application/utils/state_management/slices';
 import './metrics_raw_table.scss';
 
@@ -134,16 +135,12 @@ export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }
     []
   );
 
-  const onTableChange = useCallback(({ page }: { page?: { index: number; size: number } }) => {
-    if (page) {
-      setPagination({ pageIndex: page.index, pageSize: page.size });
-    }
-  }, []);
-
   const paginatedData = useMemo(() => {
     const start = pagination.pageIndex * pagination.pageSize;
     return tableData.slice(start, start + pagination.pageSize);
   }, [tableData, pagination]);
+
+  const pageCount = Math.ceil(tableData.length / pagination.pageSize);
 
   return (
     <>
@@ -170,18 +167,22 @@ export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <div className="metricsRawTable--noHeader">
-        <EuiBasicTable
-          items={paginatedData}
-          columns={columns}
-          pagination={{
-            pageIndex: pagination.pageIndex,
-            pageSize: pagination.pageSize,
-            totalItemCount: tableData.length,
-            pageSizeOptions: [25, 50, 100],
-          }}
-          onChange={onTableChange}
-        />
+      <div className="metricsRawTable">
+        <div className="metricsRawTable__tableContainer">
+          <EuiBasicTable items={paginatedData} columns={columns} />
+        </div>
+        {tableData.length > 0 && (
+          <div className="metricsRawTable__pagination">
+            <EuiTablePagination
+              activePage={pagination.pageIndex}
+              itemsPerPage={pagination.pageSize}
+              itemsPerPageOptions={[25, 50, 100]}
+              pageCount={pageCount}
+              onChangePage={(pageIndex) => setPagination((prev) => ({ ...prev, pageIndex }))}
+              onChangeItemsPerPage={(pageSize) => setPagination({ pageIndex: 0, pageSize })}
+            />
+          </div>
+        )}
       </div>
     </>
   );
