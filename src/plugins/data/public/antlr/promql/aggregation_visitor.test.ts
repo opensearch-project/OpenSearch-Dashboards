@@ -9,8 +9,7 @@ import {
   contextContainsCursor,
   getMetricFromAggregation,
 } from './aggregation_visitor';
-import { PromQLParser } from './.generated/PromQLParser';
-import { PromQLLexer } from './.generated/PromQLLexer';
+import { PromQLParser, PromQLLexer } from '@osd/antlr-grammar';
 
 describe('AggregationVisitor result aggregation', () => {
   it('returns nextResult when aggregate is null', () => {

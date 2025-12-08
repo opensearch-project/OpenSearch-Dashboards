@@ -4,8 +4,11 @@
  */
 
 import { ParserRuleContext, ParseTree } from 'antlr4ng';
-import { InstantSelectorContext, LabelMatcherContext } from './.generated/PromQLParser';
-import { PromQLParserVisitor } from './.generated/PromQLParserVisitor';
+import {
+  InstantSelectorContext,
+  LabelMatcherContext,
+  PromQLParserVisitor,
+} from '@osd/antlr-grammar';
 
 export interface InstantSelectorResult {
   metricName: string | undefined;

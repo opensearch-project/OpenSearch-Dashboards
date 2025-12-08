@@ -10,7 +10,7 @@ import {
   processVisitedRules,
 } from './promql_autocomplete';
 import * as c3 from 'antlr4-c3';
-import { PromQLParser } from './.generated/PromQLParser';
+import { PromQLParser } from '@osd/antlr-grammar';
 import { ParseTree, TokenStream } from 'antlr4ng';
 import { InstantSelectorResult } from './instant_selector_visitor';
 import * as instantSelectorVisitor from './instant_selector_visitor';
