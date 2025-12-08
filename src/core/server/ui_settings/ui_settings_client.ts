@@ -152,22 +152,16 @@ export class UiSettingsClient implements IUiSettingsClient {
       return all[key];
     }
 
-    const scopes = Array.isArray(this.defaults[key]?.scope)
-      ? this.defaults[key].scope
-      : this.defaults[key]?.scope
-      ? [this.defaults[key].scope]
-      : [];
+    const scopeValue = this.defaults[key]?.scope;
+    const scopes = scopeValue ? (Array.isArray(scopeValue) ? scopeValue : [scopeValue]) : [];
 
     // If no scope is provided and the key has multiple scopes
     if (scopes && scopes?.length > 1) {
-      const scopePriority = [
-        UiSettingScope.DASHBOARD_ADMIN,
-        UiSettingScope.USER,
-        UiSettingScope.WORKSPACE,
-        UiSettingScope.GLOBAL,
-      ];
-
-      const validScopes = scopePriority.filter((s) => scopes.includes(s));
+      const validScopes = [...scopes].sort((a, b) => {
+        const indexA = UiSettingScopeReadOptions.findIndex((opt) => opt.scope === a);
+        const indexB = UiSettingScopeReadOptions.findIndex((opt) => opt.scope === b);
+        return indexB - indexA;
+      });
 
       for (const s of validScopes) {
         const userProvided = await this.getUserProvided(s);
