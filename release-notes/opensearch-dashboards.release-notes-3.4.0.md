@@ -5,7 +5,6 @@
  - Remove usage of lodash template ([#10920](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10920))
  - Removing ajv ([#10941](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10941))
 
-### Deprecations
 
 ### 🛡 Security
 
