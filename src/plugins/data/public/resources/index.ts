@@ -5,4 +5,3 @@
 
 export { BaseResourceClient } from './base_resource_client';
 export { ResourceClientFactory, ResourceClientCreator } from './resource_client_factory';
-export { IPrometheusResourceClient, PrometheusMetricMetadata } from './types';
