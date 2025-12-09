@@ -30,6 +30,7 @@ import {
 import { PPLFilterUtils } from './search/filters';
 import { NaturalLanguageFilterUtils } from './search/filters/natural_language_filter_utils';
 import { PromQLSearchInterceptor } from './search/promql_search_interceptor';
+import { PrometheusResourceClient } from './resources';
 
 export class QueryEnhancementsPlugin
   implements
@@ -290,6 +291,9 @@ export class QueryEnhancementsPlugin
     };
     queryString.getLanguageService().registerLanguage(promqlLanguageConfig);
     queryString.getDatasetService().registerType(prometheusTypeConfig);
+
+    // Register prometheus resource client
+    data.resourceClientFactory.register('prometheus', (http) => new PrometheusResourceClient(http));
 
     return {
       isQuerySummaryCollapsed$: this.isQuerySummaryCollapsed$,

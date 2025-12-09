@@ -21,6 +21,12 @@ export interface GetResourcesResponse<R> {
   type: string;
 }
 
+export interface QueryResponse<R = unknown> {
+  status: 'success' | 'failed';
+  data: R;
+  error?: string;
+}
+
 export abstract class BaseConnectionClient<C> {
   protected abstract client: C;
   constructor() {}

@@ -4,7 +4,7 @@
  */
 
 import { registerResourceRoutes } from './routes';
-import { resourceManagerService } from '../../connections/resource_manager_service';
+import { dataConnectionsManagerService } from '../../connections/data_connections_manager_service';
 import { BASE_API } from '../../../common';
 import supertest from 'supertest';
 import { BaseConnectionManager } from '../../connections/managers/base_connection_manager';
@@ -78,7 +78,7 @@ describe('Resource Routes', () => {
     const handlePostRequestSpy = jest.fn().mockResolvedValue({ message: 'succeed' });
     const manager = new TestManager(handlePostRequestSpy);
     jest
-      .spyOn(resourceManagerService, 'getManager')
+      .spyOn(dataConnectionsManagerService, 'getManager')
       .mockImplementation((type: string) => (type === DATA_CONNECTION_TYPE ? manager : undefined));
 
     const httpSetup = await testSetup();
@@ -90,7 +90,7 @@ describe('Resource Routes', () => {
   });
 
   it('should return 404 when data connection type is not registered', async () => {
-    jest.spyOn(resourceManagerService, 'getManager').mockReturnValue(undefined);
+    jest.spyOn(dataConnectionsManagerService, 'getManager').mockReturnValue(undefined);
 
     const httpSetup = await testSetup();
     const result = await supertest(httpSetup.server.listener)
@@ -104,7 +104,7 @@ describe('Resource Routes', () => {
     const handlePostRequestSpy = jest.fn().mockRejectedValue({ message: 'failed' });
     const manager = new TestManager(handlePostRequestSpy);
     jest
-      .spyOn(resourceManagerService, 'getManager')
+      .spyOn(dataConnectionsManagerService, 'getManager')
       .mockImplementation((type: string) => (type === DATA_CONNECTION_TYPE ? manager : undefined));
 
     const httpSetup = await testSetup();

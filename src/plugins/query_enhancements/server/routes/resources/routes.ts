@@ -6,7 +6,7 @@
 import { schema, TypeOf } from '@osd/config-schema';
 import { IRouter, OpenSearchDashboardsRequest } from 'opensearch-dashboards/server';
 import { BASE_API } from '../../../common';
-import { resourceManagerService } from '../../connections/resource_manager_service';
+import { dataConnectionsManagerService } from '../../connections/data_connections_manager_service';
 import { coerceStatusCode } from '..';
 
 const body = schema.object({
@@ -46,7 +46,7 @@ export function registerResourceRoutes(router: IRouter) {
     },
     async (context, request, response) => {
       const { type } = request.body.connection;
-      const manager = resourceManagerService.getManager(type);
+      const manager = dataConnectionsManagerService.getManager(type);
       if (!manager) {
         return response.notFound();
       }

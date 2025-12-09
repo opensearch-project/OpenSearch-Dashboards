@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SharedGlobalConfig, Logger, ILegacyClusterClient } from 'opensearch-dashboards/server';
+import { SharedGlobalConfig, Logger } from 'opensearch-dashboards/server';
 import { Observable } from 'rxjs';
 import dateMath from '@elastic/datemath';
 import { ISearchStrategy, SearchUsage } from '../../../data/server';
@@ -14,6 +14,11 @@ import {
   IOpenSearchDashboardsSearchRequest,
   Query,
 } from '../../../data/common';
+import {
+  prometheusManager,
+  PromQLQueryParams,
+  PromQLQueryResponse,
+} from '../connections/managers/prometheus_manager';
 
 // This creates an upper bound for data points sent to the frontend (targetSamples * maxSeries)
 const AUTO_STEP_TARGET_SAMPLES = 50;
@@ -21,26 +26,9 @@ const MAX_SERIES = 2000;
 // We'll want to re-evaluate this when we provide an affordance for step configuration
 const MAX_DATAPOINTS = AUTO_STEP_TARGET_SAMPLES * MAX_SERIES;
 
-interface MetricResult {
-  metric: Record<string, string>;
-  values: Array<[number, number]>;
-}
-
-interface PrometheusResponse {
-  queryId: string;
-  sessionId: string;
-  results: {
-    [connectionId: string]: {
-      resultType: string;
-      result: MetricResult[];
-    };
-  };
-}
-
 export const promqlSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
-  client: ILegacyClusterClient,
   usage?: SearchUsage
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
   return {
@@ -63,10 +51,10 @@ export const promqlSearchStrategyProvider = (
           Math.max(Math.ceil(duration / AUTO_STEP_TARGET_SAMPLES) / 1000, 0.001);
         const { dataset, query, language }: Query = requestBody.query;
         const datasetId = dataset?.id ?? '';
-        const params = {
+        const params: PromQLQueryParams = {
           body: {
-            query,
-            language,
+            query: query as string,
+            language: language as string,
             maxResults: MAX_DATAPOINTS,
             timeout: 30,
             options: {
@@ -79,23 +67,22 @@ export const promqlSearchStrategyProvider = (
           dataconnection: datasetId,
         };
 
-        // Support multi-datasource routing like PPL strategy
-        const queryClient = request.dataSourceId
-          ? context.dataSource.opensearch.legacy.getClient(request.dataSourceId).callAPI
-          : client.asScoped(request).callAsCurrentUser;
-        const queryRes = (await queryClient(
-          'enhancements.promqlQuery',
-          params
-        )) as PrometheusResponse;
+        // Use prometheus manager for query execution - allows runtime override of client
+        const queryRes = await prometheusManager.query(context, request, params);
 
-        const dataFrame = createDataFrame(queryRes, datasetId);
+        if (queryRes.status === 'failed') {
+          throw new Error(queryRes.error || 'PromQL query failed');
+        }
+
+        const dataFrame = createDataFrame(queryRes.data, datasetId);
 
         return {
           type: DATA_FRAME_TYPES.DEFAULT,
           body: dataFrame,
         } as IDataFrameResponse;
-      } catch (e) {
-        logger.error(`promqlSearchStrategy: ${e.message}`);
+      } catch (e: unknown) {
+        const error = e as Error;
+        logger.error(`promqlSearchStrategy: ${error.message}`);
         if (usage) usage.trackError();
         throw e;
       }
@@ -107,7 +94,7 @@ export const promqlSearchStrategyProvider = (
  * Transforms Prometheus response to visualization format DataFrame (Time, Series, Value)
  * and stores raw instant format (Time, labels..., Value) in meta for the metrics table
  */
-function createDataFrame(rawResponse: PrometheusResponse, datasetId: string): IDataFrame {
+function createDataFrame(rawResponse: PromQLQueryResponse, datasetId: string): IDataFrame {
   const series = rawResponse.results[datasetId]?.result || [];
 
   const allLabelKeys = new Set<string>();

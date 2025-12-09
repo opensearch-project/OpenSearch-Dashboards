@@ -4,14 +4,15 @@
  */
 
 import {
+  ILegacyClusterClient,
   OpenSearchClient,
   OpenSearchDashboardsRequest,
   RequestHandlerContext,
 } from 'src/core/server';
-import { BaseConnectionManager } from './base_connection_manager';
-import { GetResourcesResponse } from '../clients/base_connection_client';
+import { BaseConnectionManager, QueryExecutor } from './base_connection_manager';
+import { GetResourcesResponse, QueryResponse } from '../clients/base_connection_client';
 import { URI } from '../../../common/constants';
-import { PromQLConnectionClient } from '../clients/promql_connection_client';
+import { PrometheusConnectionClient } from '../clients/prometheus_connection_client';
 import { ResourcesRequest } from '../../routes/resources/routes';
 
 const BASE_RESOURCE_API = 'api/v1';
@@ -40,6 +41,47 @@ export interface MetricMetadata {
   }>;
 }
 type PrometheusResource = Label[] | Metric[] | MetricMetadata;
+
+/**
+ * Parameters for PromQL query execution
+ */
+export interface PromQLQueryParams {
+  body: {
+    query: string;
+    language: string;
+    maxResults: number;
+    timeout: number;
+    options: {
+      queryType: 'range' | 'instant';
+      start: string;
+      end: string;
+      step: string;
+    };
+  };
+  dataconnection: string;
+}
+
+/**
+ * Result of a single metric series
+ */
+export interface MetricResult {
+  metric: Record<string, string>;
+  values: Array<[number, number]>;
+}
+
+/**
+ * Response from a PromQL query
+ */
+export interface PromQLQueryResponse {
+  queryId: string;
+  sessionId: string;
+  results: {
+    [connectionId: string]: {
+      resultType: string;
+      result: MetricResult[];
+    };
+  };
+}
 
 // We want to ensure valid resourceType and resourceName parameters in the type system
 interface CommonQuery {
@@ -85,15 +127,40 @@ type PrometheusResourceQuery = CommonQuery &
     | RulesQuery
   );
 
-class PrometheusManager extends BaseConnectionManager<OpenSearchClient> {
+class PrometheusManager extends BaseConnectionManager<
+  OpenSearchClient,
+  PromQLQueryParams,
+  PromQLQueryResponse
+> {
   constructor() {
     super();
+    // Set up the client factory for resource fetching
     const clientFactory = (
       context: RequestHandlerContext,
       request: OpenSearchDashboardsRequest
-    ): PromQLConnectionClient => new PromQLConnectionClient(context, request);
+    ): PrometheusConnectionClient => new PrometheusConnectionClient(context, request);
     this.setClientFactory(clientFactory);
   }
+
+  /**
+   * Initialize the default query executor using the legacy OpenSearch client.
+   * This should be called during plugin setup.
+   * @param client The legacy cluster client for OpenSearch
+   */
+  initializeDefaultQueryExecutor(client: ILegacyClusterClient): void {
+    const defaultQueryExecutor: QueryExecutor<PromQLQueryParams, PromQLQueryResponse> = {
+      execute: async (context, request, params) => {
+        // Support multi-datasource routing
+        const dataSourceId = (request as { dataSourceId?: string }).dataSourceId;
+        const callAPI = dataSourceId
+          ? context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI
+          : client.asScoped(request).callAsCurrentUser;
+        return callAPI('enhancements.promqlQuery', params);
+      },
+    };
+    this.setQueryExecutor(defaultQueryExecutor);
+  }
+
   private getResourceURI(query: PrometheusResourceQuery): string {
     const { resourceType, resourceName } = query;
     switch (resourceType) {

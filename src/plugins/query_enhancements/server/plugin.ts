@@ -30,7 +30,7 @@ import {
   QueryEnhancementsPluginStart,
 } from './types';
 import { OpenSearchEnhancements } from './utils';
-import { resourceManagerService } from './connections/resource_manager_service';
+import { dataConnectionsManagerService } from './connections/data_connections_manager_service';
 import { BaseConnectionManager } from './connections/managers/base_connection_manager';
 import { prometheusManager } from './connections/managers/prometheus_manager';
 
@@ -55,9 +55,12 @@ export class QueryEnhancementsPlugin
       dataSource.registerCustomApiSchema(OpenSearchEnhancements);
     }
 
+    // Initialize the default query executor for prometheus
+    prometheusManager.initializeDefaultQueryExecutor(client);
+
     const pplSearchStrategy = pplSearchStrategyProvider(this.config$, this.logger, client);
     const pplRawSearchStrategy = pplRawSearchStrategyProvider(this.config$, this.logger, client);
-    const promqlSearchStrategy = promqlSearchStrategyProvider(this.config$, this.logger, client);
+    const promqlSearchStrategy = promqlSearchStrategyProvider(this.config$, this.logger);
     const sqlSearchStrategy = sqlSearchStrategyProvider(this.config$, this.logger, client);
     const sqlAsyncSearchStrategy = sqlAsyncSearchStrategyProvider(
       this.config$,
@@ -105,13 +108,13 @@ export class QueryEnhancementsPlugin
       pplasync: pplAsyncSearchStrategy,
     });
 
-    resourceManagerService.register('prometheus', prometheusManager);
+    dataConnectionsManagerService.register('prometheus', prometheusManager);
 
     this.logger.info('queryEnhancements: Setup complete');
     return {
       defineSearchStrategyRoute: defineSearchStrategyRouteProvider(this.logger, router),
-      registerResourceManager: (dataConnectionType: string, manager: BaseConnectionManager) =>
-        resourceManagerService.register(dataConnectionType, manager),
+      registerDataConnectionManager: (dataConnectionType: string, manager: BaseConnectionManager) =>
+        dataConnectionsManagerService.register(dataConnectionType, manager),
       prometheusManager,
     };
   }
