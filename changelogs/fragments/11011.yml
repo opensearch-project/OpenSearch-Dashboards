@@ -1,2 +1,0 @@
-infra:
-- Re-generators yarn.lock to remove validator and resolve CVE-2025-56200 ([#11011](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11011))
