@@ -4,11 +4,18 @@
  */
 
 import { HttpSetup } from 'opensearch-dashboards/public';
-import {
-  BaseResourceClient,
-  IPrometheusResourceClient,
-  PrometheusMetricMetadata,
-} from '../../../data/public';
+import { BaseResourceClient } from '../../../data/public';
+
+/**
+ * Interface for Prometheus metric metadata
+ */
+interface PrometheusMetricMetadata {
+  [metric: string]: Array<{
+    type: string;
+    unit: string;
+    help: string;
+  }>;
+}
 
 const RESOURCE_TYPES = {
   LABELS: 'labels',
@@ -17,9 +24,7 @@ const RESOURCE_TYPES = {
   METRIC_METADATA: 'metric_metadata',
 } as const;
 
-export class PrometheusResourceClient
-  extends BaseResourceClient
-  implements IPrometheusResourceClient {
+export class PrometheusResourceClient extends BaseResourceClient {
   constructor(http: HttpSetup) {
     super(http, 'prometheus');
   }

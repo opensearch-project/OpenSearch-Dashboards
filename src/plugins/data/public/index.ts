@@ -638,11 +638,4 @@ export {
   SchemaAttributeConfig,
 } from './ui/dataset_selector/configurator/schema_config';
 
-// Resource clients
-export {
-  BaseResourceClient,
-  ResourceClientFactory,
-  ResourceClientCreator,
-  IPrometheusResourceClient,
-  PrometheusMetricMetadata,
-} from './resources';
+export { BaseResourceClient, ResourceClientFactory, ResourceClientCreator } from './resources';
