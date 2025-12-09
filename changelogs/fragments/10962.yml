@@ -1,2 +1,0 @@
-refactor:
-- [MDS] Refactor endpoint URL validation logic ([#10962](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10962))
