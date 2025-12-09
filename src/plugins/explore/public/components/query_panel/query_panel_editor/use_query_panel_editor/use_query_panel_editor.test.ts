@@ -144,6 +144,10 @@ describe('useQueryPanelEditor', () => {
       getOffsetAt: jest.fn(() => 10),
       getValue: jest.fn(() => 'test query'),
       getWordUntilPosition: jest.fn(() => ({ startColumn: 1, endColumn: 5 })),
+      getModel: jest.fn(() => ({ getLineCount: jest.fn() })),
+      revealLine: jest.fn(),
+      getPosition: jest.fn(() => ({ lineNumber: 1 })),
+      getVisibleRanges: jest.fn(() => [{ startLineNumber: 1, endLineNumber: 10 }]),
     };
 
     mockDataset = {
@@ -276,13 +280,11 @@ describe('useQueryPanelEditor', () => {
   describe('placeholder text', () => {
     it('should return disabled prompt placeholder when prompt mode is not available', () => {
       mockUseSelector.mockImplementation((selector: any) => {
-        if (!selector) return '';
-        const selectorString = selector.toString();
-        if (selectorString.includes('selectPromptModeIsAvailable')) return false;
-        if (selectorString.includes('selectIsPromptEditorMode')) return false;
-        if (selectorString.includes('selectQueryLanguage')) return 'PPL';
-        if (selectorString.includes('selectQueryString')) return '';
-        if (selectorString.includes('selectIsQueryEditorDirty')) return false;
+        if (selector === selectPromptModeIsAvailable) return false;
+        if (selector === selectIsPromptEditorMode) return false;
+        if (selector === selectQueryLanguage) return 'PPL';
+        if (selector === selectQueryString) return '';
+        if (selector === selectIsQueryEditorDirty) return false;
         return '';
       });
 
@@ -758,6 +760,136 @@ describe('useQueryPanelEditor', () => {
           query: 'search source=logs',
         })
       );
+    });
+  });
+
+  describe('auto-scroll behavior', () => {
+    it('should reveal cursor line when it is outside visible range', () => {
+      mockEditor.getContentHeight.mockReturnValue(150);
+      mockEditor.getPosition.mockReturnValue({ lineNumber: 25 });
+      mockEditor.getVisibleRanges.mockReturnValue([{ startLineNumber: 10, endLineNumber: 20 }]);
+      mockEditor.getModel.mockReturnValue({ getLineCount: () => 30 });
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+
+      const contentSizeChangeCallback = mockEditor.onDidContentSizeChange.mock.calls[0][0];
+      act(() => {
+        contentSizeChangeCallback();
+      });
+
+      // Cursor at line 25 is outside visible range (10-20), so should reveal
+      expect(mockEditor.revealLine).toHaveBeenCalledWith(25);
+    });
+
+    it('should not reveal cursor line when it is within visible range', () => {
+      mockEditor.getContentHeight.mockReturnValue(150);
+      mockEditor.getPosition.mockReturnValue({ lineNumber: 15 });
+      mockEditor.getVisibleRanges.mockReturnValue([{ startLineNumber: 10, endLineNumber: 20 }]);
+      mockEditor.getModel.mockReturnValue({ getLineCount: () => 30 });
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+
+      const contentSizeChangeCallback = mockEditor.onDidContentSizeChange.mock.calls[0][0];
+      act(() => {
+        contentSizeChangeCallback();
+      });
+
+      // Cursor at line 15 is within visible range (10-20), so should NOT reveal
+      expect(mockEditor.revealLine).not.toHaveBeenCalled();
+    });
+
+    it('should not auto-scroll when content height is within max height', () => {
+      mockEditor.getContentHeight.mockReturnValue(50);
+      mockEditor.getPosition.mockReturnValue({ lineNumber: 5 });
+      mockEditor.getVisibleRanges.mockReturnValue([{ startLineNumber: 1, endLineNumber: 3 }]);
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+
+      const contentSizeChangeCallback = mockEditor.onDidContentSizeChange.mock.calls[0][0];
+      act(() => {
+        contentSizeChangeCallback();
+      });
+
+      // Content fits within max height, no scrolling needed
+      expect(mockEditor.revealLine).not.toHaveBeenCalled();
+    });
+
+    it('should reveal cursor line when typing below visible range', () => {
+      mockEditor.getContentHeight.mockReturnValue(200);
+      mockEditor.getPosition.mockReturnValue({ lineNumber: 30 }); // Cursor at bottom
+      mockEditor.getVisibleRanges.mockReturnValue([{ startLineNumber: 1, endLineNumber: 10 }]);
+      mockEditor.getModel.mockReturnValue({ getLineCount: () => 30 });
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+
+      const contentSizeChangeCallback = mockEditor.onDidContentSizeChange.mock.calls[0][0];
+      act(() => {
+        contentSizeChangeCallback();
+      });
+
+      // Cursor at line 30 is below visible range (1-10), should reveal
+      expect(mockEditor.revealLine).toHaveBeenCalledWith(30);
+    });
+
+    it('should reveal cursor line when typing above visible range', () => {
+      mockEditor.getContentHeight.mockReturnValue(200);
+      mockEditor.getPosition.mockReturnValue({ lineNumber: 5 }); // Cursor at top
+      mockEditor.getVisibleRanges.mockReturnValue([{ startLineNumber: 15, endLineNumber: 25 }]);
+      mockEditor.getModel.mockReturnValue({ getLineCount: () => 30 });
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+
+      const contentSizeChangeCallback = mockEditor.onDidContentSizeChange.mock.calls[0][0];
+      act(() => {
+        contentSizeChangeCallback();
+      });
+
+      // Cursor at line 5 is above visible range (15-25), should reveal
+      expect(mockEditor.revealLine).toHaveBeenCalledWith(5);
+    });
+
+    it('should handle empty visible ranges gracefully', () => {
+      mockEditor.getContentHeight.mockReturnValue(150);
+      mockEditor.getPosition.mockReturnValue({ lineNumber: 10 });
+      mockEditor.getVisibleRanges.mockReturnValue([]);
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+
+      const contentSizeChangeCallback = mockEditor.onDidContentSizeChange.mock.calls[0][0];
+
+      // Should not throw when visible ranges is empty
+      expect(() => {
+        act(() => {
+          contentSizeChangeCallback();
+        });
+      }).not.toThrow();
+
+      // Should not reveal when no visible ranges
+      expect(mockEditor.revealLine).not.toHaveBeenCalled();
     });
   });
 });
