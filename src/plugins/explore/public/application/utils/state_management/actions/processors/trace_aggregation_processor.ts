@@ -19,17 +19,29 @@ export interface TraceAggregationResults {
   bucketInterval: BucketInterval | undefined;
 }
 
-export const processTraceAggregationResults = (
-  requestAggResults: ISearchResult | null,
-  errorAggResults: ISearchResult | null,
-  latencyAggResults: ISearchResult | null,
-  dataset: DataView,
-  interval: string,
-  timeField: string = 'endTime',
-  dataPlugin?: DataPublicPluginStart,
-  rawInterval?: string,
-  uiSettings?: IUiSettingsClient
-): TracesChartProcessedResults => {
+export interface ProcessTraceAggregationParams {
+  requestAggResults: ISearchResult | null;
+  errorAggResults: ISearchResult | null;
+  latencyAggResults: ISearchResult | null;
+  dataset: DataView;
+  interval: string;
+  timeField?: string;
+  dataPlugin: DataPublicPluginStart;
+  rawInterval?: string;
+  uiSettings?: IUiSettingsClient;
+}
+
+export const processTraceAggregationResults = ({
+  requestAggResults,
+  errorAggResults,
+  latencyAggResults,
+  dataset,
+  interval,
+  timeField = 'endTime',
+  dataPlugin,
+  rawInterval,
+  uiSettings,
+}: ProcessTraceAggregationParams): TracesChartProcessedResults => {
   const baseResults = requestAggResults
     ? defaultResultsProcessor(requestAggResults, dataset)
     : {
@@ -52,21 +64,11 @@ export const processTraceAggregationResults = (
   }
 
   try {
-    let minTime: number;
-    let maxTime: number;
-
-    if (dataPlugin) {
-      const timeRange = dataPlugin.query.timefilter.timefilter.getTime();
-      const bounds = dataPlugin.query.timefilter.timefilter.calculateBounds(timeRange);
-      minTime = bounds.min?.valueOf() || Date.now() - 3600000;
-      maxTime = bounds.max?.valueOf() || Date.now();
-    } else {
-      const now = Date.now();
-      minTime = now - 3600000;
-      maxTime = now;
-    }
-
-    const intervalMs = convertIntervalToMs(interval);
+    // Get time range from data plugin
+    const timeRange = dataPlugin.query.timefilter.timefilter.getTime();
+    const bounds = dataPlugin.query.timefilter.timefilter.calculateBounds(timeRange);
+    const minTime = bounds.min?.valueOf() || Date.now() - 3600000;
+    const maxTime = bounds.max?.valueOf() || Date.now();
 
     let xAxisFormat: { id: string; params: { pattern: string } } = {
       id: 'date',
@@ -76,8 +78,10 @@ export const processTraceAggregationResults = (
       interval: 'auto',
       scale: 1,
     };
+    let intervalMs = 300000; // Default 5 minutes
 
-    if (dataPlugin && dataset.timeFieldName && uiSettings) {
+    // Calculate actual interval from histogram configs when available
+    if (dataset.timeFieldName && uiSettings) {
       try {
         const formatInterval = rawInterval || 'auto';
         const histogramConfigs = createHistogramConfigs(
@@ -93,12 +97,21 @@ export const processTraceAggregationResults = (
             const bucketAggConfig = histogramConfigs.aggs[1] as any;
             if (bucketAggConfig?.buckets) {
               bucketInterval = bucketAggConfig.buckets.getInterval();
+              // Convert the calculated interval to milliseconds
+              // bucketInterval has: interval, scale, description, scaled
+              if (bucketInterval.interval) {
+                intervalMs = convertIntervalToMs(bucketInterval.interval);
+              }
             }
           }
         }
       } catch (error) {
-        // Fall back to hardcoded format if histogram config fails
+        // Fall back to converting the interval string if histogram config fails
+        intervalMs = convertIntervalToMs(interval);
       }
+    } else {
+      // No timeFieldName or uiSettings, fall back to converting the interval string
+      intervalMs = convertIntervalToMs(interval);
     }
 
     if (requestAggResults) {
@@ -154,9 +167,6 @@ function convertIntervalToMs(interval: string): number {
 
   const match = interval.match(/^(\d+)([smhd])$/);
   if (!match) {
-    if (interval === 'auto') {
-      return 30000; // 30 seconds for auto intervals
-    }
     return 300000; // Default 5 minutes
   }
 

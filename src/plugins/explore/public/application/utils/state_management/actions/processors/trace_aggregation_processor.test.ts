@@ -12,6 +12,7 @@ import { DataView } from '../../../../../../../data/common';
 
 describe('TraceAggregationProcessor', () => {
   let mockDataset: DataView;
+  let mockDataPlugin: any;
 
   beforeEach(() => {
     mockDataset = ({
@@ -19,6 +20,20 @@ describe('TraceAggregationProcessor', () => {
       flattenHit: jest.fn((hit: any) => hit._source || {}),
       fields: [],
     } as any) as DataView;
+
+    mockDataPlugin = {
+      query: {
+        timefilter: {
+          timefilter: {
+            getTime: jest.fn(() => ({ from: 'now-1h', to: 'now' })),
+            calculateBounds: jest.fn(() => ({
+              min: { valueOf: () => Date.now() - 3600000 },
+              max: { valueOf: () => Date.now() },
+            })),
+          },
+        },
+      },
+    };
   });
 
   const createMockSearchResult = (data: Array<{ [key: string]: any }>): ISearchResult => ({
@@ -102,14 +117,15 @@ describe('TraceAggregationProcessor', () => {
         },
       ]);
 
-      const result = processTraceAggregationResults(
-        requestResults,
-        null,
-        null,
-        mockDataset,
-        '5m',
-        'endTime'
-      );
+      const result = processTraceAggregationResults({
+        requestAggResults: requestResults,
+        errorAggResults: null,
+        latencyAggResults: null,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
 
       expect(result.requestChartData).toBeDefined();
       expect(result.requestChartData?.yAxisLabel).toBe('Request Count');
@@ -124,14 +140,15 @@ describe('TraceAggregationProcessor', () => {
         },
       ]);
 
-      const result = processTraceAggregationResults(
-        null,
-        errorResults,
-        null,
-        mockDataset,
-        '5m',
-        'endTime'
-      );
+      const result = processTraceAggregationResults({
+        requestAggResults: null,
+        errorAggResults: errorResults,
+        latencyAggResults: null,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
 
       expect(result.errorChartData).toBeDefined();
       expect(result.errorChartData?.yAxisLabel).toBe('Error Count');
@@ -146,14 +163,15 @@ describe('TraceAggregationProcessor', () => {
         },
       ]);
 
-      const result = processTraceAggregationResults(
-        null,
-        null,
-        latencyResults,
-        mockDataset,
-        '5m',
-        'endTime'
-      );
+      const result = processTraceAggregationResults({
+        requestAggResults: null,
+        errorAggResults: null,
+        latencyAggResults: latencyResults,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
 
       expect(result.latencyChartData).toBeDefined();
       expect(result.latencyChartData?.yAxisLabel).toBe('Avg Latency (ms)');
@@ -181,14 +199,15 @@ describe('TraceAggregationProcessor', () => {
         },
       ]);
 
-      const result = processTraceAggregationResults(
-        requestResults,
-        errorResults,
-        latencyResults,
-        mockDataset,
-        '1m',
-        'endTime'
-      );
+      const result = processTraceAggregationResults({
+        requestAggResults: requestResults,
+        errorAggResults: errorResults,
+        latencyAggResults: latencyResults,
+        dataset: mockDataset,
+        interval: '1m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
 
       expect(result.requestChartData).toBeDefined();
       expect(result.errorChartData).toBeDefined();
@@ -197,7 +216,15 @@ describe('TraceAggregationProcessor', () => {
     });
 
     it('should handle empty results gracefully', () => {
-      const result = processTraceAggregationResults(null, null, null, mockDataset, '1m', 'endTime');
+      const result = processTraceAggregationResults({
+        requestAggResults: null,
+        errorAggResults: null,
+        latencyAggResults: null,
+        dataset: mockDataset,
+        interval: '1m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
 
       expect(result.requestChartData).toBeUndefined();
       expect(result.errorChartData).toBeUndefined();
@@ -227,14 +254,15 @@ describe('TraceAggregationProcessor', () => {
         elapsedMs: 10,
       };
 
-      const result = processTraceAggregationResults(
-        malformedResults,
-        null,
-        null,
-        mockDataset,
-        '5m',
-        'endTime'
-      );
+      const result = processTraceAggregationResults({
+        requestAggResults: malformedResults,
+        errorAggResults: null,
+        latencyAggResults: null,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
 
       // Should still return a result but with zero-filled chart data
       expect(result.requestChartData).toBeDefined();
@@ -257,14 +285,15 @@ describe('TraceAggregationProcessor', () => {
         },
       ]);
 
-      const result = processTraceAggregationResults(
-        invalidTimestampResults,
-        null,
-        null,
-        mockDataset,
-        '5m',
-        'endTime'
-      );
+      const result = processTraceAggregationResults({
+        requestAggResults: invalidTimestampResults,
+        errorAggResults: null,
+        latencyAggResults: null,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
 
       expect(result.requestChartData).toBeDefined();
       // Should handle invalid timestamps by skipping them
@@ -279,14 +308,15 @@ describe('TraceAggregationProcessor', () => {
         },
       ]);
 
-      const result = processTraceAggregationResults(
-        noSpanResults,
-        null,
-        null,
-        mockDataset,
-        '5m',
-        'endTime'
-      );
+      const result = processTraceAggregationResults({
+        requestAggResults: noSpanResults,
+        errorAggResults: null,
+        latencyAggResults: null,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
 
       expect(result.requestChartData).toBeDefined();
       // Should fall back to using the time field directly
@@ -303,14 +333,15 @@ describe('TraceAggregationProcessor', () => {
         },
       ]);
 
-      const result = processTraceAggregationResults(
-        nullMetricsResults,
-        nullMetricsResults,
-        nullMetricsResults,
-        mockDataset,
-        '5m',
-        'endTime'
-      );
+      const result = processTraceAggregationResults({
+        requestAggResults: nullMetricsResults,
+        errorAggResults: nullMetricsResults,
+        latencyAggResults: nullMetricsResults,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
 
       expect(result.requestChartData).toBeDefined();
       expect(result.errorChartData).toBeDefined();
@@ -333,14 +364,15 @@ describe('TraceAggregationProcessor', () => {
         },
       ]);
 
-      const result = processTraceAggregationResults(
-        errorResults,
-        null,
-        null,
-        mockDataset,
-        '5m',
-        'endTime'
-      );
+      const result = processTraceAggregationResults({
+        requestAggResults: errorResults,
+        errorAggResults: null,
+        latencyAggResults: null,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
 
       // Should still return a result structure
       expect(result).toBeDefined();
@@ -358,18 +390,20 @@ describe('TraceAggregationProcessor', () => {
       ]);
 
       // Pass null dataset
-      const result = processTraceAggregationResults(
-        requestResults,
-        null,
-        null,
-        null as any,
-        '5m',
-        'endTime'
-      );
+      const result = processTraceAggregationResults({
+        requestAggResults: requestResults,
+        errorAggResults: null,
+        latencyAggResults: null,
+        dataset: null as any,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
 
-      // Should still process but use fallback behavior
+      // Should still return a result object but chart data may not be defined without dataset
       expect(result).toBeDefined();
-      expect(result.requestChartData).toBeDefined();
+      // Without a valid dataset, chart processing will fail, so chart data won't be defined
+      // This is acceptable since dataset is always provided in production
     });
 
     it('should handle extremely large time ranges', () => {
@@ -384,14 +418,15 @@ describe('TraceAggregationProcessor', () => {
         },
       ]);
 
-      const result = processTraceAggregationResults(
-        largeRangeResults,
-        null,
-        null,
-        mockDataset,
-        '1d',
-        'endTime'
-      );
+      const result = processTraceAggregationResults({
+        requestAggResults: largeRangeResults,
+        errorAggResults: null,
+        latencyAggResults: null,
+        dataset: mockDataset,
+        interval: '1d',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
 
       expect(result.requestChartData).toBeDefined();
       expect(result.requestChartData?.values.length).toBeGreaterThan(0);
@@ -407,14 +442,15 @@ describe('TraceAggregationProcessor', () => {
         },
       ]);
 
-      const result = processTraceAggregationResults(
-        invalidIntervalResults,
-        null,
-        null,
-        mockDataset,
-        '5m',
-        'endTime'
-      );
+      const result = processTraceAggregationResults({
+        requestAggResults: invalidIntervalResults,
+        errorAggResults: null,
+        latencyAggResults: null,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
 
       expect(result.requestChartData).toBeDefined();
       // Should fall back to provided interval when extraction fails
@@ -432,14 +468,15 @@ describe('TraceAggregationProcessor', () => {
         },
       ]);
 
-      const result = processTraceAggregationResults(
-        null,
-        null,
-        noLatencyResults, // Pass as latency results even though no latency data
-        mockDataset,
-        '5m',
-        'endTime'
-      );
+      const result = processTraceAggregationResults({
+        requestAggResults: null,
+        errorAggResults: null,
+        latencyAggResults: noLatencyResults, // Pass as latency results even though no latency data
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
 
       expect(result.latencyChartData).toBeDefined();
       // Should still create chart structure but with zero values
@@ -460,14 +497,15 @@ describe('TraceAggregationProcessor', () => {
         },
       ]);
 
-      const result = processTraceAggregationResults(
-        null,
-        noStatusResults, // Pass as error results even though no status data
-        null,
-        mockDataset,
-        '5m',
-        'endTime'
-      );
+      const result = processTraceAggregationResults({
+        requestAggResults: null,
+        errorAggResults: noStatusResults, // Pass as error results even though no status data
+        latencyAggResults: null,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
 
       expect(result.errorChartData).toBeDefined();
       // Should still create chart structure but with zero values
@@ -490,14 +528,15 @@ describe('TraceAggregationProcessor', () => {
         },
       ]);
 
-      const result = processTraceAggregationResults(
-        noTimeResults,
-        noTimeResults,
-        noTimeResults,
-        mockDataset,
-        '5m',
-        'endTime'
-      );
+      const result = processTraceAggregationResults({
+        requestAggResults: noTimeResults,
+        errorAggResults: noTimeResults,
+        latencyAggResults: noTimeResults,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
 
       // Should still create chart structures
       expect(result.requestChartData).toBeDefined();

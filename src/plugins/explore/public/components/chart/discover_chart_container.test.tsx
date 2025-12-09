@@ -84,6 +84,14 @@ jest.mock('../../helpers/use_flavor_id', () => ({
   useFlavorId: jest.fn(() => 'logs'),
 }));
 
+jest.mock('../../application/utils/state_management/actions/trace_query_actions', () => ({
+  prepareTraceCacheKeys: jest.fn(() => ({
+    requestCacheKey: 'trace-requests:test-query',
+    errorCacheKey: 'trace-errors:test-query',
+    latencyCacheKey: 'trace-latency:test-query',
+  })),
+}));
+
 jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
   histogramResultsProcessor: jest.fn(() => ({
     chartData: { values: [], xAxisOrderedValues: [] },
@@ -92,11 +100,6 @@ jest.mock('../../application/utils/state_management/actions/query_actions', () =
   })),
   defaultPrepareQueryString: jest.fn(() => 'test-cache-key'),
   prepareHistogramCacheKey: jest.fn(() => 'histogram:test-cache-key'),
-  prepareTraceCacheKeys: jest.fn(() => ({
-    requestCacheKey: 'trace-requests:test-query',
-    errorCacheKey: 'trace-errors:test-query',
-    latencyCacheKey: 'trace-latency:test-query',
-  })),
   defaultResultsProcessor: jest.fn(() => ({
     hits: { hits: [], total: 10, max_score: 1.0 },
     fieldCounts: {},

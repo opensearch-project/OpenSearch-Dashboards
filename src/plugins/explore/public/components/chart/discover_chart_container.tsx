@@ -14,8 +14,8 @@ import { useDatasetContext } from '../../application/context/dataset_context/dat
 import {
   histogramResultsProcessor,
   prepareHistogramCacheKey,
-  prepareTraceCacheKeys,
 } from '../../application/utils/state_management/actions/query_actions';
+import { prepareTraceCacheKeys } from '../../application/utils/state_management/actions/trace_query_actions';
 import { RootState } from '../../application/utils/state_management/store';
 import { selectShowHistogram } from '../../application/utils/state_management/selectors';
 import { CanvasPanel } from '../panel/canvas_panel';
@@ -115,17 +115,17 @@ export const DiscoverChartContainer = () => {
       if (!requestResults || !dataset) {
         return null;
       }
-      return processTraceAggregationResults(
-        requestResults,
-        errorResults,
-        latencyResults,
+      return processTraceAggregationResults({
+        requestAggResults: requestResults,
+        errorAggResults: errorResults,
+        latencyAggResults: latencyResults,
         dataset,
-        actualInterval,
-        dataset.timeFieldName || 'endTime',
-        data,
-        interval,
-        uiSettings
-      );
+        interval: actualInterval,
+        timeField: dataset.timeFieldName || 'endTime',
+        dataPlugin: data,
+        rawInterval: interval,
+        uiSettings,
+      });
     }
 
     if (!rawResults || !dataset) {

@@ -46,16 +46,16 @@ import {
   processRawResultsForHistogram,
   createHistogramConfigWithInterval,
 } from './utils';
-import {
-  TraceAggregationConfig,
-  buildRequestCountQuery,
-  buildErrorCountQuery,
-  buildLatencyQuery,
-  createTraceAggregationConfig,
-} from './trace_aggregation_builder';
 import { getCurrentFlavor } from '../../../../helpers/get_flavor_from_app_id';
 import { ExploreFlavor } from '../../../../../common';
 import { TRACES_CHART_BAR_TARGET } from '../constants';
+import { createTraceAggregationConfig } from './trace_aggregation_builder';
+import {
+  prepareTraceCacheKeys,
+  executeRequestCountQuery,
+  executeErrorCountQuery,
+  executeLatencyQuery,
+} from './trace_query_actions';
 
 // Module-level storage for abort controllers keyed by cacheKey
 const activeQueryAbortControllers = new Map<string, AbortController>();
@@ -92,15 +92,6 @@ export const prepareHistogramCacheKey = (query: Query, hasBreakdown?: boolean): 
   return hasBreakdown
     ? `histogram:breakdown:${defaultPrepareQueryString(query)}`
     : `histogram:${defaultPrepareQueryString(query)}`;
-};
-
-export const prepareTraceCacheKeys = (query: Query) => {
-  const processedQuery = defaultPrepareQueryString(query);
-  return {
-    requestCacheKey: `trace-requests:${processedQuery}`,
-    errorCacheKey: `trace-errors:${processedQuery}`,
-    latencyCacheKey: `trace-latency:${processedQuery}`,
-  };
 };
 
 /**
@@ -808,122 +799,6 @@ export const executeDataTableQuery = createAsyncThunk<
       ...params,
       includeHistogram: false, // Data table doesn't need histogram
       interval: undefined, // Data table doesn't need intervals
-    },
-    thunkAPI
-  );
-});
-
-export const executeTraceAggregationQueries = createAsyncThunk<
-  {
-    requestData: ISearchResult;
-    errorData: ISearchResult;
-    latencyData: ISearchResult;
-  },
-  {
-    services: ExploreServices;
-    baseQuery: string;
-    config: TraceAggregationConfig;
-  },
-  { state: RootState }
->('query/executeTraceAggregationQueries', async ({ services, baseQuery, config }, { dispatch }) => {
-  // Execute all 3 RED metric queries in parallel
-  const [requestData, errorData, latencyData] = await Promise.all([
-    dispatch(
-      executeRequestCountQuery({
-        services,
-        cacheKey: `trace-requests:${baseQuery}`,
-        baseQuery,
-        config,
-      })
-    ).unwrap(),
-    dispatch(
-      executeErrorCountQuery({
-        services,
-        cacheKey: `trace-errors:${baseQuery}`,
-        baseQuery,
-        config,
-      })
-    ).unwrap(),
-    dispatch(
-      executeLatencyQuery({
-        services,
-        cacheKey: `trace-latency:${baseQuery}`,
-        baseQuery,
-        config,
-      })
-    ).unwrap(),
-  ]);
-
-  return { requestData, errorData, latencyData };
-});
-
-export const executeRequestCountQuery = createAsyncThunk<
-  any,
-  {
-    services: ExploreServices;
-    cacheKey: string;
-    baseQuery: string;
-    config: TraceAggregationConfig;
-  },
-  { state: RootState }
->('query/executeRequestCountQuery', async ({ services, cacheKey, baseQuery, config }, thunkAPI) => {
-  const queryString = buildRequestCountQuery(baseQuery, config);
-
-  return executeQueryBase(
-    {
-      services,
-      cacheKey,
-      queryString,
-      includeHistogram: false,
-      interval: undefined,
-    },
-    thunkAPI
-  );
-});
-
-export const executeErrorCountQuery = createAsyncThunk<
-  any,
-  {
-    services: ExploreServices;
-    cacheKey: string;
-    baseQuery: string;
-    config: TraceAggregationConfig;
-  },
-  { state: RootState }
->('query/executeErrorCountQuery', async ({ services, cacheKey, baseQuery, config }, thunkAPI) => {
-  const queryString = buildErrorCountQuery(baseQuery, config);
-
-  return executeQueryBase(
-    {
-      services,
-      cacheKey,
-      queryString,
-      includeHistogram: false,
-      interval: undefined,
-    },
-    thunkAPI
-  );
-});
-
-export const executeLatencyQuery = createAsyncThunk<
-  any,
-  {
-    services: ExploreServices;
-    cacheKey: string;
-    baseQuery: string;
-    config: TraceAggregationConfig;
-  },
-  { state: RootState }
->('query/executeLatencyQuery', async ({ services, cacheKey, baseQuery, config }, thunkAPI) => {
-  const queryString = buildLatencyQuery(baseQuery, config);
-
-  return executeQueryBase(
-    {
-      services,
-      cacheKey,
-      queryString,
-      includeHistogram: false,
-      interval: undefined,
     },
     thunkAPI
   );
