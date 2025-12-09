@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { dataConnectionsManagerService } from './data_connections_manager_service';
+import { resourceManagerService } from './resource_manager_service';
 import { BaseConnectionManager } from './managers/base_connection_manager';
 
-describe('DataConnectionsManagerService', () => {
+describe('ResourceManagerService', () => {
   let mockManager: jest.Mocked<BaseConnectionManager>;
 
   beforeEach(() => {
@@ -16,13 +16,13 @@ describe('DataConnectionsManagerService', () => {
   const DATA_CONNECTION_TYPE = 'test-connection';
   describe('register', () => {
     it('should successfully register a new manager', () => {
-      dataConnectionsManagerService.register(DATA_CONNECTION_TYPE, mockManager);
-      expect(dataConnectionsManagerService.getManager(DATA_CONNECTION_TYPE)).toBe(mockManager);
+      resourceManagerService.register(DATA_CONNECTION_TYPE, mockManager);
+      expect(resourceManagerService.getManager(DATA_CONNECTION_TYPE)).toBe(mockManager);
     });
 
     it('should throw error when registering duplicate connection type', () => {
       expect(() => {
-        dataConnectionsManagerService.register(DATA_CONNECTION_TYPE, mockManager);
+        resourceManagerService.register(DATA_CONNECTION_TYPE, mockManager);
       }).toThrow(
         `Manager for dataConnectionType ${DATA_CONNECTION_TYPE} is already registered. Unable to register another manager.`
       );
@@ -31,13 +31,13 @@ describe('DataConnectionsManagerService', () => {
 
   describe('getManager', () => {
     it('should return correct manager for registered connection type', () => {
-      const result = dataConnectionsManagerService.getManager(DATA_CONNECTION_TYPE);
+      const result = resourceManagerService.getManager(DATA_CONNECTION_TYPE);
       expect(result).toBeDefined();
     });
 
     it('should return undefined for non-existent connection type', () => {
       const nonExistentType = 'non-existent';
-      const result = dataConnectionsManagerService.getManager(nonExistentType);
+      const result = resourceManagerService.getManager(nonExistentType);
       expect(result).toBeUndefined();
     });
   });

@@ -30,7 +30,8 @@ import {
   QueryEnhancementsPluginStart,
 } from './types';
 import { OpenSearchEnhancements } from './utils';
-import { dataConnectionsManagerService } from './connections/data_connections_manager_service';
+import { resourceManagerService } from './connections/resource_manager_service';
+import { queryManagerService } from './connections/query_manager_service';
 import { BaseConnectionManager } from './connections/managers/base_connection_manager';
 import { prometheusManager } from './connections/managers/prometheus_manager';
 
@@ -108,14 +109,16 @@ export class QueryEnhancementsPlugin
       pplasync: pplAsyncSearchStrategy,
     });
 
-    dataConnectionsManagerService.register('prometheus', prometheusManager);
+    resourceManagerService.register('prometheus', prometheusManager);
+    queryManagerService.register('prometheus', prometheusManager);
 
     this.logger.info('queryEnhancements: Setup complete');
     return {
       defineSearchStrategyRoute: defineSearchStrategyRouteProvider(this.logger, router),
-      registerDataConnectionManager: (dataConnectionType: string, manager: BaseConnectionManager) =>
-        dataConnectionsManagerService.register(dataConnectionType, manager),
-      prometheusManager,
+      registerResourceManager: (dataConnectionType: string, manager: BaseConnectionManager) =>
+        resourceManagerService.register(dataConnectionType, manager),
+      registerQueryManager: (dataConnectionType: string, manager: BaseConnectionManager) =>
+        queryManagerService.register(dataConnectionType, manager),
     };
   }
 
