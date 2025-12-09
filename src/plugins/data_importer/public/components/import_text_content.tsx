@@ -14,6 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import uuid from 'uuid';
+import { i18n } from '@osd/i18n';
 import { JSON_FILE_TYPE } from '../../common/constants';
 
 export interface ImportTextContentBodyProps {
@@ -58,7 +59,11 @@ export const ImportTextContentBody = ({
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexStart" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiText>File Format: </EuiText>
+              <EuiText>
+                {i18n.translate('dataImporter.file', {
+                  defaultMessage: 'File format:',
+                })}
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiSelect
@@ -81,7 +86,10 @@ export const ImportTextContentBody = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText color={numCharacters > characterLimit ? 'danger' : 'default'}>
-            {numCharacters}/{characterLimit} characters
+            {numCharacters}/{characterLimit}{' '}
+            {i18n.translate('dataImporter.file.characters', {
+              defaultMessage: 'characters',
+            })}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

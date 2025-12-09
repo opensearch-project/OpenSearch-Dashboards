@@ -72,7 +72,10 @@ export class ChatService {
       // Set thread ID in core service
       this.coreChatService.setThreadId(currentChatState.threadId);
     }
-    this.currentMessages = currentChatState?.messages || [];
+
+    // Clean up trailing error messages from interrupted sessions (e.g., page refresh)
+    const messages = currentChatState?.messages || [];
+    this.currentMessages = this.removeTrailingErrorMessages(messages);
 
     // Subscribe to assistant action service to keep tools in sync
     const assistantActionService = AssistantActionService.getInstance();
@@ -273,11 +276,49 @@ export class ChatService {
   }
 
   /**
+   * Extract data source ID from page context
+   * Looks for page contexts with appId and dataset.dataSource.id structure
+   */
+  private extractDataSourceIdFromPageContext(allContexts: any[]): string | undefined {
+    // Find page context by checking for 'page' category and appId in value
+    const pageContext = allContexts.find((ctx) => {
+      // Look for contexts in 'page' category instead of filtering by ID existence
+      if (!ctx.categories?.includes('page')) return false;
+
+      try {
+        const value = typeof ctx.value === 'string' ? JSON.parse(ctx.value) : ctx.value;
+        return value?.appId; // Page contexts have appId
+      } catch {
+        return false;
+      }
+    });
+
+    if (!pageContext) return undefined;
+
+    const contextValue =
+      typeof pageContext.value === 'string' ? JSON.parse(pageContext.value) : pageContext.value;
+
+    // TODO: Consider adding more robust nested field search for dataSource.id
+    // if the standard dataset.dataSource.id pattern is not found
+    return contextValue?.dataset?.dataSource?.id;
+  }
+
+  /**
    * Get workspace-aware data source ID
    * Determines the correct data source based on current workspace context
    */
   private async getWorkspaceAwareDataSourceId(): Promise<string | undefined> {
     try {
+      // Try to get data source from page context first
+      const contextStore = (window as any).assistantContextStore;
+      const allContexts = contextStore ? contextStore.getAllContexts() : [];
+
+      const pageDataSourceId = this.extractDataSourceIdFromPageContext(allContexts);
+      if (pageDataSourceId) {
+        return pageDataSourceId;
+      }
+
+      // Fallback to existing workspace-aware logic
       if (!this.uiSettings) {
         // eslint-disable-next-line no-console
         console.warn('UI Settings not available, using default data source');
@@ -305,7 +346,7 @@ export class ChatService {
       return dataSourceId || undefined;
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.warn('Failed to determine workspace-aware data source, proceeding without:', error);
+      console.warn('Failed to determine data source, proceeding without:', error);
       return undefined; // Graceful fallback - undefined means local cluster
     }
   }
@@ -483,6 +524,34 @@ export class ChatService {
     }
   }
 
+  /**
+   * Remove trailing system error messages from restored chat sessions.
+   * This prevents stale "network error" messages from interrupted connections (page refresh)
+   * from appearing when the user returns to the chat.
+   */
+  private removeTrailingErrorMessages(messages: any[]): any[] {
+    if (!messages.length) {
+      return messages;
+    }
+
+    // Work backwards from the end, removing trailing system error messages
+    let endIndex = messages.length;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const message = messages[i];
+
+      // Check if this is the specific network error from page refresh
+      if (message.role === 'system' && message.content === 'Error: network error') {
+        endIndex = i; // Mark for removal
+      } else {
+        // Stop when we hit a non-error message
+        break;
+      }
+    }
+
+    // Return array without trailing error messages
+    return messages.slice(0, endIndex);
+  }
+
   public saveCurrentChatStatePublic(): void {
     this.saveCurrentChatState();
   }
@@ -502,9 +571,11 @@ export class ChatService {
       return;
     }
 
-    // Get all contexts with IDs (dynamic contexts) and remove them
+    // Get all contexts with IDs that are NOT page contexts (dynamic contexts) and remove them
     const allContexts = contextStore.getAllContexts();
-    const dynamicContexts = allContexts.filter((ctx: any) => ctx.id);
+    const dynamicContexts = allContexts.filter(
+      (ctx: any) => ctx.id && !ctx.categories?.includes('page')
+    );
 
     dynamicContexts.forEach((ctx: any) => {
       contextStore.removeContextById(ctx.id);
