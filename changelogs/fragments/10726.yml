@@ -1,2 +1,0 @@
-fix:
-- Fixed data source reference initialization and Dataset conversion in DataView classes ([#10726](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10726))

@@ -1,2 +1,0 @@
-fix:
-- [Chat][BUG] Fix chatbot stuck state: resolve AbortController reuse and missing resetConnection ([#11015](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11015))

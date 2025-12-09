@@ -1,2 +1,0 @@
-feat:
-- Persist chatbot state in local storage ([#10895](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10895))

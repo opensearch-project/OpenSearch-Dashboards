@@ -1,5 +1,0 @@
-infra:
-- Bump OpenSearch version to 3.3 in Cypress workflows ([#10771](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10771))
-
-fix:
-- Fixed the rule_matching_vis cypress test to use a working query ([#10771](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10771))

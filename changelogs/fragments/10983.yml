@@ -1,2 +1,0 @@
-refactor:
-- [Chat] Refactor chat architecture: Extract shared infrastructure into a core chat service ([#10983](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10983))

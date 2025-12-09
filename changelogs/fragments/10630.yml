@@ -1,2 +1,0 @@
-fix:
-- Fix trace details page header to always show root span([#10630](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10630))

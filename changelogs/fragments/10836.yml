@@ -1,8 +1,0 @@
-fix:
-- Optimize discover vis performance by turn off visual interactions for data point cound > 1000 ([#10836](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10836))
-- UseDebounceValue bug which onChange get called for initial value ([#10836](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10836))
-- Discover vis tooltip issue for multiple series data that if field contains vega reserved charaters ([#10836](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10836))
-- React missing key warnings ([#10836](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10836))
-- Tweaks the label text of vis style panel ([#10836](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10836))
-- Explore embeddable initially display a "No result" screen ([#10836](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10836))
-- Discover vis map PPL field type `ip` as category ([#10836](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10836))

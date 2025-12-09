@@ -1,2 +1,0 @@
-feat:
-- Conditionally replace index pattern text with dataset when dataset plugin enabled ([#10791](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10791))
