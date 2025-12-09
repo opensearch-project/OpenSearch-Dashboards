@@ -5,7 +5,8 @@
 
 import { OpenSearchDashboardsRequest, RequestHandlerContext } from 'src/core/server';
 import { URI } from '../../../common/constants';
-import { prometheusManager } from './prometheus_manager';
+import { prometheusManager, PromQLQueryParams, PromQLQueryResponse } from './prometheus_manager';
+import { QueryExecutor } from './base_connection_manager';
 
 describe('PrometheusManager', () => {
   let mockContext: RequestHandlerContext;
@@ -55,7 +56,7 @@ describe('PrometheusManager', () => {
       expect(result).toEqual({
         status: 'success',
         data: ['__name__', 'instance', 'job'],
-        type: 'promql',
+        type: 'prometheus',
       });
     });
 
@@ -322,6 +323,97 @@ describe('PrometheusManager', () => {
         querystring: '',
         method: 'GET',
       });
+    });
+  });
+
+  describe('query', () => {
+    afterEach(() => {
+      // Clean up after each test
+      prometheusManager.setQueryExecutor(undefined as any);
+    });
+
+    it('should execute query successfully when query executor is set', async () => {
+      const mockQueryResponse: PromQLQueryResponse = {
+        queryId: 'test-query-id',
+        sessionId: 'test-session-id',
+        results: {
+          'prom-conn': {
+            resultType: 'matrix',
+            result: [
+              {
+                metric: { __name__: 'up', job: 'prometheus' },
+                values: [[1638316800, 1]],
+              },
+            ],
+          },
+        },
+      };
+
+      const mockExecutor: QueryExecutor<PromQLQueryParams, PromQLQueryResponse> = {
+        execute: jest.fn().mockResolvedValue(mockQueryResponse),
+      };
+      prometheusManager.setQueryExecutor(mockExecutor);
+
+      const params: PromQLQueryParams = {
+        body: {
+          query: 'up',
+          language: 'promql',
+          maxResults: 100,
+          timeout: 30,
+          options: {
+            queryType: 'instant',
+            start: '2021-12-01T00:00:00Z',
+            end: '2021-12-01T01:00:00Z',
+            step: '15s',
+          },
+        },
+        dataconnection: 'prom-conn',
+      };
+
+      const result = await prometheusManager.query(mockContext, mockRequest, params);
+
+      expect(mockExecutor.execute).toHaveBeenCalledWith(mockContext, mockRequest, params);
+      expect(result).toEqual({
+        status: 'success',
+        data: mockQueryResponse,
+      });
+    });
+
+    it('should return failed status when query executor throws error', async () => {
+      const mockExecutor: QueryExecutor<PromQLQueryParams, PromQLQueryResponse> = {
+        execute: jest.fn().mockRejectedValue(new Error('Query timeout')),
+      };
+      prometheusManager.setQueryExecutor(mockExecutor);
+
+      const params: PromQLQueryParams = {
+        body: {
+          query: 'up',
+          language: 'promql',
+          maxResults: 100,
+          timeout: 30,
+          options: {
+            queryType: 'instant',
+            start: '2021-12-01T00:00:00Z',
+            end: '2021-12-01T01:00:00Z',
+            step: '15s',
+          },
+        },
+        dataconnection: 'prom-conn',
+      };
+
+      const result = await prometheusManager.query(mockContext, mockRequest, params);
+
+      expect(result).toEqual({
+        status: 'failed',
+        data: undefined,
+        error: 'Query timeout',
+      });
+    });
+
+    it('should throw error when no query executor is set', async () => {
+      await expect(
+        prometheusManager.query(mockContext, mockRequest, {} as PromQLQueryParams)
+      ).rejects.toThrow('No query executor available');
     });
   });
 });

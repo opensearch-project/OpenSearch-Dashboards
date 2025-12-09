@@ -3,30 +3,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  ILegacyClusterClient,
-  Logger,
-  RequestHandlerContext,
-  SharedGlobalConfig,
-} from 'opensearch-dashboards/server';
+import { Logger, RequestHandlerContext, SharedGlobalConfig } from 'opensearch-dashboards/server';
 import { Observable, of } from 'rxjs';
 import { DATA_FRAME_TYPES, IOpenSearchDashboardsSearchRequest } from '../../../data/common';
 import { SearchUsage } from '../../../data/server';
 import { promqlSearchStrategyProvider } from './promql_search_strategy';
+import { prometheusManager } from '../connections/managers/prometheus_manager';
+
+jest.mock('../connections/managers/prometheus_manager', () => ({
+  prometheusManager: {
+    query: jest.fn(),
+  },
+}));
 
 describe('promqlSearchStrategy', () => {
   let config$: Observable<SharedGlobalConfig>;
   let logger: Logger;
-  let client: ILegacyClusterClient;
   let usage: SearchUsage;
   const emptyRequestHandlerContext = ({} as unknown) as RequestHandlerContext;
 
-  const createMockClient = (mockResponse: any) => {
-    return ({
-      asScoped: jest.fn().mockReturnValue({
-        callAsCurrentUser: jest.fn().mockResolvedValue(mockResponse),
-      }),
-    } as unknown) as ILegacyClusterClient;
+  const mockPrometheusManagerQuery = (mockResponse: any) => {
+    (prometheusManager.query as jest.Mock).mockResolvedValue({
+      status: 'success',
+      data: mockResponse,
+    });
   };
 
   beforeEach(() => {
@@ -34,10 +34,10 @@ describe('promqlSearchStrategy', () => {
     logger = ({
       error: jest.fn(),
     } as unknown) as Logger;
-    usage = {
+    usage = ({
       trackSuccess: jest.fn(),
       trackError: jest.fn(),
-    } as SearchUsage;
+    } as unknown) as SearchUsage;
   });
 
   afterEach(() => {
@@ -72,8 +72,8 @@ describe('promqlSearchStrategy', () => {
         },
       };
 
-      client = createMockClient(mockPrometheusResponse);
-      const strategy = promqlSearchStrategyProvider(config$, logger, client, usage);
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
         ({
@@ -134,8 +134,8 @@ describe('promqlSearchStrategy', () => {
         },
       };
 
-      client = createMockClient(mockPrometheusResponse);
-      const strategy = promqlSearchStrategyProvider(config$, logger, client, usage);
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
         ({
@@ -175,8 +175,8 @@ describe('promqlSearchStrategy', () => {
         },
       };
 
-      client = createMockClient(mockPrometheusResponse);
-      const strategy = promqlSearchStrategyProvider(config$, logger, client, usage);
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
         ({
@@ -223,8 +223,8 @@ describe('promqlSearchStrategy', () => {
         },
       };
 
-      client = createMockClient(mockPrometheusResponse);
-      const strategy = promqlSearchStrategyProvider(config$, logger, client, usage);
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
         ({
@@ -272,8 +272,8 @@ describe('promqlSearchStrategy', () => {
         },
       };
 
-      client = createMockClient(mockPrometheusResponse);
-      const strategy = promqlSearchStrategyProvider(config$, logger, client, usage);
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
         emptyRequestHandlerContext,
         ({
@@ -316,8 +316,8 @@ describe('promqlSearchStrategy', () => {
         },
       };
 
-      client = createMockClient(mockPrometheusResponse);
-      const strategy = promqlSearchStrategyProvider(config$, logger, client, usage);
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const resultData = await strategy.search(
         emptyRequestHandlerContext,
         ({
@@ -344,13 +344,12 @@ describe('promqlSearchStrategy', () => {
   });
 
   it('should handle errors and track usage', async () => {
-    client = ({
-      asScoped: jest.fn().mockReturnValue({
-        callAsCurrentUser: jest.fn().mockRejectedValue(new Error('Query failed')),
-      }),
-    } as unknown) as ILegacyClusterClient;
+    (prometheusManager.query as jest.Mock).mockResolvedValue({
+      status: 'failed',
+      error: 'Query failed',
+    });
 
-    const strategy = promqlSearchStrategyProvider(config$, logger, client, usage);
+    const strategy = promqlSearchStrategyProvider(config$, logger, usage);
     await expect(
       strategy.search(
         emptyRequestHandlerContext,

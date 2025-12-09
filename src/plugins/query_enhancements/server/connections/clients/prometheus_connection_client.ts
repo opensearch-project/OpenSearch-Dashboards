@@ -14,7 +14,7 @@ import {
   GetResourcesResponse,
 } from './base_connection_client';
 
-export class PromQLConnectionClient extends BaseConnectionClient<OpenSearchClient> {
+export class PrometheusConnectionClient extends BaseConnectionClient<OpenSearchClient> {
   protected client: OpenSearchClient;
 
   constructor(context: RequestHandlerContext, _request: OpenSearchDashboardsRequest) {
@@ -31,13 +31,13 @@ export class PromQLConnectionClient extends BaseConnectionClient<OpenSearchClien
       return {
         status: 'success',
         data: response.body.data,
-        type: 'promql',
+        type: 'prometheus',
       };
     } catch (err) {
       return {
         status: 'failed',
         data: ([] as unknown) as R,
-        type: 'promql',
+        type: 'prometheus',
       };
     }
   }
