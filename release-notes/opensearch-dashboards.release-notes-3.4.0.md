@@ -1,9 +1,5 @@
 # VERSION 3.4.0 Release Note
 
-### 💥 Breaking Changes
-
- - Remove usage of lodash template ([#10920](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10920))
-
 ### 📈 Features/Enhancements
 
  - Add support for PATCH in dev tools ([#10361](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10361))
@@ -181,6 +177,7 @@
  - Update Webpack for  jspdf upgrade ([#10812](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10812))
  - Proxies the AG-UI calls via the node server ([#10826](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10826))
  - Removing ajv ([#10941](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10941))
+ - Remove usage of lodash template ([#10920](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10920))
  - [CVE-2025-59343] Bump tar-fs from 2.1.3 to 2.1.4 and from 3.1.0 to 3.1.1 ([#10910](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10910))
 
 ### 🪛 Refactoring
