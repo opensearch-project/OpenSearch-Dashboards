@@ -6,11 +6,9 @@
 import { BaseConnectionManager } from './managers/base_connection_manager';
 
 /**
- * Service for managing data connection managers.
- * Handles both resource fetching and query execution for different data connection types.
  * @experimental this class is experimental and might change in future releases.
  */
-class DataConnectionsManagerService {
+class ResourceManagerService {
   private readonly managers: Map<string, BaseConnectionManager>;
   constructor() {
     this.managers = new Map();
@@ -31,4 +29,4 @@ class DataConnectionsManagerService {
 }
 
 // export as singleton
-export const dataConnectionsManagerService = new DataConnectionsManagerService();
+export const resourceManagerService = new ResourceManagerService();
