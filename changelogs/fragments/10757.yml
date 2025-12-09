@@ -1,4 +1,0 @@
-fix:
-- Hide unwanted axis of point layers and crosshair layers ([#10757](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10757))
-- Bucket count placeholder text ([#10757](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10757))
-- Incorrect pie chart legend opacity ([#10757](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10757))

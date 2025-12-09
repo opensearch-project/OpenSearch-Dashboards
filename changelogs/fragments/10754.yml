@@ -1,4 +1,0 @@
-fix:
-- Fix table vis fields order not the same as fields order in the query ([#10754](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10754))
-- Table vis pagination not working due to unnecessary rerendering ([#10754](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10754))
-- Change the default table column alignment to left ([#10754](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10754))

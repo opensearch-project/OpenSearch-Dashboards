@@ -1,2 +1,0 @@
-fix:
-- [BUG] Allow workspace-specific datasets with same title by using UUID ([#10899](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10899))
