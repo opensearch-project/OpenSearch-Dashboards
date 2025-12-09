@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiTitle, EuiSelect, EuiSpacer } from '@elastic/eui';
+import { EuiTitle, EuiSelect } from '@elastic/eui';
 import { CSV_SUPPORTED_DELIMITERS } from '../../common/constants';
 
 export interface DelimiterSelectProps {
@@ -19,7 +19,7 @@ export const DelimiterSelect = ({ onDelimiterChange, initialDelimiter }: Delimit
       <EuiTitle size="xs">
         <span>
           {i18n.translate('dataImporter.delimiter', {
-            defaultMessage: 'Delimiter Options',
+            defaultMessage: 'Delimiter options',
           })}
         </span>
       </EuiTitle>
@@ -30,7 +30,6 @@ export const DelimiterSelect = ({ onDelimiterChange, initialDelimiter }: Delimit
         onChange={onDelimiterChange}
         value={initialDelimiter}
       />
-      <EuiSpacer size="m" />
     </div>
   );
 };

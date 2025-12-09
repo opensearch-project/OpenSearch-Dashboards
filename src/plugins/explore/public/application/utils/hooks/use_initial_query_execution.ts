@@ -27,8 +27,17 @@ export const useInitialQueryExecution = (services: ExploreServices) => {
   const { dataset: datasetFromContext, isLoading: datasetLoading } = useDatasetContext();
 
   const shouldSearchOnPageLoad = useMemo(() => {
+    if (queryState.dataset && services?.data?.query?.queryString) {
+      const datasetService = services.data.query.queryString.getDatasetService();
+      const typeConfig = datasetService.getType(queryState.dataset.type);
+      const datasetSearchOnLoad = typeConfig?.meta?.searchOnLoad;
+      if (datasetSearchOnLoad !== undefined) {
+        return datasetSearchOnLoad;
+      }
+    }
+
     return services?.uiSettings?.get('discover:searchOnPageLoad', true) ?? true;
-  }, [services?.uiSettings]);
+  }, [services?.uiSettings, services?.data?.query?.queryString, queryState.dataset]);
 
   useEffect(() => {
     const initializePage = async () => {
