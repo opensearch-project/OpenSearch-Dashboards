@@ -1,2 +1,0 @@
-test:
-- Split explore vis cypress tests into two ci group ([#10906](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10906))

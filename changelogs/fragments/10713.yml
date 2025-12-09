@@ -1,2 +1,0 @@
-feat:
-- Show query panel in Explore traces and metrics even if there are no datasets ([#10713](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10713))

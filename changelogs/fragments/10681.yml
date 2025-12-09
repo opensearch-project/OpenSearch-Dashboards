@@ -1,2 +1,0 @@
-test:
-- Move table.spec to fix flakiness ([#10681](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10681))
