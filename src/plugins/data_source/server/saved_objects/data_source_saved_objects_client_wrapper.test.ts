@@ -16,6 +16,20 @@ import { DataSourceSavedObjectsClientWrapper } from './data_source_saved_objects
 import { SavedObject } from 'opensearch-dashboards/public';
 import { DATA_SOURCE_TITLE_LENGTH_LIMIT } from '../util/constants';
 
+// Mock dns-sync module to allow DNS resolution in tests
+jest.mock('dns-sync', () => ({
+  resolve: jest.fn((hostname: string) => {
+    // Return a mock IP address for test hostnames
+    if (hostname === 'test.com') {
+      return '1.2.3.4';
+    }
+    if (hostname === '127.0.0.1') {
+      return '127.0.0.1';
+    }
+    return '1.2.3.4'; // Default mock IP for any other hostname
+  }),
+}));
+
 describe('DataSourceSavedObjectsClientWrapper', () => {
   const customAuthName = 'role_based_auth';
   const customAuthMethod = {
