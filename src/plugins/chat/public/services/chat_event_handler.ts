@@ -272,8 +272,10 @@ export class ChatEventHandler {
     }
 
     try {
+      const isAgentTool = !this.assistantActionService.hasAction(toolCall.function.name);
       // Parse arguments
-      const args = toolCall.function.arguments ? JSON.parse(toolCall.function.arguments) : {};
+      const args =
+        toolCall.function.arguments && !isAgentTool ? JSON.parse(toolCall.function.arguments) : {};
 
       // Update state to executing
       this.assistantActionService.updateToolCallState(toolCallId, {
@@ -299,16 +301,6 @@ export class ChatEventHandler {
           status: 'complete',
           result: result.data,
         });
-
-        // Add tool result message to timeline
-        const toolMessage: ToolMessage = {
-          id: `tool-result-${toolCallId}`,
-          role: 'tool',
-          content: typeof result.data === 'string' ? result.data : JSON.stringify(result.data),
-          toolCallId,
-        };
-
-        this.onTimelineUpdate((prev) => [...prev, toolMessage]);
 
         // Send tool result back to assistant if chatService is available
         if (this.chatService && (this.chatService as any).sendToolResult) {
@@ -494,12 +486,15 @@ export class ChatEventHandler {
    */
   private async sendToolResultToAssistant(toolCallId: string, result: any): Promise<void> {
     try {
-      const messages = this.getTimeline(); // Now pass timeline directly - no transformation needed
-      const { observable } = await (this.chatService as any).sendToolResult(
+      const messages = this.getTimeline();
+
+      const { observable, toolMessage } = await (this.chatService as any).sendToolResult(
         toolCallId,
         result,
         messages
       );
+
+      this.onTimelineUpdate((prev) => [...prev, toolMessage]);
 
       // Set streaming state and subscribe to the response stream
       this.onStreamingStateChange(true);

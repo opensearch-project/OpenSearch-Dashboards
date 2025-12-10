@@ -14,24 +14,19 @@ import {
   ContextProviderStart,
   AssistantActionService,
 } from '../../../context_provider/public';
-import type { ToolDefinition } from '../../../context_provider/public';
 import {
   // eslint-disable-next-line prettier/prettier
   type Event as ChatEvent,
 } from '../../common/events';
 import type {
   Message,
-  AssistantMessage,
   UserMessage,
-  ToolMessage,
 } from '../../common/types';
 import { ChatLayoutMode } from './chat_header_button';
 import { ChatContainer } from './chat_container';
 import { ChatHeader } from './chat_header';
 import { ChatMessages } from './chat_messages';
 import { ChatInput } from './chat_input';
-import { ContextTreeView } from './context_tree_view';
-import { useGraphTimeseriesDataAction } from '../actions/graph_timeseries_data_action';
 
 export interface ChatWindowInstance{
   startNewChat: ()=>void;
@@ -56,8 +51,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   onToggleLayout,
   onClose,
 }, ref) => {
+
   const service = AssistantActionService.getInstance();
-  const [availableTools, setAvailableTools] = useState<ToolDefinition[]>([]);
   const { chatService } = useChatContext();
   const { services } = useOpenSearchDashboards<{
     core: CoreStart;
@@ -68,6 +63,12 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const handleSendRef = useRef<typeof handleSend>();
+  
+  const timelineRef = React.useRef<Message[]>(timeline);
+  
+  React.useEffect(() => {
+    timelineRef.current = timeline;
+  }, [timeline]);
 
   // Create the event handler using useMemo
   const eventHandler = useMemo(
@@ -77,21 +78,14 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         chatService,
         setTimeline,
         setIsStreaming,
-        () => timeline
+        () => timelineRef.current
       ),
-    [service, chatService, timeline] // Only recreate if services change
+    [service, chatService]
   );
-
-  // Register actions
-  useGraphTimeseriesDataAction();
-
-  // Context is now handled by RFC hooks - no need for context manager
-  // The chat service will get context directly from assistantContextStore
 
   // Subscribe to tool updates from the service
   useEffect(() => {
     const subscription = service.getState$().subscribe((state) => {
-      setAvailableTools(state.toolDefinitions);
       if (chatService && state.toolDefinitions.length > 0) {
         // Store tools for when we send messages
         (chatService as any).availableTools = state.toolDefinitions;
@@ -142,15 +136,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       };
       setTimeline((prev) => [...prev, timelineUserMessage]);
 
-      // Start a new run group - we'll get the actual runId from the first event
-      const timestamp = new Date().toLocaleTimeString();
-      console.groupCollapsed(
-        `📊 Chat Run [${timestamp}] - "${messageContent.substring(0, 50)}${
-          messageContent.length > 50 ? '...' : ''
-        }"`
-      );
-
-      // Subscribe to streaming response - now much cleaner!
+      // Subscribe to streaming response
       const subscription = observable.subscribe({
         next: async (event: ChatEvent) => {
           // Update runId if we get it from the event
@@ -163,11 +149,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         },
         error: (error: any) => {
           console.error('Subscription error:', error);
-          console.groupEnd(); // Close the run group
           setIsStreaming(false);
         },
         complete: () => {
-          console.groupEnd(); // Close the run group
           setIsStreaming(false);
         },
       });
@@ -175,7 +159,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       return () => subscription.unsubscribe();
     } catch (error) {
       console.error('Failed to send message:', error);
-      console.groupEnd(); // Close the run group
       setIsStreaming(false);
     }
   };
@@ -224,15 +207,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       };
       setTimeline((prev) => [...prev, timelineUserMessage]);
 
-      // Start a new run group - we'll get the actual runId from the first event
-      const timestamp = new Date().toLocaleTimeString();
-      console.groupCollapsed(
-        `📊 Chat Run [${timestamp}] - "${message.content.substring(0, 50)}${
-          message.content.length > 50 ? '...' : ''
-        }"`
-      );
-
-      // Subscribe to streaming response - now using the event handler!
+      // Subscribe to streaming response
       const subscription = observable.subscribe({
         next: async (event: ChatEvent) => {
           // Update runId if we get it from the event
@@ -245,11 +220,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         },
         error: (error: any) => {
           console.error('Subscription error:', error);
-          console.groupEnd(); // Close the run group
           setIsStreaming(false);
         },
         complete: () => {
-          console.groupEnd(); // Close the run group
           setIsStreaming(false);
         },
       });
@@ -257,7 +230,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       return () => subscription.unsubscribe();
     } catch (error) {
       console.error('Failed to resend message:', error);
-      console.groupEnd(); // Close the run group
       setIsStreaming(false);
     }
   };
@@ -269,9 +241,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setIsStreaming(false);
   }, [chatService]);
 
-  // No cleanup needed - RFC hooks handle their own lifecycle
-
-  // Pass enhanced props to child components
   const currentState = service.getCurrentState();
   const enhancedProps = {
     toolCallStates: currentState.toolCallStates,

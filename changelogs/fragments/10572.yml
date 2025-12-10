@@ -1,2 +1,0 @@
-fix:
-- Fix dataset filter base on singal type ([#10572](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10572))
