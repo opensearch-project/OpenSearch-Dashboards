@@ -4,6 +4,7 @@
  */
 
 import { useDispatch } from 'react-redux';
+import { useMemo } from 'react';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { loadQueryActionCreator } from '../../../application/utils/state_management/actions/query_editor/load_query';
@@ -109,104 +110,112 @@ export function usePPLExecuteQueryAction(
   const useAssistantAction =
     services.contextProvider?.hooks?.useAssistantAction || NOOP_ASSISTANT_ACTION_HOOK;
 
-  useAssistantAction<PPLExecuteQueryArgs>({
-    name: 'execute_ppl_query',
-    description: 'Update the query bar with a PPL query and optionally execute it',
-    parameters: {
-      type: 'object',
-      properties: {
-        query: {
-          type: 'string',
-          description: 'The PPL query to set in the query bar',
+  // Memoize the action config to avoid recreation on every render
+  const actionConfig = useMemo(
+    () => ({
+      name: 'execute_ppl_query',
+      description: 'Update the query bar with a PPL query and optionally execute it',
+      parameters: {
+        type: 'object',
+        properties: {
+          query: {
+            type: 'string',
+            description: 'The PPL query to set in the query bar',
+          },
+          autoExecute: {
+            type: 'boolean',
+            description: 'Whether to automatically execute the query (default: true)',
+          },
+          description: {
+            type: 'string',
+            description: 'Optional description of what the query does',
+          },
         },
-        autoExecute: {
-          type: 'boolean',
-          description: 'Whether to automatically execute the query (default: true)',
-        },
-        description: {
-          type: 'string',
-          description: 'Optional description of what the query does',
-        },
+        required: ['query'],
       },
-      required: ['query'],
-    },
-    handler: async (args: any) => {
-      try {
-        // Check if we should auto-execute
-        const shouldExecute = args.autoExecute !== false; // Default to true
+      handler: async (args: any) => {
+        console.log('✅ PPL Execute Query Handler - Called with args:', args);
+        try {
+          // Check if we should auto-execute
+          const shouldExecute = args.autoExecute !== false; // Default to true
 
-        if (shouldExecute) {
-          // Get the current query state to determine the cache key
-          const state = services.store.getState();
-          const query = state.query;
+          if (shouldExecute) {
+            // Get the current query state to determine the cache key
+            const state = services.store.getState();
+            const query = state.query;
 
-          // Prepare the query object to get the cache key
-          const queryObject = {
-            ...query,
-            query: args.query,
-          };
-          const cacheKey = defaultPrepareQueryString(queryObject);
+            // Prepare the query object to get the cache key
+            const queryObject = {
+              ...query,
+              query: args.query,
+            };
+            const cacheKey = defaultPrepareQueryString(queryObject);
 
-          // Use loadQueryActionCreator which updates the editor and executes the query
-          // This follows the same pattern as Recent Queries
-          dispatch(loadQueryActionCreator(services, setEditorTextWithQuery, args.query));
+            // Use loadQueryActionCreator which updates the editor and executes the query
+            // This follows the same pattern as Recent Queries
+            dispatch(loadQueryActionCreator(services, setEditorTextWithQuery, args.query));
 
-          // Wait for query execution to complete
-          const executionResult = await waitForQueryExecution(
-            services,
-            cacheKey,
-            PPL_QUERY_EXECUTION_TIMEOUT_MS
-          );
+            // Wait for query execution to complete
+            const executionResult = await waitForQueryExecution(
+              services,
+              cacheKey,
+              PPL_QUERY_EXECUTION_TIMEOUT_MS
+            );
 
-          if (executionResult === null) {
-            // Timeout - query is still running or something went wrong
+            if (executionResult === null) {
+              // Timeout - query is still running or something went wrong
+              return {
+                success: false,
+                executed: false,
+                query: args.query,
+                message: 'Query execution timed out',
+                error: 'Query execution took too long to complete',
+              };
+            }
+
+            if (!executionResult.success) {
+              // Query failed validation
+              return {
+                success: false,
+                executed: false,
+                query: args.query,
+                message: `Query execution failed: ${
+                  executionResult.error?.reason || 'Unknown error'
+                }`,
+                error: `${executionResult.error?.type}: ${executionResult.error?.details}`,
+              };
+            }
+
+            // Query succeeded
             return {
-              success: false,
+              success: true,
+              executed: true,
+              query: args.query,
+              message: 'Query updated and executed successfully',
+            };
+          } else {
+            // Just update the editor without executing
+            setEditorTextWithQuery(args.query);
+
+            return {
+              success: true,
               executed: false,
               query: args.query,
-              message: 'Query execution timed out',
-              error: 'Query execution took too long to complete',
+              message: 'Query updated',
             };
           }
-
-          if (!executionResult.success) {
-            // Query failed validation
-            return {
-              success: false,
-              executed: false,
-              query: args.query,
-              message: `Query execution failed: ${
-                executionResult.error?.reason || 'Unknown error'
-              }`,
-              error: `${executionResult.error?.type}: ${executionResult.error?.details}`,
-            };
-          }
-
-          // Query succeeded
+        } catch (error) {
           return {
-            success: true,
-            executed: true,
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
             query: args.query,
-            message: 'Query updated and executed successfully',
-          };
-        } else {
-          // Just update the editor without executing
-          setEditorTextWithQuery(args.query);
-
-          return {
-            success: true,
-            executed: false,
-            query: args.query,
-            message: 'Query updated',
           };
         }
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          query: args.query,
-        };
-      }
-    },
-  });
+      },
+    }),
+    [services, dispatch, setEditorTextWithQuery]
+  );
+
+  // Register the action
+  useAssistantAction(actionConfig);
 }

@@ -61,6 +61,11 @@ export const TableCellUI = ({
       <span
         className="exploreDocTableCell__dataField"
         data-test-subj="osdDocTableCellDataField"
+        data-field-name={columnId}
+        data-field-type={fieldMapping?.type || 'text'}
+        data-field-value={JSON.stringify(rowData?._source?.[columnId])}
+        data-document-id={rowData?._id}
+        data-row-index={index}
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: sanitizedCellValue }}
       />
@@ -118,12 +123,25 @@ export const TableCellUI = ({
   );
 
   return isTimeField ? (
-    <td data-test-subj="docTableField" className="exploreDocTableCell eui-textNoWrap">
+    <td
+      data-test-subj="dataGridRowCell"
+      data-field-name={columnId}
+      data-field-type={fieldMapping?.type || 'text'}
+      data-field-value={JSON.stringify(rowData?._source?.[columnId])}
+      data-document-id={rowData?._id}
+      data-row-index={index}
+      className="exploreDocTableCell eui-textNoWrap"
+    >
       {content}
     </td>
   ) : (
     <td
-      data-test-subj="docTableField"
+      data-test-subj="dataGridRowCell"
+      data-field-name={columnId}
+      data-field-type={fieldMapping?.type || 'text'}
+      data-field-value={JSON.stringify(rowData?._source?.[columnId])}
+      data-document-id={rowData?._id}
+      data-row-index={index}
       className="exploreDocTableCell eui-textBreakAll eui-textBreakWord"
     >
       <div className="truncate-by-height">{content}</div>

@@ -32,14 +32,23 @@ export class ToolExecutor {
    * First checks registered actions, then agent-only tools
    */
   async executeTool(toolName: string, toolArgs: any): Promise<ToolResult> {
+    console.log(
+      '🔧 ToolExecutor.executeTool called with toolName:',
+      toolName,
+      'toolArgs:',
+      toolArgs
+    );
     try {
       // First, check if this is a registered assistant action
+      console.log('🔧 ToolExecutor.executeTool - Checking registered actions...');
       const registeredAction = await this.tryExecuteRegisteredAction(toolName, toolArgs);
+      console.log('🔧 ToolExecutor.executeTool - Registered action result:', registeredAction);
       if (registeredAction.handled) {
         return registeredAction.result;
       }
 
       // Otherwise, handle as agent-only tool
+      console.log('🔧 ToolExecutor.executeTool - Handling as agent-only tool');
       return await this.executeAgentTool(toolName, toolArgs);
     } catch (error: any) {
       return {
@@ -57,9 +66,14 @@ export class ToolExecutor {
     toolName: string,
     toolArgs: any
   ): Promise<{ handled: boolean; result?: ToolResult }> {
+    console.log('🎯 ToolExecutor.tryExecuteRegisteredAction - Attempting to execute:', toolName);
     try {
       // Use the assistantActionService to execute the action
+      console.log(
+        '🎯 ToolExecutor.tryExecuteRegisteredAction - Calling assistantActionService.executeAction'
+      );
       const result = await this.assistantActionService.executeAction(toolName, toolArgs);
+      console.log('🎯 ToolExecutor.tryExecuteRegisteredAction - executeAction result:', result);
 
       return {
         handled: true,
