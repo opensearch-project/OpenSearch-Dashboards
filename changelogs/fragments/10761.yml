@@ -1,2 +1,0 @@
-test:
-- Fix Cypress test failures by enabling OpenSearch index auto-creation ([#10761](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10761))

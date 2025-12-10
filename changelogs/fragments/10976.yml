@@ -1,2 +1,0 @@
-fix:
-- Clear query state before switching flavors in explore ([#10976](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10976))

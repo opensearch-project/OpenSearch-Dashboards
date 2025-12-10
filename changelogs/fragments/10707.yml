@@ -1,2 +1,0 @@
-refactor:
-- Change service legend from modal to popover and move button. Update timeline column. ([#10707](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10707))
