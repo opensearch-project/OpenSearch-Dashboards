@@ -319,7 +319,7 @@ export const ExploreTracesChart = ({
                     title={i18n.translate('explore.traces.error.requestChartTitle', {
                       defaultMessage: 'Request Count Unavailable',
                     })}
-                    color="warning"
+                    color="danger"
                     iconType="alert"
                     size="s"
                   >
@@ -390,7 +390,7 @@ export const ExploreTracesChart = ({
                     title={i18n.translate('explore.traces.error.errorChartTitle', {
                       defaultMessage: 'Error Count Unavailable',
                     })}
-                    color="warning"
+                    color="danger"
                     iconType="alert"
                     size="s"
                   >
@@ -456,7 +456,7 @@ export const ExploreTracesChart = ({
                     title={i18n.translate('explore.traces.error.latencyChartTitle', {
                       defaultMessage: 'Latency Unavailable',
                     })}
-                    color="warning"
+                    color="danger"
                     iconType="alert"
                     size="s"
                   >
