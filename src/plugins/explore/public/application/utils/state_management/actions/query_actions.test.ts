@@ -91,7 +91,7 @@ import * as fieldCalculatorModule from '../../../../components/fields_selector/l
 
 jest.mock('../../languages', () => ({
   defaultPreparePplQuery: jest.fn(),
-  getQueryWithSource: jest.fn((query) => query),
+  prepareQueryForLanguage: jest.fn((query) => query),
 }));
 
 jest.mock('../../../../../../data/public', () => ({
@@ -1407,6 +1407,56 @@ describe('Query Actions - Comprehensive Test Suite', () => {
                   type: 'parsing_exception',
                 },
                 statusCode: 400,
+              }),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('should handle search errors with non-JSON error message', async () => {
+      const error = {
+        name: 'SearchError',
+        message: 'Connection timeout',
+        body: {
+          error: 'Connection failed',
+          message: 'This is a plain text error message, not JSON',
+          statusCode: 500,
+        },
+      };
+      mockSearchSource.fetch.mockRejectedValue(error);
+
+      const params = {
+        services: mockServices,
+        cacheKey: 'test-cache-key',
+        queryString: 'source=logs',
+        interval: '1h',
+      };
+
+      const thunk = executeHistogramQuery(params);
+
+      try {
+        await thunk(mockDispatch, mockGetState, undefined);
+      } catch (e) {
+        expect(e).toBe(error);
+      }
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'queryEditor/setIndividualQueryStatus',
+          payload: expect.objectContaining({
+            cacheKey: 'test-cache-key',
+            status: expect.objectContaining({
+              status: QueryExecutionStatus.ERROR,
+              error: expect.objectContaining({
+                error: 'Connection failed',
+                message: {
+                  details: 'Connection failed',
+                  reason: 'This is a plain text error message, not JSON',
+                  type: 'SearchError',
+                },
+                statusCode: 500,
+                originalErrorMessage: 'This is a plain text error message, not JSON',
               }),
             }),
           }),

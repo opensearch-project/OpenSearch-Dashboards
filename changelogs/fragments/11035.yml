@@ -1,0 +1,2 @@
+fix:
+- Update timechart onIntervalChange to execute data table queries ([#11035](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11035))

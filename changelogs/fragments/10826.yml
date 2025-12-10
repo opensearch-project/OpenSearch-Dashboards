@@ -1,2 +1,0 @@
-chore:
-- Proxies the AG-UI calls via the node server ([#10826](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10826))
