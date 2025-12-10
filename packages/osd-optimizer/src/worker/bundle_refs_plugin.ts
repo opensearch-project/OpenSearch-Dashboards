@@ -28,14 +28,6 @@ import { BundleRefModule } from './bundle_ref_module';
 
 const RESOLVE_EXTENSIONS = ['.js', '.ts', '.tsx'];
 
-interface RequestData {
-  context: string;
-  dependencies: Array<{ request: string }>;
-}
-
-type Callback<T> = (error?: any, result?: T) => void;
-type ModuleFactory = (data: RequestData, callback: Callback<BundleRefModule>) => void;
-
 export class BundleRefsPlugin {
   private readonly resolvedRefEntryCache = new Map<BundleRef, Promise<string>>();
   private readonly resolvedRequestCache = new Map<string, Promise<string | undefined>>();
@@ -50,7 +42,7 @@ export class BundleRefsPlugin {
   public apply(compiler: webpack.Compiler) {
     // called whenever the compiler starts to compile, passed the params
     // that will be used to create the compilation
-    compiler.hooks.compile.tap('BundleRefsPlugin', (compilationParams: any) => {
+    compiler.hooks.compile.tap('BundleRefsPlugin', (compilationParams) => {
       // clear caches because a new compilation is starting, meaning that files have
       // changed and we should re-run resolutions
       this.resolvedRefEntryCache.clear();
@@ -59,22 +51,17 @@ export class BundleRefsPlugin {
       // hook into the creation of NormalModule instances in webpack, if the import
       // statement leading to the creation of the module is pointing to a bundleRef
       // entry then create a BundleRefModule instead of a NormalModule.
-      compilationParams.normalModuleFactory.hooks.factory.tap(
-        'BundleRefsPlugin/normalModuleFactory/factory',
-        (wrappedFactory: ModuleFactory): ModuleFactory => (data, callback) => {
-          const context = data.context;
-          const dep = data.dependencies[0];
+      compilationParams.normalModuleFactory.hooks.factorize.tapPromise(
+        'BundleRefsPlugin/normalModuleFactory/factorize',
+        async (resolveData) => {
+          const context = resolveData.context;
+          const request = resolveData.request;
 
-          this.maybeReplaceImport(context, dep.request, compiler).then(
-            (module) => {
-              if (!module) {
-                wrappedFactory(data, callback);
-              } else {
-                callback(undefined, module);
-              }
-            },
-            (error) => callback(error)
-          );
+          const module = await this.maybeReplaceImport(context, request, compiler);
+          if (module) {
+            return module;
+          }
+          return undefined;
         }
       );
     });
@@ -99,7 +86,7 @@ export class BundleRefsPlugin {
       compilation.hooks.finishModules.tapPromise(
         'BundleRefsPlugin/finishModules',
         async (modules) => {
-          const usedBundleIds = (modules as any[])
+          const usedBundleIds = Array.from(modules)
             .filter((m: any): m is BundleRefModule => m instanceof BundleRefModule)
             .map((m) => m.ref.bundleId);
 

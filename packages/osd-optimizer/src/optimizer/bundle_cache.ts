@@ -31,7 +31,7 @@
 import * as Rx from 'rxjs';
 import { mergeAll } from 'rxjs/operators';
 
-import { Bundle, BundleRefs } from '../common';
+import { Bundle } from '../common';
 
 import { OptimizerConfig } from './optimizer_config';
 import { getHashes } from './get_hashes';
@@ -65,7 +65,6 @@ export function getBundleCacheEvent$(
   return Rx.defer(async () => {
     const events: BundleCacheEvent[] = [];
     const eligibleBundles: Bundle[] = [];
-    const bundleRefs = BundleRefs.fromBundles(config.bundles);
 
     for (const bundle of config.bundles) {
       if (!config.cache) {
@@ -102,32 +101,6 @@ export function getBundleCacheEvent$(
         events.push({
           type: 'bundle not cached',
           reason: 'missing cache key',
-          bundle,
-        });
-        continue;
-      }
-
-      const bundleRefExportIds = bundle.cache.getBundleRefExportIds();
-      if (!bundleRefExportIds) {
-        events.push({
-          type: 'bundle not cached',
-          reason: 'bundle references missing',
-          bundle,
-        });
-        continue;
-      }
-
-      const refs = bundleRefs.filterByExportIds(bundleRefExportIds);
-
-      const bundleRefsDiff = diffCacheKey(
-        refs.map((r) => r.exportId).sort((a, b) => a.localeCompare(b)),
-        bundleRefExportIds
-      );
-      if (bundleRefsDiff) {
-        events.push({
-          type: 'bundle not cached',
-          reason: 'bundle references outdated',
-          diff: bundleRefsDiff,
           bundle,
         });
         continue;
