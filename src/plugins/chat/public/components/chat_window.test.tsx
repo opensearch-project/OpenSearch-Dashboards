@@ -117,6 +117,121 @@ describe('ChatWindow', () => {
     });
   });
 
+  describe('loading message functionality', () => {
+    it('should add loading message to timeline when sending a message', async () => {
+      const { container } = renderWithContext(<ChatWindow />);
+
+      // Mock the sendMessage to return a controllable observable
+      const loadingObservable = {
+        subscribe: jest.fn((callbacks) => {
+          // Don't call next immediately to simulate loading state
+          return { unsubscribe: jest.fn() };
+        }),
+      };
+
+      mockChatService.sendMessage.mockResolvedValue({
+        observable: loadingObservable,
+        userMessage: { id: 'user-1', content: 'test', role: 'user' },
+      });
+
+      const ref = React.createRef<ChatWindowInstance>();
+      const { rerender } = renderWithContext(<ChatWindow ref={ref} />);
+
+      // Send a message
+      await ref.current?.sendMessage({ content: 'test message' });
+
+      // Wait for state updates
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(mockChatService.sendMessage).toHaveBeenCalled();
+      expect(loadingObservable.subscribe).toHaveBeenCalled();
+    });
+
+    it('should remove loading message when first response is received', async () => {
+      const responseObservable = {
+        subscribe: jest.fn((callbacks) => {
+          // Simulate receiving a response
+          setTimeout(() => {
+            callbacks.next({ type: 'message', content: 'response' });
+          }, 10);
+          return { unsubscribe: jest.fn() };
+        }),
+      };
+
+      mockChatService.sendMessage.mockResolvedValue({
+        observable: responseObservable,
+        userMessage: { id: 'user-1', content: 'test', role: 'user' },
+      });
+
+      const ref = React.createRef<ChatWindowInstance>();
+      renderWithContext(<ChatWindow ref={ref} />);
+
+      // Send a message
+      await ref.current?.sendMessage({ content: 'test message' });
+
+      // Wait for the response to be processed
+      await new Promise((resolve) => setTimeout(resolve, 20));
+
+      expect(responseObservable.subscribe).toHaveBeenCalled();
+    });
+
+    it('should remove loading message on error', async () => {
+      const errorObservable = {
+        subscribe: jest.fn((callbacks) => {
+          // Simulate an error
+          setTimeout(() => {
+            callbacks.error(new Error('Test error'));
+          }, 10);
+          return { unsubscribe: jest.fn() };
+        }),
+      };
+
+      mockChatService.sendMessage.mockResolvedValue({
+        observable: errorObservable,
+        userMessage: { id: 'user-1', content: 'test', role: 'user' },
+      });
+
+      const ref = React.createRef<ChatWindowInstance>();
+      renderWithContext(<ChatWindow ref={ref} />);
+
+      // Send a message
+      await ref.current?.sendMessage({ content: 'test message' });
+
+      // Wait for the error to be processed
+      await new Promise((resolve) => setTimeout(resolve, 20));
+
+      expect(errorObservable.subscribe).toHaveBeenCalled();
+    });
+
+    it('should remove loading message on completion', async () => {
+      const completionObservable = {
+        subscribe: jest.fn((callbacks) => {
+          // Simulate completion without response
+          setTimeout(() => {
+            callbacks.complete();
+          }, 10);
+          return { unsubscribe: jest.fn() };
+        }),
+      };
+
+      mockChatService.sendMessage.mockResolvedValue({
+        observable: completionObservable,
+        userMessage: { id: 'user-1', content: 'test', role: 'user' },
+      });
+
+      const ref = React.createRef<ChatWindowInstance>();
+      renderWithContext(<ChatWindow ref={ref} />);
+
+      // Send a message
+      await ref.current?.sendMessage({ content: 'test message' });
+
+      // Wait for completion
+      await new Promise((resolve) => setTimeout(resolve, 20));
+
+      expect(completionObservable.subscribe).toHaveBeenCalled();
+    });
+  });
+
   describe('persistence integration', () => {
     it('should restore timeline from persisted messages on mount', () => {
       const persistedMessages = [
