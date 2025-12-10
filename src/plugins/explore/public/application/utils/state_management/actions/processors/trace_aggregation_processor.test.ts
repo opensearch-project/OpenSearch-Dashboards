@@ -549,4 +549,168 @@ describe('TraceAggregationProcessor', () => {
       expect(result.latencyChartData?.yAxisLabel).toBe('Avg Latency (ms)');
     });
   });
+
+  describe('generic processChartData function', () => {
+    it('should handle multiple metric field fallbacks for request count', () => {
+      // Test that it tries 'request_count' first, then falls back to 'count()'
+      const now = Date.now();
+      const timestamp = new Date(now - 1800000).toISOString(); // 30 minutes ago
+      const resultsWithCountOnly = createMockSearchResult([
+        {
+          'span(endTime,5m)': timestamp,
+          'count()': 150,
+        },
+      ]);
+
+      const result = processTraceAggregationResults({
+        requestAggResults: resultsWithCountOnly,
+        errorAggResults: null,
+        latencyAggResults: null,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
+
+      expect(result.requestChartData).toBeDefined();
+      expect(result.requestChartData?.values.some((v) => v.y === 150)).toBe(true);
+    });
+
+    it('should handle multiple metric field fallbacks for error count', () => {
+      // Test that it tries 'error_count' first, then falls back to 'count()'
+      const now = Date.now();
+      const timestamp = new Date(now - 1800000).toISOString(); // 30 minutes ago
+      const resultsWithCountOnly = createMockSearchResult([
+        {
+          'span(endTime,5m)': timestamp,
+          'count()': 25,
+        },
+      ]);
+
+      const result = processTraceAggregationResults({
+        requestAggResults: null,
+        errorAggResults: resultsWithCountOnly,
+        latencyAggResults: null,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
+
+      expect(result.errorChartData).toBeDefined();
+      expect(result.errorChartData?.values.some((v) => v.y === 25)).toBe(true);
+    });
+
+    it('should apply transformer for latency nanoseconds to milliseconds conversion', () => {
+      const now = Date.now();
+      const timestamp = new Date(now - 1800000).toISOString(); // 30 minutes ago
+      const latencyResultsWithNanos = createMockSearchResult([
+        {
+          'span(endTime,5m)': timestamp,
+          avg_duration_nanos: 2000000, // 2ms in nanoseconds
+        },
+      ]);
+
+      const result = processTraceAggregationResults({
+        requestAggResults: null,
+        errorAggResults: null,
+        latencyAggResults: latencyResultsWithNanos,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
+
+      expect(result.latencyChartData).toBeDefined();
+      // Should convert 2000000 nanoseconds to 2 milliseconds
+      const nonZeroValue = result.latencyChartData?.values.find((v) => v.y > 0);
+      expect(nonZeroValue?.y).toBeCloseTo(2, 1);
+    });
+
+    it('should handle latency with avg_latency_ms directly without conversion', () => {
+      const now = Date.now();
+      const timestamp = new Date(now - 1800000).toISOString(); // 30 minutes ago
+      const latencyResultsWithMs = createMockSearchResult([
+        {
+          'span(endTime,5m)': timestamp,
+          avg_latency_ms: 5.5,
+        },
+      ]);
+
+      const result = processTraceAggregationResults({
+        requestAggResults: null,
+        errorAggResults: null,
+        latencyAggResults: latencyResultsWithMs,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
+
+      expect(result.latencyChartData).toBeDefined();
+      // Should use avg_latency_ms directly without conversion
+      const nonZeroValue = result.latencyChartData?.values.find((v) => v.y > 0);
+      expect(nonZeroValue?.y).toBe(5.5);
+    });
+
+    it('should correctly aggregate data with sum aggregation type', () => {
+      const now = Date.now();
+      const timestamp = new Date(now - 1800000).toISOString(); // 30 minutes ago
+      const requestResults = createMockSearchResult([
+        {
+          'span(endTime,5m)': timestamp,
+          'count()': 100,
+        },
+        {
+          'span(endTime,5m)': timestamp, // Same timestamp
+          'count()': 50,
+        },
+      ]);
+
+      const result = processTraceAggregationResults({
+        requestAggResults: requestResults,
+        errorAggResults: null,
+        latencyAggResults: null,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
+
+      expect(result.requestChartData).toBeDefined();
+      // Should sum both values: 100 + 50 = 150
+      const nonZeroValue = result.requestChartData?.values.find((v) => v.y > 0);
+      expect(nonZeroValue?.y).toBe(150);
+    });
+
+    it('should correctly aggregate data with average aggregation type', () => {
+      const now = Date.now();
+      const timestamp = new Date(now - 1800000).toISOString(); // 30 minutes ago
+      const latencyResults = createMockSearchResult([
+        {
+          'span(endTime,5m)': timestamp,
+          avg_latency_ms: 10,
+        },
+        {
+          'span(endTime,5m)': timestamp, // Same timestamp
+          avg_latency_ms: 20,
+        },
+      ]);
+
+      const result = processTraceAggregationResults({
+        requestAggResults: null,
+        errorAggResults: null,
+        latencyAggResults: latencyResults,
+        dataset: mockDataset,
+        interval: '5m',
+        timeField: 'endTime',
+        dataPlugin: mockDataPlugin,
+      });
+
+      expect(result.latencyChartData).toBeDefined();
+      // Should average both values: (10 + 20) / 2 = 15
+      const nonZeroValue = result.latencyChartData?.values.find((v) => v.y > 0);
+      expect(nonZeroValue?.y).toBe(15);
+    });
+  });
 });

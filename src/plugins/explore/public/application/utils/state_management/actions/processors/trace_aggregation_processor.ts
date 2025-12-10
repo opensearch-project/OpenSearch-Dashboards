@@ -12,6 +12,13 @@ import { TracesChartProcessedResults, ChartData, BucketInterval } from '../../..
 import { defaultResultsProcessor } from '../query_actions';
 import { createHistogramConfigs, getDimensions } from '../../../../../components/chart/utils';
 
+export interface ChartProcessConfig {
+  metricField: string | string[];
+  yAxisLabel: string;
+  transformer?: (value: number) => number;
+  aggregationType: 'sum' | 'average';
+}
+
 export interface TraceAggregationResults {
   requestChartData: ChartData;
   errorChartData: ChartData;
@@ -228,8 +235,9 @@ export function extractPPLIntervalMs(results: ISearchResult, fallbackMs: number)
   }
 }
 
-function processRequestCountData(
+function processChartData(
   results: ISearchResult,
+  config: ChartProcessConfig,
   dataset: DataView,
   minTime: number,
   maxTime: number,
@@ -242,8 +250,15 @@ function processRequestCountData(
   let actualIntervalMs = intervalMs;
 
   if (results.hits?.hits) {
-    const dataMap = new Map<number, number>();
-    let totalCount = 0;
+    const metricFields = Array.isArray(config.metricField)
+      ? config.metricField
+      : [config.metricField];
+
+    // Choose aggregation data structure based on type
+    const dataMap =
+      config.aggregationType === 'average'
+        ? new Map<number, { sum: number; count: number }>()
+        : new Map<number, number>();
 
     actualIntervalMs = extractPPLIntervalMs(results, intervalMs);
 
@@ -253,7 +268,7 @@ function processRequestCountData(
         xAxisOrderedValues,
         xAxisFormat,
         xAxisLabel: timeField,
-        yAxisLabel: 'Request Count',
+        yAxisLabel: config.yAxisLabel,
         ordered: {
           date: true,
           interval: moment.duration(intervalMs),
@@ -270,24 +285,51 @@ function processRequestCountData(
       const spanTimeKey = Object.keys(hit._source || {}).find((key) => key.startsWith('span('));
       const timeValue = spanTimeKey ? hit._source?.[spanTimeKey] : hit._source?.[timeField];
 
-      const requestCount = hit._source?.['request_count'] || hit._source?.['count()'] || 0;
+      // Try each metric field in order until we find a value
+      let metricValue = 0;
+      for (const field of metricFields) {
+        const value = hit._source?.[field];
+        if (value !== undefined && value !== null && !isNaN(value)) {
+          metricValue = config.transformer ? config.transformer(value) : value;
+          break;
+        }
+      }
 
-      totalCount += requestCount;
-
-      if (timeValue && !isNaN(requestCount)) {
+      if (timeValue && !isNaN(metricValue)) {
         const timestamp = new Date(timeValue).getTime();
         if (!isNaN(timestamp)) {
           const bucketKey = Math.floor(timestamp / actualIntervalMs) * actualIntervalMs;
-          dataMap.set(bucketKey, (dataMap.get(bucketKey) || 0) + requestCount);
+
+          if (config.aggregationType === 'average') {
+            const existing = (dataMap as Map<number, { sum: number; count: number }>).get(
+              bucketKey
+            ) || { sum: 0, count: 0 };
+            (dataMap as Map<number, { sum: number; count: number }>).set(bucketKey, {
+              sum: existing.sum + metricValue,
+              count: existing.count + 1,
+            });
+          } else {
+            (dataMap as Map<number, number>).set(
+              bucketKey,
+              ((dataMap as Map<number, number>).get(bucketKey) || 0) + metricValue
+            );
+          }
         }
       }
     }
 
+    // Fill missing buckets using extracted PPL interval
     const startBucket = Math.floor(minTime / actualIntervalMs) * actualIntervalMs;
     const endBucket = Math.floor(maxTime / actualIntervalMs) * actualIntervalMs;
 
     for (let bucketKey = startBucket; bucketKey <= endBucket; bucketKey += actualIntervalMs) {
-      const value = dataMap.get(bucketKey) || 0;
+      let value = 0;
+      if (config.aggregationType === 'average') {
+        const bucket = (dataMap as Map<number, { sum: number; count: number }>).get(bucketKey);
+        value = bucket ? bucket.sum / bucket.count : 0;
+      } else {
+        value = (dataMap as Map<number, number>).get(bucketKey) || 0;
+      }
       chartValues.push({ x: bucketKey, y: value });
       xAxisOrderedValues.push(bucketKey);
     }
@@ -298,7 +340,7 @@ function processRequestCountData(
     xAxisOrderedValues,
     xAxisFormat,
     xAxisLabel: timeField,
-    yAxisLabel: 'Request Count',
+    yAxisLabel: config.yAxisLabel,
     ordered: {
       date: true,
       interval: moment.duration(actualIntervalMs),
@@ -308,6 +350,31 @@ function processRequestCountData(
       max: moment(maxTime),
     },
   };
+}
+
+function processRequestCountData(
+  results: ISearchResult,
+  dataset: DataView,
+  minTime: number,
+  maxTime: number,
+  intervalMs: number,
+  timeField: string,
+  xAxisFormat: { id: string; params: { pattern: string } }
+): ChartData {
+  return processChartData(
+    results,
+    {
+      metricField: ['request_count', 'count()'],
+      yAxisLabel: 'Request Count',
+      aggregationType: 'sum',
+    },
+    dataset,
+    minTime,
+    maxTime,
+    intervalMs,
+    timeField,
+    xAxisFormat
+  );
 }
 
 function processErrorCountData(
@@ -319,73 +386,20 @@ function processErrorCountData(
   timeField: string,
   xAxisFormat: { id: string; params: { pattern: string } }
 ): ChartData {
-  const chartValues: Array<{ x: number; y: number }> = [];
-  const xAxisOrderedValues: number[] = [];
-  let actualIntervalMs = intervalMs; // Default to fallback interval
-
-  if (results.hits?.hits) {
-    const dataMap = new Map<number, number>();
-
-    actualIntervalMs = extractPPLIntervalMs(results, intervalMs);
-
-    if (!Number.isFinite(actualIntervalMs) || actualIntervalMs <= 0) {
-      return {
-        values: chartValues,
-        xAxisOrderedValues,
-        xAxisFormat,
-        xAxisLabel: timeField,
-        yAxisLabel: 'Error Count',
-        ordered: {
-          date: true,
-          interval: moment.duration(intervalMs),
-          intervalOpenSearchUnit: 'ms',
-          intervalOpenSearchValue: intervalMs,
-          min: moment(minTime),
-          max: moment(maxTime),
-        },
-      };
-    }
-
-    for (const hit of results.hits.hits) {
-      const spanTimeKey = Object.keys(hit._source || {}).find((key) => key.startsWith('span('));
-      const timeValue = spanTimeKey ? hit._source?.[spanTimeKey] : hit._source?.[timeField];
-      const errorCount = hit._source?.['error_count'] || hit._source?.['count()'] || 0;
-
-      if (timeValue && !isNaN(errorCount)) {
-        const timestamp = new Date(timeValue).getTime();
-        if (!isNaN(timestamp)) {
-          const bucketKey = Math.floor(timestamp / actualIntervalMs) * actualIntervalMs;
-          dataMap.set(bucketKey, (dataMap.get(bucketKey) || 0) + errorCount);
-        }
-      }
-    }
-
-    // Fill missing buckets using extracted PPL interval
-    const startBucket = Math.floor(minTime / actualIntervalMs) * actualIntervalMs;
-    const endBucket = Math.floor(maxTime / actualIntervalMs) * actualIntervalMs;
-
-    for (let bucketKey = startBucket; bucketKey <= endBucket; bucketKey += actualIntervalMs) {
-      const value = dataMap.get(bucketKey) || 0;
-      chartValues.push({ x: bucketKey, y: value });
-      xAxisOrderedValues.push(bucketKey);
-    }
-  }
-
-  return {
-    values: chartValues,
-    xAxisOrderedValues,
-    xAxisFormat,
-    xAxisLabel: timeField,
-    yAxisLabel: 'Error Count',
-    ordered: {
-      date: true,
-      interval: moment.duration(actualIntervalMs),
-      intervalOpenSearchUnit: 'ms',
-      intervalOpenSearchValue: actualIntervalMs,
-      min: moment(minTime),
-      max: moment(maxTime),
+  return processChartData(
+    results,
+    {
+      metricField: ['error_count', 'count()'],
+      yAxisLabel: 'Error Count',
+      aggregationType: 'sum',
     },
-  };
+    dataset,
+    minTime,
+    maxTime,
+    intervalMs,
+    timeField,
+    xAxisFormat
+  );
 }
 
 function processLatencyData(
@@ -397,75 +411,23 @@ function processLatencyData(
   timeField: string,
   xAxisFormat: { id: string; params: { pattern: string } }
 ): ChartData {
-  const chartValues: Array<{ x: number; y: number }> = [];
-  const xAxisOrderedValues: number[] = [];
-  let actualIntervalMs = intervalMs; // Default to fallback interval
-
-  if (results.hits?.hits) {
-    const dataMap = new Map<number, { sum: number; count: number }>();
-
-    actualIntervalMs = extractPPLIntervalMs(results, intervalMs);
-
-    if (!Number.isFinite(actualIntervalMs) || actualIntervalMs <= 0) {
-      return {
-        values: chartValues,
-        xAxisOrderedValues,
-        xAxisFormat,
-        xAxisLabel: timeField,
-        yAxisLabel: 'Avg Latency (ms)',
-        ordered: {
-          date: true,
-          interval: moment.duration(intervalMs),
-          intervalOpenSearchUnit: 'ms',
-          intervalOpenSearchValue: intervalMs,
-          min: moment(minTime),
-          max: moment(maxTime),
-        },
-      };
-    }
-
-    for (const hit of results.hits.hits) {
-      const spanTimeKey = Object.keys(hit._source || {}).find((key) => key.startsWith('span('));
-      const timeValue = spanTimeKey ? hit._source?.[spanTimeKey] : hit._source?.[timeField];
-      const avgLatencyMs =
-        hit._source?.avg_latency_ms ||
-        (hit._source?.avg_duration_nanos ? hit._source.avg_duration_nanos / 1000000 : 0);
-
-      if (timeValue && !isNaN(avgLatencyMs)) {
-        const timestamp = new Date(timeValue).getTime();
-        if (!isNaN(timestamp)) {
-          const bucketKey = Math.floor(timestamp / actualIntervalMs) * actualIntervalMs;
-          const existing = dataMap.get(bucketKey) || { sum: 0, count: 0 };
-          dataMap.set(bucketKey, { sum: existing.sum + avgLatencyMs, count: existing.count + 1 });
-        }
-      }
-    }
-
-    // Fill missing buckets using extracted PPL interval
-    const startBucket = Math.floor(minTime / actualIntervalMs) * actualIntervalMs;
-    const endBucket = Math.floor(maxTime / actualIntervalMs) * actualIntervalMs;
-
-    for (let bucketKey = startBucket; bucketKey <= endBucket; bucketKey += actualIntervalMs) {
-      const bucket = dataMap.get(bucketKey);
-      const value = bucket ? bucket.sum / bucket.count : 0;
-      chartValues.push({ x: bucketKey, y: value });
-      xAxisOrderedValues.push(bucketKey);
-    }
-  }
-
-  return {
-    values: chartValues,
-    xAxisOrderedValues,
-    xAxisFormat,
-    xAxisLabel: timeField,
-    yAxisLabel: 'Avg Latency (ms)',
-    ordered: {
-      date: true,
-      interval: moment.duration(actualIntervalMs),
-      intervalOpenSearchUnit: 'ms',
-      intervalOpenSearchValue: actualIntervalMs,
-      min: moment(minTime),
-      max: moment(maxTime),
+  return processChartData(
+    results,
+    {
+      metricField: ['avg_latency_ms', 'avg_duration_nanos'],
+      yAxisLabel: 'Avg Latency (ms)',
+      transformer: (value) => {
+        // If the value is from avg_duration_nanos (which would be a large number),
+        // convert from nanoseconds to milliseconds
+        return value > 1000000 ? value / 1000000 : value;
+      },
+      aggregationType: 'average',
     },
-  };
+    dataset,
+    minTime,
+    maxTime,
+    intervalMs,
+    timeField,
+    xAxisFormat
+  );
 }
