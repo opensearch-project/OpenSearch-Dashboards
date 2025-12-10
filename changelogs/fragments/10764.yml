@@ -1,5 +1,0 @@
-feat:
-- Histogram Breakdowns enable timechart to work on every dataset ([#10764](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10764))
-
-test:
-- Histogram Breakdowns Cypress test ([#10764](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10764))
