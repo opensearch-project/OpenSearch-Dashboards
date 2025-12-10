@@ -1,2 +1,0 @@
-fix:
-- Fix active tab not set when loading saved explore if no vis rule matched ([#10807](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10807))
