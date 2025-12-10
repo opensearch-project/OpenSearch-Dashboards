@@ -51,7 +51,11 @@ export abstract class BaseConnectionManager<
 
   constructor() {}
 
-  protected setClientFactory(factory: ClientFactory<TClient>): void {
+  /**
+   * Set the client factory for creating connection clients.
+   * This allows overriding the default client behavior at runtime.
+   */
+  setClientFactory(factory: ClientFactory<TClient>): void {
     this.clientFactory = factory;
   }
 
