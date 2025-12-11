@@ -383,7 +383,7 @@ cy.explore.add('setDataset', (dataset, dataSourceName, type) => {
   }
 
   // Wait for dataset selection to complete by verifying the button is ready
-  cy.getElementByTestId('datasetSelectorButton').should('be.visible').should('not.be.disabled');
+  cy.getElementByTestId('datasetSelectButton').should('be.visible').should('not.be.disabled');
 });
 
 cy.explore.add(
@@ -545,6 +545,7 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName, o
   // Run the query
   cy.getElementByTestId('exploreQueryExecutionButton').click();
   cy.osd.waitForLoader(true);
+  cy.wait(1000);
   cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
 
   // Ensure chart type is correct
