@@ -30,7 +30,7 @@ import { TableVisControl } from './table_vis_control';
 // Constants for dynamic sizing
 const MIN_COLUMN_WIDTH = 80;
 const COLUMN_BUFFER = 32;
-const HEADER_BUTTON_SPACE = 64;
+const HEADER_BUTTON_SPACE = 24;
 
 // Pagination constants
 const DEFAULT_PAGE_SIZE = 10;
@@ -287,7 +287,11 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
           maxContentWidth = Math.max(maxContentWidth, contentWidth);
         });
 
-        return maxContentWidth + COLUMN_BUFFER;
+        measuringDiv.textContent = col.title || '';
+        const headerTextWidth = measuringDiv.offsetWidth + HEADER_BUTTON_SPACE;
+        const finalWidth = Math.max(maxContentWidth, headerTextWidth) + COLUMN_BUFFER;
+
+        return finalWidth;
       });
 
       const totalWidth = widths.reduce((a, b) => a + b, 0);
@@ -314,12 +318,10 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
           const columnWidth = newWidths[index];
           // Reserve space for sort icon and padding
           const availableHeaderWidth = columnWidth - HEADER_BUTTON_SPACE;
-
-          // Measure header text width
           measuringDiv.textContent = headerElement.textContent || '';
           const headerTextWidth = measuringDiv.offsetWidth;
 
-          if (headerTextWidth > availableHeaderWidth) {
+          if (headerTextWidth > availableHeaderWidth * 1.5) {
             // Apply truncation styles
             headerElement.style.maxWidth = `${availableHeaderWidth}px`;
             headerElement.style.overflow = 'hidden';
