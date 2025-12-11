@@ -1,5 +1,0 @@
-breaking:
-- Remove usage of lodash template ([#10920](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10920))
-
-infra:
-- Add in eslint rule to prevent the use of lodash template ([#10920](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10920))

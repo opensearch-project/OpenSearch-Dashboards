@@ -1,2 +1,0 @@
-fix:
-- [Bug] Fix missing data source information in dataset selector for namespaced index patterns ([#10844](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10844))
