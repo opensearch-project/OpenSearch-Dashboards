@@ -45,7 +45,17 @@ export default function () {
       license: 'oss',
       from: 'snapshot',
       serverArgs: [
-        // NOTE: search.concurrent_segment_search.mode=none removed for OpenSearch 1.0.0 compatibility
+        // Conditionally add concurrent segment search mode for OpenSearch 3.0+
+        ...(() => {
+          const opensearchVersion = process.env.OPENSEARCH_VERSION;
+          if (opensearchVersion) {
+            const majorVersion = parseInt(opensearchVersion.split('.')[0], 10);
+            if (majorVersion >= 3) {
+              return ['search.concurrent_segment_search.mode=none'];
+            }
+          }
+          return [];
+        })(),
         // Disable disk-based shard allocation to prevent index creation blocks in CI
         'cluster.routing.allocation.disk.threshold_enabled=false',
         // Set very low disk watermarks for testing

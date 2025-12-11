@@ -166,6 +166,7 @@ jobs:
           JOB: compatibility-test
           CACHE_DIR: compatibility-${{ matrix.version }}-${{ matrix.group }}
           TEST_OPENSEARCH_PORT: 9200
+          OPENSEARCH_VERSION: ${{ matrix.version }}
 
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -304,6 +305,7 @@ jobs:
         run: node scripts/functional_tests.js --config test/plugin_functional/config.ts --opensearchFrom ${{ env.OPENSEARCH_DIR }}
         env:
           TEST_OPENSEARCH_PORT: 9200
+          OPENSEARCH_VERSION: ${{ matrix.version }}
 
       - uses: actions/upload-artifact@v4
         if: failure()
