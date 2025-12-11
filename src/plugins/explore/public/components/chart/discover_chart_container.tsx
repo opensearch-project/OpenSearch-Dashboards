@@ -15,17 +15,19 @@ import {
   histogramResultsProcessor,
   prepareHistogramCacheKey,
 } from '../../application/utils/state_management/actions/query_actions';
+import { prepareTraceCacheKeys } from '../../application/utils/state_management/actions/trace_query_actions';
 import { RootState } from '../../application/utils/state_management/store';
 import { selectShowHistogram } from '../../application/utils/state_management/selectors';
 import { CanvasPanel } from '../panel/canvas_panel';
-import { Chart } from './utils';
+import { Chart, createHistogramConfigs } from './utils';
 import { useFlavorId } from '../../helpers/use_flavor_id';
-import { tracesHistogramResultsProcessor } from '../../application/utils/state_management/actions/processors/trace_chart_data_processor';
+import { processTraceAggregationResults } from '../../application/utils/state_management/actions/processors/trace_aggregation_processor';
 import { ExploreTracesChart } from './explore_traces_chart';
 import {
   ProcessedSearchResults,
   TracesChartProcessedResults,
 } from '../../application/utils/interfaces';
+import { TRACES_CHART_BAR_TARGET } from '../../application/utils/state_management/constants';
 
 export const DiscoverChartContainer = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -38,6 +40,9 @@ export const DiscoverChartContainer = () => {
   const breakdownField = useSelector((state: RootState) => state.queryEditor.breakdownField);
   const queryStatusMap = useSelector((state: RootState) => state.queryEditor.queryStatusMap);
   const showHistogram = useSelector(selectShowHistogram);
+
+  // Get dataset early since it's needed for cache key calculations
+  const { dataset } = useDatasetContext();
 
   const breakdownCacheKey = useMemo(() => {
     return breakdownField ? prepareHistogramCacheKey(query, true) : undefined;
@@ -64,42 +69,98 @@ export const DiscoverChartContainer = () => {
 
   const rawResults = cacheKey ? results[cacheKey] : null;
 
-  // Get dataset from centralized context
-  const { dataset } = useDatasetContext();
+  const actualInterval = useMemo(() => {
+    if (flavorId === ExploreFlavor.Traces && dataset && services?.data && interval) {
+      const histogramConfigs = createHistogramConfigs(
+        dataset,
+        interval,
+        services.data,
+        services.uiSettings,
+        breakdownField,
+        TRACES_CHART_BAR_TARGET
+      );
+      // Extract interval from configs if available
+      const bucketAggConfig = histogramConfigs?.aggs?.[1] as any;
+      const finalInterval = bucketAggConfig?.buckets?.getInterval()?.expression;
+      return finalInterval || interval || 'auto';
+    }
+    return interval || 'auto';
+  }, [flavorId, dataset, services, interval, breakdownField]);
+
+  const { requestCacheKey, errorCacheKey, latencyCacheKey } = useMemo(() => {
+    if (flavorId !== ExploreFlavor.Traces || !dataset || !services?.data) {
+      return { requestCacheKey: null, errorCacheKey: null, latencyCacheKey: null };
+    }
+    // Cache keys use base query only (like Logs) - interval changes overwrite results
+    return prepareTraceCacheKeys(query);
+  }, [flavorId, query, dataset, services]);
+
+  const requestResults = requestCacheKey ? results[requestCacheKey] : null;
+  const errorResults = errorCacheKey ? results[errorCacheKey] : null;
+  const latencyResults = latencyCacheKey ? results[latencyCacheKey] : null;
+
+  // Get error states for each trace query
+  const requestError = requestCacheKey ? queryStatusMap[requestCacheKey]?.error : null;
+  const errorQueryError = errorCacheKey ? queryStatusMap[errorCacheKey]?.error : null;
+  const latencyError = latencyCacheKey ? queryStatusMap[latencyCacheKey]?.error : null;
 
   const isTimeBased = useMemo(() => {
     return dataset ? dataset.isTimeBased() : false;
   }, [dataset]);
 
-  // Process raw results to get chart data
   const processedResults = useMemo<
     ProcessedSearchResults | TracesChartProcessedResults | null
   >(() => {
+    if (flavorId === ExploreFlavor.Traces) {
+      if (!requestResults || !dataset) {
+        return null;
+      }
+      return processTraceAggregationResults({
+        requestAggResults: requestResults,
+        errorAggResults: errorResults,
+        latencyAggResults: latencyResults,
+        dataset,
+        interval: actualInterval,
+        timeField: dataset.timeFieldName || 'endTime',
+        dataPlugin: data,
+        rawInterval: interval,
+        uiSettings,
+      });
+    }
+
     if (!rawResults || !dataset) {
       return null;
     }
-
-    if (flavorId === ExploreFlavor.Traces) {
-      return tracesHistogramResultsProcessor(rawResults, dataset, data, interval);
-    }
-
-    return histogramResultsProcessor(rawResults, dataset, data, interval);
-  }, [rawResults, dataset, flavorId, data, interval]);
+    return histogramResultsProcessor(rawResults, dataset, data, interval, uiSettings);
+  }, [
+    rawResults,
+    requestResults,
+    errorResults,
+    latencyResults,
+    dataset,
+    flavorId,
+    data,
+    actualInterval,
+    interval,
+    uiSettings,
+  ]);
 
   if (!isTimeBased) {
     return null;
   }
 
-  // Return null if no processed results or no chart data
-  if (!processedResults || !processedResults.hits.total) {
+  if (!processedResults) {
     return null;
   }
 
-  if (
-    (processedResults as TracesChartProcessedResults).requestChartData == null &&
-    (processedResults as ProcessedSearchResults).chartData == null
-  ) {
-    return null;
+  if (flavorId === ExploreFlavor.Traces) {
+    if (!(processedResults as TracesChartProcessedResults).requestChartData) {
+      return null;
+    }
+  } else {
+    if (!processedResults.hits.total || !(processedResults as ProcessedSearchResults).chartData) {
+      return null;
+    }
   }
 
   return (
@@ -127,6 +188,10 @@ export const DiscoverChartContainer = () => {
             latencyChartData={
               (processedResults as TracesChartProcessedResults).latencyChartData as Chart
             }
+            requestError={requestError}
+            errorQueryError={errorQueryError}
+            latencyError={latencyError}
+            timeFieldName={dataset?.timeFieldName || 'endTime'}
             config={uiSettings}
             data={data}
             services={services}

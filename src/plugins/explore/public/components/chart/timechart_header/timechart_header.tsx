@@ -91,6 +91,10 @@ export interface TimechartHeaderProps {
    * Explore services for executing queries
    */
   services?: any;
+  /**
+   * Hide interval selector (defaults to auto interval)
+   */
+  hideIntervalSelector?: boolean;
 }
 
 export function TimechartHeader({
@@ -104,6 +108,7 @@ export function TimechartHeader({
   additionalControl,
   toggleIdSelected,
   services,
+  hideIntervalSelector = false,
 }: TimechartHeaderProps) {
   const [interval, setInterval] = useState(stateInterval);
   const { dataset } = useDatasetContext();
@@ -136,74 +141,76 @@ export function TimechartHeader({
         </EuiFlexItem>
         {(toggleIdSelected === 'histogram' || additionalControl == null) && (
           <>
-            <EuiFlexItem grow={false}>
-              <EuiSelect
-                className="exploreChart__TimechartHeader__selection"
-                aria-label={i18n.translate(
-                  'explore.discover.timechartHeader.timeIntervalSelect.ariaLabel',
-                  {
-                    defaultMessage: 'Time interval',
-                  }
-                )}
-                compressed
-                id="dscResultsIntervalSelector"
-                data-test-subj="discoverIntervalSelect"
-                options={options
-                  .filter(({ val }) => val !== 'custom')
-                  .map(({ display, val }) => {
-                    return {
-                      text: display,
-                      value: val,
-                      label: display,
-                    };
-                  })}
-                value={interval}
-                onChange={handleIntervalChange}
-                onMouseUp={(e) => e.stopPropagation()}
-                prepend={
-                  <EuiText
-                    className="exploreChart__TimechartHeader__selection__prependText"
-                    data-test-subj="discoverTimechartHeaderInterval"
-                    size="s"
-                  >
-                    {i18n.translate('explore.discover.timechartHeader.interval', {
-                      defaultMessage: 'Interval',
+            {!hideIntervalSelector && (
+              <EuiFlexItem grow={false}>
+                <EuiSelect
+                  className="exploreChart__TimechartHeader__selection"
+                  aria-label={i18n.translate(
+                    'explore.discover.timechartHeader.timeIntervalSelect.ariaLabel',
+                    {
+                      defaultMessage: 'Time interval',
+                    }
+                  )}
+                  compressed
+                  id="dscResultsIntervalSelector"
+                  data-test-subj="discoverIntervalSelect"
+                  options={options
+                    .filter(({ val }) => val !== 'custom')
+                    .map(({ display, val }) => {
+                      return {
+                        text: display,
+                        value: val,
+                        label: display,
+                      };
                     })}
-                  </EuiText>
-                }
-                append={
-                  bucketInterval.scaled ? (
-                    <EuiIconTip
-                      id="discoverIntervalIconTip"
-                      content={i18n.translate('explore.discover.bucketIntervalTooltip', {
-                        defaultMessage:
-                          'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}.',
-                        values: {
-                          bucketsDescription:
-                            bucketInterval!.scale && bucketInterval!.scale > 1
-                              ? i18n.translate(
-                                  'explore.explore.discover.bucketIntervalTooltip.tooLargeBucketsText',
-                                  {
-                                    defaultMessage: 'buckets that are too large',
-                                  }
-                                )
-                              : i18n.translate(
-                                  'explore.explore.discover.bucketIntervalTooltip.tooManyBucketsText',
-                                  {
-                                    defaultMessage: 'too many buckets',
-                                  }
-                                ),
-                          bucketIntervalDescription: bucketInterval.description,
-                        },
-                      })}
-                      color="warning"
+                  value={interval}
+                  onChange={handleIntervalChange}
+                  onMouseUp={(e) => e.stopPropagation()}
+                  prepend={
+                    <EuiText
+                      className="exploreChart__TimechartHeader__selection__prependText"
+                      data-test-subj="discoverTimechartHeaderInterval"
                       size="s"
-                      type="alert"
-                    />
-                  ) : undefined
-                }
-              />
-            </EuiFlexItem>
+                    >
+                      {i18n.translate('explore.discover.timechartHeader.interval', {
+                        defaultMessage: 'Interval',
+                      })}
+                    </EuiText>
+                  }
+                  append={
+                    bucketInterval.scaled ? (
+                      <EuiIconTip
+                        id="discoverIntervalIconTip"
+                        content={i18n.translate('explore.discover.bucketIntervalTooltip', {
+                          defaultMessage:
+                            'This interval creates {bucketsDescription} to show in the selected time range, so it has been scaled to {bucketIntervalDescription}.',
+                          values: {
+                            bucketsDescription:
+                              bucketInterval!.scale && bucketInterval!.scale > 1
+                                ? i18n.translate(
+                                    'explore.explore.discover.bucketIntervalTooltip.tooLargeBucketsText',
+                                    {
+                                      defaultMessage: 'buckets that are too large',
+                                    }
+                                  )
+                                : i18n.translate(
+                                    'explore.explore.discover.bucketIntervalTooltip.tooManyBucketsText',
+                                    {
+                                      defaultMessage: 'too many buckets',
+                                    }
+                                  ),
+                            bucketIntervalDescription: bucketInterval.description,
+                          },
+                        })}
+                        color="warning"
+                        size="s"
+                        type="alert"
+                      />
+                    ) : undefined
+                  }
+                />
+              </EuiFlexItem>
+            )}
             {showBreakdownSelector && services && <BreakdownFieldSelector services={services} />}
           </>
         )}
