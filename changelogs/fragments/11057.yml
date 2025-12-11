@@ -1,0 +1,2 @@
+fix:
+- Update PatternsTableFlyout to render without timefield ([#11057](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11057))
