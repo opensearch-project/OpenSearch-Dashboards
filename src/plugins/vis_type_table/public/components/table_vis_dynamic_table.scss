@@ -2,13 +2,16 @@
   position: relative;
   user-select: none;
   padding: $euiSizeS;
+  text-align: left;
 
   &-isSorted {
     background-color: transparent;
   }
 
   &__content {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
   }
 
   .header-text {
@@ -84,6 +87,7 @@
     overflow: hidden;
     position: relative;
     transition: background-color $euiAnimSpeedFast;
+    text-align: left;
   }
 
   td {
