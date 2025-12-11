@@ -37,8 +37,8 @@ jest.mock('../../../components/query_panel', () => ({
   QueryPanel: () => <div data-test-subj="query-panel">Query Panel</div>,
 }));
 
-jest.mock('../../../components/container/bottom_container', () => ({
-  BottomContainer: () => (
+jest.mock('./metrics_bottom_container/bottom_right_container', () => ({
+  BottomRightContainer: () => (
     <div data-test-subj="bottom-container">
       <div data-test-subj="discover-panel">Discover Panel</div>
       <div data-test-subj="discover-chart-container">Chart Container</div>

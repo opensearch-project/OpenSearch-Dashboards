@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
@@ -14,6 +15,7 @@ import { selectQuery } from '../../../../application/utils/state_management/sele
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import { useClearEditors } from '../../../../application/hooks';
 import './dataset_select_terminology.scss';
+import { ExploreFlavor } from '../../../../../common';
 
 export const DatasetSelectWidget = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -93,7 +95,9 @@ export const DatasetSelectWidget = () => {
         clearEditors();
       } catch (error) {
         services.notifications?.toasts.addError(error, {
-          title: 'Error selecting dataset',
+          title: i18n.translate('explore.datasetSelect.errorSelectingDataset', {
+            defaultMessage: 'Error selecting dataset',
+          }),
         });
       }
     },
@@ -101,13 +105,15 @@ export const DatasetSelectWidget = () => {
   );
 
   const supportedTypes = useMemo(() => {
+    if (flavorId === ExploreFlavor.Metrics) return ['PROMETHEUS'];
+
     return (
       services.supportedTypes || [
         DEFAULT_DATA.SET_TYPES.INDEX,
         DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       ]
     );
-  }, [services.supportedTypes]);
+  }, [services.supportedTypes, flavorId]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 

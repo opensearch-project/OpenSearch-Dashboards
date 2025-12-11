@@ -637,3 +637,5 @@ export {
   SchemaConfig,
   SchemaAttributeConfig,
 } from './ui/dataset_selector/configurator/schema_config';
+
+export { BaseResourceClient, ResourceClientFactory, ResourceClientCreator } from './resources';

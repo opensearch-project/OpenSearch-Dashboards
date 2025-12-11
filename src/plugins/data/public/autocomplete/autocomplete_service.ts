@@ -48,12 +48,24 @@ export class AutocompleteService {
   }
 
   private readonly querySuggestionProviders: Map<string, QuerySuggestionGetFn> = new Map();
+  private readonly triggerCharactersMap: Map<string, string[]> = new Map();
   private getValueSuggestions?: ValueSuggestionsGetFn;
 
-  private addQuerySuggestionProvider = (language: string, provider: QuerySuggestionGetFn): void => {
+  private addQuerySuggestionProvider = (
+    language: string,
+    provider: QuerySuggestionGetFn,
+    triggerCharacters?: string[]
+  ): void => {
     if (language && provider && this.autocompleteConfig.querySuggestions.enabled) {
       this.querySuggestionProviders.set(language, provider);
+      if (triggerCharacters) {
+        this.triggerCharactersMap.set(language, triggerCharacters);
+      }
     }
+  };
+
+  private getTriggerCharacters = (language: string): string[] | undefined => {
+    return this.triggerCharactersMap.get(language);
   };
 
   private getQuerySuggestions: QuerySuggestionGetFn = (args) => {
@@ -88,6 +100,7 @@ export class AutocompleteService {
       getQuerySuggestions: this.getQuerySuggestions,
       hasQuerySuggestions: this.hasQuerySuggestions,
       getValueSuggestions: this.getValueSuggestions!,
+      getTriggerCharacters: this.getTriggerCharacters,
     };
   }
 

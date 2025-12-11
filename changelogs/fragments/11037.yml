@@ -1,0 +1,2 @@
+feat:
+- Add prometheus grammar and autocomplete functions ([#11037](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11037))

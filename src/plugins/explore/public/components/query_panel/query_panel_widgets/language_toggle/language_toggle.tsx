@@ -16,6 +16,7 @@ import {
 import { EditorMode } from '../../../../application/utils/state_management/types';
 import { useEditorFocus } from '../../../../application/hooks';
 import { useLanguageSwitch } from '../../../../application/hooks/editor_hooks/use_switch_language';
+import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import './language_toggle.scss';
 
 const promptOptionText = i18n.translate('explore.queryPanelFooter.languageToggle.promptOption', {
@@ -28,6 +29,7 @@ export const LanguageToggle = () => {
   const isPromptMode = useSelector(selectIsPromptEditorMode);
   const language = useSelector(selectQueryLanguage);
   const focusOnEditor = useEditorFocus();
+  const flavorId = useFlavorId();
 
   const switchEditorMode = useLanguageSwitch();
 
@@ -73,6 +75,9 @@ export const LanguageToggle = () => {
 
     return output;
   }, [isPromptMode, onItemClick, promptModeIsAvailable]);
+
+  // Hide the language toggle in metrics flavor since only PromQL is supported
+  if (flavorId === 'metrics') return null;
 
   return (
     // This div is needed to allow for the gradient styling

@@ -3,7 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import { LogsTab } from '../components/tabs/logs_tab';
+import { MetricsTab } from '../components/tabs/metrics_tab';
+import { MetricsRawTab } from '../components/tabs/metrics_raw_tab';
 import { FieldStatsTab } from '../components/tabs/field_stats_tab';
 import { TabDefinition, TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { ExploreServices } from '../types';
@@ -40,25 +43,56 @@ export const registerBuiltInTabs = (
 ) => {
   const isExperimentalEnabled = services.uiSettings.get(ENABLE_EXPERIMENTAL_SETTING, false);
 
-  // Register Logs Tab
-  const logsTabDefinition: TabDefinition = {
-    id: EXPLORE_LOGS_TAB_ID,
-    label: registryFlavor === ExploreFlavor.Traces ? 'Spans' : 'Logs',
-    flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics, ExploreFlavor.Traces],
-    order: 10,
-    supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
+  if (registryFlavor === ExploreFlavor.Metrics) {
+    tabRegistry.registerTab({
+      id: 'metrics',
+      label: i18n.translate('explore.metricsTab.tableLabel', {
+        defaultMessage: 'Table',
+      }),
+      flavor: [ExploreFlavor.Metrics],
+      order: 10,
+      supportedLanguages: ['PROMQL'],
+      component: MetricsTab,
+    });
 
-    component: LogsTab,
-  };
-
-  tabRegistry.registerTab(logsTabDefinition);
+    tabRegistry.registerTab({
+      id: 'metrics-raw',
+      label: i18n.translate('explore.metricsTab.rawLabel', {
+        defaultMessage: 'Raw',
+      }),
+      flavor: [ExploreFlavor.Metrics],
+      order: 15,
+      supportedLanguages: ['PROMQL'],
+      component: MetricsRawTab,
+    });
+  } else {
+    // Register Logs Tab
+    const logsTabDefinition: TabDefinition = {
+      id: EXPLORE_LOGS_TAB_ID,
+      label:
+        registryFlavor === ExploreFlavor.Traces
+          ? i18n.translate('explore.logsTab.spansLabel', {
+              defaultMessage: 'Spans',
+            })
+          : i18n.translate('explore.logsTab.logsLabel', {
+              defaultMessage: 'Logs',
+            }),
+      flavor: [ExploreFlavor.Logs, ExploreFlavor.Traces],
+      order: 10,
+      supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
+      component: LogsTab,
+    };
+    tabRegistry.registerTab(logsTabDefinition);
+  }
 
   // Register Patterns Tab
   if (isExperimentalEnabled) {
     tabRegistry.registerTab({
       id: EXPLORE_PATTERNS_TAB_ID,
-      label: 'Patterns',
-      flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics],
+      label: i18n.translate('explore.patternsTab.label', {
+        defaultMessage: 'Patterns',
+      }),
+      flavor: [ExploreFlavor.Logs],
       order: 15,
       supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
 
@@ -143,10 +177,15 @@ export const registerBuiltInTabs = (
   // Register Visualizations Tab
   tabRegistry.registerTab({
     id: EXPLORE_VISUALIZATION_TAB_ID,
-    label: 'Visualization',
+    label: i18n.translate('explore.visualizationTab.label', {
+      defaultMessage: 'Visualization',
+    }),
     flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics, ExploreFlavor.Traces],
     order: 20,
-    supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
+    supportedLanguages:
+      registryFlavor === ExploreFlavor.Metrics
+        ? [EXPLORE_DEFAULT_LANGUAGE, 'PROMQL']
+        : [EXPLORE_DEFAULT_LANGUAGE],
 
     // Prepare query based on language
     prepareQuery: (query) => {
@@ -161,8 +200,10 @@ export const registerBuiltInTabs = (
   if (isExperimentalEnabled) {
     tabRegistry.registerTab({
       id: EXPLORE_FIELD_STATS_TAB_ID,
-      label: 'Field Stats',
-      flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics],
+      label: i18n.translate('explore.fieldStatsTab.label', {
+        defaultMessage: 'Field Stats',
+      }),
+      flavor: [ExploreFlavor.Logs],
       order: 25,
       supportedLanguages: [EXPLORE_DEFAULT_LANGUAGE],
       component: FieldStatsTab,
