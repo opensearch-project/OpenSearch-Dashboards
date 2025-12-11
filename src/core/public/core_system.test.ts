@@ -69,7 +69,6 @@ jest.mock('@osd/monaco', () => ({
 
 const defaultCoreSystemParams = {
   rootDomElement: document.createElement('div'),
-  browserSupportsCsp: true,
   injectedMetadata: {
     uiPlugins: [],
     csp: {
@@ -120,16 +119,7 @@ describe('constructor', () => {
       injectedMetadata,
     });
   });
-
-  it('passes browserSupportsCsp to ChromeService', () => {
-    createCoreSystem();
-
-    expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
-    expect(ChromeServiceConstructor).toHaveBeenCalledWith({
-      browserSupportsCsp: expect.any(Boolean),
-    });
-  });
-
+  
   it('passes injectedMetadata, rootDomElement, and a stopCoreSystem function to FatalErrorsService', () => {
     const rootDomElement = document.createElement('div');
 
