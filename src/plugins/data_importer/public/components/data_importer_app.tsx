@@ -73,9 +73,6 @@ export const DataImporterPluginApp = ({
   hideLocalCluster,
   dataSourceManagement,
 }: DataImporterPluginAppProps) => {
-  const DataSourceMenuComponent = dataSourceManagement?.ui.getDataSourceMenu<
-    DataSourceSelectableConfig
-  >();
   const [indexName, setIndexName] = useState<string>();
   const [importType, setImportType] = useState<ImportChoices>(IMPORT_CHOICE_FILE);
   const [disableImport, setDisableImport] = useState<boolean>();
@@ -332,23 +329,22 @@ export const DataImporterPluginApp = ({
   }, [inputText, inputFile, config.maxTextCount, config.maxFileSizeBytes, notifications.toasts]);
 
   const renderDataSourceComponent = useMemo(() => {
+    if (!dataSourceEnabled || !dataSourceManagement) return null;
+
+    const DataSourceSelector = dataSourceManagement!.ui.DataSourceSelector as React.ComponentType<
+      any
+    >;
     return (
-      <div>
-        {DataSourceMenuComponent && (
-          <>
-            <DataSourceMenuComponent
-              componentType={'DataSourceSelectable'}
-              componentConfig={{
-                fullWidth: true,
-                savedObjects: savedObjects.client,
-                notifications,
-                onSelectedDataSources: onDataSourceSelect,
-              }}
-              onManageDataSource={() => {}}
-            />
-            <EuiSpacer size="m" />
-          </>
-        )}
+      <div className="devAppDataSourceSelector">
+        <DataSourceSelector
+          savedObjectsClient={savedObjects.client}
+          notifications={notifications.toasts}
+          onSelectedDataSource={onDataSourceSelect}
+          disabled={!dataSourceEnabled}
+          fullWidth={false}
+          compressed={false}
+          hideLocalCluster={hideLocalCluster}
+        />
       </div>
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -392,13 +388,14 @@ export const DataImporterPluginApp = ({
                   </h1>
                 </EuiTitle>
               </EuiPageHeader>
-              <EuiPageContent>
+              <EuiPageContent className="data_importer_content" paddingSize="s">
                 <EuiFlexGroup>
                   <EuiFlexItem grow={1}>
                     <ImportTypeSelector
                       updateSelection={onImportTypeChange}
                       initialSelection={importType}
                     />
+                    <EuiSpacer size="s" />
                     {dataSourceEnabled && (
                       <>
                         <EuiTitle size="xs">
@@ -415,7 +412,7 @@ export const DataImporterPluginApp = ({
                     <EuiTitle size="xs">
                       <span>
                         {i18n.translate('dataImporter.indexName', {
-                          defaultMessage: 'Create/Select Index Name',
+                          defaultMessage: 'Select an existing index or create new',
                         })}
                       </span>
                     </EuiTitle>
@@ -429,27 +426,45 @@ export const DataImporterPluginApp = ({
                         onCreateOption={onCreateIndexName}
                       />
                     </EuiFormRow>
-                    <EuiSpacer size="s" />
+
                     {showDelimiterChoice && (
-                      <DelimiterSelect
-                        onDelimiterChange={onDelimiterChange}
-                        initialDelimiter={delimiter}
-                      />
+                      <>
+                        <EuiSpacer size="s" />
+                        <DelimiterSelect
+                          onDelimiterChange={onDelimiterChange}
+                          initialDelimiter={delimiter}
+                        />
+                      </>
+                    )}
+
+                    {importType === IMPORT_CHOICE_FILE && (
+                      <>
+                        <EuiSpacer size="s" />
+                        <ImportFileContentBody
+                          enabledFileTypes={config.enabledFileTypes}
+                          onFileUpdate={onFileInput}
+                        />
+                      </>
                     )}
                     {importType === IMPORT_CHOICE_FILE && (
-                      <ImportFileContentBody
-                        enabledFileTypes={config.enabledFileTypes}
-                        onFileUpdate={onFileInput}
-                      />
-                    )}
-                    {importType === IMPORT_CHOICE_FILE && (
-                      <EuiButton fullWidth={true} isDisabled={disableImport} onClick={previewData}>
-                        Preview
-                      </EuiButton>
+                      <>
+                        <EuiSpacer size="s" />
+                        <EuiButton
+                          fullWidth={true}
+                          isDisabled={disableImport}
+                          onClick={previewData}
+                        >
+                          {i18n.translate('dataImporter.previewButton', {
+                            defaultMessage: 'Preview',
+                          })}
+                        </EuiButton>
+                      </>
                     )}
                     <EuiSpacer size="s" />
                     <EuiButton fullWidth={true} isDisabled={disableImport} onClick={importData}>
-                      Import
+                      {i18n.translate('dataImporter.importButton', {
+                        defaultMessage: 'Import',
+                      })}
                     </EuiButton>
                   </EuiFlexItem>
                   <EuiFlexItem grow={2}>

@@ -50,7 +50,7 @@ const ExplorePageContextProvider: React.FC<{
       },
       dataset: urlState._q?.dataset,
     }),
-    categories: ['static', 'explore'],
+    categories: ['page', 'static'],
   });
 
   return <>{children}</>;
