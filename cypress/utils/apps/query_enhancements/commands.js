@@ -212,6 +212,7 @@ Cypress.Commands.add(
       cy.get('[type="button"]').contains('Cancel').click();
 
       // Wait for modal to close by checking dataset selector button is ready
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       cy.getElementByTestId('datasetSelectorButton').should('be.visible').should('not.be.disabled');
     }
   }
