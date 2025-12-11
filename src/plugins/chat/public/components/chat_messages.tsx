@@ -97,13 +97,11 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
           if (message.role === 'assistant') {
             const assistantMsg = message as AssistantMessage;
             const isLoadingMessage = message.id.startsWith('loading-');
-            const isEmptyAndStreaming =
-              !assistantMsg.content?.trim() && !assistantMsg.toolCalls?.length && isStreaming;
 
             return (
               <div key={message.id}>
-                {/* Show loading indicator for loading messages or empty streaming messages */}
-                {(isLoadingMessage || isEmptyAndStreaming) && (
+                {/* Show thinking indicator for loading messages */}
+                {isLoadingMessage && (
                   <div className="messageRow">
                     <div className="messageRow__icon">
                       <EuiIcon type="console" size="m" color="success" />
