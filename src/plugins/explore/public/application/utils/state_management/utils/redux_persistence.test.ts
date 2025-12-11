@@ -74,7 +74,7 @@ describe('redux_persistence', () => {
       uiSettings: {
         get: jest.fn((key) => {
           if (key === 'defaultColumns') return ['_source'];
-          if (key === DEFAULT_TRACE_COLUMNS_SETTING) return ['traceID', 'spanID'];
+          if (key === DEFAULT_TRACE_COLUMNS_SETTING) return ['spanId'];
           return undefined;
         }),
       },
@@ -583,6 +583,115 @@ describe('redux_persistence', () => {
     });
   });
 
+  describe('loadReduxState with empty columns in URL state', () => {
+    it('should use default columns when URL state has empty columns array', async () => {
+      const mockQueryState = {
+        query: 'source=logs | head 10',
+        language: 'PPL',
+        dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+      };
+      const mockAppState = {
+        ui: { activeTabId: 'logs', showHistogram: true },
+        tab: {
+          logs: {},
+        },
+        legacy: {
+          columns: [], // Empty columns array
+          sort: [],
+          isDirty: false,
+          interval: 'auto',
+          savedSearch: undefined,
+          savedQuery: undefined,
+          lineCount: undefined,
+        },
+      };
+
+      (mockServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(mockAppState);
+
+      const result = await loadReduxState(mockServices);
+
+      // Should use default columns from UI settings instead of empty array
+      expect(result.legacy.columns).toEqual(['_source']);
+    });
+
+    it('should use default columns for traces flavor when URL state has empty columns', async () => {
+      const tracesServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/traces') } },
+      } as any;
+
+      const mockQueryState = {
+        query: 'source=traces',
+        language: 'PPL',
+        dataset: { id: 'traces-dataset', title: 'Traces Dataset', type: 'INDEX_PATTERN' },
+      };
+      const mockAppState = {
+        ui: { activeTabId: 'logs', showHistogram: true },
+        tab: {
+          logs: {},
+        },
+        legacy: {
+          columns: [], // Empty columns array
+          sort: [],
+          isDirty: false,
+          interval: 'auto',
+          savedSearch: undefined,
+          savedQuery: undefined,
+          lineCount: undefined,
+        },
+      };
+
+      (tracesServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(mockAppState);
+
+      (tracesServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
+        id: 'traces-dataset',
+        title: 'Traces Dataset',
+        signalType: CORE_SIGNAL_TYPES.TRACES,
+      });
+
+      const result = await loadReduxState(tracesServices);
+
+      // Should use default trace columns from UI settings
+      expect(result.legacy.columns).toEqual(['spanId']);
+    });
+
+    it('should preserve existing columns when they are present in URL state', async () => {
+      const mockQueryState = {
+        query: 'source=logs | head 10',
+        language: 'PPL',
+        dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+      };
+      const mockAppState = {
+        ui: { activeTabId: 'logs', showHistogram: true },
+        tab: {
+          logs: {},
+        },
+        legacy: {
+          columns: ['field1', 'field2'], // Valid columns
+          sort: [],
+          isDirty: false,
+          interval: 'auto',
+          savedSearch: undefined,
+          savedQuery: undefined,
+          lineCount: undefined,
+        },
+      };
+
+      (mockServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(mockAppState);
+
+      const result = await loadReduxState(mockServices);
+
+      // Should preserve URL state columns when they exist
+      expect(result.legacy.columns).toEqual(['field1', 'field2']);
+    });
+  });
+
   describe('loadReduxState with SignalType validation for URL datasets', () => {
     it('should validate URL dataset against current flavor and use it if compatible', async () => {
       const mockQueryState = {
@@ -765,6 +874,209 @@ describe('redux_persistence', () => {
         timeFieldName: undefined,
         dataSource: undefined,
       });
+    });
+  });
+
+  describe('loadReduxState with column validation for flavor switching', () => {
+    it('should replace logs columns with traces defaults when switching to traces flavor', async () => {
+      const tracesServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/traces') } },
+      } as any;
+
+      const mockQueryState = {
+        query: 'source=traces',
+        language: 'PPL',
+        dataset: { id: 'traces-dataset', title: 'Traces Dataset', type: 'INDEX_PATTERN' },
+      };
+
+      const mockAppState = {
+        ui: { activeTabId: 'logs', showHistogram: true },
+        tab: { logs: {} },
+        legacy: {
+          columns: ['attributes.@OrderResult', 'attributes.amount.nanos'],
+          sort: [],
+          isDirty: false,
+          interval: 'auto',
+        },
+      };
+
+      (tracesServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(mockAppState);
+
+      (tracesServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
+        id: 'traces-dataset',
+        title: 'Traces Dataset',
+        signalType: CORE_SIGNAL_TYPES.TRACES,
+      });
+
+      const result = await loadReduxState(tracesServices);
+
+      // Should replace logs columns with traces defaults
+      expect(result.legacy.columns).toEqual(['spanId']);
+      expect(result.legacy.columns).not.toContain('attributes.@OrderResult');
+      expect(result.legacy.columns).not.toContain('attributes.amount.nanos');
+    });
+
+    it('should replace traces columns with logs defaults when switching to logs flavor', async () => {
+      const logsServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/logs') } },
+      } as any;
+
+      const mockQueryState = {
+        query: 'source=logs',
+        language: 'PPL',
+        dataset: { id: 'logs-dataset', title: 'Logs Dataset', type: 'INDEX_PATTERN' },
+      };
+
+      const mockAppState = {
+        ui: { activeTabId: 'logs', showHistogram: true },
+        tab: { logs: {} },
+        legacy: {
+          columns: ['spanId'],
+          sort: [],
+          isDirty: false,
+          interval: 'auto',
+        },
+      };
+
+      (logsServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(mockAppState);
+
+      // Mock dataViews.get to return LOGS signal type
+      (logsServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
+        id: 'logs-dataset',
+        title: 'Logs Dataset',
+        signalType: CORE_SIGNAL_TYPES.LOGS,
+      });
+
+      const result = await loadReduxState(logsServices);
+
+      // Should replace traces columns with logs defaults
+      expect(result.legacy.columns).toEqual(['_source']);
+      expect(result.legacy.columns).not.toContain('spanId');
+    });
+
+    it('should keep valid traces columns when in traces flavor', async () => {
+      const tracesServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/traces') } },
+      } as any;
+
+      const mockQueryState = {
+        query: 'source=traces',
+        language: 'PPL',
+        dataset: { id: 'traces-dataset', title: 'Traces Dataset', type: 'INDEX_PATTERN' },
+      };
+
+      // URL has valid traces columns
+      const mockAppState = {
+        ui: { activeTabId: 'logs', showHistogram: true },
+        tab: { logs: {} },
+        legacy: {
+          columns: ['spanId', 'serviceName'],
+          sort: [],
+          isDirty: false,
+          interval: 'auto',
+        },
+      };
+
+      (tracesServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(mockAppState);
+
+      (tracesServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
+        id: 'traces-dataset',
+        title: 'Traces Dataset',
+        signalType: CORE_SIGNAL_TYPES.TRACES,
+      });
+
+      const result = await loadReduxState(tracesServices);
+
+      // Should keep the valid traces columns
+      expect(result.legacy.columns).toEqual(['spanId', 'serviceName']);
+    });
+
+    it('should keep valid logs columns when in logs flavor', async () => {
+      const logsServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/logs') } },
+      } as any;
+
+      const mockQueryState = {
+        query: 'source=logs',
+        language: 'PPL',
+        dataset: { id: 'logs-dataset', title: 'Logs Dataset', type: 'INDEX_PATTERN' },
+      };
+
+      const mockAppState = {
+        ui: { activeTabId: 'logs', showHistogram: true },
+        tab: { logs: {} },
+        legacy: {
+          columns: ['_source', 'timestamp', 'message'],
+          sort: [],
+          isDirty: false,
+          interval: 'auto',
+        },
+      };
+
+      (logsServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(mockAppState);
+
+      (logsServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
+        id: 'logs-dataset',
+        title: 'Logs Dataset',
+        signalType: CORE_SIGNAL_TYPES.LOGS,
+      });
+
+      const result = await loadReduxState(logsServices);
+
+      // Should keep the valid logs columns
+      expect(result.legacy.columns).toEqual(['_source', 'timestamp', 'message']);
+    });
+
+    it('should replace columns when dataset type does not match flavor', async () => {
+      const tracesServices = {
+        ...mockServices,
+        core: { application: { currentAppId$: of('explore/traces') } },
+      } as any;
+
+      const mockQueryState = {
+        query: 'source=traces',
+        language: 'PPL',
+        dataset: { id: 'wrong-dataset', title: 'Wrong Dataset', type: 'INDEX_PATTERN' },
+      };
+
+      const mockAppState = {
+        ui: { activeTabId: 'logs', showHistogram: true },
+        tab: { logs: {} },
+        legacy: {
+          columns: ['someColumn', 'anotherColumn'],
+          sort: [],
+          isDirty: false,
+          interval: 'auto',
+        },
+      };
+
+      (tracesServices.osdUrlStateStorage!.get as jest.Mock)
+        .mockReturnValueOnce(mockQueryState)
+        .mockReturnValueOnce(mockAppState);
+
+      // Mock dataViews.get to return LOGS signal type (mismatch with traces flavor)
+      (tracesServices.data.dataViews!.get as jest.Mock).mockResolvedValue({
+        id: 'wrong-dataset',
+        title: 'Wrong Dataset',
+        signalType: CORE_SIGNAL_TYPES.LOGS, // Dataset is logs but flavor is traces
+      });
+
+      const result = await loadReduxState(tracesServices);
+
+      // Should replace with traces defaults since we're in traces flavor
+      expect(result.legacy.columns).toEqual(['spanId']);
     });
   });
 });
