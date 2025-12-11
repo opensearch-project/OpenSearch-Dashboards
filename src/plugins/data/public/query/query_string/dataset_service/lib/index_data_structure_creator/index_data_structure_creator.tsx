@@ -15,15 +15,10 @@ import {
 import { IDataPluginServices } from '../../../../../types';
 import { ModeSelectionRow } from './mode_selection_row';
 import { MatchingIndicesList } from './matching_indices_list';
+import { useIndexFetcher } from './use_index_fetcher';
 import './index_data_structure_creator.scss';
 
 type SelectionMode = 'single' | 'prefix';
-
-interface ResolveIndexResponse {
-  indices?: Array<{ name: string; attributes?: string[] }>;
-  aliases?: Array<{ name: string }>;
-  data_streams?: Array<{ name: string }>;
-}
 
 interface IndexDataStructureCreatorProps extends DataStructureCreatorProps {
   services?: IDataPluginServices;
@@ -45,82 +40,34 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
   const [isLoadingMatches, setIsLoadingMatches] = useState(false);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch indices matching a wildcard pattern using API
+  // Use shared hook for fetching indices
+  const { fetchIndices } = useIndexFetcher({ services, path });
+
+  // Fetch indices matching a wildcard pattern using shared hook
   const fetchMatchingIndices = useCallback(
     async (pattern: string) => {
-      if (!services?.http || !pattern || pattern.trim() === '') {
+      if (!pattern || pattern.trim() === '') {
         setMatchingIndices([]);
         return;
       }
 
+      setIsLoadingMatches(true);
+
       try {
-        setIsLoadingMatches(true);
-
-        const dataSourceId = path.find((item) => item.type === 'DATA_SOURCE')?.id;
-        const query: any = {
-          expand_wildcards: 'all',
-        };
-
-        if (dataSourceId && dataSourceId !== '') {
-          query.data_source = dataSourceId;
-        }
-
         // Check if pattern contains commas (multiple patterns)
         const patterns = pattern
           .split(',')
           .map((p) => p.trim())
           .filter((p) => p);
 
-        // Fetch matches for all patterns in parallel
-        const allResponses = await Promise.all(
-          patterns.map(
-            (p) =>
-              services.http
-                .get<ResolveIndexResponse>(
-                  `/internal/index-pattern-management/resolve_index/${encodeURIComponent(p)}`,
-                  { query }
-                )
-                .catch(() => null) // Handle individual pattern failures gracefully
-          )
-        );
-
-        // Combine all results into a single set (to avoid duplicates)
-        const allIndices = new Set<string>();
-
-        allResponses.forEach((response) => {
-          if (!response) return;
-
-          // Add regular indices
-          if (response.indices) {
-            response.indices.forEach((idx) => {
-              allIndices.add(idx.name);
-            });
-          }
-
-          // Add aliases
-          if (response.aliases) {
-            response.aliases.forEach((alias) => {
-              allIndices.add(alias.name);
-            });
-          }
-
-          // Add data streams
-          if (response.data_streams) {
-            response.data_streams.forEach((dataStream) => {
-              allIndices.add(dataStream.name);
-            });
-          }
-        });
-
-        setMatchingIndices(Array.from(allIndices).sort());
-      } catch (error) {
-        // On error, set empty array
-        setMatchingIndices([]);
+        // Fetch indices using shared hook
+        const results = await fetchIndices({ patterns });
+        setMatchingIndices(results);
       } finally {
         setIsLoadingMatches(false);
       }
     },
-    [services, path]
+    [fetchIndices]
   );
 
   // Debounced handler for wildcard pattern changes
@@ -136,10 +83,8 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
       allPatterns.push(currentWildcardPattern);
     }
 
-    if (allPatterns.length === 0) {
-      setMatchingIndices([]);
-      return;
-    }
+    // If no patterns, show all indices (*) to help user see what's available
+    const patternToFetch = allPatterns.length === 0 ? '*' : allPatterns.join(', ');
 
     // Clear existing timer
     if (debounceTimerRef.current) {
@@ -148,7 +93,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
 
     // Set new timer
     debounceTimerRef.current = setTimeout(() => {
-      fetchMatchingIndices(allPatterns.join(', '));
+      fetchMatchingIndices(patternToFetch);
     }, 300);
 
     // Cleanup
@@ -219,21 +164,8 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
       const dataSourceId = path.find((item) => item.type === 'DATA_SOURCE')?.id || 'local';
       const combinedPattern = patterns.join(',');
 
-      // Calculate all matching indices
-      const childrenList = current.children || [];
-      const allMatches = new Set<string>();
-
-      patterns.forEach((pattern) => {
-        const regexPattern = pattern.replace(/\*/g, '.*');
-        const regex = new RegExp(`^${regexPattern}$`, 'i');
-
-        childrenList
-          .filter((child) => regex.test(child.title))
-          .forEach((child) => allMatches.add(child.title));
-      });
-
-      const matchingTitles = Array.from(allMatches).sort();
-
+      // Use API-fetched matchingIndices instead of deriving from current.children
+      // matchingIndices is populated by fetchMatchingIndices via debounced API calls
       const wildcardDataStructure: DataStructure = {
         id: `${dataSourceId}::${combinedPattern}`,
         title: combinedPattern,
@@ -242,7 +174,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
           type: DATA_STRUCTURE_META_TYPES.CUSTOM,
           isMultiWildcard: true,
           wildcardPatterns: patterns,
-          matchingIndices: matchingTitles,
+          matchingIndices, // Use API results, not client-side filtering
         },
       };
 
@@ -339,7 +271,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
                 iconSide="right"
                 iconOnClick={() => {
                   const newPatterns = wildcardPatterns.filter((p) => p !== pattern);
-                  setWildcardPatterns(newPatterns);
+                  // handleWildcardPatternsChange already calls setWildcardPatterns
                   handleWildcardPatternsChange(newPatterns);
                 }}
                 iconOnClickAriaLabel={i18n.translate(
@@ -362,6 +294,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
         <MatchingIndicesList
           matchingIndices={matchingIndices}
           customPrefix={currentWildcardPattern}
+          isLoading={isLoadingMatches}
         />
       )}
     </div>

@@ -174,14 +174,14 @@ Cypress.Commands.add(
       .should('contain.text', 'Index name');
 
     // Click the search field to open the popover (onFocus triggers isPopoverOpen = true)
-    cy.get('.indexSelector input[type="text"]')
+    cy.getElementByTestId('index-selector-search')
       .should('be.visible')
       .click({ force: true }) // Use click instead of focus to ensure onFocus event fires
       .clear()
       .type(index);
 
-    // Wait for the popover to fully render and dataset-index-selector to appear
-    cy.get('.indexSelector__popover', { timeout: 10000 }).should('be.visible');
+    // Wait for the popover to fully render
+    cy.getElementByTestId('index-selector-popover', { timeout: 10000 }).should('be.visible');
 
     // Now look for the dataset-index-selector within the popover
     cy.getElementByTestId('dataset-index-selector', { timeout: 5000 })
@@ -210,8 +210,10 @@ Cypress.Commands.add(
       );
     } else {
       cy.get('[type="button"]').contains('Cancel').click();
+
+      // Wait for modal to close by checking dataset selector button is ready
+      cy.getElementByTestId('datasetSelectorButton').should('be.visible').should('not.be.disabled');
     }
-    cy.wait(1000);
   }
 );
 

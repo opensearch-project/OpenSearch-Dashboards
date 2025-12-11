@@ -14,13 +14,9 @@ import {
 import { i18n } from '@osd/i18n';
 import { DataStructure } from '../../../../../../common';
 import { IDataPluginServices } from '../../../../../types';
+import { useIndexFetcher } from './use_index_fetcher';
+import { MAX_INITIAL_RESULTS } from './constants';
 import './index_selector.scss';
-
-interface ResolveIndexResponse {
-  indices?: Array<{ name: string; attributes?: string[] }>;
-  aliases?: Array<{ name: string }>;
-  data_streams?: Array<{ name: string }>;
-}
 
 interface IndexSelectorProps {
   selectedIndexIds: string[];
@@ -44,83 +40,48 @@ export const IndexSelector: React.FC<IndexSelectorProps> = ({
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasLoadedInitial = useRef(false);
 
-  const MAX_INITIAL_RESULTS = 100;
+  // Use shared hook for fetching indices
+  const { fetchIndices: fetchIndicesFromHook } = useIndexFetcher({ services, path });
 
-  // Fetch indices matching search using API
+  // Fetch indices matching search using shared hook
   const fetchIndices = useCallback(
     async (search: string, limit?: number) => {
-      if (!services?.http || !search || search.trim() === '') {
+      if (!search || search.trim() === '') {
         setSearchResults([]);
         setTotalCount(0);
         return;
       }
 
+      setIsLoading(true);
+
       try {
-        setIsLoading(true);
-
-        const dataSourceId = path?.find((item) => item.type === 'DATA_SOURCE')?.id;
-        const query: any = {
-          expand_wildcards: 'all',
-        };
-
-        if (dataSourceId && dataSourceId !== '') {
-          query.data_source = dataSourceId;
-        }
-
         // Use wildcard pattern for search
         const searchPattern = search.includes('*') ? search : `*${search}*`;
 
-        const response = await services.http.get<ResolveIndexResponse>(
-          `/internal/index-pattern-management/resolve_index/${encodeURIComponent(searchPattern)}`,
-          { query }
-        );
+        // Fetch indices using shared hook
+        const allIndices = await fetchIndicesFromHook({
+          patterns: [searchPattern],
+          limit: undefined, // Don't limit in hook, we need total count
+        });
 
-        if (!response) {
-          setSearchResults([]);
-          setTotalCount(0);
-          return;
-        }
-
-        const indices: string[] = [];
-
-        // Add regular indices
-        if (response.indices) {
-          response.indices.forEach((idx) => {
-            indices.push(idx.name);
-          });
-        }
-
-        // Add aliases
-        if (response.aliases) {
-          response.aliases.forEach((alias) => {
-            indices.push(alias.name);
-          });
-        }
-
-        // Add data streams
-        if (response.data_streams) {
-          response.data_streams.forEach((dataStream) => {
-            indices.push(dataStream.name);
-          });
-        }
-
-        const sortedIndices = indices.sort();
-        setTotalCount(sortedIndices.length);
+        // Set total count
+        setTotalCount(allIndices.length);
 
         // Apply limit if specified
-        if (limit && sortedIndices.length > limit) {
-          setSearchResults(sortedIndices.slice(0, limit));
+        if (limit && allIndices.length > limit) {
+          setSearchResults(allIndices.slice(0, limit));
         } else {
-          setSearchResults(sortedIndices);
+          setSearchResults(allIndices);
         }
       } catch (error) {
+        // Error handling is done in the shared hook
         setSearchResults([]);
         setTotalCount(0);
       } finally {
         setIsLoading(false);
       }
     },
-    [services, path]
+    [fetchIndicesFromHook]
   );
 
   // Load initial results on mount
@@ -217,9 +178,10 @@ export const IndexSelector: React.FC<IndexSelectorProps> = ({
   }, []);
 
   return (
-    <div ref={containerRef} className="indexSelector">
+    <div ref={containerRef} className="indexSelector" data-test-subj="index-selector-container">
       {/* Always visible search field */}
       <EuiFieldText
+        data-test-subj="index-selector-search"
         placeholder={i18n.translate('data.datasetService.indexSelector.searchPlaceholder', {
           defaultMessage: 'Search indices',
         })}
@@ -231,7 +193,7 @@ export const IndexSelector: React.FC<IndexSelectorProps> = ({
 
       {/* Popover that appears over content */}
       {isPopoverOpen && (
-        <div className="indexSelector__popover">
+        <div className="indexSelector__popover" data-test-subj="index-selector-popover">
           {/* Show count message when results are limited */}
           {!searchValue && totalCount > MAX_INITIAL_RESULTS && (
             <div style={{ padding: '8px 12px', fontSize: '12px', color: '#69707D' }}>

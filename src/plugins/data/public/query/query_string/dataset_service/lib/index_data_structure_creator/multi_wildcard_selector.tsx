@@ -8,7 +8,9 @@ import { EuiFieldText, EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '
 import { i18n } from '@osd/i18n';
 import { canAppendWildcard } from './index_data_structure_creator_utils';
 
-const ILLEGAL_CHARACTERS_VISIBLE = ['\\', '/', '?', '"', '<', '>', '|'];
+// Note: * and , are NOT in this list because they are special characters
+// * is used for wildcard matching, , is used to separate multiple patterns
+const ILLEGAL_CHARACTERS_VISIBLE = ['\\', '/', '?', '"', '<', '>', '|', ':', '+', '#'];
 
 interface MultiWildcardSelectorProps {
   patterns: string[];

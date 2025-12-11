@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import './matching_indices_list.scss';
@@ -20,11 +21,13 @@ import './matching_indices_list.scss';
 interface MatchingIndicesListProps {
   matchingIndices: string[];
   customPrefix: string;
+  isLoading?: boolean;
 }
 
 export const MatchingIndicesList: React.FC<MatchingIndicesListProps> = ({
   matchingIndices,
   customPrefix,
+  isLoading = false,
 }) => {
   const highlightIndexName = (indexName: string, queryPattern: string): React.ReactNode => {
     // Remove wildcards from query for highlighting
@@ -46,6 +49,32 @@ export const MatchingIndicesList: React.FC<MatchingIndicesListProps> = ({
       </span>
     );
   };
+
+  // Show loading spinner when fetching indices
+  if (isLoading) {
+    return (
+      <EuiFlexGroup
+        className="matchingIndicesList"
+        direction="column"
+        gutterSize="none"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiSpacer size="m" />
+          <EuiLoadingSpinner size="l" />
+          <EuiSpacer size="xs" />
+          <EuiText size="s" color="subdued">
+            <FormattedMessage
+              id="data.datasetService.matchingIndicesList.loadingMessage"
+              defaultMessage="Loading matching indices..."
+            />
+          </EuiText>
+          <EuiSpacer size="m" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   // Early return if no matching indices
   if (matchingIndices.length === 0) {

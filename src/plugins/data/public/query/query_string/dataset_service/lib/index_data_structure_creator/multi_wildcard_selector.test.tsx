@@ -265,4 +265,56 @@ describe('MultiWildcardSelector', () => {
       expect(input.value).toBe('');
     });
   });
+
+  describe('Illegal characters validation', () => {
+    test('allows wildcard * and comma , as special characters', () => {
+      renderComponent();
+      const input = screen.getByTestId('multiWildcardPatternInput');
+      const addButton = screen.getByTestId('multiWildcardAddButton');
+
+      // Wildcard should be allowed
+      fireEvent.change(input, { target: { value: 'logs*' } });
+      expect(addButton).not.toBeDisabled();
+
+      // Comma should be allowed (for separating patterns)
+      fireEvent.change(input, { target: { value: 'logs*,otel*' } });
+      expect(addButton).not.toBeDisabled();
+    });
+
+    test('rejects newly added illegal characters (colon, plus, hash)', () => {
+      renderComponent();
+      const input = screen.getByTestId('multiWildcardPatternInput');
+      const addButton = screen.getByTestId('multiWildcardAddButton');
+
+      // Colon should be rejected
+      fireEvent.change(input, { target: { value: 'logs:test' } });
+      expect(addButton).toBeDisabled();
+
+      // Plus should be rejected
+      fireEvent.change(input, { target: { value: 'logs+test' } });
+      expect(addButton).toBeDisabled();
+
+      // Hash should be rejected
+      fireEvent.change(input, { target: { value: 'logs#test' } });
+      expect(addButton).toBeDisabled();
+    });
+
+    test('rejects existing illegal characters', () => {
+      renderComponent();
+      const input = screen.getByTestId('multiWildcardPatternInput');
+      const addButton = screen.getByTestId('multiWildcardAddButton');
+
+      // Backslash
+      fireEvent.change(input, { target: { value: 'logs\\test' } });
+      expect(addButton).toBeDisabled();
+
+      // Forward slash
+      fireEvent.change(input, { target: { value: 'logs/test' } });
+      expect(addButton).toBeDisabled();
+
+      // Question mark
+      fireEvent.change(input, { target: { value: 'logs?test' } });
+      expect(addButton).toBeDisabled();
+    });
+  });
 });

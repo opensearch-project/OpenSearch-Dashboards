@@ -48,19 +48,19 @@ export const indexTypeConfig: DatasetTypeConfig = {
     let datasetTitle = index.title;
 
     // Check if this is a multi-index selection
-    if (indexMeta?.isMultiIndex && indexMeta?.selectedTitles) {
+    if (indexMeta?.isMultiIndex && indexMeta?.selectedTitles?.length) {
       // Use the selected titles array to create comma-separated string
       datasetTitle = indexMeta.selectedTitles.join(',');
     }
     // Check if this is a multi-wildcard selection
-    else if (indexMeta?.isMultiWildcard && indexMeta?.wildcardPatterns) {
+    else if (indexMeta?.isMultiWildcard && indexMeta?.wildcardPatterns?.length) {
       // Use the wildcard patterns to create comma-separated string
       datasetTitle = indexMeta.wildcardPatterns.join(',');
     }
 
     return {
       id: index.id,
-      title: datasetTitle, // ← Now properly handles multi-index AND multi-wildcard comma-separated format
+      title: datasetTitle,
       type: DEFAULT_DATA.SET_TYPES.INDEX,
       timeFieldName: indexMeta?.timeFieldName,
       isRemoteDataset: indexMeta?.isRemoteIndex,

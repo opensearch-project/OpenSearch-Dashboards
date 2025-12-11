@@ -59,6 +59,30 @@ const isEditorEmpty = () => {
     .then((text) => text.trim() === '');
 };
 
+const selectIndexWildcardMode = (indexPattern, appendWildcard = true) => {
+  // Select "Index wildcard" from the scope selector
+  cy.getElementByTestId('index-scope-selector')
+    .should('be.visible')
+    .find('[data-test-subj="comboBoxSearchInput"]')
+    .click()
+    .clear()
+    .type('Index wildcard{enter}');
+
+  // Wait for the selection to take effect by verifying the text changed
+  cy.getElementByTestId('index-scope-selector')
+    .find('[data-test-subj="comboBoxInput"]')
+    .should('contain.text', 'Index wildcard')
+    .should('be.visible');
+
+  // Enter the pattern with optional wildcard appending
+  const pattern = appendWildcard ? `${indexPattern}*{enter}` : `${indexPattern}{enter}`;
+  cy.getElementByTestId('dataset-prefix-selector', { timeout: 10000 })
+    .should('be.visible')
+    .find('[data-test-subj="multiWildcardPatternInput"]')
+    .clear()
+    .type(pattern);
+};
+
 cy.explore.add('clearQueryEditor', () => {
   const clearWithRetry = (attempt = 1) => {
     cy.log(`Attempt ${attempt} to clear editor`);
@@ -358,7 +382,8 @@ cy.explore.add('setDataset', (dataset, dataSourceName, type) => {
       throw new Error(`setIndexPatternAsDataset encountered unknown type: ${type}`);
   }
 
-  cy.wait(3000);
+  // Wait for dataset selection to complete by verifying the button is ready
+  cy.getElementByTestId('datasetSelectorButton').should('be.visible').should('not.be.disabled');
 });
 
 cy.explore.add(
@@ -395,14 +420,14 @@ cy.explore.add(
       .should('contain.text', 'Index name');
 
     // Click the search field to open the popover (onFocus triggers isPopoverOpen = true)
-    cy.get('.indexSelector input[type="text"]')
+    cy.getElementByTestId('index-selector-search')
       .should('be.visible')
       .click({ force: true }) // Use click instead of focus to ensure onFocus event fires
       .clear()
       .type(index);
 
-    // Wait for the popover to fully render and dataset-index-selector to appear
-    cy.get('.indexSelector__popover', { timeout: 10000 }).should('be.visible');
+    // Wait for the popover to fully render
+    cy.getElementByTestId('index-selector-popover', { timeout: 10000 }).should('be.visible');
 
     // Now look for the dataset-index-selector within the popover
     cy.getElementByTestId('dataset-index-selector', { timeout: 5000 })
@@ -482,28 +507,8 @@ cy.explore.add(
     cy.get(`[title="${dataSourceName}"]`).should('be.visible');
     cy.get(`[title="${dataSourceName}"]`).click();
 
-    // Step 6 - Select index scope (Index wildcard)
-    cy.getElementByTestId('index-scope-selector')
-      .should('be.visible')
-      .find('[data-test-subj="comboBoxSearchInput"]')
-      .click()
-      .clear()
-      .type('Index wildcard{enter}');
-
-    // Wait for the selection to take effect
-    cy.wait(1000);
-
-    // Verify that "Index wildcard" was selected
-    cy.getElementByTestId('index-scope-selector')
-      .find('[data-test-subj="comboBoxInput"]')
-      .should('contain.text', 'Index wildcard');
-
-    // Step 7 - Enter index pattern
-    cy.getElementByTestId('dataset-prefix-selector', { timeout: 10000 })
-      .should('be.visible')
-      .find('[data-test-subj="multiWildcardPatternInput"]')
-      .clear()
-      .type(`${indexPattern}*{enter}`);
+    // Step 6 & 7 - Select index scope (Index wildcard) and enter pattern
+    selectIndexWildcardMode(indexPattern, true);
 
     // Step 8 - Click Next button
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
@@ -540,7 +545,6 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName, o
   // Run the query
   cy.getElementByTestId('exploreQueryExecutionButton').click();
   cy.osd.waitForLoader(true);
-  cy.wait(1000);
   cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
 
   // Ensure chart type is correct
@@ -662,28 +666,8 @@ cy.explore.add(
     cy.get(`[title="${dataSource}"]`).should('be.visible');
     cy.get(`[title="${dataSource}"]`).click();
 
-    // Step 6 - Select index scope (Index wildcard) using typing approach
-    cy.getElementByTestId('index-scope-selector')
-      .should('be.visible')
-      .find('[data-test-subj="comboBoxSearchInput"]')
-      .click()
-      .clear()
-      .type('Index wildcard{enter}');
-
-    // Wait for the selection to take effect
-    cy.wait(1000);
-
-    // Verify that "Index wildcard" was selected
-    cy.getElementByTestId('index-scope-selector')
-      .find('[data-test-subj="comboBoxInput"]')
-      .should('contain.text', 'Index wildcard');
-
-    // Step 7 - Enter index pattern
-    cy.getElementByTestId('dataset-prefix-selector', { timeout: 10000 })
-      .should('be.visible')
-      .find('[data-test-subj="multiWildcardPatternInput"]')
-      .clear()
-      .type(`${indexPattern}{enter}`);
+    // Step 6 & 7 - Select index scope (Index wildcard) and enter pattern (no wildcard appending)
+    selectIndexWildcardMode(indexPattern, false);
 
     // Step 8 - Click Next button
     cy.getElementByTestId('datasetSelectorNext')
