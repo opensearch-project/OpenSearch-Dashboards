@@ -119,7 +119,7 @@ describe('constructor', () => {
       injectedMetadata,
     });
   });
-  
+
   it('passes injectedMetadata, rootDomElement, and a stopCoreSystem function to FatalErrorsService', () => {
     const rootDomElement = document.createElement('div');
 
