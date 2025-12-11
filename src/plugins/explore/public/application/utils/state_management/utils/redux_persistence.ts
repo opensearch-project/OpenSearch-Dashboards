@@ -110,7 +110,27 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
     const finalUIState = appState?.ui || getPreloadedUIState(services);
     const finalResultsState = appState?.results || getPreloadedResultsState(services);
     const finalTabState = appState?.tab || getPreloadedTabState(services);
-    const finalLegacyState = appState?.legacy || (await getPreloadedLegacyState(services));
+
+    // Handle legacy state with special logic for columns
+    let finalLegacyState = appState?.legacy;
+    if (!finalLegacyState || !finalLegacyState.columns || finalLegacyState.columns.length === 0) {
+      // If no legacy state or columns are empty/missing, load defaults
+      finalLegacyState = await getPreloadedLegacyState(services);
+    } else {
+      const correctedColumns = await getColumnsForDataset(
+        services,
+        resolvedQueryState.dataset,
+        finalLegacyState.columns
+      );
+
+      if (correctedColumns) {
+        finalLegacyState = {
+          ...finalLegacyState,
+          columns: correctedColumns,
+        };
+      }
+    }
+
     const finalQueryEditorState = await getPreloadedQueryEditorState(services, finalQueryState);
     const finalMetaState = appState?.meta || getPreloadedMetaState(services);
 
@@ -434,4 +454,60 @@ const getPreloadedMetaState = (services: ExploreServices) => {
   return {
     isInitialized: false,
   };
+};
+
+const getColumnsForDataset = async (
+  services: ExploreServices,
+  dataset?: Dataset,
+  currentColumns?: string[]
+): Promise<string[] | null> => {
+  if (!currentColumns) {
+    return null;
+  }
+
+  try {
+    const currentAppId = await getCurrentAppId(services);
+    const currentFlavor = getFlavorFromAppId(currentAppId);
+    const isTracesFlavor = currentFlavor === ExploreFlavor.Traces;
+
+    const tracesDefaultColumns = services.uiSettings?.get(DEFAULT_TRACE_COLUMNS_SETTING) || [
+      'spanId',
+    ];
+    const logsDefaultColumns = services.uiSettings?.get('defaultColumns') || ['_source'];
+
+    const hasTracesColumns = currentColumns.some((col) => tracesDefaultColumns.includes(col));
+    const hasLogsColumns = currentColumns.some((col) => logsDefaultColumns.includes(col));
+
+    let isTracesDataset: boolean | undefined;
+    if (dataset) {
+      try {
+        const dataView = await services.data?.dataViews?.get(
+          dataset.id,
+          dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+        );
+        isTracesDataset = dataView?.signalType === CORE_SIGNAL_TYPES.TRACES;
+      } catch {
+        isTracesDataset = undefined;
+      }
+    }
+
+    if (isTracesFlavor) {
+      if (!hasTracesColumns) {
+        return tracesDefaultColumns;
+      }
+    } else {
+      if (!hasLogsColumns && hasTracesColumns) {
+        return logsDefaultColumns;
+      }
+    }
+
+    if (isTracesDataset !== undefined && isTracesDataset !== isTracesFlavor) {
+      // Dataset type doesn't match flavor - use flavor's default columns
+      return isTracesFlavor ? tracesDefaultColumns : logsDefaultColumns;
+    }
+
+    return null;
+  } catch (error) {
+    return null;
+  }
 };
