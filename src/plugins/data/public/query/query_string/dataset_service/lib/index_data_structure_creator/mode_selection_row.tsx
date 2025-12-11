@@ -7,6 +7,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataStructure } from '../../../../../../common';
+import { IDataPluginServices } from '../../../../../types';
 import './mode_selection_row.scss';
 import { IndexSelector } from './index_selector';
 import { MultiWildcardSelector } from './multi_wildcard_selector';
@@ -19,10 +20,13 @@ interface ModeSelectionRowProps {
   // Props for multi-wildcard mode
   wildcardPatterns: string[];
   onWildcardPatternsChange: (patterns: string[]) => void;
+  onCurrentWildcardPatternChange?: (pattern: string) => void;
   // Props for index mode
-  children: DataStructure[] | undefined;
   selectedIndexIds: string[];
   onMultiIndexSelectionChange: (selectedIds: string[]) => void;
+  // Shared props
+  services?: IDataPluginServices;
+  path?: DataStructure[];
 }
 
 export const ModeSelectionRow: React.FC<ModeSelectionRowProps> = ({
@@ -30,9 +34,11 @@ export const ModeSelectionRow: React.FC<ModeSelectionRowProps> = ({
   onModeChange,
   wildcardPatterns,
   onWildcardPatternsChange,
-  children,
+  onCurrentWildcardPatternChange,
   selectedIndexIds,
   onMultiIndexSelectionChange,
+  services,
+  path,
 }) => {
   const modeOptions = [
     {
@@ -87,12 +93,14 @@ export const ModeSelectionRow: React.FC<ModeSelectionRowProps> = ({
             <MultiWildcardSelector
               patterns={wildcardPatterns}
               onPatternsChange={onWildcardPatternsChange}
+              onCurrentPatternChange={onCurrentWildcardPatternChange}
             />
           ) : (
             <IndexSelector
-              children={children}
               selectedIndexIds={selectedIndexIds}
               onMultiSelectionChange={onMultiIndexSelectionChange}
+              services={services}
+              path={path}
             />
           )}
         </EuiFormRow>

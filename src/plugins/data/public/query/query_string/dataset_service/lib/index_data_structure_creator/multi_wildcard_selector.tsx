@@ -13,11 +13,13 @@ const ILLEGAL_CHARACTERS_VISIBLE = ['\\', '/', '?', '"', '<', '>', '|'];
 interface MultiWildcardSelectorProps {
   patterns: string[];
   onPatternsChange: (patterns: string[]) => void;
+  onCurrentPatternChange?: (pattern: string) => void;
 }
 
 export const MultiWildcardSelector: React.FC<MultiWildcardSelectorProps> = ({
   patterns,
   onPatternsChange,
+  onCurrentPatternChange,
 }) => {
   const [currentPattern, setCurrentPattern] = useState('');
   const [appendedWildcard, setAppendedWildcard] = useState(false);
@@ -108,6 +110,10 @@ export const MultiWildcardSelector: React.FC<MultiWildcardSelectorProps> = ({
         setTimeout(() => target.setSelectionRange(cursorPosition, cursorPosition));
         // Validate transformed value
         setValidationErrors(validatePattern(value));
+        // Notify parent of current pattern change
+        if (onCurrentPatternChange) {
+          onCurrentPatternChange(value);
+        }
         return;
       }
 
@@ -123,6 +129,10 @@ export const MultiWildcardSelector: React.FC<MultiWildcardSelectorProps> = ({
         setTimeout(() => target.setSelectionRange(cursorPosition, cursorPosition));
         // Validate transformed value
         setValidationErrors(validatePattern(value));
+        // Notify parent of current pattern change
+        if (onCurrentPatternChange) {
+          onCurrentPatternChange(value);
+        }
         return;
       }
     }
@@ -131,6 +141,11 @@ export const MultiWildcardSelector: React.FC<MultiWildcardSelectorProps> = ({
     setCurrentPattern(value);
     // Validate current value
     setValidationErrors(validatePattern(value));
+
+    // Notify parent of current pattern change for real-time matching
+    if (onCurrentPatternChange) {
+      onCurrentPatternChange(value);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -172,6 +187,11 @@ export const MultiWildcardSelector: React.FC<MultiWildcardSelectorProps> = ({
     setCurrentPattern('');
     setAppendedWildcard(false);
     setValidationErrors([]);
+
+    // Notify parent that pattern was cleared
+    if (onCurrentPatternChange) {
+      onCurrentPatternChange('');
+    }
   };
 
   // Helper function to check if should disable the add button

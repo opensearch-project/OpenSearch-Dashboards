@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { EuiSpacer, EuiText, EuiBadge, EuiBadgeGroup } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -12,55 +12,158 @@ import {
   DataStructure,
   DATA_STRUCTURE_META_TYPES,
 } from '../../../../../../common';
+import { IDataPluginServices } from '../../../../../types';
 import { ModeSelectionRow } from './mode_selection_row';
 import { MatchingIndicesList } from './matching_indices_list';
 import './index_data_structure_creator.scss';
 
 type SelectionMode = 'single' | 'prefix';
 
-export const IndexDataStructureCreator: React.FC<DataStructureCreatorProps> = ({
+interface ResolveIndexResponse {
+  indices?: Array<{ name: string; attributes?: string[] }>;
+  aliases?: Array<{ name: string }>;
+  data_streams?: Array<{ name: string }>;
+}
+
+interface IndexDataStructureCreatorProps extends DataStructureCreatorProps {
+  services?: IDataPluginServices;
+}
+
+export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps> = ({
   path,
   index,
   selectDataStructure,
+  services,
 }) => {
   const current = path[index];
 
   const [selectionMode, setSelectionMode] = useState<SelectionMode>('single');
-  const [customPrefix, setCustomPrefix] = useState('');
   const [selectedIndexIds, setSelectedIndexIds] = useState<string[]>([]);
   const [wildcardPatterns, setWildcardPatterns] = useState<string[]>([]);
+  const [currentWildcardPattern, setCurrentWildcardPattern] = useState('');
+  const [matchingIndices, setMatchingIndices] = useState<string[]>([]);
+  const [isLoadingMatches, setIsLoadingMatches] = useState(false);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const matchingIndices = useMemo(() => {
+  // Fetch indices matching a wildcard pattern using API
+  const fetchMatchingIndices = useCallback(
+    async (pattern: string) => {
+      if (!services?.http || !pattern || pattern.trim() === '') {
+        setMatchingIndices([]);
+        return;
+      }
+
+      try {
+        setIsLoadingMatches(true);
+
+        const dataSourceId = path.find((item) => item.type === 'DATA_SOURCE')?.id;
+        const query: any = {
+          expand_wildcards: 'all',
+        };
+
+        if (dataSourceId && dataSourceId !== '') {
+          query.data_source = dataSourceId;
+        }
+
+        // Check if pattern contains commas (multiple patterns)
+        const patterns = pattern
+          .split(',')
+          .map((p) => p.trim())
+          .filter((p) => p);
+
+        // Fetch matches for all patterns in parallel
+        const allResponses = await Promise.all(
+          patterns.map(
+            (p) =>
+              services.http
+                .get<ResolveIndexResponse>(
+                  `/internal/index-pattern-management/resolve_index/${encodeURIComponent(p)}`,
+                  { query }
+                )
+                .catch(() => null) // Handle individual pattern failures gracefully
+          )
+        );
+
+        // Combine all results into a single set (to avoid duplicates)
+        const allIndices = new Set<string>();
+
+        allResponses.forEach((response) => {
+          if (!response) return;
+
+          // Add regular indices
+          if (response.indices) {
+            response.indices.forEach((idx) => {
+              allIndices.add(idx.name);
+            });
+          }
+
+          // Add aliases
+          if (response.aliases) {
+            response.aliases.forEach((alias) => {
+              allIndices.add(alias.name);
+            });
+          }
+
+          // Add data streams
+          if (response.data_streams) {
+            response.data_streams.forEach((dataStream) => {
+              allIndices.add(dataStream.name);
+            });
+          }
+        });
+
+        setMatchingIndices(Array.from(allIndices).sort());
+      } catch (error) {
+        // On error, set empty array
+        setMatchingIndices([]);
+      } finally {
+        setIsLoadingMatches(false);
+      }
+    },
+    [services, path]
+  );
+
+  // Debounced handler for wildcard pattern changes
+  useEffect(() => {
     if (selectionMode !== 'prefix') {
-      return [];
+      setMatchingIndices([]);
+      return;
     }
 
-    if (wildcardPatterns.length > 0) {
-      const children = current.children || [];
-      const allMatches = new Set<string>();
-
-      wildcardPatterns.forEach((pattern) => {
-        const regexPattern = pattern.replace(/\*/g, '.*');
-        const regex = new RegExp(`^${regexPattern}$`, 'i');
-
-        children
-          .filter((child) => regex.test(child.title))
-          .forEach((child) => allMatches.add(child.title));
-      });
-
-      return Array.from(allMatches).sort();
+    // Combine added patterns with current pattern
+    const allPatterns = [...wildcardPatterns];
+    if (currentWildcardPattern && currentWildcardPattern.trim()) {
+      allPatterns.push(currentWildcardPattern);
     }
 
-    if (!customPrefix) {
-      return [];
+    if (allPatterns.length === 0) {
+      setMatchingIndices([]);
+      return;
     }
 
-    const children = current.children || [];
-    const pattern = customPrefix.replace(/\*/g, '.*');
-    const regex = new RegExp(`^${pattern}$`, 'i');
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
 
-    return children.filter((child) => regex.test(child.title)).map((child) => child.title);
-  }, [selectionMode, wildcardPatterns, customPrefix, current.children]);
+    // Set new timer
+    debounceTimerRef.current = setTimeout(() => {
+      fetchMatchingIndices(allPatterns.join(', '));
+    }, 300);
+
+    // Cleanup
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, [currentWildcardPattern, wildcardPatterns, selectionMode, fetchMatchingIndices]);
+
+  const handleCurrentWildcardPatternChange = useCallback((pattern: string) => {
+    setCurrentWildcardPattern(pattern);
+  }, []);
+
+  // matchingIndices now comes from API calls via state
 
   const handleModeChange = (selectedOptions: Array<{ label: string; value?: string }>) => {
     if (selectedOptions.length > 0 && selectedOptions[0].value) {
@@ -68,13 +171,14 @@ export const IndexDataStructureCreator: React.FC<DataStructureCreatorProps> = ({
       setSelectionMode(newMode);
 
       if (newMode === 'prefix') {
-        // Show all indices initially to help users see what's available
-        setCustomPrefix('*');
+        // Show all indices initially by querying for *
+        setCurrentWildcardPattern('*');
       } else {
-        setCustomPrefix('');
+        setCurrentWildcardPattern('');
       }
 
       setWildcardPatterns([]);
+      setMatchingIndices([]);
     }
   };
 
@@ -165,9 +269,11 @@ export const IndexDataStructureCreator: React.FC<DataStructureCreatorProps> = ({
         onModeChange={handleModeChange}
         wildcardPatterns={wildcardPatterns}
         onWildcardPatternsChange={handleWildcardPatternsChange}
-        children={current.children}
+        onCurrentWildcardPatternChange={handleCurrentWildcardPatternChange}
         selectedIndexIds={selectedIndexIds}
         onMultiIndexSelectionChange={handleMultiIndexSelectionChange}
+        services={services}
+        path={path}
       />
 
       <EuiSpacer size="s" />
@@ -255,7 +361,7 @@ export const IndexDataStructureCreator: React.FC<DataStructureCreatorProps> = ({
       {selectionMode === 'prefix' && (
         <MatchingIndicesList
           matchingIndices={matchingIndices}
-          customPrefix={wildcardPatterns.length > 0 ? wildcardPatterns.join(',') : customPrefix}
+          customPrefix={currentWildcardPattern}
         />
       )}
     </div>
