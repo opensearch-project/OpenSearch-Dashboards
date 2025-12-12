@@ -19,10 +19,18 @@ import {
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import { nanoToMilliSec, isEmpty, round } from '../../utils/helper_functions';
-import { extractSpanDuration, extractHttpStatusCode } from '../../utils/span_data_utils';
+import {
+  extractSpanDuration,
+  extractHttpStatusCode,
+  extractStartTime,
+  hasHttpContext,
+  hasRpcContext,
+  extractRpcData,
+} from '../../utils/span_data_utils';
 import { isSpanError, resolveServiceNameFromSpan } from '../ppl_resolve_helpers';
 import './span_tabs.scss';
 import { getStatusCodeColor } from '../../../../../../../components/data_table/table_cell/trace_utils/trace_utils';
+import { getGrpcStatusName } from '../../utils/grpc_constants';
 
 export interface SpanOverviewTabProps {
   selectedSpan?: any;
@@ -89,14 +97,29 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
     const serviceName = resolveServiceNameFromSpan(selectedSpan);
     const operation = selectedSpan.name;
     const duration = extractSpanDuration(selectedSpan);
-    const startTime = selectedSpan.startTime;
+
+    // Extract start time - handle different formats across trace systems
+    const startTime = extractStartTime(selectedSpan);
     const hasError = isSpanError(selectedSpan);
 
-    // Extract HTTP-specific attributes
-    const httpMethod =
-      selectedSpan.attributes?.['http.method'] || selectedSpan.attributes?.['http.request.method'];
-    const httpUrl = selectedSpan.attributes?.['http.url'] || selectedSpan.attributes?.['url.full'];
-    const httpStatusCode = extractHttpStatusCode(selectedSpan);
+    // Detect protocol type
+    const isHttpSpan = hasHttpContext(selectedSpan);
+    const isRpcSpan = hasRpcContext(selectedSpan);
+
+    // Extract HTTP-specific attributes (only for HTTP spans)
+    let httpMethod;
+    let httpUrl;
+    let httpStatusCode;
+    if (isHttpSpan) {
+      httpMethod =
+        selectedSpan.attributes?.['http.method'] ||
+        selectedSpan.attributes?.['http.request.method'];
+      httpUrl = selectedSpan.attributes?.['http.url'] || selectedSpan.attributes?.['url.full'];
+      httpStatusCode = extractHttpStatusCode(selectedSpan);
+    }
+
+    // Extract RPC-specific attributes (only for RPC spans)
+    const rpcData = isRpcSpan ? extractRpcData(selectedSpan) : null;
 
     return {
       spanId,
@@ -105,9 +128,12 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
       duration,
       startTime,
       hasError,
+      isHttpSpan,
+      isRpcSpan,
       httpMethod,
       httpUrl,
       httpStatusCode,
+      rpcData,
     };
   }, [selectedSpan]);
 
@@ -127,9 +153,12 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
     duration,
     startTime,
     hasError,
+    isHttpSpan,
+    isRpcSpan,
     httpMethod,
     httpUrl,
     httpStatusCode,
+    rpcData,
   } = spanData;
 
   return (
@@ -214,7 +243,7 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
       <EuiSpacer size="l" />
 
       {/* Requests & Response Section */}
-      {(httpUrl || httpMethod || httpStatusCode) && (
+      {isHttpSpan && (httpUrl || httpMethod || httpStatusCode) && (
         <>
           <EuiTitle size="xs">
             <h3>
@@ -291,6 +320,78 @@ export const SpanOverviewTab: React.FC<SpanOverviewTabProps> = ({
                     <EuiBadge color="success">
                       {i18n.translate('explore.spanOverviewTab.success', {
                         defaultMessage: 'Success',
+                      })}
+                    </EuiBadge>
+                  )
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+
+      {/* RPC/gRPC Section */}
+      {isRpcSpan && rpcData && (
+        <>
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('explore.spanOverviewTab.rpcCall', {
+                defaultMessage: 'RPC Call',
+              })}
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+
+          <EuiFlexGroup gutterSize="l">
+            <EuiFlexItem>
+              <OverviewField
+                label={i18n.translate('explore.spanOverviewTab.rpcSystem', {
+                  defaultMessage: 'RPC System',
+                })}
+                value={rpcData.system || '-'}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <OverviewField
+                label={i18n.translate('explore.spanOverviewTab.rpcService', {
+                  defaultMessage: 'RPC Service',
+                })}
+                value={rpcData.service || '-'}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="m" />
+
+          <EuiFlexGroup gutterSize="l">
+            <EuiFlexItem>
+              <OverviewField
+                label={i18n.translate('explore.spanOverviewTab.rpcMethod', {
+                  defaultMessage: 'RPC Method',
+                })}
+                value={rpcData.method || operation || '-'}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <OverviewField
+                label={i18n.translate('explore.spanOverviewTab.rpcStatus', {
+                  defaultMessage: 'RPC Status',
+                })}
+                value={
+                  rpcData.statusCode !== undefined ? (
+                    <EuiBadge color={rpcData.statusCode === 0 ? 'success' : 'danger'}>
+                      {rpcData.statusCode} ({getGrpcStatusName(rpcData.statusCode)})
+                    </EuiBadge>
+                  ) : hasError ? (
+                    <EuiBadge color="danger">
+                      {i18n.translate('explore.spanOverviewTab.error', {
+                        defaultMessage: 'Error',
+                      })}
+                    </EuiBadge>
+                  ) : (
+                    <EuiBadge color="success">
+                      {i18n.translate('explore.spanOverviewTab.ok', {
+                        defaultMessage: 'OK',
                       })}
                     </EuiBadge>
                   )

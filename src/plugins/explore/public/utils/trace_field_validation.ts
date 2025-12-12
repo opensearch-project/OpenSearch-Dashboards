@@ -12,21 +12,27 @@ import {
 } from './trace_field_constants';
 
 export const START_TIME_FIELD_PATHS = [
-  'startTimeUnixNano',
   'startTime',
-  '_source.startTimeUnixNano',
+  'startTimeMillis',
+  'startTimeUnixNano',
   '_source.startTime',
-  'fields.startTimeUnixNano',
+  '_source.startTimeMillis',
+  '_source.startTimeUnixNano',
   'fields.startTime',
+  'fields.startTimeMillis',
+  'fields.startTimeUnixNano',
 ] as const;
 
 export const END_TIME_FIELD_PATHS = [
-  'endTimeUnixNano',
   'endTime',
-  '_source.endTimeUnixNano',
+  'endTimeMillis',
+  'endTimeUnixNano',
   '_source.endTime',
-  'fields.endTimeUnixNano',
+  '_source.endTimeMillis',
+  '_source.endTimeUnixNano',
   'fields.endTime',
+  'fields.endTimeMillis',
+  'fields.endTimeUnixNano',
 ] as const;
 
 export const PARENT_SPAN_ID_FIELD_PATHS = [
@@ -72,6 +78,16 @@ export const extractServiceNameFromRowData = (
 ): string => {
   if (!rowData) return '';
 
+  const processServiceName = getNestedValue(rowData, 'process.serviceName');
+  if (processServiceName && typeof processServiceName === 'string') {
+    return processServiceName;
+  }
+
+  const sourceProcessServiceName = getNestedValue(rowData, '_source.process.serviceName');
+  if (sourceProcessServiceName && typeof sourceProcessServiceName === 'string') {
+    return sourceProcessServiceName;
+  }
+
   const resourceServiceName = getNestedValue(rowData, 'resource.attributes.service.name');
   if (resourceServiceName && typeof resourceServiceName === 'string') {
     return resourceServiceName;
@@ -105,6 +121,84 @@ export const extractServiceNameFromRowData = (
   return '';
 };
 
+export const extractJaegerTagValue = (
+  rowData: OpenSearchSearchHit<Record<string, unknown>>,
+  tagKey: string
+): string => {
+  if (!rowData) return '';
+
+  const tags = getNestedValue(rowData, 'tags') || getNestedValue(rowData, '_source.tags');
+  if (Array.isArray(tags)) {
+    const tag = tags.find((t: any) => t?.key === tagKey);
+    if (tag?.value && typeof tag.value === 'string') {
+      return tag.value;
+    }
+  }
+
+  const processTags =
+    getNestedValue(rowData, 'process.tags') || getNestedValue(rowData, '_source.process.tags');
+  if (Array.isArray(processTags)) {
+    const tag = processTags.find((t: any) => t?.key === tagKey);
+    if (tag?.value && typeof tag.value === 'string') {
+      return tag.value;
+    }
+  }
+
+  return '';
+};
+
+export const extractJaegerHttpStatusCode = (
+  rowData: OpenSearchSearchHit<Record<string, unknown>>
+): string => {
+  if (!rowData) return '';
+
+  // Try extracting from Jaeger tags first
+  const httpStatusFromTags = extractJaegerTagValue(rowData, 'http.status_code');
+  if (httpStatusFromTags) {
+    return httpStatusFromTags;
+  }
+
+  // Fallback to standard HTTP status code extraction
+  const httpStatusFromFields = extractFieldFromRowData(rowData, [
+    'attributes.http.status_code',
+    'http.status_code',
+    'httpStatusCode',
+    '_source.attributes.http.status_code',
+    '_source.http.status_code',
+  ]);
+
+  return httpStatusFromFields;
+};
+
+export const extractJaegerGrpcStatusCode = (
+  rowData: OpenSearchSearchHit<Record<string, unknown>>
+): string => {
+  if (!rowData) return '';
+
+  // Try extracting from Jaeger tags first - check both field formats
+  const grpcStatusFromTags =
+    extractJaegerTagValue(rowData, 'rpc.grpc.status_code') ||
+    extractJaegerTagValue(rowData, 'grpc.status_code');
+  if (grpcStatusFromTags) {
+    return grpcStatusFromTags;
+  }
+
+  // Fallback to standard gRPC status code extraction - include both field formats
+  const grpcStatusFromFields = extractFieldFromRowData(rowData, [
+    'attributes.rpc.grpc.status_code',
+    'attributes.grpc.status_code',
+    'rpc.grpc.status_code',
+    'grpc.status_code',
+    'grpcStatusCode',
+    '_source.attributes.rpc.grpc.status_code',
+    '_source.attributes.grpc.status_code',
+    '_source.rpc.grpc.status_code',
+    '_source.grpc.status_code',
+  ]);
+
+  return grpcStatusFromFields;
+};
+
 export const validateRequiredTraceFields = (
   rowData: OpenSearchSearchHit<Record<string, unknown>>
 ): {
@@ -130,12 +224,18 @@ export const validateRequiredTraceFields = (
   }
 
   // For root spans, parentSpanId can be null or empty string
+  // Also check Jaeger references array for parent span relationships
   const hasParentSpanIdField = PARENT_SPAN_ID_FIELD_PATHS.some((field) => {
     const value = getNestedValue(rowData, field);
     return value !== undefined;
   });
 
-  if (hasParentSpanIdField) {
+  // Check for Jaeger references array structure
+  const jaegerReferences =
+    getNestedValue(rowData, 'references') || getNestedValue(rowData, '_source.references');
+  const hasJaegerParentRef = Array.isArray(jaegerReferences) && jaegerReferences.length > 0;
+
+  if (hasParentSpanIdField || hasJaegerParentRef) {
     presentFields.push('parentSpanId');
   } else {
     missingFields.push('parentSpanId');
@@ -162,21 +262,29 @@ export const validateRequiredTraceFields = (
     missingFields.push('startTime');
   }
 
+  // For endTime validation, accept either endTime field OR startTime + duration (Jaeger pattern)
   const endTime = extractFieldFromRowData(rowData, END_TIME_FIELD_PATHS);
-  if (endTime) {
+  const hasDuration =
+    getNestedValue(rowData, 'duration') !== undefined ||
+    getNestedValue(rowData, '_source.duration') !== undefined;
+
+  if (endTime || (startTime && hasDuration)) {
     presentFields.push('endTime');
   } else {
     missingFields.push('endTime');
   }
 
   // status.code is optional - if missing, error indicators won't show but visualization won't break
-  // only consider it missing if the field doesn't exist at all
   const hasStatusCodeField = STATUS_CODE_FIELD_PATHS.some((field) => {
     const value = getNestedValue(rowData, field);
     return value !== undefined;
   });
 
-  if (hasStatusCodeField) {
+  const hasJaegerTags =
+    Array.isArray(getNestedValue(rowData, 'tags')) ||
+    Array.isArray(getNestedValue(rowData, '_source.tags'));
+
+  if (hasStatusCodeField || hasJaegerTags) {
     presentFields.push('status.code');
   } else {
     missingFields.push('status.code');
