@@ -15,7 +15,6 @@ import {
 } from '../../../../../common';
 import * as services from '../../../../services';
 import { IDataPluginServices } from 'src/plugins/data/public';
-import { of } from 'rxjs';
 
 jest.mock('../../../../services', () => {
   const mockSearchFunction = jest.fn();
@@ -212,29 +211,27 @@ describe('indexTypeConfig', () => {
 
   describe('fetchIndices', () => {
     test('should extract index names correctly from different formats', async () => {
-      const mockResponse = {
-        rawResponse: {
-          aggregations: {
-            indices: {
-              buckets: [
-                { key: '123::TIMESERIES::sample-index-1:0' },
-                // Serverless format without TIMESERIES
-                { key: '123::sample-index-2:0' },
-                // Non-serverless format
-                { key: 'simple-index' },
-              ],
-            },
-          },
-        },
+      const mockResolveIndexResponse = {
+        indices: [{ name: 'sample-index-1' }, { name: 'sample-index-2' }],
+        aliases: [{ name: 'simple-index' }],
+        data_streams: [],
       };
 
-      const searchService = services.getSearchService();
-      const interceptor = searchService.getDefaultSearchInterceptor();
-      (interceptor.search as jest.Mock).mockReturnValue(of(mockResponse));
+      mockHttp.get = jest.fn().mockResolvedValue(mockResolveIndexResponse);
 
       const result = await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
         { id: 'datasource1', title: 'DataSource 1', type: 'DATA_SOURCE' },
       ]);
+
+      expect(mockHttp.get).toHaveBeenCalledWith(
+        '/internal/index-pattern-management/resolve_index/*',
+        expect.objectContaining({
+          query: expect.objectContaining({
+            data_source: 'datasource1',
+            expand_wildcards: 'all',
+          }),
+        })
+      );
 
       expect(result.children).toEqual([
         {
@@ -268,13 +265,13 @@ describe('indexTypeConfig', () => {
     });
 
     test('should handle response without aggregations', async () => {
-      const mockResponse = {
-        rawResponse: {},
+      const mockResolveIndexResponse = {
+        indices: [],
+        aliases: [],
+        data_streams: [],
       };
 
-      const searchService = services.getSearchService();
-      const interceptor = searchService.getDefaultSearchInterceptor();
-      (interceptor.search as jest.Mock).mockReturnValue(of(mockResponse));
+      mockHttp.get = jest.fn().mockResolvedValue(mockResolveIndexResponse);
 
       const result = await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
         { id: 'datasource1', title: 'DataSource 1', type: 'DATA_SOURCE' },
@@ -284,23 +281,18 @@ describe('indexTypeConfig', () => {
     });
 
     test('should handle remote indices correctly', async () => {
-      // Mock remote indices
-
-      const mockResponse = {
-        rawResponse: {
-          aggregations: {
-            indices: {
-              buckets: [{ key: 'local-index-1' }, { key: 'local-index-2' }],
-            },
-          },
-        },
+      const mockResolveIndexResponse = {
+        indices: [{ name: 'local-index-1' }, { name: 'local-index-2' }],
+        aliases: [],
+        data_streams: [],
       };
 
-      const searchService = services.getSearchService();
-      const interceptor = searchService.getDefaultSearchInterceptor();
-      (interceptor.search as jest.Mock).mockReturnValue(of(mockResponse));
+      const mockRemoteIndices = ['remote-index-1', 'remote-index-2'];
 
-      mockHttp.get = jest.fn().mockResolvedValue(['remote-index-1', 'remote-index-2']);
+      mockHttp.get = jest
+        .fn()
+        .mockResolvedValueOnce(mockResolveIndexResponse)
+        .mockResolvedValueOnce(mockRemoteIndices);
 
       const result = await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
         {
@@ -310,6 +302,16 @@ describe('indexTypeConfig', () => {
           remoteConnections: ['connectionalias1'],
         },
       ]);
+
+      expect(mockHttp.get).toHaveBeenCalledWith(
+        '/internal/index-pattern-management/resolve_index/*',
+        expect.objectContaining({
+          query: expect.objectContaining({
+            data_source: 'datasource1',
+            expand_wildcards: 'all',
+          }),
+        })
+      );
 
       expect(mockHttp.get).toHaveBeenCalledWith(
         '/api/enhancements/remote_cluster/indexes',
@@ -333,6 +335,190 @@ describe('indexTypeConfig', () => {
         { title: 'remote-index-1', isRemoteIndex: true },
         { title: 'remote-index-2', isRemoteIndex: true },
       ]);
+    });
+
+    test('should handle newly created indices without cache issues', async () => {
+      const mockResolveIndexResponse = {
+        indices: [{ name: 'existing-index' }, { name: 'newly-created-testlog' }],
+        aliases: [],
+        data_streams: [],
+      };
+
+      mockHttp.get = jest.fn().mockResolvedValue(mockResolveIndexResponse);
+
+      const result = await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
+        { id: 'datasource1', title: 'DataSource 1', type: 'DATA_SOURCE' },
+      ]);
+
+      expect(result.children).toHaveLength(2);
+      expect(
+        result.children?.find((child) => child.title === 'newly-created-testlog')
+      ).toBeDefined();
+
+      // Verify no caching is used by checking API is called with fresh parameters
+      expect(mockHttp.get).toHaveBeenCalledWith(
+        '/internal/index-pattern-management/resolve_index/*',
+        expect.objectContaining({
+          query: expect.objectContaining({
+            data_source: 'datasource1',
+            expand_wildcards: 'all',
+          }),
+        })
+      );
+    });
+
+    test('should handle large number of indices without pagination issues', async () => {
+      const largeIndexList = Array.from({ length: 150 }, (_, i) => ({
+        name: `large-index-${i.toString().padStart(3, '0')}`,
+      }));
+
+      const mockResolveIndexResponse = {
+        indices: largeIndexList,
+        aliases: [],
+        data_streams: [],
+      };
+
+      mockHttp.get = jest.fn().mockResolvedValue(mockResolveIndexResponse);
+
+      const result = await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
+        { id: 'datasource1', title: 'DataSource 1', type: 'DATA_SOURCE' },
+      ]);
+
+      expect(result.children).toHaveLength(150);
+      expect(result.children?.[0].title).toBe('large-index-000');
+      expect(result.children?.[149].title).toBe('large-index-149');
+
+      expect(mockHttp.get).toHaveBeenCalledWith(
+        '/internal/index-pattern-management/resolve_index/*',
+        expect.objectContaining({
+          query: expect.objectContaining({
+            expand_wildcards: 'all',
+          }),
+        })
+      );
+    });
+
+    test('should handle API errors gracefully', async () => {
+      mockHttp.get = jest.fn().mockRejectedValue(new Error('Network error'));
+
+      const result = await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
+        { id: 'datasource1', title: 'DataSource 1', type: 'DATA_SOURCE' },
+      ]);
+
+      expect(result.children).toEqual([]);
+    });
+
+    test('should use fresh API calls without relying on search service cache', async () => {
+      const mockResolveIndexResponse = {
+        indices: [{ name: 'fresh-index' }],
+        aliases: [],
+        data_streams: [],
+      };
+
+      mockHttp.get = jest.fn().mockResolvedValue(mockResolveIndexResponse);
+
+      await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
+        { id: 'datasource1', title: 'DataSource 1', type: 'DATA_SOURCE' },
+      ]);
+
+      await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
+        { id: 'datasource1', title: 'DataSource 1', type: 'DATA_SOURCE' },
+      ]);
+
+      expect(mockHttp.get).toHaveBeenCalledTimes(2);
+      expect(mockHttp.get).toHaveBeenNthCalledWith(
+        1,
+        '/internal/index-pattern-management/resolve_index/*',
+        expect.objectContaining({
+          query: expect.objectContaining({
+            data_source: 'datasource1',
+            expand_wildcards: 'all',
+          }),
+        })
+      );
+      expect(mockHttp.get).toHaveBeenNthCalledWith(
+        2,
+        '/internal/index-pattern-management/resolve_index/*',
+        expect.objectContaining({
+          query: expect.objectContaining({
+            data_source: 'datasource1',
+            expand_wildcards: 'all',
+          }),
+        })
+      );
+    });
+
+    test('should include all index types (indices, aliases, data_streams)', async () => {
+      const mockResolveIndexResponse = {
+        indices: [{ name: 'regular-index-1' }, { name: 'regular-index-2' }],
+        aliases: [{ name: 'alias-index-1' }, { name: 'alias-index-2' }],
+        data_streams: [{ name: 'datastream-1' }, { name: 'datastream-2' }],
+      };
+
+      mockHttp.get = jest.fn().mockResolvedValue(mockResolveIndexResponse);
+
+      const result = await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
+        { id: 'datasource1', title: 'DataSource 1', type: 'DATA_SOURCE' },
+      ]);
+
+      // All types should be included
+      expect(result.children).toHaveLength(6);
+
+      const titles = result.children?.map((child) => child.title).sort();
+      expect(titles).toEqual([
+        'alias-index-1',
+        'alias-index-2',
+        'datastream-1',
+        'datastream-2',
+        'regular-index-1',
+        'regular-index-2',
+      ]);
+    });
+
+    test('should maintain consistent index structure for dataset workflow', async () => {
+      const mockResolveIndexResponse = {
+        indices: [{ name: 'workflow-test-index' }],
+        aliases: [],
+        data_streams: [],
+      };
+
+      mockHttp.get = jest.fn().mockResolvedValue(mockResolveIndexResponse);
+
+      const result = await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
+        { id: 'test-datasource', title: 'Test DataSource', type: 'DATA_SOURCE' },
+      ]);
+
+      expect(result.children).toHaveLength(1);
+      const index = result.children![0];
+
+      expect(index).toEqual({
+        id: 'test-datasource::workflow-test-index',
+        title: 'workflow-test-index',
+        type: 'INDEX',
+        meta: {
+          isRemoteIndex: false,
+          type: 'CUSTOM',
+        },
+      });
+
+      const mockPath = [
+        { id: 'test-datasource', title: 'Test DataSource', type: 'DATA_SOURCE' },
+        index,
+      ];
+
+      const dataset = indexTypeConfig.toDataset(mockPath);
+      expect(dataset).toEqual({
+        id: 'test-datasource::workflow-test-index',
+        title: 'workflow-test-index',
+        type: 'INDEXES',
+        timeFieldName: undefined,
+        isRemoteDataset: false,
+        dataSource: {
+          id: 'test-datasource',
+          title: 'Test DataSource',
+          type: 'DATA_SOURCE',
+        },
+      });
     });
   });
 });
