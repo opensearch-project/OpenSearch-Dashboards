@@ -1,0 +1,11 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.modeSelectionRow {
+  &__selectorColumn {
+    flex-basis: 20%;
+    min-width: 170px;
+  }
+}
