@@ -47,7 +47,9 @@ describe('TraceAggregationBuilder', () => {
     it('should build a basic request count query', () => {
       const query = buildRequestCountQuery('source=traces', baseConfig);
 
-      expect(query).toBe('source=traces | stats count() by span(endTime, 1m) | sort endTime');
+      expect(query).toBe(
+        'source=traces | stats count() by span(endTime, 1m) | sort `span(endTime,1m)`'
+      );
     });
 
     it('should build a request count query with breakdown field', () => {
@@ -55,7 +57,7 @@ describe('TraceAggregationBuilder', () => {
       const query = buildRequestCountQuery('source=traces', configWithBreakdown);
 
       expect(query).toBe(
-        'source=traces | stats count() by span(endTime, 1m), service.name | sort endTime'
+        'source=traces | stats count() by span(endTime, 1m), service.name | sort `span(endTime,1m)`'
       );
     });
   });
@@ -65,7 +67,7 @@ describe('TraceAggregationBuilder', () => {
       const query = buildErrorCountQuery('source=traces', baseConfig);
 
       expect(query).toBe(
-        'source=traces | where status.code=2 | stats count() as error_count by span(endTime, 1m) | sort endTime'
+        'source=traces | where status.code=2 | stats count() as error_count by span(endTime, 1m) | sort `span(endTime,1m)`'
       );
     });
 
@@ -74,7 +76,7 @@ describe('TraceAggregationBuilder', () => {
       const query = buildErrorCountQuery('source=traces', configWithBreakdown);
 
       expect(query).toBe(
-        'source=traces | where status.code=2 | stats count() as error_count by span(endTime, 1m), service.name | sort endTime'
+        'source=traces | where status.code=2 | stats count() as error_count by span(endTime, 1m), service.name | sort `span(endTime,1m)`'
       );
     });
   });
@@ -84,7 +86,7 @@ describe('TraceAggregationBuilder', () => {
       const query = buildLatencyQuery('source=traces', baseConfig);
 
       expect(query).toBe(
-        'source=traces | where isnotnull(durationInNanos) | stats avg(durationInNanos) as avg_duration_nanos by span(endTime, 1m) | eval avg_latency_ms = avg_duration_nanos / 1000000 | sort endTime'
+        'source=traces | where isnotnull(durationInNanos) | stats avg(durationInNanos) as avg_duration_nanos by span(endTime, 1m) | eval avg_latency_ms = avg_duration_nanos / 1000000 | sort `span(endTime,1m)`'
       );
     });
 
@@ -93,7 +95,7 @@ describe('TraceAggregationBuilder', () => {
       const query = buildLatencyQuery('source=traces', configWithBreakdown);
 
       expect(query).toBe(
-        'source=traces | where isnotnull(durationInNanos) | stats avg(durationInNanos) as avg_duration_nanos by span(endTime, 1m), service.name | eval avg_latency_ms = avg_duration_nanos / 1000000 | sort endTime'
+        'source=traces | where isnotnull(durationInNanos) | stats avg(durationInNanos) as avg_duration_nanos by span(endTime, 1m), service.name | eval avg_latency_ms = avg_duration_nanos / 1000000 | sort `span(endTime,1m)`'
       );
     });
   });
@@ -103,11 +105,12 @@ describe('TraceAggregationBuilder', () => {
       const queries = buildTraceAggregationQueries('source=traces', baseConfig);
 
       expect(queries).toEqual({
-        requestCountQuery: 'source=traces | stats count() by span(endTime, 1m) | sort endTime',
+        requestCountQuery:
+          'source=traces | stats count() by span(endTime, 1m) | sort `span(endTime,1m)`',
         errorCountQuery:
-          'source=traces | where status.code=2 | stats count() as error_count by span(endTime, 1m) | sort endTime',
+          'source=traces | where status.code=2 | stats count() as error_count by span(endTime, 1m) | sort `span(endTime,1m)`',
         latencyQuery:
-          'source=traces | where isnotnull(durationInNanos) | stats avg(durationInNanos) as avg_duration_nanos by span(endTime, 1m) | eval avg_latency_ms = avg_duration_nanos / 1000000 | sort endTime',
+          'source=traces | where isnotnull(durationInNanos) | stats avg(durationInNanos) as avg_duration_nanos by span(endTime, 1m) | eval avg_latency_ms = avg_duration_nanos / 1000000 | sort `span(endTime,1m)`',
       });
     });
   });
@@ -137,7 +140,7 @@ describe('TraceAggregationBuilder', () => {
       const query = buildRequestCountQuery(baseQuery, baseConfig);
 
       expect(query).toBe(
-        'source=`traces-*` | WHERE `service.name` = "frontend" | stats count() by span(endTime, 1m) | sort endTime'
+        'source=`traces-*` | WHERE `service.name` = "frontend" | stats count() by span(endTime, 1m) | sort `span(endTime,1m)`'
       );
     });
 
