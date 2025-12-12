@@ -113,7 +113,8 @@ const oneMetricOneDateRule: VisualizationRule = {
     styleOptions,
     chartType = 'line',
     axisColumnMappings,
-    timeRange?: { from: string; to: string }
+    timeRange?: { from: string; to: string },
+    annotations?: any[]
   ) => {
     // Select the appropriate chart creation function based on the chart type
     switch (chartType) {
@@ -133,7 +134,8 @@ const oneMetricOneDateRule: VisualizationRule = {
           dateColumns,
           styleOptions as AreaChartStyle,
           axisColumnMappings,
-          timeRange
+          timeRange,
+          annotations
         );
       case 'bar':
         return createTimeBarChart(
@@ -186,7 +188,8 @@ const twoMetricOneDateRule: VisualizationRule = {
     styleOptions,
     chartType = 'line',
     axisColumnMappings,
-    timeRange?: { from: string; to: string }
+    timeRange?: { from: string; to: string },
+    annotations?: any[]
   ) => {
     // Select the appropriate chart creation function based on the chart type
     switch (chartType) {
@@ -228,7 +231,8 @@ const twoMetricOneDateRule: VisualizationRule = {
           dateColumns,
           styleOptions as AreaChartStyle,
           axisColumnMappings,
-          timeRange
+          timeRange,
+          annotations
         );
       default:
         return createLineBarChart(
@@ -264,7 +268,8 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
     styleOptions,
     chartType = 'line',
     axisColumnMappings,
-    timeRange?: { from: string; to: string }
+    timeRange?: { from: string; to: string },
+    annotations?: any[]
   ) => {
     // Select the appropriate chart creation function based on the chart type
     switch (chartType) {
@@ -286,7 +291,8 @@ const oneMetricOneCateOneDateRule: VisualizationRule = {
           dateColumns,
           styleOptions as AreaChartStyle,
           axisColumnMappings,
-          timeRange
+          timeRange,
+          annotations
         );
       case 'bar':
         return createGroupedTimeBarChart(
@@ -341,7 +347,8 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
     styleOptions,
     chartType = 'line',
     axisColumnMappings,
-    timeRange?: { from: string; to: string }
+    timeRange?: { from: string; to: string },
+    annotations?: any[]
   ) => {
     // Select the appropriate chart creation function based on the chart type
     switch (chartType) {
@@ -363,7 +370,8 @@ const oneMetricTwoCateOneDateRule: VisualizationRule = {
           dateColumns,
           styleOptions as AreaChartStyle,
           axisColumnMappings,
-          timeRange
+          timeRange,
+          annotations
         );
       case 'bar':
         return createFacetedTimeBarChart(
@@ -422,7 +430,9 @@ const oneMetricTwoCateHighCardRule: VisualizationRule = {
     dateColumns,
     styleOptions,
     chartType = 'heatmap',
-    axisColumnMappings
+    axisColumnMappings,
+    timeRange?: { from: string; to: string },
+    annotations?: any[]
   ) => {
     switch (chartType) {
       case 'heatmap':
@@ -503,7 +513,9 @@ const oneMetricTwoCateLowCardRule: VisualizationRule = {
     dateColumns,
     styleOptions,
     chartType = 'bar',
-    axisColumnMappings
+    axisColumnMappings,
+    timeRange?: { from: string; to: string },
+    annotations?: any[]
   ) => {
     switch (chartType) {
       case 'heatmap':
@@ -571,7 +583,9 @@ const oneMetricOneCateRule: VisualizationRule = {
     dateColumns,
     styleOptions,
     chartType = 'pie',
-    axisColumnMappings
+    axisColumnMappings,
+    timeRange?: { from: string; to: string },
+    annotations?: any[]
   ) => {
     switch (chartType) {
       case 'bar_gauge':
@@ -769,7 +783,9 @@ const twoMetricOneCateRule: VisualizationRule = {
     dateColumns,
     styleOptions,
     chartType = 'scatter',
-    axisColumnMappings
+    axisColumnMappings,
+    timeRange?: { from: string; to: string },
+    annotations?: any[]
   ) => {
     switch (chartType) {
       case 'scatter':
@@ -911,7 +927,8 @@ const twoMetricOneCateOneDateRule: VisualizationRule = {
     styleOptions,
     chartType = 'bar',
     axisColumnMappings,
-    timeRange?: { from: string; to: string }
+    timeRange?: { from: string; to: string },
+    annotations?: any[]
   ) => {
     switch (chartType) {
       case 'bar':
@@ -932,7 +949,8 @@ const twoMetricOneCateOneDateRule: VisualizationRule = {
           dateColumns,
           styleOptions as AreaChartStyle,
           axisColumnMappings,
-          timeRange
+          timeRange,
+          annotations
         );
       case 'line':
         return createFacetedMultiLineChart(

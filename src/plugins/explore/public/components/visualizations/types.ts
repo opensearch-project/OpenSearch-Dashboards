@@ -56,7 +56,8 @@ export interface VisualizationRule {
     styleOptions: ChartStylesMapping[ChartType],
     chartType?: ChartType,
     axisColumnMappings?: AxisColumnMappings,
-    timeRange?: { from: string; to: string }
+    timeRange?: { from: string; to: string },
+    annotations?: any[]
   ) => any;
 }
 export interface VisColumn {

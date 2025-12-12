@@ -268,7 +268,10 @@ export function getTopNavRightConfig(
 ) {
   switch (dashboardMode) {
     case ViewMode.VIEW:
-      return [getFullScreenConfig(actions[TopNavIds.FULL_SCREEN])];
+      return [
+        getAnnotationsConfig(actions[TopNavIds.ANNOTATIONS]),
+        getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
+      ];
 
     default:
       return [];
@@ -374,6 +377,20 @@ function getOptionsConfig(action: NavAction) {
     testId: 'dashboardOptionsButton',
     run: action,
     iconType: 'gear',
+    controlType: 'icon',
+  };
+}
+
+function getAnnotationsConfig(action: NavAction): TopNavControlIconData {
+  return {
+    id: 'annotations',
+    ariaLabel: i18n.translate('dashboard.topNav.annotationsButtonAriaLabel', {
+      defaultMessage: 'Annotations Settings',
+    }),
+    testId: 'dashboardAnnotationsButton',
+    run: action,
+    iconType: 'annotation',
+    display: 'base',
     controlType: 'icon',
   };
 }

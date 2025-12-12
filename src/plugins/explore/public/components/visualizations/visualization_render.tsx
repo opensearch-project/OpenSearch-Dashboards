@@ -98,7 +98,8 @@ export const VisualizationRender = ({
       visConfig.styles,
       visConfig.type,
       axisColumnMappings,
-      timeRange
+      timeRange,
+      [] // No annotations in standalone explore - annotations are handled via embeddable system in dashboard
     );
   }, [columns, visConfig, visualizationData, timeRange]);
 

@@ -58,6 +58,7 @@ export { SavedObjectDashboard } from './saved_dashboards';
 export { SavedDashboardPanel } from './types';
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './attribute_service';
 export { DASHBOARD_ADD_PANEL_TRIGGER } from './ui_triggers';
+export * from './application/annotations';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);
