@@ -20,9 +20,18 @@ describe('QueryManagerService', () => {
       expect(queryManagerService.getManager(DATA_CONNECTION_TYPE)).toBe(mockManager);
     });
 
-    it('should throw error when registering duplicate connection type', () => {
+    it('should allow idempotent registration of the same manager', () => {
+      const existingManager = queryManagerService.getManager(DATA_CONNECTION_TYPE);
       expect(() => {
-        queryManagerService.register(DATA_CONNECTION_TYPE, mockManager);
+        queryManagerService.register(DATA_CONNECTION_TYPE, existingManager!);
+      }).not.toThrow();
+      expect(queryManagerService.getManager(DATA_CONNECTION_TYPE)).toBe(existingManager);
+    });
+
+    it('should throw error when registering a different manager for same connection type', () => {
+      const differentManager = {} as jest.Mocked<BaseConnectionManager>;
+      expect(() => {
+        queryManagerService.register(DATA_CONNECTION_TYPE, differentManager);
       }).toThrow(
         `Query manager for dataConnectionType ${DATA_CONNECTION_TYPE} is already registered. Unable to register another manager.`
       );
