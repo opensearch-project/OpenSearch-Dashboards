@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { BaseActionDefinition } from './base_actions';
 
 /**
  * Context passed to log actions containing document data and query information
@@ -48,15 +49,7 @@ export interface LogActionItemProps {
 /**
  * Definition for a log action that can be registered and executed
  */
-export interface LogActionDefinition {
-  /** Unique identifier for the action */
-  id: string;
-  /** Display name shown in the menu */
-  displayName: string;
-  /** Icon type from EUI icon set */
-  iconType: string;
-  /** Order in which action appears in menu (lower numbers first) */
-  order: number;
+export interface LogActionDefinition extends BaseActionDefinition {
   /** Whether this action is available for the given context */
   isCompatible: (context: LogActionContext) => boolean;
   /** React component that handles the action's UI and execution */
