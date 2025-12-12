@@ -78,6 +78,7 @@ export interface SavedObjectMetaData<T = unknown> {
 
 interface FinderAttributes {
   title?: string;
+  displayName?: string;
   type: string;
   kibanaSavedObjectMeta?: string;
 }
@@ -182,7 +183,10 @@ class SavedObjectFinderUi extends React.Component<
 
     const fields = Object.values(metaDataMap)
       .map((metaData) => metaData.includeFields || [])
-      .reduce((allFields, currentFields) => allFields.concat(currentFields), ['title']);
+      .reduce((allFields, currentFields) => allFields.concat(currentFields), [
+        'title',
+        'displayName',
+      ]);
 
     const perPage = this.props.uiSettings.get(LISTING_LIMIT_SETTING);
     const resp = await this.props.savedObjects.client.find<FinderAttributes>({
@@ -253,13 +257,16 @@ class SavedObjectFinderUi extends React.Component<
         page: 0,
         items: resp.savedObjects.map((savedObject) => {
           const {
-            attributes: { title },
+            attributes: { title, displayName },
             id,
             type,
           } = savedObject;
 
+          // Use displayName for index-pattern type, otherwise use title
+          const displayTitle = type === 'index-pattern' && displayName ? displayName : title;
+
           return {
-            title: typeof title === 'string' ? title : '',
+            title: typeof displayTitle === 'string' ? displayTitle : '',
             id,
             type,
             savedObject,
