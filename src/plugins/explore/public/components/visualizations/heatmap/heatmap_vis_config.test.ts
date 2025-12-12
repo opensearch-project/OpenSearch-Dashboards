@@ -40,7 +40,7 @@ describe('createHeatmapeConfig', () => {
     expect(defaults.exclusive.maxNumberOfColors).toBe(4);
     expect(defaults.useThresholdColor).toBe(false);
     expect(defaults.thresholdOptions).toMatchObject({
-      baseColor: '#00BD6B',
+      baseColor: '#017D73',
       thresholds: [],
     });
 

@@ -28,7 +28,7 @@ describe('createBarGaugeConfig', () => {
     const config = createBarGaugeConfig();
     const defaults = config.ui.style.defaults;
     expect(defaults.thresholdOptions).toMatchObject({
-      baseColor: '#00BD6B',
+      baseColor: '#017D73',
       thresholds: [],
     });
     expect(defaults.valueCalculation).toBe('last');

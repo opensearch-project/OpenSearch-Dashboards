@@ -31,7 +31,6 @@ export const SelectColorButton: React.FC<SelectColorButtonProps> = ({ onChange }
       closePopover={() => setPopover(false)}
       panelPaddingSize="s"
       anchorPosition="downLeft"
-      hasArrow={false}
     >
       <ColorGroupPanel onChange={onChange} onClose={() => setPopover(false)} />
     </EuiPopover>
