@@ -220,15 +220,6 @@ export const Template: FunctionComponent<Props> = ({
           </div>
         </div>
 
-        <script>
-          {`
-            // Since this is an unsafe inline script, this code will not run
-            // in browsers that support content security policy(CSP). This is
-            // intentional as we check for the existence of __osdCspNotEnforced__ in
-            // bootstrap.
-            window.__osdCspNotEnforced__ = true;
-          `}
-        </script>
         <script src={bootstrapScriptUrl} />
       </body>
     </html>
