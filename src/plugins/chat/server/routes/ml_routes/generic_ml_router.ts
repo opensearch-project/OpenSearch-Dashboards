@@ -100,12 +100,36 @@ export class GenericMLRouter implements MLAgentRouter {
       });
     }
 
-    const mlClient = findMLClient(context);
+    let mlClient = findMLClient(context);
     if (!mlClient) {
-      return response.customError({
-        statusCode: 503,
-        body: { message: 'ML client not available in request context' },
-      });
+      mlClient = {
+        request: async (params: any) => {
+          // Use asInternalUser to avoid header conflicts with current user context
+          const client =
+            dataSourceId && (context as any).dataSource
+              ? await (context as any).dataSource.opensearch.getClient(dataSourceId)
+              : context.core.opensearch.client.asInternalUser;
+
+          const result = await client.transport.request(
+            {
+              method: params.method,
+              path: params.path,
+              body: params.body,
+            },
+            {
+              asStream: true,
+              requestTimeout: 300000,
+              maxRetries: 0,
+            }
+          );
+          return {
+            status: result.statusCode || 200,
+            statusText: 'OK',
+            headers: result.headers || {},
+            body: result.body,
+          };
+        },
+      };
     }
 
     try {
@@ -115,18 +139,11 @@ export class GenericMLRouter implements MLAgentRouter {
       });
 
       // Use detected ML client from request context
-      const mlResponse: MLClientResponse = await mlClient.request(
-        {
-          method: 'POST',
-          path: `/_plugins/_ml/agents/${configuredAgentId}/_execute/stream`,
-          body: JSON.stringify(request.body),
-          datasourceId: dataSourceId, // Use actual dataSourceId from request
-          stream: true,
-          timeout: 300000,
-        },
-        request,
-        context
-      );
+      const mlResponse: MLClientResponse = await mlClient.request({
+        method: 'POST',
+        path: `/_plugins/_ml/agents/${configuredAgentId}/_execute/stream`,
+        body: JSON.stringify(request.body),
+      });
 
       // Handle streaming response properly using type guard
       if (isStreamResponse(mlResponse)) {
