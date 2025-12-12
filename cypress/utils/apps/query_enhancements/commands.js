@@ -143,15 +143,53 @@ Cypress.Commands.add('setQueryLanguage', (value) => {
 Cypress.Commands.add(
   'setIndexAsDataset',
   (index, dataSourceName, language, timeFieldName = 'timestamp', finalAction = 'submit') => {
-    cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
+    cy.intercept('GET', '**/api/assistant/agent_config*', (req) => {
+      req.continue((res) => {
+        if (res.statusCode === 404) {
+          res.send(200, { status: 'ok', data: {} });
+        }
+      });
+    }).as('agentConfigRequest');
+
+    cy.getElementByTestId('datasetSelectorButton')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click();
     cy.getElementByTestId(`datasetSelectorAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Indexes"]`).click();
     cy.get(`[title="${dataSourceName}"]`).click();
-    cy.getElementByTestId('dataset-index-selector')
+
+    // Ensure "Index name" mode is selected (not "Index wildcard")
+    cy.getElementByTestId('index-scope-selector')
+      .should('be.visible')
       .find('[data-test-subj="comboBoxInput"]')
       .click();
-    // this element is sometimes dataSourceName masked by another element
-    cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
+
+    // Select "Index name" if not already selected
+    cy.get(`[title="Index name"]`).should('be.visible').click({ force: true });
+
+    // Verify selection
+    cy.getElementByTestId('index-scope-selector')
+      .find('[data-test-subj="comboBoxInput"]')
+      .should('contain.text', 'Index name');
+
+    // Click the search field to open the popover (onFocus triggers isPopoverOpen = true)
+    cy.getElementByTestId('index-selector-search')
+      .should('be.visible')
+      .click({ force: true }) // Use click instead of focus to ensure onFocus event fires
+      .clear()
+      .type(index);
+
+    // Wait for the popover to fully render
+    cy.getElementByTestId('index-selector-popover', { timeout: 10000 }).should('be.visible');
+
+    // Now look for the dataset-index-selector within the popover
+    cy.getElementByTestId('dataset-index-selector', { timeout: 5000 })
+      .should('be.visible')
+      .within(() => {
+        // Look for the index by title attribute in the popover
+        cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
+      });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
 
     if (language) {
@@ -172,6 +210,10 @@ Cypress.Commands.add(
       );
     } else {
       cy.get('[type="button"]').contains('Cancel').click();
+
+      // Wait for modal to close by checking dataset selector button is ready
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+      cy.getElementByTestId('datasetSelectorButton').should('be.visible').should('not.be.disabled');
     }
   }
 );
