@@ -201,8 +201,16 @@ export class AdvancedSettingsComponent extends Component<
           value: setting[1].userValue,
           isCustom: config.isCustom(setting[0]),
           isOverridden: config.isOverridden(setting[0]),
+          // Setting is permission controlled if:
+          // 1. It has DASHBOARD_ADMIN scope (string or array) AND
+          // 2. Current user is NOT a dashboard admin
+          // This prevents non-admin users from modifying admin-only settings
           isPermissionControlled:
-            all[setting[0]].scope === UiSettingScope.DASHBOARD_ADMIN && !isDashboardAdmin,
+            ((typeof all[setting[0]].scope === 'string' &&
+              all[setting[0]].scope === UiSettingScope.DASHBOARD_ADMIN) ||
+              (Array.isArray(all[setting[0]].scope) &&
+                (all[setting[0]].scope || []).includes(UiSettingScope.DASHBOARD_ADMIN))) &&
+            !isDashboardAdmin,
           userSettingsEnabled,
         });
       })
