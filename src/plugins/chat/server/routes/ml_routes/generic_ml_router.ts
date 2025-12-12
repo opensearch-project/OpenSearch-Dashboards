@@ -138,12 +138,18 @@ export class GenericMLRouter implements MLAgentRouter {
         dataSourceId,
       });
 
-      // Use detected ML client from request context
-      const mlResponse: MLClientResponse = await mlClient.request({
-        method: 'POST',
-        path: `/_plugins/_ml/agents/${configuredAgentId}/_execute/stream`,
-        body: JSON.stringify(request.body),
-      });
+      const mlResponse: MLClientResponse = await mlClient.request(
+        {
+          method: 'POST',
+          path: `/_plugins/_ml/agents/${configuredAgentId}/_execute/stream`,
+          body: JSON.stringify(request.body),
+          datasourceId: dataSourceId, // Use actual dataSourceId from request
+          stream: true,
+          timeout: 300000,
+        },
+        request,
+        context
+      );
 
       // Handle streaming response properly using type guard
       if (isStreamResponse(mlResponse)) {
