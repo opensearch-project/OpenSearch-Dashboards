@@ -201,6 +201,30 @@ const handleCourierRequest = async ({
 
   (searchSource as any).finalResponse = resp;
 
+  function extractSumOtherDocCount(aggregations: any): number {
+    let results = 0;
+
+    function traverse(obj: any): void {
+      if (typeof obj !== 'object' || obj === null) {
+        return;
+      }
+
+      // Check if current object has sum_other_doc_count, if sum_other_doc_count >0 it indicates some buckets were dropped due to bucket size limit
+      if (obj.hasOwnProperty('sum_other_doc_count')) {
+        results += obj.sum_other_doc_count;
+      }
+
+      // Recursively traverse all properties
+      Object.keys(obj).forEach((key) => {
+        traverse(obj[key]);
+      });
+    }
+
+    traverse(aggregations);
+    return results;
+  }
+  const sumOtherDocCounts = extractSumOtherDocCount(resp.aggregations);
+
   const parsedTimeRange = timeRange ? calculateBounds(timeRange) : null;
   const tabifyParams = {
     metricsAtAllLevels,
@@ -215,6 +239,9 @@ const handleCourierRequest = async ({
     (searchSource as any).finalResponse,
     tabifyParams
   );
+
+  const tr: any = (searchSource as any).tabifiedResponse;
+  tr.meta = { ...(tr.meta || {}), sumOtherDocCount: sumOtherDocCounts };
 
   inspectorAdapters.data.setTabularLoader(
     () =>
@@ -310,6 +337,7 @@ export const opensearchaggs = (): OpenSearchaggsExpressionFunctionDefinition => 
         }
         return cleanedColumn;
       }),
+      meta: (response as any).meta,
     };
 
     return table;
