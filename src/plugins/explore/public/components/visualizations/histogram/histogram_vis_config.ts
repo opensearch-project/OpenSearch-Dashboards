@@ -17,6 +17,8 @@ import {
   AggregationType,
   BucketOptions,
   ThresholdOptions,
+  ValueMappingOptions,
+  ColorModeOption,
 } from '../types';
 import { HistogramVisStyleControls } from './histogram_vis_options';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
@@ -43,10 +45,20 @@ export interface HistogramChartStyleOptions {
 
   thresholdOptions?: ThresholdOptions;
 
+  /**
+   * @deprecated - use colorModeOption instead
+   */
   useThresholdColor?: boolean;
+  valueMappingOptions?: ValueMappingOptions;
+  colorModeOption?: ColorModeOption;
 }
 
-export type HistogramChartStyle = Required<HistogramChartStyleOptions>;
+// export type HistogramChartStyle = Required<HistogramChartStyleOptions>;
+
+export type HistogramChartStyle = Required<
+  Omit<HistogramChartStyleOptions, 'colorModeOption' | 'useThresholdColor'>
+> &
+  Pick<HistogramChartStyleOptions, 'colorModeOption'>;
 
 export const defaultHistogramChartStyles: HistogramChartStyle = {
   tooltipOptions: {
@@ -67,7 +79,6 @@ export const defaultHistogramChartStyles: HistogramChartStyle = {
     thresholds: [],
     thresholdStyle: ThresholdMode.Off,
   },
-  useThresholdColor: false,
   standardAxes: [
     {
       id: 'Axis-1',
@@ -115,6 +126,10 @@ export const defaultHistogramChartStyles: HistogramChartStyle = {
   bucket: {
     aggregationType: AggregationType.SUM,
   },
+  valueMappingOptions: {
+    valueMappings: [],
+  },
+  colorModeOption: 'none',
 };
 
 export const createHistogramConfig = (): VisualizationType<'histogram'> => ({

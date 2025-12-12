@@ -41,7 +41,7 @@ describe('bar_vis_config', () => {
           aggregationType: AggregationType.SUM,
           bucketTimeUnit: TimeUnit.AUTO,
         },
-        useThresholdColor: false,
+        colorModeOption: 'none',
       });
 
       // Check axes configuration

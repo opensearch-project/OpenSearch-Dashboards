@@ -17,6 +17,8 @@ import {
 import { StyleAccordion } from '../style_panel/style_accordion';
 import { DebouncedFieldNumber } from '../style_panel/utils';
 import { defaultBarChartStyles } from './bar_vis_config';
+import { ColorModeOption } from '../types';
+import { ColorModeOptionSelect } from '../style_panel/value_mapping/filter_options_select';
 
 interface BarExclusiveVisOptionsProps {
   type: 'bar' | 'histogram';
@@ -33,8 +35,11 @@ interface BarExclusiveVisOptionsProps {
   onShowBarBorderChange: (showBarBorder: boolean) => void;
   onBarBorderWidthChange: (barBorderWidth: number) => void;
   onBarBorderColorChange: (barBorderColor: string) => void;
-  onUseThresholdColorChange: (useThresholdColor: boolean) => void;
+  onUseThresholdColorChange?: (useThresholdColor: boolean) => void;
   shouldDisableUseThresholdColor?: boolean;
+  colorModeOption?: ColorModeOption | undefined;
+  onColorModeOptionChange?: (option: ColorModeOption | undefined) => void;
+  hasDate?: boolean;
 }
 
 export const BarExclusiveVisOptions = ({
@@ -54,6 +59,9 @@ export const BarExclusiveVisOptions = ({
   onBarBorderColorChange,
   onUseThresholdColorChange,
   shouldDisableUseThresholdColor = false,
+  colorModeOption,
+  onColorModeOptionChange,
+  hasDate = false,
 }: BarExclusiveVisOptionsProps) => {
   const sizeModeOptions = [
     {
@@ -81,19 +89,12 @@ export const BarExclusiveVisOptions = ({
 
   return (
     <StyleAccordion id="barSection" accordionLabel={barAccordionMessage} initialIsOpen={true}>
-      {!shouldDisableUseThresholdColor && (
-        <EuiFormRow>
-          <EuiSwitch
-            compressed
-            label={i18n.translate('explore.vis.bar.useThresholdColor', {
-              defaultMessage: 'Use threshold colors',
-            })}
-            data-test-subj="useThresholdColorButton"
-            checked={useThresholdColor ?? false}
-            onChange={(e) => onUseThresholdColorChange(e.target.checked)}
-          />
-        </EuiFormRow>
-      )}
+      <ColorModeOptionSelect
+        colorModeOption={colorModeOption}
+        onColorModeOptionChange={onColorModeOptionChange}
+        disableThreshold={shouldDisableUseThresholdColor}
+        disableValueMapping={hasDate}
+      />
 
       <EuiFormRow
         label={i18n.translate('explore.stylePanel.bar.sizeMode', {
