@@ -21,6 +21,7 @@ export interface SectionError {
 
 export interface FieldDetails {
   topValues?: TopValue[] | SectionError;
+  rareValues?: TopValue[] | SectionError;
   numericSummary?: NumericSummary | SectionError;
   dateRange?: DateRange | SectionError;
   examples?: ExampleValue[] | SectionError;
@@ -28,6 +29,11 @@ export interface FieldDetails {
 }
 
 export interface TopValue {
+  value: string | number;
+  count?: number;
+}
+
+export interface RareValue {
   value: string | number;
   count?: number;
 }
