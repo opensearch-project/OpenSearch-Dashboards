@@ -639,7 +639,7 @@ import { SavedObjectsClientContract } from 'opensearch-dashboards/server';
 
 export const shortUrlLookup = {
   generateUrlId(url: string, savedObjectsClient: SavedObjectsClientContract) {
-    const id = crypto.createHash('md5').update(url).digest('hex');
+    const id = crypto.createHash('sha256').update(url).digest('hex');
 
     return savedObjectsClient
       .create(
