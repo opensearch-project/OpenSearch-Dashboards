@@ -48,6 +48,7 @@ export const Template: FunctionComponent<Props> = ({
     startupScriptUrl,
     bootstrapScriptUrl,
     strictCsp,
+    nonce,
   },
 }) => {
   const darkLogos = getLogos(
@@ -74,6 +75,7 @@ export const Template: FunctionComponent<Props> = ({
         <meta charSet="utf-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <meta name="viewport" content="width=device-width" />
+        <meta name="csp-nonce" content={nonce} />
         <title>{applicationTitle}</title>
         {/**
          * ToDo: Custom branded favicons will not work correctly across all browsers with
@@ -125,7 +127,7 @@ export const Template: FunctionComponent<Props> = ({
           content={favicon ? `` : `${uiPublicUrl}/favicons/browserconfig.xml`}
         />
 
-        <Styles />
+        <Styles nonce={nonce} />
 
         {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
         <meta name="add-styles-here" />
