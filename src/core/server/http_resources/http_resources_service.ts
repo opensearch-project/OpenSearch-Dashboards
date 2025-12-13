@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import crypto from 'crypto';
 import { RequestHandlerContext } from 'src/core/server';
 
 import { CoreContext } from '../core_context';
@@ -111,9 +112,12 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
       cspReportOnlyIsEmitting = cspReportOnly.isEmitting;
     }
 
+    const nonce = crypto.randomBytes(16).toString('base64');
+    const cspReportOnlyHeader = cspReportOnly.cspReportOnlyHeader.replace('<NONCE>', nonce);
+
     const cspReportOnlyHeaders = cspReportOnlyIsEmitting
       ? {
-          'content-security-policy-report-only': cspReportOnly.cspReportOnlyHeader,
+          'content-security-policy-report-only': cspReportOnlyHeader,
           'reporting-endpoints': cspReportOnly.reportingEndpointsHeader,
         }
       : {};
@@ -122,6 +126,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
         const body = await deps.rendering.render(request, context.core.uiSettings.client, {
           includeUserSettings: true,
+          nonce,
         });
 
         return response.ok({
@@ -136,6 +141,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
         const body = await deps.rendering.render(request, context.core.uiSettings.client, {
           includeUserSettings: false,
+          nonce,
         });
 
         return response.ok({

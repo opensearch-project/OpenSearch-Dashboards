@@ -20,7 +20,7 @@ export const config = {
         `default-src 'self'`,
         `script-src 'self'`,
         `script-src-attr 'none'`,
-        `style-src 'self'`,
+        `style-src 'self' 'nonce-<NONCE>'`,
         `child-src 'none'`,
         `worker-src 'self'`,
         `frame-src 'none'`,
