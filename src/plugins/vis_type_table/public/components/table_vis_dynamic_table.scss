@@ -1,0 +1,125 @@
+.tableVisHeaderField {
+  position: relative;
+  user-select: none;
+  padding: $euiSizeS;
+  text-align: left;
+
+  &-isSorted {
+    background-color: transparent;
+  }
+
+  &__content {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .header-text {
+    display: inline-block;
+    vertical-align: top;
+  }
+
+  &__sortIcon {
+    margin-left: $euiSizeXS;
+    opacity: 0 !important;
+    transition: opacity $euiAnimSpeedFast;
+  }
+
+  // Show sort icon on hover of the th element
+  &:hover &__sortIcon,
+  &:focus &__sortIcon {
+    opacity: 1 !important;
+  }
+
+  &__actionButton {
+    margin-left: $euiSizeXS;
+    opacity: 0;
+    transition: opacity $euiAnimSpeedFast;
+  }
+
+  &:hover &__actionButton,
+  &:focus &__actionButton {
+    opacity: 1;
+  }
+}
+
+.tableVisContainer {
+  table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .tableVisCell {
+    position: relative;
+    width: 100%;
+
+    &__dataField {
+      word-break: break-word;
+    }
+
+    &__filter {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: none;
+      align-items: center;
+      background-color: transparentize($euiColorEmptyShade, 0.1);
+      z-index: 10;
+      padding-left: $euiSizeXS;
+    }
+
+    &__filterButton {
+      margin-left: $euiSizeXS;
+    }
+
+    &:hover {
+      .tableVisCell__filter {
+        display: flex;
+      }
+    }
+  }
+
+  th {
+    cursor: pointer;
+    border-bottom: $euiBorderThin;
+    overflow: hidden;
+    position: relative;
+    transition: background-color $euiAnimSpeedFast;
+    text-align: left;
+  }
+
+  td {
+    padding: $euiSizeS;
+    vertical-align: top;
+    word-break: break-word;
+    position: relative;
+  }
+
+  .tableVis-row-separator-cell {
+    border-bottom: $euiBorderThin;
+    height: 1px;
+    padding: 0;
+  }
+}
+
+.column-width-measuring-element {
+  position: absolute;
+  visibility: hidden;
+  white-space: nowrap;
+  width: auto;
+  height: auto;
+  max-width: none;
+  min-width: 0;
+  box-sizing: content-box;
+  padding: $euiSizeXS;
+  border: none;
+  margin: 0;
+  font-size: $euiFontSizeXS;
+}
+
+.tableVisPagination {
+  margin-top: $euiSizeXS;
+  padding: $euiSizeXS 0;
+}

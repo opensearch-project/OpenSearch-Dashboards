@@ -31,7 +31,11 @@ describe('ChatPlugin', () => {
     };
 
     // Mock core setup
-    mockCoreSetup = {};
+    mockCoreSetup = {
+      chat: {
+        setSuggestedActionsService: jest.fn(),
+      },
+    };
 
     // Mock core start - start with non-explore app
     mockCurrentAppId$ = new BehaviorSubject<string | undefined>('dashboard');
@@ -86,6 +90,12 @@ describe('ChatPlugin', () => {
           unregisterProvider: expect.any(Function),
         }),
       });
+    });
+
+    it('should setup suggested actions service', () => {
+      expect(mockCoreSetup.chat.setSuggestedActionsService).not.toHaveBeenCalled();
+      plugin.setup(mockCoreSetup);
+      expect(mockCoreSetup.chat.setSuggestedActionsService).toHaveBeenCalled();
     });
   });
 

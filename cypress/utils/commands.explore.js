@@ -59,6 +59,30 @@ const isEditorEmpty = () => {
     .then((text) => text.trim() === '');
 };
 
+const selectIndexWildcardMode = (indexPattern, appendWildcard = true) => {
+  // Select "Index wildcard" from the scope selector
+  cy.getElementByTestId('index-scope-selector')
+    .should('be.visible')
+    .find('[data-test-subj="comboBoxSearchInput"]')
+    .click()
+    .clear()
+    .type('Index wildcard{enter}');
+
+  // Wait for the selection to take effect by verifying the text changed
+  cy.getElementByTestId('index-scope-selector')
+    .find('[data-test-subj="comboBoxInput"]')
+    .should('contain.text', 'Index wildcard')
+    .should('be.visible');
+
+  // Enter the pattern with optional wildcard appending
+  const pattern = appendWildcard ? `${indexPattern}*{enter}` : `${indexPattern}{enter}`;
+  cy.getElementByTestId('dataset-prefix-selector', { timeout: 10000 })
+    .should('be.visible')
+    .find('[data-test-subj="multiWildcardPatternInput"]')
+    .clear()
+    .type(pattern);
+};
+
 cy.explore.add('clearQueryEditor', () => {
   const clearWithRetry = (attempt = 1) => {
     cy.log(`Attempt ${attempt} to clear editor`);
@@ -79,8 +103,12 @@ cy.explore.add('clearQueryEditor', () => {
             return clearWithRetry(attempt + 1);
           } else {
             cy.log('Failed to clear editor after all attempts');
-            // Instead of throwing error, try one last time with extra waiting
-            return cy.wait(2000).then(forceFocusEditor).then(clearMonacoEditor);
+            // Instead of throwing error, try one last time ensuring editor is ready
+            return cy
+              .get('.monaco-editor')
+              .should('be.visible')
+              .then(forceFocusEditor)
+              .then(clearMonacoEditor);
           }
         });
       });
@@ -358,7 +386,8 @@ cy.explore.add('setDataset', (dataset, dataSourceName, type) => {
       throw new Error(`setIndexPatternAsDataset encountered unknown type: ${type}`);
   }
 
-  cy.wait(3000);
+  // Wait for dataset selection to complete by verifying the button is ready
+  cy.getElementByTestId('datasetSelectButton').should('be.visible').should('not.be.disabled');
 });
 
 cy.explore.add(
@@ -379,11 +408,38 @@ cy.explore.add(
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
     cy.get(`[title="Indexes"]`).click();
     cy.get(`[title="${dataSourceName}"]`).click();
-    cy.getElementByTestId('dataset-index-selector')
+
+    // Ensure "Index name" mode is selected (not "Index wildcard")
+    cy.getElementByTestId('index-scope-selector')
+      .should('be.visible')
       .find('[data-test-subj="comboBoxInput"]')
       .click();
-    // this element is sometimes dataSourceName masked by another element
-    cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
+
+    // Select "Index name" if not already selected
+    cy.get(`[title="Index name"]`).should('be.visible').click({ force: true });
+
+    // Verify selection
+    cy.getElementByTestId('index-scope-selector')
+      .find('[data-test-subj="comboBoxInput"]')
+      .should('contain.text', 'Index name');
+
+    // Click the search field to open the popover (onFocus triggers isPopoverOpen = true)
+    cy.getElementByTestId('index-selector-search')
+      .should('be.visible')
+      .click({ force: true }) // Use click instead of focus to ensure onFocus event fires
+      .clear()
+      .type(index);
+
+    // Wait for the popover to fully render
+    cy.getElementByTestId('index-selector-popover', { timeout: 10000 }).should('be.visible');
+
+    // Now look for the dataset-index-selector within the popover
+    cy.getElementByTestId('dataset-index-selector', { timeout: 5000 })
+      .should('be.visible')
+      .within(() => {
+        // Look for the index by title attribute in the popover
+        cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
+      });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
 
     if (language) {
@@ -401,7 +457,9 @@ cy.explore.add(
     } else {
       cy.get('[type="button"]').contains('Cancel').click();
     }
-    cy.wait(3000);
+    // Wait for dataset selection to complete
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.getElementByTestId('datasetSelectButton').should('be.visible').should('not.be.disabled');
   }
 );
 
@@ -423,7 +481,9 @@ cy.explore.add('setIndexPatternAsDataset', (indexPattern) => {
   // verify that it has been selected
   cy.getElementByTestId('datasetSelectButton').should('contain.text', `${indexPattern}`);
 
-  cy.wait(3000);
+  // Wait for dataset selection to complete
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+  cy.getElementByTestId('datasetSelectButton').should('be.visible').should('not.be.disabled');
 });
 
 cy.explore.add(
@@ -455,25 +515,8 @@ cy.explore.add(
     cy.get(`[title="${dataSourceName}"]`).should('be.visible');
     cy.get(`[title="${dataSourceName}"]`).click();
 
-    // Step 6 - Select index scope (Index wildcard)
-    cy.getElementByTestId('index-scope-selector')
-      .should('be.visible')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
-
-    cy.get(`[title="Index wildcard"]`).should('be.visible').click({ force: true });
-
-    // Step 7 - Enter index pattern
-    cy.getElementByTestId('dataset-prefix-selector')
-      .should('be.visible')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
-
-    cy.getElementByTestId('dataset-prefix-selector')
-      .should('be.visible')
-      .find('[data-test-subj="comboBoxSearchInput"]')
-      .clear()
-      .type(`${indexPattern}*{enter}`);
+    // Step 6 & 7 - Select index scope (Index wildcard) and enter pattern
+    selectIndexWildcardMode(indexPattern, true);
 
     // Step 8 - Click Next button
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
@@ -497,7 +540,9 @@ cy.explore.add(
     } else {
       cy.get('[type="button"]').contains('Cancel').click();
     }
-    cy.wait(3000);
+    // Wait for dataset selection to complete
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.getElementByTestId('datasetSelectButton').should('be.visible').should('not.be.disabled');
   }
 );
 
@@ -505,12 +550,11 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName, o
   cy.explore.clearQueryEditor();
   cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
   setDatePickerDatesAndSearchIfRelevant('PPL');
-  cy.wait(2000);
   cy.explore.setQueryEditor(query);
   // Run the query
   cy.getElementByTestId('exploreQueryExecutionButton').click();
   cy.osd.waitForLoader(true);
-  cy.wait(1000);
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
   cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
 
   // Ensure chart type is correct
@@ -607,11 +651,12 @@ cy.explore.add(
         isEnhancement,
       });
 
-      // Adding a wait here as sometimes the button doesn't click below
-      cy.wait(2000);
-
-      // Step 2 - Click create dataset button
-      cy.getElementByTestId('createDatasetButton').should('exist').should('be.visible');
+      // Step 2 - Wait for create dataset button to be fully ready before clicking
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+      cy.getElementByTestId('createDatasetButton')
+        .should('exist')
+        .should('be.visible')
+        .should('not.be.disabled');
       cy.getElementByTestId('createDatasetButton').click({ force: true });
 
       // Step 3 - Select signal type (logs or traces)
@@ -632,25 +677,8 @@ cy.explore.add(
     cy.get(`[title="${dataSource}"]`).should('be.visible');
     cy.get(`[title="${dataSource}"]`).click();
 
-    // Step 6 - Select index scope (Index wildcard)
-    cy.getElementByTestId('index-scope-selector')
-      .should('be.visible')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
-
-    cy.get(`[title="Index wildcard"]`).should('be.visible').click({ force: true });
-
-    // Step 7 - Enter index pattern
-    cy.getElementByTestId('dataset-prefix-selector')
-      .should('be.visible')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
-
-    cy.getElementByTestId('dataset-prefix-selector')
-      .should('be.visible')
-      .find('[data-test-subj="comboBoxSearchInput"]')
-      .clear()
-      .type(`${indexPattern}*{enter}`);
+    // Step 6 & 7 - Select index scope (Index wildcard) and enter pattern (no wildcard appending)
+    selectIndexWildcardMode(indexPattern, false);
 
     // Step 8 - Click Next button
     cy.getElementByTestId('datasetSelectorNext')
@@ -732,9 +760,8 @@ cy.explore.add(
       cy.wrap(interception.response.body.id).as('INDEX_PATTERN_ID');
     });
 
-    cy.wait(3000);
-
-    // Step 15 - Verify page title contains the index pattern
+    // Step 15 - Verify page title contains the index pattern (this will wait for the page to update)
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.getElementByTestId('headerApplicationTitle').should('contain', indexPattern);
   }
 );

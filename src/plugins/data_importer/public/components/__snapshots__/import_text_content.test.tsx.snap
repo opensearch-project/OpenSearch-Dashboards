@@ -20,7 +20,7 @@ exports[`ImportTextContent should render 1`] = `
             <div
               class="euiText euiText--medium"
             >
-              File Format: 
+              File format:
             </div>
           </div>
           <div
@@ -194,7 +194,8 @@ exports[`ImportTextContent should render 1`] = `
             0
             /
             10000
-             characters
+             
+            characters
           </div>
         </div>
       </div>
