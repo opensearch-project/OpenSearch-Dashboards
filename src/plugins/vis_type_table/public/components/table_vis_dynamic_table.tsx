@@ -505,6 +505,8 @@ export const TableVisDynamicTable: React.FC<DynamicTableProps> = ({
                           padding: '8px',
                           verticalAlign: 'top',
                           wordBreak: 'break-word',
+                          overflowWrap: 'break-word',
+                          whiteSpace: 'normal',
                         }}
                       >
                         <TableCell
