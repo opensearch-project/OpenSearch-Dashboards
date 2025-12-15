@@ -1,0 +1,2 @@
+feat:
+- Add a MetricsRecorder plugin for metrics reporting ([#8628](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8628))
