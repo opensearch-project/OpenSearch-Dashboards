@@ -273,16 +273,18 @@ export const createHistogramConfigWithInterval = (
     'YYYY-MM-DD HH:mm:ss.SSS'
   );
 
-  const dateHistogramAgg = histogramConfigs.aggs[1] as any;
-
   // Extract interval directly from the buckets we configured
-  let finalInterval: string;
+  let finalInterval: string = effectiveInterval;
+
+  // Find the date histogram aggregation - it could be at different indices
+  const dateHistogramAgg = histogramConfigs.aggs?.find(
+    (agg: any) => agg && agg.type && agg.type.name === 'date_histogram'
+  ) as any;
+
   if (dateHistogramAgg?.buckets) {
     const bucketInterval = dateHistogramAgg.buckets.getInterval();
     // Convert the interval to PPL format (e.g., "7d", "12h")
     finalInterval = bucketInterval.expression || bucketInterval.interval || effectiveInterval;
-  } else {
-    finalInterval = effectiveInterval;
   }
 
   return {
