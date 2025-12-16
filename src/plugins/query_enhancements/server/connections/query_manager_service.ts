@@ -6,9 +6,11 @@
 import { BaseConnectionManager } from './managers/base_connection_manager';
 
 /**
+ * Service for managing query managers.
+ * Handles query execution for different data connection types.
  * @experimental this class is experimental and might change in future releases.
  */
-class ResourceManagerService {
+class QueryManagerService {
   private readonly managers: Map<string, BaseConnectionManager>;
   constructor() {
     this.managers = new Map();
@@ -20,7 +22,7 @@ class ResourceManagerService {
       if (existingManager === manager) return;
 
       throw new Error(
-        `Manager for dataConnectionType ${dataConnectionType} is already registered. Unable to register another manager.`
+        `Query manager for dataConnectionType ${dataConnectionType} is already registered. Unable to register another manager.`
       );
     }
     this.managers.set(dataConnectionType, manager);
@@ -32,4 +34,4 @@ class ResourceManagerService {
 }
 
 // export as singleton
-export const resourceManagerService = new ResourceManagerService();
+export const queryManagerService = new QueryManagerService();
