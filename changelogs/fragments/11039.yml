@@ -1,0 +1,2 @@
+feat:
+- Add prometheus server APIs and frontend type config ([#11039](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11039))
