@@ -119,9 +119,7 @@ const traceTestSuite = () => {
         page: 'explore/traces',
         isEnhancement: true,
       });
-      // Wait for page to load
-      cy.wait(20000);
-      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+      cy.getElementByTestId('docTable', { timeout: 15000 }).should('exist');
       cy.explore.setTopNavDate('Jan 1, 2024 @ 00:00:00.000', 'Dec 31, 2025 @ 00:00:00.000');
     });
 

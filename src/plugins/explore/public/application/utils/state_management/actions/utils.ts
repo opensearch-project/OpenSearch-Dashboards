@@ -264,7 +264,7 @@ export const createHistogramConfigWithInterval = (
   );
   const aggs = histogramConfigs?.toDsl();
 
-  if (!aggs) {
+  if (!aggs || !histogramConfigs) {
     return null;
   }
 
@@ -273,14 +273,17 @@ export const createHistogramConfigWithInterval = (
     'YYYY-MM-DD HH:mm:ss.SSS'
   );
 
-  const finalInterval =
-    aggs[2].date_histogram.fixed_interval ??
-    aggs[2].date_histogram.calendar_interval ??
-    services.data.search.aggs.calculateAutoTimeExpression({
-      from: fromDate,
-      to: toDate,
-      mode: 'absolute',
-    });
+  const dateHistogramAgg = histogramConfigs.aggs[1] as any;
+
+  // Extract interval directly from the buckets we configured
+  let finalInterval: string;
+  if (dateHistogramAgg?.buckets) {
+    const bucketInterval = dateHistogramAgg.buckets.getInterval();
+    // Convert the interval to PPL format (e.g., "7d", "12h")
+    finalInterval = bucketInterval.expression || bucketInterval.interval || effectiveInterval;
+  } else {
+    finalInterval = effectiveInterval;
+  }
 
   return {
     histogramConfigs,
