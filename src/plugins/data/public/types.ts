@@ -42,6 +42,7 @@ import { UsageCollectionSetup } from '../../usage_collection/public';
 import { DataSourceStart } from './data_sources/datasource_services/types';
 import { IUiStart } from './ui';
 import { DataStorage } from '../common';
+import { ResourceClientFactory } from './resources';
 
 export interface DataPublicPluginEnhancements {
   search?: SearchEnhancements;
@@ -66,6 +67,11 @@ export interface DataPublicPluginSetup {
   search: ISearchSetup;
   fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
+  /**
+   * Factory for creating resource clients.
+   * Use register() to add new resource client types.
+   */
+  resourceClientFactory: ResourceClientFactory;
   /**
    * @experimental
    */
