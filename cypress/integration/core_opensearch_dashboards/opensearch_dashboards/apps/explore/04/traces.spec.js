@@ -120,6 +120,7 @@ const traceTestSuite = () => {
         isEnhancement: true,
       });
       // Wait for page to load
+      cy.wait(2000);
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       cy.explore.setTopNavDate('Jan 1, 2024 @ 00:00:00.000', 'Dec 31, 2025 @ 00:00:00.000');
     });
