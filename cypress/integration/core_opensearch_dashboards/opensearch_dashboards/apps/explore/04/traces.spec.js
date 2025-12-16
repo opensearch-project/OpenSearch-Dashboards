@@ -120,7 +120,7 @@ const traceTestSuite = () => {
         isEnhancement: true,
       });
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-      cy.explore.setTopNavDate('Jan 1, 2024 @ 00:00:00.000', 'Dec 31, 2025 @ 00:00:00.000');
+      cy.explore.setTopNavDate('Aug 1, 2025 @ 00:00:00.000', 'Sep 25, 2025 @ 00:00:00.000');
     });
 
     it('should have default columns on landing page', () => {
