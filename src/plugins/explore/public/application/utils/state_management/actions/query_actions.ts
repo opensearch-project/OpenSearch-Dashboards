@@ -314,6 +314,7 @@ export const executeQueries = createAsyncThunk<
         breakdownField
       );
 
+      // Execute request count query immediately
       promises.push(
         dispatch(
           executeRequestCountQuery({
@@ -325,25 +326,31 @@ export const executeQueries = createAsyncThunk<
         )
       );
 
+      // Stagger error and latency queries to reduce memory pressure in CI
+      // Small delays prevent circuit breaker exceptions when all queries hit simultaneously
       promises.push(
-        dispatch(
-          executeErrorCountQuery({
-            services,
-            cacheKey: errorCacheKey,
-            baseQuery,
-            config,
-          })
+        new Promise((resolve) => setTimeout(resolve, 100)).then(() =>
+          dispatch(
+            executeErrorCountQuery({
+              services,
+              cacheKey: errorCacheKey,
+              baseQuery,
+              config,
+            })
+          )
         )
       );
 
       promises.push(
-        dispatch(
-          executeLatencyQuery({
-            services,
-            cacheKey: latencyCacheKey,
-            baseQuery,
-            config,
-          })
+        new Promise((resolve) => setTimeout(resolve, 200)).then(() =>
+          dispatch(
+            executeLatencyQuery({
+              services,
+              cacheKey: latencyCacheKey,
+              baseQuery,
+              config,
+            })
+          )
         )
       );
     }

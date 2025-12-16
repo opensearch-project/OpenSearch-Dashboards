@@ -25,8 +25,8 @@ export const buildRequestCountQuery = (
   const spanColumn = `span(${timeField},${interval})`;
 
   return breakdownField
-    ? `${baseQuery} | stats count() by span(${timeField}, ${interval}), ${breakdownField} | sort \`${spanColumn}\``
-    : `${baseQuery} | stats count() by span(${timeField}, ${interval}) | sort \`${spanColumn}\``;
+    ? `${baseQuery} | stats count() by span(${timeField}, ${interval}), ${breakdownField} | sort \`${spanColumn}\` | head 200`
+    : `${baseQuery} | stats count() by span(${timeField}, ${interval}) | sort \`${spanColumn}\` | head 200`;
 };
 
 export const buildErrorCountQuery = (baseQuery: string, config: TraceAggregationConfig): string => {
@@ -35,8 +35,8 @@ export const buildErrorCountQuery = (baseQuery: string, config: TraceAggregation
   const spanColumn = `span(${timeField},${interval})`;
 
   return breakdownField
-    ? `${baseQuery} | where ${errorCondition} | stats count() as error_count by span(${timeField}, ${interval}), ${breakdownField} | sort \`${spanColumn}\``
-    : `${baseQuery} | where ${errorCondition} | stats count() as error_count by span(${timeField}, ${interval}) | sort \`${spanColumn}\``;
+    ? `${baseQuery} | where ${errorCondition} | stats count() as error_count by span(${timeField}, ${interval}), ${breakdownField} | sort \`${spanColumn}\` | head 200`
+    : `${baseQuery} | where ${errorCondition} | stats count() as error_count by span(${timeField}, ${interval}) | sort \`${spanColumn}\` | head 200`;
 };
 
 export const buildLatencyQuery = (baseQuery: string, config: TraceAggregationConfig): string => {
@@ -44,8 +44,8 @@ export const buildLatencyQuery = (baseQuery: string, config: TraceAggregationCon
   const spanColumn = `span(${timeField},${interval})`;
 
   return breakdownField
-    ? `${baseQuery} | where isnotnull(durationInNanos) | stats avg(durationInNanos) as avg_duration_nanos by span(${timeField}, ${interval}), ${breakdownField} | eval avg_latency_ms = avg_duration_nanos / 1000000 | sort \`${spanColumn}\``
-    : `${baseQuery} | where isnotnull(durationInNanos) | stats avg(durationInNanos) as avg_duration_nanos by span(${timeField}, ${interval}) | eval avg_latency_ms = avg_duration_nanos / 1000000 | sort \`${spanColumn}\``;
+    ? `${baseQuery} | where isnotnull(durationInNanos) | stats avg(durationInNanos) as avg_duration_nanos by span(${timeField}, ${interval}), ${breakdownField} | eval avg_latency_ms = avg_duration_nanos / 1000000 | sort \`${spanColumn}\` | head 200`
+    : `${baseQuery} | where isnotnull(durationInNanos) | stats avg(durationInNanos) as avg_duration_nanos by span(${timeField}, ${interval}) | eval avg_latency_ms = avg_duration_nanos / 1000000 | sort \`${spanColumn}\` | head 200`;
 };
 
 export const createTraceAggregationConfig = (
