@@ -14,6 +14,7 @@ import { ExploreServices } from '../../../../types';
 import { ISearchResult } from '../slices';
 import { createHistogramConfigs } from '../../../../components/chart/utils';
 import { RootState } from '../store';
+import { calculateTraceInterval } from '../constants';
 
 export interface HistogramConfig {
   histogramConfigs: AggConfigs | undefined;
@@ -282,9 +283,29 @@ export const createHistogramConfigWithInterval = (
   ) as any;
 
   if (dateHistogramAgg?.buckets) {
-    const bucketInterval = dateHistogramAgg.buckets.getInterval();
-    // Convert the interval to PPL format (e.g., "7d", "12h")
-    finalInterval = bucketInterval.expression || bucketInterval.interval || effectiveInterval;
+    // For traces with custom bar target, bypass TimeBuckets and calculate interval manually
+    // TimeBuckets doesn't honor our minimum interval settings reliably
+    if (customBarTarget) {
+      const bounds = services.data.query.timefilter.timefilter.calculateBounds(
+        services.data.query.timefilter.timefilter.getTime()
+      );
+      const diffDays =
+        bounds.max && bounds.min
+          ? (bounds.max.valueOf() - bounds.min.valueOf()) / (1000 * 60 * 60 * 24)
+          : 0;
+
+      const calculatedInterval = calculateTraceInterval(diffDays);
+      if (calculatedInterval) {
+        finalInterval = calculatedInterval;
+      } else {
+        // For < 7 days, use TimeBuckets
+        const bucketInterval = dateHistogramAgg.buckets.getInterval();
+        finalInterval = bucketInterval.expression || bucketInterval.interval || effectiveInterval;
+      }
+    } else {
+      const bucketInterval = dateHistogramAgg.buckets.getInterval();
+      finalInterval = bucketInterval.expression || bucketInterval.interval || effectiveInterval;
+    }
   }
 
   return {
