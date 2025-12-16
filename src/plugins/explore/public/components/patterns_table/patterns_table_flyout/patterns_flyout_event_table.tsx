@@ -31,7 +31,7 @@ interface EventTableItem {
 
 const EVENT_TABLE_PAGE_SIZE = 10;
 
-export const PatternsFlyoutEventTable = ({
+const PatternsFlyoutEventTableComponent = ({
   patternString,
   totalItemCount,
 }: PatternsFlyoutEventTableProps) => {
@@ -171,3 +171,5 @@ export const PatternsFlyoutEventTable = ({
     />
   );
 };
+
+export const PatternsFlyoutEventTable = React.memo(PatternsFlyoutEventTableComponent);
