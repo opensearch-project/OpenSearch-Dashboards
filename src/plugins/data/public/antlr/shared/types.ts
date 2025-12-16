@@ -86,7 +86,8 @@ export type EnrichAutocompleteResult<A extends AutocompleteResultBase> = (
   tokenStream: TokenStream,
   cursorTokenIndex: number,
   cursor: CursorPosition,
-  query: string
+  query: string,
+  tree: ParseTree
 ) => A;
 
 export interface CursorPosition {
@@ -106,6 +107,15 @@ export interface OpenSearchPplAutocompleteResult extends AutocompleteResultBase 
   isInBackQuote?: boolean;
   isInQuote?: boolean;
   suggestSingleQuotes?: boolean;
+}
+
+export interface PromQLAutocompleteResult extends AutocompleteResultBase {
+  suggestMetrics?: boolean;
+  suggestLabels?: string;
+  suggestLabelValues?: { metric?: string; label?: string };
+  suggestTimeRangeUnits?: boolean;
+  suggestAggregationOperators?: boolean;
+  suggestFunctionNames?: boolean;
 }
 
 export enum TableOrViewSuggestion {
@@ -148,6 +158,17 @@ export type ProcessVisitedRulesResult<A extends AutocompleteResultBase> = Partia
   shouldSuggestColumns?: boolean;
   shouldSuggestColumnAliases?: boolean;
   shouldSuggestConstraints?: boolean;
+};
+
+export enum LabelOrigin {
+  LabelMatcher,
+  AggregationList,
+  VectorMatchGrouping,
+}
+
+export type ProcessPromQLVisitedRulesResult<A extends AutocompleteResultBase> = Partial<A> & {
+  shouldSuggestLabels: LabelOrigin | undefined;
+  shouldSuggestLabelValues: boolean;
 };
 
 export interface ParsingSubject<A extends AutocompleteResultBase, L, P> {
