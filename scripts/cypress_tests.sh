@@ -37,6 +37,29 @@ function run_opensearch() {
     spawn_process_and_save_PID "./bin/opensearch &"
   fi
   check_status $OPENSEARCH_URL $OPENSEARCH_MSG
+  configure_circuit_breaker
+}
+
+# Configure circuit breaker to prevent memory issues during testing
+function configure_circuit_breaker() {
+  echo "[ Configuring circuit breaker settings... ]"
+  if [ $SECURITY_ENABLED == "false" ]; then
+    curl -X PUT "http://localhost:9200/_cluster/settings" -H 'Content-Type: application/json' -d'
+    {
+      "persistent": {
+        "indices.breaker.total.limit": "99%"
+      }
+    }'
+  else
+    curl -X PUT "https://localhost:9200/_cluster/settings" -u $CREDENTIAL --insecure -H 'Content-Type: application/json' -d'
+    {
+      "persistent": {
+        "indices.breaker.total.limit": "99%"
+      }
+    }'
+  fi
+  echo ""
+  echo "Circuit breaker configured to 99%"
 }
 
 # Checks the running status of OpenSearch and Dashboards
