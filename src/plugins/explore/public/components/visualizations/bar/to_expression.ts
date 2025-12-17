@@ -18,6 +18,9 @@ import {
   getSwappedAxisRole,
   getSchemaByAxis,
   applyTimeRangeToEncoding,
+  getChartRender,
+  applyEchartsAxisStyling,
+  aggregateDataForECharts,
 } from '../utils/utils';
 
 import {
@@ -28,6 +31,7 @@ import {
 } from './bar_chart_utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
+import { AggregationType } from '../types';
 
 // Only set size and binSpacing in manual mode
 const configureBarSizeAndSpacing = (barMark: any, styles: BarChartStyle) => {
@@ -45,6 +49,71 @@ export const createBarSpec = (
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
+  // if chart render is 'echarts', here it return the echarts config options
+  if (getChartRender() === 'echarts') {
+    const styles = { ...defaultBarChartStyles, ...styleOptions };
+    const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+    // Determine which axis is categorical and which is numerical
+    // After getSwappedAxisRole, axes are already swapped if switchAxes is true
+    const isCategoricalOnX = xAxis?.schema !== VisFieldType.Numerical;
+    const categoricalAxis = isCategoricalOnX ? xAxis : yAxis;
+    const numericalAxis = isCategoricalOnX ? yAxis : xAxis;
+
+    // Get aggregation type
+    const aggregationType = styles?.bucket?.aggregationType || AggregationType.SUM;
+
+    // Aggregate data - returns 2D array with header row
+    const aggregatedData = aggregateDataForECharts(
+      transformedData,
+      categoricalAxis?.column || '',
+      numericalAxis?.column || '',
+      aggregationType
+    );
+
+    // Apply axis styling
+    const xAxisConfig = applyEchartsAxisStyling({ axisStyle: xAxisStyle });
+    const yAxisConfig = applyEchartsAxisStyling({ axisStyle: yAxisStyle });
+
+    return {
+      title: {
+        text: styles.titleOptions?.show
+          ? styles.titleOptions?.titleName || `${numericalAxis?.name} by ${categoricalAxis?.name}`
+          : undefined,
+      },
+      tooltip: {
+        show: styles.tooltipOptions?.mode !== 'hidden',
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow',
+        },
+      },
+      // Use dataset with 2D array (header row + data rows)
+      dataset: {
+        source: aggregatedData,
+      },
+      xAxis: {
+        type: isCategoricalOnX ? 'category' : 'value',
+        ...xAxisConfig,
+      },
+      yAxis: {
+        type: isCategoricalOnX ? 'value' : 'category',
+        ...yAxisConfig,
+      },
+      series: [
+        {
+          name: numericalAxis?.name,
+          type: 'bar',
+          // Apply bar sizing when in manual mode
+          barWidth:
+            styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
+          barCategoryGap:
+            styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
+        },
+      ],
+    };
+  }
+
   const styles = { ...defaultBarChartStyles, ...styleOptions };
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
