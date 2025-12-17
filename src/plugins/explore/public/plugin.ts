@@ -370,6 +370,7 @@ export class ExplorePlugin
             unmount();
             unsubscribeStore();
             resetStore();
+            pluginsStart.data.query.queryString.clearQuery();
           };
         },
         ...options,
@@ -512,11 +513,9 @@ export class ExplorePlugin
     this.initializeServices();
 
     // Register Log Actions
-    // Register Ask AI action if chat service is available
-    if (plugins.chat?.chatService) {
-      const askAiAction = createAskAiAction(plugins.chat.chatService);
-      logActionRegistry.registerAction(askAiAction);
-    }
+    // Always register Ask AI action - let isCompatible handle enablement logic
+    const askAiAction = createAskAiAction(core.chat);
+    logActionRegistry.registerAction(askAiAction);
 
     const savedExploreLoader = createSavedExploreLoader({
       savedObjectsClient: core.savedObjects.client,

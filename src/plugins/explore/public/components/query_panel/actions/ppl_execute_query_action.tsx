@@ -3,13 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { EuiPanel, EuiText, EuiSpacer, EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../../../types';
 import { loadQueryActionCreator } from '../../../application/utils/state_management/actions/query_editor/load_query';
 import { useSetEditorTextWithQuery } from '../../../application/hooks';
+import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
+import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
+
+export const PPL_QUERY_EXECUTION_TIMEOUT_MS = 10000;
+export const PPL_QUERY_POLL_INTERVAL_MS = 1000;
 
 interface PPLExecuteQueryArgs {
   query: string;
@@ -18,6 +21,85 @@ interface PPLExecuteQueryArgs {
 }
 
 const NOOP_ASSISTANT_ACTION_HOOK = (_action: any) => {};
+
+/**
+ * Wait for query execution to complete and return the result status
+ * @param services - Explore services containing the Redux store
+ * @param cacheKey - The cache key for the query
+ * @param timeoutMs - Maximum time to wait in milliseconds
+ * @returns The query result status or null if timeout
+ */
+async function waitForQueryExecution(
+  services: ExploreServices,
+  cacheKey: string,
+  timeoutMs: number
+): Promise<{
+  success: boolean;
+  error?: {
+    details: string;
+    reason: string;
+    type?: string;
+  };
+} | null> {
+  const startTime = Date.now();
+  const pollInterval = PPL_QUERY_POLL_INTERVAL_MS;
+
+  return new Promise((resolve) => {
+    const checkStatus = () => {
+      const state = services.store.getState();
+      const queryStatus = state.queryEditor.queryStatusMap[cacheKey];
+
+      if (!queryStatus) {
+        // Query hasn't started yet, keep waiting
+        if (Date.now() - startTime < timeoutMs) {
+          setTimeout(checkStatus, pollInterval);
+        } else {
+          // Timeout - return null
+          resolve(null);
+        }
+        return;
+      }
+
+      // Check if query execution is complete
+      if (queryStatus.status === QueryExecutionStatus.LOADING) {
+        // Still loading, keep waiting
+        if (Date.now() - startTime < timeoutMs) {
+          setTimeout(checkStatus, pollInterval);
+        } else {
+          // Timeout
+          resolve(null);
+        }
+        return;
+      }
+
+      // Query execution completed
+      if (queryStatus.status === QueryExecutionStatus.ERROR) {
+        // Query failed validation
+        resolve({
+          success: false,
+          error: {
+            details: queryStatus.error?.message?.details || 'Query execution failed',
+            reason: queryStatus.error?.message?.reason || 'Unknown error',
+            type: queryStatus.error?.message?.type,
+          },
+        });
+      } else if (
+        queryStatus.status === QueryExecutionStatus.READY ||
+        queryStatus.status === QueryExecutionStatus.NO_RESULTS
+      ) {
+        // Query succeeded
+        resolve({
+          success: true,
+        });
+      } else {
+        // Other status (UNINITIALIZED, etc.) - treat as timeout
+        resolve(null);
+      }
+    };
+
+    checkStatus();
+  });
+}
 
 export function usePPLExecuteQueryAction(
   setEditorTextWithQuery: ReturnType<typeof useSetEditorTextWithQuery>
@@ -54,15 +136,58 @@ export function usePPLExecuteQueryAction(
         const shouldExecute = args.autoExecute !== false; // Default to true
 
         if (shouldExecute) {
+          // Get the current query state to determine the cache key
+          const state = services.store.getState();
+          const query = state.query;
+
+          // Prepare the query object to get the cache key
+          const queryObject = {
+            ...query,
+            query: args.query,
+          };
+          const cacheKey = defaultPrepareQueryString(queryObject);
+
           // Use loadQueryActionCreator which updates the editor and executes the query
           // This follows the same pattern as Recent Queries
           dispatch(loadQueryActionCreator(services, setEditorTextWithQuery, args.query));
 
+          // Wait for query execution to complete
+          const executionResult = await waitForQueryExecution(
+            services,
+            cacheKey,
+            PPL_QUERY_EXECUTION_TIMEOUT_MS
+          );
+
+          if (executionResult === null) {
+            // Timeout - query is still running or something went wrong
+            return {
+              success: false,
+              executed: false,
+              query: args.query,
+              message: 'Query execution timed out',
+              error: 'Query execution took too long to complete',
+            };
+          }
+
+          if (!executionResult.success) {
+            // Query failed validation
+            return {
+              success: false,
+              executed: false,
+              query: args.query,
+              message: `Query execution failed: ${
+                executionResult.error?.reason || 'Unknown error'
+              }`,
+              error: `${executionResult.error?.type}: ${executionResult.error?.details}`,
+            };
+          }
+
+          // Query succeeded
           return {
             success: true,
             executed: true,
             query: args.query,
-            message: 'Query updated and executed',
+            message: 'Query updated and executed successfully',
           };
         } else {
           // Just update the editor without executing
@@ -82,53 +207,6 @@ export function usePPLExecuteQueryAction(
           query: args.query,
         };
       }
-    },
-    render: ({ status, args, result }: any) => {
-      if (!args) return null;
-
-      const getStatusColor = () => {
-        if (status === 'failed' || (result && !result.success)) return 'danger';
-        if (status === 'complete' && result?.executed) return 'success';
-        if (status === 'complete') return 'primary';
-        return 'subdued';
-      };
-
-      const getStatusIcon = () => {
-        if (status === 'failed' || (result && !result.success)) return '✗';
-        if (status === 'executing') return '⟳';
-        return '✓';
-      };
-
-      return (
-        <EuiPanel paddingSize="s" color={getStatusColor()}>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <strong>{getStatusIcon()}</strong>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s">
-                {status === 'executing' && 'Updating query...'}
-                {status === 'complete' && result?.message}
-                {status === 'failed' && (result?.error || 'Failed to update query')}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {args.description && (
-            <>
-              <EuiSpacer size="xs" />
-              <EuiText size="xs" color="subdued">
-                {args.description}
-              </EuiText>
-            </>
-          )}
-          <EuiSpacer size="xs" />
-          <EuiText size="xs">
-            <EuiCode transparentBackground>{args.query}</EuiCode>
-          </EuiText>
-        </EuiPanel>
-      );
     },
   });
 }

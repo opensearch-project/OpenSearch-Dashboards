@@ -6,6 +6,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
+import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import {
   IBucketDateHistogramAggConfig,
   Query,
@@ -38,13 +39,23 @@ import {
   HistogramDataProcessor,
   ProcessedSearchResults,
 } from '../../interfaces';
-import { defaultPreparePplQuery, getQueryWithSource } from '../../languages';
+import { defaultPreparePplQuery } from '../../languages';
 import {
   HistogramConfig,
   buildPPLHistogramQuery,
   processRawResultsForHistogram,
   createHistogramConfigWithInterval,
 } from './utils';
+import { getCurrentFlavor } from '../../../../helpers/get_flavor_from_app_id';
+import { ExploreFlavor } from '../../../../../common';
+import { TRACES_CHART_BAR_TARGET } from '../constants';
+import { createTraceAggregationConfig } from './trace_aggregation_builder';
+import {
+  prepareTraceCacheKeys,
+  executeRequestCountQuery,
+  executeErrorCountQuery,
+  executeLatencyQuery,
+} from './trace_query_actions';
 
 // Module-level storage for abort controllers keyed by cacheKey
 const activeQueryAbortControllers = new Map<string, AbortController>();
@@ -178,14 +189,15 @@ export const histogramResultsProcessor: HistogramDataProcessor = (
   rawResults: ISearchResult,
   dataset: DataView,
   data: DataPublicPluginStart,
-  interval: string
+  interval: string,
+  uiSettings: IUiSettingsClient
 ): ProcessedSearchResults => {
   const result = defaultResultsProcessor(rawResults, dataset);
 
   data.dataViews.saveToCache(dataset.id!, dataset); // Updating the cache
 
   const histogramConfigs = dataset.timeFieldName
-    ? createHistogramConfigs(dataset, interval, data)
+    ? createHistogramConfigs(dataset, interval, data, uiSettings)
     : undefined;
 
   if (histogramConfigs) {
@@ -273,13 +285,77 @@ export const executeQueries = createAsyncThunk<
     );
   }
 
+  const flavorId = await getCurrentFlavor(services);
+
+  if (flavorId === ExploreFlavor.Traces) {
+    const dataset = query.dataset
+      ? await services.data.dataViews.get(query.dataset.id, query.dataset.type !== 'INDEX_PATTERN')
+      : await services.data.dataViews.getDefault();
+
+    if (dataset?.timeFieldName) {
+      const rawInterval = state.legacy?.interval || 'auto';
+
+      const histogramConfig = createHistogramConfigWithInterval(
+        dataset,
+        rawInterval,
+        services,
+        getState,
+        TRACES_CHART_BAR_TARGET
+      );
+      const calculatedInterval = histogramConfig?.finalInterval || '5m';
+
+      const { requestCacheKey, errorCacheKey, latencyCacheKey } = prepareTraceCacheKeys(query);
+
+      const baseQuery = defaultPrepareQueryString(query);
+
+      const config = createTraceAggregationConfig(
+        dataset.timeFieldName,
+        calculatedInterval,
+        breakdownField
+      );
+
+      promises.push(
+        dispatch(
+          executeRequestCountQuery({
+            services,
+            cacheKey: requestCacheKey,
+            baseQuery,
+            config,
+          })
+        )
+      );
+
+      promises.push(
+        dispatch(
+          executeErrorCountQuery({
+            services,
+            cacheKey: errorCacheKey,
+            baseQuery,
+            config,
+          })
+        )
+      );
+
+      promises.push(
+        dispatch(
+          executeLatencyQuery({
+            services,
+            cacheKey: latencyCacheKey,
+            baseQuery,
+            config,
+          })
+        )
+      );
+    }
+  }
+
   // Handle tab queries as before (keeping existing tab logic)
   const visualizationTab = services.tabRegistry.getTab('explore_visualization_tab');
   let visualizationTabPrepareQuery = defaultPrepareQueryString;
   if (visualizationTab?.prepareQuery) {
     const prepareQuery = visualizationTab.prepareQuery;
     visualizationTabPrepareQuery = (queryParam: Query): string => {
-      return prepareQuery(getQueryWithSource(queryParam));
+      return prepareQuery(queryParam);
     };
   }
   const visualizationTabCacheKey = visualizationTabPrepareQuery(query);
@@ -291,7 +367,7 @@ export const executeQueries = createAsyncThunk<
     if (activeTab?.prepareQuery) {
       const prepareQuery = activeTab.prepareQuery;
       activeTabPrepareQuery = (queryParam: Query): string => {
-        return prepareQuery(getQueryWithSource(queryParam));
+        return prepareQuery(queryParam);
       };
     }
     activeTabCacheKey = activeTabPrepareQuery(query);
@@ -430,7 +506,7 @@ const executeQueryBase = async (
       ...query,
       dataset,
       query:
-        isHistogramQuery && histogramConfig
+        query.language === 'PPL' && isHistogramQuery && histogramConfig
           ? buildPPLHistogramQuery(queryString, histogramConfig)
           : queryString,
     };
@@ -540,7 +616,18 @@ const executeQueryBase = async (
       return;
     }
 
-    const parsedError = JSON.parse(error.body.message);
+    let parsedError;
+    try {
+      parsedError = JSON.parse(error.body.message);
+    } catch (parseError) {
+      parsedError = {
+        error: {
+          reason: error.body?.message || error.message || 'Unknown Error',
+          details: error.body?.error || 'An error occurred',
+          type: error.name,
+        },
+      };
+    }
 
     // if there is no avoidDispatchingError function, dispatch Error.
     // if there is that function, and it returns false, dispatch Error
@@ -556,14 +643,14 @@ const executeQueryBase = async (
             startTime: queryStartTime,
             elapsedMs: undefined,
             error: {
-              error: error.body.error || 'Unknown Error',
+              error: error.body?.error || 'Unknown Error',
               message: {
                 details: parsedError?.error?.details || 'Unknown Error',
                 reason: parsedError?.error?.reason || 'Unknown Error',
                 type: parsedError?.error?.type,
               },
-              statusCode: error.body.statusCode,
-              originalErrorMessage: error.body.message,
+              statusCode: error.body?.statusCode,
+              originalErrorMessage: error.body?.message,
             },
           },
         })

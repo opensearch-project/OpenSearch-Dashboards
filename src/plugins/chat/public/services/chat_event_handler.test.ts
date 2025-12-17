@@ -22,6 +22,7 @@ import type { Message, AssistantMessage, ToolMessage } from '../../common/types'
 const mockAssistantActionService = ({
   updateToolCallState: jest.fn(),
   executeAction: jest.fn(),
+  hasAction: jest.fn().mockReturnValue(true),
 } as unknown) as jest.Mocked<AssistantActionService>;
 
 const mockChatService = ({
@@ -206,6 +207,23 @@ describe('ChatEventHandler', () => {
 
       mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockResult);
 
+      // Mock sendToolResult to return the expected structure
+      const mockToolMessage: ToolMessage = {
+        id: `tool-result-${toolCallId}`,
+        role: 'tool',
+        content: JSON.stringify(mockResult),
+        toolCallId,
+      };
+
+      const mockObservable = {
+        subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+      };
+
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: mockObservable,
+        toolMessage: mockToolMessage,
+      });
+
       await chatEventHandler.handleEvent({
         type: EventType.TOOL_CALL_START,
         toolCallId,
@@ -285,6 +303,7 @@ describe('ChatEventHandler', () => {
       const toolCallId = 'tool-123';
       const notFoundError = new Error('Action not found');
 
+      mockAssistantActionService.hasAction.mockReturnValueOnce(false);
       mockAssistantActionService.executeAction = jest.fn().mockRejectedValue(notFoundError);
 
       await chatEventHandler.handleEvent({

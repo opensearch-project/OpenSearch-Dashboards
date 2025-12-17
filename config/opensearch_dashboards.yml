@@ -276,30 +276,35 @@
 # data_source.encryption.wrappingKeyNamespace: 'changeme'
 # data_source.encryption.wrappingKey: [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 
+# IP addresses and CIDR ranges that are blocked from being used as data source endpoints
+# This prevents connections to internal/private networks and reserved IP ranges
 # data_source.endpointDeniedIPs: [
-#    '127.0.0.0/8',
-#    '::1/128',
-#    '169.254.0.0/16',
-#    'fe80::/10',
-#    '10.0.0.0/8',
-#    '172.16.0.0/12',
-#    '192.168.0.0/16',
-#    'fc00::/7',
-#    '0.0.0.0/8',
-#    '100.64.0.0/10',
-#    '192.0.0.0/24',
-#    '192.0.2.0/24',
-#    '198.18.0.0/15',
-#    '192.88.99.0/24',
-#    '198.51.100.0/24',
-#    '203.0.113.0/24',
-#    '224.0.0.0/4',
-#    '240.0.0.0/4',
-#    '255.255.255.255/32',
-#    '::/128',
-#    '2001:db8::/32',
-#    'ff00::/8',
+#    '127.0.0.0/8',           # Loopback addresses (localhost)
+#    '::1/128',               # IPv6 loopback address
+#    '169.254.0.0/16',        # Link-local addresses (AWS metadata service)
+#    'fe80::/10',             # IPv6 link-local addresses
+#    '10.0.0.0/8',            # Private network - Class A
+#    '172.16.0.0/12',         # Private network - Class B
+#    '192.168.0.0/16',        # Private network - Class C
+#    'fc00::/7',              # IPv6 Unique Local Addresses (ULA)
+#    '0.0.0.0/8',             # Reserved IP Address
+#    '100.64.0.0/10',         # Shared address space (CGNAT)
+#    '192.0.0.0/24',          # IETF Protocol Assignments
+#    '192.0.2.0/24',          # Documentation and examples (TEST-NET-1)
+#    '198.18.0.0/15',         # Benchmarking
+#    '192.88.99.0/24',        # IPv6 to IPv4 relay (deprecated)
+#    '198.51.100.0/24',       # Documentation and examples (TEST-NET-2)
+#    '203.0.113.0/24',        # Documentation and examples (TEST-NET-3)
+#    '224.0.0.0/4',           # Multicast addresses
+#    '240.0.0.0/4',           # Reserved for future use
+#    '255.255.255.255/32',    # Broadcast address
+#    '::/128',                # IPv6 unspecified address
+#    '2001:db8::/32',         # IPv6 documentation and examples
+#    'ff00::/8',              # IPv6 multicast addresses
 # ]
+
+# Endpoint hostname suffixes that bypass IP validation
+# data_source.endpointAllowlistedSuffixes: []
 
 # Optional setting that enables you to specify a path to PEM files for the certificate
 # authority for your connected datasources.

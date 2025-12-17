@@ -11,7 +11,72 @@ import {
   OpenSearchDashboardsRequest,
   Capabilities,
 } from '../../../../core/server';
-import { forwardToMLCommonsAgent } from './ml_routes/ml_commons_agent';
+import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
+import { MLAgentRouterRegistry } from './ml_routes/router_registry';
+
+/**
+ * Forward request to external AG-UI server
+ */
+async function forwardToAgUI(
+  agUiUrl: string,
+  request: OpenSearchDashboardsRequest,
+  response: any,
+  dataSourceId?: string,
+  logger?: Logger
+) {
+  // Prepare request body - include dataSourceId if provided
+  const requestBody = dataSourceId ? { ...(request.body || {}), dataSourceId } : request.body;
+
+  logger?.debug('Forwarding to external AG-UI', { agUiUrl, dataSourceId });
+
+  // Forward the request to AG-UI server using native fetch (Node 18+)
+  const agUiResponse = await fetch(agUiUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'text/event-stream',
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  if (!agUiResponse.ok) {
+    return response.customError({
+      statusCode: agUiResponse.status,
+      body: {
+        message: `AG-UI server error: ${agUiResponse.statusText}`,
+      },
+    });
+  }
+
+  // Convert Web ReadableStream to Node.js Readable stream
+  const reader = agUiResponse.body!.getReader();
+  const stream = new Readable({
+    async read() {
+      try {
+        const { done, value } = await reader.read();
+        if (done) {
+          this.push(null); // Signal end of stream
+        } else {
+          this.push(Buffer.from(value)); // Push as Buffer for binary mode
+        }
+      } catch (error) {
+        this.destroy(error as Error);
+      }
+    },
+  });
+
+  return response.ok({
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Content-Encoding': 'identity', // Prevents compression buffering
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+      'Transfer-Encoding': 'chunked', // Enables HTTP chunked transfer
+      'X-Accel-Buffering': 'no', // Disables nginx buffering
+    },
+    body: stream,
+  });
+}
 
 export function defineRoutes(
   router: IRouter,
@@ -36,28 +101,40 @@ export function defineRoutes(
           state: schema.maybe(schema.any()),
           forwardedProps: schema.maybe(schema.any()),
         }),
+        query: schema.maybe(
+          schema.object({
+            dataSourceId: schema.maybe(schema.string()),
+          })
+        ),
       },
     },
     async (context, request, response) => {
+      const dataSourceId = request.query?.dataSourceId;
+
       try {
         // Check if ML Commons agentic features are enabled via capabilities
         const capabilitiesResolver = getCapabilitiesResolver?.();
-        if (capabilitiesResolver) {
-          const capabilities = await capabilitiesResolver(request);
+        const capabilities = capabilitiesResolver ? await capabilitiesResolver(request) : undefined;
 
-          if (capabilities?.investigation?.agenticFeaturesEnabled === true) {
-            logger.debug('Routing to ML Commons agent proxy');
-            return await forwardToMLCommonsAgent(
-              context,
-              request,
-              response,
-              logger,
-              mlCommonsAgentId
-            );
-          }
+        // Initialize ML agent routers based on current capabilities (if not already done)
+        // This ensures routers are registered based on actual runtime capabilities
+        MLAgentRouterRegistry.initialize(capabilities);
+
+        // Get the registered ML agent router (if any)
+        const mlRouter = MLAgentRouterFactory.getRouter();
+
+        if (mlRouter) {
+          logger.info(`Routing to ML Commons agent via ${mlRouter.getRouterName()}`);
+          return await mlRouter.forward(
+            context,
+            request,
+            response,
+            logger,
+            mlCommonsAgentId,
+            dataSourceId
+          );
         }
 
-        // Fallback to external AG-UI
         if (!agUiUrl) {
           return response.customError({
             statusCode: 503,
@@ -68,70 +145,10 @@ export function defineRoutes(
           });
         }
 
-        logger.debug('Routing to external AG-UI');
+        // Forward to AG-UI capable endpoint. This is the default router.
+        return await forwardToAgUI(agUiUrl, request, response, dataSourceId, logger);
       } catch (error) {
-        logger.error(`Error checking capabilities or routing: ${error}`);
-        // If capabilities check fails, fallback to external AG-UI
-        if (!agUiUrl) {
-          return response.customError({
-            statusCode: 500,
-            body: {
-              message: error instanceof Error ? error.message : 'Unknown error occurred',
-            },
-          });
-        }
-      }
-
-      try {
-        // Forward the request to AG-UI server using native fetch (Node 18+)
-        const agUiResponse = await fetch(agUiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'text/event-stream',
-          },
-          body: JSON.stringify(request.body),
-        });
-
-        if (!agUiResponse.ok) {
-          return response.customError({
-            statusCode: agUiResponse.status,
-            body: {
-              message: `AG-UI server error: ${agUiResponse.statusText}`,
-            },
-          });
-        }
-
-        // Convert Web ReadableStream to Node.js Readable stream
-        const reader = agUiResponse.body!.getReader();
-        const stream = new Readable({
-          async read() {
-            try {
-              const { done, value } = await reader.read();
-              if (done) {
-                this.push(null); // Signal end of stream
-              } else {
-                this.push(Buffer.from(value)); // Push as Buffer for binary mode
-              }
-            } catch (error) {
-              this.destroy(error as Error);
-            }
-          },
-        });
-
-        return response.ok({
-          headers: {
-            'Content-Type': 'text/event-stream',
-            'Content-Encoding': 'identity', // Prevents compression buffering
-            'Cache-Control': 'no-cache',
-            Connection: 'keep-alive',
-            'Transfer-Encoding': 'chunked', // Enables HTTP chunked transfer
-            'X-Accel-Buffering': 'no', // Disables nginx buffering
-          },
-          body: stream,
-        });
-      } catch (error) {
-        logger.error(`Error proxying request to AG-UI: ${error}`);
+        logger.error(`AI agent routing error: ${error}`);
         return response.customError({
           statusCode: 500,
           body: {

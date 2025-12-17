@@ -191,7 +191,7 @@ describe('PatternsFlyoutEventTable', () => {
           totalItemCount={mockTotalItemCount}
         />
       );
-    }).toThrow('Dataset, patterns field, or time field is not appearing for event table');
+    }).toThrow('Dataset or patterns field is not appearing for event table');
 
     consoleErrorSpy.mockRestore();
   });
@@ -231,5 +231,74 @@ describe('PatternsFlyoutEventTable', () => {
     });
 
     expect(screen.queryByLabelText('Pattern event table')).not.toBeInTheDocument();
+  });
+
+  it('renders the event table without timestamp column when dataset has no timeFieldName', async () => {
+    const mockDatasetWithoutTimeField = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      type: 'INDEX_PATTERN',
+      timeFieldName: undefined,
+    };
+
+    const mockSearchResultsWithoutTime = {
+      hits: {
+        hits: [
+          {
+            _source: {
+              message: 'Test message 1',
+            },
+          },
+          {
+            _source: {
+              message: 'Test message 2',
+            },
+          },
+        ],
+      },
+    };
+
+    const mockSearchSourceInstance = {
+      setFields: jest.fn().mockReturnThis(),
+      fetch: jest.fn().mockResolvedValue(mockSearchResultsWithoutTime),
+    };
+
+    mockServices.data.search.searchSource.create.mockResolvedValue(mockSearchSourceInstance);
+
+    (useSelector as jest.Mock).mockImplementation((selector) => {
+      const {
+        selectDataset,
+        selectQuery,
+        selectPatternsField,
+        selectUsingRegexPatterns,
+      } = jest.requireActual('../../../application/utils/state_management/selectors');
+
+      if (selector === selectDataset) return mockDatasetWithoutTimeField;
+      if (selector === selectQuery) return mockQuery;
+      if (selector === selectPatternsField) return mockPatternsField;
+      if (selector === selectUsingRegexPatterns) return mockUsingRegexPatterns;
+
+      return undefined;
+    });
+
+    render(
+      <PatternsFlyoutEventTable
+        patternString={mockPatternString}
+        totalItemCount={mockTotalItemCount}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockServices.data.search.searchSource.create).toHaveBeenCalled();
+    });
+
+    expect(screen.getByText('Test message 1')).toBeInTheDocument();
+    expect(screen.getByText('Test message 2')).toBeInTheDocument();
+
+    // Verify the time column header does not exist
+    const table = screen.getByLabelText('Pattern event table');
+    const headers = table.querySelectorAll('th');
+    expect(headers).toHaveLength(1);
+    expect(headers[0]).toHaveTextContent('Event (message)');
   });
 });

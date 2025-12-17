@@ -7,220 +7,367 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
-import { ExploreTracesChart } from './explore_traces_chart';
 import {
-  uiReducer,
   legacyReducer,
+  uiReducer,
   queryReducer,
+  resultsReducer,
+  queryEditorReducer,
 } from '../../application/utils/state_management/slices';
-import { SortDirection } from '../../types/saved_explore_types';
 
-// Mock the query actions
-jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
-  defaultPrepareQueryString: jest.fn(() => 'mock-cache-key'),
-  executeHistogramQuery: jest.fn(),
-  executeQueries: jest.fn(),
-}));
-
-// Mock the child components
-jest.mock('./timechart_header', () => ({
-  TimechartHeader: (props: any) => (
-    <div
-      data-test-subj="mocked-timechart-header"
-      onClick={() => props.onChangeInterval('auto')}
-      onKeyDown={() => props.onChangeInterval('auto')}
-      role="button"
-      tabIndex={0}
-    >
-      Mocked TimechartHeader
-    </div>
-  ),
+jest.mock('../../../../opensearch_dashboards_react/public', () => ({
+  useOpenSearchDashboards: jest.fn(() => ({
+    services: {
+      uiSettings: { get: jest.fn() },
+      data: {
+        query: {
+          timefilter: {
+            timefilter: {
+              getTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })),
+            },
+          },
+        },
+      },
+    },
+  })),
+  withOpenSearchDashboards: jest.fn((component) => component),
 }));
 
 jest.mock('./histogram/histogram', () => ({
-  DiscoverHistogram: (props: any) => (
-    <div data-test-subj={`mocked-histogram-${props.chartData.yAxisLabel}`}>
-      Mocked Histogram for {props.chartData.yAxisLabel}
+  DiscoverHistogram: ({ chartData }: { chartData: any }) => (
+    <div data-test-subj="discover-histogram">
+      Chart with {chartData?.values?.length || 0} data points
     </div>
   ),
 }));
 
-describe('ExploreTracesChart', () => {
-  const createMockStore = (initialState = {}) => {
-    return configureStore({
-      reducer: {
-        ui: uiReducer,
-        legacy: legacyReducer,
-        query: queryReducer,
-      },
-      preloadedState: {
-        ui: { activeTabId: 'traces', showHistogram: true },
-        legacy: {
-          interval: 'auto',
-          columns: ['@timestamp', 'message'],
-          sort: [['@timestamp', 'desc' as SortDirection]],
-        },
-        query: {
-          query: 'SELECT * FROM traces',
-          language: 'ppl',
-          dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
-        },
-        ...initialState,
-      },
-    });
-  };
+jest.mock('./timechart_header', () => ({
+  TimechartHeader: () => <div data-test-subj="timechart-header">Timechart Header</div>,
+}));
 
-  const mockServices = {
-    tabRegistry: { getAllTabs: jest.fn(() => []) },
-  };
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  EuiCallOut: ({ title, children, color }: any) => (
+    <div data-test-subj={`eui-callout-${color}`}>
+      <div>{title}</div>
+      <div>{children}</div>
+    </div>
+  ),
+  EuiLoadingSpinner: () => <div role="progressbar">Loading...</div>,
+}));
+
+// Import after mocks
+import { ExploreTracesChart } from './explore_traces_chart';
+
+describe('ExploreTracesChart - Field Missing Error Messages', () => {
+  const mockStore = configureStore({
+    reducer: {
+      legacy: legacyReducer,
+      ui: uiReducer,
+      query: queryReducer,
+      results: resultsReducer,
+      queryEditor: queryEditorReducer,
+    },
+    preloadedState: {
+      legacy: {
+        savedSearch: undefined,
+        savedQuery: undefined,
+        columns: [],
+        sort: [],
+        interval: '5m',
+        isDirty: false,
+        lineCount: undefined,
+      },
+      ui: {
+        activeTabId: 'traces',
+        showHistogram: true,
+      },
+      query: {
+        query: 'source=traces',
+        language: 'PPL',
+        dataset: {
+          id: 'trace-dataset',
+          title: 'trace-dataset',
+          type: 'INDEX_PATTERN',
+        },
+      },
+      queryEditor: {
+        breakdownField: undefined,
+        queryStatusMap: {},
+        overallQueryStatus: {
+          status: 'READY' as any,
+          elapsedMs: 100,
+          startTime: Date.now(),
+        },
+        editorMode: 'Query' as any,
+        promptModeIsAvailable: false,
+        promptToQueryIsLoading: false,
+        summaryAgentIsAvailable: false,
+        lastExecutedPrompt: '',
+        lastExecutedTranslatedQuery: '',
+        queryExecutionButtonStatus: 'REFRESH',
+        isQueryEditorDirty: false,
+        hasUserInitiatedQuery: false,
+      },
+      results: {},
+    },
+  });
 
   const defaultProps = {
-    bucketInterval: { scaled: false, description: 'minute', scale: 1 },
-    config: {
-      get: jest.fn((key: string) => {
-        if (key === 'dateFormat') return 'YYYY-MM-DD HH:mm:ss';
-        return 'UTC';
-      }),
-    },
+    bucketInterval: { scale: 1, description: '5m' },
+    config: { get: jest.fn() } as any,
     data: {
       query: {
         timefilter: {
           timefilter: {
-            getTime: jest.fn(() => ({
-              from: '2023-01-01T00:00:00Z',
-              to: '2023-01-02T00:00:00Z',
-            })),
+            getTime: jest.fn(() => ({ from: 'now-15m', to: 'now' })),
           },
         },
       },
-      search: {
-        aggs: {
-          intervalOptions: [
-            { display: 'Auto', val: 'auto' },
-            { display: 'Second', val: 's' },
-          ],
-        },
-      },
-    },
-    services: mockServices,
+    } as any,
+    services: {} as any,
     showHistogram: true,
+    timeFieldName: 'endTime',
   };
 
-  const mockChartData = {
-    values: [{ x: 1609459200000, y: 10 }],
-    xAxisOrderedValues: [1609459200000],
-    xAxisFormat: { id: 'date', params: { pattern: 'YYYY-MM-DD' } },
-    xAxisLabel: 'timestamp',
-    yAxisLabel: 'Count',
-    ordered: {
-      date: true,
-      interval: { asMilliseconds: () => 3600000 },
-      intervalOpenSearchUnit: 'h',
-      intervalOpenSearchValue: 1,
-      min: 1609459200000,
-      max: 1609462800000,
-    },
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it('renders the component with basic elements', () => {
-    const store = createMockStore();
-
-    render(
-      <Provider store={store}>
-        <ExploreTracesChart {...(defaultProps as any)} />
-      </Provider>
-    );
-
-    expect(screen.getByTestId('dscChartWrapper')).toBeInTheDocument();
-    expect(screen.getByTestId('dscChartChartheader')).toBeInTheDocument();
-    expect(screen.getByTestId('histogramCollapseBtn')).toBeInTheDocument();
-    expect(screen.getByTestId('mocked-timechart-header')).toBeInTheDocument();
-  });
-
-  it('renders request chart when requestChartData is provided', () => {
-    const store = createMockStore();
-    const requestChartData = { ...mockChartData, yAxisLabel: 'Request Count' };
-    const props = { ...defaultProps, requestChartData };
-
-    render(
-      <Provider store={store}>
-        <ExploreTracesChart {...(props as any)} />
-      </Provider>
-    );
-
-    expect(screen.getByTestId('exploreTimechart-request')).toBeInTheDocument();
-    expect(screen.getByTestId('mocked-histogram-Request Count')).toBeInTheDocument();
-  });
-
-  it('renders error chart when errorChartData is provided', () => {
-    const store = createMockStore();
-    const errorChartData = { ...mockChartData, yAxisLabel: 'Error Count' };
-    const props = { ...defaultProps, errorChartData };
-
-    render(
-      <Provider store={store}>
-        <ExploreTracesChart {...(props as any)} />
-      </Provider>
-    );
-
-    expect(screen.getByTestId('exploreTimechart-error')).toBeInTheDocument();
-    expect(screen.getByTestId('mocked-histogram-Error Count')).toBeInTheDocument();
-  });
-
-  it('renders latency chart when latencyChartData is provided', () => {
-    const store = createMockStore();
-    const latencyChartData = { ...mockChartData, yAxisLabel: 'Average Latency' };
-    const props = { ...defaultProps, latencyChartData };
-
-    render(
-      <Provider store={store}>
-        <ExploreTracesChart {...(props as any)} />
-      </Provider>
-    );
-
-    expect(screen.getByTestId('exploreTimechart-latency')).toBeInTheDocument();
-    expect(screen.getByTestId('mocked-histogram-Average Latency')).toBeInTheDocument();
-  });
-
-  it('renders all three charts when all chart data is provided', () => {
-    const store = createMockStore();
-    const requestChartData = { ...mockChartData, yAxisLabel: 'Request Count' };
-    const errorChartData = { ...mockChartData, yAxisLabel: 'Error Count' };
-    const latencyChartData = { ...mockChartData, yAxisLabel: 'Average Latency' };
-
-    const props = {
-      ...defaultProps,
-      requestChartData,
-      errorChartData,
-      latencyChartData,
+  it('displays error message when durationInNanos field is missing from dataset', () => {
+    const latencyError = {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: {
+        details: "can't resolve Symbol(namespace=FIELD_NAME, name=durationInNanos) in type env",
+        reason: 'SemanticCheckException',
+        type: 'SemanticCheckException',
+      },
+      originalErrorMessage: "can't resolve Symbol(namespace=FIELD_NAME, name=durationInNanos)",
     };
 
     render(
-      <Provider store={store}>
-        <ExploreTracesChart {...(props as any)} />
+      <Provider store={mockStore}>
+        <ExploreTracesChart
+          {...defaultProps}
+          requestChartData={{ values: [], xAxisOrderedValues: [] } as any}
+          errorChartData={{ values: [], xAxisOrderedValues: [] } as any}
+          latencyChartData={undefined}
+          latencyError={latencyError}
+        />
       </Provider>
     );
 
-    expect(screen.getByTestId('exploreTimechart-request')).toBeInTheDocument();
-    expect(screen.getByTestId('exploreTimechart-error')).toBeInTheDocument();
-    expect(screen.getByTestId('exploreTimechart-latency')).toBeInTheDocument();
+    expect(screen.getByText('Latency Unavailable')).toBeInTheDocument();
+    expect(
+      screen.getByText(/Duration field "durationInNanos" not found in this dataset/)
+    ).toBeInTheDocument();
+    expect(screen.getByText(/This field is required for latency metrics/)).toBeInTheDocument();
+
+    // Other charts should still render normally
+    expect(screen.getAllByTestId('discover-histogram')).toHaveLength(2); // Request and error charts
   });
 
-  it('does not render charts when chart data is not provided', () => {
-    const store = createMockStore();
+  it('displays error message when status field is missing from dataset', () => {
+    const errorQueryError = {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: {
+        details: "can't resolve Symbol(namespace=FIELD_NAME, name=status) in type env",
+        reason: 'SemanticCheckException',
+        type: 'SemanticCheckException',
+      },
+      originalErrorMessage: "can't resolve Symbol(namespace=FIELD_NAME, name=status)",
+    };
 
     render(
-      <Provider store={store}>
-        <ExploreTracesChart {...(defaultProps as any)} />
+      <Provider store={mockStore}>
+        <ExploreTracesChart
+          {...defaultProps}
+          requestChartData={{ values: [], xAxisOrderedValues: [] } as any}
+          errorChartData={undefined}
+          latencyChartData={{ values: [], xAxisOrderedValues: [] } as any}
+          errorQueryError={errorQueryError}
+        />
       </Provider>
     );
 
-    expect(screen.queryByTestId('exploreTimechart-request')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('exploreTimechart-error')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('exploreTimechart-latency')).not.toBeInTheDocument();
+    expect(screen.getByText('Error Count Unavailable')).toBeInTheDocument();
+    expect(screen.getByText(/Status field "status" not found in this dataset/)).toBeInTheDocument();
+    expect(screen.getByText(/This field is required for error metrics/)).toBeInTheDocument();
+
+    // Other charts should still render normally
+    expect(screen.getAllByTestId('discover-histogram')).toHaveLength(2); // Request and latency charts
+  });
+
+  it('displays error message when time field is missing from dataset', () => {
+    const requestError = {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: {
+        details: "can't resolve Symbol(namespace=FIELD_NAME, name=endTime) in type env",
+        reason: 'SemanticCheckException',
+        type: 'SemanticCheckException',
+      },
+      originalErrorMessage: "can't resolve Symbol(namespace=FIELD_NAME, name=endTime)",
+    };
+
+    render(
+      <Provider store={mockStore}>
+        <ExploreTracesChart
+          {...defaultProps}
+          requestChartData={undefined}
+          errorChartData={{ values: [], xAxisOrderedValues: [] } as any}
+          latencyChartData={{ values: [], xAxisOrderedValues: [] } as any}
+          requestError={requestError}
+          timeFieldName="endTime"
+        />
+      </Provider>
+    );
+
+    expect(screen.getByText('Request Count Unavailable')).toBeInTheDocument();
+    expect(screen.getByText(/Time field "endTime" not found in this dataset/)).toBeInTheDocument();
+    expect(screen.getByText(/This field is required for time-based metrics/)).toBeInTheDocument();
+
+    // Other charts should still render normally
+    expect(screen.getAllByTestId('discover-histogram')).toHaveLength(2); // Error and latency charts
+  });
+
+  it('displays error message with custom time field name', () => {
+    const requestError = {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: {
+        details: "can't resolve Symbol(namespace=FIELD_NAME, name=@timestamp) in type env",
+        reason: 'SemanticCheckException',
+        type: 'SemanticCheckException',
+      },
+      originalErrorMessage: "can't resolve Symbol(namespace=FIELD_NAME, name=@timestamp)",
+    };
+
+    render(
+      <Provider store={mockStore}>
+        <ExploreTracesChart
+          {...defaultProps}
+          requestChartData={undefined}
+          errorChartData={{ values: [], xAxisOrderedValues: [] } as any}
+          latencyChartData={{ values: [], xAxisOrderedValues: [] } as any}
+          requestError={requestError}
+          timeFieldName="@timestamp"
+        />
+      </Provider>
+    );
+
+    // Should use the actual time field name in the error message
+    expect(
+      screen.getByText(/Time field "@timestamp" not found in this dataset/)
+    ).toBeInTheDocument();
+  });
+
+  it('displays multiple field missing error messages simultaneously', () => {
+    const requestError = {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: {
+        details: "can't resolve Symbol(namespace=FIELD_NAME, name=endTime) in type env",
+        reason: 'SemanticCheckException',
+        type: 'SemanticCheckException',
+      },
+      originalErrorMessage: "can't resolve Symbol(namespace=FIELD_NAME, name=endTime)",
+    };
+
+    const errorQueryError = {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: {
+        details: "can't resolve Symbol(namespace=FIELD_NAME, name=status) in type env",
+        reason: 'SemanticCheckException',
+        type: 'SemanticCheckException',
+      },
+      originalErrorMessage: "can't resolve Symbol(namespace=FIELD_NAME, name=status)",
+    };
+
+    const latencyError = {
+      statusCode: 400,
+      error: 'Bad Request',
+      message: {
+        details: "can't resolve Symbol(namespace=FIELD_NAME, name=durationInNanos) in type env",
+        reason: 'SemanticCheckException',
+        type: 'SemanticCheckException',
+      },
+      originalErrorMessage: "can't resolve Symbol(namespace=FIELD_NAME, name=durationInNanos)",
+    };
+
+    render(
+      <Provider store={mockStore}>
+        <ExploreTracesChart
+          {...defaultProps}
+          requestChartData={undefined}
+          errorChartData={undefined}
+          latencyChartData={undefined}
+          requestError={requestError}
+          errorQueryError={errorQueryError}
+          latencyError={latencyError}
+        />
+      </Provider>
+    );
+
+    expect(screen.getByText('Request Count Unavailable')).toBeInTheDocument();
+    expect(screen.getByText('Error Count Unavailable')).toBeInTheDocument();
+    expect(screen.getByText('Latency Unavailable')).toBeInTheDocument();
+
+    expect(screen.getByText(/Time field "endTime" not found/)).toBeInTheDocument();
+    expect(screen.getByText(/Status field "status" not found/)).toBeInTheDocument();
+    expect(screen.getByText(/Duration field "durationInNanos" not found/)).toBeInTheDocument();
+
+    // No charts should render
+    expect(screen.queryByTestId('discover-histogram')).not.toBeInTheDocument();
+  });
+
+  it('handles non-field-missing errors gracefully', () => {
+    const genericError = {
+      statusCode: 500,
+      error: 'Internal Server Error',
+      message: {
+        details: 'Some other error occurred',
+        reason: 'ServerException',
+        type: 'ServerException',
+      },
+      originalErrorMessage: 'Some other error occurred',
+    };
+
+    render(
+      <Provider store={mockStore}>
+        <ExploreTracesChart
+          {...defaultProps}
+          requestChartData={undefined}
+          errorChartData={{ values: [], xAxisOrderedValues: [] } as any}
+          latencyChartData={{ values: [], xAxisOrderedValues: [] } as any}
+          requestError={genericError}
+        />
+      </Provider>
+    );
+
+    // Should show actual error message instead of infinite loading spinner
+    expect(screen.getByText('Request Count Unavailable')).toBeInTheDocument();
+    expect(screen.getByText('Some other error occurred')).toBeInTheDocument();
+    expect(screen.queryByText(/not found in this dataset/)).not.toBeInTheDocument();
+
+    // Other charts should still render normally
+    expect(screen.getAllByTestId('discover-histogram')).toHaveLength(2);
+  });
+
+  it('renders charts normally when no errors are present', () => {
+    render(
+      <Provider store={mockStore}>
+        <ExploreTracesChart
+          {...defaultProps}
+          requestChartData={{ values: [{ x: 1, y: 10 }], xAxisOrderedValues: [] } as any}
+          errorChartData={{ values: [{ x: 1, y: 2 }], xAxisOrderedValues: [] } as any}
+          latencyChartData={{ values: [{ x: 1, y: 1.5 }], xAxisOrderedValues: [] } as any}
+        />
+      </Provider>
+    );
+
+    // Should render all three charts
+    expect(screen.getAllByTestId('discover-histogram')).toHaveLength(3);
+    expect(screen.queryByText(/Unavailable/)).not.toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });
 });

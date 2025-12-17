@@ -169,9 +169,11 @@ export class CodeEditor extends React.Component<Props, {}> {
 
     editor.onMouseDown((e) => {
       if (e.target.position) {
-        e.event.preventDefault(); // Prevent Monaco's default focus handling
-        editor.setPosition(e.target.position!);
-        editor.revealPosition(e.target.position!);
+        if (e.event.detail === 1) {
+          e.event.preventDefault(); // Prevent Monaco's default focus handling
+          editor.setPosition(e.target.position!);
+          editor.revealPosition(e.target.position!);
+        }
         editor.focus();
       }
     });

@@ -3,12 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Observable } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
+import { AssistantActionService } from '../../../context_provider/public';
 import { ChatLayoutMode } from '../components/chat_header_button';
 import type { ChatWindowInstance } from '../components/chat_window';
+import {
+  IUiSettingsClient,
+  UiSettingScope,
+  ChatServiceStart,
+  ChatWindowState,
+  WorkspacesStart,
+} from '../../../../core/public';
+import { getDefaultDataSourceId } from '../../../data_source_management/public';
 
 export interface ChatState {
   messages: Message[];
@@ -21,12 +30,6 @@ export interface CurrentChatState {
   messages: Message[];
 }
 
-export interface ChatWindowState {
-  isWindowOpen: boolean;
-  windowMode: ChatLayoutMode;
-  paddingSize: number;
-}
-
 export type ChatWindowStateCallback = (
   newWindowState: ChatWindowState,
   changed: { [key in keyof ChatWindowState]: boolean }
@@ -34,44 +37,66 @@ export type ChatWindowStateCallback = (
 
 export class ChatService {
   private agent: AgUiAgent;
-  private threadId: string;
   public availableTools: ToolDefinition[] = [];
   public events$: any;
   private activeRequests: Set<string> = new Set();
   private requestCounter: number = 0;
+  private uiSettings: IUiSettingsClient;
+  private coreChatService?: ChatServiceStart;
+  private workspaces?: WorkspacesStart;
 
   // Chat state persistence
   private readonly STORAGE_KEY = 'chat.currentState';
   private currentMessages: Message[] = [];
 
-  // Window state management
-  private _isWindowOpen: boolean = false;
-  private _windowMode: ChatLayoutMode = ChatLayoutMode.SIDECAR;
-  private _windowPaddingSize: number = 400;
-  private windowStateCallbacks: Set<ChatWindowStateCallback> = new Set();
-  private windowOpenCallbacks: Set<() => void> = new Set();
-  private windowCloseCallbacks: Set<() => void> = new Set();
-
   // ChatWindow ref for delegating sendMessage calls to proper timeline management
   private chatWindowRef: React.RefObject<ChatWindowInstance> | null = null;
 
-  constructor() {
+  // Subscription to assistant action service for tool updates
+  private toolSubscription?: Subscription;
+
+  constructor(
+    uiSettings: IUiSettingsClient,
+    coreChatService?: ChatServiceStart,
+    workspaces?: WorkspacesStart
+  ) {
     // No need to pass URL anymore - agent will use the proxy endpoint
     this.agent = new AgUiAgent();
+    this.uiSettings = uiSettings;
+    this.coreChatService = coreChatService;
+    this.workspaces = workspaces;
 
     // Try to restore existing state first
     const currentChatState = this.loadCurrentChatState();
-    this.threadId = currentChatState?.threadId || this.generateThreadId();
-    this.currentMessages = currentChatState?.messages || [];
+    if (currentChatState?.threadId && this.coreChatService) {
+      // Set thread ID in core service
+      this.coreChatService.setThreadId(currentChatState.threadId);
+    }
+
+    // Clean up trailing error messages from interrupted sessions (e.g., page refresh)
+    const messages = currentChatState?.messages || [];
+    this.currentMessages = this.removeTrailingErrorMessages(messages);
+
+    // Subscribe to assistant action service to keep tools in sync
+    const assistantActionService = AssistantActionService.getInstance();
+    this.toolSubscription = assistantActionService.getState$().subscribe((state) => {
+      this.availableTools = state.toolDefinitions;
+    });
   }
 
   public getThreadId = () => {
-    return this.threadId;
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    return this.coreChatService.getThreadId();
   };
 
-  private generateThreadId(): string {
-    return `thread-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-  }
+  public getThreadId$ = () => {
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    return this.coreChatService.getThreadId$();
+  };
 
   private generateRunId(): string {
     return `run-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
@@ -88,89 +113,94 @@ export class ChatService {
 
   private addActiveRequest(requestId: string): void {
     this.activeRequests.add(requestId);
-    // eslint-disable-next-line no-console
-    console.log(
-      `📊 [ChatService] Active requests: ${this.activeRequests.size} (added: ${requestId})`
-    );
   }
 
   private removeActiveRequest(requestId: string): void {
     this.activeRequests.delete(requestId);
-    // eslint-disable-next-line no-console
-    console.log(
-      `📊 [ChatService] Active requests: ${this.activeRequests.size} (removed: ${requestId})`
-    );
   }
 
-  // Window state management public API
+  // Window state management - delegate to core service
   public isWindowOpen(): boolean {
-    return this._isWindowOpen;
-  }
-
-  public getWindowMode(): ChatLayoutMode {
-    return this._windowMode;
-  }
-
-  public getPaddingSize(): number {
-    return this._windowPaddingSize;
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    return this.coreChatService.isWindowOpen();
   }
 
   public getWindowState(): ChatWindowState {
-    return {
-      isWindowOpen: this._isWindowOpen,
-      windowMode: this._windowMode,
-      paddingSize: this._windowPaddingSize,
-    };
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    return this.coreChatService.getWindowState();
+  }
+
+  public getWindowMode(): ChatLayoutMode {
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    const windowMode = this.coreChatService.getWindowState().windowMode;
+    return windowMode === 'sidecar' ? ChatLayoutMode.SIDECAR : ChatLayoutMode.FULLSCREEN;
+  }
+
+  public getPaddingSize(): number {
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    const paddingSize = this.coreChatService.getWindowState().paddingSize;
+    // Fallback to default if undefined
+    return paddingSize ?? 400;
   }
 
   public setWindowState(newWindowState: Partial<ChatWindowState>): void {
-    const { isWindowOpen, windowMode, paddingSize } = newWindowState;
-    const previousWindowState = this.getWindowState();
-    const changed = {
-      isWindowOpen: false,
-      windowMode: false,
-      paddingSize: false,
-    };
-
-    if (isWindowOpen !== undefined && previousWindowState.isWindowOpen !== isWindowOpen) {
-      this._isWindowOpen = isWindowOpen;
-      changed.isWindowOpen = true;
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
     }
-
-    if (windowMode !== undefined && previousWindowState.windowMode !== windowMode) {
-      this._windowMode = windowMode;
-      changed.windowMode = true;
-    }
-
-    if (paddingSize !== undefined && previousWindowState.paddingSize !== paddingSize) {
-      this._windowPaddingSize = paddingSize;
-      changed.paddingSize = true;
-    }
-
-    // Notify listeners if state changed
-    if (changed.isWindowOpen || changed.windowMode || changed.paddingSize) {
-      this.windowStateCallbacks.forEach((callback) =>
-        callback({ ...previousWindowState, ...newWindowState }, changed)
-      );
-    }
+    this.coreChatService.setWindowState(newWindowState);
   }
 
   public onWindowStateChange(callback: ChatWindowStateCallback): () => void {
-    this.windowStateCallbacks.add(callback);
-    // Return unsubscribe function
-    return () => this.windowStateCallbacks.delete(callback);
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+
+    let previousState: ChatWindowState | null = null;
+
+    // Subscribe to core service observable and add change tracking logic
+    const subscription = this.coreChatService.getWindowState$().subscribe((newState) => {
+      if (previousState === null) {
+        previousState = { ...newState };
+        return;
+      }
+
+      // Compare with previous state to determine what changed
+      const changed = {
+        isWindowOpen: previousState.isWindowOpen !== newState.isWindowOpen,
+        windowMode: previousState.windowMode !== newState.windowMode,
+        paddingSize: previousState.paddingSize !== newState.paddingSize,
+      };
+
+      // Only notify if something actually changed
+      if (changed.isWindowOpen || changed.windowMode || changed.paddingSize) {
+        callback(newState, changed);
+        previousState = { ...newState };
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }
 
   public onWindowOpenRequest(callback: () => void): () => void {
-    this.windowOpenCallbacks.add(callback);
-    // Return unsubscribe function
-    return () => this.windowOpenCallbacks.delete(callback);
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    return this.coreChatService.onWindowOpen(callback);
   }
 
   public onWindowCloseRequest(callback: () => void): () => void {
-    this.windowCloseCallbacks.add(callback);
-    // Return unsubscribe function
-    return () => this.windowCloseCallbacks.delete(callback);
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    return this.coreChatService.onWindowClose(callback);
   }
 
   // ChatWindow ref management for proper timeline handling
@@ -183,17 +213,17 @@ export class ChatService {
   }
 
   public async openWindow(): Promise<void> {
-    if (!this._isWindowOpen) {
-      // Trigger callbacks to request window opening
-      this.windowOpenCallbacks.forEach((callback) => callback());
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
     }
+    await this.coreChatService.openWindow();
   }
 
   public async closeWindow(): Promise<void> {
-    if (this._isWindowOpen) {
-      // Trigger callbacks to request window closing
-      this.windowCloseCallbacks.forEach((callback) => callback());
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
     }
+    await this.coreChatService.closeWindow();
   }
 
   public async sendMessageWithWindow(
@@ -218,7 +248,7 @@ export class ChatService {
     }
 
     // If ChatWindow is available, delegate to its sendMessage for proper timeline management
-    if (this.chatWindowRef?.current && this._isWindowOpen) {
+    if (this.chatWindowRef?.current && this.isWindowOpen()) {
       try {
         await this.chatWindowRef.current.sendMessage({ content });
 
@@ -245,6 +275,82 @@ export class ChatService {
     return result;
   }
 
+  /**
+   * Extract data source ID from page context
+   * Looks for page contexts with appId and dataset.dataSource.id structure
+   */
+  private extractDataSourceIdFromPageContext(allContexts: any[]): string | undefined {
+    // Find page context by checking for 'page' category and appId in value
+    const pageContext = allContexts.find((ctx) => {
+      // Look for contexts in 'page' category instead of filtering by ID existence
+      if (!ctx.categories?.includes('page')) return false;
+
+      try {
+        const value = typeof ctx.value === 'string' ? JSON.parse(ctx.value) : ctx.value;
+        return value?.appId; // Page contexts have appId
+      } catch {
+        return false;
+      }
+    });
+
+    if (!pageContext) return undefined;
+
+    const contextValue =
+      typeof pageContext.value === 'string' ? JSON.parse(pageContext.value) : pageContext.value;
+
+    // TODO: Consider adding more robust nested field search for dataSource.id
+    // if the standard dataset.dataSource.id pattern is not found
+    return contextValue?.dataset?.dataSource?.id;
+  }
+
+  /**
+   * Get workspace-aware data source ID
+   * Determines the correct data source based on current workspace context
+   */
+  private async getWorkspaceAwareDataSourceId(): Promise<string | undefined> {
+    try {
+      // Try to get data source from page context first
+      const contextStore = (window as any).assistantContextStore;
+      const allContexts = contextStore ? contextStore.getAllContexts() : [];
+
+      const pageDataSourceId = this.extractDataSourceIdFromPageContext(allContexts);
+      if (pageDataSourceId) {
+        return pageDataSourceId;
+      }
+
+      // Fallback to existing workspace-aware logic
+      if (!this.uiSettings) {
+        // eslint-disable-next-line no-console
+        console.warn('UI Settings not available, using default data source');
+        return undefined;
+      }
+
+      // Get workspace context
+      const workspaces = this.workspaces;
+      if (!workspaces) {
+        // eslint-disable-next-line no-console
+        console.warn('Workspaces service not available, using global scope');
+        return undefined;
+      }
+
+      const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
+
+      // Determine scope based on workspace context
+      const scope: UiSettingScope = !!currentWorkspaceId
+        ? UiSettingScope.WORKSPACE
+        : UiSettingScope.GLOBAL;
+
+      // Get default data source with proper scope
+      const dataSourceId = await getDefaultDataSourceId(this.uiSettings, scope);
+
+      return dataSourceId || undefined;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to determine data source, proceeding without:', error);
+      return undefined; // Graceful fallback - undefined means local cluster
+    }
+  }
+
   public async sendMessage(
     content: string,
     messages: Message[]
@@ -261,6 +367,9 @@ export class ChatService {
       content: content.trim(),
     };
 
+    // Get workspace-aware data source ID
+    const dataSourceId = await this.getWorkspaceAwareDataSourceId();
+
     // Get all contexts from the assistant context store (static + dynamic)
     const contextStore = (window as any).assistantContextStore;
     const allContexts = contextStore ? contextStore.getAllContexts() : [];
@@ -272,7 +381,7 @@ export class ChatService {
     }));
 
     const runInput: RunAgentInput = {
-      threadId: this.threadId,
+      threadId: this.getThreadId(),
       runId: this.generateRunId(),
       messages: [...messages, userMessage],
       tools: this.availableTools || [], // Pass available tools to AG-UI server
@@ -281,7 +390,7 @@ export class ChatService {
       forwardedProps: {},
     };
 
-    const observable = this.agent.runAgent(runInput);
+    const observable = this.agent.runAgent(runInput, dataSourceId);
 
     // Wrap observable to track completion
     const trackedObservable = new Observable((subscriber: any) => {
@@ -323,6 +432,9 @@ export class ChatService {
       toolCallId,
     };
 
+    // Get workspace-aware data source ID
+    const dataSourceId = await this.getWorkspaceAwareDataSourceId();
+
     // Get all contexts from the assistant context store (static + dynamic)
     const contextStore = (window as any).assistantContextStore;
     const allContexts = contextStore ? contextStore.getAllContexts() : [];
@@ -337,7 +449,7 @@ export class ChatService {
     const mappedMessages = [...messages, toolMessage];
 
     const runInput: RunAgentInput = {
-      threadId: this.threadId,
+      threadId: this.getThreadId(),
       runId: this.generateRunId(),
       messages: mappedMessages,
       tools: this.availableTools || [],
@@ -347,7 +459,7 @@ export class ChatService {
     };
 
     // Continue the conversation with the tool result
-    const observable = this.agent.runAgent(runInput);
+    const observable = this.agent.runAgent(runInput, dataSourceId);
 
     // Wrap observable to track completion
     const trackedObservable = new Observable((subscriber: any) => {
@@ -381,7 +493,7 @@ export class ChatService {
   // Chat state persistence methods
   private saveCurrentChatState(): void {
     const state: CurrentChatState = {
-      threadId: this.threadId,
+      threadId: this.getThreadId(),
       messages: this.currentMessages,
     };
     try {
@@ -412,6 +524,34 @@ export class ChatService {
     }
   }
 
+  /**
+   * Remove trailing system error messages from restored chat sessions.
+   * This prevents stale "network error" messages from interrupted connections (page refresh)
+   * from appearing when the user returns to the chat.
+   */
+  private removeTrailingErrorMessages(messages: any[]): any[] {
+    if (!messages.length) {
+      return messages;
+    }
+
+    // Work backwards from the end, removing trailing system error messages
+    let endIndex = messages.length;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const message = messages[i];
+
+      // Check if this is the specific network error from page refresh
+      if (message.role === 'system' && message.content === 'Error: network error') {
+        endIndex = i; // Mark for removal
+      } else {
+        // Stop when we hit a non-error message
+        break;
+      }
+    }
+
+    // Return array without trailing error messages
+    return messages.slice(0, endIndex);
+  }
+
   public saveCurrentChatStatePublic(): void {
     this.saveCurrentChatState();
   }
@@ -427,11 +567,15 @@ export class ChatService {
 
   private clearDynamicContextFromStore(): void {
     const contextStore = (window as any).assistantContextStore;
-    if (!contextStore) return;
+    if (!contextStore) {
+      return;
+    }
 
-    // Get all contexts with IDs (dynamic contexts) and remove them
+    // Get all contexts with IDs that are NOT page contexts (dynamic contexts) and remove them
     const allContexts = contextStore.getAllContexts();
-    const dynamicContexts = allContexts.filter((ctx: any) => ctx.id);
+    const dynamicContexts = allContexts.filter(
+      (ctx: any) => ctx.id && !ctx.categories?.includes('page')
+    );
 
     dynamicContexts.forEach((ctx: any) => {
       contextStore.removeContextById(ctx.id);
@@ -439,11 +583,29 @@ export class ChatService {
   }
 
   public newThread(): void {
-    this.threadId = this.generateThreadId();
+    // Delegate to core service
+    if (!this.coreChatService) {
+      throw new Error('Core chat service not available');
+    }
+    this.coreChatService.newThread();
+
     this.currentMessages = [];
     this.clearCurrentChatState();
 
     // Clear dynamic context from global store for fresh chat session
     this.clearDynamicContextFromStore();
+
+    // Reset AgUiAgent connection state to clear any aborted controllers
+    this.resetConnection();
+  }
+
+  /**
+   * Cleanup method to properly dispose of subscriptions
+   */
+  public destroy(): void {
+    if (this.toolSubscription) {
+      this.toolSubscription.unsubscribe();
+      this.toolSubscription = undefined;
+    }
   }
 }
