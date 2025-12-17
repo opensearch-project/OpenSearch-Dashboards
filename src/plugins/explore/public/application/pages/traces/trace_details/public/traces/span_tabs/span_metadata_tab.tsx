@@ -8,6 +8,7 @@ import { i18n } from '@osd/i18n';
 import { isEmpty } from '../../utils/helper_functions';
 import { formatSpanAttributes, sortAttributes } from '../../utils/span_data_utils';
 import { FlyoutListItem } from '../flyout_list_item';
+import { getReadableGrpcStatus } from '../../utils/grpc_constants';
 
 export interface SpanMetadataTabProps {
   selectedSpan?: any;
@@ -16,6 +17,7 @@ export interface SpanMetadataTabProps {
 
 interface CategorizedAttributes {
   http: Array<[string, any]>;
+  rpc: Array<[string, any]>;
   infrastructure: Array<[string, any]>;
   application: Array<[string, any]>;
   general: Array<[string, any]>;
@@ -35,6 +37,7 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
 
     const categorized: CategorizedAttributes = {
       http: [],
+      rpc: [],
       infrastructure: [],
       application: [],
       general: [],
@@ -43,17 +46,38 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
     sortedAttributes.forEach(([key, value]) => {
       const lowerKey = key.toLowerCase();
 
+      // RPC/gRPC fields (categorize before HTTP to avoid conflicts)
       if (
-        lowerKey.includes('http') ||
-        lowerKey.includes('url') ||
-        lowerKey.includes('method') ||
-        lowerKey.includes('status_code') ||
-        lowerKey.includes('user_agent') ||
-        lowerKey.includes('request') ||
-        lowerKey.includes('response')
+        lowerKey.includes('rpc.') ||
+        lowerKey.includes('grpc') ||
+        lowerKey === 'rpc.system' ||
+        lowerKey === 'rpc.service' ||
+        lowerKey === 'rpc.method'
+      ) {
+        // Make gRPC status codes more readable
+        if (lowerKey.includes('grpc.status_code') || lowerKey.includes('rpc.grpc.status_code')) {
+          const readableStatus = getReadableGrpcStatus(String(value));
+          categorized.rpc.push([key, readableStatus]);
+        } else {
+          categorized.rpc.push([key, value]);
+        }
+      }
+      // HTTP fields (but exclude gRPC fields that might contain "method")
+      else if (
+        (lowerKey.includes('http') ||
+          lowerKey.includes('url') ||
+          lowerKey.includes('user_agent') ||
+          lowerKey.includes('request') ||
+          lowerKey.includes('response') ||
+          (lowerKey.includes('method') && !lowerKey.includes('rpc')) ||
+          (lowerKey.includes('status_code') && !lowerKey.includes('grpc'))) &&
+        !lowerKey.includes('rpc') &&
+        !lowerKey.includes('grpc')
       ) {
         categorized.http.push([key, value]);
-      } else if (
+      }
+      // Infrastructure fields
+      else if (
         lowerKey.includes('aws') ||
         lowerKey.includes('ec2') ||
         lowerKey.includes('cloud') ||
@@ -65,20 +89,29 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
         lowerKey.includes('pod') ||
         lowerKey.includes('container') ||
         lowerKey.includes('namespace') ||
-        lowerKey.includes('cluster')
+        lowerKey.includes('cluster') ||
+        lowerKey.includes('net.') ||
+        lowerKey.includes('peer.')
       ) {
         categorized.infrastructure.push([key, value]);
-      } else if (
+      }
+      // Application fields
+      else if (
         lowerKey.includes('app') ||
         lowerKey.includes('service') ||
         lowerKey.includes('version') ||
         lowerKey.includes('platform') ||
         lowerKey.includes('code') ||
         lowerKey.includes('thread') ||
-        lowerKey.includes('function')
+        lowerKey.includes('function') ||
+        lowerKey.includes('telemetry') ||
+        lowerKey.includes('otel.') ||
+        lowerKey.includes('instrumentation')
       ) {
         categorized.application.push([key, value]);
-      } else {
+      }
+      // Everything else goes to general
+      else {
         categorized.general.push([key, value]);
       }
     });
@@ -199,6 +232,13 @@ export const SpanMetadataTab: React.FC<SpanMetadataTabProps> = ({
           defaultMessage: 'HTTP',
         }),
         categorizedAttributes.http
+      )}
+
+      {renderSection(
+        i18n.translate('explore.spanMetadataTab.section.rpc', {
+          defaultMessage: 'RPC/gRPC',
+        }),
+        categorizedAttributes.rpc
       )}
 
       {renderSection(

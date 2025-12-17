@@ -77,9 +77,10 @@ export const SpanHierarchyTable: React.FC<SpanTableProps> = (props) => {
     const alreadyAddedRootSpans: Set<string> = new Set();
 
     spanList.forEach((span) => {
-      // Data Prepper
-      if (span.parentSpanId && spanMap[span.parentSpanId]) {
-        spanMap[span.parentSpanId].children.push(spanMap[span.spanId]);
+      const parentId = span.parentSpanId || '';
+
+      if (parentId && spanMap[parentId]) {
+        spanMap[parentId].children.push(spanMap[span.spanId]);
       } else {
         addRootSpan(span.spanId, spanMap, rootSpans, alreadyAddedRootSpans);
       }

@@ -369,10 +369,10 @@ describe('ppl_to_trace_hits', () => {
       };
 
       const result = transformPPLDataToTraceHits(pplResponse);
-      expect(result[0]?.sort[0]).toBe(0);
+      // When timestamp processing fails, span should be skipped entirely for data integrity
+      expect(result).toHaveLength(0);
       expect(consoleSpy).toHaveBeenCalledWith(
-        'Error converting timestamp to nanos:',
-        expect.any(Object),
+        'Error processing span at index 0:',
         expect.any(Error)
       );
 
@@ -425,6 +425,193 @@ describe('ppl_to_trace_hits', () => {
       expect(result[0]?.traceGroupFields.endTime).toBe('2025-05-29T03:11:25.392Z');
       expect(result[0]?.traceGroupFields.durationInNanos).toBe(100000000);
       expect(result[0]?.traceGroupFields.statusCode).toBe(200);
+    });
+
+    describe('Jaeger Error Detection in Transformation', () => {
+      it('detects error from Jaeger tag.error field', () => {
+        const pplResponse: PPLResponse = {
+          fields: [
+            {
+              name: 'traceId',
+              type: 'string',
+              values: ['78e8654a4e4c66fee98aec2d6863a115'],
+            },
+            {
+              name: 'spanId',
+              type: 'string',
+              values: ['6e7c54dfbec98ecb'],
+            },
+            {
+              name: 'tag',
+              type: 'object',
+              values: [{ error: 'true', 'span@kind': 'client' }],
+            },
+          ],
+          size: 1,
+        };
+        const result = transformPPLDataToTraceHits(pplResponse);
+        expect(result[0]?.['status.code']).toBe(2); // ERROR
+        expect(result[0]?.status.code).toBe(2);
+        expect(result[0]?.tag.error).toBe('true');
+      });
+
+      it('detects error from gRPC status code in Jaeger tags', () => {
+        const pplResponse: PPLResponse = {
+          fields: [
+            {
+              name: 'traceId',
+              type: 'string',
+              values: ['78e8654a4e4c66fee98aec2d6863a115'],
+            },
+            {
+              name: 'spanId',
+              type: 'string',
+              values: ['6e7c54dfbec98ecb'],
+            },
+            {
+              name: 'tags',
+              type: 'array',
+              values: [
+                [
+                  { key: 'rpc.grpc.status_code', value: '4', type: 'string' },
+                  { key: 'component', value: 'grpc-client', type: 'string' },
+                ],
+              ],
+            },
+          ],
+          size: 1,
+        };
+        const result = transformPPLDataToTraceHits(pplResponse);
+        expect(result[0]?.['status.code']).toBe(2); // ERROR (gRPC 4 = DEADLINE_EXCEEDED)
+        expect(result[0]?.status.code).toBe(2);
+        expect(result[0]?.attributes['rpc.grpc.status_code']).toBe('4');
+      });
+
+      it('transforms Jaeger logs to events for error detection', () => {
+        const pplResponse: PPLResponse = {
+          fields: [
+            {
+              name: 'traceId',
+              type: 'string',
+              values: ['78e8654a4e4c66fee98aec2d6863a115'],
+            },
+            {
+              name: 'logs',
+              type: 'array',
+              values: [
+                [
+                  {
+                    fields: [
+                      { key: 'event', value: 'exception' },
+                      { key: 'exception.type', value: 'TimeoutException' },
+                    ],
+                    timestamp: 1763595349860715,
+                  },
+                ],
+              ],
+            },
+          ],
+          size: 1,
+        };
+        const result = transformPPLDataToTraceHits(pplResponse);
+        expect(result[0]?.events).toHaveLength(1);
+        expect(result[0]?.events[0].name).toBe('exception');
+        expect(result[0]?.events[0].attributes['exception.type']).toBe('TimeoutException');
+      });
+
+      it('handles complex Jaeger error scenario like user example', () => {
+        const pplResponse: PPLResponse = {
+          fields: [
+            {
+              name: 'traceId',
+              type: 'string',
+              values: ['78e8654a4e4c66fee98aec2d6863a115'],
+            },
+            {
+              name: 'spanId',
+              type: 'string',
+              values: ['6e7c54dfbec98ecb'],
+            },
+            {
+              name: 'serviceName',
+              type: 'string',
+              values: ['recommendation'],
+            },
+            {
+              name: 'name',
+              type: 'string',
+              values: ['/flagd.evaluation.v1.Service/EventStream'],
+            },
+            {
+              name: 'tag',
+              type: 'object',
+              values: [{ error: 'true', 'span@kind': 'client' }],
+            },
+            {
+              name: 'tags',
+              type: 'array',
+              values: [
+                [
+                  { key: 'rpc.grpc.status_code', value: '4', type: 'string' },
+                  { key: 'otel.status_description', value: 'Deadline Exceeded' },
+                ],
+              ],
+            },
+            {
+              name: 'logs',
+              type: 'array',
+              values: [
+                [
+                  {
+                    fields: [{ key: 'event', value: 'exception' }],
+                    timestamp: 1763595349860715,
+                  },
+                ],
+              ],
+            },
+          ],
+          size: 1,
+        };
+        const result = transformPPLDataToTraceHits(pplResponse);
+
+        // Should detect error from multiple indicators
+        expect(result[0]?.['status.code']).toBe(2); // ERROR
+        expect(result[0]?.status.code).toBe(2);
+        expect(result[0]?.traceGroupFields.statusCode).toBe(2);
+
+        // Should preserve Jaeger fields for error detection
+        expect(result[0]?.tag.error).toBe('true');
+        expect(result[0]?.tags).toHaveLength(2);
+        expect(result[0]?.attributes['rpc.grpc.status_code']).toBe('4');
+
+        // Should convert logs to events
+        expect(result[0]?.events).toHaveLength(1);
+        expect(result[0]?.events[0].name).toBe('exception');
+      });
+
+      it('handles gRPC OK status (code 0) correctly', () => {
+        const pplResponse: PPLResponse = {
+          fields: [
+            {
+              name: 'traceId',
+              type: 'string',
+              values: ['78e8654a4e4c66fee98aec2d6863a115'],
+            },
+            {
+              name: 'tags',
+              type: 'array',
+              values: [
+                [
+                  { key: 'rpc.grpc.status_code', value: '0', type: 'string' }, // OK
+                ],
+              ],
+            },
+          ],
+          size: 1,
+        };
+        const result = transformPPLDataToTraceHits(pplResponse);
+        expect(result[0]?.['status.code']).toBe(1); // OK (not error)
+      });
     });
   });
 });

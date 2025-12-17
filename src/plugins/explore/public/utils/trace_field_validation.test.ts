@@ -7,6 +7,9 @@ import {
   validateRequiredTraceFields,
   getMissingFieldsDescription,
   extractFieldFromRowData,
+  extractServiceNameFromRowData,
+  extractJaegerTagValue,
+  extractJaegerHttpStatusCode,
 } from './trace_field_validation';
 
 describe('trace_field_validation', () => {
@@ -393,6 +396,316 @@ describe('trace_field_validation', () => {
       const result = extractFieldFromRowData(rowData, ['status.code']);
 
       expect(result).toBe('0');
+    });
+  });
+
+  describe('extractServiceNameFromRowData', () => {
+    const createMockRowData = (data: any) => ({
+      _index: 'test-index',
+      _id: 'test-id',
+      _score: 1.0,
+      _source: data,
+      ...data,
+    });
+
+    it('should extract service name from Jaeger format (process.serviceName)', () => {
+      const rowData = createMockRowData({
+        process: {
+          serviceName: 'jaeger-service',
+        },
+      });
+      const result = extractServiceNameFromRowData(rowData);
+      expect(result).toBe('jaeger-service');
+    });
+
+    it('should extract service name from _source.process.serviceName', () => {
+      const rowData = createMockRowData({
+        _source: {
+          process: {
+            serviceName: 'jaeger-source-service',
+          },
+        },
+      });
+      const result = extractServiceNameFromRowData(rowData);
+      expect(result).toBe('jaeger-source-service');
+    });
+
+    it('should fallback to DataPrepper format (resource.attributes.service.name)', () => {
+      const rowData = createMockRowData({
+        resource: {
+          attributes: {
+            service: {
+              name: 'dataprepper-service',
+            },
+          },
+        },
+      });
+      const result = extractServiceNameFromRowData(rowData);
+      expect(result).toBe('dataprepper-service');
+    });
+
+    it('should prioritize Jaeger format over DataPrepper format', () => {
+      const rowData = createMockRowData({
+        process: {
+          serviceName: 'jaeger-service',
+        },
+        resource: {
+          attributes: {
+            service: {
+              name: 'dataprepper-service',
+            },
+          },
+        },
+      });
+      const result = extractServiceNameFromRowData(rowData);
+      expect(result).toBe('jaeger-service');
+    });
+
+    it('should extract from serviceName field when Jaeger and DataPrepper formats are not available', () => {
+      const rowData = createMockRowData({
+        serviceName: 'simple-service',
+      });
+      const result = extractServiceNameFromRowData(rowData);
+      expect(result).toBe('simple-service');
+    });
+
+    it('should return empty string when no service name is found', () => {
+      const rowData = createMockRowData({});
+      const result = extractServiceNameFromRowData(rowData);
+      expect(result).toBe('');
+    });
+  });
+
+  describe('extractJaegerTagValue', () => {
+    const createMockRowData = (data: any) => ({
+      _index: 'test-index',
+      _id: 'test-id',
+      _score: 1.0,
+      _source: data,
+      ...data,
+    });
+
+    it('should extract tag value from span tags', () => {
+      const rowData = createMockRowData({
+        tags: [
+          { key: 'http.status_code', value: '200', type: 'string' },
+          { key: 'component', value: 'http-client', type: 'string' },
+        ],
+      });
+      const result = extractJaegerTagValue(rowData, 'http.status_code');
+      expect(result).toBe('200');
+    });
+
+    it('should extract tag value from process tags', () => {
+      const rowData = createMockRowData({
+        process: {
+          tags: [
+            { key: 'service.version', value: '1.2.3', type: 'string' },
+            { key: 'environment', value: 'production', type: 'string' },
+          ],
+        },
+      });
+      const result = extractJaegerTagValue(rowData, 'service.version');
+      expect(result).toBe('1.2.3');
+    });
+
+    it('should extract tag value from _source.tags', () => {
+      const rowData = createMockRowData({
+        _source: {
+          tags: [{ key: 'user.id', value: 'user123', type: 'string' }],
+        },
+      });
+      const result = extractJaegerTagValue(rowData, 'user.id');
+      expect(result).toBe('user123');
+    });
+
+    it('should extract tag value from _source.process.tags', () => {
+      const rowData = createMockRowData({
+        _source: {
+          process: {
+            tags: [{ key: 'hostname', value: 'server01', type: 'string' }],
+          },
+        },
+      });
+      const result = extractJaegerTagValue(rowData, 'hostname');
+      expect(result).toBe('server01');
+    });
+
+    it('should return empty string when tag is not found', () => {
+      const rowData = createMockRowData({
+        tags: [{ key: 'other.tag', value: 'other-value', type: 'string' }],
+      });
+      const result = extractJaegerTagValue(rowData, 'missing.tag');
+      expect(result).toBe('');
+    });
+
+    it('should return empty string when tags array is empty', () => {
+      const rowData = createMockRowData({ tags: [] });
+      const result = extractJaegerTagValue(rowData, 'any.tag');
+      expect(result).toBe('');
+    });
+
+    it('should return empty string when tags is not an array', () => {
+      const rowData = createMockRowData({ tags: 'not-an-array' });
+      const result = extractJaegerTagValue(rowData, 'any.tag');
+      expect(result).toBe('');
+    });
+
+    it('should handle tag with missing value', () => {
+      const rowData = createMockRowData({
+        tags: [
+          { key: 'incomplete.tag', type: 'string' }, // No value
+        ],
+      });
+      const result = extractJaegerTagValue(rowData, 'incomplete.tag');
+      expect(result).toBe('');
+    });
+
+    it('should handle tag with non-string value', () => {
+      const rowData = createMockRowData({
+        tags: [{ key: 'numeric.tag', value: 123, type: 'number' }],
+      });
+      const result = extractJaegerTagValue(rowData, 'numeric.tag');
+      expect(result).toBe('');
+    });
+
+    it('should prioritize span tags over process tags', () => {
+      const rowData = createMockRowData({
+        tags: [{ key: 'duplicate.key', value: 'span-value', type: 'string' }],
+        process: {
+          tags: [{ key: 'duplicate.key', value: 'process-value', type: 'string' }],
+        },
+      });
+      const result = extractJaegerTagValue(rowData, 'duplicate.key');
+      expect(result).toBe('span-value');
+    });
+  });
+
+  describe('extractJaegerHttpStatusCode', () => {
+    const createMockRowData = (data: any) => ({
+      _index: 'test-index',
+      _id: 'test-id',
+      _score: 1.0,
+      _source: data,
+      ...data,
+    });
+
+    it('should extract HTTP status code from Jaeger tags', () => {
+      const rowData = createMockRowData({
+        tags: [{ key: 'http.status_code', value: '404', type: 'string' }],
+      });
+      const result = extractJaegerHttpStatusCode(rowData);
+      expect(result).toBe('404');
+    });
+
+    it('should fallback to standard HTTP status code fields', () => {
+      const rowData = createMockRowData({
+        attributes: {
+          http: {
+            status_code: 200,
+          },
+        },
+      });
+      const result = extractJaegerHttpStatusCode(rowData);
+      expect(result).toBe('200');
+    });
+
+    it('should prioritize Jaeger tags over standard fields', () => {
+      const rowData = createMockRowData({
+        tags: [{ key: 'http.status_code', value: '500', type: 'string' }],
+        attributes: {
+          http: {
+            status_code: 200,
+          },
+        },
+      });
+      const result = extractJaegerHttpStatusCode(rowData);
+      expect(result).toBe('500');
+    });
+
+    it('should return empty string when no HTTP status code is found', () => {
+      const rowData = createMockRowData({});
+      const result = extractJaegerHttpStatusCode(rowData);
+      expect(result).toBe('');
+    });
+  });
+
+  describe('Jaeger Schema Integration Tests', () => {
+    it('should validate complete Jaeger trace data', () => {
+      const jaegerSpan = {
+        traceID: '0c49a3cf243904fca1d2eb167903fd0d',
+        spanID: 'C_o-npoBvkC6KKY-QGLb',
+        parentSpanID: 'aa61c9fd77570245',
+        duration: 8301, // microseconds
+        process: {
+          serviceName: 'frontend-proxy',
+          tags: [
+            { key: 'service.namespace', value: 'opentelemetry-demo', type: 'string' },
+            { key: 'service.version', value: '2.1.3', type: 'string' },
+          ],
+        },
+        startTime: 1763591468681804, // microseconds
+        startTimeMillis: 1763591468681, // milliseconds
+        operationName: 'router frontend egress',
+        tags: [
+          { key: 'http.protocol', value: 'HTTP/1.1', type: 'string' },
+          { key: 'http.status_code', value: '200', type: 'string' },
+        ],
+      };
+
+      const result = validateRequiredTraceFields(jaegerSpan as any);
+      expect(result.isValid).toBe(true);
+      expect(result.missingFields).toEqual([]);
+
+      // Test service name extraction
+      const serviceName = extractServiceNameFromRowData(jaegerSpan as any);
+      expect(serviceName).toBe('frontend-proxy');
+
+      // Test tag extraction
+      const httpStatus = extractJaegerTagValue(jaegerSpan as any, 'http.status_code');
+      expect(httpStatus).toBe('200');
+
+      const serviceVersion = extractJaegerTagValue(jaegerSpan as any, 'service.version');
+      expect(serviceVersion).toBe('2.1.3');
+    });
+
+    it('should handle Jaeger trace with _source wrapper', () => {
+      const jaegerSpanWithSource = {
+        _source: {
+          traceID: '0c49a3cf243904fca1d2eb167903fd0d',
+          spanID: 'C_o-npoBvkC6KKY-QGLb',
+          process: {
+            serviceName: 'wrapped-service',
+          },
+          operationName: 'wrapped operation',
+          startTime: 1763591468681804,
+          duration: 5000,
+        },
+      };
+
+      const serviceName = extractServiceNameFromRowData(jaegerSpanWithSource as any);
+      expect(serviceName).toBe('wrapped-service');
+    });
+
+    it('should validate Jaeger trace with missing optional fields', () => {
+      const minimalJaegerSpan = {
+        traceID: '0c49a3cf243904fca1d2eb167903fd0d',
+        spanID: 'C_o-npoBvkC6KKY-QGLb',
+        parentSpanID: '',
+        process: {
+          serviceName: 'minimal-service',
+        },
+        operationName: 'minimal operation',
+        startTime: 1763591468681804,
+        duration: 1000,
+      };
+
+      const result = validateRequiredTraceFields(minimalJaegerSpan as any);
+      expect(result.isValid).toBe(true); // startTime + duration is sufficient for endTime in Jaeger
+      expect(result.missingFields).not.toContain('endTime');
+      expect(result.missingFields).toContain('status.code');
+      expect(result.missingFields).not.toContain('serviceName');
+      expect(result.missingFields).not.toContain('name');
     });
   });
 });
