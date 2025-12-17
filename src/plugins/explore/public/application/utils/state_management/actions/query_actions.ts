@@ -14,7 +14,7 @@ import {
   IndexPatternField,
 } from '../../../../../../../../src/plugins/data/common';
 import { QueryExecutionStatus } from '../types';
-import { setResults, ISearchResult } from '../slices';
+import { setResults, ISearchResult, IPrometheusSearchResult } from '../slices';
 import { setIndividualQueryStatus } from '../slices/query_editor/query_editor_slice';
 import { ExploreServices } from '../../../../types';
 import {
@@ -78,10 +78,26 @@ export const defaultPrepareQueryString = (query: Query): string => {
   switch (query.language) {
     case 'PPL':
       return defaultPreparePplQuery(query).query;
+    case 'PROMQL':
+      return query.query as string;
     default:
       throw new Error(
         `defaultPrepareQueryString encountered unhandled language: ${query.language}`
       );
+  }
+};
+
+/**
+ * Checks if query execution should be skipped for the given query.
+ * This provides a centralized place to add language-specific skip conditions.
+ */
+export const shouldSkipQueryExecution = (query: Query): boolean => {
+  switch (query.language) {
+    case 'PROMQL':
+      // Empty PROMQL queries are not valid
+      return !query.query?.toString().trim();
+    default:
+      return false;
   }
 };
 
@@ -250,12 +266,18 @@ export const executeQueries = createAsyncThunk<
   const dataTableQueryStatus = state.queryEditor.queryStatusMap[dataTableCacheKey];
   const histogramQueryStatus = state.queryEditor.queryStatusMap[histogramCacheKey];
 
+  // Early exit if query should be skipped
+  if (shouldSkipQueryExecution(query)) {
+    return;
+  }
+
   const needsDataTableQuery =
     !results[dataTableCacheKey] ||
     dataTableQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
   const needsHistogramQuery =
-    !results[histogramCacheKey] ||
-    histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED;
+    query.language !== 'PROMQL' &&
+    (!results[histogramCacheKey] ||
+      histogramQueryStatus?.status === QueryExecutionStatus.UNINITIALIZED);
 
   const promises = [];
   // Execute query without aggregations
@@ -561,7 +583,7 @@ const executeQueryBase = async (
       .ok({ json: rawResults });
 
     // Store RAW results in cache
-    let rawResultsWithMeta: ISearchResult = {
+    let rawResultsWithMeta: ISearchResult | IPrometheusSearchResult = {
       ...rawResults,
       elapsedMs: inspectorRequest.getTime()!,
       fieldSchema: searchSource.getDataFrame()?.schema,
