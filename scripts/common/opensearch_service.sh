@@ -19,14 +19,6 @@ function setup_opensearch() {
   [ -d "plugins/opensearch-sql" ] && echo "script.context.field.max_compilations_rate: 1000/1m" >> config/opensearch.yml
   # Required for PA
   [ -d "plugins/opensearch-performance-analyzer" ] && echo "webservice-bind-host = 0.0.0.0" >> config/opensearch-performance-analyzer/performance-analyzer.properties
-
-  if [ -f "config/jvm.options" ]; then
-    sed -i.bak '/^-Xms/d' config/jvm.options
-    sed -i.bak '/^-Xmx/d' config/jvm.options
-    echo "-Xms1536m" >> config/jvm.options
-    echo "-Xmx1536m" >> config/jvm.options
-    echo "JVM heap size configured to 1.5GB"
-  fi
 }
 
 # Starts OpenSearch, if verifying a distribution it will install the certs then start.
