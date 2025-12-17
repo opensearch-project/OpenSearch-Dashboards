@@ -38,6 +38,17 @@ export interface ProcessTraceAggregationParams {
   uiSettings?: IUiSettingsClient;
 }
 
+// Cache for expensive histogram config calculations
+// Key format: "datasetId:interval:timeField"
+const histogramConfigCache = new Map<
+  string,
+  {
+    xAxisFormat: { id: string; params: { pattern: string } };
+    bucketInterval: BucketInterval;
+    intervalMs: number;
+  }
+>();
+
 export const processTraceAggregationResults = ({
   requestAggResults,
   errorAggResults,
@@ -81,44 +92,47 @@ export const processTraceAggregationResults = ({
       id: 'date',
       params: { pattern: 'HH:mm:ss' },
     };
-    let bucketInterval: BucketInterval = {
+    const bucketInterval: BucketInterval = {
       interval: 'auto',
       scale: 1,
     };
     let intervalMs = 300000; // Default 5 minutes
 
-    // Calculate actual interval from histogram configs when available
+    // The interval passed to us was already calculated with the correct custom bar target
+    // in query_actions.ts, so we can just convert it directly to milliseconds
+    intervalMs = convertIntervalToMs(interval);
+
+    // Only calculate xAxisFormat if we have the necessary dependencies
     if (dataset.timeFieldName && uiSettings) {
-      try {
-        const formatInterval = rawInterval || 'auto';
-        const histogramConfigs = createHistogramConfigs(
-          dataset,
-          formatInterval,
-          dataPlugin,
-          uiSettings
-        );
-        if (histogramConfigs) {
-          const dimensions = getDimensions(histogramConfigs, dataPlugin);
-          if (dimensions?.x?.format?.id) {
-            xAxisFormat = dimensions.x.format as { id: string; params: { pattern: string } };
-            const bucketAggConfig = histogramConfigs.aggs[1] as any;
-            if (bucketAggConfig?.buckets) {
-              bucketInterval = bucketAggConfig.buckets.getInterval();
-              // Convert the calculated interval to milliseconds
-              // bucketInterval has: interval, scale, description, scaled
-              if (bucketInterval.interval) {
-                intervalMs = convertIntervalToMs(bucketInterval.interval);
-              }
+      // Check cache first to avoid expensive histogram config calculation
+      const cacheKey = `${dataset.id}:${interval}:${timeField}:${rawInterval || 'auto'}`;
+      const cached = histogramConfigCache.get(cacheKey);
+
+      if (cached) {
+        // Use cached xAxisFormat
+        xAxisFormat = cached.xAxisFormat;
+      } else {
+        // Calculate xAxisFormat from histogram configs
+        try {
+          const formatInterval = rawInterval || 'auto';
+          const histogramConfigs = createHistogramConfigs(
+            dataset,
+            formatInterval,
+            dataPlugin,
+            uiSettings
+          );
+          if (histogramConfigs) {
+            const dimensions = getDimensions(histogramConfigs, dataPlugin);
+            if (dimensions?.x?.format?.id) {
+              xAxisFormat = dimensions.x.format as { id: string; params: { pattern: string } };
             }
           }
+          // Cache the xAxisFormat
+          histogramConfigCache.set(cacheKey, { xAxisFormat, bucketInterval, intervalMs });
+        } catch (error) {
+          // Fall back to default format if histogram config fails
         }
-      } catch (error) {
-        // Fall back to converting the interval string if histogram config fails
-        intervalMs = convertIntervalToMs(interval);
       }
-    } else {
-      // No timeFieldName or uiSettings, fall back to converting the interval string
-      intervalMs = convertIntervalToMs(interval);
     }
 
     if (requestAggResults) {
@@ -166,13 +180,13 @@ export const processTraceAggregationResults = ({
 };
 
 function convertIntervalToMs(interval: string): number {
-  // Handle unit-only intervals (m, s, h, d) - transform to 1 unit
-  if (/^[smhd]$/.test(interval)) {
+  // Handle unit-only intervals (m, s, h, d, w) - transform to 1 unit
+  if (/^[smhdw]$/.test(interval)) {
     const transformedInterval = `1${interval}`;
     return convertIntervalToMs(transformedInterval);
   }
 
-  const match = interval.match(/^(\d+)([smhd])$/);
+  const match = interval.match(/^(\d+)([smhdw])$/);
   if (!match) {
     return 300000; // Default 5 minutes
   }
@@ -180,25 +194,20 @@ function convertIntervalToMs(interval: string): number {
   const [, value, unit] = match;
   const num = parseInt(value, 10);
 
-  let result: number;
   switch (unit) {
     case 's':
-      result = num * 1000;
-      break;
+      return num * 1000;
     case 'm':
-      result = num * 60 * 1000;
-      break;
+      return num * 60 * 1000;
     case 'h':
-      result = num * 60 * 60 * 1000;
-      break;
+      return num * 60 * 60 * 1000;
     case 'd':
-      result = num * 24 * 60 * 60 * 1000;
-      break;
+      return num * 24 * 60 * 60 * 1000;
+    case 'w':
+      return num * 7 * 24 * 60 * 60 * 1000;
     default:
-      result = 300000;
+      return 300000;
   }
-
-  return result;
 }
 
 export function extractPPLIntervalMs(results: ISearchResult, fallbackMs: number): number {
