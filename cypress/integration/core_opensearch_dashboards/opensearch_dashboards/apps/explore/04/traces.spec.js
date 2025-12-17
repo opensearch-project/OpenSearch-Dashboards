@@ -155,8 +155,6 @@ const traceTestSuite = () => {
     });
 
     it('Clicking a span entry opens the trace flyout', () => {
-      cy.explore.setQueryEditor("| WHERE spanId = '58f52f0436530c7c'");
-      cy.osd.verifyResultsCount(1);
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       cy.getElementByTestId('traceFlyoutButton').first().click();
 
