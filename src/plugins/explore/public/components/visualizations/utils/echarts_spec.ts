@@ -3,16 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Axis, BarSeriesOption, CustomSeriesOption } from 'echarts';
+import { BarChartStyle } from '../bar/bar_vis_config';
 import {
   AggregationType,
   AxisColumnMappings,
-  AxisRole,
   Positions,
   StandardAxes,
+  TimeUnit,
   VisColumn,
   VisFieldType,
 } from '../types';
-import { aggregate } from './data_transformation';
+import { aggregate, aggregateByTime } from './data_transformation';
+import { getSwappedAxisRole, timeUnitToMs } from './utils';
+import { inferTimeIntervals } from '../bar/bar_chart_utils';
 
 /**
  * Base style interface that all chart styles should extend
@@ -27,7 +31,10 @@ export interface BaseChartStyle {
   };
   bucket?: {
     aggregationType?: AggregationType;
+    bucketTimeUnit?: TimeUnit;
   };
+  switchAxes?: boolean;
+  standardAxes?: StandardAxes[];
 }
 
 /**
@@ -41,22 +48,47 @@ export interface EChartsAxisConfig {
 }
 
 /**
- * Configuration for ECharts series
+ * Input for ECharts spec pipeline
  */
-export interface EChartsSeriesConfig {
-  type: 'bar' | 'line' | 'scatter' | 'pie';
-  name?: string;
-  [key: string]: any;
+export interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
+  data: Array<Record<string, any>>;
+  styles: T;
+  axisColumnMappings?: AxisColumnMappings;
 }
 
 /**
- * Options for building ECharts specification
+ * State object that flows through the pipeline
  */
-export interface EChartsBuildOptions<T extends BaseChartStyle = BaseChartStyle> {
-  data: Array<Record<string, any>>;
-  axisConfig: EChartsAxisConfig;
-  seriesConfig: EChartsSeriesConfig | EChartsSeriesConfig[];
-  styles: T;
+export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
+  extends EChartsSpecInput<T> {
+  // Derived from input
+  axisConfig?: EChartsAxisConfig;
+
+  // Built incrementally
+  aggregatedData?: any[];
+  baseConfig?: any;
+  xAxisConfig?: any;
+  yAxisConfig?: any;
+  series?: Array<BarSeriesOption | CustomSeriesOption>;
+
+  // Final output
+  spec?: any;
+}
+
+/**
+ * Pipeline function signature
+ */
+export type PipelineFn<T extends BaseChartStyle = BaseChartStyle> = (
+  state: EChartsSpecState<T>
+) => EChartsSpecState<T>;
+
+/**
+ * Compose functions left-to-right (pipeline)
+ */
+export function pipe<T extends BaseChartStyle>(
+  ...fns: Array<PipelineFn<T>>
+): (state: EChartsSpecState<T>) => EChartsSpecState<T> {
+  return (initialState: EChartsSpecState<T>) => fns.reduce((state, fn) => fn(state), initialState);
 }
 
 /**
@@ -77,66 +109,86 @@ function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time'
 }
 
 /**
- * Build a complete ECharts specification
+ * Derive axis configuration from styles and mappings
  */
-export function buildEChartsSpec<T extends BaseChartStyle>(options: EChartsBuildOptions<T>): any {
-  const { data, axisConfig, seriesConfig, styles } = options;
-  const { xAxis, yAxis, xAxisStyle, yAxisStyle } = axisConfig;
+export const deriveAxisConfig = <T extends BaseChartStyle>(
+  state: EChartsSpecState<T>
+): EChartsSpecState<T> => {
+  const { styles, axisColumnMappings } = state;
+  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
 
-  // Get aggregation type from styles
-  const aggregationType = styles.bucket?.aggregationType || AggregationType.SUM;
-
-  const categoricalColumn = [xAxis, yAxis].find(
-    (axis) => axis?.schema === VisFieldType.Categorical
-  );
-  const numericalColumn = [xAxis, yAxis].find((axis) => axis?.schema === VisFieldType.Numerical);
-
-  // Aggregate data
-  const aggregatedData = aggregate(
-    data,
-    categoricalColumn?.column || '',
-    numericalColumn?.column || '',
-    aggregationType
-  );
-
-  // Build axis configs - type derived from schema
-  const xAxisConfig = {
-    type: getAxisType(xAxis),
-    ...applyAxisStyling({ axisStyle: xAxisStyle }),
-  };
-
-  const yAxisConfig = {
-    type: getAxisType(yAxis),
-    ...applyAxisStyling({ axisStyle: yAxisStyle }),
-  };
-
-  // Build base config
-  const baseConfig = buildBaseConfig(styles, xAxis, yAxis);
-
-  // Build series (support single or multiple)
-  const series = Array.isArray(seriesConfig) ? seriesConfig : [seriesConfig];
-
-  return {
-    ...baseConfig,
-    dataset: { source: aggregatedData },
-    xAxis: xAxisConfig,
-    yAxis: yAxisConfig,
-    series,
-  };
-}
+  return { ...state, axisConfig };
+};
 
 /**
- * Build common base configuration (title, tooltip, etc)
+ * Prepare and aggregate data
  */
-function buildBaseConfig(
-  styles: BaseChartStyle,
-  xAxis: VisColumn | undefined,
-  yAxis: VisColumn | undefined
-): any {
-  return {
+export const prepareData = <T extends BaseChartStyle>(
+  state: EChartsSpecState<T>
+): EChartsSpecState<T> => {
+  const { data, axisConfig, styles } = state;
+
+  if (!axisConfig) {
+    throw new Error('axisConfig must be derived before prepareData');
+  }
+
+  // Detect column types
+  const dateColumn = [axisConfig.xAxis, axisConfig.yAxis].find(
+    (axis) => axis?.schema === VisFieldType.Date
+  );
+  const categoricalColumn = [axisConfig.xAxis, axisConfig.yAxis].find(
+    (axis) => axis?.schema === VisFieldType.Categorical
+  );
+  const numericalColumn = [axisConfig.xAxis, axisConfig.yAxis].find(
+    (axis) => axis?.schema === VisFieldType.Numerical
+  );
+
+  let aggregatedData;
+
+  // TIME + NUMERICAL: Use time-based aggregation
+  if (dateColumn && numericalColumn) {
+    const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
+    aggregatedData = aggregateByTime(
+      data,
+      dateColumn.column,
+      numericalColumn.column,
+      timeUnit,
+      styles.bucket?.aggregationType || AggregationType.SUM
+    );
+  }
+  // CATEGORICAL + NUMERICAL: Use existing aggregation
+  else if (categoricalColumn && numericalColumn) {
+    aggregatedData = aggregate(
+      data,
+      categoricalColumn.column,
+      numericalColumn.column,
+      styles.bucket?.aggregationType || AggregationType.SUM
+    );
+  }
+  // Fallback: return data as-is
+  else {
+    aggregatedData = data;
+  }
+
+  return { ...state, aggregatedData };
+};
+
+/**
+ * Create base configuration (title, tooltip)
+ */
+export const createBaseConfig = <T extends BaseChartStyle>(
+  state: EChartsSpecState<T>
+): EChartsSpecState<T> => {
+  const { styles, axisConfig } = state;
+
+  if (!axisConfig) {
+    throw new Error('axisConfig must be derived before createBaseConfig');
+  }
+
+  const baseConfig = {
     title: {
       text: styles.titleOptions?.show
-        ? styles.titleOptions?.titleName || `${yAxis?.name} by ${xAxis?.name}`
+        ? styles.titleOptions?.titleName || `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}`
         : undefined,
     },
     tooltip: {
@@ -145,20 +197,81 @@ function buildBaseConfig(
       axisPointer: { type: 'shadow' },
     },
   };
-}
+
+  return { ...state, baseConfig };
+};
 
 /**
- * Build bar series configuration
+ * Build axis configurations
  */
-export function buildBarSeries(name: string, styles: any): EChartsSeriesConfig {
-  return {
-    type: 'bar',
-    name,
-    barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
-    barCategoryGap:
-      styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
+export const buildAxisConfigs = <T extends BaseChartStyle>(
+  state: EChartsSpecState<T>
+): EChartsSpecState<T> => {
+  const { axisConfig, aggregatedData, styles, data } = state;
+
+  if (!axisConfig) {
+    throw new Error('axisConfig must be derived before buildAxisConfigs');
+  }
+
+  const xAxisConfig = {
+    type: getAxisType(axisConfig.xAxis),
+    ...applyAxisStyling({ axisStyle: axisConfig.xAxisStyle }),
   };
-}
+
+  const yAxisConfig = {
+    type: getAxisType(axisConfig.yAxis),
+    ...applyAxisStyling({ axisStyle: axisConfig.yAxisStyle }),
+  };
+
+  const dateAxis = [axisConfig.xAxis, axisConfig.yAxis].find(
+    (axis) => axis?.schema === VisFieldType.Date
+  );
+
+  if (dateAxis && aggregatedData) {
+    const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
+    const effectiveTimeUnit =
+      timeUnit === TimeUnit.AUTO ? inferTimeIntervals(data, dateAxis.column) : timeUnit;
+
+    // Get the last data point (skip header row at index 0)
+    const lastDataPoint = aggregatedData[aggregatedData.length - 1];
+    if (lastDataPoint && lastDataPoint[0] instanceof Date) {
+      const lastDate = lastDataPoint[0];
+      const lastTime = lastDate.getTime();
+
+      // Calculate bar width based on the actual last date for accurate month/year durations
+      const barWidthInMs = timeUnitToMs(effectiveTimeUnit, lastDate);
+      const extendedMax = new Date(lastTime + barWidthInMs);
+
+      if (xAxisConfig.type === 'time') {
+        xAxisConfig.max = extendedMax;
+      }
+      if (yAxisConfig.type === 'time') {
+        yAxisConfig.max = extendedMax;
+      }
+    }
+  }
+
+  return { ...state, xAxisConfig, yAxisConfig };
+};
+
+/**
+ * Assemble final specification
+ */
+export const assembleSpec = <T extends BaseChartStyle>(
+  state: EChartsSpecState<T>
+): EChartsSpecState<T> => {
+  const { baseConfig, aggregatedData, xAxisConfig, yAxisConfig, series } = state;
+
+  const spec = {
+    ...baseConfig,
+    dataset: { source: aggregatedData },
+    xAxis: xAxisConfig,
+    yAxis: yAxisConfig,
+    series,
+  };
+
+  return { ...state, spec };
+};
 
 export const applyAxisStyling = ({ axisStyle }: { axisStyle?: StandardAxes }): any => {
   const echartsAxisConfig: any = {

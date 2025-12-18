@@ -15,6 +15,7 @@ import {
   AxisSupportedStyles,
   Threshold,
   AxisConfig,
+  TimeUnit,
 } from '../types';
 import { ChartStyles, StyleOptions } from './use_visualization_types';
 
@@ -170,7 +171,7 @@ const positionSwapMap: Record<Positions, Positions> = {
 const swapPosition = (pos: Positions): Positions => positionSwapMap[pos] ?? pos;
 
 export const getSwappedAxisRole = (
-  styles: Partial<AxisSupportedStyles>,
+  styles: { standardAxes?: StandardAxes[]; switchAxes?: boolean },
   axisColumnMappings?: AxisColumnMappings
 ): {
   xAxis?: VisColumn;
@@ -425,4 +426,47 @@ export function applyTimeRangeToEncoding(
 export const getChartRender = () => {
   const chartRender = localStorage.getItem('__DEVELOPMENT__.discover.vis.render');
   return chartRender || 'vega';
+};
+
+/**
+ * Convert TimeUnit to milliseconds for bar width calculation
+ * @param timeUnit - The time unit to convert
+ * @param referenceDate - Optional date to calculate actual month/year duration
+ * @returns Duration in milliseconds
+ */
+export const timeUnitToMs = (timeUnit: TimeUnit, referenceDate?: Date): number => {
+  const second = 1000;
+  const minute = 60 * second;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+
+  switch (timeUnit) {
+    case TimeUnit.SECOND:
+      return second;
+    case TimeUnit.MINUTE:
+      return minute;
+    case TimeUnit.HOUR:
+      return hour;
+    case TimeUnit.DATE:
+      return day;
+    case TimeUnit.MONTH:
+      if (referenceDate) {
+        // Calculate actual days in the specific month
+        const year = referenceDate.getFullYear();
+        const month = referenceDate.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        return daysInMonth * day;
+      }
+      return 30 * day; // Fallback to approximate
+    case TimeUnit.YEAR:
+      if (referenceDate) {
+        // Check if it's a leap year
+        const year = referenceDate.getFullYear();
+        const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+        return (isLeapYear ? 366 : 365) * day;
+      }
+      return 365 * day; // Fallback to approximate
+    default:
+      return day; // Default to day
+  }
 };

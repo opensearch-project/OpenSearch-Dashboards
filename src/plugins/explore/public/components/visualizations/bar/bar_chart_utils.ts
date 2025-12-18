@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BarSeriesOption, CustomSeriesOption } from 'echarts';
 import {
   StandardAxes,
   VisFieldType,
@@ -11,9 +12,10 @@ import {
   BucketOptions,
   AggregationType,
 } from '../types';
-import { applyAxisStyling, getSchemaByAxis } from '../utils/utils';
+import { applyAxisStyling, getSchemaByAxis, timeUnitToMs } from '../utils/utils';
 import { BarChartStyle } from './bar_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
+import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
@@ -185,4 +187,73 @@ export const buildThresholdColorEncoding = (
   };
 
   return colorLayer;
+};
+
+/**
+ * Create bar series configuration
+ */
+export const createBarSeries = <T extends BaseChartStyle>(styles: BarChartStyle): PipelineFn<T> => (
+  state
+) => {
+  const { axisConfig } = state;
+
+  if (!axisConfig) {
+    throw new Error('axisConfig must be derived before createBarSeries');
+  }
+
+  const numericalAxis = [axisConfig.xAxis, axisConfig.yAxis].find(
+    (axis) => axis?.schema === VisFieldType.Numerical
+  );
+  const dateAxis = [axisConfig.xAxis, axisConfig.yAxis].find(
+    (axis) => axis?.schema === VisFieldType.Date
+  );
+
+  if (dateAxis) {
+    // Calculate bar width based on time unit
+    const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
+
+    const series: CustomSeriesOption[] = [
+      {
+        type: 'custom',
+        renderItem: (params, api) => {
+          const timeValue = api.value(0) as number;
+          const numValue = api.value(1) as number;
+
+          // Calculate bar width based on the actual date for accurate month/year durations
+          const currentDate = new Date(timeValue);
+          const barWidthInMs = timeUnitToMs(timeUnit, currentDate);
+
+          const start = api.coord([timeValue, numValue]) as number[];
+          const end = api.coord([timeValue + barWidthInMs, numValue]) as number[];
+          const width = end[0] - start[0];
+          const sizeResult = api.size?.([0, numValue]) as number[] | undefined;
+          const height = sizeResult ? sizeResult[1] : 0;
+
+          return {
+            type: 'rect',
+            shape: {
+              x: start[0], // Left edge starts at the tick
+              y: start[1],
+              width,
+              height,
+            },
+            style: api.style(),
+          };
+        },
+      },
+    ];
+    return { ...state, series };
+  }
+
+  const series: BarSeriesOption[] = [
+    {
+      type: 'bar',
+      name: numericalAxis?.name || '',
+      barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
+      barCategoryGap:
+        styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
+    },
+  ];
+
+  return { ...state, series };
 };

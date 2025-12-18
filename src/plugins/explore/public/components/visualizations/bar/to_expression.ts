@@ -26,10 +26,18 @@ import {
   buildEncoding,
   buildTooltipEncoding,
   buildThresholdColorEncoding,
+  createBarSeries,
 } from './bar_chart_utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
-import { buildEChartsSpec, buildBarSeries } from '../utils/echarts_spec';
+import {
+  pipe,
+  deriveAxisConfig,
+  prepareData,
+  createBaseConfig,
+  buildAxisConfigs,
+  assembleSpec,
+} from '../utils/echarts_spec';
 
 // Only set size and binSpacing in manual mode
 const configureBarSizeAndSpacing = (barMark: any, styles: BarChartStyle) => {
@@ -49,20 +57,22 @@ export const createBarSpec = (
 ): any => {
   // if chart render is 'echarts', here it return the echarts config options
   if (getChartRender() === 'echarts') {
-    const styles = styleOptions;
-    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const styles = { ...defaultBarChartStyles, ...styleOptions };
 
-    // Determine numerical axis for series name
-    const numericalAxis = [axisConfig.xAxis, axisConfig.yAxis].find(
-      (axis) => axis?.schema === VisFieldType.Numerical
-    );
-
-    return buildEChartsSpec({
+    const result = pipe(
+      deriveAxisConfig,
+      prepareData,
+      createBaseConfig,
+      buildAxisConfigs,
+      createBarSeries(styles),
+      assembleSpec
+    )({
       data: transformedData,
-      axisConfig,
-      seriesConfig: buildBarSeries(numericalAxis?.name || '', styles),
       styles,
+      axisColumnMappings,
     });
+
+    return result.spec;
   }
 
   const styles = { ...defaultBarChartStyles, ...styleOptions };
@@ -156,6 +166,29 @@ export const createTimeBarChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
+  // Check if we have the required columns
+  if (numericalColumns.length === 0 || dateColumns.length === 0) {
+    throw new Error('Time bar chart requires at least one numerical column and one date column');
+  }
+
+  // if chart render is 'echarts', here it return the echarts config options
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      prepareData,
+      createBaseConfig,
+      buildAxisConfigs,
+      createBarSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+
+    return result.spec;
+  }
+
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const timeAxis = xAxis?.schema === VisFieldType.Date ? xAxis : yAxis;
