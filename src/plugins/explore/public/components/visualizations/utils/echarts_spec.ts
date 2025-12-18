@@ -3,8 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Axis, BarSeriesOption, CustomSeriesOption } from 'echarts';
-import { BarChartStyle } from '../bar/bar_vis_config';
+import { BarSeriesOption, CustomSeriesOption, EChartsOption } from 'echarts';
 import {
   AggregationType,
   AxisColumnMappings,
@@ -15,8 +14,7 @@ import {
   VisFieldType,
 } from '../types';
 import { aggregate, aggregateByTime } from './data_transformation';
-import { getSwappedAxisRole, timeUnitToMs } from './utils';
-import { inferTimeIntervals } from '../bar/bar_chart_utils';
+import { getSwappedAxisRole } from './utils';
 
 /**
  * Base style interface that all chart styles should extend
@@ -65,6 +63,7 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   axisConfig?: EChartsAxisConfig;
 
   // Built incrementally
+  // TODO: avoid any
   aggregatedData?: any[];
   baseConfig?: any;
   xAxisConfig?: any;
@@ -72,7 +71,7 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   series?: Array<BarSeriesOption | CustomSeriesOption>;
 
   // Final output
-  spec?: any;
+  spec?: EChartsOption;
 }
 
 /**
@@ -207,7 +206,7 @@ export const createBaseConfig = <T extends BaseChartStyle>(
 export const buildAxisConfigs = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { axisConfig, aggregatedData, styles, data } = state;
+  const { axisConfig } = state;
 
   if (!axisConfig) {
     throw new Error('axisConfig must be derived before buildAxisConfigs');
@@ -222,34 +221,6 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
     type: getAxisType(axisConfig.yAxis),
     ...applyAxisStyling({ axisStyle: axisConfig.yAxisStyle }),
   };
-
-  const dateAxis = [axisConfig.xAxis, axisConfig.yAxis].find(
-    (axis) => axis?.schema === VisFieldType.Date
-  );
-
-  if (dateAxis && aggregatedData) {
-    const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
-    const effectiveTimeUnit =
-      timeUnit === TimeUnit.AUTO ? inferTimeIntervals(data, dateAxis.column) : timeUnit;
-
-    // Get the last data point (skip header row at index 0)
-    const lastDataPoint = aggregatedData[aggregatedData.length - 1];
-    if (lastDataPoint && lastDataPoint[0] instanceof Date) {
-      const lastDate = lastDataPoint[0];
-      const lastTime = lastDate.getTime();
-
-      // Calculate bar width based on the actual last date for accurate month/year durations
-      const barWidthInMs = timeUnitToMs(effectiveTimeUnit, lastDate);
-      const extendedMax = new Date(lastTime + barWidthInMs);
-
-      if (xAxisConfig.type === 'time') {
-        xAxisConfig.max = extendedMax;
-      }
-      if (yAxisConfig.type === 'time') {
-        yAxisConfig.max = extendedMax;
-      }
-    }
-  }
 
   return { ...state, xAxisConfig, yAxisConfig };
 };

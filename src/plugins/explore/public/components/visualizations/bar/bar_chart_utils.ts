@@ -15,7 +15,7 @@ import {
 import { applyAxisStyling, getSchemaByAxis, timeUnitToMs } from '../utils/utils';
 import { BarChartStyle } from './bar_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
-import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
+import { BaseChartStyle, EChartsSpecState, PipelineFn } from '../utils/echarts_spec';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
@@ -195,7 +195,8 @@ export const buildThresholdColorEncoding = (
 export const createBarSeries = <T extends BaseChartStyle>(styles: BarChartStyle): PipelineFn<T> => (
   state
 ) => {
-  const { axisConfig } = state;
+  const { axisConfig, data, baseConfig } = state;
+  const newState = { ...state };
 
   if (!axisConfig) {
     throw new Error('axisConfig must be derived before createBarSeries');
@@ -211,49 +212,155 @@ export const createBarSeries = <T extends BaseChartStyle>(styles: BarChartStyle)
   if (dateAxis) {
     // Calculate bar width based on time unit
     const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
+    const effectiveTimeUnit =
+      timeUnit === TimeUnit.AUTO ? inferTimeIntervals(data, dateAxis.column) : timeUnit;
 
     const series: CustomSeriesOption[] = [
       {
         type: 'custom',
+        encode: {
+          x: axisConfig.xAxis?.column,
+          y: axisConfig.yAxis?.column,
+        },
         renderItem: (params, api) => {
+          // Check if time is on X or Y axis
+          const timeOnXAxis = axisConfig.xAxis?.schema === VisFieldType.Date;
           const timeValue = api.value(0) as number;
           const numValue = api.value(1) as number;
 
           // Calculate bar width based on the actual date for accurate month/year durations
           const currentDate = new Date(timeValue);
-          const barWidthInMs = timeUnitToMs(timeUnit, currentDate);
+          const barWidthInMs = timeUnitToMs(effectiveTimeUnit, currentDate);
 
-          const start = api.coord([timeValue, numValue]) as number[];
-          const end = api.coord([timeValue + barWidthInMs, numValue]) as number[];
-          const width = end[0] - start[0];
-          const sizeResult = api.size?.([0, numValue]) as number[] | undefined;
-          const height = sizeResult ? sizeResult[1] : 0;
+          if (timeOnXAxis) {
+            // Vertical bars: time on X-axis, value on Y-axis
+            // Get pixel coordinates for the bar's left edge (at timeValue) and right edge (at timeValue + barWidthInMs)
+            const startPoint = api.coord([timeValue, numValue]) as number[];
+            const endPoint = api.coord([timeValue + barWidthInMs, numValue]) as number[];
 
-          return {
-            type: 'rect',
-            shape: {
-              x: start[0], // Left edge starts at the tick
-              y: start[1],
-              width,
-              height,
-            },
-            style: api.style(),
-          };
+            // Calculate bar width in pixels (horizontal extent)
+            const barWidth = endPoint[0] - startPoint[0];
+
+            // Calculate bar height in pixels (vertical extent from 0 to numValue)
+            const sizeResult = api.size?.([0, numValue]);
+            const barHeight = Array.isArray(sizeResult) ? sizeResult[1] : 0;
+
+            return {
+              type: 'rect',
+              shape: {
+                x: startPoint[0], // Left edge at the time tick
+                y: startPoint[1], // Top edge at the value height
+                width: barWidth, // Horizontal extent (time duration)
+                height: barHeight, // Vertical extent (value magnitude)
+              },
+              style: api.style(),
+            };
+          } else {
+            // Horizontal bars: time on Y-axis, value on X-axis
+            // Get pixel coordinates for the bar's left edge (at x=0) and right edge (at x=numValue)
+            const startPoint = api.coord([0, timeValue]) as number[];
+            const endPoint = api.coord([numValue, timeValue]) as number[];
+
+            // Calculate bar width in pixels (horizontal extent from 0 to numValue)
+            const barWidth = endPoint[0] - startPoint[0];
+
+            // Calculate bar height in pixels (vertical extent representing time duration)
+            // api.size converts data space [0, barWidthInMs] to pixel space
+            const sizeResult = api.size?.([0, barWidthInMs]);
+            const barHeight = Array.isArray(sizeResult) ? sizeResult[1] : 0;
+
+            return {
+              type: 'rect',
+              shape: {
+                x: startPoint[0], // Left edge at x=0
+                y: startPoint[1] - barHeight, // Top edge (subtract height to position bar correctly)
+                width: barWidth, // Horizontal extent (value magnitude)
+                height: barHeight, // Vertical extent (time duration)
+              },
+              style: api.style(),
+            };
+          }
         },
       },
     ];
-    return { ...state, series };
+
+    if (baseConfig) {
+      baseConfig.tooltip.axisPointer.type = 'none';
+    }
+    newState.series = series;
+  } else {
+    const series: BarSeriesOption[] = [
+      {
+        type: 'bar',
+        encode: {
+          x: axisConfig.xAxis?.column,
+          y: axisConfig.yAxis?.column,
+        },
+        name: numericalAxis?.name || '',
+        // TODO: barWidth and barCategoryGap seems are exclusive, we need to revise the current UI for this config
+        barWidth:
+          styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
+        barCategoryGap:
+          styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
+      },
+    ];
+    newState.series = series;
   }
 
-  const series: BarSeriesOption[] = [
-    {
-      type: 'bar',
-      name: numericalAxis?.name || '',
-      barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
-      barCategoryGap:
-        styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
-    },
-  ];
+  newState.series?.forEach((s) => {
+    if (styles.showBarBorder) {
+      s.itemStyle = {
+        borderWidth: styles.barBorderWidth,
+        borderColor: styles.barBorderColor,
+      };
+    }
+  });
 
-  return { ...state, series };
+  return newState;
+};
+
+/**
+ * Extend time axis range to accommodate bar width
+ * This is bar-chart specific and should only be chained in bar chart pipelines
+ */
+export const extendTimeAxisForBarWidth = <T extends BaseChartStyle>(
+  state: EChartsSpecState<T>
+): EChartsSpecState<T> => {
+  const { axisConfig, aggregatedData, styles, data, xAxisConfig, yAxisConfig } = state;
+
+  if (!axisConfig || !aggregatedData || !xAxisConfig || !yAxisConfig) {
+    return state;
+  }
+
+  const dateAxis = [axisConfig.xAxis, axisConfig.yAxis].find(
+    (axis) => axis?.schema === VisFieldType.Date
+  );
+
+  if (!dateAxis) {
+    return state;
+  }
+
+  const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
+  const effectiveTimeUnit =
+    timeUnit === TimeUnit.AUTO ? inferTimeIntervals(data, dateAxis.column) : timeUnit;
+
+  // Get the last data point (skip header row at index 0)
+  const lastDataPoint = aggregatedData[aggregatedData.length - 1];
+  if (lastDataPoint && lastDataPoint[0] instanceof Date) {
+    const lastDate = lastDataPoint[0];
+    const lastTime = lastDate.getTime();
+
+    // Calculate bar width based on the actual last date for accurate month/year durations
+    const barWidthInMs = timeUnitToMs(effectiveTimeUnit, lastDate);
+    const extendedMax = new Date(lastTime + barWidthInMs);
+
+    if (xAxisConfig.type === 'time') {
+      xAxisConfig.max = extendedMax;
+    }
+    if (yAxisConfig.type === 'time') {
+      yAxisConfig.max = extendedMax;
+    }
+  }
+
+  return state;
 };

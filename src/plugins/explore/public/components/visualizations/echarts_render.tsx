@@ -7,7 +7,7 @@ import * as echarts from 'echarts';
 import React, { useMemo, useRef, useEffect, useState } from 'react';
 
 interface Props {
-  spec: Record<string, any>;
+  spec: echarts.EChartsOption;
 }
 
 export const EchartsRender = ({ spec }: Props) => {
