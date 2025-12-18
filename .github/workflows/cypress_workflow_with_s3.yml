@@ -90,12 +90,6 @@ jobs:
           /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-security"
         shell: bash
 
-      - name: Configure OpenSearch for Cypress tests
-        run: |
-          chmod +x scripts/configure_opensearch_for_cypress.sh
-          ./scripts/configure_opensearch_for_cypress.sh opensearch-${{ env.LATEST_VERSION }}
-        shell: bash
-
       - name: Run OpenSearch
         run: |
           /bin/bash -c "./opensearch-${{ env.LATEST_VERSION }}/opensearch-tar-install.sh &"

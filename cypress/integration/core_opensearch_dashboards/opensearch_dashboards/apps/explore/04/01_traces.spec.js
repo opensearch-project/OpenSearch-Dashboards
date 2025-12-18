@@ -114,41 +114,13 @@ const traceTestSuite = () => {
         },
       });
 
-      // Block PPL queries initially to prevent memory issues on empty data
-      let blockPPL = true;
-      cy.intercept('POST', '**/api/enhancements/search/ppl*', (req) => {
-        if (blockPPL) {
-          req.reply({
-            statusCode: 200,
-            body: {
-              datarows: [],
-              schema: [],
-              size: 0,
-              total: 0,
-              status: 200,
-              took: 0,
-              timed_out: false,
-            },
-          });
-        } else {
-          req.continue();
-        }
-      }).as('pplQuery');
-
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
         page: 'explore/traces',
         isEnhancement: true,
       });
-
-      // Set date range, then unblock PPL queries
-      cy.explore
-        .setTopNavDate('Aug 1, 2025 @ 00:00:00.000', 'Sep 25, 2025 @ 00:00:00.000')
-        .then(() => {
-          blockPPL = false;
-        });
-
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+      cy.explore.setTopNavDate('Aug 1, 2025 @ 00:00:00.000', 'Sep 25, 2025 @ 00:00:00.000');
     });
 
     it('should have default columns on landing page', () => {
