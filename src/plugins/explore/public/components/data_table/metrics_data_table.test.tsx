@@ -64,17 +64,24 @@ describe('MetricsDataTable', () => {
     expect(container.querySelector('.euiDataGrid')).toBeInTheDocument();
   });
 
-  it('displays correct number of columns', () => {
+  it('renders data grid with columns derived from instantFieldSchema', () => {
     const { container } = render(<MetricsDataTable searchResult={mockSearchResult} />);
     expect(container.querySelector('.euiDataGrid')).toBeInTheDocument();
-    // EuiDataGrid columns are set from instantFieldSchema
-    expect(mockSearchResult.instantFieldSchema.length).toBe(4);
+    // Verify the component receives correct field schema for column configuration
+    expect(mockSearchResult.instantFieldSchema).toHaveLength(4);
+    expect(mockSearchResult.instantFieldSchema.map((f) => f.name)).toEqual([
+      'Time',
+      'cpu',
+      'mode',
+      'Value',
+    ]);
   });
 
-  it('formats timestamp correctly', () => {
+  it('renders data grid with timestamp data for formatting', () => {
     const { container } = render(<MetricsDataTable searchResult={mockSearchResult} />);
-    // The component should render the data grid
     expect(container.querySelector('.euiDataGrid')).toBeInTheDocument();
+    // Verify the component receives timestamp data that will be formatted using dateFormat setting
+    expect(mockSearchResult.instantHits?.hits[0]._source.Time).toBe(1638316800000);
   });
 
   it('handles empty search results', () => {

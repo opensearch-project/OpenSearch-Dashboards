@@ -215,6 +215,10 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
                 isTrusted: true,
               }
             : '',
+          command: {
+            id: 'editor.action.triggerSuggest',
+            title: 'Trigger Next Suggestion',
+          },
         }));
 
         return {
