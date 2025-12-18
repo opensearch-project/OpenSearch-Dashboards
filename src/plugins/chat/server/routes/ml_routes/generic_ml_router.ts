@@ -10,6 +10,7 @@ import {
   IOpenSearchDashboardsResponse,
   OpenSearchDashboardsResponseFactory,
   Capabilities,
+  OpenSearchClient,
 } from '../../../../../core/server';
 import { MLAgentRouter } from './ml_agent_router';
 
@@ -78,7 +79,13 @@ function isStreamResponse(response: MLClientResponse): response is MLStreamRespo
  */
 export class GenericMLRouter implements MLAgentRouter {
   async forward(
-    context: RequestHandlerContext,
+    context: RequestHandlerContext & {
+      dataSource?: {
+        opensearch: {
+          getClient: (dataSourceId: string) => Promise<OpenSearchClient>;
+        };
+      };
+    },
     request: OpenSearchDashboardsRequest,
     response: OpenSearchDashboardsResponseFactory,
     logger: Logger,
@@ -105,8 +112,8 @@ export class GenericMLRouter implements MLAgentRouter {
       mlClient = {
         request: async (params: any) => {
           const client =
-            dataSourceId && (context as any).dataSource
-              ? await (context as any).dataSource.opensearch.getClient(dataSourceId)
+            dataSourceId && context.dataSource
+              ? await context.dataSource.opensearch.getClient(dataSourceId)
               : context.core.opensearch.client.asCurrentUser;
 
           const result = await client.transport.request(
