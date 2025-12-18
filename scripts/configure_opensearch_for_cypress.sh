@@ -23,7 +23,7 @@ fi
 
 echo "Configuring OpenSearch in: $OPENSEARCH_DIR"
 
-# Configure JVM heap size (increase from default ~1GB to 1.5GB)
+# Configure JVM heap size (increase from default ~1GB to 2GB for large trace queries)
 JVM_OPTIONS_FILE="$OPENSEARCH_DIR/config/jvm.options"
 if [ -f "$JVM_OPTIONS_FILE" ]; then
   echo "Configuring JVM heap size..."
@@ -35,11 +35,11 @@ if [ -f "$JVM_OPTIONS_FILE" ]; then
   sed -i.bak '/^-Xms/d' "$JVM_OPTIONS_FILE"
   sed -i.bak '/^-Xmx/d' "$JVM_OPTIONS_FILE"
 
-  # Set heap size to 1.5GB (balanced for CI environment)
-  echo "-Xms1536m" >> "$JVM_OPTIONS_FILE"
-  echo "-Xmx1536m" >> "$JVM_OPTIONS_FILE"
+  # Set heap size to 2GB (needed for large trace data queries)
+  echo "-Xms2g" >> "$JVM_OPTIONS_FILE"
+  echo "-Xmx2g" >> "$JVM_OPTIONS_FILE"
 
-  echo "✓ JVM heap size set to 1.5GB"
+  echo "✓ JVM heap size set to 2GB"
 else
   echo "Warning: jvm.options file not found at $JVM_OPTIONS_FILE"
 fi
@@ -72,7 +72,7 @@ fi
 echo "OpenSearch configuration complete!"
 echo ""
 echo "Configuration summary:"
-echo "  - JVM Heap: 1.5GB (1536MB)"
-echo "  - Total circuit breaker limit: 98% of heap (~1.5GB)"
-echo "  - Request circuit breaker limit: 70% of heap (~1.05GB)"
-echo "  - Fielddata circuit breaker limit: 60% of heap (~920MB)"
+echo "  - JVM Heap: 2GB (2048MB)"
+echo "  - Total circuit breaker limit: 98% of heap (~1.96GB)"
+echo "  - Request circuit breaker limit: 70% of heap (~1.4GB)"
+echo "  - Fielddata circuit breaker limit: 60% of heap (~1.2GB)"
