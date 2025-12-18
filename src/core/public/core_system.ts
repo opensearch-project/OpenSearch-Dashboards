@@ -61,7 +61,6 @@ import { ChatService } from './chat';
 
 interface Params {
   rootDomElement: HTMLElement;
-  browserSupportsCsp: boolean;
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
 }
 
@@ -120,7 +119,7 @@ export class CoreSystem {
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
-    const { rootDomElement, browserSupportsCsp, injectedMetadata } = params;
+    const { rootDomElement, injectedMetadata } = params;
 
     this.rootDomElement = rootDomElement;
 
@@ -140,7 +139,7 @@ export class CoreSystem {
     this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.overlay = new OverlayService();
-    this.chrome = new ChromeService({ browserSupportsCsp });
+    this.chrome = new ChromeService();
     this.docLinks = new DocLinksService();
     this.rendering = new RenderingService();
     this.application = new ApplicationService();

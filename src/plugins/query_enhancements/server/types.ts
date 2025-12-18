@@ -14,6 +14,7 @@ export interface QueryEnhancementsPluginSetup {
     searchStrategy: ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse>
   ) => void;
   registerResourceManager: (dataConnectionType: string, manager: BaseConnectionManager) => void;
+  registerQueryManager: (dataConnectionType: string, manager: BaseConnectionManager) => void;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueryEnhancementsPluginStart {}
