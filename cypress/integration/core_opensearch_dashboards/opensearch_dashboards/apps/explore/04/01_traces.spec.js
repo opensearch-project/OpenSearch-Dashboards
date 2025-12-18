@@ -114,14 +114,25 @@ const traceTestSuite = () => {
         },
       });
 
+      // Block PPL queries during initial page load to prevent memory issues
+      // Facet queries on empty data (default "last 15 min") cause circuit breakers
+      cy.intercept('POST', '**/api/enhancements/search/ppl*', (req) => {
+        req.reply({ datarows: [], schema: [], size: 0, total: 0 });
+      }).as('blockedPpl');
+
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
         page: 'explore/traces',
         isEnhancement: true,
       });
 
-      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+      // Set correct date range, then unblock PPL queries
       cy.explore.setTopNavDate('Aug 1, 2025 @ 00:00:00.000', 'Sep 25, 2025 @ 00:00:00.000');
+
+      // Remove intercept to allow real queries
+      cy.intercept('POST', '**/api/enhancements/search/ppl*').as('pplQuery');
+
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     });
 
     it('should have default columns on landing page', () => {
