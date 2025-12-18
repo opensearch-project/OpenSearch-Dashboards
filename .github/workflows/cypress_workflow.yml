@@ -52,7 +52,7 @@ env:
   COMMENT_TAG: "[MANUAL CYPRESS TEST RUN RESULTS]"
   COMMENT_SUCCESS_MSG: ":white_check_mark: Cypress test run succeeded!"
   COMMENT_FAILURE_MSG: ":x: Cypress test run failed!"
-  LATEST_VERSION: '3.3.0'
+  LATEST_VERSION: '3.4.0'
 
 jobs:
   cypress-tests:
