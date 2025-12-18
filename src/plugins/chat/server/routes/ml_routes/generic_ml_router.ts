@@ -104,11 +104,10 @@ export class GenericMLRouter implements MLAgentRouter {
     if (!mlClient) {
       mlClient = {
         request: async (params: any) => {
-          // Use asInternalUser to avoid header conflicts with current user context
           const client =
             dataSourceId && (context as any).dataSource
               ? await (context as any).dataSource.opensearch.getClient(dataSourceId)
-              : context.core.opensearch.client.asInternalUser;
+              : context.core.opensearch.client.asCurrentUser;
 
           const result = await client.transport.request(
             {
