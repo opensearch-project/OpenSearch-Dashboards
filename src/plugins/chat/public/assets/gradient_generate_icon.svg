@@ -1,0 +1,32 @@
+<!--
+  Copyright OpenSearch Contributors
+  SPDX-License-Identifier: Apache-2.0
+-->
+
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <defs>
+    <linearGradient id="generateGradient" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00d0ff" />
+      <stop offset="50%" stop-color="#1034d4" />
+      <stop offset="100%" stop-color="#9b1fa8" />
+    </linearGradient>
+  </defs>
+
+  <!-- Main large sparkle (center) -->
+  <path
+    fill="url(#generateGradient)"
+    d="M7 2L8.5 6L12.5 7.5L8.5 9L7 13L5.5 9L1.5 7.5L5.5 6L7 2Z"
+  />
+
+  <!-- Upper right small sparkle -->
+  <path
+    fill="url(#generateGradient)"
+    d="M12 2.5L12.7 3.8L14 4.5L12.7 5.2L12 6.5L11.3 5.2L10 4.5L11.3 3.8L12 2.5Z"
+  />
+
+  <!-- Lower right small sparkle -->
+  <path
+    fill="url(#generateGradient)"
+    d="M12.5 9.5L13.2 10.8L14.5 11.5L13.2 12.2L12.5 13.5L11.8 12.2L10.5 11.5L11.8 10.8L12.5 9.5Z"
+  />
+</svg>

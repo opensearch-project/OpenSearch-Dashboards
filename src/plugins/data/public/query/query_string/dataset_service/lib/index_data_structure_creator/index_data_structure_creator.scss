@@ -7,4 +7,15 @@
 
 .indexDataStructureCreator {
   padding: $euiSize;
+
+  &__selectedIndices {
+    display: flex;
+    flex-direction: column;
+    gap: $euiSizeXS;
+    margin-top: $euiSizeS;
+  }
+
+  &__badgeContainer {
+    display: flex;
+  }
 }

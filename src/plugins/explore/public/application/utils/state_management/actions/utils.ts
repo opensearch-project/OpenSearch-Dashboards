@@ -14,6 +14,7 @@ import { ExploreServices } from '../../../../types';
 import { ISearchResult } from '../slices';
 import { createHistogramConfigs } from '../../../../components/chart/utils';
 import { RootState } from '../store';
+import { calculateTraceInterval } from '../constants';
 
 export interface HistogramConfig {
   histogramConfigs: AggConfigs | undefined;
@@ -239,14 +240,12 @@ export const processRawResultsForHistogram = (
   }
 };
 
-/**
- * Creates histogram configuration with computed interval and time range
- */
 export const createHistogramConfigWithInterval = (
   dataView: DataView,
   interval: string | undefined,
   services: ExploreServices,
-  getState: () => RootState
+  getState: () => RootState,
+  customBarTarget?: number
 ): HistogramConfig | null => {
   if (!dataView.timeFieldName || !interval) {
     return null;
@@ -256,10 +255,17 @@ export const createHistogramConfigWithInterval = (
   const effectiveInterval = interval || state.legacy?.interval || 'auto';
   const breakdownField = state.queryEditor.breakdownField;
 
-  const histogramConfigs = createHistogramConfigs(dataView, effectiveInterval, services.data);
+  const histogramConfigs = createHistogramConfigs(
+    dataView,
+    effectiveInterval,
+    services.data,
+    services.uiSettings,
+    breakdownField,
+    customBarTarget
+  );
   const aggs = histogramConfigs?.toDsl();
 
-  if (!aggs) {
+  if (!aggs || !histogramConfigs) {
     return null;
   }
 
@@ -268,14 +274,39 @@ export const createHistogramConfigWithInterval = (
     'YYYY-MM-DD HH:mm:ss.SSS'
   );
 
-  const finalInterval =
-    aggs[2].date_histogram.fixed_interval ??
-    aggs[2].date_histogram.calendar_interval ??
-    services.data.search.aggs.calculateAutoTimeExpression({
-      from: fromDate,
-      to: toDate,
-      mode: 'absolute',
-    });
+  // Extract interval directly from the buckets we configured
+  let finalInterval: string = effectiveInterval;
+
+  // Find the date histogram aggregation - it could be at different indices
+  const dateHistogramAgg = histogramConfigs.aggs?.find(
+    (agg: any) => agg && agg.type && agg.type.name === 'date_histogram'
+  ) as any;
+
+  if (dateHistogramAgg?.buckets) {
+    // For traces with custom bar target, bypass TimeBuckets and calculate interval manually
+    // TimeBuckets doesn't honor our minimum interval settings reliably
+    if (customBarTarget) {
+      const bounds = services.data.query.timefilter.timefilter.calculateBounds(
+        services.data.query.timefilter.timefilter.getTime()
+      );
+      const diffDays =
+        bounds.max && bounds.min
+          ? (bounds.max.valueOf() - bounds.min.valueOf()) / (1000 * 60 * 60 * 24)
+          : 0;
+
+      const calculatedInterval = calculateTraceInterval(diffDays);
+      if (calculatedInterval) {
+        finalInterval = calculatedInterval;
+      } else {
+        // For < 7 days, use TimeBuckets
+        const bucketInterval = dateHistogramAgg.buckets.getInterval();
+        finalInterval = bucketInterval.expression || bucketInterval.interval || effectiveInterval;
+      }
+    } else {
+      const bucketInterval = dateHistogramAgg.buckets.getInterval();
+      finalInterval = bucketInterval.expression || bucketInterval.interval || effectiveInterval;
+    }
+  }
 
   return {
     histogramConfigs,

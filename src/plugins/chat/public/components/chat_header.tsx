@@ -13,6 +13,7 @@ interface ChatHeaderProps {
   isStreaming: boolean;
   onToggleLayout?: () => void;
   onNewChat: () => void;
+  onClose: () => void;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -20,6 +21,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   isStreaming,
   onToggleLayout,
   onNewChat,
+  onClose,
 }) => {
   return (
     <div className="chatHeader">
@@ -56,6 +58,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           aria-label="New chat"
           size="m"
         />
+        <EuiButtonIcon iconType="cross" onClick={onClose} aria-label="Close chatbot" size="m" />
       </div>
     </div>
   );

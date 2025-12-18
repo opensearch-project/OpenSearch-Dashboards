@@ -7,7 +7,7 @@ import { Middleware } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
 import { RootState } from '../store';
 import { ExploreServices } from '../../../../types';
-import { getQueryWithSource } from '../../languages';
+import { prepareQueryForLanguage } from '../../languages';
 
 /**
  * Middleware to sync Redux query state with global queryStringManager
@@ -26,13 +26,13 @@ export const createQuerySyncMiddleware = (services: ExploreServices): Middleware
     ) {
       const state = store.getState();
       const query = state.query;
-      const queryWithSource = getQueryWithSource(query);
+      const preparedQuery = prepareQueryForLanguage(query);
 
       if (query.dataset && services.data?.query?.queryString) {
         const queryStringQuery = services.data.query.queryString.getQuery();
 
-        if (!isEqual(queryStringQuery, queryWithSource)) {
-          services.data.query.queryString.setQuery(queryWithSource);
+        if (!isEqual(queryStringQuery, preparedQuery)) {
+          services.data.query.queryString.setQuery(preparedQuery);
         }
 
         // Add to query history only for user-initiated query executions

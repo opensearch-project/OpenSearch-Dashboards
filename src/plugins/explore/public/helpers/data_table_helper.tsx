@@ -110,8 +110,8 @@ function getColumnDisplayName(column: string): string {
 export function getLegacyDisplayedColumns(
   columns: string[],
   indexPattern: IndexPattern | Dataset,
-  hideTimeField: boolean,
-  isShortDots: boolean
+  isShortDots: boolean,
+  hideTimeField: boolean
 ): LegacyDisplayedColumn[] {
   if (!Array.isArray(columns) || !indexPattern || !indexPattern.getFieldByName) {
     return [];

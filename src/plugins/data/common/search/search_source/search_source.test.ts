@@ -236,6 +236,88 @@ describe('SearchSource', () => {
     });
   });
 
+  describe('#createDataFrame()', () => {
+    test('handles index with title property', async () => {
+      let storedDataFrame: any;
+      const mockDf = {
+        get: jest.fn(() => storedDataFrame),
+        set: jest.fn((df) => {
+          storedDataFrame = df;
+        }),
+        clear: jest.fn(),
+      };
+      const deps = { ...searchSourceDependencies, df: mockDf };
+      const searchSource = new SearchSource({}, deps);
+      const searchRequest = {
+        index: { title: 'my-index' },
+        body: {},
+      };
+      const result = await searchSource.createDataFrame(searchRequest as any);
+      expect(mockDf.set).toHaveBeenCalled();
+      expect(storedDataFrame?.name).toBe('my-index');
+    });
+
+    test('handles index as string', async () => {
+      let storedDataFrame: any;
+      const mockDf = {
+        get: jest.fn(() => storedDataFrame),
+        set: jest.fn((df) => {
+          storedDataFrame = df;
+        }),
+        clear: jest.fn(),
+      };
+      const deps = { ...searchSourceDependencies, df: mockDf };
+      const searchSource = new SearchSource({}, deps);
+      const searchRequest = {
+        index: 'my-index-string',
+        body: {},
+      };
+      const result = await searchSource.createDataFrame(searchRequest as any);
+      expect(mockDf.set).toHaveBeenCalled();
+      expect(storedDataFrame?.name).toBe('my-index-string');
+    });
+
+    test('handles undefined index with optional chaining', async () => {
+      let storedDataFrame: any;
+      const mockDf = {
+        get: jest.fn(() => storedDataFrame),
+        set: jest.fn((df) => {
+          storedDataFrame = df;
+        }),
+        clear: jest.fn(),
+      };
+      const deps = { ...searchSourceDependencies, df: mockDf };
+      const searchSource = new SearchSource({}, deps);
+      const searchRequest = {
+        index: undefined,
+        body: {},
+      };
+      const result = await searchSource.createDataFrame(searchRequest as any);
+      expect(mockDf.set).toHaveBeenCalled();
+      expect(storedDataFrame?.name).toBeUndefined();
+    });
+
+    test('handles null index with optional chaining', async () => {
+      let storedDataFrame: any;
+      const mockDf = {
+        get: jest.fn(() => storedDataFrame),
+        set: jest.fn((df) => {
+          storedDataFrame = df;
+        }),
+        clear: jest.fn(),
+      };
+      const deps = { ...searchSourceDependencies, df: mockDf };
+      const searchSource = new SearchSource({}, deps);
+      const searchRequest = {
+        index: null,
+        body: {},
+      };
+      const result = await searchSource.createDataFrame(searchRequest as any);
+      expect(mockDf.set).toHaveBeenCalled();
+      expect(storedDataFrame?.name).toBeNull();
+    });
+  });
+
   describe('#serialize', () => {
     test('should reference index patterns', () => {
       const indexPattern123 = { id: '123' } as IndexPattern;

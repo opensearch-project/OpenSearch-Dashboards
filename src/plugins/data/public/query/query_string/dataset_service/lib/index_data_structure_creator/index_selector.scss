@@ -3,6 +3,25 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+@import "@elastic/eui/src/global_styling/variables/size";
+
+.indexSelector {
+  position: relative;
+
+  &__popover {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background-color: $euiColorEmptyShade;
+    border: $euiBorderThin;
+    border-radius: $euiBorderRadius;
+    box-shadow: none;
+    margin-top: $euiSizeXS;
+  }
+}
+
 .indexSelectorOption {
   width: 100%;
 }

@@ -1,2 +1,0 @@
-fix:
-- Allow updating of console_polling through the UI ([#10595](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10595))

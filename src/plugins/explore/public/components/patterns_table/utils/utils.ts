@@ -18,7 +18,7 @@ import {
 import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
 import { ExploreServices } from '../../../types';
 import { setPatternsField } from '../../../application/utils/state_management/slices/tab/tab_slice';
-import { getQueryWithSource } from '../../../application/utils/languages';
+import { prepareQueryForLanguage } from '../../../application/utils/languages';
 
 // Small functions returning the two pattern queries
 export const regexPatternQuery = (queryBase: string, patternsField: string) => {
@@ -51,7 +51,7 @@ export const createSearchPatternQuery = (
   usingRegexPatterns: boolean,
   patternString: string
 ) => {
-  const preparedQuery = getQueryWithSource(query);
+  const preparedQuery = prepareQueryForLanguage(query);
   return usingRegexPatterns
     ? regexUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString)
     : brainUpdateSearchPatternQuery(preparedQuery.query, patternsField, patternString);
@@ -62,21 +62,27 @@ export const createSearchPatternQueryWithSlice = (
   patternsField: string,
   usingRegexPatterns: boolean,
   patternString: string,
-  timeField: string,
+  timeField: string | undefined,
   pageSize: number,
   pageOffset: number
 ) => {
   // TODO: switch this logic back to adding onto the createSearchPatternQuery
   // when we don't need a patterns clause to lock in the pattern type
 
-  const preparedQuery = getQueryWithSource(query);
+  const preparedQuery = prepareQueryForLanguage(query);
+  const sortClause = timeField ? ` | sort - ${timeField}` : '';
+
   return usingRegexPatterns
     ? `${regexUpdateSearchPatternQuery(
         preparedQuery.query,
         patternsField,
         patternString
-      )} | sort - ${timeField} | head ${pageSize} from ${pageOffset}`
-    : `${preparedQuery.query} | patterns \`${patternsField}\` method=brain mode=label | fields patterns_field, ${timeField}, ${patternsField} | where patterns_field = '${patternString}' | sort - ${timeField} | head ${pageSize} from ${pageOffset}`;
+      )}${sortClause} | head ${pageSize} from ${pageOffset}`
+    : `${
+        preparedQuery.query
+      } | patterns \`${patternsField}\` method=brain mode=label | fields patterns_field${
+        timeField ? `, ${timeField}` : ''
+      }, ${patternsField} | where patterns_field = '${patternString}'${sortClause} | head ${pageSize} from ${pageOffset}`;
 };
 
 // Checks if the value is a valid, finite number. Used for patterns table

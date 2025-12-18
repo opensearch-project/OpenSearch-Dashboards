@@ -28,6 +28,7 @@ jest.mock('../../services/usage_collector', () => ({
 jest.mock('../../application/utils/state_management/actions/query_actions', () => ({
   executeQueries: jest.fn(() => ({ type: 'mock/executeQueries' })),
   executeHistogramQuery: jest.fn(() => ({ type: 'mock/executeHistogramQuery' })),
+  executeDataTableQuery: jest.fn(() => ({ type: 'mock/executeDataTableQuery' })),
   defaultPrepareQueryString: jest.fn((query) => `${query.language}:${query.query}`),
   prepareHistogramCacheKey: jest.fn((query) => `histogram:${query.language}:${query.query}`),
 }));
@@ -148,6 +149,7 @@ describe('DiscoverChart', () => {
         summaryAgentIsAvailable: false,
         queryExecutionButtonStatus: 'REFRESH',
         isQueryEditorDirty: false,
+        hasUserInitiatedQuery: false,
       },
       results: {},
       tab: {
@@ -291,7 +293,7 @@ describe('DiscoverChart', () => {
     fireEvent.click(changeIntervalButton);
 
     // Should dispatch setInterval, clearResultsByKey, clearQueryStatusMapByKey, and executeHistogramQuery
-    expect(dispatchSpy).toHaveBeenCalledTimes(4);
+    expect(dispatchSpy).toHaveBeenCalledTimes(5);
     expect(dispatchSpy).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'legacy/setInterval' })
     );
