@@ -32,7 +32,7 @@ env:
   CYPRESS_VISBUILDER_ENABLED: true
   CYPRESS_DATASOURCE_MANAGEMENT_ENABLED: false
   OSD_SNAPSHOT_SKIP_VERIFY_CHECKSUM: true
-  NODE_OPTIONS: '--max-old-space-size=12288 --dns-result-order=ipv4first'
+  NODE_OPTIONS: '--max-old-space-size=6144 --dns-result-order=ipv4first'
   LATEST_VERSION: '2.17.0'
 
 jobs:
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
-      options: --user 1001 --shm-size=4g
+      options: --user 1001
     env:
       START_CMD: 'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides[''home:useNewHomePage'']=true --data_source.enabled=true --workspace.enabled=true --opensearch.ignoreVersionMismatch=true'
       OPENSEARCH_SNAPSHOT_CMD: '/bin/bash -c "./opensearch-2.17.0/opensearch-tar-install.sh &"'
@@ -85,8 +85,9 @@ jobs:
           rm -f opensearch-*.tar.gz
         shell: bash
 
-      - name: Remove security plugin
+      - name: Remove security plugin and plugins that depend on security
         run: |
+          /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-flow-framework"
           /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-security"
         shell: bash
 
