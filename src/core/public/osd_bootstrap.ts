@@ -57,7 +57,6 @@ export async function __osdBootstrap__() {
   const coreSystem = new CoreSystem({
     injectedMetadata,
     rootDomElement: document.body,
-    browserSupportsCsp: !(window as any).__osdCspNotEnforced__,
   });
 
   const setup = await coreSystem.setup();
