@@ -278,37 +278,81 @@ export const executeTraceAggregationQueries = createAsyncThunk<
     config: TraceAggregationConfig;
   },
   { state: RootState }
->('query/executeTraceAggregationQueries', async ({ services, baseQuery, config }, { dispatch }) => {
-  // Execute all 3 RED metric queries in parallel
-  const [requestData, errorData, latencyData] = await Promise.all([
-    dispatch(
-      executeRequestCountQuery({
-        services,
-        cacheKey: `trace-requests:${baseQuery}`,
-        baseQuery,
-        config,
-      })
-    ).unwrap(),
-    dispatch(
-      executeErrorCountQuery({
-        services,
-        cacheKey: `trace-errors:${baseQuery}`,
-        baseQuery,
-        config,
-      })
-    ).unwrap(),
-    dispatch(
-      executeLatencyQuery({
-        services,
-        cacheKey: `trace-latency:${baseQuery}`,
-        baseQuery,
-        config,
-      })
-    ).unwrap(),
-  ]);
+>(
+  'query/executeTraceAggregationQueries',
+  async ({ services, baseQuery, config }, { dispatch, getState }) => {
+    // First, do a check to see if any data exists
+    const quickCheckQuery = `${baseQuery} | head 1`;
+    const quickCheckCacheKey = `trace-quick-check:${baseQuery}`;
 
-  return { requestData, errorData, latencyData };
-});
+    try {
+      const quickCheckResult = await executeTraceQueryBase(
+        {
+          services,
+          cacheKey: quickCheckCacheKey,
+          queryString: quickCheckQuery,
+        },
+        { dispatch, getState }
+      );
+
+      // If no data exists, return empty results for all metrics
+      if (
+        !quickCheckResult ||
+        !quickCheckResult.hits?.hits ||
+        quickCheckResult.hits.hits.length === 0
+      ) {
+        const emptyResult: ISearchResult = {
+          hits: { hits: [], total: 0 },
+          elapsedMs: 0,
+          fieldSchema: undefined,
+        };
+
+        // Store empty results in cache
+        dispatch(setResults({ cacheKey: `trace-requests:${baseQuery}`, results: emptyResult }));
+        dispatch(setResults({ cacheKey: `trace-errors:${baseQuery}`, results: emptyResult }));
+        dispatch(setResults({ cacheKey: `trace-latency:${baseQuery}`, results: emptyResult }));
+
+        return {
+          requestData: emptyResult,
+          errorData: emptyResult,
+          latencyData: emptyResult,
+        };
+      }
+    } catch (error) {
+      // If quick check fails, continue with normal execution
+    }
+
+    // Data exists, execute all 3 RED metric queries in parallel
+    const [requestData, errorData, latencyData] = await Promise.all([
+      dispatch(
+        executeRequestCountQuery({
+          services,
+          cacheKey: `trace-requests:${baseQuery}`,
+          baseQuery,
+          config,
+        })
+      ).unwrap(),
+      dispatch(
+        executeErrorCountQuery({
+          services,
+          cacheKey: `trace-errors:${baseQuery}`,
+          baseQuery,
+          config,
+        })
+      ).unwrap(),
+      dispatch(
+        executeLatencyQuery({
+          services,
+          cacheKey: `trace-latency:${baseQuery}`,
+          baseQuery,
+          config,
+        })
+      ).unwrap(),
+    ]);
+
+    return { requestData, errorData, latencyData };
+  }
+);
 
 /**
  * Execute request count query for traces

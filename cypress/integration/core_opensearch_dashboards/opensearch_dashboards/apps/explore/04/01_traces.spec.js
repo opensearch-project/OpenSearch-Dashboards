@@ -119,8 +119,8 @@ const traceTestSuite = () => {
         page: 'explore/traces',
         isEnhancement: true,
       });
-      cy.wait(5000);
-      //cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       cy.explore.setTopNavDate('Aug 1, 2025 @ 00:00:00.000', 'Sep 25, 2025 @ 00:00:00.000');
     });
 
