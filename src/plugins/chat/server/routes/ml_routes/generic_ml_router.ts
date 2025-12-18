@@ -123,8 +123,8 @@ export class GenericMLRouter implements MLAgentRouter {
               body: params.body,
             },
             {
-              asStream: true,
-              requestTimeout: 300000,
+              asStream: params.stream,
+              requestTimeout: params.timeout,
               maxRetries: 0,
             }
           );
