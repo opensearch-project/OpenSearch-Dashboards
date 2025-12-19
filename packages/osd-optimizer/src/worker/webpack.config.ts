@@ -92,6 +92,12 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
       rules: [
         {
+          // Force .mjs files to be treated as commonjs to avoid ES module externals conflicts
+          test: /\.mjs$/,
+          include: /node_modules/,
+          type: 'javascript/auto',
+        },
+        {
           include: [ENTRY_CREATOR],
           use: [
             {
@@ -213,6 +219,46 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           },
         },
         {
+          test: /\.(js|mjs)$/,
+          /* @opensearch-project/oui and related packages use modern JavaScript syntax
+           * Process these BEFORE the main exclusion rule
+           */
+          include: [
+            /node_modules[\\/]@opensearch-project[\\/]oui/,
+            /node_modules[\\/]@radix-ui/,
+            /node_modules[\\/]@hookform/,
+            /node_modules[\\/]@tailwindcss/,
+            /node_modules[\\/]@floating-ui/,
+            /node_modules[\\/]class-variance-authority/,
+            /node_modules[\\/]clsx/,
+            /node_modules[\\/]tailwind-merge/,
+            /node_modules[\\/]lucide-react/,
+            /node_modules[\\/]react-day-picker/,
+            /node_modules[\\/]react-resizable-panels/,
+            /node_modules[\\/]input-otp/,
+            /node_modules[\\/]sonner/,
+            /node_modules[\\/]cmdk/,
+            /node_modules[\\/]vaul/,
+            /node_modules[\\/]embla-carousel/,
+            /node_modules[\\/]recharts/,
+            /node_modules[\\/]next-themes/,
+            /node_modules[\\/]date-fns/,
+            /node_modules[\\/]@date-fns/,
+            /node_modules[\\/]victory-vendor/,
+            /node_modules[\\/]zod/,
+            /node_modules[\\/]antlr4ng/,
+            /node_modules[\\/]antlr4-c3/,
+          ],
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              envName: worker.dist ? 'production' : 'development',
+              presets: [BABEL_PRESET_PATH],
+            },
+          },
+        },
+        {
           test: /\.(js|tsx?)$/,
           exclude: [
             /* vega-lite and some of its dependencies don't have es5 builds
@@ -291,11 +337,16 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     },
 
     resolve: {
-      extensions: ['.js', '.ts', '.tsx', '.json'],
-      mainFields: ['browser', 'main'],
+      extensions: ['.js', '.ts', '.tsx', '.json', '.mjs'],
+      mainFields: ['browser', 'module', 'main'],
       alias: {
         core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
         'opensearch-dashboards/public': Path.resolve(worker.repoRoot, 'src/core/public'),
+        // Add specific resolution for problematic modern ES modules
+        'react-resizable-panels': Path.resolve(
+          worker.repoRoot,
+          'node_modules/react-resizable-panels/dist/react-resizable-panels.development.js'
+        ),
       },
     },
 

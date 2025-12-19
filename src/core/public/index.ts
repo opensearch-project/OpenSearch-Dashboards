@@ -47,6 +47,7 @@
  */
 
 import './index.scss';
+import '@opensearch-project/oui/dist/style.scoped.css';
 
 import {
   ChromeBadge,
