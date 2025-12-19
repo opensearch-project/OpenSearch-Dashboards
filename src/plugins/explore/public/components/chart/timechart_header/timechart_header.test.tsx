@@ -159,6 +159,16 @@ describe('timechart header', function () {
     expect(labels).toEqual(['Auto', 'Millisecond', 'Second']);
   });
 
+  it('should hide interval selector when hideIntervalSelector is true', () => {
+    const updatedProps = {
+      ...props,
+      hideIntervalSelector: true,
+    };
+    component = mountWithIntl(<TimechartHeader {...updatedProps} />);
+    const intervalSelect = findTestSubject(component, 'discoverIntervalSelect');
+    expect(intervalSelect.length).toBe(0);
+  });
+
   it('should change the interval', function () {
     component = mountWithIntl(<TimechartHeader {...props} />);
     findTestSubject(component, 'discoverIntervalSelect').simulate('change', {

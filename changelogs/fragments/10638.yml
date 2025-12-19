@@ -1,2 +1,0 @@
-chore:
-- Change to a uniform pattern where uncommenting the line has the intended action in opensearch_dashboards.yml config file ([#10638](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10638))

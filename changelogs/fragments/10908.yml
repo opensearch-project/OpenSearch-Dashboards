@@ -1,2 +1,0 @@
-fix:
-- Trim collaboratorId when adding collaborators for workspace ([#10908](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10908))

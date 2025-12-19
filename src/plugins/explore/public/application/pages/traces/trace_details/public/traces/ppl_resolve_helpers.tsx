@@ -123,19 +123,29 @@ export function resolveServiceName(fieldMap: Map<string, any[]>, index: number):
 }
 
 export function resolveStartTime(fieldMap: Map<string, any[]>, index: number): string {
-  return fieldMap.get('startTimeUnixNano')?.[index] || fieldMap.get('startTime')?.[index] || '';
+  return fieldMap.get('startTime')?.[index] || fieldMap.get('startTimeUnixNano')?.[index] || '';
 }
 
 export function resolveEndTime(fieldMap: Map<string, any[]>, index: number): string {
-  return fieldMap.get('endTimeUnixNano')?.[index] || fieldMap.get('endTime')?.[index] || '';
+  return fieldMap.get('endTime')?.[index] || fieldMap.get('endTimeUnixNano')?.[index] || '';
 }
 
 export function resolveTimestamp(fieldMap: Map<string, any[]>, index: number): string {
-  return fieldMap.get('endTimeUnixNano')?.[index] || fieldMap.get('@timestamp')?.[index] || '';
+  return (
+    fieldMap.get('@timestamp')?.[index] ||
+    fieldMap.get('endTime')?.[index] ||
+    fieldMap.get('endTimeUnixNano')?.[index] ||
+    ''
+  );
 }
 
 export function resolveTime(fieldMap: Map<string, any[]>, index: number): string {
-  return fieldMap.get('endTimeUnixNano')?.[index] || fieldMap.get('time')?.[index] || '';
+  return (
+    fieldMap.get('time')?.[index] ||
+    fieldMap.get('endTime')?.[index] ||
+    fieldMap.get('endTimeUnixNano')?.[index] ||
+    ''
+  );
 }
 
 export function resolveDuration(
@@ -144,8 +154,8 @@ export function resolveDuration(
   startTime: string,
   endTime: string
 ): number {
-  const durationNano = fieldMap.get('durationNano')?.[index];
   const durationInNanos = fieldMap.get('durationInNanos')?.[index];
+  const durationNano = fieldMap.get('durationNano')?.[index];
 
   if (startTime && endTime) {
     const hasStartNanoPrecision = hasNanosecondPrecision(startTime);
@@ -165,8 +175,8 @@ export function resolveDuration(
     }
 
     // If timestamps lack precision, prefer provided duration fields for better accuracy
-    if ((!hasStartNanoPrecision || !hasEndNanoPrecision) && (durationNano || durationInNanos)) {
-      return durationNano || durationInNanos;
+    if ((!hasStartNanoPrecision || !hasEndNanoPrecision) && (durationInNanos || durationNano)) {
+      return durationInNanos || durationNano;
     }
 
     // Fall back to calculated duration from lower-precision timestamps
@@ -183,11 +193,11 @@ export function resolveDuration(
   }
 
   // Final fallback to provided duration fields
-  return durationNano || durationInNanos || 0;
+  return durationInNanos || durationNano || 0;
 }
 
 export function resolveInstrumentationScope(fieldMap: Map<string, any[]>, index: number): any {
-  return fieldMap.get('scope')?.[index] || fieldMap.get('instrumentationScope')?.[index] || {};
+  return fieldMap.get('instrumentationScope')?.[index] || fieldMap.get('scope')?.[index] || {};
 }
 
 export function resolveServiceNameFromDatarows(getValueByName: (name: string) => any): string {
@@ -200,11 +210,11 @@ export function resolveServiceNameFromDatarows(getValueByName: (name: string) =>
 }
 
 export function resolveStartTimeFromDatarows(getValueByName: (name: string) => any): string {
-  return getValueByName('startTimeUnixNano') || getValueByName('startTime') || '';
+  return getValueByName('startTime') || getValueByName('startTimeUnixNano') || '';
 }
 
 export function resolveEndTimeFromDatarows(getValueByName: (name: string) => any): string {
-  return getValueByName('endTimeUnixNano') || getValueByName('endTime') || '';
+  return getValueByName('endTime') || getValueByName('endTimeUnixNano') || '';
 }
 
 export function resolveDurationFromDatarows(
@@ -212,8 +222,8 @@ export function resolveDurationFromDatarows(
   startTime: string,
   endTime: string
 ): number {
-  const durationNano = getValueByName('durationNano');
   const durationInNanos = getValueByName('durationInNanos');
+  const durationNano = getValueByName('durationNano');
 
   if (startTime && endTime) {
     const hasStartNanoPrecision = hasNanosecondPrecision(startTime);
@@ -233,8 +243,8 @@ export function resolveDurationFromDatarows(
     }
 
     // If timestamps lack precision, prefer provided duration fields for better accuracy
-    if ((!hasStartNanoPrecision || !hasEndNanoPrecision) && (durationNano || durationInNanos)) {
-      return durationNano || durationInNanos;
+    if ((!hasStartNanoPrecision || !hasEndNanoPrecision) && (durationInNanos || durationNano)) {
+      return durationInNanos || durationNano;
     }
 
     // Fall back to calculated duration from lower-precision timestamps
@@ -251,13 +261,13 @@ export function resolveDurationFromDatarows(
   }
 
   // Final fallback to provided duration fields
-  return durationNano || durationInNanos || 0;
+  return durationInNanos || durationNano || 0;
 }
 
 export function resolveInstrumentationScopeFromDatarows(
   getValueByName: (name: string) => any
 ): any {
-  return getValueByName('scope') || getValueByName('instrumentationScope') || {};
+  return getValueByName('instrumentationScope') || getValueByName('scope') || {};
 }
 
 export function isSpanError(span: any): boolean {

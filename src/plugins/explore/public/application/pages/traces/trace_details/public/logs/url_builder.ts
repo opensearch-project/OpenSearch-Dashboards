@@ -42,11 +42,11 @@ export function buildExploreLogsUrl(params: {
   const timeFieldName = logDataset.timeFieldName || 'time';
 
   // Build _q parameter (dataset and query)
-  let datasetParam = `(id:'${logDataset.id}',timeFieldName:${timeFieldName},title:'${logDataset.title}',type:${logDataset.type}`;
+  let datasetParam = `(id:'${logDataset.id}',timeFieldName:'${timeFieldName}',title:'${logDataset.title}',type:'${logDataset.type}'`;
 
   // Include dataSource if present for external data sources
   if (logDataset.dataSource) {
-    datasetParam += `,dataSource:(id:'${logDataset.dataSource.id}',title:'${logDataset.dataSource.title}',type:${logDataset.dataSource.type})`;
+    datasetParam += `,dataSource:(id:'${logDataset.dataSource.id}',title:'${logDataset.dataSource.title}',type:'${logDataset.dataSource.type}')`;
   }
 
   datasetParam += ')';

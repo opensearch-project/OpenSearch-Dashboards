@@ -1,2 +1,0 @@
-fix:
-- Breadcrumb trailing link not clickable for visualization and dashboard ([#10897](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10897))

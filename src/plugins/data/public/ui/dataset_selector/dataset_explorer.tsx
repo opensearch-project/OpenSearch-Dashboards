@@ -188,6 +188,7 @@ export const DatasetExplorer = ({
                     setPath={setPath}
                     index={index}
                     selectDataStructure={selectDataStructure}
+                    services={services}
                     // @ts-ignore custom component can have their own fetch options
                     fetchDataStructure={fetchNextDataStructure}
                   />

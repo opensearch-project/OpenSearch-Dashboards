@@ -1,2 +1,0 @@
-fix:
-- Ensure the disabled prop gets passed to the EuiSideNavItem for navlinks ([#10678](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10678))

@@ -1,2 +1,0 @@
-fix:
-- First character being trimmed during Query Snippet Insertion ([#10901](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10901))

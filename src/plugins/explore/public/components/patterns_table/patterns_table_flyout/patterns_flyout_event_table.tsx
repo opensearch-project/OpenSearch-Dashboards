@@ -25,7 +25,7 @@ interface PatternsFlyoutEventTableProps {
 }
 
 interface EventTableItem {
-  timestamp: string;
+  timestamp?: string;
   event: string;
 }
 
@@ -44,8 +44,8 @@ export const PatternsFlyoutEventTable = ({
 
   const [fetchError, setFetchError] = useState<unknown | null>(null);
 
-  if (!dataset || !patternsField || !timeFieldName)
-    throw new Error('Dataset, patterns field, or time field is not appearing for event table');
+  if (!dataset || !patternsField)
+    throw new Error('Dataset or patterns field is not appearing for event table');
 
   const [fetchedItems, setFetchedItems] = useState<EventTableItem[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
@@ -94,10 +94,15 @@ export const PatternsFlyoutEventTable = ({
       const rows = results.hits.hits;
 
       const items: EventTableItem[] = rows.map((row) => {
-        return {
-          timestamp: row._source[timeFieldName],
+        const item: EventTableItem = {
           event: row._source[patternsField],
         };
+
+        if (timeFieldName) {
+          item.timestamp = row._source[timeFieldName];
+        }
+
+        return item;
       });
 
       setFetchedItems(items);
@@ -114,24 +119,29 @@ export const PatternsFlyoutEventTable = ({
   }, []);
 
   const eventTableColumns = useMemo(() => {
-    return [
-      {
+    const columns = [];
+
+    if (timeFieldName) {
+      columns.push({
         field: 'timestamp',
         name: i18n.translate('explore.patterns.flyout.timeColumnName', {
           defaultMessage: 'Time ({timeFieldName})',
           values: { timeFieldName },
         }),
         sortable: false,
-      },
-      {
-        field: 'event',
-        name: i18n.translate('explore.patterns.flyout.eventsColumnName', {
-          defaultMessage: 'Event ({patternsField})',
-          values: { patternsField },
-        }),
-        sortable: false,
-      },
-    ];
+      });
+    }
+
+    columns.push({
+      field: 'event',
+      name: i18n.translate('explore.patterns.flyout.eventsColumnName', {
+        defaultMessage: 'Event ({patternsField})',
+        values: { patternsField },
+      }),
+      sortable: false,
+    });
+
+    return columns;
   }, [timeFieldName, patternsField]);
 
   return fetchError ? (

@@ -1,3 +1,0 @@
-feat:
-- Add assets search command to find dashboards and visualizations from global search ([#10789](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10789))
-- Enhance global submit commands for Enter-key triggered actions in global search ([#10789](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10789))

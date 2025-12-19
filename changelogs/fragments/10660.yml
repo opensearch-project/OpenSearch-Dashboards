@@ -1,2 +1,0 @@
-feat:
-- Allow more use cases for serverless collections; Expose utilities for deriving workspace permissions ([#10660](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10660))

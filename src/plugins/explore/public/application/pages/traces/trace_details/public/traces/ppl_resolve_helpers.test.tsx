@@ -181,13 +181,13 @@ describe('ppl_resolve_helpers', () => {
   });
 
   describe('resolveStartTime', () => {
-    it('resolves startTimeUnixNano (new format)', () => {
+    it('resolves startTime when both are present', () => {
       const fieldMap = new Map([
         ['startTimeUnixNano', ['1672574400000000000']],
         ['startTime', ['2023-01-01T10:00:00.000Z']],
       ]);
 
-      expect(resolveStartTime(fieldMap, 0)).toBe('1672574400000000000');
+      expect(resolveStartTime(fieldMap, 0)).toBe('2023-01-01T10:00:00.000Z');
     });
 
     it('falls back to startTime (legacy format)', () => {
@@ -203,13 +203,13 @@ describe('ppl_resolve_helpers', () => {
   });
 
   describe('resolveEndTime', () => {
-    it('resolves endTimeUnixNano (new format)', () => {
+    it('resolves endTime when both are present', () => {
       const fieldMap = new Map([
         ['endTimeUnixNano', ['1672574400100000000']],
         ['endTime', ['2023-01-01T10:00:00.100Z']],
       ]);
 
-      expect(resolveEndTime(fieldMap, 0)).toBe('1672574400100000000');
+      expect(resolveEndTime(fieldMap, 0)).toBe('2023-01-01T10:00:00.100Z');
     });
 
     it('falls back to endTime (legacy format)', () => {
@@ -225,13 +225,13 @@ describe('ppl_resolve_helpers', () => {
   });
 
   describe('resolveTimestamp', () => {
-    it('resolves endTimeUnixNano for @timestamp compatibility', () => {
+    it('resolves @timestamp when both are present', () => {
       const fieldMap = new Map([
         ['endTimeUnixNano', ['1672574400100000000']],
         ['@timestamp', ['2023-01-01T10:00:00.100Z']],
       ]);
 
-      expect(resolveTimestamp(fieldMap, 0)).toBe('1672574400100000000');
+      expect(resolveTimestamp(fieldMap, 0)).toBe('2023-01-01T10:00:00.100Z');
     });
 
     it('falls back to @timestamp', () => {
@@ -242,13 +242,13 @@ describe('ppl_resolve_helpers', () => {
   });
 
   describe('resolveTime', () => {
-    it('resolves endTimeUnixNano for time compatibility', () => {
+    it('resolves time when both are present', () => {
       const fieldMap = new Map([
         ['endTimeUnixNano', ['1672574400100000000']],
         ['time', ['2023-01-01T10:00:00.100Z']],
       ]);
 
-      expect(resolveTime(fieldMap, 0)).toBe('1672574400100000000');
+      expect(resolveTime(fieldMap, 0)).toBe('2023-01-01T10:00:00.100Z');
     });
 
     it('falls back to time', () => {
@@ -279,7 +279,7 @@ describe('ppl_resolve_helpers', () => {
       const endTime = '2023-01-01T10:00:00.100Z'; // Low precision
 
       const result = resolveDuration(fieldMap, 0, startTime, endTime);
-      expect(result).toBe(50000000); // Uses durationNano field
+      expect(result).toBe(60000000); // Uses durationInNanos field
     });
 
     it('falls back to calculated duration from low-precision timestamps', () => {
@@ -334,15 +334,14 @@ describe('ppl_resolve_helpers', () => {
   });
 
   describe('resolveInstrumentationScope', () => {
-    it('resolves scope (new format)', () => {
+    it('resolves instrumentationScope when both are present', () => {
       const fieldMap = new Map([
         ['scope', [{ name: 'test-scope', version: '1.0' }]],
         ['instrumentationScope', [{ name: 'legacy-scope' }]],
       ]);
 
       expect(resolveInstrumentationScope(fieldMap, 0)).toEqual({
-        name: 'test-scope',
-        version: '1.0',
+        name: 'legacy-scope',
       });
     });
 
@@ -380,24 +379,24 @@ describe('ppl_resolve_helpers', () => {
     });
 
     describe('resolveStartTimeFromDatarows', () => {
-      it('resolves startTimeUnixNano first', () => {
+      it('resolves startTime first', () => {
         const getValueByName = jest
           .fn()
-          .mockReturnValueOnce('1672574400000000000')
-          .mockReturnValueOnce('2023-01-01T10:00:00.000Z');
+          .mockReturnValueOnce('2023-01-01T10:00:00.000Z')
+          .mockReturnValueOnce('1672574400000000000');
 
-        expect(resolveStartTimeFromDatarows(getValueByName)).toBe('1672574400000000000');
+        expect(resolveStartTimeFromDatarows(getValueByName)).toBe('2023-01-01T10:00:00.000Z');
       });
     });
 
     describe('resolveEndTimeFromDatarows', () => {
-      it('resolves endTimeUnixNano first', () => {
+      it('resolves endTime first', () => {
         const getValueByName = jest
           .fn()
-          .mockReturnValueOnce('1672574400100000000')
-          .mockReturnValueOnce('2023-01-01T10:00:00.100Z');
+          .mockReturnValueOnce('2023-01-01T10:00:00.100Z')
+          .mockReturnValueOnce('1672574400100000000');
 
-        expect(resolveEndTimeFromDatarows(getValueByName)).toBe('1672574400100000000');
+        expect(resolveEndTimeFromDatarows(getValueByName)).toBe('2023-01-01T10:00:00.100Z');
       });
     });
 
@@ -418,26 +417,26 @@ describe('ppl_resolve_helpers', () => {
       it('prefers provided duration fields for low-precision timestamps', () => {
         const getValueByName = jest
           .fn()
-          .mockReturnValueOnce(50000000) // durationNano
-          .mockReturnValueOnce(60000000); // durationInNanos
+          .mockReturnValueOnce(60000000) // durationInNanos (called first)
+          .mockReturnValueOnce(50000000); // durationNano (called second)
 
         const startTime = '2023-01-01T10:00:00.000Z';
         const endTime = '2023-01-01T10:00:00.100Z';
 
         const result = resolveDurationFromDatarows(getValueByName, startTime, endTime);
-        expect(result).toBe(50000000); // Uses durationNano field
+        expect(result).toBe(60000000); // Uses durationInNanos field
       });
     });
 
     describe('resolveInstrumentationScopeFromDatarows', () => {
-      it('resolves scope first', () => {
+      it('resolves instrumentationScope first', () => {
         const getValueByName = jest
           .fn()
-          .mockReturnValueOnce({ name: 'test-scope' })
-          .mockReturnValueOnce({ name: 'legacy-scope' });
+          .mockReturnValueOnce({ name: 'legacy-scope' })
+          .mockReturnValueOnce({ name: 'test-scope' });
 
         expect(resolveInstrumentationScopeFromDatarows(getValueByName)).toEqual({
-          name: 'test-scope',
+          name: 'legacy-scope',
         });
       });
     });

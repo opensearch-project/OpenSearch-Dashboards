@@ -1,2 +1,0 @@
-fix:
-- Temporarily add backticks to explore's data source command ([#10661](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10661))

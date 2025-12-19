@@ -1,2 +1,0 @@
-fix:
-- Hide non-opensearch data source on new dataset picker UI ([#10788](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10788))
