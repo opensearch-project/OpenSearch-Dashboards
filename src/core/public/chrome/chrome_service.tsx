@@ -118,10 +118,6 @@ export interface ChromeGlobalBanner {
   component: React.ReactNode;
 }
 
-interface ConstructorParams {
-  browserSupportsCsp: boolean;
-}
-
 export interface SetupDeps {
   uiSettings: IUiSettingsClient;
 }
@@ -160,7 +156,7 @@ export class ChromeService {
   private applicationStart?: InternalApplicationStart;
   private globalBanner$ = new BehaviorSubject<ChromeGlobalBanner | undefined>(undefined);
 
-  constructor(private readonly params: ConstructorParams) {}
+  constructor() {}
 
   /**
    * These observables allow consumers to toggle the chrome visibility via either:
@@ -343,17 +339,6 @@ export class ChromeService {
 
       return msie > 0 || trident > 0;
     };
-
-    if (!this.params.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
-      notifications.toasts.addWarning({
-        title: mountReactNode(
-          <FormattedMessage
-            id="core.chrome.legacyBrowserWarning"
-            defaultMessage="Your browser does not meet the security requirements for OpenSearch Dashboards."
-          />
-        ),
-      });
-    }
 
     if (isIE()) {
       notifications.toasts.addWarning({
