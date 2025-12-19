@@ -33,10 +33,12 @@ if (process.noProcessWarnings !== true) {
     'MaxListenersExceededWarning',
     'NodeDeprecationWarning',
     'MODULE_TYPELESS_PACKAGE_JSON',
+    'fs.Stats constructor is deprecated.',
   ];
 
   process.on('warning', function (warn) {
-    if (ignore.includes(warn.name) || ignore.includes(warn.code)) return;
+    if (ignore.includes(warn.name) || ignore.includes(warn.code) || ignore.includes(warn.message))
+      return;
 
     if (process.traceProcessWarnings === true) {
       console.error('Node.js process-warning detected - Terminating process...');
