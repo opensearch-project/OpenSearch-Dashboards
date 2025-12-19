@@ -70,6 +70,17 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     timelineRef.current = timeline;
   }, [timeline]);
 
+  // Helper function to create loading message
+  const createLoadingMessage = (): { id: string; message: Message } => {
+    const loadingMessageId = `loading-${Date.now()}`;
+    const loadingMessage: Message = {
+      id: loadingMessageId,
+      role: 'assistant',
+      content: '',
+    };
+    return { id: loadingMessageId, message: loadingMessage };
+  };
+
   // Create the event handler using useMemo
   const eventHandler = useMemo(
     () =>
@@ -116,7 +127,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   }, [timeline, chatService]);
 
   const handleSend = async (options?: {input?: string}) => {
-    const messageContent = options?.input ?? input.trim();
+    const messageContent = (options?.input ?? input).trim();
     if (!messageContent || isStreaming) return;
 
     setInput('');
@@ -136,12 +147,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       };
       
       // Add loading assistant message
-      const loadingMessageId = `loading-${Date.now()}`;
-      const loadingMessage: Message = {
-        id: loadingMessageId,
-        role: 'assistant',
-        content: '',
-      };
+      const { id: loadingMessageId, message: loadingMessage } = createLoadingMessage();
       
       setTimeline((prev) => [...prev, timelineUserMessage, loadingMessage]);
 
@@ -228,12 +234,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       };
       
       // Add loading assistant message
-      const loadingMessageId = `loading-${Date.now()}`;
-      const loadingMessage: Message = {
-        id: loadingMessageId,
-        role: 'assistant',
-        content: '',
-      };
+      const { id: loadingMessageId, message: loadingMessage } = createLoadingMessage();
       
       setTimeline((prev) => [...prev, timelineUserMessage, loadingMessage]);
 
