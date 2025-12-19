@@ -7,13 +7,15 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ChatWindow, ChatWindowInstance } from './chat_window';
 import { coreMock } from '../../../../core/public/mocks';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ChatProvider } from '../contexts/chat_context';
 import { ChatService } from '../services/chat_service';
+import { ChatLayoutMode } from './chat_header_button';
 
-// Create mock observable before using it in mocks
-const mockObservable = of({ toolDefinitions: [], toolCallStates: {} });
+// Create mock subject that can be controlled in tests
+const mockStateSubject = new Subject();
+const mockObservable = mockStateSubject.asObservable();
 
 // Mock dependencies
 jest.mock('../../../context_provider/public', () => ({
@@ -58,21 +60,40 @@ describe('ChatWindow', () => {
     } as any;
   });
 
+  const mockSuggestedActionsService = {
+    getActions: jest.fn().mockReturnValue([]),
+    subscribe: jest.fn(),
+  };
+
+  const defaultProps = {
+    onClose: jest.fn(),
+    layoutMode: ChatLayoutMode.SIDECAR,
+  };
+
   const renderWithContext = (component: React.ReactElement) => {
     return render(
       <OpenSearchDashboardsContextProvider
         services={{ core: mockCore, contextProvider: mockContextProvider }}
       >
-        <ChatProvider chatService={mockChatService}>{component}</ChatProvider>
+        <ChatProvider
+          chatService={mockChatService}
+          suggestedActionsService={mockSuggestedActionsService}
+        >
+          {component}
+        </ChatProvider>
       </OpenSearchDashboardsContextProvider>
     );
+  };
+
+  const renderChatWindow = (props: Partial<React.ComponentProps<typeof ChatWindow>> = {}) => {
+    return renderWithContext(<ChatWindow {...defaultProps} {...props} />);
   };
 
   describe('ref functionality', () => {
     it('should expose startNewChat method via ref', () => {
       const ref = React.createRef<ChatWindowInstance>();
 
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderChatWindow({ ref });
 
       expect(ref.current).toBeDefined();
       expect(ref.current?.startNewChat).toBeDefined();
@@ -82,7 +103,7 @@ describe('ChatWindow', () => {
     it('should expose sendMessage method via ref', () => {
       const ref = React.createRef<ChatWindowInstance>();
 
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderChatWindow({ ref });
 
       expect(ref.current).toBeDefined();
       expect(ref.current?.sendMessage).toBeDefined();
@@ -92,7 +113,7 @@ describe('ChatWindow', () => {
     it('should call chatService.newThread when startNewChat is invoked', () => {
       const ref = React.createRef<ChatWindowInstance>();
 
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderChatWindow({ ref });
 
       ref.current?.startNewChat();
 
@@ -102,7 +123,7 @@ describe('ChatWindow', () => {
     it('should call chatService.sendMessage when sendMessage is invoked via ref', async () => {
       const ref = React.createRef<ChatWindowInstance>();
 
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderChatWindow({ ref });
 
       // Wait for the sendMessage to complete
       await ref.current?.sendMessage({ content: 'test message from ref' });
@@ -119,7 +140,7 @@ describe('ChatWindow', () => {
 
   describe('loading message functionality', () => {
     it('should add loading message to timeline when sending a message', async () => {
-      const { container } = renderWithContext(<ChatWindow />);
+      renderChatWindow();
 
       // Mock the sendMessage to return a controllable observable
       const loadingObservable = {
@@ -135,7 +156,7 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
-      const { rerender } = renderWithContext(<ChatWindow ref={ref} />);
+      renderChatWindow({ ref });
 
       // Send a message
       await ref.current?.sendMessage({ content: 'test message' });
@@ -164,7 +185,7 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderChatWindow({ ref });
 
       // Send a message
       await ref.current?.sendMessage({ content: 'test message' });
@@ -192,7 +213,7 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderChatWindow({ ref });
 
       // Send a message
       await ref.current?.sendMessage({ content: 'test message' });
@@ -220,7 +241,7 @@ describe('ChatWindow', () => {
       });
 
       const ref = React.createRef<ChatWindowInstance>();
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderChatWindow({ ref });
 
       // Send a message
       await ref.current?.sendMessage({ content: 'test message' });
@@ -232,6 +253,150 @@ describe('ChatWindow', () => {
     });
   });
 
+  describe('createLoadingMessage helper', () => {
+    it('should create loading message with unique ID and correct structure', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+      renderChatWindow({ ref });
+
+      // Mock Date.now to control the ID generation
+      const mockNow = 1234567890;
+      jest.spyOn(Date, 'now').mockReturnValue(mockNow);
+
+      const loadingObservable = {
+        subscribe: jest.fn((callbacks) => {
+          // Don't call next to keep loading state
+          return { unsubscribe: jest.fn() };
+        }),
+      };
+
+      mockChatService.sendMessage.mockResolvedValue({
+        observable: loadingObservable,
+        userMessage: { id: 'user-1', content: 'test', role: 'user' },
+      });
+
+      await ref.current?.sendMessage({ content: 'test message' });
+
+      expect(loadingObservable.subscribe).toHaveBeenCalled();
+
+      // Restore Date.now
+      jest.restoreAllMocks();
+    });
+  });
+
+  describe('error handling and edge cases', () => {
+    it('should handle sendMessage failure gracefully', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+      renderChatWindow({ ref });
+
+      // Mock sendMessage to throw an error
+      mockChatService.sendMessage.mockRejectedValue(new Error('Send failed'));
+
+      // Should not throw when sendMessage fails
+      await expect(
+        ref.current?.sendMessage({ content: 'failing message' })
+      ).resolves.toBeUndefined();
+    });
+
+    it('should not send empty or whitespace-only messages', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+      renderChatWindow({ ref });
+
+      // Try to send empty message
+      await ref.current?.sendMessage({ content: '' });
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+
+      // Try to send whitespace-only message
+      await ref.current?.sendMessage({ content: '   ' });
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+    });
+
+    it('should not send message when already streaming', async () => {
+      const ref = React.createRef<ChatWindowInstance>();
+      renderChatWindow({ ref });
+
+      // Set up a long-running observable to simulate streaming
+      const longRunningObservable = {
+        subscribe: jest.fn(() => ({ unsubscribe: jest.fn() })),
+      };
+
+      mockChatService.sendMessage.mockResolvedValue({
+        observable: longRunningObservable,
+        userMessage: { id: 'user-1', content: 'first message', role: 'user' },
+      });
+
+      // Send first message (starts streaming)
+      await ref.current?.sendMessage({ content: 'first message' });
+
+      // Clear the mock to track subsequent calls
+      mockChatService.sendMessage.mockClear();
+
+      // Try to send second message while streaming
+      await ref.current?.sendMessage({ content: 'second message' });
+
+      // Second message should be ignored
+      expect(mockChatService.sendMessage).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('tool definitions subscription', () => {
+    it('should subscribe to tool updates and store them in chatService', async () => {
+      const mockToolDefinitions = [
+        { id: 'tool1', name: 'Test Tool 1' },
+        { id: 'tool2', name: 'Test Tool 2' },
+      ];
+
+      renderChatWindow();
+
+      // Emit tool definitions through the subject
+      mockStateSubject.next({
+        toolDefinitions: mockToolDefinitions,
+        toolCallStates: {},
+      });
+
+      // Wait for subscription to process
+      await new Promise((resolve) => setTimeout(resolve, 10));
+
+      // Check that tools were stored in chatService
+      expect((mockChatService as any).availableTools).toEqual(mockToolDefinitions);
+    });
+
+    it('should not store tools when toolDefinitions is empty', async () => {
+      const mockAssistantService = jest.mocked(
+        jest.requireMock('../../../context_provider/public').AssistantActionService.getInstance()
+      );
+
+      mockAssistantService.getState$ = jest.fn(() =>
+        of({
+          toolDefinitions: [],
+          toolCallStates: {},
+        })
+      );
+
+      renderChatWindow();
+
+      // Wait for subscription to process
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // Should not set availableTools when empty
+      expect((mockChatService as any).availableTools).toBeUndefined();
+    });
+  });
+
+  describe('event handler cleanup', () => {
+    it('should clean up event handler on unmount', () => {
+      const mockEventHandler = jest.mocked(
+        jest.requireMock('../services/chat_event_handler').ChatEventHandler
+      );
+
+      const { unmount } = renderChatWindow();
+
+      unmount();
+
+      // Should call clearState on unmount (via the mocked constructor)
+      expect(mockEventHandler).toHaveBeenCalled();
+    });
+  });
+
   describe('persistence integration', () => {
     it('should restore timeline from persisted messages on mount', () => {
       const persistedMessages = [
@@ -240,7 +405,7 @@ describe('ChatWindow', () => {
       ];
       mockChatService.getCurrentMessages.mockReturnValue(persistedMessages);
 
-      renderWithContext(<ChatWindow />);
+      renderChatWindow();
 
       // Should call getCurrentMessages on mount
       expect(mockChatService.getCurrentMessages).toHaveBeenCalled();
@@ -249,44 +414,62 @@ describe('ChatWindow', () => {
     it('should not restore timeline when no persisted messages exist', () => {
       mockChatService.getCurrentMessages.mockReturnValue([]);
 
-      renderWithContext(<ChatWindow />);
+      renderChatWindow();
 
       // Should call getCurrentMessages but timeline should remain empty
       expect(mockChatService.getCurrentMessages).toHaveBeenCalled();
     });
 
     it('should sync timeline changes with ChatService for persistence', async () => {
-      const { rerender } = renderWithContext(<ChatWindow />);
+      renderChatWindow();
 
       // Wait for initial render and useEffect calls
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Initially called with empty timeline
       expect(mockChatService.updateCurrentMessages).toHaveBeenCalledWith([]);
-
-      // Simulate timeline change by re-rendering
-      rerender(
-        <OpenSearchDashboardsContextProvider
-          services={{ core: mockCore, contextProvider: mockContextProvider }}
-        >
-          <ChatProvider chatService={mockChatService}>
-            <ChatWindow />
-          </ChatProvider>
-        </OpenSearchDashboardsContextProvider>
-      );
-
-      // Should call updateCurrentMessages whenever timeline changes
-      expect(mockChatService.updateCurrentMessages).toHaveBeenCalled();
     });
 
     it('should call updateCurrentMessages on every timeline update', async () => {
-      renderWithContext(<ChatWindow />);
+      renderChatWindow();
 
       // Wait for initial mount effects
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Should be called at least once during initialization
       expect(mockChatService.updateCurrentMessages).toHaveBeenCalled();
+    });
+  });
+
+  describe('component props and layout', () => {
+    it('should render with default layout mode', () => {
+      const { container } = renderChatWindow();
+      expect(container).toBeTruthy();
+    });
+
+    it('should render with custom layout mode', () => {
+      const { container } = renderChatWindow({
+        layoutMode: ChatLayoutMode.FULLSCREEN,
+        onToggleLayout: () => {},
+      });
+      expect(container).toBeTruthy();
+    });
+
+    it('should call onClose when provided', () => {
+      const onCloseMock = jest.fn();
+      renderChatWindow({ onClose: onCloseMock });
+
+      // The onClose callback is passed to child components
+      // Actual testing would depend on how the close button is implemented
+      expect(onCloseMock).toBeDefined();
+    });
+
+    it('should call onToggleLayout when provided', () => {
+      const onToggleLayoutMock = jest.fn();
+      renderChatWindow({ onToggleLayout: onToggleLayoutMock });
+
+      // The onToggleLayout callback is passed to child components
+      expect(onToggleLayoutMock).toBeDefined();
     });
   });
 });

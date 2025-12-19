@@ -4,6 +4,10 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+### 📈 Features/Enhancements
+
+ - Add thinking message in chat conversation ([#11059](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11059))
+
 ## [3.2.0-2025-08-06](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/3.2.0)
 
 ### 💥 Breaking Changes
