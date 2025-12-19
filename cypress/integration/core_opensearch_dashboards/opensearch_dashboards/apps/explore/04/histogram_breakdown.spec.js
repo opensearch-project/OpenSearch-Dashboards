@@ -33,6 +33,7 @@ const runHistogramBreakdownTests = () => {
     });
 
     beforeEach(() => {
+      cy.clearLocalStorage('exploreChartState');
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
         page: 'explore/logs',
@@ -60,6 +61,7 @@ const runHistogramBreakdownTests = () => {
         cy.getElementByTestId('histogramBreakdownFieldSelector').click();
         cy.get('.euiComboBoxOptionsList').contains('category').click();
 
+        cy.osd.waitForLoader(true);
         cy.getElementByTestId('histogramBreakdownFieldSelector').should('contain', 'category');
         cy.getElementByTestId('discoverChart').should('be.visible');
 
@@ -67,6 +69,7 @@ const runHistogramBreakdownTests = () => {
           .find('button.euiFormControlLayoutClearButton')
           .click();
 
+        cy.osd.waitForLoader(true);
         cy.getElementByTestId('histogramBreakdownFieldSelector').should('not.contain', 'category');
         cy.getElementByTestId('discoverChart').should('be.visible');
       });
@@ -80,10 +83,12 @@ const runHistogramBreakdownTests = () => {
         cy.getElementByTestId('histogramBreakdownFieldSelector').click();
         cy.get('.euiComboBoxOptionsList').contains('category').click();
 
+        cy.osd.waitForLoader(true);
         const intervals = ['auto', 'h', 'd'];
         intervals.forEach((interval) => {
           cy.getElementByTestId('discoverIntervalSelect').select(interval);
 
+          cy.osd.waitForLoader(true);
           cy.getElementByTestId('histogramBreakdownFieldSelector').should('contain', 'category');
           cy.getElementByTestId('discoverChart').should('be.visible');
         });
@@ -98,6 +103,7 @@ const runHistogramBreakdownTests = () => {
         cy.getElementByTestId('histogramBreakdownFieldSelector').click();
         cy.get('.euiComboBoxOptionsList').contains('category').click();
 
+        cy.osd.waitForLoader(true);
         cy.getElementByTestId('histogramCollapseBtn').click();
         cy.getElementByTestId('discoverChart').should('not.exist');
         cy.getElementByTestId('histogramBreakdownFieldSelector').should('contain', 'category');
@@ -115,10 +121,7 @@ const runHistogramBreakdownTests = () => {
 
         cy.getElementByTestId('histogramBreakdownFieldSelector').click();
         cy.get('.euiComboBoxOptionsList').contains('category').click();
-
-        const START_DATE = 'Jan 1, 2021 @ 13:00:00.000';
-        const END_DATE = 'Oct 1, 2021 @ 13:00:00.000';
-        cy.explore.setTopNavDate(START_DATE, END_DATE);
+        cy.osd.waitForLoader(true);
 
         cy.getElementByTestId('histogramBreakdownFieldSelector').should('contain', 'category');
         cy.getElementByTestId('discoverChart').should('be.visible');
