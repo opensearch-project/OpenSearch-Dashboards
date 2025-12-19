@@ -231,10 +231,11 @@ export async function copyAll(
 
   await pipelineAsync(
     vfs.src(select, {
-      buffer: false,
+      buffer: true,
       cwd: sourceDir,
       base: sourceDir,
       dot,
+      allowEmpty: true,
     }),
     vfs.dest(destination)
   );
@@ -244,10 +245,11 @@ export async function copyAll(
   if (Boolean(time)) {
     await pipelineAsync(
       vfs.src(select, {
-        buffer: false,
+        buffer: true,
         cwd: destination,
         base: destination,
         dot,
+        allowEmpty: true,
       }),
       new Writable({
         objectMode: true,
