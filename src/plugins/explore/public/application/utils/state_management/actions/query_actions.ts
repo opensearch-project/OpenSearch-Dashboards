@@ -271,50 +271,63 @@ export const executeQueries = createAsyncThunk<
     );
   }
 
+  // Execute histogram query in background (non-blocking)
   if (needsHistogramQuery) {
     const interval = state.legacy?.interval;
-    promises.push(
-      dispatch(
-        executeHistogramQuery({
-          services,
-          cacheKey: histogramCacheKey,
-          queryString: defaultPrepareQueryString(query),
-          interval,
-        })
-      )
+    dispatch(
+      executeHistogramQuery({
+        services,
+        cacheKey: histogramCacheKey,
+        queryString: defaultPrepareQueryString(query),
+        interval,
+      })
     );
   }
 
+  // Wait only for data table query to complete (not histogram)
+  await Promise.all(promises);
+
+  // After main queries complete, check if we should execute trace aggregation queries
   const flavorId = await getCurrentFlavor(services);
 
   if (flavorId === ExploreFlavor.Traces) {
-    const dataset = query.dataset
-      ? await services.data.dataViews.get(query.dataset.id, query.dataset.type !== 'INDEX_PATTERN')
-      : await services.data.dataViews.getDefault();
+    // Get the latest results from state after the data table query has completed
+    const latestState = getState();
+    const dataTableResults = latestState.results[dataTableCacheKey];
 
-    if (dataset?.timeFieldName) {
-      const rawInterval = state.legacy?.interval || 'auto';
+    // Only execute RED metrics queries if we have table results with data
+    if (dataTableResults && dataTableResults.hits?.hits?.length > 0) {
+      const dataset = query.dataset
+        ? await services.data.dataViews.get(
+            query.dataset.id,
+            query.dataset.type !== 'INDEX_PATTERN'
+          )
+        : await services.data.dataViews.getDefault();
 
-      const histogramConfig = createHistogramConfigWithInterval(
-        dataset,
-        rawInterval,
-        services,
-        getState,
-        TRACES_CHART_BAR_TARGET
-      );
-      const calculatedInterval = histogramConfig?.finalInterval || '5m';
+      if (dataset?.timeFieldName) {
+        const rawInterval = latestState.legacy?.interval || 'auto';
 
-      const { requestCacheKey, errorCacheKey, latencyCacheKey } = prepareTraceCacheKeys(query);
+        const histogramConfig = createHistogramConfigWithInterval(
+          dataset,
+          rawInterval,
+          services,
+          getState,
+          TRACES_CHART_BAR_TARGET
+        );
+        const calculatedInterval = histogramConfig?.finalInterval || '5m';
 
-      const baseQuery = defaultPrepareQueryString(query);
+        const { requestCacheKey, errorCacheKey, latencyCacheKey } = prepareTraceCacheKeys(query);
 
-      const config = createTraceAggregationConfig(
-        dataset.timeFieldName,
-        calculatedInterval,
-        breakdownField
-      );
+        const baseQuery = defaultPrepareQueryString(query);
 
-      promises.push(
+        const config = createTraceAggregationConfig(
+          dataset.timeFieldName,
+          calculatedInterval,
+          breakdownField
+        );
+
+        // Execute all 3 RED metrics queries in background (non-blocking)
+        // These are histogram queries that shouldn't block tab queries
         dispatch(
           executeRequestCountQuery({
             services,
@@ -322,10 +335,7 @@ export const executeQueries = createAsyncThunk<
             baseQuery,
             config,
           })
-        )
-      );
-
-      promises.push(
+        );
         dispatch(
           executeErrorCountQuery({
             services,
@@ -333,10 +343,7 @@ export const executeQueries = createAsyncThunk<
             baseQuery,
             config,
           })
-        )
-      );
-
-      promises.push(
+        );
         dispatch(
           executeLatencyQuery({
             services,
@@ -344,8 +351,8 @@ export const executeQueries = createAsyncThunk<
             baseQuery,
             config,
           })
-        )
-      );
+        );
+      }
     }
   }
 
@@ -381,9 +388,10 @@ export const executeQueries = createAsyncThunk<
     activeTabCacheKey !== defaultCacheKey &&
     !results[activeTabCacheKey];
 
+  const tabPromises = [];
   // Execute visualization tab query independently
   if (needsVisualizationTabQuery) {
-    promises.push(
+    tabPromises.push(
       dispatch(
         executeTabQuery({
           services,
@@ -396,7 +404,7 @@ export const executeQueries = createAsyncThunk<
 
   // Execute active tab query if needed and different from default and visualization tab
   if (needsActiveTabQuery) {
-    promises.push(
+    tabPromises.push(
       dispatch(
         executeTabQuery({
           services,
@@ -407,8 +415,8 @@ export const executeQueries = createAsyncThunk<
     );
   }
 
-  // Wait for all queries to complete
-  await Promise.all(promises);
+  // Wait for all tab queries to complete
+  await Promise.all(tabPromises);
 });
 
 /**
