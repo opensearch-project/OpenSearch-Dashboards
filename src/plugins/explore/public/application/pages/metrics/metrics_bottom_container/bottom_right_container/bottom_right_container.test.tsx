@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 
@@ -41,10 +41,6 @@ jest.mock('./resizable_vis_control_and_tabs', () => ({
   ),
 }));
 
-jest.mock('../../../../../components/chart/discover_chart_container', () => ({
-  DiscoverChartContainer: () => <div data-test-subj="chart-container">Chart Container</div>,
-}));
-
 // Mock the context
 jest.mock('../../../../context', () => ({
   useDatasetContext: jest.fn(),
@@ -73,6 +69,7 @@ import { useDatasetContext } from '../../../../context';
 import { useOpenSearchDashboards } from '../../../../../../../opensearch_dashboards_react/public';
 import { useFlavorId } from '../../../../../helpers/use_flavor_id';
 import { ExploreFlavor } from '../../../../../../common';
+import { executeQueries } from '../../../../utils/state_management/actions/query_actions';
 
 const mockUseDatasetContext = useDatasetContext as jest.MockedFunction<typeof useDatasetContext>;
 const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFunction<
@@ -162,6 +159,39 @@ describe('BottomRightContainer', () => {
     expect(screen.getByTestId('uninitialized')).toBeInTheDocument();
   });
 
+  it('calls executeQueries when onRefresh is triggered', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: 'timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
+
+    renderComponent(QueryExecutionStatus.UNINITIALIZED);
+
+    const refreshButton = screen.getByRole('button', { name: 'Refresh' });
+    fireEvent.click(refreshButton);
+
+    expect(executeQueries).toHaveBeenCalledWith({ services: mockServices });
+  });
+
+  it('does not call executeQueries when services is undefined', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: 'timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
+    mockUseOpenSearchDashboards.mockReturnValue({
+      services: undefined,
+    } as any);
+
+    renderComponent(QueryExecutionStatus.UNINITIALIZED);
+
+    const refreshButton = screen.getByRole('button', { name: 'Refresh' });
+    fireEvent.click(refreshButton);
+
+    expect(executeQueries).not.toHaveBeenCalled();
+  });
+
   it('renders loading spinner when status is LOADING', () => {
     mockUseDatasetContext.mockReturnValue({
       dataset: { timeFieldName: 'timestamp' } as any,
@@ -193,7 +223,6 @@ describe('BottomRightContainer', () => {
 
     renderComponent(QueryExecutionStatus.ERROR);
 
-    expect(screen.getByTestId('chart-container')).toBeInTheDocument();
     expect(screen.getByTestId('explore-tabs-vis-style-panel')).toBeInTheDocument();
   });
 
@@ -206,7 +235,6 @@ describe('BottomRightContainer', () => {
 
     renderComponent(QueryExecutionStatus.READY);
 
-    expect(screen.getByTestId('chart-container')).toBeInTheDocument();
     expect(screen.getByTestId('explore-tabs-vis-style-panel')).toBeInTheDocument();
   });
 
@@ -252,6 +280,48 @@ describe('BottomRightContainer', () => {
     expect(container.firstChild).toBeNull();
   });
 
+  it('defaults to UNINITIALIZED when overallQueryStatus.status is undefined', () => {
+    mockUseDatasetContext.mockReturnValue({
+      dataset: { timeFieldName: 'timestamp' } as any,
+      isLoading: false,
+      error: null,
+    });
+
+    // Create a store with undefined status
+    const store = configureStore({
+      reducer: {
+        legacy: (state = {}) => state,
+        ui: (state = {}) => state,
+        queryEditor: (
+          state = {
+            queryStatusMap: {},
+            overallQueryStatus: {
+              status: undefined,
+              elapsedMs: undefined,
+              startTime: undefined,
+              body: undefined,
+            },
+            promptModeIsAvailable: false,
+            editorMode: 'single-query',
+            lastExecutedPrompt: '',
+          }
+        ) => state,
+        query: (state = {}) => state,
+        results: (state = {}) => state,
+        tab: (state = {}) => state,
+      },
+    });
+
+    render(
+      <Provider store={store}>
+        <BottomRightContainer />
+      </Provider>
+    );
+
+    // Should render uninitialized state
+    expect(screen.getByTestId('uninitialized')).toBeInTheDocument();
+  });
+
   it('should handle dataset with null value correctly', () => {
     mockUseDatasetContext.mockReturnValue({
       dataset: undefined,
@@ -274,7 +344,7 @@ describe('BottomRightContainer', () => {
     expect(screen.getByTestId('no-results')).toBeInTheDocument();
   });
 
-  it('should render chart container', () => {
+  it('should render resizable vis control and tabs when status is READY', () => {
     mockUseDatasetContext.mockReturnValue({
       dataset: { timeFieldName: 'timestamp' } as any,
       isLoading: false,
@@ -284,7 +354,6 @@ describe('BottomRightContainer', () => {
 
     renderComponent(QueryExecutionStatus.READY);
 
-    expect(screen.getByTestId('chart-container')).toBeInTheDocument();
     expect(screen.getByTestId('explore-tabs-vis-style-panel')).toBeInTheDocument();
   });
 });
