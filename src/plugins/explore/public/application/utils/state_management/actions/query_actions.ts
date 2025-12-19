@@ -271,21 +271,20 @@ export const executeQueries = createAsyncThunk<
     );
   }
 
+  // Execute histogram query in background (non-blocking)
   if (needsHistogramQuery) {
     const interval = state.legacy?.interval;
-    promises.push(
-      dispatch(
-        executeHistogramQuery({
-          services,
-          cacheKey: histogramCacheKey,
-          queryString: defaultPrepareQueryString(query),
-          interval,
-        })
-      )
+    dispatch(
+      executeHistogramQuery({
+        services,
+        cacheKey: histogramCacheKey,
+        queryString: defaultPrepareQueryString(query),
+        interval,
+      })
     );
   }
 
-  // Wait for main queries (data table and histogram) to complete
+  // Wait only for data table query to complete (not histogram)
   await Promise.all(promises);
 
   // After main queries complete, check if we should execute trace aggregation queries
@@ -327,33 +326,32 @@ export const executeQueries = createAsyncThunk<
           breakdownField
         );
 
-        // Execute all 3 RED metrics queries in parallel after table has loaded
-        await Promise.all([
-          dispatch(
-            executeRequestCountQuery({
-              services,
-              cacheKey: requestCacheKey,
-              baseQuery,
-              config,
-            })
-          ),
-          dispatch(
-            executeErrorCountQuery({
-              services,
-              cacheKey: errorCacheKey,
-              baseQuery,
-              config,
-            })
-          ),
-          dispatch(
-            executeLatencyQuery({
-              services,
-              cacheKey: latencyCacheKey,
-              baseQuery,
-              config,
-            })
-          ),
-        ]);
+        // Execute all 3 RED metrics queries in background (non-blocking)
+        // These are histogram queries that shouldn't block tab queries
+        dispatch(
+          executeRequestCountQuery({
+            services,
+            cacheKey: requestCacheKey,
+            baseQuery,
+            config,
+          })
+        );
+        dispatch(
+          executeErrorCountQuery({
+            services,
+            cacheKey: errorCacheKey,
+            baseQuery,
+            config,
+          })
+        );
+        dispatch(
+          executeLatencyQuery({
+            services,
+            cacheKey: latencyCacheKey,
+            baseQuery,
+            config,
+          })
+        );
       }
     }
   }
