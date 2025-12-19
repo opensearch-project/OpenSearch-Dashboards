@@ -565,7 +565,7 @@
     "vega-lite": "^5.23.0",
     "vega-schema-url-parser": "^2.1.0",
     "vega-tooltip": "^0.30.0",
-    "vinyl-fs": "^3.0.3",
+    "vinyl-fs": "^4.0.2",
     "wait-on": "^8.0.2",
     "xml2js": "^0.5.0",
     "xmlbuilder": "13.0.2",

@@ -30,7 +30,7 @@
     "rxjs": "^6.5.5",
     "strip-ansi": "^6.0.0",
     "tree-kill": "^1.2.2",
-    "vinyl": "^2.2.0"
+    "vinyl": "^3.0.1"
   },
   "devDependencies": {
     "@osd/babel-preset": "1.0.0",
