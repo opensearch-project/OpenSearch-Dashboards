@@ -34,14 +34,15 @@ const runHistogramBreakdownTests = () => {
 
     beforeEach(() => {
       cy.clearLocalStorage('exploreChartState');
+
+      cy.setAdvancedSetting({
+        'explore:experimental': true,
+      });
+
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
         page: 'explore/logs',
         isEnhancement: true,
-      });
-
-      cy.setAdvancedSetting({
-        'explore:experimental': true,
       });
     });
 
@@ -58,6 +59,7 @@ const runHistogramBreakdownTests = () => {
 
         cy.getElementByTestId('discoverChart').should('be.visible');
 
+        cy.osd.waitForLoader(true);
         cy.getElementByTestId('histogramBreakdownFieldSelector').click();
         cy.get('.euiComboBoxOptionsList').contains('category').click();
 
@@ -80,7 +82,11 @@ const runHistogramBreakdownTests = () => {
         cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
-        cy.getElementByTestId('histogramBreakdownFieldSelector').click();
+        // Ensure breakdown selector is visible and ready
+        cy.getElementByTestId('histogramBreakdownFieldSelector', { timeout: 15000 })
+          .should('be.visible')
+          .and('not.be.disabled')
+          .click();
         cy.get('.euiComboBoxOptionsList').contains('category').click();
 
         cy.osd.waitForLoader(true);
@@ -100,7 +106,11 @@ const runHistogramBreakdownTests = () => {
         cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
-        cy.getElementByTestId('histogramBreakdownFieldSelector').click();
+        // Ensure breakdown selector is visible and ready
+        cy.getElementByTestId('histogramBreakdownFieldSelector', { timeout: 15000 })
+          .should('be.visible')
+          .and('not.be.disabled')
+          .click();
         cy.get('.euiComboBoxOptionsList').contains('category').click();
 
         cy.osd.waitForLoader(true);
@@ -119,7 +129,11 @@ const runHistogramBreakdownTests = () => {
         cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
-        cy.getElementByTestId('histogramBreakdownFieldSelector').click();
+        // Ensure breakdown selector is visible and ready
+        cy.getElementByTestId('histogramBreakdownFieldSelector', { timeout: 15000 })
+          .should('be.visible')
+          .and('not.be.disabled')
+          .click();
         cy.get('.euiComboBoxOptionsList').contains('category').click();
         cy.osd.waitForLoader(true);
 
