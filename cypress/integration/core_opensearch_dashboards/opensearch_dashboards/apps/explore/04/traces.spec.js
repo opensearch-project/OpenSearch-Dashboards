@@ -125,13 +125,13 @@ const traceTestSuite = () => {
 
     it('should have default columns on landing page', () => {
       // Time field
-      cy.getElementByTestId('docTableHeader-endTimeUnixNano').should('exist');
+      cy.getElementByTestId('docTableHeader-endTime').should('exist');
       cy.getElementByTestId('docTableHeader-spanId').should('exist');
       cy.getElementByTestId('docTableHeader-status.code').should('exist');
       cy.getElementByTestId('docTableHeader-attributes.http.status_code').should('exist');
       cy.getElementByTestId('docTableHeader-resource.attributes.service.name').should('exist');
       cy.getElementByTestId('docTableHeader-name').should('exist');
-      cy.getElementByTestId('docTableHeader-durationNano').should('exist');
+      cy.getElementByTestId('docTableHeader-durationInNanos').should('exist');
     });
 
     it('should have correct tabs', () => {
@@ -147,14 +147,16 @@ const traceTestSuite = () => {
         .contains('.euiButtonEmpty__text', 'Faceted fields')
         .should('exist');
       cy.getElementByTestId('exploreSidebarFacetValue')
-        .find('[data-test-subj="fieldToggle-ERROR"][aria-label="Filter for ERROR"]')
+        .find('[data-test-subj="fieldToggle-2"][aria-label="Filter for 2"]')
         .click();
-      verifyMonacoEditorContent(`| WHERE \`status.code\` = 'ERROR'`);
+      verifyMonacoEditorContent(`| WHERE \`status.code\` = 2`);
       cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.verifyResultsCount(2);
     });
 
     it('Clicking a span entry opens the trace flyout', () => {
+      cy.explore.setQueryEditor("| WHERE spanId = '58f52f0436530c7c'");
+      cy.osd.verifyResultsCount(1);
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       cy.getElementByTestId('traceFlyoutButton').first().click();
 

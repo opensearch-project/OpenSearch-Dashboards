@@ -155,7 +155,11 @@ export const processRawResultsForHistogram = (
 
     const timestampIdx = fieldSchema.findIndex((col: any) => col.name === '@timestamp');
     const breakdownIdx = fieldSchema.findIndex((col: any) => col.name === breakdownField);
-    const countIdx = fieldSchema.findIndex((col: any) => col.name === 'count');
+    // Support both 'count' and 'count()' column names from PPL
+    let countIdx = fieldSchema.findIndex((col: any) => col.name === 'count()');
+    if (countIdx === -1) {
+      countIdx = fieldSchema.findIndex((col: any) => col.name === 'count');
+    }
 
     if (breakdownIdx === -1 || countIdx === -1) {
       return rawResults;
