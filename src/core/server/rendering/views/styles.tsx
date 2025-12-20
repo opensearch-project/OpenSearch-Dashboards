@@ -41,11 +41,20 @@ export const Styles: FunctionComponent = () => {
             box-sizing: border-box;
           }
 
-          html, body, div, span, svg {
+          html, body {
             margin: 0;
             padding: 0;
             border: none;
             vertical-align: baseline;
+          }
+
+          @layer theme {
+            div, span, svg {
+              margin: 0;
+              padding: 0;
+              border: none;
+              vertical-align: baseline;
+            }
           }
 
           body, html {
