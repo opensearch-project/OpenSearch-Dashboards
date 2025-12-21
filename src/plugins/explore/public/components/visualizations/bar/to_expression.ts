@@ -27,7 +27,6 @@ import {
   buildTooltipEncoding,
   buildThresholdColorEncoding,
   createBarSeries,
-  extendTimeAxisForBarWidth,
 } from './bar_chart_utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
@@ -65,7 +64,6 @@ export const createBarSpec = (
       prepareData,
       createBaseConfig,
       buildAxisConfigs,
-      extendTimeAxisForBarWidth,
       createBarSeries(styles),
       assembleSpec
     )({
@@ -180,7 +178,6 @@ export const createTimeBarChart = (
       prepareData,
       createBaseConfig,
       buildAxisConfigs,
-      extendTimeAxisForBarWidth,
       createBarSeries(styles),
       assembleSpec
     )({
