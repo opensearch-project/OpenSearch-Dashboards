@@ -97,7 +97,7 @@ export enum OSD_FIELD_TYPES {
   HISTOGRAM = 'histogram',
 }
 
-// Types from opensearch-project/sql/docs/user/ppl/general/datatypes.rst
+// Types from opensearch-project/sql/docs/user/ppl/general/datatypes.md
 /** @public **/
 export enum PPL_FIELD_TYPES {
   BOOLEAN = 'boolean',
