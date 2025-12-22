@@ -8,6 +8,22 @@ window.__webpack_nonce__ = (function() {
   return meta ? meta.getAttribute('content') : '';
 })();
 
+// Intercept dynamically created style elements to add CSP nonce
+// This handles third-party libraries (like nano-css from react-use) that create
+// style elements without using webpack's style-loader nonce mechanism
+(function() {
+  if (!window.__webpack_nonce__) return;
+
+  var originalCreateElement = document.createElement.bind(document);
+  document.createElement = function(tagName, options) {
+    var element = originalCreateElement(tagName, options);
+    if (tagName.toLowerCase() === 'style') {
+      element.setAttribute('nonce', window.__webpack_nonce__);
+    }
+    return element;
+  };
+})();
+
 if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
   var legacyBrowserError = document.getElementById('osd_legacy_browser_error');
   legacyBrowserError.style.display = 'flex';
