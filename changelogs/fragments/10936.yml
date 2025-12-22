@@ -1,0 +1,2 @@
+chore:
+- Upgrade webpack to v5 ([#10936](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10936))
