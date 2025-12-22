@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
 import { Control } from './control';
 import { ControlParams } from '../editor_utils';
 import { FilterManager as BaseFilterManager } from './filter_manager/filter_manager';
@@ -74,18 +73,18 @@ describe('hasChanged', () => {
   });
 
   test('should be false if value has not changed', () => {
-    expect(control.hasChanged()).to.be(false);
+    expect(control.hasChanged()).toBe(false);
   });
 
   test('should be true if value has been set', () => {
     control.set('new value');
-    expect(control.hasChanged()).to.be(true);
+    expect(control.hasChanged()).toBe(true);
   });
 
   test('should be false if value has been set and control is cleared', () => {
     control.set('new value');
     control.clear();
-    expect(control.hasChanged()).to.be(false);
+    expect(control.hasChanged()).toBe(false);
   });
 });
 
@@ -116,18 +115,18 @@ describe('ancestors', () => {
       grandParentControl.set('myGrandParentValue');
 
       childControl.setAncestors([parentControl, grandParentControl]);
-      expect(grandParentControl.hasValue()).to.be(true);
-      expect(parentControl.hasValue()).to.be(false);
-      expect(childControl.hasUnsetAncestor()).to.be(true);
+      expect(grandParentControl.hasValue()).toBe(true);
+      expect(parentControl.hasValue()).toBe(false);
+      expect(childControl.hasUnsetAncestor()).toBe(true);
     });
 
     test('should be true if grand parent is not set', function () {
       parentControl.set('myParentValue');
 
       childControl.setAncestors([parentControl, grandParentControl]);
-      expect(grandParentControl.hasValue()).to.be(false);
-      expect(parentControl.hasValue()).to.be(true);
-      expect(childControl.hasUnsetAncestor()).to.be(true);
+      expect(grandParentControl.hasValue()).toBe(false);
+      expect(parentControl.hasValue()).toBe(true);
+      expect(childControl.hasUnsetAncestor()).toBe(true);
     });
 
     test('should be false if all ancestors are set', function () {
@@ -135,9 +134,9 @@ describe('ancestors', () => {
       parentControl.set('myParentValue');
 
       childControl.setAncestors([parentControl, grandParentControl]);
-      expect(grandParentControl.hasValue()).to.be(true);
-      expect(parentControl.hasValue()).to.be(true);
-      expect(childControl.hasUnsetAncestor()).to.be(false);
+      expect(grandParentControl.hasValue()).toBe(true);
+      expect(parentControl.hasValue()).toBe(true);
+      expect(childControl.hasUnsetAncestor()).toBe(false);
     });
   });
 
@@ -152,19 +151,19 @@ describe('ancestors', () => {
 
     test('should be the same when ancestor values have not changed', function () {
       const newAncestorValues = childControl.getAncestorValues();
-      expect(newAncestorValues).to.eql(lastAncestorValues);
+      expect(newAncestorValues).toEqual(lastAncestorValues);
     });
 
     test('should be different when grand parent value changes', function () {
       grandParentControl.set('new myGrandParentValue');
       const newAncestorValues = childControl.getAncestorValues();
-      expect(newAncestorValues).to.not.eql(lastAncestorValues);
+      expect(newAncestorValues).not.toEqual(lastAncestorValues);
     });
 
     test('should be different when parent value changes', function () {
       parentControl.set('new myParentValue');
       const newAncestorValues = childControl.getAncestorValues();
-      expect(newAncestorValues).to.not.eql(lastAncestorValues);
+      expect(newAncestorValues).not.toEqual(lastAncestorValues);
     });
   });
 
@@ -175,8 +174,8 @@ describe('ancestors', () => {
     childControl.setAncestors([parentControl, grandParentControl]);
 
     const ancestorFilters = childControl.getAncestorFilters();
-    expect(ancestorFilters.length).to.be(2);
-    expect(ancestorFilters[0]).to.eql('mockOsdFilter:myParentValue');
-    expect(ancestorFilters[1]).to.eql('mockOsdFilter:myGrandParentValue');
+    expect(ancestorFilters.length).toBe(2);
+    expect(ancestorFilters[0]).toEqual('mockOsdFilter:myParentValue');
+    expect(ancestorFilters[1]).toEqual('mockOsdFilter:myGrandParentValue');
   });
 });

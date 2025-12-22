@@ -28,8 +28,6 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
-
 import { FilterManager } from './filter_manager';
 import { coreMock } from '../../../../../core/public/mocks';
 import { Filter, IndexPattern, FilterManager as QueryFilterManager } from '../../../../data/public';
@@ -65,7 +63,7 @@ describe('FilterManager', function () {
     test('should not find filters that are not controlled by any visualization', function () {
       osdFilters.push({} as Filter);
       const foundFilters = filterManager.findFilters();
-      expect(foundFilters.length).to.be(0);
+      expect(foundFilters.length).toBe(0);
     });
 
     test('should not find filters that are controlled by other Visualizations', function () {
@@ -75,7 +73,7 @@ describe('FilterManager', function () {
         },
       } as Filter);
       const foundFilters = filterManager.findFilters();
-      expect(foundFilters.length).to.be(0);
+      expect(foundFilters.length).toBe(0);
     });
 
     test('should find filter that is controlled by target Visualization', function () {
@@ -85,7 +83,7 @@ describe('FilterManager', function () {
         },
       } as Filter);
       const foundFilters = filterManager.findFilters();
-      expect(foundFilters.length).to.be(1);
+      expect(foundFilters.length).toBe(1);
     });
   });
 });

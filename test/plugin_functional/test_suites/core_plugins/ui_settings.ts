@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 import '../../plugins/core_provider_plugin/types';
 
@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         return window._coreProvider.setup.core.uiSettings.getAll().ui_settings_plugin;
       });
 
-      expect(settings).to.eql({
+      expect(settings).toEqual({
         category: ['any'],
         description: 'just for testing',
         name: 'from_ui_settings_plugin',
@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         return window._coreProvider.setup.core.uiSettings.get('ui_settings_plugin');
       });
 
-      expect(settingsValue).to.be('2');
+      expect(settingsValue).toBe('2');
 
       const settingsValueViaObservables = await browser.executeAsync(async (callback) => {
         window._coreProvider.setup.core.uiSettings
@@ -66,14 +66,14 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
           .subscribe((v) => callback(v));
       });
 
-      expect(settingsValueViaObservables).to.be('2');
+      expect(settingsValueViaObservables).toBe('2');
     });
 
     it('server plugins have access to registered settings', async () => {
       const result = await supertest.get('/api/ui-settings-plugin');
-      expect(result.statusCode).to.be(200);
-      expect(Object.keys(result.body).length).to.be(1);
-      expect(Number(result.body.uiSettingsValue)).to.be(2);
+      expect(result.statusCode).toBe(200);
+      expect(Object.keys(result.body).length).toBe(1);
+      expect(Number(result.body.uiSettingsValue)).toBe(2);
     });
   });
 }

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -92,7 +92,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.settings.clickOpenSearchDashboardsSavedObjects();
 
       let objects = await PageObjects.savedObjects.getRowTitles();
-      expect(objects.includes('A Dashboard')).to.be(true);
+      expect(objects.includes('A Dashboard')).toBe(true);
 
       await PageObjects.common.navigateToUrl(
         'management',
@@ -104,7 +104,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await testSubjects.existOrFail('savedObjectEditSave');
 
-      expect(await getFieldValue('title')).to.eql('A Dashboard');
+      expect(await getFieldValue('title')).toEqual('A Dashboard');
 
       await setFieldValue('title', 'Edited Dashboard');
       await setFieldValue('description', 'Some description');
@@ -112,8 +112,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await focusAndClickButton('savedObjectEditSave');
 
       objects = await PageObjects.savedObjects.getRowTitles();
-      expect(objects.includes('A Dashboard')).to.be(false);
-      expect(objects.includes('Edited Dashboard')).to.be(true);
+      expect(objects.includes('A Dashboard')).toBe(false);
+      expect(objects.includes('Edited Dashboard')).toBe(true);
 
       await PageObjects.common.navigateToUrl(
         'management',
@@ -123,8 +123,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
       );
 
-      expect(await getFieldValue('title')).to.eql('Edited Dashboard');
-      expect(await getFieldValue('description')).to.eql('Some description');
+      expect(await getFieldValue('title')).toEqual('Edited Dashboard');
+      expect(await getFieldValue('description')).toEqual('Some description');
     });
 
     it('allows to delete a saved object', async () => {
@@ -140,7 +140,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.common.clickConfirmOnModal();
 
       const objects = await PageObjects.savedObjects.getRowTitles();
-      expect(objects.includes('A Dashboard')).to.be(false);
+      expect(objects.includes('A Dashboard')).toBe(false);
     });
 
     it('preserves the object references when saving', async () => {
@@ -158,7 +158,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.settings.clickOpenSearchDashboardsSavedObjects();
 
       const objects = await PageObjects.savedObjects.getRowTitles();
-      expect(objects.includes('A Pie')).to.be(true);
+      expect(objects.includes('A Pie')).toBe(true);
 
       await PageObjects.common.navigateToUrl('management', testVisualizationUrl, {
         shouldUseHashForSubUrl: false,
@@ -168,7 +168,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       let displayedReferencesValue = await getAceEditorFieldValue('references');
 
-      expect(JSON.parse(displayedReferencesValue)).to.eql(visualizationRefs);
+      expect(JSON.parse(displayedReferencesValue)).toEqual(visualizationRefs);
 
       await focusAndClickButton('savedObjectEditSave');
 
@@ -179,7 +179,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       // Parsing to avoid random keys ordering issues in raw string comparison
-      expect(JSON.parse(await getAceEditorFieldValue('references'))).to.eql(visualizationRefs);
+      expect(JSON.parse(await getAceEditorFieldValue('references'))).toEqual(visualizationRefs);
 
       await setAceEditorFieldValue('references', JSON.stringify([], undefined, 2));
 
@@ -193,7 +193,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       displayedReferencesValue = await getAceEditorFieldValue('references');
 
-      expect(JSON.parse(displayedReferencesValue)).to.eql([]);
+      expect(JSON.parse(displayedReferencesValue)).toEqual([]);
     });
   });
 }

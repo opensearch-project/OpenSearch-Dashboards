@@ -29,7 +29,7 @@
  */
 
 import _ from 'lodash';
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const chartTypes = (await PageObjects.visualize.getChartTypes()).sort();
       log.debug('returned chart types = ' + chartTypes);
       log.debug('expected chart types = ' + expectedChartTypes);
-      expect(chartTypes).to.eql(expectedChartTypes);
+      expect(chartTypes).toEqual(expectedChartTypes);
     });
   });
 }

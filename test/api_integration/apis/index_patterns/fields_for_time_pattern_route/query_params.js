@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -44,7 +44,7 @@ export default function ({ getService }) {
         .query({ look_back: 1 })
         .expect(400)
         .then((resp) => {
-          expect(resp.body.message).to.contain(
+          expect(resp.body.message).toContain(
             '[request query.pattern]: expected value of type [string] but got [undefined]'
           );
         }));
@@ -55,7 +55,7 @@ export default function ({ getService }) {
         .query({ pattern: 'pattern-*' })
         .expect(400)
         .then((resp) => {
-          expect(resp.body.message).to.contain(
+          expect(resp.body.message).toContain(
             '[request query.look_back]: expected value of type [number] but got [undefined]'
           );
         }));
@@ -89,7 +89,7 @@ export default function ({ getService }) {
         })
         .expect(400)
         .then((resp) => {
-          expect(resp.body.message).to.contain(
+          expect(resp.body.message).toContain(
             '[request query.look_back]: expected value of type [number] but got [string]'
           );
         }));
@@ -103,7 +103,7 @@ export default function ({ getService }) {
         })
         .expect(400)
         .then((resp) => {
-          expect(resp.body.message).to.contain(
+          expect(resp.body.message).toContain(
             '[request query.look_back]: Value must be equal to or greater than [1].'
           );
         }));

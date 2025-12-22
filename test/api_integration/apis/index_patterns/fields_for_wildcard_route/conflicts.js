@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -44,7 +44,7 @@ export default function ({ getService }) {
         .query({ pattern: 'logs-*' })
         .expect(200)
         .then((resp) => {
-          expect(resp.body).to.eql({
+          expect(resp.body).toEqual({
             fields: [
               {
                 name: '@timestamp',

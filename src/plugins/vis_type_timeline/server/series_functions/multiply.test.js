@@ -31,7 +31,6 @@
 import fn from './multiply';
 
 import _ from 'lodash';
-const expect = require('chai').expect;
 import invoke from './helpers/invoke_series_fn.js';
 
 describe('multiply.js', () => {
@@ -42,7 +41,7 @@ describe('multiply.js', () => {
 
   it('multiplies by a number', () => {
     return invoke(fn, [seriesList, 2]).then((r) => {
-      expect(_.map(r.output.list[1].data, 1)).to.eql([200, 100, 100, 40]);
+      expect(_.map(r.output.list[1].data, 1)).toEqual([200, 100, 100, 40]);
     });
   });
 });

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 /**
  * This tests both that one of each visualization can be added to a dashboard (as opposed to opening an existing
@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.metricValuesExist(['7,544']);
     await dashboardExpect.seriesElementCount(19);
     const tsvbGuageExists = await find.existsByCssSelector('.tvbVisHalfGauge');
-    expect(tsvbGuageExists).to.be(true);
+    expect(tsvbGuageExists).toBe(true);
     await dashboardExpect.timelineLegendCount(5);
     await dashboardExpect.markdownWithValuesExists(["I'm a markdown!"]);
     await dashboardExpect.vegaTextsExist(['5,000']);
@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }) {
 
     await dashboardExpect.timelineLegendCount(0);
     const tsvbGuageExists = await find.existsByCssSelector('.tvbVisHalfGauge');
-    expect(tsvbGuageExists).to.be(true);
+    expect(tsvbGuageExists).toBe(true);
     await dashboardExpect.tsvbMetricValuesExist(['0']);
     await dashboardExpect.tsvbMarkdownWithValuesExists(['Hi Avg last bytes: 0']);
     await dashboardExpect.tsvbTableCellCount(0);
@@ -144,7 +144,7 @@ export default function ({ getService, getPageObjects }) {
       visNames.push(await dashboardAddPanel.addVisualization('Filter Bytes Test: vega'));
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardExpect.visualizationsArePresent(visNames);
-      expect(visNames.length).to.be.equal(26);
+      expect(visNames.length).toEqual(26);
       await PageObjects.dashboard.waitForRenderComplete();
     });
 
@@ -155,7 +155,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardExpect.visualizationsArePresent(visAndSearchNames);
-      expect(visAndSearchNames.length).to.be.equal(27);
+      expect(visAndSearchNames.length).toEqual(27);
       await PageObjects.dashboard.waitForRenderComplete();
 
       await PageObjects.dashboard.saveDashboard('embeddable rendering test', {

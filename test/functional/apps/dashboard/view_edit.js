@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.loadSavedDashboard(dashboardName);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
 
-      expect(inViewMode).to.equal(true);
+      expect(inViewMode).toEqual(true);
     });
 
     describe('save', function () {
@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.saveDashboard(dashboardName);
         const isViewMode = await PageObjects.dashboard.getIsInViewMode();
-        expect(isViewMode).to.equal(true);
+        expect(isViewMode).toEqual(true);
       });
     });
 
@@ -99,8 +99,8 @@ export default function ({ getService, getPageObjects }) {
 
           const newTime = await PageObjects.timePicker.getTimeConfig();
 
-          expect(newTime.start).to.equal(originalTime.start);
-          expect(newTime.end).to.equal(originalTime.end);
+          expect(newTime.start).toEqual(originalTime.start);
+          expect(newTime.end).toEqual(originalTime.end);
         });
 
         it('when the query is edited and applied', async function () {
@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.common.clickConfirmOnModal();
 
           const query = await queryBar.getQueryString();
-          expect(query).to.equal(originalQuery);
+          expect(query).toEqual(originalQuery);
         });
 
         it('when a filter is deleted', async function () {
@@ -124,12 +124,12 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.switchToEditMode();
 
           let hasFilter = await filterBar.hasFilter('animal', 'dog');
-          expect(hasFilter).to.be(true);
+          expect(hasFilter).toBe(true);
 
           await filterBar.removeFilter('animal');
 
           hasFilter = await filterBar.hasFilter('animal', 'dog');
-          expect(hasFilter).to.be(false);
+          expect(hasFilter).toBe(false);
 
           await PageObjects.dashboard.clickCancelOutOfEditMode();
 
@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.common.clickConfirmOnModal();
 
           hasFilter = await filterBar.hasFilter('animal', 'dog');
-          expect(hasFilter).to.be(true);
+          expect(hasFilter).toBe(true);
         });
 
         it('when a new vis is added', async function () {
@@ -158,7 +158,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.common.clickConfirmOnModal();
 
           const panelCount = await PageObjects.dashboard.getPanelCount();
-          expect(panelCount).to.eql(originalPanelCount);
+          expect(panelCount).toEqual(originalPanelCount);
         });
 
         it('when an existing vis is added', async function () {
@@ -171,7 +171,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.common.clickConfirmOnModal();
 
           const panelCount = await PageObjects.dashboard.getPanelCount();
-          expect(panelCount).to.eql(originalPanelCount);
+          expect(panelCount).toEqual(originalPanelCount);
         });
       });
 
@@ -199,8 +199,8 @@ export default function ({ getService, getPageObjects }) {
 
           const time = await PageObjects.timePicker.getTimeConfig();
 
-          expect(time.start).to.equal('Sep 19, 2015 @ 06:31:44.000');
-          expect(time.end).to.equal('Sep 19, 2015 @ 06:31:44.000');
+          expect(time.start).toEqual('Sep 19, 2015 @ 06:31:44.000');
+          expect(time.end).toEqual('Sep 19, 2015 @ 06:31:44.000');
         });
       });
     });
@@ -226,8 +226,8 @@ export default function ({ getService, getPageObjects }) {
 
         const time = await PageObjects.timePicker.getTimeConfig();
 
-        expect(time.start).to.equal(newTime.start);
-        expect(time.end).to.equal(newTime.end);
+        expect(time.start).toEqual(newTime.start);
+        expect(time.end).toEqual(newTime.end);
       });
     });
 
@@ -258,7 +258,7 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
         const query = await queryBar.getQueryString();
-        expect(query).to.equal(originalQuery);
+        expect(query).toEqual(originalQuery);
       });
     });
   });

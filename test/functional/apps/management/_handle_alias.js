@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const opensearchArchiver = getService('opensearchArchiver');
@@ -69,7 +69,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('alias1*');
       await retry.try(async function () {
-        expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
+        expect(await PageObjects.discover.getHitCount()).toBe(expectedHitCount);
       });
     });
 
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
       await retry.try(async function () {
-        expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
+        expect(await PageObjects.discover.getHitCount()).toBe(expectedHitCount);
       });
     });
 

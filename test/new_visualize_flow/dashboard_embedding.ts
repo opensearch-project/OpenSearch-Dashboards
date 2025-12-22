@@ -29,7 +29,7 @@
  */
 
 import { FtrProviderContext } from 'test/functional/ftr_provider_context';
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 /**
  * This tests both that one of each visualization can be added to a dashboard (as opposed to opening an existing
@@ -68,19 +68,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('adding a metric visualization', async function () {
       const originalPanelCount = await PageObjects.dashboard.getPanelCount();
-      expect(originalPanelCount).to.eql(0);
+      expect(originalPanelCount).toEqual(0);
       await testSubjects.exists('addVisualizationButton');
       await testSubjects.click('addVisualizationButton');
       await dashboardVisualizations.createAndEmbedMetric('Embedding Vis Test');
       await PageObjects.dashboard.waitForRenderComplete();
       await dashboardExpect.metricValuesExist(['0']);
       const panelCount = await PageObjects.dashboard.getPanelCount();
-      expect(panelCount).to.eql(1);
+      expect(panelCount).toEqual(1);
     });
 
     it('adding a markdown', async function () {
       const originalPanelCount = await PageObjects.dashboard.getPanelCount();
-      expect(originalPanelCount).to.eql(1);
+      expect(originalPanelCount).toEqual(1);
       await testSubjects.exists('dashboardAddNewPanelButton');
       await testSubjects.click('dashboardAddNewPanelButton');
       await dashboardVisualizations.createAndEmbedMarkdown({
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
       await dashboardExpect.markdownWithValuesExists(['Nice to meet you, markdown is my name']);
       const panelCount = await PageObjects.dashboard.getPanelCount();
-      expect(panelCount).to.eql(2);
+      expect(panelCount).toEqual(2);
     });
   });
 }

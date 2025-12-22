@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -476,7 +476,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickGo();
         const legends = await PageObjects.visChart.getLegendEntries();
         const expectedLegends = ['geo.dest:"US"', 'geo.dest:"UX"'];
-        expect(legends).to.eql(expectedLegends);
+        expect(legends).toEqual(expectedLegends);
       });
     });
 

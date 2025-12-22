@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['visualize', 'visEditor', 'visChart', 'header']);
@@ -55,13 +55,13 @@ export default function ({ getPageObjects, getService }) {
 
       it('should render markdown as html', async function () {
         const h1Txt = await PageObjects.visChart.getMarkdownBodyDescendentText('h1');
-        expect(h1Txt).to.equal('Heading 1');
+        expect(h1Txt).toEqual('Heading 1');
       });
 
       it('should not render html in markdown as html', async function () {
         const expected = 'Heading 1\n<h3>Inline HTML that should not be rendered as html</h3>';
         const actual = await PageObjects.visChart.getMarkdownText();
-        expect(actual).to.equal(expected);
+        expect(actual).toEqual(expected);
       });
 
       it('should auto apply changes if auto mode is turned on', async function () {
@@ -70,7 +70,7 @@ export default function ({ getPageObjects, getService }) {
         await PageObjects.visEditor.setMarkdownTxt(markdown2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         const h1Txt = await PageObjects.visChart.getMarkdownBodyDescendentText('h2');
-        expect(h1Txt).to.equal('Heading 2');
+        expect(h1Txt).toEqual('Heading 2');
       });
 
       it('should resize the editor', async function () {
@@ -78,7 +78,7 @@ export default function ({ getPageObjects, getService }) {
         const initialSize = await editorSidebar.getSize();
         await PageObjects.visEditor.sizeUpEditor();
         const afterSize = await editorSidebar.getSize();
-        expect(afterSize.width).to.be.greaterThan(initialSize.width);
+        expect(afterSize.width).toBeGreaterThan(initialSize.width);
       });
     });
   });

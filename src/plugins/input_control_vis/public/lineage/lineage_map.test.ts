@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
 import { getLineageMap } from './lineage_map';
 import { CONTROL_TYPES, newControl } from '../editor_utils';
 
@@ -44,9 +43,9 @@ test('creates lineage map', () => {
   control3.parent = control2.id;
 
   const lineageMap = getLineageMap([control1, control2, control3]);
-  expect([control1.id]).to.eql(lineageMap.get(control1.id));
-  expect([control2.id, control1.id]).to.eql(lineageMap.get(control2.id));
-  expect([control3.id, control2.id, control1.id]).to.eql(lineageMap.get(control3.id));
+  expect([control1.id]).toEqual(lineageMap.get(control1.id));
+  expect([control2.id, control1.id]).toEqual(lineageMap.get(control2.id));
+  expect([control3.id, control2.id, control1.id]).toEqual(lineageMap.get(control3.id));
 });
 
 test('safely handles circular graph', () => {
@@ -59,6 +58,6 @@ test('safely handles circular graph', () => {
   control2.parent = control1.id;
 
   const lineageMap = getLineageMap([control1, control2]);
-  expect([control1.id, control2.id]).to.eql(lineageMap.get(control1.id));
-  expect([control2.id, control1.id]).to.eql(lineageMap.get(control2.id));
+  expect([control1.id, control2.id]).toEqual(lineageMap.get(control1.id));
+  expect([control2.id, control1.id]).toEqual(lineageMap.get(control2.id));
 });

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { sortBy } from 'lodash';
 
 export default function ({ getService }) {
@@ -36,7 +36,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
 
   const ensureFieldsAreSorted = (resp) => {
-    expect(resp.body.fields).to.eql(sortBy(resp.body.fields, 'name'));
+    expect(resp.body.fields).toEqual(sortBy(resp.body.fields, 'name'));
   };
 
   describe('fields_for_wildcard_route response', () => {
