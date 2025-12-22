@@ -360,6 +360,11 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
   const nonDistributableConfig: webpack.Configuration = {
     mode: 'development',
+    plugins: [
+      new webpack.DefinePlugin({
+        'process.env.NODE_ENV': JSON.stringify('production'), // eslint-disable-line @typescript-eslint/naming-convention
+      }),
+    ],
   };
 
   const distributableConfig: webpack.Configuration = {
