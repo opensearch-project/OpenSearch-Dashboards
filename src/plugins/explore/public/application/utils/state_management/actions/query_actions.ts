@@ -79,11 +79,7 @@ export const defaultPrepareQueryString = (query: Query): string => {
     case 'PPL':
       return defaultPreparePplQuery(query).query;
     case 'PROMQL':
-      const queryStr = query.query?.toString();
-      if (!queryStr) {
-        throw new Error('PROMQL query string is required');
-      }
-      return queryStr;
+      return query.query as string;
     default:
       throw new Error(
         `defaultPrepareQueryString encountered unhandled language: ${query.language}`
