@@ -153,6 +153,20 @@ export class ChatService implements CoreService<ChatServiceSetup, ChatServiceSta
         return this.implementation.sendMessageWithWindow(content, messages, options);
       },
 
+      setPendingImage: (imageData: string | undefined) => {
+        if (!this.implementation?.setPendingImage) {
+          return;
+        }
+        return this.implementation.setPendingImage(imageData);
+      },
+
+      setCapturingImage: (isCapturing: boolean) => {
+        if (!this.implementation?.setCapturingImage) {
+          return;
+        }
+        return this.implementation.setCapturingImage(isCapturing);
+      },
+
       // Infrastructure service - use getter to ensure dynamic access
       get suggestedActionsService() {
         return chatServiceInstance.suggestedActionsService;

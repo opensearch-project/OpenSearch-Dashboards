@@ -56,6 +56,7 @@ export const AssistantMessageSchema = BaseMessageSchema.extend({
 export const UserMessageSchema = BaseMessageSchema.extend({
   role: z.literal('user'),
   content: z.string(),
+  imageData: z.string().optional(), // Base64 encoded image data
 });
 
 export const ToolMessageSchema = z.object({
