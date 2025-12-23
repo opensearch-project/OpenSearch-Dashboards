@@ -23,7 +23,7 @@ describe('CspReportOnlyConfig', () => {
     test('DEFAULT', () => {
       expect(CspReportOnlyConfig.DEFAULT).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
-          "cspReportOnlyHeader": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'",
+          "cspReportOnlyHeader": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; style-src-elem 'self' 'nonce-<NONCE>'; style-src-attr 'self' 'unsafe-inline'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'",
           "endpoint": undefined,
           "endpointName": "csp-endpoint",
           "isEmitting": false,
@@ -32,7 +32,9 @@ describe('CspReportOnlyConfig', () => {
             "default-src 'self'",
             "script-src 'self'",
             "script-src-attr 'none'",
-            "style-src 'self'",
+            "style-src 'self' 'unsafe-inline'",
+            "style-src-elem 'self' 'nonce-<NONCE>'",
+            "style-src-attr 'self' 'unsafe-inline'",
             "child-src 'none'",
             "worker-src 'self'",
             "frame-src 'none'",
@@ -53,7 +55,7 @@ describe('CspReportOnlyConfig', () => {
     test('defaults from config', () => {
       expect(new CspReportOnlyConfig()).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
-          "cspReportOnlyHeader": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'",
+          "cspReportOnlyHeader": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; style-src-elem 'self' 'nonce-<NONCE>'; style-src-attr 'self' 'unsafe-inline'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'",
           "endpoint": undefined,
           "endpointName": "csp-endpoint",
           "isEmitting": false,
@@ -62,7 +64,9 @@ describe('CspReportOnlyConfig', () => {
             "default-src 'self'",
             "script-src 'self'",
             "script-src-attr 'none'",
-            "style-src 'self'",
+            "style-src 'self' 'unsafe-inline'",
+            "style-src-elem 'self' 'nonce-<NONCE>'",
+            "style-src-attr 'self' 'unsafe-inline'",
             "child-src 'none'",
             "worker-src 'self'",
             "frame-src 'none'",
@@ -83,7 +87,7 @@ describe('CspReportOnlyConfig', () => {
     test('creates from partial config', () => {
       expect(new CspReportOnlyConfig({ isEmitting: true })).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
-          "cspReportOnlyHeader": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'",
+          "cspReportOnlyHeader": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; style-src-elem 'self' 'nonce-<NONCE>'; style-src-attr 'self' 'unsafe-inline'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'",
           "endpoint": undefined,
           "endpointName": "csp-endpoint",
           "isEmitting": true,
@@ -92,7 +96,9 @@ describe('CspReportOnlyConfig', () => {
             "default-src 'self'",
             "script-src 'self'",
             "script-src-attr 'none'",
-            "style-src 'self'",
+            "style-src 'self' 'unsafe-inline'",
+            "style-src-elem 'self' 'nonce-<NONCE>'",
+            "style-src-attr 'self' 'unsafe-inline'",
             "child-src 'none'",
             "worker-src 'self'",
             "frame-src 'none'",
@@ -141,7 +147,7 @@ describe('CspReportOnlyConfig', () => {
 
       expect(config).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
-          "cspReportOnlyHeader": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'; report-uri https://opensearch.org/csp-endpoints; report-to csp-endpoint;",
+          "cspReportOnlyHeader": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; style-src-elem 'self' 'nonce-<NONCE>'; style-src-attr 'self' 'unsafe-inline'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'; report-uri https://opensearch.org/csp-endpoints; report-to csp-endpoint;",
           "endpoint": "https://opensearch.org/csp-endpoints",
           "endpointName": "csp-endpoint",
           "isEmitting": true,
@@ -150,7 +156,9 @@ describe('CspReportOnlyConfig', () => {
             "default-src 'self'",
             "script-src 'self'",
             "script-src-attr 'none'",
-            "style-src 'self'",
+            "style-src 'self' 'unsafe-inline'",
+            "style-src-elem 'self' 'nonce-<NONCE>'",
+            "style-src-attr 'self' 'unsafe-inline'",
             "child-src 'none'",
             "worker-src 'self'",
             "frame-src 'none'",
@@ -221,7 +229,7 @@ describe('CspReportOnlyConfig', () => {
 
       expect(config).toMatchInlineSnapshot(`
         CspReportOnlyConfig {
-          "cspReportOnlyHeader": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'; report-uri https://opensearch.org/csp-endpoints;",
+          "cspReportOnlyHeader": "default-src 'self'; script-src 'self'; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; style-src-elem 'self' 'nonce-<NONCE>'; style-src-attr 'self' 'unsafe-inline'; child-src 'none'; worker-src 'self'; frame-src 'none'; object-src 'none'; manifest-src 'self'; media-src 'none'; font-src 'self'; connect-src 'self' https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; img-src 'self' data: https://opensearch.org https://docs.opensearch.org https://maps.opensearch.org https://vectors.maps.opensearch.org https://tiles.maps.opensearch.org; form-action 'self'; frame-ancestors 'self'; report-uri https://opensearch.org/csp-endpoints;",
           "endpoint": "https://opensearch.org/csp-endpoints",
           "endpointName": "csp-endpoint",
           "isEmitting": true,
@@ -230,7 +238,9 @@ describe('CspReportOnlyConfig', () => {
             "default-src 'self'",
             "script-src 'self'",
             "script-src-attr 'none'",
-            "style-src 'self'",
+            "style-src 'self' 'unsafe-inline'",
+            "style-src-elem 'self' 'nonce-<NONCE>'",
+            "style-src-attr 'self' 'unsafe-inline'",
             "child-src 'none'",
             "worker-src 'self'",
             "frame-src 'none'",
