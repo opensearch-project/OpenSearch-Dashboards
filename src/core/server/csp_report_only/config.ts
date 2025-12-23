@@ -4,7 +4,7 @@
  */
 
 import { TypeOf, schema } from '@osd/config-schema';
-// import { CSP_TRUSTED_ENDPOINTS } from '../constants';
+import { CSP_TRUSTED_ENDPOINTS } from '../constants';
 
 /**
  * @internal
@@ -23,17 +23,17 @@ export const config = {
         `style-src 'self' 'unsafe-inline'`,
         `style-src-elem 'self' 'nonce-<NONCE>'`,
         `style-src-attr 'self' 'unsafe-inline'`,
-        // `child-src 'none'`,
-        // `worker-src 'self'`,
-        // `frame-src 'none'`,
-        // `object-src 'none'`,
-        // `manifest-src 'self'`,
-        // `media-src 'none'`,
-        // `font-src 'self'`,
-        // `connect-src 'self' ${CSP_TRUSTED_ENDPOINTS.join(' ')}`,
-        // `img-src 'self' data: ${CSP_TRUSTED_ENDPOINTS.join(' ')}`,
-        // `form-action 'self'`,
-        // `frame-ancestors 'self'`,
+        `child-src 'none'`,
+        `worker-src 'self'`,
+        `frame-src 'none'`,
+        `object-src 'none'`,
+        `manifest-src 'self'`,
+        `media-src 'none'`,
+        `font-src 'self'`,
+        `connect-src 'self' ${CSP_TRUSTED_ENDPOINTS.join(' ')}`,
+        `img-src 'self' data: ${CSP_TRUSTED_ENDPOINTS.join(' ')}`,
+        `form-action 'self'`,
+        `frame-ancestors 'self'`,
       ],
     }),
     endpoint: schema.maybe(schema.string()),
