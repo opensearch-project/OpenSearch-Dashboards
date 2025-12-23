@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-ignore - React import needed for JSX but not directly used with new JSX transform
 import * as React from 'react';
 import { createReactOverlays } from './create_react_overlays';
 import { overlayServiceMock } from '../../../../core/public/mocks';

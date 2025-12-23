@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-ignore - React import needed for JSX but not directly used with new JSX transform
 import React, { FC } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { MountPoint, UnmountCallback } from 'opensearch-dashboards/public';

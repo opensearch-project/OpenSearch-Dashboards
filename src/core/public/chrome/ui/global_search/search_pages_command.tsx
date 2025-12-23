@@ -4,6 +4,7 @@
  */
 
 import { first } from 'rxjs/operators';
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React, { ReactNode } from 'react';
 import { GlobalSearchPageItem } from './page_item';
 import { ChromeNavGroupServiceStartContract } from '../../nav_group';

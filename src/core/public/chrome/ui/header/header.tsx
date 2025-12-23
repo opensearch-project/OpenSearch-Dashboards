@@ -44,6 +44,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classnames from 'classnames';
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React, { createRef, useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable, of } from 'rxjs';

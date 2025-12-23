@@ -9,6 +9,7 @@ import {
   ChromeRegistrationNavLink,
   NavGroupItemInMap,
 } from 'opensearch-dashboards/public';
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React, { useMemo } from 'react';
 
 interface Props {

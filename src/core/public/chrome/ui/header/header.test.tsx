@@ -29,6 +29,7 @@
  */
 
 import { EuiHeaderSectionItemButton } from '@elastic/eui';
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';

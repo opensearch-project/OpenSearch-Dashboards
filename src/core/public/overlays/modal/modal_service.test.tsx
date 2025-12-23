@@ -30,6 +30,7 @@
 
 import { mockReactDomRender, mockReactDomUnmount } from '../overlay.test.mocks';
 
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 import { mount } from 'enzyme';
 import { i18nServiceMock } from '../../i18n/i18n_service.mock';

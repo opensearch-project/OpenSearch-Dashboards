@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React, { FC, useRef, useLayoutEffect, useState } from 'react';
 import { Observable } from 'rxjs';
 import classNames from 'classnames';

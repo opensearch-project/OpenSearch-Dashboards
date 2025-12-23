@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { GlobalSearchPageItem } from './page_item';

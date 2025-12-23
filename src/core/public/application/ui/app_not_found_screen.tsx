@@ -29,6 +29,7 @@
  */
 
 import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent, EuiText } from '@elastic/eui';
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 

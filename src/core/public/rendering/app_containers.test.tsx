@@ -31,6 +31,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { act } from 'react-dom/test-utils';
 import { mount } from 'enzyme';
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 
 import { AppWrapper, AppContainer } from './app_containers';

@@ -29,6 +29,7 @@
  */
 
 import { mount, shallow } from 'enzyme';
+// @ts-ignore - React import needed for JSX but not directly used with new JSX transform
 import * as React from 'react';
 import { injectI18n } from './inject';
 import { I18nProvider } from './provider';

@@ -4,6 +4,7 @@
  */
 
 import { fireEvent, render, screen, act } from '@testing-library/react';
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { applicationServiceMock, httpServiceMock } from '../../../mocks';

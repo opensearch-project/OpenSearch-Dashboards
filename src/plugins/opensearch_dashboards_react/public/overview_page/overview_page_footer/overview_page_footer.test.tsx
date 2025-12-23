@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-ignore - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 import { OverviewPageFooter } from './overview_page_footer';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';

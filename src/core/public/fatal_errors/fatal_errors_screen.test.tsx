@@ -30,6 +30,7 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import { testSubjSelector } from '@osd/test-subj-selector';
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 import * as Rx from 'rxjs';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';

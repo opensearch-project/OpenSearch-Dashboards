@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-ignore - React import needed for JSX but not directly used with new JSX transform
 import React, { Children, ReactNode, useRef, useState, useCallback, useEffect } from 'react';
 
 import { keys } from '@elastic/eui';

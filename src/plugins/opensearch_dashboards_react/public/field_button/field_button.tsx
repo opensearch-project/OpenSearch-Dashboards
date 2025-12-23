@@ -30,6 +30,7 @@
 
 import './field_button.scss';
 import classNames from 'classnames';
+// @ts-ignore - React import needed for JSX but not directly used with new JSX transform
 import React, { ReactNode, HTMLAttributes, ButtonHTMLAttributes } from 'react';
 import { CommonProps } from '@elastic/eui';
 

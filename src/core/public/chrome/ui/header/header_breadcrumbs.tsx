@@ -30,6 +30,7 @@
 
 import { EuiHeaderBreadcrumbs, EuiSimplifiedBreadcrumbs } from '@elastic/eui';
 import classNames from 'classnames';
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';

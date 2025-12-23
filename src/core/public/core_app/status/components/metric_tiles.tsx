@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React, { FunctionComponent } from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiCard } from '@elastic/eui';
 import { formatNumber, Metric } from '../lib';

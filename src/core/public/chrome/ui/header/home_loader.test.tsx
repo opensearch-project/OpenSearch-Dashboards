@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { getLogosMock } from '../../../../common/mocks';

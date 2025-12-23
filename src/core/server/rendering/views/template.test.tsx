@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 import { injectedMetadataServiceMock } from '../../../public/mocks';
 import { httpServiceMock } from '../../http/http_service.mock';

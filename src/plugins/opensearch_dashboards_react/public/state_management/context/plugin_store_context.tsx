@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// @ts-ignore - React import needed for JSX but not directly used with new JSX transform
 import React, { ReactNode, createContext, useContext } from 'react';
 import { Store, globalStore } from '../store';
 
