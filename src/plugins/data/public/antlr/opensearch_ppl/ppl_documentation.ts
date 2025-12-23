@@ -31,7 +31,7 @@ The \`ad\` command applies the Random Cut Forest (RCF) algorithm from the ml-com
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/ad.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/ad.md)
   `,
   DEDUP: `
 # **DEDUP Command**
@@ -49,7 +49,7 @@ The \`dedup\` command removes identical documents defined by specified fields fr
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/dedup.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/dedup.md)
   `,
   DESCRIBE: `
 # **DESCRIBE Command**
@@ -67,7 +67,7 @@ The \`describe\` command queries metadata of an index. This command provides ess
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/describe.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/describe.md)
   `,
   EVAL: `
 # **EVAL Command**
@@ -85,7 +85,7 @@ The \`eval\` command evaluates expressions and appends the results to search res
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/eval.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/eval.md)
   `,
   EVENTSTATS: `
 # **EVENTSTATS Command**
@@ -105,7 +105,7 @@ The \`eventstats\` command enriches event data with calculated summary statistic
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/eventstats.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/eventstats.md)
   `,
   APPENDCOL: `
 # **APPENDCOL Command**
@@ -125,7 +125,7 @@ The \`appendcol\` command appends the result of a sub-search and attaches it alo
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/appendcol.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/appendcol.md)
   `,
   EXPAND: `
 # **EXPAND Command**
@@ -145,7 +145,7 @@ The \`expand\` command transforms a single document into multiple documents by e
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/expand.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/expand.md)
   `,
   EXPLAIN: `
 # **EXPLAIN Command**
@@ -163,7 +163,7 @@ The \`explain\` command shows the execution plan of a query, commonly used for q
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/explain.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/explain.md)
   `,
   FIELDS: `
 # **FIELDS Command**
@@ -181,7 +181,7 @@ The \`fields\` command keeps or removes fields from search results. Use \`+\` to
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/fields.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/fields.md)
   `,
   FILLNULL: `
 # **FILLNULL Command**
@@ -199,7 +199,7 @@ The \`fillnull\` command fills null values with a provided replacement value in 
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/fillnull.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/fillnull.md)
   `,
   FLATTEN: `
 # **FLATTEN Command**
@@ -219,7 +219,7 @@ flatten <field> [as (<alias-list>)]
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/flatten.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/flatten.md)
   `,
   GROK: `
 # **GROK Command**
@@ -237,7 +237,7 @@ The \`grok\` command parses a text field using grok patterns and appends the res
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/grok.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/grok.md)
   `,
   HEAD: `
 # **HEAD Command**
@@ -255,7 +255,7 @@ The \`head\` command returns the first N number of results after an optional off
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/head.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/head.md)
   `,
   JOIN: `
 # **JOIN Command**
@@ -275,7 +275,7 @@ The \`join\` command combines two datasets together. The left side can be an ind
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/join.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/join.md)
   `,
   KMEANS: `
 # **KMEANS Command**
@@ -293,7 +293,7 @@ kmeans <centroids> <iterations> <distance_type>
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/kmeans.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/kmeans.md)
   `,
   LOOKUP: `
 # **LOOKUP Command**
@@ -313,7 +313,7 @@ LOOKUP <lookupIndex> (<lookupMappingField> [AS <sourceMappingField>])...
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/lookup.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/lookup.md)
   `,
   ML: `
 # **ML Command**
@@ -331,7 +331,7 @@ ml action='train' algorithm='<algorithm>' <parameters>...
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/ml.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/ml.md)
   `,
   PARSE: `
 # **PARSE Command**
@@ -349,7 +349,7 @@ The \`parse\` command parses a text field using regular expressions and appends 
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/parse.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/parse.md)
   `,
   PATTERNS: `
 # **PATTERNS Command**
@@ -369,7 +369,7 @@ The \`patterns\` command extracts log patterns from a text field and appends the
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/patterns.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/patterns.md)
   `,
   RARE: `
 # **RARE Command**
@@ -387,7 +387,7 @@ The \`rare\` command finds the least common tuple of values of all fields in the
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/rare.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/rare.md)
   `,
   RENAME: `
 # **RENAME Command**
@@ -405,7 +405,7 @@ rename <source-field> AS <target-field>
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/rename.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/rename.md)
   `,
   SEARCH: `
 # **SEARCH Command**
@@ -423,7 +423,7 @@ The \`search\` command retrieves documents from an index. Must be used as the fi
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/search.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/search.md)
   `,
   SHOWDATASOURCES: `
 # **SHOWDATASOURCES Command**
@@ -441,7 +441,7 @@ The \`show datasources\` command queries datasources configured in the PPL engin
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/showdatasources.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/showdatasources.md)
   `,
   SORT: `
 # **SORT Command**
@@ -459,7 +459,7 @@ The \`sort\` command sorts all search results by the specified fields. Use \`+\`
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/sort.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/sort.md)
   `,
   STATS: `
 # **STATS Command**
@@ -477,7 +477,7 @@ The \`stats\` command calculates aggregations from search results. Supports vari
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/stats.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/stats.md)
   `,
   SUBQUERY: `
 # **SUBQUERY Command**
@@ -497,7 +497,7 @@ The \`subquery\` command contains 4 types: InSubquery, ExistsSubquery, ScalarSub
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/subquery.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/subquery.md)
   `,
   TOP: `
 # **TOP Command**
@@ -515,7 +515,7 @@ The \`top\` command finds the most common tuple of values of all fields in the f
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/top.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/top.md)
   `,
   TRENDLINE: `
 # **TRENDLINE Command**
@@ -535,7 +535,7 @@ The \`trendline\` command calculates moving averages of fields. Supports both Si
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/trendline.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/trendline.md)
   `,
   WHERE: `
 # **WHERE Command**
@@ -553,7 +553,7 @@ The \`where\` command filters search results using boolean expressions. Only ret
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/where.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/where.md)
   `,
   SOURCE: `
 # **SOURCE Command**
@@ -571,7 +571,7 @@ The \`source\` command specifies the data source (index) for the query. This is 
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/search.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/search.md)
   `,
   APPEND: `
 # **APPEND Command**
@@ -589,7 +589,7 @@ The \`append\` command appends the result of a sub-search and attaches it as add
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/append.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/append.md)
   `,
   BIN: `
 # **BIN Command**
@@ -607,7 +607,7 @@ The \`bin\` command groups numeric values into equal-interval buckets for data d
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/bin.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/bin.md)
   `,
   MULTISEARCH: `
 # **MULTISEARCH Command**
@@ -625,7 +625,7 @@ The \`multisearch\` command combines results from multiple search operations int
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/multisearch.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/multisearch.md)
   `,
   REGEX: `
 # **REGEX Command**
@@ -644,7 +644,7 @@ The \`regex\` command filters search results by matching field values against a 
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/regex.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/regex.md)
   `,
   REPLACE: `
 # **REPLACE Command**
@@ -664,7 +664,7 @@ The \`replace\` command replaces text in one or more fields within search result
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/replace.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/replace.md)
   `,
   REVERSE: `
 # **REVERSE Command**
@@ -684,7 +684,7 @@ The \`reverse\` command reverses the display order of search results without cha
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/reverse.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/reverse.md)
   `,
   REX: `
 # **REX Command**
@@ -702,7 +702,7 @@ The \`rex\` command extracts fields from a raw text field using regular expressi
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/rex.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/rex.md)
   `,
   SPATH: `
 # **SPATH Command**
@@ -720,7 +720,7 @@ The \`spath\` command extracts fields from structured text data, currently suppo
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/spath.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/spath.md)
   `,
   TABLE: `
 # **TABLE Command**
@@ -740,7 +740,7 @@ The \`table\` command is an alias for the fields command that provides field sel
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/table.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/table.md)
   `,
   TIMECHART: `
 # **TIMECHART Command**
@@ -758,6 +758,6 @@ The \`timechart\` command creates time-based aggregation of data by grouping dat
 
 &nbsp;
 
-[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/timechart.rst)
+[Command Reference](https://github.com/opensearch-project/sql/blob/main/docs/user/ppl/cmd/timechart.md)
   `,
 };

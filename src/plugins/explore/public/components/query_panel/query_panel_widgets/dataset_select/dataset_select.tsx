@@ -15,6 +15,7 @@ import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import { useClearEditors } from '../../../../application/hooks';
 import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
 import './dataset_select_terminology.scss';
+import { ExploreFlavor } from '../../../../../common';
 
 export const DatasetSelectWidget = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
@@ -117,13 +118,15 @@ export const DatasetSelectWidget = () => {
   );
 
   const supportedTypes = useMemo(() => {
+    if (flavorId === ExploreFlavor.Metrics) return ['PROMETHEUS'];
+
     return (
       services.supportedTypes || [
         DEFAULT_DATA.SET_TYPES.INDEX,
         DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
       ]
     );
-  }, [services.supportedTypes]);
+  }, [services.supportedTypes, flavorId]);
 
   const containerRef = useRef<HTMLDivElement>(null);
 

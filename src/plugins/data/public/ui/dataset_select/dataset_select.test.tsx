@@ -7,7 +7,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { coreMock } from '../../../../../core/public/mocks';
 import { DataPublicPluginStart, IDataPluginServices } from '../..';
-import { DataStorage, DEFAULT_DATA } from '../../../common';
+import { CORE_SIGNAL_TYPES, DataStorage, DEFAULT_DATA } from '../../../common';
 import { dataPluginMock } from '../../mocks';
 import { queryServiceMock } from '../../query/mocks';
 import { getQueryService } from '../../services';
@@ -317,5 +317,82 @@ describe('DatasetSelect', () => {
     // The dataset should appear since supportedAppNames is undefined (checking by display name)
     const allAppsElements = screen.getAllByText('All Apps Dataset');
     expect(allAppsElements.length).toBeGreaterThan(0);
+  });
+
+  it('filters datasets by METRICS signal type', async () => {
+    const mockGetTypeMetrics = jest.fn().mockReturnValue({
+      id: 'metrics-type',
+      title: 'Metrics Type',
+      meta: {
+        icon: { type: 'database' },
+        supportedAppNames: undefined,
+      },
+    });
+
+    mockQueryService.queryString.getDatasetService = jest.fn().mockReturnValue({
+      getType: mockGetTypeMetrics,
+      cacheDataset: jest.fn(),
+    });
+
+    // Create two datasets: one with metrics signal type, one with logs
+    mockDataViews.getIds = jest.fn().mockResolvedValue(['metrics-id', 'logs-id']);
+    mockDataViews.get = jest.fn().mockImplementation((id) => {
+      if (id === 'metrics-id') {
+        return Promise.resolve({
+          id: 'metrics-id',
+          title: 'metrics-dataset',
+          displayName: 'Metrics Dataset',
+          signalType: CORE_SIGNAL_TYPES.METRICS,
+        });
+      }
+      return Promise.resolve({
+        id: 'logs-id',
+        title: 'logs-dataset',
+        displayName: 'Logs Dataset',
+        signalType: CORE_SIGNAL_TYPES.LOGS,
+      });
+    });
+    mockDataViews.convertToDataset = jest.fn().mockImplementation((dataView) => {
+      return Promise.resolve({
+        id: dataView.id,
+        title: dataView.title,
+        type: 'metrics-type',
+        signalType: dataView.signalType,
+      });
+    });
+    mockDataViews.getDefault = jest.fn().mockResolvedValue({
+      id: 'metrics-id',
+      title: 'metrics-dataset',
+      displayName: 'Metrics Dataset',
+      signalType: CORE_SIGNAL_TYPES.METRICS,
+    });
+    mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
+      dataset: {
+        id: 'metrics-id',
+        title: 'metrics-dataset',
+        type: 'metrics-type',
+      },
+    });
+
+    renderWithContext({
+      ...defaultProps,
+      signalType: CORE_SIGNAL_TYPES.METRICS,
+    });
+
+    await waitFor(() => {
+      expect(mockDataViews.getIds).toHaveBeenCalled();
+    });
+
+    const button = screen.getByTestId('datasetSelectButton');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+    });
+
+    const metricsElements = screen.queryAllByText('Metrics Dataset');
+    expect(metricsElements.length).toBeGreaterThan(0);
+
+    expect(screen.queryByText('Logs Dataset')).not.toBeInTheDocument();
   });
 });
