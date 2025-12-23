@@ -50,7 +50,7 @@ export const runCreateVisTests = () => {
       // Open axes setting
       cy.get('[aria-controls="allAxesSection"]').click();
       // turn off show X axis
-      cy.getElementByTestId('showAxisSwitch').click();
+      cy.getElementByTestId('showAxisSwitch').first().click();
       // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
