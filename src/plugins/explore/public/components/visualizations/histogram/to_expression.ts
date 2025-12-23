@@ -63,7 +63,7 @@ export const createNumericalHistogramChart = (
         type: getSchemaByAxis(yAxis),
         axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
       },
-      color: styles?.useThresholdColor ? colorEncodingLayer : [],
+      color: styles?.colorModeOption === 'useThresholdColor' ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -147,7 +147,7 @@ export const createSingleHistogramChart = (
         type: 'quantitative',
         axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
       },
-      color: styles?.useThresholdColor ? colorEncodingLayer : [],
+      color: styles?.colorModeOption === 'useThresholdColor' ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {

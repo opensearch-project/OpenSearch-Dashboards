@@ -340,3 +340,9 @@ export interface ConnectNullValuesOption {
   connectMode: DisableMode;
   threshold: string;
 }
+
+export type ColorModeOption =
+  | 'useValueMapping'
+  | 'highlightValueMapping'
+  | 'none'
+  | 'useThresholdColor';

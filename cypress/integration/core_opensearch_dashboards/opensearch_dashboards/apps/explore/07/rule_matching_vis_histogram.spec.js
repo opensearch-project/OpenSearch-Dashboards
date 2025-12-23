@@ -60,7 +60,9 @@ export const runCreateVisTests = () => {
         });
 
       // Use threshold color to update the histogram
-      cy.getElementByTestId('useThresholdColorButton').click();
+      cy.getElementByTestId('colorModeOptionsSelection')
+        .should('be.visible')
+        .select('Use Threshold Color');
       // compare with new canvas
       cy.get('canvas.marks').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();

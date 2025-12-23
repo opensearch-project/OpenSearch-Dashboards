@@ -25,9 +25,17 @@ import {
   buildEncoding,
   buildTooltipEncoding,
   buildThresholdColorEncoding,
+  buildValueMappingColorEncoding,
+  buildCombinedScale,
 } from './bar_chart_utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
+import {
+  processData,
+  generateTransformLayer,
+  generateLabelExpr,
+} from '../style_panel/value_mapping/value_mapping_utils';
+import { transformBucketToCalculationMethod } from '../utils/calculation';
 
 // Only set size and binSpacing in manual mode
 const configureBarSizeAndSpacing = (barMark: any, styles: BarChartStyle) => {
@@ -45,14 +53,33 @@ export const createBarSpec = (
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length === 0 || categoricalColumns.length === 0) {
-    throw new Error('Bar chart requires at least one numerical column and one categorical column');
-  }
-
   const styles = { ...defaultBarChartStyles, ...styleOptions };
 
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const valueMappings = styleOptions?.valueMappingOptions?.valueMappings?.filter(
+    (mapping) => mapping?.type === 'value'
+  );
+
+  const rangeMappings = styleOptions?.valueMappingOptions?.valueMappings?.filter(
+    (mapping) => mapping?.type === 'range'
+  );
+
+  const categoricalColumn = styleOptions?.switchAxes ? yAxis?.column : xAxis?.column;
+  const numericalColumn = styleOptions?.switchAxes ? xAxis?.column : yAxis?.column;
+
+  const transformedCalculationMethod = transformBucketToCalculationMethod(
+    styles?.bucket?.aggregationType
+  );
+
+  const { newRecord, validValues, validRanges } = processData({
+    transformedData,
+    categoricalColumn,
+    numericalColumn,
+    transformedCalculationMethod,
+    valueMappings,
+    rangeMappings,
+  });
 
   const layers: any[] = [];
 
@@ -75,7 +102,15 @@ export const createBarSpec = (
 
   const numericalAxis = yAxis?.schema === VisFieldType.Numerical ? yAxis : xAxis;
 
-  const colorEncodingLayer = buildThresholdColorEncoding(numericalAxis, styleOptions);
+  const colorEncodingLayer =
+    styleOptions.colorModeOption === 'useThresholdColor'
+      ? buildThresholdColorEncoding(numericalAxis, styleOptions, true)
+      : buildValueMappingColorEncoding(styleOptions, validValues, validRanges);
+
+  const canUseValueMapping =
+    ((validRanges && validRanges.length > 0) || (validValues && validValues.length > 0)) &&
+    styleOptions.colorModeOption !== 'none' &&
+    styleOptions.colorModeOption !== 'useThresholdColor';
 
   const mainLayer = {
     params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
@@ -83,20 +118,32 @@ export const createBarSpec = (
     encoding: {
       // Category axis (X or Y depending on orientation)
       [categoryAxis]: {
-        ...buildEncoding(xAxis, xAxisStyle, undefined, styles?.bucket?.aggregationType),
+        ...buildEncoding(xAxis, xAxisStyle, undefined, styles?.bucket?.aggregationType, true),
       },
       // Value axis (Y or X depending on orientation)
       [valueAxis]: {
-        ...buildEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType),
+        ...buildEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType, true),
       },
-      color: styleOptions?.useThresholdColor ? colorEncodingLayer : [],
+      color: colorEncodingLayer,
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
-            ...buildTooltipEncoding(xAxis, xAxisStyle, undefined, styles?.bucket?.aggregationType),
+            ...buildTooltipEncoding(
+              xAxis,
+              xAxisStyle,
+              undefined,
+              styles?.bucket?.aggregationType,
+              true
+            ),
           },
           {
-            ...buildTooltipEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType),
+            ...buildTooltipEncoding(
+              yAxis,
+              yAxisStyle,
+              undefined,
+              styles?.bucket?.aggregationType,
+              true
+            ),
           },
         ],
       }),
@@ -121,7 +168,14 @@ export const createBarSpec = (
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${yAxis?.name} by ${xAxis?.name}`
       : undefined,
-    data: { values: transformedData },
+    data: { values: newRecord },
+    transform: generateTransformLayer(
+      canUseValueMapping,
+      numericalColumn,
+      validRanges,
+      validValues,
+      styleOptions?.colorModeOption
+    ),
     layer: layers,
   };
 };
@@ -188,7 +242,7 @@ export const createTimeBarChart = (
       y: {
         ...buildEncoding(yAxis, yAxisStyle, interval, styles?.bucket?.aggregationType),
       },
-      color: styles?.useThresholdColor ? colorEncodingLayer : [],
+      color: styles?.colorModeOption === 'useThresholdColor' ? colorEncodingLayer : [],
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -511,6 +565,31 @@ export const createStackedBarSpec = (
   const categoryField2 = colorMapping?.column;
   const categoryName2 = colorMapping?.name;
 
+  const valueMappings = styleOptions?.valueMappingOptions?.valueMappings?.filter(
+    (mapping) => mapping?.type === 'value'
+  );
+
+  const rangeMappings = styleOptions?.valueMappingOptions?.valueMappings?.filter(
+    (mapping) => mapping?.type === 'range'
+  );
+
+  const categoricalColumn = styleOptions?.switchAxes ? yAxis?.column : xAxis?.column;
+  const numericalColumn = styleOptions?.switchAxes ? xAxis?.column : yAxis?.column;
+
+  const transformedCalculationMethod = transformBucketToCalculationMethod(
+    styles?.bucket?.aggregationType
+  );
+
+  const { newRecord, validValues, validRanges, categorical2Options } = processData({
+    transformedData,
+    categoricalColumn,
+    numericalColumn,
+    transformedCalculationMethod,
+    valueMappings,
+    rangeMappings,
+    categoricalColumn2: categoryField2,
+  });
+
   // Set up encoding
   const categoryAxis = 'x';
   const valueAxis = 'y';
@@ -528,24 +607,56 @@ export const createStackedBarSpec = (
     barMark.strokeWidth = styles.barBorderWidth || 1;
   }
 
+  const canUseValueMapping =
+    ((validRanges && validRanges.length > 0) || (validValues && validValues.length > 0)) &&
+    styleOptions.colorModeOption !== 'none';
+
+  const transformLayer = [
+    ...generateTransformLayer(
+      canUseValueMapping,
+      numericalColumn,
+      validRanges,
+      validValues,
+      styleOptions?.colorModeOption
+    ),
+    // create a new field for manual legend categories
+    {
+      calculate: `datum.mappingValue ? datum.mappingValue : datum['${categoryField2}']`,
+      as: 'combinedCategory',
+    },
+  ];
+
   const barLayer = {
     params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
     mark: barMark,
     encoding: {
       // Category axis (X or Y depending on orientation)
       [categoryAxis]: {
-        ...buildEncoding(xAxis, xAxisStyle, undefined, styles?.bucket?.aggregationType),
+        ...buildEncoding(xAxis, xAxisStyle, undefined, styles?.bucket?.aggregationType, true),
       },
       // Value axis (Y or X depending on orientation)
       [valueAxis]: {
-        ...buildEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType),
+        ...buildEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType, true),
       },
       // Color: Second categorical field (stacking)
       color: {
-        field: categoryField2,
+        field: 'combinedCategory',
         type: 'nominal',
+        scale: buildCombinedScale(
+          canUseValueMapping,
+          categorical2Options,
+          validValues,
+          validRanges
+        ),
         legend: styles.addLegend
           ? {
+              ...(canUseValueMapping && {
+                labelExpr: generateLabelExpr(
+                  rangeMappings,
+                  valueMappings,
+                  styleOptions?.colorModeOption
+                ),
+              }),
               title: styles.legendTitle,
               orient: styles.legendPosition?.toLowerCase() || 'bottom',
               symbolType: styles.legendShape ?? 'circle',
@@ -556,10 +667,22 @@ export const createStackedBarSpec = (
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
-            ...buildTooltipEncoding(xAxis, xAxisStyle, undefined, styles?.bucket?.aggregationType),
+            ...buildTooltipEncoding(
+              xAxis,
+              xAxisStyle,
+              undefined,
+              styles?.bucket?.aggregationType,
+              true
+            ),
           },
           {
-            ...buildTooltipEncoding(yAxis, yAxisStyle, undefined, styles?.bucket?.aggregationType),
+            ...buildTooltipEncoding(
+              yAxis,
+              yAxisStyle,
+              undefined,
+              styles?.bucket?.aggregationType,
+              true
+            ),
           },
           { field: categoryField2, type: 'nominal', title: categoryName2 },
         ],
@@ -586,7 +709,8 @@ export const createStackedBarSpec = (
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${yAxis?.name} by ${xAxis?.name} and ${categoryName2}`
       : undefined,
-    data: { values: transformedData },
+    data: { values: newRecord },
+    transform: transformLayer,
     layer,
   };
 
@@ -599,13 +723,29 @@ export const createDoubleNumericalBarChart = (
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length < 2) {
-    throw new Error('Histogram bar chart requires at least two numerical column');
-  }
-
   const styles = { ...defaultBarChartStyles, ...styleOptions };
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const valueMappings = styleOptions?.valueMappingOptions?.valueMappings?.filter(
+    (mapping) => mapping?.type === 'value'
+  );
+
+  const rangeMappings = styleOptions?.valueMappingOptions?.valueMappings?.filter(
+    (mapping) => mapping?.type === 'range'
+  );
+
+  const transformedCalculationMethod = transformBucketToCalculationMethod(
+    styles?.bucket?.aggregationType
+  );
+
+  const { newRecord, validValues, validRanges } = processData({
+    transformedData,
+    categoricalColumn: xAxis?.column,
+    numericalColumn: yAxis?.column,
+    transformedCalculationMethod,
+    valueMappings,
+    rangeMappings,
+  });
 
   const layers: any[] = [];
 
@@ -623,7 +763,16 @@ export const createDoubleNumericalBarChart = (
     barMark.strokeWidth = styles.barBorderWidth || 1;
   }
 
-  const colorEncodingLayer = buildThresholdColorEncoding(yAxis, styleOptions);
+  const colorEncodingLayer =
+    styleOptions.colorModeOption === 'useThresholdColor'
+      ? buildThresholdColorEncoding(yAxis, styleOptions, true)
+      : buildValueMappingColorEncoding(styleOptions, validValues, validRanges);
+  // const colorEncodingLayer = buildThresholdColorEncoding(yAxis, styleOptions);
+
+  const canUseValueMapping =
+    ((validRanges && validRanges.length > 0) || (validValues && validValues.length > 0)) &&
+    styleOptions.colorModeOption !== 'none' &&
+    styleOptions.colorModeOption !== 'useThresholdColor';
 
   const mainLayer = {
     mark: barMark,
@@ -635,11 +784,11 @@ export const createDoubleNumericalBarChart = (
       },
       y: {
         field: yAxis?.column,
-        aggregate: styles?.bucket?.aggregationType,
+        // aggregate: styles?.bucket?.aggregationType,
         type: getSchemaByAxis(yAxis),
         axis: applyAxisStyling({ axis: yAxis, axisStyle: yAxisStyle }),
       },
-      color: styleOptions?.useThresholdColor ? colorEncodingLayer : [],
+      color: colorEncodingLayer,
       ...(styles.tooltipOptions?.mode !== 'hidden' && {
         tooltip: [
           {
@@ -672,7 +821,14 @@ export const createDoubleNumericalBarChart = (
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${xAxis?.name} with ${yAxis?.name}`
       : undefined,
-    data: { values: transformedData },
+    data: { values: newRecord },
+    transform: generateTransformLayer(
+      canUseValueMapping,
+      yAxis?.column,
+      validRanges,
+      validValues,
+      styleOptions?.colorModeOption
+    ),
     layer: layers,
   };
 };

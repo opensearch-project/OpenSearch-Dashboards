@@ -10,10 +10,13 @@ import {
   TimeUnit,
   BucketOptions,
   AggregationType,
+  ValueMapping,
 } from '../types';
 import { applyAxisStyling, getSchemaByAxis } from '../utils/utils';
 import { BarChartStyle } from './bar_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
+import { decideScale, generateLabelExpr } from '../style_panel/value_mapping/value_mapping_utils';
+import { getCategoryNextColor, resolveColor } from '../theme/color_utils';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
@@ -87,7 +90,8 @@ export const buildEncoding = (
   axis: VisColumn | undefined,
   axisStyle: StandardAxes | undefined,
   interval: TimeUnit | undefined,
-  aggregationType: AggregationType | undefined
+  aggregationType: AggregationType | undefined,
+  disbaleAggregationType: boolean = false
 ) => {
   const defaultAxisTitle = '';
   const encoding: any = {
@@ -101,7 +105,7 @@ export const buildEncoding = (
     encoding.axis.tickCount = transformIntervalsToTickCount(interval);
   }
 
-  if (axis?.schema === VisFieldType.Numerical && aggregationType) {
+  if (axis?.schema === VisFieldType.Numerical && aggregationType && !disbaleAggregationType) {
     encoding.aggregate = aggregationType;
   }
 
@@ -112,7 +116,8 @@ export const buildTooltipEncoding = (
   axis: VisColumn | undefined,
   axisStyle: StandardAxes | undefined,
   interval: TimeUnit | undefined,
-  aggregationType: AggregationType | undefined
+  aggregationType: AggregationType | undefined,
+  disbaleAggregationType: boolean = false
 ) => {
   const encoding: any = {
     field: axis?.column,
@@ -125,18 +130,21 @@ export const buildTooltipEncoding = (
   }
 
   if (axis?.schema === VisFieldType.Numerical && aggregationType) {
-    encoding.aggregate = aggregationType;
+    if (!disbaleAggregationType) {
+      encoding.aggregate = aggregationType;
+    }
     encoding.title = axisStyle?.title?.text || `${axis?.name}(${aggregationType})`;
   }
+
   return encoding;
 };
 
 export const buildThresholdColorEncoding = (
   numericalField: VisColumn | undefined,
-  styleOptions: Partial<BarChartStyle>
+  styleOptions: Partial<BarChartStyle>,
+  disbaleAggregationType: boolean = false
 ) => {
-  // support old thresholdLines config to be compatible with new thresholds
-
+  if (styleOptions?.colorModeOption !== 'useThresholdColor') return [];
   const activeThresholds = styleOptions?.thresholdOptions?.thresholds ?? [];
 
   const thresholdWithBase = [
@@ -168,7 +176,7 @@ export const buildThresholdColorEncoding = (
     };
 
   const colorLayer = {
-    aggregate: styleOptions?.bucket?.aggregationType,
+    ...(!disbaleAggregationType ? { aggregate: styleOptions?.bucket?.aggregationType } : {}),
     field: numericalField?.column,
     type: 'quantitative',
     scale: {
@@ -185,4 +193,64 @@ export const buildThresholdColorEncoding = (
   };
 
   return colorLayer;
+};
+
+export const buildValueMappingColorEncoding = (
+  styleOptions: Partial<BarChartStyle>,
+  valueMappings?: ValueMapping[],
+  rangeMappings?: ValueMapping[]
+) => {
+  if (
+    styleOptions?.colorModeOption === 'none' ||
+    (!rangeMappings?.length && !valueMappings?.length)
+  )
+    return [];
+
+  const colorLayer = {
+    field: 'mappingValue',
+    type: 'nominal',
+    scale: decideScale(styleOptions?.colorModeOption, rangeMappings, valueMappings),
+    legend: styleOptions.addLegend
+      ? {
+          labelExpr: generateLabelExpr(rangeMappings, valueMappings, styleOptions?.colorModeOption),
+          orient: styleOptions.legendPosition?.toLowerCase() || 'right',
+          title: 'Mappings',
+        }
+      : null,
+  };
+
+  return colorLayer;
+};
+
+export const buildCombinedScale = (
+  canUseValueMapping: boolean | undefined,
+  categorical2Options: any[] | null,
+  validValues?: ValueMapping[],
+  validRanges?: ValueMapping[]
+) => {
+  if (!canUseValueMapping) {
+    return {
+      domain: categorical2Options,
+      range: (categorical2Options ?? []).map((c, i) => getCategoryNextColor(i)),
+    };
+  }
+
+  const items = [...(validValues ?? []), ...(validRanges ?? [])];
+
+  const mappinglabels = [
+    ...(validValues?.map((m) => m.value) ?? []),
+    ...(validRanges?.map((m) => `[${m.range?.min},${m.range?.max ?? '∞'})`) ?? []),
+  ];
+
+  const labels = [...(categorical2Options ?? []), ...mappinglabels];
+
+  const colors = [
+    ...(categorical2Options ?? []).map((c, i) => getCategoryNextColor(i)),
+    ...items.map((m, i) => resolveColor(m.color) || getCategoryNextColor(i)),
+  ];
+
+  return {
+    domain: labels,
+    range: colors,
+  };
 };

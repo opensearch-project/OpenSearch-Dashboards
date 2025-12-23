@@ -19,6 +19,8 @@ import {
   BucketOptions,
   TimeUnit,
   ThresholdOptions,
+  ValueMappingOptions,
+  ColorModeOption,
 } from '../types';
 import { BarVisStyleControls } from './bar_vis_options';
 import { AXIS_LABEL_MAX_LENGTH } from '../constants';
@@ -56,14 +58,22 @@ export interface BarChartStyleOptions {
 
   thresholdOptions?: ThresholdOptions;
 
+  /**
+   * @deprecated - use colorModeOption instead
+   */
   useThresholdColor?: boolean;
   showFullTimeRange?: boolean;
+  valueMappingOptions?: ValueMappingOptions;
+  colorModeOption?: ColorModeOption;
 }
 
 export type BarChartStyle = Required<
-  Omit<BarChartStyleOptions, 'legendShape' | 'thresholdLines' | 'legendTitle'>
+  Omit<
+    BarChartStyleOptions,
+    'legendShape' | 'thresholdLines' | 'legendTitle' | 'colorModeOption' | 'useThresholdColor'
+  >
 > &
-  Pick<BarChartStyleOptions, 'legendShape' | 'legendTitle'>;
+  Pick<BarChartStyleOptions, 'legendShape' | 'legendTitle' | 'colorModeOption'>;
 
 export const defaultBarChartStyles: BarChartStyle = {
   // Basic controls
@@ -89,7 +99,6 @@ export const defaultBarChartStyles: BarChartStyle = {
     thresholds: [],
     thresholdStyle: ThresholdMode.Off,
   },
-  useThresholdColor: false,
   standardAxes: [
     {
       id: 'Axis-1',
@@ -139,6 +148,10 @@ export const defaultBarChartStyles: BarChartStyle = {
     bucketTimeUnit: TimeUnit.AUTO,
   },
   showFullTimeRange: false,
+  valueMappingOptions: {
+    valueMappings: [],
+  },
+  colorModeOption: 'none',
 };
 
 export const createBarConfig = (): VisualizationType<'bar'> => ({

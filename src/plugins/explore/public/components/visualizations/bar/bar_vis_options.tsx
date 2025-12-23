@@ -17,6 +17,7 @@ import { TitleOptionsPanel } from '../style_panel/title/title';
 import { AxisRole, VisFieldType } from '../types';
 import { BucketOptionsPanel } from './bucket_options';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { ValueMappingPanel } from '../style_panel/value_mapping/value_mapping_panel';
 
 export type BarVisStyleControlsProps = StyleControlsProps<BarChartStyle>;
 
@@ -52,6 +53,7 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
   // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
   const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
@@ -68,40 +70,18 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
       </EuiFlexItem>
       {hasMappingSelected && (
         <>
-          <EuiFlexItem grow={false}>
-            <BarExclusiveVisOptions
-              type="bar"
-              barSizeMode={styleOptions.barSizeMode}
-              barWidth={styleOptions.barWidth}
-              barPadding={styleOptions.barPadding}
-              showBarBorder={styleOptions.showBarBorder}
-              barBorderWidth={styleOptions.barBorderWidth}
-              barBorderColor={styleOptions.barBorderColor}
-              useThresholdColor={styleOptions?.useThresholdColor}
-              onBarSizeModeChange={(barSizeMode) => updateStyleOption('barSizeMode', barSizeMode)}
-              onBarWidthChange={(barWidth) => updateStyleOption('barWidth', barWidth)}
-              onBarPaddingChange={(barPadding) => updateStyleOption('barPadding', barPadding)}
-              onShowBarBorderChange={(showBarBorder) =>
-                updateStyleOption('showBarBorder', showBarBorder)
-              }
-              onBarBorderWidthChange={(barBorderWidth) =>
-                updateStyleOption('barBorderWidth', barBorderWidth)
-              }
-              onBarBorderColorChange={(barBorderColor) =>
-                updateStyleOption('barBorderColor', barBorderColor)
-              }
-              onUseThresholdColorChange={(useThresholdColor) =>
-                updateStyleOption('useThresholdColor', useThresholdColor)
-              }
-              shouldDisableUseThresholdColor={hasColorMapping}
-            />
-          </EuiFlexItem>
-
           <EuiFlexItem>
             <BucketOptionsPanel
               styles={styleOptions?.bucket}
               bucketType={bucketType}
               onChange={(bucket) => updateStyleOption('bucket', bucket)}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <ValueMappingPanel
+              valueMappingOption={styleOptions?.valueMappingOptions}
+              onChange={(val) => updateStyleOption('valueMappingOptions', val)}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -123,6 +103,37 @@ export const BarVisStyleControls: React.FC<BarVisStyleControlsProps> = ({
               onShowFullTimeRangeChange={(showFullTimeRange) =>
                 updateStyleOption('showFullTimeRange', showFullTimeRange)
               }
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <BarExclusiveVisOptions
+              type="bar"
+              barSizeMode={styleOptions.barSizeMode}
+              barWidth={styleOptions.barWidth}
+              barPadding={styleOptions.barPadding}
+              showBarBorder={styleOptions.showBarBorder}
+              barBorderWidth={styleOptions.barBorderWidth}
+              barBorderColor={styleOptions.barBorderColor}
+              onBarSizeModeChange={(barSizeMode) => updateStyleOption('barSizeMode', barSizeMode)}
+              onBarWidthChange={(barWidth) => updateStyleOption('barWidth', barWidth)}
+              onBarPaddingChange={(barPadding) => updateStyleOption('barPadding', barPadding)}
+              onShowBarBorderChange={(showBarBorder) =>
+                updateStyleOption('showBarBorder', showBarBorder)
+              }
+              onBarBorderWidthChange={(barBorderWidth) =>
+                updateStyleOption('barBorderWidth', barBorderWidth)
+              }
+              onBarBorderColorChange={(barBorderColor) =>
+                updateStyleOption('barBorderColor', barBorderColor)
+              }
+              onUseThresholdColorChange={(useThresholdColor) =>
+                updateStyleOption('useThresholdColor', useThresholdColor)
+              }
+              shouldDisableUseThresholdColor={hasColorMapping}
+              colorModeOption={styleOptions?.colorModeOption}
+              onColorModeOptionChange={(option) => updateStyleOption('colorModeOption', option)}
+              hasDate={hasDate}
             />
           </EuiFlexItem>
 

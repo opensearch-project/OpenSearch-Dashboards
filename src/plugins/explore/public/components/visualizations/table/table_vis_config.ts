@@ -6,7 +6,13 @@
 import React from 'react';
 import { VisualizationType } from '../utils/use_visualization_types';
 import { TableVisStyleControls } from './table_vis_options';
-import { CellAlignment, ColorMode, Threshold } from '../types';
+import {
+  CellAlignment,
+  ColorMode,
+  Threshold,
+  ColorModeOption,
+  ValueMappingOptions,
+} from '../types';
 import { CalculationMethod } from '../utils/calculation';
 import { DataLink } from './data_link_options';
 
@@ -27,11 +33,14 @@ export interface TableChartStyleOptions {
   showFooter?: boolean;
   footerCalculations?: Calc[];
   cellTypes?: CellTypeConfig[];
+  // TODO deprecate it and use thresholdOptions instead
   thresholds?: Threshold[];
   baseColor?: string;
   dataLinks?: DataLink[];
   visibleColumns?: string[];
   hiddenColumns?: string[];
+  colorModeOption?: ColorModeOption;
+  valueMappingOptions?: ValueMappingOptions;
 }
 
 export type TableChartStyle = Required<TableChartStyleOptions>;
@@ -48,6 +57,10 @@ export const defaultTableChartStyles: TableChartStyle = {
   dataLinks: [],
   visibleColumns: [],
   hiddenColumns: [],
+  colorModeOption: 'none',
+  valueMappingOptions: {
+    valueMappings: [],
+  },
 };
 
 export const createTableConfig = (): VisualizationType<'table'> => ({

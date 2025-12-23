@@ -7,6 +7,7 @@ import { HeatmapChartStyle } from './heatmap_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
 import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
 import { createLabelLayer, enhanceStyle, addTransform } from './heatmap_chart_utils';
+import { processData } from '../style_panel/value_mapping/value_mapping_utils';
 
 export const createHeatmapWithBin = (
   transformedData: Array<Record<string, any>>,
@@ -44,9 +45,10 @@ export const createHeatmapWithBin = (
         field: colorField,
         type: getSchemaByAxis(colorFieldColumn),
         // TODO: a dedicate method to handle scale type is log especially in percentage mode
-        bin: !styles?.useThresholdColor
-          ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
-          : false,
+        bin:
+          styles?.colorModeOption === 'none'
+            ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
+            : false,
         scale: {
           type: styles.exclusive?.colorScaleType,
           scheme: styles.exclusive?.colorSchema,
@@ -103,6 +105,29 @@ export const createRegularHeatmap = (
   const colorField = colorFieldColumn?.column;
   const colorName = colorFieldColumn?.name;
 
+  const valueMappings = styles?.valueMappingOptions?.valueMappings?.filter(
+    (mapping) => mapping?.type === 'value'
+  );
+
+  const rangeMappings = styles?.valueMappingOptions?.valueMappings?.filter(
+    (mapping) => mapping?.type === 'range'
+  );
+
+  const { newRecord, validValues, validRanges } = processData({
+    transformedData,
+    categoricalColumn: xAxis?.column,
+    numericalColumn: colorField,
+    transformedCalculationMethod: undefined,
+    valueMappings,
+    rangeMappings,
+    categoricalColumn2: yAxis?.column,
+  });
+
+  const canUseValueMapping =
+    ((validRanges && validRanges.length > 0) || (validValues && validValues.length > 0)) &&
+    styles.colorModeOption !== 'none' &&
+    styles.colorModeOption !== 'useThresholdColor';
+
   const markLayer: any = {
     mark: {
       type: 'rect',
@@ -132,9 +157,10 @@ export const createRegularHeatmap = (
         field: colorField,
         type: getSchemaByAxis(colorFieldColumn),
         // TODO: a dedicate method to handle scale type is log especially in percentage mode
-        bin: !styles?.useThresholdColor
-          ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
-          : false,
+        bin:
+          styles?.colorModeOption === 'none'
+            ? { maxbins: Number(styles.exclusive?.maxNumberOfColors) }
+            : false,
         scale: {
           type: styles.exclusive?.colorScaleType,
           scheme: styles.exclusive?.colorSchema,
@@ -165,12 +191,20 @@ export const createRegularHeatmap = (
     },
   };
 
-  enhanceStyle(markLayer, styles, transformedData, colorField);
+  enhanceStyle(
+    markLayer,
+    styles,
+    transformedData,
+    colorField,
+    canUseValueMapping,
+    validValues,
+    validRanges
+  );
 
   const baseSpec = {
     $schema: VEGASCHEMA,
-    data: { values: transformedData },
-    transform: addTransform(styles, colorField),
+    data: { values: newRecord },
+    transform: addTransform(styles, colorField, canUseValueMapping, validRanges, validValues),
     layer: [markLayer, createLabelLayer(styles, true, colorField, xAxis, yAxis)].filter(Boolean),
     title: styles.titleOptions?.show
       ? styles.titleOptions?.titleName || `${colorName} by ${xAxis?.name} and ${yAxis?.name}`

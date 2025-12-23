@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PieVisStyleControls, PieVisStyleControlsProps } from './pie_vis_options';
 import { VisFieldType, AxisRole } from '../types';
@@ -107,6 +107,24 @@ jest.mock('./pie_exclusive_vis_options', () => ({
   )),
 }));
 
+jest.mock('../style_panel/value_mapping/value_mapping_panel', () => ({
+  ValueMappingPanel: jest.fn(({ valueMappingOption, onChange }) => (
+    <>
+      <div data-test-subj="mockValueMappingOption">
+        <button
+          data-test-subj="addValueMapping"
+          onClick={() =>
+            onChange({
+              valueMappings: [],
+            })
+          }
+        >
+          Show value
+        </button>
+      </div>
+    </>
+  )),
+}));
 describe('PieVisStyleControls', () => {
   const numericalColumn = {
     id: 1,
@@ -151,6 +169,11 @@ describe('PieVisStyleControls', () => {
   it('renders the legend options accordion', () => {
     render(<PieVisStyleControls {...mockProps} />);
     expect(screen.getByTestId('mockLegendOptionsPanel')).toBeInTheDocument();
+  });
+
+  it('renders the value mappings options accordion', () => {
+    render(<PieVisStyleControls {...mockProps} />);
+    expect(screen.getByTestId('mockValueMappingOption')).toBeInTheDocument();
   });
 
   it('calls onStyleChange with the correct parameters when a legend option changes', async () => {
@@ -242,6 +265,15 @@ describe('PieVisStyleControls', () => {
           titleName: 'New Chart Title',
         },
       });
+    });
+  });
+  it('updates value mapping ', async () => {
+    render(<PieVisStyleControls {...mockProps} />);
+    fireEvent.click(screen.getByTestId('addValueMapping'));
+    expect(mockProps.onStyleChange).toHaveBeenCalledWith({
+      valueMappingOptions: {
+        valueMappings: [],
+      },
     });
   });
 });
