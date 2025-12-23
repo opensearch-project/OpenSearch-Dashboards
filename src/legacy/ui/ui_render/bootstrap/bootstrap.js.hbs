@@ -9,16 +9,29 @@ window.__webpack_nonce__ = (function() {
 })();
 
 // Intercept dynamically created style elements to add CSP nonce
-// This handles third-party libraries (like nano-css from react-use) that create
-// style elements without using webpack's style-loader nonce mechanism
+// This handles third-party libraries (like nano-css from react-use, brace/ace editor)
+// that create style elements without using webpack's style-loader nonce mechanism
 (function() {
   if (!window.__webpack_nonce__) return;
 
+  var nonce = window.__webpack_nonce__;
+
+  // Patch document.createElement
   var originalCreateElement = document.createElement.bind(document);
   document.createElement = function(tagName, options) {
     var element = originalCreateElement(tagName, options);
     if (tagName.toLowerCase() === 'style') {
-      element.setAttribute('nonce', window.__webpack_nonce__);
+      element.setAttribute('nonce', nonce);
+    }
+    return element;
+  };
+
+  // Patch document.createElementNS (used by brace/ace editor)
+  var originalCreateElementNS = document.createElementNS.bind(document);
+  document.createElementNS = function(namespaceURI, qualifiedName) {
+    var element = originalCreateElementNS(namespaceURI, qualifiedName);
+    if (qualifiedName.toLowerCase() === 'style') {
+      element.setAttribute('nonce', nonce);
     }
     return element;
   };
