@@ -23,7 +23,7 @@ export class ResourceClientFactory {
     this.resourceClientCreators.set(dataConnectionType, creator);
   }
 
-  get(dataConnectionType: string) {
+  get<T = BaseResourceClient>(dataConnectionType: string): T | undefined {
     if (!this.resourceClients.has(dataConnectionType)) {
       const creator = this.resourceClientCreators.get(dataConnectionType);
       if (!creator) {
@@ -32,6 +32,6 @@ export class ResourceClientFactory {
       this.resourceClients.set(dataConnectionType, creator(this.http));
     }
 
-    return this.resourceClients.get(dataConnectionType);
+    return this.resourceClients.get(dataConnectionType) as T | undefined;
   }
 }

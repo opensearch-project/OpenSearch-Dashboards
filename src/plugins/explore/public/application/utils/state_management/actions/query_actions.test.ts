@@ -1186,6 +1186,40 @@ describe('Query Actions - Comprehensive Test Suite', () => {
       expect(mockServices.tabRegistry.getTab).toHaveBeenCalledWith('explore_visualization_tab');
     });
 
+    it('should skip histogram query when language is PROMQL', async () => {
+      mockDispatch.mockClear();
+
+      const mockState = {
+        query: { query: 'up{job="prometheus"}', language: 'PROMQL', dataset: null },
+        ui: { activeTabId: '' },
+        results: {},
+        legacy: { interval: '1h' },
+        queryEditor: { breakdownField: undefined, queryStatusMap: {} },
+      };
+
+      mockGetState.mockReturnValue(mockState);
+      mockDefaultPreparePplQuery.mockReturnValue({
+        query: 'up{job="prometheus"}',
+        language: 'PROMQL',
+        dataset: { id: 'test-dataset', title: 'test-dataset', type: 'INDEX_PATTERN' },
+      });
+
+      const thunk = executeQueries({ services: mockServices });
+      await thunk(mockDispatch, mockGetState, undefined);
+
+      const dispatchedThunks = mockDispatch.mock.calls.filter(
+        (call) => typeof call[0] === 'function'
+      );
+      expect(dispatchedThunks.length).toBeGreaterThanOrEqual(1);
+
+      const histogramActions = mockDispatch.mock.calls.filter(
+        (call) =>
+          call[0]?.type === 'query/executeHistogramQuery/pending' ||
+          call[0]?.type?.includes('executeHistogramQuery')
+      );
+      expect(histogramActions).toHaveLength(0);
+    });
+
     it('should handle missing tab registry gracefully', async () => {
       const mockState = {
         query: { query: 'source=logs', language: 'PPL', dataset: null },

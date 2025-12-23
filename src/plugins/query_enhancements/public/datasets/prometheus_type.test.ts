@@ -195,7 +195,7 @@ describe('prometheusTypeConfig', () => {
       expect(prometheusTypeConfig.meta).toEqual({
         icon: expect.objectContaining({ type: expect.any(String) }),
         tooltip: 'Prometheus',
-        searchOnLoad: false,
+        supportedAppNames: ['explore'],
       });
     });
   });

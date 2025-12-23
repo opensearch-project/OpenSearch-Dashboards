@@ -172,6 +172,7 @@ describe('useQueryPanelEditor', () => {
               },
             ])
           ),
+          getTriggerCharacters: jest.fn(() => []),
         },
       },
       datasets: {

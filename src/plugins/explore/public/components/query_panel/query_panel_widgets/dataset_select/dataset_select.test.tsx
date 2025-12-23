@@ -37,6 +37,7 @@ jest.doMock('react-redux', () => {
 });
 
 let capturedSignalType: string | null | undefined;
+let capturedSupportedTypes: string[] | undefined;
 
 jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: () => ({
@@ -60,11 +61,14 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
           DatasetSelect: ({
             onSelect,
             signalType,
+            supportedTypes,
           }: {
             onSelect: (dataset: any) => void;
             signalType: string | null;
+            supportedTypes?: string[];
           }) => {
             capturedSignalType = signalType;
+            capturedSupportedTypes = supportedTypes;
             return (
               <div data-test-subj="dataset-select">
                 <button
@@ -75,6 +79,11 @@ jest.doMock('../../../../../../opensearch_dashboards_react/public', () => ({
                 </button>
                 <div data-test-subj="dataset-singaltype-prop">
                   {signalType !== undefined ? `Signal type: ${signalType}` : 'No signal type'}
+                </div>
+                <div data-test-subj="dataset-supportedtypes-prop">
+                  {supportedTypes
+                    ? `Supported types: ${supportedTypes.join(',')}`
+                    : 'Default types'}
                 </div>
               </div>
             );
@@ -117,6 +126,7 @@ jest.doMock('../../../../../../data/common', () => ({
   Dataset: class {},
   DEFAULT_DATA: {
     SET_TYPES: {
+      INDEX: 'INDEX',
       INDEX_PATTERN: 'index_pattern',
     },
   },
@@ -136,6 +146,8 @@ jest.doMock('../../../../helpers/use_flavor_id', () => ({
 
 jest.doMock('../../../../../common', () => ({
   ExploreFlavor: {
+    Logs: 'logs',
+    Metrics: 'metrics',
     Traces: 'traces',
   },
 }));
@@ -265,6 +277,44 @@ describe('DatasetSelectWidget', () => {
       renderWithStore();
 
       expect(capturedSignalType).toBe(null);
+    });
+  });
+
+  describe('supportedTypes functionality', () => {
+    beforeEach(() => {
+      capturedSupportedTypes = undefined;
+    });
+
+    it('passes PROMETHEUS as supportedTypes for Metrics flavor', () => {
+      mockUseFlavorId.mockReturnValue('metrics');
+      renderWithStore();
+
+      expect(capturedSupportedTypes).toEqual(['PROMETHEUS']);
+      expect(screen.getByTestId('dataset-supportedtypes-prop')).toHaveTextContent(
+        'Supported types: PROMETHEUS'
+      );
+    });
+
+    it('passes default supportedTypes for Logs flavor', () => {
+      mockUseFlavorId.mockReturnValue('logs');
+      renderWithStore();
+
+      // When services.supportedTypes is not set, it falls back to default types
+      expect(capturedSupportedTypes).toEqual(['INDEX', 'index_pattern']);
+    });
+
+    it('passes default supportedTypes for Traces flavor', () => {
+      mockUseFlavorId.mockReturnValue('traces');
+      renderWithStore();
+
+      expect(capturedSupportedTypes).toEqual(['INDEX', 'index_pattern']);
+    });
+
+    it('passes default supportedTypes when flavor is null', () => {
+      mockUseFlavorId.mockReturnValue(null);
+      renderWithStore();
+
+      expect(capturedSupportedTypes).toEqual(['INDEX', 'index_pattern']);
     });
   });
 });

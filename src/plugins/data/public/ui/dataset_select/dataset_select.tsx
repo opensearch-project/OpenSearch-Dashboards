@@ -29,7 +29,7 @@ import {
   useOpenSearchDashboards,
   toMountPoint,
 } from '../../../../opensearch_dashboards_react/public';
-import { CORE_SIGNAL_TYPES, Dataset, DEFAULT_DATA, Query } from '../../../common';
+import { CORE_SIGNAL_TYPES, Dataset, DEFAULT_DATA, DataStructure, Query } from '../../../common';
 import { IDataPluginServices } from '../../types';
 import { DatasetDetails, DatasetDetailsBody, DatasetDetailsHeader } from './dataset_details';
 import { AdvancedSelector } from '../dataset_selector/advanced_selector';
@@ -112,6 +112,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
     if (!isMounted.current) return;
 
     setIsLoading(true);
+    setDatasets([]);
 
     try {
       const datasetIds = await dataViews.getIds(true);
@@ -129,11 +130,34 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
         });
       }
 
+      // Check if we need to fetch from dataset types that do not use data views (e.g., PROMETHEUS)
+      // These types have their own fetch mechanism via the type config
+      await Promise.all(
+        supportedTypes?.map(async (type) => {
+          if ([DEFAULT_DATA.SET_TYPES.INDEX_PATTERN, DEFAULT_DATA.SET_TYPES.INDEX].includes(type))
+            return;
+          const typeConfig = datasetService.getType(type);
+          if (!typeConfig?.fetch) return;
+          const datasetRoot: DataStructure = { id: typeConfig.id, title: typeConfig.title, type };
+          const result = await typeConfig.fetch(services, [datasetRoot]);
+          result.children?.forEach((child) => {
+            const dataset = typeConfig.toDataset([datasetRoot, child]);
+            fetchedDatasets.push({
+              ...dataset,
+              displayName: child.title,
+              signalType: dataset.signalType,
+            });
+          });
+        }) || []
+      );
+
       const onFilter = (detailedDataset: DetailedDataset) => {
         // Filter by signal type
         const signalTypeMatch =
           signalType === CORE_SIGNAL_TYPES.TRACES
             ? detailedDataset.signalType === CORE_SIGNAL_TYPES.TRACES
+            : signalType === CORE_SIGNAL_TYPES.METRICS
+            ? detailedDataset.signalType === CORE_SIGNAL_TYPES.METRICS
             : detailedDataset.signalType !== CORE_SIGNAL_TYPES.TRACES;
 
         if (!signalTypeMatch) {
@@ -168,7 +192,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
         setIsLoading(false);
       }
     }
-  }, [dataViews, signalType, onSelect, queryString, datasetService, services.appName]);
+  }, [dataViews, signalType, onSelect, queryString, datasetService, services, supportedTypes]);
 
   useEffect(() => {
     isMounted.current = true;

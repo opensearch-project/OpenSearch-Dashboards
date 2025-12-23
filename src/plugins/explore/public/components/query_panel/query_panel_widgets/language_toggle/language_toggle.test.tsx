@@ -30,6 +30,12 @@ jest.mock('../../../../application/hooks', () => ({
   useEditorRef: () => mockEditorRef,
 }));
 
+// Mock useFlavorId hook
+const mockUseFlavorId = jest.fn();
+jest.mock('../../../../helpers/use_flavor_id', () => ({
+  useFlavorId: () => mockUseFlavorId(),
+}));
+
 // Mock the useLanguageSwitch hook
 jest.mock('../../../../application/hooks/editor_hooks/use_switch_language', () => ({
   useLanguageSwitch: () =>
@@ -93,6 +99,7 @@ describe('LanguageToggle', () => {
     mockSelectIsPromptEditorMode.mockReturnValue(false);
     mockSelectPromptModeIsAvailable.mockReturnValue(true);
     mockSelectQueryLanguage.mockReturnValue('PPL');
+    mockUseFlavorId.mockReturnValue('logs');
   });
 
   it('renders the language toggle button', () => {
@@ -257,6 +264,41 @@ describe('LanguageToggle', () => {
       await waitFor(() => {
         expect(screen.queryByText('PPL')).not.toBeInTheDocument();
       });
+    });
+  });
+
+  describe('Metrics Flavor', () => {
+    it('should not render when flavor is metrics', () => {
+      mockUseFlavorId.mockReturnValue('metrics');
+
+      const { container } = renderWithProvider(<LanguageToggle />);
+
+      expect(container.firstChild).toBeNull();
+      expect(screen.queryByTestId('queryPanelFooterLanguageToggle')).not.toBeInTheDocument();
+    });
+
+    it('should render when flavor is logs', () => {
+      mockUseFlavorId.mockReturnValue('logs');
+
+      renderWithProvider(<LanguageToggle />);
+
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle')).toBeInTheDocument();
+    });
+
+    it('should render when flavor is traces', () => {
+      mockUseFlavorId.mockReturnValue('traces');
+
+      renderWithProvider(<LanguageToggle />);
+
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle')).toBeInTheDocument();
+    });
+
+    it('should render when flavor is null', () => {
+      mockUseFlavorId.mockReturnValue(null);
+
+      renderWithProvider(<LanguageToggle />);
+
+      expect(screen.getByTestId('queryPanelFooterLanguageToggle')).toBeInTheDocument();
     });
   });
 });

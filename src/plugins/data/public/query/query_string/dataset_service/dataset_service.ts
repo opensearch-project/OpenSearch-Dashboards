@@ -110,6 +110,7 @@ export class DatasetService {
           : await type?.fetchFields(dataset, services);
         const spec = {
           id: dataset.id,
+          type: dataset.type,
           title: dataset.title,
           timeFieldName: dataset.timeFieldName,
           fields: fetchedFields,
