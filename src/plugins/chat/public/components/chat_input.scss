@@ -1,12 +1,82 @@
+@import "@elastic/eui/src/global_styling/variables";
+@import "@elastic/eui/src/global_styling/mixins/shadow";
+
 .chatInput {
   grid-area: input;
   display: flex;
   flex-direction: column;
+
+  &__inputContainer {
+    display: flex;
+    flex-direction: column;
+    background-color: $euiColorEmptyShade;
+    border: 2px solid $euiColorLightShade;
+    border-radius: 12px;
+    padding: 8px;
+    transition: border-color 0.2s ease;
+
+    &:focus-within {
+      border-color: $euiColorPrimary;
+      box-shadow: 0 0 0 1px $euiColorPrimary;
+    }
+  }
 
   &__inputRow {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 8px;
     align-items: center;
+  }
+
+  &__fieldWithImage {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+
+    &:focus {
+      border: none !important;
+      box-shadow: none !important;
+    }
+  }
+
+  &__loadingIndicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 8px 12px;
+    background: $euiColorLightestShade;
+    border-radius: 8px;
+    border: 1px solid $euiColorLightShade;
+  }
+
+  &__imageAttachment {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 8px;
+    padding: 4px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid $euiColorLightShade;
+
+    @include euiBottomShadowSmall;
+
+    max-width: 120px;
+  }
+
+  &__removeButton {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background-color: $euiColorDanger;
+    border: 1px solid white;
+    border-radius: 50%;
+
+    @include euiBottomShadowSmall;
+
+    &:hover {
+      background-color: $euiColorDangerText;
+      transform: scale(1.1);
+    }
   }
 }
