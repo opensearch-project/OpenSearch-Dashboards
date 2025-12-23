@@ -1955,7 +1955,9 @@ exports[`Header help menu hides survey link 1`] = `
                       }
                       onMutation={[Function]}
                     >
-                      <div>
+                      <div
+                        onMouseDown={[Function]}
+                      >
                         <EuiPopoverTitle>
                           <div
                             className="euiPopoverTitle"
@@ -4160,7 +4162,9 @@ exports[`Header help menu renders survey link 1`] = `
                       }
                       onMutation={[Function]}
                     >
-                      <div>
+                      <div
+                        onMouseDown={[Function]}
+                      >
                         <EuiPopoverTitle>
                           <div
                             className="euiPopoverTitle"
