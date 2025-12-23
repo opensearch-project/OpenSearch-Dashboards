@@ -217,8 +217,9 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           exclude: [
             /* vega-lite and some of its dependencies don't have es5 builds
              * so we need to build from source and transpile for webpack v4
+             * kbn-handlebars uses modern syntax (nullish coalescing) that needs transpilation
              */
-            /[\/\\]node_modules[\/\\](?!vega(-lite|-label|-functions|-scenegraph)?[\/\\])/,
+            /[\/\\]node_modules[\/\\](?!(vega(-lite|-label|-functions|-scenegraph)?|kbn-handlebars)[\/\\])/,
 
             // Don't attempt to look into release artifacts of the plugins
             /[\/\\]plugins[\/\\][^\/\\]+[\/\\]build[\/\\]/,
