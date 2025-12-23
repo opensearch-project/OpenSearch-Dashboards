@@ -13,6 +13,7 @@ import { setQueryWithHistory } from '../../../../application/utils/state_managem
 import { selectQuery } from '../../../../application/utils/state_management/selectors';
 import { useFlavorId } from '../../../../helpers/use_flavor_id';
 import { useClearEditors } from '../../../../application/hooks';
+import { EXPLORE_DEFAULT_LANGUAGE } from '../../../../../common';
 import './dataset_select_terminology.scss';
 
 export const DatasetSelectWidget = () => {
@@ -73,10 +74,25 @@ export const DatasetSelectWidget = () => {
   }, [currentQuery, dataViews, queryString, services]);
 
   const handleDatasetSelect = useCallback(
-    async (dataset: Dataset) => {
-      if (!dataset) return;
-
+    async (dataset: Dataset | undefined) => {
       try {
+        if (!dataset) {
+          // Clear dataset - reset to empty query state with explore default language
+          queryString.setQuery({
+            query: EMPTY_QUERY.QUERY,
+            language: EXPLORE_DEFAULT_LANGUAGE,
+            dataset: undefined,
+          });
+
+          dispatch(
+            setQueryWithHistory({
+              ...queryString.getQuery(),
+            })
+          );
+          clearEditors();
+          return;
+        }
+
         const initialQuery = queryString.getInitialQueryByDataset(dataset);
 
         queryString.setQuery({

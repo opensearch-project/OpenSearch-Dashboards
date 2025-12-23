@@ -22,6 +22,13 @@ import {
   EuiText,
   EuiPopoverTitle,
   EuiSplitPanel,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiBasicTable,
+  EuiFieldSearch,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -31,7 +38,7 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { CORE_SIGNAL_TYPES, Dataset, DEFAULT_DATA, Query } from '../../../common';
 import { IDataPluginServices } from '../../types';
-import { DatasetDetails, DatasetDetailsBody, DatasetDetailsHeader } from './dataset_details';
+import { DatasetDetails } from './dataset_details';
 import { AdvancedSelector } from '../dataset_selector/advanced_selector';
 import './_index.scss';
 
@@ -42,11 +49,147 @@ export interface DetailedDataset extends Dataset {
 }
 
 export interface DatasetSelectProps {
-  onSelect: (dataset: Dataset) => void;
-  appName: string;
+  onSelect: (dataset: Dataset | undefined) => void;
   supportedTypes?: string[];
   signalType: string | null;
 }
+
+interface ViewDatasetsModalProps {
+  datasets: DetailedDataset[];
+  isLoading: boolean;
+  onClose: () => void;
+  services: IDataPluginServices;
+}
+
+const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
+  datasets,
+  isLoading,
+  onClose,
+  services,
+}) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const { data, application } = services;
+  const { queryString } = data.query;
+  const datasetService = queryString.getDatasetService();
+
+  const filteredDatasets = useMemo(() => {
+    if (!searchQuery) return datasets;
+    const lowerSearch = searchQuery.toLowerCase();
+    return datasets.filter(
+      (dataset) =>
+        (dataset.displayName || dataset.title).toLowerCase().includes(lowerSearch) ||
+        dataset.description?.toLowerCase().includes(lowerSearch)
+    );
+  }, [datasets, searchQuery]);
+
+  const handleDatasetClick = useCallback(
+    (dataset: DetailedDataset) => {
+      onClose();
+      application.navigateToApp('datasets', {
+        path: `/patterns/${dataset.id}`,
+      });
+    },
+    [onClose, application]
+  );
+
+  const columns = [
+    {
+      field: 'displayName',
+      name: i18n.translate('data.datasetSelect.viewModal.nameColumn', {
+        defaultMessage: 'Name',
+      }),
+      render: (displayName: string, dataset: DetailedDataset) => {
+        const typeConfig = datasetService.getType(dataset.type);
+        const iconType = typeConfig?.meta?.icon?.type || 'database';
+        return (
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={iconType} size="m" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s">
+                <strong>{displayName || dataset.title}</strong>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
+      sortable: true,
+    },
+    {
+      field: 'type',
+      name: i18n.translate('data.datasetSelect.viewModal.typeColumn', {
+        defaultMessage: 'Type',
+      }),
+      render: (type: string) => {
+        const typeConfig = datasetService.getType(type);
+        return typeConfig?.title || type;
+      },
+      sortable: true,
+    },
+    {
+      field: 'title',
+      name: i18n.translate('data.datasetSelect.viewModal.dataColumn', {
+        defaultMessage: 'Data',
+      }),
+      render: (title: string) => title,
+      sortable: true,
+    },
+    {
+      field: 'description',
+      name: i18n.translate('data.datasetSelect.viewModal.descriptionColumn', {
+        defaultMessage: 'Description',
+      }),
+      render: (description: string) => description || '—',
+      truncateText: true,
+    },
+  ];
+
+  return (
+    <EuiModal onClose={onClose} maxWidth="800px">
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            id="data.datasetSelect.viewModal.title"
+            defaultMessage="Workspace datasets"
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiText size="s" color="subdued">
+          <FormattedMessage
+            id="data.datasetSelect.viewModal.description"
+            defaultMessage="Create and manage the datasets that help you retrieve your data from OpenSearch."
+          />
+        </EuiText>
+        <EuiSpacer size="m" />
+        <EuiFieldSearch
+          placeholder={i18n.translate('data.datasetSelect.viewModal.searchPlaceholder', {
+            defaultMessage: 'Search...',
+          })}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          isClearable
+          fullWidth
+        />
+        <EuiSpacer size="m" />
+        <EuiBasicTable
+          items={filteredDatasets}
+          columns={columns}
+          loading={isLoading}
+          rowProps={(dataset) => ({
+            onClick: () => handleDatasetClick(dataset),
+            style: { cursor: 'pointer' },
+          })}
+          pagination={{
+            pageSize: 10,
+            pageSizeOptions: [10],
+          }}
+        />
+      </EuiModalBody>
+    </EuiModal>
+  );
+};
 
 /**
  * @experimental This component is experimental and may change in future versions
@@ -78,7 +221,25 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
 
       const matchingDataset = datasets.find((d) => d.id === currentDataset.id);
       if (matchingDataset) {
-        setSelectedDataset(matchingDataset);
+        // Check if matching dataset is compatible with current signal type
+        let isCompatible = true;
+        if (signalType === CORE_SIGNAL_TYPES.TRACES) {
+          isCompatible = matchingDataset.signalType === CORE_SIGNAL_TYPES.TRACES;
+        } else if (signalType === CORE_SIGNAL_TYPES.LOGS) {
+          isCompatible =
+            matchingDataset.signalType === CORE_SIGNAL_TYPES.LOGS || !matchingDataset.signalType;
+        } else if (signalType === CORE_SIGNAL_TYPES.METRICS) {
+          isCompatible =
+            matchingDataset.signalType === CORE_SIGNAL_TYPES.METRICS || !matchingDataset.signalType;
+        }
+
+        if (isCompatible) {
+          setSelectedDataset(matchingDataset);
+        } else {
+          // Clear incompatible dataset - call onSelect to update Redux state
+          setSelectedDataset(undefined);
+          onSelect(undefined);
+        }
         return;
       }
 
@@ -98,10 +259,39 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
         signalType: dataView.signalType,
       } as DetailedDataset;
 
-      setSelectedDataset(detailedDataset);
+      // Check if dataset is compatible with current signal type before setting it
+      let isCompatible = true;
+      if (signalType === CORE_SIGNAL_TYPES.TRACES) {
+        isCompatible = detailedDataset.signalType === CORE_SIGNAL_TYPES.TRACES;
+      } else if (signalType === CORE_SIGNAL_TYPES.LOGS) {
+        isCompatible =
+          detailedDataset.signalType === CORE_SIGNAL_TYPES.LOGS || !detailedDataset.signalType;
+      } else if (signalType === CORE_SIGNAL_TYPES.METRICS) {
+        isCompatible =
+          detailedDataset.signalType === CORE_SIGNAL_TYPES.METRICS || !detailedDataset.signalType;
+      }
+
+      if (isCompatible) {
+        setSelectedDataset(detailedDataset);
+      } else {
+        // Clear incompatible dataset
+        queryString.setQuery({
+          query: '',
+          language: currentQuery.language,
+        });
+        setSelectedDataset(undefined);
+      }
     };
     updateSelectedDataset();
-  }, [currentDataset, dataViews, datasets]);
+  }, [
+    currentDataset,
+    dataViews,
+    datasets,
+    signalType,
+    queryString,
+    currentQuery.language,
+    onSelect,
+  ]);
 
   const datasetTypeConfig = datasetService.getType(
     selectedDataset?.sourceDatasetRef?.type || selectedDataset?.type || ''
@@ -131,10 +321,24 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
 
       const onFilter = (detailedDataset: DetailedDataset) => {
         // Filter by signal type
-        const signalTypeMatch =
-          signalType === CORE_SIGNAL_TYPES.TRACES
-            ? detailedDataset.signalType === CORE_SIGNAL_TYPES.TRACES
-            : detailedDataset.signalType !== CORE_SIGNAL_TYPES.TRACES;
+        let signalTypeMatch = false;
+
+        if (signalType === CORE_SIGNAL_TYPES.TRACES) {
+          // Traces page: ONLY show datasets with signalType='traces' (strict)
+          signalTypeMatch = detailedDataset.signalType === CORE_SIGNAL_TYPES.TRACES;
+        } else if (signalType === CORE_SIGNAL_TYPES.LOGS) {
+          // Logs page: Show datasets with signalType='logs' OR null (permissive)
+          signalTypeMatch =
+            detailedDataset.signalType === CORE_SIGNAL_TYPES.LOGS || !detailedDataset.signalType;
+        } else if (signalType === CORE_SIGNAL_TYPES.METRICS) {
+          // Metrics page: Show datasets with signalType='metrics' OR null (permissive)
+          signalTypeMatch =
+            detailedDataset.signalType === CORE_SIGNAL_TYPES.METRICS || !detailedDataset.signalType;
+        } else {
+          // Regular Discover page: Show only datasets without a signal type
+          // (null or undefined) - these are regular index patterns
+          signalTypeMatch = !detailedDataset.signalType;
+        }
 
         if (!signalTypeMatch) {
           return false;
@@ -151,15 +355,41 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
 
       const filteredDatasets = fetchedDatasets.filter(onFilter);
 
-      const defaultDataView = await dataViews.getDefault();
-      if (defaultDataView) {
-        setDefaultDatasetId(defaultDataView.id);
+      let defaultDataView;
+      try {
+        defaultDataView = await dataViews.getDefault();
+        if (defaultDataView) {
+          setDefaultDatasetId(defaultDataView.id);
+        }
+      } catch (error) {
+        // Default dataset not found (stale reference), continue without it
+        // eslint-disable-next-line no-console
+        console.warn('[DatasetSelect] Default dataset not found, using first available:', error);
       }
       const defaultDataset =
         filteredDatasets.find((d) => d.id === defaultDataView?.id) ?? filteredDatasets[0];
       // Get fresh current dataset value at execution time
       const currentlySelectedDataset = queryString.getQuery().dataset;
-      if (defaultDataset && !currentlySelectedDataset) {
+
+      // Check if currently selected dataset is compatible with current signal type filter
+      const isCurrentDatasetValid = currentlySelectedDataset
+        ? filteredDatasets.some((d) => d.id === currentlySelectedDataset.id)
+        : false;
+
+      // If current dataset is incompatible with the signal type filter, clear it or select default
+      if (currentlySelectedDataset && !isCurrentDatasetValid) {
+        if (defaultDataset) {
+          // Select the first valid dataset
+          onSelect(defaultDataset);
+        } else {
+          // No valid datasets available, clear the selection by setting to empty query
+          queryString.setQuery({
+            query: '',
+            language: queryString.getQuery().language,
+          });
+        }
+      } else if (!currentlySelectedDataset && defaultDataset) {
+        // No dataset selected but default is available
         onSelect(defaultDataset);
       }
       setDatasets(filteredDatasets);
@@ -184,16 +414,40 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
   }, []);
 
   const options = datasets.map((dataset) => {
-    const { id, title, type, description, displayName } = dataset;
+    const { id, title, type, description, displayName, dataSource, timeFieldName } = dataset;
     const isSelected = id === selectedDataset?.id;
     const isDefault = id === defaultDatasetId;
     const typeConfig = datasetService.getType(type);
     const iconType = typeConfig?.meta?.icon?.type || 'database';
     const label = displayName || title;
+
+    // Build subtitle with data source and time field
+    const subtitleParts = [];
+    if (dataSource?.title) {
+      subtitleParts.push(dataSource.title);
+    } else {
+      // For local data sources (no dataSourceRef), show "Local cluster"
+      subtitleParts.push(
+        i18n.translate('data.datasetSelect.localCluster', {
+          defaultMessage: 'Local cluster',
+        })
+      );
+    }
+    if (timeFieldName) {
+      subtitleParts.push(
+        i18n.translate('data.datasetSelect.timeField', {
+          defaultMessage: 'Time field: {timeField}',
+          values: { timeField: timeFieldName },
+        })
+      );
+    }
+    const subtitle = subtitleParts.length > 0 ? subtitleParts.join(' • ') : '';
+
     // Prepending the label to the searchable label to allow for better search, render will strip it out
-    const searchableLabel = `${label}${typeConfig?.title || DEFAULT_DATA.STRUCTURES.ROOT.title}${
-      description && description.trim() !== '' ? ` - ${description}` : ''
-    }`.trim();
+    // Adding a separator before subtitle if it exists so renderOption can parse it correctly
+    const searchableLabel = subtitle
+      ? `${label} ${subtitle}${description && description.trim() !== '' ? ` - ${description}` : ''}`
+      : `${label}${description && description.trim() !== '' ? ` - ${description}` : ''}`;
 
     return {
       label,
@@ -279,7 +533,6 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
                       className="datasetSelect__contextMenu"
                       hasBorder={false}
                       hasShadow={false}
-                      onFocus={() => {}}
                       direction="column"
                     >
                       <EuiSplitPanel.Inner paddingSize="none">
@@ -290,13 +543,35 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
                       <EuiSplitPanel.Inner paddingSize="none">
                         <EuiText size="xs" color="subdued">
                           <small>
-                            {datasetTypeConfig?.title || DEFAULT_DATA.STRUCTURES.ROOT.title}
+                            {(() => {
+                              const parts = [];
+                              if (selectedDataset?.dataSource?.title) {
+                                parts.push(selectedDataset.dataSource.title);
+                              } else if (selectedDataset) {
+                                // For local data sources (no dataSourceRef), show "Local cluster"
+                                parts.push(
+                                  i18n.translate('data.datasetSelect.localCluster', {
+                                    defaultMessage: 'Local cluster',
+                                  })
+                                );
+                              }
+                              if (selectedDataset?.timeFieldName) {
+                                parts.push(
+                                  i18n.translate('data.datasetSelect.timeField', {
+                                    defaultMessage: 'Time field: {timeField}',
+                                    values: { timeField: selectedDataset.timeFieldName },
+                                  })
+                                );
+                              }
+                              return parts.length > 0
+                                ? parts.join(' • ')
+                                : datasetTypeConfig?.title || DEFAULT_DATA.STRUCTURES.ROOT.title;
+                            })()}
                           </small>
                         </EuiText>
                       </EuiSplitPanel.Inner>
                     </EuiSplitPanel.Outer>
                   ),
-                  panel: 1,
                   icon: <EuiIcon type={datasetIcon} size="s" />,
                 },
                 {
@@ -384,23 +659,6 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
                 },
               ],
             },
-            {
-              id: 1,
-              title: (
-                <DatasetDetailsHeader
-                  className="datasetSelect__contextMenu"
-                  dataset={selectedDataset}
-                  isDefault={selectedDataset?.id === defaultDatasetId}
-                />
-              ),
-              content: (
-                <DatasetDetailsBody
-                  className="datasetSelect__contextMenu"
-                  dataset={selectedDataset}
-                  isDefault={selectedDataset?.id === defaultDatasetId}
-                />
-              ),
-            },
           ]}
         />
       </EuiPopoverTitle>
@@ -410,17 +668,17 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
           justifyContent="spaceBetween"
           alignItems="center"
           responsive={false}
-          gutterSize="none"
+          gutterSize="s"
           className="datasetSelect__footer"
         >
           <EuiFlexItem grow={false} className="datasetSelect__footerItem">
             <EuiButton
-              className="datasetSelect__advancedButton"
-              data-test-subj="datasetSelectAdvancedButton"
-              iconType="gear"
-              iconSide="right"
+              className="datasetSelect__createButton"
+              data-test-subj="datasetSelectCreateButton"
+              iconType="plus"
+              iconSide="left"
               size="s"
-              isSelected={false}
+              fill
               onClick={() => {
                 closePopover();
                 const overlay = overlays?.openModal(
@@ -486,8 +744,37 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
               }}
             >
               <FormattedMessage
-                id="data.datasetSelect.advancedButton"
-                defaultMessage="View all available data"
+                id="data.datasetSelect.createDatasetButton"
+                defaultMessage="Create dataset"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} className="datasetSelect__footerItem">
+            <EuiButton
+              className="datasetSelect__viewDatasetsButton"
+              data-test-subj="datasetSelectViewDatasetsButton"
+              size="s"
+              onClick={() => {
+                closePopover();
+                const overlay = overlays?.openModal(
+                  toMountPoint(
+                    <ViewDatasetsModal
+                      datasets={datasets}
+                      isLoading={isLoading}
+                      onClose={() => overlay?.close()}
+                      services={services}
+                    />
+                  ),
+                  {
+                    maxWidth: '800px',
+                    className: 'datasetSelect__viewDatasetsModal',
+                  }
+                );
+              }}
+            >
+              <FormattedMessage
+                id="data.datasetSelect.viewDatasetsButton"
+                defaultMessage="View datasets"
               />
             </EuiButton>
           </EuiFlexItem>

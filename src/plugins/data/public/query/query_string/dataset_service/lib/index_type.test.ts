@@ -80,6 +80,85 @@ describe('indexTypeConfig', () => {
     });
   });
 
+  test('toDataset handles multi-index selection with comma-separated titles', () => {
+    const mockPath: DataStructure[] = [
+      {
+        id: 'datasource1',
+        title: 'DataSource 1',
+        type: 'DATA_SOURCE',
+      },
+      {
+        id: 'datasource1::index1,index2,index3',
+        title: 'index1,index2,index3',
+        type: 'INDEX',
+        meta: {
+          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+          isMultiIndex: true,
+          selectedIndices: ['datasource1::index1', 'datasource1::index2', 'datasource1::index3'],
+          selectedTitles: ['index1', 'index2', 'index3'],
+        } as DataStructureCustomMeta,
+      },
+    ];
+
+    const result = indexTypeConfig.toDataset(mockPath);
+
+    expect(result.title).toBe('index1,index2,index3');
+    expect(result.type).toBe('INDEXES');
+  });
+
+  test('toDataset handles multi-wildcard selection', () => {
+    const mockPath: DataStructure[] = [
+      {
+        id: 'datasource1',
+        title: 'DataSource 1',
+        type: 'DATA_SOURCE',
+      },
+      {
+        id: 'datasource1::logs-*,metrics-*',
+        title: 'logs-*,metrics-*',
+        type: 'INDEX',
+        meta: {
+          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+          isMultiWildcard: true,
+          wildcardPatterns: ['logs-*', 'metrics-*'],
+        } as DataStructureCustomMeta,
+      },
+    ];
+
+    const result = indexTypeConfig.toDataset(mockPath);
+
+    expect(result.title).toBe('logs-*,metrics-*');
+    expect(result.type).toBe('INDEXES');
+  });
+
+  test('toDataset handles mixed wildcard and single index selection', () => {
+    const mockPath: DataStructure[] = [
+      {
+        id: 'datasource1',
+        title: 'DataSource 1',
+        type: 'DATA_SOURCE',
+      },
+      {
+        id: 'datasource1::logs-*,index1,index2',
+        title: 'logs-*,index1,index2',
+        type: 'INDEX',
+        meta: {
+          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+          isMultiWildcard: true,
+          wildcardPatterns: ['logs-*'],
+          selectedIndices: ['datasource1::index1', 'datasource1::index2'],
+          selectedTitles: ['index1', 'index2'],
+        } as DataStructureCustomMeta,
+      },
+    ];
+
+    const result = indexTypeConfig.toDataset(mockPath);
+
+    // Should contain wildcard patterns first, then exact indices
+    expect(result.title).toBe('logs-*,index1,index2');
+    expect(result.type).toBe('INDEXES');
+  });
+
   test('fetchFields returns fields from index', async () => {
     const mockFields = [
       { name: 'field1', type: 'string' },

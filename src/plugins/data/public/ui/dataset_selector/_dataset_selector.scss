@@ -26,6 +26,26 @@
     .euiModal__flex {
       max-height: none;
     }
+
+    .osdOverlayMountWrapper {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .euiModalBody {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .euiModalBody__overflow {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
   }
 
   &__checkbox {

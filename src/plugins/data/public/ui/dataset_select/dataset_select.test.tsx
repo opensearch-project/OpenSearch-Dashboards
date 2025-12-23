@@ -165,19 +165,29 @@ describe('DatasetSelect', () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      const datasetOption = screen.getByTestId('datasetSelectOption-index-pattern-id');
-      expect(datasetOption).toBeInTheDocument();
-      fireEvent.click(datasetOption);
+      expect(screen.getByTestId('datasetSelectSelectable')).toBeInTheDocument();
     });
 
-    expect(mockOnSelect).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 'index-pattern-id',
-      })
+    // Find the option using findByTestId which waits for the element
+    const datasetOption = await screen.findByTestId(
+      'datasetSelectOption-Test Index Pattern',
+      {},
+      { timeout: 5000 }
     );
+    expect(datasetOption).toBeInTheDocument();
+    fireEvent.click(datasetOption);
+
+    await waitFor(() => {
+      expect(mockOnSelect).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'index-pattern-id',
+          title: 'Test Index Pattern',
+        })
+      );
+    });
   });
 
-  it('opens advanced selector when advanced button is clicked', async () => {
+  it('opens advanced selector when create dataset button is clicked', async () => {
     renderWithContext();
 
     await waitFor(() => {
@@ -188,9 +198,9 @@ describe('DatasetSelect', () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      const advancedButton = screen.getByTestId('datasetSelectAdvancedButton');
-      expect(advancedButton).toBeInTheDocument();
-      fireEvent.click(advancedButton);
+      const createButton = screen.getByTestId('datasetSelectCreateButton');
+      expect(createButton).toBeInTheDocument();
+      fireEvent.click(createButton);
     });
 
     expect(mockCore.overlays.openModal).toHaveBeenCalled();
