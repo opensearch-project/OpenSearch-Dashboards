@@ -134,7 +134,7 @@ export const Template: FunctionComponent<Props> = ({
         <meta name="add-scripts-here" />
 
         {/* Place fonts after styles that would be injected later to make sure nothing overrides them */}
-        <Fonts url={uiPublicUrl} />
+        <Fonts url={uiPublicUrl} nonce={nonce} />
         <meta name="add-fonts-here" />
 
         <script src={startupScriptUrl} />
