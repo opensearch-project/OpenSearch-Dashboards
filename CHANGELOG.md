@@ -1473,6 +1473,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Fix navigation issue across dashboards ([#5435](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5435))
 - [Discover] Fix table panel auto-sizing ([#5441](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5441))
+- [Fix] ScopedHistory out of navigation scope ([#5498](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5498))
 
 ### 🚞 Infrastructure
 
