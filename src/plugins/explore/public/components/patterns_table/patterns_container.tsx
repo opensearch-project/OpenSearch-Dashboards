@@ -32,8 +32,7 @@ const PatternsContainerContent = () => {
   const usingRegexPatterns = useSelector(selectUsingRegexPatterns);
 
   const logsTotal = histogramResults?.hits.total || 0;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const hits = patternResults?.hits?.hits || [];
+  const hits = useMemo(() => patternResults?.hits?.hits || [], [patternResults?.hits.hits]);
 
   const items: PatternItem[] = useMemo(
     () =>
@@ -81,33 +80,29 @@ const PatternsContainerContent = () => {
     );
   }
 
-  try {
-    const hit = hits?.[0];
-    if (!hit) {
-      return null;
-    }
-
-    // Check if the hit has all required fields in hit._source
-    const requiredFields = [COUNT_FIELD, SAMPLE_FIELD, PATTERNS_FIELD];
-    const hasAllRequiredFields = requiredFields.every((field) => field in hit._source);
-
-    if (!hasAllRequiredFields) {
-      // doesn't match normal fields or calcite fields
-      const title = i18n.translate('explore.patterns.schemaUnexpected', {
-        defaultMessage: 'Expected schema not found',
-      });
-      return <EuiCallOut title={title} color="danger" iconType="alert" />;
-    }
-
-    return (
-      <>
-        {isFlyoutOpen && <PatternsTableFlyout />}
-        <PatternsTable items={items} />
-      </>
-    );
-  } catch {
-    return <></>;
+  const hit = hits?.[0];
+  if (!hit) {
+    return null;
   }
+
+  // Check if the hit has all required fields in hit._source
+  const requiredFields = [COUNT_FIELD, SAMPLE_FIELD, PATTERNS_FIELD];
+  const hasAllRequiredFields = requiredFields.every((field) => field in hit._source);
+
+  if (!hasAllRequiredFields) {
+    // doesn't match normal fields or calcite fields
+    const title = i18n.translate('explore.patterns.schemaUnexpected', {
+      defaultMessage: 'Expected schema not found',
+    });
+    return <EuiCallOut title={title} color="danger" iconType="alert" />;
+  }
+
+  return (
+    <>
+      {isFlyoutOpen && <PatternsTableFlyout />}
+      <PatternsTable items={items} />
+    </>
+  );
 };
 
 export const PatternsContainer = () => {
