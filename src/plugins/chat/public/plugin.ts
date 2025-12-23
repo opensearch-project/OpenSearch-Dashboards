@@ -125,6 +125,8 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
         sendMessageWithWindow: this.chatService.sendMessageWithWindow.bind(this.chatService),
         openWindow: this.chatService.openWindow.bind(this.chatService),
         closeWindow: this.chatService.closeWindow.bind(this.chatService),
+        setPendingImage: this.chatService.setPendingImage.bind(this.chatService),
+        setCapturingImage: this.chatService.setCapturingImage.bind(this.chatService),
       });
     }
 
