@@ -77,6 +77,7 @@ export const loadReduxState = async (services: ExploreServices): Promise<RootSta
         id: queryState.dataset.id,
         title: queryState.dataset.title,
         type: queryState.dataset.type,
+        language: queryState.dataset.language,
         timeFieldName: queryState.dataset.timeFieldName,
         dataSource: queryState.dataset.dataSource,
         signalType: queryState.dataset.signalType,
@@ -176,6 +177,7 @@ export const getPreloadedState = async (services: ExploreServices): Promise<Root
  */
 const fetchFirstAvailableDataset = async (
   services: ExploreServices,
+  flavor: ExploreFlavor | null,
   requiredSignalType?: string
 ): Promise<Dataset | undefined> => {
   try {
@@ -184,7 +186,9 @@ const fetchFirstAvailableDataset = async (
       return undefined;
     }
 
-    const typeConfig: DatasetTypeConfig | undefined = datasetService.getType('INDEX_PATTERN');
+    const typeConfig: DatasetTypeConfig | undefined = datasetService.getType(
+      flavor === ExploreFlavor.Metrics ? 'PROMETHEUS' : 'INDEX_PATTERN'
+    );
     if (!typeConfig) {
       return undefined;
     }
@@ -262,7 +266,10 @@ const resolveDataset = async (
 
   // Get existing dataset from QueryStringManager or use preferred dataset
   const queryStringQuery = services.data?.query?.queryString?.getQuery();
-  const defaultQuery = services.data?.query?.queryString?.getDefaultQuery();
+  const defaultQuery =
+    flavorFromAppId === ExploreFlavor.Metrics
+      ? undefined
+      : services.data?.query?.queryString?.getDefaultQuery();
   const existingDataset = preferredDataset || queryStringQuery?.dataset || defaultQuery?.dataset;
 
   // If we have an existing dataset, validate SignalType compatibility
@@ -298,7 +305,7 @@ const resolveDataset = async (
   }
 
   // Fetch first available dataset with required SignalType
-  return await fetchFirstAvailableDataset(services, requiredSignalType);
+  return await fetchFirstAvailableDataset(services, flavorFromAppId, requiredSignalType);
 };
 
 /**
@@ -322,6 +329,7 @@ const getPreloadedQueryState = async (
         id: selectedDataset.id,
         title: selectedDataset.title,
         type: selectedDataset.type,
+        language: selectedDataset.language,
         timeFieldName: selectedDataset.timeFieldName,
         dataSource: selectedDataset.dataSource,
         signalType: selectedDataset.signalType,
@@ -332,7 +340,7 @@ const getPreloadedQueryState = async (
   if (minimalDataset) {
     const initialQueryByDataset = services.data.query.queryString.getInitialQueryByDataset({
       ...minimalDataset,
-      language: EXPLORE_DEFAULT_LANGUAGE,
+      language: minimalDataset.language || EXPLORE_DEFAULT_LANGUAGE,
     });
 
     // override the initial query to be an empty string
