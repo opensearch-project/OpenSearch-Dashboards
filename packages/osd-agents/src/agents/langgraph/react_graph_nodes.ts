@@ -462,21 +462,94 @@ export class ReactGraphNodes {
         }
         return true;
       })
-      .map((msg) => ({
+      .map((msg) => {
         // Convert 'tool' role to 'user' role for Bedrock compatibility
         // Bedrock only accepts 'user' and 'assistant' roles
-        role: msg.role === 'tool' ? 'user' : msg.role || 'user',
+        const role = msg.role === 'tool' ? 'user' : msg.role || 'user';
+
+        let content: any[];
+
         // If content is already an array (proper format), use it directly
-        // This preserves toolUse and toolResult blocks
-        // Filter out empty text blocks to prevent ValidationException
-        content: Array.isArray(msg.content)
-          ? msg.content.filter((block: any) => !block.text || block.text.trim() !== '')
-          : [{ text: msg.content || '' }].filter((block: any) => block.text.trim() !== ''),
-      }));
+        if (Array.isArray(msg.content)) {
+          // Filter out empty text blocks to prevent ValidationException
+          content = msg.content.filter((block: any) => !block.text || block.text.trim() !== '');
+        } else {
+          // Convert string content to array format
+          const textContent = msg.content || '';
+          if (textContent.trim() !== '') {
+            content = [{ text: textContent }];
+          } else {
+            content = [];
+          }
+        }
+
+        // Handle image data for user messages
+        if (msg.role === 'user' && msg.imageData) {
+          this.logger.info('📸 Processing user message with image data', {
+            hasImageData: !!msg.imageData,
+            imageDataLength: msg.imageData.length,
+            contentBlocksCount: content.length,
+          });
+
+          try {
+            // Parse the base64 image data
+            // Expected format: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+            const imageDataMatch = msg.imageData.match(/^data:image\/([^;]+);base64,(.+)$/);
+
+            if (imageDataMatch) {
+              const [, format, base64Data] = imageDataMatch;
+
+              // Add image block to content array
+              const imageBlock = {
+                image: {
+                  format, // png, jpeg, gif, webp
+                  source: {
+                    bytes: Buffer.from(base64Data, 'base64'), // Convert base64 string to Buffer
+                  },
+                },
+              };
+
+              // Add image block to the beginning of content array
+              content.unshift(imageBlock);
+
+              this.logger.info('✅ Successfully added image block to message', {
+                format,
+                base64Length: base64Data.length,
+                bufferLength: Buffer.from(base64Data, 'base64').length,
+                totalContentBlocks: content.length,
+                imageBlockStructure: {
+                  hasImage: true,
+                  hasFormat: !!format,
+                  hasSource: true,
+                  hasBytesBuffer: Buffer.isBuffer(Buffer.from(base64Data, 'base64')),
+                },
+              });
+            } else {
+              this.logger.warn(
+                '⚠️ Invalid image data format, expected data:image/format;base64,data',
+                {
+                  imageDataPreview: msg.imageData.substring(0, 50) + '...',
+                }
+              );
+            }
+          } catch (error) {
+            this.logger.error('❌ Error processing image data', {
+              error: error instanceof Error ? error.message : String(error),
+              imageDataPreview: msg.imageData.substring(0, 50) + '...',
+            });
+          }
+        }
+
+        return {
+          role,
+          content,
+        };
+      });
 
     // Debug logging to catch toolUse/toolResult mismatch
     let toolUseCount = 0;
     let toolResultCount = 0;
+    let imageCount = 0;
 
     prepared.forEach((msg, index) => {
       if (msg.role === 'assistant' && Array.isArray(msg.content)) {
@@ -488,9 +561,14 @@ export class ReactGraphNodes {
       }
       if (msg.role === 'user' && Array.isArray(msg.content)) {
         const msgToolResults = msg.content.filter((c: any) => c.toolResult).length;
+        const msgImages = msg.content.filter((c: any) => c.image).length;
         toolResultCount += msgToolResults;
+        imageCount += msgImages;
         if (msgToolResults > 0) {
           this.logger.info(`Message ${index} (user): ${msgToolResults} toolResult blocks`);
+        }
+        if (msgImages > 0) {
+          this.logger.info(`Message ${index} (user): ${msgImages} image blocks`);
         }
       }
     });
@@ -502,6 +580,10 @@ export class ReactGraphNodes {
         messageCount: prepared.length,
         lastMessage: prepared[prepared.length - 1],
       });
+    }
+
+    if (imageCount > 0) {
+      this.logger.info(`📊 Total images in conversation: ${imageCount}`);
     }
 
     return prepared;
