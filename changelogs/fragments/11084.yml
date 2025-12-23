@@ -1,0 +1,2 @@
+infra:
+- Replace handlebars package with kbn-handlebars ([#11084](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11084))

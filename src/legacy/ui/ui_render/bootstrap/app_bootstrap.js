@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import Handlebars from 'handlebars';
+import Handlebars from 'kbn-handlebars';
 import { createHash } from 'crypto';
 import { readFile } from 'fs';
 import { resolve } from 'path';

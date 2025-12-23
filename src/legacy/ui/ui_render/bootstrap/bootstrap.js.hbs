@@ -7,10 +7,6 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
   var legacyBrowserError = document.getElementById('osd_legacy_browser_error');
   legacyBrowserError.style.display = 'flex';
 } else {
-  if (!window.__osdCspNotEnforced__ && window.console) {
-    window.console.log("^ A single error about an inline script not firing due to content security policy is expected!");
-  }
-
   var themeCssDistFilenames = {{THEME_CSS_DIST_FILENAMES}};
   var kuiCssDistFilenames = {{KUI_CSS_DIST_FILENAMES}};
 
