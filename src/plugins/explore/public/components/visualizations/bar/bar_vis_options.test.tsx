@@ -144,13 +144,13 @@ jest.mock('../style_panel/axes/standard_axes_options', () => ({
     <div data-test-subj="allAxesOptions">
       <button
         data-test-subj="changeAxis"
-        onClick={() => onStandardAxesChange([...standardAxes, { id: 'new-axis' }])}
+        onClick={() => onStandardAxesChange([...standardAxes, { show: true }])}
       >
         Change Axis
       </button>
       <button
         data-test-subj="mockUpdateValueAxes"
-        onClick={() => onStandardAxesChange([...standardAxes, { id: 'new-axis' }])}
+        onClick={() => onStandardAxesChange([...standardAxes, { show: true }])}
       >
         Update Value Axes
       </button>
@@ -438,7 +438,7 @@ describe('BarVisStyleControls', () => {
 
     await userEvent.click(screen.getByTestId('changeAxis'));
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      standardAxes: [...defaultProps.styleOptions.standardAxes, { id: 'new-axis' }],
+      standardAxes: [...defaultProps.styleOptions.standardAxes, { show: true }],
     });
   });
 

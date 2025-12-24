@@ -18,6 +18,7 @@ import { VisualizationEmptyState } from './visualization_empty_state';
 import { visualizationRegistry } from './visualization_registry';
 import { RenderChartConfig } from './types';
 import { opensearchFilters, TimeRange } from '../../../../data/public';
+import { getAxisConfigByColumnMapping } from './utils/axis';
 
 interface Props {
   data$: Observable<VisData | undefined>;
@@ -89,13 +90,19 @@ export const VisualizationRender = ({
     if (!rule || !rule.toSpec) {
       return;
     }
+
+    const standardAxes = 'standardAxes' in visConfig.styles ? visConfig.styles.standardAxes : [];
     const axisColumnMappings = convertStringsToMappings(visConfig?.axesMapping ?? {}, columns);
+    // initialize axis config
+    const allAxisConfig = getAxisConfigByColumnMapping(axisColumnMappings, standardAxes);
+    const styles = { ...visConfig.styles, standardAxes: allAxisConfig };
+
     return rule.toSpec(
       visualizationData.transformedData,
       visualizationData.numericalColumns,
       visualizationData.categoricalColumns,
       visualizationData.dateColumns,
-      visConfig.styles,
+      styles,
       visConfig.type,
       axisColumnMappings,
       timeRange
