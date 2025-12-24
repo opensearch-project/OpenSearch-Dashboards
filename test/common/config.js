@@ -45,7 +45,17 @@ export default function () {
       license: 'oss',
       from: 'snapshot',
       serverArgs: [
-        'search.concurrent_segment_search.mode=none',
+        // Conditionally add concurrent segment search mode for OpenSearch 3.0+
+        ...(() => {
+          const opensearchVersion = process.env.OPENSEARCH_VERSION;
+          if (opensearchVersion) {
+            const majorVersion = parseInt(opensearchVersion.split('.')[0], 10);
+            if (majorVersion >= 3) {
+              return ['search.concurrent_segment_search.mode=none'];
+            }
+          }
+          return [];
+        })(),
         // Disable disk-based shard allocation to prevent index creation blocks in CI
         'cluster.routing.allocation.disk.threshold_enabled=false',
         // Set very low disk watermarks for testing
@@ -67,6 +77,7 @@ export default function () {
         `--opensearch.hosts=${servers.opensearch.serverUrl}`,
         `--opensearch.username=${opensearchDashboardsServerTestUser.username}`,
         `--opensearch.password=${opensearchDashboardsServerTestUser.password}`,
+        '--opensearch.ignoreVersionMismatch=true', // Enable backward compatibility for testing
         `--home.disableWelcomeScreen=false`,
         `--home.disableExperienceModal=true`, // Disable experience modal for tests
         // Needed for async search functional tests to introduce a delay
