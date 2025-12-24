@@ -180,7 +180,6 @@
       "test/interpreter_functional/plugins/*"
     ],
     "nohoist": [
-      "**/json11",
       "**/@types/*",
       "**/@types/*/**",
       "**/grunt-*",
