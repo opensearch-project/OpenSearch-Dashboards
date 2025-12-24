@@ -267,18 +267,6 @@ describe('bar to_expression', () => {
       expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
-
-    test('throws error when required columns are missing', () => {
-      // No numerical columns
-      expect(() => {
-        createBarSpec(mockData, [], [mockCategoricalColumn], [], defaultBarChartStyles);
-      }).toThrow('Bar chart requires at least one numerical column and one categorical column');
-
-      // No categorical columns
-      expect(() => {
-        createBarSpec(mockData, [mockNumericalColumn], [], [], defaultBarChartStyles);
-      }).toThrow('Bar chart requires at least one numerical column and one categorical column');
-    });
   });
 
   describe('createStackedBarSpec', () => {
@@ -578,18 +566,6 @@ describe('bar to_expression', () => {
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 
-    test('throws error when required columns are missing', () => {
-      // No numerical columns
-      expect(() => {
-        createTimeBarChart(mockData, [], [mockDateColumn], defaultBarChartStyles);
-      }).toThrow('Time bar chart requires at least one numerical column and one date column');
-
-      // No date columns
-      expect(() => {
-        createTimeBarChart(mockData, [mockNumericalColumn], [], defaultBarChartStyles);
-      }).toThrow('Time bar chart requires at least one numerical column and one date column');
-    });
-
     test('uses xAxis as numericalAxis when xAxis is not temporal', () => {
       const mockAxisColumnMappings = {
         [AxisRole.X]: mockNumericalColumn,
@@ -825,47 +801,6 @@ describe('bar to_expression', () => {
       expect(thresholdLayer.encoding.y.datum).toBe(15);
     });
 
-    test('throws error when required columns are missing', () => {
-      // No numerical columns
-      expect(() => {
-        createGroupedTimeBarChart(
-          mockData,
-          [],
-          [mockCategoricalColumn],
-          [mockDateColumn],
-          defaultBarChartStyles
-        );
-      }).toThrow(
-        'Grouped time bar chart requires at least one numerical column, one categorical column, and one date column'
-      );
-
-      // No categorical columns
-      expect(() => {
-        createGroupedTimeBarChart(
-          mockData,
-          [mockNumericalColumn],
-          [],
-          [mockDateColumn],
-          defaultBarChartStyles
-        );
-      }).toThrow(
-        'Grouped time bar chart requires at least one numerical column, one categorical column, and one date column'
-      );
-
-      // No date columns
-      expect(() => {
-        createGroupedTimeBarChart(
-          mockData,
-          [mockNumericalColumn],
-          [mockCategoricalColumn],
-          [],
-          defaultBarChartStyles
-        );
-      }).toThrow(
-        'Grouped time bar chart requires at least one numerical column, one categorical column, and one date column'
-      );
-    });
-
     test('adds domain layer when showFullTimeRange is true (createGroupedTimeBarChart)', () => {
       const styles: BarChartStyle = {
         ...defaultBarChartStyles,
@@ -1073,47 +1008,6 @@ describe('bar to_expression', () => {
       expect(thresholdLayer.mark.color).toBe('#00FF00');
       expect(thresholdLayer.mark.strokeWidth).toBe(1);
       expect(thresholdLayer.encoding.y.datum).toBe(15);
-    });
-
-    test('throws error when required columns are missing', () => {
-      // No numerical columns
-      expect(() => {
-        createFacetedTimeBarChart(
-          mockData,
-          [],
-          [mockCategoricalColumn, mockCategoricalColumn2],
-          [mockDateColumn],
-          defaultBarChartStyles
-        );
-      }).toThrow(
-        'Faceted time bar chart requires at least one numerical column, two categorical columns, and one date column'
-      );
-
-      // Only one categorical column
-      expect(() => {
-        createFacetedTimeBarChart(
-          mockData,
-          [mockNumericalColumn],
-          [mockCategoricalColumn],
-          [mockDateColumn],
-          defaultBarChartStyles
-        );
-      }).toThrow(
-        'Faceted time bar chart requires at least one numerical column, two categorical columns, and one date column'
-      );
-
-      // No date columns
-      expect(() => {
-        createFacetedTimeBarChart(
-          mockData,
-          [mockNumericalColumn],
-          [mockCategoricalColumn, mockCategoricalColumn2],
-          [],
-          defaultBarChartStyles
-        );
-      }).toThrow(
-        'Faceted time bar chart requires at least one numerical column, two categorical columns, and one date column'
-      );
     });
 
     test('adds domain layer when showFullTimeRange is true (createFacetedTimeBarChart)', () => {

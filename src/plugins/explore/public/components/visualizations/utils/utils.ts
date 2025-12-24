@@ -89,7 +89,7 @@ export const applyAxisStyling = ({
 
 export function getAxisByRole(
   axes: StandardAxes[],
-  axisRole: AxisRole.X | AxisRole.Y
+  axisRole: AxisRole.X | AxisRole.Y | AxisRole.Y_SECOND
 ): StandardAxes | undefined {
   return axes.find((axis) => axis.axisRole === axisRole);
 }
