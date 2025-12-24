@@ -102,6 +102,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
  - Fix autocomplete for ne query panel ([#9960](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9960))
  - Adjust panels layout on Explore page ([#9972](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9972))
  - Popover not close if double click ([#9993](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9993))
+ - Fix dangerous Functions:dangerouslySetInnerHTML ([#11099](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11099))
 
 ### 🚞 Infrastructure
 
