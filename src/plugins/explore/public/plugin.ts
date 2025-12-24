@@ -422,15 +422,12 @@ export class ExplorePlugin
       });
     }
 
-    // uncomment when metrics is ready for launch
-    /*
     navLinks.push({
       id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
       category: undefined,
       order: 300,
       parentNavLinkId: PLUGIN_ID,
     });
-    */
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks);
     this.registerEmbeddable(core, setupDeps);
