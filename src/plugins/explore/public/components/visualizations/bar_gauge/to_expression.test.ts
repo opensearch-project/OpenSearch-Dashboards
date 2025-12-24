@@ -20,6 +20,10 @@ jest.mock('../theme/default_colors', () => ({
   getColors: jest.fn(() => ({ text: 'black', statusGreen: 'green', backgroundShade: 'grey' })),
 }));
 
+jest.mock('../theme/color_utils', () => ({
+  resolveColor: jest.fn((color) => color),
+}));
+
 jest.mock('../utils/utils', () => ({
   getSchemaByAxis: jest.fn((axis) => axis?.schema || 'nominal'),
 }));

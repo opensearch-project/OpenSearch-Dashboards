@@ -15,8 +15,8 @@ describe('getColorGroups', () => {
 });
 
 describe('resolveColor', () => {
-  it('returns undefined for empty input', () => {
-    expect(resolveColor()).toBeUndefined();
+  it('returns status green for empty input', () => {
+    expect(resolveColor()).toBe('#017D73');
   });
 
   it('returns hex color', () => {

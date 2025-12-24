@@ -16,6 +16,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { getColorGroups, resolveColor } from '../../../visualizations/theme/color_utils';
+import { getColors } from '../../../visualizations/theme/default_colors';
 import { useDebouncedValue } from '../../utils/use_debounced_value';
 import './color_group_panel.scss';
 
@@ -26,6 +27,16 @@ interface ColorGroupPanelProps {
 }
 export const ColorGroupPanel: React.FC<ColorGroupPanelProps> = ({ color, onChange, onClose }) => {
   const colors = getColorGroups();
+
+  const defaultColors = getColors();
+
+  const THRESHOLD_COLORS = [
+    defaultColors.statusGreen,
+    defaultColors.statusYellow,
+    defaultColors.statusOrange,
+    defaultColors.statusRed,
+    defaultColors.statusBlue,
+  ];
 
   const [debouncedColor, setDebouncedColor] = useDebouncedValue<string | undefined>(
     color,
@@ -103,15 +114,20 @@ export const ColorGroupPanel: React.FC<ColorGroupPanelProps> = ({ color, onChang
       }),
       content: (
         <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
-          <EuiColorPicker
-            compressed
-            onChange={(val) => {
-              setDebouncedColor(val);
-              onClose();
-            }}
-            color={resolveColor(debouncedColor)}
-            display="inline"
-          />
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiColorPicker
+                compressed
+                onChange={(val) => {
+                  setDebouncedColor(val);
+                  onClose();
+                }}
+                color={resolveColor(debouncedColor)}
+                display="inline"
+                swatches={THRESHOLD_COLORS}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPanel>
       ),
     },
@@ -127,6 +143,7 @@ export const ColorGroupPanel: React.FC<ColorGroupPanelProps> = ({ color, onChang
           size="s"
           autoFocus="selected"
           tabs={tabs}
+          expand={true}
         />
       ),
     },

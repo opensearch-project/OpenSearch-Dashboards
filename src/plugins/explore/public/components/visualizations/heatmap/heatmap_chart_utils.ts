@@ -8,6 +8,7 @@ import { AggregationType, VisColumn } from '../types';
 import { HeatmapChartStyle } from './heatmap_vis_config';
 
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
+import { resolveColor } from '../theme/color_utils';
 
 // isRegular=== true refers to 2 dimension and 1 metric heatmap.
 export const createLabelLayer = (
@@ -108,7 +109,7 @@ export const enhanceStyle = (
     ];
 
     const colorDomain = thresholdWithBase.map<number>((val) => val.value);
-    const colorRange = thresholdWithBase.map<string>((val) => val.color);
+    const colorRange = thresholdWithBase.map<string>((val) => resolveColor(val.color));
 
     // overwrite color scale type to quantize to map continuous domains to discrete output ranges
     markLayer.encoding.color.scale.type = 'threshold';
