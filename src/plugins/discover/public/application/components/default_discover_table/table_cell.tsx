@@ -14,6 +14,7 @@ import './_table_cell.scss';
 import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import DOMPurify from 'dompurify';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 
 export interface TableCellProps {
@@ -38,7 +39,7 @@ const TableCellUI = ({
         className="osdDocTableCell__dataField"
         data-test-subj="osdDocTableCellDataField"
         // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: sanitizedCellValue }}
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(sanitizedCellValue) }}
       />
       <span className="osdDocTableCell__filter" data-test-subj="osdDocTableCellFilter">
         <EuiToolTip

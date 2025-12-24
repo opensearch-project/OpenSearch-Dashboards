@@ -30,7 +30,8 @@
 
 /* eslint-disable react/no-danger */
 
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useMemo } from 'react';
+import DOMPurify from 'dompurify';
 
 import { RenderingMetadata } from '../types';
 
@@ -631,12 +632,14 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
     )
     .join('\n');
 
+  const sanitizedFontsRules = useMemo(() => DOMPurify.sanitize(fontsDefinitionRules), [
+    fontsDefinitionRules,
+  ]);
+
   return (
     <style
       dangerouslySetInnerHTML={{
-        __html: `
-        ${fontsDefinitionRules}
-      `,
+        __html: sanitizedFontsRules,
       }}
     />
   );
