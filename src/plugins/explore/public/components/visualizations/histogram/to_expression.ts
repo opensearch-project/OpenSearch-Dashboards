@@ -23,11 +23,6 @@ export const createNumericalHistogramChart = (
   styles: HistogramChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length < 2) {
-    throw new Error('Histogram bar chart requires at least two numerical column');
-  }
-
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const layers: any[] = [];
@@ -108,11 +103,6 @@ export const createSingleHistogramChart = (
   styles: HistogramChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length < 1) {
-    throw new Error('Histogram bar chart requires at least one numerical column');
-  }
-
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const layers: any[] = [];

@@ -4,7 +4,7 @@
  */
 
 import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES, PPL_FIELD_TYPES } from '../../../../data/common';
-import { ChartMetadata, VisFieldType } from './types';
+import { AxisRole, ChartMetadata, Positions, StandardAxes, VisFieldType } from './types';
 import { ChartType } from './utils/use_visualization_types';
 
 export const CHART_METADATA: Record<ChartType, ChartMetadata> = {
@@ -67,3 +67,39 @@ export const FIELD_TYPE_MAP: Partial<Record<string, VisFieldType>> = {
 
 export const DEFAULT_OPACITY = 0.87;
 export const AXIS_LABEL_MAX_LENGTH = 100;
+
+const DEFAULT_AXIS_CONFIG: StandardAxes = {
+  position: Positions.BOTTOM,
+  show: true,
+  labels: {
+    show: true,
+    filter: true,
+    rotate: 0,
+    truncate: AXIS_LABEL_MAX_LENGTH,
+  },
+  title: {
+    text: '',
+  },
+  grid: {
+    showLines: true,
+  },
+  axisRole: AxisRole.X,
+};
+
+export const DEFAULT_X_AXIS_CONFIG: StandardAxes = {
+  ...DEFAULT_AXIS_CONFIG,
+  position: Positions.BOTTOM,
+  axisRole: AxisRole.X,
+};
+
+export const DEFAULT_Y_AXIS_CONFIG: StandardAxes = {
+  ...DEFAULT_AXIS_CONFIG,
+  position: Positions.LEFT,
+  axisRole: AxisRole.Y,
+};
+
+export const DEFAULT_Y_2_AXIS_CONFIG: StandardAxes = {
+  ...DEFAULT_AXIS_CONFIG,
+  position: Positions.RIGHT,
+  axisRole: AxisRole.Y_SECOND,
+};

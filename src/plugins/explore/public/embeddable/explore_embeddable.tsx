@@ -409,7 +409,6 @@ export class ExploreEmbeddable
             styles: styleOptions,
             axesMapping: visualization.axesMapping,
           })?.styles;
-
           this.searchProps.styleOptions = styles;
 
           const spec = matchedRule.toSpec(

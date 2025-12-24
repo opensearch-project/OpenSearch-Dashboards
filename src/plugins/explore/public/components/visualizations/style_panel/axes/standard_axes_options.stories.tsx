@@ -71,10 +71,8 @@ const mockAxisColumnMappings: AxisColumnMappings = {
 
 const mockStandardAxes: StandardAxes[] = [
   {
-    id: 'Axis-1',
     position: Positions.LEFT,
     show: true,
-    style: {},
     labels: {
       show: true,
       rotate: 0,
@@ -91,10 +89,8 @@ const mockStandardAxes: StandardAxes[] = [
     axisRole: AxisRole.Y,
   },
   {
-    id: 'Axis-2',
     position: Positions.BOTTOM,
     show: true,
-    style: {},
     labels: {
       show: true,
       rotate: 0,
@@ -142,10 +138,6 @@ AxesWithField.args = {
   standardAxes: [
     {
       ...mockStandardAxes[0],
-      field: {
-        default: mockNumericalColumns[2],
-        options: mockNumericalColumns,
-      },
     },
   ],
   axisColumnMappings: mockAxisColumnMappings,

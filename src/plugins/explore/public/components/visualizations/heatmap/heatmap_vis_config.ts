@@ -20,6 +20,7 @@ import {
   ThresholdOptions,
 } from '../types';
 import { getColors } from '../theme/default_colors';
+import { DEFAULT_X_AXIS_CONFIG, DEFAULT_Y_AXIS_CONFIG } from '../constants';
 
 export interface HeatmapLabels {
   show: boolean;
@@ -104,42 +105,16 @@ export const defaultHeatmapChartStyles: HeatmapChartStyle = {
   // Standard axes
   standardAxes: [
     {
-      id: 'Axis-1',
-      position: Positions.BOTTOM,
-      show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 0,
-        filter: false,
-        truncate: 100,
-      },
-      title: {
-        text: '',
-      },
+      ...DEFAULT_X_AXIS_CONFIG,
       grid: {
         showLines: false,
       },
-      axisRole: AxisRole.X,
     },
     {
-      id: 'Axis-2',
-      position: Positions.LEFT,
-      show: true,
-      style: {},
-      labels: {
-        show: true,
-        rotate: 0,
-        filter: false,
-        truncate: 100,
-      },
-      title: {
-        text: '',
-      },
+      ...DEFAULT_Y_AXIS_CONFIG,
       grid: {
         showLines: false,
       },
-      axisRole: AxisRole.Y,
     },
   ],
   titleOptions: {
