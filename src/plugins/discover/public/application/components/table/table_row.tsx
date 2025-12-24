@@ -125,7 +125,7 @@ export function DocViewTableRow({
            */
           // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(DOMPurify.sanitize(value as string)),
+            __html: DOMPurify.sanitize(value as string),
           }}
         />
       </td>
