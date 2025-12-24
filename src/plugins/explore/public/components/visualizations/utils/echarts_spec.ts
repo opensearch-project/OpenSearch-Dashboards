@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BarSeriesOption, CustomSeriesOption, EChartsOption } from 'echarts';
+import {
+  BarSeriesOption,
+  CustomSeriesOption,
+  EChartsOption,
+  XAXisComponentOption,
+  YAXisComponentOption,
+} from 'echarts';
 import {
   AggregationType,
   AxisColumnMappings,
@@ -244,8 +250,19 @@ export const assembleSpec = <T extends BaseChartStyle>(
   return { ...state, spec };
 };
 
-export const applyAxisStyling = ({ axisStyle }: { axisStyle?: StandardAxes }): any => {
-  const echartsAxisConfig: any = {
+const POSITION_MAP = {
+  [Positions.LEFT]: 'left' as const,
+  [Positions.RIGHT]: 'right' as const,
+  [Positions.BOTTOM]: 'bottom' as const,
+  [Positions.TOP]: 'top' as const,
+};
+
+export const applyAxisStyling = ({
+  axisStyle,
+}: {
+  axisStyle?: StandardAxes;
+}): XAXisComponentOption | YAXisComponentOption => {
+  const echartsAxisConfig: XAXisComponentOption | YAXisComponentOption = {
     name: axisStyle?.title?.text || '',
     nameLocation: 'middle',
     nameGap: 35,
@@ -289,13 +306,7 @@ export const applyAxisStyling = ({ axisStyle }: { axisStyle?: StandardAxes }): a
 
   // Apply position
   if (axisStyle?.position) {
-    const positionMap: Record<Positions, string> = {
-      [Positions.LEFT]: 'left',
-      [Positions.RIGHT]: 'right',
-      [Positions.BOTTOM]: 'bottom',
-      [Positions.TOP]: 'top',
-    };
-    echartsAxisConfig.position = positionMap[axisStyle.position];
+    echartsAxisConfig.position = POSITION_MAP[axisStyle.position];
   }
 
   return echartsAxisConfig;

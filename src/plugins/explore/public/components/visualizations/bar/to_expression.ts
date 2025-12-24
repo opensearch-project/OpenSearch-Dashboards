@@ -171,6 +171,7 @@ export const createTimeBarChart = (
     throw new Error('Time bar chart requires at least one numerical column and one date column');
   }
 
+  // TODO: support styles.showFullTimeRange
   // if chart render is 'echarts', here it return the echarts config options
   if (getChartRender() === 'echarts') {
     const result = pipe(

@@ -422,6 +422,10 @@ export function applyTimeRangeToEncoding(
 }
 
 export const getChartRender = () => {
-  const chartRender = localStorage.getItem('__DEVELOPMENT__.discover.vis.render');
-  return chartRender || 'vega';
+  try {
+    const chartRender = localStorage.getItem('__DEVELOPMENT__.discover.vis.render');
+    return chartRender || 'vega';
+  } catch (e) {
+    return 'vega';
+  }
 };

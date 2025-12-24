@@ -34,6 +34,10 @@ export const EchartsRender = ({ spec }: Props) => {
 
     return () => {
       containerResizeObserver.disconnect();
+      if (instanceRef.current) {
+        instanceRef.current.dispose();
+        instanceRef.current = null;
+      }
     };
   }, [containerResizeObserver]);
 
