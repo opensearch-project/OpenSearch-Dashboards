@@ -36,7 +36,7 @@ import {
   Logger,
 } from '../../../core/server';
 
-import { dashboardSavedObjectType } from './saved_objects';
+import { dashboardSavedObjectType, dashboardAnnotationsSavedObjectType } from './saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
 
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
@@ -52,6 +52,7 @@ export class DashboardPlugin implements Plugin<DashboardPluginSetup, DashboardPl
     this.logger.debug('dashboard: Setup');
 
     core.savedObjects.registerType(dashboardSavedObjectType);
+    core.savedObjects.registerType(dashboardAnnotationsSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
     core.capabilities.registerSwitcher(async (request, capabilites) => {
       return await core.security.readonlyService().hideForReadonly(request, capabilites, {

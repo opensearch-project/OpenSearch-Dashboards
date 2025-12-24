@@ -34,6 +34,8 @@ import { DashboardConstants, createDashboardEditUrl } from '../../dashboard_cons
 import { unhashUrl } from '../../../../opensearch_dashboards_utils/public';
 import { Dashboard } from '../../dashboard';
 import { showAddPanelPopover } from '../components/dashboard_top_nav/top_nav/show_add_panel_popover';
+import { showAnnotationsModal } from '../components/dashboard_top_nav/top_nav/show_annotations_modal';
+import { DashboardAnnotationsService } from '../services/dashboard_annotations_service';
 
 interface UrlParamsSelectedMap {
   [UrlParams.SHOW_TOP_MENU]: boolean;
@@ -232,6 +234,42 @@ export const getNavActions = (
         stateContainer.transitions.setOption('hidePanelTitles', isChecked);
       },
     });
+  };
+
+  navActions[TopNavIds.ANNOTATIONS] = () => {
+    const annotationsService = DashboardAnnotationsService.getInstance(
+      services.savedObjects.client
+    );
+    const dashboardId = savedDashboard.id;
+
+    if (!dashboardId) {
+      notifications.toasts.addDanger({
+        title: 'Cannot open annotations',
+        text: 'Dashboard must be saved before adding annotations.',
+      });
+      return;
+    }
+
+    showAnnotationsModal(
+      overlays,
+      dashboardId,
+      annotationsService,
+      appState.panels,
+      savedObjects,
+      services.http,
+      services.data,
+      (annotations) => {
+        notifications.toasts.addSuccess({
+          title: i18n.translate('dashboard.annotations.saved', {
+            defaultMessage: 'Annotations updated: {count} items',
+            values: { count: annotations.length },
+          }),
+          text: i18n.translate('dashboard.annotations.appliedAutomatically', {
+            defaultMessage: 'Annotations have been applied to visualizations automatically.',
+          }),
+        });
+      }
+    );
   };
 
   if (share) {

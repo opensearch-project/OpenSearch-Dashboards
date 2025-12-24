@@ -8,6 +8,7 @@ import { merge, Subscription } from 'rxjs';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@osd/i18n';
+import { DashboardAnnotation } from '../../../dashboard/public';
 import { RequestAdapter, Adapters } from '../../../inspector/public';
 import {
   opensearchFilters,
@@ -52,6 +53,8 @@ import {
 import { normalizeResultRows } from '../components/visualizations/utils/normalize_result_rows';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 import { prepareQueryForLanguage } from '../application/utils/languages';
+import { ExploreAnnotationsService } from '../services/annotations_service';
+import { DashboardAnnotationsService } from '../../../dashboard/public';
 
 export interface SearchProps {
   description?: string;
@@ -114,12 +117,17 @@ export class ExploreEmbeddable
   private panelTitle: string = '';
   private filterManager: FilterManager;
   private services: ExploreServices;
+  private annotationsService: ExploreAnnotationsService;
+  private dashboardAnnotationsService?: DashboardAnnotationsService;
+  private annotationSubscription?: Subscription;
   private prevState = {
     filters: undefined as Filter[] | undefined,
     query: undefined as Query | undefined,
     timeRange: undefined as TimeRange | undefined,
   };
   private node?: HTMLElement;
+  private pplAnnotationsCache: Map<string, DashboardAnnotation> = new Map();
+  private isInitialLoad = true;
 
   constructor(
     {
@@ -151,10 +159,15 @@ export class ExploreEmbeddable
     this.services = services;
     this.filterManager = filterManager;
     this.savedExplore = savedExplore;
+    this.annotationsService = new ExploreAnnotationsService(services.savedObjects.client);
+    this.dashboardAnnotationsService = DashboardAnnotationsService.getInstance(
+      services.savedObjects.client
+    );
     this.inspectorAdaptors = {
       requests: new RequestAdapter(),
     };
     this.initializeSearchProps();
+    this.setupAnnotationSubscription();
 
     this.subscription = merge(this.getOutput$(), this.getInput$()).subscribe(() => {
       this.panelTitle = this.output.title || '';
@@ -319,8 +332,38 @@ export class ExploreEmbeddable
 
   public reload() {
     if (this.searchProps) {
+      // Clear PPL annotations cache and set initial load flag for reload
+      this.pplAnnotationsCache.clear();
+      this.isInitialLoad = true;
       this.updateHandler(this.searchProps, true);
     }
+  }
+
+  private setupAnnotationSubscription() {
+    if (!this.dashboardAnnotationsService || !this.parent) {
+      return;
+    }
+
+    const dashboardId = this.parent.id;
+    if (!dashboardId) {
+      return;
+    }
+
+    // Subscribe to annotation changes for this dashboard
+    this.annotationSubscription = this.dashboardAnnotationsService
+      .subscribeToAnnotationChanges(dashboardId)
+      .subscribe((annotations) => {
+        // Clear PPL annotations cache when annotations change
+        this.pplAnnotationsCache.clear();
+
+        // Set initial load flag to trigger PPL query re-execution
+        this.isInitialLoad = true;
+
+        // Trigger a re-render with updated annotations
+        if (this.searchProps) {
+          this.updateHandler(this.searchProps, true);
+        }
+      });
   }
 
   private fetch = async () => {
@@ -410,6 +453,20 @@ export class ExploreEmbeddable
             axesMapping: visualization.axesMapping,
           })?.styles;
           this.searchProps.styleOptions = styles;
+          const timeRange = searchContext.timeRange
+            ? {
+                from: searchContext.timeRange.from,
+                to: searchContext.timeRange.to,
+              }
+            : undefined;
+
+          // Load annotations from saved object if we're in a dashboard
+          let annotations: DashboardAnnotation[] = [];
+          if (this.parent && this.parent.id) {
+            const allAnnotations = await this.annotationsService.getAnnotations(this.parent.id);
+            const filteredAnnotations = this.filterAnnotationsForCurrentPanel(allAnnotations);
+            annotations = await this.processAnnotations(filteredAnnotations);
+          }
 
           const spec = matchedRule.toSpec(
             visualizationData.transformedData,
@@ -418,7 +475,9 @@ export class ExploreEmbeddable
             dateColumns,
             styles || styleOptions,
             selectedChartType,
-            axesMapping
+            axesMapping,
+            timeRange,
+            annotations
           );
           const exp = toExpression(searchContext, spec);
           this.searchProps.expression = exp;
@@ -431,12 +490,216 @@ export class ExploreEmbeddable
     // NOTE: PPL response is not the same as OpenSearch response, resp.hits.total here is 0.
     this.searchProps.hits = resp.hits.hits.length;
     this.searchProps.isLoading = false;
+
+    this.isInitialLoad = false;
   };
 
   private renderComponent(node: HTMLElement, searchProps: SearchProps) {
     if (!this.searchProps) return;
     const MemorizedExploreEmbeddableComponent = React.memo(ExploreEmbeddableComponent);
     ReactDOM.render(<MemorizedExploreEmbeddableComponent searchProps={searchProps} />, node);
+  }
+
+  private filterAnnotationsForCurrentPanel(
+    annotations: DashboardAnnotation[]
+  ): DashboardAnnotation[] {
+    const currentPanelId = this.input.id;
+
+    return annotations.filter((annotation) => {
+      if (!annotation.enabled) {
+        return false;
+      }
+
+      switch (annotation.showIn) {
+        case 'all':
+          return true;
+        case 'selected':
+          return annotation.selectedVisualizations.includes(currentPanelId);
+        case 'except':
+          return !annotation.selectedVisualizations.includes(currentPanelId);
+        default:
+          return false;
+      }
+    });
+  }
+
+  private async processAnnotations(
+    annotations: DashboardAnnotation[]
+  ): Promise<DashboardAnnotation[]> {
+    const processedAnnotations: DashboardAnnotation[] = [];
+
+    for (const annotation of annotations) {
+      if (annotation.query.queryType === 'ppl-query') {
+        // For PPL query annotations, only execute on initial load or reload
+        if (this.isInitialLoad) {
+          // Execute PPL query and cache the result
+          const pplAnnotation = await this.processPPLAnnotation(annotation);
+          if (pplAnnotation) {
+            this.pplAnnotationsCache.set(annotation.id, pplAnnotation);
+            processedAnnotations.push(pplAnnotation);
+          }
+        } else {
+          // Use cached result if available
+          const cachedAnnotation = this.pplAnnotationsCache.get(annotation.id);
+          if (cachedAnnotation) {
+            processedAnnotations.push(cachedAnnotation);
+          } else {
+            // If no cache available, use the original annotation without PPL results
+            processedAnnotations.push(annotation);
+          }
+        }
+      } else {
+        // Keep time-regions annotations as they are
+        processedAnnotations.push(annotation);
+      }
+    }
+
+    return processedAnnotations;
+  }
+
+  private async processPPLAnnotation(
+    annotation: DashboardAnnotation
+  ): Promise<DashboardAnnotation | null> {
+    if (!annotation.query.pplQuery || !annotation.query.pplDataset) {
+      return annotation;
+    }
+
+    try {
+      await this.services.data.dataViews.ensureDefaultDataView();
+      const dataView = await this.services.data.dataViews.get(annotation.query.pplDataset);
+      if (!dataView) {
+        return annotation;
+      }
+
+      const dataset = await this.services.data.dataViews.convertToDataset(dataView);
+
+      const queryObject = {
+        query: annotation.query.pplQuery,
+        language: 'PPL' as const,
+        dataset,
+      };
+
+      const getQuery = (query: typeof queryObject) => {
+        const queryString = typeof query.query === 'string' ? query.query : '';
+        const lowerCaseQuery = queryString.toLowerCase();
+        const hasSource = /^[^|]*\bsource\s*=/.test(lowerCaseQuery);
+        const hasDescribe = /^\s*describe\s+/.test(lowerCaseQuery);
+        const hasShow = /^\s*show\s+/.test(lowerCaseQuery);
+
+        let datasetTitle: string;
+        if (query.dataset && ['INDEXES', 'INDEX_PATTERN'].includes(query.dataset.type)) {
+          if (hasSource) {
+            // Replace source=anything with source=`anything`
+            const updatedQuery = queryString.replace(
+              /(\bsource\s*=\s*)([^`\s][^\s|]*)/gi,
+              '$1`$2`'
+            );
+            return { ...query, query: updatedQuery };
+          }
+          datasetTitle = `\`${query.dataset.title}\``;
+        } else {
+          datasetTitle = query.dataset?.title || '';
+        }
+
+        if (hasSource || hasDescribe || hasShow) {
+          return { ...query, query: queryString };
+        }
+
+        let queryStringWithSource: string;
+        if (queryString.trim() === '') {
+          queryStringWithSource = `source = ${datasetTitle}`;
+        } else {
+          queryStringWithSource = `source = ${datasetTitle} ${queryString}`;
+        }
+
+        return {
+          ...query,
+          query: queryStringWithSource,
+        };
+      };
+
+      const queryWithSource = getQuery(queryObject);
+      const searchSource = await this.services.data.search.searchSource.create();
+      const filters = this.services.data.query.filterManager.getFilters();
+      const timeRangeSearchSource = await this.services.data.search.searchSource.create();
+      const timefilter = this.services.data.query.timefilter.timefilter;
+      const timeFilter = timefilter.createFilter(dataView);
+
+      timeRangeSearchSource.setField('filter', () => {
+        return timeFilter;
+      });
+
+      searchSource.setParent(timeRangeSearchSource);
+
+      const queryStringWithExecutedQuery = {
+        ...this.services.data.query.queryString.getQuery(),
+        query: queryWithSource.query,
+        language: 'PPL',
+      };
+
+      searchSource.setFields({
+        index: dataView,
+        size: 10000,
+        query: queryStringWithExecutedQuery || null,
+        highlightAll: true,
+        version: true,
+        filter: filters,
+      });
+
+      const languageConfig = this.services.data.query.queryString
+        .getLanguageService()
+        .getLanguage('PPL');
+
+      const fetchOptions = {
+        withLongNumeralsSupport: false,
+        ...(languageConfig &&
+          languageConfig.fields?.formatter && {
+            formatter: languageConfig.fields.formatter,
+          }),
+      };
+
+      const response = await searchSource.fetch(fetchOptions);
+      let timestamps: any[] = [];
+
+      if (response && response.hits && response.hits.hits && response.hits.hits.length > 0) {
+        const firstHit = response.hits.hits[0];
+        let timeField: string | null = null;
+
+        if (firstHit._source) {
+          for (const [fieldName, fieldValue] of Object.entries(firstHit._source)) {
+            // Check if field value looks like a timestamp
+            if (
+              typeof fieldValue === 'string' &&
+              fieldValue.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
+            ) {
+              timeField = fieldName;
+              break;
+            }
+          }
+        }
+
+        if (timeField) {
+          timestamps = response.hits.hits
+            .map((hit: any) => hit._source?.[timeField])
+            .filter(Boolean);
+        }
+      }
+
+      if (timestamps.length > 0) {
+        return {
+          ...annotation,
+          query: {
+            ...annotation.query,
+            pplResultTimestamps: timestamps,
+            pplResultCount: timestamps.length,
+          },
+        };
+      }
+
+      return annotation;
+    } catch (error) {
+      return annotation;
+    }
   }
 
   public destroy() {
@@ -447,6 +710,10 @@ export class ExploreEmbeddable
 
     if (this.autoRefreshFetchSubscription) {
       this.autoRefreshFetchSubscription.unsubscribe();
+    }
+
+    if (this.annotationSubscription) {
+      this.annotationSubscription.unsubscribe();
     }
 
     if (this.abortController) {

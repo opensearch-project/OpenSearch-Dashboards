@@ -29,3 +29,4 @@
  */
 
 export { dashboardSavedObjectType } from './dashboard';
+export { dashboardAnnotationsSavedObjectType } from './dashboard_annotations';

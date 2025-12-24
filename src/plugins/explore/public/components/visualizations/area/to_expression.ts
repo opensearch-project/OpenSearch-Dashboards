@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import dateMath from '@elastic/datemath';
+import { DashboardAnnotation } from '../../../../../dashboard/public';
 import { AreaChartStyle } from './area_vis_config';
 import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
 import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
@@ -11,6 +13,257 @@ import { applyTimeRangeToEncoding, getSwappedAxisRole, getTooltipFormat } from '
 import { DEFAULT_OPACITY } from '../constants';
 import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
+
+/**
+ * Create annotation layers for Vega-Lite area charts
+ * @param annotations Array of dashboard annotations
+ * @param timeRange Time range for filtering annotations
+ * @param dateField The date field name used in the chart
+ * @returns Array of Vega-Lite layer objects for annotations
+ */
+const createAnnotationLayers = (
+  annotations: DashboardAnnotation[] = [],
+  timeRange?: { from: string; to: string },
+  dateField?: string
+): any[] => {
+  if (!annotations.length || !timeRange || !dateField) {
+    return [];
+  }
+
+  // Parse time range - handle relative time strings like 'now-2d', 'now'
+  const startMoment = dateMath.parse(timeRange.from);
+  const endMoment = dateMath.parse(timeRange.to, { roundUp: true });
+
+  if (!startMoment || !endMoment || !startMoment.isValid() || !endMoment.isValid()) {
+    return [];
+  }
+
+  const startTime = startMoment.valueOf();
+  const endTime = endMoment.valueOf();
+  const annotationLayers: any[] = [];
+
+  annotations.forEach((annotation) => {
+    if (!annotation.enabled || !annotation.showAnnotations) {
+      return;
+    }
+
+    // Handle PPL query annotations
+    if (annotation.query.queryType === 'ppl-query' && annotation.query.pplResultTimestamps) {
+      annotation.query.pplResultTimestamps.forEach((timestamp: any) => {
+        // Convert timestamp to milliseconds if needed
+        let timestampMs: number;
+        if (typeof timestamp === 'string') {
+          timestampMs = new Date(timestamp).getTime();
+        } else if (typeof timestamp === 'number') {
+          // Handle both seconds and milliseconds timestamps
+          timestampMs = timestamp > 10000000000 ? timestamp : timestamp * 1000;
+        } else {
+          return;
+        }
+
+        // Check if timestamp is within the visible time range
+        if (timestampMs >= startTime && timestampMs <= endTime) {
+          annotationLayers.push({
+            data: { values: [{}] },
+            mark: {
+              type: 'rule',
+              color: annotation.defaultColor || '#FF6B6B',
+              strokeWidth: 2,
+              strokeDash: [5, 5],
+              opacity: 0.8,
+              tooltip: true,
+            },
+            encoding: {
+              x: {
+                datum: timestampMs,
+                type: 'temporal',
+                scale: { type: 'time' },
+              },
+              tooltip: {
+                value: `${annotation.name}: ${new Date(timestampMs).toLocaleString()}`,
+              },
+            },
+          });
+        }
+      });
+      return;
+    }
+
+    if (
+      annotation.query.queryType !== 'time-regions' ||
+      !annotation.query.fromTime ||
+      !annotation.query.toTime
+    ) {
+      return;
+    }
+
+    const [fromHour, fromMinute] = annotation.query.fromTime.split(':').map(Number);
+    const [toHour, toMinute] = annotation.query.toTime.split(':').map(Number);
+
+    // Generate annotation time ranges
+    const currentDate = new Date(startTime);
+    while (currentDate.getTime() <= endTime) {
+      const dayOfWeek = currentDate.getDay().toString();
+
+      // Check if this day should have annotations
+      let shouldAnnotate = false;
+      if (annotation.query.fromType === 'everyday') {
+        shouldAnnotate = true;
+      } else if (
+        annotation.query.fromType === 'weekdays' &&
+        annotation.query.fromWeekdays?.includes(dayOfWeek)
+      ) {
+        shouldAnnotate = true;
+      }
+
+      if (shouldAnnotate) {
+        const annotationStart = new Date(currentDate);
+        annotationStart.setHours(fromHour, fromMinute, 0, 0);
+
+        let annotationEnd = new Date(currentDate);
+        annotationEnd.setHours(toHour, toMinute, 0, 0);
+
+        // Handle cross-day annotations
+        if (
+          annotation.query.toType === 'weekdays' &&
+          annotation.query.toWeekdays &&
+          annotation.query.toWeekdays.length > 0
+        ) {
+          const currentToDay = currentDate.getDay().toString();
+          if (!annotation.query.toWeekdays.includes(currentToDay)) {
+            // Find next valid day
+            const searchDate = new Date(currentDate);
+            let found = false;
+            for (let i = 1; i <= 7 && !found; i++) {
+              searchDate.setDate(searchDate.getDate() + 1);
+              if (
+                annotation.query.toWeekdays?.includes(searchDate.getDay().toString()) &&
+                searchDate.getTime() <= endTime
+              ) {
+                annotationEnd = new Date(searchDate);
+                annotationEnd.setHours(toHour, toMinute, 0, 0);
+                found = true;
+              }
+            }
+            if (!found) {
+              currentDate.setDate(currentDate.getDate() + 1);
+              continue;
+            }
+          }
+        }
+
+        // If end time is before start time, assume next day
+        if (annotationEnd.getTime() <= annotationStart.getTime()) {
+          annotationEnd.setDate(annotationEnd.getDate() + 1);
+        }
+
+        // Check if annotation overlaps with visible range
+        if (annotationStart.getTime() < endTime && annotationEnd.getTime() > startTime) {
+          // Create rectangle annotation for time ranges
+          if (annotationEnd.getTime() !== annotationStart.getTime()) {
+            annotationLayers.push({
+              data: { values: [{}] }, // Provide data source for the annotation
+              mark: {
+                type: 'rect',
+                opacity: 0.2,
+                fill: annotation.defaultColor || '#FF6B6B',
+                stroke: annotation.defaultColor || '#FF6B6B',
+                strokeWidth: 1,
+                strokeOpacity: 0.6,
+                tooltip: true,
+              },
+              encoding: {
+                x: {
+                  datum: Math.max(annotationStart.getTime(), startTime), // Start from visible range
+                  type: 'temporal',
+                  scale: { type: 'time' },
+                },
+                x2: {
+                  datum: Math.min(annotationEnd.getTime(), endTime),
+                  type: 'temporal',
+                },
+                y: { value: 0 },
+                y2: { expr: 'height' },
+                tooltip: {
+                  value: `${annotation.name}: ${annotationStart.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })} - ${annotationEnd.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}`,
+                },
+              },
+            });
+          }
+
+          // Create line annotations for start and end points
+          // Only show start line if start time is within visible range
+          if (annotationStart.getTime() >= startTime && annotationStart.getTime() <= endTime) {
+            annotationLayers.push({
+              data: { values: [{}] },
+              mark: {
+                type: 'rule',
+                color: annotation.defaultColor || '#FF6B6B',
+                strokeWidth: 2,
+                strokeDash: [5, 5],
+                opacity: 0.8,
+                tooltip: true,
+              },
+              encoding: {
+                x: {
+                  datum: annotationStart.getTime(),
+                  type: 'temporal',
+                  scale: { type: 'time' },
+                },
+                tooltip: {
+                  value: `${annotation.name} Start: ${annotationStart.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}`,
+                },
+              },
+            });
+          }
+
+          if (
+            annotationEnd.getTime() !== annotationStart.getTime() &&
+            annotationEnd.getTime() <= endTime
+          ) {
+            annotationLayers.push({
+              data: { values: [{}] },
+              mark: {
+                type: 'rule',
+                color: annotation.defaultColor || '#FF6B6B',
+                strokeWidth: 2,
+                strokeDash: [5, 5],
+                opacity: 0.8,
+                tooltip: true,
+              },
+              encoding: {
+                x: {
+                  datum: Math.min(annotationEnd.getTime(), endTime),
+                  type: 'temporal',
+                  scale: { type: 'time' },
+                },
+                tooltip: {
+                  value: `${annotation.name} End: ${annotationEnd.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}`,
+                },
+              },
+            });
+          }
+        }
+      }
+
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+  });
+
+  return annotationLayers;
+};
 
 /**
  * Create a simple area chart with one metric and one date
@@ -26,7 +279,8 @@ export const createSimpleAreaChart = (
   dateColumns: VisColumn[],
   styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings,
-  timeRange?: { from: string; to: string }
+  timeRange?: { from: string; to: string },
+  annotations?: DashboardAnnotation[]
 ): any => {
   // Using getSwappedAxisRole here but area chart doesn't have switchAxes config for now
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
@@ -125,6 +379,10 @@ export const createSimpleAreaChart = (
     applyTimeRangeToEncoding(mainLayer.encoding, axisColumnMappings, timeRange);
   }
 
+  // Add annotation layers
+  const annotationLayers = createAnnotationLayers(annotations, timeRange, dateField);
+  layers.push(...annotationLayers);
+
   return {
     $schema: VEGASCHEMA,
     params: [...(dateField ? [createTimeRangeUpdater()] : [])],
@@ -159,7 +417,8 @@ export const createMultiAreaChart = (
   dateColumns: VisColumn[],
   styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings,
-  timeRange?: { from: string; to: string }
+  timeRange?: { from: string; to: string },
+  annotations?: DashboardAnnotation[]
 ): any => {
   const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
 
@@ -280,6 +539,10 @@ export const createMultiAreaChart = (
     applyTimeRangeToEncoding(mainLayer.encoding, axisColumnMappings, timeRange);
   }
 
+  // Add annotation layers
+  const annotationLayers = createAnnotationLayers(annotations, timeRange, dateField);
+  layers.push(...annotationLayers);
+
   return {
     $schema: VEGASCHEMA,
     params: [...(dateField ? [createTimeRangeUpdater()] : [])],
@@ -307,7 +570,8 @@ export const createFacetedMultiAreaChart = (
   dateColumns: VisColumn[],
   styles: AreaChartStyle,
   axisColumnMappings?: AxisColumnMappings,
-  timeRange?: { from: string; to: string }
+  timeRange?: { from: string; to: string },
+  annotations?: DashboardAnnotation[]
 ): any => {
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
   const facetMapping = axisColumnMappings?.[AxisRole.FACET];
@@ -461,6 +725,8 @@ export const createFacetedMultiAreaChart = (
               },
             ]
           : []),
+        // Add annotation layers to each facet
+        ...createAnnotationLayers(annotations, timeRange, dateField),
       ],
     },
   };
