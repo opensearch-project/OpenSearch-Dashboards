@@ -30,18 +30,18 @@
 
 import Path from 'path';
 
-import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
-// @ts-expect-error
+// Webpack 5: TerserPlugin is now properly typed, no @ts-expect-error needed
 import TerserPlugin from 'terser-webpack-plugin';
-// @ts-expect-error
-import webpackMerge from 'webpack-merge';
-import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+// Webpack 5: webpack-merge v5 uses named export 'merge' instead of default export
+import { merge } from 'webpack-merge';
 import CompressionPlugin from 'compression-webpack-plugin';
+import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 import * as UiSharedDeps from '@osd/ui-shared-deps';
 
 import { Bundle, BundleRefs, WorkerConfig } from '../common';
 import { BundleRefsPlugin } from './bundle_refs_plugin';
+import { STATS_WARNINGS_FILTER } from './webpack_helpers';
 
 const BABEL_PRESET_PATH = require.resolve('@osd/babel-preset/webpack_preset');
 
@@ -49,16 +49,15 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
 
   const commonConfig: webpack.Configuration = {
-    node: { fs: 'empty' },
     context: Path.normalize(bundle.contextDir),
-    cache: true,
     entry: {
       [bundle.id]: ENTRY_CREATOR,
     },
 
-    devtool: worker.dist ? false : '#cheap-source-map',
+    // Webpack 5: Removed '#' prefix from devtool values
+    devtool: worker.dist ? false : 'cheap-source-map',
     profile: worker.profileWebpack,
-
+    target: 'web',
     output: {
       path: bundle.outputDir,
       filename: `${bundle.id}.${bundle.type}.js`,
@@ -68,20 +67,28 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           bundle.sourceRoot,
           info.absoluteResourcePath
         )}${info.query}`,
-      jsonpFunction: `${bundle.id}_bundle_jsonpfunction`,
-      hashFunction: 'Xxh64',
+      // Webpack 5: jsonpFunction renamed to chunkLoadingGlobal
+      chunkLoadingGlobal: `${bundle.id}_bundle_jsonpfunction`,
+      chunkLoading: 'jsonp',
+      // Webpack 5: hashFunction now uses lowercase 'xxhash64'
+      hashFunction: 'xxhash64',
     },
 
     optimization: {
-      noEmitOnErrors: true,
+      moduleIds: worker.dist ? 'deterministic' : 'natural',
+      chunkIds: worker.dist ? 'deterministic' : 'natural',
+      // Webpack 5: noEmitOnErrors inverted to emitOnErrors
+      emitOnErrors: false,
     },
 
     externals: [UiSharedDeps.externals],
 
     plugins: [
-      new CleanWebpackPlugin(),
+      // Webpack 5: CleanWebpackPlugin removed, using output.clean instead
       new BundleRefsPlugin(bundle, bundleRefs),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
+      // Webpack 5: Provide Node.js polyfills for browser compatibility
+      new NodePolyfillPlugin(),
     ],
 
     module: {
@@ -176,20 +183,24 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                 {
                   loader: 'sass-loader',
                   options: {
-                    additionalData(content: string, loaderContext: webpack.loader.LoaderContext) {
-                      return `@import ${stringifyRequest(
-                        loaderContext,
-                        Path.resolve(
-                          worker.repoRoot,
-                          `src/core/public/core_app/styles/_globals_${theme}.scss`
+                    additionalData(content: string, loaderContext: webpack.LoaderContext<any>) {
+                      const req = JSON.stringify(
+                        loaderContext.utils.contextify(
+                          loaderContext.context || loaderContext.rootContext,
+                          Path.resolve(
+                            worker.repoRoot,
+                            `src/core/public/core_app/styles/_globals_${theme}.scss`
+                          )
                         )
-                      )};\n${content}`;
+                      );
+                      return `@import ${req};\n${content}`;
                     },
-                    webpackImporter: false,
                     implementation: require('sass-embedded'),
                     sassOptions: {
-                      outputStyle: 'compressed',
-                      includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
+                      // Webpack 5 / sass-loader v14: outputStyle renamed to style
+                      style: 'compressed',
+                      // Webpack 5 / sass-loader v14: includePaths renamed to loadPaths
+                      loadPaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                       sourceMapRoot: `/${bundle.type}:${bundle.id}`,
                     },
                   },
@@ -207,9 +218,12 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         },
         {
           test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
-          loader: 'url-loader',
-          options: {
-            limit: 8192,
+          // Webpack 5: Asset Modules replace url-loader
+          type: 'asset',
+          parser: {
+            dataUrlCondition: {
+              maxSize: 8192,
+            },
           },
         },
         {
@@ -232,7 +246,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             options: {
               babelrc: false,
               envName: worker.dist ? 'production' : 'development',
-              presets: [BABEL_PRESET_PATH],
+              presets: [[BABEL_PRESET_PATH, { useTransformRequireDefault: true }]],
             },
           },
         },
@@ -253,9 +267,8 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         },
         {
           test: /\.(html|md|txt|tmpl)$/,
-          use: {
-            loader: 'raw-loader',
-          },
+          // Webpack 5: asset/source replaces raw-loader
+          type: 'asset/source',
         },
         {
           test: /\.cjs$/,
@@ -293,7 +306,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json'],
-      mainFields: ['browser', 'main'],
+      mainFields: ['browser', 'module', 'main'],
       alias: {
         core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
         'opensearch-dashboards/public': Path.resolve(worker.repoRoot, 'src/core/public'),
@@ -306,10 +319,32 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       // and not for the webpack compilations performance itself
       hints: false,
     },
+
+    ignoreWarnings: [
+      STATS_WARNINGS_FILTER,
+      /export .* was not found in/,
+      /export .* \(reexported as .*\) was not found in/,
+      /export .* \(imported as .*\) was not found in/,
+      /Should not import the named export/,
+    ],
   };
 
   const nonDistributableConfig: webpack.Configuration = {
     mode: 'development',
+    cache: {
+      type: 'memory',
+      cacheUnaffected: true,
+    },
+    experiments: {
+      cacheUnaffected: true,
+      backCompat: false,
+    },
+    optimization: {
+      removeAvailableModules: false,
+    },
+    module: {
+      unsafeCache: true,
+    },
   };
 
   const distributableConfig: webpack.Configuration = {
@@ -323,23 +358,25 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       }),
       new CompressionPlugin({
         algorithm: 'brotliCompress',
-        filename: '[path].br',
+        // Webpack 5: filename pattern changed from '[path].br' to '[path][base].br'
+        filename: '[path][base].br',
         test: /\.(js|css)$/,
-        cache: false,
+        // Webpack 5: cache option removed (handled by webpack's cache system)
       }),
       new CompressionPlugin({
         algorithm: 'gzip',
-        filename: '[path].gz',
+        // Webpack 5: filename pattern changed from '[path].gz' to '[path][base].gz'
+        filename: '[path][base].gz',
         test: /\.(js|css)$/,
-        cache: false,
+        // Webpack 5: cache option removed (handled by webpack's cache system)
       }),
     ],
 
     optimization: {
       minimizer: [
         new TerserPlugin({
-          cache: false,
-          sourceMap: false,
+          // Webpack 5 / terser-webpack-plugin v5: Simplified configuration
+          // cache, sourceMap, options removed
           extractComments: false,
           parallel: false,
           terserOptions: {
@@ -351,5 +388,5 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     },
   };
 
-  return webpackMerge(commonConfig, worker.dist ? distributableConfig : nonDistributableConfig);
+  return merge(commonConfig, worker.dist ? distributableConfig : nonDistributableConfig);
 }

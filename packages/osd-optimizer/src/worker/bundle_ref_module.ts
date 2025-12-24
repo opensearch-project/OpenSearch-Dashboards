@@ -21,13 +21,15 @@
 
 // @ts-ignore not typed by @types/webpack
 import Module from 'webpack/lib/Module';
+import webpack from 'webpack';
 import { BundleRef } from '../common';
+
+const { RawSource } = webpack.sources;
 
 export class BundleRefModule extends Module {
   public built = false;
   public buildMeta?: any;
   public buildInfo?: any;
-  public exportsArgument = '__webpack_exports__';
 
   constructor(public readonly ref: BundleRef) {
     super('osd/bundleRef', null);
@@ -37,8 +39,8 @@ export class BundleRefModule extends Module {
     return this.ref.exportId;
   }
 
-  chunkCondition(chunk: any) {
-    return chunk.hasEntryModule();
+  chunkCondition(chunk: any, { chunkGraph }: any) {
+    return chunkGraph.getNumberOfEntryModules(chunk) > 0;
   }
 
   identifier() {
@@ -49,15 +51,47 @@ export class BundleRefModule extends Module {
     return this.identifier();
   }
 
-  needRebuild() {
-    return false;
+  needBuild(context: any, callback: any) {
+    return callback(null, !this.buildMeta);
   }
 
   build(_: any, __: any, ___: any, ____: any, callback: () => void) {
-    this.built = true;
-    this.buildMeta = {};
-    this.buildInfo = {};
+    this.buildMeta = {
+      async: false,
+      exportsType: undefined,
+    };
+    this.buildInfo = {
+      strict: false,
+      topLevelDeclarations: new Set(),
+      module: __.outputOptions.module,
+      exportsArgument: '__webpack_exports__',
+    };
     callback();
+  }
+
+  getConcatenationBailoutReason({ moduleGraph }: any) {
+    return `@osd/bundleRef externals can't be concatenated`;
+  }
+
+  codeGeneration(_: any) {
+    const sources = new Map();
+    sources.set(
+      'javascript',
+      new RawSource(`
+      __webpack_require__.r(__webpack_exports__);
+      var ns = __osdBundles__.get('${this.ref.exportId}');
+      Object.defineProperties(__webpack_exports__, Object.getOwnPropertyDescriptors(ns))
+    `)
+    );
+
+    const data = new Map();
+    data.set('url', this.ref.exportId);
+
+    return {
+      sources,
+      runtimeRequirements: new Set(['module', '__webpack_exports__', '__webpack_require__']),
+      data,
+    };
   }
 
   source() {
@@ -72,8 +106,8 @@ export class BundleRefModule extends Module {
     return 42;
   }
 
-  updateHash(hash: any) {
+  updateHash(hash: any, context: any) {
     hash.update(this.identifier());
-    super.updateHash(hash);
+    super.updateHash(hash, context);
   }
 }
