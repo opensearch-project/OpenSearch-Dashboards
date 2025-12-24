@@ -1,2 +1,0 @@
-feat:
-- [chat] Add session storage persistence for chat history and thread continuity ([#10916](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10916))

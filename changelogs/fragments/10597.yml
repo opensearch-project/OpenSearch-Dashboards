@@ -1,2 +1,0 @@
-fix:
-- Clear editor after dataset change in explore ([#10597](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10597))

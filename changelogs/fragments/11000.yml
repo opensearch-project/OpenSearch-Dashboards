@@ -1,2 +1,0 @@
-fix:
-- Handle non-json errors in explore ([#11000](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11000))

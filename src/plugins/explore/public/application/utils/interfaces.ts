@@ -4,6 +4,7 @@
  */
 
 import { Duration, Moment } from 'moment';
+import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { DataView as Dataset, DataPublicPluginStart } from '../../../../data/public';
 import { QueryState, ISearchResult } from './state_management/slices';
 import { ExploreServices } from '../../types';
@@ -142,6 +143,7 @@ export type HistogramDataProcessor = (
   dataset: Dataset,
   data: DataPublicPluginStart,
   interval: string,
+  uiSettings: IUiSettingsClient,
   breakdownField?: string
 ) => ProcessedSearchResults;
 

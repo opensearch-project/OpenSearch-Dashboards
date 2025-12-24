@@ -1,2 +1,0 @@
-fix:
-- Skip loading filter if navigating to a saved search without params ([#10913](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10913))

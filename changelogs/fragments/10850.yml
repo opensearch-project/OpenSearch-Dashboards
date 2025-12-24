@@ -1,2 +1,0 @@
-fix:
-- Dedupe index names for data selection ([#10850](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10850))

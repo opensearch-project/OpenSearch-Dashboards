@@ -6,6 +6,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
+import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import {
   IBucketDateHistogramAggConfig,
   Query,
@@ -45,6 +46,16 @@ import {
   processRawResultsForHistogram,
   createHistogramConfigWithInterval,
 } from './utils';
+import { getCurrentFlavor } from '../../../../helpers/get_flavor_from_app_id';
+import { ExploreFlavor } from '../../../../../common';
+import { TRACES_CHART_BAR_TARGET } from '../constants';
+import { createTraceAggregationConfig } from './trace_aggregation_builder';
+import {
+  prepareTraceCacheKeys,
+  executeRequestCountQuery,
+  executeErrorCountQuery,
+  executeLatencyQuery,
+} from './trace_query_actions';
 
 // Module-level storage for abort controllers keyed by cacheKey
 const activeQueryAbortControllers = new Map<string, AbortController>();
@@ -178,14 +189,15 @@ export const histogramResultsProcessor: HistogramDataProcessor = (
   rawResults: ISearchResult,
   dataset: DataView,
   data: DataPublicPluginStart,
-  interval: string
+  interval: string,
+  uiSettings: IUiSettingsClient
 ): ProcessedSearchResults => {
   const result = defaultResultsProcessor(rawResults, dataset);
 
   data.dataViews.saveToCache(dataset.id!, dataset); // Updating the cache
 
   const histogramConfigs = dataset.timeFieldName
-    ? createHistogramConfigs(dataset, interval, data)
+    ? createHistogramConfigs(dataset, interval, data, uiSettings)
     : undefined;
 
   if (histogramConfigs) {
@@ -271,6 +283,70 @@ export const executeQueries = createAsyncThunk<
         })
       )
     );
+  }
+
+  const flavorId = await getCurrentFlavor(services);
+
+  if (flavorId === ExploreFlavor.Traces) {
+    const dataset = query.dataset
+      ? await services.data.dataViews.get(query.dataset.id, query.dataset.type !== 'INDEX_PATTERN')
+      : await services.data.dataViews.getDefault();
+
+    if (dataset?.timeFieldName) {
+      const rawInterval = state.legacy?.interval || 'auto';
+
+      const histogramConfig = createHistogramConfigWithInterval(
+        dataset,
+        rawInterval,
+        services,
+        getState,
+        TRACES_CHART_BAR_TARGET
+      );
+      const calculatedInterval = histogramConfig?.finalInterval || '5m';
+
+      const { requestCacheKey, errorCacheKey, latencyCacheKey } = prepareTraceCacheKeys(query);
+
+      const baseQuery = defaultPrepareQueryString(query);
+
+      const config = createTraceAggregationConfig(
+        dataset.timeFieldName,
+        calculatedInterval,
+        breakdownField
+      );
+
+      promises.push(
+        dispatch(
+          executeRequestCountQuery({
+            services,
+            cacheKey: requestCacheKey,
+            baseQuery,
+            config,
+          })
+        )
+      );
+
+      promises.push(
+        dispatch(
+          executeErrorCountQuery({
+            services,
+            cacheKey: errorCacheKey,
+            baseQuery,
+            config,
+          })
+        )
+      );
+
+      promises.push(
+        dispatch(
+          executeLatencyQuery({
+            services,
+            cacheKey: latencyCacheKey,
+            baseQuery,
+            config,
+          })
+        )
+      );
+    }
   }
 
   // Handle tab queries as before (keeping existing tab logic)

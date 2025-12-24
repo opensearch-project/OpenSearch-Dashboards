@@ -12,6 +12,11 @@ import { coreMock } from '../../../../core/public/mocks';
 
 // Mock dependencies
 
+jest.mock('@osd/i18n/react', () => ({
+  ...jest.requireActual('@osd/i18n/react'),
+  FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => defaultMessage,
+}));
+
 jest.mock('./chat_window', () => {
   const ActualReact = jest.requireActual('react');
   return {

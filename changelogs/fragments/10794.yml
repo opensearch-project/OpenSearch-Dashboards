@@ -1,2 +1,0 @@
-fix:
-- Replace index pattern text with dataset in dataset management plugin ([#10794](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10794))

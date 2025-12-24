@@ -19,6 +19,10 @@
 
   .exploreChart__chartheader {
     align-items: center;
+
+    &Content {
+      justify-content: flex-start;
+    }
   }
 }
 
@@ -57,5 +61,42 @@
         height: 30px !important;
       }
     }
+  }
+}
+
+// Traces charts container styles
+.exploreTracesChart {
+  &__container {
+    min-height: clamp(200px, 20vh, 400px);
+    max-height: clamp(200px, 20vh, 400px);
+  }
+
+  &__section {
+    height: clamp(200px, 20vh, 400px);
+  }
+
+  &__histogram {
+    height: 100%;
+  }
+
+  &__loading {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__spacer {
+    width: 32px;
+  }
+
+  &__headerItem {
+    text-align: center;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
   }
 }

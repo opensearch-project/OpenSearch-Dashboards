@@ -1,0 +1,2 @@
+fix:
+- Flaky test for global threshold custom value ([#11045](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11045))

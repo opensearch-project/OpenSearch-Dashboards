@@ -338,7 +338,15 @@ const singleParseQuery = <
     suggestKeywords,
   };
 
-  return enrichAutocompleteResult(result, rules, tokenStream, cursorTokenIndex, cursor, query);
+  return enrichAutocompleteResult(
+    result,
+    rules,
+    tokenStream,
+    cursorTokenIndex,
+    cursor,
+    query,
+    parseTree
+  );
 };
 
 export const parseQuery = <

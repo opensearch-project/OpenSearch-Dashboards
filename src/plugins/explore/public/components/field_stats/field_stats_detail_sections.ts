@@ -5,6 +5,7 @@
 
 import { DetailSectionConfig } from './utils/field_stats_types';
 import { topValuesDetailConfig } from './detail_sections/top_values_detail';
+import { rareValuesDetailConfig } from './detail_sections/rare_values_detail';
 import { numericSummaryDetailConfig } from './detail_sections/numeric_summary_detail';
 import { dateRangeDetailConfig } from './detail_sections/date_range_detail';
 import { examplesDetailConfig } from './detail_sections/examples_detail';
@@ -30,6 +31,7 @@ import { examplesDetailConfig } from './detail_sections/examples_detail';
  */
 export const DETAIL_SECTIONS: DetailSectionConfig[] = [
   topValuesDetailConfig,
+  rareValuesDetailConfig,
   numericSummaryDetailConfig,
   dateRangeDetailConfig,
   examplesDetailConfig,
