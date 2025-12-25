@@ -12,7 +12,6 @@ import {
   VisFieldType,
   VisColumn,
   AxisColumnMappings,
-  AxisSupportedStyles,
   Threshold,
   AxisConfig,
 } from '../types';
@@ -170,7 +169,7 @@ const positionSwapMap: Record<Positions, Positions> = {
 const swapPosition = (pos: Positions): Positions => positionSwapMap[pos] ?? pos;
 
 export const getSwappedAxisRole = (
-  styles: Partial<AxisSupportedStyles>,
+  styles: { standardAxes?: StandardAxes[]; switchAxes?: boolean },
   axisColumnMappings?: AxisColumnMappings
 ): {
   xAxis?: VisColumn;
@@ -216,6 +215,19 @@ export const getSchemaByAxis = (
       return 'nominal';
     case VisFieldType.Date:
       return 'temporal';
+    default:
+      return 'unknown';
+  }
+};
+
+export const getAxisType = (axis?: VisColumn) => {
+  switch (axis?.schema) {
+    case VisFieldType.Numerical:
+      return 'value';
+    case VisFieldType.Categorical:
+      return 'category';
+    case VisFieldType.Date:
+      return 'time';
     default:
       return 'unknown';
   }
@@ -408,3 +420,12 @@ export function applyTimeRangeToEncoding(
     };
   }
 }
+
+export const getChartRender = () => {
+  try {
+    const chartRender = localStorage.getItem('__DEVELOPMENT__.discover.vis.render');
+    return chartRender || 'vega';
+  } catch (e) {
+    return 'vega';
+  }
+};
