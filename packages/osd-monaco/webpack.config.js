@@ -29,6 +29,9 @@
  */
 
 const path = require('path');
+const { getSwcLoaderConfig } = require('@osd/utils');
+
+const targets = ['last 2 versions', 'ie >= 11'];
 
 const commonConfig = {
   mode: 'development',
@@ -44,87 +47,18 @@ const commonConfig = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              [
-                '@babel/preset-env',
-                {
-                  targets: {
-                    browsers: ['last 2 versions', 'ie >= 11'],
-                  },
-                  modules: false,
-                },
-              ],
-              [
-                '@babel/preset-typescript',
-                {
-                  allowDeclareFields: true,
-                },
-              ],
-            ],
-            plugins: [
-              '@babel/plugin-proposal-class-properties',
-              '@babel/plugin-proposal-optional-chaining',
-              '@babel/plugin-transform-class-static-block',
-              '@babel/plugin-transform-private-methods',
-            ],
-          },
-        },
         exclude: [/node_modules(?!\/antlr4ng)/, /target/, path.resolve(__dirname, 'target')],
+        use: getSwcLoaderConfig({ jsx: true, targets, syntax: 'typescript' }),
       },
       {
         test: /\.js$/,
         exclude: [/node_modules(?!\/antlr4ng)/, path.resolve(__dirname, 'target')],
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              [
-                '@babel/preset-env',
-                {
-                  targets: {
-                    browsers: ['last 2 versions', 'ie >= 11'],
-                  },
-                  modules: false,
-                },
-              ],
-            ],
-            plugins: [
-              '@babel/plugin-proposal-class-properties',
-              '@babel/plugin-proposal-optional-chaining',
-              '@babel/plugin-transform-class-static-block',
-              '@babel/plugin-transform-private-methods',
-            ],
-          },
-        },
+        use: getSwcLoaderConfig({ jsx: false, targets, syntax: 'ecmascript' }),
       },
       {
         test: /\.m?js$/,
         include: /node_modules[/\\](antlr4ng|monaco-editor)/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              [
-                '@babel/preset-env',
-                {
-                  targets: {
-                    browsers: ['last 2 versions', 'ie >= 11'],
-                  },
-                  modules: false,
-                },
-              ],
-            ],
-            plugins: [
-              '@babel/plugin-proposal-class-properties',
-              '@babel/plugin-proposal-optional-chaining',
-              '@babel/plugin-transform-class-static-block',
-              '@babel/plugin-transform-private-methods',
-            ],
-          },
-        },
+        use: getSwcLoaderConfig({ jsx: false, targets, syntax: 'ecmascript' }),
       },
       {
         test: /\.ts$/,
@@ -132,36 +66,16 @@ const commonConfig = {
           path.resolve(__dirname, 'src/ppl/.generated'),
           path.resolve(__dirname, 'src/sql/.generated'),
         ],
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              [
-                '@babel/preset-env',
-                {
-                  targets: {
-                    browsers: ['last 2 versions', 'ie >= 11'],
-                  },
-                  modules: false,
-                },
-              ],
-              '@babel/preset-typescript',
-            ],
-            plugins: [
-              '@babel/plugin-proposal-class-properties',
-              '@babel/plugin-transform-class-static-block',
-              '@babel/plugin-transform-private-methods',
-            ],
-          },
-        },
+        use: getSwcLoaderConfig({ jsx: false, targets, syntax: 'typescript' }),
       },
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
+        type: 'javascript/auto',
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/,
-        use: 'file-loader',
+        type: 'asset/resource',
       },
     ],
   },

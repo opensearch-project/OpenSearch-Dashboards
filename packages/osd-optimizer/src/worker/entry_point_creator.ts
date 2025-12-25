@@ -34,7 +34,7 @@ module.exports = function ({
   entries: Array<{ importId: string; requirePath: string }>;
 }) {
   const lines = entries.map(({ importId, requirePath }) => [
-    `__osdBundles__.define('${importId}', __webpack_require__, require.resolve('${requirePath}'))`,
+    `__osdBundles__.define('${importId}', () => {return require('${requirePath}')})`,
   ]);
 
   return {

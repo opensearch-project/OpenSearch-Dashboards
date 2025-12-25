@@ -34,9 +34,10 @@ import Fs from 'fs';
 import Path from 'path';
 import { inspect } from 'util';
 
-import webpack, { Stats } from 'webpack';
+// import webpack, { Stats } from 'webpack';
+import { rspack, Compiler, Stats } from '@rspack/core';
 import * as Rx from 'rxjs';
-import { mergeMap, map, mapTo, takeUntil } from 'rxjs/operators';
+import { mergeMap, map, mapTo, takeUntil, tap, finalize } from 'rxjs/operators';
 
 import {
   CompilerMsgs,
@@ -48,8 +49,7 @@ import {
   parseFilePath,
   BundleRefs,
 } from '../common';
-import { BundleRefModule } from './bundle_ref_module';
-import { getWebpackConfig } from './webpack.config';
+import { getWebpackConfig, sassCompiler } from './webpack.config';
 import { isFailureStats, failedStatsToErrorMessage } from './webpack_helpers';
 import {
   isExternalModule,
@@ -77,8 +77,9 @@ const EXTRA_SCSS_WORK_UNITS = 100;
 const observeCompiler = (
   workerConfig: WorkerConfig,
   bundle: Bundle,
-  compiler: webpack.Compiler
+  compiler: Compiler
 ): Rx.Observable<CompilerMsg> => {
+  let START = 0;
   const compilerMsgs = new CompilerMsgs(bundle.id);
   const done$ = new Rx.Subject();
   const { beforeRun, watchRun, done } = compiler.hooks;
@@ -89,7 +90,13 @@ const observeCompiler = (
   const started$ = Rx.merge(
     Rx.fromEventPattern((cb) => beforeRun.tap(PLUGIN_NAME, cb)),
     Rx.fromEventPattern((cb) => watchRun.tap(PLUGIN_NAME, cb))
-  ).pipe(mapTo(compilerMsgs.running()));
+  )
+    .pipe(mapTo(compilerMsgs.running()))
+    .pipe(
+      tap(() => {
+        START = Date.now();
+      })
+    );
 
   /**
    * Called by webpack as any compilation is complete. If the
@@ -98,10 +105,11 @@ const observeCompiler = (
    */
   const complete$ = Rx.fromEventPattern<Stats>((cb) => done.tap(PLUGIN_NAME, cb)).pipe(
     maybeMap((stats) => {
-      // @ts-expect-error not included in types, but it is real https://github.com/webpack/webpack/blob/ab4fa8ddb3f433d286653cd6af7e3aad51168649/lib/Watching.js#L58
       if (stats.compilation.needAdditionalPass) {
         return undefined;
       }
+
+      const durationSec = (Date.now() - START) / 1000;
 
       if (workerConfig.profileWebpack) {
         Fs.writeFileSync(
@@ -123,7 +131,7 @@ const observeCompiler = (
       const bundleRefExportIds: string[] = [];
       const referencedFiles = new Set<string>();
       let moduleCount = 0;
-      let workUnits = stats.compilation.fileDependencies.size;
+      let workUnits = [...stats.compilation.fileDependencies].length;
 
       if (bundle.manifestPath) {
         referencedFiles.add(bundle.manifestPath);
@@ -161,11 +169,6 @@ const observeCompiler = (
           continue;
         }
 
-        if (module instanceof BundleRefModule) {
-          bundleRefExportIds.push(module.ref.exportId);
-          continue;
-        }
-
         if (isConcatenatedModule(module)) {
           moduleCount += module.modules.length;
           continue;
@@ -197,6 +200,7 @@ const observeCompiler = (
 
       return compilerMsgs.compilerSuccess({
         moduleCount,
+        durationSec,
       });
     })
   );
@@ -229,7 +233,7 @@ export const runCompilers = (
   bundles: Bundle[],
   bundleRefs: BundleRefs
 ) => {
-  const multiCompiler = webpack(
+  const multiCompiler = rspack(
     bundles.map((def) => getWebpackConfig(def, bundleRefs, workerConfig))
   );
 
@@ -245,6 +249,12 @@ export const runCompilers = (
       mergeMap(([compilerIndex, compiler]) => {
         const bundle = bundles[compilerIndex];
         return observeCompiler(workerConfig, bundle, compiler);
+      }),
+      finalize(() => {
+        // Dispose of SASS compilers when all compilations are complete
+        if (!workerConfig.watch) {
+          sassCompiler.dispose();
+        }
       })
     ),
 
