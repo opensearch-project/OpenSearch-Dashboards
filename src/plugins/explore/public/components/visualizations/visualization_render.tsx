@@ -80,7 +80,7 @@ export const VisualizationRender = ({
     return createVisSpec({ data: visualizationData, config: visConfig, timeRange });
   }, [visConfig, visualizationData, timeRange]);
 
-  if (!visualizationData || columns.length === 0 || !spec) {
+  if (!visualizationData || columns.length === 0) {
     return null;
   }
 
