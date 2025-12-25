@@ -76,6 +76,10 @@ import { SlotRegistryService } from './services/slot_registry';
 import { logActionRegistry } from './services/log_action_registry';
 import { createAskAiAction } from './actions/ask_ai_action';
 
+// Smart Actions
+import { smartActionRegistry } from './services/smart_action_registry/smart_action_registry_service';
+import { registerBuiltInSmartActions } from './services/smart_action_registry/built_in_smart_actions';
+
 export class ExplorePlugin
   implements
     Plugin<
@@ -327,6 +331,7 @@ export class ExplorePlugin
             this.tabRegistry,
             this.visualizationRegistryService,
             this.queryPanelActionsRegistryService,
+            smartActionRegistry,
             this.isDatasetManagementEnabled,
             this.slotRegistryService
           );
@@ -471,6 +476,9 @@ export class ExplorePlugin
       logActionRegistry: {
         registerAction: (action) => logActionRegistry.registerAction(action),
       },
+      smartActionRegistry: {
+        registerAction: (action) => smartActionRegistry.registerAction(action),
+      },
     };
   }
 
@@ -495,6 +503,7 @@ export class ExplorePlugin
         this.tabRegistry,
         this.visualizationRegistryService,
         this.queryPanelActionsRegistryService,
+        smartActionRegistry,
         this.isDatasetManagementEnabled,
         this.slotRegistryService
       );
@@ -513,6 +522,10 @@ export class ExplorePlugin
     // Always register Ask AI action - let isCompatible handle enablement logic
     const askAiAction = createAskAiAction(core.chat);
     logActionRegistry.registerAction(askAiAction);
+
+    // Register Smart Actions
+    // Register built-in smart actions (Extract Pattern, etc.)
+    registerBuiltInSmartActions();
 
     const savedExploreLoader = createSavedExploreLoader({
       savedObjectsClient: core.savedObjects.client,
