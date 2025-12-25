@@ -40,8 +40,9 @@ $euiCollapsibleNavWidth: $euiSize * 20;
 // You can also use "osd-resetFocusState" to not apply the default focus
 // state. This is useful when you've already hand crafted your own
 // focus states in OpenSearch Dashboards.
+// NOTE: we also ignore this style for OUI2 classes ("oui:" prefix)
 :focus {
-  &:not([class^="eui"]):not(.osd-resetFocusState) {
+  &:not([class^="eui"]):not([class^="oui\:"]):not(.osd-resetFocusState) {
     @include euiFocusRing;
   }
 }
