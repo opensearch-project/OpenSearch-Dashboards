@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BarSeriesOption } from 'echarts';
 import {
   StandardAxes,
   VisFieldType,
@@ -14,6 +15,7 @@ import {
 import { applyAxisStyling, getSchemaByAxis } from '../utils/utils';
 import { BarChartStyle } from './bar_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
+import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
@@ -185,4 +187,49 @@ export const buildThresholdColorEncoding = (
   };
 
   return colorLayer;
+};
+
+/**
+ * Create bar series configuration
+ */
+export const createBarSeries = <T extends BaseChartStyle>(styles: BarChartStyle): PipelineFn<T> => (
+  state
+) => {
+  const { axisConfig } = state;
+  const newState = { ...state };
+
+  if (!axisConfig) {
+    throw new Error('axisConfig must be derived before createBarSeries');
+  }
+
+  const numericalAxis = [axisConfig.xAxis, axisConfig.yAxis].find(
+    (axis) => axis?.schema === VisFieldType.Numerical
+  );
+
+  const series: BarSeriesOption[] = [
+    {
+      type: 'bar',
+      encode: {
+        x: axisConfig.xAxis?.column,
+        y: axisConfig.yAxis?.column,
+      },
+      name: numericalAxis?.name || '',
+      // TODO: barWidth and barCategoryGap seems are exclusive, we need to revise the current UI for this config
+      barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
+      barCategoryGap:
+        styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
+    },
+  ];
+  newState.series = series;
+
+  newState.series?.forEach((s) => {
+    if (styles.showBarBorder) {
+      s.itemStyle = {
+        borderWidth: styles.barBorderWidth,
+        borderColor: styles.barBorderColor,
+      };
+    }
+  });
+
+  return newState;
 };

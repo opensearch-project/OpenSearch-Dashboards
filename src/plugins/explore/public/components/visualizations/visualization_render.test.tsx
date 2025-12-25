@@ -13,6 +13,7 @@ import { VisFieldType, Positions, RenderChartConfig } from './types';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { defaultBarChartStyles } from './bar/bar_vis_config';
 import { defaultTableChartStyles } from './table/table_vis_config';
+import { createVisSpec } from './utils/create_vis_spec';
 
 // Mock the dependencies
 jest.mock('./table/table_vis', () => ({
@@ -27,6 +28,18 @@ jest.mock('./visualization_empty_state', () => ({
 
 jest.mock('./utils/to_expression', () => ({
   toExpression: jest.fn(() => 'mocked-expression'),
+}));
+
+jest.mock('./utils/create_vis_spec', () => ({
+  createVisSpec: jest.fn(),
+}));
+
+jest.mock('./echarts_render', () => ({
+  EchartsRender: jest.fn(() => <div data-test-subj="echartsRender">Echarts Render</div>),
+}));
+
+jest.mock('./vega_render', () => ({
+  VegaRender: jest.fn(() => <div data-test-subj="vegaRender">Vega Render</div>),
 }));
 
 // Mock getServices
@@ -112,6 +125,8 @@ describe('VisualizationRender', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Default mock implementation returns a spec object
+    (createVisSpec as jest.Mock).mockReturnValue({ type: 'bar' });
   });
 
   it('returns null when no visualization data is provided', () => {
@@ -127,6 +142,9 @@ describe('VisualizationRender', () => {
   });
 
   it('renders table visualization when type is table', () => {
+    // Mock createVisSpec to return a spec for table visualization
+    (createVisSpec as jest.Mock).mockReturnValue({ type: 'table' });
+
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
     const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockTableConfig);
     const showRawTable$ = new BehaviorSubject<boolean>(false);
@@ -139,6 +157,11 @@ describe('VisualizationRender', () => {
   });
 
   it('renders expression renderer when there is a selection mapping and ExpressionRenderer is provided', () => {
+    // Mock createVisSpec to return a spec with $schema (Vega spec)
+    (createVisSpec as jest.Mock).mockReturnValue({
+      $schema: 'https://vega.github.io/schema/vega/v5.json',
+    });
+
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
     const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
     const showRawTable$ = new BehaviorSubject<boolean>(false);
@@ -153,15 +176,18 @@ describe('VisualizationRender', () => {
       />
     );
 
-    expect(screen.getByTestId('expressionRenderer')).toBeInTheDocument();
+    expect(screen.getByTestId('vegaRender')).toBeInTheDocument();
   });
 
-  it('returns null when there is a selection mapping but no ExpressionRenderer', () => {
+  it('renders echarts when there is a selection mapping but spec has no $schema', () => {
+    // Mock createVisSpec to return a spec without $schema (Echarts spec)
+    (createVisSpec as jest.Mock).mockReturnValue({ type: 'bar' });
+
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
     const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>(mockChartConfig);
     const showRawTable$ = new BehaviorSubject<boolean>(false);
 
-    const { container } = render(
+    render(
       <VisualizationRender
         data$={data$}
         config$={visConfig$}
@@ -170,10 +196,13 @@ describe('VisualizationRender', () => {
       />
     );
 
-    expect(container.firstChild).toBeNull();
+    expect(screen.getByTestId('echartsRender')).toBeInTheDocument();
   });
 
   it('renders empty state when there is no selection mapping', () => {
+    // Mock createVisSpec to return a spec even though there's no axes mapping
+    (createVisSpec as jest.Mock).mockReturnValue({ type: 'bar' });
+
     const data$ = new BehaviorSubject<VisData | undefined>(mockVisData);
     const visConfig$ = new BehaviorSubject<RenderChartConfig | undefined>({
       ...mockChartConfig,
