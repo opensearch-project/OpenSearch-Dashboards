@@ -3,10 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { LineSeriesOption } from 'echarts';
 import { LineChartStyle } from './line_vis_config';
 import { VisColumn, Positions, VisFieldType, StandardAxes } from '../types';
 import { DEFAULT_OPACITY } from '../constants';
 import { AreaChartStyle } from '../area/area_vis_config';
+import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
+import { composeMarkline } from '../utils/utils';
+import { LineMode } from './line_vis_config';
 
 /**
  * Get Vega interpolation from UI lineMode
@@ -278,4 +282,194 @@ export const applyAxisStyling = (
   }
 
   return baseAxis;
+};
+
+const findLineInterpolation = (lineMode: LineMode) => {
+  switch (lineMode) {
+    case 'straight':
+      return {};
+    case 'smooth':
+      return {
+        smooth: true,
+      };
+    case 'stepped':
+      return {
+        step: true,
+      };
+  }
+};
+
+const generateLineStyles = (styles: LineChartStyle) => {
+  const lineWidth = styles.lineStyle === 'dots' ? 0 : styles?.lineWidth;
+  return {
+    ...(styles.lineStyle === 'line' ? { symbol: 'none' } : {}),
+    lineStyle: {
+      width: lineWidth,
+    },
+    ...findLineInterpolation(styles.lineMode),
+  };
+};
+
+export const createLineSeries = <T extends BaseChartStyle>(
+  styles: LineChartStyle,
+  addTimeMarker = true
+): PipelineFn<T> => (state) => {
+  const { axisConfig, xAxisConfig, aggregatedData } = state;
+  const newState = { ...state };
+  const usedTimeMarker = addTimeMarker && styles.addTimeMarker;
+
+  const cateColumns = aggregatedData?.[0].filter((c: string) => c !== axisConfig?.xAxis?.column);
+
+  if (usedTimeMarker) {
+    {
+      // manully extend xAxis range
+      const newxAxisConfig = { ...xAxisConfig };
+      newxAxisConfig.max = new Date();
+      newState.xAxisConfig = newxAxisConfig;
+    }
+  }
+
+  if (!axisConfig) {
+    throw new Error('axisConfig must be derived before createBarSeries');
+  }
+
+  const series = cateColumns?.map((item: string, index: number) => {
+    return {
+      name: String(item),
+      type: 'line',
+      connectNulls: true,
+      encode: {
+        x: axisConfig?.xAxis?.column,
+        y: item,
+      },
+      emphasis: {
+        focus: 'self',
+      },
+      ...generateLineStyles(styles),
+      ...composeMarkline(styles?.thresholdOptions, styles?.addTimeMarker),
+    };
+  });
+
+  newState.series = series as LineSeriesOption[];
+
+  return newState;
+};
+
+export const createLineBarSeries = <T extends BaseChartStyle>(
+  styles: LineChartStyle
+): PipelineFn<T> => (state) => {
+  const { axisConfig, xAxisConfig, yAxisConfig, axisColumnMappings } = state;
+  const newState = { ...state };
+  const newYAxisConfig = { ...yAxisConfig };
+
+  if (styles.addTimeMarker) {
+    {
+      // manully extend xAxis range
+      const newxAxisConfig = { ...xAxisConfig };
+      newxAxisConfig.max = new Date();
+      newState.xAxisConfig = newxAxisConfig;
+    }
+  }
+
+  // add one more y axis for bar
+  newState.yAxisConfig = [
+    newYAxisConfig,
+    {
+      type: 'value',
+      name: axisColumnMappings?.y2?.name,
+      position: 'right',
+    },
+  ];
+
+  if (!axisConfig) {
+    throw new Error('axisConfig must be derived before createBarSeries');
+  }
+  const numericalAxis = [axisConfig.xAxis, axisConfig.yAxis].find(
+    (axis) => axis?.schema === VisFieldType.Numerical
+  );
+
+  const series = [
+    {
+      type: 'line',
+      name: numericalAxis?.name,
+      ...generateLineStyles(styles),
+      ...composeMarkline(styles?.thresholdOptions, styles?.addTimeMarker),
+      yAxisIndex: 0,
+      encode: {
+        x: 0,
+        y: 1,
+      },
+      emphasis: {
+        focus: 'self',
+      },
+    },
+    {
+      type: 'bar',
+      name: axisColumnMappings?.y2?.name,
+      yAxisIndex: 1,
+      encode: {
+        x: 0,
+        y: 2,
+      },
+      emphasis: {
+        focus: 'self',
+      },
+    },
+  ];
+
+  newState.series = series as LineSeriesOption[];
+
+  return newState;
+};
+
+export const createFacetLineSeries = <T extends BaseChartStyle>(
+  styles: LineChartStyle,
+  addTimeMarker = true
+): PipelineFn<T> => (state) => {
+  const { axisConfig, xAxisConfig, aggregatedData } = state;
+
+  const newState = { ...state };
+
+  const usedTimeMarker = addTimeMarker && styles.addTimeMarker;
+
+  if (usedTimeMarker) {
+    const newxAxisConfig = [...xAxisConfig];
+    aggregatedData.map((_: any[], index: number) => {
+      newxAxisConfig[index].max = new Date();
+    });
+
+    newState.xAxisConfig = newxAxisConfig;
+  }
+
+  if (!axisConfig) {
+    throw new Error('axisConfig must be derived before createBarSeries');
+  }
+
+  const allSeries = aggregatedData.map((seriesData: any[], index: number) => {
+    const header = seriesData[0];
+    const cateColumns = header.filter((c: string) => c !== axisConfig?.xAxis?.column);
+
+    return cateColumns.map((item: string) => ({
+      name: String(`${item}_${index}`),
+      type: 'line',
+      connectNulls: true,
+      encode: {
+        x: axisConfig?.xAxis?.column,
+        y: item,
+      },
+      datasetIndex: index,
+      gridIndex: index,
+      xAxisIndex: index,
+      yAxisIndex: index,
+      emphasis: {
+        focus: 'self',
+      },
+      ...generateLineStyles(styles),
+      ...composeMarkline(styles?.thresholdOptions, styles?.addTimeMarker),
+    }));
+  });
+
+  newState.series = allSeries.flat() as LineSeriesOption[];
+
+  return newState;
 };

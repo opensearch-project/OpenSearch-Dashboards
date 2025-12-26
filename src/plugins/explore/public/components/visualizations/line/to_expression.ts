@@ -10,6 +10,9 @@ import {
   createTimeMarkerLayer,
   applyAxisStyling,
   ValueAxisPosition,
+  createLineSeries,
+  createLineBarSeries,
+  createFacetLineSeries,
 } from './line_chart_utils';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
 import {
@@ -17,9 +20,18 @@ import {
   getAxisByRole,
   getSwappedAxisRole,
   getTooltipFormat,
+  getChartRender,
 } from '../utils/utils';
 import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
+import {
+  pipe,
+  deriveAxisConfig,
+  createBaseConfig,
+  buildAxisConfigs,
+  assembleSpec,
+} from '../utils/echarts_spec';
+import { formatData, pivotDataWithCategory, formatFacetData } from '../utils/data_transformation';
 
 /**
  * Rule 1: Create a simple line chart with one metric and one date
@@ -45,6 +57,22 @@ export const createSimpleLineChart = (
   const dateName = xAxisStyle?.title?.text || xAxis?.name;
   const layers: any[] = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
+
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      formatData,
+      createBaseConfig,
+      buildAxisConfigs,
+      createLineSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+    return result.spec;
+  }
 
   const mainLayer = {
     params: [createTimeRangeBrush({ timeAxis: 'x' })],
@@ -172,6 +200,23 @@ export const createLineBarChart = (
   const dateName = xAxisStyle?.title?.text || xAxisMapping?.name;
   const layers: any[] = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
+
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      formatData,
+      createBaseConfig,
+      buildAxisConfigs,
+      createLineBarSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+
+    return result.spec;
+  }
 
   const barLayer = {
     params: [createTimeRangeBrush({ timeAxis: 'x' })],
@@ -366,6 +411,22 @@ export const createMultiLineChart = (
   const layers: any[] = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      pivotDataWithCategory({ groupField: xAxis }),
+      createBaseConfig,
+      buildAxisConfigs,
+      createLineSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+    return result.spec;
+  }
+
   const mainLayer = {
     params: [createTimeRangeBrush({ timeAxis: 'x' })],
     mark: buildMarkConfig(styles, 'line'),
@@ -513,6 +574,23 @@ export const createFacetedMultiLineChart = (
   const facetMarkConfig = buildMarkConfig(styles, 'line');
 
   const thresholdLayer = createThresholdLayer(styles?.thresholdOptions);
+
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      formatFacetData(pivotDataWithCategory, { groupField: xAxis }),
+      createBaseConfig,
+      buildAxisConfigs,
+      createFacetLineSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+
+    return result.spec;
+  }
 
   const mainLayerEncoding = {
     x: {
@@ -671,6 +749,29 @@ export const createCategoryLineChart = (
   const categoryName = xAxisStyle?.title?.text || xAxis?.name;
   const layers: any[] = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
+  // When axesMapping is updated but the data itself has not changed
+  // (for example, when switching x axis to a different field),
+  // the previous chart styles will be preserved.
+  // This is the critical minimal fix:
+  // for category-based line charts, simply set addTimeMarker to false
+  // to prevent crashes when switching from date-based(enable addTimeMarker) to category-based.
+
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      formatData,
+      createBaseConfig,
+      buildAxisConfigs,
+      createLineSeries(styles, false),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+
+    return result.spec;
+  }
 
   const mainLayer = {
     mark: buildMarkConfig(styles, 'line'),
@@ -767,6 +868,22 @@ export const createCategoryMultiLineChart = (
   const category2Name = colorAxisColumn?.name;
   const layers: any[] = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
+
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      pivotDataWithCategory({ groupField: xAxis }),
+      createBaseConfig,
+      buildAxisConfigs,
+      createLineSeries(styles, false),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+    return result.spec;
+  }
 
   const mainLayer = {
     mark: buildMarkConfig(styles, 'line'),

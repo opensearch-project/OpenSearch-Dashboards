@@ -153,21 +153,43 @@ export const createBaseConfig = <T extends BaseChartStyle>(
 export const buildAxisConfigs = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { axisConfig } = state;
+  const { axisConfig, transformedData = [] } = state;
+
+  const hasFacet = Array.isArray(transformedData[transformedData?.length - 1][0][0]);
+
+  const getConfig = (
+    axis: VisColumn | undefined,
+    axisStyle: StandardAxes | undefined,
+    gridNumber?: number
+  ) => {
+    return {
+      type: getAxisType(axis),
+      ...applyAxisStyling({ axisStyle }),
+      ...(hasFacet && { gridIndex: gridNumber }),
+    };
+  };
 
   if (!axisConfig) {
     throw new Error('axisConfig must be derived before buildAxisConfigs');
   }
 
-  const xAxisConfig = {
-    type: getAxisType(axisConfig.xAxis),
-    ...applyAxisStyling({ axisStyle: axisConfig.xAxisStyle }),
-  };
+  let xAxisConfig;
+  let yAxisConfig;
 
-  const yAxisConfig = {
-    type: getAxisType(axisConfig.yAxis),
-    ...applyAxisStyling({ axisStyle: axisConfig.yAxisStyle }),
-  };
+  if (hasFacet) {
+    // each grids needs an axis config
+    xAxisConfig = aggregatedData.map((_: any, index: number) => {
+      return getConfig(axisConfig.xAxis, axisConfig.xAxisStyle, index);
+    });
+
+    yAxisConfig = aggregatedData.map((_: any, index: number) => {
+      return getConfig(axisConfig.yAxis, axisConfig.yAxisStyle, index);
+    });
+  } else {
+    xAxisConfig = getConfig(axisConfig.xAxis, axisConfig.xAxisStyle);
+
+    yAxisConfig = getConfig(axisConfig.yAxis, axisConfig.yAxisStyle);
+  }
 
   return { ...state, xAxisConfig, yAxisConfig };
 };
@@ -178,16 +200,36 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
 export const assembleSpec = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { baseConfig, transformedData = [], xAxisConfig, yAxisConfig, series, visualMap } = state;
+  const {
+    baseConfig,
+    transformedData = [],
+    xAxisConfig,
+    yAxisConfig,
+    series,
+    visualMap,
+    grid,
+  } = state;
   const source = transformedData[transformedData.length - 1];
 
   const spec = {
     ...baseConfig,
     dataset: { source },
+    // const { baseConfig, aggregatedData, xAxisConfig, yAxisConfig, series, visualMap, grid } = state;
+
+    // const hasFacet = Array.isArray(aggregatedData[0][0]);
+
+    // const data = hasFacet
+    //   ? aggregatedData.map((facetData: any) => ({ source: facetData }))
+    //   : { source: aggregatedData };
+
+    // const spec = {
+    //   ...baseConfig,
+    //   dataset: data,
     xAxis: xAxisConfig,
     yAxis: yAxisConfig,
     visualMap,
     series,
+    grid: grid ?? { top: 60, bottom: 60, left: 60, right: 60 },
   };
 
   return { ...state, spec };

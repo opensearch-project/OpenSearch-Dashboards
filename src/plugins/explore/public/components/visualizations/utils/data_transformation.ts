@@ -417,3 +417,47 @@ export const pivot = (options: {
 
   return result;
 };
+
+export const formatFacetData = (fn: TransformFn, params: Record<string, any>) => (
+  state: EChartsSpecState<T>
+): EChartsSpecState<T> => {
+  const { data, axisColumnMappings } = state;
+  if (!axisColumnMappings?.facet) return state;
+
+  const facetColumn = axisColumnMappings.facet;
+
+  const grouped = data.reduce((acc, row) => {
+    const facet = String(row[facetColumn.column]);
+    acc[facet] ??= [];
+    acc[facet].push(row);
+    return acc;
+  }, {} as Record<string, any[]>);
+
+  const facetNumbers = Object.keys(grouped).length;
+
+  if (facetNumbers <= 1) return state;
+
+  const res = Object.entries(grouped).map(([_, facetData]) => {
+    const facetState = { ...state, data: facetData };
+    return fn({ ...params })(facetState).aggregatedData;
+  });
+
+  const cols = Math.ceil(facetNumbers / 2); // always in two rows
+  const colWidth = 90 / cols;
+  const rowHeight = 40;
+
+  const grid = Array.from({ length: facetNumbers }).map((_, i) => {
+    const row = Math.floor(i / cols);
+    const col = i % cols;
+    return {
+      left: `${5 + col * colWidth}%`,
+      width: `${colWidth - 2}%`,
+      top: `${5 + row * (rowHeight + 10)}%`,
+      height: `${rowHeight}%`,
+      containLabel: true,
+      bottom: `${5 + row * (rowHeight + 10)}%`,
+    };
+  });
+
+  return { ...state, transformedData: res, grid };
+};
