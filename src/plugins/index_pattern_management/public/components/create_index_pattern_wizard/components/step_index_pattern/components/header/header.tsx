@@ -59,6 +59,8 @@ interface HeaderProps {
   characterList: string;
   query: string;
   onQueryChanged: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  displayName?: string;
+  onDisplayNameChanged?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   goToNextStep: (query: string) => void;
   isNextStepDisabled: boolean;
   showSystemIndices?: boolean;
@@ -74,6 +76,8 @@ export const Header: React.FC<HeaderProps> = ({
   characterList,
   query,
   onQueryChanged,
+  displayName,
+  onDisplayNameChanged,
   goToNextStep,
   isNextStepDisabled,
   showSystemIndices = false,
@@ -100,9 +104,10 @@ export const Header: React.FC<HeaderProps> = ({
         </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiForm isInvalid={isInputInvalid}>
+      <EuiForm isInvalid={isInputInvalid}>
+        {renderDisplayNameInput(displayName, onDisplayNameChanged, query)}
+        <EuiFlexGroup>
+          <EuiFlexItem>
             {dataSourceEnabled && dataSourceRef?.title
               ? renderDataSourceAndIndexPatternInput(
                   isInputInvalid,
@@ -119,42 +124,42 @@ export const Header: React.FC<HeaderProps> = ({
                   query,
                   onQueryChanged
                 )}
-            {showSystemIndices ? (
-              <EuiCompressedFormRow>
-                <EuiCompressedSwitch
-                  label={
-                    <FormattedMessage
-                      id="indexPatternManagement.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
-                      defaultMessage="Include system and hidden indices"
-                    />
-                  }
-                  id="checkboxShowSystemIndices"
-                  checked={isIncludingSystemIndices}
-                  onChange={onChangeIncludingSystemIndices}
-                  data-test-subj="showSystemAndHiddenIndices"
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiCompressedFormRow hasEmptyLabelSpace>
+              <EuiSmallButton
+                fill
+                iconSide="right"
+                iconType="arrowRight"
+                onClick={() => goToNextStep(query)}
+                isDisabled={isNextStepDisabled}
+                data-test-subj="createIndexPatternGoToStep2Button"
+              >
+                <FormattedMessage
+                  id="indexPatternManagement.createIndexPattern.step.nextStepButton"
+                  defaultMessage="Next step"
                 />
-              </EuiCompressedFormRow>
-            ) : null}
-          </EuiForm>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiCompressedFormRow hasEmptyLabelSpace>
-            <EuiSmallButton
-              fill
-              iconSide="right"
-              iconType="arrowRight"
-              onClick={() => goToNextStep(query)}
-              isDisabled={isNextStepDisabled}
-              data-test-subj="createIndexPatternGoToStep2Button"
-            >
-              <FormattedMessage
-                id="indexPatternManagement.createIndexPattern.step.nextStepButton"
-                defaultMessage="Next step"
-              />
-            </EuiSmallButton>
+              </EuiSmallButton>
+            </EuiCompressedFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        {showSystemIndices ? (
+          <EuiCompressedFormRow>
+            <EuiCompressedSwitch
+              label={
+                <FormattedMessage
+                  id="indexPatternManagement.createIndexPattern.includeSystemIndicesToggleSwitchLabel"
+                  defaultMessage="Include system and hidden indices"
+                />
+              }
+              id="checkboxShowSystemIndices"
+              checked={isIncludingSystemIndices}
+              onChange={onChangeIncludingSystemIndices}
+              data-test-subj="showSystemAndHiddenIndices"
+            />
           </EuiCompressedFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        ) : null}
+      </EuiForm>
     </div>
   );
 };
@@ -172,7 +177,7 @@ const renderIndexPatternInput = (
       label={
         <FormattedMessage
           id="indexPatternManagement.createIndexPattern.step.indexPatternLabel"
-          defaultMessage="Index pattern name"
+          defaultMessage="Index pattern"
         />
       }
       isInvalid={isInputInvalid}
@@ -204,6 +209,46 @@ const renderIndexPatternInput = (
         isInvalid={isInputInvalid}
         onChange={onQueryChanged}
         data-test-subj="createIndexPatternNameInput"
+        fullWidth
+      />
+    </EuiCompressedFormRow>
+  );
+};
+
+const renderDisplayNameInput = (
+  displayName?: string,
+  onDisplayNameChanged?: (e: React.ChangeEvent<HTMLInputElement>) => void,
+  query?: string
+) => {
+  if (!onDisplayNameChanged) return null;
+
+  return (
+    <EuiCompressedFormRow
+      fullWidth
+      label={
+        <FormattedMessage
+          id="indexPatternManagement.createIndexPattern.step.displayNameLabel"
+          defaultMessage="Display name (optional)"
+        />
+      }
+      helpText={
+        <FormattedMessage
+          id="indexPatternManagement.createIndexPattern.step.displayNameHelp"
+          defaultMessage="A friendly name to display instead of the pattern. The pattern will still be used for queries."
+        />
+      }
+    >
+      <EuiCompressedFieldText
+        name="displayName"
+        placeholder={
+          query ||
+          i18n.translate('indexPatternManagement.createIndexPattern.step.displayNamePlaceholder', {
+            defaultMessage: 'e.g. My Friendly Name',
+          })
+        }
+        value={displayName || ''}
+        onChange={onDisplayNameChanged}
+        data-test-subj="createIndexPatternDisplayNameInput"
         fullWidth
       />
     </EuiCompressedFormRow>
