@@ -48,7 +48,6 @@ export const defaultPieChartStyles: PieChartStyle = {
     donut: true,
     showValues: false,
     showLabels: false,
-    truncate: 100,
   },
   titleOptions: {
     show: false,

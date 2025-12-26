@@ -86,21 +86,19 @@ export const PieExclusiveVisOptions = ({ styles, onChange }: PieVisOptionsProps)
           data-test-subj="showLabelsSwitch"
         />
       </EuiFormRow>
-      {styles.showLabels && (
-        <EuiFormRow
-          label={i18n.translate('explore.vis.pie.exclusive.labelTruncate', {
-            defaultMessage: 'Truncate after',
-          })}
-        >
-          <DebouncedFieldNumber
-            value={styles.truncate}
-            defaultValue={defaultPieChartStyles.exclusive.truncate}
-            onChange={(truncateValue) =>
-              updateStyle('truncate', truncateValue ?? defaultPieChartStyles.exclusive.truncate)
-            }
-          />
-        </EuiFormRow>
-      )}
+
+      <EuiFormRow
+        label={i18n.translate('explore.vis.pie.exclusive.labelTruncate', {
+          defaultMessage: 'Truncate after',
+        })}
+      >
+        <DebouncedFieldNumber
+          value={styles.truncate}
+          min={100}
+          onChange={(truncateValue) => updateStyle('truncate', truncateValue)}
+          placeholder="input a number"
+        />
+      </EuiFormRow>
     </StyleAccordion>
   );
 };
