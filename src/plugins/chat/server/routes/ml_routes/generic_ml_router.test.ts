@@ -13,15 +13,15 @@ import {
 import { GenericMLRouter } from './generic_ml_router';
 
 // Mock dependencies
-const mockLogger = {
+const mockLogger = ({
   info: jest.fn(),
   error: jest.fn(),
-} as unknown as Logger;
+} as unknown) as Logger;
 
-const mockResponse = {
+const mockResponse = ({
   custom: jest.fn(),
   customError: jest.fn(),
-} as unknown as OpenSearchDashboardsResponseFactory;
+} as unknown) as OpenSearchDashboardsResponseFactory;
 
 const mockRequest = {
   body: { message: 'test message' },
@@ -43,14 +43,14 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
     router = new GenericMLRouter();
 
     // Mock OpenSearch client
-    mockOpenSearchClient = {
+    mockOpenSearchClient = ({
       transport: {
         request: jest.fn(),
       },
-    } as unknown as OpenSearchClient;
+    } as unknown) as OpenSearchClient;
 
     // Mock context
-    mockContext = {
+    mockContext = ({
       core: {
         opensearch: {
           client: {
@@ -63,7 +63,7 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
           getClient: jest.fn().mockResolvedValue(mockOpenSearchClient),
         },
       },
-    } as unknown as RequestHandlerContext & {
+    } as unknown) as RequestHandlerContext & {
       dataSource?: {
         opensearch: {
           getClient: (dataSourceId: string) => Promise<OpenSearchClient>;
@@ -81,15 +81,11 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
         body: { response: 'test response' },
       };
 
-      (mockOpenSearchClient.transport.request as jest.Mock).mockResolvedValue(mockTransportResponse);
-
-      await router.forward(
-        mockContext,
-        mockRequest,
-        mockResponse,
-        mockLogger,
-        'test-agent-id'
+      (mockOpenSearchClient.transport.request as jest.Mock).mockResolvedValue(
+        mockTransportResponse
       );
+
+      await router.forward(mockContext, mockRequest, mockResponse, mockLogger, 'test-agent-id');
 
       // Verify fallback client was created and used
       expect(mockOpenSearchClient.transport.request).toHaveBeenCalledWith(
@@ -107,7 +103,7 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
     });
 
     it('should use dataSource client when dataSourceId is provided (line 115-117)', async () => {
-      const mockDataSourceClient = {
+      const mockDataSourceClient = ({
         transport: {
           request: jest.fn().mockResolvedValue({
             statusCode: 200,
@@ -115,9 +111,11 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
             body: { response: 'datasource response' },
           }),
         },
-      } as unknown as OpenSearchClient;
+      } as unknown) as OpenSearchClient;
 
-      (mockContext.dataSource!.opensearch.getClient as jest.Mock).mockResolvedValue(mockDataSourceClient);
+      (mockContext.dataSource!.opensearch.getClient as jest.Mock).mockResolvedValue(
+        mockDataSourceClient
+      );
 
       await router.forward(
         mockContext,
@@ -129,7 +127,9 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
       );
 
       // Verify dataSource.opensearch.getClient was called with correct dataSourceId
-      expect(mockContext.dataSource!.opensearch.getClient).toHaveBeenCalledWith('test-datasource-id');
+      expect(mockContext.dataSource!.opensearch.getClient).toHaveBeenCalledWith(
+        'test-datasource-id'
+      );
 
       // Verify dataSource client was used instead of current user client
       expect(mockDataSourceClient.transport.request).toHaveBeenCalled();
@@ -143,7 +143,9 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
         body: { response: 'current user response' },
       };
 
-      (mockOpenSearchClient.transport.request as jest.Mock).mockResolvedValue(mockTransportResponse);
+      (mockOpenSearchClient.transport.request as jest.Mock).mockResolvedValue(
+        mockTransportResponse
+      );
 
       await router.forward(
         mockContext,
@@ -177,7 +179,9 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
         body: { response: 'current user response' },
       };
 
-      (mockOpenSearchClient.transport.request as jest.Mock).mockResolvedValue(mockTransportResponse);
+      (mockOpenSearchClient.transport.request as jest.Mock).mockResolvedValue(
+        mockTransportResponse
+      );
 
       await router.forward(
         contextWithoutDataSource,
@@ -199,15 +203,11 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
         body: { data: 'test' },
       };
 
-      (mockOpenSearchClient.transport.request as jest.Mock).mockResolvedValue(mockTransportResponse);
-
-      await router.forward(
-        mockContext,
-        mockRequest,
-        mockResponse,
-        mockLogger,
-        'test-agent-id'
+      (mockOpenSearchClient.transport.request as jest.Mock).mockResolvedValue(
+        mockTransportResponse
       );
+
+      await router.forward(mockContext, mockRequest, mockResponse, mockLogger, 'test-agent-id');
 
       expect(mockOpenSearchClient.transport.request).toHaveBeenCalled();
       // The response should have status: 200 (default), statusText: 'OK', headers, and body
@@ -220,15 +220,11 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
         body: { data: 'test' },
       };
 
-      (mockOpenSearchClient.transport.request as jest.Mock).mockResolvedValue(mockTransportResponse);
-
-      await router.forward(
-        mockContext,
-        mockRequest,
-        mockResponse,
-        mockLogger,
-        'test-agent-id'
+      (mockOpenSearchClient.transport.request as jest.Mock).mockResolvedValue(
+        mockTransportResponse
       );
+
+      await router.forward(mockContext, mockRequest, mockResponse, mockLogger, 'test-agent-id');
 
       expect(mockOpenSearchClient.transport.request).toHaveBeenCalled();
       // The response should have status: 201, statusText: 'OK', headers: {}, and body
@@ -241,15 +237,11 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
         body: { response: 'test' },
       };
 
-      (mockOpenSearchClient.transport.request as jest.Mock).mockResolvedValue(mockTransportResponse);
-
-      await router.forward(
-        mockContext,
-        mockRequest,
-        mockResponse,
-        mockLogger,
-        'test-agent-id'
+      (mockOpenSearchClient.transport.request as jest.Mock).mockResolvedValue(
+        mockTransportResponse
       );
+
+      await router.forward(mockContext, mockRequest, mockResponse, mockLogger, 'test-agent-id');
 
       // Verify transport.request was called with correct options
       expect(mockOpenSearchClient.transport.request).toHaveBeenCalledWith(
@@ -279,7 +271,9 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
         body: { response: 'test' },
       };
 
-      (mockOpenSearchClient.transport.request as jest.Mock).mockResolvedValue(mockTransportResponse);
+      (mockOpenSearchClient.transport.request as jest.Mock).mockResolvedValue(
+        mockTransportResponse
+      );
 
       await router.forward(
         mockContext,
