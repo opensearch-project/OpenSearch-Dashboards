@@ -2,7 +2,6 @@ var osdCsp = JSON.parse(document.querySelector('osd-csp').getAttribute('data'));
 window.__osdStrictCsp__ = osdCsp.strictCsp;
 window.__osdPublicPath__ = {{publicPathMap}};
 window.__osdBundles__ = {{osdBundlesLoaderSource}}
-
 window.__webpack_nonce__ = (function() {
   var meta = document.querySelector('meta[name="csp-nonce"]');
   return meta ? meta.getAttribute('content') : '';
