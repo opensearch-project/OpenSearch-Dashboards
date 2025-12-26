@@ -53,12 +53,12 @@ export class PermissionControlledUiSettingsWrapper {
     ): Promise<SavedObjectsUpdateResponse<T>> => {
       if (type === 'config' && id === DASHBOARD_ADMIN_SETTINGS_ID) {
         try {
-          return ((await wrapperOptions.client.update<SavedObject<T>>(
+          return await wrapperOptions.client.update<T>(
             type,
             DASHBOARD_ADMIN_SETTINGS_ID,
             attributes,
             options
-          )) as unknown) as SavedObjectsUpdateResponse<T>;
+          );
         } catch (error) {
           if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
             return this.createPermissionUiSetting(attributes, options, wrapperOptions);
