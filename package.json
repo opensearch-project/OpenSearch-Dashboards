@@ -438,7 +438,7 @@
     "@types/use-sync-external-store": "^1.5.0",
     "@types/uuid": "^3.4.4",
     "@types/vinyl": "^2.0.4",
-    "@types/vinyl-fs": "^2.4.11",
+    "@types/vinyl-fs": "^3.0.7",
     "@types/webpack": "^4.41.31",
     "@types/webpack-env": "^1.16.3",
     "@types/zen-observable": "^0.8.0",
@@ -567,14 +567,14 @@
     "vega-lite": "^5.23.0",
     "vega-schema-url-parser": "^2.1.0",
     "vega-tooltip": "^0.30.0",
-    "vinyl-fs": "^3.0.3",
+    "vinyl-fs": "^4.0.2",
     "wait-on": "^8.0.2",
     "xml2js": "^0.5.0",
     "xmlbuilder": "13.0.2",
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": ">=14.20.1 <21",
+    "node": ">=14.20.1 <23",
     "yarn": "^1.22.10"
   }
 }

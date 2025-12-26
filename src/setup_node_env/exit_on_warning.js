@@ -29,10 +29,14 @@
  */
 
 if (process.noProcessWarnings !== true) {
-  var ignore = ['MaxListenersExceededWarning', 'NodeDeprecationWarning'];
+  var ignore = [
+    'MaxListenersExceededWarning',
+    'NodeDeprecationWarning',
+    'MODULE_TYPELESS_PACKAGE_JSON',
+  ];
 
   process.on('warning', function (warn) {
-    if (ignore.includes(warn.name)) return;
+    if (ignore.includes(warn.name) || ignore.includes(warn.code)) return;
 
     if (process.traceProcessWarnings === true) {
       console.error('Node.js process-warning detected - Terminating process...');

@@ -16,8 +16,8 @@
     "inquirer": "^7.3.3",
     "normalize-path": "^3.0.0",
     "prettier": "^2.1.1",
-    "vinyl": "^2.2.0",
-    "vinyl-fs": "^3.0.3"
+    "vinyl": "^3.0.1",
+    "vinyl-fs": "^4.0.2"
   },
   "devDependencies": {
     "@types/ejs": "^3.1.0",
