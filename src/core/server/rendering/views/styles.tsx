@@ -32,9 +32,14 @@
 
 import React, { FunctionComponent } from 'react';
 
-export const Styles: FunctionComponent = () => {
+interface StylesProps {
+  nonce: string;
+}
+
+export const Styles: FunctionComponent<StylesProps> = ({ nonce }) => {
   return (
     <style
+      nonce={nonce}
       dangerouslySetInnerHTML={{
         __html: `
           *, *:before, *:after {
