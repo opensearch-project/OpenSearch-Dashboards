@@ -8,7 +8,6 @@ import {
   SavedObjectsClientContract,
   SimpleSavedObject,
 } from 'opensearch-dashboards/public';
-import { map } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import {
   DATA_STRUCTURE_META_TYPES,
@@ -44,18 +43,25 @@ export const indexTypeConfig: DatasetTypeConfig = {
     const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
     const indexMeta = index.meta as DataStructureCustomMeta;
 
-    // Handle different types of multi-selections - preserve comma-separated format
+    // Build dataset title from multi-selections (wildcards and/or exact indices)
     let datasetTitle = index.title;
 
-    // Check if this is a multi-index selection
-    if (indexMeta?.isMultiIndex && indexMeta?.selectedTitles?.length) {
-      // Use the selected titles array to create comma-separated string
-      datasetTitle = indexMeta.selectedTitles.join(',');
-    }
-    // Check if this is a multi-wildcard selection
-    else if (indexMeta?.isMultiWildcard && indexMeta?.wildcardPatterns?.length) {
-      // Use the wildcard patterns to create comma-separated string
-      datasetTitle = indexMeta.wildcardPatterns.join(',');
+    if (indexMeta?.isMultiWildcard || indexMeta?.isMultiIndex) {
+      const titles: string[] = [];
+
+      // Add wildcard patterns if present
+      if (indexMeta.wildcardPatterns?.length) {
+        titles.push(...indexMeta.wildcardPatterns);
+      }
+
+      // Add exact indices if present
+      if (indexMeta.selectedTitles?.length) {
+        titles.push(...indexMeta.selectedTitles);
+      }
+
+      if (titles.length > 0) {
+        datasetTitle = titles.join(',');
+      }
     }
 
     return {

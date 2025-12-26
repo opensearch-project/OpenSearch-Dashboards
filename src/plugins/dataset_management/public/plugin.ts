@@ -4,6 +4,8 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { BehaviorSubject } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { CoreSetup, CoreStart, Plugin, AppMountParameters } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DataSourcePluginSetup, DataSourcePluginStart } from 'src/plugins/data_source/public';
@@ -15,7 +17,13 @@ import {
 } from './service';
 
 import { ManagementSetup } from '../../management/public';
-import { AppStatus, AppNavLinkStatus, DEFAULT_NAV_GROUPS } from '../../../core/public';
+import {
+  AppStatus,
+  AppNavLinkStatus,
+  DEFAULT_NAV_GROUPS,
+  isNavGroupInFeatureConfigs,
+  AppUpdater,
+} from '../../../core/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 
@@ -53,6 +61,7 @@ export class DatasetManagementPlugin
       DatasetManagementStartDependencies
     > {
   private readonly datasetManagementService = new DatasetManagementService();
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   public setup(
     core: CoreSetup<DatasetManagementStartDependencies, DatasetManagementStart>,
@@ -79,39 +88,34 @@ export class DatasetManagementPlugin
       return pathInApp && `/patterns${pathInApp}`;
     });
 
-    // Forward indexPatterns management page to datasets management page
-    urlForwarding.forwardApp('indexPatterns', DM_APP_ID, (path) => {
-      // Transform indexPatterns paths to datasets paths
-      // e.g., /indexPatterns/patterns/123 -> /patterns/123
-      const transformedPath = path.replace(/^\/indexPatterns/, '');
-      return transformedPath || '/';
-    });
-
-    // Register indexPatterns app as a redirect to datasets app (for direct app URLs)
-    core.application.register({
-      id: 'indexPatterns',
-      title: 'Index Patterns (Redirecting...)',
-      navLinkStatus: AppNavLinkStatus.hidden,
-      chromeless: true,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
-        const targetPath = params.history.location.pathname + params.history.location.search;
-        // Redirect to datasets app with the same path
-        coreStart.application.navigateToApp(DM_APP_ID, {
-          path: targetPath,
-          replace: true,
-        });
-        return () => {};
-      },
-    });
-
+    // Register in management section only for observability workspace
+    // Check workspace in mount to prevent access in non-observability workspaces
     opensearchDashboardsSection.registerApp({
       id: DM_APP_ID,
       title: sectionsHeader,
-      order: 0,
+      order: 1,
       mount: async (params) => {
+        const [coreStart] = await core.getStartServices();
+
+        // Check if we're in an observability workspace
+        const features = await coreStart.workspaces.currentWorkspace$
+          .pipe(take(1))
+          .toPromise()
+          .then((workspace) => workspace?.features);
+
+        const isObservabilityWorkspace =
+          (features && isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
+          false;
+
+        // If not in observability workspace, don't allow access
+        if (!isObservabilityWorkspace && coreStart.application.capabilities.workspaces.enabled) {
+          // Redirect to index patterns instead
+          const indexPatternsUrl = coreStart.application.getUrlForApp('indexPatterns');
+          coreStart.application.navigateToUrl(indexPatternsUrl);
+          return () => {};
+        }
+
         if (core.chrome.navGroup.getNavGroupEnabled()) {
-          const [coreStart] = await core.getStartServices();
           const urlForStandardIPMApp = new URL(
             coreStart.application.getUrlForApp(DM_APP_ID),
             window.location.href
@@ -122,7 +126,6 @@ export class DatasetManagementPlugin
           return () => {};
         }
         const { mountManagementSection } = await import('./management_app');
-
         return mountManagementSection(
           core.getStartServices,
           params,
@@ -141,6 +144,7 @@ export class DatasetManagementPlugin
       status: core.chrome.navGroup.getNavGroupEnabled()
         ? AppStatus.accessible
         : AppStatus.inaccessible,
+      updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import('./management_app');
         const [coreStart] = await core.getStartServices();
@@ -162,19 +166,29 @@ export class DatasetManagementPlugin
 
     core.getStartServices().then(([coreStart]) => {
       /**
-       * The `capabilities.workspaces.enabled` indicates
-       * if workspace feature flag is turned on or not and
-       * the global index pattern management page should only be registered
-       * to settings and setup when workspace is turned off,
+       * Only show datasets in observability workspace when workspaces are enabled.
+       * Do not show datasets when workspaces are disabled.
        */
-      if (!coreStart.application.capabilities.workspaces.enabled) {
-        core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
-          {
-            id: DM_APP_ID,
-            title: sectionsHeader,
-            order: 400,
-          },
-        ]);
+      if (coreStart.application.capabilities.workspaces.enabled) {
+        // Subscribe to workspace changes to control nav link visibility
+        coreStart.workspaces.currentWorkspace$.subscribe(async () => {
+          const features = await coreStart.workspaces.currentWorkspace$
+            .pipe(take(1))
+            .toPromise()
+            .then((workspace) => workspace?.features);
+
+          const isObservabilityWorkspace =
+            (features &&
+              isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
+            false;
+
+          // Update nav link visibility based on workspace
+          this.appUpdater$.next(() => ({
+            navLinkStatus: isObservabilityWorkspace
+              ? AppNavLinkStatus.visible
+              : AppNavLinkStatus.hidden,
+          }));
+        });
       }
     });
 

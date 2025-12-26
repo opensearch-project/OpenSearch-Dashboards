@@ -19,6 +19,7 @@ export type Services = CoreStart & {
   contentManagement?: ContentManagementPluginStart;
   collaboratorTypes: WorkspaceCollaboratorTypesService;
   useCaseService: UseCaseService;
+  data?: any;
 };
 
 export interface WorkspaceUseCaseFeature {
