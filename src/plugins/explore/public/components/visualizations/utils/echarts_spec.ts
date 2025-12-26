@@ -5,6 +5,7 @@
 
 import {
   BarSeriesOption,
+  LineSeriesOption,
   CustomSeriesOption,
   EChartsOption,
   XAXisComponentOption,
@@ -18,9 +19,11 @@ import {
   TimeUnit,
   VisColumn,
   VisFieldType,
+  Threshold,
+  ThresholdOptions,
 } from '../types';
 import { aggregate, aggregateByTime } from './data_transformation';
-import { getSwappedAxisRole } from './utils';
+import { getSwappedAxisRole, convertThresholds } from './utils';
 
 /**
  * Base style interface that all chart styles should extend
@@ -39,6 +42,9 @@ export interface BaseChartStyle {
   };
   switchAxes?: boolean;
   standardAxes?: StandardAxes[];
+  thresholdOptions?: ThresholdOptions;
+  useThresholdColor?: boolean;
+  addLegend?: boolean;
 }
 
 /**
@@ -70,11 +76,13 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
 
   // Built incrementally
   // TODO: avoid any
-  aggregatedData?: any[];
+  aggregatedData?: any;
   baseConfig?: any;
   xAxisConfig?: any;
   yAxisConfig?: any;
-  series?: Array<BarSeriesOption | CustomSeriesOption>;
+  series?: Array<BarSeriesOption | LineSeriesOption | CustomSeriesOption>;
+  visualMap?: any;
+  grid?: any;
 
   // Final output
   spec?: EChartsOption;
@@ -137,7 +145,6 @@ export const prepareData = <T extends BaseChartStyle>(
     throw new Error('axisConfig must be derived before prepareData');
   }
 
-  // Detect column types
   const dateColumn = [axisConfig.xAxis, axisConfig.yAxis].find(
     (axis) => axis?.schema === VisFieldType.Date
   );
@@ -153,22 +160,24 @@ export const prepareData = <T extends BaseChartStyle>(
   // TIME + NUMERICAL: Use time-based aggregation
   if (dateColumn && numericalColumn) {
     const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
-    aggregatedData = aggregateByTime(
+    const result = aggregateByTime(
       data,
       dateColumn.column,
       numericalColumn.column,
       timeUnit,
       styles.bucket?.aggregationType || AggregationType.SUM
     );
+    aggregatedData = result.aggregatedData;
   }
   // CATEGORICAL + NUMERICAL: Use existing aggregation
   else if (categoricalColumn && numericalColumn) {
-    aggregatedData = aggregate(
+    const result = aggregate(
       data,
       categoricalColumn.column,
       numericalColumn.column,
       styles.bucket?.aggregationType || AggregationType.SUM
     );
+    aggregatedData = result.aggregatedData;
   }
   // Fallback: return data as-is
   else {
@@ -237,13 +246,14 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
 export const assembleSpec = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { baseConfig, aggregatedData, xAxisConfig, yAxisConfig, series } = state;
+  const { baseConfig, aggregatedData, xAxisConfig, yAxisConfig, series, visualMap } = state;
 
   const spec = {
     ...baseConfig,
     dataset: { source: aggregatedData },
     xAxis: xAxisConfig,
     yAxis: yAxisConfig,
+    visualMap,
     series,
   };
 
@@ -310,4 +320,58 @@ export const applyAxisStyling = ({
   }
 
   return echartsAxisConfig;
+};
+
+export const buildVisMap = <T extends BaseChartStyle>(
+  state: EChartsSpecState<T>
+): EChartsSpecState<T> => {
+  const { styles, aggregatedData, axisColumnMappings } = state;
+
+  const actualX = axisColumnMappings?.x?.column;
+  const cateColumns = aggregatedData?.[0]?.filter((c: string) => c !== actualX);
+
+  if (!styles.useThresholdColor) return state;
+
+  const completeThreshold =
+    styles.thresholdOptions && styles?.thresholdOptions.thresholds
+      ? [
+          { value: 0, color: styles.thresholdOptions.baseColor } as Threshold,
+          ...styles.thresholdOptions.thresholds,
+        ]
+      : [];
+
+  const convertedThresholds = convertThresholds(completeThreshold);
+  const pieces = convertedThresholds.map((t) => ({
+    gte: t.min,
+    lt: t.max,
+    color: t.color,
+  }));
+
+  let visualMap;
+
+  if (axisColumnMappings?.color) {
+    visualMap = cateColumns.map((c: string, index: number) => {
+      const originalIndex = aggregatedData?.[0]?.indexOf(c);
+      return {
+        type: 'piecewise',
+        show: false,
+        seriesIndex: index,
+        dimension: originalIndex,
+        pieces,
+      };
+    });
+  } else {
+    visualMap = {
+      type: 'piecewise',
+      show: false,
+      seriesIndex: 0,
+      dimension: 1,
+      pieces,
+    };
+  }
+
+  return {
+    ...state,
+    visualMap,
+  };
 };
