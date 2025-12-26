@@ -29,6 +29,7 @@
  */
 
 import { mount } from 'enzyme';
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 import { HeaderExtension } from './header_extension';
 

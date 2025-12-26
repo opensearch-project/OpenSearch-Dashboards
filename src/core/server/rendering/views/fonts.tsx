@@ -30,6 +30,7 @@
 
 /* eslint-disable react/no-danger */
 
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React, { FunctionComponent } from 'react';
 
 import { RenderingMetadata } from '../types';

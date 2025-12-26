@@ -29,6 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+// @ts-ignore - React import needed for JSX but not directly used with new JSX transform
 import React, { PureComponent } from 'react';
 import { EuiScreenReaderOnly, keys } from '@elastic/eui';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';

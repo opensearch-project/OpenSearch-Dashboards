@@ -51,7 +51,12 @@ const plugins = [
 module.exports = {
   presets: [
     [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }],
-    require.resolve('@babel/preset-react'),
+    [
+      require.resolve('@babel/preset-react'),
+      {
+        runtime: 'automatic',
+      },
+    ],
   ],
   plugins,
 };

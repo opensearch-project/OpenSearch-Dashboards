@@ -15,7 +15,7 @@
       "@opensearch-project/opensearch/lib/*": ["node_modules/@opensearch-project/opensearch/lib/*"],
     },
     // Support .tsx files and transform JSX into calls to React.createElement
-    "jsx": "react",
+    "jsx": "react-jsx",
     // Enables all strict type checking options.
     "strict": true,
     // save information about the project graph on disk

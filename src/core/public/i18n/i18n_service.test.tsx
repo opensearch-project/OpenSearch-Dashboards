@@ -46,6 +46,7 @@ jest.mock('@osd/i18n/react', () => {
   };
 });
 
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 
 import { I18nService } from './i18n_service';

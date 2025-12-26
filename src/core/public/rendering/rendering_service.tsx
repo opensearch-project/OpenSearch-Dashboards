@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@osd/i18n/react';

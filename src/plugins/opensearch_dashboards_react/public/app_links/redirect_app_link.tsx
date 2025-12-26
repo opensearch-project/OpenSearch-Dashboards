@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-ignore - React import needed for JSX but not directly used with new JSX transform
 import React, { FunctionComponent, useRef, useMemo } from 'react';
 import classNames from 'classnames';
 import useObservable from 'react-use/lib/useObservable';

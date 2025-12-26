@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-ignore - React import needed for JSX but not directly used with new JSX transform
 import * as React from 'react';
 import { createNotifications } from './create_notifications';
 // eslint-disable-next-lien

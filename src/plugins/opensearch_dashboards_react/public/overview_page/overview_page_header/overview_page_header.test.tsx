@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-ignore - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 import { OverviewPageHeader } from './overview_page_header';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';

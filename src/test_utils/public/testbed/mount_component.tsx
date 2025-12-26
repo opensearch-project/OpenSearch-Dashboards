@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-ignore - React import needed for JSX but not directly used with new JSX transform
 import React, { ComponentType } from 'react';
 import { Store } from 'redux';
 import { ReactWrapper } from 'enzyme';

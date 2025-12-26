@@ -30,6 +30,7 @@
 
 import { EuiGlobalToastList } from '@elastic/eui';
 import { shallow } from 'enzyme';
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 import * as Rx from 'rxjs';
 

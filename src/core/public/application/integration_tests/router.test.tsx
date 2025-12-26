@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-expect-error - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { createMemoryHistory, History, createHashHistory } from 'history';

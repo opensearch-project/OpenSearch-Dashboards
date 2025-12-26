@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-ignore - React import needed for JSX but not directly used with new JSX transform
 import React, { Component, ComponentType } from 'react';
 import { MemoryRouter, Route, withRouter } from 'react-router-dom';
 import * as H from 'history';

@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-ignore - React import needed for JSX but not directly used with new JSX transform
 import React from 'react';
 import { ExitFullScreenButton } from './exit_full_screen_button';
 import { keys } from '@elastic/eui';

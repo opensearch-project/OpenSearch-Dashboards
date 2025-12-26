@@ -28,6 +28,7 @@
  * under the License.
  */
 
+// @ts-ignore - React import needed for JSX but not directly used with new JSX transform
 import React, { CSSProperties, ReactNode, useEffect, useRef, useState } from 'react';
 import { usePanelContext } from '../context';
 
