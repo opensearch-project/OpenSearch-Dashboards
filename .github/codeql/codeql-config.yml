@@ -1,0 +1,21 @@
+name: "CodeQL Config for OpenSearch Dashboards"
+
+# Use multiple query packs for comprehensive frontend security scanning
+queries:
+  - uses: security-extended
+  - uses: security-and-quality
+
+# Add community security rules
+packs:
+  - githubsecuritylab/codeql-javascript-queries
+
+# Focus scanning on source code, ignore test files for speed
+paths-ignore:
+  - "**/*.test.js"
+  - "**/*.test.ts"
+  - "**/test/**"
+  - "**/tests/**"
+  - "**/node_modules/**"
+  - "build/**"
+  - "dist/**"
+  - "target/**"
