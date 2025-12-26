@@ -10,6 +10,7 @@
  */
 
 import React from 'react';
+import DOMPurify from 'dompurify';
 import { LogActionMenu } from '../../log_action_menu';
 import { OpenSearchSearchHit } from '../../../types/doc_views_types';
 import { useDatasetContext } from '../../../application/context';
@@ -38,7 +39,7 @@ export const NonFilterableTableCell: React.FC<NonFilterableTableCellProps> = ({
     <td key={colName} data-test-subj="docTableField" className={className}>
       <div className="truncate-by-height">
         {/* eslint-disable-next-line react/no-danger */}
-        <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
+        <span dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(sanitizedCellValue) }} />
 
         {isTimeField && (
           <span className="exploreDocTableCell__filter" data-test-subj="osdDocTableCellFilter">

@@ -30,6 +30,7 @@
 
 import React, { PureComponent, Fragment } from 'react';
 import classNames from 'classnames';
+import DOMPurify from 'dompurify';
 
 import 'brace/theme/textmate';
 import 'brace/mode/markdown';
@@ -602,7 +603,7 @@ export class Field extends PureComponent<FieldProps> {
            * Justification for dangerouslySetInnerHTML:
            * Setting description may contain formatting and links to documentation.
            */
-          dangerouslySetInnerHTML={{ __html: setting.description || '' }} // eslint-disable-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(setting.description || '') }} // eslint-disable-line react/no-danger
         />
       );
     }

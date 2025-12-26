@@ -5,6 +5,7 @@
 import './samples.scss';
 
 import React, { PureComponent } from 'react';
+import DOMPurify from 'dompurify';
 
 import { EuiBasicTable, EuiCompressedFormRow } from '@elastic/eui';
 
@@ -47,7 +48,7 @@ export class FormatEditorSamples extends PureComponent<FormatEditorSamplesProps>
                * Justification for dangerouslySetInnerHTML:
                * Sample output may contain HTML tags, like URL image/audio format.
                */
-              dangerouslySetInnerHTML={{ __html: output }} // eslint-disable-line react/no-danger
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(output) }} // eslint-disable-line react/no-danger
             />
           ) : (
             <div>{output}</div>
