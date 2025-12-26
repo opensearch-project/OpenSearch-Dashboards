@@ -51,6 +51,6 @@
     "postcss-loader": "^8.1.1",
     "sass-loader": "^14.2.1",
     "style-loader": "^3.3.4",
-    "webpack": "^5.102.1"
+    "webpack": "^5.104.1"
   }
 }
