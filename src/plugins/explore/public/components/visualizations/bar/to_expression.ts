@@ -27,6 +27,7 @@ import {
   buildTooltipEncoding,
   buildThresholdColorEncoding,
   createBarSeries,
+  createStackBarSeries,
 } from './bar_chart_utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
@@ -37,7 +38,9 @@ import {
   createBaseConfig,
   buildAxisConfigs,
   assembleSpec,
+  buildVisMap,
 } from '../utils/echarts_spec';
+import { pivotDataWithCategory, pivotDataWithTime } from '../utils/data_transformation';
 
 // Only set size and binSpacing in manual mode
 const configureBarSizeAndSpacing = (barMark: any, styles: BarChartStyle) => {
@@ -64,6 +67,7 @@ export const createBarSpec = (
       prepareData,
       createBaseConfig,
       buildAxisConfigs,
+      buildVisMap,
       createBarSeries(styles),
       assembleSpec
     )({
@@ -71,7 +75,6 @@ export const createBarSpec = (
       styles,
       axisColumnMappings,
     });
-
     return result.spec;
   }
 
@@ -179,6 +182,7 @@ export const createTimeBarChart = (
       prepareData,
       createBaseConfig,
       buildAxisConfigs,
+      buildVisMap,
       createBarSeries(styles),
       assembleSpec
     )({
@@ -299,6 +303,27 @@ export const createGroupedTimeBarChart = (
   const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
   const categoryField = colorColumn?.column;
   const categoryName = colorColumn?.name;
+
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      pivotDataWithTime({
+        aggregationType: styles?.bucket?.aggregationType,
+        timeUnit: styles?.bucket?.bucketTimeUnit,
+      }),
+      createBaseConfig,
+      buildAxisConfigs,
+      buildVisMap,
+      createStackBarSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+
+    return result.spec;
+  }
 
   // Configure bar mark
   const barMark: any = {
@@ -529,7 +554,6 @@ export const createStackedBarSpec = (
   axisColumnMappings?: AxisColumnMappings
 ): any => {
   const styles = { ...defaultBarChartStyles, ...styleOptions };
-
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
 
@@ -539,6 +563,25 @@ export const createStackedBarSpec = (
   // Set up encoding
   const categoryAxis = 'x';
   const valueAxis = 'y';
+
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      pivotDataWithCategory({
+        aggregationType: styles?.bucket?.aggregationType,
+      }),
+      createBaseConfig,
+      buildAxisConfigs,
+      buildVisMap,
+      createStackBarSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+    return result.spec;
+  }
 
   // Configure bar mark
   const barMark: any = {
