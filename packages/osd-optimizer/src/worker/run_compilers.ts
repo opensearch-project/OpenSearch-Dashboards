@@ -98,7 +98,6 @@ const observeCompiler = (
    */
   const complete$ = Rx.fromEventPattern<Stats>((cb) => done.tap(PLUGIN_NAME, cb)).pipe(
     maybeMap((stats) => {
-      // @ts-expect-error not included in types, but it is real https://github.com/webpack/webpack/blob/ab4fa8ddb3f433d286653cd6af7e3aad51168649/lib/Watching.js#L58
       if (stats.compilation.needAdditionalPass) {
         return undefined;
       }
@@ -141,8 +140,12 @@ const observeCompiler = (
             if (path.endsWith('.scss')) {
               workUnits += EXTRA_SCSS_WORK_UNITS;
 
-              for (const depPath of module.buildInfo.fileDependencies) {
-                referencedFiles.add(depPath);
+              // Webpack 5: buildInfo.fileDependencies might be undefined or not iterable
+              const fileDeps = module.buildInfo?.fileDependencies;
+              if (fileDeps && typeof fileDeps[Symbol.iterator] === 'function') {
+                for (const depPath of fileDeps) {
+                  referencedFiles.add(depPath);
+                }
               }
             }
 
@@ -172,6 +175,11 @@ const observeCompiler = (
         }
 
         if (isExternalModule(module) || isIgnoredModule(module)) {
+          continue;
+        }
+
+        // Webpack 5: Skip RuntimeModule types (e.g., CompatGetDefaultExportRuntimeModule)
+        if (module.type === 'runtime') {
           continue;
         }
 

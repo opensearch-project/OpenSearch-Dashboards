@@ -41,7 +41,6 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
     libraryTarget: 'commonjs2',
-    hashFunction: 'Xxh64',
   },
 
   resolve: {
@@ -64,12 +63,6 @@ module.exports = {
         exclude: /node_modules/,
       },
     ],
-  },
-
-  node: {
-    // Don't replace built-in globals
-    __filename: false,
-    __dirname: false,
   },
 
   externals: {
