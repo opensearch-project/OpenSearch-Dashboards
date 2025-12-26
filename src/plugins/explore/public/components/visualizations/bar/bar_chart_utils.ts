@@ -12,7 +12,12 @@ import {
   BucketOptions,
   AggregationType,
 } from '../types';
-import { applyAxisStyling, getSchemaByAxis } from '../utils/utils';
+import {
+  applyAxisStyling,
+  getSchemaByAxis,
+  adjustOppositeSymbol,
+  generateThresholdLines,
+} from '../utils/utils';
 import { BarChartStyle } from './bar_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
@@ -206,30 +211,74 @@ export const createBarSeries = <T extends BaseChartStyle>(styles: BarChartStyle)
     (axis) => axis?.schema === VisFieldType.Numerical
   );
 
-  const series: BarSeriesOption[] = [
+  const thresholdLines = generateThresholdLines(styles?.thresholdOptions, styles?.switchAxes);
+  const series = [
     {
       type: 'bar',
-      encode: {
-        x: axisConfig.xAxis?.column,
-        y: axisConfig.yAxis?.column,
-      },
       name: numericalAxis?.name || '',
+      encode: {
+        [adjustOppositeSymbol(styles?.switchAxes, 'x')]: 0,
+        [adjustOppositeSymbol(styles?.switchAxes, 'y')]: 1,
+      },
       // TODO: barWidth and barCategoryGap seems are exclusive, we need to revise the current UI for this config
       barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
       barCategoryGap:
         styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
+      ...thresholdLines,
+      ...(styles?.showBarBorder && {
+        itemStyle: {
+          borderWidth: styles.barBorderWidth,
+          borderColor: styles.barBorderColor,
+        },
+      }),
     },
-  ];
+  ] as BarSeriesOption[];
   newState.series = series;
 
-  newState.series?.forEach((s) => {
-    if (styles.showBarBorder) {
-      s.itemStyle = {
+  return newState;
+};
+
+export const createStackBarSeries = <T extends BaseChartStyle>(
+  styles: BarChartStyle
+): PipelineFn<T> => (state) => {
+  const { axisConfig, categorical2Collection } = state;
+  const newState = { ...state };
+
+  if (!axisConfig) {
+    throw new Error('axisConfig must be derived before createBarSeries');
+  }
+
+  const thresholdLines = generateThresholdLines(styles?.thresholdOptions, styles?.switchAxes);
+
+  // create multi-series for each item in categorical2Collection
+  const newseries = categorical2Collection?.map((item, index) => ({
+    name: String(item),
+    type: 'bar',
+    stack: 'total',
+    //  use it for debugging
+    label: {
+      show: true,
+    },
+    emphasis: {
+      focus: 'self',
+    },
+    encode: {
+      [adjustOppositeSymbol(styles?.switchAxes, 'x')]: 0,
+      [adjustOppositeSymbol(styles?.switchAxes, 'y')]: index + 1,
+    },
+    barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
+    barCategoryGap:
+      styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
+    ...(styles.showBarBorder && {
+      itemStyle: {
         borderWidth: styles.barBorderWidth,
         borderColor: styles.barBorderColor,
-      };
-    }
-  });
+      },
+    }),
+    ...(index === 0 && thresholdLines),
+  }));
+
+  newState.series = newseries as BarSeriesOption[];
 
   return newState;
 };

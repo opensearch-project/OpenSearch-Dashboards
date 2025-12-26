@@ -18,9 +18,11 @@ import {
   TimeUnit,
   VisColumn,
   VisFieldType,
+  Threshold,
+  ThresholdOptions,
 } from '../types';
 import { aggregate, aggregateByTime } from './data_transformation';
-import { getSwappedAxisRole } from './utils';
+import { getSwappedAxisRole, convertThresholds } from './utils';
 
 /**
  * Base style interface that all chart styles should extend
@@ -39,6 +41,9 @@ export interface BaseChartStyle {
   };
   switchAxes?: boolean;
   standardAxes?: StandardAxes[];
+  thresholdOptions?: ThresholdOptions;
+  useThresholdColor?: boolean;
+  addLegend?: boolean;
 }
 
 /**
@@ -75,6 +80,8 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   xAxisConfig?: any;
   yAxisConfig?: any;
   series?: Array<BarSeriesOption | CustomSeriesOption>;
+  visualMap?: any;
+  categorical2Collection?: any[];
 
   // Final output
   spec?: EChartsOption;
@@ -95,6 +102,13 @@ export function pipe<T extends BaseChartStyle>(
 ): (state: EChartsSpecState<T>) => EChartsSpecState<T> {
   return (initialState: EChartsSpecState<T>) => fns.reduce((state, fn) => fn(state), initialState);
 }
+
+export type DataProcessFn<T extends BaseChartStyle = BaseChartStyle> = PipelineFn<T>;
+
+// data processing pipeline
+export const processData = <T extends BaseChartStyle>(
+  ...processors: Array<DataProcessFn<T>>
+): DataProcessFn<T> => pipe(...processors);
 
 /**
  * Get ECharts axis type from VisColumn schema
@@ -137,7 +151,6 @@ export const prepareData = <T extends BaseChartStyle>(
     throw new Error('axisConfig must be derived before prepareData');
   }
 
-  // Detect column types
   const dateColumn = [axisConfig.xAxis, axisConfig.yAxis].find(
     (axis) => axis?.schema === VisFieldType.Date
   );
@@ -149,33 +162,36 @@ export const prepareData = <T extends BaseChartStyle>(
   );
 
   let aggregatedData;
+  let categorical2Collection;
 
   // TIME + NUMERICAL: Use time-based aggregation
   if (dateColumn && numericalColumn) {
     const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
-    aggregatedData = aggregateByTime(
+    const result = aggregateByTime(
       data,
       dateColumn.column,
       numericalColumn.column,
       timeUnit,
       styles.bucket?.aggregationType || AggregationType.SUM
     );
+    aggregatedData = result.aggregatedData;
   }
   // CATEGORICAL + NUMERICAL: Use existing aggregation
   else if (categoricalColumn && numericalColumn) {
-    aggregatedData = aggregate(
+    const result = aggregate(
       data,
       categoricalColumn.column,
       numericalColumn.column,
       styles.bucket?.aggregationType || AggregationType.SUM
     );
+    aggregatedData = result.aggregatedData;
   }
   // Fallback: return data as-is
   else {
     aggregatedData = data;
   }
 
-  return { ...state, aggregatedData };
+  return { ...state, aggregatedData, categorical2Collection };
 };
 
 /**
@@ -237,13 +253,14 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
 export const assembleSpec = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { baseConfig, aggregatedData, xAxisConfig, yAxisConfig, series } = state;
+  const { baseConfig, aggregatedData, xAxisConfig, yAxisConfig, series, visualMap } = state;
 
   const spec = {
     ...baseConfig,
     dataset: { source: aggregatedData },
     xAxis: xAxisConfig,
     yAxis: yAxisConfig,
+    visualMap,
     series,
   };
 
@@ -310,4 +327,52 @@ export const applyAxisStyling = ({
   }
 
   return echartsAxisConfig;
+};
+
+export const buildVisMap = <T extends BaseChartStyle>(
+  state: EChartsSpecState<T>
+): EChartsSpecState<T> => {
+  const { categorical2Collection, styles } = state;
+
+  if (!styles.useThresholdColor) return state;
+
+  const completeThreshold =
+    styles.thresholdOptions && styles?.thresholdOptions.thresholds
+      ? [
+          { value: 0, color: styles.thresholdOptions.baseColor } as Threshold,
+          ...styles.thresholdOptions.thresholds,
+        ]
+      : [];
+
+  const convertedThresholds = convertThresholds(completeThreshold);
+  const pieces = convertedThresholds.map((t) => ({
+    gte: t.min,
+    lt: t.max,
+    color: t.color,
+  }));
+
+  let visualMap;
+
+  if (categorical2Collection) {
+    visualMap = categorical2Collection.map((c, index) => ({
+      type: 'piecewise',
+      show: false,
+      seriesIndex: index,
+      dimension: index + 1,
+      pieces,
+    }));
+  } else {
+    visualMap = {
+      type: 'piecewise',
+      show: false,
+      seriesIndex: 0,
+      dimension: 1,
+      pieces,
+    };
+  }
+
+  return {
+    ...state,
+    visualMap,
+  };
 };
