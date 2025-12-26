@@ -4,20 +4,20 @@
  */
 
 import { resolve } from 'path';
-import { stringifyRequest } from 'loader-utils';
-import { Configuration, Stats } from 'webpack';
-import webpackMerge from 'webpack-merge';
+import { Configuration } from 'webpack';
+// Webpack 5: webpack-merge v5 uses named export 'merge'
+import { merge as webpackMerge } from 'webpack-merge';
 import { REPO_ROOT } from './lib/constants';
 
 const BABEL_PRESET_PATH = require.resolve('@osd/babel-preset/webpack_preset');
 
+// Webpack 5: Stats.presetToOptions removed, use preset string directly
 const stats = {
-  ...Stats.presetToOptions('minimal'),
+  preset: 'minimal',
   colors: true,
   errorDetails: true,
   errors: true,
   moduleTrace: true,
-  warningsFilter: /(export .* was not found in)|(entrypoint size limit)/,
 };
 
 // Extend the Storybook Webpack config with some customizations
@@ -61,7 +61,6 @@ export default function ({ config: storybookConfig }: { config: Configuration })
         {
           test: /\.mjs$/,
           include: /node_modules/,
-          type: 'javascript/auto',
           use: {
             loader: 'babel-loader',
             options: {
@@ -88,9 +87,8 @@ export default function ({ config: storybookConfig }: { config: Configuration })
         },
         {
           test: /\.(html|md|txt|tmpl)$/,
-          use: {
-            loader: 'raw-loader',
-          },
+          // Webpack 5: asset/source replaces raw-loader
+          type: 'asset/source',
         },
         {
           test: /\.scss$/,
@@ -110,13 +108,16 @@ export default function ({ config: storybookConfig }: { config: Configuration })
               loader: 'sass-loader',
               options: {
                 additionalData(content: string, loaderContext: any) {
-                  return `@import ${stringifyRequest(
-                    loaderContext,
-                    resolve(REPO_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
+                  return `@import ${JSON.stringify(
+                    loaderContext.utils.contextify(
+                      loaderContext.context || loaderContext.rootContext,
+                      resolve(REPO_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
+                    )
                   )};\n${content}`;
                 },
                 sassOptions: {
-                  includePaths: [resolve(REPO_ROOT, 'node_modules')],
+                  // Webpack 5 / sass-loader v14: includePaths renamed to loadPaths
+                  loadPaths: [resolve(REPO_ROOT, 'node_modules')],
                 },
               },
             },
@@ -148,6 +149,8 @@ export default function ({ config: storybookConfig }: { config: Configuration })
       },
     },
     stats,
+    // Webpack 5: Add ignoreWarnings to replace stats.warningsFilter
+    ignoreWarnings: [/export .* was not found in/, /entrypoint size limit/],
   };
 
   // @ts-ignore There's a long error here about the types of the

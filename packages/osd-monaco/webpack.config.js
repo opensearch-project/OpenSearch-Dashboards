@@ -33,6 +33,8 @@ const path = require('path');
 const commonConfig = {
   mode: 'development',
   devtool: 'source-map',
+  // Webpack 5: Explicitly set target
+  target: 'web',
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.mjs'],
     alias: {
@@ -161,7 +163,8 @@ const commonConfig = {
       },
       {
         test: /\.(woff|woff2|eot|ttf|otf)$/,
-        use: 'file-loader',
+        // Webpack 5: Asset Modules replace file-loader
+        type: 'asset/resource',
       },
     ],
   },
