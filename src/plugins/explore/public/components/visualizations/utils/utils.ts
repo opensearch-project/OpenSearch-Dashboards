@@ -423,6 +423,29 @@ export function applyTimeRangeToEncoding(
   }
 }
 
+/**
+ * Parses a date string as UTC time
+ * Handles date strings without timezone information by treating them as UTC
+ *
+ * @param dateString - Date string in formats like "2025-12-10 00:00:00" or "2025-12-10T00:00:00"
+ * @returns Date object representing the UTC time
+ *
+ * @example
+ * parseUTCDate("2025-12-10 00:00:00") // Treats as UTC: 2025-12-10T00:00:00Z
+ * parseUTCDate("2025-12-10T00:00:00") // Treats as UTC: 2025-12-10T00:00:00Z
+ * parseUTCDate("2025-12-10T00:00:00Z") // Already UTC, parses correctly
+ */
+export function parseUTCDate(dateString: string): Date {
+  // If already has timezone info (Z, +, or -), parse directly
+  if (dateString.includes('Z') || /[+-]\d{2}:\d{2}$/.test(dateString)) {
+    return new Date(dateString);
+  }
+
+  // Convert space to 'T' for ISO 8601 format and add 'Z' for UTC
+  const isoString = dateString.replace(' ', 'T') + 'Z';
+  return new Date(isoString);
+}
+
 export const getChartRender = () => {
   try {
     const chartRender = localStorage.getItem('__DEVELOPMENT__.discover.vis.render');
@@ -441,7 +464,7 @@ export const convertThresholds = (thresholds: Threshold[]) => {
   }));
 };
 
-export const convertThresholdlineStyle = (style: ThresholdMode | undefined) => {
+export const convertThresholdLineStyle = (style: ThresholdMode | undefined) => {
   if (style === ThresholdMode.DotDashed) return 'dotted';
   return style;
 };
@@ -477,7 +500,7 @@ export const generateThresholdLines = (
       animation: false,
       lineStyle: {
         width: 2,
-        type: convertThresholdlineStyle(thresholdOptions?.thresholdStyle),
+        type: convertThresholdLineStyle(thresholdOptions?.thresholdStyle),
       },
       data: ThresholdSteps,
     },
@@ -485,7 +508,7 @@ export const generateThresholdLines = (
 };
 
 // return a combined markline with threshold lines and time marker
-export const composeMarkline = (thresholdOptions: ThresholdOptions, addTimeMarker: boolean) => {
+export const composeMarkLine = (thresholdOptions: ThresholdOptions, addTimeMarker: boolean) => {
   const hasThresholds = thresholdOptions?.thresholdStyle !== ThresholdMode.Off;
 
   if (!hasThresholds && !addTimeMarker) return {};
@@ -512,7 +535,7 @@ export const composeMarkline = (thresholdOptions: ThresholdOptions, addTimeMarke
       animation: false,
       lineStyle: {
         width: 2,
-        type: convertThresholdlineStyle(thresholdOptions?.thresholdStyle),
+        type: convertThresholdLineStyle(thresholdOptions?.thresholdStyle),
       },
       data,
     },
