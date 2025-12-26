@@ -31,7 +31,7 @@
 import path from 'path';
 import { i18n } from '@osd/i18n';
 import { getSavedObjects } from './saved_objects';
-import { fieldMappings } from './field_mappings';
+import { fieldMappings, ubiEventsFieldMappings, ubiQueriesFieldMappings } from './field_mappings';
 import { SampleDatasetSchema, AppLinkSchema } from '../../lib/sample_dataset_registry_types';
 import {
   appendDataSourceId,
@@ -76,6 +76,24 @@ export const ecommerceSpecProvider = function (): SampleDatasetSchema {
         timeFields: ['order_date'],
         currentTimeMarker: '2016-12-11T00:00:00',
         preserveDayOfWeekTimeOfDay: true,
+      },
+      {
+        id: 'ubi_events',
+        dataPath: path.join(__dirname, './ubi_events.json.gz'),
+        fields: ubiEventsFieldMappings,
+        timeFields: [],
+        currentTimeMarker: '2024-12-10T00:00:00',
+        preserveDayOfWeekTimeOfDay: false,
+        indexName: 'opensearch_dashboards_sample_ubi_events',
+      },
+      {
+        id: 'ubi_queries',
+        dataPath: path.join(__dirname, './ubi_queries.json.gz'),
+        fields: ubiQueriesFieldMappings,
+        timeFields: [],
+        currentTimeMarker: '2024-12-10T00:00:00',
+        preserveDayOfWeekTimeOfDay: false,
+        indexName: 'opensearch_dashboards_sample_ubi_queries',
       },
     ],
     status: 'not_installed',
