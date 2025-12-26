@@ -345,7 +345,7 @@ export function uiRenderMixin(osdServer, server, config) {
     }
 
     if (cspReportOnlyIsEmitting) {
-      const cspReportOnlyHeader = http.cspReportOnly.cspReportOnlyHeader.replace('<NONCE>', nonce);
+      const cspReportOnlyHeader = http.cspReportOnly.buildHeaderWithNonce(nonce);
       output.header('content-security-policy-report-only', cspReportOnlyHeader);
 
       if (http.cspReportOnly.reportingEndpointsHeader) {

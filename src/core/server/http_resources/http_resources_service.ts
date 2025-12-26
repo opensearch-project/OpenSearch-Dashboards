@@ -113,7 +113,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     }
 
     const nonce = crypto.randomBytes(16).toString('base64');
-    const cspReportOnlyHeader = cspReportOnly.cspReportOnlyHeader.replace('<NONCE>', nonce);
+    const cspReportOnlyHeader = cspReportOnly.buildHeaderWithNonce(nonce);
 
     const cspReportOnlyHeaders = cspReportOnlyIsEmitting
       ? {
