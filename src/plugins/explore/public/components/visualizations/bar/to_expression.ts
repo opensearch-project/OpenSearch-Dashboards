@@ -38,13 +38,7 @@ import {
   assembleSpec,
   buildVisMap,
 } from '../utils/echarts_spec';
-import {
-  aggregate,
-  aggregateByTime,
-  convertTo2DArray,
-  transform,
-  pivot,
-} from '../utils/data_transformation';
+import { aggregate, convertTo2DArray, transform, pivot } from '../utils/data_transformation';
 
 // Only set size and binSpacing in manual mode
 const configureBarSizeAndSpacing = (barMark: any, styles: BarChartStyle) => {
@@ -235,7 +229,7 @@ export const createTimeBarChart = (
     const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
     const result = pipe(
       transform(
-        aggregateByTime({
+        aggregate({
           groupBy: timeField,
           field: valueField,
           timeUnit,

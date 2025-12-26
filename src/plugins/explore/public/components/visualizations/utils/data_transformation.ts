@@ -237,33 +237,6 @@ const roundToTimeUnit = (timestamp: Date, unit: TimeUnit): Date => {
 };
 
 /**
- * Aggregate data by time intervals
- * This is a convenience wrapper around aggregate with timeUnit parameter
- *
- * @param options - Aggregation configuration options
- * @param options.groupBy - Field name for time/date values (ISO 8601 format)
- * @param options.field - Field name for numerical values to aggregate
- * @param options.timeUnit - Time interval unit (YEAR, MONTH, DATE, HOUR, MINUTE, SECOND, AUTO)
- * @param options.aggregationType - Type of aggregation to apply (SUM, MEAN, MAX, MIN, COUNT, NONE)
- *
- * @returns Function that takes data array and returns array of aggregated objects
- *
- * @example
- * const aggregateByDay = aggregateByTime({
- *   groupBy: 'timestamp',
- *   field: 'sales',
- *   timeUnit: TimeUnit.DATE,
- *   aggregationType: AggregationType.SUM
- * });
- */
-export const aggregateByTime = (options: {
-  groupBy: string;
-  field: string;
-  timeUnit: TimeUnit;
-  aggregationType: AggregationType;
-}) => aggregate({ ...options });
-
-/**
  * Helper function to normalize empty/null/undefined values
  * @param value - Value to normalize
  * @param defaultValue - Default value to use for empty values
