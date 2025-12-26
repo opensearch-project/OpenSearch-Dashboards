@@ -70,6 +70,17 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     timelineRef.current = timeline;
   }, [timeline]);
 
+  // Helper function to create loading message
+  const createLoadingMessage = (): { id: string; message: Message } => {
+    const loadingMessageId = `loading-${Date.now()}`;
+    const loadingMessage: Message = {
+      id: loadingMessageId,
+      role: 'assistant',
+      content: '',
+    };
+    return { id: loadingMessageId, message: loadingMessage };
+  };
+
   // Create the event handler using useMemo
   const eventHandler = useMemo(
     () =>
@@ -116,7 +127,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   }, [timeline, chatService]);
 
   const handleSend = async (options?: {input?: string}) => {
-    const messageContent = options?.input ?? input.trim();
+    const messageContent = (options?.input ?? input).trim();
     if (!messageContent || isStreaming) return;
 
     setInput('');
@@ -134,7 +145,13 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         role: 'user',
         content: userMessage.content,
       };
-      setTimeline((prev) => [...prev, timelineUserMessage]);
+      
+      // Add loading assistant message
+      const { id: loadingMessageId, message: loadingMessage } = createLoadingMessage();
+      
+      setTimeline((prev) => [...prev, timelineUserMessage, loadingMessage]);
+
+      let firstResponseReceived = false;
 
       // Subscribe to streaming response
       const subscription = observable.subscribe({
@@ -144,14 +161,24 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             setCurrentRunId(event.runId);
           }
 
+          // Remove loading message on first response
+          if (!firstResponseReceived) {
+            firstResponseReceived = true;
+            setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
+          }
+
           // Handle all events through the event handler service
           await eventHandler.handleEvent(event);
         },
         error: (error: any) => {
           console.error('Subscription error:', error);
+          // Remove loading message on error
+          setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
           setIsStreaming(false);
         },
         complete: () => {
+          // Remove loading message if still present
+          setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
           setIsStreaming(false);
         },
       });
@@ -205,7 +232,13 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         role: 'user',
         content: userMessage.content,
       };
-      setTimeline((prev) => [...prev, timelineUserMessage]);
+      
+      // Add loading assistant message
+      const { id: loadingMessageId, message: loadingMessage } = createLoadingMessage();
+      
+      setTimeline((prev) => [...prev, timelineUserMessage, loadingMessage]);
+
+      let firstResponseReceived = false;
 
       // Subscribe to streaming response
       const subscription = observable.subscribe({
@@ -215,14 +248,24 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             setCurrentRunId(event.runId);
           }
 
+          // Remove loading message on first response
+          if (!firstResponseReceived) {
+            firstResponseReceived = true;
+            setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
+          }
+
           // Handle all events through the event handler service
           await eventHandler.handleEvent(event);
         },
         error: (error: any) => {
           console.error('Subscription error:', error);
+          // Remove loading message on error
+          setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
           setIsStreaming(false);
         },
         complete: () => {
+          // Remove loading message if still present
+          setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
           setIsStreaming(false);
         },
       });
