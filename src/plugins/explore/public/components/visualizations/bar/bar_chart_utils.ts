@@ -217,8 +217,8 @@ export const createBarSeries = <T extends BaseChartStyle>(styles: BarChartStyle)
       type: 'bar',
       name: numericalAxis?.name || '',
       encode: {
-        [adjustOppositeSymbol(styles?.switchAxes, 'x')]: 0,
-        [adjustOppositeSymbol(styles?.switchAxes, 'y')]: 1,
+        x: axisConfig.xAxis?.column,
+        y: axisConfig.yAxis?.column,
       },
       // TODO: barWidth and barCategoryGap seems are exclusive, we need to revise the current UI for this config
       barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
@@ -241,7 +241,7 @@ export const createBarSeries = <T extends BaseChartStyle>(styles: BarChartStyle)
 export const createStackBarSeries = <T extends BaseChartStyle>(
   styles: BarChartStyle
 ): PipelineFn<T> => (state) => {
-  const { axisConfig, categorical2Collection } = state;
+  const { axisConfig, aggregatedData } = state;
   const newState = { ...state };
 
   if (!axisConfig) {
@@ -250,8 +250,12 @@ export const createStackBarSeries = <T extends BaseChartStyle>(
 
   const thresholdLines = generateThresholdLines(styles?.thresholdOptions, styles?.switchAxes);
 
+  const actualX = styles?.switchAxes ? axisConfig.yAxis : axisConfig.xAxis;
+
+  const cateColumns = aggregatedData?.[0]?.filter((c: string) => c !== actualX?.column);
+
   // create multi-series for each item in categorical2Collection
-  const newseries = categorical2Collection?.map((item, index) => ({
+  const newseries = cateColumns?.map((item: string, index: number) => ({
     name: String(item),
     type: 'bar',
     stack: 'total',
@@ -263,8 +267,8 @@ export const createStackBarSeries = <T extends BaseChartStyle>(
       focus: 'self',
     },
     encode: {
-      [adjustOppositeSymbol(styles?.switchAxes, 'x')]: 0,
-      [adjustOppositeSymbol(styles?.switchAxes, 'y')]: index + 1,
+      [adjustOppositeSymbol(styles?.switchAxes, 'x')]: actualX?.column,
+      [adjustOppositeSymbol(styles?.switchAxes, 'y')]: item,
     },
     barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
     barCategoryGap:

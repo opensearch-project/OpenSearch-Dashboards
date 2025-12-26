@@ -211,7 +211,7 @@ export const aggregateByTime = (
  * ]
  * */
 
-export const pivot2DCategory = <T extends BaseChartStyle>({
+export const pivotDataWithCategory = <T extends BaseChartStyle>({
   aggregationType,
   groupField,
 }: {
@@ -294,14 +294,12 @@ export const pivot2DCategory = <T extends BaseChartStyle>({
       return {
         ...state,
         aggregatedData: [[groupByMe, ...categorical2Collection.map((c) => String(c))], ...sorted],
-        categorical2Collection,
       };
     }
   }
   return {
     ...state,
     aggregatedData: data,
-    categorical2Collection: undefined,
   };
 };
 
@@ -380,13 +378,11 @@ export const pivotDataWithTime = <T extends BaseChartStyle>({
         [timeField, ...categorical2Collection.map((c) => String(c))],
         ...aggregatedRes,
       ],
-      categorical2Collection,
     };
   }
   return {
     ...state,
     aggregatedData: data,
-    categorical2Collection: undefined,
   };
 };
 

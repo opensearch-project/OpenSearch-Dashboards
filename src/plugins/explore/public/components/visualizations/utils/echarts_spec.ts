@@ -5,6 +5,7 @@
 
 import {
   BarSeriesOption,
+  LineSeriesOption,
   CustomSeriesOption,
   EChartsOption,
   XAXisComponentOption,
@@ -75,13 +76,13 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
 
   // Built incrementally
   // TODO: avoid any
-  aggregatedData?: any[];
+  aggregatedData?: any;
   baseConfig?: any;
   xAxisConfig?: any;
   yAxisConfig?: any;
-  series?: Array<BarSeriesOption | CustomSeriesOption>;
+  series?: Array<BarSeriesOption | LineSeriesOption | CustomSeriesOption>;
   visualMap?: any;
-  categorical2Collection?: any[];
+  grid?: any;
 
   // Final output
   spec?: EChartsOption;
@@ -102,13 +103,6 @@ export function pipe<T extends BaseChartStyle>(
 ): (state: EChartsSpecState<T>) => EChartsSpecState<T> {
   return (initialState: EChartsSpecState<T>) => fns.reduce((state, fn) => fn(state), initialState);
 }
-
-export type DataProcessFn<T extends BaseChartStyle = BaseChartStyle> = PipelineFn<T>;
-
-// data processing pipeline
-export const processData = <T extends BaseChartStyle>(
-  ...processors: Array<DataProcessFn<T>>
-): DataProcessFn<T> => pipe(...processors);
 
 /**
  * Get ECharts axis type from VisColumn schema
@@ -162,7 +156,6 @@ export const prepareData = <T extends BaseChartStyle>(
   );
 
   let aggregatedData;
-  let categorical2Collection;
 
   // TIME + NUMERICAL: Use time-based aggregation
   if (dateColumn && numericalColumn) {
@@ -191,7 +184,7 @@ export const prepareData = <T extends BaseChartStyle>(
     aggregatedData = data;
   }
 
-  return { ...state, aggregatedData, categorical2Collection };
+  return { ...state, aggregatedData };
 };
 
 /**
@@ -332,7 +325,10 @@ export const applyAxisStyling = ({
 export const buildVisMap = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { categorical2Collection, styles } = state;
+  const { styles, aggregatedData, axisColumnMappings } = state;
+
+  const actualX = axisColumnMappings?.x?.column;
+  const cateColumns = aggregatedData?.[0]?.filter((c: string) => c !== actualX);
 
   if (!styles.useThresholdColor) return state;
 
@@ -353,14 +349,17 @@ export const buildVisMap = <T extends BaseChartStyle>(
 
   let visualMap;
 
-  if (categorical2Collection) {
-    visualMap = categorical2Collection.map((c, index) => ({
-      type: 'piecewise',
-      show: false,
-      seriesIndex: index,
-      dimension: index + 1,
-      pieces,
-    }));
+  if (axisColumnMappings?.color) {
+    visualMap = cateColumns.map((c: string, index: number) => {
+      const originalIndex = aggregatedData?.[0]?.indexOf(c);
+      return {
+        type: 'piecewise',
+        show: false,
+        seriesIndex: index,
+        dimension: originalIndex,
+        pieces,
+      };
+    });
   } else {
     visualMap = {
       type: 'piecewise',
