@@ -41,6 +41,8 @@ const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
 
 exports.getWebpackConfig = ({ dev = false } = {}) => ({
   mode: dev ? 'development' : 'production',
+  // Webpack 5: Explicitly set target for browser compatibility
+  target: 'web',
   entry: {
     'osd-ui-shared-deps': './entry.js',
     'osd-ui-shared-deps.v7.dark': ['@elastic/eui/dist/eui_theme_dark.css'],
@@ -51,7 +53,7 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     'osd-ui-shared-deps.v9.light': ['@elastic/eui/dist/eui_theme_v9_light.css'],
   },
   context: __dirname,
-  devtool: dev ? '#cheap-source-map' : false,
+  devtool: dev ? 'cheap-source-map' : false,
   output: {
     path: UiSharedDeps.distDir,
     filename: '[name].js',
@@ -59,7 +61,9 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     devtoolModuleFilenameTemplate: (info) =>
       `osd-ui-shared-deps/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
     library: '__osdSharedDeps__',
-    hashFunction: 'Xxh64',
+    // Webpack 5: jsonpFunction renamed to chunkLoadingGlobal
+    chunkLoadingGlobal: '__osdSharedDeps__',
+    // Webpack 5: hashFunction default changed, removed explicit setting
   },
 
   module: {
@@ -99,15 +103,11 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
       // Handle Monaco's codicon font files
       {
         test: /[\/\\]node_modules[\/\\]monaco-editor[\/\\].*\.ttf$/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: '[name].[ext]',
-              outputPath: 'fonts/',
-            },
-          },
-        ],
+        // Webpack 5: Asset Modules replace file-loader
+        type: 'asset/resource',
+        generator: {
+          filename: 'fonts/[name][ext]',
+        },
       },
       {
         test: /\.scss$/,
@@ -243,7 +243,11 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
   },
 
   optimization: {
-    noEmitOnErrors: true,
+    // Webpack 5: Use deterministic IDs for production
+    moduleIds: dev ? 'natural' : 'deterministic',
+    chunkIds: dev ? 'natural' : 'deterministic',
+    // Webpack 5: noEmitOnErrors inverted to emitOnErrors
+    emitOnErrors: false,
     splitChunks: {
       cacheGroups: {
         'osd-ui-shared-deps.@elastic': {
@@ -263,6 +267,14 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
     hints: false,
   },
 
+  // Webpack 5: Add ignoreWarnings to suppress common warnings
+  ignoreWarnings: [
+    /export .* was not found in/,
+    /export .* \(reexported as .*\) was not found in/,
+    /export .* \(imported as .*\) was not found in/,
+    /Should not import the named export/,
+  ],
+
   plugins: [
     new MiniCssExtractPlugin({
       filename: '[name].css',
@@ -275,15 +287,17 @@ exports.getWebpackConfig = ({ dev = false } = {}) => ({
       : [
           new CompressionPlugin({
             algorithm: 'brotliCompress',
-            filename: '[path].br',
+            // Webpack 5: filename pattern changed
+            filename: '[path][base].br',
             test: /\.(js|css)$/,
-            cache: false,
+            // Webpack 5: cache option removed
           }),
           new CompressionPlugin({
             algorithm: 'gzip',
-            filename: '[path].gz',
+            // Webpack 5: filename pattern changed
+            filename: '[path][base].gz',
             test: /\.(js|css)$/,
-            cache: false,
+            // Webpack 5: cache option removed
           }),
         ]),
   ],
