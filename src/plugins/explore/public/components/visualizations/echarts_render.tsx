@@ -43,7 +43,13 @@ export const EchartsRender = ({ spec }: Props) => {
 
   useEffect(() => {
     if (instance && spec) {
-      instance.setOption({ ...spec, grid: { top: 60, bottom: 60, left: 60, right: 60 } });
+      instance.setOption(
+        {
+          ...spec,
+          grid: { top: 60, bottom: 60, left: 60, right: 60 },
+        },
+        { notMerge: true } // this is a must to update compulsorily otherwise will merge with previous option
+      );
     }
   }, [spec, instance]);
 
