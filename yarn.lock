@@ -8659,9 +8659,9 @@
     "@types/react" "*"
 
 "@types/react-input-autosize@^2.2.1":
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/@types/react-input-autosize/-/react-input-autosize-2.2.4.tgz#8c8d4becb14c76cd3337f292e4fe53c9ab3ce1b8"
-  integrity sha512-7O028jRZHZo3mj63h3HSvB0WpvPXNWN86sajHTi0+CtjA4Ym+DFzO9RzrSbfFURe5ZWsq6P72xk7MInI6aGWJA==
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/@types/react-input-autosize/-/react-input-autosize-2.2.1.tgz#6a335212e7fce1e1a4da56ae2095c8c5c35fbfe6"
+  integrity sha512-RxzEjd4gbLAAdLQ92Q68/AC+TfsAKTc4evsArUH1aIShIMqQMIMjsxoSnwyjtbFTO/AGIW/RQI94XSdvOxCz/w==
   dependencies:
     "@types/react" "*"
 
@@ -23184,8 +23184,8 @@ react-grid-layout@^0.16.2:
 
 react-input-autosize@^3.0.0:
   version "3.0.0"
-  resolved "https://registry.yarnpkg.com/react-18-input-autosize/-/react-18-input-autosize-3.0.0.tgz#eb34ac8c8335c30f76a56a8902d31f1fc1b62c4c"
-  integrity sha512-7tsUc9PJWg6Vsp8qYuzlKKBf7hbCoTBdNfjYZSprEPbxf3meuhjklg9QPBe9rIyoR3uDAzmG7NpoJ1+kP5ns+w==
+  resolved "https://registry.yarnpkg.com/react-input-autosize/-/react-input-autosize-3.0.0.tgz#6b5898c790d4478d69420b55441fcc31d5c50a85"
+  integrity sha512-nL9uS7jEs/zu8sqwFE5MAPx6pPkNAriACQ2rGLlqmKr2sPGtN7TXTyDdQt4lbNXVx7Uzadb40x8qotIuru6Rhg==
   dependencies:
     prop-types "^15.5.8"
 
