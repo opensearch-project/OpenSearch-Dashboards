@@ -1,0 +1,2 @@
+infra:
+- Introduce bundle refs settings and add core plugins and core entry as refs to plugin build config ([#9737](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9737))

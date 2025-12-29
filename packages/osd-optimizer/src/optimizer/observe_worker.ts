@@ -148,7 +148,7 @@ function initWorker(
         args: [
           JSON.stringify(workerConfig),
           JSON.stringify(bundles.map((b) => b.toSpec())),
-          BundleRefs.fromBundles(config.bundles).toSpecJson(),
+          BundleRefs.fromBundles(config.bundles).addRefs(config.bundleRefs).toSpecJson(),
         ],
       });
       return [];

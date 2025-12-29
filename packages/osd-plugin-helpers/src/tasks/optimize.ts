@@ -33,7 +33,13 @@ import Path from 'path';
 import { promisify } from 'util';
 
 import { REPO_ROOT } from '@osd/utils';
-import { OptimizerConfig, runOptimizer, logOptimizerState } from '@osd/optimizer';
+import {
+  OptimizerConfig,
+  runOptimizer,
+  logOptimizerState,
+  findOpenSearchDashboardsPlatformPlugins,
+  BundleRef,
+} from '@osd/optimizer';
 
 import { BuildContext } from '../contexts';
 
@@ -47,6 +53,42 @@ export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContex
   log.info('running @osd/optimizer');
   log.indent(2);
 
+  // Find all OpenSearch Dashboards platform plugins located in 'src/plugins'
+  const corePlugins = findOpenSearchDashboardsPlatformPlugins(
+    [Path.resolve(REPO_ROOT, 'src/plugins')],
+    []
+  );
+
+  const refs: BundleRef[] = [];
+
+  // The core module public dirs
+  ['public', 'public/utils'].forEach((name) => {
+    refs.push({
+      bundleId: 'core',
+      contextDir: Path.resolve(REPO_ROOT, 'src/core'),
+      contextPrefix: Path.resolve(REPO_ROOT, 'src/core') + Path.sep,
+      entry: name,
+      exportId: `entry/core/${name}`,
+    });
+  });
+
+  // Define bundleRefs, which tell the optimizer (and ultimately webpack)
+  // not to bundle these modules directly, but instead to treat them as external
+  // and reference their exports at runtime. This avoids redundant bundling
+  // and enables module sharing across plugins and core components.
+  for (const p of corePlugins) {
+    const publicDirNames = ['public', ...p.extraPublicDirs];
+    for (const name of publicDirNames) {
+      refs.push({
+        bundleId: p.id,
+        contextDir: p.directory,
+        contextPrefix: Path.resolve(p.directory) + Path.sep,
+        entry: name,
+        exportId: `plugin/${p.id}/${name}`,
+      });
+    }
+  }
+
   // build bundles into target
   const config = OptimizerConfig.create({
     repoRoot: REPO_ROOT,
@@ -54,6 +96,7 @@ export async function optimize({ log, plugin, sourceDir, buildDir }: BuildContex
     cache: false,
     dist: true,
     pluginScanDirs: [],
+    bundleRefs: refs,
   });
 
   await runOptimizer(config).pipe(logOptimizerState(log, config)).toPromise();

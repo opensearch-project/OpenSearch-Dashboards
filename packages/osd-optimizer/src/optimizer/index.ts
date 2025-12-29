@@ -37,3 +37,4 @@ export * from './run_workers';
 export * from './bundle_cache';
 export * from './handle_optimizer_completion';
 export * from './get_output_stats';
+export * from './opensearch_dashboards_platform_plugins';
