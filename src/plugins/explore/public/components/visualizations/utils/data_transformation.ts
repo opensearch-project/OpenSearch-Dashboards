@@ -258,7 +258,7 @@ export const pivotDataWithCategory = <T extends BaseChartStyle>({
         return [
           group,
           ...categorical2Collection.map(
-            (color) => aggregateValues(aggregationType, colorValues[color]) ?? null
+            (color) => aggregateValues(aggregationType, colorValues[color]) ?? 0
           ),
         ];
       });
@@ -366,7 +366,7 @@ export const pivotDataWithTime = <T extends BaseChartStyle>({
         return [
           colorValues.date,
           ...categorical2Collection.map(
-            (c) => aggregateValues(aggregationType ?? AggregationType.SUM, colorValues[c]) ?? null
+            (c) => aggregateValues(aggregationType ?? AggregationType.SUM, colorValues[c]) ?? 0
           ),
         ];
       })

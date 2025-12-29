@@ -4,13 +4,40 @@
  */
 
 import { AreaChartStyle } from './area_vis_config';
-import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
+import {
+  VisColumn,
+  VEGASCHEMA,
+  AxisColumnMappings,
+  AxisRole,
+  TimeUnit,
+  AggregationType,
+} from '../types';
 import { buildMarkConfig, createTimeMarkerLayer, applyAxisStyling } from '../line/line_chart_utils';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
-import { applyTimeRangeToEncoding, getSwappedAxisRole, getTooltipFormat } from '../utils/utils';
+import {
+  applyTimeRangeToEncoding,
+  getSwappedAxisRole,
+  getTooltipFormat,
+  getChartRender,
+} from '../utils/utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
+import {
+  pipe,
+  deriveAxisConfig,
+  prepareData,
+  createBaseConfig,
+  buildAxisConfigs,
+  assembleSpec,
+  buildVisMap,
+} from '../utils/echarts_spec';
+import { pivotDataWithCategory, pivotDataWithTime } from '../utils/data_transformation';
+import {
+  createAreaSeries,
+  createStackAreaSeries,
+  createFacetedAreaSeries,
+} from './area_chart_utils';
 
 /**
  * Create a simple area chart with one metric and one date
@@ -32,6 +59,23 @@ export const createSimpleAreaChart = (
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
   const metricField = yAxis?.column;
   const dateField = xAxis?.column;
+  // Check if we should use ECharts rendering
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      prepareData,
+      createBaseConfig,
+      buildAxisConfigs,
+      createAreaSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+
+    return result.spec;
+  }
 
   const metricName = yAxisStyle?.title?.text || yAxis?.name;
   const dateName = xAxisStyle?.title?.text || xAxis?.name;
@@ -161,10 +205,9 @@ export const createMultiAreaChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
-  const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
-
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
+  const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
   const metricField = yAxis?.column;
   const dateField = xAxis?.column;
   const categoryField = colorColumn?.column;
@@ -174,6 +217,26 @@ export const createMultiAreaChart = (
   const categoryName = colorColumn?.name;
   const layers: any[] = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
+  // Check if we should use ECharts rendering
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      pivotDataWithTime({
+        timeUnit: TimeUnit.MINUTE,
+      }),
+      createBaseConfig,
+      buildAxisConfigs,
+      buildVisMap,
+      createStackAreaSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+
+    return result.spec;
+  }
 
   const mainLayer = {
     params: [createTimeRangeBrush({ timeAxis: 'x' })],
@@ -309,6 +372,24 @@ export const createFacetedMultiAreaChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
+  // Check if we should use ECharts rendering
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      prepareData,
+      createBaseConfig,
+      buildAxisConfigs,
+      createFacetedAreaSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+
+    return result.spec;
+  }
+
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
   const facetMapping = axisColumnMappings?.[AxisRole.FACET];
 
@@ -489,6 +570,23 @@ export const createCategoryAreaChart = (
   const categoryField = xAxis?.column;
   const metricName = yAxisStyle?.title?.text || yAxis?.name;
   const categoryName = xAxisStyle?.title?.text || xAxis?.name;
+  // Check if we should use ECharts rendering
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      prepareData,
+      createBaseConfig,
+      buildAxisConfigs,
+      createAreaSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+
+    return result.spec;
+  }
   const layers: any[] = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
@@ -599,6 +697,27 @@ export const createStackedAreaChart = (
   const categoryName2 = colorMapping?.name;
   const layers = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
+  // Check if we should use ECharts rendering
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      pivotDataWithCategory({
+        groupField: xAxis,
+        aggregationType: AggregationType.SUM,
+      }),
+      createBaseConfig,
+      buildAxisConfigs,
+      buildVisMap,
+      createStackAreaSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+
+    return result.spec;
+  }
 
   const mainLayer = {
     mark: {
