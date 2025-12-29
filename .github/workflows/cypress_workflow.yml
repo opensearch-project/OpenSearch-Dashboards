@@ -310,23 +310,23 @@ jobs:
           sleep 30
         shell: bash
 
-      - name: Start Prometheus with Docker
+      - name: Download and Start Prometheus
         if: matrix.group == '14Explore'
         run: |
-          # Start clean Prometheus instance with fixture config
-          docker run -d \
-            --name prometheus \
-            --network host \
-            -p 9090:9090 \
-            -v ${{ github.workspace }}/cypress/fixtures/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml \
-            prom/prometheus:v3.8.1 \
-            --config.file=/etc/prometheus/prometheus.yml \
-            --storage.tsdb.path=/prometheus \
+          # Download Prometheus binary
+          PROM_VERSION="3.8.1"
+          curl -LO https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz
+          tar xzf prometheus-${PROM_VERSION}.linux-amd64.tar.gz
+
+          # Start Prometheus with fixture config
+          ./prometheus-${PROM_VERSION}.linux-amd64/prometheus \
+            --config.file=${{ github.workspace }}/cypress/fixtures/prometheus/prometheus.yml \
+            --storage.tsdb.path=/tmp/prometheus-data \
             --web.listen-address=:9090 \
             --web.enable-lifecycle \
-            --web.enable-admin-api
+            --web.enable-admin-api &
 
-          # Wait for Prometheus to be ready and load fixtures
+          # Wait for Prometheus to be ready
           echo "Waiting for Prometheus to start..."
           for i in {1..30}; do
             if curl -s http://localhost:9090/-/healthy > /dev/null 2>&1; then

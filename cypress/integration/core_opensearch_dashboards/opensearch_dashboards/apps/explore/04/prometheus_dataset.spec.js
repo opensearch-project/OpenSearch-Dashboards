@@ -144,9 +144,8 @@ const createPrometheusWorkspace = (workspaceName, dataConnectionId) => {
 const prometheusDatasetTestSuite = () => {
   let workspaceId = '';
   const prometheusConfig = PROMETHEUS_CLUSTER;
-  const definedPrometheusVariables = !prometheusConfig.url;
 
-  (definedPrometheusVariables ? describe.skip : describe)(
+  (!prometheusConfig.url ? describe.skip : describe)(
     'Prometheus Dataset',
     { defaultCommandTimeout: 600000 },
     () => {
