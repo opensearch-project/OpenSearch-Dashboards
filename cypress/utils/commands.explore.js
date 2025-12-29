@@ -60,27 +60,26 @@ const isEditorEmpty = () => {
 };
 
 const selectIndexWildcardMode = (indexPattern, appendWildcard = true) => {
-  // Select "Index wildcard" from the scope selector
-  cy.getElementByTestId('index-scope-selector')
-    .should('be.visible')
-    .find('[data-test-subj="comboBoxSearchInput"]')
-    .click()
-    .clear()
-    .type('Index wildcard{enter}');
+  let pattern = indexPattern;
 
-  // Wait for the selection to take effect by verifying the text changed
-  cy.getElementByTestId('index-scope-selector')
-    .find('[data-test-subj="comboBoxInput"]')
-    .should('contain.text', 'Index wildcard')
-    .should('be.visible');
+  if (appendWildcard) {
+    pattern = `${indexPattern}*`;
+  } else if (!indexPattern.includes('*')) {
+    pattern = `${indexPattern}*`;
+  }
 
-  // Enter the pattern with optional wildcard appending
-  const pattern = appendWildcard ? `${indexPattern}*{enter}` : `${indexPattern}{enter}`;
-  cy.getElementByTestId('dataset-prefix-selector', { timeout: 10000 })
+  // Type the pattern into the unified search field
+  cy.getElementByTestId('unified-index-selector-search')
     .should('be.visible')
-    .find('[data-test-subj="multiWildcardPatternInput"]')
+    .click({ force: true })
     .clear()
     .type(pattern);
+
+  // Click the "Add wildcard" button to add the pattern
+  cy.getElementByTestId('unified-index-selector-add-button')
+    .should('be.visible')
+    .should('not.be.disabled')
+    .click();
 };
 
 cy.explore.add('clearQueryEditor', () => {
@@ -406,38 +405,25 @@ cy.explore.add(
       .should('not.be.disabled')
       .click();
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
-    cy.get(`[title="Indexes"]`).click();
     cy.get(`[title="${dataSourceName}"]`).click();
 
-    // Ensure "Index name" mode is selected (not "Index wildcard")
-    cy.getElementByTestId('index-scope-selector')
+    // Use the unified index selector - type to search and click from results
+    cy.getElementByTestId('unified-index-selector-search')
       .should('be.visible')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
-
-    // Select "Index name" if not already selected
-    cy.get(`[title="Index name"]`).should('be.visible').click({ force: true });
-
-    // Verify selection
-    cy.getElementByTestId('index-scope-selector')
-      .find('[data-test-subj="comboBoxInput"]')
-      .should('contain.text', 'Index name');
-
-    // Click the search field to open the popover (onFocus triggers isPopoverOpen = true)
-    cy.getElementByTestId('index-selector-search')
-      .should('be.visible')
-      .click({ force: true }) // Use click instead of focus to ensure onFocus event fires
+      .click({ force: true })
       .clear()
       .type(index);
 
-    // Wait for the popover to fully render
-    cy.getElementByTestId('index-selector-popover', { timeout: 10000 }).should('be.visible');
+    // Wait for the dropdown to appear with results
+    cy.getElementByTestId('unified-index-selector-dropdown', { timeout: 10000 }).should(
+      'be.visible'
+    );
 
-    // Now look for the dataset-index-selector within the popover
-    cy.getElementByTestId('dataset-index-selector', { timeout: 5000 })
+    // Click the matching index from the dropdown list
+    cy.getElementByTestId('unified-index-selector-list', { timeout: 5000 })
       .should('be.visible')
       .within(() => {
-        // Look for the index by title attribute in the popover
+        // Find and click the index by its label in the EuiSelectable
         cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
       });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
@@ -507,9 +493,7 @@ cy.explore.add(
     // Step 3 - Click advanced selector button
     cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
 
-    // Step 4 - Select Indexes
-    cy.get(`[title="Indexes"]`).should('be.visible');
-    cy.get(`[title="Indexes"]`).click();
+    // Step 4 - Indexes panel is now hidden when it's the only option, skip to data source selection
 
     // Step 5 - Select data source
     cy.get(`[title="${dataSourceName}"]`).should('be.visible');
@@ -669,9 +653,7 @@ cy.explore.add(
       }
     }
 
-    // Step 4 - Select Indexes
-    cy.get(`[title="Indexes"]`).should('be.visible');
-    cy.get(`[title="Indexes"]`).click();
+    // Step 4 - Indexes panel is now hidden when it's the only option, skip to data source selection
 
     // Step 5 - Select data source
     cy.get(`[title="${dataSource}"]`).should('be.visible');
