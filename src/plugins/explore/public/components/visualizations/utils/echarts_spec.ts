@@ -22,7 +22,6 @@ import {
   Threshold,
   ThresholdOptions,
 } from '../types';
-import { aggregate, aggregateByTime } from './data_transformation';
 import { getSwappedAxisRole, convertThresholds } from './utils';
 
 /**
@@ -63,7 +62,8 @@ export interface EChartsAxisConfig {
 export interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
   data: Array<Record<string, any>>;
   styles: T;
-  axisColumnMappings?: AxisColumnMappings;
+  axisConfig: EChartsAxisConfig;
+  axisColumnMappings: AxisColumnMappings;
 }
 
 /**
@@ -71,12 +71,9 @@ export interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
  */
 export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   extends EChartsSpecInput<T> {
-  // Derived from input
-  axisConfig?: EChartsAxisConfig;
-
   // Built incrementally
   // TODO: avoid any
-  aggregatedData?: any;
+  transformedData?: any[];
   baseConfig?: any;
   xAxisConfig?: any;
   yAxisConfig?: any;
@@ -122,72 +119,6 @@ function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time'
 }
 
 /**
- * Derive axis configuration from styles and mappings
- */
-export const deriveAxisConfig = <T extends BaseChartStyle>(
-  state: EChartsSpecState<T>
-): EChartsSpecState<T> => {
-  const { styles, axisColumnMappings } = state;
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
-
-  return { ...state, axisConfig };
-};
-
-/**
- * Prepare and aggregate data
- */
-export const prepareData = <T extends BaseChartStyle>(
-  state: EChartsSpecState<T>
-): EChartsSpecState<T> => {
-  const { data, axisConfig, styles } = state;
-
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before prepareData');
-  }
-
-  const dateColumn = [axisConfig.xAxis, axisConfig.yAxis].find(
-    (axis) => axis?.schema === VisFieldType.Date
-  );
-  const categoricalColumn = [axisConfig.xAxis, axisConfig.yAxis].find(
-    (axis) => axis?.schema === VisFieldType.Categorical
-  );
-  const numericalColumn = [axisConfig.xAxis, axisConfig.yAxis].find(
-    (axis) => axis?.schema === VisFieldType.Numerical
-  );
-
-  let aggregatedData;
-
-  // TIME + NUMERICAL: Use time-based aggregation
-  if (dateColumn && numericalColumn) {
-    const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
-    const result = aggregateByTime(
-      data,
-      dateColumn.column,
-      numericalColumn.column,
-      timeUnit,
-      styles.bucket?.aggregationType || AggregationType.SUM
-    );
-    aggregatedData = result.aggregatedData;
-  }
-  // CATEGORICAL + NUMERICAL: Use existing aggregation
-  else if (categoricalColumn && numericalColumn) {
-    const result = aggregate(
-      data,
-      categoricalColumn.column,
-      numericalColumn.column,
-      styles.bucket?.aggregationType || AggregationType.SUM
-    );
-    aggregatedData = result.aggregatedData;
-  }
-  // Fallback: return data as-is
-  else {
-    aggregatedData = data;
-  }
-
-  return { ...state, aggregatedData };
-};
-
-/**
  * Create base configuration (title, tooltip)
  */
 export const createBaseConfig = <T extends BaseChartStyle>(
@@ -210,6 +141,7 @@ export const createBaseConfig = <T extends BaseChartStyle>(
       trigger: 'axis',
       axisPointer: { type: 'shadow' },
     },
+    legend: {},
   };
 
   return { ...state, baseConfig };
@@ -246,11 +178,12 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
 export const assembleSpec = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { baseConfig, aggregatedData, xAxisConfig, yAxisConfig, series, visualMap } = state;
+  const { baseConfig, transformedData = [], xAxisConfig, yAxisConfig, series, visualMap } = state;
+  const source = transformedData[transformedData.length - 1];
 
   const spec = {
     ...baseConfig,
-    dataset: { source: aggregatedData },
+    dataset: { source },
     xAxis: xAxisConfig,
     yAxis: yAxisConfig,
     visualMap,
@@ -322,13 +255,17 @@ export const applyAxisStyling = ({
   return echartsAxisConfig;
 };
 
-export const buildVisMap = <T extends BaseChartStyle>(
-  state: EChartsSpecState<T>
-): EChartsSpecState<T> => {
-  const { styles, aggregatedData, axisColumnMappings } = state;
+export const buildVisMap = ({
+  seriesFields,
+}: {
+  seriesFields: string[] | ((headers?: string[]) => string[]);
+}) => (state: EChartsSpecState) => {
+  const { styles, transformedData = [] } = state;
+  const source = transformedData[transformedData?.length - 1];
 
-  const actualX = axisColumnMappings?.x?.column;
-  const cateColumns = aggregatedData?.[0]?.filter((c: string) => c !== actualX);
+  if (!Array.isArray(seriesFields)) {
+    seriesFields = seriesFields(source[0]);
+  }
 
   if (!styles.useThresholdColor) return state;
 
@@ -347,28 +284,16 @@ export const buildVisMap = <T extends BaseChartStyle>(
     color: t.color,
   }));
 
-  let visualMap;
-
-  if (axisColumnMappings?.color) {
-    visualMap = cateColumns.map((c: string, index: number) => {
-      const originalIndex = aggregatedData?.[0]?.indexOf(c);
-      return {
-        type: 'piecewise',
-        show: false,
-        seriesIndex: index,
-        dimension: originalIndex,
-        pieces,
-      };
-    });
-  } else {
-    visualMap = {
+  const visualMap = seriesFields.map((c: string, index: number) => {
+    const originalIndex = source[0]?.indexOf(c);
+    return {
       type: 'piecewise',
       show: false,
-      seriesIndex: 0,
-      dimension: 1,
+      seriesIndex: index,
+      dimension: originalIndex,
       pieces,
     };
-  }
+  });
 
   return {
     ...state,

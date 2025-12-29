@@ -21,6 +21,7 @@ import {
 import { BarChartStyle } from './bar_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
+import { getSeriesDisplayName } from '../utils/series';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
@@ -197,92 +198,56 @@ export const buildThresholdColorEncoding = (
 /**
  * Create bar series configuration
  */
-export const createBarSeries = <T extends BaseChartStyle>(styles: BarChartStyle): PipelineFn<T> => (
-  state
-) => {
-  const { axisConfig } = state;
+export const createBarSeries = <T extends BaseChartStyle>({
+  styles,
+  categoryField,
+  seriesFields,
+}: {
+  styles: BarChartStyle;
+  categoryField: string;
+  seriesFields: string[] | ((headers?: string[]) => string[]);
+}): PipelineFn<T> => (state) => {
+  const { axisConfig, axisColumnMappings, transformedData = [] } = state;
   const newState = { ...state };
+  const source = transformedData[transformedData?.length - 1];
 
   if (!axisConfig) {
     throw new Error('axisConfig must be derived before createBarSeries');
   }
 
-  const numericalAxis = [axisConfig.xAxis, axisConfig.yAxis].find(
-    (axis) => axis?.schema === VisFieldType.Numerical
-  );
+  if (!Array.isArray(seriesFields)) {
+    seriesFields = seriesFields(source[0]);
+  }
 
   const thresholdLines = generateThresholdLines(styles?.thresholdOptions, styles?.switchAxes);
-  const series = [
-    {
+
+  const series = seriesFields.map((seriesField, index) => {
+    const name = getSeriesDisplayName(seriesField, Object.values(axisColumnMappings));
+    return {
       type: 'bar',
-      name: numericalAxis?.name || '',
+      stack: 'total',
+      emphasis: {
+        focus: 'self',
+      },
+      name,
       encode: {
-        x: axisConfig.xAxis?.column,
-        y: axisConfig.yAxis?.column,
+        [adjustOppositeSymbol(styles?.switchAxes, 'x')]: categoryField,
+        [adjustOppositeSymbol(styles?.switchAxes, 'y')]: seriesField,
       },
       // TODO: barWidth and barCategoryGap seems are exclusive, we need to revise the current UI for this config
       barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
       barCategoryGap:
         styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
-      ...thresholdLines,
+      ...(index === 0 && thresholdLines),
       ...(styles?.showBarBorder && {
         itemStyle: {
           borderWidth: styles.barBorderWidth,
           borderColor: styles.barBorderColor,
         },
       }),
-    },
-  ] as BarSeriesOption[];
+    };
+  }) as BarSeriesOption[];
   newState.series = series;
-
-  return newState;
-};
-
-export const createStackBarSeries = <T extends BaseChartStyle>(
-  styles: BarChartStyle
-): PipelineFn<T> => (state) => {
-  const { axisConfig, aggregatedData } = state;
-  const newState = { ...state };
-
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before createBarSeries');
-  }
-
-  const thresholdLines = generateThresholdLines(styles?.thresholdOptions, styles?.switchAxes);
-
-  const actualX = styles?.switchAxes ? axisConfig.yAxis : axisConfig.xAxis;
-
-  const cateColumns = aggregatedData?.[0]?.filter((c: string) => c !== actualX?.column);
-
-  // create multi-series for each item in categorical2Collection
-  const newseries = cateColumns?.map((item: string, index: number) => ({
-    name: String(item),
-    type: 'bar',
-    stack: 'total',
-    //  use it for debugging
-    label: {
-      show: true,
-    },
-    emphasis: {
-      focus: 'self',
-    },
-    encode: {
-      [adjustOppositeSymbol(styles?.switchAxes, 'x')]: actualX?.column,
-      [adjustOppositeSymbol(styles?.switchAxes, 'y')]: item,
-    },
-    barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
-    barCategoryGap:
-      styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
-    ...(styles.showBarBorder && {
-      itemStyle: {
-        borderWidth: styles.barBorderWidth,
-        borderColor: styles.barBorderColor,
-      },
-    }),
-    ...(index === 0 && thresholdLines),
-  }));
-
-  newState.series = newseries as BarSeriesOption[];
 
   return newState;
 };
