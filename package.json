@@ -264,7 +264,7 @@
     "glob": "^7.1.7",
     "glob-all": "^3.2.1",
     "globby": "^11.1.0",
-    "handlebars": "4.7.7",
+    "handlebars": "4.7.8",
     "hjson": "3.2.1",
     "http-aws-es": "npm:@zhongnansu/http-aws-es@6.0.1",
     "http-proxy-agent": "^2.1.0",
