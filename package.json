@@ -219,7 +219,7 @@
     "@hapi/wreck": "^17.1.0",
     "@opensearch-dashboards-test/opensearch-dashboards-test-library": "https://github.com/opensearch-project/opensearch-dashboards-test-library/archive/refs/tags/1.0.6.tar.gz",
     "@opensearch-project/opensearch": "^2.13.0",
-    "@opensearch-project/oui": "^2.0.0-alpha.1",
+    "@opensearch-project/oui": "^2.0.0-alpha.2",
     "@opensearch/datemath": "5.0.3",
     "@osd/ace": "1.0.0",
     "@osd/analytics": "1.0.0",
