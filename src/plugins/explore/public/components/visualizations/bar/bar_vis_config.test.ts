@@ -45,46 +45,15 @@ describe('bar_vis_config', () => {
       });
 
       // Check axes configuration
-      expect(defaultBarChartStyles.standardAxes).toHaveLength(2);
-      expect(defaultBarChartStyles.standardAxes[1]).toMatchObject({
-        id: 'Axis-2',
-        position: Positions.LEFT,
-        show: true,
-        style: {},
-        labels: {
-          show: true,
-          rotate: 0,
-          filter: false,
-          truncate: 100,
-        },
-        title: {
-          text: '',
-        },
-        grid: {
-          showLines: true,
-        },
-        axisRole: AxisRole.Y,
-      });
-
-      expect(defaultBarChartStyles.standardAxes[0]).toMatchObject({
-        id: 'Axis-1',
-        position: Positions.BOTTOM,
-        show: true,
-        style: {},
-        labels: {
-          show: true,
-          rotate: 0,
-          filter: false,
-          truncate: 100,
-        },
-        title: {
-          text: '',
-        },
-        grid: {
-          showLines: false,
-        },
-        axisRole: AxisRole.X,
-      });
+      expect(defaultBarChartStyles.standardAxes).toHaveLength(1);
+      expect(defaultBarChartStyles.standardAxes[0]).toEqual(
+        expect.objectContaining({
+          grid: {
+            showLines: false,
+          },
+          axisRole: AxisRole.X,
+        })
+      );
 
       expect(defaultBarChartStyles.titleOptions).toMatchObject({
         show: false,

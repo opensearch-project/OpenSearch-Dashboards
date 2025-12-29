@@ -3,21 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Observable } from 'rxjs';
 import { useObservable } from 'react-use';
 import dateMath from '@elastic/datemath';
 import { VisData } from './visualization_builder.types';
 import { TableVis } from './table/table_vis';
 import { defaultTableChartStyles, TableChartStyle } from './table/table_vis_config';
-import { convertStringsToMappings } from './visualization_builder_utils';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
-import { toExpression } from './utils/to_expression';
-import { ExpressionRendererEvent, ExpressionsStart } from '../../../../expressions/public';
+import { ExpressionsStart } from '../../../../expressions/public';
 import { VisualizationEmptyState } from './visualization_empty_state';
-import { visualizationRegistry } from './visualization_registry';
 import { RenderChartConfig } from './types';
-import { opensearchFilters, TimeRange } from '../../../../data/public';
+import { TimeRange } from '../../../../data/public';
+import { VegaRender } from './vega_render';
+import { EchartsRender } from './echarts_render';
+import { createVisSpec } from './utils/create_vis_spec';
 
 interface Props {
   data$: Observable<VisData | undefined>;
@@ -77,48 +77,8 @@ export const VisualizationRender = ({
   }, [from, to]);
 
   const spec = useMemo(() => {
-    if (!visualizationData) {
-      return;
-    }
-
-    if (!visConfig?.type) {
-      return;
-    }
-
-    const rule = visualizationRegistry.findRuleByAxesMapping(visConfig?.axesMapping ?? {}, columns);
-    if (!rule || !rule.toSpec) {
-      return;
-    }
-    const axisColumnMappings = convertStringsToMappings(visConfig?.axesMapping ?? {}, columns);
-    return rule.toSpec(
-      visualizationData.transformedData,
-      visualizationData.numericalColumns,
-      visualizationData.categoricalColumns,
-      visualizationData.dateColumns,
-      visConfig.styles,
-      visConfig.type,
-      axisColumnMappings,
-      timeRange
-    );
-  }, [columns, visConfig, visualizationData, timeRange]);
-
-  const onExpressionEvent = useCallback(
-    async (e: ExpressionRendererEvent) => {
-      if (!onSelectTimeRange) {
-        return;
-      }
-      if (e.name === 'applyFilter') {
-        if (e.data && e.data.filters) {
-          const { timeRange: extractedTimeRange } = opensearchFilters.extractTimeRange(
-            e.data.filters,
-            e.data.timeFieldName
-          );
-          onSelectTimeRange(extractedTimeRange);
-        }
-      }
-    },
-    [onSelectTimeRange]
-  );
+    return createVisSpec({ data: visualizationData, config: visConfig, timeRange });
+  }, [visConfig, visualizationData, timeRange]);
 
   if (!visualizationData || columns.length === 0) {
     return null;
@@ -154,16 +114,15 @@ export const VisualizationRender = ({
 
   const hasSelectionMapping = Object.keys(visConfig?.axesMapping ?? {}).length !== 0;
   if (hasSelectionMapping) {
-    if (!ExpressionRenderer) {
-      return null;
+    if (!spec.$schema) {
+      return <EchartsRender spec={spec} />;
     }
-    const expression = toExpression(searchContext, spec);
     return (
-      <ExpressionRenderer
-        key={JSON.stringify(searchContext) + expression}
-        expression={expression}
+      <VegaRender
         searchContext={searchContext}
-        onEvent={onExpressionEvent}
+        ExpressionRenderer={ExpressionRenderer}
+        onSelectTimeRange={onSelectTimeRange}
+        spec={spec}
       />
     );
   }
