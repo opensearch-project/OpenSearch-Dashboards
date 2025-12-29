@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AggregationType, TimeUnit, VisColumn, VisFieldType } from '../types';
+import { AggregationType, TimeUnit } from '../types';
 import { inferTimeIntervals } from '../bar/bar_chart_utils';
-import { PipelineFn, BaseChartStyle, EChartsSpecState } from './echarts_spec';
+import { EChartsSpecState } from './echarts_spec';
+import { parseUTCDate } from './utils';
 
 const aggregateValues = (aggregationType: AggregationType, values?: number[]) => {
   if (!values || values.length === 0) return null;
@@ -27,60 +28,179 @@ const aggregateValues = (aggregationType: AggregationType, values?: number[]) =>
   }
 };
 
+type TransformFn = (data: Array<Record<string, any>>) => Array<Record<string, any>>;
+
 /**
- * Helper function to aggregate data for ECharts
- * Returns 2D array with header row for use with ECharts dataset
+ * Convert array of objects to 2D array format
  *
- * @param data - Raw data array
- * @param groupBy - Field name for categories (e.g., 'product', 'region')
- * @param field - Field name for values (e.g., 'sales', 'count')
- * @param aggregationType - Type of aggregation to apply (SUM, MEAN, MAX, MIN, COUNT, NONE)
- *
- * @returns 2D array with header row
+ * @param data - Array of objects with consistent keys
+ * @param headers - Optional array of field names to specify column order and selection
+ * @returns 2D array with header row as first element
  *
  * @example
- * Input data:
+ * Input: [{name: 'foo', age: 10, height: 100}, {name: 'bar', age: 15, height: 130}]
+ * Output (no headers): [['name', 'age', 'height'], ['foo', 10, 100], ['bar', 15, 130]]
+ * Output (with headers): [['name', 'age'], ['foo', 10], ['bar', 15]]
+ */
+export const convertTo2DArray = (headers?: string[]) => (
+  data: Array<Record<string, any>>
+): Array<string[] | any[]> => {
+  if (data.length === 0) return [];
+
+  // Use provided headers or extract from first object
+  const columnHeaders = headers || Object.keys(data[0]);
+
+  // Create data rows
+  const rows = data.map((obj) => columnHeaders.map((key) => obj[key]));
+
+  return [columnHeaders, ...rows];
+};
+
+export const transform = (...fns: TransformFn[]) => (state: EChartsSpecState) => {
+  const { data } = state;
+  const transformedData: Array<Array<Record<string, any>>> = [data];
+
+  for (const fn of fns) {
+    const transformed = fn(transformedData[transformedData.length - 1]);
+    transformedData.push(transformed);
+  }
+
+  return { ...state, transformedData };
+};
+
+/**
+ * Creates an aggregation function for grouping and aggregating data
+ * Returns a function that processes data and returns an array of aggregated objects
+ *
+ * @param options - Aggregation configuration options
+ * @param options.groupBy - Field name for categories or time field (e.g., 'product', 'region', 'timestamp')
+ * @param options.field - Field name for values (e.g., 'sales', 'count')
+ * @param options.aggregationType - Type of aggregation to apply (SUM, MEAN, MAX, MIN, COUNT, NONE)
+ * @param options.timeUnit - Optional time interval unit. When provided, treats groupBy as date field
+ *
+ * @returns Function that takes data array and returns array of aggregated objects
+ *
+ * @example
+ * // Example 1: Categorical aggregation
+ * // Input data:
  * [
  *   { product: 'A', sales: 100 },
  *   { product: 'A', sales: 150 },
- *   { product: 'B', sales: 200 }
+ *   { product: 'B', sales: 200 },
+ *   { product: 'B', sales: 120 }
  * ]
  *
- * Output (with SUM aggregation):
+ * // Usage:
+ * const aggregateSales = aggregate({
+ *   groupBy: 'product',
+ *   field: 'sales',
+ *   aggregationType: AggregationType.SUM
+ * });
+ *
+ * // Output:
  * [
- *   ['product', 'sales'],  // Header row
- *   ['A', 250],            // Aggregated: 100 + 150
- *   ['B', 200]
+ *   { product: 'A', sales: 250 },
+ *   { product: 'B', sales: 320 }
+ * ]
+ *
+ * @example
+ * // Example 2: Time-based aggregation
+ * // Input data:
+ * [
+ *   { timestamp: '2024-01-01T08:00:00Z', sales: 100 },
+ *   { timestamp: '2024-01-01T14:00:00Z', sales: 150 },
+ *   { timestamp: '2024-01-02T09:00:00Z', sales: 200 },
+ *   { timestamp: '2024-01-02T16:00:00Z', sales: 180 }
+ * ]
+ *
+ * // Usage:
+ * const aggregateSalesByDay = aggregate({
+ *   groupBy: 'timestamp',
+ *   field: 'sales',
+ *   timeUnit: TimeUnit.DATE,
+ *   aggregationType: AggregationType.SUM
+ * });
+ *
+ * // Output (sorted by time):
+ * [
+ *   { timestamp: Date('2024-01-01T00:00:00.000Z'), sales: 250 },
+ *   { timestamp: Date('2024-01-02T00:00:00.000Z'), sales: 380 }
  * ]
  */
+export const aggregate = (options: {
+  groupBy: string;
+  field: string;
+  aggregationType: AggregationType;
+  timeUnit?: TimeUnit;
+}) => (data: Array<Record<string, any>>) => {
+  const { groupBy, field, aggregationType, timeUnit } = options;
 
-export const aggregate = (
-  data: Array<Record<string, any>>,
-  groupByMe: string,
-  field: string,
-  aggregationType: AggregationType
-): {
-  aggregatedData: Array<Array<string | number | null>>;
-} => {
+  // Determine if this is time-based grouping
+  const isTimeBased = timeUnit !== undefined;
+
+  // Infer time unit if AUTO
+  const effectiveTimeUnit = isTimeBased
+    ? timeUnit === TimeUnit.AUTO
+      ? inferTimeIntervals(data, groupBy)
+      : timeUnit
+    : undefined;
+
+  // Group by category or time bucket
   const grouped = data.reduce((acc, row) => {
-    const category = String(row[groupByMe]);
-    if (!acc[category]) {
-      acc[category] = [];
+    let groupKey: string | number;
+    let groupValue: string | Date;
+
+    if (isTimeBased && effectiveTimeUnit) {
+      // Time-based grouping
+      const timestamp = parseUTCDate(row[groupBy]);
+
+      // Skip invalid dates
+      if (isNaN(timestamp.getTime())) {
+        return acc;
+      }
+
+      // Round to time bucket
+      const bucket = roundToTimeUnit(timestamp, effectiveTimeUnit);
+      groupKey = bucket.getTime(); // Use timestamp as key for grouping
+      groupValue = bucket;
+    } else {
+      // Categorical grouping
+      groupKey = String(row[groupBy]);
+      groupValue = groupKey;
     }
+
     const value = Number(row[field]);
     if (!isNaN(value)) {
-      acc[category].push(value);
+      if (!acc[groupKey]) {
+        acc[groupKey] = { groupValue, values: [] };
+      }
+      acc[groupKey].values.push(value);
     }
-    return acc;
-  }, {} as Record<string, number[]>);
 
-  const aggregatedRes = Object.entries(grouped).map(([category, rows]) => {
-    return [category, aggregateValues(aggregationType, rows) ?? null];
+    return acc;
+  }, {} as Record<string | number, { groupValue: string | Date; values: number[] }>);
+
+  // Apply aggregation and convert to array of objects
+  let result = Object.values(grouped).map(({ groupValue, values }) => {
+    let aggregatedValue: number;
+    if (values.length === 0) {
+      aggregatedValue = 0;
+    } else {
+      aggregatedValue = aggregateValues(aggregationType, values) ?? 0;
+    }
+
+    return {
+      [groupBy]: groupValue,
+      [field]: aggregatedValue,
+    };
   });
 
-  return {
-    aggregatedData: [[groupByMe, field], ...aggregatedRes],
-  };
+  // Sort by time if time-based
+  if (isTimeBased) {
+    result = result.sort((a, b) => (a[groupBy] as Date).getTime() - (b[groupBy] as Date).getTime());
+  }
+
+  return result;
 };
 
 /**
@@ -117,226 +237,135 @@ const roundToTimeUnit = (timestamp: Date, unit: TimeUnit): Date => {
 };
 
 /**
- * Aggregate data by time intervals for ECharts
- * Returns 2D array with header row, using Date objects as time bucket keys
- *
- * @param data - Raw data array
- * @param timeField - Field name for time/date values (ISO 8601 format)
- * @param valueField - Field name for numerical values to aggregate
- * @param timeUnit - Time interval unit (YEAR, MONTH, DATE, HOUR, MINUTE, SECOND, AUTO)
- * @param aggregationType - Type of aggregation to apply (SUM, MEAN, MAX, MIN, COUNT, NONE)
- *
- * @returns 2D array with header row, time buckets as Date objects
- *
- * @example
- * Input data:
- * [
- *   { timestamp: '2024-01-15T10:30:00Z', sales: 100 },
- *   { timestamp: '2024-01-15T14:20:00Z', sales: 150 },
- *   { timestamp: '2024-01-16T09:00:00Z', sales: 200 }
- * ]
- *
- * Output (with TimeUnit.DATE and SUM aggregation):
- * [
- *   ['timestamp', 'sales'],              // Header row
- *   [new Date('2024-01-15T00:00:00Z'), 250],  // 100 + 150
- *   [new Date('2024-01-16T00:00:00Z'), 200]
- * ]
+ * Helper function to normalize empty/null/undefined values
+ * @param value - Value to normalize
+ * @param defaultValue - Default value to use for empty values
+ * @returns Normalized string value
  */
-export const aggregateByTime = (
-  data: Array<Record<string, any>>,
-  timeField: string,
-  valueField: string,
-  timeUnit: TimeUnit,
-  aggregationType: AggregationType
-): {
-  aggregatedData: Array<Array<string | number | null>>;
-} => {
-  // Infer time unit if AUTO
-  const effectiveTimeUnit =
-    timeUnit === TimeUnit.AUTO ? inferTimeIntervals(data, timeField) : timeUnit;
-
-  // Group by time bucket
-  const grouped = data.reduce((acc, row) => {
-    const timestamp = new Date(row[timeField]);
-
-    // Skip invalid dates
-    if (isNaN(timestamp.getTime())) {
-      return acc;
-    }
-
-    // Round to time bucket
-    const bucket = roundToTimeUnit(timestamp, effectiveTimeUnit);
-    const bucketKey = bucket.getTime(); // Use timestamp as key for grouping
-
-    if (!acc[bucketKey]) {
-      acc[bucketKey] = {
-        date: bucket,
-        values: [],
-      };
-    }
-
-    const value = Number(row[valueField]);
-    if (!isNaN(value)) {
-      acc[bucketKey].values.push(value);
-    }
-
-    return acc;
-  }, {} as Record<number, { date: Date; values: number[] }>);
-
-  const aggregatedRes = Object.values(grouped)
-    .map(({ date, values }) => {
-      return [date, aggregateValues(aggregationType, values) ?? null];
-    })
-    .sort((a, b) => a[0].getTime() - b[0].getTime()); // Sort by time;
-
-  return { aggregatedData: [[timeField, valueField], ...aggregatedRes] };
+const normalizeEmptyValue = (value: any, defaultValue: string = '-'): string => {
+  if (value === null || value === undefined || value === '') {
+    return defaultValue;
+  }
+  return String(value);
 };
 
 /**
- * pivot data if there is a color column
+ * Pivot data by a categorical or time-based column
+ * Returns array of objects with pivoted columns
+ *
+ * @param options - Pivot configuration options
+ * @param options.groupBy - Field name for grouping rows (e.g., 'product', 'region', 'timestamp')
+ * @param options.pivot - Field name for pivot columns (e.g., 'category', 'type')
+ * @param options.field - Field name for values to aggregate (e.g., 'sales', 'count')
+ * @param options.aggregationType - Type of aggregation to apply (SUM, MEAN, MAX, MIN, COUNT, NONE)
+ * @param options.timeUnit - Optional time interval unit. When provided, treats groupBy as date field
+ *
+ * @returns Function that takes data array and returns array of objects with pivoted columns
+ *
  * @example
- * Input data:
+ * // Example 1: Categorical pivot
+ * // Input data:
  * [
- *   { product: 'A', sales: 100, type: 'cloth'},
- *   { product: 'A', sales: 150, type: 'food' },
- *   { product: 'B', sales: 200, type: 'food' }
+ *   { product: 'A', type: 'online', sales: 100 },
+ *   { product: 'A', type: 'store', sales: 150 },
+ *   { product: 'B', type: 'online', sales: 200 },
+ *   { product: 'B', type: 'store', sales: 120 }
  * ]
  *
- * Output:
+ * // Usage:
+ * const pivotSales = pivot({
+ *   groupBy: 'product',
+ *   pivot: 'type',
+ *   field: 'sales',
+ *   aggregationType: AggregationType.SUM
+ * });
+ *
+ * // Output:
  * [
- *   ['product', "cloth", "food"],  // Header row
- *   ['A', 100, 150],
- *   ['B', 200, null]
+ *   { product: 'A', online: 100, store: 150 },
+ *   { product: 'B', online: 200, store: 120 }
  * ]
- * */
+ *
+ * @example
+ * // Example 2: Time-based pivot
+ * // Input data:
+ * [
+ *   { timestamp: '2024-01-01T00:00:00Z', product: 'A', sales: 100 },
+ *   { timestamp: '2024-01-01T00:00:00Z', product: 'B', sales: 200 },
+ *   { timestamp: '2024-01-02T00:00:00Z', product: 'A', sales: 150 },
+ *   { timestamp: '2024-01-02T00:00:00Z', product: 'B', sales: 180 }
+ * ]
+ *
+ * // Usage:
+ * const pivotSalesByTime = pivot({
+ *   groupBy: 'timestamp',
+ *   pivot: 'product',
+ *   field: 'sales',
+ *   timeUnit: TimeUnit.DATE,
+ *   aggregationType: AggregationType.SUM
+ * });
+ *
+ * // Output:
+ * [
+ *   { timestamp: Date('2024-01-01T00:00:00.000Z'), A: 100, B: 200 },
+ *   { timestamp: Date('2024-01-02T00:00:00.000Z'), A: 150, B: 180 }
+ * ]
+ *
+ * @example
+ * // Example 3: Handling empty/null/undefined pivot values
+ * // Input data with empty values:
+ * [
+ *   { region: 'US', category: '', sales: 100 },
+ *   { region: 'EU', category: null, sales: 150 },
+ *   { region: 'US', category: 'Electronics', sales: 200 }
+ * ]
+ *
+ * // Usage:
+ * const pivotByCategory = pivot({
+ *   groupBy: 'region',
+ *   pivot: 'category',
+ *   field: 'sales',
+ *   aggregationType: AggregationType.SUM
+ * });
+ *
+ * // Output (empty/null/undefined values normalized to '-'):
+ * [
+ *   { region: 'US', '-': 100, Electronics: 200 },
+ *   { region: 'EU', '-': 150, Electronics: null }
+ * ]
+ */
+export const pivot = (options: {
+  groupBy: string;
+  pivot: string;
+  field: string;
+  aggregationType?: AggregationType;
+  timeUnit?: TimeUnit;
+}) => (data: Array<Record<string, any>>): Array<Record<string, any>> => {
+  const { groupBy, pivot: pivotField, field, aggregationType, timeUnit } = options;
 
-export const pivotDataWithCategory = <T extends BaseChartStyle>({
-  aggregationType,
-  groupField,
-}: {
-  aggregationType?: AggregationType | undefined;
-  groupField?: VisColumn;
-}): PipelineFn<T> => (state) => {
-  const { data, axisConfig, axisColumnMappings } = state;
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before prepareData');
-  }
-
-  const categoricalColumn = [axisConfig.xAxis, axisConfig.yAxis].find(
-    (axis) => axis?.schema === VisFieldType.Categorical
-  );
-  const numericalColumn = [axisConfig.xAxis, axisConfig.yAxis].find(
-    (axis) => axis?.schema === VisFieldType.Numerical
-  );
-
-  const colorColumn = axisColumnMappings?.color?.column;
-  // use categoricalColumn as default
-  const groupByMe = groupField ? groupField.column : categoricalColumn?.column;
-  const valueField = numericalColumn?.column;
-
-  if (colorColumn && groupByMe && valueField) {
-    const categorical2Collection = Array.from(new Set(data.map((item) => item[colorColumn])));
-
-    const grouped = data.reduce((acc, row) => {
-      const group = String(row[groupByMe]);
-      const color = String(row[colorColumn]);
-      const value = Number(row[valueField]);
-
-      if (isNaN(value)) return acc;
-
-      acc[group] ??= {};
-      acc[group][color] ??= [];
-      acc[group][color].push(value);
-
-      return acc;
-    }, {} as Record<string, Record<string, number[]>>);
-
-    if (aggregationType) {
-      // Aggregate data with same second_group. used in bar chart
-      const aggregatedRes = Object.entries(grouped).map(([group, colorValues]) => {
-        return [
-          group,
-          ...categorical2Collection.map(
-            (color) => aggregateValues(aggregationType, colorValues[color]) ?? null
-          ),
-        ];
-      });
-
-      return {
-        ...state,
-        aggregatedData: [
-          [groupByMe, ...categorical2Collection.map((c) => String(c))],
-          ...aggregatedRes,
-        ],
-        categorical2Collection,
-      };
-    } else {
-      // simply pivot data without aggregation, used in multi-lines and stack-area
-      const pivotedRes = [];
-      for (const [group, colorValues] of Object.entries(grouped)) {
-        const maxLength = Math.max(
-          ...categorical2Collection.map((color) => colorValues[color]?.length || 0)
-        );
-        for (let i = 0; i < maxLength; i++) {
-          pivotedRes.push([
-            group,
-            ...categorical2Collection.map((color) => colorValues[color]?.[i] ?? null),
-          ]);
-        }
-      }
-
-      const sorted =
-        groupField?.schema === VisFieldType.Date
-          ? [...pivotedRes].sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()) // Sort by time;;,
-          : pivotedRes;
-
-      return {
-        ...state,
-        aggregatedData: [[groupByMe, ...categorical2Collection.map((c) => String(c))], ...sorted],
-      };
-    }
-  }
-  return {
-    ...state,
-    aggregatedData: data,
-  };
-};
-
-export const pivotDataWithTime = <T extends BaseChartStyle>({
-  timeUnit,
-  aggregationType,
-}: {
-  timeUnit?: TimeUnit | undefined;
-  aggregationType?: AggregationType | undefined;
-}): PipelineFn<T> => (state) => {
-  const { data, axisConfig, axisColumnMappings } = state;
-
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before prepareData');
-  }
-
-  const dateColumn = [axisConfig.xAxis, axisConfig.yAxis].find(
-    (axis) => axis?.schema === VisFieldType.Date
-  );
-  const numericalColumn = [axisConfig.xAxis, axisConfig.yAxis].find(
-    (axis) => axis?.schema === VisFieldType.Numerical
+  // Extract unique pivot values for column headers, normalizing empty values
+  const pivotValues = Array.from(
+    new Set(data.map((item) => normalizeEmptyValue(item[pivotField])))
   );
 
-  const colorColumn = axisColumnMappings?.color?.column;
-  const timeField = dateColumn?.column;
-  const valueField = numericalColumn?.column;
+  // Determine if this is time-based grouping
+  const isTimeBased = timeUnit !== undefined;
 
-  if (colorColumn && timeField && valueField) {
-    const effectiveTimeUnit =
-      (timeUnit ?? TimeUnit.AUTO) === TimeUnit.AUTO
-        ? inferTimeIntervals(data, timeField)
-        : timeUnit ?? TimeUnit.AUTO;
+  // Infer time unit if AUTO
+  const effectiveTimeUnit = isTimeBased
+    ? timeUnit === TimeUnit.AUTO
+      ? inferTimeIntervals(data, groupBy)
+      : timeUnit
+    : undefined;
 
-    const categorical2Collection = Array.from(new Set(data.map((item) => item[colorColumn])));
+  // Group data by groupBy and pivot fields
+  const grouped = data.reduce((acc, row) => {
+    let groupKey: string | number;
+    let groupValue: string | Date;
 
-    const grouped = data.reduce((acc, row) => {
-      const timestamp = new Date(row[timeField]);
+    if (isTimeBased && effectiveTimeUnit) {
+      // Time-based grouping
+      const timestamp = parseUTCDate(row[groupBy]);
 
       // Skip invalid dates
       if (isNaN(timestamp.getTime())) {
@@ -345,81 +374,46 @@ export const pivotDataWithTime = <T extends BaseChartStyle>({
 
       // Round to time bucket
       const bucket = roundToTimeUnit(timestamp, effectiveTimeUnit);
-      const bucketKey = bucket.getTime(); // Use timestamp as key for grouping
+      groupKey = bucket.getTime(); // Use timestamp as key for grouping
+      groupValue = bucket;
+    } else {
+      // Categorical grouping
+      groupKey = String(row[groupBy]);
+      groupValue = groupKey;
+    }
 
-      // treate colorColumn value as string as it could be boolean and numerical
-      const color = String(row[colorColumn]);
-      const value = Number(row[valueField]);
+    const pivotKey = normalizeEmptyValue(row[pivotField]);
+    const value = Number(row[field]);
 
-      if (isNaN(value)) return acc;
+    if (isNaN(value)) return acc;
 
-      acc[bucketKey] ??= {};
-      acc[bucketKey].date ??= bucket;
-      acc[bucketKey][color] ??= [];
-      acc[bucketKey][color].push(value);
+    if (!acc[groupKey]) {
+      acc[groupKey] = { groupValue, pivotData: {} };
+    }
+    acc[groupKey].pivotData[pivotKey] ??= [];
+    acc[groupKey].pivotData[pivotKey].push(value);
 
-      return acc;
-    }, {} as Record<string, Record<string, number[]>>);
+    return acc;
+  }, {} as Record<string | number, { groupValue: string | Date; pivotData: Record<string, number[]> }>);
 
-    const aggregatedRes = Object.entries(grouped)
-      .map(([_, colorValues]) => {
-        return [
-          colorValues.date,
-          ...categorical2Collection.map(
-            (c) => aggregateValues(aggregationType ?? AggregationType.SUM, colorValues[c]) ?? null
-          ),
-        ];
-      })
-      .sort((a, b) => a[0].getTime() - b[0].getTime()); // Sort by time;;
+  // Convert to array of objects with pivoted columns
+  let result = Object.values(grouped).map(({ groupValue, pivotData: pd }) => {
+    const row: Record<string, any> = { [groupBy]: groupValue };
 
-    return {
-      ...state,
-      aggregatedData: [
-        [timeField, ...categorical2Collection.map((c) => String(c))],
-        ...aggregatedRes,
-      ],
-    };
-  }
-  return {
-    ...state,
-    aggregatedData: data,
-  };
-};
+    // Add a column for each pivot value
+    pivotValues.forEach((pv) => {
+      row[pv] = aggregationType
+        ? aggregateValues(aggregationType, pd[pv]) ?? null
+        : pd[pv]?.[0] ?? null;
+    });
 
-/**
- * Format data into 2D array
- * This transformation is used for charts without bucket type for example: line and area
- * */
+    return row;
+  });
 
-export const formatData = <T extends BaseChartStyle>(
-  state: EChartsSpecState<T>
-): EChartsSpecState<T> => {
-  const { data, axisColumnMappings } = state;
-
-  if (!axisColumnMappings) {
-    throw new Error('axisConfig must be derived before prepareData');
+  // Sort by time if time-based
+  if (isTimeBased) {
+    result = result.sort((a, b) => (a[groupBy] as Date).getTime() - (b[groupBy] as Date).getTime());
   }
 
-  // If a chart does not use bucket and has a date column, Switch Axes has no effect
-  const hasDate = axisColumnMappings.x?.schema === VisFieldType.Date;
-
-  const xColumn = axisColumnMappings.x?.column;
-  const allColumns = [
-    xColumn,
-    ...Object.values(axisColumnMappings)
-      .map((m) => m.column)
-      .filter((c) => c !== xColumn),
-  ];
-
-  let processed;
-  if (hasDate) {
-    const sortedData = [...data.map((row) => allColumns.map((col) => row[col!]))].sort(
-      (a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime()
-    );
-    processed = [allColumns, ...sortedData];
-  } else {
-    processed = [allColumns, ...data.map((row) => allColumns.map((col) => row[col!]))];
-  }
-
-  return { ...state, aggregatedData: processed };
+  return result;
 };
