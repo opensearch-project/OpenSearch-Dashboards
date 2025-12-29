@@ -310,6 +310,34 @@ jobs:
           sleep 30
         shell: bash
 
+      - name: Start Prometheus with Docker
+        if: matrix.group == '14Explore'
+        run: |
+          # Start clean Prometheus instance with fixture config
+          docker run -d \
+            --name prometheus \
+            --network host \
+            -p 9090:9090 \
+            -v ${{ github.workspace }}/cypress/fixtures/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml \
+            prom/prometheus:v3.8.1 \
+            --config.file=/etc/prometheus/prometheus.yml \
+            --storage.tsdb.path=/prometheus \
+            --web.listen-address=:9090 \
+            --web.enable-lifecycle \
+            --web.enable-admin-api
+
+          # Wait for Prometheus to be ready and load fixtures
+          echo "Waiting for Prometheus to start..."
+          for i in {1..30}; do
+            if curl -s http://localhost:9090/-/healthy > /dev/null 2>&1; then
+              echo "Prometheus is ready!"
+              break
+            fi
+            echo "Attempt $i: Prometheus not ready yet..."
+            sleep 2
+          done
+        shell: bash
+
       # Clear Cypress Cache before running OSD tests
       - name: Clear Cypress Cache
         if: matrix.test_location == 'source'
@@ -317,13 +345,24 @@ jobs:
 
       # Run OSD Cypress tests within the source repo
       - name: Run OSD Cypress tests with query enhancements
-        if: matrix.test_location == 'source' && (matrix.config == 'query_enhanced' || matrix.config == 'explore')
+        if: matrix.test_location == 'source' && (matrix.config == 'query_enhanced' || matrix.config == 'explore') && matrix.group != '14Explore'
         uses: cypress-io/github-action@v6
         with:
           install-command: npx cypress install --force
           start: ${{ env.START_CMD }}
           wait-on: "http://localhost:9200, http://localhost:5601"
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
+
+      - name: Run OSD Cypress tests with Prometheus (part of Explore group 14)
+        if: matrix.test_location == 'source' && matrix.group == '14Explore'
+        uses: cypress-io/github-action@v6
+        with:
+          install-command: npx cypress install --force
+          start: ${{ env.START_CMD }}
+          wait-on: "http://localhost:9200, http://localhost:5601, http://localhost:9090/-/healthy"
+          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
+        env:
+          CYPRESS_PROMETHEUS_CONNECTION_URL: "http://localhost:9090"
 
       - name: Run OSD Cypress tests without query enhancements
         if: matrix.test_location == 'source' && matrix.config == 'dashboard'
