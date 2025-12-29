@@ -261,7 +261,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                         const additional = `@import '${Path.resolve(
                           worker.repoRoot,
                           `src/core/public/core_app/styles/_globals_${theme}.scss`
-                        )}';`;
+                        ).replace(/\\/g, '/')}';`;
                         return `${additional}\n${content}`;
                       },
                       api: 'modern',
