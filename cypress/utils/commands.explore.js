@@ -59,14 +59,9 @@ const isEditorEmpty = () => {
     .then((text) => text.trim() === '');
 };
 
-const selectIndexWildcardMode = (indexPattern, appendWildcard = true) => {
-  let pattern = indexPattern;
-
-  if (appendWildcard) {
-    pattern = `${indexPattern}*`;
-  } else if (!indexPattern.includes('*')) {
-    pattern = `${indexPattern}*`;
-  }
+const selectIndexWildcardMode = (indexPattern) => {
+  // UI now auto-appends wildcard when typing single character, so just use the pattern as-is
+  const pattern = indexPattern;
 
   // Type the pattern into the unified search field
   cy.getElementByTestId('unified-index-selector-search')
@@ -500,7 +495,7 @@ cy.explore.add(
     cy.get(`[title="${dataSourceName}"]`).click();
 
     // Step 6 & 7 - Select index scope (Index wildcard) and enter pattern
-    selectIndexWildcardMode(indexPattern, true);
+    selectIndexWildcardMode(indexPattern);
 
     // Step 8 - Click Next button
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
@@ -659,8 +654,8 @@ cy.explore.add(
     cy.get(`[title="${dataSource}"]`).should('be.visible');
     cy.get(`[title="${dataSource}"]`).click();
 
-    // Step 6 & 7 - Select index scope (Index wildcard) and enter pattern (no wildcard appending)
-    selectIndexWildcardMode(indexPattern, false);
+    // Step 6 & 7 - Select index scope (Index wildcard) and enter pattern
+    selectIndexWildcardMode(indexPattern);
 
     // Step 8 - Click Next button
     cy.getElementByTestId('datasetSelectorNext')
