@@ -320,7 +320,7 @@ jobs:
 
           # Start Prometheus with fixture config
           ./prometheus-${PROM_VERSION}.linux-amd64/prometheus \
-            --config.file=${{ github.workspace }}/cypress/fixtures/prometheus/prometheus.yml \
+            --config.file=./cypress/fixtures/prometheus/prometheus.yml \
             --storage.tsdb.path=/tmp/prometheus-data \
             --web.listen-address=:9090 \
             --web.enable-lifecycle \
