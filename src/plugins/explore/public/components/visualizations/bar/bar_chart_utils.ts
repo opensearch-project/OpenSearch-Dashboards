@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BarSeriesOption } from 'echarts';
 import {
   StandardAxes,
   VisFieldType,
@@ -11,9 +12,16 @@ import {
   BucketOptions,
   AggregationType,
 } from '../types';
-import { applyAxisStyling, getSchemaByAxis } from '../utils/utils';
+import {
+  applyAxisStyling,
+  getSchemaByAxis,
+  adjustOppositeSymbol,
+  generateThresholdLines,
+} from '../utils/utils';
 import { BarChartStyle } from './bar_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
+import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
+import { getSeriesDisplayName } from '../utils/series';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
@@ -185,4 +193,61 @@ export const buildThresholdColorEncoding = (
   };
 
   return colorLayer;
+};
+
+/**
+ * Create bar series configuration
+ */
+export const createBarSeries = <T extends BaseChartStyle>({
+  styles,
+  categoryField,
+  seriesFields,
+}: {
+  styles: BarChartStyle;
+  categoryField: string;
+  seriesFields: string[] | ((headers?: string[]) => string[]);
+}): PipelineFn<T> => (state) => {
+  const { axisConfig, axisColumnMappings, transformedData = [] } = state;
+  const newState = { ...state };
+  const source = transformedData[transformedData?.length - 1];
+
+  if (!axisConfig) {
+    throw new Error('axisConfig must be derived before createBarSeries');
+  }
+
+  if (!Array.isArray(seriesFields)) {
+    seriesFields = seriesFields(source[0]);
+  }
+
+  const thresholdLines = generateThresholdLines(styles?.thresholdOptions, styles?.switchAxes);
+
+  const series = seriesFields.map((seriesField, index) => {
+    const name = getSeriesDisplayName(seriesField, Object.values(axisColumnMappings));
+    return {
+      type: 'bar',
+      stack: 'total',
+      emphasis: {
+        focus: 'self',
+      },
+      name,
+      encode: {
+        [adjustOppositeSymbol(styles?.switchAxes, 'x')]: categoryField,
+        [adjustOppositeSymbol(styles?.switchAxes, 'y')]: seriesField,
+      },
+      // TODO: barWidth and barCategoryGap seems are exclusive, we need to revise the current UI for this config
+      barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
+      barCategoryGap:
+        styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
+      ...(index === 0 && thresholdLines),
+      ...(styles?.showBarBorder && {
+        itemStyle: {
+          borderWidth: styles.barBorderWidth,
+          borderColor: styles.barBorderColor,
+        },
+      }),
+    };
+  }) as BarSeriesOption[];
+  newState.series = series;
+
+  return newState;
 };

@@ -8,7 +8,6 @@ import { CursorPosition, PromQLAutocompleteResult } from '../shared/types';
 import { openSearchPromQLAutocompleteData } from './promql_autocomplete';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { parseQuery } from '../shared/utils';
-import { PrometheusResourceClient } from '../../resources/prometheus_resource_client';
 import {
   aggregationOperators,
   functionNames,
@@ -45,9 +44,14 @@ export const getSuggestions = async ({
       line: lineNumber || selectionStart,
       column: column || selectionEnd,
     });
-    const prometheusResourceClient = services.data.resourceClientFactory.get(
-      'prometheus'
-    ) as PrometheusResourceClient;
+    const prometheusResourceClient = services.data.resourceClientFactory.get<{
+      getMetricMetadata: (
+        dataSourceId?: string
+      ) => Promise<Record<string, Array<{ type: string; help: string }>>>;
+      getLabels: (dataSourceId: string, metric?: string) => Promise<string[]>;
+      getLabelValues: (dataSourceId: string, label: string, metric?: string) => Promise<string[]>;
+    }>('prometheus');
+    if (!prometheusResourceClient) throw new Error('Prometheus resource client not found.');
 
     const finalSuggestions: MonacoCompatibleQuerySuggestion[] = [];
 

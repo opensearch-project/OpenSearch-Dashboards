@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AxisColumnMappings, VisColumn, VisFieldType, ThresholdMode } from './types';
+import {
+  AxisColumnMappings,
+  VisColumn,
+  VisFieldType,
+  ThresholdMode,
+  StandardAxes,
+  AxisRole,
+  Positions,
+} from './types';
 import { StyleOptions } from './utils/use_visualization_types';
 import { ChartConfig } from './visualization_builder.types';
 import {
@@ -177,6 +185,38 @@ export const adaptLegacyData = (config?: ChartConfig) => {
           },
         } as StyleOptions,
       };
+    }
+  }
+
+  if (transformedConfig.type === 'line' || transformedConfig.type === 'area') {
+    const standardAxes: StandardAxes[] = [];
+    const { valueAxes, categoryAxes } = transformedConfig.styles as
+      | AreaChartStyleOptions
+      | LineChartStyleOptions;
+    if (categoryAxes || valueAxes) {
+      transformedConfig = {
+        ...transformedConfig,
+        styles: { ...transformedConfig.styles, standardAxes },
+      };
+    }
+    if (categoryAxes) {
+      if (categoryAxes.length === 1) {
+        standardAxes.push({ ...categoryAxes[0], axisRole: AxisRole.X });
+      }
+    }
+    if (valueAxes) {
+      if (valueAxes.length === 1) {
+        standardAxes.push({ ...valueAxes[0], axisRole: AxisRole.Y });
+      } else if (valueAxes.length === 2) {
+        const leftAxis = valueAxes.find((axis) => axis.position === Positions.LEFT);
+        const rightAxis = valueAxes.find((axis) => axis.position === Positions.RIGHT);
+        if (leftAxis) {
+          standardAxes.push({ ...leftAxis, axisRole: AxisRole.Y });
+        }
+        if (rightAxis) {
+          standardAxes.push({ ...rightAxis, axisRole: AxisRole.Y_SECOND });
+        }
+      }
     }
   }
 
