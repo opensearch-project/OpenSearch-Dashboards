@@ -246,16 +246,34 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
 export const assembleSpec = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { baseConfig, aggregatedData, xAxisConfig, yAxisConfig, series, visualMap } = state;
+  const { baseConfig, aggregatedData, xAxisConfig, yAxisConfig, series } = state;
+  const stateWithGrids = state as any;
+
+  // Check if this is a multi-grid (faceted) chart
+  const isMultiGrid = !!(stateWithGrids.grids && stateWithGrids.xAxes && stateWithGrids.yAxes);
 
   const spec = {
     ...baseConfig,
-    dataset: { source: aggregatedData },
-    xAxis: xAxisConfig,
-    yAxis: yAxisConfig,
-    visualMap,
+    ...(isMultiGrid
+      ? {
+          // Multi-grid configuration for faceted charts - don't use dataset
+          grid: stateWithGrids.grids, // ECharts expects 'grid' for arrays
+          xAxis: stateWithGrids.xAxes, // ECharts expects 'xAxis' for arrays
+          yAxis: stateWithGrids.yAxes, // ECharts expects 'yAxis' for arrays
+        }
+      : {
+          // Single-grid configuration for regular charts
+          dataset: { source: aggregatedData },
+          xAxis: xAxisConfig,
+          yAxis: yAxisConfig,
+        }),
     series,
   };
+
+  // Copy totalWidth from state to spec for scrolling support
+  if (stateWithGrids.totalWidth) {
+    (spec as any).totalWidth = stateWithGrids.totalWidth;
+  }
 
   return { ...state, spec };
 };
