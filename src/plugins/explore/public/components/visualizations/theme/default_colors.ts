@@ -74,3 +74,4 @@ export const getColors = () => {
 };
 
 export const DEFAULT_GREY = '#d3d3d3';
+export const DEFAULT_DARK_GREY = '#7b7979ff';

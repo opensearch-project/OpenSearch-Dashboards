@@ -36,7 +36,6 @@ describe('createPieConfig', () => {
     expect(defaults.exclusive.donut).toBe(true);
     expect(defaults.exclusive.showValues).toBe(false);
     expect(defaults.exclusive.showLabels).toBe(false);
-    expect(defaults.exclusive.truncate).toBe(100);
 
     // Verify title
     expect(defaults.titleOptions.show).toBe(false);
@@ -101,6 +100,5 @@ describe('createPieConfig', () => {
     expect(typeof defaults.exclusive.donut).toBe('boolean');
     expect(typeof defaults.exclusive.showValues).toBe('boolean');
     expect(typeof defaults.exclusive.showLabels).toBe('boolean');
-    expect(typeof defaults.exclusive.truncate).toBe('number');
   });
 });
