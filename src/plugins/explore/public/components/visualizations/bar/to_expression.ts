@@ -28,6 +28,8 @@ import {
   buildTooltipEncoding,
   buildThresholdColorEncoding,
   createBarSeries,
+  createStackBarSeries,
+  createFacetBarSeries,
 } from './bar_chart_utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
@@ -557,6 +559,26 @@ export const createFacetedTimeBarChart = (
 
   const timeAxis = xAxis?.schema === VisFieldType.Date ? xAxis : yAxis;
 
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      formatFacetData(pivotDataWithTime, {
+        aggregationType: styles?.bucket?.aggregationType,
+        timeUnit: styles?.bucket?.bucketTimeUnit,
+      }),
+      createBaseConfig,
+      buildAxisConfigs,
+      buildVisMap,
+      createFacetBarSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+    return result.spec;
+  }
+
   const interval =
     styles?.bucket?.bucketTimeUnit === TimeUnit.AUTO
       ? inferTimeIntervals(transformedData, timeAxis?.column)
@@ -828,6 +850,27 @@ export const createDoubleNumericalBarChart = (
     type: 'bar',
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
   };
+
+  if (getChartRender() === 'echarts') {
+    const result = pipe(
+      deriveAxisConfig,
+      pivotDataWithCategory({
+        aggregationType: styles?.bucket?.aggregationType,
+        groupField: xAxis,
+      }),
+      createBaseConfig,
+      buildAxisConfigs,
+      buildVisMap,
+      createStackBarSeries(styles),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisColumnMappings,
+    });
+
+    return result.spec;
+  }
 
   configureBarSizeAndSpacing(barMark, styles);
 

@@ -311,6 +311,10 @@ export const buildVisMap = ({
 
   if (!styles.useThresholdColor) return state;
 
+  const actualX = axisColumnMappings?.x?.column;
+
+  const hasFacet = Array.isArray(aggregatedData[0][0]);
+
   const completeThreshold =
     styles.thresholdOptions && styles?.thresholdOptions.thresholds
       ? [
@@ -336,6 +340,51 @@ export const buildVisMap = ({
       pieces,
     };
   });
+  // if (hasFacet) {
+  //   let seriesIndexCounter = 0;
+  //   const facetVis = aggregatedData.map((seriesData: any[], index: number) => {
+  //     const header = seriesData[0];
+  //     const cateColumns = header.filter((c: string) => c !== actualX);
+
+  //     return cateColumns.map((c: string) => {
+  //       const originalIndex = header?.indexOf(c);
+  //       return {
+  //         datasetIndex: index,
+  //         gridIndex: index,
+  //         type: 'piecewise',
+  //         show: false,
+  //         seriesIndex: seriesIndexCounter++,
+  //         dimension: originalIndex,
+  //         pieces,
+  //       };
+  //     });
+  //   });
+
+  //   visualMap = facetVis.flat();
+  // } else {
+  //   const cateColumns = aggregatedData?.[0]?.filter((c: string) => c !== actualX);
+
+  //   if (axisColumnMappings?.color) {
+  //     visualMap = cateColumns.map((c: string, index: number) => {
+  //       const originalIndex = aggregatedData?.[0]?.indexOf(c);
+  //       return {
+  //         type: 'piecewise',
+  //         show: false,
+  //         seriesIndex: index,
+  //         dimension: originalIndex,
+  //         pieces,
+  //       };
+  //     });
+  //   } else {
+  //     visualMap = {
+  //       type: 'piecewise',
+  //       show: false,
+  //       seriesIndex: 0,
+  //       dimension: 1,
+  //       pieces,
+  //     };
+  //   }
+  // }
 
   return {
     ...state,
