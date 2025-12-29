@@ -5,7 +5,7 @@
 
 import { SavedObjectsClientContract } from 'src/core/public';
 import { IndexPatternsContract } from '../../../data/public';
-import { detectTraceData } from './auto_detect_trace_data';
+import { detectTraceData, detectTraceDataAcrossDataSources } from './auto_detect_trace_data';
 
 describe('detectTraceData', () => {
   let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
@@ -342,5 +342,397 @@ describe('detectTraceData', () => {
     // Should continue with detection since no trace signalType was found
     expect(result.tracesDetected).toBe(true);
     expect(result.logsDetected).toBe(true);
+  });
+});
+
+describe('detectTraceDataAcrossDataSources', () => {
+  let mockSavedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  let mockIndexPatternsService: jest.Mocked<IndexPatternsContract>;
+
+  beforeEach(() => {
+    mockSavedObjectsClient = {
+      find: jest.fn(),
+    } as any;
+
+    mockIndexPatternsService = {
+      getIds: jest.fn(),
+      get: jest.fn(),
+      getFieldsForWildcard: jest.fn(),
+    } as any;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return empty array when trace datasets already exist', async () => {
+    mockIndexPatternsService.getIds.mockResolvedValue(['existing-trace-id']);
+    mockIndexPatternsService.get.mockResolvedValue({
+      id: 'existing-trace-id',
+      signalType: 'traces',
+    } as any);
+
+    const results = await detectTraceDataAcrossDataSources(
+      mockSavedObjectsClient,
+      mockIndexPatternsService
+    );
+
+    expect(results).toEqual([]);
+    expect(mockIndexPatternsService.getIds).toHaveBeenCalled();
+    expect(mockIndexPatternsService.get).toHaveBeenCalledWith('existing-trace-id');
+    // Should not fetch data sources since trace datasets exist
+    expect(mockSavedObjectsClient.find).not.toHaveBeenCalled();
+  });
+
+  it('should detect traces from multiple data sources', async () => {
+    mockIndexPatternsService.getIds.mockResolvedValue([]);
+    mockSavedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        {
+          id: 'ds1',
+          attributes: { title: 'DataSource 1' },
+        },
+        {
+          id: 'ds2',
+          attributes: { title: 'DataSource 2' },
+        },
+      ],
+    } as any);
+
+    mockIndexPatternsService.getFieldsForWildcard.mockImplementation(
+      async ({ pattern, dataSourceId }) => {
+        if (pattern === 'otel-v1-apm-span*') {
+          return [
+            { name: 'spanId', type: 'string' },
+            { name: 'traceId', type: 'string' },
+            { name: 'endTime', type: 'date' },
+          ] as any;
+        }
+        throw new Error('No matching indices');
+      }
+    );
+
+    const results = await detectTraceDataAcrossDataSources(
+      mockSavedObjectsClient,
+      mockIndexPatternsService
+    );
+
+    expect(results).toHaveLength(2);
+    expect(results[0]).toMatchObject({
+      tracesDetected: true,
+      tracePattern: 'otel-v1-apm-span*',
+      traceTimeField: 'endTime',
+      dataSourceId: 'ds1',
+      dataSourceTitle: 'DataSource 1',
+    });
+    expect(results[1]).toMatchObject({
+      tracesDetected: true,
+      tracePattern: 'otel-v1-apm-span*',
+      traceTimeField: 'endTime',
+      dataSourceId: 'ds2',
+      dataSourceTitle: 'DataSource 2',
+    });
+  });
+
+  it('should only include data sources with detected traces or logs', async () => {
+    mockIndexPatternsService.getIds.mockResolvedValue([]);
+    mockSavedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        {
+          id: 'ds1',
+          attributes: { title: 'DataSource 1' },
+        },
+        {
+          id: 'ds2',
+          attributes: { title: 'DataSource 2' },
+        },
+      ],
+    } as any);
+
+    // Only ds1 has traces
+    mockIndexPatternsService.getFieldsForWildcard.mockImplementation(
+      async ({ pattern, dataSourceId }) => {
+        if (dataSourceId === 'ds1' && pattern === 'otel-v1-apm-span*') {
+          return [
+            { name: 'spanId', type: 'string' },
+            { name: 'traceId', type: 'string' },
+            { name: 'endTime', type: 'date' },
+          ] as any;
+        }
+        throw new Error('No matching indices');
+      }
+    );
+
+    const results = await detectTraceDataAcrossDataSources(
+      mockSavedObjectsClient,
+      mockIndexPatternsService
+    );
+
+    expect(results).toHaveLength(1);
+    expect(results[0].dataSourceId).toBe('ds1');
+    expect(results[0].dataSourceTitle).toBe('DataSource 1');
+  });
+
+  it('should check local cluster when no data sources have traces', async () => {
+    mockIndexPatternsService.getIds.mockResolvedValue([]);
+    mockSavedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        {
+          id: 'ds1',
+          attributes: { title: 'DataSource 1' },
+        },
+      ],
+    } as any);
+
+    mockIndexPatternsService.getFieldsForWildcard.mockImplementation(
+      async ({ pattern, dataSourceId }) => {
+        // No traces in data sources, but traces in local cluster
+        if (dataSourceId === undefined && pattern === 'otel-v1-apm-span*') {
+          return [
+            { name: 'spanId', type: 'string' },
+            { name: 'traceId', type: 'string' },
+            { name: 'endTime', type: 'date' },
+          ] as any;
+        }
+        throw new Error('No matching indices');
+      }
+    );
+
+    const results = await detectTraceDataAcrossDataSources(
+      mockSavedObjectsClient,
+      mockIndexPatternsService
+    );
+
+    expect(results).toHaveLength(1);
+    expect(results[0]).toMatchObject({
+      tracesDetected: true,
+      dataSourceTitle: 'Local Cluster',
+      dataSourceId: undefined,
+    });
+  });
+
+  it('should not check local cluster when data sources have traces', async () => {
+    mockIndexPatternsService.getIds.mockResolvedValue([]);
+    mockSavedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        {
+          id: 'ds1',
+          attributes: { title: 'DataSource 1' },
+        },
+      ],
+    } as any);
+
+    mockIndexPatternsService.getFieldsForWildcard.mockImplementation(
+      async ({ pattern, dataSourceId }) => {
+        // Both data source and local cluster have traces
+        if (pattern === 'otel-v1-apm-span*') {
+          return [
+            { name: 'spanId', type: 'string' },
+            { name: 'traceId', type: 'string' },
+            { name: 'endTime', type: 'date' },
+          ] as any;
+        }
+        throw new Error('No matching indices');
+      }
+    );
+
+    const results = await detectTraceDataAcrossDataSources(
+      mockSavedObjectsClient,
+      mockIndexPatternsService
+    );
+
+    // Should only have the data source, not local cluster
+    expect(results).toHaveLength(1);
+    expect(results[0].dataSourceId).toBe('ds1');
+    expect(results[0].dataSourceTitle).toBe('DataSource 1');
+  });
+
+  it('should handle errors when checking individual data sources', async () => {
+    mockIndexPatternsService.getIds.mockResolvedValue([]);
+    mockSavedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        {
+          id: 'ds1',
+          attributes: { title: 'DataSource 1' },
+        },
+        {
+          id: 'ds2',
+          attributes: { title: 'DataSource 2' },
+        },
+      ],
+    } as any);
+
+    mockIndexPatternsService.getFieldsForWildcard.mockImplementation(
+      async ({ pattern, dataSourceId }) => {
+        if (dataSourceId === 'ds1') {
+          throw new Error('Connection failed');
+        }
+        if (dataSourceId === 'ds2' && pattern === 'otel-v1-apm-span*') {
+          return [
+            { name: 'spanId', type: 'string' },
+            { name: 'traceId', type: 'string' },
+            { name: 'endTime', type: 'date' },
+          ] as any;
+        }
+        throw new Error('No matching indices');
+      }
+    );
+
+    const results = await detectTraceDataAcrossDataSources(
+      mockSavedObjectsClient,
+      mockIndexPatternsService
+    );
+
+    // Should continue and return ds2 even though ds1 failed
+    expect(results).toHaveLength(1);
+    expect(results[0].dataSourceId).toBe('ds2');
+  });
+
+  it('should handle errors when fetching data sources and check local cluster', async () => {
+    mockIndexPatternsService.getIds.mockResolvedValue([]);
+    mockSavedObjectsClient.find.mockRejectedValue(new Error('Failed to fetch data sources'));
+
+    mockIndexPatternsService.getFieldsForWildcard.mockImplementation(
+      async ({ pattern, dataSourceId }) => {
+        if (dataSourceId === undefined && pattern === 'otel-v1-apm-span*') {
+          return [
+            { name: 'spanId', type: 'string' },
+            { name: 'traceId', type: 'string' },
+            { name: 'endTime', type: 'date' },
+          ] as any;
+        }
+        throw new Error('No matching indices');
+      }
+    );
+
+    const results = await detectTraceDataAcrossDataSources(
+      mockSavedObjectsClient,
+      mockIndexPatternsService
+    );
+
+    // Should fall back to local cluster
+    expect(results).toHaveLength(1);
+    expect(results[0].dataSourceTitle).toBe('Local Cluster');
+  });
+
+  it('should detect both traces and logs for a data source', async () => {
+    mockIndexPatternsService.getIds.mockResolvedValue([]);
+    mockSavedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        {
+          id: 'ds1',
+          attributes: { title: 'DataSource 1' },
+        },
+      ],
+    } as any);
+
+    mockIndexPatternsService.getFieldsForWildcard.mockImplementation(
+      async ({ pattern, dataSourceId }) => {
+        if (pattern === 'otel-v1-apm-span*') {
+          return [
+            { name: 'spanId', type: 'string' },
+            { name: 'traceId', type: 'string' },
+            { name: 'endTime', type: 'date' },
+          ] as any;
+        }
+        if (pattern === 'logs-otel-v1*') {
+          return [
+            { name: 'traceId', type: 'string' },
+            { name: 'spanId', type: 'string' },
+            { name: 'time', type: 'date' },
+          ] as any;
+        }
+        throw new Error('No matching indices');
+      }
+    );
+
+    const results = await detectTraceDataAcrossDataSources(
+      mockSavedObjectsClient,
+      mockIndexPatternsService
+    );
+
+    expect(results).toHaveLength(1);
+    expect(results[0]).toMatchObject({
+      tracesDetected: true,
+      logsDetected: true,
+      tracePattern: 'otel-v1-apm-span*',
+      logPattern: 'logs-otel-v1*',
+      dataSourceId: 'ds1',
+      dataSourceTitle: 'DataSource 1',
+    });
+  });
+
+  it('should return empty array when no traces or logs are detected anywhere', async () => {
+    mockIndexPatternsService.getIds.mockResolvedValue([]);
+    mockSavedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        {
+          id: 'ds1',
+          attributes: { title: 'DataSource 1' },
+        },
+      ],
+    } as any);
+
+    mockIndexPatternsService.getFieldsForWildcard.mockRejectedValue(
+      new Error('No matching indices')
+    );
+
+    const results = await detectTraceDataAcrossDataSources(
+      mockSavedObjectsClient,
+      mockIndexPatternsService
+    );
+
+    expect(results).toEqual([]);
+  });
+
+  it('should handle error when checking local cluster', async () => {
+    mockIndexPatternsService.getIds.mockResolvedValue([]);
+    mockSavedObjectsClient.find.mockResolvedValue({
+      savedObjects: [],
+    } as any);
+
+    mockIndexPatternsService.getFieldsForWildcard.mockRejectedValue(new Error('Connection failed'));
+
+    const results = await detectTraceDataAcrossDataSources(
+      mockSavedObjectsClient,
+      mockIndexPatternsService
+    );
+
+    // Should handle error gracefully and return empty array
+    expect(results).toEqual([]);
+  });
+
+  it('should continue checking other data sources if getIds fails', async () => {
+    mockIndexPatternsService.getIds.mockRejectedValue(new Error('Failed to get IDs'));
+    mockSavedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        {
+          id: 'ds1',
+          attributes: { title: 'DataSource 1' },
+        },
+      ],
+    } as any);
+
+    mockIndexPatternsService.getFieldsForWildcard.mockImplementation(
+      async ({ pattern, dataSourceId }) => {
+        if (pattern === 'otel-v1-apm-span*') {
+          return [
+            { name: 'spanId', type: 'string' },
+            { name: 'traceId', type: 'string' },
+            { name: 'endTime', type: 'date' },
+          ] as any;
+        }
+        throw new Error('No matching indices');
+      }
+    );
+
+    const results = await detectTraceDataAcrossDataSources(
+      mockSavedObjectsClient,
+      mockIndexPatternsService
+    );
+
+    // Should continue with detection even if getIds fails
+    expect(results).toHaveLength(1);
+    expect(results[0].dataSourceId).toBe('ds1');
   });
 });

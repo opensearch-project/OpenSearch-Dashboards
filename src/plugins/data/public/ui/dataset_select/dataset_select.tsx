@@ -197,6 +197,8 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
 const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes, signalType }) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const isMounted = useRef(true);
+  const hasCompletedInitialLoad = useRef(false);
+  const previousSignalType = useRef(signalType);
   const [isOpen, setIsOpen] = useState(false);
   const [datasets, setDatasets] = useState<DetailedDataset[]>([]);
   const [selectedDataset, setSelectedDataset] = useState<DetailedDataset | undefined>();
@@ -212,10 +214,27 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
   const currentQuery = queryString.getQuery();
   const currentDataset = currentQuery.dataset;
 
+  // Handle signal type changes (e.g., navigating from logs to traces)
+  useEffect(() => {
+    const signalTypeChanged = previousSignalType.current !== signalType;
+    if (signalTypeChanged) {
+      previousSignalType.current = signalType;
+      // Reset initial load flag AND clear datasets to force refetch with new signal type
+      hasCompletedInitialLoad.current = false;
+      setDatasets([]);
+    }
+  }, [signalType, currentDataset]);
+
   useEffect(() => {
     const updateSelectedDataset = async () => {
       if (!currentDataset) {
         setSelectedDataset(undefined);
+        return;
+      }
+
+      // If datasets array is empty during a refetch, don't update selection
+      // This prevents clearing the dataset when fetchDatasets temporarily clears the array
+      if (datasets.length === 0 && hasCompletedInitialLoad.current) {
         return;
       }
 
@@ -236,9 +255,9 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
         if (isCompatible) {
           setSelectedDataset(matchingDataset);
         } else {
-          // Clear incompatible dataset - call onSelect to update Redux state
-          setSelectedDataset(undefined);
-          onSelect(undefined);
+          // Don't clear incompatible dataset - just ignore it
+          // This handles cases where flyouts temporarily change the query dataset
+          // Keep the current UI state - don't update
         }
         return;
       }
@@ -274,12 +293,10 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
       if (isCompatible) {
         setSelectedDataset(detailedDataset);
       } else {
-        // Clear incompatible dataset
-        queryString.setQuery({
-          query: '',
-          language: currentQuery.language,
-        });
-        setSelectedDataset(undefined);
+        // Don't clear incompatible dataset - just ignore it
+        // This handles cases where flyouts temporarily change the query dataset
+        // (e.g., trace flyout querying related logs changes dataset from traces to logs)
+        // Keep the current UI state - don't update selectedDataset
       }
     };
     updateSelectedDataset();
@@ -386,26 +403,32 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
         ? filteredDatasets.some((d) => d.id === currentlySelectedDataset.id)
         : false;
 
-      // If current dataset is incompatible with the signal type filter, clear it or select default
-      if (currentlySelectedDataset && !isCurrentDatasetValid) {
-        if (defaultDataset) {
-          // Select the first valid dataset
+      // Only auto-select or clear datasets on initial load to prevent unnecessary re-renders
+      // During refetches (e.g., when flyouts open), we don't want to trigger dataset changes
+      // IMPORTANT: Don't run auto-select when signalType is null (component is still mounting)
+      if (!hasCompletedInitialLoad.current && signalType !== null) {
+        // If current dataset is incompatible with the signal type filter, clear it or select default
+        if (currentlySelectedDataset && !isCurrentDatasetValid) {
+          if (defaultDataset) {
+            // Select the first valid dataset
+            onSelect(defaultDataset);
+          } else {
+            // No valid datasets available, clear the selection by setting to empty query
+            queryString.setQuery({
+              query: '',
+              language: queryString.getQuery().language,
+            });
+          }
+        } else if (!currentlySelectedDataset && defaultDataset) {
+          // No dataset selected but default is available
           onSelect(defaultDataset);
-        } else {
-          // No valid datasets available, clear the selection by setting to empty query
-          queryString.setQuery({
-            query: '',
-            language: queryString.getQuery().language,
-          });
         }
-      } else if (!currentlySelectedDataset && defaultDataset) {
-        // No dataset selected but default is available
-        onSelect(defaultDataset);
       }
       setDatasets(filteredDatasets);
     } finally {
       if (isMounted.current) {
         setIsLoading(false);
+        hasCompletedInitialLoad.current = true;
       }
     }
   }, [dataViews, signalType, onSelect, queryString, datasetService, services, supportedTypes]);
@@ -684,7 +707,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
           <EuiFlexItem grow={false} className="datasetSelect__footerItem">
             <EuiButton
               className="datasetSelect__createButton"
-              data-test-subj="datasetSelectCreateButton"
+              data-test-subj="datasetSelectorAdvancedButton"
               iconType="plus"
               iconSide="left"
               size="s"

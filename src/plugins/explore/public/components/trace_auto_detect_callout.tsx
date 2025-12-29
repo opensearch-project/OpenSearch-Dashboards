@@ -18,7 +18,7 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { ExploreServices } from '../types';
-import { detectTraceData, DetectionResult } from '../utils/auto_detect_trace_data';
+import { detectTraceDataAcrossDataSources, DetectionResult } from '../utils/auto_detect_trace_data';
 import { createAutoDetectedDatasets } from '../utils/create_auto_datasets';
 import { DiscoverNoIndexPatterns } from '../application/legacy/discover/application/components/no_index_patterns/no_index_patterns';
 
@@ -27,7 +27,7 @@ const DISMISSED_KEY = 'explore:traces:autoDetectDismissed';
 export const TraceAutoDetectCallout: React.FC = () => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const [isDetecting, setIsDetecting] = useState(true);
-  const [detection, setDetection] = useState<DetectionResult | null>(null);
+  const [detections, setDetections] = useState<DetectionResult[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
 
@@ -72,14 +72,13 @@ export const TraceAutoDetectCallout: React.FC = () => {
         }
       }
       try {
-        const result = await detectTraceData(
+        const results = await detectTraceDataAcrossDataSources(
           services.savedObjects.client,
-          services.indexPatterns,
-          undefined // TODO: Get current data source ID from context/state
+          services.indexPatterns
         );
 
-        if (result.tracesDetected || result.logsDetected) {
-          setDetection(result);
+        if (results.length > 0) {
+          setDetections(results);
         }
       } catch (error) {
         // Detection failed, but don't show any error
@@ -92,15 +91,24 @@ export const TraceAutoDetectCallout: React.FC = () => {
   }, [services]);
 
   const handleCreate = async () => {
-    if (!detection) return;
+    if (detections.length === 0) return;
 
     setIsCreating(true);
     try {
-      const result = await createAutoDetectedDatasets(
-        services.savedObjects.client,
-        detection,
-        undefined // TODO: Get current data source ID from context/state
-      );
+      let totalCreated = 0;
+      const dataSourceNames: string[] = [];
+
+      // Create datasets for each detected datasource
+      for (const detection of detections) {
+        const result = await createAutoDetectedDatasets(services.savedObjects.client, detection);
+
+        if (result.traceDatasetId || result.logDatasetId) {
+          totalCreated++;
+          if (detection.dataSourceTitle) {
+            dataSourceNames.push(detection.dataSourceTitle);
+          }
+        }
+      }
 
       // Clear dismissed flag so if datasets are deleted later, callout can show again
       localStorage.removeItem(DISMISSED_KEY);
@@ -109,26 +117,13 @@ export const TraceAutoDetectCallout: React.FC = () => {
         title: i18n.translate('explore.traces.autoDetect.successTitle', {
           defaultMessage: 'Trace datasets created',
         }),
-        text: i18n.translate('explore.traces.autoDetect.successMessage', {
+        text: i18n.translate('explore.traces.autoDetect.successMessageMultiple', {
           defaultMessage:
-            'Created {traceDataset}{separator}{logDataset}{correlation}. Reloading page...',
+            'Created trace and log datasets for {count} data {sources}: {names}. Reloading page...',
           values: {
-            traceDataset: result.traceDatasetId
-              ? i18n.translate('explore.traces.autoDetect.traceDataset', {
-                  defaultMessage: 'trace dataset',
-                })
-              : '',
-            separator: result.traceDatasetId && result.logDatasetId ? ' and ' : '',
-            logDataset: result.logDatasetId
-              ? i18n.translate('explore.traces.autoDetect.logDataset', {
-                  defaultMessage: 'log dataset',
-                })
-              : '',
-            correlation: result.correlationId
-              ? i18n.translate('explore.traces.autoDetect.withCorrelation', {
-                  defaultMessage: ' with correlation',
-                })
-              : '',
+            count: totalCreated,
+            sources: totalCreated === 1 ? 'source' : 'sources',
+            names: dataSourceNames.join(', '),
           },
         }),
       });
@@ -152,12 +147,7 @@ export const TraceAutoDetectCallout: React.FC = () => {
   };
 
   // Always show default empty state while detecting, after dismissal, or when no trace data found
-  if (
-    isDetecting ||
-    isDismissed ||
-    !detection ||
-    (!detection.tracesDetected && !detection.logsDetected)
-  ) {
+  if (isDetecting || isDismissed || detections.length === 0) {
     return <DiscoverNoIndexPatterns />;
   }
 
@@ -184,7 +174,11 @@ export const TraceAutoDetectCallout: React.FC = () => {
                 <p>
                   <FormattedMessage
                     id="explore.traces.autoDetect.description"
-                    defaultMessage="We found trace data matching OpenTelemetry conventions in your cluster:"
+                    defaultMessage="We found trace data matching OpenTelemetry conventions in {count} data {sources}:"
+                    values={{
+                      count: detections.length,
+                      sources: detections.length === 1 ? 'source' : 'sources',
+                    }}
                   />
                 </p>
               </EuiText>
@@ -192,24 +186,33 @@ export const TraceAutoDetectCallout: React.FC = () => {
             <EuiFlexItem>
               <EuiText size="s">
                 <ul style={{ textAlign: 'left' }}>
-                  {detection.tracesDetected && detection.tracePattern && (
-                    <li>
-                      <strong>{detection.tracePattern}</strong>{' '}
-                      <FormattedMessage
-                        id="explore.traces.autoDetect.tracesLabel"
-                        defaultMessage="(traces)"
-                      />
-                    </li>
-                  )}
-                  {detection.logsDetected && detection.logPattern && (
-                    <li>
-                      <strong>{detection.logPattern}</strong>{' '}
-                      <FormattedMessage
-                        id="explore.traces.autoDetect.correlatedLogsLabel"
-                        defaultMessage="(correlated logs)"
-                      />
-                    </li>
-                  )}
+                  {detections.map((detection, index) => (
+                    <React.Fragment key={index}>
+                      {detection.dataSourceTitle && (
+                        <li style={{ fontWeight: 'bold', marginTop: index > 0 ? '8px' : '0' }}>
+                          {detection.dataSourceTitle}:
+                        </li>
+                      )}
+                      {detection.tracesDetected && detection.tracePattern && (
+                        <li style={{ marginLeft: detection.dataSourceTitle ? '20px' : '0' }}>
+                          <strong>{detection.tracePattern}</strong>{' '}
+                          <FormattedMessage
+                            id="explore.traces.autoDetect.tracesLabel"
+                            defaultMessage="(traces)"
+                          />
+                        </li>
+                      )}
+                      {detection.logsDetected && detection.logPattern && (
+                        <li style={{ marginLeft: detection.dataSourceTitle ? '20px' : '0' }}>
+                          <strong>{detection.logPattern}</strong>{' '}
+                          <FormattedMessage
+                            id="explore.traces.autoDetect.correlatedLogsLabel"
+                            defaultMessage="(correlated logs)"
+                          />
+                        </li>
+                      )}
+                    </React.Fragment>
+                  ))}
                 </ul>
               </EuiText>
             </EuiFlexItem>

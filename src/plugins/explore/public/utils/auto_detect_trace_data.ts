@@ -13,6 +13,8 @@ export interface DetectionResult {
   logPattern: string | null;
   traceTimeField: string | null;
   logTimeField: string | null;
+  dataSourceId?: string;
+  dataSourceTitle?: string;
 }
 
 /**
@@ -31,6 +33,7 @@ export async function detectTraceData(
     logPattern: null,
     traceTimeField: null,
     logTimeField: null,
+    dataSourceId,
   };
 
   // 1. Check if trace datasets already exist
@@ -98,4 +101,100 @@ export async function detectTraceData(
   }
 
   return result;
+}
+
+/**
+ * Detect trace data across all OpenSearch datasource connections
+ * Returns detection results for each datasource that has matching indices
+ */
+export async function detectTraceDataAcrossDataSources(
+  savedObjectsClient: SavedObjectsClientContract,
+  indexPatternsService: IndexPatternsContract
+): Promise<DetectionResult[]> {
+  const results: DetectionResult[] = [];
+
+  // 1. Check if trace datasets already exist (for any datasource)
+  try {
+    const allIndexPatterns = await indexPatternsService.getIds();
+    let hasTraceDatasets = false;
+
+    for (const id of allIndexPatterns) {
+      try {
+        const indexPattern = await indexPatternsService.get(id);
+        if (indexPattern.signalType === 'traces') {
+          hasTraceDatasets = true;
+          break;
+        }
+      } catch (error) {
+        continue;
+      }
+    }
+
+    // If trace datasets exist, return empty array (no need to auto-detect)
+    if (hasTraceDatasets) {
+      return results;
+    }
+  } catch (error) {
+    // If loading fails, continue with detection
+  }
+
+  // 2. Fetch all data sources
+  try {
+    const dataSourcesResp = await savedObjectsClient.find<any>({
+      type: 'data-source',
+      perPage: 10000,
+    });
+
+    // 3. Check each data source for trace data
+    for (const dataSource of dataSourcesResp.savedObjects) {
+      try {
+        const detection = await detectTraceData(
+          savedObjectsClient,
+          indexPatternsService,
+          dataSource.id
+        );
+
+        // If traces or logs detected, include datasource info and add to results
+        if (detection.tracesDetected || detection.logsDetected) {
+          // Create a new object with datasource info instead of mutating
+          const detectionWithSource: DetectionResult = {
+            ...detection,
+            dataSourceId: dataSource.id,
+            dataSourceTitle: dataSource.attributes.title,
+          };
+          results.push(detectionWithSource);
+        }
+      } catch (error) {
+        // Skip this datasource if detection fails
+        continue;
+      }
+    }
+  } catch (error) {
+    // If fetching data sources fails, fall through
+  }
+
+  // 4. Also check local cluster (no datasource) - but only if no datasources were found
+  // This prevents duplicates when a datasource points to the local cluster
+  if (results.length === 0) {
+    try {
+      const localDetection = await detectTraceData(
+        savedObjectsClient,
+        indexPatternsService,
+        undefined
+      );
+
+      if (localDetection.tracesDetected || localDetection.logsDetected) {
+        // Create a new object with local cluster title
+        const detectionWithSource: DetectionResult = {
+          ...localDetection,
+          dataSourceTitle: 'Local Cluster',
+        };
+        results.push(detectionWithSource);
+      }
+    } catch (error) {
+      // Continue if local cluster check fails
+    }
+  }
+
+  return results;
 }

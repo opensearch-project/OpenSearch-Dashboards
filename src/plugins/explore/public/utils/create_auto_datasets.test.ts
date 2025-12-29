@@ -45,12 +45,18 @@ describe('createAutoDetectedDatasets', () => {
     expect(result.correlationId).toBeNull();
 
     expect(mockSavedObjectsClient.create).toHaveBeenCalledTimes(1);
-    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith('index-pattern', {
-      title: 'otel-v1-apm-span*',
-      displayName: 'Trace Dataset',
-      timeFieldName: 'endTime',
-      signalType: 'traces',
-    });
+    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+      'index-pattern',
+      {
+        title: 'otel-v1-apm-span*',
+        displayName: 'Trace Dataset',
+        timeFieldName: 'endTime',
+        signalType: 'traces',
+      },
+      {
+        references: [],
+      }
+    );
   });
 
   it('should create log dataset when logs are detected', async () => {
@@ -77,20 +83,26 @@ describe('createAutoDetectedDatasets', () => {
     expect(result.correlationId).toBeNull();
 
     expect(mockSavedObjectsClient.create).toHaveBeenCalledTimes(1);
-    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith('index-pattern', {
-      title: 'logs-otel-v1*',
-      displayName: 'Log Dataset',
-      timeFieldName: 'time',
-      signalType: 'logs',
-      schemaMappings: JSON.stringify({
-        otelLogs: {
-          timeField: 'time',
-          traceId: 'traceId',
-          spanId: 'spanId',
-          serviceName: 'resource.attributes.service.name',
-        },
-      }),
-    });
+    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+      'index-pattern',
+      {
+        title: 'logs-otel-v1*',
+        displayName: 'Log Dataset',
+        timeFieldName: 'time',
+        signalType: 'logs',
+        schemaMappings: JSON.stringify({
+          otelLogs: {
+            timeField: 'time',
+            traceId: 'traceId',
+            spanId: 'spanId',
+            serviceName: 'resource.attributes.service.name',
+          },
+        }),
+      },
+      {
+        references: [],
+      }
+    );
   });
 
   it('should create both datasets and correlation when both are detected', async () => {
@@ -132,28 +144,42 @@ describe('createAutoDetectedDatasets', () => {
     expect(mockSavedObjectsClient.create).toHaveBeenCalledTimes(3);
 
     // Verify trace dataset creation
-    expect(mockSavedObjectsClient.create).toHaveBeenNthCalledWith(1, 'index-pattern', {
-      title: 'otel-v1-apm-span*',
-      displayName: 'Trace Dataset',
-      timeFieldName: 'endTime',
-      signalType: 'traces',
-    });
+    expect(mockSavedObjectsClient.create).toHaveBeenNthCalledWith(
+      1,
+      'index-pattern',
+      {
+        title: 'otel-v1-apm-span*',
+        displayName: 'Trace Dataset',
+        timeFieldName: 'endTime',
+        signalType: 'traces',
+      },
+      {
+        references: [],
+      }
+    );
 
     // Verify log dataset creation
-    expect(mockSavedObjectsClient.create).toHaveBeenNthCalledWith(2, 'index-pattern', {
-      title: 'logs-otel-v1*',
-      displayName: 'Log Dataset',
-      timeFieldName: 'time',
-      signalType: 'logs',
-      schemaMappings: JSON.stringify({
-        otelLogs: {
-          timeField: 'time',
-          traceId: 'traceId',
-          spanId: 'spanId',
-          serviceName: 'resource.attributes.service.name',
-        },
-      }),
-    });
+    expect(mockSavedObjectsClient.create).toHaveBeenNthCalledWith(
+      2,
+      'index-pattern',
+      {
+        title: 'logs-otel-v1*',
+        displayName: 'Log Dataset',
+        timeFieldName: 'time',
+        signalType: 'logs',
+        schemaMappings: JSON.stringify({
+          otelLogs: {
+            timeField: 'time',
+            traceId: 'traceId',
+            spanId: 'spanId',
+            serviceName: 'resource.attributes.service.name',
+          },
+        }),
+      },
+      {
+        references: [],
+      }
+    );
 
     // Verify correlation creation
     expect(mockSavedObjectsClient.create).toHaveBeenNthCalledWith(
@@ -205,16 +231,24 @@ describe('createAutoDetectedDatasets', () => {
 
     await createAutoDetectedDatasets(mockSavedObjectsClient, detection, dataSourceId);
 
-    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith('index-pattern', {
-      title: 'otel-v1-apm-span*',
-      displayName: 'Trace Dataset',
-      timeFieldName: 'endTime',
-      signalType: 'traces',
-      dataSourceRef: {
-        id: dataSourceId,
-        type: 'data-source',
+    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+      'index-pattern',
+      {
+        title: 'otel-v1-apm-span*',
+        displayName: 'Trace Dataset',
+        timeFieldName: 'endTime',
+        signalType: 'traces',
       },
-    });
+      {
+        references: [
+          {
+            id: dataSourceId,
+            type: 'data-source',
+            name: 'dataSource',
+          },
+        ],
+      }
+    );
   });
 
   it('should include dataSourceRef when dataSourceId is provided for log dataset', async () => {
@@ -238,24 +272,32 @@ describe('createAutoDetectedDatasets', () => {
 
     await createAutoDetectedDatasets(mockSavedObjectsClient, detection, dataSourceId);
 
-    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith('index-pattern', {
-      title: 'logs-otel-v1*',
-      displayName: 'Log Dataset',
-      timeFieldName: 'time',
-      signalType: 'logs',
-      dataSourceRef: {
-        id: dataSourceId,
-        type: 'data-source',
+    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+      'index-pattern',
+      {
+        title: 'logs-otel-v1*',
+        displayName: 'Log Dataset',
+        timeFieldName: 'time',
+        signalType: 'logs',
+        schemaMappings: JSON.stringify({
+          otelLogs: {
+            timeField: 'time',
+            traceId: 'traceId',
+            spanId: 'spanId',
+            serviceName: 'resource.attributes.service.name',
+          },
+        }),
       },
-      schemaMappings: JSON.stringify({
-        otelLogs: {
-          timeField: 'time',
-          traceId: 'traceId',
-          spanId: 'spanId',
-          serviceName: 'resource.attributes.service.name',
-        },
-      }),
-    });
+      {
+        references: [
+          {
+            id: dataSourceId,
+            type: 'data-source',
+            name: 'dataSource',
+          },
+        ],
+      }
+    );
   });
 
   it('should not create trace dataset when tracePattern is missing', async () => {
@@ -494,26 +536,34 @@ describe('createAutoDetectedDatasets', () => {
 
     await createAutoDetectedDatasets(mockSavedObjectsClient, detection, dataSourceId);
 
-    // Verify both datasets have dataSourceRef
+    // Verify both datasets have dataSourceRef in references
     expect(mockSavedObjectsClient.create).toHaveBeenNthCalledWith(
       1,
       'index-pattern',
+      expect.anything(),
       expect.objectContaining({
-        dataSourceRef: {
-          id: dataSourceId,
-          type: 'data-source',
-        },
+        references: [
+          {
+            id: dataSourceId,
+            type: 'data-source',
+            name: 'dataSource',
+          },
+        ],
       })
     );
 
     expect(mockSavedObjectsClient.create).toHaveBeenNthCalledWith(
       2,
       'index-pattern',
+      expect.anything(),
       expect.objectContaining({
-        dataSourceRef: {
-          id: dataSourceId,
-          type: 'data-source',
-        },
+        references: [
+          {
+            id: dataSourceId,
+            type: 'data-source',
+            name: 'dataSource',
+          },
+        ],
       })
     );
   });
@@ -556,7 +606,8 @@ describe('createAutoDetectedDatasets', () => {
       'index-pattern',
       expect.objectContaining({
         signalType: 'traces',
-      })
+      }),
+      expect.anything()
     );
 
     // Verify log dataset has signalType='logs'
@@ -565,7 +616,8 @@ describe('createAutoDetectedDatasets', () => {
       'index-pattern',
       expect.objectContaining({
         signalType: 'logs',
-      })
+      }),
+      expect.anything()
     );
   });
 
@@ -601,7 +653,8 @@ describe('createAutoDetectedDatasets', () => {
       'index-pattern',
       expect.objectContaining({
         schemaMappings: JSON.stringify(expectedSchemaMappings),
-      })
+      }),
+      expect.anything()
     );
   });
 });

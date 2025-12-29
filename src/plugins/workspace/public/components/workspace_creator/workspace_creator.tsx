@@ -164,6 +164,11 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                     connectionType === DataSourceConnectionType.OpenSearchConnection
                 );
 
+                // Create mapping from dataSourceId to name
+                const dataSourceIdToName = new Map(
+                  dataSourceConnections.map(({ id, name }) => [id, name])
+                );
+
                 // If no data sources selected, check local cluster
                 const dataSourcesToCheck =
                   dataSourceConnections.length > 0
@@ -182,6 +187,13 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                     );
 
                     if (detection.tracesDetected || detection.logsDetected) {
+                      // Add datasource title to detection
+                      if (dataSourceId) {
+                        detection.dataSourceTitle = dataSourceIdToName.get(dataSourceId);
+                      } else {
+                        detection.dataSourceTitle = 'Local Cluster';
+                      }
+
                       await createAutoDetectedDatasets(
                         savedObjects.client,
                         detection,

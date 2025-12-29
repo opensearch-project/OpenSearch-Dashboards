@@ -26,45 +26,67 @@ export async function createAutoDetectedDatasets(
     correlationId: null,
   };
 
+  // Use datasource title from detection if available, otherwise use provided dataSourceId
+  const effectiveDataSourceId = detection.dataSourceId || dataSourceId;
+  const dataSourceSuffix = detection.dataSourceTitle ? ` - ${detection.dataSourceTitle}` : '';
+
   // 1. Create trace dataset
   if (detection.tracesDetected && detection.tracePattern && detection.traceTimeField) {
-    const traceResponse = await savedObjectsClient.create('index-pattern', {
-      title: detection.tracePattern,
-      displayName: 'Trace Dataset',
-      timeFieldName: detection.traceTimeField,
-      signalType: 'traces',
-      ...(dataSourceId && {
-        dataSourceRef: {
-          id: dataSourceId,
-          type: 'data-source',
-        },
-      }),
-    });
+    const displayName = `Trace Dataset${dataSourceSuffix}`;
+
+    const traceResponse = await savedObjectsClient.create(
+      'index-pattern',
+      {
+        title: detection.tracePattern,
+        displayName,
+        timeFieldName: detection.traceTimeField,
+        signalType: 'traces',
+      },
+      {
+        references: effectiveDataSourceId
+          ? [
+              {
+                id: effectiveDataSourceId,
+                type: 'data-source',
+                name: 'dataSource',
+              },
+            ]
+          : [],
+      }
+    );
     result.traceDatasetId = traceResponse.id;
   }
 
   // 2. Create log dataset with schema mappings for correlation
   if (detection.logsDetected && detection.logPattern && detection.logTimeField) {
-    const logResponse = await savedObjectsClient.create('index-pattern', {
-      title: detection.logPattern,
-      displayName: 'Log Dataset',
-      timeFieldName: detection.logTimeField,
-      signalType: 'logs',
-      ...(dataSourceId && {
-        dataSourceRef: {
-          id: dataSourceId,
-          type: 'data-source',
-        },
-      }),
-      schemaMappings: JSON.stringify({
-        otelLogs: {
-          timeField: 'time',
-          traceId: 'traceId',
-          spanId: 'spanId',
-          serviceName: 'resource.attributes.service.name',
-        },
-      }),
-    });
+    const logResponse = await savedObjectsClient.create(
+      'index-pattern',
+      {
+        title: detection.logPattern,
+        displayName: `Log Dataset${dataSourceSuffix}`,
+        timeFieldName: detection.logTimeField,
+        signalType: 'logs',
+        schemaMappings: JSON.stringify({
+          otelLogs: {
+            timeField: 'time',
+            traceId: 'traceId',
+            spanId: 'spanId',
+            serviceName: 'resource.attributes.service.name',
+          },
+        }),
+      },
+      {
+        references: effectiveDataSourceId
+          ? [
+              {
+                id: effectiveDataSourceId,
+                type: 'data-source',
+                name: 'dataSource',
+              },
+            ]
+          : [],
+      }
+    );
     result.logDatasetId = logResponse.id;
   }
 

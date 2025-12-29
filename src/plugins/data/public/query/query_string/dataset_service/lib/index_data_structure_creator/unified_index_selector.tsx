@@ -15,6 +15,7 @@ import {
   EuiIcon,
   EuiText,
   EuiPopover,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataStructure } from '../../../../../../common';
@@ -51,6 +52,8 @@ export const UnifiedIndexSelector: React.FC<UnifiedIndexSelectorProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasLoadedInitial = useRef(false);
+  const hasAutoFocused = useRef(false);
+  const shouldRepositionCursor = useRef(false);
 
   // Use shared hook for fetching indices
   const { fetchIndices: fetchIndicesFromHook } = useIndexFetcher({ services, path });
@@ -175,6 +178,26 @@ export const UnifiedIndexSelector: React.FC<UnifiedIndexSelectorProps> = ({
     };
   }, [searchValue, fetchIndices]);
 
+  // Auto-focus input on first mount to open dropdown
+  useEffect(() => {
+    if (!hasAutoFocused.current && inputRef.current) {
+      hasAutoFocused.current = true;
+      // Small delay to ensure component is fully mounted
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, []);
+
+  // Reposition cursor after wildcard is auto-appended
+  useEffect(() => {
+    if (shouldRepositionCursor.current && inputRef.current) {
+      shouldRepositionCursor.current = false;
+      // Position cursor after the first character (before the wildcard)
+      inputRef.current.setSelectionRange(1, 1);
+    }
+  }, [searchValue]);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { target } = e;
     let value = target.value;
@@ -183,7 +206,8 @@ export const UnifiedIndexSelector: React.FC<UnifiedIndexSelectorProps> = ({
     if (value.length === 1 && canAppendWildcard(value)) {
       value += '*';
       setAppendedWildcard(true);
-      setTimeout(() => target.setSelectionRange(1, 1));
+      // Signal that cursor should be repositioned after state update
+      shouldRepositionCursor.current = true;
     } else {
       if (value === '*' && appendedWildcard) {
         value = '';
@@ -249,6 +273,8 @@ export const UnifiedIndexSelector: React.FC<UnifiedIndexSelectorProps> = ({
     if (e.key === 'Enter' && searchValue.trim() && searchValue.includes('*')) {
       e.preventDefault();
       handleAddPattern();
+      setIsPopoverOpen(false);
+      inputRef.current?.blur();
     }
   };
 
@@ -285,14 +311,17 @@ export const UnifiedIndexSelector: React.FC<UnifiedIndexSelectorProps> = ({
 
   return (
     <div className="unifiedIndexSelector">
+      <EuiText size="s" color="subdued">
+        {i18n.translate('data.datasetService.unifiedSelector.helpText', {
+          defaultMessage:
+            'Click indices to add them, or enter wildcards (e.g., otel*) and use Add wildcard button',
+        })}
+      </EuiText>
+      <EuiSpacer size="s" />
       <EuiFormRow
         isInvalid={hasValidationErrors}
         error={hasValidationErrors ? errorMessage : undefined}
         fullWidth
-        helpText={i18n.translate('data.datasetService.unifiedSelector.helpText', {
-          defaultMessage:
-            'Click indices to add them, or enter wildcards (e.g., otel*) and use Add wildcard button',
-        })}
       >
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem>

@@ -21,5 +21,14 @@
 
   &__selectedList {
     height: 40vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__emptyState {
+    height: 40vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }

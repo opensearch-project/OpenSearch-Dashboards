@@ -198,7 +198,7 @@ describe('DatasetSelect', () => {
     fireEvent.click(button);
 
     await waitFor(() => {
-      const createButton = screen.getByTestId('datasetSelectCreateButton');
+      const createButton = screen.getByTestId('datasetSelectorAdvancedButton');
       expect(createButton).toBeInTheDocument();
       fireEvent.click(createButton);
     });
@@ -208,7 +208,10 @@ describe('DatasetSelect', () => {
 
   it('selects default dataset if no current dataset', async () => {
     mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
-    renderWithContext();
+    renderWithContext({
+      ...defaultProps,
+      signalType: CORE_SIGNAL_TYPES.LOGS,
+    });
 
     await waitFor(() => {
       expect(mockDataViews.getDefault).toHaveBeenCalled();
@@ -394,5 +397,94 @@ describe('DatasetSelect', () => {
     expect(metricsElements.length).toBeGreaterThan(0);
 
     expect(screen.queryByText('Logs Dataset')).not.toBeInTheDocument();
+  });
+
+  it('ignores incompatible dataset changes and preserves selection', async () => {
+    // Setup: Start with a trace dataset selected on traces page
+    const traceDataset = {
+      id: 'trace-id',
+      title: 'trace-dataset',
+      type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+      signalType: CORE_SIGNAL_TYPES.TRACES,
+    };
+
+    const logDataset = {
+      id: 'log-id',
+      title: 'log-dataset',
+      type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+      signalType: CORE_SIGNAL_TYPES.LOGS,
+    };
+
+    // Mock getIds to return both datasets
+    mockDataViews.getIds = jest.fn().mockResolvedValue(['trace-id', 'log-id']);
+
+    // Mock get to return the correct dataset based on ID
+    mockDataViews.get = jest.fn().mockImplementation((id) => {
+      if (id === 'trace-id') {
+        return Promise.resolve({
+          id: 'trace-id',
+          title: 'trace-dataset',
+          displayName: 'Trace Dataset',
+          signalType: CORE_SIGNAL_TYPES.TRACES,
+        });
+      } else if (id === 'log-id') {
+        return Promise.resolve({
+          id: 'log-id',
+          title: 'log-dataset',
+          displayName: 'Log Dataset',
+          signalType: CORE_SIGNAL_TYPES.LOGS,
+        });
+      }
+      return Promise.resolve(null);
+    });
+
+    mockDataViews.convertToDataset = jest.fn().mockImplementation((dataView) => {
+      return Promise.resolve({
+        id: dataView.id,
+        title: dataView.title,
+        type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+        signalType: dataView.signalType,
+      });
+    });
+
+    // Start with trace dataset selected
+    mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
+      dataset: traceDataset,
+    });
+
+    const { rerender } = renderWithContext({
+      ...defaultProps,
+      signalType: CORE_SIGNAL_TYPES.TRACES,
+    });
+
+    await waitFor(() => {
+      expect(mockDataViews.getIds).toHaveBeenCalled();
+      expect(screen.getByText('Trace Dataset')).toBeInTheDocument();
+    });
+
+    // Simulate flyout changing query to log dataset (e.g., querying related logs)
+    mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({
+      dataset: logDataset,
+    });
+
+    // Force re-render to trigger the effect
+    rerender(
+      <I18nProvider>
+        <OpenSearchDashboardsContextProvider services={mockServices}>
+          <DatasetSelect {...defaultProps} signalType={CORE_SIGNAL_TYPES.TRACES} />
+        </OpenSearchDashboardsContextProvider>
+      </I18nProvider>
+    );
+
+    // Wait a bit for effects to run
+    await waitFor(() => {
+      expect(mockDataViews.get).toHaveBeenCalledWith('log-id', false);
+    });
+
+    // The UI should still show the trace dataset, not the incompatible log dataset
+    // It should NOT clear the selection or show "Select data"
+    expect(screen.getByText('Trace Dataset')).toBeInTheDocument();
+    expect(screen.queryByText('Log Dataset')).not.toBeInTheDocument();
+    expect(screen.queryByText('Select data')).not.toBeInTheDocument();
   });
 });

@@ -267,22 +267,31 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
         path={path}
       />
 
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
 
       {/* Selected items and health panel */}
-      {selectedItems.length > 0 && (
-        <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
-          {/* Left: Selected items using EuiSelectable */}
-          <EuiFlexItem grow={true} style={{ minWidth: 0, flexBasis: '55%' }}>
-            <EuiText size="s">
-              <strong>
-                {i18n.translate('data.datasetService.unifiedSelector.selectedItemsLabel', {
-                  defaultMessage: 'Selected:',
-                })}
-              </strong>
-            </EuiText>
-            <EuiSpacer size="xs" />
-            <div className="indexDataStructureCreator__selectedList">
+      <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
+        {/* Left: Selected items using EuiSelectable */}
+        <EuiFlexItem grow={true} style={{ minWidth: 0, flexBasis: '55%' }}>
+          <EuiText size="s">
+            <strong>
+              {i18n.translate('data.datasetService.unifiedSelector.selectedItemsLabel', {
+                defaultMessage: 'Selected:',
+              })}
+            </strong>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <div className="indexDataStructureCreator__selectedList">
+            {selectedItems.length === 0 ? (
+              <EuiPanel hasBorder paddingSize="m" className="indexDataStructureCreator__emptyState">
+                <EuiText size="s" color="subdued" textAlign="center">
+                  <FormattedMessage
+                    id="data.datasetService.unifiedSelector.emptySelection"
+                    defaultMessage="No indices or patterns selected yet. Use the search above to add indices or wildcard patterns."
+                  />
+                </EuiText>
+              </EuiPanel>
+            ) : (
               <EuiSelectable
                 options={selectedItems.map((item, itemIndex) => ({
                   label: item.title,
@@ -318,170 +327,183 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
               >
                 {(list) => list}
               </EuiSelectable>
-            </div>
-          </EuiFlexItem>
+            )}
+          </div>
+        </EuiFlexItem>
 
-          {/* Right: Health/Matches panel */}
-          {selectedItems[selectedBadgeIndex] && (
-            <EuiFlexItem grow={false} style={{ minWidth: 0, flexBasis: '35%', maxWidth: '300px' }}>
-              <EuiText size="s">
-                <strong>&nbsp;</strong>
-              </EuiText>
-              <EuiSpacer size="xs" />
-              <EuiPanel hasBorder>
-                {isLoadingHealth ? (
-                  <EuiFlexGroup justifyContent="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiLoadingSpinner size="m" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ) : selectedItems[selectedBadgeIndex].isWildcard ? (
-                  // Show matching indices for wildcard
+        {/* Right: Health/Matches panel */}
+        <EuiFlexItem grow={false} style={{ minWidth: 0, flexBasis: '35%', maxWidth: '300px' }}>
+          <EuiText size="s">
+            <strong>&nbsp;</strong>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiPanel hasBorder className="indexDataStructureCreator__healthPanel">
+            {selectedItems.length === 0 ? (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                }}
+              >
+                <EuiText size="s" color="subdued" textAlign="center">
+                  <FormattedMessage
+                    id="data.datasetService.unifiedSelector.emptyHealthPanel"
+                    defaultMessage="Select an index or pattern to view details"
+                  />
+                </EuiText>
+              </div>
+            ) : isLoadingHealth ? (
+              <EuiFlexGroup justifyContent="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner size="m" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : selectedItems[selectedBadgeIndex].isWildcard ? (
+              // Show matching indices for wildcard
+              <>
+                <EuiText size="s" color="subdued">
+                  {matchingIndicesForWildcard.length > 0 ? (
+                    <FormattedMessage
+                      id="data.datasetService.unifiedSelector.matchingCount"
+                      defaultMessage="{count} {count, plural, one {index} other {indices}} match this pattern"
+                      values={{ count: matchingIndicesForWildcard.length }}
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="data.datasetService.unifiedSelector.noMatchingIndices"
+                      defaultMessage="No indices match this pattern"
+                    />
+                  )}
+                </EuiText>
+                {matchingIndicesForWildcard.length > 0 && (
                   <>
-                    <EuiText size="s" color="subdued">
-                      {matchingIndicesForWildcard.length > 0 ? (
-                        <FormattedMessage
-                          id="data.datasetService.unifiedSelector.matchingCount"
-                          defaultMessage="{count} {count, plural, one {index} other {indices}} match this pattern"
-                          values={{ count: matchingIndicesForWildcard.length }}
-                        />
-                      ) : (
-                        <FormattedMessage
-                          id="data.datasetService.unifiedSelector.noMatchingIndices"
-                          defaultMessage="No indices match this pattern"
-                        />
-                      )}
-                    </EuiText>
-                    {matchingIndicesForWildcard.length > 0 && (
+                    <EuiSpacer size="s" />
+                    <div style={{ height: '20vh' }}>
+                      <EuiSelectable
+                        options={matchingIndicesForWildcard.map((indexName) => ({
+                          label: indexName,
+                          key: indexName,
+                          checked: clickedMatchingIndex === indexName ? 'on' : undefined,
+                        }))}
+                        onChange={(newOptions) => {
+                          const selected = newOptions.find((opt) => opt.checked === 'on');
+                          if (
+                            selected &&
+                            selected.label &&
+                            clickedMatchingIndex !== selected.label
+                          ) {
+                            // Clicking a new item - fetch its health
+                            setClickedMatchingIndex(selected.label);
+                            fetchMatchingIndexHealth(selected.label);
+                          }
+                        }}
+                        singleSelection="always"
+                        searchable={false}
+                        height="full"
+                        listProps={{
+                          bordered: true,
+                        }}
+                      >
+                        {(list) => list}
+                      </EuiSelectable>
+                    </div>
+                    {clickedMatchingIndex && matchingIndexHealth && (
                       <>
                         <EuiSpacer size="s" />
-                        <div style={{ height: '20vh' }}>
-                          <EuiSelectable
-                            options={matchingIndicesForWildcard.map((indexName) => ({
-                              label: indexName,
-                              key: indexName,
-                              checked: clickedMatchingIndex === indexName ? 'on' : undefined,
-                            }))}
-                            onChange={(newOptions) => {
-                              const selected = newOptions.find((opt) => opt.checked === 'on');
-                              if (
-                                selected &&
-                                selected.label &&
-                                clickedMatchingIndex !== selected.label
-                              ) {
-                                // Clicking a new item - fetch its health
-                                setClickedMatchingIndex(selected.label);
-                                fetchMatchingIndexHealth(selected.label);
-                              }
-                            }}
-                            singleSelection="always"
-                            searchable={false}
-                            height="full"
-                            listProps={{
-                              bordered: true,
-                            }}
-                          >
-                            {(list) => list}
-                          </EuiSelectable>
-                        </div>
-                        {clickedMatchingIndex && matchingIndexHealth && (
-                          <>
-                            <EuiSpacer size="s" />
-                            <EuiPanel color="subdued" style={{ padding: '12px' }}>
-                              <EuiTitle size="xxs">
-                                <h5>{clickedMatchingIndex}</h5>
-                              </EuiTitle>
-                              <EuiSpacer size="xs" />
-                              <EuiFlexGroup gutterSize="s" alignItems="center">
-                                <EuiFlexItem grow={false}>
-                                  <EuiText size="xs">
-                                    <strong>Health:</strong>
-                                  </EuiText>
-                                </EuiFlexItem>
-                                <EuiFlexItem grow={false}>
-                                  <EuiHealth
-                                    color={
-                                      matchingIndexHealth.health === 'green'
-                                        ? 'success'
-                                        : matchingIndexHealth.health === 'yellow'
-                                        ? 'warning'
-                                        : 'danger'
-                                    }
-                                  >
-                                    {matchingIndexHealth.health}
-                                  </EuiHealth>
-                                </EuiFlexItem>
-                              </EuiFlexGroup>
+                        <EuiPanel color="subdued" style={{ padding: '12px' }}>
+                          <EuiTitle size="xxs">
+                            <h5>{clickedMatchingIndex}</h5>
+                          </EuiTitle>
+                          <EuiSpacer size="xs" />
+                          <EuiFlexGroup gutterSize="s" alignItems="center">
+                            <EuiFlexItem grow={false}>
                               <EuiText size="xs">
-                                <strong>Status:</strong> {matchingIndexHealth.status}
+                                <strong>Health:</strong>
                               </EuiText>
-                              <EuiText size="xs">
-                                <strong>Documents:</strong>{' '}
-                                {matchingIndexHealth['docs.count'] || '0'}
-                              </EuiText>
-                              <EuiText size="xs">
-                                <strong>Size:</strong> {matchingIndexHealth['store.size'] || 'N/A'}
-                              </EuiText>
-                            </EuiPanel>
-                          </>
-                        )}
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false}>
+                              <EuiHealth
+                                color={
+                                  matchingIndexHealth.health === 'green'
+                                    ? 'success'
+                                    : matchingIndexHealth.health === 'yellow'
+                                    ? 'warning'
+                                    : 'danger'
+                                }
+                              >
+                                {matchingIndexHealth.health}
+                              </EuiHealth>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                          <EuiText size="xs">
+                            <strong>Status:</strong> {matchingIndexHealth.status}
+                          </EuiText>
+                          <EuiText size="xs">
+                            <strong>Documents:</strong> {matchingIndexHealth['docs.count'] || '0'}
+                          </EuiText>
+                          <EuiText size="xs">
+                            <strong>Size:</strong> {matchingIndexHealth['store.size'] || 'N/A'}
+                          </EuiText>
+                        </EuiPanel>
                       </>
                     )}
                   </>
-                ) : (
-                  // Show health info for exact index
-                  <>
-                    {indexHealthData ? (
-                      <EuiPanel color="subdued" style={{ padding: '12px' }}>
-                        <EuiTitle size="xxs">
-                          <h5>{selectedItems[selectedBadgeIndex].title}</h5>
-                        </EuiTitle>
-                        <EuiSpacer size="xs" />
-                        <EuiFlexGroup gutterSize="s" alignItems="center">
-                          <EuiFlexItem grow={false}>
-                            <EuiText size="xs">
-                              <strong>Health:</strong>
-                            </EuiText>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiHealth
-                              color={
-                                indexHealthData.health === 'green'
-                                  ? 'success'
-                                  : indexHealthData.health === 'yellow'
-                                  ? 'warning'
-                                  : 'danger'
-                              }
-                            >
-                              {indexHealthData.health}
-                            </EuiHealth>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                        <EuiText size="xs">
-                          <strong>Status:</strong> {indexHealthData.status}
-                        </EuiText>
-                        <EuiText size="xs">
-                          <strong>Documents:</strong> {indexHealthData['docs.count'] || '0'}
-                        </EuiText>
-                        <EuiText size="xs">
-                          <strong>Size:</strong> {indexHealthData['store.size'] || 'N/A'}
-                        </EuiText>
-                      </EuiPanel>
-                    ) : (
-                      <EuiText size="s" color="subdued">
-                        <FormattedMessage
-                          id="data.datasetService.unifiedSelector.noHealthData"
-                          defaultMessage="Unable to fetch health data"
-                        />
-                      </EuiText>
-                    )}
-                  </>
                 )}
-              </EuiPanel>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      )}
+              </>
+            ) : (
+              // Show health info for exact index
+              <>
+                {indexHealthData ? (
+                  <EuiPanel color="subdued" style={{ padding: '12px' }}>
+                    <EuiTitle size="xxs">
+                      <h5>{selectedItems[selectedBadgeIndex].title}</h5>
+                    </EuiTitle>
+                    <EuiSpacer size="xs" />
+                    <EuiFlexGroup gutterSize="s" alignItems="center">
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs">
+                          <strong>Health:</strong>
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiHealth
+                          color={
+                            indexHealthData.health === 'green'
+                              ? 'success'
+                              : indexHealthData.health === 'yellow'
+                              ? 'warning'
+                              : 'danger'
+                          }
+                        >
+                          {indexHealthData.health}
+                        </EuiHealth>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiText size="xs">
+                      <strong>Status:</strong> {indexHealthData.status}
+                    </EuiText>
+                    <EuiText size="xs">
+                      <strong>Documents:</strong> {indexHealthData['docs.count'] || '0'}
+                    </EuiText>
+                    <EuiText size="xs">
+                      <strong>Size:</strong> {indexHealthData['store.size'] || 'N/A'}
+                    </EuiText>
+                  </EuiPanel>
+                ) : (
+                  <EuiText size="s" color="subdued">
+                    <FormattedMessage
+                      id="data.datasetService.unifiedSelector.noHealthData"
+                      defaultMessage="Unable to fetch health data"
+                    />
+                  </EuiText>
+                )}
+              </>
+            )}
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };

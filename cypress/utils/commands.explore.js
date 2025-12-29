@@ -399,7 +399,7 @@ cy.explore.add(
       .should('be.visible')
       .should('not.be.disabled')
       .click();
-    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
+    cy.getElementByTestId(`datasetSelectorAdvancedButton`).should('be.visible').click();
     cy.get(`[title="${dataSourceName}"]`).click();
 
     // Use the unified index selector - type to search and click from results
@@ -486,7 +486,7 @@ cy.explore.add(
       .click();
 
     // Step 3 - Click advanced selector button
-    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
+    cy.getElementByTestId(`datasetSelectorAdvancedButton`).should('be.visible').click();
 
     // Step 4 - Indexes panel is now hidden when it's the only option, skip to data source selection
 
