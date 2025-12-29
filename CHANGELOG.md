@@ -54,6 +54,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
  - Update table action bar and field selector in Explore ([#9985](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9985))
  - Add static banner plugin and feature flag ([#9989](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/9989))
  - Add route path to request ([#10399](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10399))
+ - Add User Behavior Insights(UBI) sample dataset and dashboards ([#11110](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11110))
 
 ### 🐛 Bug Fixes
 
