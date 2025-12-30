@@ -98,7 +98,6 @@ export const parse = (
   obj = JSON.parse(text, checkForLargeNumerals);
 
   if (!numeralsAreNumbers) {
-    console.log(JSON11);
     const temp = JSON11.parse(text, reviver, { withLongNumerals: true });
     if (temp) obj = temp;
   }
