@@ -97,7 +97,9 @@ export const createBarSpec = (
       ),
       createBaseConfig,
       buildAxisConfigs,
-      buildVisMap({ seriesFields: [valueField], actualX: categoryField }),
+      buildVisMap({
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
+      }),
       createBarSeries({ styles, categoryField, seriesFields: [valueField] }),
       assembleSpec
     )({
@@ -240,7 +242,9 @@ export const createTimeBarChart = (
       ),
       createBaseConfig,
       buildAxisConfigs,
-      buildVisMap({ seriesFields: [valueField], actualX: timeField }),
+      buildVisMap({
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      }),
       createBarSeries({
         styles,
         categoryField: timeField,
@@ -403,7 +407,6 @@ export const createGroupedTimeBarChart = (
       createBaseConfig,
       buildAxisConfigs,
       buildVisMap({
-        actualX: timeField,
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
       }),
       createBarSeries({
@@ -550,7 +553,9 @@ export const createFacetedTimeBarChart = (
     const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
     const colorField = colorColumn?.column;
 
-    if (!xAxis || !yAxis || !colorField) {
+    const facetColumn = axisColumnMappings?.[AxisRole.FACET]?.column;
+
+    if (!xAxis || !yAxis || !colorField || !facetColumn) {
       throw Error('Missing axis config for facet time bar chart');
     }
 
@@ -569,6 +574,7 @@ export const createFacetedTimeBarChart = (
 
     const result = pipe(
       facetTransform(
+        facetColumn,
         pivot({
           groupBy: timeField,
           pivot: colorField,
@@ -580,7 +586,9 @@ export const createFacetedTimeBarChart = (
       ),
       createBaseConfig,
       buildAxisConfigs,
-      buildVisMap({ actualX: timeField, seriesFields: [valueField] }),
+      buildVisMap({
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      }),
       createFacetBarSeries({
         styles,
         categoryField: timeField,
@@ -756,7 +764,6 @@ export const createStackedBarSpec = (
       createBaseConfig,
       buildAxisConfigs,
       buildVisMap({
-        actualX: categoryField,
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
       }),
       createBarSeries({
@@ -899,7 +906,9 @@ export const createDoubleNumericalBarChart = (
       ),
       createBaseConfig,
       buildAxisConfigs,
-      buildVisMap({ actualX: categoryField, seriesFields: [valueField] }),
+      buildVisMap({
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
+      }),
       createBarSeries({ styles, categoryField, seriesFields: [valueField] }),
       assembleSpec
     )({

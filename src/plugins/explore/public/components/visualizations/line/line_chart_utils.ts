@@ -285,7 +285,7 @@ export const applyAxisStyling = (
   return baseAxis;
 };
 
-const findLineInterpolation = (lineMode: LineMode) => {
+const getLineInterpolation = (lineMode: LineMode) => {
   switch (lineMode) {
     case 'straight':
       return {};
@@ -307,19 +307,19 @@ const generateLineStyles = (styles: LineChartStyle) => {
     lineStyle: {
       width: lineWidth,
     },
-    ...findLineInterpolation(styles.lineMode),
+    ...getLineInterpolation(styles.lineMode),
   };
 };
 
 export const createLineSeries = <T extends BaseChartStyle>({
   styles,
   seriesFields,
-  actualX,
+  categoryField,
   addTimeMarker = true,
 }: {
   styles: LineChartStyle;
   seriesFields: string[] | ((headers?: string[]) => string[]);
-  actualX: string;
+  categoryField: string;
   addTimeMarker?: boolean;
 }): PipelineFn<T> => (state) => {
   const { xAxisConfig, transformedData = [], axisColumnMappings } = state;
@@ -347,7 +347,7 @@ export const createLineSeries = <T extends BaseChartStyle>({
       type: 'line',
       connectNulls: true,
       encode: {
-        x: actualX,
+        x: categoryField,
         y: item,
       },
       emphasis: {
@@ -367,12 +367,12 @@ export const createLineBarSeries = <T extends BaseChartStyle>({
   styles,
   valueField,
   value2Field,
-  actualX,
+  categoryField,
 }: {
   styles: LineChartStyle;
   valueField: VisColumn;
   value2Field: VisColumn;
-  actualX: string;
+  categoryField: string;
 }): PipelineFn<T> => (state) => {
   const { xAxisConfig, yAxisConfig } = state;
   const newState = { ...state };
@@ -405,7 +405,7 @@ export const createLineBarSeries = <T extends BaseChartStyle>({
       ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
       yAxisIndex: 0,
       encode: {
-        x: actualX,
+        x: categoryField,
         y: valueField.column,
       },
       emphasis: {
@@ -417,7 +417,7 @@ export const createLineBarSeries = <T extends BaseChartStyle>({
       name: value2Field?.name,
       yAxisIndex: 1,
       encode: {
-        x: actualX,
+        x: categoryField,
         y: value2Field.column,
       },
       emphasis: {
@@ -434,11 +434,11 @@ export const createLineBarSeries = <T extends BaseChartStyle>({
 export const createFacetLineSeries = <T extends BaseChartStyle>({
   styles,
   seriesFields,
-  actualX,
+  categoryField,
 }: {
   styles: LineChartStyle;
   seriesFields: (headers?: string[]) => string[];
-  actualX: string;
+  categoryField: string;
 }): PipelineFn<T> => (state) => {
   const { xAxisConfig, transformedData } = state;
 
@@ -461,7 +461,7 @@ export const createFacetLineSeries = <T extends BaseChartStyle>({
       type: 'line',
       connectNulls: true,
       encode: {
-        x: actualX,
+        x: categoryField,
         y: item,
       },
       datasetIndex: index,

@@ -79,14 +79,13 @@ export const transform = (...fns: TransformFn[]) => (state: EChartsSpecState) =>
   return { ...state, transformedData: lastValue };
 };
 
-export const facetTransform = (...fns: TransformFn[]) => (state: EChartsSpecState) => {
-  const { data, axisColumnMappings } = state;
-
-  if (!axisColumnMappings?.facet) throw Error('Missing config for facet chart');
-  const facetColumn = axisColumnMappings.facet;
+export const facetTransform = (facetColumn: string, ...fns: TransformFn[]) => (
+  state: EChartsSpecState
+) => {
+  const { data } = state;
 
   const grouped = data.reduce((acc, row) => {
-    const facet = String(row[facetColumn.column]);
+    const facet = String(row[facetColumn]);
     acc[facet] ??= [];
     acc[facet].push(row);
     return acc;

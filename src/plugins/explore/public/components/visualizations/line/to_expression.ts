@@ -64,7 +64,7 @@ export const createSimpleLineChart = (
       buildAxisConfigs,
       createLineSeries({
         styles,
-        actualX: timeField,
+        categoryField: timeField,
         seriesFields: [valueField],
       }),
       assembleSpec
@@ -231,7 +231,7 @@ export const createLineBarChart = (
       transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
       createBaseConfig,
       buildAxisConfigs,
-      createLineBarSeries({ styles, actualX: timeField, value2Field, valueField }),
+      createLineBarSeries({ styles, categoryField: timeField, value2Field, valueField }),
       assembleSpec
     )({
       data: transformedData,
@@ -448,7 +448,7 @@ export const createMultiLineChart = (
       buildAxisConfigs,
       createLineSeries({
         styles,
-        actualX: timeField,
+        categoryField: timeField,
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
       }),
       assembleSpec
@@ -610,12 +610,14 @@ export const createFacetedMultiLineChart = (
     const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
     const colorField = colorColumn?.column;
 
-    if (!timeField || !valueField || !colorField) {
+    const facetColumn = axisColumnMappings?.[AxisRole.FACET]?.column;
+    if (!timeField || !valueField || !colorField || !facetColumn) {
       throw Error('Missing axis config for facet time line chart');
     }
 
     const result = pipe(
       facetTransform(
+        facetColumn,
         sortByTime(timeField),
         pivot({
           groupBy: timeField,
@@ -628,7 +630,7 @@ export const createFacetedMultiLineChart = (
       buildAxisConfigs,
       createFacetLineSeries({
         styles,
-        actualX: timeField,
+        categoryField: timeField,
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
       }),
       assembleSpec
@@ -831,7 +833,7 @@ export const createCategoryLineChart = (
       buildAxisConfigs,
       createLineSeries({
         styles,
-        actualX: categoryField,
+        categoryField,
         seriesFields: [valueField],
         addTimeMarker: false,
       }),
@@ -961,7 +963,7 @@ export const createCategoryMultiLineChart = (
       buildAxisConfigs,
       createLineSeries({
         styles,
-        actualX: cateField,
+        categoryField: cateField,
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== cateField),
         addTimeMarker: false,
       }),

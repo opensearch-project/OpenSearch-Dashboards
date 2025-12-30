@@ -306,16 +306,10 @@ export const applyAxisStyling = ({
 
 export const buildVisMap = ({
   seriesFields,
-  actualX,
 }: {
-  seriesFields: string[] | ((headers?: string[]) => string[]);
-  actualX: string;
+  seriesFields: (headers?: string[]) => string[];
 }) => (state: EChartsSpecState) => {
   const { styles, transformedData = [] } = state;
-
-  if (!Array.isArray(seriesFields)) {
-    seriesFields = seriesFields(transformedData[0]);
-  }
 
   const hasFacet = Array.isArray(transformedData[0]?.[0]);
 
@@ -341,8 +335,7 @@ export const buildVisMap = ({
     let seriesIndexCounter = 0;
     const facetVis = transformedData.map((seriesData: any[], index: number) => {
       const header = seriesData[0];
-      const cateColumns = header.filter((c: string) => c !== actualX);
-
+      const cateColumns = seriesFields(header);
       return cateColumns.map((c: string) => {
         const originalIndex = header?.indexOf(c);
         return {
@@ -359,7 +352,7 @@ export const buildVisMap = ({
 
     visualMap = facetVis.flat();
   } else {
-    visualMap = seriesFields.map((c: string, index: number) => {
+    visualMap = seriesFields(transformedData[0]).map((c: string, index: number) => {
       const originalIndex = transformedData[0]?.indexOf(c);
       return {
         type: 'piecewise',
