@@ -44,6 +44,7 @@ export interface BaseChartStyle {
   thresholdOptions?: ThresholdOptions;
   useThresholdColor?: boolean;
   addLegend?: boolean;
+  legendPosition?: Positions;
 }
 
 /**
@@ -62,7 +63,7 @@ export interface EChartsAxisConfig {
 export interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
   data: Array<Record<string, any>>;
   styles: T;
-  axisConfig: EChartsAxisConfig;
+  axisConfig?: EChartsAxisConfig;
   axisColumnMappings: AxisColumnMappings;
 }
 
@@ -119,27 +120,26 @@ function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time'
 /**
  * Create base configuration (title, tooltip)
  */
-export const createBaseConfig = <T extends BaseChartStyle>(
+export const createBaseConfig = <T extends BaseChartStyle>(title?: string) => (
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
   const { styles, axisConfig } = state;
 
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before createBaseConfig');
-  }
-
   const baseConfig = {
     title: {
-      text: styles.titleOptions?.show
-        ? styles.titleOptions?.titleName || `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}`
-        : undefined,
+      text: styles.titleOptions?.show ? styles.titleOptions?.titleName || title : undefined,
     },
     tooltip: {
       show: styles.tooltipOptions?.mode !== 'hidden',
-      trigger: 'axis',
+      ...(axisConfig && { trigger: 'axis' }),
       axisPointer: { type: 'shadow' },
     },
-    legend: {},
+    legend: {
+      ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
+        ? { orient: 'vertical' }
+        : {}),
+      [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%',
+    },
   };
 
   return { ...state, baseConfig };
@@ -304,7 +304,7 @@ export const applyAxisStyling = ({
   return echartsAxisConfig;
 };
 
-export const buildVisMap = ({
+export const buildVisMap = <T extends BaseChartStyle = BaseChartStyle>({
   seriesFields,
 }: {
   seriesFields: (headers?: string[]) => string[];

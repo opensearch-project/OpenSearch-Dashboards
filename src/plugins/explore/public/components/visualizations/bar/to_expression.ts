@@ -86,7 +86,7 @@ export const createBarSpec = (
     }
 
     const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
-    const result = pipe(
+    const result = pipe<BarChartStyle>(
       transform(
         aggregate({
           groupBy: categoryField,
@@ -95,7 +95,7 @@ export const createBarSpec = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig(`${yAxis?.name} by ${xAxis?.name}`),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
@@ -240,7 +240,7 @@ export const createTimeBarChart = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig(`${axisColumnMappings?.y?.name} Over Time`),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
@@ -404,7 +404,7 @@ export const createGroupedTimeBarChart = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig(`${axisColumnMappings?.y?.name} Over Time by ${colorColumn.name}`),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
@@ -761,7 +761,9 @@ export const createStackedBarSpec = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig(
+        `${axisColumnMappings?.y?.name} by ${axisColumnMappings?.x?.name} and ${colorMapping.name}`
+      ),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
