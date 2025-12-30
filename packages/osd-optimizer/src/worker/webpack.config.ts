@@ -200,7 +200,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                       // Webpack 5 / sass-loader v14: outputStyle renamed to style
                       style: 'compressed',
                       // Webpack 5 / sass-loader v14: includePaths renamed to loadPaths
-                      loadPaths: [Path.resolve(worker.repoRoot, 'node_modules')],
+                      loadPaths: [
+                        Path.resolve(worker.repoRoot, 'node_modules'),
+                        Path.resolve(worker.repoRoot),
+                      ],
                       sourceMapRoot: `/${bundle.type}:${bundle.id}`,
                     },
                   },
