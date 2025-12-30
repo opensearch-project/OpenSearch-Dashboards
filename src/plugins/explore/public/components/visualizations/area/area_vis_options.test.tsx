@@ -100,79 +100,6 @@ jest.mock('../style_panel/tooltip/tooltip', () => ({
   )),
 }));
 
-jest.mock('../style_panel/axes/axes', () => ({
-  AxesOptions: jest.fn(
-    ({
-      categoryAxes,
-      valueAxes,
-      onCategoryAxesChange,
-      onValueAxesChange,
-      onShowFullTimeRangeChange,
-      showFullTimeRange,
-    }) => (
-      <div data-test-subj="axes-panel">
-        <button
-          data-test-subj="update-category-axes"
-          onClick={() =>
-            onCategoryAxesChange([
-              ...categoryAxes,
-              {
-                id: 'new-category',
-                type: 'category' as const,
-                position: 'bottom',
-                show: true,
-                labels: {
-                  show: true,
-                  filter: true,
-                  rotate: 0,
-                  truncate: 100,
-                },
-                title: {
-                  text: 'New Category',
-                },
-              },
-            ])
-          }
-        >
-          Update Category Axes
-        </button>
-        <button
-          data-test-subj="update-value-axes"
-          onClick={() =>
-            onValueAxesChange([
-              ...valueAxes,
-              {
-                id: 'new-value',
-                name: 'NewAxis',
-                type: 'value' as const,
-                position: 'left',
-                show: true,
-                labels: {
-                  show: true,
-                  rotate: 0,
-                  filter: false,
-                  truncate: 100,
-                },
-                title: {
-                  text: 'New Value',
-                },
-              },
-            ])
-          }
-        >
-          Update Value Axes
-        </button>
-        <button
-          data-test-subj="toggle-full-time-range"
-          onClick={() => onShowFullTimeRangeChange(!showFullTimeRange)}
-        >
-          Toggle Full Time Range
-        </button>
-      </div>
-    )
-  ),
-}));
-
 jest.mock('../style_panel/title/title', () => ({
   TitleOptionsPanel: jest.fn(({ titleOptions, onShowTitleChange }) => (
     <div data-test-subj="title-panel">
@@ -205,9 +132,8 @@ describe('AreaVisStyleControls', () => {
         thresholdStyle: ThresholdMode.Solid,
       },
       tooltipOptions: { mode: 'all' as TooltipOptions['mode'] },
-      categoryAxes: [
+      standardAxes: [
         {
-          id: 'CategoryAxis-1',
           type: 'category' as const,
           position: Positions.BOTTOM as Positions.TOP | Positions.BOTTOM,
           show: true,
@@ -223,12 +149,9 @@ describe('AreaVisStyleControls', () => {
           title: {
             text: '',
           },
+          axisRole: AxisRole.X,
         },
-      ],
-      valueAxes: [
         {
-          id: 'ValueAxis-1',
-          name: 'LeftAxis-1',
           type: 'value' as const,
           position: Positions.LEFT as Positions.LEFT | Positions.RIGHT,
           show: true,
@@ -244,6 +167,7 @@ describe('AreaVisStyleControls', () => {
           title: {
             text: '',
           },
+          axisRole: AxisRole.Y,
         },
       ],
       titleOptions: {
@@ -292,7 +216,6 @@ describe('AreaVisStyleControls', () => {
     expect(screen.getByTestId('legend-panel')).toBeInTheDocument();
     expect(screen.getByTestId('mockAreaThresholdPanel')).toBeInTheDocument();
     expect(screen.getByTestId('tooltip-panel')).toBeInTheDocument();
-    expect(screen.getByTestId('axes-panel')).toBeInTheDocument();
     expect(screen.getByTestId('title-panel')).toBeInTheDocument();
   });
 
@@ -416,61 +339,6 @@ describe('AreaVisStyleControls', () => {
     });
   });
 
-  test('updates category axes correctly', async () => {
-    render(<AreaVisStyleControls {...defaultProps} />);
-
-    await userEvent.click(screen.getByTestId('update-category-axes'));
-
-    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      categoryAxes: [
-        ...defaultProps.styleOptions.categoryAxes,
-        {
-          id: 'new-category',
-          type: 'category' as const,
-          position: Positions.BOTTOM as Positions.TOP | Positions.BOTTOM,
-          show: true,
-          labels: {
-            show: true,
-            filter: true,
-            rotate: 0,
-            truncate: 100,
-          },
-          title: {
-            text: 'New Category',
-          },
-        },
-      ],
-    });
-  });
-
-  test('updates value axes correctly', async () => {
-    render(<AreaVisStyleControls {...defaultProps} />);
-
-    await userEvent.click(screen.getByTestId('update-value-axes'));
-
-    expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
-      valueAxes: [
-        ...defaultProps.styleOptions.valueAxes,
-        {
-          id: 'new-value',
-          name: 'NewAxis',
-          type: 'value' as const,
-          position: Positions.LEFT as Positions.LEFT | Positions.RIGHT,
-          show: true,
-          labels: {
-            show: true,
-            rotate: 0,
-            filter: false,
-            truncate: 100,
-          },
-          title: {
-            text: 'New Value',
-          },
-        },
-      ],
-    });
-  });
-
   test('does not render style panels when no mappings are selected', () => {
     const props = {
       ...defaultProps,
@@ -570,7 +438,7 @@ describe('AreaVisStyleControls', () => {
   test('updates showFullTimeRange correctly', async () => {
     render(<AreaVisStyleControls {...defaultProps} />);
 
-    await userEvent.click(screen.getByTestId('toggle-full-time-range'));
+    await userEvent.click(screen.getByTestId('showFullTimeRangeSwitch'));
 
     expect(defaultProps.onStyleChange).toHaveBeenCalledWith({
       showFullTimeRange: true, // Default is false, so toggling sets it to true

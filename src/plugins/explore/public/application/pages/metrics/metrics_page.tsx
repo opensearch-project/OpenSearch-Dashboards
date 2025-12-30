@@ -15,10 +15,11 @@ import { useInitialQueryExecution } from '../../utils/hooks/use_initial_query_ex
 import { useUrlStateSync } from '../../utils/hooks/use_url_state_sync';
 import { useTimefilterSubscription } from '../../utils/hooks/use_timefilter_subscription';
 import { useHeaderVariants } from '../../utils/hooks/use_header_variants';
+import { useInitializeMetricsDataset } from '../../utils/hooks/use_initialize_metrics_dataset';
 import { NewExperienceBanner } from '../../../components/experience_banners/new_experience_banner';
-import { BottomContainer } from '../../../components/container/bottom_container';
 import { TopNav } from '../../../components/top_nav/top_nav';
 import { useInitPage } from '../../../application/utils/hooks/use_page_initialization';
+import { BottomRightContainer } from './metrics_bottom_container/bottom_right_container';
 
 /**
  * Main application component for the Explore plugin
@@ -28,6 +29,7 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
 }) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { savedExplore } = useInitPage();
+  useInitializeMetricsDataset({ services, savedExplore });
 
   useInitialQueryExecution(services);
   useUrlStateSync(services);
@@ -47,7 +49,9 @@ export const MetricsPage: React.FC<Partial<Pick<AppMountParameters, 'setHeaderAc
             </div>
 
             {/* Main content area with resizable panels under QueryPanel */}
-            <BottomContainer />
+            <EuiPageBody className="explore-layout__canvas">
+              <BottomRightContainer />
+            </EuiPageBody>
           </EuiPageBody>
         </EuiPage>
       </div>
