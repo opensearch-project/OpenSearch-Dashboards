@@ -156,7 +156,14 @@ Cypress.Commands.add(
       .should('not.be.disabled')
       .click();
     cy.getElementByTestId(`datasetSelectorAdvancedButton`).should('be.visible').click();
-    // Indexes panel is now hidden when it's the only option, so we skip directly to data source selection
+
+    // Click on "Indexes" dataset type if it's visible
+    cy.get('body').then(($body) => {
+      if ($body.find(`[title="Indexes"]`).length > 0) {
+        cy.get(`[title="Indexes"]`).click();
+      }
+    });
+
     cy.get(`[title="${dataSourceName}"]`).click();
 
     // Use the unified index selector - type to search and click from results
