@@ -217,13 +217,21 @@ export const createLineBarChart = (
   if (getChartRender() === 'echarts') {
     const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
 
+    const timeField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis;
+    const value2Field = axisColumnMappings?.[AxisRole.Y_SECOND];
+
+    if (!timeField || !valueField || !value2Field) {
+      throw Error('Missing axis config or color field for multi lines chart');
+    }
+
     const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
 
     const result = pipe(
       transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
       createBaseConfig,
       buildAxisConfigs,
-      createLineBarSeries(styles),
+      createLineBarSeries({ styles, actualX: timeField, value2Field, valueField }),
       assembleSpec
     )({
       data: transformedData,

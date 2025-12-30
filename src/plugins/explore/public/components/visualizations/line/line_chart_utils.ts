@@ -11,6 +11,7 @@ import { AreaChartStyle } from '../area/area_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { composeMarkLine } from '../utils/utils';
 import { LineMode } from './line_vis_config';
+import { getSeriesDisplayName } from '../utils/series';
 
 /**
  * Get Vega interpolation from UI lineMode
@@ -321,7 +322,7 @@ export const createLineSeries = <T extends BaseChartStyle>({
   actualX: string;
   addTimeMarker?: boolean;
 }): PipelineFn<T> => (state) => {
-  const { xAxisConfig, transformedData = [] } = state;
+  const { xAxisConfig, transformedData = [], axisColumnMappings } = state;
   const newState = { ...state };
   const usedTimeMarker = addTimeMarker && styles.addTimeMarker;
 
@@ -339,8 +340,10 @@ export const createLineSeries = <T extends BaseChartStyle>({
   }
 
   const series = seriesFields?.map((item: string) => {
+    const name = getSeriesDisplayName(item, Object.values(axisColumnMappings));
+
     return {
-      name: String(item),
+      name,
       type: 'line',
       connectNulls: true,
       encode: {
@@ -360,10 +363,18 @@ export const createLineSeries = <T extends BaseChartStyle>({
   return newState;
 };
 
-export const createLineBarSeries = <T extends BaseChartStyle>(
-  styles: LineChartStyle
-): PipelineFn<T> => (state) => {
-  const { axisConfig, xAxisConfig, yAxisConfig, axisColumnMappings } = state;
+export const createLineBarSeries = <T extends BaseChartStyle>({
+  styles,
+  valueField,
+  value2Field,
+  actualX,
+}: {
+  styles: LineChartStyle;
+  valueField: VisColumn;
+  value2Field: VisColumn;
+  actualX: string;
+}): PipelineFn<T> => (state) => {
+  const { xAxisConfig, yAxisConfig } = state;
   const newState = { ...state };
   const newYAxisConfig = { ...yAxisConfig };
 
@@ -381,25 +392,21 @@ export const createLineBarSeries = <T extends BaseChartStyle>(
     newYAxisConfig,
     {
       type: 'value',
-      name: axisColumnMappings?.y2?.name,
+      name: value2Field?.name,
       position: 'right',
     },
   ];
 
-  const numericalAxis = [axisConfig.xAxis, axisConfig.yAxis].find(
-    (axis) => axis?.schema === VisFieldType.Numerical
-  );
-
   const series = [
     {
       type: 'line',
-      name: numericalAxis?.name,
+      name: valueField?.name,
       ...generateLineStyles(styles),
       ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
       yAxisIndex: 0,
       encode: {
-        x: 0,
-        y: 1,
+        x: actualX,
+        y: valueField.column,
       },
       emphasis: {
         focus: 'self',
@@ -407,11 +414,11 @@ export const createLineBarSeries = <T extends BaseChartStyle>(
     },
     {
       type: 'bar',
-      name: axisColumnMappings?.y2?.name,
+      name: value2Field?.name,
       yAxisIndex: 1,
       encode: {
-        x: 0,
-        y: 2,
+        x: actualX,
+        y: value2Field.column,
       },
       emphasis: {
         focus: 'self',
