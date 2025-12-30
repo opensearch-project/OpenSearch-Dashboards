@@ -77,7 +77,8 @@ const EXTRA_SCSS_WORK_UNITS = 100;
 const observeCompiler = (
   workerConfig: WorkerConfig,
   bundle: Bundle,
-  compiler: Compiler
+  compiler: Compiler,
+  bundleRefs: BundleRefs
 ): Rx.Observable<CompilerMsg> => {
   let START = 0;
   const compilerMsgs = new CompilerMsgs(bundle.id);
@@ -143,6 +144,16 @@ const observeCompiler = (
           const path = getModulePath(module);
           const parsedPath = parseFilePath(path);
 
+          // if the current bundle referenced other bundles, add the referenced bundle to bundleRefExportIds
+          if (!path.startsWith(bundle.contextDir)) {
+            const ref = bundleRefs
+              .getRefs()
+              .find((r) => path.startsWith(Path.join(r.contextDir, r.entry)));
+            if (ref) {
+              bundleRefExportIds.push(ref.exportId);
+            }
+          }
+
           if (!parsedPath.dirs.includes('node_modules')) {
             referencedFiles.add(path);
 
@@ -186,7 +197,7 @@ const observeCompiler = (
       getHashes(files)
         .then((hashes) => {
           bundle.cache.set({
-            bundleRefExportIds,
+            bundleRefExportIds: [...new Set(bundleRefExportIds)],
             optimizerCacheKey: workerConfig.optimizerCacheKey,
             cacheKey: bundle.createCacheKey(files, hashes),
             moduleCount,
@@ -248,7 +259,7 @@ export const runCompilers = (
     Rx.from(multiCompiler.compilers.entries()).pipe(
       mergeMap(([compilerIndex, compiler]) => {
         const bundle = bundles[compilerIndex];
-        return observeCompiler(workerConfig, bundle, compiler);
+        return observeCompiler(workerConfig, bundle, compiler, bundleRefs);
       }),
       finalize(() => {
         // Dispose of SASS compilers when all compilations are complete
