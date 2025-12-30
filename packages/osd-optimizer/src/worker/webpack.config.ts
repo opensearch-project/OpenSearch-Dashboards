@@ -88,7 +88,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       new BundleRefsPlugin(bundle, bundleRefs),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
       // Webpack 5: Provide Node.js polyfills for browser compatibility
-      new NodePolyfillPlugin(),
+      new NodePolyfillPlugin({ additionalAliases: ['process'] }),
     ],
 
     module: {
@@ -98,6 +98,15 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       noParse: [/[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/],
 
       rules: [
+        // Webpack 5: Disable fullySpecified for ESM modules in node_modules
+        // This fixes issues with packages like zrender/echarts that use ESM imports
+        // without file extensions, which would otherwise fail to resolve polyfills
+        {
+          test: /\.m?js$/,
+          resolve: {
+            fullySpecified: false,
+          },
+        },
         {
           include: [ENTRY_CREATOR],
           use: [
@@ -183,6 +192,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                 {
                   loader: 'sass-loader',
                   options: {
+                    api: 'modern-compiler',
                     additionalData(content: string, loaderContext: webpack.LoaderContext<any>) {
                       const req = JSON.stringify(
                         loaderContext.utils.contextify(
@@ -205,6 +215,13 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                         Path.resolve(worker.repoRoot),
                       ],
                       sourceMapRoot: `/${bundle.type}:${bundle.id}`,
+                      // Silence Dart Sass 2.0 deprecation warnings from @elastic/eui
+                      silenceDeprecations: [
+                        'color-functions',
+                        'if-function',
+                        'import',
+                        'global-builtin',
+                      ],
                     },
                   },
                 },

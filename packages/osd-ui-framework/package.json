@@ -31,7 +31,7 @@
     "grunt-babel": "^8.0.0",
     "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-copy": "^1.0.0",
-    "sass-embedded": "1.66.1",
+    "sass-embedded": "1.97.1",
     "sass-loader": "^14.2.1",
     "postcss": "^8.4.31",
     "sinon": "^7.4.2"
