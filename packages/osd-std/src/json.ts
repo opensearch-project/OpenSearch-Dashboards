@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import JSON11 from 'json11';
+import * as JSON11 from 'json11';
 
 export const stringify = (
   obj: any,
@@ -98,6 +98,7 @@ export const parse = (
   obj = JSON.parse(text, checkForLargeNumerals);
 
   if (!numeralsAreNumbers) {
+    console.log(JSON11);
     const temp = JSON11.parse(text, reviver, { withLongNumerals: true });
     if (temp) obj = temp;
   }
