@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { IUiSettingsClient } from 'opensearch-dashboards/public';
+import { IUiSettingsClient, getNonce } from 'opensearch-dashboards/public';
 
 export function buildCSS(maxHeight = 0, truncateGradientHeight = 15) {
   return `
@@ -45,6 +45,10 @@ export function buildCSS(maxHeight = 0, truncateGradientHeight = 15) {
 export function injectHeaderStyle(uiSettings: IUiSettingsClient) {
   const style = document.createElement('style');
   style.setAttribute('id', 'style-compile');
+  const nonce = getNonce();
+  if (nonce) {
+    style.setAttribute('nonce', nonce);
+  }
   document.getElementsByTagName('head')[0].appendChild(style);
 
   uiSettings.get$('truncate:maxHeight').subscribe((value: number) => {

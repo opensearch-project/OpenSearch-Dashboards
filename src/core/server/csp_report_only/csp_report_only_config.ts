@@ -65,6 +65,29 @@ export interface ICspReportOnlyConfig {
    * This is useful to set to true if the app is served through non-https as well as for dev purposes
    */
   readonly useDeprecatedReportUriOnly?: boolean;
+
+  /**
+   * Directives that should have a nonce value appended when building the header.
+   * Example: ['style-src-elem'] will add 'nonce-{value}' to the style-src-elem directive.
+   */
+  readonly nonceDirectives: string[];
+
+  /**
+   * Builds the CSP-Report-Only header with nonce values inserted into configured directives.
+   * @param nonce - The nonce value to insert (without 'nonce-' prefix)
+   * @returns The complete CSP-Report-Only header string with nonces
+   */
+  buildHeaderWithNonce(nonce: string): string;
+}
+
+/**
+ * Allowed source configuration for CSP directives.
+ * @internal
+ */
+interface AllowedSourcesConfig {
+  allowedFrameAncestorSources?: string[];
+  allowedConnectSources?: string[];
+  allowedImgSources?: string[];
 }
 
 /**
@@ -76,6 +99,7 @@ export class CspReportOnlyConfig implements ICspReportOnlyConfig {
 
   public readonly isEmitting: boolean;
   public readonly rules: string[];
+  public readonly nonceDirectives: string[];
   public readonly cspReportOnlyHeader: string;
   public readonly reportingEndpointsHeader?: string;
   public readonly endpoint?: string;
@@ -94,35 +118,85 @@ export class CspReportOnlyConfig implements ICspReportOnlyConfig {
     const source = { ...DEFAULT_CONFIG, ...rawCspReportOnlyConfig };
 
     this.isEmitting = source.isEmitting;
-    this.rules = source.rules;
     this.useDeprecatedReportUriOnly = source.useDeprecatedReportUriOnly;
+    this.nonceDirectives = source.nonceDirectives;
+    this.endpoint = source.endpoint;
 
-    const finalRules = source.rules.map((rule) => {
-      if (source.allowedFrameAncestorSources && rule.startsWith('frame-ancestors')) {
-        return `${rule} ${source.allowedFrameAncestorSources.join(' ')}`;
+    // Store processed rules with allowed sources applied
+    this.rules = this.applyAllowedSources(source.rules, source);
+
+    // Set up reporting endpoint header if using modern reporting
+    if (this.endpoint && !this.useDeprecatedReportUriOnly) {
+      this.reportingEndpointsHeader = `${this.endpointName}="${this.endpoint}"`;
+    }
+
+    // Build the base header
+    this.cspReportOnlyHeader = this.buildHeaderInternal();
+  }
+
+  /**
+   * Builds the CSP-Report-Only header with nonce values inserted into configured directives.
+   * @param nonce - The nonce value to insert (without 'nonce-' prefix)
+   * @returns The complete CSP-Report-Only header string with nonces
+   */
+  public buildHeaderWithNonce(nonce: string): string {
+    return this.buildHeaderInternal(nonce);
+  }
+
+  /**
+   * Apply allowed sources to rules that support them.
+   * @internal
+   */
+  private applyAllowedSources(rules: string[], sources: AllowedSourcesConfig): string[] {
+    return rules.map((rule) => {
+      if (sources.allowedFrameAncestorSources && rule.startsWith('frame-ancestors')) {
+        return `${rule} ${sources.allowedFrameAncestorSources.join(' ')}`;
       }
-      if (source.allowedConnectSources && rule.startsWith('connect-src')) {
-        return `${rule} ${source.allowedConnectSources.join(' ')}`;
+      if (sources.allowedConnectSources && rule.startsWith('connect-src')) {
+        return `${rule} ${sources.allowedConnectSources.join(' ')}`;
       }
-      if (source.allowedImgSources && rule.startsWith('img-src')) {
-        return `${rule} ${source.allowedImgSources.join(' ')}`;
+      if (sources.allowedImgSources && rule.startsWith('img-src')) {
+        return `${rule} ${sources.allowedImgSources.join(' ')}`;
       }
       return rule;
     });
+  }
 
-    let cspReportOnlyHeader = finalRules.join('; ');
-
-    if (source.endpoint) {
-      this.endpoint = source.endpoint;
-
-      if (source.useDeprecatedReportUriOnly) {
-        cspReportOnlyHeader += `; report-uri ${this.endpoint};`;
-      } else {
-        this.reportingEndpointsHeader = `${this.endpointName}="${this.endpoint}"`;
-        cspReportOnlyHeader += `; report-uri ${this.endpoint}; report-to ${this.endpointName};`;
+  /**
+   * Apply nonces to rules that are in nonceDirectives.
+   * @internal
+   */
+  private applyNonces(rules: string[], nonce: string): string[] {
+    return rules.map((rule) => {
+      const directive = rule.split(' ')[0];
+      if (this.nonceDirectives.includes(directive)) {
+        return `${rule} 'nonce-${nonce}'`;
       }
-    }
+      return rule;
+    });
+  }
 
-    this.cspReportOnlyHeader = cspReportOnlyHeader;
+  /**
+   * Append reporting directives to a header string.
+   * @internal
+   */
+  private appendReportingDirectives(header: string): string {
+    if (!this.endpoint) {
+      return header;
+    }
+    if (this.useDeprecatedReportUriOnly) {
+      return `${header}; report-uri ${this.endpoint};`;
+    }
+    return `${header}; report-uri ${this.endpoint}; report-to ${this.endpointName};`;
+  }
+
+  /**
+   * Core header building logic, optionally with nonce.
+   * @internal
+   */
+  private buildHeaderInternal(nonce?: string): string {
+    const rules = nonce ? this.applyNonces(this.rules, nonce) : this.rules;
+    const header = rules.join('; ');
+    return this.appendReportingDirectives(header);
   }
 }
