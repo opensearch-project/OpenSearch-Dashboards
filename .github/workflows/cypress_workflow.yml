@@ -310,13 +310,11 @@ jobs:
           sleep 30
         shell: bash
 
-      - name: Download and Start Prometheus
+      - name: Start Prometheus
         if: matrix.group == '14Explore'
         run: |
-          # Download Prometheus binary
           PROM_VERSION="3.8.1"
-          curl -LO https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz
-          tar xzf prometheus-${PROM_VERSION}.linux-amd64.tar.gz
+          curl -sL https://github.com/prometheus/prometheus/releases/download/v${PROM_VERSION}/prometheus-${PROM_VERSION}.linux-amd64.tar.gz | tar xzf -
 
           # Start Prometheus with fixture config
           ./prometheus-${PROM_VERSION}.linux-amd64/prometheus \
@@ -362,7 +360,7 @@ jobs:
           wait-on: "http://localhost:9200, http://localhost:5601, http://localhost:9090/-/healthy"
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
         env:
-          CYPRESS_PROMETHEUS_CONNECTION_URL: "http://localhost:9090"
+          PROMETHEUS_CONNECTION_URL: "http://localhost:9090"
 
       - name: Run OSD Cypress tests without query enhancements
         if: matrix.test_location == 'source' && matrix.config == 'dashboard'
