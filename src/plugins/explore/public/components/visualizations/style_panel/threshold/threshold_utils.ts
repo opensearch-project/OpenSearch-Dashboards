@@ -25,7 +25,7 @@ export function mergeThresholdsWithBase(
   // Handle empty thresholds
   if (!validThresholds || validThresholds.length === 0) {
     return {
-      textColor: !targetValue || targetValue < minBase ? DEFAULT_GREY : defaultColor,
+      textColor: !targetValue ? DEFAULT_GREY : defaultColor,
       mergedThresholds: [{ value: minBase, color: defaultColor }],
     };
   }
