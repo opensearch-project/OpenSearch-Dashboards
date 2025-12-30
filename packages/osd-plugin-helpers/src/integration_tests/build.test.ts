@@ -58,7 +58,10 @@ expect.addSnapshotSerializer(createReplaceSerializer(/\d+(\.\d+)?[sm]/g, '<time>
 expect.addSnapshotSerializer(createReplaceSerializer(/yarn (\w+) v[\d\.]+/g, 'yarn $1 <version>'));
 expect.addSnapshotSerializer(createStripAnsiSerializer());
 
-const processProcOutput = (all: string | undefined) => all?.replace(/\(node:\d+\)\s*/, '');
+const processProcOutput = (all: string | undefined) => {
+  const regexp = /\n\s*\(node:\d+\)\s*\[DEP0180\] DeprecationWarning: fs.Stats constructor is deprecated.\n\s*\(Use `node --trace-deprecation ...` to show where the warning was created\)/;
+  return all?.replace(regexp, '');
+};
 
 beforeEach(async () => {
   await del([PLUGIN_DIR, TMP_DIR]);
@@ -108,8 +111,6 @@ it('builds a generated plugin into a viable archive', async () => {
      info copying server source into the build and converting with babel
      info running yarn to install dependencies
      info compressing plugin into [fooTestPlugin-1.0.0.zip]
-    [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
-    (Use \`node --trace-deprecation ...\` to show where the warning was created)
      info cleaning up compression temporary artifacts"
   `);
 
@@ -198,8 +199,6 @@ it('builds a non-semver generated plugin into a viable archive', async () => {
      info copying server source into the build and converting with babel
      info running yarn to install dependencies
      info compressing plugin into [fooTestPlugin-1.0.0.x.zip]
-    [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
-    (Use \`node --trace-deprecation ...\` to show where the warning was created)
      info cleaning up compression temporary artifacts"
   `);
 
