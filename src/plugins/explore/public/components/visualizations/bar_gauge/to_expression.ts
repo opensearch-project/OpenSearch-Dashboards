@@ -13,11 +13,11 @@ import {
   getBarOrientation,
   thresholdsToGradient,
   symbolOpposite,
-  processThresholds,
   generateParams,
+  generateThresholds,
+  generateValueThresholds,
 } from './bar_gauge_utils';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
-import { mergeThresholdsWithBase } from '../style_panel/threshold/threshold_utils';
 
 export const createBarGaugeSpec = (
   transformedData: Array<Record<string, any>>,
@@ -51,6 +51,7 @@ export const createBarGaugeSpec = (
   let maxNumber: number = -Infinity;
   let minNumber: number = Infinity;
   let maxTextLength: number = 0;
+  const valueStops: number[] = [];
 
   const selectedUnit = getUnitById(styleOptions?.unitId);
 
@@ -75,6 +76,7 @@ export const createBarGaugeSpec = (
         [numericField]: isValidNumber ? calculate : null,
         displayValue,
       });
+      valueStops.push(...(isValidNumber ? [calculate] : []));
     }
   }
 
@@ -98,36 +100,19 @@ export const createBarGaugeSpec = (
         ]
       : styleOptions?.thresholdOptions?.thresholds;
 
-  const { textColor, mergedThresholds } = mergeThresholdsWithBase(
+  const mergedThresholds = generateThresholds(
     minBase,
     maxBase,
-    styleOptions?.thresholdOptions?.baseColor,
-    styleOptions?.thresholdOptions?.thresholds
+    styleOptions?.thresholdOptions?.thresholds ?? [],
+    styleOptions?.thresholdOptions?.baseColor
   );
 
-  // transfer value to threshold
-  const valueToThreshold = [];
-
-  for (const record of newRecord) {
-    for (let i = mergedThresholds.length - 1; i >= 0; i--) {
-      if (numericField && record[numericField] >= mergedThresholds[i].value) {
-        valueToThreshold.push({ value: record[numericField], color: mergedThresholds[i].color });
-        break;
-      }
-    }
-  }
-
-  // only use value-based thresholds in gradient mode
-  const finalThreshold = styleOptions?.exclusive.displayMode === 'gradient' ? valueToThreshold : [];
-
-  const completeThreshold = [...mergedThresholds, ...(invalidCase ? [] : finalThreshold)].sort(
-    (a, b) => a.value - b.value
-  );
-
-  // filter out value thresholds that are beyond maxBase, this ensures that the gradient mode on different bar is always aligned.
-  const processedThresholds = processThresholds(
-    completeThreshold.filter((t) => t.value <= maxBase)
-  );
+  const processedThresholds = [
+    ...mergedThresholds,
+    ...(styleOptions?.exclusive.displayMode === 'gradient'
+      ? generateValueThresholds(minBase, maxBase, valueStops, mergedThresholds)
+      : []),
+  ].sort((a, b) => a.value - b.value);
 
   const gradientParams = generateParams(processedThresholds, styleOptions, isXaxisNumerical);
 
