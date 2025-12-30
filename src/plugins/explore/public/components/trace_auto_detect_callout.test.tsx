@@ -28,7 +28,7 @@ jest.mock(
 describe('TraceAutoDetectCallout', () => {
   const mockCore = coreMock.createStart();
   let mockServices: Partial<ExploreServices>;
-  const mockDetectTraceData = autoDetectModule.detectTraceData as jest.Mock;
+  const mockDetectTraceDataAcrossDataSources = autoDetectModule.detectTraceDataAcrossDataSources as jest.Mock;
   const mockCreateAutoDetectedDatasets = createDatasetsModule.createAutoDetectedDatasets as jest.Mock;
 
   // Setup localStorage mock
@@ -97,10 +97,7 @@ describe('TraceAutoDetectCallout', () => {
   };
 
   it('should render DiscoverNoIndexPatterns when no trace data is detected', async () => {
-    mockDetectTraceData.mockResolvedValue({
-      tracesDetected: false,
-      logsDetected: false,
-    });
+    mockDetectTraceDataAcrossDataSources.mockResolvedValue([]);
 
     renderWithContext();
 
@@ -110,11 +107,16 @@ describe('TraceAutoDetectCallout', () => {
   });
 
   it('should render callout when trace data is detected', async () => {
-    mockDetectTraceData.mockResolvedValue({
-      tracesDetected: true,
-      logsDetected: false,
-      tracePattern: 'otel-traces-*',
-    });
+    mockDetectTraceDataAcrossDataSources.mockResolvedValue([
+      {
+        tracesDetected: true,
+        logsDetected: false,
+        tracePattern: 'otel-traces-*',
+        logPattern: null,
+        traceTimeField: 'endTime',
+        logTimeField: null,
+      },
+    ]);
 
     renderWithContext();
 
@@ -125,12 +127,16 @@ describe('TraceAutoDetectCallout', () => {
   });
 
   it('should render callout when trace and log data is detected', async () => {
-    mockDetectTraceData.mockResolvedValue({
-      tracesDetected: true,
-      logsDetected: true,
-      tracePattern: 'otel-traces-*',
-      logPattern: 'otel-logs-*',
-    });
+    mockDetectTraceDataAcrossDataSources.mockResolvedValue([
+      {
+        tracesDetected: true,
+        logsDetected: true,
+        tracePattern: 'otel-traces-*',
+        logPattern: 'otel-logs-*',
+        traceTimeField: 'endTime',
+        logTimeField: 'time',
+      },
+    ]);
 
     renderWithContext();
 
@@ -144,11 +150,16 @@ describe('TraceAutoDetectCallout', () => {
   it('should respect localStorage dismissal', async () => {
     localStorageMock.setItem('explore:traces:autoDetectDismissed', 'true');
 
-    mockDetectTraceData.mockResolvedValue({
-      tracesDetected: true,
-      logsDetected: false,
-      tracePattern: 'otel-traces-*',
-    });
+    mockDetectTraceDataAcrossDataSources.mockResolvedValue([
+      {
+        tracesDetected: true,
+        logsDetected: false,
+        tracePattern: 'otel-traces-*',
+        logPattern: null,
+        traceTimeField: 'endTime',
+        logTimeField: null,
+      },
+    ]);
 
     // Mock indexPatterns to indicate there are trace datasets
     (mockServices.indexPatterns!.getIds as jest.Mock).mockResolvedValue(['test-id']);
@@ -167,11 +178,16 @@ describe('TraceAutoDetectCallout', () => {
   it('should clear dismissal if no trace datasets exist', async () => {
     localStorageMock.setItem('explore:traces:autoDetectDismissed', 'true');
 
-    mockDetectTraceData.mockResolvedValue({
-      tracesDetected: true,
-      logsDetected: false,
-      tracePattern: 'otel-traces-*',
-    });
+    mockDetectTraceDataAcrossDataSources.mockResolvedValue([
+      {
+        tracesDetected: true,
+        logsDetected: false,
+        tracePattern: 'otel-traces-*',
+        logPattern: null,
+        traceTimeField: 'endTime',
+        logTimeField: null,
+      },
+    ]);
 
     // Mock indexPatterns to indicate there are NO trace datasets
     (mockServices.indexPatterns!.getIds as jest.Mock).mockResolvedValue(['test-id']);
@@ -188,11 +204,16 @@ describe('TraceAutoDetectCallout', () => {
   });
 
   it('should dismiss callout when Dismiss button is clicked', async () => {
-    mockDetectTraceData.mockResolvedValue({
-      tracesDetected: true,
-      logsDetected: false,
-      tracePattern: 'otel-traces-*',
-    });
+    mockDetectTraceDataAcrossDataSources.mockResolvedValue([
+      {
+        tracesDetected: true,
+        logsDetected: false,
+        tracePattern: 'otel-traces-*',
+        logPattern: null,
+        traceTimeField: 'endTime',
+        logTimeField: null,
+      },
+    ]);
 
     renderWithContext();
 
@@ -210,12 +231,16 @@ describe('TraceAutoDetectCallout', () => {
   });
 
   it('should create datasets when Create button is clicked', async () => {
-    mockDetectTraceData.mockResolvedValue({
-      tracesDetected: true,
-      logsDetected: true,
-      tracePattern: 'otel-traces-*',
-      logPattern: 'otel-logs-*',
-    });
+    mockDetectTraceDataAcrossDataSources.mockResolvedValue([
+      {
+        tracesDetected: true,
+        logsDetected: true,
+        tracePattern: 'otel-traces-*',
+        logPattern: 'otel-logs-*',
+        traceTimeField: 'endTime',
+        logTimeField: 'time',
+      },
+    ]);
 
     mockCreateAutoDetectedDatasets.mockResolvedValue({
       traceDatasetId: 'trace-id',
@@ -238,18 +263,22 @@ describe('TraceAutoDetectCallout', () => {
         expect.objectContaining({
           tracesDetected: true,
           logsDetected: true,
-        }),
-        undefined
+        })
       );
     });
   });
 
   it('should show success toast and reload after creating datasets', async () => {
-    mockDetectTraceData.mockResolvedValue({
-      tracesDetected: true,
-      logsDetected: false,
-      tracePattern: 'otel-traces-*',
-    });
+    mockDetectTraceDataAcrossDataSources.mockResolvedValue([
+      {
+        tracesDetected: true,
+        logsDetected: false,
+        tracePattern: 'otel-traces-*',
+        logPattern: null,
+        traceTimeField: 'endTime',
+        logTimeField: null,
+      },
+    ]);
 
     mockCreateAutoDetectedDatasets.mockResolvedValue({
       traceDatasetId: 'trace-id',
@@ -278,11 +307,16 @@ describe('TraceAutoDetectCallout', () => {
   });
 
   it('should show error toast when dataset creation fails', async () => {
-    mockDetectTraceData.mockResolvedValue({
-      tracesDetected: true,
-      logsDetected: false,
-      tracePattern: 'otel-traces-*',
-    });
+    mockDetectTraceDataAcrossDataSources.mockResolvedValue([
+      {
+        tracesDetected: true,
+        logsDetected: false,
+        tracePattern: 'otel-traces-*',
+        logPattern: null,
+        traceTimeField: 'endTime',
+        logTimeField: null,
+      },
+    ]);
 
     const errorMessage = 'Failed to create datasets';
     mockCreateAutoDetectedDatasets.mockRejectedValue(new Error(errorMessage));
@@ -307,11 +341,16 @@ describe('TraceAutoDetectCallout', () => {
   it('should clear dismissal flag after successful dataset creation', async () => {
     localStorageMock.setItem('explore:traces:autoDetectDismissed', 'true');
 
-    mockDetectTraceData.mockResolvedValue({
-      tracesDetected: true,
-      logsDetected: false,
-      tracePattern: 'otel-traces-*',
-    });
+    mockDetectTraceDataAcrossDataSources.mockResolvedValue([
+      {
+        tracesDetected: true,
+        logsDetected: false,
+        tracePattern: 'otel-traces-*',
+        logPattern: null,
+        traceTimeField: 'endTime',
+        logTimeField: null,
+      },
+    ]);
 
     // Mock to show no existing trace datasets so callout shows
     (mockServices.indexPatterns!.getIds as jest.Mock).mockResolvedValue([]);
@@ -335,7 +374,7 @@ describe('TraceAutoDetectCallout', () => {
   });
 
   it('should handle detection failure gracefully', async () => {
-    mockDetectTraceData.mockRejectedValue(new Error('Detection failed'));
+    mockDetectTraceDataAcrossDataSources.mockRejectedValue(new Error('Detection failed'));
 
     renderWithContext();
 
@@ -349,11 +388,16 @@ describe('TraceAutoDetectCallout', () => {
   });
 
   it('should disable create button while creating datasets', async () => {
-    mockDetectTraceData.mockResolvedValue({
-      tracesDetected: true,
-      logsDetected: false,
-      tracePattern: 'otel-traces-*',
-    });
+    mockDetectTraceDataAcrossDataSources.mockResolvedValue([
+      {
+        tracesDetected: true,
+        logsDetected: false,
+        tracePattern: 'otel-traces-*',
+        logPattern: null,
+        traceTimeField: 'endTime',
+        logTimeField: null,
+      },
+    ]);
 
     // Mock a slow creation
     mockCreateAutoDetectedDatasets.mockImplementation(
