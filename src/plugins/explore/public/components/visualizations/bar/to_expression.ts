@@ -28,7 +28,6 @@ import {
   buildTooltipEncoding,
   buildThresholdColorEncoding,
   createBarSeries,
-  createStackBarSeries,
   createFacetBarSeries,
 } from './bar_chart_utils';
 import { DEFAULT_OPACITY } from '../constants';
@@ -39,8 +38,15 @@ import {
   buildAxisConfigs,
   assembleSpec,
   buildVisMap,
+  buildGrid,
 } from '../utils/echarts_spec';
-import { aggregate, convertTo2DArray, transform, pivot } from '../utils/data_transformation';
+import {
+  aggregate,
+  convertTo2DArray,
+  transform,
+  pivot,
+  facetTransform,
+} from '../utils/data_transformation';
 
 // Only set size and binSpacing in manual mode
 const configureBarSizeAndSpacing = (barMark: any, styles: BarChartStyle) => {
@@ -78,9 +84,6 @@ export const createBarSpec = (
     } else if (yAxis.schema === VisFieldType.Categorical) {
       categoryField = yAxis.column;
       valueField = xAxis.column;
-    } else {
-      categoryField = styles.switchAxes ? yAxis.column : xAxis.column;
-      valueField = styles.switchAxes ? xAxis.column : yAxis.column;
     }
 
     const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
@@ -222,9 +225,6 @@ export const createTimeBarChart = (
     } else if (yAxis.schema === VisFieldType.Date) {
       timeField = yAxis.column;
       valueField = xAxis.column;
-    } else {
-      timeField = styles.switchAxes ? yAxis.column : xAxis.column;
-      valueField = styles.switchAxes ? xAxis.column : yAxis.column;
     }
 
     const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
@@ -381,9 +381,6 @@ export const createGroupedTimeBarChart = (
     } else if (yAxis.schema === VisFieldType.Date) {
       timeField = yAxis.column;
       valueField = xAxis.column;
-    } else {
-      timeField = styles.switchAxes ? yAxis.column : xAxis.column;
-      valueField = styles.switchAxes ? xAxis.column : yAxis.column;
     }
 
     const timeUnit = styles?.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
@@ -543,6 +540,57 @@ export const createFacetedTimeBarChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
+  if (getChartRender() === 'echarts') {
+    const styles = { ...defaultBarChartStyles, ...styleOptions };
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const xAxis = axisConfig.xAxis;
+    const yAxis = axisConfig.yAxis;
+    const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+    const colorField = colorColumn?.column;
+
+    if (!xAxis || !yAxis || !colorField) {
+      throw Error('Missing axis config for facet time bar chart');
+    }
+
+    let timeField = '';
+    let valueField = '';
+    if (xAxis.schema === VisFieldType.Date) {
+      timeField = xAxis.column;
+      valueField = yAxis.column;
+    } else if (yAxis.schema === VisFieldType.Date) {
+      timeField = yAxis.column;
+      valueField = xAxis.column;
+    }
+
+    const timeUnit = styles?.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
+    const aggregationType = styles?.bucket?.aggregationType ?? AggregationType.SUM;
+
+    const result = pipe(
+      facetTransform(
+        pivot({
+          groupBy: timeField,
+          pivot: colorField,
+          field: valueField,
+          timeUnit,
+          aggregationType,
+        }),
+        convertTo2DArray()
+      ),
+      createBaseConfig,
+      buildAxisConfigs,
+      buildVisMap({ seriesFields: [valueField] }),
+      createFacetBarSeries(styles),
+      buildGrid,
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+    return result.spec;
+  }
+
   const styles = { ...defaultBarChartStyles, ...styleOptions };
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
@@ -558,26 +606,6 @@ export const createFacetedTimeBarChart = (
   const category2Name = facetMapping?.name;
 
   const timeAxis = xAxis?.schema === VisFieldType.Date ? xAxis : yAxis;
-
-  if (getChartRender() === 'echarts') {
-    const result = pipe(
-      deriveAxisConfig,
-      formatFacetData(pivotDataWithTime, {
-        aggregationType: styles?.bucket?.aggregationType,
-        timeUnit: styles?.bucket?.bucketTimeUnit,
-      }),
-      createBaseConfig,
-      buildAxisConfigs,
-      buildVisMap,
-      createFacetBarSeries(styles),
-      assembleSpec
-    )({
-      data: transformedData,
-      styles,
-      axisColumnMappings,
-    });
-    return result.spec;
-  }
 
   const interval =
     styles?.bucket?.bucketTimeUnit === TimeUnit.AUTO
@@ -702,9 +730,6 @@ export const createStackedBarSpec = (
     } else if (yAxis.schema === VisFieldType.Categorical) {
       categoryField = yAxis.column;
       valueField = xAxis.column;
-    } else {
-      categoryField = styles.switchAxes ? yAxis.column : xAxis.column;
-      valueField = styles.switchAxes ? xAxis.column : yAxis.column;
     }
 
     const aggregationType = styles?.bucket?.aggregationType ?? AggregationType.SUM;
@@ -840,6 +865,53 @@ export const createDoubleNumericalBarChart = (
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
+  if (getChartRender() === 'echarts') {
+    const styles = { ...defaultBarChartStyles, ...styleOptions };
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const xAxis = axisConfig.xAxis;
+    const yAxis = axisConfig.yAxis;
+
+    if (!xAxis || !yAxis) {
+      throw Error('Missing axis config for Bar chart');
+    }
+
+    let categoryField = '';
+    let valueField = '';
+
+    categoryField = styles.switchAxes ? yAxis.column : xAxis.column;
+    valueField = styles.switchAxes ? xAxis.column : yAxis.column;
+
+    const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
+    const result = pipe(
+      transform(
+        aggregate({
+          groupBy: categoryField,
+          field: valueField,
+          aggregationType,
+        }),
+        convertTo2DArray()
+      ),
+      createBaseConfig,
+      buildAxisConfigs,
+      buildVisMap({ seriesFields: [valueField] }),
+      createBarSeries({ styles, categoryField, seriesFields: [valueField] }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    if (styles.switchAxes) {
+      result.yAxisConfig.type = 'category';
+    } else {
+      result.xAxisConfig.type = 'category';
+    }
+
+    return result.spec;
+  }
+
   const styles = { ...defaultBarChartStyles, ...styleOptions };
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
@@ -850,27 +922,6 @@ export const createDoubleNumericalBarChart = (
     type: 'bar',
     tooltip: styles.tooltipOptions?.mode !== 'hidden',
   };
-
-  if (getChartRender() === 'echarts') {
-    const result = pipe(
-      deriveAxisConfig,
-      pivotDataWithCategory({
-        aggregationType: styles?.bucket?.aggregationType,
-        groupField: xAxis,
-      }),
-      createBaseConfig,
-      buildAxisConfigs,
-      buildVisMap,
-      createStackBarSeries(styles),
-      assembleSpec
-    )({
-      data: transformedData,
-      styles,
-      axisColumnMappings,
-    });
-
-    return result.spec;
-  }
 
   configureBarSizeAndSpacing(barMark, styles);
 

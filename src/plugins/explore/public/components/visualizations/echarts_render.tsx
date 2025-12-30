@@ -63,10 +63,6 @@ export const EchartsRender = ({ spec }: Props) => {
         overflowX: 'auto',
         ...(shouldScroll && { width: widthPercentage }),
       }}
-      onWheel={(e) => {
-        e.currentTarget.scrollLeft += e.deltaY;
-        e.preventDefault();
-      }}
       ref={containerRef}
     />
   );

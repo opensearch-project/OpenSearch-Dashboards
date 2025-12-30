@@ -209,14 +209,13 @@ export const createBarSeries = <T extends BaseChartStyle>({
 }): PipelineFn<T> => (state) => {
   const { axisConfig, axisColumnMappings, transformedData = [] } = state;
   const newState = { ...state };
-  const source = transformedData[transformedData?.length - 1];
 
   if (!axisConfig) {
     throw new Error('axisConfig must be derived before createBarSeries');
   }
 
   if (!Array.isArray(seriesFields)) {
-    seriesFields = seriesFields(source[0]);
+    seriesFields = seriesFields(transformedData[0]);
   }
 
   const thresholdLines = generateThresholdLines(styles?.thresholdOptions, styles?.switchAxes);
@@ -252,59 +251,10 @@ export const createBarSeries = <T extends BaseChartStyle>({
   return newState;
 };
 
-export const createStackBarSeries = <T extends BaseChartStyle>(
-  styles: BarChartStyle
-): PipelineFn<T> => (state) => {
-  const { axisConfig, aggregatedData } = state;
-  const newState = { ...state };
-
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before createBarSeries');
-  }
-
-  const thresholdLines = generateThresholdLines(styles?.thresholdOptions, styles?.switchAxes);
-
-  const actualX = styles?.switchAxes ? axisConfig.yAxis : axisConfig.xAxis;
-
-  const cateColumns = aggregatedData?.[0]?.filter((c: string) => c !== actualX?.column);
-
-  // create multi-series for each item in categorical2Collection
-  const newseries = cateColumns?.map((item: string, index: number) => ({
-    name: String(item),
-    type: 'bar',
-    stack: 'total',
-    //  use it for debugging
-    label: {
-      show: true,
-    },
-    emphasis: {
-      focus: 'self',
-    },
-    encode: {
-      [adjustOppositeSymbol(styles?.switchAxes, 'x')]: actualX?.column,
-      [adjustOppositeSymbol(styles?.switchAxes, 'y')]: item,
-    },
-    barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
-    barCategoryGap:
-      styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
-    ...(styles.showBarBorder && {
-      itemStyle: {
-        borderWidth: styles.barBorderWidth,
-        borderColor: styles.barBorderColor,
-      },
-    }),
-    ...(index === 0 && thresholdLines),
-  }));
-
-  newState.series = newseries as BarSeriesOption[];
-
-  return newState;
-};
-
 export const createFacetBarSeries = <T extends BaseChartStyle>(
   styles: BarChartStyle
 ): PipelineFn<T> => (state) => {
-  const { axisConfig, aggregatedData } = state;
+  const { axisConfig, transformedData } = state;
 
   const newState = { ...state };
 
@@ -316,12 +266,12 @@ export const createFacetBarSeries = <T extends BaseChartStyle>(
 
   const actualX = styles?.switchAxes ? axisConfig.yAxis : axisConfig.xAxis;
 
-  const allSeries = aggregatedData.map((seriesData: any[], index: number) => {
+  const allSeries = transformedData?.map((seriesData: any[], index: number) => {
     const header = seriesData[0];
     const cateColumns = header?.filter((c: string) => c !== actualX?.column);
 
     return cateColumns.map((item: string, i: number) => ({
-      name: String(`${item}_${index}`),
+      name: String(item),
       type: 'bar',
       stack: `stack_${index}`, // each grid should have a exclusive stack key
       encode: {
@@ -348,7 +298,7 @@ export const createFacetBarSeries = <T extends BaseChartStyle>(
     }));
   });
 
-  newState.series = allSeries.flat() as BarSeriesOption[];
+  newState.series = allSeries?.flat() as BarSeriesOption[];
 
   return newState;
 };

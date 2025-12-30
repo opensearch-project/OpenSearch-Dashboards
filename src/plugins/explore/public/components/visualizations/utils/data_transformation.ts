@@ -56,6 +56,16 @@ export const convertTo2DArray = (headers?: string[]) => (
   return [columnHeaders, ...rows];
 };
 
+export const sortByTime = (dateField?: string) => (
+  data: Array<Record<string, any>>
+): Array<Record<string, any>> => {
+  const sortedData = dateField
+    ? [...data].sort((a, b) => new Date(a[dateField]).getTime() - new Date(b[dateField]).getTime())
+    : data;
+
+  return sortedData;
+};
+
 export const transform = (...fns: TransformFn[]) => (state: EChartsSpecState) => {
   const { data } = state;
   const transformedData: Array<Array<Record<string, any>>> = [data];
@@ -65,7 +75,33 @@ export const transform = (...fns: TransformFn[]) => (state: EChartsSpecState) =>
     transformedData.push(transformed);
   }
 
-  return { ...state, transformedData };
+  const lastValue = transformedData[transformedData?.length - 1];
+  return { ...state, transformedData: lastValue };
+};
+
+export const facetTransform = (...fns: TransformFn[]) => (state: EChartsSpecState) => {
+  const { data, axisColumnMappings } = state;
+
+  if (!axisColumnMappings?.facet) throw Error('Missing config for facet chart');
+  const facetColumn = axisColumnMappings.facet;
+
+  const grouped = data.reduce((acc, row) => {
+    const facet = String(row[facetColumn.column]);
+    acc[facet] ??= [];
+    acc[facet].push(row);
+    return acc;
+  }, {} as Record<string, any[]>);
+
+  const facetNumbers = Object.keys(grouped).length;
+
+  if (facetNumbers <= 1) return transform(...fns)(state);
+
+  const res = Object.entries(grouped).map(([_, facetData]) => {
+    const facetState = { ...state, data: facetData };
+    return transform(...fns)(facetState).transformedData;
+  });
+
+  return { ...state, transformedData: res };
 };
 
 /**
@@ -397,6 +433,7 @@ export const pivot = (options: {
   }, {} as Record<string | number, { groupValue: string | Date; pivotData: Record<string, number[]> }>);
 
   // Convert to array of objects with pivoted columns
+
   let result = Object.values(grouped).map(({ groupValue, pivotData: pd }) => {
     const row: Record<string, any> = { [groupBy]: groupValue };
 
@@ -409,55 +446,10 @@ export const pivot = (options: {
 
     return row;
   });
-
   // Sort by time if time-based
   if (isTimeBased) {
     result = result.sort((a, b) => (a[groupBy] as Date).getTime() - (b[groupBy] as Date).getTime());
   }
 
   return result;
-};
-
-export const formatFacetData = (fn: TransformFn, params: Record<string, any>) => (
-  state: EChartsSpecState<T>
-): EChartsSpecState<T> => {
-  const { data, axisColumnMappings } = state;
-  if (!axisColumnMappings?.facet) return state;
-
-  const facetColumn = axisColumnMappings.facet;
-
-  const grouped = data.reduce((acc, row) => {
-    const facet = String(row[facetColumn.column]);
-    acc[facet] ??= [];
-    acc[facet].push(row);
-    return acc;
-  }, {} as Record<string, any[]>);
-
-  const facetNumbers = Object.keys(grouped).length;
-
-  if (facetNumbers <= 1) return state;
-
-  const res = Object.entries(grouped).map(([_, facetData]) => {
-    const facetState = { ...state, data: facetData };
-    return fn({ ...params })(facetState).aggregatedData;
-  });
-
-  const cols = Math.ceil(facetNumbers / 2); // always in two rows
-  const colWidth = 90 / cols;
-  const rowHeight = 40;
-
-  const grid = Array.from({ length: facetNumbers }).map((_, i) => {
-    const row = Math.floor(i / cols);
-    const col = i % cols;
-    return {
-      left: `${5 + col * colWidth}%`,
-      width: `${colWidth - 2}%`,
-      top: `${5 + row * (rowHeight + 10)}%`,
-      height: `${rowHeight}%`,
-      containLabel: true,
-      bottom: `${5 + row * (rowHeight + 10)}%`,
-    };
-  });
-
-  return { ...state, transformedData: res, grid };
 };

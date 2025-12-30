@@ -9,7 +9,7 @@ import { VisColumn, Positions, VisFieldType, StandardAxes } from '../types';
 import { DEFAULT_OPACITY } from '../constants';
 import { AreaChartStyle } from '../area/area_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
-import { composeMarkline } from '../utils/utils';
+import { composeMarkLine } from '../utils/utils';
 import { LineMode } from './line_vis_config';
 
 /**
@@ -314,11 +314,11 @@ export const createLineSeries = <T extends BaseChartStyle>(
   styles: LineChartStyle,
   addTimeMarker = true
 ): PipelineFn<T> => (state) => {
-  const { axisConfig, xAxisConfig, aggregatedData } = state;
+  const { axisConfig, xAxisConfig, transformedData } = state;
   const newState = { ...state };
   const usedTimeMarker = addTimeMarker && styles.addTimeMarker;
 
-  const cateColumns = aggregatedData?.[0].filter((c: string) => c !== axisConfig?.xAxis?.column);
+  const cateColumns = transformedData?.[0].filter((c: string) => c !== axisConfig?.xAxis?.column);
 
   if (usedTimeMarker) {
     {
@@ -346,7 +346,7 @@ export const createLineSeries = <T extends BaseChartStyle>(
         focus: 'self',
       },
       ...generateLineStyles(styles),
-      ...composeMarkline(styles?.thresholdOptions, styles?.addTimeMarker),
+      ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
     };
   });
 
@@ -393,7 +393,7 @@ export const createLineBarSeries = <T extends BaseChartStyle>(
       type: 'line',
       name: numericalAxis?.name,
       ...generateLineStyles(styles),
-      ...composeMarkline(styles?.thresholdOptions, styles?.addTimeMarker),
+      ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
       yAxisIndex: 0,
       encode: {
         x: 0,
@@ -426,7 +426,7 @@ export const createFacetLineSeries = <T extends BaseChartStyle>(
   styles: LineChartStyle,
   addTimeMarker = true
 ): PipelineFn<T> => (state) => {
-  const { axisConfig, xAxisConfig, aggregatedData } = state;
+  const { axisConfig, xAxisConfig, transformedData } = state;
 
   const newState = { ...state };
 
@@ -434,7 +434,7 @@ export const createFacetLineSeries = <T extends BaseChartStyle>(
 
   if (usedTimeMarker) {
     const newxAxisConfig = [...xAxisConfig];
-    aggregatedData.map((_: any[], index: number) => {
+    transformedData?.map((_: any[], index: number) => {
       newxAxisConfig[index].max = new Date();
     });
 
@@ -445,12 +445,12 @@ export const createFacetLineSeries = <T extends BaseChartStyle>(
     throw new Error('axisConfig must be derived before createBarSeries');
   }
 
-  const allSeries = aggregatedData.map((seriesData: any[], index: number) => {
+  const allSeries = transformedData?.map((seriesData: any[], index: number) => {
     const header = seriesData[0];
     const cateColumns = header.filter((c: string) => c !== axisConfig?.xAxis?.column);
 
     return cateColumns.map((item: string) => ({
-      name: String(`${item}_${index}`),
+      name: String(item),
       type: 'line',
       connectNulls: true,
       encode: {
@@ -465,11 +465,11 @@ export const createFacetLineSeries = <T extends BaseChartStyle>(
         focus: 'self',
       },
       ...generateLineStyles(styles),
-      ...composeMarkline(styles?.thresholdOptions, styles?.addTimeMarker),
+      ...composeMarkLine(styles?.thresholdOptions, styles?.addTimeMarker),
     }));
   });
 
-  newState.series = allSeries.flat() as LineSeriesOption[];
+  newState.series = allSeries?.flat() as LineSeriesOption[];
 
   return newState;
 };
