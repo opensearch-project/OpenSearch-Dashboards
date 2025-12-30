@@ -28,7 +28,7 @@
     "js-yaml": "^4.1.1",
     "json-stable-stringify": "^1.0.1",
     "lmdb": "^2.8.0",
-    "node-polyfill-webpack-plugin": "^2.0.1",
+    "node-polyfill-webpack-plugin": "^4.1.0",
     "normalize-path": "^3.0.0",
     "pirates": "^4.0.1",
     "postcss": "^8.4.31",
