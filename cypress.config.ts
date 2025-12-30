@@ -75,17 +75,25 @@ function setupNodeEvents(
   const { webpackOptions } = webpackPreprocessor.defaultOptions;
 
   /**
+   * Add Node.js polyfills for webpack 5 using the same plugin as the main build
+   */
+  webpackOptions!.plugins = webpackOptions!.plugins || [];
+  webpackOptions!.plugins.push(new (require('node-polyfill-webpack-plugin'))());
+
+  /**
    * By default, cypress' internal webpack preprocessor doesn't allow imports without file extensions.
    * This makes our life a bit hard since if any file in our testing dependency graph has an import without
    * the .js extension our cypress build will fail.
    *
    * This extra rule relaxes this a bit by allowing imports without file extension
    *     ex. import module from './module'
+   *
+   * Webpack 5: Use 'fullySpecified: false' instead of 'enforceExtension: false'
    */
   webpackOptions!.module!.rules.unshift({
     test: /\.m?js/,
     resolve: {
-      enforceExtension: false,
+      fullySpecified: false,
     },
   });
 
