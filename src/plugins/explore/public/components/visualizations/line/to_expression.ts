@@ -24,13 +24,7 @@ import {
 } from '../utils/utils';
 import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
-import {
-  pipe,
-  createBaseConfig,
-  buildAxisConfigs,
-  assembleSpec,
-  buildGrid,
-} from '../utils/echarts_spec';
+import { pipe, createBaseConfig, buildAxisConfigs, assembleSpec } from '../utils/echarts_spec';
 import {
   convertTo2DArray,
   transform,
@@ -57,13 +51,22 @@ export const createSimpleLineChart = (
   if (getChartRender() === 'echarts') {
     const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
 
+    const timeField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis?.column;
+
+    if (!valueField || !timeField) throw Error('Missing axis config for line chart');
+
     const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
 
     const result = pipe(
       transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
       createBaseConfig,
       buildAxisConfigs,
-      createLineSeries(styles),
+      createLineSeries({
+        styles,
+        actualX: timeField,
+        seriesFields: [valueField],
+      }),
       assembleSpec
     )({
       data: transformedData,
@@ -435,7 +438,11 @@ export const createMultiLineChart = (
       ),
       createBaseConfig,
       buildAxisConfigs,
-      createLineSeries(styles),
+      createLineSeries({
+        styles,
+        actualX: timeField,
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      }),
       assembleSpec
     )({
       data: transformedData,
@@ -611,8 +618,11 @@ export const createFacetedMultiLineChart = (
       ),
       createBaseConfig,
       buildAxisConfigs,
-      createFacetLineSeries(styles),
-      buildGrid,
+      createFacetLineSeries({
+        styles,
+        actualX: timeField,
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      }),
       assembleSpec
     )({
       data: transformedData,
@@ -795,6 +805,11 @@ export const createCategoryLineChart = (
   if (getChartRender() === 'echarts') {
     const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
 
+    const categoryField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis?.column;
+
+    if (!valueField || !categoryField) throw Error('Missing axis config for line chart');
+
     const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
     // When axesMapping is updated but the data itself has not changed
     // (for example, when switching x axis to a different field),
@@ -806,7 +821,12 @@ export const createCategoryLineChart = (
       transform(convertTo2DArray(allColumns)),
       createBaseConfig,
       buildAxisConfigs,
-      createLineSeries(styles, false),
+      createLineSeries({
+        styles,
+        actualX: categoryField,
+        seriesFields: [valueField],
+        addTimeMarker: false,
+      }),
       assembleSpec
     )({
       data: transformedData,
@@ -931,7 +951,13 @@ export const createCategoryMultiLineChart = (
       ),
       createBaseConfig,
       buildAxisConfigs,
-      createLineSeries(styles, false),
+      createLineSeries({
+        styles,
+        actualX: cateField,
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== cateField),
+        addTimeMarker: false,
+      }),
+
       assembleSpec
     )({
       data: transformedData,

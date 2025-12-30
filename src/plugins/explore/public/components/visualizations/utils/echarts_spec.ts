@@ -79,8 +79,6 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   yAxisConfig?: any;
   series?: Array<BarSeriesOption | LineSeriesOption | CustomSeriesOption>;
   visualMap?: any;
-  grid?: any;
-
   // Final output
   spec?: EChartsOption;
 }
@@ -200,21 +198,35 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
 export const assembleSpec = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const {
-    baseConfig,
-    transformedData = [],
-    xAxisConfig,
-    yAxisConfig,
-    series,
-    visualMap,
-    grid,
-  } = state;
+  const { baseConfig, transformedData = [], xAxisConfig, yAxisConfig, series, visualMap } = state;
 
   const hasFacet = Array.isArray(transformedData[0]?.[0]);
 
   const data = hasFacet
     ? transformedData.map((facetData: any) => ({ source: facetData }))
     : { source: transformedData };
+
+  const facetNumber = transformedData.length;
+
+  let grid;
+  if (!hasFacet || facetNumber <= 1) grid = { top: 60, bottom: 60, left: 60, right: 60 };
+  else {
+    const cols = Math.ceil(facetNumber / 2); // always in two rows
+    const colWidth = 90 / cols;
+    const rowHeight = 39; // slighly smaller to make legend fit
+
+    grid = Array.from({ length: facetNumber }).map((_, i) => {
+      const row = Math.floor(i / cols);
+      const col = i % cols;
+      return {
+        left: `${5 + col * colWidth}%`,
+        width: `${colWidth - 2}%`,
+        top: `${5 + row * (rowHeight + 10)}%`,
+        height: `${rowHeight}%`,
+        containLabel: true,
+      };
+    });
+  }
 
   const spec = {
     ...baseConfig,
@@ -224,43 +236,10 @@ export const assembleSpec = <T extends BaseChartStyle>(
     yAxis: yAxisConfig,
     visualMap,
     series,
-    grid: grid ?? { top: 60, bottom: 60, left: 60, right: 60 },
+    grid,
   };
 
   return { ...state, spec };
-};
-
-/**
- * generate grid
- */
-export const buildGrid = <T extends BaseChartStyle>(
-  state: EChartsSpecState<T>
-): EChartsSpecState<T> => {
-  const { transformedData = [] } = state;
-
-  const hasFacet = Array.isArray(transformedData[0]?.[0]);
-
-  const facetNumber = transformedData.length;
-
-  if (!hasFacet || facetNumber <= 1) return state;
-
-  const cols = Math.ceil(facetNumber / 2); // always in two rows
-  const colWidth = 90 / cols;
-  const rowHeight = 39; // slighly smaller to make legend fit
-
-  const grid = Array.from({ length: facetNumber }).map((_, i) => {
-    const row = Math.floor(i / cols);
-    const col = i % cols;
-    return {
-      left: `${5 + col * colWidth}%`,
-      width: `${colWidth - 2}%`,
-      top: `${5 + row * (rowHeight + 10)}%`,
-      height: `${rowHeight}%`,
-      containLabel: true,
-    };
-  });
-
-  return { ...state, grid };
 };
 
 const POSITION_MAP = {
@@ -327,18 +306,18 @@ export const applyAxisStyling = ({
 
 export const buildVisMap = ({
   seriesFields,
+  actualX,
 }: {
   seriesFields: string[] | ((headers?: string[]) => string[]);
+  actualX: string;
 }) => (state: EChartsSpecState) => {
-  const { styles, transformedData = [], axisColumnMappings } = state;
+  const { styles, transformedData = [] } = state;
 
   if (!Array.isArray(seriesFields)) {
     seriesFields = seriesFields(transformedData[0]);
   }
 
   const hasFacet = Array.isArray(transformedData[0]?.[0]);
-
-  const actualX = axisColumnMappings?.x?.column;
 
   if (!styles.useThresholdColor) return state;
 

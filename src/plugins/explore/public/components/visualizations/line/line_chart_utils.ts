@@ -310,15 +310,24 @@ const generateLineStyles = (styles: LineChartStyle) => {
   };
 };
 
-export const createLineSeries = <T extends BaseChartStyle>(
-  styles: LineChartStyle,
-  addTimeMarker = true
-): PipelineFn<T> => (state) => {
-  const { axisConfig, xAxisConfig, transformedData } = state;
+export const createLineSeries = <T extends BaseChartStyle>({
+  styles,
+  seriesFields,
+  actualX,
+  addTimeMarker = true,
+}: {
+  styles: LineChartStyle;
+  seriesFields: string[] | ((headers?: string[]) => string[]);
+  actualX: string;
+  addTimeMarker?: boolean;
+}): PipelineFn<T> => (state) => {
+  const { xAxisConfig, transformedData = [] } = state;
   const newState = { ...state };
   const usedTimeMarker = addTimeMarker && styles.addTimeMarker;
 
-  const cateColumns = transformedData?.[0].filter((c: string) => c !== axisConfig?.xAxis?.column);
+  if (!Array.isArray(seriesFields)) {
+    seriesFields = seriesFields(transformedData[0]);
+  }
 
   if (usedTimeMarker) {
     {
@@ -329,17 +338,13 @@ export const createLineSeries = <T extends BaseChartStyle>(
     }
   }
 
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before createBarSeries');
-  }
-
-  const series = cateColumns?.map((item: string, index: number) => {
+  const series = seriesFields?.map((item: string) => {
     return {
       name: String(item),
       type: 'line',
       connectNulls: true,
       encode: {
-        x: axisConfig?.xAxis?.column,
+        x: actualX,
         y: item,
       },
       emphasis: {
@@ -381,9 +386,6 @@ export const createLineBarSeries = <T extends BaseChartStyle>(
     },
   ];
 
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before createBarSeries');
-  }
   const numericalAxis = [axisConfig.xAxis, axisConfig.yAxis].find(
     (axis) => axis?.schema === VisFieldType.Numerical
   );
@@ -422,17 +424,20 @@ export const createLineBarSeries = <T extends BaseChartStyle>(
   return newState;
 };
 
-export const createFacetLineSeries = <T extends BaseChartStyle>(
-  styles: LineChartStyle,
-  addTimeMarker = true
-): PipelineFn<T> => (state) => {
-  const { axisConfig, xAxisConfig, transformedData } = state;
+export const createFacetLineSeries = <T extends BaseChartStyle>({
+  styles,
+  seriesFields,
+  actualX,
+}: {
+  styles: LineChartStyle;
+  seriesFields: (headers?: string[]) => string[];
+  actualX: string;
+}): PipelineFn<T> => (state) => {
+  const { xAxisConfig, transformedData } = state;
 
   const newState = { ...state };
 
-  const usedTimeMarker = addTimeMarker && styles.addTimeMarker;
-
-  if (usedTimeMarker) {
+  if (styles.addTimeMarker) {
     const newxAxisConfig = [...xAxisConfig];
     transformedData?.map((_: any[], index: number) => {
       newxAxisConfig[index].max = new Date();
@@ -441,20 +446,15 @@ export const createFacetLineSeries = <T extends BaseChartStyle>(
     newState.xAxisConfig = newxAxisConfig;
   }
 
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before createBarSeries');
-  }
-
   const allSeries = transformedData?.map((seriesData: any[], index: number) => {
     const header = seriesData[0];
-    const cateColumns = header.filter((c: string) => c !== axisConfig?.xAxis?.column);
-
+    const cateColumns = seriesFields(header);
     return cateColumns.map((item: string) => ({
       name: String(item),
       type: 'line',
       connectNulls: true,
       encode: {
-        x: axisConfig?.xAxis?.column,
+        x: actualX,
         y: item,
       },
       datasetIndex: index,

@@ -38,7 +38,6 @@ import {
   buildAxisConfigs,
   assembleSpec,
   buildVisMap,
-  buildGrid,
 } from '../utils/echarts_spec';
 import {
   aggregate,
@@ -98,7 +97,7 @@ export const createBarSpec = (
       ),
       createBaseConfig,
       buildAxisConfigs,
-      buildVisMap({ seriesFields: [valueField] }),
+      buildVisMap({ seriesFields: [valueField], actualX: categoryField }),
       createBarSeries({ styles, categoryField, seriesFields: [valueField] }),
       assembleSpec
     )({
@@ -241,7 +240,7 @@ export const createTimeBarChart = (
       ),
       createBaseConfig,
       buildAxisConfigs,
-      buildVisMap({ seriesFields: [valueField] }),
+      buildVisMap({ seriesFields: [valueField], actualX: timeField }),
       createBarSeries({
         styles,
         categoryField: timeField,
@@ -403,7 +402,10 @@ export const createGroupedTimeBarChart = (
       ),
       createBaseConfig,
       buildAxisConfigs,
-      buildVisMap({ seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField) }),
+      buildVisMap({
+        actualX: timeField,
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      }),
       createBarSeries({
         styles,
         categoryField: timeField,
@@ -578,9 +580,12 @@ export const createFacetedTimeBarChart = (
       ),
       createBaseConfig,
       buildAxisConfigs,
-      buildVisMap({ seriesFields: [valueField] }),
-      createFacetBarSeries(styles),
-      buildGrid,
+      buildVisMap({ actualX: timeField, seriesFields: [valueField] }),
+      createFacetBarSeries({
+        styles,
+        categoryField: timeField,
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      }),
       assembleSpec
     )({
       data: transformedData,
@@ -751,6 +756,7 @@ export const createStackedBarSpec = (
       createBaseConfig,
       buildAxisConfigs,
       buildVisMap({
+        actualX: categoryField,
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
       }),
       createBarSeries({
@@ -893,7 +899,7 @@ export const createDoubleNumericalBarChart = (
       ),
       createBaseConfig,
       buildAxisConfigs,
-      buildVisMap({ seriesFields: [valueField] }),
+      buildVisMap({ actualX: categoryField, seriesFields: [valueField] }),
       createBarSeries({ styles, categoryField, seriesFields: [valueField] }),
       assembleSpec
     )({

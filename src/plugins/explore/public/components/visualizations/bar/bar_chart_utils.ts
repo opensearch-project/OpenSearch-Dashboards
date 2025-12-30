@@ -207,12 +207,8 @@ export const createBarSeries = <T extends BaseChartStyle>({
   categoryField: string;
   seriesFields: string[] | ((headers?: string[]) => string[]);
 }): PipelineFn<T> => (state) => {
-  const { axisConfig, axisColumnMappings, transformedData = [] } = state;
+  const { axisColumnMappings, transformedData = [] } = state;
   const newState = { ...state };
-
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before createBarSeries');
-  }
 
   if (!Array.isArray(seriesFields)) {
     seriesFields = seriesFields(transformedData[0]);
@@ -251,31 +247,30 @@ export const createBarSeries = <T extends BaseChartStyle>({
   return newState;
 };
 
-export const createFacetBarSeries = <T extends BaseChartStyle>(
-  styles: BarChartStyle
-): PipelineFn<T> => (state) => {
-  const { axisConfig, transformedData } = state;
+export const createFacetBarSeries = <T extends BaseChartStyle>({
+  styles,
+  categoryField,
+  seriesFields,
+}: {
+  styles: BarChartStyle;
+  categoryField: string;
+  seriesFields: (headers?: string[]) => string[];
+}): PipelineFn<T> => (state) => {
+  const { transformedData } = state;
 
   const newState = { ...state };
-
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before createBarSeries');
-  }
-
   const thresholdLines = generateThresholdLines(styles?.thresholdOptions, styles?.switchAxes);
-
-  const actualX = styles?.switchAxes ? axisConfig.yAxis : axisConfig.xAxis;
 
   const allSeries = transformedData?.map((seriesData: any[], index: number) => {
     const header = seriesData[0];
-    const cateColumns = header?.filter((c: string) => c !== actualX?.column);
+    const cateColumns = seriesFields(header);
 
     return cateColumns.map((item: string, i: number) => ({
       name: String(item),
       type: 'bar',
       stack: `stack_${index}`, // each grid should have a exclusive stack key
       encode: {
-        [adjustOppositeSymbol(styles?.switchAxes, 'x')]: actualX?.column,
+        [adjustOppositeSymbol(styles?.switchAxes, 'x')]: categoryField,
         [adjustOppositeSymbol(styles?.switchAxes, 'y')]: item,
       },
       datasetIndex: index,
