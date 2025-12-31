@@ -11,6 +11,7 @@ import { ContentManagementPluginStart } from '../../../plugins/content_managemen
 import { DataSourceAttributes } from '../../../plugins/data_source/common/data_sources';
 import type { AddCollaboratorsModal } from './components/add_collaborators_modal';
 import { UseCaseService, WorkspaceCollaboratorTypesService } from './services';
+import { DataPublicPluginStart } from '../../../plugins/data/public';
 
 export type Services = CoreStart & {
   workspaceClient: WorkspaceClient;
@@ -19,7 +20,7 @@ export type Services = CoreStart & {
   contentManagement?: ContentManagementPluginStart;
   collaboratorTypes: WorkspaceCollaboratorTypesService;
   useCaseService: UseCaseService;
-  data?: any;
+  data?: DataPublicPluginStart;
 };
 
 export interface WorkspaceUseCaseFeature {

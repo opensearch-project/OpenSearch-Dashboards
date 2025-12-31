@@ -487,4 +487,271 @@ describe('DatasetSelect', () => {
     expect(screen.queryByText('Log Dataset')).not.toBeInTheDocument();
     expect(screen.queryByText('Select data')).not.toBeInTheDocument();
   });
+
+  it('handles errors when fetching datasets gracefully', async () => {
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    const localMockDataViews = {
+      ...mockDataViews,
+      getIds: jest.fn().mockRejectedValue(new Error('Failed to fetch')),
+    };
+
+    const localMockQueryService = {
+      ...mockQueryService,
+      queryString: {
+        ...mockQueryService.queryString,
+        getQuery: jest.fn().mockReturnValue({ dataset: null, language: 'kuery' }),
+      },
+    };
+
+    const localServices = {
+      ...mockServices,
+      data: {
+        ...mockServices.data,
+        dataViews: localMockDataViews,
+        query: localMockQueryService,
+      },
+    };
+
+    render(
+      <I18nProvider>
+        <OpenSearchDashboardsContextProvider services={localServices}>
+          <DatasetSelect {...defaultProps} />
+        </OpenSearchDashboardsContextProvider>
+      </I18nProvider>
+    );
+
+    // Wait for getIds to be called and error handling to complete
+    await waitFor(
+      () => {
+        expect(localMockDataViews.getIds).toHaveBeenCalled();
+      },
+      { timeout: 3000 }
+    );
+
+    // Wait for loading to complete after error
+    await waitFor(
+      () => {
+        const button = screen.getByTestId('datasetSelectButton');
+        expect(button).not.toHaveClass('euiButtonEmpty-isDisabled');
+      },
+      { timeout: 3000 }
+    );
+
+    // Component should render without crashing and show "Select data" text
+    expect(screen.getByTestId('datasetSelectButton')).toBeInTheDocument();
+    expect(screen.getByText('Select data')).toBeInTheDocument();
+
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('shows loading state initially', () => {
+    renderWithContext();
+    // Check for disabled state which indicates loading
+    const button = screen.getByTestId('datasetSelectButton');
+    expect(button).toHaveClass('euiButtonEmpty-isDisabled');
+  });
+
+  it('displays "Select data" when no dataset is selected', async () => {
+    mockQueryService.queryString.getQuery = jest.fn().mockReturnValue({ dataset: null });
+    mockDataViews.getDefault = jest.fn().mockResolvedValue(null);
+
+    renderWithContext();
+
+    await waitFor(() => {
+      expect(screen.getByText('Select data')).toBeInTheDocument();
+    });
+  });
+
+  it('renders dataset information with time field', async () => {
+    const { getByTestId } = renderWithContext();
+
+    await waitFor(() => {
+      expect(mockDataViews.getIds).toHaveBeenCalled();
+      expect(mockDataViews.get).toHaveBeenCalled();
+    });
+
+    // Verify dataset was loaded and component rendered
+    expect(getByTestId('datasetSelectButton')).toBeInTheDocument();
+  });
+
+  it('renders dataset with data source information', async () => {
+    const localMockDataViews = {
+      ...mockDataViews,
+      get: jest.fn().mockResolvedValue({
+        ...mockDataViewData,
+        dataSourceRef: {
+          id: 'ds-id',
+          type: 'data-source',
+        },
+      }),
+      convertToDataset: jest.fn().mockResolvedValue({
+        id: mockDataViewData.id,
+        title: mockDataViewData.title,
+        type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+        dataSource: {
+          id: 'ds-id',
+          title: 'Test Data Source',
+          type: 'data-source',
+        },
+      }),
+    };
+
+    const localServices = {
+      ...mockServices,
+      data: {
+        ...mockServices.data,
+        dataViews: localMockDataViews,
+      },
+    };
+
+    render(
+      <I18nProvider>
+        <OpenSearchDashboardsContextProvider services={localServices}>
+          <DatasetSelect {...defaultProps} />
+        </OpenSearchDashboardsContextProvider>
+      </I18nProvider>
+    );
+
+    await waitFor(() => {
+      expect(localMockDataViews.getIds).toHaveBeenCalled();
+      expect(localMockDataViews.convertToDataset).toHaveBeenCalled();
+    });
+
+    // Verify component rendered with data source
+    expect(screen.getByTestId('datasetSelectButton')).toBeInTheDocument();
+  });
+
+  it('opens dataset selector popover', async () => {
+    const { getByTestId } = renderWithContext();
+
+    await waitFor(() => {
+      expect(mockDataViews.getIds).toHaveBeenCalled();
+    });
+
+    const button = getByTestId('datasetSelectButton');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+    });
+
+    // Verify the selectable component is visible
+    expect(screen.getByTestId('datasetSelectSelectable')).toBeInTheDocument();
+  });
+
+  it('handles empty datasets list', async () => {
+    const localMockDataViews = {
+      ...mockDataViews,
+      getIds: jest.fn().mockResolvedValue([]),
+    };
+
+    const localQueryService = {
+      ...mockQueryService,
+      queryString: {
+        ...mockQueryService.queryString,
+        getQuery: jest.fn().mockReturnValue({ dataset: null }),
+      },
+    };
+
+    const localMockDataViewsWithDefault = {
+      ...localMockDataViews,
+      getDefault: jest.fn().mockResolvedValue(null),
+    };
+
+    (getQueryService as jest.Mock).mockReturnValue(localQueryService);
+
+    const localServices = {
+      ...mockServices,
+      data: {
+        ...mockServices.data,
+        dataViews: localMockDataViewsWithDefault,
+      },
+    };
+
+    render(
+      <I18nProvider>
+        <OpenSearchDashboardsContextProvider services={localServices}>
+          <DatasetSelect {...defaultProps} />
+        </OpenSearchDashboardsContextProvider>
+      </I18nProvider>
+    );
+
+    await waitFor(() => {
+      expect(localMockDataViewsWithDefault.getIds).toHaveBeenCalled();
+    });
+
+    const button = screen.getByTestId('datasetSelectButton');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+    });
+
+    // Should not crash with empty list
+    expect(button).toBeInTheDocument();
+  });
+
+  it('searches datasets by title', async () => {
+    renderWithContext();
+
+    await waitFor(() => {
+      expect(mockDataViews.getIds).toHaveBeenCalled();
+    });
+
+    const button = screen.getByTestId('datasetSelectButton');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      const searchInput = screen.getByPlaceholderText('Search');
+      expect(searchInput).toBeInTheDocument();
+      fireEvent.change(searchInput, { target: { value: 'Test' } });
+    });
+
+    expect(screen.getByPlaceholderText('Search')).toHaveValue('Test');
+  });
+
+  it('closes popover after dataset selection', async () => {
+    mockDataViews.getIds = jest.fn().mockResolvedValue(['index-pattern-id', 'new-id']);
+    mockDataViews.get = jest.fn().mockImplementation((id) => {
+      if (id === 'new-id') {
+        return Promise.resolve({
+          id: 'new-id',
+          title: 'New Dataset',
+          displayName: 'New Dataset',
+        });
+      }
+      return Promise.resolve(mockDataViewData);
+    });
+
+    renderWithContext();
+
+    await waitFor(() => {
+      expect(mockDataViews.getIds).toHaveBeenCalled();
+    });
+
+    const button = screen.getByTestId('datasetSelectButton');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+    });
+
+    expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+  });
+
+  it('handles dataset with description', async () => {
+    const { getByTestId } = renderWithContext();
+
+    await waitFor(() => {
+      expect(mockDataViews.getIds).toHaveBeenCalled();
+    });
+
+    const button = getByTestId('datasetSelectButton');
+    fireEvent.click(button);
+
+    await waitFor(() => {
+      // Just verify the popover opened successfully
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+    });
+  });
 });

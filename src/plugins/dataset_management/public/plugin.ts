@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { CoreSetup, CoreStart, Plugin, AppMountParameters } from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
@@ -62,6 +62,7 @@ export class DatasetManagementPlugin
     > {
   private readonly datasetManagementService = new DatasetManagementService();
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private workspaceSubscription?: Subscription;
 
   public setup(
     core: CoreSetup<DatasetManagementStartDependencies, DatasetManagementStart>,
@@ -171,24 +172,23 @@ export class DatasetManagementPlugin
        */
       if (coreStart.application.capabilities.workspaces.enabled) {
         // Subscribe to workspace changes to control nav link visibility
-        coreStart.workspaces.currentWorkspace$.subscribe(async () => {
-          const features = await coreStart.workspaces.currentWorkspace$
-            .pipe(take(1))
-            .toPromise()
-            .then((workspace) => workspace?.features);
+        this.workspaceSubscription = coreStart.workspaces.currentWorkspace$.subscribe(
+          (workspace) => {
+            const features = workspace?.features;
 
-          const isObservabilityWorkspace =
-            (features &&
-              isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
-            false;
+            const isObservabilityWorkspace =
+              (features &&
+                isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
+              false;
 
-          // Update nav link visibility based on workspace
-          this.appUpdater$.next(() => ({
-            navLinkStatus: isObservabilityWorkspace
-              ? AppNavLinkStatus.visible
-              : AppNavLinkStatus.hidden,
-          }));
-        });
+            // Update nav link visibility based on workspace
+            this.appUpdater$.next(() => ({
+              navLinkStatus: isObservabilityWorkspace
+                ? AppNavLinkStatus.visible
+                : AppNavLinkStatus.hidden,
+            }));
+          }
+        );
       }
     });
 
@@ -200,6 +200,10 @@ export class DatasetManagementPlugin
   }
 
   public stop() {
+    if (this.workspaceSubscription) {
+      this.workspaceSubscription.unsubscribe();
+      this.workspaceSubscription = undefined;
+    }
     this.datasetManagementService.stop();
   }
 }

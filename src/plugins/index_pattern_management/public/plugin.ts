@@ -155,21 +155,43 @@ export class IndexPatternManagementPlugin
         ? AppStatus.accessible
         : AppStatus.inaccessible,
       mount: async (params: AppMountParameters) => {
-        const { mountManagementSection } = await import('./management_app');
-        const [coreStart] = await core.getStartServices();
+        try {
+          const { mountManagementSection } = await import('./management_app');
+          const [coreStart] = await core.getStartServices();
 
-        return mountManagementSection(
-          core.getStartServices,
-          {
-            ...params,
-            basePath: core.http.basePath.get(),
-            setBreadcrumbs: (breadCrumbs) =>
-              coreStart.chrome.setBreadcrumbs(getScopedBreadcrumbs(breadCrumbs, params.history)),
-            wrapInPage: true,
-          },
-          () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
-          dataSource
-        );
+          return mountManagementSection(
+            core.getStartServices,
+            {
+              ...params,
+              basePath: core.http.basePath.get(),
+              setBreadcrumbs: (breadCrumbs) =>
+                coreStart.chrome.setBreadcrumbs(getScopedBreadcrumbs(breadCrumbs, params.history)),
+              wrapInPage: true,
+            },
+            () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
+            dataSource
+          );
+        } catch (error) {
+          // Try to show error notification to user
+          try {
+            const [coreStart] = await core.getStartServices();
+            coreStart.notifications.toasts.addDanger({
+              title: i18n.translate('indexPatternManagement.mountError.title', {
+                defaultMessage: 'Failed to mount Index Pattern Management',
+              }),
+              text: error.message,
+            });
+          } catch (notificationError) {
+            // If we can't show notification, log to console as last resort
+            // eslint-disable-next-line no-console
+            console.error('Failed to mount Index Pattern Management:', error);
+            // eslint-disable-next-line no-console
+            console.error('Also failed to show error notification:', notificationError);
+          }
+
+          // Return no-op unmount function
+          return () => {};
+        }
       },
     });
 
@@ -178,9 +200,14 @@ export class IndexPatternManagementPlugin
        * The `capabilities.workspaces.enabled` indicates
        * if workspace feature flag is turned on or not and
        * the global index pattern management page should only be registered
-       * to settings and setup when workspace is turned off,
+       * to settings and setup when workspace is turned off.
+       * Additionally, only add the nav link if nav groups are enabled to match
+       * the app accessibility status.
        */
-      if (!coreStart.application.capabilities.workspaces.enabled) {
+      if (
+        !coreStart.application.capabilities.workspaces.enabled &&
+        core.chrome.navGroup.getNavGroupEnabled()
+      ) {
         core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
           {
             id: IPM_APP_ID,

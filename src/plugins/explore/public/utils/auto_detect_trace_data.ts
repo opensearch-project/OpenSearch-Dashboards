@@ -45,6 +45,13 @@ export async function detectTraceData(
     for (const id of allIndexPatterns) {
       try {
         const indexPattern = await indexPatternsService.get(id);
+        // Only check patterns from the target datasource
+        if (
+          indexPattern.dataSourceRef?.id !== dataSourceId &&
+          (indexPattern.dataSourceRef?.id || dataSourceId)
+        ) {
+          continue;
+        }
         if (indexPattern.signalType === 'traces') {
           // Already have trace datasets, no need to auto-detect
           return result;
@@ -113,39 +120,14 @@ export async function detectTraceDataAcrossDataSources(
 ): Promise<DetectionResult[]> {
   const results: DetectionResult[] = [];
 
-  // 1. Check if trace datasets already exist (for any datasource)
-  try {
-    const allIndexPatterns = await indexPatternsService.getIds();
-    let hasTraceDatasets = false;
-
-    for (const id of allIndexPatterns) {
-      try {
-        const indexPattern = await indexPatternsService.get(id);
-        if (indexPattern.signalType === 'traces') {
-          hasTraceDatasets = true;
-          break;
-        }
-      } catch (error) {
-        continue;
-      }
-    }
-
-    // If trace datasets exist, return empty array (no need to auto-detect)
-    if (hasTraceDatasets) {
-      return results;
-    }
-  } catch (error) {
-    // If loading fails, continue with detection
-  }
-
-  // 2. Fetch all data sources
+  // 1. Fetch all data sources
   try {
     const dataSourcesResp = await savedObjectsClient.find<any>({
       type: 'data-source',
       perPage: 10000,
     });
 
-    // 3. Check each data source for trace data
+    // 2. Check each data source for trace data
     for (const dataSource of dataSourcesResp.savedObjects) {
       try {
         const detection = await detectTraceData(
@@ -173,7 +155,7 @@ export async function detectTraceDataAcrossDataSources(
     // If fetching data sources fails, fall through
   }
 
-  // 4. Also check local cluster (no datasource) - but only if no datasources were found
+  // 3. Also check local cluster (no datasource) - but only if no datasources were found
   // This prevents duplicates when a datasource points to the local cluster
   if (results.length === 0) {
     try {

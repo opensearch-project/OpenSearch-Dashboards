@@ -56,9 +56,11 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const [openPopoverIndex, setOpenPopoverIndex] = useState<number | null>(null);
   const [indexHealthCache, setIndexHealthCache] = useState<Record<string, IndexHealth | null>>({});
-  const [loadingHealthForIndex, setLoadingHealthForIndex] = useState<string | null>(null);
+  const [loadingHealthForIndexSet, setLoadingHealthForIndexSet] = useState<Set<string>>(new Set());
   const [matchingIndicesCache, setMatchingIndicesCache] = useState<Record<string, string[]>>({});
-  const [loadingMatchingIndices, setLoadingMatchingIndices] = useState<string | null>(null);
+  const [loadingMatchingIndicesSet, setLoadingMatchingIndicesSet] = useState<Set<string>>(
+    new Set()
+  );
 
   // Pagination state for wildcard popover
   const [wildcardPopoverPage, setWildcardPopoverPage] = useState<
@@ -73,12 +75,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
     async (indexName: string) => {
       if (!services?.http) return;
 
-      // Check cache first
-      if (indexHealthCache[indexName] !== undefined) {
-        return indexHealthCache[indexName];
-      }
-
-      setLoadingHealthForIndex(indexName);
+      setLoadingHealthForIndexSet((prev) => new Set(prev).add(indexName));
       try {
         const dataSourceId = path?.find((item) => item.type === 'DATA_SOURCE')?.id;
 
@@ -111,10 +108,14 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
         setIndexHealthCache((prev) => ({ ...prev, [indexName]: null }));
         return null;
       } finally {
-        setLoadingHealthForIndex(null);
+        setLoadingHealthForIndexSet((prev) => {
+          const next = new Set(prev);
+          next.delete(indexName);
+          return next;
+        });
       }
     },
-    [services, path, indexHealthCache]
+    [services, path]
   );
 
   // Batch fetch index health information for multiple indices
@@ -122,15 +123,11 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
     async (indexNames: string[]) => {
       if (!services?.http || indexNames.length === 0) return;
 
-      // Filter out already cached indices
-      const uncachedIndices = indexNames.filter((name) => indexHealthCache[name] === undefined);
-      if (uncachedIndices.length === 0) return;
-
       try {
         const dataSourceId = path?.find((item) => item.type === 'DATA_SOURCE')?.id;
 
         const queryParams: Record<string, any> = {
-          path: `_cat/indices/${uncachedIndices.join(
+          path: `_cat/indices/${indexNames.join(
             ','
           )}?format=json&h=health,status,index,docs.count,store.size`,
           method: 'GET',
@@ -153,7 +150,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
           });
 
           // Mark any missing indices as null (not found)
-          uncachedIndices.forEach((indexName) => {
+          indexNames.forEach((indexName) => {
             if (!newCache[indexName]) {
               newCache[indexName] = null;
             }
@@ -166,13 +163,13 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
         console.error('Error fetching batch index health:', error);
         // Mark all as null on error
         const errorCache: Record<string, IndexHealth | null> = {};
-        uncachedIndices.forEach((indexName) => {
+        indexNames.forEach((indexName) => {
           errorCache[indexName] = null;
         });
         setIndexHealthCache((prev) => ({ ...prev, ...errorCache }));
       }
     },
-    [services, path, indexHealthCache]
+    [services, path]
   );
 
   // Fetch matching indices for wildcard pattern
@@ -182,12 +179,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
         return [];
       }
 
-      // Check cache first
-      if (matchingIndicesCache[pattern]) {
-        return matchingIndicesCache[pattern];
-      }
-
-      setLoadingMatchingIndices(pattern);
+      setLoadingMatchingIndicesSet((prev) => new Set(prev).add(pattern));
       try {
         const allIndices = await fetchIndices({
           patterns: [pattern],
@@ -202,10 +194,14 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
         setMatchingIndicesCache((prev) => ({ ...prev, [pattern]: [] }));
         return [];
       } finally {
-        setLoadingMatchingIndices(null);
+        setLoadingMatchingIndicesSet((prev) => {
+          const next = new Set(prev);
+          next.delete(pattern);
+          return next;
+        });
       }
     },
-    [fetchIndices, matchingIndicesCache]
+    [fetchIndices]
   );
 
   // Auto-fetch health/matching data for selected items
@@ -213,12 +209,15 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
     selectedItems.forEach((item) => {
       if (item.isWildcard) {
         // Fetch matching indices for wildcards
-        if (!matchingIndicesCache[item.title] && loadingMatchingIndices !== item.title) {
+        if (!matchingIndicesCache[item.title] && !loadingMatchingIndicesSet.has(item.title)) {
           fetchMatchingIndices(item.title);
         }
       } else {
         // Fetch health for exact indices
-        if (indexHealthCache[item.title] === undefined && loadingHealthForIndex !== item.title) {
+        if (
+          indexHealthCache[item.title] === undefined &&
+          !loadingHealthForIndexSet.has(item.title)
+        ) {
           fetchIndexHealth(item.title);
         }
       }
@@ -227,8 +226,8 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
     selectedItems,
     matchingIndicesCache,
     indexHealthCache,
-    loadingMatchingIndices,
-    loadingHealthForIndex,
+    loadingMatchingIndicesSet,
+    loadingHealthForIndexSet,
     fetchMatchingIndices,
     fetchIndexHealth,
   ]);
@@ -244,8 +243,13 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
         const endIndex = Math.min(startIndex + pagination.pageSize, matchingIndices.length);
         const visibleIndices = matchingIndices.slice(startIndex, endIndex);
 
-        // Batch fetch health data for visible indices
-        fetchBatchIndexHealth(visibleIndices);
+        // Filter out already cached indices before batch fetching
+        const uncachedIndices = visibleIndices.filter(
+          (name) => indexHealthCache[name] === undefined
+        );
+        if (uncachedIndices.length > 0) {
+          fetchBatchIndexHealth(uncachedIndices);
+        }
       }
     }
   }, [
@@ -253,6 +257,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
     selectedItems,
     matchingIndicesCache,
     wildcardPopoverPage,
+    indexHealthCache,
     fetchBatchIndexHealth,
   ]);
 
@@ -322,11 +327,15 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
     } else {
       setOpenPopoverIndex(itemIndex);
       if (item.isWildcard) {
-        // Fetch matching indices for wildcard
-        await fetchMatchingIndices(item.title);
+        // Fetch matching indices for wildcard if not cached
+        if (!matchingIndicesCache[item.title]) {
+          await fetchMatchingIndices(item.title);
+        }
       } else {
-        // Fetch health data for exact index
-        await fetchIndexHealth(item.title);
+        // Fetch health data for exact index if not cached
+        if (indexHealthCache[item.title] === undefined) {
+          await fetchIndexHealth(item.title);
+        }
       }
     }
   };
@@ -335,7 +344,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
   const renderHealthPopover = (item: SelectedItem, itemIndex: number) => {
     if (item.isWildcard) {
       const matchingIndices = matchingIndicesCache[item.title] || [];
-      const isLoading = loadingMatchingIndices === item.title;
+      const isLoading = loadingMatchingIndicesSet.has(item.title);
 
       if (isLoading) {
         return (
@@ -414,7 +423,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
             <div className="indexDataStructureCreator__wildcardPopoverTableBody">
               {visibleIndices.map((indexName) => {
                 const indexHealth = indexHealthCache[indexName];
-                const isLoadingIndexHealth = loadingHealthForIndex === indexName;
+                const isLoadingIndexHealth = loadingHealthForIndexSet.has(indexName);
 
                 return (
                   <div key={indexName} className="indexDataStructureCreator__wildcardPopoverRow">
@@ -484,7 +493,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
     }
 
     const healthData = indexHealthCache[item.title];
-    const isLoading = loadingHealthForIndex === item.title;
+    const isLoading = loadingHealthForIndexSet.has(item.title);
 
     if (isLoading) {
       return (
@@ -633,8 +642,8 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
             {selectedItems.map((item, itemIndex) => {
               const healthData = indexHealthCache[item.title];
               const matchingIndices = matchingIndicesCache[item.title];
-              const isLoadingHealth = loadingHealthForIndex === item.title;
-              const isLoadingMatches = loadingMatchingIndices === item.title;
+              const isLoadingHealth = loadingHealthForIndexSet.has(item.title);
+              const isLoadingMatches = loadingMatchingIndicesSet.has(item.title);
 
               return (
                 <div key={item.id} className="indexDataStructureCreator__tableRow">

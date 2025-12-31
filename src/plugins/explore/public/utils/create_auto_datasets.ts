@@ -132,7 +132,7 @@ export async function createAutoDetectedDatasets(
             signalType: 'logs',
             schemaMappings: JSON.stringify({
               otelLogs: {
-                timeField: 'time',
+                timeField: detection.logTimeField || 'time',
                 traceId: 'traceId',
                 spanId: 'spanId',
                 serviceName: 'resource.attributes.service.name',
@@ -165,7 +165,7 @@ export async function createAutoDetectedDatasets(
             signalType: 'logs',
             schemaMappings: JSON.stringify({
               otelLogs: {
-                timeField: 'time',
+                timeField: detection.logTimeField || 'time',
                 traceId: 'traceId',
                 spanId: 'spanId',
                 serviceName: 'resource.attributes.service.name',
@@ -194,32 +194,37 @@ export async function createAutoDetectedDatasets(
 
   // 3. Create correlation if both trace and log datasets were created
   if (result.traceDatasetId && result.logDatasetId) {
-    const correlationResponse = await savedObjectsClient.create(
-      'correlations',
-      {
-        correlationType: 'APM-Correlation',
-        version: '1.0.0',
-        entities: [
-          { tracesDataset: { id: 'references[0].id' } },
-          { logsDataset: { id: 'references[1].id' } },
-        ],
-      },
-      {
-        references: [
-          {
-            name: 'entities[0].index',
-            type: 'index-pattern',
-            id: result.traceDatasetId,
-          },
-          {
-            name: 'entities[1].index',
-            type: 'index-pattern',
-            id: result.logDatasetId,
-          },
-        ],
-      }
-    );
-    result.correlationId = correlationResponse.id;
+    try {
+      const correlationResponse = await savedObjectsClient.create(
+        'correlations',
+        {
+          correlationType: 'APM-Correlation',
+          version: '1.0.0',
+          entities: [
+            { tracesDataset: { id: 'references[0].id' } },
+            { logsDataset: { id: 'references[1].id' } },
+          ],
+        },
+        {
+          references: [
+            {
+              name: 'entities[0].index',
+              type: 'index-pattern',
+              id: result.traceDatasetId,
+            },
+            {
+              name: 'entities[1].index',
+              type: 'index-pattern',
+              id: result.logDatasetId,
+            },
+          ],
+        }
+      );
+      result.correlationId = correlationResponse.id;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Failed to create correlation:', error);
+    }
   }
 
   return result;

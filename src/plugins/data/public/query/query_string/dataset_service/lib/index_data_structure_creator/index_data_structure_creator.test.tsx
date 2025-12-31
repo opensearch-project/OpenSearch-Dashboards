@@ -233,4 +233,115 @@ describe('IndexDataStructureCreator', () => {
       );
     });
   });
+
+  describe('Health Data Fetching', () => {
+    it('fetches health data when exact index is selected', async () => {
+      const { getByTestId } = renderComponent();
+
+      fireEvent.click(getByTestId('add-single-index'));
+
+      await waitFor(() => {
+        expect(mockHttp.post).toHaveBeenCalledWith(
+          '/api/console/proxy',
+          expect.objectContaining({
+            query: expect.objectContaining({
+              path: expect.stringContaining('_cat/indices/index1'),
+              method: 'GET',
+            }),
+          })
+        );
+      });
+    });
+
+    it('handles health data fetch errors gracefully', async () => {
+      mockHttp.post.mockRejectedValueOnce(new Error('Network error'));
+      const { getByTestId } = renderComponent();
+
+      fireEvent.click(getByTestId('add-single-index'));
+
+      await waitFor(() => {
+        expect(mockHttp.post).toHaveBeenCalled();
+      });
+
+      // Component should still work after error
+      expect(getByTestId('selected-count')).toHaveTextContent('1');
+    });
+
+    it('includes dataSourceId in health query when present', async () => {
+      const { getByTestId } = renderComponent();
+
+      fireEvent.click(getByTestId('add-single-index'));
+
+      await waitFor(() => {
+        expect(mockHttp.post).toHaveBeenCalledWith(
+          '/api/console/proxy',
+          expect.objectContaining({
+            query: expect.objectContaining({
+              dataSourceId: 'test',
+            }),
+          })
+        );
+      });
+    });
+  });
+
+  describe('Empty State', () => {
+    it('shows empty state message when no items selected', () => {
+      const { getByText } = renderComponent();
+      expect(getByText(/No indices or patterns selected yet/i)).toBeInTheDocument();
+    });
+
+    it('hides empty state when items are selected', async () => {
+      const { getByTestId, queryByText } = renderComponent();
+
+      fireEvent.click(getByTestId('add-single-index'));
+
+      await waitFor(() => {
+        expect(queryByText(/No indices or patterns selected yet/i)).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Data Source Handling', () => {
+    it('uses local as default when no data source in path', async () => {
+      const { getByTestId } = renderComponent({
+        path: [],
+      });
+
+      fireEvent.click(getByTestId('add-single-index'));
+
+      await waitFor(() => {
+        expect(mockSelectDataStructure).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'local::index1',
+          }),
+          expect.any(Array)
+        );
+      });
+    });
+
+    it('uses data source id from path when present', async () => {
+      const { getByTestId } = renderComponent();
+
+      fireEvent.click(getByTestId('add-single-index'));
+
+      await waitFor(() => {
+        expect(mockSelectDataStructure).toHaveBeenCalledWith(
+          expect.objectContaining({
+            id: 'test::index1',
+          }),
+          expect.any(Array)
+        );
+      });
+    });
+  });
+
+  describe('Services Prop', () => {
+    it('renders without services prop', () => {
+      const { container } = renderComponent({
+        services: undefined,
+      });
+      expect(container.querySelector('.indexDataStructureCreator')).toBeInTheDocument();
+    });
+  });
 });

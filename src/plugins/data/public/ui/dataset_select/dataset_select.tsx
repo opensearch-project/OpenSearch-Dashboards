@@ -246,7 +246,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
       hasCompletedInitialLoad.current = false;
       setDatasets([]);
     }
-  }, [signalType, currentDataset]);
+  }, [signalType]);
 
   useEffect(() => {
     const updateSelectedDataset = async () => {
@@ -452,7 +452,12 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
           onSelect(defaultDataset);
         }
       }
-      setDatasets(deduplicatedDatasets);
+      if (isMounted.current) {
+        setDatasets(deduplicatedDatasets);
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('[DatasetSelect] Error fetching datasets:', error);
     } finally {
       if (isMounted.current) {
         setIsLoading(false);

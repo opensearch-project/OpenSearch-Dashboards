@@ -47,6 +47,7 @@ import {
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
 import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
+import { DataPublicPluginStart } from '../../../plugins/data/public';
 import {
   enrichBreadcrumbsWithWorkspace,
   filterWorkspaceConfigurableApps,
@@ -92,7 +93,7 @@ interface WorkspacePluginSetupDeps {
 export interface WorkspacePluginStartDeps {
   contentManagement: ContentManagementPluginStart;
   navigation: NavigationPublicPluginStart;
-  data: any;
+  data: DataPublicPluginStart;
 }
 
 export class WorkspacePlugin

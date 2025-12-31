@@ -479,7 +479,7 @@ describe('createAutoDetectedDatasets', () => {
     expect(result.correlationId).toBeNull();
   });
 
-  it('should propagate errors when correlation creation fails', async () => {
+  it('should handle errors gracefully when correlation creation fails', async () => {
     const detection: DetectionResult = {
       tracesDetected: true,
       logsDetected: true,
@@ -504,9 +504,12 @@ describe('createAutoDetectedDatasets', () => {
       } as any)
       .mockRejectedValueOnce(new Error('Failed to create correlation'));
 
-    await expect(createAutoDetectedDatasets(mockSavedObjectsClient, detection)).rejects.toThrow(
-      'Failed to create correlation'
-    );
+    const result = await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
+
+    // Should return successfully with dataset IDs even if correlation fails
+    expect(result.traceDatasetId).toBe('trace-dataset-id');
+    expect(result.logDatasetId).toBe('log-dataset-id');
+    expect(result.correlationId).toBeNull();
   });
 
   it('should include dataSourceRef for both datasets when dataSourceId is provided', async () => {
@@ -659,6 +662,44 @@ describe('createAutoDetectedDatasets', () => {
     expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
       'index-pattern',
       expect.objectContaining({
+        schemaMappings: JSON.stringify(expectedSchemaMappings),
+      }),
+      expect.anything()
+    );
+  });
+
+  it('should use detected logTimeField in schema mappings when different from default', async () => {
+    const detection: DetectionResult = {
+      tracesDetected: false,
+      logsDetected: true,
+      tracePattern: null,
+      logPattern: 'logs-custom*',
+      traceTimeField: null,
+      logTimeField: 'timestamp',
+    };
+
+    mockSavedObjectsClient.create.mockResolvedValue({
+      id: 'log-dataset-id',
+      type: 'index-pattern',
+      attributes: {},
+      references: [],
+    } as any);
+
+    await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
+
+    const expectedSchemaMappings = {
+      otelLogs: {
+        timeField: 'timestamp',
+        traceId: 'traceId',
+        spanId: 'spanId',
+        serviceName: 'resource.attributes.service.name',
+      },
+    };
+
+    expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+      'index-pattern',
+      expect.objectContaining({
+        timeFieldName: 'timestamp',
         schemaMappings: JSON.stringify(expectedSchemaMappings),
       }),
       expect.anything()

@@ -43,6 +43,7 @@ describe('detectTraceData', () => {
       logPattern: null,
       traceTimeField: null,
       logTimeField: null,
+      dataSourceId: undefined,
     });
     expect(mockIndexPatternsService.getIds).toHaveBeenCalled();
     expect(mockIndexPatternsService.get).toHaveBeenCalledWith('existing-trace-id');
@@ -185,6 +186,7 @@ describe('detectTraceData', () => {
       logPattern: null,
       traceTimeField: null,
       logTimeField: null,
+      dataSourceId: undefined,
     });
   });
 
@@ -343,6 +345,44 @@ describe('detectTraceData', () => {
     expect(result.tracesDetected).toBe(true);
     expect(result.logsDetected).toBe(true);
   });
+
+  it('should not skip detection when trace dataset exists in different datasource', async () => {
+    // Setup: datasource A has trace datasets, but we're checking datasource B
+    mockIndexPatternsService.getIds.mockResolvedValue(['trace-from-datasource-a']);
+    mockIndexPatternsService.get.mockImplementation(async (id) => {
+      if (id === 'trace-from-datasource-a') {
+        return {
+          id: 'trace-from-datasource-a',
+          signalType: 'traces',
+          dataSourceRef: { id: 'datasource-a', type: 'data-source' },
+        } as any;
+      }
+      return {} as any;
+    });
+
+    mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
+      if (pattern === 'otel-v1-apm-span*') {
+        return [
+          { name: 'spanId', type: 'string' },
+          { name: 'traceId', type: 'string' },
+          { name: 'endTime', type: 'date' },
+        ] as any;
+      }
+      throw new Error('No matching indices');
+    });
+
+    // Call with datasource-b, should NOT early return because trace dataset is from datasource-a
+    const result = await detectTraceData(
+      mockSavedObjectsClient,
+      mockIndexPatternsService,
+      'datasource-b'
+    );
+
+    // Should detect traces for datasource-b even though datasource-a has trace datasets
+    expect(result.tracesDetected).toBe(true);
+    expect(result.tracePattern).toBe('otel-v1-apm-span*');
+    expect(result.dataSourceId).toBe('datasource-b');
+  });
 });
 
 describe('detectTraceDataAcrossDataSources', () => {
@@ -365,23 +405,51 @@ describe('detectTraceDataAcrossDataSources', () => {
     jest.clearAllMocks();
   });
 
-  it('should return empty array when trace datasets already exist', async () => {
+  it('should check datasources even when trace datasets exist for other datasources', async () => {
+    // Setup: existing trace dataset for datasource A
     mockIndexPatternsService.getIds.mockResolvedValue(['existing-trace-id']);
-    mockIndexPatternsService.get.mockResolvedValue({
-      id: 'existing-trace-id',
-      signalType: 'traces',
+    mockIndexPatternsService.get.mockImplementation(async (id) => {
+      if (id === 'existing-trace-id') {
+        return {
+          id: 'existing-trace-id',
+          signalType: 'traces',
+          dataSourceRef: { id: 'datasource-a', type: 'data-source' },
+        } as any;
+      }
+      return {} as any;
+    });
+
+    // Setup datasource B that should still be checked
+    mockSavedObjectsClient.find.mockResolvedValue({
+      savedObjects: [
+        {
+          id: 'datasource-b',
+          attributes: { title: 'DataSource B' },
+        },
+      ],
     } as any);
+
+    mockIndexPatternsService.getFieldsForWildcard.mockImplementation(async ({ pattern }) => {
+      if (pattern === 'otel-v1-apm-span*') {
+        return [
+          { name: 'spanId', type: 'string' },
+          { name: 'traceId', type: 'string' },
+          { name: 'endTime', type: 'date' },
+        ] as any;
+      }
+      throw new Error('No matching indices');
+    });
 
     const results = await detectTraceDataAcrossDataSources(
       mockSavedObjectsClient,
       mockIndexPatternsService
     );
 
-    expect(results).toEqual([]);
-    expect(mockIndexPatternsService.getIds).toHaveBeenCalled();
-    expect(mockIndexPatternsService.get).toHaveBeenCalledWith('existing-trace-id');
-    // Should not fetch data sources since trace datasets exist
-    expect(mockSavedObjectsClient.find).not.toHaveBeenCalled();
+    // Should still check datasource B even though datasource A has traces
+    expect(mockSavedObjectsClient.find).toHaveBeenCalled();
+    expect(results.length).toBe(1);
+    expect(results[0].dataSourceId).toBe('datasource-b');
+    expect(results[0].tracesDetected).toBe(true);
   });
 
   it('should detect traces from multiple data sources', async () => {
