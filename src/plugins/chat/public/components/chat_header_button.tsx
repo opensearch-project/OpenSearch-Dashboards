@@ -4,8 +4,9 @@
  */
 
 import React, { useCallback, useRef, useState, useEffect, useImperativeHandle } from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { useEffectOnce, useUnmount } from 'react-use';
+import { EuiToolTip, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
+import { FormattedMessage } from '@osd/i18n/react';
 import { CoreStart, SIDECAR_DOCKED_MODE } from '../../../../core/public';
 import { ChatWindow, ChatWindowInstance } from './chat_window';
 import { ChatProvider } from '../contexts/chat_context';
@@ -18,6 +19,7 @@ import {
 import { ContextProviderStart, TextSelectionMonitor } from '../../../context_provider/public';
 import './chat_header_button.scss';
 import { SuggestedActionsService } from '../services/suggested_action';
+import gradientGenerateIcon from '../assets/gradient_generate_icon.svg';
 
 export interface ChatHeaderButtonInstance {
   startNewConversation: ({ content }: { content: string }) => Promise<void>;
@@ -58,19 +60,25 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
     }, [chatService]);
 
     const openSidecar = useCallback(() => {
-      if (!flyoutMountPoint.current) return;
+      if (!flyoutMountPoint.current) {
+        return;
+      }
 
-      sideCarRef.current = core.overlays.sidecar.open(flyoutMountPoint.current, {
-        className: `chat-sidecar chat-sidecar--${layoutMode}`,
-        config: {
-          dockedMode:
-            layoutMode === ChatLayoutMode.FULLSCREEN
-              ? SIDECAR_DOCKED_MODE.TAKEOVER
-              : SIDECAR_DOCKED_MODE.RIGHT,
-          paddingSize: chatService.getPaddingSize(),
-          isHidden: false,
-        },
-      });
+      try {
+        sideCarRef.current = core.overlays.sidecar.open(flyoutMountPoint.current, {
+          className: `chat-sidecar chat-sidecar--${layoutMode}`,
+          config: {
+            dockedMode:
+              layoutMode === ChatLayoutMode.FULLSCREEN
+                ? SIDECAR_DOCKED_MODE.TAKEOVER
+                : SIDECAR_DOCKED_MODE.RIGHT,
+            paddingSize: chatService.getPaddingSize(),
+            isHidden: false,
+          },
+        });
+      } catch (error) {
+        return;
+      }
 
       // Notify ChatService that window is now open
       chatService.setWindowState({ isWindowOpen: true });
@@ -134,23 +142,25 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
             setIsOpen(isWindowOpen);
           }
           if (changed.windowMode) {
-            setLayoutMode(windowMode);
+            setLayoutMode(windowMode as ChatLayoutMode);
           }
         }
       );
-      return unsubscribe;
+      return () => {
+        unsubscribe();
+      };
     }, [chatService]);
 
     // Register callbacks for external window open/close requests
     useEffect(() => {
       const unsubscribeOpen = chatService.onWindowOpenRequest(() => {
-        if (!isOpen) {
+        if (!chatService.isWindowOpen()) {
           openSidecar();
         }
       });
 
       const unsubscribeClose = chatService.onWindowCloseRequest(() => {
-        if (isOpen) {
+        if (chatService.isWindowOpen()) {
           closeSidecar();
         }
       });
@@ -159,7 +169,7 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
         unsubscribeOpen();
         unsubscribeClose();
       };
-    }, [chatService, isOpen, openSidecar, closeSidecar]);
+    }, [chatService, openSidecar, closeSidecar]);
 
     // Cleanup on unmount
     useUnmount(() => {
@@ -182,20 +192,29 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
       };
     });
 
+    // Use core chat service enablement logic
+    const isChatAvailable = core.chat.isAvailable();
+
+    if (!isChatAvailable) {
+      return null;
+    }
+
     return (
       <>
         {/* Text selection monitor - always active when chat UI is rendered */}
         <TextSelectionMonitor />
 
         <EuiToolTip content="Open Chat Assistant">
-          <EuiButtonIcon
-            iconType="generate"
-            onClick={toggleSidecar}
-            color={isOpen ? 'primary' : 'subdued'}
+          <EuiButtonEmpty
             size="s"
+            onClick={toggleSidecar}
+            color="primary"
             aria-label="Toggle chat assistant"
-            display="empty"
-          />
+            className="chatHeaderButton__button"
+          >
+            <EuiIcon type={gradientGenerateIcon} size="s" className="chatHeaderButton__icon" />
+            <FormattedMessage id="chat.headerButton.askAI" defaultMessage="Ask AI" />
+          </EuiButtonEmpty>
         </EuiToolTip>
 
         {/* Mount point for sidecar content */}
@@ -210,7 +229,7 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
             <div className="chatHeaderButton__content">
               <OpenSearchDashboardsContextProvider services={{ core, contextProvider, charts }}>
                 <GlobalAssistantProvider
-                  onToolsUpdated={(tools) => {
+                  onToolsUpdated={(_tools) => {
                     // Tools updated in chat
                   }}
                 >

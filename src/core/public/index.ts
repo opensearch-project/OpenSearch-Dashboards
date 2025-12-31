@@ -103,6 +103,7 @@ import {
 import { Branding } from '../types';
 import { WorkspacesStart, WorkspacesSetup } from './workspace';
 import { KeyboardShortcutSetup, KeyboardShortcutStart } from './keyboard_shortcut';
+import { ChatServiceSetup, ChatServiceStart } from './chat';
 
 export type { Logos } from '../common';
 export { PackageInfo, EnvironmentMode } from '../server/types';
@@ -292,6 +293,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   workspaces: WorkspacesSetup;
   /** {@link KeyboardShortcutsSetup} */
   keyboardShortcut: KeyboardShortcutSetup;
+  /** {@link ChatServiceSetup} */
+  chat: ChatServiceSetup;
 }
 
 /**
@@ -350,6 +353,8 @@ export interface CoreStart {
   workspaces: WorkspacesStart;
   /** {@link KeyboardShortcutStart} */
   keyboardShortcut?: KeyboardShortcutStart;
+  /** {@link ChatServiceStart} */
+  chat: ChatServiceStart;
 }
 
 export {
@@ -429,6 +434,15 @@ export {
   KeyboardShortcutHelpModal,
 } from './keyboard_shortcut';
 
-export { debounce } from './utils';
+export {
+  ChatServiceInterface,
+  ChatServiceSetup,
+  ChatServiceStart,
+  ChatImplementationFunctions,
+  Message,
+  ChatWindowState,
+} from './chat';
+
+export { debounce, getNonce } from './utils';
 
 export { searchNavigationLinks, GlobalSearchPageItem, renderNavGroupElement } from './chrome';

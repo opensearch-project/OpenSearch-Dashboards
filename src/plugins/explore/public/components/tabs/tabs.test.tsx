@@ -61,7 +61,7 @@ describe('ExploreTabsComponent', () => {
     tabRegistry: {
       getAllTabs: jest.fn(() => [
         {
-          id: 'logs',
+          id: 'logs_tab',
           label: 'Logs',
           component: () => <div>Logs Content</div>,
           flavor: [ExploreFlavor.Logs],
@@ -215,7 +215,7 @@ describe('ExploreTabsComponent', () => {
     mockUseFlavorId.mockReturnValue(ExploreFlavor.Logs); // Reset for other tests
   });
 
-  it('should fallback to logs tab when activeTabId is empty', () => {
+  it('should fallback to first tab when activeTabId is empty', () => {
     const store = createMockStore({
       ui: {
         activeTabId: '',
@@ -231,7 +231,7 @@ describe('ExploreTabsComponent', () => {
       </Provider>
     );
 
-    // The component should render and fallback to logs tab
+    // The component should render and fallback to first available tab
     expect(screen.getByText('Logs Content')).toBeInTheDocument();
   });
 });

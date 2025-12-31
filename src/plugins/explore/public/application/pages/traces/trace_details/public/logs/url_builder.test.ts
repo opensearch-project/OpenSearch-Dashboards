@@ -61,7 +61,7 @@ describe('url_builder', () => {
       expect(result).toContain('test-trace-id');
       expect(result).toContain("id:'logs-dataset-id'");
       expect(result).toContain("title:'logs-*'");
-      expect(result).toContain('timeFieldName:@timestamp');
+      expect(result).toContain("timeFieldName:'@timestamp'");
       expect(result).toContain("from:'2023-01-01T10:00:00.000Z'");
       expect(result).toContain("to:'2023-01-01T14:00:00.000Z'");
     });
@@ -108,7 +108,7 @@ describe('url_builder', () => {
 
       const result = buildExploreLogsUrl(params);
 
-      expect(result).toContain('timeFieldName:custom_timestamp');
+      expect(result).toContain("timeFieldName:'custom_timestamp'");
     });
 
     it('should use default time field when not specified', () => {
@@ -126,7 +126,7 @@ describe('url_builder', () => {
 
       const result = buildExploreLogsUrl(params);
 
-      expect(result).toContain('timeFieldName:time');
+      expect(result).toContain("timeFieldName:'time'");
     });
 
     it('should use schema mappings for traceId and spanId field names', () => {

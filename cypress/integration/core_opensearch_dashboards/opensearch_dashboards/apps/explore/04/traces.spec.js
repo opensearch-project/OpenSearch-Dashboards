@@ -61,10 +61,27 @@ const traceTestSuite = () => {
     cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
 
     cy.get('[data-test-subj="createCorrelationButton"]').click();
-    cy.get('[data-test-subj="comboBoxInput"]').click();
-    cy.get(`[title*="${LOG_INDEX_PATTERN}"]`).click();
-    cy.getElementByTestId('saveCorrelationButton').click();
 
+    // Wait for correlation dialog to be ready
+    cy.get('[data-test-subj="comboBoxInput"]').should('be.visible');
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+    cy.get('[data-test-subj="comboBoxInput"]').click();
+
+    // Wait for dropdown options to load and be visible
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.get(`[title*="${LOG_INDEX_PATTERN}"]`).should('be.visible');
+    cy.get(`[title*="${LOG_INDEX_PATTERN}"]`).click();
+
+    // Wait for selection to be processed and save button to be enabled
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.getElementByTestId('saveCorrelationButton')
+      .should('be.visible')
+      .and('not.be.disabled')
+      .click();
+
+    // Wait for save operation to complete
+    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
     cy.get('.euiTableCellContent').should('contain.text', 'Trace-to-logs');
 
     cy.window().then((win) => {
@@ -102,20 +119,19 @@ const traceTestSuite = () => {
         page: 'explore/traces',
         isEnhancement: true,
       });
-      // Wait for page to load
       cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-      cy.explore.setTopNavDate('Jan 1, 2024 @ 00:00:00.000', 'Dec 31, 2025 @ 00:00:00.000');
+      cy.explore.setTopNavDate('Aug 1, 2025 @ 00:00:00.000', 'Sep 25, 2025 @ 00:00:00.000');
     });
 
     it('should have default columns on landing page', () => {
       // Time field
-      cy.getElementByTestId('docTableHeader-endTimeUnixNano').should('exist');
+      cy.getElementByTestId('docTableHeader-endTime').should('exist');
       cy.getElementByTestId('docTableHeader-spanId').should('exist');
       cy.getElementByTestId('docTableHeader-status.code').should('exist');
       cy.getElementByTestId('docTableHeader-attributes.http.status_code').should('exist');
       cy.getElementByTestId('docTableHeader-resource.attributes.service.name').should('exist');
       cy.getElementByTestId('docTableHeader-name').should('exist');
-      cy.getElementByTestId('docTableHeader-durationNano').should('exist');
+      cy.getElementByTestId('docTableHeader-durationInNanos').should('exist');
     });
 
     it('should have correct tabs', () => {
@@ -131,9 +147,9 @@ const traceTestSuite = () => {
         .contains('.euiButtonEmpty__text', 'Faceted fields')
         .should('exist');
       cy.getElementByTestId('exploreSidebarFacetValue')
-        .find('[data-test-subj="fieldToggle-ERROR"][aria-label="Filter for ERROR"]')
+        .find('[data-test-subj="fieldToggle-2"][aria-label="Filter for 2"]')
         .click();
-      verifyMonacoEditorContent(`| WHERE \`status.code\` = 'ERROR'`);
+      verifyMonacoEditorContent(`| WHERE \`status.code\` = 2`);
       cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.verifyResultsCount(2);
     });
@@ -141,6 +157,7 @@ const traceTestSuite = () => {
     it('Clicking a span entry opens the trace flyout', () => {
       cy.explore.setQueryEditor("| WHERE spanId = '58f52f0436530c7c'");
       cy.osd.verifyResultsCount(1);
+      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
       cy.getElementByTestId('traceFlyoutButton').first().click();
 
       // Verify flyout header
@@ -475,83 +492,6 @@ const traceTestSuite = () => {
         cy.getElementByTestId('span-hierarchy-table').should('be.visible');
       });
 
-      it('should display and interact with Logs tab', () => {
-        // Verify all expected tabs are present
-        cy.get('button[role="tab"]').contains('Timeline').should('be.visible');
-        cy.get('button[role="tab"]').contains('Span list').should('be.visible');
-
-        // Wait for Related logs tab to appear (PPL request needs time to load)
-        cy.get('button[role="tab"]', { timeout: 10000 }).should('contain', 'Related logs');
-
-        // Verify Related logs tab shows up with badge count
-        cy.get('button[role="tab"]:contains("Related logs")')
-          .should('be.visible')
-          .within(() => {
-            // Check for badge with count (should show number of related logs)
-            cy.get('.euiBadge').should('be.visible');
-            cy.get('.euiBadge__text').should('exist');
-          });
-
-        // Click on Related logs tab
-        cy.get('button[role="tab"]:contains("Related logs")').click();
-
-        // Wait for tab to be active
-        cy.get('button[role="tab"]:contains("Related logs")').should(
-          'have.attr',
-          'aria-selected',
-          'true'
-        );
-
-        // Verify exactly 5 related logs are displayed
-        cy.get('[data-test-subj="dataset-logs-table"]', { timeout: 10000 })
-          .should('be.visible')
-          .within(() => {
-            // Count the table rows (excluding header)
-            cy.get('tbody tr').should('have.length', 5);
-          });
-
-        // Verify logs table contains log data (the trace ID correlation happens behind the scenes)
-        cy.get('[data-test-subj="dataset-logs-table"]').should('be.visible');
-
-        // Test "View in Explore" functionality - should always be available with 5 logs
-        cy.get('button:contains("View in Discover Logs")').should('be.visible');
-
-        // Store current URL before navigation
-        let currentUrl;
-        cy.url().then((url) => {
-          currentUrl = url;
-        });
-
-        // Click "View in Discover Logs" button using data-test-subj
-        cy.get('[data-test-subj^="trace-logs-view-in-explore-button-"]').first().click();
-
-        // Verify navigation to explore logs page with correct URL pattern
-        cy.url().should('include', '/app/explore/logs/');
-        cy.url().should('not.equal', currentUrl);
-
-        // Wait for explore page to load
-        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-
-        // Verify results are showing on the explore page
-        cy.get('[data-test-subj="docTable"]', { timeout: 10000 }).should('be.visible');
-        cy.get('[data-test-subj="docTable"] tbody tr').should('have.length.greaterThan', 0);
-
-        // Verify trace ID filter is applied in the results
-        cy.get('body').should('contain.text', '68b0ad76fc05c5a5f5e3738d42b8a735');
-
-        // Navigate back to trace details for other tests
-        cy.visit(traceUrl);
-        cy.osd.waitForLoader(true);
-
-        // Switch back to Timeline tab to verify navigation works
-        cy.get('button[role="tab"]').contains('Timeline').click();
-        cy.get('button[role="tab"]:contains("Timeline")').should(
-          'have.attr',
-          'aria-selected',
-          'true'
-        );
-      });
-
       it('should maintain span selection across tab switches', () => {
         // Wait for the main span detail panel and select a span
         cy.getElementByTestId('span-detail-panel', { timeout: 15000 }).should('be.visible');
@@ -696,6 +636,73 @@ const traceTestSuite = () => {
         // Verify right panel has span data
         cy.contains('Service identifier').should('be.visible');
         cy.contains('Span ID').should('be.visible');
+      });
+    });
+
+    describe('Logs Integration', () => {
+      it('should display and interact with Logs tab', () => {
+        // Verify all expected tabs are present
+        cy.get('button[role="tab"]').contains('Timeline').should('be.visible');
+        cy.get('button[role="tab"]').contains('Span list').should('be.visible');
+
+        // Wait for Related logs tab to appear (PPL request needs time to load)
+        cy.get('button[role="tab"]', { timeout: 10000 }).should('contain', 'Related logs');
+
+        // Verify Related logs tab shows up with badge count
+        cy.get('button[role="tab"]:contains("Related logs")')
+          .should('be.visible')
+          .within(() => {
+            // Check for badge with count (should show number of related logs)
+            cy.get('.euiBadge').should('be.visible');
+            cy.get('.euiBadge__text').should('exist');
+          });
+
+        // Click on Related logs tab
+        cy.get('button[role="tab"]:contains("Related logs")').click();
+
+        // Wait for tab to be active
+        cy.get('button[role="tab"]:contains("Related logs")').should(
+          'have.attr',
+          'aria-selected',
+          'true'
+        );
+
+        // Verify exactly 5 related logs are displayed
+        cy.get('[data-test-subj="dataset-logs-table"]', { timeout: 10000 })
+          .should('be.visible')
+          .within(() => {
+            // Count the table rows (excluding header)
+            cy.get('tbody tr').should('have.length', 5);
+          });
+
+        // Verify logs table contains log data (the trace ID correlation happens behind the scenes)
+        cy.get('[data-test-subj="dataset-logs-table"]').should('be.visible');
+
+        // Test "View in Explore" functionality - should always be available with 5 logs
+        cy.get('button:contains("View in Discover Logs")').should('be.visible');
+
+        // Store current URL before navigation
+        let currentUrl;
+        cy.url().then((url) => {
+          currentUrl = url;
+        });
+
+        // Click "View in Discover Logs" button using data-test-subj
+        cy.get('[data-test-subj^="trace-logs-view-in-explore-button-"]').first().click();
+
+        // Verify navigation to explore logs page with correct URL pattern
+        cy.url().should('include', '/app/explore/logs/');
+        cy.url().should('not.equal', currentUrl);
+
+        // Wait for explore page to load
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+
+        // Verify results are showing on the explore page
+        cy.get('[data-test-subj="docTable"]', { timeout: 10000 }).should('be.visible');
+        cy.get('[data-test-subj="docTable"] tbody tr').should('have.length.greaterThan', 0);
+
+        // Verify trace ID filter is applied in the results
+        cy.get('body').should('contain.text', '68b0ad76fc05c5a5f5e3738d42b8a735');
       });
     });
   });

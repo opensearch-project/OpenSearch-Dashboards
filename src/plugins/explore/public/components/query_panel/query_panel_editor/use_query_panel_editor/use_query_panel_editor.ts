@@ -37,31 +37,7 @@ type IStandaloneCodeEditor = monaco.editor.IStandaloneCodeEditor;
 type LanguageConfiguration = monaco.languages.LanguageConfiguration;
 type IEditorConstructionOptions = monaco.editor.IEditorConstructionOptions;
 
-const enabledPromptPlaceholder = i18n.translate(
-  'explore.queryPanel.queryPanelEditor.enabledPromptPlaceholder',
-  {
-    defaultMessage: 'Press `space` to Ask AI with natural language, or search with PPL',
-  }
-);
-
-const disabledPromptPlaceholder = i18n.translate(
-  'explore.queryPanel.queryPanelEditor.disabledPromptPlaceholder',
-  {
-    defaultMessage: 'Search using {symbol} PPL',
-    values: {
-      symbol: '</>',
-    },
-  }
-);
-
-const promptModePlaceholder = i18n.translate(
-  'explore.queryPanel.queryPanelEditor.promptPlaceholder',
-  {
-    defaultMessage: 'Ask AI with natural language. `Esc` to clear and search with PPL',
-  }
-);
-
-const TRIGGER_CHARACTERS = [' ', '=', "'", '"', '`'];
+const DEFAULT_TRIGGER_CHARACTERS = [' ', '=', "'", '"', '`'];
 
 const languageConfiguration: LanguageConfiguration = {
   autoClosingPairs: [
@@ -257,11 +233,16 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   );
 
   const suggestionProvider = useMemo(() => {
+    const languageTriggerCharacters = services?.data?.autocomplete?.getTriggerCharacters(
+      queryLanguage
+    );
     return {
-      triggerCharacters: isPromptMode ? ['='] : TRIGGER_CHARACTERS,
+      triggerCharacters: isPromptMode
+        ? ['=']
+        : languageTriggerCharacters ?? DEFAULT_TRIGGER_CHARACTERS,
       provideCompletionItems,
     };
-  }, [isPromptMode, provideCompletionItems]);
+  }, [isPromptMode, provideCompletionItems, queryLanguage, services]);
 
   const handleRun = useCallback(() => {
     dispatch(onEditorRunActionCreator(services, editorTextRef.current));
@@ -313,6 +294,23 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
             vertical: contentHeight > maxHeight ? 'visible' : 'hidden',
           },
         });
+
+        // Automatically scroll to the bottom when new lines are added
+        if (contentHeight > finalHeight) {
+          const cursorLine = editor.getPosition()?.lineNumber || 0;
+          const visibleRanges = editor.getVisibleRanges();
+
+          if (visibleRanges.length > 0) {
+            // use index 0 since we did not introduce code folding in our monaco editor
+            const firstVisibleLine = visibleRanges[0].startLineNumber;
+            const lastVisibleLine = visibleRanges[0].endLineNumber;
+
+            // Only reveal if cursor is outside the visible range
+            if (cursorLine < firstVisibleLine || cursorLine > lastVisibleLine) {
+              editor.revealLine(cursorLine);
+            }
+          }
+        }
       });
 
       return () => {
@@ -333,12 +331,41 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   }, [isQueryMode]);
 
   const placeholder = useMemo(() => {
+    const enabledPromptPlaceholder = i18n.translate(
+      'explore.queryPanel.queryPanelEditor.enabledPromptPlaceholder',
+      {
+        defaultMessage: 'Press `space` to Ask AI with natural language, or search with {language}',
+        values: {
+          language: queryLanguage,
+        },
+      }
+    );
+    const disabledPromptPlaceholder = i18n.translate(
+      'explore.queryPanel.queryPanelEditor.disabledPromptPlaceholder',
+      {
+        defaultMessage: 'Search using {symbol} {language}',
+        values: {
+          symbol: '</>',
+          language: queryLanguage,
+        },
+      }
+    );
+    const promptModePlaceholder = i18n.translate(
+      'explore.queryPanel.queryPanelEditor.promptPlaceholder',
+      {
+        defaultMessage: 'Ask AI with natural language. `Esc` to clear and search with {language}',
+        values: {
+          language: queryLanguage,
+        },
+      }
+    );
+
     if (!promptModeIsAvailable) {
       return disabledPromptPlaceholder;
     }
 
     return isPromptMode ? promptModePlaceholder : enabledPromptPlaceholder;
-  }, [isPromptMode, promptModeIsAvailable]);
+  }, [isPromptMode, promptModeIsAvailable, queryLanguage]);
 
   const onEditorClick = useCallback(() => {
     editorRef.current?.focus();

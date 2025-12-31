@@ -21,6 +21,8 @@ export const config = {
         `script-src 'self'`,
         `script-src-attr 'none'`,
         `style-src 'self'`,
+        `style-src-elem 'self'`,
+        `style-src-attr 'self' 'unsafe-inline'`,
         `child-src 'none'`,
         `worker-src 'self'`,
         `frame-src 'none'`,
@@ -33,6 +35,9 @@ export const config = {
         `form-action 'self'`,
         `frame-ancestors 'self'`,
       ],
+    }),
+    nonceDirectives: schema.arrayOf(schema.string(), {
+      defaultValue: ['style-src-elem'],
     }),
     endpoint: schema.maybe(schema.string()),
     useDeprecatedReportUriOnly: schema.boolean({ defaultValue: false }),

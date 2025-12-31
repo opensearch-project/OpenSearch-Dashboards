@@ -9,7 +9,7 @@ exports[`ImportTypeSelector should render 1`] = `
       <span
         class="euiTitle euiTitle--xsmall"
       >
-        Import Type
+        Import type
       </span>
     </legend>
     <div
@@ -137,9 +137,6 @@ exports[`ImportTypeSelector should render 1`] = `
         </div>
       </div>
     </div>
-    <div
-      class="euiSpacer euiSpacer--m"
-    />
   </fieldset>
 </div>
 `;

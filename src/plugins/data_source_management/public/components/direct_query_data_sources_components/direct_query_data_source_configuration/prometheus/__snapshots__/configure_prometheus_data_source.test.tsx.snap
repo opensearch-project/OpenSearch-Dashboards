@@ -39,6 +39,7 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
     <ConfigurePrometheusDatasourcePanel
       currentAccessKey=""
       currentAuthMethod="basicauth"
+      currentDataSourceId=""
       currentDetails=""
       currentName=""
       currentPassword=""
@@ -46,8 +47,11 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
       currentSecretKey=""
       currentStore=""
       currentUsername=""
+      dataSources={Array []}
       error=""
+      featureFlagStatus={false}
       hasSecurityAccess={true}
+      hideLocalCluster={false}
       roles={
         Array [
           Object {
@@ -59,6 +63,7 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
       selectedQueryPermissionRoles={Array []}
       setAccessKeyForRequest={[MockFunction]}
       setAuthMethodForRequest={[MockFunction]}
+      setDataSourceIdForRequest={[MockFunction]}
       setDetailsForRequest={[MockFunction]}
       setError={[MockFunction]}
       setNameForRequest={[MockFunction]}
@@ -542,6 +547,10 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                         options={
                           Array [
                             Object {
+                              "text": "No authentication",
+                              "value": "noauth",
+                            },
+                            Object {
                               "text": "Basic authentication",
                               "value": "basicauth",
                             },
@@ -561,6 +570,10 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                           onFocus={[Function]}
                           options={
                             Array [
+                              Object {
+                                "text": "No authentication",
+                                "value": "noauth",
+                              },
                               Object {
                                 "text": "Basic authentication",
                                 "value": "basicauth",
@@ -603,12 +616,18 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                                   >
                                     <option
                                       key="0"
+                                      value="noauth"
+                                    >
+                                      No authentication
+                                    </option>
+                                    <option
+                                      key="1"
                                       value="basicauth"
                                     >
                                       Basic authentication
                                     </option>
                                     <option
-                                      key="1"
+                                      key="2"
                                       value="awssigv4"
                                     >
                                       AWS Signature Version 4

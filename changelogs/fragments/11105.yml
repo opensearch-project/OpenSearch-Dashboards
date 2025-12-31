@@ -1,0 +1,2 @@
+fix:
+- Add back handlebars to fix bwc tests ([#11105](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11105))

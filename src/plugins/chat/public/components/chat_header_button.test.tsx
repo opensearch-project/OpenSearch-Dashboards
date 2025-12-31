@@ -12,6 +12,11 @@ import { coreMock } from '../../../../core/public/mocks';
 
 // Mock dependencies
 
+jest.mock('@osd/i18n/react', () => ({
+  ...jest.requireActual('@osd/i18n/react'),
+  FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => defaultMessage,
+}));
+
 jest.mock('./chat_window', () => {
   const ActualReact = jest.requireActual('react');
   return {
@@ -30,10 +35,15 @@ describe('ChatHeaderButton', () => {
   let mockChatService: jest.Mocked<ChatService>;
   let mockContextProvider: any;
   let mockSuggestedActionsService: any;
+  let mockConfig: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockCore = coreMock.createStart();
+
+    // Make chat available by default (chat service is now included in coreMock.createStart())
+    mockCore.chat.isAvailable.mockReturnValue(true);
+
     mockChatService = {
       sendMessage: jest.fn(),
       newThread: jest.fn(),
@@ -59,6 +69,18 @@ describe('ChatHeaderButton', () => {
     } as any;
     mockCore.overlays.sidecar.open = jest.fn().mockReturnValue(mockSidecarRef);
     mockCore.overlays.sidecar.setSidecarConfig = jest.fn();
+
+    // Mock capabilities with agentic features enabled by default
+    mockCore.application.capabilities = {
+      investigation: {
+        agenticFeaturesEnabled: true,
+      },
+    } as any;
+
+    // Mock config with enabled = true by default
+    mockConfig = {
+      enabled: true,
+    };
   });
 
   describe('ref functionality', () => {
@@ -71,6 +93,7 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
           ref={ref}
         />
       );
@@ -89,6 +112,7 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
           ref={ref}
         />
       );
@@ -113,6 +137,7 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
         />
       );
 
@@ -129,6 +154,7 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
         />
       );
 
@@ -142,6 +168,7 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
         />
       );
 
@@ -155,6 +182,7 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
         />
       );
 
@@ -178,6 +206,7 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
         />
       );
 
@@ -209,6 +238,7 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
         />
       );
 
@@ -235,6 +265,7 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
         />
       );
 
@@ -258,6 +289,7 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
         />
       );
 
@@ -279,6 +311,7 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
         />
       );
 
@@ -289,6 +322,130 @@ describe('ChatHeaderButton', () => {
       unmount();
 
       expect(mockClose).toHaveBeenCalled();
+    });
+  });
+
+  describe('feature flag visibility', () => {
+    it('should render when agenticFeaturesEnabled is true', () => {
+      mockCore.application.capabilities = {
+        investigation: {
+          agenticFeaturesEnabled: true,
+        },
+      } as any;
+
+      const { container } = render(
+        <ChatHeaderButton
+          core={mockCore}
+          chatService={mockChatService}
+          contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
+        />
+      );
+
+      // Should render the button
+      const button = container.querySelector('[aria-label="Toggle chat assistant"]');
+      expect(button).toBeTruthy();
+    });
+
+    it('should not render when chat is not available', () => {
+      // Make chat unavailable
+      mockCore.chat.isAvailable.mockReturnValue(false);
+
+      const { container } = render(
+        <ChatHeaderButton
+          core={mockCore}
+          chatService={mockChatService}
+          contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
+        />
+      );
+
+      // Should not render anything
+      expect(container.firstChild).toBeNull();
+    });
+
+    it('should render when agenticFeaturesEnabled is undefined (open source environment)', () => {
+      mockCore.application.capabilities = {
+        investigation: {
+          agenticFeaturesEnabled: undefined,
+        },
+      } as any;
+
+      const { container } = render(
+        <ChatHeaderButton
+          core={mockCore}
+          chatService={mockChatService}
+          contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
+        />
+      );
+
+      // Should render the button in open source environment
+      const button = container.querySelector('[aria-label="Toggle chat assistant"]');
+      expect(button).toBeTruthy();
+    });
+
+    it('should render when investigation capabilities are missing (open source environment)', () => {
+      mockCore.application.capabilities = {} as any;
+
+      const { container } = render(
+        <ChatHeaderButton
+          core={mockCore}
+          chatService={mockChatService}
+          contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
+        />
+      );
+
+      // Should render the button in open source environment
+      const button = container.querySelector('[aria-label="Toggle chat assistant"]');
+      expect(button).toBeTruthy();
+    });
+
+    it('should render when capabilities are missing entirely (open source environment)', () => {
+      mockCore.application.capabilities = undefined as any;
+
+      const { container } = render(
+        <ChatHeaderButton
+          core={mockCore}
+          chatService={mockChatService}
+          contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
+        />
+      );
+
+      // Should render the button in open source environment
+      const button = container.querySelector('[aria-label="Toggle chat assistant"]');
+      expect(button).toBeTruthy();
+    });
+
+    it('should still call hooks but return null when chat is not available', () => {
+      // This test ensures that all React hooks are called even when chat is not available
+      mockCore.chat.isAvailable.mockReturnValue(false);
+
+      const { container } = render(
+        <ChatHeaderButton
+          core={mockCore}
+          chatService={mockChatService}
+          contextProvider={mockContextProvider}
+          suggestedActionsService={mockSuggestedActionsService}
+          config={mockConfig}
+        />
+      );
+
+      // Hooks should still be called (like setChatWindowRef, onWindowStateChange, etc.)
+      expect(mockChatService.setChatWindowRef).toHaveBeenCalled();
+      expect(mockChatService.onWindowStateChange).toHaveBeenCalled();
+      expect(mockChatService.onWindowOpenRequest).toHaveBeenCalled();
+      expect(mockChatService.onWindowCloseRequest).toHaveBeenCalled();
+
+      // But no DOM elements should be rendered
+      expect(container.firstChild).toBeNull();
     });
   });
 });

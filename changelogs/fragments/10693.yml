@@ -1,2 +1,0 @@
-fix:
-- Add type checks to dashboard utilities and catch embeddable errors ([#10693](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10693))

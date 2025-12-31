@@ -327,7 +327,7 @@ export class SearchSource {
    */
   async createDataFrame(searchRequest: SearchRequest) {
     const dataFrame = createDataFrame({
-      name: searchRequest.index.title || searchRequest.index,
+      name: searchRequest.index?.title || searchRequest.index,
       fields: [],
     });
     await this.setDataFrame(dataFrame);

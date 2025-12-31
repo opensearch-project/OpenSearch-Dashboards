@@ -59,6 +59,12 @@ export const OpenSearchEnhancements = (client: any, config: any, components: any
     method: 'POST',
     needBody: true,
   });
+  enhancements.promqlQuery = createAction(client, components, {
+    endpoint: URI.DIRECT_QUERY.QUERY,
+    method: 'POST',
+    needBody: true,
+    paramKey: 'dataconnection',
+  });
   enhancements.getDataConnectionById = createAction(client, components, {
     endpoint: OPENSEARCH_API.DATA_CONNECTIONS,
     method: 'GET',

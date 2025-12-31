@@ -57,10 +57,10 @@ import { SavedObjectsService } from './saved_objects';
 import { UiSettingsService } from './ui_settings';
 import { WorkspacesService } from './workspace';
 import { KeyboardShortcutService } from './keyboard_shortcut';
+import { ChatService } from './chat';
 
 interface Params {
   rootDomElement: HTMLElement;
-  browserSupportsCsp: boolean;
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
 }
 
@@ -115,10 +115,11 @@ export class CoreSystem {
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
   private readonly workspaces: WorkspacesService;
+  private readonly chat: ChatService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
-    const { rootDomElement, browserSupportsCsp, injectedMetadata } = params;
+    const { rootDomElement, injectedMetadata } = params;
 
     this.rootDomElement = rootDomElement;
 
@@ -138,12 +139,13 @@ export class CoreSystem {
     this.savedObjects = new SavedObjectsService();
     this.uiSettings = new UiSettingsService();
     this.overlay = new OverlayService();
-    this.chrome = new ChromeService({ browserSupportsCsp });
+    this.chrome = new ChromeService();
     this.docLinks = new DocLinksService();
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
     this.workspaces = new WorkspacesService();
+    this.chat = new ChatService();
 
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
 
@@ -172,6 +174,7 @@ export class CoreSystem {
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
       const workspaces = this.workspaces.setup();
+      const chat = this.chat.setup();
 
       const pluginDependencies = this.plugins.getOpaqueIds();
       const context = this.context.setup({
@@ -193,6 +196,7 @@ export class CoreSystem {
         uiSettings,
         workspaces,
         keyboardShortcut,
+        chat,
       };
 
       // Services that do not expose contracts at setup
@@ -239,6 +243,9 @@ export class CoreSystem {
       const workspaces = this.workspaces.start();
       const application = await this.application.start({ http, overlays, workspaces });
 
+      // Start chat service - enablement logic is now handled by the plugin
+      const chat = this.chat.start();
+
       // Only enable keyboard shortcuts when both the configuration is enabled AND workspaces are enabled
       const keyboardShortcutsConfigEnabled = injectedMetadata.getKeyboardShortcuts().enabled;
       const workspacesEnabled = application.capabilities.workspaces.enabled;
@@ -273,6 +280,7 @@ export class CoreSystem {
         savedObjects,
         uiSettings,
         workspaces,
+        chat,
       }));
 
       const core: InternalCoreStart = {
@@ -289,6 +297,7 @@ export class CoreSystem {
         fatalErrors,
         workspaces,
         keyboardShortcut: keyboardShortcut || undefined,
+        chat,
       };
 
       await this.plugins.start(core);
@@ -341,6 +350,7 @@ export class CoreSystem {
     this.i18n.stop();
     this.application.stop();
     this.workspaces.stop();
+    this.chat.stop();
     this.keyboardShortcut.stop();
     this.rootDomElement.textContent = '';
   }

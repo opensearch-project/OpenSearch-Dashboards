@@ -52,7 +52,7 @@ env:
   COMMENT_TAG: "[MANUAL CYPRESS TEST RUN RESULTS]"
   COMMENT_SUCCESS_MSG: ":white_check_mark: Cypress test run succeeded!"
   COMMENT_FAILURE_MSG: ":x: Cypress test run failed!"
-  LATEST_VERSION: '3.3.0'
+  LATEST_VERSION: '3.4.0'
 
 jobs:
   cypress-tests:
@@ -250,7 +250,7 @@ jobs:
       - name: Get Cypress version
         id: cypress_version
         run: |
-          echo "name=cypress_version::$(cat ./${{ env.FTR_PATH }}/package.json | jq '.devDependencies.cypress' | tr -d '"')" >> $GITHUB_OUTPUT
+          echo "cypress_version=$(cat ./${{ env.FTR_PATH }}/package.json | jq '.devDependencies.cypress' | tr -d '"')" >> $GITHUB_OUTPUT
 
       - name: Cache Cypress
         id: cache-cypress
@@ -292,6 +292,7 @@ jobs:
           /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-skills"
           /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-ml"
           /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-anomaly-detection"
+          /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-flow-framework"
           /bin/bash -c "yes | ./opensearch-${{ env.LATEST_VERSION }}/bin/opensearch-plugin remove opensearch-security"
         shell: bash
 
