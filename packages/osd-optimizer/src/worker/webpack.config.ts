@@ -330,6 +330,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       alias: {
         core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
         'opensearch-dashboards/public': Path.resolve(worker.repoRoot, 'src/core/public'),
+        // Force json11 to use CJS version for default export interop compatibility
+        // The ESM version only has named exports, which breaks `import JSON11 from 'json11'`
+        // Use path.join to bypass exports field restrictions
+        json11: Path.join(worker.repoRoot, 'node_modules/json11/dist/cjs/index.cjs'),
       },
     },
 
