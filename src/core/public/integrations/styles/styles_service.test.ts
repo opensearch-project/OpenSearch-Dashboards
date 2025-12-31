@@ -31,9 +31,13 @@
 import { BehaviorSubject } from 'rxjs';
 
 jest.mock('!!raw-loader!./disable_animations.css', () => 'MOCK DISABLE ANIMATIONS CSS');
+jest.mock('../../utils', () => ({
+  getNonce: jest.fn(),
+}));
 
 import { StylesService } from './styles_service';
 import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
+import { getNonce } from '../../utils';
 
 describe('StylesService', () => {
   const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 100));
@@ -70,5 +74,35 @@ describe('StylesService', () => {
     disableAnimations$.next(false);
     await flushPromises();
     expect(getDisableAnimationsTag().textContent).toEqual('');
+  });
+
+  test('sets nonce attribute on style tag when getNonce returns a value', async () => {
+    const mockGetNonce = getNonce as jest.Mock;
+    mockGetNonce.mockReturnValue('test-nonce-abc123');
+
+    const disableAnimations$ = new BehaviorSubject(false);
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    uiSettings.get$.mockReturnValueOnce(disableAnimations$);
+
+    new StylesService().start({ uiSettings });
+    await flushPromises();
+
+    const styleTag = getDisableAnimationsTag();
+    expect(styleTag.getAttribute('nonce')).toBe('test-nonce-abc123');
+  });
+
+  test('does not set nonce attribute on style tag when getNonce returns empty string', async () => {
+    const mockGetNonce = getNonce as jest.Mock;
+    mockGetNonce.mockReturnValue('');
+
+    const disableAnimations$ = new BehaviorSubject(false);
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    uiSettings.get$.mockReturnValueOnce(disableAnimations$);
+
+    new StylesService().start({ uiSettings });
+    await flushPromises();
+
+    const styleTag = getDisableAnimationsTag();
+    expect(styleTag.getAttribute('nonce')).toBeNull();
   });
 });

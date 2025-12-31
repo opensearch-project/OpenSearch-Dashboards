@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { createHash } from 'crypto';
+import { createHash, randomBytes } from 'crypto';
 import Boom from '@hapi/boom';
 import { i18n, i18nLoader } from '@osd/i18n';
 import * as v7light from '@elastic/eui/dist/eui_theme_light.json';
@@ -313,12 +313,16 @@ export function uiRenderMixin(osdServer, server, config) {
     const uiSettings = osdServer.newPlatform.start.core.uiSettings.asScopedToClient(
       savedObjects.getScopedClient(req)
     );
+
+    const nonce = randomBytes(16).toString('base64');
+
     const vars = {
       apmConfig: getApmConfig(h.request.path),
     };
     const content = await rendering.render(h.request, uiSettings, {
       includeUserSettings: true,
       vars,
+      nonce,
     });
 
     const output = h
@@ -341,7 +345,8 @@ export function uiRenderMixin(osdServer, server, config) {
     }
 
     if (cspReportOnlyIsEmitting) {
-      output.header('content-security-policy-report-only', http.cspReportOnly.cspReportOnlyHeader);
+      const cspReportOnlyHeader = http.cspReportOnly.buildHeaderWithNonce(nonce);
+      output.header('content-security-policy-report-only', cspReportOnlyHeader);
 
       if (http.cspReportOnly.reportingEndpointsHeader) {
         output.header('reporting-endpoints', http.cspReportOnly.reportingEndpointsHeader);

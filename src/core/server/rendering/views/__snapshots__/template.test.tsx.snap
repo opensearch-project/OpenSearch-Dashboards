@@ -13,6 +13,10 @@ Array [
     content="width=device-width"
     name="viewport"
   />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
+  />,
   <title>
     OpenSearch Dashboards
   </title>,
@@ -151,6 +155,10 @@ Array [
     content="width=device-width"
     name="viewport"
   />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
+  />,
   <title>
     OpenSearch Dashboards
   </title>,
@@ -288,6 +296,10 @@ Array [
   <meta
     content="width=device-width"
     name="viewport"
+  />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
   />,
   <title>
     OpenSearch Dashboards
@@ -433,6 +445,10 @@ Array [
     content="width=device-width"
     name="viewport"
   />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
+  />,
   <title>
     OpenSearch Dashboards
   </title>,
@@ -577,6 +593,10 @@ Array [
     content="width=device-width"
     name="viewport"
   />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
+  />,
   <title>
     OpenSearch Dashboards
   </title>,
@@ -715,6 +735,10 @@ Array [
     content="width=device-width"
     name="viewport"
   />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
+  />,
   <title>
     custom title
   </title>,
@@ -852,6 +876,10 @@ Array [
   <meta
     content="width=device-width"
     name="viewport"
+  />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
   />,
   <title>
     custom title
@@ -997,6 +1025,10 @@ Array [
     content="width=device-width"
     name="viewport"
   />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
+  />,
   <title>
     custom title
   </title>,
@@ -1135,6 +1167,10 @@ Array [
     content="width=device-width"
     name="viewport"
   />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
+  />,
   <title>
     OpenSearch Dashboards
   </title>,
@@ -1272,6 +1308,10 @@ Array [
   <meta
     content="width=device-width"
     name="viewport"
+  />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
   />,
   <title>
     OpenSearch Dashboards
