@@ -10,6 +10,7 @@ import {
   EChartsOption,
   XAXisComponentOption,
   YAXisComponentOption,
+  PieSeriesOption,
 } from 'echarts';
 import {
   AggregationType,
@@ -78,7 +79,7 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   baseConfig?: any;
   xAxisConfig?: any;
   yAxisConfig?: any;
-  series?: Array<BarSeriesOption | LineSeriesOption | CustomSeriesOption>;
+  series?: Array<BarSeriesOption | LineSeriesOption | CustomSeriesOption | PieSeriesOption>;
   visualMap?: any;
   // Final output
   spec?: EChartsOption;
@@ -304,7 +305,7 @@ export const applyAxisStyling = ({
   return echartsAxisConfig;
 };
 
-export const buildVisMap = <T extends BaseChartStyle = BaseChartStyle>({
+export const buildVisMap = ({
   seriesFields,
 }: {
   seriesFields: (headers?: string[]) => string[];

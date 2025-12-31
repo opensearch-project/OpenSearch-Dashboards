@@ -5,7 +5,7 @@
 
 import { AggregationType, TimeUnit } from '../types';
 import { inferTimeIntervals } from '../bar/bar_chart_utils';
-import { EChartsSpecState, BaseChartStyle } from './echarts_spec';
+import { EChartsSpecState } from './echarts_spec';
 import { parseUTCDate } from './utils';
 
 const aggregateValues = (aggregationType: AggregationType, values?: number[]) => {
@@ -56,9 +56,7 @@ export const convertTo2DArray = (headers?: string[]) => (
   return [columnHeaders, ...rows];
 };
 
-export const transform = <T extends BaseChartStyle = BaseChartStyle>(...fns: TransformFn[]) => (
-  state: EChartsSpecState<T>
-): EChartsSpecState<T> => {
+export const transform = (...fns: TransformFn[]) => (state: EChartsSpecState) => {
   const { data } = state;
   const transformedData: Array<Array<Record<string, any>>> = [data];
 

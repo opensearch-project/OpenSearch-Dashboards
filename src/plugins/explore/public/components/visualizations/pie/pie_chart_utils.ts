@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { PieSeriesOption } from 'echarts';
 import { PieChartStyle } from './pie_vis_config';
 import { BaseChartStyle, PipelineFn, EChartsSpecState } from '../utils/echarts_spec';
 
@@ -26,7 +27,7 @@ export const createPieSeries = <T extends BaseChartStyle>({
       ? (params: any) => params.value[1]
       : '{b}';
 
-  const series: any[] = [
+  const series: PieSeriesOption[] = [
     {
       type: 'pie',
       radius,
@@ -43,8 +44,6 @@ export const createPieSeries = <T extends BaseChartStyle>({
         formatter,
       },
       labelLayout: {
-        ellipsis: true,
-        overflow: 'truncate',
         width: styles?.exclusive.truncate,
       },
     },

@@ -86,7 +86,7 @@ export const createBarSpec = (
     }
 
     const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
-    const result = pipe<BarChartStyle>(
+    const result = pipe(
       transform(
         aggregate({
           groupBy: categoryField,

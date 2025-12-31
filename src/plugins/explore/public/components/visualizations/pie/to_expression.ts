@@ -33,7 +33,7 @@ export const createPieSpec = (
       axisColumnMappings?.[AxisRole.COLOR]?.name
     }`;
 
-    const result = pipe<PieChartStyle>(
+    const result = pipe(
       transform(convertTo2DArray(allColumns)),
       createBaseConfig(defaultTitle),
       createPieSeries({ styles: styleOptions, cateField: colorColumn, valueField: thetaColumn }),
