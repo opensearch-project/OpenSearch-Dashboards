@@ -56,6 +56,8 @@ const TMP_DIR = Path.resolve(__dirname, '__tmp__');
 expect.addSnapshotSerializer(createReplaceSerializer(/[\d\.]+ sec/g, '<time>'));
 expect.addSnapshotSerializer(createReplaceSerializer(/\d+(\.\d+)?[sm]/g, '<time>'));
 expect.addSnapshotSerializer(createReplaceSerializer(/yarn (\w+) v[\d\.]+/g, 'yarn $1 <version>'));
+// Webpack 5 generates different chunk IDs, so we normalize them in snapshots
+expect.addSnapshotSerializer(createReplaceSerializer(/\.chunk\.\d+\./g, '.chunk.<id>.'));
 expect.addSnapshotSerializer(createStripAnsiSerializer());
 
 beforeEach(async () => {
@@ -123,9 +125,9 @@ it('builds a generated plugin into a viable archive', async () => {
       "opensearch-dashboards/fooTestPlugin/server/plugin.js",
       "opensearch-dashboards/fooTestPlugin/server/routes/index.js",
       "opensearch-dashboards/fooTestPlugin/server/types.js",
-      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.843.js",
-      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.843.js.br",
-      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.843.js.gz",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.<id>.js",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.<id>.js.br",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.<id>.js.gz",
       "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.plugin.js",
       "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.plugin.js.br",
       "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.plugin.js.gz",
@@ -211,9 +213,9 @@ it('builds a non-semver generated plugin into a viable archive', async () => {
       "opensearch-dashboards/fooTestPlugin/server/plugin.js",
       "opensearch-dashboards/fooTestPlugin/server/routes/index.js",
       "opensearch-dashboards/fooTestPlugin/server/types.js",
-      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.843.js",
-      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.843.js.br",
-      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.843.js.gz",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.<id>.js",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.<id>.js.br",
+      "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.chunk.<id>.js.gz",
       "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.plugin.js",
       "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.plugin.js.br",
       "opensearch-dashboards/fooTestPlugin/target/public/fooTestPlugin.plugin.js.gz",
