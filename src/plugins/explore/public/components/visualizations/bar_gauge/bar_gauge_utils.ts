@@ -5,6 +5,7 @@
 
 import { AxisColumnMappings, Threshold, VisFieldType } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
+import { getColors } from '../theme/default_colors';
 
 export const getBarOrientation = (
   styles: BarGaugeChartStyle,
@@ -80,22 +81,6 @@ export const getGradientConfig = (
     };
 };
 
-export const processThresholds = (thresholds: Threshold[]) => {
-  const result: Threshold[] = [];
-
-  for (let i = 0; i < thresholds.length; i++) {
-    const current = thresholds[i];
-    const next = thresholds[i + 1];
-
-    // if the next threshold has the same value, use next
-    if (next && next.value === current.value) continue;
-
-    result.push(current);
-  }
-
-  return result;
-};
-
 export const normalizeData = (data: number, start: number, end: number) => {
   if (start === end) return null;
   // normalize data value between start and end into 0–1 range
@@ -156,4 +141,76 @@ export const generateParams = (
   }
 
   return result;
+};
+
+export const generateThresholds = (
+  minBase: number,
+  maxBase: number,
+  thresholds: Threshold[],
+  baseColor: string | undefined
+) => {
+  const defaultColor = baseColor ?? getColors().statusGreen;
+
+  // sort thresholds by value and dedupe threshold by value
+  thresholds = thresholds
+    .sort((t1, t2) => t1.value - t2.value)
+    .reduce((acc, t) => {
+      const last = acc.pop();
+      if (last) {
+        if (last.value === t.value) {
+          return [...acc, t];
+        } else {
+          return [...acc, last, t];
+        }
+      }
+      return [...acc, t];
+    }, [] as Threshold[]);
+
+  const result: Threshold[] = [];
+
+  const minThreshold: Threshold = { value: minBase, color: defaultColor };
+  for (const threshold of thresholds) {
+    if (minThreshold.value >= threshold.value) {
+      minThreshold.color = threshold.color;
+    }
+    if (threshold.value > minThreshold.value && threshold.value <= maxBase) {
+      result.push(threshold);
+    }
+  }
+  result.unshift(minThreshold);
+
+  return result;
+};
+
+export const generateValueThresholds = (
+  minBase: number,
+  maxBase: number,
+  valueStops: number[],
+  thresholds: Threshold[]
+) => {
+  const filteredValueStops = valueStops
+    .filter((v) => v <= maxBase && v >= minBase)
+    .sort((a, b) => a - b);
+
+  const valueThresholds: Threshold[] = [];
+  if (filteredValueStops.length > 0 && thresholds.length > 0) {
+    const stops = [...new Set(filteredValueStops)];
+
+    let thresholdIndex = 0;
+
+    for (const stop of stops) {
+      while (
+        thresholdIndex < thresholds.length - 1 &&
+        thresholds[thresholdIndex + 1].value <= stop
+      ) {
+        thresholdIndex++;
+      }
+
+      // Add valid threshold for this stop
+      if (thresholds[thresholdIndex].value <= stop) {
+        valueThresholds.push({ value: stop, color: thresholds[thresholdIndex].color });
+      }
+    }
+  }
+  return valueThresholds;
 };
