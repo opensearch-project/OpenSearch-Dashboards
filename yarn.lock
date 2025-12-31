@@ -3852,14 +3852,14 @@
   resolved "https://registry.yarnpkg.com/@amoo-miki/numeral/-/numeral-2.6.0.tgz#3a114ef81cd36ab8207dc771751e47a1323f3a6f"
   integrity sha512-P2w5/ufeYdMuvY6Y1BiI3Gzj4MQ+87NAvGTQ0Qvx1wJbTh8q1b+ZWUGJjT5h9xl9BgYQ6sF4X8UZgIwW5T/ljg==
 
-"@elastic/request-crypto@2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-2.0.0.tgz#a3988be98ed63398c3d0177948c7ac2a857835bb"
-  integrity sha512-jIReBeHzgUKNsYwdhnTyLFSGHyLsJgQIIw+AMEnq1lcONA/uKG7hhFUK2Z8XxjJ86/oXt1TwJ4BIagZR3mzq7w==
+"@elastic/request-crypto@2.0.2":
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-2.0.2.tgz#4e5216783be82371012857a76da75195828d3f45"
+  integrity sha512-DdTMs4ZZKo9Hl6XNHmR8eOuooImpvQp/+4Wzkzw1VdSR+bBsDa8TT6UrIuCgl5n6WI/WujjTneLTKmtSYm+HpA==
   dependencies:
     "@elastic/node-crypto" "1.1.1"
-    "@types/node-jose" "1.1.8"
-    node-jose "2.0.0"
+    "@types/node-jose" "1.1.10"
+    node-jose "2.2.0"
 
 "@emotion/cache@^10.0.27", "@emotion/cache@^10.0.9":
   version "10.0.29"
@@ -8525,10 +8525,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node-jose@1.1.8":
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/@types/node-jose/-/node-jose-1.1.8.tgz#26b7ae96e3309acb426ea5393ff5d6a0c1c38625"
-  integrity sha512-AFcArbplUaO+DqGVEPaiz/guw3uUA+dRHjaj26EEDF0DmTEPUd3dEdfdJMUx4kD65EAR3TnI1iHIcb31+Ko87Q==
+"@types/node-jose@1.1.10":
+  version "1.1.10"
+  resolved "https://registry.yarnpkg.com/@types/node-jose/-/node-jose-1.1.10.tgz#1fc559b63e665f27acedbcb91601e2fee256fad0"
+  integrity sha512-7L0ucJTugW4x/sYpQ+c5IudAwr0pFuxDVnZLpHKWpff7p1lVa3wTuNvnrzFBNeLojE+UY0cVCwNGXLxXsMIrzw==
   dependencies:
     "@types/node" "*"
 
@@ -21206,7 +21206,7 @@ node-int64@^0.4.0:
   resolved "https://registry.yarnpkg.com/node-int64/-/node-int64-0.4.0.tgz#87a9065cdb355d3182d8f94ce11188b825c68a3b"
   integrity sha1-h6kGXNs1XTGC2PlM4RGIuCXGijs=
 
-node-jose@2.0.0, node-jose@^2.2.0:
+node-jose@2.2.0, node-jose@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/node-jose/-/node-jose-2.2.0.tgz#b64f3225ad6bec328509a420800de597ba2bf3ed"
   integrity sha512-XPCvJRr94SjLrSIm4pbYHKLEaOsDvJCpyFw/6V/KK/IXmyZ6SFBzAUDO9HQf4DB/nTEFcRGH87mNciOP23kFjw==
