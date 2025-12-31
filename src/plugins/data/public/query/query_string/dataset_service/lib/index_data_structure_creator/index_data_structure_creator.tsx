@@ -10,11 +10,12 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiHealth,
   EuiLoadingSpinner,
   EuiButtonEmpty,
-  EuiSelectable,
+  EuiPopover,
+  EuiToolTip,
+  EuiTablePagination,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -53,12 +54,16 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
   services,
 }) => {
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
-  const [selectedBadgeIndex, setSelectedBadgeIndex] = useState<number>(0);
-  const [indexHealthData, setIndexHealthData] = useState<IndexHealth | null>(null);
-  const [matchingIndicesForWildcard, setMatchingIndicesForWildcard] = useState<string[]>([]);
-  const [isLoadingHealth, setIsLoadingHealth] = useState(false);
-  const [clickedMatchingIndex, setClickedMatchingIndex] = useState<string | null>(null);
-  const [matchingIndexHealth, setMatchingIndexHealth] = useState<IndexHealth | null>(null);
+  const [openPopoverIndex, setOpenPopoverIndex] = useState<number | null>(null);
+  const [indexHealthCache, setIndexHealthCache] = useState<Record<string, IndexHealth | null>>({});
+  const [loadingHealthForIndex, setLoadingHealthForIndex] = useState<string | null>(null);
+  const [matchingIndicesCache, setMatchingIndicesCache] = useState<Record<string, string[]>>({});
+  const [loadingMatchingIndices, setLoadingMatchingIndices] = useState<string | null>(null);
+
+  // Pagination state for wildcard popover
+  const [wildcardPopoverPage, setWildcardPopoverPage] = useState<
+    Record<string, { pageIndex: number; pageSize: number }>
+  >({});
 
   // Use shared hook for fetching indices
   const { fetchIndices } = useIndexFetcher({ services, path });
@@ -68,7 +73,12 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
     async (indexName: string) => {
       if (!services?.http) return;
 
-      setIsLoadingHealth(true);
+      // Check cache first
+      if (indexHealthCache[indexName] !== undefined) {
+        return indexHealthCache[indexName];
+      }
+
+      setLoadingHealthForIndex(indexName);
       try {
         const dataSourceId = path?.find((item) => item.type === 'DATA_SOURCE')?.id;
 
@@ -88,33 +98,40 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
           body: '',
         });
 
-        if (response && Array.isArray(response) && response.length > 0) {
-          setIndexHealthData(response[0]);
-        } else {
-          setIndexHealthData(null);
-        }
+        const healthData =
+          response && Array.isArray(response) && response.length > 0 ? response[0] : null;
+
+        // Cache the result
+        setIndexHealthCache((prev) => ({ ...prev, [indexName]: healthData }));
+
+        return healthData;
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Error fetching index health:', error);
-        setIndexHealthData(null);
+        setIndexHealthCache((prev) => ({ ...prev, [indexName]: null }));
+        return null;
       } finally {
-        setIsLoadingHealth(false);
+        setLoadingHealthForIndex(null);
       }
     },
-    [services, path]
+    [services, path, indexHealthCache]
   );
 
-  // Fetch health for matching index
-  const fetchMatchingIndexHealth = useCallback(
-    async (indexName: string) => {
-      if (!services?.http) return;
+  // Batch fetch index health information for multiple indices
+  const fetchBatchIndexHealth = useCallback(
+    async (indexNames: string[]) => {
+      if (!services?.http || indexNames.length === 0) return;
+
+      // Filter out already cached indices
+      const uncachedIndices = indexNames.filter((name) => indexHealthCache[name] === undefined);
+      if (uncachedIndices.length === 0) return;
 
       try {
         const dataSourceId = path?.find((item) => item.type === 'DATA_SOURCE')?.id;
 
         const queryParams: Record<string, any> = {
-          path: `_cat/indices/${encodeURIComponent(
-            indexName
+          path: `_cat/indices/${uncachedIndices.join(
+            ','
           )}?format=json&h=health,status,index,docs.count,store.size`,
           method: 'GET',
         };
@@ -128,75 +145,116 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
           body: '',
         });
 
-        if (response && Array.isArray(response) && response.length > 0) {
-          setMatchingIndexHealth(response[0]);
-        } else {
-          setMatchingIndexHealth(null);
+        if (response && Array.isArray(response)) {
+          // Cache all results
+          const newCache: Record<string, IndexHealth | null> = {};
+          response.forEach((healthData: IndexHealth) => {
+            newCache[healthData.index] = healthData;
+          });
+
+          // Mark any missing indices as null (not found)
+          uncachedIndices.forEach((indexName) => {
+            if (!newCache[indexName]) {
+              newCache[indexName] = null;
+            }
+          });
+
+          setIndexHealthCache((prev) => ({ ...prev, ...newCache }));
         }
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error('Error fetching matching index health:', error);
-        setMatchingIndexHealth(null);
+        console.error('Error fetching batch index health:', error);
+        // Mark all as null on error
+        const errorCache: Record<string, IndexHealth | null> = {};
+        uncachedIndices.forEach((indexName) => {
+          errorCache[indexName] = null;
+        });
+        setIndexHealthCache((prev) => ({ ...prev, ...errorCache }));
       }
     },
-    [services, path]
+    [services, path, indexHealthCache]
   );
 
   // Fetch matching indices for wildcard pattern
-  const fetchMatchingIndicesForPattern = useCallback(
+  const fetchMatchingIndices = useCallback(
     async (pattern: string) => {
       if (!pattern || !pattern.includes('*')) {
-        setMatchingIndicesForWildcard([]);
-        return;
+        return [];
       }
 
+      // Check cache first
+      if (matchingIndicesCache[pattern]) {
+        return matchingIndicesCache[pattern];
+      }
+
+      setLoadingMatchingIndices(pattern);
       try {
         const allIndices = await fetchIndices({
           patterns: [pattern],
           limit: undefined,
         });
-        setMatchingIndicesForWildcard(allIndices);
+
+        // Cache the result
+        setMatchingIndicesCache((prev) => ({ ...prev, [pattern]: allIndices }));
+
+        return allIndices;
       } catch (error) {
-        setMatchingIndicesForWildcard([]);
+        setMatchingIndicesCache((prev) => ({ ...prev, [pattern]: [] }));
+        return [];
+      } finally {
+        setLoadingMatchingIndices(null);
       }
     },
-    [fetchIndices]
+    [fetchIndices, matchingIndicesCache]
   );
 
-  // Update health data when selected badge changes
+  // Auto-fetch health/matching data for selected items
   useEffect(() => {
-    if (selectedItems.length === 0) {
-      setIndexHealthData(null);
-      setMatchingIndicesForWildcard([]);
-      setClickedMatchingIndex(null);
-      setMatchingIndexHealth(null);
-      return;
-    }
+    selectedItems.forEach((item) => {
+      if (item.isWildcard) {
+        // Fetch matching indices for wildcards
+        if (!matchingIndicesCache[item.title] && loadingMatchingIndices !== item.title) {
+          fetchMatchingIndices(item.title);
+        }
+      } else {
+        // Fetch health for exact indices
+        if (indexHealthCache[item.title] === undefined && loadingHealthForIndex !== item.title) {
+          fetchIndexHealth(item.title);
+        }
+      }
+    });
+  }, [
+    selectedItems,
+    matchingIndicesCache,
+    indexHealthCache,
+    loadingMatchingIndices,
+    loadingHealthForIndex,
+    fetchMatchingIndices,
+    fetchIndexHealth,
+  ]);
 
-    const selectedItem = selectedItems[selectedBadgeIndex];
-    if (!selectedItem) return;
-
-    if (selectedItem.isWildcard) {
-      // Fetch matching indices for wildcard
-      fetchMatchingIndicesForPattern(selectedItem.title);
-      setIndexHealthData(null);
-    } else {
-      // Fetch health for exact index
-      fetchIndexHealth(selectedItem.title);
-      setMatchingIndicesForWildcard([]);
-      setClickedMatchingIndex(null);
-      setMatchingIndexHealth(null);
-    }
-  }, [selectedBadgeIndex, selectedItems, fetchIndexHealth, fetchMatchingIndicesForPattern]);
-
-  // Auto-select first matching index when list is populated
+  // Auto-fetch health data for visible indices in wildcard popover
   useEffect(() => {
-    if (matchingIndicesForWildcard.length > 0) {
-      const firstIndex = matchingIndicesForWildcard[0];
-      setClickedMatchingIndex(firstIndex);
-      fetchMatchingIndexHealth(firstIndex);
+    if (openPopoverIndex !== null) {
+      const item = selectedItems[openPopoverIndex];
+      if (item?.isWildcard) {
+        const matchingIndices = matchingIndicesCache[item.title] || [];
+        const pagination = wildcardPopoverPage[item.title] || { pageIndex: 0, pageSize: 10 };
+        const startIndex = pagination.pageIndex * pagination.pageSize;
+        const endIndex = Math.min(startIndex + pagination.pageSize, matchingIndices.length);
+        const visibleIndices = matchingIndices.slice(startIndex, endIndex);
+
+        // Batch fetch health data for visible indices
+        fetchBatchIndexHealth(visibleIndices);
+      }
     }
-  }, [matchingIndicesForWildcard, fetchMatchingIndexHealth]);
+  }, [
+    openPopoverIndex,
+    selectedItems,
+    matchingIndicesCache,
+    wildcardPopoverPage,
+    fetchBatchIndexHealth,
+  ]);
 
   // Handle selection changes from unified selector
   const handleSelectionChange = useCallback(
@@ -249,12 +307,239 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
     const newItems = selectedItems.filter((_, itemIndex) => itemIndex !== indexToRemove);
     handleSelectionChange(newItems);
 
-    // Adjust selected badge index if needed
-    if (selectedBadgeIndex >= newItems.length && newItems.length > 0) {
-      setSelectedBadgeIndex(newItems.length - 1);
-    } else if (newItems.length === 0) {
-      setSelectedBadgeIndex(0);
+    // Close popover if the removed item had it open
+    if (openPopoverIndex === indexToRemove) {
+      setOpenPopoverIndex(null);
+    } else if (openPopoverIndex !== null && openPopoverIndex > indexToRemove) {
+      setOpenPopoverIndex(openPopoverIndex - 1);
     }
+  };
+
+  // Handle info icon click
+  const handleInfoIconClick = async (itemIndex: number, item: SelectedItem) => {
+    if (openPopoverIndex === itemIndex) {
+      setOpenPopoverIndex(null);
+    } else {
+      setOpenPopoverIndex(itemIndex);
+      if (item.isWildcard) {
+        // Fetch matching indices for wildcard
+        await fetchMatchingIndices(item.title);
+      } else {
+        // Fetch health data for exact index
+        await fetchIndexHealth(item.title);
+      }
+    }
+  };
+
+  // Render health popover content
+  const renderHealthPopover = (item: SelectedItem, itemIndex: number) => {
+    if (item.isWildcard) {
+      const matchingIndices = matchingIndicesCache[item.title] || [];
+      const isLoading = loadingMatchingIndices === item.title;
+
+      if (isLoading) {
+        return (
+          <div className="indexDataStructureCreator__healthPopoverLoading">
+            <EuiLoadingSpinner size="m" />
+          </div>
+        );
+      }
+
+      if (matchingIndices.length === 0) {
+        return (
+          <div className="indexDataStructureCreator__healthPopover">
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="data.datasetService.unifiedSelector.noMatchingIndices"
+                defaultMessage="No indices match this pattern"
+              />
+            </EuiText>
+          </div>
+        );
+      }
+
+      // Get or initialize pagination for this wildcard
+      const pagination = wildcardPopoverPage[item.title] || { pageIndex: 0, pageSize: 10 };
+      const { pageIndex, pageSize } = pagination;
+
+      // Calculate pagination
+      const pageCount = Math.ceil(matchingIndices.length / pageSize);
+      const startIndex = pageIndex * pageSize;
+      const endIndex = Math.min(startIndex + pageSize, matchingIndices.length);
+      const visibleIndices = matchingIndices.slice(startIndex, endIndex);
+
+      return (
+        <div className="indexDataStructureCreator__wildcardPopover">
+          <div className="indexDataStructureCreator__wildcardPopoverHeader">
+            <EuiText size="xs">
+              <strong>
+                <FormattedMessage
+                  id="data.datasetService.unifiedSelector.matchingCount"
+                  defaultMessage="{count} {count, plural, one {index} other {indices}} match this pattern"
+                  values={{ count: matchingIndices.length }}
+                />
+              </strong>
+            </EuiText>
+          </div>
+
+          <div className="indexDataStructureCreator__wildcardPopoverContent">
+            {/* Table header */}
+            <div className="indexDataStructureCreator__wildcardPopoverTableHeader">
+              <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+                <EuiFlexItem grow={true}>
+                  <EuiText size="xs">
+                    <strong>Name</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                  className="indexDataStructureCreator__wildcardPopoverColumn"
+                >
+                  <EuiText size="xs">
+                    <strong>Documents</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                  className="indexDataStructureCreator__wildcardPopoverColumn"
+                >
+                  <EuiText size="xs">
+                    <strong>Size</strong>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+
+            {/* Table rows */}
+            <div className="indexDataStructureCreator__wildcardPopoverTableBody">
+              {visibleIndices.map((indexName) => {
+                const indexHealth = indexHealthCache[indexName];
+                const isLoadingIndexHealth = loadingHealthForIndex === indexName;
+
+                return (
+                  <div key={indexName} className="indexDataStructureCreator__wildcardPopoverRow">
+                    <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+                      <EuiFlexItem grow={true}>
+                        <EuiText size="xs">{indexName}</EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        grow={false}
+                        className="indexDataStructureCreator__wildcardPopoverColumn"
+                      >
+                        {isLoadingIndexHealth ? (
+                          <EuiLoadingSpinner size="s" />
+                        ) : indexHealth?.['docs.count'] ? (
+                          <EuiText size="xs">{indexHealth['docs.count']}</EuiText>
+                        ) : (
+                          <EuiText size="xs" color="subdued">
+                            —
+                          </EuiText>
+                        )}
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        grow={false}
+                        className="indexDataStructureCreator__wildcardPopoverColumn"
+                      >
+                        {isLoadingIndexHealth ? (
+                          <EuiLoadingSpinner size="s" />
+                        ) : indexHealth?.['store.size'] ? (
+                          <EuiText size="xs">{indexHealth['store.size']}</EuiText>
+                        ) : (
+                          <EuiText size="xs" color="subdued">
+                            —
+                          </EuiText>
+                        )}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* EUI-styled pagination */}
+          <div className="indexDataStructureCreator__wildcardPopoverFooter">
+            <EuiTablePagination
+              aria-label="Wildcard indices pagination"
+              pageCount={pageCount}
+              activePage={pageIndex}
+              onChangePage={(newPageIndex) => {
+                setWildcardPopoverPage((prev) => ({
+                  ...prev,
+                  [item.title]: { ...pagination, pageIndex: newPageIndex },
+                }));
+              }}
+              itemsPerPage={pageSize}
+              onChangeItemsPerPage={(newPageSize) => {
+                setWildcardPopoverPage((prev) => ({
+                  ...prev,
+                  [item.title]: { pageIndex: 0, pageSize: newPageSize },
+                }));
+              }}
+              itemsPerPageOptions={[5, 10, 20]}
+            />
+          </div>
+        </div>
+      );
+    }
+
+    const healthData = indexHealthCache[item.title];
+    const isLoading = loadingHealthForIndex === item.title;
+
+    if (isLoading) {
+      return (
+        <div className="indexDataStructureCreator__healthPopoverLoading">
+          <EuiLoadingSpinner size="m" />
+        </div>
+      );
+    }
+
+    if (!healthData) {
+      return (
+        <div className="indexDataStructureCreator__healthPopover">
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="data.datasetService.unifiedSelector.noHealthData"
+              defaultMessage="Unable to fetch health data"
+            />
+          </EuiText>
+        </div>
+      );
+    }
+
+    return (
+      <div className="indexDataStructureCreator__healthPopover">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <strong>Health:</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiHealth
+              color={
+                healthData.health === 'green'
+                  ? 'success'
+                  : healthData.health === 'yellow'
+                  ? 'warning'
+                  : 'danger'
+              }
+            >
+              {healthData.health}
+            </EuiHealth>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiText size="xs">
+          <strong>Status:</strong> {healthData.status}
+        </EuiText>
+        <EuiText size="xs">
+          <strong>Documents:</strong> {healthData['docs.count'] || '0'}
+        </EuiText>
+        <EuiText size="xs">
+          <strong>Size:</strong> {healthData['store.size'] || 'N/A'}
+        </EuiText>
+      </div>
+    );
   };
 
   return (
@@ -269,241 +554,211 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
 
       <EuiSpacer size="s" />
 
-      {/* Selected items and health panel */}
-      <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
-        {/* Left: Selected items using EuiSelectable */}
-        <EuiFlexItem grow={true} style={{ minWidth: 0, flexBasis: '55%' }}>
-          <EuiText size="s">
-            <strong>
-              {i18n.translate('data.datasetService.unifiedSelector.selectedItemsLabel', {
-                defaultMessage: 'Selected:',
-              })}
-            </strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <div className="indexDataStructureCreator__selectedList">
-            {selectedItems.length === 0 ? (
-              <EuiPanel hasBorder paddingSize="m" className="indexDataStructureCreator__emptyState">
-                <EuiText size="s" color="subdued" textAlign="center">
-                  <FormattedMessage
-                    id="data.datasetService.unifiedSelector.emptySelection"
-                    defaultMessage="No indices or patterns selected yet. Use the search above to add indices or wildcard patterns."
-                  />
-                </EuiText>
-              </EuiPanel>
-            ) : (
-              <EuiSelectable
-                options={selectedItems.map((item, itemIndex) => ({
-                  label: item.title,
-                  key: item.id,
-                  checked: selectedBadgeIndex === itemIndex ? 'on' : undefined,
-                  append: (
-                    <EuiButtonEmpty
-                      size="xs"
-                      iconType="cross"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRemoveItem(itemIndex);
-                      }}
-                      aria-label={i18n.translate('data.datasetService.unifiedSelector.removeItem', {
-                        defaultMessage: 'Remove {item}',
-                        values: { item: item.title },
+      {/* Selected items - full width */}
+      <EuiText size="s">
+        <strong>
+          {i18n.translate('data.datasetService.unifiedSelector.selectedItemsLabel', {
+            defaultMessage: 'Selected:',
+          })}
+        </strong>
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <div className="indexDataStructureCreator__selectedList">
+        {selectedItems.length === 0 ? (
+          <EuiPanel hasBorder paddingSize="m" className="indexDataStructureCreator__emptyState">
+            <EuiText size="s" color="subdued" textAlign="center">
+              <FormattedMessage
+                id="data.datasetService.unifiedSelector.emptySelection"
+                defaultMessage="No indices or patterns selected yet. Use the search above to add indices or wildcard patterns."
+              />
+            </EuiText>
+          </EuiPanel>
+        ) : (
+          <EuiPanel
+            hasBorder
+            paddingSize="none"
+            className="indexDataStructureCreator__selectedTable"
+          >
+            {/* Table header */}
+            <div className="indexDataStructureCreator__tableHeader">
+              <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+                <EuiFlexItem grow={true}>
+                  <EuiText size="xs">
+                    <strong>
+                      {i18n.translate('data.datasetService.unifiedSelector.nameHeader', {
+                        defaultMessage: 'Name',
                       })}
-                    />
-                  ),
-                }))}
-                onChange={(newOptions) => {
-                  const clickedIndex = newOptions.findIndex((opt) => opt.checked === 'on');
-                  if (clickedIndex >= 0 && clickedIndex !== selectedBadgeIndex) {
-                    setSelectedBadgeIndex(clickedIndex);
-                  }
-                }}
-                singleSelection="always"
-                searchable={false}
-                height="full"
-                listProps={{
-                  bordered: true,
-                }}
-              >
-                {(list) => list}
-              </EuiSelectable>
-            )}
-          </div>
-        </EuiFlexItem>
-
-        {/* Right: Health/Matches panel */}
-        <EuiFlexItem grow={false} style={{ minWidth: 0, flexBasis: '35%', maxWidth: '300px' }}>
-          <EuiText size="s">
-            <strong>&nbsp;</strong>
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiPanel hasBorder className="indexDataStructureCreator__healthPanel">
-            {selectedItems.length === 0 ? (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100%',
-                }}
-              >
-                <EuiText size="s" color="subdued" textAlign="center">
-                  <FormattedMessage
-                    id="data.datasetService.unifiedSelector.emptyHealthPanel"
-                    defaultMessage="Select an index or pattern to view details"
-                  />
-                </EuiText>
-              </div>
-            ) : isLoadingHealth ? (
-              <EuiFlexGroup justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="m" />
+                    </strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} className="indexDataStructureCreator__columnStatus">
+                  <EuiText size="xs">
+                    <strong>
+                      {i18n.translate('data.datasetService.unifiedSelector.statusHeader', {
+                        defaultMessage: 'Status',
+                      })}
+                    </strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} className="indexDataStructureCreator__columnDocuments">
+                  <EuiText size="xs">
+                    <strong>
+                      {i18n.translate('data.datasetService.unifiedSelector.documentsHeader', {
+                        defaultMessage: 'Documents',
+                      })}
+                    </strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} className="indexDataStructureCreator__columnSize">
+                  <EuiText size="xs">
+                    <strong>
+                      {i18n.translate('data.datasetService.unifiedSelector.sizeHeader', {
+                        defaultMessage: 'Size',
+                      })}
+                    </strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false} className="indexDataStructureCreator__columnActions">
+                  <EuiText size="xs">
+                    <strong>
+                      {i18n.translate('data.datasetService.unifiedSelector.actionsHeader', {
+                        defaultMessage: 'Actions',
+                      })}
+                    </strong>
+                  </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            ) : selectedItems[selectedBadgeIndex].isWildcard ? (
-              // Show matching indices for wildcard
-              <>
-                <EuiText size="s" color="subdued">
-                  {matchingIndicesForWildcard.length > 0 ? (
-                    <FormattedMessage
-                      id="data.datasetService.unifiedSelector.matchingCount"
-                      defaultMessage="{count} {count, plural, one {index} other {indices}} match this pattern"
-                      values={{ count: matchingIndicesForWildcard.length }}
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="data.datasetService.unifiedSelector.noMatchingIndices"
-                      defaultMessage="No indices match this pattern"
-                    />
-                  )}
-                </EuiText>
-                {matchingIndicesForWildcard.length > 0 && (
-                  <>
-                    <EuiSpacer size="s" />
-                    <div style={{ height: '20vh' }}>
-                      <EuiSelectable
-                        options={matchingIndicesForWildcard.map((indexName) => ({
-                          label: indexName,
-                          key: indexName,
-                          checked: clickedMatchingIndex === indexName ? 'on' : undefined,
-                        }))}
-                        onChange={(newOptions) => {
-                          const selected = newOptions.find((opt) => opt.checked === 'on');
-                          if (
-                            selected &&
-                            selected.label &&
-                            clickedMatchingIndex !== selected.label
-                          ) {
-                            // Clicking a new item - fetch its health
-                            setClickedMatchingIndex(selected.label);
-                            fetchMatchingIndexHealth(selected.label);
-                          }
-                        }}
-                        singleSelection="always"
-                        searchable={false}
-                        height="full"
-                        listProps={{
-                          bordered: true,
-                        }}
-                      >
-                        {(list) => list}
-                      </EuiSelectable>
-                    </div>
-                    {clickedMatchingIndex && matchingIndexHealth && (
-                      <>
-                        <EuiSpacer size="s" />
-                        <EuiPanel color="subdued" style={{ padding: '12px' }}>
-                          <EuiTitle size="xxs">
-                            <h5>{clickedMatchingIndex}</h5>
-                          </EuiTitle>
-                          <EuiSpacer size="xs" />
-                          <EuiFlexGroup gutterSize="s" alignItems="center">
-                            <EuiFlexItem grow={false}>
-                              <EuiText size="xs">
-                                <strong>Health:</strong>
-                              </EuiText>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiHealth
-                                color={
-                                  matchingIndexHealth.health === 'green'
-                                    ? 'success'
-                                    : matchingIndexHealth.health === 'yellow'
-                                    ? 'warning'
-                                    : 'danger'
-                                }
+            </div>
+            {/* Table rows */}
+            {selectedItems.map((item, itemIndex) => {
+              const healthData = indexHealthCache[item.title];
+              const matchingIndices = matchingIndicesCache[item.title];
+              const isLoadingHealth = loadingHealthForIndex === item.title;
+              const isLoadingMatches = loadingMatchingIndices === item.title;
+
+              return (
+                <div key={item.id} className="indexDataStructureCreator__tableRow">
+                  <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
+                    {/* Name Column */}
+                    <EuiFlexItem grow={true}>
+                      <EuiText size="s">{item.title}</EuiText>
+                    </EuiFlexItem>
+
+                    {/* Status Column */}
+                    <EuiFlexItem grow={false} className="indexDataStructureCreator__columnStatus">
+                      {isLoadingHealth || isLoadingMatches ? (
+                        <EuiLoadingSpinner size="s" />
+                      ) : item.isWildcard ? (
+                        matchingIndices && matchingIndices.length > 0 ? (
+                          <EuiPopover
+                            button={
+                              <EuiToolTip
+                                content={i18n.translate(
+                                  'data.datasetService.unifiedSelector.clickToShowMatchingIndices',
+                                  {
+                                    defaultMessage: 'Click to show matching indices',
+                                  }
+                                )}
                               >
-                                {matchingIndexHealth.health}
-                              </EuiHealth>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                          <EuiText size="xs">
-                            <strong>Status:</strong> {matchingIndexHealth.status}
+                                <EuiButtonEmpty
+                                  size="xs"
+                                  color="primary"
+                                  onClick={() => handleInfoIconClick(itemIndex, item)}
+                                  className="indexDataStructureCreator__wildcardButton"
+                                >
+                                  <EuiText size="xs" color="primary">
+                                    {matchingIndices.length}{' '}
+                                    {matchingIndices.length === 1 ? 'index' : 'indices'}
+                                  </EuiText>
+                                </EuiButtonEmpty>
+                              </EuiToolTip>
+                            }
+                            isOpen={openPopoverIndex === itemIndex}
+                            closePopover={() => setOpenPopoverIndex(null)}
+                            anchorPosition="rightCenter"
+                          >
+                            {renderHealthPopover(item, itemIndex)}
+                          </EuiPopover>
+                        ) : (
+                          <EuiText size="xs" color="subdued">
+                            —
                           </EuiText>
-                          <EuiText size="xs">
-                            <strong>Documents:</strong> {matchingIndexHealth['docs.count'] || '0'}
-                          </EuiText>
-                          <EuiText size="xs">
-                            <strong>Size:</strong> {matchingIndexHealth['store.size'] || 'N/A'}
-                          </EuiText>
-                        </EuiPanel>
-                      </>
-                    )}
-                  </>
-                )}
-              </>
-            ) : (
-              // Show health info for exact index
-              <>
-                {indexHealthData ? (
-                  <EuiPanel color="subdued" style={{ padding: '12px' }}>
-                    <EuiTitle size="xxs">
-                      <h5>{selectedItems[selectedBadgeIndex].title}</h5>
-                    </EuiTitle>
-                    <EuiSpacer size="xs" />
-                    <EuiFlexGroup gutterSize="s" alignItems="center">
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="xs">
-                          <strong>Health:</strong>
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
+                        )
+                      ) : healthData ? (
                         <EuiHealth
                           color={
-                            indexHealthData.health === 'green'
+                            healthData.health === 'green'
                               ? 'success'
-                              : indexHealthData.health === 'yellow'
+                              : healthData.health === 'yellow'
                               ? 'warning'
                               : 'danger'
                           }
                         >
-                          {indexHealthData.health}
+                          <EuiText size="xs">{healthData.health}</EuiText>
                         </EuiHealth>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                    <EuiText size="xs">
-                      <strong>Status:</strong> {indexHealthData.status}
-                    </EuiText>
-                    <EuiText size="xs">
-                      <strong>Documents:</strong> {indexHealthData['docs.count'] || '0'}
-                    </EuiText>
-                    <EuiText size="xs">
-                      <strong>Size:</strong> {indexHealthData['store.size'] || 'N/A'}
-                    </EuiText>
-                  </EuiPanel>
-                ) : (
-                  <EuiText size="s" color="subdued">
-                    <FormattedMessage
-                      id="data.datasetService.unifiedSelector.noHealthData"
-                      defaultMessage="Unable to fetch health data"
-                    />
-                  </EuiText>
-                )}
-              </>
-            )}
+                      ) : (
+                        <EuiText size="xs" color="subdued">
+                          —
+                        </EuiText>
+                      )}
+                    </EuiFlexItem>
+
+                    {/* Documents Column */}
+                    <EuiFlexItem
+                      grow={false}
+                      className="indexDataStructureCreator__columnDocuments"
+                    >
+                      {item.isWildcard ? (
+                        <EuiText size="xs" color="subdued">
+                          —
+                        </EuiText>
+                      ) : healthData?.['docs.count'] ? (
+                        <EuiText size="xs">{healthData['docs.count']}</EuiText>
+                      ) : (
+                        <EuiText size="xs" color="subdued">
+                          —
+                        </EuiText>
+                      )}
+                    </EuiFlexItem>
+
+                    {/* Size Column */}
+                    <EuiFlexItem grow={false} className="indexDataStructureCreator__columnSize">
+                      {item.isWildcard ? (
+                        <EuiText size="xs" color="subdued">
+                          —
+                        </EuiText>
+                      ) : healthData?.['store.size'] ? (
+                        <EuiText size="xs">{healthData['store.size']}</EuiText>
+                      ) : (
+                        <EuiText size="xs" color="subdued">
+                          —
+                        </EuiText>
+                      )}
+                    </EuiFlexItem>
+
+                    {/* Actions Column */}
+                    <EuiFlexItem grow={false} className="indexDataStructureCreator__columnActions">
+                      <EuiButtonEmpty
+                        size="xs"
+                        iconType="cross"
+                        color="danger"
+                        onClick={() => handleRemoveItem(itemIndex)}
+                        aria-label={i18n.translate(
+                          'data.datasetService.unifiedSelector.removeItem',
+                          {
+                            defaultMessage: 'Remove {item}',
+                            values: { item: item.title },
+                          }
+                        )}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
+              );
+            })}
           </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        )}
+      </div>
     </div>
   );
 };

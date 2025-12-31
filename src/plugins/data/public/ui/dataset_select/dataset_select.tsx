@@ -75,11 +75,21 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
   const filteredDatasets = useMemo(() => {
     if (!searchQuery) return datasets;
     const lowerSearch = searchQuery.toLowerCase();
-    return datasets.filter(
-      (dataset) =>
-        (dataset.displayName || dataset.title).toLowerCase().includes(lowerSearch) ||
-        dataset.description?.toLowerCase().includes(lowerSearch)
-    );
+    return datasets.filter((dataset) => {
+      const displayName = (dataset.displayName || dataset.title).toLowerCase();
+      const description = dataset.description?.toLowerCase() || '';
+      const signalType = dataset.signalType?.toLowerCase() || '';
+      const dataSourceName = dataset.dataSource?.title?.toLowerCase() || 'local cluster';
+      const indexPattern = dataset.title.toLowerCase();
+
+      return (
+        displayName.includes(lowerSearch) ||
+        description.includes(lowerSearch) ||
+        signalType.includes(lowerSearch) ||
+        dataSourceName.includes(lowerSearch) ||
+        indexPattern.includes(lowerSearch)
+      );
+    });
   }, [datasets, searchQuery]);
 
   const handleDatasetClick = useCallback(
@@ -117,13 +127,16 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
       sortable: true,
     },
     {
-      field: 'type',
+      field: 'signalType',
       name: i18n.translate('data.datasetSelect.viewModal.typeColumn', {
         defaultMessage: 'Type',
       }),
-      render: (type: string) => {
-        const typeConfig = datasetService.getType(type);
-        return typeConfig?.title || type;
+      render: (signalType: string | undefined) => {
+        if (!signalType) {
+          return '—';
+        }
+        // Capitalize first letter for display
+        return signalType.charAt(0).toUpperCase() + signalType.slice(1).toLowerCase();
       },
       sortable: true,
     },
@@ -132,7 +145,24 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
       name: i18n.translate('data.datasetSelect.viewModal.dataColumn', {
         defaultMessage: 'Data',
       }),
-      render: (title: string) => title,
+      render: (title: string, dataset: DetailedDataset) => {
+        const dataSourceName = dataset.dataSource?.title || 'Local cluster';
+        return (
+          <div>
+            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="database" size="s" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">{dataSourceName}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiText size="s" color="subdued">
+              {title}
+            </EuiText>
+          </div>
+        );
+      },
       sortable: true,
     },
     {
@@ -156,13 +186,6 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="data.datasetSelect.viewModal.description"
-            defaultMessage="Create and manage the datasets that help you retrieve your data from OpenSearch."
-          />
-        </EuiText>
-        <EuiSpacer size="m" />
         <EuiFieldSearch
           placeholder={i18n.translate('data.datasetSelect.viewModal.searchPlaceholder', {
             defaultMessage: 'Search...',
@@ -172,7 +195,7 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
           isClearable
           fullWidth
         />
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         <EuiBasicTable
           items={filteredDatasets}
           columns={columns}
@@ -382,6 +405,11 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
 
       const filteredDatasets = fetchedDatasets.filter(onFilter);
 
+      // Deduplicate datasets by id to prevent duplicates from multiple sources
+      const deduplicatedDatasets = Array.from(
+        new Map(filteredDatasets.map((dataset) => [dataset.id, dataset])).values()
+      );
+
       let defaultDataView;
       try {
         defaultDataView = await dataViews.getDefault();
@@ -394,13 +422,13 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
         console.warn('[DatasetSelect] Default dataset not found, using first available:', error);
       }
       const defaultDataset =
-        filteredDatasets.find((d) => d.id === defaultDataView?.id) ?? filteredDatasets[0];
+        deduplicatedDatasets.find((d) => d.id === defaultDataView?.id) ?? deduplicatedDatasets[0];
       // Get fresh current dataset value at execution time
       const currentlySelectedDataset = queryString.getQuery().dataset;
 
       // Check if currently selected dataset is compatible with current signal type filter
       const isCurrentDatasetValid = currentlySelectedDataset
-        ? filteredDatasets.some((d) => d.id === currentlySelectedDataset.id)
+        ? deduplicatedDatasets.some((d) => d.id === currentlySelectedDataset.id)
         : false;
 
       // Only auto-select or clear datasets on initial load to prevent unnecessary re-renders
@@ -424,7 +452,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
           onSelect(defaultDataset);
         }
       }
-      setDatasets(filteredDatasets);
+      setDatasets(deduplicatedDatasets);
     } finally {
       if (isMounted.current) {
         setIsLoading(false);

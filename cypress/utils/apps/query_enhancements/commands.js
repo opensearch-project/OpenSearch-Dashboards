@@ -218,7 +218,11 @@ Cypress.Commands.add(
   (indexPattern, dataSourceName, datasetEnabled = false) => {
     const title = datasetEnabled ? indexPattern : `${dataSourceName}::${indexPattern}`;
     cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
-    cy.get(`[title="${title}"]`).should('be.visible').click();
+
+    // Wait for dropdown list to appear
+    cy.get('.euiSelectableList', { timeout: 5000 }).should('be.visible');
+
+    cy.get(`[title="${title}"]`, { timeout: 5000 }).should('be.visible').click();
 
     // verify that it has been selected
     cy.getElementByTestId('datasetSelectorButton').should('contain.text', `${title}`);

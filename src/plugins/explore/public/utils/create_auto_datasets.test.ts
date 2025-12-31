@@ -14,6 +14,7 @@ describe('createAutoDetectedDatasets', () => {
     // Create mock saved objects client
     mockSavedObjectsClient = {
       create: jest.fn(),
+      find: jest.fn().mockResolvedValue({ total: 0, savedObjects: [] }),
     } as any;
   });
 
@@ -436,7 +437,7 @@ describe('createAutoDetectedDatasets', () => {
     expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
   });
 
-  it('should propagate errors when trace dataset creation fails', async () => {
+  it('should handle errors gracefully when trace dataset creation fails', async () => {
     const detection: DetectionResult = {
       tracesDetected: true,
       logsDetected: false,
@@ -449,12 +450,15 @@ describe('createAutoDetectedDatasets', () => {
     const error = new Error('Failed to create trace dataset');
     mockSavedObjectsClient.create.mockRejectedValue(error);
 
-    await expect(createAutoDetectedDatasets(mockSavedObjectsClient, detection)).rejects.toThrow(
-      'Failed to create trace dataset'
-    );
+    const result = await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
+
+    // Should return null instead of throwing
+    expect(result.traceDatasetId).toBeNull();
+    expect(result.logDatasetId).toBeNull();
+    expect(result.correlationId).toBeNull();
   });
 
-  it('should propagate errors when log dataset creation fails', async () => {
+  it('should handle errors gracefully when log dataset creation fails', async () => {
     const detection: DetectionResult = {
       tracesDetected: false,
       logsDetected: true,
@@ -467,9 +471,12 @@ describe('createAutoDetectedDatasets', () => {
     const error = new Error('Failed to create log dataset');
     mockSavedObjectsClient.create.mockRejectedValue(error);
 
-    await expect(createAutoDetectedDatasets(mockSavedObjectsClient, detection)).rejects.toThrow(
-      'Failed to create log dataset'
-    );
+    const result = await createAutoDetectedDatasets(mockSavedObjectsClient, detection);
+
+    // Should return null instead of throwing
+    expect(result.traceDatasetId).toBeNull();
+    expect(result.logDatasetId).toBeNull();
+    expect(result.correlationId).toBeNull();
   });
 
   it('should propagate errors when correlation creation fails', async () => {
