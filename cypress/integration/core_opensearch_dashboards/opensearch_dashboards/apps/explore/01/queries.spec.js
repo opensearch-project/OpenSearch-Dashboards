@@ -72,6 +72,7 @@ const queriesTestSuite = () => {
 
         // Query should persist across refresh
         cy.reload();
+        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
         cy.getElementByTestId(`discoverQueryElapsedMs`).should('be.visible');
 
         // Verify the state again after reload
