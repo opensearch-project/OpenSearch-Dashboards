@@ -77,6 +77,8 @@ const queriesTestSuite = () => {
         cy.getElementByTestId('datasetSelectButton', { timeout: 30000 })
           .should('be.visible')
           .should('not.be.disabled');
+        // Wait for page to fully stabilize and query to execute
+        cy.osd.waitForLoader(true);
         cy.getElementByTestId(`discoverQueryElapsedMs`, { timeout: 30000 }).should('be.visible');
 
         // Verify the state again after reload
