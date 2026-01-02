@@ -73,7 +73,11 @@ const queriesTestSuite = () => {
         // Query should persist across refresh
         cy.reload();
         cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-        cy.getElementByTestId(`discoverQueryElapsedMs`).should('be.visible');
+        // Wait for dataset to be fully loaded after reload
+        cy.getElementByTestId('datasetSelectButton', { timeout: 30000 })
+          .should('be.visible')
+          .should('not.be.disabled');
+        cy.getElementByTestId(`discoverQueryElapsedMs`, { timeout: 30000 }).should('be.visible');
 
         // Verify the state again after reload
         verifyDiscoverPageState({

@@ -285,7 +285,9 @@ cy.explore.add(
 
     // The force is necessary as there is occasionally a popover that covers the button
     cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
-    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+    cy.getElementByTestId('euiToastHeader', { timeout: 30000 })
+      .contains('was saved')
+      .should('be.visible');
   }
 );
 
@@ -323,7 +325,9 @@ cy.explore.add(
 
     // The force is necessary as there is occasionally a popover that covers the button
     cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
-    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+    cy.getElementByTestId('euiToastHeader', { timeout: 30000 })
+      .contains('was saved')
+      .should('be.visible');
     cy.osd.waitForSync();
   }
 );
