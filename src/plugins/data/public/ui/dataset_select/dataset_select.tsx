@@ -61,6 +61,22 @@ interface ViewDatasetsModalProps {
   services: IDataPluginServices;
 }
 
+const isDatasetCompatibleWithSignalType = (
+  dataset: DetailedDataset,
+  signalType: string | null
+): boolean => {
+  if (!signalType) return true;
+
+  if (signalType === CORE_SIGNAL_TYPES.TRACES) {
+    return dataset.signalType === CORE_SIGNAL_TYPES.TRACES;
+  } else if (signalType === CORE_SIGNAL_TYPES.LOGS) {
+    return dataset.signalType === CORE_SIGNAL_TYPES.LOGS || !dataset.signalType;
+  } else if (signalType === CORE_SIGNAL_TYPES.METRICS) {
+    return dataset.signalType === CORE_SIGNAL_TYPES.METRICS || !dataset.signalType;
+  }
+  return true;
+};
+
 const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
   datasets,
   isLoading,
@@ -263,17 +279,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
 
       const matchingDataset = datasets.find((d) => d.id === currentDataset.id);
       if (matchingDataset) {
-        // Check if matching dataset is compatible with current signal type
-        let isCompatible = true;
-        if (signalType === CORE_SIGNAL_TYPES.TRACES) {
-          isCompatible = matchingDataset.signalType === CORE_SIGNAL_TYPES.TRACES;
-        } else if (signalType === CORE_SIGNAL_TYPES.LOGS) {
-          isCompatible =
-            matchingDataset.signalType === CORE_SIGNAL_TYPES.LOGS || !matchingDataset.signalType;
-        } else if (signalType === CORE_SIGNAL_TYPES.METRICS) {
-          isCompatible =
-            matchingDataset.signalType === CORE_SIGNAL_TYPES.METRICS || !matchingDataset.signalType;
-        }
+        const isCompatible = isDatasetCompatibleWithSignalType(matchingDataset, signalType);
 
         if (isCompatible) {
           setSelectedDataset(matchingDataset);
@@ -301,17 +307,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
         signalType: dataView.signalType,
       } as DetailedDataset;
 
-      // Check if dataset is compatible with current signal type before setting it
-      let isCompatible = true;
-      if (signalType === CORE_SIGNAL_TYPES.TRACES) {
-        isCompatible = detailedDataset.signalType === CORE_SIGNAL_TYPES.TRACES;
-      } else if (signalType === CORE_SIGNAL_TYPES.LOGS) {
-        isCompatible =
-          detailedDataset.signalType === CORE_SIGNAL_TYPES.LOGS || !detailedDataset.signalType;
-      } else if (signalType === CORE_SIGNAL_TYPES.METRICS) {
-        isCompatible =
-          detailedDataset.signalType === CORE_SIGNAL_TYPES.METRICS || !detailedDataset.signalType;
-      }
+      const isCompatible = isDatasetCompatibleWithSignalType(detailedDataset, signalType);
 
       if (isCompatible) {
         setSelectedDataset(detailedDataset);

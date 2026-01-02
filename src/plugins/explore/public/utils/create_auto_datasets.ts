@@ -39,7 +39,7 @@ export async function createAutoDetectedDatasets(
       const existingPatterns = await savedObjectsClient.find({
         type: 'index-pattern',
         searchFields: ['title'],
-        search: `"${detection.tracePattern}"`,
+        search: detection.tracePattern,
         hasReference: effectiveDataSourceId
           ? { type: 'data-source', id: effectiveDataSourceId }
           : undefined,
@@ -112,7 +112,7 @@ export async function createAutoDetectedDatasets(
       const existingPatterns = await savedObjectsClient.find({
         type: 'index-pattern',
         searchFields: ['title'],
-        search: `"${detection.logPattern}"`,
+        search: detection.logPattern,
         hasReference: effectiveDataSourceId
           ? { type: 'data-source', id: effectiveDataSourceId }
           : undefined,
