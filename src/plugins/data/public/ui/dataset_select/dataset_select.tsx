@@ -103,6 +103,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
     updateSelectedDataset();
   }, [currentDataset, dataViews, datasets]);
 
+  // To trigger test
   const datasetTypeConfig = datasetService.getType(
     selectedDataset?.sourceDatasetRef?.type || selectedDataset?.type || ''
   );
