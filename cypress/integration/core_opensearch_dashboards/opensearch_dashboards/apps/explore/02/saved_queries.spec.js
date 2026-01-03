@@ -55,6 +55,13 @@ const loadSavedQuery = (config) => {
   });
 
   cy.getElementByTestId('discoverNewButton').click();
+
+  // Wait for page to fully reset after clicking "New"
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+  cy.getElementByTestId('datasetSelectButton', { timeout: 10000 })
+    .should('be.visible')
+    .should('not.be.disabled');
+
   // Todo - Date Picker sometimes does not load when expected. Have to set dataset and query language again.
   cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
@@ -82,6 +89,12 @@ const modifyAndVerifySavedQuery = (config, saveAsNewQueryName) => {
   cy.explore.updateSavedQuery(`${workspaceName}-${saveAsNewQueryName}`, true, true, true);
 
   cy.reload();
+  // Wait for page to fully load after reload
+  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+  cy.getElementByTestId('datasetSelectButton', { timeout: 10000 })
+    .should('be.visible')
+    .should('not.be.disabled');
+
   cy.explore.loadSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
   // wait for saved query to load
   cy.getElementByTestId('docTable').should('be.visible');
