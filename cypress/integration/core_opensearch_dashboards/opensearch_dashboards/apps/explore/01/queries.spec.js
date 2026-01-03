@@ -154,7 +154,8 @@ const queriesTestSuite = () => {
         cy.get('button[role="tab"]').contains('Logs').click();
         cy.get('button[role="tab"][aria-selected="true"]').contains('Logs').should('be.visible');
 
-        cy.explore.setTopNavDate(START_TIME, START_TIME);
+        // Change date range to trigger query re-execution (use valid range)
+        cy.explore.setTopNavDate('Jan 1, 2020 @ 00:00:00.000', 'Jan 2, 2020 @ 00:00:00.000');
 
         cy.getElementByTestId('exploreQueryExecutionButton').click();
         cy.osd.waitForLoader(true);
