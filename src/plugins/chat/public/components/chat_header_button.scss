@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// This is for the gradient animation colors
+/* stylelint-disable @osd/stylelint/no_restricted_values */
+
 .chatHeaderButton {
   &__container {
     display: flex;
@@ -32,5 +35,32 @@
   &__content {
     height: 100%;
     box-sizing: border-box;
+  }
+
+  &__button {
+    position: relative;
+    border-radius: $ouiBorderRadius;
+    background:
+      linear-gradient(180deg, rgba(87, 196, 251, 10%) 0%, rgba(165, 20, 255, 10%) 100%),
+      $ouiColorEmptyShade !important;
+
+    .chatHeaderButton__icon {
+      opacity: 0.8 !important;
+      transition: opacity 0.2s ease;
+      margin-right: 4px !important;
+      position: relative !important;
+      top: 4px !important;
+    }
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      z-index: -1;
+      border-radius: 6px;
+      background: linear-gradient(90deg, #00d0ff 0%, #1034d4 50%, #9b1fa8 100%);
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
   }
 }

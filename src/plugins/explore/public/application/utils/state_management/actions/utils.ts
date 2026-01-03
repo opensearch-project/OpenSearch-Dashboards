@@ -14,6 +14,7 @@ import { ExploreServices } from '../../../../types';
 import { ISearchResult } from '../slices';
 import { createHistogramConfigs } from '../../../../components/chart/utils';
 import { RootState } from '../store';
+import { calculateTraceInterval } from '../constants';
 
 export interface HistogramConfig {
   histogramConfigs: AggConfigs | undefined;
@@ -154,7 +155,11 @@ export const processRawResultsForHistogram = (
 
     const timestampIdx = fieldSchema.findIndex((col: any) => col.name === '@timestamp');
     const breakdownIdx = fieldSchema.findIndex((col: any) => col.name === breakdownField);
-    const countIdx = fieldSchema.findIndex((col: any) => col.name === 'count');
+    // Support both 'count' and 'count()' column names from PPL
+    let countIdx = fieldSchema.findIndex((col: any) => col.name === 'count()');
+    if (countIdx === -1) {
+      countIdx = fieldSchema.findIndex((col: any) => col.name === 'count');
+    }
 
     if (breakdownIdx === -1 || countIdx === -1) {
       return rawResults;
@@ -264,7 +269,7 @@ export const createHistogramConfigWithInterval = (
   );
   const aggs = histogramConfigs?.toDsl();
 
-  if (!aggs) {
+  if (!aggs || !histogramConfigs) {
     return null;
   }
 
@@ -273,14 +278,39 @@ export const createHistogramConfigWithInterval = (
     'YYYY-MM-DD HH:mm:ss.SSS'
   );
 
-  const finalInterval =
-    aggs[2].date_histogram.fixed_interval ??
-    aggs[2].date_histogram.calendar_interval ??
-    services.data.search.aggs.calculateAutoTimeExpression({
-      from: fromDate,
-      to: toDate,
-      mode: 'absolute',
-    });
+  // Extract interval directly from the buckets we configured
+  let finalInterval: string = effectiveInterval;
+
+  // Find the date histogram aggregation - it could be at different indices
+  const dateHistogramAgg = histogramConfigs.aggs?.find(
+    (agg: any) => agg && agg.type && agg.type.name === 'date_histogram'
+  ) as any;
+
+  if (dateHistogramAgg?.buckets) {
+    // For traces with custom bar target, bypass TimeBuckets and calculate interval manually
+    // TimeBuckets doesn't honor our minimum interval settings reliably
+    if (customBarTarget) {
+      const bounds = services.data.query.timefilter.timefilter.calculateBounds(
+        services.data.query.timefilter.timefilter.getTime()
+      );
+      const diffDays =
+        bounds.max && bounds.min
+          ? (bounds.max.valueOf() - bounds.min.valueOf()) / (1000 * 60 * 60 * 24)
+          : 0;
+
+      const calculatedInterval = calculateTraceInterval(diffDays);
+      if (calculatedInterval) {
+        finalInterval = calculatedInterval;
+      } else {
+        // For < 7 days, use TimeBuckets
+        const bucketInterval = dateHistogramAgg.buckets.getInterval();
+        finalInterval = bucketInterval.expression || bucketInterval.interval || effectiveInterval;
+      }
+    } else {
+      const bucketInterval = dateHistogramAgg.buckets.getInterval();
+      finalInterval = bucketInterval.expression || bucketInterval.interval || effectiveInterval;
+    }
+  }
 
   return {
     histogramConfigs,

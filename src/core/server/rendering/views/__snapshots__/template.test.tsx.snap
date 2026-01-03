@@ -13,6 +13,10 @@ Array [
     content="width=device-width"
     name="viewport"
   />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
+  />,
   <title>
     OpenSearch Dashboards
   </title>,
@@ -132,15 +136,6 @@ Array [
       class="osdWelcomeText"
     />
   </div>,
-  <script>
-    
-            // Since this is an unsafe inline script, this code will not run
-            // in browsers that support content security policy(CSP). This is
-            // intentional as we check for the existence of __osdCspNotEnforced__ in
-            // bootstrap.
-            window.__osdCspNotEnforced__ = true;
-          
-  </script>,
   <script
     src="[object Object]/bootstrap.js"
   />,
@@ -159,6 +154,10 @@ Array [
   <meta
     content="width=device-width"
     name="viewport"
+  />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
   />,
   <title>
     OpenSearch Dashboards
@@ -279,15 +278,6 @@ Array [
       class="osdWelcomeText"
     />
   </div>,
-  <script>
-    
-            // Since this is an unsafe inline script, this code will not run
-            // in browsers that support content security policy(CSP). This is
-            // intentional as we check for the existence of __osdCspNotEnforced__ in
-            // bootstrap.
-            window.__osdCspNotEnforced__ = true;
-          
-  </script>,
   <script
     src="[object Object]/bootstrap.js"
   />,
@@ -306,6 +296,10 @@ Array [
   <meta
     content="width=device-width"
     name="viewport"
+  />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
   />,
   <title>
     OpenSearch Dashboards
@@ -432,15 +426,6 @@ Array [
       class="osdWelcomeText"
     />
   </div>,
-  <script>
-    
-            // Since this is an unsafe inline script, this code will not run
-            // in browsers that support content security policy(CSP). This is
-            // intentional as we check for the existence of __osdCspNotEnforced__ in
-            // bootstrap.
-            window.__osdCspNotEnforced__ = true;
-          
-  </script>,
   <script
     src="[object Object]/bootstrap.js"
   />,
@@ -459,6 +444,10 @@ Array [
   <meta
     content="width=device-width"
     name="viewport"
+  />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
   />,
   <title>
     OpenSearch Dashboards
@@ -585,15 +574,6 @@ Array [
       class="osdWelcomeText"
     />
   </div>,
-  <script>
-    
-            // Since this is an unsafe inline script, this code will not run
-            // in browsers that support content security policy(CSP). This is
-            // intentional as we check for the existence of __osdCspNotEnforced__ in
-            // bootstrap.
-            window.__osdCspNotEnforced__ = true;
-          
-  </script>,
   <script
     src="[object Object]/bootstrap.js"
   />,
@@ -612,6 +592,10 @@ Array [
   <meta
     content="width=device-width"
     name="viewport"
+  />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
   />,
   <title>
     OpenSearch Dashboards
@@ -732,15 +716,6 @@ Array [
       class="osdWelcomeText"
     />
   </div>,
-  <script>
-    
-            // Since this is an unsafe inline script, this code will not run
-            // in browsers that support content security policy(CSP). This is
-            // intentional as we check for the existence of __osdCspNotEnforced__ in
-            // bootstrap.
-            window.__osdCspNotEnforced__ = true;
-          
-  </script>,
   <script
     src="[object Object]/bootstrap.js"
   />,
@@ -759,6 +734,10 @@ Array [
   <meta
     content="width=device-width"
     name="viewport"
+  />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
   />,
   <title>
     custom title
@@ -879,15 +858,6 @@ Array [
       class="osdWelcomeText"
     />
   </div>,
-  <script>
-    
-            // Since this is an unsafe inline script, this code will not run
-            // in browsers that support content security policy(CSP). This is
-            // intentional as we check for the existence of __osdCspNotEnforced__ in
-            // bootstrap.
-            window.__osdCspNotEnforced__ = true;
-          
-  </script>,
   <script
     src="[object Object]/bootstrap.js"
   />,
@@ -906,6 +876,10 @@ Array [
   <meta
     content="width=device-width"
     name="viewport"
+  />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
   />,
   <title>
     custom title
@@ -1032,15 +1006,6 @@ Array [
       class="osdWelcomeText"
     />
   </div>,
-  <script>
-    
-            // Since this is an unsafe inline script, this code will not run
-            // in browsers that support content security policy(CSP). This is
-            // intentional as we check for the existence of __osdCspNotEnforced__ in
-            // bootstrap.
-            window.__osdCspNotEnforced__ = true;
-          
-  </script>,
   <script
     src="[object Object]/bootstrap.js"
   />,
@@ -1059,6 +1024,10 @@ Array [
   <meta
     content="width=device-width"
     name="viewport"
+  />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
   />,
   <title>
     custom title
@@ -1179,15 +1148,6 @@ Array [
       class="osdWelcomeText"
     />
   </div>,
-  <script>
-    
-            // Since this is an unsafe inline script, this code will not run
-            // in browsers that support content security policy(CSP). This is
-            // intentional as we check for the existence of __osdCspNotEnforced__ in
-            // bootstrap.
-            window.__osdCspNotEnforced__ = true;
-          
-  </script>,
   <script
     src="[object Object]/bootstrap.js"
   />,
@@ -1206,6 +1166,10 @@ Array [
   <meta
     content="width=device-width"
     name="viewport"
+  />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
   />,
   <title>
     OpenSearch Dashboards
@@ -1326,15 +1290,6 @@ Array [
       class="osdWelcomeText"
     />
   </div>,
-  <script>
-    
-            // Since this is an unsafe inline script, this code will not run
-            // in browsers that support content security policy(CSP). This is
-            // intentional as we check for the existence of __osdCspNotEnforced__ in
-            // bootstrap.
-            window.__osdCspNotEnforced__ = true;
-          
-  </script>,
   <script
     src="[object Object]/bootstrap.js"
   />,
@@ -1353,6 +1308,10 @@ Array [
   <meta
     content="width=device-width"
     name="viewport"
+  />,
+  <meta
+    content="test-nonce"
+    name="csp-nonce"
   />,
   <title>
     OpenSearch Dashboards
@@ -1473,15 +1432,6 @@ Array [
       class="osdWelcomeText"
     />
   </div>,
-  <script>
-    
-            // Since this is an unsafe inline script, this code will not run
-            // in browsers that support content security policy(CSP). This is
-            // intentional as we check for the existence of __osdCspNotEnforced__ in
-            // bootstrap.
-            window.__osdCspNotEnforced__ = true;
-          
-  </script>,
   <script
     src="[object Object]/bootstrap.js"
   />,

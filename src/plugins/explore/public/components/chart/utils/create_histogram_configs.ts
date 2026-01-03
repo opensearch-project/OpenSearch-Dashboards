@@ -11,6 +11,7 @@ import {
   IAggConfig,
 } from '../../../../../data/public';
 import { IUiSettingsClient } from '../../../../../../core/public';
+import { calculateTraceInterval } from '../../../application/utils/state_management/constants';
 
 const { TimeBuckets } = search.aggs;
 
@@ -67,8 +68,16 @@ export function createHistogramConfigs(
         // Set bounds and interval on custom buckets
         const timeRange = data.query.timefilter.timefilter.getTime();
         const bounds = data.query.timefilter.timefilter.calculateBounds(timeRange);
+        const diffDays =
+          bounds.max && bounds.min
+            ? (bounds.max.valueOf() - bounds.min.valueOf()) / (1000 * 60 * 60 * 24)
+            : 0;
+
+        // Calculate interval based on time range to get ~15-25 buckets
+        const minInterval = calculateTraceInterval(diffDays);
+
         customBuckets.setBounds(bounds);
-        customBuckets.setInterval(histogramInterval);
+        customBuckets.setInterval(minInterval || histogramInterval);
 
         // Note: We use delete + Object.defineProperty to override the buckets property
         // because the original buckets property is defined as a getter on the prototype,

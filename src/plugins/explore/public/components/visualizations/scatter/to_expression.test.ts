@@ -86,10 +86,8 @@ describe('Scatter Chart to_expression', () => {
     },
     standardAxes: [
       {
-        id: 'Axis-1',
         position: Positions.BOTTOM,
         show: true,
-        style: {},
         labels: {
           show: true,
           rotate: 0,
@@ -101,15 +99,10 @@ describe('Scatter Chart to_expression', () => {
         },
         grid: { showLines: true },
         axisRole: AxisRole.X,
-        field: {
-          default: mockNumericalColumns[0],
-        },
       },
       {
-        id: 'Axis-2',
         position: Positions.LEFT,
         show: true,
-        style: {},
         labels: {
           show: true,
           rotate: 0,
@@ -121,9 +114,6 @@ describe('Scatter Chart to_expression', () => {
           text: 'Y Axis',
         },
         axisRole: AxisRole.Y,
-        field: {
-          default: mockNumericalColumns[1],
-        },
       },
     ],
   };

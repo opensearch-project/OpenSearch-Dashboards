@@ -443,6 +443,6 @@ export {
   ChatWindowState,
 } from './chat';
 
-export { debounce } from './utils';
+export { debounce, getNonce } from './utils';
 
 export { searchNavigationLinks, GlobalSearchPageItem, renderNavGroupElement } from './chrome';
