@@ -232,6 +232,7 @@ exports.Cluster = class Cluster {
    * @property {String} version - version of OpenSearch
    */
   async setupSql(installPath, version) {
+    await this.installSqlPlugin(installPath, version, 'opensearch-job-scheduler');
     await this.installSqlPlugin(installPath, version, 'opensearch-sql');
     await this.installSqlPlugin(installPath, version, 'opensearch-observability');
   }
