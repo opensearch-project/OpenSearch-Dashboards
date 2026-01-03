@@ -55,6 +55,7 @@ import {
   QueryPanelActionsRegistryServiceSetup,
 } from './services/query_panel_actions_registry';
 import { SlotRegistryService, SlotRegistryServiceStart } from './services/slot_registry';
+import { SmartActionRegistryService } from './services/smart_action_registry/smart_action_registry_service';
 
 // ============================================================================
 // PLUGIN INTERFACES - What Explore provides to other plugins
@@ -65,6 +66,9 @@ export interface ExplorePluginSetup {
   queryPanelActionsRegistry: QueryPanelActionsRegistryServiceSetup;
   logActionRegistry: {
     registerAction: (action: import('./types/log_actions').LogActionDefinition) => void;
+  };
+  smartActionRegistry: {
+    registerAction: (action: import('./types/smart_actions').SmartActionDefinition) => void;
   };
   docViews: {
     addDocView: (docViewSpec: unknown) => void;
@@ -183,12 +187,18 @@ export interface ExploreServices {
   tabRegistry: TabRegistryService;
   visualizationRegistry: VisualizationRegistryService;
   queryPanelActionsRegistry: QueryPanelActionsRegistryService;
+  smartActionRegistry: SmartActionRegistryService;
   slotRegistry?: SlotRegistryService;
   expressions: ExpressionsStart;
   contextProvider?: ContextProviderStart;
 
   dashboard: DashboardStart;
   keyboardShortcut?: KeyboardShortcutStart;
+
+  // Chat service for smart actions
+  chat?: {
+    chatService: import('../../../core/public').ChatServiceStart;
+  };
 
   supportedTypes?: string[];
   isDatasetManagementEnabled: boolean;

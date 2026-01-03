@@ -17,6 +17,7 @@ import { VisualizationRegistryService } from './services/visualization_registry_
 import { AppStore } from './application/utils/state_management/store';
 import { QueryPanelActionsRegistryService } from './services/query_panel_actions_registry';
 import { SlotRegistryService } from './services/slot_registry';
+import { SmartActionRegistryService } from './services/smart_action_registry/smart_action_registry_service';
 
 export function buildServices(
   core: CoreStart,
@@ -25,6 +26,7 @@ export function buildServices(
   tabRegistry: TabRegistryService,
   visualizationRegistry: VisualizationRegistryService,
   queryPanelActionsRegistry: QueryPanelActionsRegistryService,
+  smartActionRegistry: SmartActionRegistryService,
   isDatasetManagementEnabled: boolean = false,
   slotRegistry?: SlotRegistryService
 ): ExploreServices {
@@ -93,6 +95,7 @@ export function buildServices(
     tabRegistry,
     visualizationRegistry,
     queryPanelActionsRegistry,
+    smartActionRegistry,
     slotRegistry,
     expressions: plugins.expressions,
 

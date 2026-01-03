@@ -8,6 +8,7 @@ import { AgUiAgent } from './ag_ui_agent';
 import { RunAgentInput, Message, UserMessage, ToolMessage } from '../../common/types';
 import type { ToolDefinition } from '../../../context_provider/public';
 import { AssistantActionService } from '../../../context_provider/public';
+import { ChatEventHandler } from './chat_event_handler';
 import { ChatLayoutMode } from '../components/chat_header_button';
 import type { ChatWindowInstance } from '../components/chat_window';
 import {
@@ -55,6 +56,9 @@ export class ChatService {
   // Subscription to assistant action service for tool updates
   private toolSubscription?: Subscription;
 
+  // Background event handler for tool processing when no UI is present
+  private backgroundEventHandler: ChatEventHandler;
+
   constructor(
     uiSettings: IUiSettingsClient,
     coreChatService?: ChatServiceStart,
@@ -82,6 +86,17 @@ export class ChatService {
     this.toolSubscription = assistantActionService.getState$().subscribe((state) => {
       this.availableTools = state.toolDefinitions;
     });
+
+    // Create background event handler for headless tool processing
+    this.backgroundEventHandler = new ChatEventHandler(
+      assistantActionService,
+      this,
+      () => {}, // Empty timeline update callback - no UI updates needed
+      () => {}, // Empty streaming state callback - no UI updates needed
+      () => this.currentMessages // Provide current messages for tool context
+    );
+
+    console.log('🏗️ ChatService: Background ChatEventHandler created for headless tool processing');
   }
 
   public getThreadId = () => {
@@ -394,18 +409,40 @@ export class ChatService {
 
     // Wrap observable to track completion
     const trackedObservable = new Observable((subscriber: any) => {
+      console.log(
+        '🔌 ChatService.sendMessage - Observable subscription started (someone is listening to events)'
+      );
       const subscription = observable.subscribe({
-        next: (value: any) => subscriber.next(value),
+        next: async (value: any) => {
+          // Process events through background handler for tool execution
+          try {
+            console.log(
+              '🔄 ChatService: Processing event through background handler:',
+              value?.type
+            );
+            await this.backgroundEventHandler.handleEvent(value);
+          } catch (error) {
+            console.error('❌ ChatService: Background event processing failed:', error);
+          }
+
+          // Also emit to subscribers (including ChatWindow) - unchanged behavior
+          subscriber.next(value);
+        },
         error: (error: any) => {
+          console.log('❌ ChatService.sendMessage - Observable error');
           this.removeActiveRequest(requestId);
           subscriber.error(error);
         },
         complete: () => {
+          console.log('✅ ChatService.sendMessage - Observable completed');
           this.removeActiveRequest(requestId);
           subscriber.complete();
         },
       });
-      return () => subscription.unsubscribe();
+      return () => {
+        console.log('🔌 ChatService.sendMessage - Observable subscription ended (unsubscribed)');
+        subscription.unsubscribe();
+      };
     });
 
     // Store the observable as events$ for tool call handling
@@ -607,5 +644,12 @@ export class ChatService {
       this.toolSubscription.unsubscribe();
       this.toolSubscription = undefined;
     }
+
+    // Clean up background event handler state
+    if (this.backgroundEventHandler) {
+      this.backgroundEventHandler.clearState();
+    }
+
+    console.log('🧹 ChatService: Cleaned up background event handler');
   }
 }

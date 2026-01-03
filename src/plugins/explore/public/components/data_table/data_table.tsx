@@ -18,6 +18,8 @@ import {
 import { TableRow } from './table_row/table_row';
 import { LegacyDisplayedColumn } from '../../helpers/data_table_helper';
 import { Pagination } from './pagination/pagination';
+import { SmartActionMenu, useSmartActionMenu } from '../smart_action_menu';
+import { FieldSelectionContext } from '../../types/smart_actions';
 
 export interface DataTableProps {
   columns: LegacyDisplayedColumn[];
@@ -259,6 +261,187 @@ const DataTableUI = ({
   expandedTableHeader,
 }: DataTableProps) => {
   const columnNames = columns.map((column) => column.name);
+
+  // Smart action menu integration - using registry approach
+  const { menuState, openMenu, closeMenu } = useSmartActionMenu();
+
+  // Extract field context from DOM event for Smart Actions
+  const extractFieldContext = useCallback(
+    (target: HTMLElement, overrideSelectedText?: string): FieldSelectionContext | null => {
+      console.log('🔍 Starting field context extraction for:', target);
+
+      // Get selected text first
+      const selectedText =
+        overrideSelectedText ||
+        window.getSelection()?.toString()?.trim() ||
+        target.textContent?.trim() ||
+        '';
+
+      if (!selectedText) {
+        console.log('❌ No selected text found');
+        return null;
+      }
+
+      console.log('📝 Selected text:', selectedText);
+
+      // Strategy 1: Check for Expanded Document View
+      const expandedValueCell = target.closest('.exploreDocViewer__value');
+      if (expandedValueCell) {
+        console.log('📖 Expanded view detected');
+
+        // Get field name from data-test-subj="tableDocViewRow-{fieldName}-value"
+        const testSubj = expandedValueCell.getAttribute('data-test-subj');
+        const fieldNameMatch = testSubj?.match(/tableDocViewRow-(.+)-value/);
+        const fieldName = fieldNameMatch?.[1];
+
+        if (!fieldName) {
+          console.log('❌ Could not extract field name from:', testSubj);
+          return null;
+        }
+
+        console.log('✅ Expanded view field name:', fieldName);
+
+        return {
+          selectedText,
+          fieldName,
+          fieldType: 'text', // Default for now - can be enhanced later
+          fieldValue: selectedText,
+          documentId: '', // Can be enhanced later
+          rowIndex: 0, // Can be enhanced later
+          element: target,
+        };
+      }
+
+      // Strategy 2: Check for Collapsed View (Description List in Source Column)
+      const descriptionCell = target.closest('.euiDescriptionList__description');
+      if (descriptionCell) {
+        console.log('📋 Collapsed view (description list) detected');
+
+        // Find the previous sibling <dt> element with field name
+        const titleElement = descriptionCell.previousElementSibling;
+        if (!titleElement?.classList.contains('exploreDescriptionListFieldTitle')) {
+          console.log('❌ Could not find field title element');
+          return null;
+        }
+
+        // Extract field name (remove trailing ":")
+        const fieldName = titleElement.textContent?.replace(':', '').trim();
+        if (!fieldName) {
+          console.log('❌ Could not extract field name from title');
+          return null;
+        }
+
+        console.log('✅ Collapsed view field name:', fieldName);
+
+        return {
+          selectedText,
+          fieldName,
+          fieldType: 'text', // Default for now - can be enhanced later
+          fieldValue: selectedText,
+          documentId: '', // Can be enhanced later
+          rowIndex: 0, // Can be enhanced later
+          element: target,
+        };
+      }
+
+      // Strategy 3: Check for Individual Field Cells (like timestamp column)
+      const fieldCell = target.closest('[data-field-name]') as HTMLElement;
+      if (fieldCell) {
+        console.log('📊 Individual field cell detected');
+
+        const fieldName = fieldCell.getAttribute('data-field-name');
+        const fieldType = fieldCell.getAttribute('data-field-type');
+        const fieldValue = fieldCell.getAttribute('data-field-value');
+        const documentId = fieldCell.getAttribute('data-document-id');
+        const rowIndex = fieldCell.getAttribute('data-row-index');
+
+        console.log('Extracted field attributes:', { fieldName, fieldType, documentId, rowIndex });
+
+        if (!fieldName || !fieldType) {
+          console.log('❌ Missing required field attributes');
+          return null;
+        }
+
+        console.log('✅ Individual field cell - field name:', fieldName);
+
+        return {
+          selectedText,
+          fieldName,
+          fieldType,
+          fieldValue: fieldValue ? JSON.parse(fieldValue) : null,
+          documentId: documentId || '',
+          rowIndex: rowIndex ? parseInt(rowIndex, 10) : 0,
+          element: target,
+        };
+      }
+
+      console.log(
+        '❌ Element not found in any supported context (expanded, collapsed, or individual field)'
+      );
+      return null;
+    },
+    []
+  );
+
+  // Handle text selection events for Smart Actions
+  const handleTextSelection = useCallback(
+    (event: React.MouseEvent) => {
+      console.log('🖱️ Mouse up event triggered');
+
+      const selection = window.getSelection();
+      const target = event.target as HTMLElement;
+
+      console.log('🎯 Target element:', target);
+      console.log('📍 Target classes:', target.className);
+      console.log('🔍 Selection object:', selection);
+
+      // Check if text is selected
+      if (selection && !selection.isCollapsed && selection.toString().trim().length > 0) {
+        const selectedText = selection.toString().trim();
+
+        const fieldContext = extractFieldContext(target, selectedText);
+        if (!fieldContext) {
+          return;
+        }
+
+        // Open smart action menu near the selection
+        const range = selection.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+
+        openMenu(fieldContext, {
+          x: rect.right + 10, // Position menu slightly to the right of selection
+          y: rect.top,
+        });
+      } else if (event.shiftKey) {
+        // Fallback: Shift+Click to test with whole cell content
+        const fieldContext = extractFieldContext(target);
+        if (!fieldContext) {
+          return;
+        }
+        console.log('📍 Mouse event coordinates:');
+        console.log('📍   clientX (viewport):', event.clientX);
+        console.log('📍   clientY (viewport):', event.clientY);
+        console.log('📍   pageX (document):', event.pageX);
+        console.log('📍   pageY (document):', event.pageY);
+        console.log('📍   screenX (screen):', event.screenX);
+        console.log('📍   screenY (screen):', event.screenY);
+        console.log('📍 Window scroll:', { scrollX: window.scrollX, scrollY: window.scrollY });
+        console.log(
+          '📍 Document scroll element:',
+          document.documentElement.scrollTop,
+          document.documentElement.scrollLeft
+        );
+
+        openMenu(fieldContext, {
+          x: event.clientX,
+          y: event.clientY,
+        });
+      } else {
+        // No text selected and no shift key - ignoring mouseup
+      }
+    },
+    [extractFieldContext, openMenu]
+  );
 
   /* INFINITE_SCROLLED_PAGE_SIZE:
    * Infinitely scrolling, a page of 10 rows is shown and then 4 pages are lazy-loaded for a total of 5 pages.
@@ -521,7 +704,12 @@ const DataTableUI = ({
           sampleSize={sampleSize}
         />
       ) : null}
-      <table data-test-subj="docTable" className="explore-table table" ref={tableRef}>
+      <table
+        data-test-subj="docTable"
+        className="explore-table table"
+        ref={tableRef}
+        onMouseUp={handleTextSelection}
+      >
         <thead>
           <TableHeader displayedColumns={columns} onRemoveColumn={onRemoveColumn} />
         </thead>
@@ -587,6 +775,29 @@ const DataTableUI = ({
           sampleSize={sampleSize}
         />
       ) : null}
+
+      {/* Smart Action Menu - using registry approach */}
+      {(() => {
+        console.log('🖼️ DataTable render - menu state:', menuState);
+        if (menuState?.isOpen && menuState.fieldContext) {
+          console.log('📱 Rendering SmartActionMenu component');
+          return (
+            <SmartActionMenu
+              fieldContext={menuState.fieldContext}
+              position={menuState.position}
+              onClose={closeMenu}
+            />
+          );
+        } else {
+          console.log(
+            '⏭️ Not rendering SmartActionMenu - isOpen:',
+            menuState?.isOpen,
+            'hasContext:',
+            !!menuState?.fieldContext
+          );
+          return null;
+        }
+      })()}
     </div>
   );
 };

@@ -52,6 +52,10 @@ export class ChatEventHandler {
     private onStreamingStateChange: (isStreaming: boolean) => void,
     private getTimeline: () => Message[]
   ) {
+    console.log(
+      '🏗️ ChatEventHandler constructor called with chatService:',
+      chatService ? 'available' : 'null'
+    );
     this.toolExecutor = new ToolExecutor(assistantActionService);
   }
 
@@ -59,6 +63,7 @@ export class ChatEventHandler {
    * Main event handler - routes events to appropriate handlers
    */
   async handleEvent(event: ChatEvent): Promise<void> {
+    console.log('🔄 ChatEventHandler.handleEvent called with event type:', event.type);
     switch (event.type) {
       case EventType.RUN_STARTED:
         this.handleRunStarted(event);
@@ -262,6 +267,7 @@ export class ChatEventHandler {
    * Handle end of tool call - execute the tool
    */
   private async handleToolCallEnd(event: ToolCallEndEvent): Promise<void> {
+    console.log('🛠️ ChatEventHandler.handleToolCallEnd called with toolCallId:', event.toolCallId);
     const { toolCallId } = event;
     const toolCall = this.pendingToolCalls.get(toolCallId);
 
@@ -270,6 +276,8 @@ export class ChatEventHandler {
       console.warn(`Tool call not found: ${toolCallId}`);
       return;
     }
+
+    console.log('🛠️ ChatEventHandler.handleToolCallEnd - Found tool call:', toolCall.function.name);
 
     try {
       const isAgentTool = !this.assistantActionService.hasAction(toolCall.function.name);
@@ -284,7 +292,14 @@ export class ChatEventHandler {
       });
 
       // Execute the tool
+      console.log(
+        '🛠️ ChatEventHandler.handleToolCallEnd - About to execute tool:',
+        toolCall.function.name,
+        'with args:',
+        args
+      );
       const result = await this.toolExecutor.executeTool(toolCall.function.name, args);
+      console.log('🛠️ ChatEventHandler.handleToolCallEnd - Tool execution result:', result);
 
       if (result.waitingForAgentResponse) {
         // Agent will handle this tool and send results back via events
