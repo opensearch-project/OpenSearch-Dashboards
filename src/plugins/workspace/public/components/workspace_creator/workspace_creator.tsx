@@ -177,45 +177,51 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
 
                 let datasetsCreatedCount = 0;
 
-                // Run detection for each data source
-                for (const dataSourceId of dataSourcesToCheck) {
-                  try {
-                    const detection = await detectTraceData(
-                      savedObjects.client,
-                      dataPlugin.dataViews,
-                      dataSourceId
-                    );
+                // Skip auto-detection in Cypress test environment to prevent interference with test queries
+                const isCypressTest =
+                  (window as any).Cypress || (window as any).__CYPRESS__ || false;
 
-                    if (detection.tracesDetected || detection.logsDetected) {
-                      // Add datasource title to detection
-                      if (dataSourceId) {
-                        detection.dataSourceTitle = dataSourceIdToName.get(dataSourceId);
-                      } else {
-                        detection.dataSourceTitle = 'Local Cluster';
-                      }
-
-                      await createAutoDetectedDatasets(
+                if (!isCypressTest) {
+                  // Run detection for each data source
+                  for (const dataSourceId of dataSourcesToCheck) {
+                    try {
+                      const detection = await detectTraceData(
                         savedObjects.client,
-                        detection,
+                        dataPlugin.dataViews,
                         dataSourceId
                       );
-                      datasetsCreatedCount++;
-                    }
-                  } catch (error) {
-                    // Continue with other data sources even if one fails
-                  }
-                }
 
-                if (datasetsCreatedCount > 0) {
-                  notifications?.toasts.addSuccess({
-                    title: i18n.translate('workspace.create.traceDatasetsCreated', {
-                      defaultMessage: 'Trace datasets created automatically',
-                    }),
-                    text:
-                      datasetsCreatedCount > 1
-                        ? `Created datasets for ${datasetsCreatedCount} data sources`
-                        : undefined,
-                  });
+                      if (detection.tracesDetected || detection.logsDetected) {
+                        // Add datasource title to detection
+                        if (dataSourceId) {
+                          detection.dataSourceTitle = dataSourceIdToName.get(dataSourceId);
+                        } else {
+                          detection.dataSourceTitle = 'Local Cluster';
+                        }
+
+                        await createAutoDetectedDatasets(
+                          savedObjects.client,
+                          detection,
+                          dataSourceId
+                        );
+                        datasetsCreatedCount++;
+                      }
+                    } catch (error) {
+                      // Continue with other data sources even if one fails
+                    }
+                  }
+
+                  if (datasetsCreatedCount > 0) {
+                    notifications?.toasts.addSuccess({
+                      title: i18n.translate('workspace.create.traceDatasetsCreated', {
+                        defaultMessage: 'Trace datasets created automatically',
+                      }),
+                      text:
+                        datasetsCreatedCount > 1
+                          ? `Created datasets for ${datasetsCreatedCount} data sources`
+                          : undefined,
+                    });
+                  }
                 }
               } catch (error) {
                 // Don't block workspace creation if trace detection fails

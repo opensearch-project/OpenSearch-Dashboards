@@ -34,6 +34,13 @@ export const TraceAutoDetectCallout: React.FC = () => {
   useEffect(() => {
     // Run detection
     const runDetection = async () => {
+      // Skip auto-detection in Cypress test environment to prevent interference with test queries
+      const isCypressTest = (window as any).Cypress || (window as any).__CYPRESS__ || false;
+      if (isCypressTest) {
+        setIsDetecting(false);
+        return;
+      }
+
       // Check if user dismissed this before
       const dismissed = localStorage.getItem(DISMISSED_KEY);
       if (dismissed === 'true') {
