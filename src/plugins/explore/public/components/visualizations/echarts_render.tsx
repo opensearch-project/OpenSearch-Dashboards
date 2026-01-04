@@ -24,6 +24,10 @@ export const EchartsRender = ({ spec }: Props) => {
     []
   );
 
+  const gridArray = Array.isArray(spec?.grid) ? spec.grid : [];
+  const shouldScroll = gridArray.length > 10;
+  const widthPercentage = shouldScroll ? `${Math.ceil(gridArray.length / 10) * 100}%` : '100%';
+
   useEffect(() => {
     if (containerRef.current) {
       const echartsInstance = echarts.init(containerRef.current);
@@ -46,12 +50,20 @@ export const EchartsRender = ({ spec }: Props) => {
       instance.setOption(
         {
           ...spec,
-          grid: { top: 60, bottom: 60, left: 60, right: 60 },
         },
         { notMerge: true } // this is a must to update compulsorily otherwise will merge with previous option
       );
     }
   }, [spec, instance]);
 
-  return <div style={{ height: '100%', width: '100%' }} ref={containerRef} />;
+  return (
+    <div
+      style={{
+        height: '100%',
+        overflowX: 'auto',
+        ...(shouldScroll && { width: widthPercentage }),
+      }}
+      ref={containerRef}
+    />
+  );
 };
