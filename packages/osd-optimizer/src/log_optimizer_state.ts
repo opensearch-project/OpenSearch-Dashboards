@@ -48,6 +48,14 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
         const { event, state } = update;
 
         if (event?.type === 'worker stdio') {
+          // Filter out webpack 5 debug output that just shows directory paths
+          if (
+            event.stream === 'stdout' &&
+            event.line.trim().match(/^\/.*\/plugins\/.*\/public\s*$/)
+          ) {
+            // Skip logging these webpack 5 debug directory outputs
+            return;
+          }
           log.warning(`worker`, event.stream, event.line);
         }
 

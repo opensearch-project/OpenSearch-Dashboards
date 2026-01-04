@@ -30,6 +30,12 @@
 
 module.exports = {
   plugins: [
-    /*require('autoprefixer')()*/
+    // Empty function plugin to suppress PostCSS warnings
+    function () {
+      return {
+        postcssPlugin: 'postcss-noop',
+        Once() {},
+      };
+    },
   ],
 };

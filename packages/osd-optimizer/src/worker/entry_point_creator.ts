@@ -33,9 +33,12 @@ module.exports = function ({
 }: {
   entries: Array<{ importId: string; requirePath: string }>;
 }) {
-  const lines = entries.map(({ importId, requirePath }) => [
-    `__osdBundles__.define('${importId}', __webpack_require__, require.resolve('${requirePath}'))`,
-  ]);
+  // Webpack 5: Each entry creates a define statement that registers the module
+  // The bundleRequire is a function that returns the required module
+  // This avoids issues with require.resolve returning different formats in Webpack 5
+  const lines = entries.map(({ importId, requirePath }) => {
+    return `__osdBundles__.define('${importId}', () => require('${requirePath}'))`;
+  });
 
   return {
     code: lines.join('\n'),

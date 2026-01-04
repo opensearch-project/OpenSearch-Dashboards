@@ -29,8 +29,8 @@
  */
 
 import webpack from 'webpack';
-// @ts-ignore
-import Stats from 'webpack/lib/Stats';
+
+export const STATS_WARNINGS_FILTER = new RegExp(['(export .* was not found in)'].join(''));
 
 export function isFailureStats(stats: webpack.Stats) {
   if (stats.hasErrors()) {
@@ -45,21 +45,24 @@ export function isFailureStats(stats: webpack.Stats) {
   // exported, typescript has no choice but to emit the export. Fortunately,
   // the extraneous export should not be harmful, so we just suppress these warnings
   // https://github.com/TypeStrong/ts-loader#transpileonly-boolean-defaultfalse
-  const filteredWarnings = Stats.filterWarnings(warnings, STATS_WARNINGS_FILTER);
 
-  return filteredWarnings.length > 0;
+  // Webpack 5: Stats.filterWarnings removed, implement filtering manually
+  const filteredWarnings = warnings?.filter((warning: any) => {
+    const message = typeof warning === 'string' ? warning : warning.message || '';
+    return !STATS_WARNINGS_FILTER.test(message);
+  });
+
+  return filteredWarnings && filteredWarnings.length > 0;
 }
-
-const STATS_WARNINGS_FILTER = new RegExp(['(export .* was not found in)'].join(''));
 
 export function failedStatsToErrorMessage(stats: webpack.Stats) {
   const details = stats.toString({
-    ...Stats.presetToOptions('minimal'),
+    ...stats.compilation.createStatsOptions('minimal'),
     colors: true,
-    warningsFilter: STATS_WARNINGS_FILTER,
     errors: true,
     errorDetails: true,
     moduleTrace: true,
+    // Webpack 5: warningsFilter option removed, warnings filtered in isFailureStats
   });
 
   return `Optimizations failure.\n${details.split('\n').join('\n    ')}`;
@@ -131,7 +134,8 @@ export interface WebpackIgnoredModule {
 }
 
 export function isIgnoredModule(module: any): module is WebpackIgnoredModule {
-  return module?.constructor?.name === 'RawModule' && module.identifierStr?.startsWith('ignored ');
+  // Webpack 5: RawModule is used for ignored modules, check identifierStr or readableIdentifierStr
+  return module?.constructor?.name === 'RawModule' && module.identifierStr?.startsWith('ignored');
 }
 
 /** module replacing imports for webpack externals */

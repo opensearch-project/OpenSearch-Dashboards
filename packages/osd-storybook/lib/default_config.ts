@@ -13,7 +13,7 @@ export const defaultConfig: StorybookConfig = {
     '@storybook/addon-postcss',
   ],
   core: {
-    builder: 'webpack4',
+    builder: 'webpack5',
   },
   stories: ['../**/*.stories.tsx'],
   typescript: {
@@ -21,27 +21,29 @@ export const defaultConfig: StorybookConfig = {
   },
   webpackFinal: async (config) => {
     // Configure PostCSS
-    config.module?.rules.push({
-      test: /\.css$/,
-      use: [
-        {
-          loader: 'postcss-loader',
-          options: {
-            postcssOptions: {
-              plugins: [
-                'postcss-flexbugs-fixes',
-                [
-                  'autoprefixer',
-                  {
-                    flexbox: 'no-2009',
-                  },
+    if (config.module?.rules) {
+      config.module.rules.push({
+        test: /\.css$/,
+        use: [
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [
+                  'postcss-flexbugs-fixes',
+                  [
+                    'autoprefixer',
+                    {
+                      flexbox: 'no-2009',
+                    },
+                  ],
                 ],
-              ],
+              },
             },
           },
-        },
-      ],
-    });
+        ],
+      });
+    }
 
     return config;
   },
