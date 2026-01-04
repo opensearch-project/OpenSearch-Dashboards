@@ -192,7 +192,7 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
         'some-datasource-id' // dataSourceId provided but context.dataSource is undefined
       );
 
-      // Verify current user client was used as fallback
+      // Verify current user client was used as fallback when dataSource context is unavailable
       expect(mockOpenSearchClient.transport.request).toHaveBeenCalled();
     });
 
@@ -226,8 +226,14 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
 
       await router.forward(mockContext, mockRequest, mockResponse, mockLogger, 'test-agent-id');
 
-      expect(mockOpenSearchClient.transport.request).toHaveBeenCalled();
-      // The response should have status: 201, statusText: 'OK', headers: {}, and body
+      expect(mockOpenSearchClient.transport.request).toHaveBeenCalledWith(
+        expect.any(Object),
+        expect.objectContaining({
+          asStream: true,
+          requestTimeout: 300000,
+          maxRetries: 0,
+        })
+      );
     });
 
     it('should pass correct transport request options (line 125-129)', async () => {
