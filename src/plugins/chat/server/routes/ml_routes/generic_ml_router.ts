@@ -155,9 +155,7 @@ export class GenericMLRouter implements MLAgentRouter {
       return response.customError({
         statusCode: error?.status || 500,
         body: {
-          message:
-            error?.message ||
-            `ML Commons agent error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          message: error?.message || 'Unknown error',
         },
       });
     }
