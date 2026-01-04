@@ -123,12 +123,9 @@ export const aggregate = (options: {
 
   // Apply aggregation and convert to array of objects
   let result = Object.values(grouped).map(({ groupValue, values }) => {
-    let aggregatedValue: number;
-    if (values.length === 0) {
-      aggregatedValue = 0;
-    } else {
-      aggregatedValue = aggregateValues(aggregationType, values) ?? 0;
-    }
+    // values is guaranteed to have at least one element since groups
+    // are only created when valid values exist
+    const aggregatedValue: number = aggregateValues(aggregationType, values) ?? 0;
 
     return {
       [groupBy]: groupValue,
