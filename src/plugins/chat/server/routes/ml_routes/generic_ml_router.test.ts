@@ -27,7 +27,7 @@ const mockRequest = {
   body: { message: 'test message' },
 } as OpenSearchDashboardsRequest;
 
-describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
+describe('GenericMLRouter - ML Client Creation', () => {
   let router: GenericMLRouter;
   let mockContext: RequestHandlerContext & {
     dataSource?: {
@@ -102,7 +102,7 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
       );
     });
 
-    it('should use dataSource client when dataSourceId is provided (line 115-117)', async () => {
+    it('should use dataSource client when dataSourceId is provided', async () => {
       const mockDataSourceClient = ({
         transport: {
           request: jest.fn().mockResolvedValue({
@@ -136,7 +136,7 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
       expect(mockOpenSearchClient.transport.request).not.toHaveBeenCalled();
     });
 
-    it('should use current user client when no dataSourceId provided (line 117)', async () => {
+    it('should use current user client when no dataSourceId provided', async () => {
       const mockTransportResponse = {
         statusCode: 200,
         headers: {},
@@ -161,7 +161,7 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
       expect(mockContext.dataSource?.opensearch.getClient).not.toHaveBeenCalled();
     });
 
-    it('should use current user client when dataSource context is not available (line 117)', async () => {
+    it('should use current user client when dataSource context is not available', async () => {
       // Create context without dataSource
       const contextWithoutDataSource = {
         core: {
@@ -196,7 +196,7 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
       expect(mockOpenSearchClient.transport.request).toHaveBeenCalled();
     });
 
-    it('should return correct response format with default status code (line 131-137)', async () => {
+    it('should return correct response format with default status code', async () => {
       const mockTransportResponse = {
         // No statusCode provided - should default to 200
         headers: { 'custom-header': 'value' },
@@ -209,11 +209,15 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
 
       await router.forward(mockContext, mockRequest, mockResponse, mockLogger, 'test-agent-id');
 
-      expect(mockOpenSearchClient.transport.request).toHaveBeenCalled();
-      // The response should have status: 200 (default), statusText: 'OK', headers, and body
+      expect(mockResponse.custom).toHaveBeenCalledWith(
+        expect.objectContaining({
+          statusCode: 200,
+          body: { data: 'test' },
+        })
+      );
     });
 
-    it('should return correct response format with default headers (line 131-137)', async () => {
+    it('should return correct response format with default headers', async () => {
       const mockTransportResponse = {
         statusCode: 201,
         // No headers provided - should default to empty object
@@ -226,17 +230,15 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
 
       await router.forward(mockContext, mockRequest, mockResponse, mockLogger, 'test-agent-id');
 
-      expect(mockOpenSearchClient.transport.request).toHaveBeenCalledWith(
-        expect.any(Object),
+      expect(mockResponse.custom).toHaveBeenCalledWith(
         expect.objectContaining({
-          asStream: true,
-          requestTimeout: 300000,
-          maxRetries: 0,
+          statusCode: 201,
+          body: { data: 'test' },
         })
       );
     });
 
-    it('should pass correct transport request options (line 125-129)', async () => {
+    it('should pass correct transport request options', async () => {
       const mockTransportResponse = {
         statusCode: 200,
         headers: {},
@@ -260,7 +262,7 @@ describe('GenericMLRouter - ML Client Creation (lines 110-139)', () => {
       );
     });
 
-    it('should stringify request body correctly (line 123)', async () => {
+    it('should stringify request body correctly', async () => {
       const complexBody = {
         message: 'test',
         params: { key: 'value' },
