@@ -31,6 +31,7 @@ import {
   pivot,
   sortByTime,
   facetTransform,
+  flatten,
 } from '../utils/data_transformation';
 /**
  * Rule 1: Create a simple line chart with one metric and one date
@@ -442,6 +443,7 @@ export const createMultiLineChart = (
           pivot: colorField,
           field: valueField,
         }),
+        flatten(),
         convertTo2DArray()
       ),
       createBaseConfig,
@@ -624,6 +626,7 @@ export const createFacetedMultiLineChart = (
           pivot: colorField,
           field: valueField,
         }),
+        flatten(),
         convertTo2DArray()
       ),
       createBaseConfig,
@@ -957,6 +960,7 @@ export const createCategoryMultiLineChart = (
           pivot: colorField,
           field: valueField,
         }),
+        flatten(),
         convertTo2DArray()
       ),
       createBaseConfig,
