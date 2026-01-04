@@ -67,9 +67,7 @@ describe('transform', () => {
 
     const result = transform(addB)(state);
 
-    expect(result.transformedData).toHaveLength(2);
-    expect(result.transformedData[0]).toEqual([{ a: 1 }, { a: 2 }]);
-    expect(result.transformedData[1]).toEqual([
+    expect(result.transformedData).toEqual([
       { a: 1, b: 2 },
       { a: 2, b: 4 },
     ]);
@@ -82,8 +80,7 @@ describe('transform', () => {
 
     const result = transform(addB, addC)(state);
 
-    expect(result.transformedData).toHaveLength(3);
-    expect(result.transformedData[2]).toEqual([
+    expect(result.transformedData).toEqual([
       { a: 1, b: 2, c: 3 },
       { a: 2, b: 4, c: 6 },
     ]);
