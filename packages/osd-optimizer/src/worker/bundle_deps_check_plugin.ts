@@ -38,6 +38,7 @@ export class BundleDepsCheckPlugin {
   public apply(compiler: Compiler) {
     compiler.hooks.compilation.tap('BundleDepsCheckPlugin/getRequiredBundles', (compilation) => {
       this.allowedBundleIds.clear();
+      this.usedBundleIds.clear();
 
       const manifestPath = this.bundle.manifestPath;
       if (!manifestPath) {
