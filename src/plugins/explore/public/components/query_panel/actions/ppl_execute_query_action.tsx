@@ -8,8 +8,8 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { ExploreServices } from '../../../types';
 import { loadQueryActionCreator } from '../../../application/utils/state_management/actions/query_editor/load_query';
 import { useSetEditorTextWithQuery } from '../../../application/hooks';
-import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
 import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
+import { prepareQueryForLanguage } from '../../../application/utils/languages';
 
 export const PPL_QUERY_EXECUTION_TIMEOUT_MS = 10000;
 export const PPL_QUERY_POLL_INTERVAL_MS = 1000;
@@ -145,7 +145,7 @@ export function usePPLExecuteQueryAction(
             ...query,
             query: args.query,
           };
-          const cacheKey = defaultPrepareQueryString(queryObject);
+          const cacheKey = prepareQueryForLanguage(queryObject).query;
 
           // Use loadQueryActionCreator which updates the editor and executes the query
           // This follows the same pattern as Recent Queries
