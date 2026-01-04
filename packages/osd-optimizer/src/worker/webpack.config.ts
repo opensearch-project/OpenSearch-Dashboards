@@ -315,6 +315,13 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           use: getSwcLoaderConfig({ syntax: 'typescript', jsx: true, targets }),
         },
         {
+          test: /\.m?js$/,
+          resolve: {
+            // This allows Rspack to resolve ES modules without the .js/.mjs extension
+            fullySpecified: false,
+          },
+        },
+        {
           test: /\.(html|md|txt|tmpl)$/,
           type: 'asset/source',
         },
