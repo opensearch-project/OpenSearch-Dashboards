@@ -113,9 +113,7 @@ Cypress.Commands.add(
 
     // The force is necessary as there is occasionally a popover that covers the button
     cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
-    cy.getElementByTestId('euiToastHeader', { timeout: 30000 })
-      .contains('was saved')
-      .should('be.visible');
+    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
   }
 );
 
@@ -153,9 +151,7 @@ Cypress.Commands.add(
 
     // The force is necessary as there is occasionally a popover that covers the button
     cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
-    cy.getElementByTestId('euiToastHeader', { timeout: 30000 })
-      .contains('was saved')
-      .should('be.visible');
+    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
   }
 );
 
@@ -167,14 +163,6 @@ Cypress.Commands.add('loadSavedQuery', (name) => {
   cy.getElementByTestId('euiFlyoutCloseButton').parent().contains(name).should('exist').click();
   // click button through popover
   cy.getElementByTestId('open-query-action-button').click({ force: true });
-
-  // Wait for dataset to be loaded and query to be applied
-  cy.getElementByTestId('datasetSelectButton', { timeout: 30000 })
-    .should('be.visible')
-    .should('not.be.disabled');
-
-  // Wait for query execution to complete by checking for query elapsed time indicator
-  cy.getElementByTestId('discoverQueryElapsedMs', { timeout: 30000 }).should('be.visible');
 });
 
 Cypress.Commands.add('clearSavedQuery', () => {
