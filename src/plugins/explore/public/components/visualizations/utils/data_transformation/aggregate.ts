@@ -93,6 +93,9 @@ export const aggregate = (options: {
 
     if (isTimeBased && effectiveTimeUnit) {
       // Time-based grouping
+      if (!row[groupBy]) {
+        return acc; // Skip rows with missing time field
+      }
       const timestamp = parseUTCDate(row[groupBy]);
 
       // Skip invalid dates
@@ -106,6 +109,7 @@ export const aggregate = (options: {
       groupValue = bucket;
     } else {
       // Categorical grouping
+      // NOTE: this will convert undefined to "undefined" and null to "null" intentionally
       groupKey = String(row[groupBy]);
       groupValue = groupKey;
     }
