@@ -62,28 +62,9 @@ describe('populateStateFromSavedQuery', () => {
     dataMock.query.filterManager.getGlobalFilters = jest.fn().mockReturnValue([]);
   });
 
-  it('should use saved query dataset when available', async () => {
+  it('should set query with current dataset', async () => {
     const savedQuery: SavedQuery = {
       ...baseSavedQuery,
-    };
-    populateStateFromSavedQuery(dataMock.query, savedQuery);
-    expect(dataMock.query.queryString.setQuery).toHaveBeenCalledWith({
-      ...savedQuery.attributes.query,
-      dataset: savedQuery.attributes.query.dataset,
-    });
-  });
-
-  it('should fallback to current dataset when saved query has no dataset', async () => {
-    const savedQuery: SavedQuery = {
-      ...baseSavedQuery,
-      attributes: {
-        ...baseSavedQuery.attributes,
-        query: {
-          query: 'test',
-          language: 'kuery',
-          // No dataset in saved query
-        },
-      },
     };
     populateStateFromSavedQuery(dataMock.query, savedQuery);
     expect(dataMock.query.queryString.setQuery).toHaveBeenCalledWith({

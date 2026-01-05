@@ -422,31 +422,19 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
       // Get fresh current dataset value at execution time
       const currentlySelectedDataset = queryString.getQuery().dataset;
 
-      // Check if currently selected dataset is compatible with current signal type filter
-      const isCurrentDatasetValid = currentlySelectedDataset
-        ? deduplicatedDatasets.some((d) => d.id === currentlySelectedDataset.id)
-        : false;
-
-      // Only auto-select or clear datasets on initial load to prevent unnecessary re-renders
+      // Only auto-select datasets on initial load when there's no dataset selected
       // During refetches (e.g., when flyouts open), we don't want to trigger dataset changes
       // IMPORTANT: Don't run auto-select when signalType is null (component is still mounting)
-      if (!hasCompletedInitialLoad.current && signalType !== null) {
-        // If current dataset is incompatible with the signal type filter, clear it or select default
-        if (currentlySelectedDataset && !isCurrentDatasetValid) {
-          if (defaultDataset) {
-            // Select the first valid dataset
-            onSelect(defaultDataset);
-          } else {
-            // No valid datasets available, clear the selection by setting to empty query
-            queryString.setQuery({
-              query: '',
-              language: queryString.getQuery().language,
-            });
-          }
-        } else if (!currentlySelectedDataset && defaultDataset) {
-          // No dataset selected but default is available
-          onSelect(defaultDataset);
-        }
+      // IMPORTANT: Don't override a dataset that's already selected - it may have been set by
+      // a saved query, test, or manual selection, and may not be in the fetched list
+      if (
+        !hasCompletedInitialLoad.current &&
+        signalType !== null &&
+        !currentlySelectedDataset &&
+        defaultDataset
+      ) {
+        // No dataset selected but default is available - select it
+        onSelect(defaultDataset);
       }
       if (isMounted.current) {
         setDatasets(deduplicatedDatasets);

@@ -50,8 +50,8 @@ export const populateStateFromSavedQuery = (queryService: QueryStart, savedQuery
   // query string
   queryString.setQuery({
     ...savedQuery.attributes.query,
-    // Use the saved query's dataset if it exists, otherwise keep the current one
-    dataset: savedQuery.attributes.query.dataset || queryString.getQuery().dataset,
+    // We should keep the currently selected dataset intact
+    dataset: queryString.getQuery().dataset,
   });
 
   // filters
