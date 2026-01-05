@@ -207,16 +207,11 @@ export const createBarSeries = <T extends BaseChartStyle>({
   categoryField: string;
   seriesFields: string[] | ((headers?: string[]) => string[]);
 }): PipelineFn<T> => (state) => {
-  const { axisConfig, axisColumnMappings, transformedData = [] } = state;
+  const { axisColumnMappings, transformedData = [] } = state;
   const newState = { ...state };
-  const source = transformedData[transformedData?.length - 1];
-
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before createBarSeries');
-  }
 
   if (!Array.isArray(seriesFields)) {
-    seriesFields = seriesFields(source[0]);
+    seriesFields = seriesFields(transformedData[0]);
   }
 
   const thresholdLines = generateThresholdLines(styles?.thresholdOptions, styles?.switchAxes);
@@ -248,6 +243,57 @@ export const createBarSeries = <T extends BaseChartStyle>({
     };
   }) as BarSeriesOption[];
   newState.series = series;
+
+  return newState;
+};
+
+export const createFacetBarSeries = <T extends BaseChartStyle>({
+  styles,
+  categoryField,
+  seriesFields,
+}: {
+  styles: BarChartStyle;
+  categoryField: string;
+  seriesFields: (headers?: string[]) => string[];
+}): PipelineFn<T> => (state) => {
+  const { transformedData } = state;
+
+  const newState = { ...state };
+  const thresholdLines = generateThresholdLines(styles?.thresholdOptions, styles?.switchAxes);
+
+  const allSeries = transformedData?.map((seriesData: any[], index: number) => {
+    const header = seriesData[0];
+    const cateColumns = seriesFields(header);
+
+    return cateColumns.map((item: string, i: number) => ({
+      name: String(item),
+      type: 'bar',
+      stack: `stack_${index}`, // each grid should have a exclusive stack key
+      encode: {
+        [adjustOppositeSymbol(styles?.switchAxes, 'x')]: categoryField,
+        [adjustOppositeSymbol(styles?.switchAxes, 'y')]: item,
+      },
+      datasetIndex: index,
+      gridIndex: index,
+      xAxisIndex: index,
+      yAxisIndex: index,
+      emphasis: {
+        focus: 'self',
+      },
+      barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
+      barCategoryGap:
+        styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
+      ...(styles.showBarBorder && {
+        itemStyle: {
+          borderWidth: styles.barBorderWidth,
+          borderColor: styles.barBorderColor,
+        },
+      }),
+      ...(i === 0 && thresholdLines),
+    }));
+  });
+
+  newState.series = allSeries?.flat() as BarSeriesOption[];
 
   return newState;
 };
