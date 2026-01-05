@@ -39,6 +39,10 @@ module.exports = defineConfig({
       username: process.env.S3_CONNECTION_USERNAME,
       password: process.env.S3_CONNECTION_PASSWORD,
     },
+    PROMETHEUS: {
+      name: 'test-prometheus',
+      url: process.env.PROMETHEUS_CONNECTION_URL,
+    },
     openSearchUrl: 'http://localhost:9200',
     SECURITY_ENABLED: false,
     AGGREGATION_VIEW: false,
