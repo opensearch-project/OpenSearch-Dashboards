@@ -1,0 +1,2 @@
+fix:
+- Fix mlClient is not defined for chatbot ([#11064](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11064))
