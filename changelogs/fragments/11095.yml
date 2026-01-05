@@ -1,0 +1,2 @@
+feat:
+- Add raw table to prometheus results page in explore metrics flavor ([#11095](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11095))

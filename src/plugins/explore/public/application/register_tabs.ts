@@ -6,6 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { LogsTab } from '../components/tabs/logs_tab';
 import { MetricsTab } from '../components/tabs/metrics_tab';
+import { MetricsRawTab } from '../components/tabs/metrics_raw_tab';
 import { FieldStatsTab } from '../components/tabs/field_stats_tab';
 import { TabDefinition, TabRegistryService } from '../services/tab_registry/tab_registry_service';
 import { ExploreServices } from '../types';
@@ -52,6 +53,17 @@ export const registerBuiltInTabs = (
       order: 10,
       supportedLanguages: ['PROMQL'],
       component: MetricsTab,
+    });
+
+    tabRegistry.registerTab({
+      id: 'metrics-raw',
+      label: i18n.translate('explore.metricsTab.rawLabel', {
+        defaultMessage: 'Raw',
+      }),
+      flavor: [ExploreFlavor.Metrics],
+      order: 15,
+      supportedLanguages: ['PROMQL'],
+      component: MetricsRawTab,
     });
   } else {
     // Register Logs Tab
@@ -165,7 +177,9 @@ export const registerBuiltInTabs = (
   // Register Visualizations Tab
   tabRegistry.registerTab({
     id: EXPLORE_VISUALIZATION_TAB_ID,
-    label: 'Visualization',
+    label: i18n.translate('explore.visualizationTab.label', {
+      defaultMessage: 'Visualization',
+    }),
     flavor: [ExploreFlavor.Logs, ExploreFlavor.Metrics, ExploreFlavor.Traces],
     order: 20,
     supportedLanguages:

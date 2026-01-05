@@ -28,10 +28,12 @@ export const MetricsDataTable: React.FC<MetricsDataTableProps> = ({ searchResult
   const rows = searchResult?.instantHits?.hits || emptyHits;
   const columns = useMemo(
     () =>
-      searchResult?.instantFieldSchema?.map((field) => ({
-        id: field.name || '',
-        displayAsText: field.name || '',
-      })) || [],
+      searchResult?.instantFieldSchema
+        ?.filter((field) => field.name !== 'Metric')
+        .map((field) => ({
+          id: field.name || '',
+          displayAsText: field.name || '',
+        })) || [],
     [searchResult]
   );
 
