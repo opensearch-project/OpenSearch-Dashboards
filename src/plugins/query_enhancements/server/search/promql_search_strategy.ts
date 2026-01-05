@@ -109,15 +109,26 @@ function createDataFrame(rawResponse: PromQLQueryResponse, datasetId: string): I
 
   const labelKeys = Array.from(allLabelKeys).sort();
 
-  // Create instant format rows (Time, label1, label2, ..., Value)
-  // For instant queries, we only want the latest timestamp
+  // Create instant format rows (Time, Metric, label1, label2, ..., Value)
+  // Metric column contains the formatted metric string: metricName{label1="value1", label2="value2"}
   const rows: Array<Record<string, unknown>> = [];
 
   series.forEach((metricResult, seriesIndex) => {
     if (seriesIndex >= MAX_SERIES) return;
 
+    const metricName = metricResult.metric.__name__ || '';
+    const labelParts = labelKeys
+      .filter((key) => key !== '__name__')
+      .map((labelKey) => {
+        const labelValue = metricResult.metric[labelKey];
+        return labelValue ? `${labelKey}="${labelValue}"` : null;
+      })
+      .filter(Boolean);
+    const metricString =
+      labelParts.length > 0 ? `${metricName}{${labelParts.join(', ')}}` : metricName;
+
     metricResult.values.forEach(([timestamp, value]) => {
-      const row: Record<string, unknown> = { Time: timestamp * 1000 };
+      const row: Record<string, unknown> = { Time: timestamp * 1000, Metric: metricString };
       labelKeys.forEach((labelKey) => (row[labelKey] = metricResult.metric[labelKey] || ''));
       row.Value = Number(value);
       rows.push(row);
@@ -130,6 +141,7 @@ function createDataFrame(rawResponse: PromQLQueryResponse, datasetId: string): I
 
   const instantSchema = [
     { name: 'Time', type: 'time', values: [] },
+    { name: 'Metric', type: 'string', values: [] },
     ...labelKeys.map((key) => ({ name: key, type: 'string', values: [] })),
     { name: 'Value', type: 'number', values: [] },
   ];
