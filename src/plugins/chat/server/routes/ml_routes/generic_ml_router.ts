@@ -152,19 +152,10 @@ export class GenericMLRouter implements MLAgentRouter {
     } catch (error) {
       logger.error(`Error forwarding to ML Commons agent: ${error}`);
 
-      if (error instanceof Error && error.message.includes('404')) {
-        return response.customError({
-          statusCode: 404,
-          body: { message: `ML Commons agent "${configuredAgentId}" not found` },
-        });
-      }
-
       return response.customError({
-        statusCode: 500,
+        statusCode: error?.status || 500,
         body: {
-          message: `ML Commons agent error: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`,
+          message: error?.message || 'Unknown error',
         },
       });
     }
