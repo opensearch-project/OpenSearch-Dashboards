@@ -60,11 +60,40 @@ export function stdMetricRaw(resp, panel, series, meta) {
     }
     if (/_bucket$/.test(metric.type)) return next(results);
 
-    // Skip math metrics - they will be evaluated client-side
+    // For math metrics, we need to process all NON-math metrics as component metrics
+    // instead of just processing the last metric
     if (metric.type === METRIC_TYPES.MATH) {
+      const decoration = getDefaultDecoration(series);
+      // Process each non-math metric in the series
+      series.metrics.forEach((m) => {
+        // Skip math, percentile, percentile_rank, sibling, and band metrics
+        if (
+          m.type === METRIC_TYPES.MATH ||
+          m.type === METRIC_TYPES.PERCENTILE ||
+          m.type === METRIC_TYPES.PERCENTILE_RANK ||
+          /_bucket$/.test(m.type) ||
+          (m.type === METRIC_TYPES.STD_DEVIATION && m.mode === 'band')
+        ) {
+          return;
+        }
+
+        getSplits(resp, panel, series, meta).forEach((split) => {
+          const data = split.timeseries.buckets.map(mapBucket(m));
+          results.push({
+            id: `${split.id}:${m.id}`,
+            label: split.label,
+            labelFormatted: split.labelFormatted,
+            color: split.color,
+            data,
+            meta: split.meta,
+            ...decoration,
+          });
+        });
+      });
       return next(results);
     }
 
+    // Regular processing for non-math metrics
     const decoration = getDefaultDecoration(series);
     getSplits(resp, panel, series, meta).forEach((split) => {
       const data = split.timeseries.buckets.map(mapBucket(metric));

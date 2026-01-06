@@ -47,11 +47,38 @@ export function stdSiblingRaw(resp, panel, series, meta) {
     if (!/_bucket$/.test(metric.type)) return next(results);
     if (metric.type === 'std_deviation_bucket' && metric.mode === 'band') return next(results);
 
-    // Skip math metrics - they will be evaluated client-side
+    // For math metrics, we need to process all sibling aggregations as component metrics
     if (metric.type === METRIC_TYPES.MATH) {
+      const decoration = getDefaultDecoration(series);
+      // Process each sibling metric in the series
+      series.metrics.forEach((m) => {
+        // Only process sibling bucket metrics (not math, not bands)
+        if (
+          !/_bucket$/.test(m.type) ||
+          m.type === METRIC_TYPES.MATH ||
+          (m.type === 'std_deviation_bucket' && m.mode === 'band')
+        ) {
+          return;
+        }
+
+        getSplits(resp, panel, series, meta).forEach((split) => {
+          const data = split.timeseries.buckets.map((bucket) => {
+            return [bucket.key, getSiblingAggValue(split, m)];
+          });
+          results.push({
+            id: `${split.id}:${m.id}`,
+            label: split.label,
+            color: split.color,
+            data,
+            meta: split.meta,
+            ...decoration,
+          });
+        });
+      });
       return next(results);
     }
 
+    // Regular processing for non-math sibling metrics
     const decoration = getDefaultDecoration(series);
     getSplits(resp, panel, series, meta).forEach((split) => {
       const data = split.timeseries.buckets.map((bucket) => {
