@@ -34,19 +34,21 @@ import { percentileRank } from './percentile_rank';
 import { seriesAgg } from './series_agg';
 import { stdDeviationBands } from './std_deviation_bands';
 import { stdDeviationSibling } from './std_deviation_sibling';
-import { stdMetric } from './std_metric';
-import { stdSibling } from './std_sibling';
+import { stdMetricRaw } from './std_metric_raw';
+import { stdSiblingRaw } from './std_sibling_raw';
 import { timeShift } from './time_shift';
 import { dropLastBucket } from './drop_last_bucket';
 // NOTE: mathAgg is intentionally NOT imported for raw data endpoint
+// NOTE: Using stdMetricRaw and stdSiblingRaw instead of stdMetric/stdSibling
+//       to append metric IDs to series IDs for client-side processing
 
 export const processorsRaw = [
   percentile,
   percentileRank,
   stdDeviationBands,
   stdDeviationSibling,
-  stdMetric,
-  stdSibling,
+  stdMetricRaw,
+  stdSiblingRaw,
   // mathAgg, // EXCLUDED - client will handle math evaluation
   seriesAgg,
   timeShift,

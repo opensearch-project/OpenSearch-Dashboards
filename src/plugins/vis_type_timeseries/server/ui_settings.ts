@@ -57,5 +57,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     }),
     category: ['visualization'],
     schema: schema.boolean(),
+    requiresPageReload: true,
   },
 };
