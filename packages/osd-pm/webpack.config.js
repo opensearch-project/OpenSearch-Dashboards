@@ -72,6 +72,6 @@ module.exports = {
   },
 
   watchOptions: {
-    ignored: [/node_modules/, /vendor/],
+    ignored: ['**/node_modules/**', '**/vendor/**'],
   },
 };

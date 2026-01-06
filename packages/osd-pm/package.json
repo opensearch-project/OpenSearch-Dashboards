@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "rspack --config webpack.config.js",
-    "osd:watch": "rspack --config webpack.config.js --watch --progress",
+    "osd:watch": "rspack --config webpack.config.js --watch",
     "prettier": "prettier --write './src/**/*.ts'"
   },
   "devDependencies": {
