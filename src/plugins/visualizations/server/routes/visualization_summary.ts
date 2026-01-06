@@ -90,7 +90,7 @@ export function registerVisualizationSummaryRoute(router: IRouter) {
             path: `${ML_COMMONS_API_PREFIX}/config/${ML_CONFIG_NAME}`,
           });
 
-          // Extract model ID from config response
+          // Extract agent ID from config response
           const configBody = configResponse.body as any;
           agentId = configBody?.configuration?.agent_id;
 
