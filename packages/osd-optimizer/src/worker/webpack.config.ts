@@ -38,12 +38,37 @@ import { merge } from 'webpack-merge';
 import CompressionPlugin from 'compression-webpack-plugin';
 import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 import * as UiSharedDeps from '@osd/ui-shared-deps';
+import * as sass from 'sass-embedded';
 
 import { Bundle, BundleRefs, WorkerConfig } from '../common';
 import { BundleRefsPlugin } from './bundle_refs_plugin';
 import { STATS_WARNINGS_FILTER } from './webpack_helpers';
 
 const BABEL_PRESET_PATH = require.resolve('@osd/babel-preset/webpack_preset');
+
+const compilers: sass.AsyncCompiler[] = [];
+let index = 0;
+export const sassCompiler = {
+  ...sass,
+  compileStringAsync: async (data: string, options: sass.StringOptions<'async'>) => {
+    if (compilers.length === 0) {
+      compilers.push(
+        ...[
+          await sass.initAsyncCompiler(),
+          await sass.initAsyncCompiler(),
+          await sass.initAsyncCompiler(),
+        ]
+      );
+    }
+    const compiler = compilers[index++ % compilers.length];
+    return compiler.compileStringAsync(data, options);
+  },
+  dispose: () => {
+    // Dispose of all SASS compilers to allow the process to exit cleanly
+    compilers.forEach((compiler) => compiler.dispose());
+    compilers.length = 0;
+  },
+};
 
 export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
@@ -192,7 +217,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                 {
                   loader: 'sass-loader',
                   options: {
-                    api: 'modern-compiler',
+                    api: 'modern',
                     additionalData(content: string, loaderContext: webpack.LoaderContext<any>) {
                       const req = JSON.stringify(
                         loaderContext.utils.contextify(
@@ -205,10 +230,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
                       );
                       return `@import ${req};\n${content}`;
                     },
-                    implementation: require('sass-embedded'),
+                    implementation: sassCompiler,
                     sassOptions: {
                       // Webpack 5 / sass-loader v14: outputStyle renamed to style
-                      style: 'compressed',
+                      style: worker.dist ? 'compressed' : 'expanded',
                       // Webpack 5 / sass-loader v14: includePaths renamed to loadPaths
                       loadPaths: [
                         Path.resolve(worker.repoRoot, 'node_modules'),
@@ -364,6 +389,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       backCompat: false,
     },
     optimization: {
+      sideEffects: false,
       removeAvailableModules: false,
     },
     module: {
