@@ -80,7 +80,6 @@ const observeCompiler = (
   compiler: Compiler,
   bundleRefs: BundleRefs
 ): Rx.Observable<CompilerMsg> => {
-  let START = 0;
   const compilerMsgs = new CompilerMsgs(bundle.id);
   const done$ = new Rx.Subject();
   const { beforeRun, watchRun, done } = compiler.hooks;
@@ -91,13 +90,7 @@ const observeCompiler = (
   const started$ = Rx.merge(
     Rx.fromEventPattern((cb) => beforeRun.tap(PLUGIN_NAME, cb)),
     Rx.fromEventPattern((cb) => watchRun.tap(PLUGIN_NAME, cb))
-  )
-    .pipe(mapTo(compilerMsgs.running()))
-    .pipe(
-      tap(() => {
-        START = Date.now();
-      })
-    );
+  ).pipe(mapTo(compilerMsgs.running()));
 
   /**
    * Called by webpack as any compilation is complete. If the
@@ -109,8 +102,6 @@ const observeCompiler = (
       if (stats.compilation.needAdditionalPass) {
         return undefined;
       }
-
-      const durationSec = (Date.now() - START) / 1000;
 
       if (workerConfig.profileWebpack) {
         Fs.writeFileSync(
@@ -211,7 +202,6 @@ const observeCompiler = (
 
       return compilerMsgs.compilerSuccess({
         moduleCount,
-        durationSec,
       });
     })
   );

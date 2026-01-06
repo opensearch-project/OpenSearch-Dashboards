@@ -111,15 +111,9 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
 
           bundleStates.set(id, type);
 
-          if (type === 'compiler success') {
-            log.info(
-              `[${id}] compiled successfully after ${compilerState.durationSec.toFixed(3)}s`
-            );
-          } else {
-            log.debug(
-              `[${id}] state = "${type}"${type !== 'running' ? ` after ${state.durSec} sec` : ''}`
-            );
-          }
+          log.debug(
+            `[${id}] state = "${type}"${type !== 'running' ? ` after ${state.durSec} sec` : ''}`
+          );
         }
 
         if (state.phase === 'running' || state.phase === 'initializing') {

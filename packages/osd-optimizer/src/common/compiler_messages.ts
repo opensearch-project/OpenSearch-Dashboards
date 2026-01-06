@@ -68,7 +68,6 @@ export interface CompilerSuccessMsg {
   type: 'compiler success';
   bundleId: string;
   moduleCount: number;
-  durationSec: number;
 }
 
 export type CompilerMsg = CompilerRunningMsg | CompilerIssueMsg | CompilerSuccessMsg;
@@ -91,12 +90,11 @@ export class CompilerMsgs {
     };
   }
 
-  compilerSuccess(options: { moduleCount: number; durationSec: number }): CompilerSuccessMsg {
+  compilerSuccess(options: { moduleCount: number }): CompilerSuccessMsg {
     return {
       bundleId: this.bundle,
       type: 'compiler success',
       moduleCount: options.moduleCount,
-      durationSec: options.durationSec,
     };
   }
 
