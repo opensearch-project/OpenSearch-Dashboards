@@ -190,7 +190,7 @@ function evaluateMathSeries(seriesConfig, mathMetric, componentSeries) {
     if (!metric) return;
 
     // Find the component series for this variable
-    const componentSerie = componentSeries.find((s) => s.id.includes(metric.id));
+    const componentSerie = componentSeries.find((s) => s.id === `${seriesConfig.id}:${metric.id}`);
     if (componentSerie) {
       splitData[variable.name] = componentSerie.data;
     }
@@ -250,7 +250,7 @@ function evaluateMathSeries(seriesConfig, mathMetric, componentSeries) {
       });
 
       // Handle object results (flatten and return last value)
-      if (typeof result === 'object') {
+      if (result !== null && typeof result === 'object') {
         return [ts, last(flatten(result.valueOf()))];
       }
       // Handle Infinity and -Infinity from division by zero

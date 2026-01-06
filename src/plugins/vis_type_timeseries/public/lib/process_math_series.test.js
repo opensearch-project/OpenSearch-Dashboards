@@ -373,6 +373,54 @@ describe('process_math_series - evaluateMathExpressions', () => {
     });
   });
 
+  describe('Metric ID matching', () => {
+    test('should correctly match series IDs with exact metric ID suffix', () => {
+      // This tests the fix for substring matching bug in componentSeries lookup
+      // Using UUID-style IDs that might contain similar patterns
+      panel.series[0].metrics = [
+        { id: 'abc-123', type: 'avg' },
+        { id: 'abc-456', type: 'max' },
+        {
+          id: 'math-1',
+          type: 'math',
+          script: 'params.a + params.b',
+          variables: [
+            { name: 'a', field: 'abc-123' },
+            { name: 'b', field: 'abc-456' },
+          ],
+        },
+      ];
+
+      response = {
+        'panel-1': {
+          series: [
+            {
+              id: 'series-1:abc-123',
+              data: [[1000, 10]],
+              meta: { bucketSize: 60 },
+            },
+            {
+              id: 'series-1:abc-456',
+              data: [[1000, 50]],
+              meta: { bucketSize: 60 },
+            },
+            // This series ID contains 'abc-123' but shouldn't match
+            {
+              id: 'series-1:abc-123-extra',
+              data: [[1000, 999]],
+              meta: { bucketSize: 60 },
+            },
+          ],
+        },
+      };
+
+      const result = evaluateMathExpressions(response, panel);
+
+      // Should correctly use abc-123=10 and abc-456=50, not the wrong series
+      expect(result['panel-1'].series[0].data).toEqual([[1000, 60]]); // 10 + 50 = 60
+    });
+  });
+
   describe('Edge cases', () => {
     test('should return original response if panel data is missing', () => {
       const emptyResponse = {};

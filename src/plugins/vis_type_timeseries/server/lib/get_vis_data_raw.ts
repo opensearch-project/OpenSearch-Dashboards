@@ -62,7 +62,7 @@ export interface GetVisDataOptions {
 
 export type GetVisDataRaw = (
   requestContext: RequestHandlerContext,
-  options: GetVisDataOptions,
+  request: FakeRequest & { body: GetVisDataOptions },
   framework: Framework
 ) => Promise<GetVisDataRawResponse>;
 
@@ -92,7 +92,8 @@ export function getVisDataRaw(
         .toPromise();
     },
   };
-  const promises = (reqFacade.payload as GetVisDataOptions).panels.map(getPanelDataRaw(reqFacade));
+  const panels = (reqFacade.payload as GetVisDataOptions).panels || [];
+  const promises = panels.map(getPanelDataRaw(reqFacade));
   return Promise.all(promises).then((res) => {
     return res.reduce((acc, data) => {
       return _.assign(acc as any, data);

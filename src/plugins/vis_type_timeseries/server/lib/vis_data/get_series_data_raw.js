@@ -94,5 +94,6 @@ export async function getSeriesDataRaw(req, panel) {
         ...handleErrorResponse(panel)(err),
       };
     }
+    throw err;
   }
 }

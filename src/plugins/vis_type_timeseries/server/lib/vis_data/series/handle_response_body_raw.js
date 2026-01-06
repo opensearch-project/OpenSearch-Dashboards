@@ -59,6 +59,16 @@ export function handleResponseBodyRaw(panel) {
     const [seriesId] = keys;
     const meta = get(resp, `aggregations.${seriesId}.meta`, {});
     const series = panel.series.find((s) => s.id === (meta.seriesId || seriesId));
+
+    if (!series) {
+      throw new Error(
+        i18n.translate('visTypeTimeseries.series.seriesNotFoundErrorMessage', {
+          defaultMessage: 'Series {seriesId} not found in panel {panelId}',
+          values: { seriesId: meta.seriesId || seriesId, panelId: panel.id },
+        })
+      );
+    }
+
     const processor = buildProcessorFunction(processorsRaw, resp, panel, series, meta);
 
     return processor([]);
