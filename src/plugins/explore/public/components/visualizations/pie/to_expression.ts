@@ -4,11 +4,11 @@
  */
 
 import { defaultPieChartStyles, PieChartStyle } from './pie_vis_config';
-import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
+import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole, AggregationType } from '../types';
 import { DEFAULT_OPACITY } from '../constants';
 import { getChartRender } from '../utils/utils';
 import { pipe, createBaseConfig, assembleSpec } from '../utils/echarts_spec';
-import { convertTo2DArray, transform } from '../utils/data_transformation';
+import { aggregate, convertTo2DArray, transform } from '../utils/data_transformation';
 import { createPieSeries } from './pie_chart_utils';
 
 export const createPieSpec = (
@@ -34,8 +34,15 @@ export const createPieSpec = (
     }`;
 
     const result = pipe(
-      transform(convertTo2DArray(allColumns)),
-      createBaseConfig(defaultTitle),
+      transform(
+        aggregate({
+          groupBy: colorColumn,
+          field: thetaColumn,
+          aggregationType: AggregationType.SUM, // TODO add aggregation in UI, temporarily use sum to aggregate data
+        }),
+        convertTo2DArray(allColumns)
+      ),
+      createBaseConfig({ title: defaultTitle }),
       createPieSeries({ styles: styleOptions, cateField: colorColumn, valueField: thetaColumn }),
       assembleSpec
     )({

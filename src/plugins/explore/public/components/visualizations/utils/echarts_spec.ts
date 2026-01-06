@@ -121,7 +121,7 @@ function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time'
 /**
  * Create base configuration (title, tooltip)
  */
-export const createBaseConfig = <T extends BaseChartStyle>(title?: string) => (
+export const createBaseConfig = <T extends BaseChartStyle>({ title }: { title?: string }) => (
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
   const { styles, axisConfig } = state;
@@ -139,7 +139,7 @@ export const createBaseConfig = <T extends BaseChartStyle>(title?: string) => (
       ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
         ? { orient: 'vertical' }
         : {}),
-      [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%',
+      [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%', // distance between legend and the corresponding orientation edge side of the container
     },
   };
 
