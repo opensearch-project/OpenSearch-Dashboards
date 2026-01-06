@@ -73,7 +73,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
   const resolveOptions = {
     extensions: ['.js', '.ts', '.tsx', '.json'],
     // TODO: we might want to include `module` before `main` to be ESM first
-    mainFields: ['browser', 'main'],
+    mainFields: ['browser', 'module', 'main'],
     alias: {
       core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
       'opensearch-dashboards/public': Path.resolve(worker.repoRoot, 'src/core/public'),
