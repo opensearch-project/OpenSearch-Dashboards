@@ -17,6 +17,11 @@ describe('process_math_series - evaluateMathExpressions', () => {
           id: 'series-1',
           label: 'Math Series',
           color: '#FF0000',
+          chart_type: 'line',
+          line_width: 1,
+          fill: 0.5,
+          point_size: 0,
+          stacked: false,
           metrics: [
             {
               id: 'metric-a',
@@ -75,15 +80,25 @@ describe('process_math_series - evaluateMathExpressions', () => {
       const result = evaluateMathExpressions(response, panel);
 
       expect(result['panel-1'].series).toHaveLength(1);
-      expect(result['panel-1'].series[0]).toEqual({
-        id: 'series-1',
-        label: 'Math Series',
-        color: '#FF0000',
-        data: [
-          [1000, 2], // 100 / 50 = 2
-          [2000, 2], // 200 / 100 = 2
-        ],
-      });
+      expect(result['panel-1'].series[0]).toEqual(
+        expect.objectContaining({
+          id: 'series-1',
+          label: 'Math Series',
+          color: '#FF0000',
+          data: [
+            [1000, 2], // 100 / 50 = 2
+            [2000, 2], // 200 / 100 = 2
+          ],
+          // Decoration properties are also included
+          seriesId: 'series-1',
+          stack: false,
+          lines: expect.objectContaining({
+            show: true,
+            fill: 0.5,
+            lineWidth: 1,
+          }),
+        })
+      );
     });
 
     test('should evaluate addition expression', () => {
@@ -340,12 +355,14 @@ describe('process_math_series - evaluateMathExpressions', () => {
       expect(result['panel-1'].series).toHaveLength(2);
 
       // Math series
-      expect(result['panel-1'].series[0]).toEqual({
-        id: 'series-1',
-        label: 'Math Series',
-        color: '#FF0000',
-        data: [[1000, 2]],
-      });
+      expect(result['panel-1'].series[0]).toEqual(
+        expect.objectContaining({
+          id: 'series-1',
+          label: 'Math Series',
+          color: '#FF0000',
+          data: [[1000, 2]],
+        })
+      );
 
       // Non-math series preserved
       expect(result['panel-1'].series[1]).toEqual({
@@ -382,11 +399,13 @@ describe('process_math_series - evaluateMathExpressions', () => {
 
       const result = evaluateMathExpressions(response, panel);
 
-      expect(result['panel-1'].series[0]).toEqual({
-        id: 'series-1',
-        label: 'Math Series',
-        data: [],
-      });
+      expect(result['panel-1'].series[0]).toEqual(
+        expect.objectContaining({
+          id: 'series-1',
+          label: 'Math Series',
+          data: [],
+        })
+      );
     });
 
     test('should handle empty variables array', () => {
@@ -405,11 +424,13 @@ describe('process_math_series - evaluateMathExpressions', () => {
 
       const result = evaluateMathExpressions(response, panel);
 
-      expect(result['panel-1'].series[0]).toEqual({
-        id: 'series-1',
-        label: 'Math Series',
-        data: [],
-      });
+      expect(result['panel-1'].series[0]).toEqual(
+        expect.objectContaining({
+          id: 'series-1',
+          label: 'Math Series',
+          data: [],
+        })
+      );
     });
 
     test('should use default label when label is missing', () => {

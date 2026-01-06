@@ -34,6 +34,37 @@ import { evaluate, configureMathJs } from './mathjs_wrapper';
 configureMathJs();
 
 /**
+ * Gets default decoration properties for series rendering.
+ * This replicates server/lib/vis_data/helpers/get_default_decoration.js
+ */
+function getDefaultDecoration(series) {
+  const pointSize =
+    series.point_size != null ? Number(series.point_size) : Number(series.line_width);
+  const showPoints = series.chart_type === 'line' && pointSize !== 0;
+
+  return {
+    seriesId: series.id,
+    stack: series.stacked,
+    lines: {
+      show: series.chart_type === 'line' && series.line_width !== 0,
+      fill: Number(series.fill),
+      lineWidth: Number(series.line_width),
+      steps: series.steps || false,
+    },
+    points: {
+      show: showPoints,
+      radius: 1,
+      lineWidth: showPoints ? pointSize : 5,
+    },
+    bars: {
+      show: series.chart_type === 'bar',
+      fill: Number(series.fill),
+      lineWidth: Number(series.line_width),
+    },
+  };
+}
+
+/**
  * Evaluates math expressions client-side for TSVB visualizations.
  * This mirrors the server-side math evaluation logic from
  * server/lib/vis_data/response_processors/series/math.js
@@ -109,10 +140,12 @@ export function evaluateMathExpressions(response, panel) {
       componentSeries.forEach((s) => processedIds.add(s.id));
     } else {
       // No component metrics found, return empty series
+      const decoration = getDefaultDecoration(seriesConfig);
       evaluatedSeries.push({
         id: seriesConfig.id,
         label: seriesConfig.label || 'Math',
         data: [],
+        ...decoration,
       });
     }
   });
@@ -139,11 +172,13 @@ export function evaluateMathExpressions(response, panel) {
  * @returns {Object} Evaluated series with computed data
  */
 function evaluateMathSeries(seriesConfig, mathMetric, componentSeries) {
+  const decoration = getDefaultDecoration(seriesConfig);
   if (!mathMetric.variables || mathMetric.variables.length === 0) {
     return {
       id: seriesConfig.id,
       label: seriesConfig.label || 'Math',
       data: [],
+      ...decoration,
     };
   }
 
@@ -179,6 +214,7 @@ function evaluateMathSeries(seriesConfig, mathMetric, componentSeries) {
       id: seriesConfig.id,
       label: seriesConfig.label || 'Math',
       data: [],
+      ...decoration,
     };
   }
 
@@ -235,7 +271,8 @@ function evaluateMathSeries(seriesConfig, mathMetric, componentSeries) {
   return {
     id: seriesConfig.id,
     label: seriesConfig.label || 'Math',
-    data,
     color: seriesConfig.color,
+    data,
+    ...decoration,
   };
 }

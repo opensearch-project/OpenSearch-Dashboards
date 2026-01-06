@@ -380,16 +380,20 @@ describe('Client-side vs Server-side evaluation', () => {
       const result = evaluateMathExpressions(rawResponse, panel);
 
       expect(result['panel-1'].series).toHaveLength(2);
-      expect(result['panel-1'].series[0]).toEqual({
-        id: 'series-1',
-        label: 'Math 1',
-        data: [[1000, 15]], // 10 + 5
-      });
-      expect(result['panel-1'].series[1]).toEqual({
-        id: 'series-2',
-        label: 'Math 2',
-        data: [[1000, 20]], // 100 - 80
-      });
+      expect(result['panel-1'].series[0]).toEqual(
+        expect.objectContaining({
+          id: 'series-1',
+          label: 'Math 1',
+          data: [[1000, 15]], // 10 + 5
+        })
+      );
+      expect(result['panel-1'].series[1]).toEqual(
+        expect.objectContaining({
+          id: 'series-2',
+          label: 'Math 2',
+          data: [[1000, 20]], // 100 - 80
+        })
+      );
     });
   });
 });
