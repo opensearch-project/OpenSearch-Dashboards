@@ -62,13 +62,13 @@ export function stdMetricRaw(resp, panel, series, meta) {
 
     // For math metrics, we need to process all NON-math metrics as component metrics
     // instead of just processing the last metric
-    if (metric.type === METRIC_TYPES.MATH) {
+    if (metric.type === 'math') {
       const decoration = getDefaultDecoration(series);
       // Process each non-math metric in the series
       series.metrics.forEach((m) => {
         // Skip math, percentile, percentile_rank, sibling, and band metrics
         if (
-          m.type === METRIC_TYPES.MATH ||
+          m.type === 'math' ||
           m.type === METRIC_TYPES.PERCENTILE ||
           m.type === METRIC_TYPES.PERCENTILE_RANK ||
           /_bucket$/.test(m.type) ||

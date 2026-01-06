@@ -32,7 +32,6 @@ import { getDefaultDecoration } from '../../helpers/get_default_decoration';
 import { getSplits } from '../../helpers/get_splits';
 import { getLastMetric } from '../../helpers/get_last_metric';
 import { getSiblingAggValue } from '../../helpers/get_sibling_agg_value';
-import { METRIC_TYPES } from '../../../../../common/metric_types';
 
 /**
  * stdSiblingRaw - Modified version of stdSibling for the raw endpoint
@@ -48,14 +47,14 @@ export function stdSiblingRaw(resp, panel, series, meta) {
     if (metric.type === 'std_deviation_bucket' && metric.mode === 'band') return next(results);
 
     // For math metrics, we need to process all sibling aggregations as component metrics
-    if (metric.type === METRIC_TYPES.MATH) {
+    if (metric.type === 'math') {
       const decoration = getDefaultDecoration(series);
       // Process each sibling metric in the series
       series.metrics.forEach((m) => {
         // Only process sibling bucket metrics (not math, not bands)
         if (
           !/_bucket$/.test(m.type) ||
-          m.type === METRIC_TYPES.MATH ||
+          m.type === 'math' ||
           (m.type === 'std_deviation_bucket' && m.mode === 'band')
         ) {
           return;
