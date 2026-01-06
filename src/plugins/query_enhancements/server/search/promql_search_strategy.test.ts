@@ -248,7 +248,7 @@ describe('promqlSearchStrategy', () => {
 
       // Should have Time, cpu, host, mode, Value (sorted alphabetically)
       const schemaNames = instantSchema.map((s: any) => s.name);
-      expect(schemaNames).toEqual(['Time', 'cpu', 'host', 'mode', 'Value']);
+      expect(schemaNames).toEqual(['Time', 'Metric', 'cpu', 'host', 'mode', 'Value']);
     });
 
     it('should handle metrics with missing labels', async () => {
