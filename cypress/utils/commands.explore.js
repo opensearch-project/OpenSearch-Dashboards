@@ -335,7 +335,11 @@ cy.explore.add(
 cy.explore.add('loadSavedQuery', (name) => {
   cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
 
-  cy.getElementByTestId('saved-query-management-open-button').click();
+  // Wait for the popover to fully render before clicking the open button
+  cy.getElementByTestId('saved-query-management-open-button')
+    .should('be.visible')
+    .should('not.be.disabled')
+    .click();
 
   cy.getElementByTestId('euiFlyoutCloseButton').parent().contains(name).should('exist').click();
   // click button through popover
@@ -353,7 +357,11 @@ cy.explore.add('clearSavedQuery', () => {
 cy.explore.add('deleteSavedQuery', (name) => {
   cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
 
-  cy.getElementByTestId('saved-query-management-open-button').click();
+  // Wait for the popover to fully render before clicking the open button
+  cy.getElementByTestId('saved-query-management-open-button')
+    .should('be.visible')
+    .should('not.be.disabled')
+    .click();
   cy.getElementByTestId('euiFlyoutCloseButton')
     .parent()
     .contains(name)
