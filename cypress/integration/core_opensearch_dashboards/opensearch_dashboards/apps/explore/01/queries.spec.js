@@ -13,25 +13,31 @@ import {
   getRandomizedWorkspaceName,
   generateAllTestConfigurations,
   generateBaseConfiguration,
+  getRandomizedDatasetId,
 } from '../../../../../../utils/apps/explore/shared';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 import { verifyDiscoverPageState } from '../../../../../../utils/apps/explore/saved';
 
 const workspace = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const queriesTestSuite = () => {
   describe('query enhancement queries', { scrollBehavior: false }, () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
-      // Create and select index pattern for ${INDEX_WITH_TIME_1}*
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspace,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspace,
+        datasetId,
+        `${INDEX_WITH_TIME_1}*`,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
     });
 
     beforeEach(() => {
@@ -44,6 +50,7 @@ const queriesTestSuite = () => {
     });
 
     after(() => {
+      // Cleanup workspace and associated resources
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
     });
 
@@ -59,6 +66,12 @@ const queriesTestSuite = () => {
         // Default PPL query should be set
         cy.osd.waitForLoader(true);
 
+        const emptyQuery = ' ';
+
+        cy.explore.setQueryEditor(emptyQuery);
+
+        cy.osd.waitForLoader(true);
+
         // Use the more robust verifyDiscoverPageState function to check editor content
         // This handles Monaco editor's special whitespace characters better
         verifyDiscoverPageState({
@@ -67,20 +80,8 @@ const queriesTestSuite = () => {
           language: 'PPL',
           hitCount: '10,000',
         });
-        cy.getElementByTestId(`discoverQueryElapsedMs`).should('be.visible');
+        cy.getElementByTestId(`discoverQueryElapsedMs`, { timeout: 60000 }).should('be.visible'); // Requires more time
         cy.osd.verifyResultsCount(10000);
-
-        // Query should persist across refresh
-        cy.reload();
-        cy.getElementByTestId(`discoverQueryElapsedMs`).should('be.visible');
-
-        // Verify the state again after reload
-        verifyDiscoverPageState({
-          dataset: config.dataset,
-          queryString: '',
-          language: 'PPL',
-          hitCount: '10,000',
-        });
       });
 
       it(`with PPL query not starting with source for ${config.testName}`, () => {

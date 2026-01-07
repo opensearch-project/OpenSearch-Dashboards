@@ -27,6 +27,12 @@ export const getRandomizedWorkspaceName = () =>
   `${moment().unix()}-${getRandomString().substring(7)}`;
 
 /**
+ * Returns a randomized Dataset Id. First part will be unix time in seconds
+ * @returns {string}
+ */
+export const getRandomizedDatasetId = () => `${moment().unix()}-${getRandomString().substring(7)}`;
+
+/**
  * Generates base test configuration for tests
  * @param {string} dataset - Dataset name
  * @param {string} datasetType - Type of dataset
@@ -117,7 +123,7 @@ export const generateIndexPatternTestConfigurations = (
 };
 
 /**
- * Sets the top nav date if it is relevant for the passed language and searches
+ * Sets the top nav date if it is relevant for the passed language
  * @param {QueryEnhancementLanguage} language - query language
  * @param {string=} start - start datetime string
  * @param {string=} end - end datetime string
@@ -129,18 +135,6 @@ export const setDatePickerDatesAndSearchIfRelevant = (
 ) => {
   if (language !== QueryLanguages.SQL.name) {
     cy.osd.setTopNavDate(start, end);
-  }
-};
-
-/**
- * Sets the top nav date if it is relevant for the passed language
- * @param {QueryEnhancementLanguage} language - query language
- * @param {string=} start - start datetime string
- * @param {string=} end - end datetime string
- */
-export const setDatePickerDatesIfRelevant = (language, start = START_TIME, end = END_TIME) => {
-  if (language !== QueryLanguages.SQL.name) {
-    cy.osd.setTopNavDate(start, end, false);
   }
 };
 
@@ -243,4 +237,11 @@ export const setHistogramIntervalIfRelevant = (language, interval) => {
   if (language !== QueryLanguages.SQL.name) {
     cy.getElementByTestId('discoverIntervalSelect').select(interval);
   }
+};
+
+export const resetPageState = () => {
+  // Resets the Page state by clicking the New button
+  cy.log('Resetting the Page by clikcing on New Button');
+  cy.getElementByTestId('discoverNewButton').click();
+  cy.wait(2000);
 };

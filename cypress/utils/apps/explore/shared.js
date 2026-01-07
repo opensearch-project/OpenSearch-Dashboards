@@ -26,6 +26,14 @@ const getRandomString = () => Math.random().toString(36);
 export const getRandomizedWorkspaceName = () =>
   `${moment().unix()}-${getRandomString().substring(7)}`;
 
+export const randomizedWorkspaceName = getRandomizedWorkspaceName();
+
+/**
+ * Returns a randomized Dataset Id. First part will be unix time in seconds
+ * @returns {string}
+ */
+export const getRandomizedDatasetId = () => `${moment().unix()}-${getRandomString().substring(7)}`;
+
 /**
  * Generates base test configuration for tests
  * @param {string} dataset - Dataset name
@@ -231,4 +239,11 @@ export const formatValue = (value) => {
  */
 export const setHistogramIntervalIfRelevant = (language, interval) => {
   cy.getElementByTestId('discoverIntervalSelect').select(interval);
+};
+
+export const resetPageState = () => {
+  // Resets the Page state by clicking the New button
+  cy.log('Resetting the Page by clicking on New Button');
+  cy.getElementByTestId('discoverNewButton').click();
+  cy.wait(2000);
 };

@@ -10,6 +10,7 @@ import {
 } from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   generateAllTestConfigurations,
   setDatePickerDatesAndSearchIfRelevant,
   setHistogramIntervalIfRelevant,
@@ -19,9 +20,13 @@ import {
   verifyShareUrl,
   openShareMenuWithRetry,
 } from '../../../../../../utils/apps/explore/shared_links';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const generateShareUrlsTestConfiguration = (dataset, datasetType, language) => {
   const baseConfig = {
@@ -44,6 +49,7 @@ const getQueryString = (config) => {
 };
 
 export const runSharedLinksTests = () => {
+  // TODO: Re-enable once it works for Neo. Currently it is failing for INDEXES
   describe('discover sharing tests', () => {
     const testData = {
       fields: ['service_endpoint'],
@@ -53,14 +59,18 @@ export const runSharedLinksTests = () => {
     };
 
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        `${INDEX_WITH_TIME_1}*`, // Uses index pattern
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
     });
 
     beforeEach(() => {
@@ -72,7 +82,7 @@ export const runSharedLinksTests = () => {
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
     generateAllTestConfigurations(generateShareUrlsTestConfiguration, {
@@ -83,6 +93,7 @@ export const runSharedLinksTests = () => {
         const queryString = getQueryString(config);
 
         it(`should persist state in shared links for ${config.testName}`, () => {
+          cy.wait(2000);
           // Set dataset and language
           cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           setDatePickerDatesAndSearchIfRelevant(config.language);
