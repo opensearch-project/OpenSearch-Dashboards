@@ -10,6 +10,7 @@ import { isResponseError } from '../../..../../../../../core/server/opensearch/c
 import { API, ERROR_DETAILS } from '../../../common';
 import { getAgentIdByConfig, requestAgentByConfig } from './agents';
 import { createResponseBody } from './createResponse';
+import { getLanguageHandler } from './language_handlers';
 import { parseTimeRangeXML, getUnselectedTimeFields } from './ppl/time_parser_utils';
 
 export function registerQueryAssistRoutes(router: IRouter) {
@@ -81,6 +82,15 @@ export function registerQueryAssistRoutes(router: IRouter) {
       );
       if (!languageConfig) return response.badRequest({ body: 'Unsupported language' });
       try {
+        const additionalParameters = await getLanguageHandler(
+          request.body.language
+        ).getAdditionalAgentParameters({
+          context,
+          request,
+          dataSourceName: request.body.index,
+          logger,
+        });
+
         // Execute the main query agent
         const queryPromise = requestAgentByConfig({
           context,
@@ -89,6 +99,7 @@ export function registerQueryAssistRoutes(router: IRouter) {
             parameters: {
               index: request.body.index,
               question: request.body.question,
+              ...additionalParameters,
             },
           },
           dataSourceId: request.body.dataSourceId,
