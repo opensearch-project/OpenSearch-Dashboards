@@ -16,7 +16,7 @@
     "@osd/i18n": "1.0.0",
     "@osd/monaco": "1.0.0",
     "axios": "^1.8.2",
-    "compression-webpack-plugin": "npm:@amoo-miki/compression-webpack-plugin@4.0.1-rc.1",
+    "compression-webpack-plugin": "^11.1.0",
     "core-js": "^3.6.5",
     "jquery": "^3.5.0",
     "lodash": "^4.17.21",
