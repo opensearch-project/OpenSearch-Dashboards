@@ -11,11 +11,11 @@ import { StyleControlsProps } from '../utils/use_visualization_types';
 import { LegendOptionsWrapper } from '../style_panel/legend/legend_options_wrapper';
 import { LineExclusiveVisOptions } from './line_exclusive_vis_options';
 import { TooltipOptionsPanel } from '../style_panel/tooltip/tooltip';
-import { AxesOptions } from '../style_panel/axes/axes';
 import { AxesSelectPanel } from '../style_panel/axes/axes_selector';
 import { TitleOptionsPanel } from '../style_panel/title/title';
-import { AxisRole } from '../types';
+import { AxisRole, VisFieldType } from '../types';
 import { ThresholdPanel } from '../style_panel/threshold/threshold_panel';
+import { AllAxesOptions } from '../style_panel/axes/standard_axes_options';
 
 export type LineVisStyleControlsProps = StyleControlsProps<LineChartStyle>;
 
@@ -39,9 +39,9 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
   const hasColorMapping = !!axisColumnMappings?.[AxisRole.COLOR];
   const hasFacetMapping = !!axisColumnMappings?.[AxisRole.FACET];
   const hasYSecondMapping = !!axisColumnMappings?.[AxisRole.Y_SECOND];
+  const shouldShowTimeMarker = axisColumnMappings?.[AxisRole.X]?.schema === VisFieldType.Date;
 
   const shouldShowLegend = hasColorMapping || hasFacetMapping || hasYSecondMapping;
-  const shouldShowTimeMarker = dateColumns.length !== 0;
   // The mapping object will be an empty object if no fields are selected on the axes selector. No
   // visualization is generated in this case so we shouldn't display style option panels.
   const hasMappingSelected = !isEmpty(axisColumnMappings);
@@ -85,17 +85,12 @@ export const LineVisStyleControls: React.FC<LineVisStyleControlsProps> = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <AxesOptions
-              categoryAxes={styleOptions.categoryAxes}
-              valueAxes={styleOptions.valueAxes}
-              onCategoryAxesChange={(categoryAxes) =>
-                updateStyleOption('categoryAxes', categoryAxes)
-              }
-              onValueAxesChange={(valueAxes) => updateStyleOption('valueAxes', valueAxes)}
-              numericalColumns={numericalColumns}
-              categoricalColumns={categoricalColumns}
-              dateColumns={dateColumns}
+            <AllAxesOptions
               axisColumnMappings={axisColumnMappings}
+              standardAxes={styleOptions.standardAxes}
+              onStandardAxesChange={(standardAxes) =>
+                updateStyleOption('standardAxes', standardAxes)
+              }
               showFullTimeRange={styleOptions.showFullTimeRange}
               onShowFullTimeRangeChange={(showFullTimeRange) =>
                 updateStyleOption('showFullTimeRange', showFullTimeRange)

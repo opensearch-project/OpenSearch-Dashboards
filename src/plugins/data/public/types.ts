@@ -136,6 +136,11 @@ export interface DataPublicPluginStart {
    * {@link DataSourceStart}
    */
   dataSources: DataSourceStart;
+  /**
+   * Factory for creating resource clients.
+   * {@link ResourceClientFactory}
+   */
+  resourceClientFactory: ResourceClientFactory;
 }
 
 export interface IDataPluginServices extends Partial<CoreStart> {

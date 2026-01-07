@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "3.4.0",
+  "version": "3.5.0",
   "branch": "main",
   "types": "./opensearch_dashboards.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -89,8 +89,8 @@
     "pkg-version": "scripts/use_node -e \"console.log(require('./package.json').version)\"",
     "release_note:generate": "scripts/use_node scripts/generate_release_note",
     "cy": "yarn cypress:run-without-security --env HEADLESS=1",
-    "cypress:run-without-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --env SECURITY_ENABLED=false",
-    "cypress:run-with-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --env SECURITY_ENABLED=true,openSearchUrl=https://localhost:9200,WAIT_FOR_LOADER_BUFFER_MS=500",
+    "cypress:run-without-security": "env -u DISPLAY TZ=America/Los_Angeles NO_COLOR=1 cypress run --env SECURITY_ENABLED=false",
+    "cypress:run-with-security": "env -u DISPLAY TZ=America/Los_Angeles NO_COLOR=1 cypress run --env SECURITY_ENABLED=true,openSearchUrl=https://localhost:9200,WAIT_FOR_LOADER_BUFFER_MS=500",
     "osd:ciGroup10": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/query_enhancements/01/*.spec.js\"",
     "osd:ciGroup10Fast": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/query_enhancements/01/*.spec.js,!cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/query_enhancements/01/saved_search.spec.js\"",
     "osd:ciGroup10Slow": "echo \"cypress/integration/core_opensearch_dashboards/opensearch_dashboards/apps/query_enhancements/01/saved_search.spec.js\"",
@@ -201,10 +201,10 @@
     "@aws-sdk/signature-v4": "^3.374.0",
     "@dagrejs/dagre": "^1.1.5",
     "@elastic/datemath": "5.0.3",
-    "@elastic/eui": "npm:@opensearch-project/oui@1.21.0",
+    "@elastic/eui": "npm:@opensearch-project/oui@1.22.1",
     "@elastic/good": "^9.0.1-kibana3",
     "@elastic/numeral": "npm:@amoo-miki/numeral@2.6.0",
-    "@elastic/request-crypto": "2.0.0",
+    "@elastic/request-crypto": "2.0.2",
     "@elastic/safer-lodash-set": "0.0.0",
     "@hapi/accept": "^5.0.2",
     "@hapi/boom": "^9.1.4",
@@ -251,6 +251,7 @@
     "deep-freeze-strict": "^1.1.1",
     "del": "^6.1.1",
     "dns-sync": "npm:@amoo-miki/dns-sync@^0.2.1",
+    "echarts": "^6.0.0",
     "elastic-apm-node": "^4.10.0",
     "elasticsearch": "^16.7.0",
     "execa": "^4.0.2",
@@ -275,6 +276,7 @@
     "json-stable-stringify": "^1.0.1",
     "json-stringify-safe": "5.0.1",
     "json5": "^2.2.3",
+    "kbn-handlebars": "1.0.0",
     "lodash": "^4.17.21",
     "lru-cache": "^4.1.5",
     "lucene": "^2.1.1",
@@ -572,7 +574,7 @@
     "zlib": "^1.0.5"
   },
   "engines": {
-    "node": ">=14.20.1 <21",
+    "node": ">=14.20.1 <23",
     "yarn": "^1.22.10"
   }
 }

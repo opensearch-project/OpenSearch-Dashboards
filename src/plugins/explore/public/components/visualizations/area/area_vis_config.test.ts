@@ -30,47 +30,6 @@ describe('area_vis_config', () => {
         thresholdStyle: ThresholdMode.Off,
       });
 
-      // Check axes configuration
-      expect(defaultAreaChartStyles.categoryAxes).toHaveLength(1);
-      expect(defaultAreaChartStyles.categoryAxes[0]).toMatchObject({
-        id: 'CategoryAxis-1',
-        type: 'category',
-        position: Positions.BOTTOM,
-        show: true,
-        labels: {
-          show: true,
-          filter: true,
-          rotate: 0,
-          truncate: 100,
-        },
-        grid: {
-          showLines: true,
-        },
-        title: {
-          text: '',
-        },
-      });
-
-      expect(defaultAreaChartStyles.valueAxes).toHaveLength(1);
-      expect(defaultAreaChartStyles.valueAxes[0]).toMatchObject({
-        id: 'ValueAxis-1',
-        name: 'LeftAxis-1',
-        type: 'value',
-        position: Positions.LEFT,
-        show: true,
-        labels: {
-          show: true,
-          rotate: 0,
-          filter: false,
-          truncate: 100,
-        },
-        grid: {
-          showLines: true,
-        },
-        title: {
-          text: '',
-        },
-      });
       expect(defaultAreaChartStyles.titleOptions).toMatchObject({
         show: false,
         titleName: '',

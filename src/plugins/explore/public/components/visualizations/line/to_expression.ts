@@ -10,12 +10,29 @@ import {
   createTimeMarkerLayer,
   applyAxisStyling,
   ValueAxisPosition,
+  createLineSeries,
+  createLineBarSeries,
+  createFacetLineSeries,
 } from './line_chart_utils';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
-import { applyTimeRangeToEncoding, getTooltipFormat } from '../utils/utils';
+import {
+  applyTimeRangeToEncoding,
+  getAxisByRole,
+  getSwappedAxisRole,
+  getTooltipFormat,
+  getChartRender,
+} from '../utils/utils';
 import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
-
+import { pipe, createBaseConfig, buildAxisConfigs, assembleSpec } from '../utils/echarts_spec';
+import {
+  convertTo2DArray,
+  transform,
+  pivot,
+  sortByTime,
+  facetTransform,
+  flatten,
+} from '../utils/data_transformation';
 /**
  * Rule 1: Create a simple line chart with one metric and one date
  * @param transformedData The transformed data
@@ -32,13 +49,42 @@ export const createSimpleLineChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
-  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
-  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
 
-  const metricField = yAxisColumn?.column;
-  const dateField = xAxisColumn?.column;
-  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
-  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
+    const timeField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis?.column;
+
+    if (!valueField || !timeField) throw Error('Missing axis config for line chart');
+
+    const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+
+    const result = pipe(
+      transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
+      createBaseConfig,
+      buildAxisConfigs,
+      createLineSeries({
+        styles,
+        categoryField: timeField,
+        seriesFields: [valueField],
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
+  }
+
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const metricField = yAxis?.column;
+  const dateField = xAxis?.column;
+  const metricName = yAxisStyle?.title?.text || yAxis?.name;
+  const dateName = xAxisStyle?.title?.text || xAxis?.name;
   const layers: any[] = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
@@ -55,7 +101,7 @@ export const createSimpleLineChart = (
             labelAngle: -45,
             labelSeparation: 8,
           },
-          styles,
+          xAxisStyle,
           'category',
           numericalColumns,
           [],
@@ -65,7 +111,14 @@ export const createSimpleLineChart = (
       y: {
         field: metricField,
         type: 'quantitative',
-        axis: applyAxisStyling({ title: '' }, styles, 'value', numericalColumns, [], dateColumns),
+        axis: applyAxisStyling(
+          { title: '' },
+          yAxisStyle,
+          'value',
+          numericalColumns,
+          [],
+          dateColumns
+        ),
       },
       ...(showTooltip && {
         tooltip: [
@@ -149,14 +202,47 @@ export const createLineBarChart = (
   const xAxisMapping = axisColumnMappings?.[AxisRole.X];
   const secondYAxisMapping = axisColumnMappings?.[AxisRole.Y_SECOND];
 
+  const xAxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.X);
+  const yAxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y);
+  const y2AxisStyle = getAxisByRole(styles.standardAxes ?? [], AxisRole.Y_SECOND);
+
   const metric1Field = yAxisMapping?.column;
   const metric2Field = secondYAxisMapping?.column;
   const dateField = xAxisMapping?.column;
-  const metric1Name = styles.valueAxes?.[0]?.title?.text || yAxisMapping?.name;
-  const metric2Name = styles.valueAxes?.[1]?.title?.text || secondYAxisMapping?.name;
-  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
+  const metric1Name = yAxisStyle?.title?.text || yAxisMapping?.name;
+  const metric2Name = y2AxisStyle?.title?.text || secondYAxisMapping?.name;
+  const dateName = xAxisStyle?.title?.text || xAxisMapping?.name;
   const layers: any[] = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
+
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+
+    const timeField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis;
+    const value2Field = axisColumnMappings?.[AxisRole.Y_SECOND];
+
+    if (!timeField || !valueField || !value2Field) {
+      throw Error('Missing axis config or color field for multi lines chart');
+    }
+
+    const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+
+    const result = pipe(
+      transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
+      createBaseConfig,
+      buildAxisConfigs,
+      createLineBarSeries({ styles, categoryField: timeField, value2Field, valueField }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
+  }
 
   const barLayer = {
     params: [createTimeRangeBrush({ timeAxis: 'x' })],
@@ -171,7 +257,7 @@ export const createLineBarChart = (
             labelAngle: -45,
             labelSeparation: 8,
           },
-          styles,
+          xAxisStyle,
           'category',
           numericalColumns,
           [],
@@ -183,7 +269,7 @@ export const createLineBarChart = (
         type: 'quantitative',
         axis: applyAxisStyling(
           { title: '' },
-          styles,
+          yAxisStyle,
           'value',
           numericalColumns,
           [],
@@ -233,7 +319,7 @@ export const createLineBarChart = (
             title: '',
             orient: Positions.RIGHT,
           },
-          styles,
+          y2AxisStyle,
           'value',
           numericalColumns,
           [],
@@ -339,15 +425,53 @@ export const createMultiLineChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
-  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
-  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
-  const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const timeField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis?.column;
+    const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+    const colorField = colorColumn?.column;
 
-  const metricField = yAxisColumn?.column;
-  const dateField = xAxisColumn?.column;
+    if (!timeField || !valueField || !colorField) {
+      throw Error('Missing axis config or color field for multi lines chart');
+    }
+    const result = pipe(
+      transform(
+        sortByTime(timeField),
+        pivot({
+          groupBy: timeField,
+          pivot: colorField,
+          field: valueField,
+        }),
+        flatten(),
+        convertTo2DArray()
+      ),
+      createBaseConfig,
+      buildAxisConfigs,
+      createLineSeries({
+        styles,
+        categoryField: timeField,
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
+  }
+
+  const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const metricField = yAxis?.column;
+  const dateField = xAxis?.column;
   const categoryField = colorColumn?.column;
-  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
-  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
+  const metricName = yAxisStyle?.title?.text || yAxis?.name;
+  const dateName = xAxisStyle?.title?.text || xAxis?.name;
   const categoryName = colorColumn?.name;
   const layers: any[] = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
@@ -365,7 +489,7 @@ export const createMultiLineChart = (
             labelAngle: -45,
             labelSeparation: 8,
           },
-          styles,
+          xAxisStyle,
           'category',
           numericalColumns,
           categoricalColumns,
@@ -377,7 +501,7 @@ export const createMultiLineChart = (
         type: 'quantitative',
         axis: applyAxisStyling(
           { title: '' },
-          styles,
+          yAxisStyle,
           'value',
           numericalColumns,
           categoricalColumns,
@@ -481,17 +605,58 @@ export const createFacetedMultiLineChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
-  const yAxisMapping = axisColumnMappings?.[AxisRole.Y];
-  const xAxisMapping = axisColumnMappings?.[AxisRole.X];
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const timeField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis?.column;
+    const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+    const colorField = colorColumn?.column;
+
+    const facetColumn = axisColumnMappings?.[AxisRole.FACET]?.column;
+    if (!timeField || !valueField || !colorField || !facetColumn) {
+      throw Error('Missing axis config for facet time line chart');
+    }
+
+    const result = pipe(
+      facetTransform(
+        facetColumn,
+        sortByTime(timeField),
+        pivot({
+          groupBy: timeField,
+          pivot: colorField,
+          field: valueField,
+        }),
+        flatten(),
+        convertTo2DArray()
+      ),
+      createBaseConfig,
+      buildAxisConfigs,
+      createFacetLineSeries({
+        styles,
+        categoryField: timeField,
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
+  }
+
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
   const facetMapping = axisColumnMappings?.[AxisRole.FACET];
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
-  const metricField = yAxisMapping?.column;
-  const dateField = xAxisMapping?.column;
+  const metricField = yAxis?.column;
+  const dateField = xAxis?.column;
   const category1Field = colorMapping?.column;
   const category2Field = facetMapping?.column;
-  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisMapping?.name;
-  const dateName = styles.categoryAxes?.[0]?.title?.text || xAxisMapping?.name;
+  const metricName = yAxisStyle?.title?.text || yAxis?.name;
+  const dateName = xAxisStyle?.title?.text || xAxis?.name;
   const category1Name = colorMapping?.name;
   const category2Name = facetMapping?.name;
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
@@ -511,7 +676,7 @@ export const createFacetedMultiLineChart = (
           labelAngle: -45,
           labelSeparation: 8,
         },
-        styles,
+        xAxisStyle,
         'category',
         numericalColumns,
         categoricalColumns,
@@ -523,7 +688,7 @@ export const createFacetedMultiLineChart = (
       type: 'quantitative',
       axis: applyAxisStyling(
         { title: '' },
-        styles,
+        yAxisStyle,
         'value',
         numericalColumns,
         categoricalColumns,
@@ -650,20 +815,47 @@ export const createCategoryLineChart = (
   styles: LineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length === 0 || categoricalColumns.length === 0) {
-    throw new Error(
-      'Category line chart requires at least one numerical column and one categorical column'
-    );
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+
+    const categoryField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis?.column;
+
+    if (!valueField || !categoryField) throw Error('Missing axis config for line chart');
+
+    const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+    // When axesMapping is updated but the data itself has not changed
+    // (for example, when switching x axis to a different field),
+    // the previous chart styles will be preserved.
+    // This is the critical minimal fix:
+    // for category-based line charts, simply set addTimeMarker to false
+    // to prevent crashes when switching from date-based(enable addTimeMarker) to category-based.
+    const result = pipe(
+      transform(convertTo2DArray(allColumns)),
+      createBaseConfig,
+      buildAxisConfigs,
+      createLineSeries({
+        styles,
+        categoryField,
+        seriesFields: [valueField],
+        addTimeMarker: false,
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
   }
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
-  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
-  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
-
-  const metricField = yAxisColumn?.column;
-  const categoryField = xAxisColumn?.column;
-  const metricName = styles.valueAxes?.[0]?.title?.text || yAxisColumn?.name;
-  const categoryName = styles.categoryAxes?.[0]?.title?.text || xAxisColumn?.name;
+  const metricField = yAxis?.column;
+  const categoryField = xAxis?.column;
+  const metricName = yAxisStyle?.title?.text || yAxis?.name;
+  const categoryName = xAxisStyle?.title?.text || xAxis?.name;
   const layers: any[] = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
 
@@ -679,7 +871,7 @@ export const createCategoryLineChart = (
             labelAngle: -45,
             labelSeparation: 8,
           },
-          styles,
+          xAxisStyle,
           'category',
           numericalColumns,
           categoricalColumns,
@@ -691,7 +883,7 @@ export const createCategoryLineChart = (
         type: 'quantitative',
         axis: applyAxisStyling(
           { title: '' },
-          styles,
+          yAxisStyle,
           'value',
           numericalColumns,
           categoricalColumns,
@@ -751,15 +943,53 @@ export const createCategoryMultiLineChart = (
   styles: LineChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const yAxisColumn = axisColumnMappings?.[AxisRole.Y];
-  const xAxisColumn = axisColumnMappings?.[AxisRole.X];
-  const colorAxisColumn = axisColumnMappings?.[AxisRole.COLOR];
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const cateField = axisConfig.xAxis?.column;
+    const valueField = axisConfig.yAxis?.column;
+    const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+    const colorField = colorColumn?.column;
 
-  const metricField = yAxisColumn?.column;
-  const categoryField = xAxisColumn?.column;
+    if (!cateField || !valueField || !colorField) {
+      throw Error('Missing axis config or color field for multi lines chart');
+    }
+    const result = pipe(
+      transform(
+        pivot({
+          groupBy: cateField,
+          pivot: colorField,
+          field: valueField,
+        }),
+        flatten(),
+        convertTo2DArray()
+      ),
+      createBaseConfig,
+      buildAxisConfigs,
+      createLineSeries({
+        styles,
+        categoryField: cateField,
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== cateField),
+        addTimeMarker: false,
+      }),
+
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
+  }
+  const colorAxisColumn = axisColumnMappings?.[AxisRole.COLOR];
+  const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
+
+  const metricField = yAxis?.column;
+  const categoryField = xAxis?.column;
   const categoryField2 = colorAxisColumn?.column;
-  const metricName = yAxisColumn?.name;
-  const categoryName = xAxisColumn?.name;
+  const metricName = yAxis?.name;
+  const categoryName = xAxis?.name;
   const category2Name = colorAxisColumn?.name;
   const layers: any[] = [];
   const showTooltip = styles.tooltipOptions?.mode !== 'hidden';
@@ -776,7 +1006,7 @@ export const createCategoryMultiLineChart = (
             labelAngle: -45,
             labelSeparation: 8,
           },
-          styles,
+          xAxisStyle,
           'category',
           numericalColumns,
           categoricalColumns,
@@ -788,7 +1018,7 @@ export const createCategoryMultiLineChart = (
         type: 'quantitative',
         axis: applyAxisStyling(
           { title: metricName },
-          styles,
+          yAxisStyle,
           'value',
           numericalColumns,
           categoricalColumns,

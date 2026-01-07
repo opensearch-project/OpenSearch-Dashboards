@@ -10,6 +10,7 @@ import {
   VisColumn,
   VisFieldType,
   TimeUnit,
+  AggregationType,
 } from '../types';
 import { BarChartStyle, defaultBarChartStyles } from './bar_vis_config';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
@@ -18,6 +19,7 @@ import {
   getSwappedAxisRole,
   getSchemaByAxis,
   applyTimeRangeToEncoding,
+  getChartRender,
 } from '../utils/utils';
 
 import {
@@ -25,9 +27,25 @@ import {
   buildEncoding,
   buildTooltipEncoding,
   buildThresholdColorEncoding,
+  createBarSeries,
+  createFacetBarSeries,
 } from './bar_chart_utils';
 import { DEFAULT_OPACITY } from '../constants';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
+import {
+  pipe,
+  createBaseConfig,
+  buildAxisConfigs,
+  assembleSpec,
+  buildVisMap,
+} from '../utils/echarts_spec';
+import {
+  aggregate,
+  convertTo2DArray,
+  transform,
+  pivot,
+  facetTransform,
+} from '../utils/data_transformation';
 
 // Only set size and binSpacing in manual mode
 const configureBarSizeAndSpacing = (barMark: any, styles: BarChartStyle) => {
@@ -45,13 +63,55 @@ export const createBarSpec = (
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length === 0 || categoricalColumns.length === 0) {
-    throw new Error('Bar chart requires at least one numerical column and one categorical column');
+  // if chart render is 'echarts', here it return the echarts config options
+  if (getChartRender() === 'echarts') {
+    const styles = { ...defaultBarChartStyles, ...styleOptions };
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const xAxis = axisConfig.xAxis;
+    const yAxis = axisConfig.yAxis;
+
+    if (!xAxis || !yAxis) {
+      throw Error('Missing axis config for Bar chart');
+    }
+
+    let categoryField = '';
+    let valueField = '';
+
+    if (xAxis.schema === VisFieldType.Categorical) {
+      categoryField = xAxis.column;
+      valueField = yAxis.column;
+    } else if (yAxis.schema === VisFieldType.Categorical) {
+      categoryField = yAxis.column;
+      valueField = xAxis.column;
+    }
+
+    const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
+    const result = pipe(
+      transform(
+        aggregate({
+          groupBy: categoryField,
+          field: valueField,
+          aggregationType,
+        }),
+        convertTo2DArray()
+      ),
+      createBaseConfig,
+      buildAxisConfigs,
+      buildVisMap({
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
+      }),
+      createBarSeries({ styles, categoryField, seriesFields: [valueField] }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+    return result.spec;
   }
 
   const styles = { ...defaultBarChartStyles, ...styleOptions };
-
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const layers: any[] = [];
@@ -145,6 +205,60 @@ export const createTimeBarChart = (
   // Check if we have the required columns
   if (numericalColumns.length === 0 || dateColumns.length === 0) {
     throw new Error('Time bar chart requires at least one numerical column and one date column');
+  }
+
+  // TODO: support styles.showFullTimeRange
+  // if chart render is 'echarts', here it return the echarts config options
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const xAxis = axisConfig.xAxis;
+    const yAxis = axisConfig.yAxis;
+
+    if (!xAxis || !yAxis) {
+      throw Error('Missing axis config for Bar chart');
+    }
+
+    let timeField = '';
+    let valueField = '';
+    if (xAxis.schema === VisFieldType.Date) {
+      timeField = xAxis.column;
+      valueField = yAxis.column;
+    } else if (yAxis.schema === VisFieldType.Date) {
+      timeField = yAxis.column;
+      valueField = xAxis.column;
+    }
+
+    const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
+    const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
+    const result = pipe(
+      transform(
+        aggregate({
+          groupBy: timeField,
+          field: valueField,
+          timeUnit,
+          aggregationType,
+        }),
+        convertTo2DArray()
+      ),
+      createBaseConfig,
+      buildAxisConfigs,
+      buildVisMap({
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      }),
+      createBarSeries({
+        styles,
+        categoryField: timeField,
+        seriesFields: [valueField],
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
   }
 
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
@@ -249,15 +363,68 @@ export const createGroupedTimeBarChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
-  // Check if we have the required columns
-  if (
-    numericalColumns.length === 0 ||
-    categoricalColumns.length === 0 ||
-    dateColumns.length === 0
-  ) {
-    throw new Error(
-      'Grouped time bar chart requires at least one numerical column, one categorical column, and one date column'
-    );
+  if (getChartRender() === 'echarts') {
+    const styles = { ...defaultBarChartStyles, ...styleOptions };
+    // Extract configuration before pipeline
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const xAxis = axisConfig.xAxis;
+    const yAxis = axisConfig.yAxis;
+    const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+    const colorField = colorColumn?.column;
+
+    if (!xAxis || !yAxis) {
+      throw Error('Missing axis config for grouped time bar chart');
+    }
+
+    let timeField = '';
+    let valueField = '';
+    if (xAxis.schema === VisFieldType.Date) {
+      timeField = xAxis.column;
+      valueField = yAxis.column;
+    } else if (yAxis.schema === VisFieldType.Date) {
+      timeField = yAxis.column;
+      valueField = xAxis.column;
+    }
+
+    const timeUnit = styles?.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
+    const aggregationType = styles?.bucket?.aggregationType ?? AggregationType.SUM;
+
+    if (!colorField) {
+      throw new Error('Color column is required for grouped time bar chart');
+    }
+
+    const result = pipe(
+      transform(
+        pivot({
+          groupBy: timeField,
+          pivot: colorField,
+          field: valueField,
+          timeUnit,
+          aggregationType,
+        }),
+        convertTo2DArray()
+      ),
+      createBaseConfig,
+      buildAxisConfigs,
+      buildVisMap({
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      }),
+      createBarSeries({
+        styles,
+        categoryField: timeField,
+        seriesFields(headers) {
+          return (headers ?? []).filter((h) => h !== timeField);
+        },
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
   }
 
   const styles = { ...defaultBarChartStyles, ...styleOptions };
@@ -378,11 +545,63 @@ export const createFacetedTimeBarChart = (
   axisColumnMappings?: AxisColumnMappings,
   timeRange?: { from: string; to: string }
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length === 0 || categoricalColumns.length < 2 || dateColumns.length === 0) {
-    throw new Error(
-      'Faceted time bar chart requires at least one numerical column, two categorical columns, and one date column'
-    );
+  if (getChartRender() === 'echarts') {
+    const styles = { ...defaultBarChartStyles, ...styleOptions };
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const xAxis = axisConfig.xAxis;
+    const yAxis = axisConfig.yAxis;
+    const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
+    const colorField = colorColumn?.column;
+
+    const facetColumn = axisColumnMappings?.[AxisRole.FACET]?.column;
+
+    if (!xAxis || !yAxis || !colorField || !facetColumn) {
+      throw Error('Missing axis config for facet time bar chart');
+    }
+
+    let timeField = '';
+    let valueField = '';
+    if (xAxis.schema === VisFieldType.Date) {
+      timeField = xAxis.column;
+      valueField = yAxis.column;
+    } else if (yAxis.schema === VisFieldType.Date) {
+      timeField = yAxis.column;
+      valueField = xAxis.column;
+    }
+
+    const timeUnit = styles?.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
+    const aggregationType = styles?.bucket?.aggregationType ?? AggregationType.SUM;
+
+    const result = pipe(
+      facetTransform(
+        facetColumn,
+        pivot({
+          groupBy: timeField,
+          pivot: colorField,
+          field: valueField,
+          timeUnit,
+          aggregationType,
+        }),
+        convertTo2DArray()
+      ),
+      createBaseConfig,
+      buildAxisConfigs,
+      buildVisMap({
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      }),
+      createFacetBarSeries({
+        styles,
+        categoryField: timeField,
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+    return result.spec;
   }
 
   const styles = { ...defaultBarChartStyles, ...styleOptions };
@@ -503,8 +722,68 @@ export const createStackedBarSpec = (
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  const styles = { ...defaultBarChartStyles, ...styleOptions };
+  if (getChartRender() === 'echarts') {
+    const styles = { ...defaultBarChartStyles, ...styleOptions };
+    // Extract configuration before pipeline
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const xAxis = axisConfig.xAxis;
+    const yAxis = axisConfig.yAxis;
+    const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
+    const colorField = colorMapping?.column;
 
+    if (!xAxis || !yAxis) {
+      throw Error('Missing axis config for stacked bar chart');
+    }
+
+    let categoryField = '';
+    let valueField = '';
+    if (xAxis.schema === VisFieldType.Categorical) {
+      categoryField = xAxis.column;
+      valueField = yAxis.column;
+    } else if (yAxis.schema === VisFieldType.Categorical) {
+      categoryField = yAxis.column;
+      valueField = xAxis.column;
+    }
+
+    const aggregationType = styles?.bucket?.aggregationType ?? AggregationType.SUM;
+
+    if (!colorField) {
+      throw new Error('Color column is required for stacked bar chart');
+    }
+
+    const result = pipe(
+      transform(
+        pivot({
+          groupBy: categoryField,
+          pivot: colorField,
+          field: valueField,
+          aggregationType,
+        }),
+        convertTo2DArray()
+      ),
+      createBaseConfig,
+      buildAxisConfigs,
+      buildVisMap({
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
+      }),
+      createBarSeries({
+        styles,
+        categoryField,
+        seriesFields(headers) {
+          return (headers ?? []).filter((h) => h !== categoryField);
+        },
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+    return result.spec;
+  }
+
+  const styles = { ...defaultBarChartStyles, ...styleOptions };
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
   const colorMapping = axisColumnMappings?.[AxisRole.COLOR];
 
@@ -599,9 +878,53 @@ export const createDoubleNumericalBarChart = (
   styleOptions: BarChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
-  // Check if we have the required columns
-  if (numericalColumns.length < 2) {
-    throw new Error('Histogram bar chart requires at least two numerical column');
+  if (getChartRender() === 'echarts') {
+    const styles = { ...defaultBarChartStyles, ...styleOptions };
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const xAxis = axisConfig.xAxis;
+    const yAxis = axisConfig.yAxis;
+
+    if (!xAxis || !yAxis) {
+      throw Error('Missing axis config for Bar chart');
+    }
+
+    let categoryField = '';
+    let valueField = '';
+
+    categoryField = styles.switchAxes ? yAxis.column : xAxis.column;
+    valueField = styles.switchAxes ? xAxis.column : yAxis.column;
+
+    const aggregationType = styles.bucket.aggregationType ?? AggregationType.SUM;
+    const result = pipe(
+      transform(
+        aggregate({
+          groupBy: categoryField,
+          field: valueField,
+          aggregationType,
+        }),
+        convertTo2DArray()
+      ),
+      createBaseConfig,
+      buildAxisConfigs,
+      buildVisMap({
+        seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
+      }),
+      createBarSeries({ styles, categoryField, seriesFields: [valueField] }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    if (styles.switchAxes) {
+      result.yAxisConfig.type = 'category';
+    } else {
+      result.xAxisConfig.type = 'category';
+    }
+
+    return result.spec;
   }
 
   const styles = { ...defaultBarChartStyles, ...styleOptions };
