@@ -3,12 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  DATASOURCE_NAME,
-  INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
-  INDEX_WITH_TIME_2,
-} from '../../../../../../utils/constants';
+import { DATASOURCE_NAME, INDEX_PATTERN_WITH_TIME } from '../../../../../../utils/constants';
 
 import {
   verifyDiscoverPageState,
@@ -21,14 +16,20 @@ import {
 
 import {
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   setDatePickerDatesAndSearchIfRelevant,
   generateAllTestConfigurations,
+  resetPageState,
 } from '../../../../../../utils/apps/explore/shared';
 
 import { generateSavedTestConfiguration } from '../../../../../../utils/apps/explore/saved';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const createSavedQuery = (config) => {
   cy.osd.navigateToWorkSpaceSpecificPage({
@@ -48,14 +49,9 @@ const createSavedQuery = (config) => {
 };
 
 const loadSavedQuery = (config) => {
-  cy.osd.navigateToWorkSpaceSpecificPage({
-    workspaceName,
-    page: 'explore/logs',
-    isEnhancement: true,
-  });
+  // Reset page State
+  resetPageState();
 
-  cy.getElementByTestId('discoverNewButton').click();
-  // Todo - Date Picker sometimes does not load when expected. Have to set dataset and query language again.
   cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
   setDatePickerDatesAndSearchIfRelevant(
@@ -81,7 +77,11 @@ const modifyAndVerifySavedQuery = (config, saveAsNewQueryName) => {
   validateSaveAsNewQueryMatchingNameHasError(`${workspaceName}-${config.saveName}`);
   cy.explore.updateSavedQuery(`${workspaceName}-${saveAsNewQueryName}`, true, true, true);
 
-  cy.reload();
+  // Reset page State
+  resetPageState();
+
+  setQueryConfigurations(config);
+  // Load saved query
   cy.explore.loadSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
   // wait for saved query to load
   cy.getElementByTestId('docTable').should('be.visible');
@@ -89,12 +89,6 @@ const modifyAndVerifySavedQuery = (config, saveAsNewQueryName) => {
 };
 
 const deleteSavedQuery = (saveAsNewQueryName) => {
-  cy.osd.navigateToWorkSpaceSpecificPage({
-    workspaceName,
-    page: 'explore/logs',
-    isEnhancement: true,
-  });
-
   cy.explore.deleteSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
   verifyQueryDoesNotExistInSavedQueries(`${workspaceName}-${saveAsNewQueryName}`);
 };
@@ -102,17 +96,18 @@ const deleteSavedQuery = (saveAsNewQueryName) => {
 const runSavedQueriesUITests = () => {
   describe('saved queries UI', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        INDEX_PATTERN_WITH_TIME, // Uses 'data_logs_small_time_*'
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
     });
 
     afterEach(() => {
@@ -123,23 +118,30 @@ const runSavedQueriesUITests = () => {
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
     const testConfigurations = generateAllTestConfigurations(generateSavedTestConfiguration);
 
     testConfigurations.forEach((config) => {
-      it(`should create, load, update, modify and delete the saved query: ${config.testName}`, () => {
-        createSavedQuery(config);
-        loadSavedQuery(config);
-        updateAndVerifySavedQuery(config);
+      describe(`saved query lifecycle: ${config.testName}`, () => {
+        beforeEach(() => {
+          cy.then(() => {
+            const workspaceId = Cypress.env(`${workspaceName}:WORKSPACE_ID`);
+            cy.osd.apiDeleteSavedQueryIfExists(`${workspaceName}-${config.saveName}`, workspaceId);
+            cy.osd.apiDeleteSavedQueryIfExists(`${workspaceName}-${config.testName}`, workspaceId);
+          });
+        });
 
-        const saveAsNewQueryName = config.testName + SAVE_AS_NEW_QUERY_SUFFIX;
-        modifyAndVerifySavedQuery(config, saveAsNewQueryName);
-        deleteSavedQuery(saveAsNewQueryName);
+        it(`should create, load, update, modify and delete the saved query: ${config.testName}`, () => {
+          createSavedQuery(config);
+          loadSavedQuery(config);
+          updateAndVerifySavedQuery(config);
+
+          const saveAsNewQueryName = config.testName + SAVE_AS_NEW_QUERY_SUFFIX;
+          modifyAndVerifySavedQuery(config, saveAsNewQueryName);
+          deleteSavedQuery(saveAsNewQueryName);
+        });
       });
     });
   });

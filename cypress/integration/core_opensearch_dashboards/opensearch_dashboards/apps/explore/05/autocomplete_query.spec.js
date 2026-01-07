@@ -6,6 +6,7 @@
 import { INDEX_WITH_TIME_1, DATASOURCE_NAME } from '../../../../../../utils/constants';
 import {
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
 import {
@@ -14,24 +15,33 @@ import {
   generateAutocompleteTestConfigurations,
   createOtherQueryUsingAutocomplete,
 } from '../../../../../../utils/apps/explore/autocomplete';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 export const runAutocompleteTests = () => {
   describe('discover autocomplete tests', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        `${INDEX_WITH_TIME_1}*`, // Uses index pattern
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
     });
 
     beforeEach(() => {
+      // mock AI mode disablement
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
         page: 'explore/logs',
@@ -40,7 +50,7 @@ export const runAutocompleteTests = () => {
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
     generateAutocompleteTestConfigurations(generateAutocompleteTestConfiguration).forEach(
