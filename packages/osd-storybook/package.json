@@ -12,7 +12,6 @@
     "@storybook/addon-actions": "~6.5.16",
     "@storybook/addon-essentials": "~6.5.16",
     "@storybook/addon-knobs": "~6.4.0",
-    "@storybook/addon-postcss": "~2.0.0",
     "@storybook/addons": "~6.5.16",
     "@storybook/api": "~6.5.16",
     "@storybook/components": "~6.5.16",
@@ -41,7 +40,9 @@
     "styled-components": "^5.3.9",
     "webpack": "^5.104.1",
     "@babel/plugin-transform-nullish-coalescing-operator": "^7.22.9",
-    "@babel/plugin-transform-optional-chaining": "^7.22.9"
+    "@babel/plugin-transform-optional-chaining": "^7.22.9",
+    "@storybook/builder-webpack5": "~6.5.16",
+    "@storybook/manager-webpack5": "~6.5.16"
   },
   "scripts": {
     "build": "tsc",

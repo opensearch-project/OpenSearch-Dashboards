@@ -6,45 +6,12 @@
 import { StorybookConfig } from '@storybook/core-common';
 
 export const defaultConfig: StorybookConfig = {
-  addons: [
-    '@osd/storybook/preset',
-    '@storybook/addon-knobs',
-    '@storybook/addon-essentials',
-    '@storybook/addon-postcss',
-  ],
+  addons: ['@osd/storybook/preset', '@storybook/addon-knobs', '@storybook/addon-essentials'],
   core: {
     builder: 'webpack5',
   },
   stories: ['../**/*.stories.tsx'],
   typescript: {
     reactDocgen: false,
-  },
-  webpackFinal: async (config) => {
-    // Configure PostCSS
-    if (config.module?.rules) {
-      config.module.rules.push({
-        test: /\.css$/,
-        use: [
-          {
-            loader: 'postcss-loader',
-            options: {
-              postcssOptions: {
-                plugins: [
-                  'postcss-flexbugs-fixes',
-                  [
-                    'autoprefixer',
-                    {
-                      flexbox: 'no-2009',
-                    },
-                  ],
-                ],
-              },
-            },
-          },
-        ],
-      });
-    }
-
-    return config;
   },
 };

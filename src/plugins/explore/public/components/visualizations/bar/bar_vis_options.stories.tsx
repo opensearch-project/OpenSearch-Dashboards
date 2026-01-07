@@ -107,13 +107,15 @@ WithCustomStyles.args = {
     showBarBorder: true,
     barBorderWidth: 2,
     barBorderColor: '#FF0000',
-    thresholdLines: defaultBarChartStyles.thresholdLines.map((t) => ({
-      ...t,
-      show: true,
-      value: 15,
-      color: '#00FF00',
-      width: 2,
-    })),
+    thresholdOptions: {
+      ...defaultBarChartStyles.thresholdOptions,
+      thresholds: [
+        {
+          value: 15,
+          color: '#00FF00',
+        },
+      ],
+    },
   },
   numericalColumns: mockNumericalColumns,
   categoricalColumns: mockCategoricalColumns,
