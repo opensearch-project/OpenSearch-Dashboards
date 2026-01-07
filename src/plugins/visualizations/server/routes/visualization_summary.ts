@@ -126,11 +126,41 @@ export function registerVisualizationSummaryRoute(router: IRouter) {
 
           // Extract summary from prediction response
           // The response structure may vary depending on the model
-          const resultJson = JSON.parse(predictBody?.inference_results?.[0]?.output?.[0]?.result);
+          const resultString = predictBody?.inference_results?.[0]?.output?.[0]?.result;
+          if (!resultString) {
+            return response.customError({
+              statusCode: 500,
+              body: {
+                message: `Invalid ML response structure: missing result field`,
+              },
+            });
+          }
+
+          let resultJson;
+          try {
+            resultJson = JSON.parse(resultString);
+          } catch (parseError) {
+            return response.customError({
+              statusCode: 500,
+              body: {
+                message: `Failed to parse ML response: invalid JSON`,
+              },
+            });
+          }
+
+          const summaryText = resultJson?.output?.message?.content?.[0]?.text;
+          if (!summaryText) {
+            return response.customError({
+              statusCode: 500,
+              body: {
+                message: `Invalid ML response structure: missing summary text`,
+              },
+            });
+          }
 
           return response.ok({
             body: {
-              summary: resultJson.output.message.content[0].text,
+              summary: summaryText,
             },
           });
         } catch (predictError: any) {

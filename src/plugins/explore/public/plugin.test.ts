@@ -251,6 +251,12 @@ describe('ExplorePlugin', () => {
       expect(coreSetup.application.register).toHaveBeenCalledTimes(4);
       expect(coreSetup.application.register).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: 'explore',
+          title: 'Explore',
+        })
+      );
+      expect(coreSetup.application.register).toHaveBeenCalledWith(
+        expect.objectContaining({
           id: 'explore/logs',
           title: 'Logs',
         })

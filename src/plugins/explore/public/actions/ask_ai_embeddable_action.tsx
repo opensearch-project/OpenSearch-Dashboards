@@ -63,8 +63,8 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
   public grouping: Action['grouping'] = [
     {
       id: ASK_AI_EMBEDDABLE_ACTION,
-      getDisplayName: this.getDisplayName,
-      getIconType: this.getIconType,
+      getDisplayName: () => this.getDisplayName(),
+      getIconType: () => this.getIconType(),
       category: 'investigation',
       order: 20,
     },
@@ -145,7 +145,9 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
 
         visualizationSummary = response.summary || '';
       } catch (captureError) {
-        // do nothing
+        // Log error for debugging but continue with empty summary
+        // eslint-disable-next-line no-console
+        console.warn('Failed to capture visualization or get summary:', captureError);
       } finally {
         // Remove loading overlay
         if (overlayContainer && embeddableContainer) {
