@@ -20,7 +20,7 @@ import {
 } from '../utils/utils';
 import { BarChartStyle } from './bar_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
-import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
+import { BaseChartStyle, PipelineFn, EChartsSpecState } from '../utils/echarts_spec';
 import { getSeriesDisplayName } from '../utils/series';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
@@ -261,6 +261,15 @@ export const createFacetBarSeries = <T extends BaseChartStyle>({
   const newState = { ...state };
   const thresholdLines = generateThresholdLines(styles?.thresholdOptions, styles?.switchAxes);
 
+  // facet into one chart
+  if (!Array.isArray(transformedData?.[0]?.[0])) {
+    const simpleBar = createBarSeries({
+      styles,
+      categoryField,
+      seriesFields,
+    })(newState);
+    return simpleBar as EChartsSpecState<T>;
+  }
   const allSeries = transformedData?.map((seriesData: any[], index: number) => {
     const header = seriesData[0];
     const cateColumns = seriesFields(header);
