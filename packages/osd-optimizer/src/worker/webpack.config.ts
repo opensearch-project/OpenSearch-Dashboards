@@ -35,7 +35,6 @@ import CompressionPlugin from 'compression-webpack-plugin';
 import { getSwcLoaderConfig } from '@osd/utils';
 import * as UiSharedDeps from '@osd/ui-shared-deps';
 import browserlist from 'browserslist';
-// import { RsdoctorRspackPlugin } from '@rsdoctor/rspack-plugin';
 import * as sass from 'sass-embedded';
 
 import { Bundle, BundleRefs, WorkerConfig } from '../common';
@@ -72,7 +71,6 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
   const resolveOptions = {
     extensions: ['.js', '.ts', '.tsx', '.json'],
-    // TODO: we might want to include `module` before `main` to be ESM first
     mainFields: ['browser', 'module', 'main'],
     alias: {
       core_app_image_assets: Path.resolve(worker.repoRoot, 'src/core/public/core_app/images'),
@@ -129,10 +127,6 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     plugins: [
       new BundleDepsCheckPlugin(bundle, bundleRefs),
       new NodePolyfillPlugin({ additionalAliases: ['process'] }),
-      // doctorEnabled &&
-      //   new RsdoctorRspackPlugin({
-      //     // plugin options
-      //   }),
       new rspack.DefinePlugin({
         'process.env': {
           IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE: worker.dist ? `"true"` : `"false"`,
@@ -219,66 +213,64 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           test: /\.scss$/,
           exclude: /node_modules/,
           oneOf: [
-            ...worker.themeTags
-              // .filter((t) => t === 'v7dark')
-              .map((theme) => ({
-                resourceQuery: `?${theme}`,
-                use: [
-                  {
-                    loader: 'style-loader',
-                    type: 'javascript/auto',
+            ...worker.themeTags.map((theme) => ({
+              resourceQuery: `?${theme}`,
+              use: [
+                {
+                  loader: 'style-loader',
+                  type: 'javascript/auto',
+                },
+                {
+                  loader: 'css-loader',
+                  options: {
+                    sourceMap: !worker.dist,
                   },
-                  {
-                    loader: 'css-loader',
-                    options: {
+                  type: 'javascript/auto',
+                },
+                {
+                  loader: 'postcss-loader',
+                  options: {
+                    sourceMap: !worker.dist,
+                    postcssOptions: {
+                      config: require.resolve('@osd/optimizer/postcss.config.js'),
+                    },
+                  },
+                  type: 'css',
+                },
+                {
+                  loader: 'comment-stripper',
+                  options: {
+                    language: 'css',
+                  },
+                },
+                {
+                  loader: 'sass-loader',
+                  type: 'css',
+                  options: {
+                    additionalData(content: string) {
+                      const additional = `@import '${Path.resolve(
+                        worker.repoRoot,
+                        `src/core/public/core_app/styles/_globals_${theme}.scss`
+                      ).replace(/\\/g, '/')}';`;
+                      return `${additional}\n${content}`;
+                    },
+                    api: 'modern',
+                    webpackImporter: false,
+                    implementation: sassCompiler,
+                    sassOptions: {
                       sourceMap: !worker.dist,
-                    },
-                    type: 'javascript/auto',
-                  },
-                  {
-                    loader: 'postcss-loader',
-                    options: {
-                      sourceMap: !worker.dist,
-                      postcssOptions: {
-                        config: require.resolve('@osd/optimizer/postcss.config.js'),
-                      },
-                    },
-                    type: 'css',
-                  },
-                  {
-                    loader: 'comment-stripper',
-                    options: {
-                      language: 'css',
+                      style: worker.dist ? 'compressed' : 'expanded',
+                      quietDeps: true,
+                      loadPaths: [
+                        Path.resolve(worker.repoRoot, 'node_modules'),
+                        Path.resolve(worker.repoRoot),
+                      ],
+                      silenceDeprecations: ['import', 'global-builtin', 'color-functions'],
                     },
                   },
-                  {
-                    loader: 'sass-loader',
-                    type: 'css',
-                    options: {
-                      additionalData(content: string) {
-                        const additional = `@import '${Path.resolve(
-                          worker.repoRoot,
-                          `src/core/public/core_app/styles/_globals_${theme}.scss`
-                        ).replace(/\\/g, '/')}';`;
-                        return `${additional}\n${content}`;
-                      },
-                      api: 'modern',
-                      webpackImporter: false,
-                      implementation: sassCompiler,
-                      sassOptions: {
-                        sourceMap: !worker.dist,
-                        style: worker.dist ? 'compressed' : 'expanded',
-                        quietDeps: true,
-                        loadPaths: [
-                          Path.resolve(worker.repoRoot, 'node_modules'),
-                          Path.resolve(worker.repoRoot),
-                        ],
-                        silenceDeprecations: ['import', 'global-builtin', 'color-functions'],
-                      },
-                    },
-                  },
-                ],
-              })),
+                },
+              ],
+            })),
             {
               loader: require.resolve('./theme_loader'),
               options: {
