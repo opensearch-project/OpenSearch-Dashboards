@@ -35,4 +35,6 @@ export const DEFAULT_HEADERS = deepFreeze({
   // access system indices using the standard OpenSearch APIs without logging a warning. After migrating to
   // use the new system index APIs, this header can be removed.
   'x-opensearch-product-origin': 'opensearch-dashboards',
+  // Request compressed responses from OpenSearch to reduce payload size and improve query latency.
+  'accept-encoding': 'gzip, deflate',
 });
