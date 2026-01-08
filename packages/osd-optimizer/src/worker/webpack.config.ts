@@ -113,7 +113,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       new BundleRefsPlugin(bundle, bundleRefs),
       ...(bundle.banner ? [new webpack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),
       // Webpack 5: Provide Node.js polyfills for browser compatibility
-      new NodePolyfillPlugin({ additionalAliases: ['process'] }),
+      new NodePolyfillPlugin({ additionalAliases: ['process'] }) as any,
     ],
 
     module: {
@@ -412,14 +412,14 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         filename: '[path][base].br',
         test: /\.(js|css)$/,
         // Webpack 5: cache option removed (handled by webpack's cache system)
-      }),
+      }) as any,
       new CompressionPlugin({
         algorithm: 'gzip',
         // Webpack 5: filename pattern changed from '[path].gz' to '[path][base].gz'
         filename: '[path][base].gz',
         test: /\.(js|css)$/,
         // Webpack 5: cache option removed (handled by webpack's cache system)
-      }),
+      }) as any,
     ],
 
     optimization: {
@@ -431,9 +431,13 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
           parallel: false,
           terserOptions: {
             compress: false,
-            mangle: false,
+            keep_classnames: true,
+            mangle: {
+              // Enable name mangling for smaller bundle size
+              safari10: true,
+            },
           },
-        }),
+        }) as any,
       ],
     },
   };
