@@ -361,6 +361,90 @@ describe('ChatEventHandler', () => {
       const toolMessage = timeline.find((msg) => msg.role === 'tool') as ToolMessage;
       expect(toolMessage.content).toBe('First part\nSecond part');
     });
+
+    it('should attach tool call to last assistant message when it appears after last user message', async () => {
+      const assistantMessageId = 'assistant-msg-123';
+      const toolCallId = 'tool-456';
+
+      // Set up timeline: user message, then assistant message
+      await chatEventHandler.handleEvent({
+        type: EventType.TEXT_MESSAGE_START,
+        messageId: assistantMessageId,
+      } as TextMessageStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TEXT_MESSAGE_END,
+        messageId: assistantMessageId,
+      } as TextMessageEndEvent);
+
+      // Add a user message to timeline manually
+      timeline.unshift({
+        id: 'user-msg-001',
+        role: 'user',
+        content: 'Hello',
+      });
+
+      // Now trigger tool call without parentMessageId
+      // The last assistant message (assistantMessageId) appears AFTER the user message in timeline
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_tool',
+        // No parentMessageId - should use selection strategy
+      } as ToolCallStartEvent);
+
+      // Tool call should be attached to the existing assistant message
+      const assistantMessage = timeline.find(
+        (msg) => msg.id === assistantMessageId
+      ) as AssistantMessage;
+      expect(assistantMessage).toBeDefined();
+      expect(assistantMessage.toolCalls).toHaveLength(1);
+      expect(assistantMessage.toolCalls![0].id).toBe(toolCallId);
+    });
+
+    it('should create fake assistant message when user message appears after last assistant message', async () => {
+      const assistantMessageId = 'assistant-msg-123';
+      const toolCallId = 'tool-456';
+
+      // Set up timeline: assistant message, then user message
+      await chatEventHandler.handleEvent({
+        type: EventType.TEXT_MESSAGE_START,
+        messageId: assistantMessageId,
+      } as TextMessageStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TEXT_MESSAGE_END,
+        messageId: assistantMessageId,
+      } as TextMessageEndEvent);
+
+      // Add a user message AFTER the assistant message
+      timeline.push({
+        id: 'user-msg-002',
+        role: 'user',
+        content: 'Another question',
+      });
+
+      const initialTimelineLength = timeline.length;
+
+      // Trigger tool call without parentMessageId
+      // The last user message appears AFTER the assistant message, so a new fake message should be created
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_tool',
+        // No parentMessageId - should create fake assistant message
+      } as ToolCallStartEvent);
+
+      // Should have created a new fake assistant message
+      expect(timeline.length).toBe(initialTimelineLength + 1);
+
+      // The new message should be an assistant message with the tool call
+      const fakeAssistantMessage = timeline[timeline.length - 1] as AssistantMessage;
+      expect(fakeAssistantMessage.role).toBe('assistant');
+      expect(fakeAssistantMessage.id).toMatch(/^fake-assistant-message-/);
+      expect(fakeAssistantMessage.toolCalls).toHaveLength(1);
+      expect(fakeAssistantMessage.toolCalls![0].id).toBe(toolCallId);
+    });
   });
 
   describe('run state handling', () => {

@@ -210,6 +210,17 @@ export class ChatEventHandler {
 
   /**
    * Handle start of a tool call
+   *
+   * This method determines the correct position in the timeline to place tool calls:
+   * 1. If parentMessageId is provided, attach to that specific message
+   * 2. Otherwise, use a selection strategy to determine placement:
+   *    - If the last assistant text message appears after the last user message,
+   *      attach the tool call to that assistant message
+   *    - If not (e.g., user sent a new message after assistant's response),
+   *      create a new fake assistant message to hold the tool calls
+   *
+   * This ensures tool calls are always associated with the correct assistant response
+   * in the conversation timeline, maintaining proper message ordering.
    */
   private handleToolCallStart(event: ToolCallStartEvent): void {
     const { toolCallId, toolCallName, parentMessageId } = event;
@@ -235,12 +246,46 @@ export class ChatEventHandler {
     // Add to pending map for args accumulation
     this.pendingToolCalls.set(toolCallId, toolCall);
 
-    // Use the last TEXT_MESSAGE_START message ID for association
-    const targetMessageId = parentMessageId || this.lastTextMessageStartId;
-
-    if (targetMessageId) {
-      this.addToolCallToMessage(targetMessageId, toolCall);
+    // Strategy 1: Use explicitly provided parent message ID
+    // This is the most reliable approach when the backend provides it
+    if (parentMessageId) {
+      this.addToolCallToMessage(parentMessageId, toolCall);
+      return;
     }
+
+    // Strategy 2: Determine placement based on message timeline positions
+    // Check if the last assistant message is still the most recent response
+    const timelineMessages = this.getTimeline();
+    if (this.lastTextMessageStartId) {
+      const lastAssistantTextMessageIndex = timelineMessages.findLastIndex(
+        (message) => message.id === this.lastTextMessageStartId
+      );
+      const lastUserMessageIndex = timelineMessages.findLastIndex(
+        (message) => message.role === 'user'
+      );
+
+      // If the last assistant message appears after the last user message,
+      // it means this tool call belongs to the current conversation turn
+      if (lastAssistantTextMessageIndex > lastUserMessageIndex) {
+        this.addToolCallToMessage(this.lastTextMessageStartId, toolCall);
+        return;
+      }
+    }
+
+    // Strategy 3: Create a new assistant message placeholder
+    // This handles the case where the LLM responds with tool calls but without any text message.
+    // Since there's no TEXT_MESSAGE_START event, we need to create a fake assistant message
+    // to hold the tool calls so they appear in the correct position in the timeline.
+    const fakeAssistantMessageId = `fake-assistant-message-` + new Date().getTime();
+    this.onTimelineUpdate((prev) => {
+      const newMessage: AssistantMessage = {
+        id: fakeAssistantMessageId,
+        role: 'assistant',
+        toolCalls: [toolCall],
+      };
+      return [...prev, newMessage];
+    });
+    this.lastTextMessageStartId = fakeAssistantMessageId;
   }
 
   /**
