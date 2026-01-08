@@ -29,11 +29,11 @@
  */
 
 import { buildProcessorFunction } from '../build_processor_function';
-import { processors } from '../response_processors/series';
+import { processorsRaw } from '../response_processors/series/index_raw';
 import { get } from 'lodash';
 import { i18n } from '@osd/i18n';
 
-export function handleResponseBody(panel) {
+export function handleResponseBodyRaw(panel) {
   return (resp) => {
     if (resp.error) {
       const err = new Error(resp.error.type);
@@ -69,7 +69,7 @@ export function handleResponseBody(panel) {
       );
     }
 
-    const processor = buildProcessorFunction(processors, resp, panel, series, meta);
+    const processor = buildProcessorFunction(processorsRaw, resp, panel, series, meta);
 
     return processor([]);
   };

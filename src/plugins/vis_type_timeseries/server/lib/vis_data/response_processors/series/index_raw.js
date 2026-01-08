@@ -28,7 +28,29 @@
  * under the License.
  */
 
-export const MAX_BUCKETS_SETTING = 'metrics:max_buckets';
-export const CLIENT_SIDE_EVALUATION_SETTING = 'metrics:clientSideEvaluation';
-export const INDEXES_SEPARATOR = ',';
-export const DATA_SOURCE_ID_KEY = 'data_source_id';
+import { percentile } from './percentile';
+import { percentileRank } from './percentile_rank';
+
+import { seriesAgg } from './series_agg';
+import { stdDeviationBands } from './std_deviation_bands';
+import { stdDeviationSibling } from './std_deviation_sibling';
+import { stdMetricRaw } from './std_metric_raw';
+import { stdSiblingRaw } from './std_sibling_raw';
+import { timeShift } from './time_shift';
+import { dropLastBucket } from './drop_last_bucket';
+// NOTE: mathAgg is intentionally NOT imported for raw data endpoint
+// NOTE: Using stdMetricRaw and stdSiblingRaw instead of stdMetric/stdSibling
+//       to append metric IDs to series IDs for client-side processing
+
+export const processorsRaw = [
+  percentile,
+  percentileRank,
+  stdDeviationBands,
+  stdDeviationSibling,
+  stdMetricRaw,
+  stdSiblingRaw,
+  // mathAgg, // EXCLUDED - client will handle math evaluation
+  seriesAgg,
+  timeShift,
+  dropLastBucket,
+];

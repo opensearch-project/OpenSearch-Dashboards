@@ -28,7 +28,4 @@
  * under the License.
  */
 
-export const MAX_BUCKETS_SETTING = 'metrics:max_buckets';
-export const CLIENT_SIDE_EVALUATION_SETTING = 'metrics:clientSideEvaluation';
-export const INDEXES_SEPARATOR = ',';
-export const DATA_SOURCE_ID_KEY = 'data_source_id';
+export function getPanelDataRaw(req: any): any;
