@@ -422,12 +422,10 @@ cy.explore.add(
       .type(index);
 
     // Wait for the dropdown to appear with results
-    cy.getElementByTestId('unified-index-selector-dropdown', { timeout: 10000 }).should(
-      'be.visible'
-    );
+    cy.getElementByTestId('unified-index-selector-dropdown').should('be.visible');
 
     // Click the matching index from the dropdown list
-    cy.getElementByTestId('unified-index-selector-list', { timeout: 5000 })
+    cy.getElementByTestId('unified-index-selector-list')
       .should('be.visible')
       .within(() => {
         // Find and click the index by its label in the EuiSelectable
@@ -744,7 +742,7 @@ cy.explore.add(
       .click();
 
     // Step 14 - Wait for dataset creation request and save ID
-    cy.wait('@createDatasetInterception', { timeout: 15000 }).then((interception) => {
+    cy.wait('@createDatasetInterception').then((interception) => {
       // Save the created index pattern ID as an alias
       cy.wrap(interception.response.body.id).as('INDEX_PATTERN_ID');
     });

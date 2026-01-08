@@ -174,12 +174,10 @@ Cypress.Commands.add(
       .type(index);
 
     // Wait for the dropdown to appear with results
-    cy.getElementByTestId('unified-index-selector-dropdown', { timeout: 10000 }).should(
-      'be.visible'
-    );
+    cy.getElementByTestId('unified-index-selector-dropdown').should('be.visible');
 
     // Click the matching index from the dropdown list
-    cy.getElementByTestId('unified-index-selector-list', { timeout: 5000 })
+    cy.getElementByTestId('unified-index-selector-list')
       .should('be.visible')
       .within(() => {
         // Find and click the index by its label in the EuiSelectable
@@ -220,9 +218,9 @@ Cypress.Commands.add(
     cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
 
     // Wait for dropdown list to appear
-    cy.get('.euiSelectableList', { timeout: 5000 }).should('be.visible');
+    cy.get('.euiSelectableList').should('be.visible');
 
-    cy.get(`[title="${title}"]`, { timeout: 5000 }).should('be.visible').click();
+    cy.get(`[title="${title}"]`).should('be.visible').click();
 
     // verify that it has been selected
     cy.getElementByTestId('datasetSelectorButton').should('contain.text', `${title}`);
