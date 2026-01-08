@@ -28,13 +28,11 @@ export function getSwcLoaderConfig({
           react: {
             runtime: 'automatic',
           },
-          useDefineForClassFields: true,
+          useDefineForClassFields: false,
         },
       },
       env: {
         targets,
-        // This makes sure transform.useDefineForClassFields still work with env.targets
-        forceAllTransforms: true,
         mode: 'entry',
         coreJs: '3.2.1',
       },

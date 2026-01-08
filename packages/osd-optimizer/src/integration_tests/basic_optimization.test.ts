@@ -157,11 +157,10 @@ it('builds expected bundles, saves bundle counts to metadata', async () => {
   const foo = config.bundles.find((b) => b.id === 'foo')!;
   expect(foo).toBeTruthy();
   foo.cache.refresh();
-  expect(foo.cache.getModuleCount()).toBe(8);
+  expect(foo.cache.getModuleCount()).toBe(6);
   expect(foo.cache.getReferencedFiles()?.map(absolutePathSerializer.serialize).sort())
     .toMatchInlineSnapshot(`
     Array [
-      "<absolute path>/node_modules/@swc/helpers/package.json",
       "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/opensearch_dashboards.json",
       "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/async_import.ts",
       "<absolute path>/packages/osd-optimizer/src/__fixtures__/__tmp__/mock_repo/plugins/foo/public/ext.ts",
