@@ -4,8 +4,12 @@
  */
 
 import { defaultPieChartStyles, PieChartStyle } from './pie_vis_config';
-import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
+import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole, AggregationType } from '../types';
 import { DEFAULT_OPACITY } from '../constants';
+import { getChartRender } from '../utils/utils';
+import { pipe, createBaseConfig, assembleSpec } from '../utils/echarts_spec';
+import { aggregate, convertTo2DArray, transform } from '../utils/data_transformation';
+import { createPieSeries } from './pie_chart_utils';
 
 export const createPieSpec = (
   transformedData: Array<Record<string, any>>,
@@ -15,6 +19,41 @@ export const createPieSpec = (
   styleOptions: PieChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {
+  if (getChartRender() === 'echarts') {
+    const colorColumn = axisColumnMappings?.[AxisRole.COLOR]?.column;
+    const thetaColumn = axisColumnMappings?.[AxisRole.SIZE]?.column;
+
+    const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+
+    if (!colorColumn || !thetaColumn) {
+      throw Error('Missing color or theta config for pie chart');
+    }
+
+    const defaultTitle = `${axisColumnMappings?.[AxisRole.SIZE]?.name} by ${
+      axisColumnMappings?.[AxisRole.COLOR]?.name
+    }`;
+
+    const result = pipe(
+      transform(
+        aggregate({
+          groupBy: colorColumn,
+          field: thetaColumn,
+          aggregationType: AggregationType.SUM, // TODO add aggregation in UI, temporarily use sum to aggregate data
+        }),
+        convertTo2DArray(allColumns)
+      ),
+      createBaseConfig({ title: defaultTitle }),
+      createPieSeries({ styles: styleOptions, cateField: colorColumn, valueField: thetaColumn }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles: styleOptions,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
+  }
+
   const colorColumn = axisColumnMappings?.[AxisRole.COLOR];
   const thetaColumn = axisColumnMappings?.[AxisRole.SIZE];
 

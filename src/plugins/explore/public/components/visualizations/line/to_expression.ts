@@ -61,7 +61,7 @@ export const createSimpleLineChart = (
 
     const result = pipe(
       transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
-      createBaseConfig,
+      createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time` }),
       buildAxisConfigs,
       createLineSeries({
         styles,
@@ -230,7 +230,9 @@ export const createLineBarChart = (
 
     const result = pipe(
       transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
-      createBaseConfig,
+      createBaseConfig({
+        title: `${valueField.name} (Bar) and ${value2Field.name} (Line) Over Time`,
+      }),
       buildAxisConfigs,
       createLineBarSeries({ styles, categoryField: timeField, value2Field, valueField }),
       assembleSpec
@@ -446,7 +448,11 @@ export const createMultiLineChart = (
         flatten(),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: `${axisConfig.yAxis?.name} Over Time by ${
+          axisColumnMappings?.[AxisRole.COLOR]?.name
+        }`,
+      }),
       buildAxisConfigs,
       createLineSeries({
         styles,
@@ -629,7 +635,11 @@ export const createFacetedMultiLineChart = (
         flatten(),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: `${axisConfig.yAxis?.name} Over Time by ${
+          axisColumnMappings?.[AxisRole.COLOR]?.name
+        } (Faceted by ${axisColumnMappings?.[AxisRole.FACET]?.name})`,
+      }),
       buildAxisConfigs,
       createFacetLineSeries({
         styles,
@@ -832,7 +842,7 @@ export const createCategoryLineChart = (
     // to prevent crashes when switching from date-based(enable addTimeMarker) to category-based.
     const result = pipe(
       transform(convertTo2DArray(allColumns)),
-      createBaseConfig,
+      createBaseConfig({ title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}` }),
       buildAxisConfigs,
       createLineSeries({
         styles,
@@ -963,7 +973,11 @@ export const createCategoryMultiLineChart = (
         flatten(),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name} and ${
+          axisColumnMappings?.[AxisRole.COLOR]?.name
+        }`,
+      }),
       buildAxisConfigs,
       createLineSeries({
         styles,
