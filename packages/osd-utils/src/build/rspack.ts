@@ -28,11 +28,12 @@ export function getSwcLoaderConfig({
           react: {
             runtime: 'automatic',
           },
-          useDefineForClassFields: false,
+          useDefineForClassFields: true,
         },
       },
       env: {
         targets,
+        forceAllTransforms: true,
         mode: 'entry',
         coreJs: '3.2.1',
       },
