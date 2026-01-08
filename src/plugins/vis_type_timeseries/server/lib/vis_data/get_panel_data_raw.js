@@ -28,13 +28,14 @@
  * under the License.
  */
 
-import { deepFreeze } from '@osd/std';
+import { getTableData } from './get_table_data';
+import { getSeriesDataRaw } from './get_series_data_raw';
 
-export const DEFAULT_HEADERS = deepFreeze({
-  // OpenSearch uses this to identify when a request is coming from OpenSearch Dashboards, to allow OpenSearch Dashboards to
-  // access system indices using the standard OpenSearch APIs without logging a warning. After migrating to
-  // use the new system index APIs, this header can be removed.
-  'x-opensearch-product-origin': 'opensearch-dashboards',
-  // Request compressed responses from OpenSearch to reduce payload size and improve query latency.
-  'accept-encoding': 'gzip, deflate',
-});
+export function getPanelDataRaw(req) {
+  return (panel) => {
+    if (panel.type === 'table') {
+      return getTableData(req, panel);
+    }
+    return getSeriesDataRaw(req, panel);
+  };
+}

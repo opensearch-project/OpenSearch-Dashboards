@@ -10,6 +10,7 @@ import {
   EChartsOption,
   XAXisComponentOption,
   YAXisComponentOption,
+  PieSeriesOption,
 } from 'echarts';
 import {
   AggregationType,
@@ -44,6 +45,7 @@ export interface BaseChartStyle {
   thresholdOptions?: ThresholdOptions;
   useThresholdColor?: boolean;
   addLegend?: boolean;
+  legendPosition?: Positions;
 }
 
 /**
@@ -62,7 +64,7 @@ export interface EChartsAxisConfig {
 export interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
   data: Array<Record<string, any>>;
   styles: T;
-  axisConfig: EChartsAxisConfig;
+  axisConfig?: EChartsAxisConfig;
   axisColumnMappings: AxisColumnMappings;
 }
 
@@ -77,7 +79,7 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   baseConfig?: any;
   xAxisConfig?: any;
   yAxisConfig?: any;
-  series?: Array<BarSeriesOption | LineSeriesOption | CustomSeriesOption>;
+  series?: Array<BarSeriesOption | LineSeriesOption | CustomSeriesOption | PieSeriesOption>;
   visualMap?: any;
   // Final output
   spec?: EChartsOption;
@@ -119,27 +121,26 @@ function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time'
 /**
  * Create base configuration (title, tooltip)
  */
-export const createBaseConfig = <T extends BaseChartStyle>(
+export const createBaseConfig = <T extends BaseChartStyle>({ title }: { title?: string }) => (
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
   const { styles, axisConfig } = state;
 
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before createBaseConfig');
-  }
-
   const baseConfig = {
     title: {
-      text: styles.titleOptions?.show
-        ? styles.titleOptions?.titleName || `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}`
-        : undefined,
+      text: styles.titleOptions?.show ? styles.titleOptions?.titleName || title : undefined,
     },
     tooltip: {
       show: styles.tooltipOptions?.mode !== 'hidden',
-      trigger: 'axis',
+      ...(axisConfig && { trigger: 'axis' }),
       axisPointer: { type: 'shadow' },
     },
-    legend: {},
+    legend: {
+      ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
+        ? { orient: 'vertical' }
+        : {}),
+      [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%', // distance between legend and the corresponding orientation edge side of the container
+    },
   };
 
   return { ...state, baseConfig };

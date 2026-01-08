@@ -28,13 +28,29 @@
  * under the License.
  */
 
-import { deepFreeze } from '@osd/std';
+import { percentile } from './percentile';
+import { percentileRank } from './percentile_rank';
 
-export const DEFAULT_HEADERS = deepFreeze({
-  // OpenSearch uses this to identify when a request is coming from OpenSearch Dashboards, to allow OpenSearch Dashboards to
-  // access system indices using the standard OpenSearch APIs without logging a warning. After migrating to
-  // use the new system index APIs, this header can be removed.
-  'x-opensearch-product-origin': 'opensearch-dashboards',
-  // Request compressed responses from OpenSearch to reduce payload size and improve query latency.
-  'accept-encoding': 'gzip, deflate',
-});
+import { seriesAgg } from './series_agg';
+import { stdDeviationBands } from './std_deviation_bands';
+import { stdDeviationSibling } from './std_deviation_sibling';
+import { stdMetricRaw } from './std_metric_raw';
+import { stdSiblingRaw } from './std_sibling_raw';
+import { timeShift } from './time_shift';
+import { dropLastBucket } from './drop_last_bucket';
+// NOTE: mathAgg is intentionally NOT imported for raw data endpoint
+// NOTE: Using stdMetricRaw and stdSiblingRaw instead of stdMetric/stdSibling
+//       to append metric IDs to series IDs for client-side processing
+
+export const processorsRaw = [
+  percentile,
+  percentileRank,
+  stdDeviationBands,
+  stdDeviationSibling,
+  stdMetricRaw,
+  stdSiblingRaw,
+  // mathAgg, // EXCLUDED - client will handle math evaluation
+  seriesAgg,
+  timeShift,
+  dropLastBucket,
+];

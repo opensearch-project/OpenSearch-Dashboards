@@ -79,19 +79,19 @@ describe('parseClientOptions', () => {
     });
 
     it('`customHeaders` take precedence to default opensearchDashboards headers', () => {
-      const customHeader = {
-        [Object.keys(DEFAULT_HEADERS)[0]]: 'foo',
-      };
+      const customHeaders = Object.fromEntries(
+        Object.keys(DEFAULT_HEADERS).map((key) => [key, 'foo'])
+      );
       const config = createConfig({
         customHeaders: {
-          ...customHeader,
+          ...customHeaders,
         },
       });
 
       expect(parseClientOptions(config, false)).toEqual(
         expect.objectContaining({
           headers: {
-            ...customHeader,
+            ...customHeaders,
           },
         })
       );
