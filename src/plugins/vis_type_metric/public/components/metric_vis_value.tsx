@@ -29,7 +29,6 @@
  */
 
 import React, { Component, KeyboardEvent } from 'react';
-import DOMPurify from 'dompurify';
 import classNames from 'classnames';
 
 import { EuiKeyboardAccessible, keys } from '@elastic/eui';
@@ -92,7 +91,7 @@ export class MetricVisValue extends Component<MetricVisValueProps> {
            * `metric.value` is set by the MetricVisComponent, so this component must make sure this value never contains
            * any unsafe HTML (e.g. by bypassing the field formatter).
            */
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(metric.value) }} // eslint-disable-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: metric.value }} // eslint-disable-line react/no-danger
         />
         {showLabel && <div>{metric.label}</div>}
       </div>

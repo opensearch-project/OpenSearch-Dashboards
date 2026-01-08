@@ -6,7 +6,6 @@
 import './table_cell.scss';
 
 import React from 'react';
-import DOMPurify from 'dompurify';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../../types/doc_views_types';
@@ -63,7 +62,7 @@ export const TableCellUI = ({
         className="exploreDocTableCell__dataField"
         data-test-subj="osdDocTableCellDataField"
         // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(sanitizedCellValue) }}
+        dangerouslySetInnerHTML={{ __html: sanitizedCellValue }}
       />
     );
 

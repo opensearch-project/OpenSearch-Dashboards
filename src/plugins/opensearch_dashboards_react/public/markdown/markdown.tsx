@@ -33,7 +33,6 @@ import React, { PureComponent } from 'react';
 import MarkdownIt from 'markdown-it';
 import { memoize } from 'lodash';
 import { getSecureRelForTarget } from '@elastic/eui';
-import DOMPurify from 'dompurify';
 
 import './index.scss';
 /**
@@ -142,7 +141,7 @@ export class Markdown extends PureComponent<MarkdownProps> {
          * The Markdown Visualization is, believe it or not, responsible for rendering Markdown.
          * This relies on `markdown-it` to produce safe and correct HTML.
          */
-        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderedMarkdown) }} // eslint-disable-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: renderedMarkdown }} // eslint-disable-line react/no-danger
       />
     );
   }
