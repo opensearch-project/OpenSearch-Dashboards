@@ -493,7 +493,7 @@ export const createStateTimeLineSpec = <T extends BaseChartStyle>({
     mergeLabelCombo.push({
       label: row[1][mergeLabelIndex],
       color: row[1][mergedColorIndex],
-      displayText: row[1][displayTextIndex] ?? row[1][displayTextIndex],
+      displayText: row[1][displayTextIndex],
     });
   });
 

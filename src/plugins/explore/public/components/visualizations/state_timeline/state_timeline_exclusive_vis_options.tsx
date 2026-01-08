@@ -17,7 +17,7 @@ interface StateTimeLineExclusiveVisOptionsProps {
   useThresholdColor?: boolean;
   onUseThresholdColorChange: (useThresholdColor: boolean) => void;
   useValueMappingColor?: boolean;
-  onUseValueMappingColorChange: (useThresholdColor: boolean) => void;
+  onUseValueMappingColorChange: (useValueMappingColor: boolean) => void;
 }
 
 const disconnectValuesOption = [

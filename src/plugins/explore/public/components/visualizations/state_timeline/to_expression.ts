@@ -104,7 +104,9 @@ export const createNumericalStateTimeline = (
         }),
         groupByMergedLabel(convertTo2DArray())
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: `${colorMapping?.name} by ${axisConfig.yAxis?.name} and ${axisConfig.xAxis?.name}`,
+      }),
       buildAxisConfigs,
       createStateTimeLineSpec({ styles: styleOptions, groupField }),
       assembleSpec
@@ -287,7 +289,7 @@ export const createNumericalStateTimeline = (
     $schema: VEGASCHEMA,
     title: styleOptions.titleOptions?.show
       ? styleOptions.titleOptions?.titleName ||
-        `${yAxis?.name} × ${xAxis?.name} × ${rangeFieldColumn?.name} State Timeline`
+        `${rangeFieldColumn?.name} by ${yAxis?.name} and ${xAxis?.name}`
       : undefined,
     data: { values: processedData },
     transform: transformLayer,
@@ -338,7 +340,9 @@ export const createCategoricalStateTimeline = (
         }),
         groupByMergedLabel(convertTo2DArray())
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: `${colorMapping?.name} by ${axisConfig.yAxis?.name} and ${axisConfig.xAxis?.name}`,
+      }),
       buildAxisConfigs,
       createStateTimeLineSpec({ styles: styleOptions, groupField }),
       assembleSpec
@@ -511,7 +515,7 @@ export const createCategoricalStateTimeline = (
     $schema: VEGASCHEMA,
     title: styleOptions.titleOptions?.show
       ? styleOptions.titleOptions?.titleName ||
-        `${yAxis?.name} × ${xAxis?.name} × ${categoryName2} State Timeline`
+        `${categoryName2} by ${yAxis?.name} and ${xAxis?.name} `
       : undefined,
     data: { values: processedData },
     transform: transformLayer,
@@ -561,7 +565,9 @@ export const createSingleCategoricalStateTimeline = (
         }),
         groupByMergedLabel(convertTo2DArray())
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: ` ${colorMapping?.name}  by ${axisConfig.xAxis?.name}`,
+      }),
       buildAxisConfigs,
       createStateTimeLineSpec({ styles: styleOptions, groupField: undefined }),
       assembleSpec
@@ -798,7 +804,9 @@ export const createSingleNumericalStateTimeline = (
         }),
         groupByMergedLabel(convertTo2DArray())
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: ` ${colorMapping?.name}  by ${axisConfig.xAxis?.name}`,
+      }),
       buildAxisConfigs,
       createStateTimeLineSpec({ styles: styleOptions, groupField: undefined }),
       assembleSpec
