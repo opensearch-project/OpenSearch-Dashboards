@@ -7,6 +7,7 @@ import {
   prometheusManager,
   MetricMetadata,
 } from '../../../connections/managers/prometheus_manager';
+import { RESOURCE_TYPES } from '../../../../common/constants';
 import { LanguageHandler, LanguageHandlerContext } from '../language_handlers';
 
 export interface PrometheusMetadataResult {
@@ -24,13 +25,13 @@ const getPrometheusMetadata = async (
     const [labelsResponse, metadataResponse] = await Promise.all([
       prometheusManager.getResources<string[]>(context, request, {
         dataSourceName,
-        resourceType: 'labels',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.LABELS,
         resourceName: undefined,
         query: {},
       }),
       prometheusManager.getResources<MetricMetadata>(context, request, {
         dataSourceName,
-        resourceType: 'metric_metadata',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA,
         resourceName: undefined,
         query: {},
       }),

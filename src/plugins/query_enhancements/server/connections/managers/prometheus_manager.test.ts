@@ -4,7 +4,7 @@
  */
 
 import { OpenSearchDashboardsRequest, RequestHandlerContext } from 'src/core/server';
-import { URI } from '../../../common/constants';
+import { URI, RESOURCE_TYPES } from '../../../common/constants';
 import { prometheusManager, PromQLQueryParams, PromQLQueryResponse } from './prometheus_manager';
 import { QueryExecutor } from './base_connection_manager';
 
@@ -44,7 +44,7 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'labels',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.LABELS,
         query: {},
       });
 
@@ -70,7 +70,7 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'labels',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.LABELS,
         resourceName: 'node_cpu_seconds_total',
         query: {},
       });
@@ -93,7 +93,7 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'label_values',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.LABEL_VALUES,
         resourceName: 'job',
         query: {},
       });
@@ -116,7 +116,7 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'metrics',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.METRICS,
         resourceName: undefined,
         query: {},
       });
@@ -145,7 +145,7 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'metric_metadata',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA,
         query: {},
       });
 
@@ -171,7 +171,7 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'metric_metadata',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA,
         resourceName: 'up',
         query: {},
       });
@@ -195,7 +195,7 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'alerts',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.ALERTS,
         resourceName: undefined,
         query: {},
       });
@@ -217,7 +217,7 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'alert_manager_alert_groups',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.ALERTS_GROUPS,
         resourceName: undefined,
         query: {},
       });
@@ -241,7 +241,7 @@ describe('PrometheusManager', () => {
 
       const result = await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'rules',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.RULES,
         resourceName: undefined,
         query: {},
       });
@@ -263,7 +263,7 @@ describe('PrometheusManager', () => {
 
       await prometheusManager.getResources(mockContext, mockRequest, {
         dataSourceName: 'prom-conn',
-        resourceType: 'labels',
+        resourceType: RESOURCE_TYPES.PROMETHEUS.LABELS,
         query: { start: '1638316800', end: '1638320400' },
       });
 

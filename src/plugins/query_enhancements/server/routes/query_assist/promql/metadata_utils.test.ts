@@ -6,6 +6,7 @@
 import { promqlHandler } from './metadata_utils';
 import { prometheusManager } from '../../../connections/managers/prometheus_manager';
 import { LanguageHandlerContext } from '../language_handlers';
+import { RESOURCE_TYPES } from '../../../../common/constants';
 
 jest.mock('../../../connections/managers/prometheus_manager', () => ({
   prometheusManager: {
@@ -108,7 +109,7 @@ describe('promqlHandler', () => {
         handlerContext.request,
         {
           dataSourceName: 'test-datasource',
-          resourceType: 'labels',
+          resourceType: RESOURCE_TYPES.PROMETHEUS.LABELS,
           resourceName: undefined,
           query: {},
         }
@@ -118,7 +119,7 @@ describe('promqlHandler', () => {
         handlerContext.request,
         {
           dataSourceName: 'test-datasource',
-          resourceType: 'metric_metadata',
+          resourceType: RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA,
           resourceName: undefined,
           query: {},
         }
