@@ -120,6 +120,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
     optimization: {
       emitOnErrors: false,
+      chunkIds: 'natural',
     },
 
     externals: [UiSharedDeps.externals],
