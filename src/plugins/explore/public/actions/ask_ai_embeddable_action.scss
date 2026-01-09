@@ -1,0 +1,9 @@
+.askAiEmbeddableLoadingOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: $euiZHeader;
+  background: transparentize($euiColorEmptyShade, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

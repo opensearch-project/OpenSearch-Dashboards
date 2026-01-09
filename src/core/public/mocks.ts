@@ -94,6 +94,7 @@ function createCoreSetupMock({
     },
     workspaces: workspacesServiceMock.createSetupContract(),
     keyboardShortcut: keyboardShortcutServiceMock.createSetup(),
+    chat: coreChatServiceMock.createSetupContract(),
   };
 
   return mock;

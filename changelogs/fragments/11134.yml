@@ -1,0 +1,3 @@
+feat:
+- Add context awareness for explore visualizations ([#11134](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11134))
+- Add `Ask AI` Context Menu Action to explore visualizations ([#11134](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11134))

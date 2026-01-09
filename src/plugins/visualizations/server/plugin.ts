@@ -49,6 +49,7 @@ import { visualizationSavedObjectType } from './saved_objects';
 
 import { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
 import { registerVisualizationsCollector } from './usage_collector';
+import { setupRoutes } from './routes';
 
 export class VisualizationsPlugin
   implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart> {
@@ -98,6 +99,10 @@ export class VisualizationsPlugin
     if (plugins.usageCollection) {
       registerVisualizationsCollector(plugins.usageCollection, this.config);
     }
+
+    // Setup API routes
+    const router = core.http.createRouter();
+    setupRoutes(router);
 
     return {};
   }
