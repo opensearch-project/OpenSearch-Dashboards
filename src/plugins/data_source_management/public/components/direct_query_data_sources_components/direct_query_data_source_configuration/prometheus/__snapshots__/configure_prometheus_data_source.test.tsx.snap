@@ -39,7 +39,6 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
     <ConfigurePrometheusDatasourcePanel
       currentAccessKey=""
       currentAuthMethod="basicauth"
-      currentDataSourceId=""
       currentDetails=""
       currentName=""
       currentPassword=""
@@ -47,11 +46,8 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
       currentSecretKey=""
       currentStore=""
       currentUsername=""
-      dataSources={Array []}
       error=""
-      featureFlagStatus={false}
       hasSecurityAccess={true}
-      hideLocalCluster={false}
       roles={
         Array [
           Object {
@@ -63,7 +59,6 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
       selectedQueryPermissionRoles={Array []}
       setAccessKeyForRequest={[MockFunction]}
       setAuthMethodForRequest={[MockFunction]}
-      setDataSourceIdForRequest={[MockFunction]}
       setDetailsForRequest={[MockFunction]}
       setError={[MockFunction]}
       setNameForRequest={[MockFunction]}
