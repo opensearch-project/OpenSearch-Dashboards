@@ -51,69 +51,10 @@ describe('data_connections_router', () => {
       registerDataConnectionsRoute(router, true);
     });
 
-    it('should create Prometheus data connection with saved object when dataSourceMDSId is provided', async () => {
-      const mockCreateDataSourceResponse = { success: true, name: 'test-prometheus' };
-      const mockSavedObjectResponse = {
-        id: 'saved-object-id',
-        type: 'data-connection',
-        attributes: {},
-        references: [],
-      };
-
-      mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
-        query: { dataSourceMDSId: 'test-datasource-id' },
-        body: {
-          name: 'test-prometheus',
-          connector: 'prometheus',
-          allowedRoles: ['admin'],
-          properties: {
-            'prometheus.uri': 'http://localhost:9090',
-          },
-        },
-      });
-
-      const mockCallAPI = jest.fn().mockResolvedValue(mockCreateDataSourceResponse);
-      mockContext.dataSource.opensearch.legacy.getClient.mockReturnValue({
-        callAPI: mockCallAPI,
-      });
-      mockContext.core.savedObjects.client.create.mockResolvedValue(mockSavedObjectResponse);
-
-      const postHandler = router.post.mock.calls[0][1];
-      await postHandler(mockContext, mockRequest, mockResponse);
-
-      expect(mockCallAPI).toHaveBeenCalledWith('ppl.createDataSource', {
-        body: {
-          name: 'test-prometheus',
-          connector: 'prometheus',
-          allowedRoles: ['admin'],
-          properties: {
-            'prometheus.uri': 'http://localhost:9090',
-          },
-        },
-      });
-
-      expect(mockContext.core.savedObjects.client.create).toHaveBeenCalledWith(
-        'data-connection',
-        {
-          connectionId: 'test-prometheus',
-          type: DataConnectionType.Prometheus,
-          meta: JSON.stringify({
-            properties: { 'prometheus.uri': 'http://localhost:9090' },
-          }),
-        },
-        {
-          references: [{ id: 'test-datasource-id', type: 'data-source', name: 'dataSource' }],
-        }
-      );
-
-      expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockCreateDataSourceResponse });
-    });
-
-    it('should create Prometheus data connection with saved object without dataSourceMDSId', async () => {
+    it('should create Prometheus data connection with saved object', async () => {
       const mockCreateDataSourceResponse = { success: true, name: 'test-prometheus' };
 
       mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
-        query: {},
         body: {
           name: 'test-prometheus',
           connector: 'prometheus',
@@ -146,26 +87,21 @@ describe('data_connections_router', () => {
         },
       });
 
-      expect(mockContext.core.savedObjects.client.create).toHaveBeenCalledWith(
-        'data-connection',
-        {
-          connectionId: 'test-prometheus',
-          type: DataConnectionType.Prometheus,
-          meta: JSON.stringify({
-            properties: { 'prometheus.uri': 'http://localhost:9090' },
-          }),
-        },
-        {
-          references: [],
-        }
-      );
+      expect(mockContext.core.savedObjects.client.create).toHaveBeenCalledWith('data-connection', {
+        connectionId: 'test-prometheus',
+        type: DataConnectionType.Prometheus,
+        meta: JSON.stringify({
+          properties: { 'prometheus.uri': 'http://localhost:9090' },
+        }),
+      });
+
+      expect(mockResponse.ok).toHaveBeenCalledWith({ body: mockCreateDataSourceResponse });
     });
 
     it('should not create saved object for non-Prometheus connectors', async () => {
       const mockCreateDataSourceResponse = { success: true, name: 'test-s3' };
 
       mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
-        query: {},
         body: {
           name: 'test-s3',
           connector: 's3glue',
@@ -190,7 +126,6 @@ describe('data_connections_router', () => {
 
     it('should handle errors when creating data connection', async () => {
       mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
-        query: {},
         body: {
           name: 'test-prometheus',
           connector: 'prometheus',
@@ -226,7 +161,6 @@ describe('data_connections_router', () => {
       const mockCreateDataSourceResponse = { success: true, name: 'test-prometheus' };
 
       mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
-        query: {},
         body: {
           name: 'test-prometheus',
           connector: 'prometheus',

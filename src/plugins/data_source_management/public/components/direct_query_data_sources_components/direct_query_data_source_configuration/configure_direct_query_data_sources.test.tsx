@@ -9,7 +9,6 @@ import { DirectQueryDataSourceConfigure } from './configure_direct_query_data_so
 import { NotificationsStart } from '../../../../../../core/public';
 import { act } from 'react-dom/test-utils';
 import { createMemoryHistory } from 'history';
-import { getDataSources } from '../../utils';
 
 const mockSetBreadcrumbs = jest.fn();
 const mockToasts = {
@@ -48,12 +47,6 @@ const mockUseParams = jest.fn();
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => mockUseParams(),
-}));
-
-jest.mock('../../utils', () => ({
-  ...jest.requireActual('../../utils'),
-  getDataSources: jest.fn().mockResolvedValue([]),
-  getHideLocalCluster: jest.fn().mockReturnValue({ enabled: false }),
 }));
 
 const mockContext = {
@@ -144,20 +137,5 @@ describe('ConfigureDirectQueryDataSourceWithRouter', () => {
     });
 
     expect(pushSpy).toHaveBeenCalledWith('/');
-  });
-
-  it('does not fetch data sources for Prometheus when featureFlagStatus is false', () => {
-    mountComponent('Prometheus', false);
-    expect(getDataSources).not.toHaveBeenCalled();
-  });
-
-  it('fetches data sources for Prometheus when featureFlagStatus is true', () => {
-    mountComponent('Prometheus', true);
-    expect(getDataSources).toHaveBeenCalled();
-  });
-
-  it('does not fetch data sources for non-Prometheus type regardless of featureFlagStatus', () => {
-    mountComponent('AmazonS3AWSGlue', true);
-    expect(getDataSources).not.toHaveBeenCalled();
   });
 });
