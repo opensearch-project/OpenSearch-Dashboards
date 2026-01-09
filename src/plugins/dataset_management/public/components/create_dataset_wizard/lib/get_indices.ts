@@ -105,32 +105,6 @@ export const getIndicesViaResolve = async ({
     });
 };
 
-/**
- * Takes two MatchedItem[]s and returns a merged set, with the second set prrioritized over the first based on name
- *
- * @param matchedA
- * @param matchedB
- */
-
-export const dedupeMatchedItems = (matchedA: MatchedItem[], matchedB: MatchedItem[]) => {
-  const mergedMatchedItems = matchedA.reduce((col, item) => {
-    col[item.name] = item;
-    return col;
-  }, {} as Record<string, MatchedItem>);
-
-  matchedB.reduce((col, item) => {
-    col[item.name] = item;
-    return col;
-  }, mergedMatchedItems);
-
-  return Object.values(mergedMatchedItems).sort((a, b) => {
-    if (a.name > b.name) return 1;
-    if (b.name > a.name) return -1;
-
-    return 0;
-  });
-};
-
 export async function getIndices({
   http,
   getIndexTags = () => [],
@@ -147,7 +121,6 @@ export async function getIndices({
   dataSourceId?: string;
 }): Promise<MatchedItem[]> {
   const pattern = rawPattern.trim();
-  const isCCS = pattern.indexOf(':') !== -1;
   const requests: Array<Promise<MatchedItem[]>> = [];
 
   // Searching for `*:` fails for CCS environments. The search request
@@ -184,26 +157,8 @@ export async function getIndices({
   });
   requests.push(promiseResolve);
 
-  if (isCCS) {
-    // CCS supports ±1 major version. We won't be able to expect resolve endpoint to exist until v9
-    const promiseSearch = getIndicesViaSearch({
-      getIndexTags,
-      pattern,
-      searchClient,
-      showAllIndices,
-      dataSourceId,
-    }).catch(() => []);
-    requests.push(promiseSearch);
-  }
-
   const responses = await Promise.all(requests);
-
-  if (responses.length === 2) {
-    const [resolveResponse, searchResponse] = responses;
-    return dedupeMatchedItems(searchResponse, resolveResponse);
-  } else {
-    return responses[0];
-  }
+  return responses[0];
 }
 
 export const responseToItemArray = (
