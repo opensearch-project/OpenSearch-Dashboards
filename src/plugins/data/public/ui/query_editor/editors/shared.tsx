@@ -104,94 +104,97 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
 
   return (
     <div
-      className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group osdQueryBar__wrap"
-      data-test-subj="osdQueryBarWrapper"
+      className="osdQueryEditor__singleLineWrapper"
+      data-test-subj="osdQueryEditor__singleLineWrapper"
     >
-      {prepend}
       <div
-        className="osdQuerEditor__singleLine euiFormControlLayout__childrenWrapper"
-        data-test-subj="osdQueryEditor__singleLine"
+        className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group osdQueryBar__wrap"
+        data-test-subj="osdQueryBarWrapper"
       >
-        <CodeEditor
-          height={20} // Adjusted to match lineHeight for a single line
-          languageId={languageId}
-          value={value}
-          onChange={onChange}
-          editorDidMount={handleEditorDidMount}
-          options={{
-            lineNumbers: 'off', // Disabled line numbers
-            // lineHeight: 40,
-            fontSize: 14,
-            fontFamily: 'Roboto Mono',
-            minimap: {
-              enabled: false,
-            },
-            scrollBeyondLastLine: false,
-            wordWrap: 'off', // Disabled word wrapping
-            wrappingIndent: 'none', // No indent since wrapping is off
-            folding: false,
-            glyphMargin: false,
-            lineDecorationsWidth: 0,
-            scrollbar: {
-              vertical: 'hidden',
-              horizontalScrollbarSize: 1,
-            },
-            overviewRulerLanes: 0,
-            hideCursorInOverviewRuler: true,
-            cursorStyle: 'line',
-            // Configure suggestion behavior
-            suggest: {
-              snippetsPreventQuickSuggestions: false, // Ensure all suggestions are shown
-              filterGraceful: false, // Don't filter suggestions
-              showWords: false, // Disable word-based suggestions
-              showStatusBar: true, // Enable the built-in status bar
-            },
-            // Using Monaco's built-in status bar with default behavior
-          }}
-          suggestionProvider={{
-            triggerCharacters: [' '],
-            // Make sure all parameters are passed to the provideCompletionItems function
-            provideCompletionItems: async (model, position, context, token) => {
-              return provideCompletionItems(model, position, context, token);
-            },
-          }}
-          languageConfiguration={{
-            autoClosingPairs: [
-              {
-                open: '(',
-                close: ')',
+        {prepend}
+        <div
+          className="osdQuerEditor__singleLine euiFormControlLayout__childrenWrapper"
+          data-test-subj="osdQueryEditor__singleLine"
+        >
+          <CodeEditor
+            height={20} // Adjusted to match lineHeight for a single line
+            languageId={languageId}
+            value={value}
+            onChange={onChange}
+            editorDidMount={handleEditorDidMount}
+            options={{
+              lineNumbers: 'off', // Disabled line numbers
+              // lineHeight: 40,
+              fontSize: 14,
+              fontFamily: 'Roboto Mono',
+              minimap: {
+                enabled: false,
               },
-              {
-                open: '"',
-                close: '"',
+              scrollBeyondLastLine: false,
+              wordWrap: 'off', // Disabled word wrapping
+              wrappingIndent: 'none', // No indent since wrapping is off
+              folding: false,
+              glyphMargin: false,
+              lineDecorationsWidth: 0,
+              scrollbar: {
+                vertical: 'hidden',
+                horizontalScrollbarSize: 1,
               },
-            ],
-          }}
-          triggerSuggestOnFocus={true}
-        />
-        <div className="queryEditor__progress" data-test-subj="queryEditorProgress">
-          {queryStatus?.status === ResultStatus.LOADING && (
-            <EuiProgress size="xs" color="accent" position="absolute" />
-          )}
-        </div>
-        {editorIsFocused && (
-          <div className="queryEditor__footer" data-test-subj="queryEditorFooter">
-            {footerItems && (
-              <Fragment>
-                {footerItems.start?.map((item: React.ReactNode, index: number) => (
-                  <div key={index} className="queryEditor__footerItem">
-                    {item}
-                  </div>
-                ))}
-                <div className="queryEditor__footerSpacer" />
-                {footerItems.end?.map((item: React.ReactNode, index: number) => (
-                  <div key={index} className="queryEditor__footerItem">
-                    {item}
-                  </div>
-                ))}
-              </Fragment>
+              overviewRulerLanes: 0,
+              hideCursorInOverviewRuler: true,
+              cursorStyle: 'line',
+              // Configure suggestion behavior
+              suggest: {
+                snippetsPreventQuickSuggestions: false, // Ensure all suggestions are shown
+                filterGraceful: false, // Don't filter suggestions
+                showWords: false, // Disable word-based suggestions
+                showStatusBar: true, // Enable the built-in status bar
+              },
+              // Using Monaco's built-in status bar with default behavior
+            }}
+            suggestionProvider={{
+              triggerCharacters: [' '],
+              // Make sure all parameters are passed to the provideCompletionItems function
+              provideCompletionItems: async (model, position, context, token) => {
+                return provideCompletionItems(model, position, context, token);
+              },
+            }}
+            languageConfiguration={{
+              autoClosingPairs: [
+                {
+                  open: '(',
+                  close: ')',
+                },
+                {
+                  open: '"',
+                  close: '"',
+                },
+              ],
+            }}
+            triggerSuggestOnFocus={true}
+          />
+          <div className="queryEditor__progress" data-test-subj="queryEditorProgress">
+            {queryStatus?.status === ResultStatus.LOADING && (
+              <EuiProgress size="xs" color="accent" position="absolute" />
             )}
           </div>
+        </div>
+      </div>
+      <div className="queryEditor__footer" data-test-subj="queryEditorFooter">
+        {footerItems && (
+          <Fragment>
+            {footerItems.start?.map((item: React.ReactNode, index: number) => (
+              <div key={index} className="queryEditor__footerItem">
+                {item}
+              </div>
+            ))}
+            <div className="queryEditor__footerSpacer" />
+            {footerItems.end?.map((item: React.ReactNode, index: number) => (
+              <div key={index} className="queryEditor__footerItem">
+                {item}
+              </div>
+            ))}
+          </Fragment>
         )}
       </div>
     </div>
