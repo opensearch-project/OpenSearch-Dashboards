@@ -17,6 +17,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { CORE_SIGNAL_TYPES } from '../../../data/common';
 import { ExploreServices } from '../types';
 import { detectTraceDataAcrossDataSources, DetectionResult } from '../utils/auto_detect_trace_data';
 import { createAutoDetectedDatasets } from '../utils/create_auto_datasets';
@@ -32,6 +33,8 @@ export const TraceAutoDetectCallout: React.FC = () => {
   const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     // Run detection
     const runDetection = async () => {
       // Check if user dismissed this before
@@ -41,53 +44,82 @@ export const TraceAutoDetectCallout: React.FC = () => {
         // If not, clear the dismissal so user can see the callout again
         try {
           const allIndexPatterns = await services.indexPatterns.getIds();
+          if (!isMounted) return;
+
           let hasTraceDatasets = false;
 
           for (const id of allIndexPatterns) {
+            if (!isMounted) return;
             try {
               const indexPattern = await services.indexPatterns.get(id);
-              if (indexPattern.signalType === 'traces') {
+              if (!isMounted) return;
+
+              if (indexPattern.signalType === CORE_SIGNAL_TYPES.TRACES) {
                 hasTraceDatasets = true;
                 break;
               }
             } catch (error) {
+              if (error instanceof Error && error.name === 'AbortError') {
+                return;
+              }
               continue;
             }
           }
+
+          if (!isMounted) return;
 
           // If no trace datasets exist, clear dismissal and run detection
           if (!hasTraceDatasets) {
             localStorage.removeItem(DISMISSED_KEY);
           } else {
             // Has trace datasets and was dismissed, so keep it dismissed
-            setIsDismissed(true);
-            setIsDetecting(false);
+            if (isMounted) {
+              setIsDismissed(true);
+              setIsDetecting(false);
+            }
             return;
           }
         } catch (error) {
+          if (error instanceof Error && error.name === 'AbortError') {
+            return;
+          }
           // If check fails, respect the dismissal
-          setIsDismissed(true);
-          setIsDetecting(false);
+          if (isMounted) {
+            setIsDismissed(true);
+            setIsDetecting(false);
+          }
           return;
         }
       }
+
       try {
         const results = await detectTraceDataAcrossDataSources(
           services.savedObjects.client,
           services.indexPatterns
         );
 
+        if (!isMounted) return;
+
         if (results.length > 0) {
           setDetections(results);
         }
       } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return;
+        }
         // Detection failed, but don't show any error
       } finally {
-        setIsDetecting(false);
+        if (isMounted) {
+          setIsDetecting(false);
+        }
       }
     };
 
     runDetection();
+
+    return () => {
+      isMounted = false;
+    };
   }, [services]);
 
   const handleCreate = async () => {

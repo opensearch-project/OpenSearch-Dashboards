@@ -55,7 +55,6 @@ const loadSavedQuery = (config) => {
   });
 
   cy.getElementByTestId('discoverNewButton').click();
-
   // Todo - Date Picker sometimes does not load when expected. Have to set dataset and query language again.
   cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 

@@ -26,6 +26,7 @@ import {
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
+import { DataPublicPluginStart } from '../../../../data/public';
 import { WorkspaceUseCase } from '../../types';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
@@ -61,7 +62,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     dataSourceManagement?: DataSourceManagementPluginSetup;
     navigationUI: NavigationPublicPluginStart['ui'];
     useCaseService: UseCaseService;
-    data: any;
+    data: DataPublicPluginStart;
   }>();
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
   const [goToCollaborators, setGoToCollaborators] = useState(false);
@@ -213,7 +214,10 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                     }),
                     text:
                       datasetsCreatedCount > 1
-                        ? `Created datasets for ${datasetsCreatedCount} data sources`
+                        ? i18n.translate('workspace.create.traceDatasetsCreatedMultiple', {
+                            defaultMessage: 'Created datasets for {count} data sources',
+                            values: { count: datasetsCreatedCount },
+                          })
                         : undefined,
                   });
                 }

@@ -39,7 +39,7 @@ interface SelectedItem {
   isWildcard: boolean;
 }
 
-interface IndexHealth {
+interface IndexInfo {
   health: string;
   status: string;
   index: string;
@@ -55,8 +55,8 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
 }) => {
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([]);
   const [openPopoverIndex, setOpenPopoverIndex] = useState<number | null>(null);
-  const [indexHealthCache, setIndexHealthCache] = useState<Record<string, IndexHealth | null>>({});
-  const [loadingHealthForIndexSet, setLoadingHealthForIndexSet] = useState<Set<string>>(new Set());
+  const [indexInfoCache, setIndexInfoCache] = useState<Record<string, IndexInfo | null>>({});
+  const [loadingInfoForIndexSet, setLoadingInfoForIndexSet] = useState<Set<string>>(new Set());
   const [matchingIndicesCache, setMatchingIndicesCache] = useState<Record<string, string[]>>({});
   const [loadingMatchingIndicesSet, setLoadingMatchingIndicesSet] = useState<Set<string>>(
     new Set()
@@ -70,58 +70,17 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
   // Use shared hook for fetching indices
   const { fetchIndices } = useIndexFetcher({ services, path });
 
-  // Fetch index health information
-  const fetchIndexHealth = useCallback(
-    async (indexName: string) => {
-      if (!services?.http) return;
-
-      setLoadingHealthForIndexSet((prev) => new Set(prev).add(indexName));
-      try {
-        const dataSourceId = path?.find((item) => item.type === 'DATA_SOURCE')?.id;
-
-        const queryParams: Record<string, any> = {
-          path: `_cat/indices/${encodeURIComponent(
-            indexName
-          )}?format=json&h=health,status,index,docs.count,store.size`,
-          method: 'GET',
-        };
-
-        if (dataSourceId) {
-          queryParams.dataSourceId = dataSourceId;
-        }
-
-        const response = await services.http.post<any>(`/api/console/proxy`, {
-          query: queryParams,
-          body: '',
-        });
-
-        const healthData =
-          response && Array.isArray(response) && response.length > 0 ? response[0] : null;
-
-        // Cache the result
-        setIndexHealthCache((prev) => ({ ...prev, [indexName]: healthData }));
-
-        return healthData;
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Error fetching index health:', error);
-        setIndexHealthCache((prev) => ({ ...prev, [indexName]: null }));
-        return null;
-      } finally {
-        setLoadingHealthForIndexSet((prev) => {
-          const next = new Set(prev);
-          next.delete(indexName);
-          return next;
-        });
-      }
-    },
-    [services, path]
-  );
-
-  // Batch fetch index health information for multiple indices
-  const fetchBatchIndexHealth = useCallback(
+  // Batch fetch index info for one or more indices
+  const fetchBatchIndexInfo = useCallback(
     async (indexNames: string[]) => {
       if (!services?.http || indexNames.length === 0) return;
+
+      // Mark all indices as loading
+      setLoadingInfoForIndexSet((prev) => {
+        const next = new Set(prev);
+        indexNames.forEach((name) => next.add(name));
+        return next;
+      });
 
       try {
         const dataSourceId = path?.find((item) => item.type === 'DATA_SOURCE')?.id;
@@ -144,9 +103,9 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
 
         if (response && Array.isArray(response)) {
           // Cache all results
-          const newCache: Record<string, IndexHealth | null> = {};
-          response.forEach((healthData: IndexHealth) => {
-            newCache[healthData.index] = healthData;
+          const newCache: Record<string, IndexInfo | null> = {};
+          response.forEach((infoData: IndexInfo) => {
+            newCache[infoData.index] = infoData;
           });
 
           // Mark any missing indices as null (not found)
@@ -156,17 +115,24 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
             }
           });
 
-          setIndexHealthCache((prev) => ({ ...prev, ...newCache }));
+          setIndexInfoCache((prev) => ({ ...prev, ...newCache }));
         }
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error('Error fetching batch index health:', error);
+        console.error('Error fetching batch index info:', error);
         // Mark all as null on error
-        const errorCache: Record<string, IndexHealth | null> = {};
+        const errorCache: Record<string, IndexInfo | null> = {};
         indexNames.forEach((indexName) => {
           errorCache[indexName] = null;
         });
-        setIndexHealthCache((prev) => ({ ...prev, ...errorCache }));
+        setIndexInfoCache((prev) => ({ ...prev, ...errorCache }));
+      } finally {
+        // Clear loading state for all indices
+        setLoadingInfoForIndexSet((prev) => {
+          const next = new Set(prev);
+          indexNames.forEach((name) => next.delete(name));
+          return next;
+        });
       }
     },
     [services, path]
@@ -213,23 +179,20 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
           fetchMatchingIndices(item.title);
         }
       } else {
-        // Fetch health for exact indices
-        if (
-          indexHealthCache[item.title] === undefined &&
-          !loadingHealthForIndexSet.has(item.title)
-        ) {
-          fetchIndexHealth(item.title);
+        // Fetch info for exact indices
+        if (indexInfoCache[item.title] === undefined && !loadingInfoForIndexSet.has(item.title)) {
+          fetchBatchIndexInfo([item.title]);
         }
       }
     });
   }, [
     selectedItems,
     matchingIndicesCache,
-    indexHealthCache,
+    indexInfoCache,
     loadingMatchingIndicesSet,
-    loadingHealthForIndexSet,
+    loadingInfoForIndexSet,
     fetchMatchingIndices,
-    fetchIndexHealth,
+    fetchBatchIndexInfo,
   ]);
 
   // Auto-fetch health data for visible indices in wildcard popover
@@ -244,11 +207,9 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
         const visibleIndices = matchingIndices.slice(startIndex, endIndex);
 
         // Filter out already cached indices before batch fetching
-        const uncachedIndices = visibleIndices.filter(
-          (name) => indexHealthCache[name] === undefined
-        );
+        const uncachedIndices = visibleIndices.filter((name) => indexInfoCache[name] === undefined);
         if (uncachedIndices.length > 0) {
-          fetchBatchIndexHealth(uncachedIndices);
+          fetchBatchIndexInfo(uncachedIndices);
         }
       }
     }
@@ -257,8 +218,8 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
     selectedItems,
     matchingIndicesCache,
     wildcardPopoverPage,
-    indexHealthCache,
-    fetchBatchIndexHealth,
+    indexInfoCache,
+    fetchBatchIndexInfo,
   ]);
 
   // Handle selection changes from unified selector
@@ -332,9 +293,9 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
           await fetchMatchingIndices(item.title);
         }
       } else {
-        // Fetch health data for exact index if not cached
-        if (indexHealthCache[item.title] === undefined) {
-          await fetchIndexHealth(item.title);
+        // Fetch info data for exact index if not cached
+        if (indexInfoCache[item.title] === undefined) {
+          await fetchBatchIndexInfo([item.title]);
         }
       }
     }
@@ -422,8 +383,8 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
             {/* Table rows */}
             <div className="indexDataStructureCreator__wildcardPopoverTableBody">
               {visibleIndices.map((indexName) => {
-                const indexHealth = indexHealthCache[indexName];
-                const isLoadingIndexHealth = loadingHealthForIndexSet.has(indexName);
+                const indexInfo = indexInfoCache[indexName];
+                const isLoadingIndexInfo = loadingInfoForIndexSet.has(indexName);
 
                 return (
                   <div key={indexName} className="indexDataStructureCreator__wildcardPopoverRow">
@@ -435,10 +396,10 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
                         grow={false}
                         className="indexDataStructureCreator__wildcardPopoverColumn"
                       >
-                        {isLoadingIndexHealth ? (
+                        {isLoadingIndexInfo ? (
                           <EuiLoadingSpinner size="s" />
-                        ) : indexHealth?.['docs.count'] ? (
-                          <EuiText size="xs">{indexHealth['docs.count']}</EuiText>
+                        ) : indexInfo?.['docs.count'] ? (
+                          <EuiText size="xs">{indexInfo['docs.count']}</EuiText>
                         ) : (
                           <EuiText size="xs" color="subdued">
                             —
@@ -449,10 +410,10 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
                         grow={false}
                         className="indexDataStructureCreator__wildcardPopoverColumn"
                       >
-                        {isLoadingIndexHealth ? (
+                        {isLoadingIndexInfo ? (
                           <EuiLoadingSpinner size="s" />
-                        ) : indexHealth?.['store.size'] ? (
-                          <EuiText size="xs">{indexHealth['store.size']}</EuiText>
+                        ) : indexInfo?.['store.size'] ? (
+                          <EuiText size="xs">{indexInfo['store.size']}</EuiText>
                         ) : (
                           <EuiText size="xs" color="subdued">
                             —
@@ -492,8 +453,8 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
       );
     }
 
-    const healthData = indexHealthCache[item.title];
-    const isLoading = loadingHealthForIndexSet.has(item.title);
+    const infoData = indexInfoCache[item.title];
+    const isLoading = loadingInfoForIndexSet.has(item.title);
 
     if (isLoading) {
       return (
@@ -503,7 +464,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
       );
     }
 
-    if (!healthData) {
+    if (!infoData) {
       return (
         <div className="indexDataStructureCreator__healthPopover">
           <EuiText size="xs" color="subdued">
@@ -527,25 +488,25 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
           <EuiFlexItem grow={false}>
             <EuiHealth
               color={
-                healthData.health === 'green'
+                infoData.health === 'green'
                   ? 'success'
-                  : healthData.health === 'yellow'
+                  : infoData.health === 'yellow'
                   ? 'warning'
                   : 'danger'
               }
             >
-              {healthData.health}
+              {infoData.health}
             </EuiHealth>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiText size="xs">
-          <strong>Status:</strong> {healthData.status}
+          <strong>Status:</strong> {infoData.status}
         </EuiText>
         <EuiText size="xs">
-          <strong>Documents:</strong> {healthData['docs.count'] || '0'}
+          <strong>Documents:</strong> {infoData['docs.count'] || '0'}
         </EuiText>
         <EuiText size="xs">
-          <strong>Size:</strong> {healthData['store.size'] || 'N/A'}
+          <strong>Size:</strong> {infoData['store.size'] || 'N/A'}
         </EuiText>
       </div>
     );
@@ -640,9 +601,9 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
             </div>
             {/* Table rows */}
             {selectedItems.map((item, itemIndex) => {
-              const healthData = indexHealthCache[item.title];
+              const infoData = indexInfoCache[item.title];
               const matchingIndices = matchingIndicesCache[item.title];
-              const isLoadingHealth = loadingHealthForIndexSet.has(item.title);
+              const isLoadingInfo = loadingInfoForIndexSet.has(item.title);
               const isLoadingMatches = loadingMatchingIndicesSet.has(item.title);
 
               return (
@@ -655,7 +616,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
 
                     {/* Status Column */}
                     <EuiFlexItem grow={false} className="indexDataStructureCreator__columnStatus">
-                      {isLoadingHealth || isLoadingMatches ? (
+                      {isLoadingInfo || isLoadingMatches ? (
                         <EuiLoadingSpinner size="s" />
                       ) : item.isWildcard ? (
                         matchingIndices && matchingIndices.length > 0 ? (
@@ -693,17 +654,17 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
                             —
                           </EuiText>
                         )
-                      ) : healthData ? (
+                      ) : infoData ? (
                         <EuiHealth
                           color={
-                            healthData.health === 'green'
+                            infoData.health === 'green'
                               ? 'success'
-                              : healthData.health === 'yellow'
+                              : infoData.health === 'yellow'
                               ? 'warning'
                               : 'danger'
                           }
                         >
-                          <EuiText size="xs">{healthData.health}</EuiText>
+                          <EuiText size="xs">{infoData.health}</EuiText>
                         </EuiHealth>
                       ) : (
                         <EuiText size="xs" color="subdued">
@@ -721,8 +682,8 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
                         <EuiText size="xs" color="subdued">
                           —
                         </EuiText>
-                      ) : healthData?.['docs.count'] ? (
-                        <EuiText size="xs">{healthData['docs.count']}</EuiText>
+                      ) : infoData?.['docs.count'] ? (
+                        <EuiText size="xs">{infoData['docs.count']}</EuiText>
                       ) : (
                         <EuiText size="xs" color="subdued">
                           —
@@ -736,8 +697,8 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
                         <EuiText size="xs" color="subdued">
                           —
                         </EuiText>
-                      ) : healthData?.['store.size'] ? (
-                        <EuiText size="xs">{healthData['store.size']}</EuiText>
+                      ) : infoData?.['store.size'] ? (
+                        <EuiText size="xs">{infoData['store.size']}</EuiText>
                       ) : (
                         <EuiText size="xs" color="subdued">
                           —

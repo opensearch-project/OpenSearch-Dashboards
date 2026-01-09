@@ -52,7 +52,6 @@ export const UnifiedIndexSelector: React.FC<UnifiedIndexSelectorProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const hasLoadedInitial = useRef(false);
-  const hasAutoFocused = useRef(false);
   const shouldRepositionCursor = useRef(false);
 
   // Use shared hook for fetching indices
@@ -180,8 +179,7 @@ export const UnifiedIndexSelector: React.FC<UnifiedIndexSelectorProps> = ({
 
   // Auto-focus input on first mount to open dropdown
   useEffect(() => {
-    if (!hasAutoFocused.current && inputRef.current) {
-      hasAutoFocused.current = true;
+    if (inputRef.current) {
       // Small delay to ensure component is fully mounted
       setTimeout(() => {
         inputRef.current?.focus();

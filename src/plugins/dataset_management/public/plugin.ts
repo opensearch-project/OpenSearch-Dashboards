@@ -102,7 +102,11 @@ export class DatasetManagementPlugin
         const features = await coreStart.workspaces.currentWorkspace$
           .pipe(take(1))
           .toPromise()
-          .then((workspace) => workspace?.features);
+          .then((workspace) => workspace?.features)
+          .catch(() => {
+            // Fallback to non-workspace mode if workspace isn't available
+            return undefined;
+          });
 
         const isObservabilityWorkspace =
           (features && isNavGroupInFeatureConfigs(DEFAULT_NAV_GROUPS.observability.id, features)) ??
