@@ -70,7 +70,7 @@ export const selectSpecificSuggestion = (suggestionText) => {
           });
 
           if (exactMatch.length > 0) {
-            cy.wrap(exactMatch).first().click();
+            cy.wrap(exactMatch).first().click({ force: true });
             return;
           }
         });

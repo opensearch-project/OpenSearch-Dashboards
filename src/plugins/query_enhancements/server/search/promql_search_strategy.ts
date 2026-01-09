@@ -12,7 +12,9 @@ import {
   IDataFrame,
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
+  ParsedQuery,
   Query,
+  splitMultiQueries,
 } from '../../../data/common';
 import {
   prometheusManager,
@@ -22,9 +24,18 @@ import {
 
 // This creates an upper bound for data points sent to the frontend (targetSamples * maxSeries)
 const AUTO_STEP_TARGET_SAMPLES = 50;
-const MAX_SERIES = 2000;
+const MAX_SERIES = 100;
 // We'll want to re-evaluate this when we provide an affordance for step configuration
 const MAX_DATAPOINTS = AUTO_STEP_TARGET_SAMPLES * MAX_SERIES;
+
+/**
+ * Result from executing a single query in a multi-query context
+ */
+interface LabeledQueryResult {
+  label: string;
+  response?: PromQLQueryResponse;
+  error?: string;
+}
 
 export const promqlSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -45,36 +56,37 @@ export const promqlSearchStrategyProvider = (
           end: parsedTo.unix(),
         };
         const duration = (timeRange.end - timeRange.start) * 1000;
-        // round to nearest ms step >= 1ms
         const step =
           requestBody.step ??
           Math.max(Math.ceil(duration / AUTO_STEP_TARGET_SAMPLES) / 1000, 0.001);
         const { dataset, query, language }: Query = requestBody.query;
         const datasetId = dataset?.id ?? '';
-        const params: PromQLQueryParams = {
-          body: {
-            query: query as string,
-            language: language as string,
-            maxResults: MAX_DATAPOINTS,
+
+        const parsedQueries = splitMultiQueries(query as string);
+        const isSingleQuery = parsedQueries.length === 1;
+
+        // Execute all queries uniformly
+        const queryResults = await executeMultipleQueries(
+          context,
+          request,
+          parsedQueries,
+          {
+            language,
+            maxResults: Math.floor(MAX_DATAPOINTS / parsedQueries.length),
             timeout: 30,
-            options: {
-              queryType: 'range',
-              start: timeRange.start.toString(),
-              end: timeRange.end.toString(),
-              step: step.toString(),
-            },
+            timeRange,
+            step: step.toString(),
           },
-          dataconnection: datasetId,
-        };
+          datasetId,
+          logger
+        );
 
-        // Use prometheus manager for query execution - allows runtime override of client
-        const queryRes = await prometheusManager.query(context, request, params);
-
-        if (queryRes.status === 'failed') {
-          throw new Error(queryRes.error || 'PromQL query failed');
+        // For single query, preserve fail-fast behavior
+        if (isSingleQuery && queryResults[0]?.error) {
+          throw new Error(queryResults[0].error);
         }
 
-        const dataFrame = createDataFrame(queryRes.data, datasetId);
+        const dataFrame = createDataFrame(queryResults, datasetId, isSingleQuery);
 
         return {
           type: DATA_FRAME_TYPES.DEFAULT,
@@ -91,85 +103,209 @@ export const promqlSearchStrategyProvider = (
 };
 
 /**
- * Transforms Prometheus response to visualization format DataFrame (Time, Series, Value)
- * and stores raw instant format (Time, labels..., Value) in meta for the metrics table
+ * Executes multiple PromQL queries in parallel
  */
-function createDataFrame(rawResponse: PromQLQueryResponse, datasetId: string): IDataFrame {
-  const series = rawResponse.results[datasetId]?.result || [];
+async function executeMultipleQueries(
+  context: any,
+  request: any,
+  queries: ParsedQuery[],
+  options: {
+    language: string;
+    maxResults: number;
+    timeout: number;
+    timeRange: { start: number; end: number };
+    step: string;
+  },
+  datasetId: string,
+  logger: Logger
+): Promise<LabeledQueryResult[]> {
+  const promises = queries.map(
+    async (parsedQuery): Promise<LabeledQueryResult> => {
+      try {
+        const params: PromQLQueryParams = {
+          body: {
+            query: parsedQuery.query,
+            language: options.language,
+            maxResults: options.maxResults,
+            timeout: options.timeout,
+            options: {
+              queryType: 'range',
+              start: options.timeRange.start.toString(),
+              end: options.timeRange.end.toString(),
+              step: options.step,
+            },
+          },
+          dataconnection: datasetId,
+        };
 
-  const allLabelKeys = new Set<string>();
-  series.forEach((metricResult, i) => {
-    if (i >= MAX_SERIES) return;
-    if (metricResult.metric) {
-      Object.keys(metricResult.metric).forEach((key) => {
-        allLabelKeys.add(key);
-      });
+        const queryRes = await prometheusManager.query(context, request, params);
+
+        if (queryRes.status === 'failed') {
+          return {
+            label: parsedQuery.label,
+            error: queryRes.error || `Query ${parsedQuery.label} failed`,
+          };
+        }
+
+        return {
+          label: parsedQuery.label,
+          response: queryRes.data,
+        };
+      } catch (e: unknown) {
+        const error = e as Error;
+        logger.error(`Query ${parsedQuery.label} failed: ${error.message}`);
+        return {
+          label: parsedQuery.label,
+          error: error.message,
+        };
+      }
     }
+  );
+
+  return Promise.all(promises);
+}
+
+/**
+ * Formats metric labels into a string like {label1="value1", label2="value2"}
+ * Only includes labels that have actual values (non-empty)
+ */
+function formatMetricLabels(metric: Record<string, string>): string {
+  const labelParts = Object.entries(metric)
+    .filter(([_, value]) => value !== undefined && value !== '')
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => `${key}="${value}"`);
+
+  return labelParts.length > 0 ? `{${labelParts.join(', ')}}` : '';
+}
+
+/**
+ * Unified DataFrame creation for single and multi-query results.
+ * - Single query: uses `Value` column, simpler series names
+ * - Multi-query: uses `Value #A`, `Value #B` columns, prefixed series names
+ */
+function createDataFrame(
+  queryResults: LabeledQueryResult[],
+  datasetId: string,
+  isSingleQuery: boolean
+): IDataFrame {
+  const allVizRows: Array<Record<string, unknown>> = [];
+  const allLabelKeys = new Set<string>();
+
+  const instantDataMap = new Map<
+    string,
+    {
+      metric: Record<string, string>;
+      metricName: string;
+      time: number;
+      valuesByQuery: Record<string, number>;
+    }
+  >();
+
+  const queryLabels = queryResults.filter((r) => !r.error && r.response).map((r) => r.label);
+
+  queryResults.forEach((result) => {
+    if (!result.response || result.error) return;
+
+    const series = result.response.results[datasetId]?.result || [];
+
+    series.forEach((metricResult, i) => {
+      if (i >= MAX_SERIES) return;
+      if (metricResult.metric) {
+        Object.keys(metricResult.metric).forEach((key) => {
+          if (key !== '__name__') {
+            allLabelKeys.add(key);
+          }
+        });
+      }
+    });
   });
 
   const labelKeys = Array.from(allLabelKeys).sort();
 
-  // Create instant format rows (Time, Metric, label1, label2, ..., Value)
-  // Metric column contains the formatted metric string: metricName{label1="value1", label2="value2"}
-  const rows: Array<Record<string, unknown>> = [];
+  queryResults.forEach((result) => {
+    if (!result.response || result.error) return;
 
-  series.forEach((metricResult, seriesIndex) => {
-    if (seriesIndex >= MAX_SERIES) return;
+    const series = result.response.results[datasetId]?.result || [];
 
-    const metricName = metricResult.metric.__name__ || '';
-    const labelParts = labelKeys
-      .filter((key) => key !== '__name__')
-      .map((labelKey) => {
-        const labelValue = metricResult.metric[labelKey];
-        return labelValue ? `${labelKey}="${labelValue}"` : null;
-      })
-      .filter(Boolean);
-    const metricString =
-      labelParts.length > 0 ? `${metricName}{${labelParts.join(', ')}}` : metricName;
+    series.forEach((metricResult, seriesIndex) => {
+      if (seriesIndex >= MAX_SERIES) return;
 
-    metricResult.values.forEach(([timestamp, value]) => {
-      const row: Record<string, unknown> = { Time: timestamp * 1000, Metric: metricString };
-      labelKeys.forEach((labelKey) => (row[labelKey] = metricResult.metric[labelKey] || ''));
-      row.Value = Number(value);
-      rows.push(row);
+      const metricName = metricResult.metric.__name__ || '';
+
+      const labelsWithoutName = { ...metricResult.metric };
+      delete labelsWithoutName.__name__;
+
+      metricResult.values.forEach(([timestamp, value]) => {
+        const metricSignature = JSON.stringify({
+          name: metricName,
+          labels: labelsWithoutName,
+        });
+
+        const existing = instantDataMap.get(metricSignature);
+        const timeMs = timestamp * 1000;
+
+        if (!existing || timeMs > existing.time) {
+          instantDataMap.set(metricSignature, {
+            metric: labelsWithoutName,
+            metricName,
+            time: timeMs,
+            valuesByQuery: {
+              ...(existing?.valuesByQuery || {}),
+              [result.label]: Number(value),
+            },
+          });
+        } else if (timeMs === existing.time) {
+          existing.valuesByQuery[result.label] = Number(value);
+        }
+
+        const formattedLabels = formatMetricLabels(metricResult.metric);
+
+        const seriesName = isSingleQuery ? formattedLabels : `${result.label}: ${formattedLabels}`;
+
+        allVizRows.push({
+          Time: timeMs,
+          Series: seriesName,
+          Value: Number(value),
+        });
+      });
     });
   });
 
-  // Filter to only the latest timestamp for data-grid
-  const latestTimestamp = Math.max(...rows.map((row) => (row.Time as number) || 0));
-  const instantRows = rows.filter((row) => row.Time === latestTimestamp);
+  const allInstantRows: Array<Record<string, unknown>> = [];
+
+  instantDataMap.forEach((data) => {
+    const row: Record<string, unknown> = {
+      Time: data.time,
+
+      Metric: data.metricName + formatMetricLabels(data.metric),
+    };
+
+    labelKeys.forEach((labelKey) => {
+      const labelValue = data.metric[labelKey];
+      row[labelKey] = labelValue !== undefined && labelValue !== '' ? labelValue : undefined;
+    });
+
+    if (isSingleQuery) {
+      row.Value = data.valuesByQuery[queryLabels[0]] ?? null;
+    } else {
+      queryLabels.forEach((label) => {
+        row[`Value #${label}`] = data.valuesByQuery[label] ?? null;
+      });
+    }
+
+    allInstantRows.push(row);
+  });
+
+  const valueColumns = isSingleQuery
+    ? [{ name: 'Value', type: 'number', values: [] }]
+    : queryLabels.map((label) => ({ name: `Value #${label}`, type: 'number', values: [] }));
 
   const instantSchema = [
     { name: 'Time', type: 'time', values: [] },
     { name: 'Metric', type: 'string', values: [] },
     ...labelKeys.map((key) => ({ name: key, type: 'string', values: [] })),
-    { name: 'Value', type: 'number', values: [] },
+    ...valueColumns,
   ];
-
-  // Create visualization format rows (Time, Series, Value)
-  const vizRows: Array<Record<string, unknown>> = [];
-
-  series.forEach((metricResult, seriesIndex) => {
-    if (seriesIndex >= MAX_SERIES) return;
-
-    metricResult.values.forEach(([timestamp, value]) => {
-      // Build series name from labels like: {cpu="0", mode="idle", instance="..."}
-      const labelParts = labelKeys
-        .map((labelKey) => {
-          const labelValue = metricResult.metric[labelKey];
-          return labelValue ? `${labelKey}="${labelValue}"` : null;
-        })
-        .filter(Boolean);
-
-      const seriesName = labelParts.length > 0 ? `{${labelParts.join(', ')}}` : '';
-
-      vizRows.push({
-        Time: timestamp * 1000,
-        Series: seriesName,
-        Value: Number(value),
-      });
-    });
-  });
 
   const vizSchema = [
     { name: 'Time', type: 'time', values: [] },
@@ -180,20 +316,35 @@ function createDataFrame(rawResponse: PromQLQueryResponse, datasetId: string): I
   const vizFields = vizSchema.map((s) => ({
     name: s.name,
     type: s.type as 'time' | 'string' | 'number',
-    values: vizRows.map((row) => row[s.name]),
+    values: allVizRows.map((row) => row[s.name]),
   }));
+
+  const errors = queryResults
+    .filter((r) => r.error)
+    .map((r) => ({ query: r.label, error: r.error }));
+
+  const meta: Record<string, unknown> = {
+    instantData: {
+      schema: instantSchema,
+      rows: allInstantRows,
+    },
+  };
+
+  if (!isSingleQuery) {
+    meta.multiQuery = {
+      queryCount: queryResults.length,
+      successCount: queryResults.filter((r) => !r.error).length,
+      errors,
+      queryLabels,
+    };
+  }
 
   return {
     type: DATA_FRAME_TYPES.DEFAULT,
     name: datasetId,
     schema: vizSchema,
     fields: vizFields,
-    size: vizRows.length,
-    meta: {
-      instantData: {
-        schema: instantSchema,
-        rows: instantRows,
-      },
-    },
+    size: allVizRows.length,
+    meta,
   };
 }
