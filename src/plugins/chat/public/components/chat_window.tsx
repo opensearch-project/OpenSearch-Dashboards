@@ -6,12 +6,9 @@
 /* eslint-disable no-console */
 
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
-import { CoreStart } from '../../../../core/public';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatEventHandler } from '../services/chat_event_handler';
-import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import {
-  ContextProviderStart,
   AssistantActionService,
 } from '../../../context_provider/public';
 import {
@@ -30,7 +27,9 @@ import { ChatInput } from './chat_input';
 
 export interface ChatWindowInstance{
   startNewChat: ()=>void;
-  sendMessage: (options:{content: string})=>Promise<unknown>;
+  sendMessage: (options:{content: string; imageData?: string})=>Promise<unknown>;
+  setPendingImage: (imageData: string | undefined) => void;
+  setCapturingImage: (isCapturing: boolean) => void;
 }
 
 interface ChatWindowProps {
@@ -54,14 +53,12 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   const service = AssistantActionService.getInstance();
   const { chatService } = useChatContext();
-  const { services } = useOpenSearchDashboards<{
-    core: CoreStart;
-    contextProvider?: ContextProviderStart;
-  }>();
   const [timeline, setTimeline] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
+  const [pendingImage, setPendingImage] = useState<string | undefined>(undefined);
+  const [isCapturingImage, setIsCapturingImage] = useState(false);
   const handleSendRef = useRef<typeof handleSend>();
   
   const timelineRef = React.useRef<Message[]>(timeline);
@@ -115,17 +112,27 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     chatService.updateCurrentMessages(timeline);
   }, [timeline, chatService]);
 
-  const handleSend = async (options?: {input?: string}) => {
+  const handleSend = async (options?: {input?: string; imageData?: string}) => {
     const messageContent = options?.input ?? input.trim();
-    if (!messageContent || isStreaming) return;
+    
+    // Debug: Log image data flow
+    const imageToSend = options?.imageData ?? pendingImage;
+    
+    // Allow sending if there's either text content or an image
+    if ((!messageContent && !imageToSend) || isStreaming) return;
+
+    // If no text content but there's an image, use a default message
+    const finalMessageContent = messageContent || 'Can you analyze this visualization?';
 
     setInput('');
+    setPendingImage(undefined); // Clear pending image after sending
     setIsStreaming(true);
 
     try {
       const { observable, userMessage } = await chatService.sendMessage(
-        messageContent,
-        timeline
+        finalMessageContent,
+        timeline,
+        imageToSend || undefined
       );
 
       // Add user message immediately to timeline
@@ -133,6 +140,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         id: userMessage.id,
         role: 'user',
         content: userMessage.content,
+        imageData: userMessage.imageData, // Include image data in timeline
       };
       setTimeline((prev) => [...prev, timelineUserMessage]);
 
@@ -239,7 +247,15 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setTimeline([]);
     setCurrentRunId(null);
     setIsStreaming(false);
+    setPendingImage(undefined); // Clear pending image on new chat
+    setIsCapturingImage(false); // Clear capturing state on new chat
   }, [chatService]);
+
+  const handleRemoveImage = () => {
+    setPendingImage(undefined);
+  };
+
+
 
   const currentState = service.getCurrentState();
   const enhancedProps = {
@@ -249,7 +265,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   useImperativeHandle(ref, ()=>({
     startNewChat: ()=>handleNewChat(),
-    sendMessage: async ({content})=>(await handleSendRef.current?.({input:content}))
+    sendMessage: async ({content, imageData})=>(await handleSendRef.current?.({input:content, imageData})),
+    setPendingImage: (imageData: string | undefined) => setPendingImage(imageData),
+    setCapturingImage: (isCapturing: boolean) => setIsCapturingImage(isCapturing)
   }), [handleNewChat]);
 
   return (
@@ -270,13 +288,18 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         {...enhancedProps}
       />
 
+
+
       <ChatInput
         layoutMode={layoutMode}
         input={input}
         isStreaming={isStreaming}
+        pendingImage={pendingImage}
+        isCapturingImage={isCapturingImage}
         onInputChange={setInput}
         onSend={handleSend}
         onKeyDown={handleKeyDown}
+        onRemoveImage={handleRemoveImage}
       />
     </ChatContainer>
   );
