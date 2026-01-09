@@ -46,7 +46,6 @@
     "loader-utils": "^2.0.4",
     "sass-embedded": "1.93.3",
     "sass-loader": "16.0.5",
-    "val-loader": "^2.1.2",
-    "webpack": "npm:@amoo-miki/webpack@4.46.0-xxhash.1"
+    "val-loader": "^2.1.2"
   }
 }
