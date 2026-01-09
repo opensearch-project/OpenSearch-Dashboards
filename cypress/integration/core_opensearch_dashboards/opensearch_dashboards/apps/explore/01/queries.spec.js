@@ -72,7 +72,7 @@ const queriesTestSuite = () => {
 
         // Query should persist across refresh
         cy.reload();
-        cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+        cy.osd.waitForLoader(true);
         // Wait for dataset to be fully loaded after reload
         cy.getElementByTestId('datasetSelectButton', { timeout: 30000 })
           .should('be.visible')

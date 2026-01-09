@@ -82,7 +82,6 @@ const modifyAndVerifySavedQuery = (config, saveAsNewQueryName) => {
   cy.explore.updateSavedQuery(`${workspaceName}-${saveAsNewQueryName}`, true, true, true);
 
   cy.reload();
-
   cy.explore.loadSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
   // wait for saved query to load
   cy.getElementByTestId('docTable').should('be.visible');
