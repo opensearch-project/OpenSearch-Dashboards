@@ -81,7 +81,7 @@ export async function saveSavedExplore({
       } else {
         // Update browser title and breadcrumbs
         chrome.docTitle.change(newTitle);
-        chrome.setBreadcrumbs([...getRootBreadcrumbs(), { text: savedExplore.title }]);
+        chrome.setBreadcrumbs([{ text: savedExplore.title }]);
       }
 
       store.dispatch(setSavedSearch(id));
