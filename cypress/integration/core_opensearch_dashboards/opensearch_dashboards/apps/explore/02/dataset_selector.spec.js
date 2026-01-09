@@ -14,6 +14,7 @@ import {
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
 
@@ -24,24 +25,29 @@ import {
   verifyBaseState,
   setUpBaseState,
 } from '../../../../../../utils/apps/explore/dataset_selector';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 export const runDatasetSelectorTests = () => {
   describe('dataset selector', { scrollBehavior: false }, () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        INDEX_PATTERN_WITH_TIME, // Uses 'data_logs_small_time_*'
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
     });
 
     after(() => {

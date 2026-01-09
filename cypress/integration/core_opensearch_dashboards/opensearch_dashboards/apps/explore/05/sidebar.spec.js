@@ -12,14 +12,19 @@ import {
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
 import { getDocTableField } from '../../../../../../utils/apps/explore/doc_table';
 import * as sideBar from '../../../../../../utils/apps/explore/sidebar';
 import { generateSideBarTestConfiguration } from '../../../../../../utils/apps/explore/sidebar';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const sidebarFields = {
   aggregatableFields: {
@@ -210,14 +215,18 @@ export const runSideBarTests = () => {
     };
 
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        `${INDEX_WITH_TIME_1}*`, // Uses index pattern
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
     });
 
     afterEach(() => {
@@ -228,7 +237,7 @@ export const runSideBarTests = () => {
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
     generateAllTestConfigurations(generateSideBarTestConfiguration, {

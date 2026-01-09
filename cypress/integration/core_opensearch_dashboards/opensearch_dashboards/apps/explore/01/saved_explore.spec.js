@@ -5,32 +5,38 @@
 
 import {
   INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
-  INDEX_WITH_TIME_2,
   DATASOURCE_NAME,
   END_TIME,
   START_TIME,
 } from '../../../../../../utils/apps/explore/constants';
-import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
+} from '../../../../../../utils/apps/explore/shared';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 import { verifyMonacoEditorContent } from '../../../../../../utils/apps/explore/autocomplete';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const runSavedExploreTests = () => {
   describe('saved explore', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        INDEX_PATTERN_WITH_TIME,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
+
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
         page: 'explore/logs',
@@ -41,10 +47,7 @@ const runSavedExploreTests = () => {
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
     beforeEach(() => {

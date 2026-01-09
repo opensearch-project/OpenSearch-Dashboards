@@ -166,6 +166,12 @@ export const createOtherQueryUsingAutocomplete = (config) => {
     .wait(1000)
     .within(() => {
       // Handle initial language-specific setup
+      // For PPL, clear any pre-populated template first
+      if (config.language === QueryLanguages.PPL.name) {
+        cy.get('.inputarea').clear({ force: true });
+        cy.wait(200); // Allow editor to process the clear
+      }
+
       langConfig.initialCommands.forEach((command) => {
         if (command.input) {
           typeAndSelectSuggestion(command.input, command.value);
@@ -363,6 +369,12 @@ export const createQuery = (config, useKeyboard = false) => {
     .should('have.class', 'vs')
     .wait(1000)
     .within(() => {
+      // For PPL, clear any pre-populated template first
+      if (config.language === QueryLanguages.PPL.name) {
+        cy.get('.inputarea').clear({ force: true });
+        cy.wait(200); // Allow editor to process the clear
+      }
+
       cy.get('.inputarea').type(' ', { force: true });
       if (config.language === QueryLanguages.PPL.name) {
         selectSuggestion('source', useKeyboard);
