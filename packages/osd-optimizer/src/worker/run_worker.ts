@@ -43,6 +43,7 @@ import {
 } from '../common';
 
 import { runCompilers } from './run_compilers';
+import { sassCompiler } from './webpack.config';
 
 /**
  **
@@ -74,6 +75,8 @@ const send = (msg: WorkerMsg) => {
  * doesn't exit naturally do so forcibly and fail.
  */
 const exit = (code: number) => {
+  // Dispose SASS compilers to allow the process to exit cleanly
+  sassCompiler.dispose();
   process.exitCode = code;
 
   // On Windows, worker processes sometimes don't exit cleanly
