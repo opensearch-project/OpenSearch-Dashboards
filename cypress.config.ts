@@ -85,7 +85,7 @@ function setupNodeEvents(
   webpackOptions!.module!.rules.unshift({
     test: /\.m?js/,
     resolve: {
-      enforceExtension: false,
+      fullySpecified: false,
     },
   });
 
