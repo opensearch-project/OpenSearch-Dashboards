@@ -87,7 +87,7 @@ export function registerQueryAssistRoutes(router: IRouter) {
         ).getAdditionalAgentParameters({
           context,
           request,
-          dataSourceName: request.body.index,
+          index: request.body.index,
           logger,
         });
 

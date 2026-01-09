@@ -10,7 +10,7 @@ import {
 import { RESOURCE_TYPES } from '../../../../common/constants';
 import { LanguageHandler, LanguageHandlerContext } from '../language_handlers';
 
-export interface PrometheusMetadataResult {
+interface PrometheusMetadataResult {
   metrics: string[];
   labels: string[];
   metricMetadata: MetricMetadata;
@@ -19,7 +19,7 @@ export interface PrometheusMetadataResult {
 const getPrometheusMetadata = async (
   handlerContext: LanguageHandlerContext
 ): Promise<PrometheusMetadataResult> => {
-  const { context, request, dataSourceName, logger } = handlerContext;
+  const { context, request, index: dataSourceName, logger } = handlerContext;
 
   try {
     const [labelsResponse, metadataResponse] = await Promise.all([

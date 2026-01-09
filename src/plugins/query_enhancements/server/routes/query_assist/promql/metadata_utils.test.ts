@@ -19,7 +19,7 @@ const mockGetResources = prometheusManager.getResources as jest.Mock;
 const createMockHandlerContext = (): LanguageHandlerContext => ({
   context: {} as any,
   request: {} as any,
-  dataSourceName: 'test-datasource',
+  index: 'my_prometheus',
   logger: {
     error: jest.fn(),
     warn: jest.fn(),
@@ -108,7 +108,7 @@ describe('promqlHandler', () => {
         handlerContext.context,
         handlerContext.request,
         {
-          dataSourceName: 'test-datasource',
+          dataSourceName: 'my_prometheus',
           resourceType: RESOURCE_TYPES.PROMETHEUS.LABELS,
           resourceName: undefined,
           query: {},
@@ -118,7 +118,7 @@ describe('promqlHandler', () => {
         handlerContext.context,
         handlerContext.request,
         {
-          dataSourceName: 'test-datasource',
+          dataSourceName: 'my_prometheus',
           resourceType: RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA,
           resourceName: undefined,
           query: {},

@@ -12,7 +12,7 @@ import { promqlHandler } from './promql/metadata_utils';
 export interface LanguageHandlerContext {
   context: RequestHandlerContext;
   request: OpenSearchDashboardsRequest;
-  dataSourceName: string;
+  index: string;
   logger: Logger;
 }
 
