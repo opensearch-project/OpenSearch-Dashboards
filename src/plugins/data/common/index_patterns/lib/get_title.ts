@@ -47,20 +47,20 @@ export async function getTitle(
     throw new Error(`Unable to get index-pattern title: ${savedObject.error.message}`);
   }
 
+  // Use displayName if available, otherwise fall back to title
+  const displayLabel = savedObject.attributes.displayName || savedObject.attributes.title;
+
   const dataSourceReference = getDataSourceReference(savedObject.references);
 
   if (dataSourceReference) {
     const dataSourceId = dataSourceReference.id;
     if (dataSourceIdToTitle.has(dataSourceId)) {
-      return concatDataSourceWithIndexPattern(
-        dataSourceIdToTitle.get(dataSourceId)!,
-        savedObject.attributes.title
-      );
+      return concatDataSourceWithIndexPattern(dataSourceIdToTitle.get(dataSourceId)!, displayLabel);
     }
   }
 
   const getDataSource = async (id: string) =>
     await client.get<DataSourceAttributes>('data-source', id);
 
-  return getIndexPatternTitle(savedObject.attributes.title, savedObject.references, getDataSource);
+  return getIndexPatternTitle(displayLabel, savedObject.references, getDataSource);
 }
