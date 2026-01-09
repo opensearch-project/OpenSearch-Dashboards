@@ -36,8 +36,11 @@ const runSavedExploreTests = () => {
         page: 'explore/logs',
         isEnhancement: true,
       });
-      // ensure dataset is loaded
-      cy.wait(10000);
+      // Wait for dataset to be fully loaded after navigation
+      cy.getElementByTestId('datasetSelectButton', { timeout: 30000 })
+        .should('be.visible')
+        .should('not.be.disabled');
+      cy.getElementByTestId('discoverNewButton', { timeout: 30000 }).should('be.visible');
     });
 
     after(() => {
@@ -48,7 +51,7 @@ const runSavedExploreTests = () => {
     });
 
     beforeEach(() => {
-      cy.getElementByTestId('discoverNewButton').click();
+      cy.getElementByTestId('discoverNewButton', { timeout: 30000 }).should('be.visible').click();
       cy.osd.waitForLoader(true);
     });
 

@@ -59,28 +59,22 @@ const isEditorEmpty = () => {
     .then((text) => text.trim() === '');
 };
 
-const selectIndexWildcardMode = (indexPattern, appendWildcard = true) => {
-  // Select "Index wildcard" from the scope selector
-  cy.getElementByTestId('index-scope-selector')
-    .should('be.visible')
-    .find('[data-test-subj="comboBoxSearchInput"]')
-    .click()
-    .clear()
-    .type('Index wildcard{enter}');
+const selectIndexWildcardMode = (indexPattern) => {
+  // UI now auto-appends wildcard when typing single character, so just use the pattern as-is
+  const pattern = indexPattern;
 
-  // Wait for the selection to take effect by verifying the text changed
-  cy.getElementByTestId('index-scope-selector')
-    .find('[data-test-subj="comboBoxInput"]')
-    .should('contain.text', 'Index wildcard')
-    .should('be.visible');
-
-  // Enter the pattern with optional wildcard appending
-  const pattern = appendWildcard ? `${indexPattern}*{enter}` : `${indexPattern}{enter}`;
-  cy.getElementByTestId('dataset-prefix-selector', { timeout: 10000 })
+  // Type the pattern into the unified search field
+  cy.getElementByTestId('unified-index-selector-search')
     .should('be.visible')
-    .find('[data-test-subj="multiWildcardPatternInput"]')
+    .click({ force: true })
     .clear()
     .type(pattern);
+
+  // Click the "Add wildcard" button to add the pattern
+  cy.getElementByTestId('unified-index-selector-add-button')
+    .should('be.visible')
+    .should('not.be.disabled')
+    .click();
 };
 
 cy.explore.add('clearQueryEditor', () => {
@@ -291,7 +285,9 @@ cy.explore.add(
 
     // The force is necessary as there is occasionally a popover that covers the button
     cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
-    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+    cy.getElementByTestId('euiToastHeader', { timeout: 30000 })
+      .contains('was saved')
+      .should('be.visible');
   }
 );
 
@@ -329,7 +325,9 @@ cy.explore.add(
 
     // The force is necessary as there is occasionally a popover that covers the button
     cy.getElementByTestId('savedQueryFormSaveButton').click({ force: true });
-    cy.getElementByTestId('euiToastHeader').contains('was saved').should('be.visible');
+    cy.getElementByTestId('euiToastHeader', { timeout: 30000 })
+      .contains('was saved')
+      .should('be.visible');
     cy.osd.waitForSync();
   }
 );
@@ -337,7 +335,11 @@ cy.explore.add(
 cy.explore.add('loadSavedQuery', (name) => {
   cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
 
-  cy.getElementByTestId('saved-query-management-open-button').click();
+  // Wait for the popover to fully render before clicking the open button
+  cy.getElementByTestId('saved-query-management-open-button')
+    .should('be.visible')
+    .should('not.be.disabled')
+    .click();
 
   cy.getElementByTestId('euiFlyoutCloseButton').parent().contains(name).should('exist').click();
   // click button through popover
@@ -355,7 +357,11 @@ cy.explore.add('clearSavedQuery', () => {
 cy.explore.add('deleteSavedQuery', (name) => {
   cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
 
-  cy.getElementByTestId('saved-query-management-open-button').click();
+  // Wait for the popover to fully render before clicking the open button
+  cy.getElementByTestId('saved-query-management-open-button')
+    .should('be.visible')
+    .should('not.be.disabled')
+    .click();
   cy.getElementByTestId('euiFlyoutCloseButton')
     .parent()
     .contains(name)
@@ -405,39 +411,24 @@ cy.explore.add(
       .should('be.visible')
       .should('not.be.disabled')
       .click();
-    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
-    cy.get(`[title="Indexes"]`).click();
+    cy.getElementByTestId(`datasetSelectorAdvancedButton`).should('be.visible').click();
     cy.get(`[title="${dataSourceName}"]`).click();
 
-    // Ensure "Index name" mode is selected (not "Index wildcard")
-    cy.getElementByTestId('index-scope-selector')
+    // Use the unified index selector - type to search and click from results
+    cy.getElementByTestId('unified-index-selector-search')
       .should('be.visible')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
-
-    // Select "Index name" if not already selected
-    cy.get(`[title="Index name"]`).should('be.visible').click({ force: true });
-
-    // Verify selection
-    cy.getElementByTestId('index-scope-selector')
-      .find('[data-test-subj="comboBoxInput"]')
-      .should('contain.text', 'Index name');
-
-    // Click the search field to open the popover (onFocus triggers isPopoverOpen = true)
-    cy.getElementByTestId('index-selector-search')
-      .should('be.visible')
-      .click({ force: true }) // Use click instead of focus to ensure onFocus event fires
+      .click({ force: true })
       .clear()
       .type(index);
 
-    // Wait for the popover to fully render
-    cy.getElementByTestId('index-selector-popover', { timeout: 10000 }).should('be.visible');
+    // Wait for the dropdown to appear with results
+    cy.getElementByTestId('unified-index-selector-dropdown').should('be.visible');
 
-    // Now look for the dataset-index-selector within the popover
-    cy.getElementByTestId('dataset-index-selector', { timeout: 5000 })
+    // Click the matching index from the dropdown list
+    cy.getElementByTestId('unified-index-selector-list')
       .should('be.visible')
       .within(() => {
-        // Look for the index by title attribute in the popover
+        // Find and click the index by its label in the EuiSelectable
         cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
       });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
@@ -505,18 +496,16 @@ cy.explore.add(
       .click();
 
     // Step 3 - Click advanced selector button
-    cy.getElementByTestId(`datasetSelectAdvancedButton`).should('be.visible').click();
+    cy.getElementByTestId(`datasetSelectorAdvancedButton`).should('be.visible').click();
 
-    // Step 4 - Select Indexes
-    cy.get(`[title="Indexes"]`).should('be.visible');
-    cy.get(`[title="Indexes"]`).click();
+    // Step 4 - Indexes panel is now hidden when it's the only option, skip to data source selection
 
     // Step 5 - Select data source
     cy.get(`[title="${dataSourceName}"]`).should('be.visible');
     cy.get(`[title="${dataSourceName}"]`).click();
 
     // Step 6 & 7 - Select index scope (Index wildcard) and enter pattern
-    selectIndexWildcardMode(indexPattern, true);
+    selectIndexWildcardMode(indexPattern);
 
     // Step 8 - Click Next button
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
@@ -669,16 +658,14 @@ cy.explore.add(
       }
     }
 
-    // Step 4 - Select Indexes
-    cy.get(`[title="Indexes"]`).should('be.visible');
-    cy.get(`[title="Indexes"]`).click();
+    // Step 4 - Indexes panel is now hidden when it's the only option, skip to data source selection
 
     // Step 5 - Select data source
     cy.get(`[title="${dataSource}"]`).should('be.visible');
     cy.get(`[title="${dataSource}"]`).click();
 
-    // Step 6 & 7 - Select index scope (Index wildcard) and enter pattern (no wildcard appending)
-    selectIndexWildcardMode(indexPattern, false);
+    // Step 6 & 7 - Select index scope (Index wildcard) and enter pattern
+    selectIndexWildcardMode(indexPattern);
 
     // Step 8 - Click Next button
     cy.getElementByTestId('datasetSelectorNext')
@@ -755,7 +742,7 @@ cy.explore.add(
       .click();
 
     // Step 14 - Wait for dataset creation request and save ID
-    cy.wait('@createDatasetInterception', { timeout: 15000 }).then((interception) => {
+    cy.wait('@createDatasetInterception').then((interception) => {
       // Save the created index pattern ID as an alias
       cy.wrap(interception.response.body.id).as('INDEX_PATTERN_ID');
     });

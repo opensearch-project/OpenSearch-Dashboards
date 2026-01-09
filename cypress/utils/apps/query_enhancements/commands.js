@@ -156,38 +156,31 @@ Cypress.Commands.add(
       .should('not.be.disabled')
       .click();
     cy.getElementByTestId(`datasetSelectorAdvancedButton`).should('be.visible').click();
-    cy.get(`[title="Indexes"]`).click();
+
+    // Click on "Indexes" dataset type if it's visible
+    cy.get('body').then(($body) => {
+      if ($body.find(`[title="Indexes"]`).length > 0) {
+        cy.get(`[title="Indexes"]`).click();
+      }
+    });
+
     cy.get(`[title="${dataSourceName}"]`).click();
 
-    // Ensure "Index name" mode is selected (not "Index wildcard")
-    cy.getElementByTestId('index-scope-selector')
+    // Use the unified index selector - type to search and click from results
+    cy.getElementByTestId('unified-index-selector-search')
       .should('be.visible')
-      .find('[data-test-subj="comboBoxInput"]')
-      .click();
-
-    // Select "Index name" if not already selected
-    cy.get(`[title="Index name"]`).should('be.visible').click({ force: true });
-
-    // Verify selection
-    cy.getElementByTestId('index-scope-selector')
-      .find('[data-test-subj="comboBoxInput"]')
-      .should('contain.text', 'Index name');
-
-    // Click the search field to open the popover (onFocus triggers isPopoverOpen = true)
-    cy.getElementByTestId('index-selector-search')
-      .should('be.visible')
-      .click({ force: true }) // Use click instead of focus to ensure onFocus event fires
+      .click({ force: true })
       .clear()
       .type(index);
 
-    // Wait for the popover to fully render
-    cy.getElementByTestId('index-selector-popover', { timeout: 10000 }).should('be.visible');
+    // Wait for the dropdown to appear with results
+    cy.getElementByTestId('unified-index-selector-dropdown').should('be.visible');
 
-    // Now look for the dataset-index-selector within the popover
-    cy.getElementByTestId('dataset-index-selector', { timeout: 5000 })
+    // Click the matching index from the dropdown list
+    cy.getElementByTestId('unified-index-selector-list')
       .should('be.visible')
       .within(() => {
-        // Look for the index by title attribute in the popover
+        // Find and click the index by its label in the EuiSelectable
         cy.get(`[title="${index}"]`).should('be.visible').click({ force: true });
       });
     cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
@@ -223,6 +216,10 @@ Cypress.Commands.add(
   (indexPattern, dataSourceName, datasetEnabled = false) => {
     const title = datasetEnabled ? indexPattern : `${dataSourceName}::${indexPattern}`;
     cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
+
+    // Wait for dropdown list to appear
+    cy.get('.euiSelectableList').should('be.visible');
+
     cy.get(`[title="${title}"]`).should('be.visible').click();
 
     // verify that it has been selected
@@ -248,7 +245,13 @@ Cypress.Commands.add(
   (indexPattern, dataSourceName, language, finalAction = 'submit') => {
     cy.getElementByTestId('datasetSelectorButton').should('be.visible').click();
     cy.getElementByTestId(`datasetSelectorAdvancedButton`).should('be.visible').click();
-    cy.get(`[title="Index Patterns"]`).click();
+    // Note: If only Index Patterns exist, the type selection will be hidden
+    // Try to click Index Patterns if it exists, otherwise continue
+    cy.get('body').then(($body) => {
+      if ($body.find(`[title="Index Patterns"]`).length > 0) {
+        cy.get(`[title="Index Patterns"]`).click();
+      }
+    });
 
     cy.getElementByTestId('datasetExplorerWindow')
       .find(`[title="${dataSourceName}::${indexPattern}"]`)
