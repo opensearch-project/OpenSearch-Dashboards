@@ -18,7 +18,7 @@ export interface PatternItem {
   count: number;
 }
 
-export const PatternsTable = ({ items }: PatternsTableProps) => {
+const PatternsTableComponent = ({ items }: PatternsTableProps) => {
   const { openPatternsTableFlyout } = usePatternsFlyoutContext();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -39,3 +39,5 @@ export const PatternsTable = ({ items }: PatternsTableProps) => {
     />
   );
 };
+
+export const PatternsTable = React.memo(PatternsTableComponent);

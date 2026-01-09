@@ -1,0 +1,2 @@
+fix:
+- [Explore] Memoize patterns components to fix pagination in tables ([#11069](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11069))
