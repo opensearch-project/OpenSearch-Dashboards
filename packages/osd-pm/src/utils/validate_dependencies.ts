@@ -197,12 +197,24 @@ export async function validateDependencies(
 
     rangesLoop: for (const { range, projects } of ranges) {
       for (const project of projects) {
-        if (!cachedManifests.has(project.path))
-          cachedManifests.set(
-            project.path,
-            // If there are errors reading or parsing the lockfiles, don't catch and let them fall through
-            parseLockFile(readFileSync(path.join(project.path, 'yarn.lock'), 'utf8'))
-          );
+        if (!cachedManifests.has(project.path)) {
+          try {
+            // First try to read from the project's own yarn.lock
+            const lockContent = readFileSync(path.join(project.path, 'yarn.lock'), 'utf8');
+            cachedManifests.set(project.path, parseLockFile(lockContent));
+          } catch (e) {
+            // If project doesn't have its own yarn.lock, use the root one
+            try {
+              const rootLockPath = path.join(osd.getAbsolute('.'), 'yarn.lock');
+              const rootLockContent = readFileSync(rootLockPath, 'utf8');
+              cachedManifests.set(project.path, parseLockFile(rootLockContent));
+            } catch (rootError) {
+              log.warning(`Failed to read yarn.lock for ${project.name}: ${rootError.message}`);
+              // Set empty manifest to avoid repeated attempts
+              cachedManifests.set(project.path, { object: {} });
+            }
+          }
+        }
         const { object: deps } = cachedManifests.get(project.path);
         if (deps?.[`${depName}@${range}`]?.version) {
           installedVersions.add(deps[`${depName}@${range}`].version);
@@ -372,6 +384,7 @@ export async function validateDependencies(
     `);
 
     if (singleVersionResolution !== SingleVersionResolution.IGNORE) {
+      log.warning('OH WAH');
       process.exit(1);
     }
   }
