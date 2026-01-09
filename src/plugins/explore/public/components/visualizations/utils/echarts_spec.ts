@@ -121,9 +121,13 @@ function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time'
 /**
  * Create base configuration (title, tooltip)
  */
-export const createBaseConfig = <T extends BaseChartStyle>({ title }: { title?: string }) => (
-  state: EChartsSpecState<T>
-): EChartsSpecState<T> => {
+export const createBaseConfig = <T extends BaseChartStyle>({
+  title,
+  addTrigger = true,
+}: {
+  title?: string;
+  addTrigger?: boolean;
+}) => (state: EChartsSpecState<T>): EChartsSpecState<T> => {
   const { styles, axisConfig } = state;
 
   const baseConfig = {
@@ -132,7 +136,7 @@ export const createBaseConfig = <T extends BaseChartStyle>({ title }: { title?: 
     },
     tooltip: {
       show: styles.tooltipOptions?.mode !== 'hidden',
-      ...(axisConfig && { trigger: 'axis' }),
+      ...(axisConfig && addTrigger && { trigger: 'axis' }),
       axisPointer: { type: 'shadow' },
     },
     legend: {
@@ -152,9 +156,9 @@ export const createBaseConfig = <T extends BaseChartStyle>({ title }: { title?: 
 export const buildAxisConfigs = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { axisConfig, transformedData = [] } = state;
+  const { axisConfig, transformedData = [], axisColumnMappings } = state;
 
-  const hasFacet = Array.isArray(transformedData[0]?.[0]);
+  const hasFacet = Array.isArray(transformedData[0]?.[0]) && axisColumnMappings.facet !== undefined;
 
   const getConfig = (
     axis: VisColumn | undefined,
@@ -199,22 +203,32 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
 export const assembleSpec = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { baseConfig, transformedData = [], xAxisConfig, yAxisConfig, series, visualMap } = state;
+  const {
+    baseConfig,
+    transformedData = [],
+    xAxisConfig,
+    yAxisConfig,
+    series,
+    visualMap,
+    axisColumnMappings,
+  } = state;
 
-  const hasFacet = Array.isArray(transformedData[0]?.[0]);
+  const hasMultiDatasets = Array.isArray(transformedData[0]?.[0]);
+  const hasFacet = hasMultiDatasets && axisColumnMappings.facet !== undefined;
 
-  const data = hasFacet
+  // Multi-datasets case (faceted or state-timeline)
+  const data = hasMultiDatasets
     ? transformedData.map((facetData: any) => ({ source: facetData }))
     : { source: transformedData };
 
   const facetNumber = transformedData.length;
 
   let grid;
-  if (!hasFacet || facetNumber <= 1) grid = { top: 60, bottom: 60, left: 60, right: 60 };
+  if (!hasFacet || facetNumber <= 1) grid = { top: '5%', left: '5%', right: '5%' };
   else {
     const cols = Math.ceil(facetNumber / 2); // always in two rows
     const colWidth = 90 / cols;
-    const rowHeight = 39; // slighly smaller to make legend fit
+    const rowHeight = 39; // slightly smaller to make legend fit
 
     grid = Array.from({ length: facetNumber }).map((_, i) => {
       const row = Math.floor(i / cols);
@@ -259,6 +273,7 @@ export const applyAxisStyling = ({
     name: axisStyle?.title?.text || '',
     nameLocation: 'middle',
     nameGap: 35,
+    axisLine: { show: true },
   };
 
   // Apply axis visibility

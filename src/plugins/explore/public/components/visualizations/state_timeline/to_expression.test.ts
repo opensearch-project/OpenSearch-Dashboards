@@ -26,43 +26,18 @@ jest.mock('../utils/utils', () => ({
     yAxisStyle: { title: { text: 'Category' } },
   })),
   applyAxisStyling: jest.fn(),
+  getChartRender: jest.fn(),
 }));
 
 jest.mock('./state_timeline_utils', () => ({
-  mergeNumericalData: jest.fn(() => [
-    [
-      {
-        timestamp: '2023-01-01',
-        category: 'A',
-        mergedLabel: '[200,400)',
-        start: '2023-01-01',
-        end: '2023-01-02',
-      },
-    ],
-    [{ range: { min: 0, max: 1000 }, color: '#ff0000' }],
-  ]),
-  mergeCategoricalData: jest.fn(() => [
-    [
-      {
-        timestamp: '2023-01-01',
-        category: 'A',
-        category2: 'true',
-        start: '2023-01-01',
-        end: '2023-01-02',
-      },
-    ],
-    [{ value: 'A', color: '#ff0000' }],
-  ]),
-  mergeSingleCategoricalData: jest.fn(() => [
-    [
-      {
-        timestamp: '2023-01-01',
-        category: 'A',
-        start: '2023-01-01',
-        end: '2023-01-02',
-      },
-    ],
-    [{ value: 'A', color: '#ff0000' }],
+  mergeDataCore: jest.fn(() => () => [
+    {
+      timestamp: '2023-01-01',
+      category: 'A',
+      mergedLabel: 'mergedLabel',
+      start: '2023-01-01',
+      end: '2023-01-02',
+    },
   ]),
   convertThresholdsToValueMappings: jest.fn(),
 }));
@@ -114,7 +89,7 @@ const mockTimeColumns: VisColumn[] = [
   },
 ];
 
-const mockStyleOptions = defaultStateTimeLineChartStyles;
+const mockStyleOptions = { ...defaultStateTimeLineChartStyles, useValueMappingColor: true };
 
 describe('to_expression', () => {
   describe('createNumericalStateTimeline', () => {
@@ -140,7 +115,7 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('data.values', [
         {
           timestamp: '2023-01-01',
-          mergedLabel: '[200,400)',
+          mergedLabel: 'mergedLabel',
           start: '2023-01-01',
           end: '2023-01-02',
           category: 'A',
@@ -177,7 +152,7 @@ describe('to_expression', () => {
         mockNumericalColumns,
         mockCateColumns,
         mockTimeColumns,
-        mockStyleOptions,
+        { ...mockStyleOptions, useValueMappingColor: false },
         mockAxisColumnMappings
       );
 
@@ -186,10 +161,10 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('data.values', [
         {
           timestamp: '2023-01-01',
+          mergedLabel: 'mergedLabel',
           start: '2023-01-01',
           end: '2023-01-02',
           category: 'A',
-          category2: 'true',
         },
       ]);
       expect(result).toHaveProperty('layer');
@@ -208,7 +183,7 @@ describe('to_expression', () => {
 
       expect(markLayer).toHaveProperty('encoding.y.field', 'category');
       expect(markLayer).toHaveProperty('encoding.y.type', 'nominal');
-      expect(markLayer).toHaveProperty('encoding.color.field', 'mappingValue');
+      expect(markLayer).toHaveProperty('encoding.color.field', 'v1');
     });
 
     it('includes text layer when showValues is true', () => {
@@ -260,10 +235,10 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('data.values', [
         {
           timestamp: '2023-01-01',
-          category: 'A',
-          category2: 'true',
+          mergedLabel: 'mergedLabel',
           start: '2023-01-01',
           end: '2023-01-02',
+          category: 'A',
         },
       ]);
       expect(result).toHaveProperty('layer');
@@ -323,9 +298,10 @@ describe('to_expression', () => {
       expect(result).toHaveProperty('data.values', [
         {
           timestamp: '2023-01-01',
-          category: 'A',
+          mergedLabel: 'mergedLabel',
           start: '2023-01-01',
           end: '2023-01-02',
+          category: 'A',
         },
       ]);
       expect(result).toHaveProperty('layer');
