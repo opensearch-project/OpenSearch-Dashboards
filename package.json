@@ -333,7 +333,7 @@
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/makelogs": "^6.1.0",
     "@faker-js/faker": "^7.6.0",
-    "@lhci/cli": "^0.14.0",
+    "@lhci/cli": "^0.15.0",
     "@microsoft/api-documenter": "^7.13.78",
     "@microsoft/api-extractor": "^7.19.3",
     "@osd/babel-preset": "1.0.0",
