@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "3.5.0",
+  "version": "3.4.0",
   "branch": "main",
   "types": "./opensearch_dashboards.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -119,7 +119,7 @@
     "url": "https://github.com/opensearch-project/opensearch-dashboards.git"
   },
   "resolutions": {
-    "**/@storybook/**/webpack": "npm:@amoo-miki/webpack@4.46.0-xxhash.1",
+    "**/@storybook/**/webpack": "^5.104.1",
     "**/@storybook/**/micromatch": "^4.0.8",
     "**/@lhci/**/lighthouse": "^12.3.0",
     "**/browserify-rsa": "^4.1.1",
