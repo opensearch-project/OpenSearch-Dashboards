@@ -232,7 +232,9 @@ export class Server {
       loggingSystem: this.loggingSystem,
     });
 
-    const securitySetup = this.security.setup();
+    const securitySetup = this.security.setup({
+      http: httpSetup,
+    });
 
     this.coreUsageData.setup({ metrics: metricsSetup });
 
