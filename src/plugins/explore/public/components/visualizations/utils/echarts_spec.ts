@@ -121,9 +121,13 @@ function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time'
 /**
  * Create base configuration (title, tooltip)
  */
-export const createBaseConfig = <T extends BaseChartStyle>({ title }: { title?: string }) => (
-  state: EChartsSpecState<T>
-): EChartsSpecState<T> => {
+export const createBaseConfig = <T extends BaseChartStyle>({
+  title,
+  addTrigger = true,
+}: {
+  title?: string;
+  addTrigger?: boolean;
+}) => (state: EChartsSpecState<T>): EChartsSpecState<T> => {
   const { styles, axisConfig } = state;
 
   const baseConfig = {
@@ -132,7 +136,7 @@ export const createBaseConfig = <T extends BaseChartStyle>({ title }: { title?: 
     },
     tooltip: {
       show: styles.tooltipOptions?.mode !== 'hidden',
-      ...(axisConfig && { trigger: 'axis' }),
+      ...(axisConfig && addTrigger && { trigger: 'axis' }),
       axisPointer: { type: 'shadow' },
     },
     legend: {

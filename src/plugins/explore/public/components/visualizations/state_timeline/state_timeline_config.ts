@@ -46,7 +46,7 @@ export interface StateTimeLineChartStyleOptions {
   useThresholdColor?: boolean;
   thresholdOptions?: ThresholdOptions;
 
-  // Temporarily add this feature to make a switch between No style, Use Value Mapping Color, Use Threshold Color
+  // add this feature to make a switch between No style, Use Value Mapping Color, Use Threshold Color
   useValueMappingColor?: boolean;
 }
 

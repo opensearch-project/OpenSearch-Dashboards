@@ -145,7 +145,7 @@ export const mergeDataCore = ({
   const mergedMappings = [...valueMappings, ...rangeMappings];
 
   const findMatch = (value: string) => {
-    if (!useThresholdColor && !useValueMappingColor) return value;
+    if (!useThresholdColor && !useValueMappingColor) return String(value);
     return mergedMappings.find((v) => {
       if (v.type === 'range') {
         const numberValue = Number(value);
@@ -480,12 +480,14 @@ export const createStateTimeLineSpec = <T extends BaseChartStyle>({
   styles: StateTimeLineChartStyle;
   groupField?: string;
 }): PipelineFn<T> => (state) => {
-  const { transformedData, yAxisConfig, baseConfig } = state;
+  const { transformedData, yAxisConfig } = state;
   const newState = { ...state };
-
-  delete baseConfig.tooltip.trigger;
   const mergeLabelCombo: Array<{ label: any; color: any; displayText: any }> = [];
 
+  // Transform data into serval datasets based on color mapping
+  // Structure: [{ source: [headers, ...dataRows] }, { source: [headers, ...dataRows] }, ...]
+  // Headers: [originalFields..., "start", "end", "mergedCount", "duration", "mergedColor", "mergedLabel", "displayText"]
+  // Get mergedLabel/mergedColor/displayText combination for styling
   transformedData?.forEach((row) => {
     const mergeLabelIndex = row[0].indexOf('mergedLabel');
     const mergedColorIndex = row[0].indexOf('mergedColor');

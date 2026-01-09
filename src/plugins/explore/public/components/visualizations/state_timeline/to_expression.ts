@@ -23,15 +23,9 @@ import { DEFAULT_OPACITY } from '../constants';
 import { getCategoryNextColor } from '../theme/color_utils';
 import { resolveColor } from '../theme/color_utils';
 import { pipe, createBaseConfig, buildAxisConfigs, assembleSpec } from '../utils/echarts_spec';
-import {
-  convertTo2DArray,
-  transform,
-  filter,
-  selectColumns,
-  sortByTime,
-} from '../utils/data_transformation';
+import { convertTo2DArray, transform, map, pick, sortByTime } from '../utils/data_transformation';
 
-const prepareAssets = (styleOptions: StateTimeLineChartStyle) => {
+const normalizeConfig = (styleOptions: StateTimeLineChartStyle) => {
   const valueMappings = styleOptions?.valueMappingOptions?.valueMappings?.filter(
     (mapping) => mapping?.type === 'value'
   );
@@ -74,7 +68,7 @@ export const createNumericalStateTimeline = (
     if (!groupField || !timeField || !categoryField2)
       throw Error('Missing field config for state-timeline chart');
 
-    const { valueMappings, rangeMappings, disconnectThreshold, connectThreshold } = prepareAssets(
+    const { valueMappings, rangeMappings, disconnectThreshold, connectThreshold } = normalizeConfig(
       styleOptions
     );
 
@@ -89,7 +83,7 @@ export const createNumericalStateTimeline = (
 
     const result = pipe(
       transform(
-        filter(selectColumns(allColumns)),
+        map(pick(allColumns)),
         sortByTime(axisColumnMappings?.x?.column),
         mergeDataCore({
           timestampField: timeField,
@@ -106,6 +100,7 @@ export const createNumericalStateTimeline = (
       ),
       createBaseConfig({
         title: `${colorMapping?.name} by ${axisConfig.yAxis?.name} and ${axisConfig.xAxis?.name}`,
+        addTrigger: false,
       }),
       buildAxisConfigs,
       createStateTimeLineSpec({ styles: styleOptions, groupField }),
@@ -320,13 +315,13 @@ export const createCategoricalStateTimeline = (
     if (!groupField || !timeField || !categoryField2)
       throw Error('Missing field config for state-timeline chart');
 
-    const { valueMappings, disconnectThreshold, connectThreshold } = prepareAssets(styleOptions);
+    const { valueMappings, disconnectThreshold, connectThreshold } = normalizeConfig(styleOptions);
 
     const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
 
     const result = pipe(
       transform(
-        filter(selectColumns(allColumns)),
+        map(pick(allColumns)),
         sortByTime(axisColumnMappings?.x?.column),
         mergeDataCore({
           timestampField: timeField,
@@ -342,6 +337,7 @@ export const createCategoricalStateTimeline = (
       ),
       createBaseConfig({
         title: `${colorMapping?.name} by ${axisConfig.yAxis?.name} and ${axisConfig.xAxis?.name}`,
+        addTrigger: false,
       }),
       buildAxisConfigs,
       createStateTimeLineSpec({ styles: styleOptions, groupField }),
@@ -365,7 +361,7 @@ export const createCategoricalStateTimeline = (
   const categoryField2 = colorMapping?.column;
   const categoryName2 = colorMapping?.name;
 
-  const { valueMappings, disconnectThreshold, connectThreshold } = prepareAssets(styleOptions);
+  const { valueMappings, disconnectThreshold, connectThreshold } = normalizeConfig(styleOptions);
   const processedData = mergeDataCore({
     timestampField: xAxis?.column,
     groupField: yAxis?.column,
@@ -545,13 +541,13 @@ export const createSingleCategoricalStateTimeline = (
     if (!timeField || !categoryField)
       throw Error('Missing field config for single state-timeline chart');
 
-    const { valueMappings, disconnectThreshold, connectThreshold } = prepareAssets(styleOptions);
+    const { valueMappings, disconnectThreshold, connectThreshold } = normalizeConfig(styleOptions);
 
     const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
 
     const result = pipe(
       transform(
-        filter(selectColumns(allColumns)),
+        map(pick(allColumns)),
         sortByTime(axisColumnMappings?.x?.column),
         mergeDataCore({
           timestampField: timeField,
@@ -567,6 +563,7 @@ export const createSingleCategoricalStateTimeline = (
       ),
       createBaseConfig({
         title: ` ${colorMapping?.name}  by ${axisConfig.xAxis?.name}`,
+        addTrigger: false,
       }),
       buildAxisConfigs,
       createStateTimeLineSpec({ styles: styleOptions, groupField: undefined }),
@@ -588,7 +585,7 @@ export const createSingleCategoricalStateTimeline = (
   const categoryField = colorMapping?.column;
   const categoryName = colorMapping?.name;
 
-  const { valueMappings, disconnectThreshold, connectThreshold } = prepareAssets(styleOptions);
+  const { valueMappings, disconnectThreshold, connectThreshold } = normalizeConfig(styleOptions);
 
   const processedData = mergeDataCore({
     timestampField: xAxis?.column,
@@ -775,7 +772,7 @@ export const createSingleNumericalStateTimeline = (
     if (!timeField || !categoryField)
       throw Error('Missing field config for single state-timeline chart');
 
-    const { valueMappings, rangeMappings, disconnectThreshold, connectThreshold } = prepareAssets(
+    const { valueMappings, rangeMappings, disconnectThreshold, connectThreshold } = normalizeConfig(
       styleOptions
     );
     const completeThreshold = [
@@ -789,7 +786,7 @@ export const createSingleNumericalStateTimeline = (
 
     const result = pipe(
       transform(
-        filter(selectColumns(allColumns)),
+        map(pick(allColumns)),
         sortByTime(axisColumnMappings?.x?.column),
         mergeDataCore({
           timestampField: timeField,
@@ -806,6 +803,7 @@ export const createSingleNumericalStateTimeline = (
       ),
       createBaseConfig({
         title: ` ${colorMapping?.name}  by ${axisConfig.xAxis?.name}`,
+        addTrigger: false,
       }),
       buildAxisConfigs,
       createStateTimeLineSpec({ styles: styleOptions, groupField: undefined }),
@@ -830,7 +828,7 @@ export const createSingleNumericalStateTimeline = (
   const categoryField = colorMapping?.column;
   const categoryName = colorMapping?.name;
 
-  const { valueMappings, rangeMappings, disconnectThreshold, connectThreshold } = prepareAssets(
+  const { valueMappings, rangeMappings, disconnectThreshold, connectThreshold } = normalizeConfig(
     styleOptions
   );
   const completeThreshold = [

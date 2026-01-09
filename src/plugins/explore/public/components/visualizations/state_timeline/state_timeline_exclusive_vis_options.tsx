@@ -89,7 +89,7 @@ export const StateTimeLineExclusiveVisOptions = ({
         />
       </EuiFormRow>
 
-      {/* Temporarily add this toggle to make a switch between No style, Use Value Mapping Color, Use Threshold Color */}
+      {/* add this toggle to make a switch between No style, Use Value Mapping Color, Use Threshold Color */}
       <EuiFormRow>
         <EuiSwitch
           compressed

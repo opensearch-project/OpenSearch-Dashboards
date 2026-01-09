@@ -17,4 +17,4 @@ export { aggregateValues } from './utils/aggregation';
 export { roundToTimeUnit } from './utils/time';
 export { normalizeEmptyValue } from './utils/normalization';
 
-export { filter, selectColumns } from './filter';
+export { map, pick } from './filter';
