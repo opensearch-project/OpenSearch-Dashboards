@@ -8,7 +8,7 @@ import {
   MetricMetadata,
 } from '../../../connections/managers/prometheus_manager';
 import { RESOURCE_TYPES } from '../../../../common/constants';
-import { LanguageHandler, LanguageHandlerContext } from '../language_handlers';
+import type { LanguageHandler, LanguageHandlerContext } from '../language_handlers';
 
 interface PrometheusMetadataResult {
   metrics: string[];

@@ -121,6 +121,9 @@ export function registerQueryAssistRoutes(router: IRouter) {
               selectedTimeField: request.body.timeField,
               client,
               logger,
+              // For non-OpenSearch data sources (e.g., Prometheus), skip mapping lookup
+              getTimestampFieldClustersFn:
+                request.body.language === 'promql' ? async () => [] : undefined,
             });
 
             // Call the time range parser agent with the retrieved fields
