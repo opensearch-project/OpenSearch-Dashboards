@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CustomSeriesOption, LineSeriesOption } from 'echarts';
+import { CustomSeriesOption, EChartsOption, LineSeriesOption } from 'echarts';
 import { BaseChartStyle, EChartsSpecState, PipelineFn } from '../utils/echarts_spec';
 import { getSeriesDisplayName } from '../utils/series';
 import { MetricChartStyle } from './metric_vis_config';
@@ -46,7 +46,7 @@ export const createMetricChartSeries = ({
   styles: MetricChartStyle;
   dateField?: string;
 }): PipelineFn => (state) => {
-  const { transformedData = [], axisColumnMappings, data } = state;
+  const { transformedData = [], axisColumnMappings } = state;
   const newState = { ...state };
 
   // If date field is set, it will a display sparkline
@@ -54,10 +54,17 @@ export const createMetricChartSeries = ({
 
   const series: Array<LineSeriesOption | CustomSeriesOption> = [];
   seriesFields.forEach((item: string) => {
-    const name = getSeriesDisplayName(item, Object.values(axisColumnMappings));
+    if (!transformedData.length || !Array.isArray(transformedData[0])) {
+      // No dataset/header row available; keep rendering stable.
+      return;
+    }
+
+    const seriesDisplayName = getSeriesDisplayName(item, Object.values(axisColumnMappings));
 
     const numericalValues: number[] = [];
     const seriesIndex = transformedData[0].indexOf(item);
+    if (seriesIndex < 0) return;
+
     for (let i = 1; i < transformedData.length; i++) {
       numericalValues.push(transformedData[i][seriesIndex]);
     }
@@ -111,7 +118,7 @@ export const createMetricChartSeries = ({
 
     if (dateField) {
       series.push({
-        name,
+        name: seriesDisplayName,
         type: 'line' as const,
         z: 1,
         encode: {
@@ -150,7 +157,7 @@ export const createMetricChartSeries = ({
               style: {
                 x: 0,
                 y: 0,
-                text: styles.showTitle ? styles.title || item : '',
+                text: styles.showTitle ? styles.title || seriesDisplayName : '',
                 fontSize: titleFontSize,
                 fontWeight: 'normal',
                 fill: colorPalette.text,
@@ -191,6 +198,9 @@ export const createMetricChartSeries = ({
 };
 
 export const assembleForMetric = <T extends BaseChartStyle>(state: EChartsSpecState<T>) => {
+  const hideAxis = (axis: EChartsOption['xAxis'] | EChartsOption['yAxis']) =>
+    Array.isArray(axis) ? axis.map((a) => ({ ...a, show: false })) : { ...axis, show: false };
+
   const spec = {
     ...state.spec,
     grid: {
@@ -199,14 +209,8 @@ export const assembleForMetric = <T extends BaseChartStyle>(state: EChartsSpecSt
       top: '50%',
       bottom: 0,
     },
-    xAxis: {
-      ...state.spec?.xAxis,
-      show: false,
-    },
-    yAxis: {
-      ...state.spec?.yAxis,
-      show: false,
-    },
+    xAxis: hideAxis(state.spec?.xAxis),
+    yAxis: hideAxis(state.spec?.yAxis),
     tooltip: {
       ...state.spec?.tooltip,
       show: false,

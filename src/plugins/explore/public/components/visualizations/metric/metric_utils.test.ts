@@ -440,7 +440,7 @@ describe('metric_utils', () => {
 
         expect(renderResult.children[0].style.fontSize).toBe(24); // titleSize
         expect(renderResult.children[1].style.fontSize).toBe(80); // fontSize
-        expect(renderResult.children[2].style.fontSize).toBe(16); // percentageSize (actually uses percentageColor in code, but tests the intent)
+        expect(renderResult.children[2].style.fontSize).toBe(16); // percentageSize
       });
 
       it('should position elements correctly', () => {

@@ -66,6 +66,7 @@ export const createSingleMetric = (
       axisConfig: { xAxis: dateColumn, yAxis: valueColumn },
       axisColumnMappings: axisColumnMappings ?? {},
     });
+    console.log(result.spec);
     return result.spec;
   }
 
