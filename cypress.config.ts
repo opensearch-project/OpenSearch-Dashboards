@@ -74,6 +74,11 @@ function setupNodeEvents(
 ): Cypress.PluginConfigOptions {
   const { webpackOptions } = webpackPreprocessor.defaultOptions;
 
+  // Fix: Error: Webpack Compilation Error
+  // Module not found: Error: Can't resolve 'path'
+  webpackOptions!.plugins = webpackOptions!.plugins || [];
+  webpackOptions!.plugins.push(new (require('node-polyfill-webpack-plugin'))());
+
   /**
    * By default, cypress' internal webpack preprocessor doesn't allow imports without file extensions.
    * This makes our life a bit hard since if any file in our testing dependency graph has an import without
@@ -85,7 +90,7 @@ function setupNodeEvents(
   webpackOptions!.module!.rules.unshift({
     test: /\.m?js/,
     resolve: {
-      enforceExtension: false,
+      fullySpecified: false,
     },
   });
 

@@ -1,0 +1,2 @@
+refactor:
+- Migrate OSD build from Webpack4 to Rspack ([#11102](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11102))

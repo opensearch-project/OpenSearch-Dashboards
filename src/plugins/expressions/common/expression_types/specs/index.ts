@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { boolean } from './boolean';
+import { boolean as booleanType } from './boolean';
 import { datatable } from './datatable';
 import { error } from './error';
 import { filter } from './filter';
@@ -47,7 +47,7 @@ import { style } from './style';
 import { AnyExpressionTypeDefinition } from '../types';
 
 export const typeSpecs: AnyExpressionTypeDefinition[] = [
-  boolean,
+  booleanType,
   datatable,
   error,
   filter,
