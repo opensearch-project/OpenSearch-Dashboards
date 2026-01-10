@@ -89,7 +89,13 @@ describe('CreateExtension', () => {
     summary: { enabled: false, branding: { label: '' } },
   };
 
-  it('should be enabled if at least one language is configured and AI features enabled', async () => {
+  it('should be enabled if current language matches configured language and AI features enabled', async () => {
+    const mockQueryWithPPL = {
+      ...mockQueryWithIndexPattern,
+      language: 'PPL',
+    };
+    queryStringMock.getQuery.mockReturnValue(mockQueryWithPPL);
+    queryStringMock.getUpdates$.mockReturnValue(of(mockQueryWithPPL));
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
     const extension = createQueryAssistExtension(
       coreSetupMock,

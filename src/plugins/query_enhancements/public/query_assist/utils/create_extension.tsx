@@ -8,7 +8,7 @@ import { ENABLE_AI_FEATURES, HttpSetup } from 'opensearch-dashboards/public';
 import React, { useCallback, useEffect, useState } from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { useObservable } from 'react-use';
-import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, map, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 import { DATA_STRUCTURE_META_TYPES, DEFAULT_DATA } from '../../../../data/common';
 import {
   DataPublicPluginSetup,
@@ -22,7 +22,7 @@ import { QueryAssistBanner, QueryAssistBar, QueryAssistSummary } from '../compon
 import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { QueryAssistContext, QueryAssistState } from '../hooks/use_query_assist';
 import { CoreSetup } from '../../../../../core/public';
-import { isPPLSupportedType } from './language_support';
+import { isPPLSupportedType, isPromQLSupportedType } from './language_support';
 
 const [getAvailableLanguagesForDataSource, clearCache] = (() => {
   const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
@@ -78,10 +78,12 @@ const getAvailableLanguages$ = (http: HttpSetup, data: DataPublicPluginSetup) =>
     switchMap(async (query) => {
       // currently query assist tool relies on opensearch API to get index
       // mappings, external data source types (e.g. s3) are not supported
+      // but Prometheus datasets are supported for PromQL query assist
       if (
         query.dataset?.dataSource?.type !== DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH && // datasource is MDS OpenSearch
         query.dataset?.dataSource?.type !== 'DATA_SOURCE' && // datasource is MDS OpenSearch when using indexes
-        !isPPLSupportedType(query.dataset?.type)
+        !isPPLSupportedType(query.dataset?.type) &&
+        !isPromQLSupportedType(query.dataset?.type)
       )
         return [];
 
@@ -134,7 +136,16 @@ export const createQueryAssistExtension = (
     },
     isEnabled$: () =>
       getAvailableLanguages$(http, data).pipe(
-        map((languages) => languages.length > 0 && assistantEnabled$.value)
+        withLatestFrom(
+          data.query.queryString.getUpdates$().pipe(
+            startWith(data.query.queryString.getQuery()),
+            map((query) => query.language)
+          )
+        ),
+        map(
+          ([availableLanguages, currentLanguage]) =>
+            availableLanguages.includes(currentLanguage) && assistantEnabled$.value
+        )
       ),
     getComponent: (dependencies) => {
       // only show the component if user is on a supported language.

@@ -398,6 +398,33 @@ describe('callAgentActionCreator', () => {
       (mockServices.http.post as jest.Mock).mockResolvedValue({ query: 'test query' });
     });
 
+    it('should use PromQL language for PROMETHEUS dataset type', async () => {
+      (mockServices.data.query.queryString.getQuery as jest.Mock).mockReturnValue({
+        dataset: {
+          title: 'prometheus-metrics',
+          type: 'PROMETHEUS',
+          dataSource: { id: 'prometheus-datasource' },
+          timeFieldName: 'timestamp',
+        },
+      });
+
+      const thunk = callAgentActionCreator({
+        services: mockServices,
+        editorText: testEditorText,
+      });
+
+      await thunk(mockDispatch, jest.fn(), undefined);
+
+      const callArgs = (mockServices.http.post as jest.Mock).mock.calls[0];
+      const bodyData = JSON.parse(callArgs[1].body);
+
+      expect(callArgs[0]).toBe('/api/enhancements/assist/generate');
+      expect(bodyData.question).toBe(testEditorText);
+      expect(bodyData.index).toBe('prometheus-metrics');
+      expect(bodyData.language).toBe('PROMQL');
+      expect(bodyData.dataSourceId).toBe('prometheus-datasource');
+    });
+
     it('should handle dataset without dataSource', async () => {
       (mockServices.data.query.queryString.getQuery as jest.Mock).mockReturnValue({
         dataset: {
