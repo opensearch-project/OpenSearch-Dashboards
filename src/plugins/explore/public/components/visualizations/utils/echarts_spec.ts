@@ -10,6 +10,7 @@ import {
   EChartsOption,
   XAXisComponentOption,
   YAXisComponentOption,
+  PieSeriesOption,
 } from 'echarts';
 import {
   AggregationType,
@@ -22,7 +23,7 @@ import {
   Threshold,
   ThresholdOptions,
 } from '../types';
-import { getSwappedAxisRole, convertThresholds } from './utils';
+import { convertThresholds } from './utils';
 
 /**
  * Base style interface that all chart styles should extend
@@ -44,6 +45,7 @@ export interface BaseChartStyle {
   thresholdOptions?: ThresholdOptions;
   useThresholdColor?: boolean;
   addLegend?: boolean;
+  legendPosition?: Positions;
 }
 
 /**
@@ -62,7 +64,7 @@ export interface EChartsAxisConfig {
 export interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
   data: Array<Record<string, any>>;
   styles: T;
-  axisConfig: EChartsAxisConfig;
+  axisConfig?: EChartsAxisConfig;
   axisColumnMappings: AxisColumnMappings;
 }
 
@@ -77,10 +79,8 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   baseConfig?: any;
   xAxisConfig?: any;
   yAxisConfig?: any;
-  series?: Array<BarSeriesOption | LineSeriesOption | CustomSeriesOption>;
+  series?: Array<BarSeriesOption | LineSeriesOption | CustomSeriesOption | PieSeriesOption>;
   visualMap?: any;
-  grid?: any;
-
   // Final output
   spec?: EChartsOption;
 }
@@ -121,27 +121,26 @@ function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time'
 /**
  * Create base configuration (title, tooltip)
  */
-export const createBaseConfig = <T extends BaseChartStyle>(
+export const createBaseConfig = <T extends BaseChartStyle>({ title }: { title?: string }) => (
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
   const { styles, axisConfig } = state;
 
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before createBaseConfig');
-  }
-
   const baseConfig = {
     title: {
-      text: styles.titleOptions?.show
-        ? styles.titleOptions?.titleName || `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}`
-        : undefined,
+      text: styles.titleOptions?.show ? styles.titleOptions?.titleName || title : undefined,
     },
     tooltip: {
       show: styles.tooltipOptions?.mode !== 'hidden',
-      trigger: 'axis',
+      ...(axisConfig && { trigger: 'axis' }),
       axisPointer: { type: 'shadow' },
     },
-    legend: {},
+    legend: {
+      ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
+        ? { orient: 'vertical' }
+        : {}),
+      [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%', // distance between legend and the corresponding orientation edge side of the container
+    },
   };
 
   return { ...state, baseConfig };
@@ -153,21 +152,43 @@ export const createBaseConfig = <T extends BaseChartStyle>(
 export const buildAxisConfigs = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { axisConfig } = state;
+  const { axisConfig, transformedData = [] } = state;
+
+  const hasFacet = Array.isArray(transformedData[0]?.[0]);
+
+  const getConfig = (
+    axis: VisColumn | undefined,
+    axisStyle: StandardAxes | undefined,
+    gridNumber?: number
+  ) => {
+    return {
+      type: getAxisType(axis),
+      ...applyAxisStyling({ axisStyle }),
+      ...(hasFacet && { gridIndex: gridNumber }),
+    };
+  };
 
   if (!axisConfig) {
     throw new Error('axisConfig must be derived before buildAxisConfigs');
   }
 
-  const xAxisConfig = {
-    type: getAxisType(axisConfig.xAxis),
-    ...applyAxisStyling({ axisStyle: axisConfig.xAxisStyle }),
-  };
+  let xAxisConfig;
+  let yAxisConfig;
 
-  const yAxisConfig = {
-    type: getAxisType(axisConfig.yAxis),
-    ...applyAxisStyling({ axisStyle: axisConfig.yAxisStyle }),
-  };
+  if (hasFacet) {
+    // each grids needs an axis config
+    xAxisConfig = transformedData.map((_: any, index: number) => {
+      return getConfig(axisConfig.xAxis, axisConfig.xAxisStyle, index);
+    });
+
+    yAxisConfig = transformedData.map((_: any, index: number) => {
+      return getConfig(axisConfig.yAxis, axisConfig.yAxisStyle, index);
+    });
+  } else {
+    xAxisConfig = getConfig(axisConfig.xAxis, axisConfig.xAxisStyle);
+
+    yAxisConfig = getConfig(axisConfig.yAxis, axisConfig.yAxisStyle);
+  }
 
   return { ...state, xAxisConfig, yAxisConfig };
 };
@@ -179,15 +200,44 @@ export const assembleSpec = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
   const { baseConfig, transformedData = [], xAxisConfig, yAxisConfig, series, visualMap } = state;
-  const source = transformedData[transformedData.length - 1];
+
+  const hasFacet = Array.isArray(transformedData[0]?.[0]);
+
+  const data = hasFacet
+    ? transformedData.map((facetData: any) => ({ source: facetData }))
+    : { source: transformedData };
+
+  const facetNumber = transformedData.length;
+
+  let grid;
+  if (!hasFacet || facetNumber <= 1) grid = { top: 60, bottom: 60, left: 60, right: 60 };
+  else {
+    const cols = Math.ceil(facetNumber / 2); // always in two rows
+    const colWidth = 90 / cols;
+    const rowHeight = 39; // slighly smaller to make legend fit
+
+    grid = Array.from({ length: facetNumber }).map((_, i) => {
+      const row = Math.floor(i / cols);
+      const col = i % cols;
+      return {
+        left: `${5 + col * colWidth}%`,
+        width: `${colWidth - 2}%`,
+        top: `${5 + row * (rowHeight + 10)}%`,
+        height: `${rowHeight}%`,
+        containLabel: true,
+      };
+    });
+  }
 
   const spec = {
     ...baseConfig,
-    dataset: { source },
+    dataset: data,
+
     xAxis: xAxisConfig,
     yAxis: yAxisConfig,
     visualMap,
     series,
+    grid,
   };
 
   return { ...state, spec };
@@ -258,14 +308,11 @@ export const applyAxisStyling = ({
 export const buildVisMap = ({
   seriesFields,
 }: {
-  seriesFields: string[] | ((headers?: string[]) => string[]);
+  seriesFields: (headers?: string[]) => string[];
 }) => (state: EChartsSpecState) => {
   const { styles, transformedData = [] } = state;
-  const source = transformedData[transformedData?.length - 1];
 
-  if (!Array.isArray(seriesFields)) {
-    seriesFields = seriesFields(source[0]);
-  }
+  const hasFacet = Array.isArray(transformedData[0]?.[0]);
 
   if (!styles.useThresholdColor) return state;
 
@@ -284,16 +331,39 @@ export const buildVisMap = ({
     color: t.color,
   }));
 
-  const visualMap = seriesFields.map((c: string, index: number) => {
-    const originalIndex = source[0]?.indexOf(c);
-    return {
-      type: 'piecewise',
-      show: false,
-      seriesIndex: index,
-      dimension: originalIndex,
-      pieces,
-    };
-  });
+  let visualMap;
+  if (hasFacet) {
+    let seriesIndexCounter = 0;
+    const facetVis = transformedData.map((seriesData: any[], index: number) => {
+      const header = seriesData[0];
+      const cateColumns = seriesFields(header);
+      return cateColumns.map((c: string) => {
+        const originalIndex = header?.indexOf(c);
+        return {
+          datasetIndex: index,
+          gridIndex: index,
+          type: 'piecewise',
+          show: false,
+          seriesIndex: seriesIndexCounter++,
+          dimension: originalIndex,
+          pieces,
+        };
+      });
+    });
+
+    visualMap = facetVis.flat();
+  } else {
+    visualMap = seriesFields(transformedData[0]).map((c: string, index: number) => {
+      const originalIndex = transformedData[0]?.indexOf(c);
+      return {
+        type: 'piecewise',
+        show: false,
+        seriesIndex: index,
+        dimension: originalIndex,
+        pieces,
+      };
+    });
+  }
 
   return {
     ...state,

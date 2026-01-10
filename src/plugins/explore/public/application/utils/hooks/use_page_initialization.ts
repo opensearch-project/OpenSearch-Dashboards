@@ -50,7 +50,11 @@ export const useInitPage = () => {
         if (searchSourceFields?.searchSourceJSON) {
           const searchSource = JSON.parse(searchSourceFields.searchSourceJSON);
           const queryFromSavedSearch = searchSource.query;
-          const query = { ...queryFromSavedSearch, ...queryFromUrl };
+          const query = {
+            ...queryFromSavedSearch,
+            ...queryFromUrl,
+            query: queryFromUrl.query || queryFromSavedSearch.query,
+          };
           if (query) {
             dispatch(setQueryState(query));
             setEditorText(query.query);
