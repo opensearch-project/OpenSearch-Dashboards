@@ -125,9 +125,7 @@ export const createMetricChartSeries = ({
 
     series.push({
       type: 'custom',
-      encode: {
-        x: dateField,
-      },
+      ...(dateField && { encode: { x: dateField } }),
       z: 10,
       renderItem(params, api) {
         const width = api.getWidth();
@@ -140,7 +138,7 @@ export const createMetricChartSeries = ({
         const valueFontSize = styles.fontSize
           ? styles.fontSize
           : 5 * textSize * (selectedUnit?.fontScale ?? 1);
-        const changeFontSize = styles.percentageSize ? styles.percentageColor : 2 * textSize;
+        const changeFontSize = styles.percentageSize ? styles.percentageSize : 2 * textSize;
 
         return {
           type: 'group',
