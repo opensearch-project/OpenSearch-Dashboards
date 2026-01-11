@@ -5,11 +5,14 @@
 
 import { MetricChartStyle } from './metric_vis_config';
 import { VisColumn, VEGASCHEMA, AxisRole, AxisColumnMappings, Threshold } from '../types';
-import { getTooltipFormat } from '../utils/utils';
+import { getChartRender, getTooltipFormat } from '../utils/utils';
 import { calculatePercentage, calculateValue } from '../utils/calculation';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { DEFAULT_OPACITY } from '../constants';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
+import { assembleSpec, buildAxisConfigs, createBaseConfig, pipe } from '../utils/echarts_spec';
+import { convertTo2DArray, transform } from '../utils/data_transformation';
+import { assembleForMetric, createMetricChartSeries } from './metric_utils';
 
 export const createSingleMetric = (
   transformedData: Array<Record<string, any>>,
@@ -38,6 +41,32 @@ export const createSingleMetric = (
 
   if (numericField) {
     numericalValues = transformedData.map((d) => d[numericField]);
+  }
+
+  if (getChartRender() === 'echarts') {
+    if (!numericField) {
+      throw Error('Missing value for metric chart');
+    }
+
+    // Echarts implementation here
+    const result = pipe(
+      transform(convertTo2DArray()),
+      createBaseConfig({ title: '' }),
+      buildAxisConfigs,
+      createMetricChartSeries({
+        styles,
+        dateField,
+        seriesFields: [numericField],
+      }),
+      assembleSpec,
+      assembleForMetric
+    )({
+      data: transformedData,
+      styles,
+      axisConfig: { xAxis: dateColumn, yAxis: valueColumn },
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+    return result.spec;
   }
 
   const calculatedValue = calculateValue(numericalValues, styles.valueCalculation);
