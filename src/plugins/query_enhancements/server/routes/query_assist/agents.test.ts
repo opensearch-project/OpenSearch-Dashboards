@@ -9,6 +9,7 @@ import { loggerMock } from '@osd/logging/target/mocks';
 import { RequestHandlerContext } from 'src/core/server';
 import { coreMock } from '../../../../../core/server/mocks';
 import { getAgentIdByConfig, requestAgentByConfig } from './agents';
+import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
 
 describe('Agents helper functions', () => {
   const coreContext = coreMock.createRequestHandlerContext();
@@ -132,5 +133,29 @@ describe('Agents helper functions', () => {
       expect.anything()
     );
     expect(response.body.inference_results[0].output[0].result).toEqual('test response');
+  });
+
+  it('should able to detect serverless data source and treat config name as agent id', async () => {
+    context.core.savedObjects.client.get = jest.fn().mockResolvedValue({
+      attributes: {
+        dataSourceEngineType: DataSourceEngineType.OpenSearchServerless,
+      },
+    });
+
+    await requestAgentByConfig({
+      context,
+      configName: 'new_agent',
+      body: { parameters: { param1: 'value1' } },
+      dataSourceId: 'test-datasource-id',
+    });
+
+    mockedTransport.mockResolvedValueOnce({
+      body: { inference_results: [{ output: [{ result: 'test response' }] }] },
+    });
+
+    expect(mockedTransport).toBeCalledWith(
+      expect.objectContaining({ path: '/_plugins/_ml/agents/new_agent/_execute' }),
+      expect.anything()
+    );
   });
 });
