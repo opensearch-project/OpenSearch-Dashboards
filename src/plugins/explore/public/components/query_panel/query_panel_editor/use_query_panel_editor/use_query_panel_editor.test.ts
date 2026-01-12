@@ -83,6 +83,12 @@ jest.mock('@osd/monaco', () => ({
       },
     },
     Range: jest.fn(),
+    Position: jest.fn((lineNumber: number, column: number) => ({ lineNumber, column })),
+    editor: {
+      TrackedRangeStickiness: {
+        NeverGrowsWhenTypingAtEdges: 1,
+      },
+    },
   },
 }));
 
@@ -134,6 +140,7 @@ describe('useQueryPanelEditor', () => {
       onDidBlurEditorText: jest.fn(() => ({ dispose: jest.fn() })),
       onDidFocusEditorWidget: jest.fn(() => ({ dispose: jest.fn() })),
       onDidContentSizeChange: jest.fn(),
+      onDidChangeModelContent: jest.fn(() => ({ dispose: jest.fn() })),
       addAction: jest.fn(),
       trigger: jest.fn(),
       focus: jest.fn(),
@@ -144,10 +151,11 @@ describe('useQueryPanelEditor', () => {
       getOffsetAt: jest.fn(() => 10),
       getValue: jest.fn(() => 'test query'),
       getWordUntilPosition: jest.fn(() => ({ startColumn: 1, endColumn: 5 })),
-      getModel: jest.fn(() => ({ getLineCount: jest.fn() })),
+      getModel: jest.fn(() => ({ getLineCount: jest.fn(), getValue: jest.fn(() => '') })),
       revealLine: jest.fn(),
       getPosition: jest.fn(() => ({ lineNumber: 1 })),
       getVisibleRanges: jest.fn(() => [{ startLineNumber: 1, endLineNumber: 10 }]),
+      createDecorationsCollection: jest.fn(() => ({ clear: jest.fn(), set: jest.fn() })),
     };
 
     mockDataset = {
