@@ -298,8 +298,8 @@ describe('promqlSearchStrategy', () => {
       expect(instantRows[1].mode).toBe('idle');
     });
 
-    it('should respect MAX_SERIES limit', async () => {
-      // Create more than MAX_SERIES (100) series
+    it('should respect MAX_SERIES_VIZ limit for visualization and MAX_SERIES_TABLE for table', async () => {
+      // Create 150 series - more than MAX_SERIES_VIZ (100) but less than MAX_SERIES_TABLE (2000)
       const resultSeries = Array.from({ length: 150 }, (_, i) => ({
         metric: { series: `series-${i}` },
         values: [[1638316800, i]],
@@ -336,10 +336,10 @@ describe('promqlSearchStrategy', () => {
         {}
       );
 
-      // Should only process MAX_SERIES (100) series
+      // Visualization data (fields) should be limited to MAX_SERIES_VIZ (100)
       expect(resultData.body.size).toBe(100);
       const instantRows = resultData.body.meta?.instantData.rows;
-      expect(instantRows.length).toBe(100);
+      expect(instantRows.length).toBe(150);
     });
   });
 

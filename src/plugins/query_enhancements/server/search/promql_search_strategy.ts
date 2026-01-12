@@ -24,9 +24,12 @@ import {
 
 // This creates an upper bound for data points sent to the frontend (targetSamples * maxSeries)
 const AUTO_STEP_TARGET_SAMPLES = 50;
-const MAX_SERIES = 100;
+// MAX_SERIES_TABLE: Maximum series for table display
+const MAX_SERIES_TABLE = 2000;
+// MAX_SERIES_VIZ: Maximum series for visualization. This should be lower than MAX_SERIES_TABLE
+const MAX_SERIES_VIZ = 100;
 // We'll want to re-evaluate this when we provide an affordance for step configuration
-const MAX_DATAPOINTS = AUTO_STEP_TARGET_SAMPLES * MAX_SERIES;
+const MAX_DATAPOINTS = AUTO_STEP_TARGET_SAMPLES * MAX_SERIES_TABLE;
 
 /**
  * Result from executing a single query in a multi-query context
@@ -191,6 +194,7 @@ function createDataFrame(
   const allVizRows: Array<Record<string, unknown>> = [];
   const allLabelKeys = new Set<string>();
 
+  // instantDataMap is used for table display, we only show the latest datapoint in the table.
   const instantDataMap = new Map<
     string,
     {
@@ -209,7 +213,7 @@ function createDataFrame(
     const series = result.response.results[datasetId]?.result || [];
 
     series.forEach((metricResult, i) => {
-      if (i >= MAX_SERIES) return;
+      if (i >= MAX_SERIES_TABLE) return;
       if (metricResult.metric) {
         Object.keys(metricResult.metric).forEach((key) => {
           if (key !== '__name__') {
@@ -228,7 +232,7 @@ function createDataFrame(
     const series = result.response.results[datasetId]?.result || [];
 
     series.forEach((metricResult, seriesIndex) => {
-      if (seriesIndex >= MAX_SERIES) return;
+      if (seriesIndex >= MAX_SERIES_TABLE) return;
 
       const metricName = metricResult.metric.__name__ || '';
 
@@ -258,15 +262,18 @@ function createDataFrame(
           existing.valuesByQuery[result.label] = Number(value);
         }
 
-        const formattedLabels = formatMetricLabels(metricResult.metric);
+        if (seriesIndex < MAX_SERIES_VIZ) {
+          const formattedLabels = formatMetricLabels(metricResult.metric);
+          const seriesName = isSingleQuery
+            ? formattedLabels
+            : `${result.label}: ${formattedLabels}`;
 
-        const seriesName = isSingleQuery ? formattedLabels : `${result.label}: ${formattedLabels}`;
-
-        allVizRows.push({
-          Time: timeMs,
-          Series: seriesName,
-          Value: Number(value),
-        });
+          allVizRows.push({
+            Time: timeMs,
+            Series: seriesName,
+            Value: Number(value),
+          });
+        }
       });
     });
   });
