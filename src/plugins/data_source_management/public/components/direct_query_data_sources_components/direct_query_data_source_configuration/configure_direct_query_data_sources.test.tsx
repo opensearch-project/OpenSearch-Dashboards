@@ -79,7 +79,7 @@ describe('ConfigureDirectQueryDataSourceWithRouter', () => {
   const mockMatch = { params: { type: 'AmazonS3AWSGlue' }, isExact: true, path: '', url: '' };
   const mockHistory = createMemoryHistory();
 
-  const mountComponent = (type: string, featureFlagStatus: boolean = false) => {
+  const mountComponent = (type: string) => {
     mockUseParams.mockReturnValue({ type });
     return mount(
       <DirectQueryDataSourceConfigure
@@ -88,7 +88,6 @@ describe('ConfigureDirectQueryDataSourceWithRouter', () => {
         location={mockLocation}
         match={{ ...mockMatch, params: { type } }}
         useNewUX={false}
-        featureFlagStatus={featureFlagStatus}
       />
     );
   };

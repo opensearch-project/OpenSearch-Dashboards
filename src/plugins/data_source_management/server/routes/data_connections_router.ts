@@ -367,7 +367,6 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
           type: 'data-connection',
           search: request.params.name,
           searchFields: ['connectionId'],
-          ...(dataSourceMDSId && { hasReference: { id: dataSourceMDSId, type: 'data-source' } }),
         });
 
         if (savedObjects.total > 0) {

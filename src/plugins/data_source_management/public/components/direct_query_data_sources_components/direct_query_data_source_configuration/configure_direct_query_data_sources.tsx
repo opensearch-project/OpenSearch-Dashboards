@@ -32,13 +32,11 @@ import { DATACONNECTIONS_BASE } from '../../../constants';
 interface ConfigureDatasourceProps extends RouteComponentProps {
   notifications: NotificationsStart;
   useNewUX: boolean;
-  featureFlagStatus: boolean;
 }
 
 export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({
   notifications,
   useNewUX,
-  featureFlagStatus,
   history,
 }) => {
   const { type: urlType } = useParams<{ type: string }>();

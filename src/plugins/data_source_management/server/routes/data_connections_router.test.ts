@@ -239,7 +239,6 @@ describe('data_connections_router', () => {
         type: 'data-connection',
         search: 'test-prometheus',
         searchFields: ['connectionId'],
-        hasReference: { id: 'test-datasource-id', type: 'data-source' },
       });
 
       expect(mockContext.core.savedObjects.client.delete).toHaveBeenCalledWith(
