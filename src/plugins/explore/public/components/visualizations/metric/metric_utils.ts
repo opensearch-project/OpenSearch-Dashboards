@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CustomSeriesOption, EChartsOption, LineSeriesOption } from 'echarts';
+import { CustomSeriesOption, LineSeriesOption } from 'echarts';
 import { BaseChartStyle, EChartsSpecState, PipelineFn } from '../utils/echarts_spec';
 import { getSeriesDisplayName } from '../utils/series';
 import { MetricChartStyle } from './metric_vis_config';
@@ -29,7 +29,7 @@ function targetFillColor(
 
   for (let i = 0; i < newThreshold.length; i++) {
     const { value, color } = newThreshold[i];
-    if (calculatedValue !== undefined && calculatedValue >= value) textColor = color;
+    if (calculatedValue >= value) textColor = color;
   }
 
   const fillColor = useThresholdColor ? textColor : colorPalette.text;
