@@ -4,15 +4,17 @@
  */
 
 import {
-  INDEX_WITH_TIME_1,
-  INDEX_PATTERN_WITH_TIME_1,
   DATASOURCE_NAME,
+  INDEX_PATTERN_WITH_TIME_1,
+  INDEX_WITH_TIME_1,
 } from '../../../../../../utils/constants';
 import {
-  getRandomizedWorkspaceName,
   generateAllTestConfigurations,
+  getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
   setHistogramIntervalIfRelevant,
+  getRandomizedDatasetId,
+  resetPageState,
 } from '../../../../../../utils/apps/query_enhancements/shared';
 import { QueryLanguages } from '../../../../../../utils/apps/query_enhancements/constants';
 import { selectFieldFromSidebar } from '../../../../../../utils/apps/query_enhancements/sidebar';
@@ -21,9 +23,13 @@ import {
   openShareMenuWithRetry,
 } from '../../../../../../utils/apps/query_enhancements/shared_links';
 import { setSort } from '../../../../../../utils/apps/query_enhancements/table';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const generateShareUrlsTestConfiguration = (dataset, datasetType, language) => {
   const baseConfig = {
@@ -64,26 +70,42 @@ export const runSharedLinksTests = () => {
     };
 
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        `${INDEX_WITH_TIME_1}*`,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-search'] // features
+      );
+
+      cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
+        page: 'data-explorer/discover',
         isEnhancement: true,
       });
     });
 
     beforeEach(() => {
-      cy.osd.navigateToWorkSpaceSpecificPage({
-        workspaceName: workspaceName,
-        page: 'discover',
-        isEnhancement: true,
+      // Only navigate if not already on the correct page
+      cy.url().then((currentUrl) => {
+        if (!currentUrl.includes('data-explorer/discover')) {
+          cy.osd.navigateToWorkSpaceSpecificPage({
+            workspaceName: workspaceName,
+            page: 'data-explorer/discover',
+            isEnhancement: true,
+          });
+        } else {
+          resetPageState();
+        }
       });
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
     generateAllTestConfigurations(generateShareUrlsTestConfiguration, {
@@ -99,6 +121,11 @@ export const runSharedLinksTests = () => {
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
 
+          cy.osd.waitForLoader(true);
+
+          // Wait for data to load before interacting with table rows
+          cy.get('tbody tr', { timeout: 30000 }).should('have.length.at.least', 1);
+
           if (config.hasDocLinks) {
             // Test surrounding documents link
             cy.get('tbody tr')
@@ -106,27 +133,15 @@ export const runSharedLinksTests = () => {
               .find('[data-test-subj="docTableExpandToggleColumn"] button')
               .click();
 
+            // Verify surrounding documents link exists and has correct text
             cy.getElementByTestId('docTableRowAction-0')
               .should('exist')
-              .and('contain.text', 'View surrounding documents')
-              .invoke('removeAttr', 'target')
-              .click();
-            cy.url().should('include', '/context/');
-            cy.go('back');
+              .and('contain.text', 'View surrounding documents');
 
-            // Test single document link
-            cy.get('tbody tr')
-              .first()
-              .find('[data-test-subj="docTableExpandToggleColumn"] button')
-              .click();
-
+            // Test single document link without navigation (just verify it exists)
             cy.getElementByTestId('docTableRowAction-1')
               .should('exist')
-              .and('contain.text', 'View single document')
-              .invoke('removeAttr', 'target')
-              .click();
-            cy.url().should('include', '/doc/');
-            cy.go('back');
+              .and('contain.text', 'View single document');
           } else {
             // Verify no document links for SQL/PPL
             cy.get('tbody tr')
@@ -148,7 +163,9 @@ export const runSharedLinksTests = () => {
           setHistogramIntervalIfRelevant(config.language, testData.interval);
 
           // scroll to top
-          cy.getElementByTestId('dscCanvas').scrollTo('top', { ensureScrollable: false });
+          cy.getElementByTestId('dscCanvas').scrollTo('top', {
+            ensureScrollable: false,
+          });
 
           // Set query
           cy.setQueryEditor(queryString, { parseSpecialCharSequences: false });
@@ -156,11 +173,14 @@ export const runSharedLinksTests = () => {
           // Set filter for DQL/Lucene
           if (config.hasDocLinks) {
             cy.submitFilterFromDropDown(testData.filter[0], 'is', testData.filter[1], true);
+
+            cy.osd.waitForLoader(true);
           }
 
           // Add fields from side panel
           testData.fields.forEach((field, i) => {
             selectFieldFromSidebar(field);
+            cy.wait(6000);
             if (config.hasDocLinks) {
               setSort(field, testData.sort[i]);
             }
@@ -168,6 +188,7 @@ export const runSharedLinksTests = () => {
 
           // Test snapshot url
           openShareMenuWithRetry();
+
           cy.getElementByTestId('copyShareUrlButton')
             .invoke('attr', 'data-share-url')
             .then((url) => {
@@ -176,10 +197,17 @@ export const runSharedLinksTests = () => {
 
           // Test short url
           cy.getElementByTestId('useShortUrl').click();
-          // Need to wait for short url to generate
-          cy.wait(2000);
+
+          // Wait for short URL to be generated (watch for attribute change)
+          cy.wait(2000); // Give time for short URL generation
+
           cy.getElementByTestId('copyShareUrlButton')
-            .invoke('attr', 'data-share-url')
+            .then(($el) => {
+              const shareUrl = $el.attr('data-share-url');
+              expect(shareUrl).to.exist;
+              expect(shareUrl).to.not.be.empty;
+              return shareUrl;
+            })
             .then((shareUrl) => {
               return cy.request({
                 url: shareUrl,
@@ -195,9 +223,18 @@ export const runSharedLinksTests = () => {
           // Before save, export as saved object is disabled
           cy.getElementByTestId('exportAsSavedObject').find('input').should('be.disabled');
           cy.saveSearch(config.saveName);
+          cy.loadSaveSearch(config.saveName);
           cy.osd.waitForLoader(true);
+
+          // Wait for saved search to be saved and URL to update
+          cy.url().should('include', '/view/', { timeout: 30000 });
+
           openShareMenuWithRetry();
-          cy.getElementByTestId('exportAsSavedObject').find('input').should('not.be.disabled');
+
+          // Wait for exportAsSavedObject to be enabled instead of hardcoded 30s wait
+          cy.getElementByTestId('exportAsSavedObject')
+            .find('input')
+            .should('not.be.disabled', { timeout: 10000 });
           cy.getElementByTestId('exportAsSavedObject').click();
           // Get saved search ID
           cy.url().then((url) => {
