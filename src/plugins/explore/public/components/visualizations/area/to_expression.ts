@@ -35,6 +35,7 @@ import {
   createFacetAreaSeries,
   createCategoryAreaSeries,
   createStackAreaSeries,
+  replaceNullWithZero,
 } from './area_chart_utils';
 import {
   convertTo2DArray,
@@ -42,6 +43,7 @@ import {
   sortByTime,
   pivot,
   facetTransform,
+  aggregate,
 } from '../utils/data_transformation';
 
 /**
@@ -72,7 +74,7 @@ export const createSimpleAreaChart = (
 
     const result = pipe(
       transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
-      createBaseConfig,
+      createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time` }),
       buildAxisConfigs,
       createAreaSeries({
         styles,
@@ -240,12 +242,17 @@ export const createMultiAreaChart = (
           groupBy: timeField,
           pivot: colorField,
           field: valueField,
-          timeUnit: TimeUnit.MINUTE,
+          timeUnit: TimeUnit.SECOND,
           aggregationType: AggregationType.SUM,
         }),
+        (data) => replaceNullWithZero(data, [timeField]),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: `${axisConfig.yAxis?.name} Over Time by ${
+          axisColumnMappings?.[AxisRole.COLOR]?.name
+        }`,
+      }),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
@@ -400,6 +407,8 @@ export const createMultiAreaChart = (
  * @param dateColumns The date columns
  * @param styles The style options
  * @returns The Vega spec for a faceted multi-area chart
+ *
+ * TODO: Improve chart styling and visual layout for better appearance
  */
 export const createFacetedMultiAreaChart = (
   transformedData: Array<Record<string, any>>,
@@ -430,10 +439,17 @@ export const createFacetedMultiAreaChart = (
           groupBy: timeField,
           pivot: colorField,
           field: valueField,
+          timeUnit: TimeUnit.SECOND,
+          aggregationType: AggregationType.SUM,
         }),
+        (data) => replaceNullWithZero(data, [timeField]),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: `${axisConfig.yAxis?.name} Over Time by ${
+          axisColumnMappings?.[AxisRole.COLOR]?.name
+        } (Faceted by ${axisColumnMappings?.[AxisRole.FACET]?.name})`,
+      }),
       buildAxisConfigs,
       createFacetAreaSeries({
         styles,
@@ -636,8 +652,15 @@ export const createCategoryAreaChart = (
     const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
 
     const result = pipe(
-      transform(convertTo2DArray(allColumns)),
-      createBaseConfig,
+      transform(
+        aggregate({
+          groupBy: categoryField,
+          field: valueField,
+          aggregationType: AggregationType.SUM,
+        }),
+        convertTo2DArray(allColumns)
+      ),
+      createBaseConfig({ title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}` }),
       buildAxisConfigs,
       createCategoryAreaSeries({
         styles,
@@ -782,9 +805,12 @@ export const createStackedAreaChart = (
           field: valueField,
           aggregationType: AggregationType.SUM,
         }),
+        (data) => replaceNullWithZero(data, [categoryField]),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: `${axisColumnMappings?.y?.name} by ${axisColumnMappings?.x?.name} and ${colorMapping.name}`,
+      }),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),

@@ -17,6 +17,27 @@ import { AreaChartStyle } from './area_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 
+/**
+ * Helper function to convert null values to 0 for stacked area charts
+ * @param data - Array of data objects
+ * @param excludeFields - Fields to exclude from null replacement (e.g., time fields, category fields)
+ * @returns Array with null values replaced by 0
+ */
+export const replaceNullWithZero = (
+  data: Array<Record<string, any>>,
+  excludeFields: string[] = []
+): Array<Record<string, any>> => {
+  return data.map((row) => {
+    const newRow = { ...row };
+    Object.keys(newRow).forEach((key) => {
+      if (!excludeFields.includes(key) && (newRow[key] === null || newRow[key] === undefined)) {
+        newRow[key] = 0;
+      }
+    });
+    return newRow;
+  });
+};
+
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
     return TimeUnit.DATE;
@@ -235,6 +256,7 @@ export const createFacetAreaSeries = <T extends BaseChartStyle>({
     return cateColumns.map((item: string) => ({
       name: String(item),
       type: 'line' as const,
+      stack: `Total_${index}` as const, // Use unique stack name for each facet
       connectNulls: true,
       areaStyle: {
         opacity: styles.areaOpacity || 0.3,
@@ -271,30 +293,17 @@ export const createCategoryAreaSeries = <T extends BaseChartStyle>({
   categoryField: string;
   valueField: string;
 }): PipelineFn<T> => (state) => {
-  const { data, axisColumnMappings } = state;
+  const { transformedData, axisColumnMappings } = state;
   const newState = { ...state };
 
-  if (!data || !Array.isArray(data) || data.length === 0) {
-    throw new Error('data must be an array with data rows');
+  if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
+    throw new Error('transformedData must be an array with data rows');
   }
 
-  const categoryMap = new Map<string, number>();
-  data.forEach((row) => {
-    const category = String(row[categoryField] || '');
-    const value = Number(row[valueField]) || 0;
-    const currentValue = categoryMap.get(category) || 0;
-    categoryMap.set(category, currentValue + value);
-  });
-
-  const aggregatedData = Array.from(categoryMap.entries());
-
+  // Data is already aggregated, just use it directly
   (newState as any).dataset = [
     {
-      dimensions: [categoryField, valueField],
-      source: aggregatedData.map(([x, y]) => ({
-        [categoryField]: x,
-        [valueField]: y,
-      })),
+      source: transformedData,
     },
   ];
 
