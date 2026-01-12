@@ -3,19 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  StandardAxes,
-  VisFieldType,
-  VisColumn,
-  TimeUnit,
-  AggregationType,
-  AxisRole,
-} from '../types';
-import { applyAxisStyling, getSchemaByAxis } from '../utils/utils';
+import { LineSeriesOption } from 'echarts';
+import { TimeUnit, AxisRole } from '../types';
 import { getSeriesDisplayName } from '../utils/series';
 import { AreaChartStyle } from './area_vis_config';
-import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
+import { generateThresholdLines } from '../utils/utils';
 
 /**
  * Helper function to convert null values to 0 for stacked area charts
@@ -38,36 +31,6 @@ export const replaceNullWithZero = (
   });
 };
 
-export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
-  if (!data || data.length === 0 || !field) {
-    return TimeUnit.DATE;
-  }
-
-  const timestamps = data
-    .map((row) => new Date(row[field]).getTime())
-    .filter((t) => !isNaN(t))
-    .sort((a, b) => a - b);
-
-  const last = timestamps[timestamps.length - 1];
-  const first = timestamps[0];
-  const minDiff = last - first;
-
-  const interval = minDiff / 30;
-
-  const second = 1000;
-  const minute = 60 * second;
-  const hour = 60 * minute;
-  const day = 24 * hour;
-  const month = 30 * day;
-
-  if (interval <= second) return TimeUnit.SECOND;
-  if (interval <= minute) return TimeUnit.MINUTE;
-  if (interval <= hour) return TimeUnit.HOUR;
-  if (interval <= day) return TimeUnit.DATE;
-  if (interval <= month) return TimeUnit.MONTH;
-  return TimeUnit.YEAR;
-};
-
 export const transformIntervalsToTickCount = (interval: TimeUnit | undefined) => {
   switch (interval) {
     case TimeUnit.YEAR:
@@ -85,109 +48,6 @@ export const transformIntervalsToTickCount = (interval: TimeUnit | undefined) =>
     default:
       return 'day';
   }
-};
-
-export const buildEncoding = (
-  axis: VisColumn | undefined,
-  axisStyle: StandardAxes | undefined,
-  interval: TimeUnit | undefined,
-  aggregationType?: AggregationType | undefined
-) => {
-  const defaultAxisTitle = '';
-  const encoding: any = {
-    field: axis?.column,
-    type: getSchemaByAxis(axis),
-    axis: applyAxisStyling({ axis, axisStyle, defaultAxisTitle }),
-  };
-
-  if (axis?.schema === VisFieldType.Date && interval) {
-    encoding.timeUnit = interval;
-    encoding.axis.tickCount = transformIntervalsToTickCount(interval);
-  }
-
-  if (axis?.schema === VisFieldType.Numerical && aggregationType) {
-    encoding.aggregate = aggregationType;
-  }
-
-  return encoding;
-};
-
-export const buildTooltipEncoding = (
-  axis: VisColumn | undefined,
-  axisStyle: StandardAxes | undefined,
-  interval: TimeUnit | undefined,
-  aggregationType?: AggregationType | undefined
-) => {
-  const encoding: any = {
-    field: axis?.column,
-    type: getSchemaByAxis(axis),
-    title: axisStyle?.title?.text || axis?.name,
-  };
-
-  if (axis?.schema === VisFieldType.Date && interval) {
-    encoding.timeUnit = interval;
-  }
-
-  if (axis?.schema === VisFieldType.Numerical && aggregationType) {
-    encoding.aggregate = aggregationType;
-    encoding.title = axisStyle?.title?.text || `${axis?.name}(${aggregationType})`;
-  }
-  return encoding;
-};
-
-export const buildThresholdColorEncoding = (
-  numericalField: VisColumn | undefined,
-  styleOptions: Partial<AreaChartStyle>
-) => {
-  // support old thresholdLines config to be compatible with new thresholds
-
-  const activeThresholds = styleOptions?.thresholdOptions?.thresholds ?? [];
-
-  const thresholdWithBase = [
-    { value: 0, color: styleOptions?.thresholdOptions?.baseColor ?? getColors().statusGreen },
-    ...activeThresholds,
-  ];
-
-  const colorDomain = thresholdWithBase.reduce<number[]>((acc, val) => [...acc, val.value], []);
-
-  const colorRange = thresholdWithBase.reduce<string[]>((acc, val) => [...acc, val.color], []);
-
-  // exclusive for single numerical bucket area
-  if (!numericalField)
-    return {
-      aggregate: AggregationType.COUNT,
-      type: 'quantitative',
-      scale: {
-        type: 'threshold',
-        domain: colorDomain,
-        // require one more color for values below the first threshold(base)
-        range: [DEFAULT_GREY, ...colorRange],
-      },
-      legend: styleOptions.addLegend
-        ? {
-            orient: styleOptions.legendPosition?.toLowerCase() || 'right',
-            title: 'Thresholds',
-          }
-        : null,
-    };
-
-  const colorLayer = {
-    field: numericalField?.column,
-    type: 'quantitative',
-    scale: {
-      type: 'threshold',
-      domain: colorDomain,
-      range: [DEFAULT_GREY, ...colorRange],
-    },
-    legend: styleOptions.addLegend
-      ? {
-          orient: styleOptions.legendPosition?.toLowerCase() || 'right',
-          title: 'Thresholds',
-        }
-      : null,
-  };
-
-  return colorLayer;
 };
 
 /**
@@ -209,12 +69,13 @@ export const createAreaSeries = <T extends BaseChartStyle>({
     seriesFields = seriesFields(transformedData[0]);
   }
 
-  const series = seriesFields?.map((item: string) => {
+  const thresholdLines = generateThresholdLines(styles.thresholdOptions);
+  const series = seriesFields?.map((item: string, index: number) => {
     const name = getSeriesDisplayName(item, Object.values(axisColumnMappings));
 
     return {
       name,
-      type: 'line' as const,
+      type: 'line',
       connectNulls: true,
       areaStyle: {
         opacity: styles.areaOpacity || 0.3,
@@ -225,12 +86,13 @@ export const createAreaSeries = <T extends BaseChartStyle>({
         y: item,
       },
       emphasis: {
-        focus: 'self' as const,
+        focus: 'self',
       },
+      ...(index === 0 && thresholdLines),
     };
   });
 
-  newState.series = series;
+  newState.series = series as LineSeriesOption[];
 
   return newState;
 };
@@ -249,14 +111,15 @@ export const createFacetAreaSeries = <T extends BaseChartStyle>({
 }): PipelineFn<T> => (state) => {
   const { transformedData } = state;
   const newState = { ...state };
+  const thresholdLines = generateThresholdLines(styles.thresholdOptions);
 
   const allSeries = transformedData?.map((seriesData: any[], index: number) => {
     const header = seriesData[0];
     const cateColumns = seriesFields(header);
-    return cateColumns.map((item: string) => ({
+    return cateColumns.map((item: string, seriesIndex: number) => ({
       name: String(item),
-      type: 'line' as const,
-      stack: `Total_${index}` as const, // Use unique stack name for each facet
+      type: 'line',
+      stack: `Total_${index}`, // Use unique stack name for each facet
       connectNulls: true,
       areaStyle: {
         opacity: styles.areaOpacity || 0.3,
@@ -271,12 +134,13 @@ export const createFacetAreaSeries = <T extends BaseChartStyle>({
       xAxisIndex: index,
       yAxisIndex: index,
       emphasis: {
-        focus: 'self' as const,
+        focus: 'self',
       },
+      ...(seriesIndex === 0 && (thresholdLines as any)),
     }));
   });
 
-  newState.series = allSeries?.flat();
+  newState.series = allSeries?.flat() as LineSeriesOption[];
 
   return newState;
 };
@@ -300,16 +164,10 @@ export const createCategoryAreaSeries = <T extends BaseChartStyle>({
     throw new Error('transformedData must be an array with data rows');
   }
 
-  // Data is already aggregated, just use it directly
-  (newState as any).dataset = [
-    {
-      source: transformedData,
-    },
-  ];
-
+  const thresholdLines = generateThresholdLines(styles.thresholdOptions);
   const series = [
     {
-      type: 'line' as const,
+      type: 'line',
       name: getSeriesDisplayName(valueField, Object.values(axisColumnMappings)),
       connectNulls: true,
       areaStyle: {
@@ -321,12 +179,13 @@ export const createCategoryAreaSeries = <T extends BaseChartStyle>({
         y: valueField,
       },
       emphasis: {
-        focus: 'self' as const,
+        focus: 'self',
       },
+      ...thresholdLines,
     },
   ];
 
-  newState.series = series;
+  newState.series = series as LineSeriesOption[];
   return newState;
 };
 
@@ -338,8 +197,7 @@ export const createStackAreaSeries = <T extends BaseChartStyle>(
 ): PipelineFn<T> => (state) => {
   const { axisColumnMappings, transformedData: aggregatedData } = state;
   const newState = { ...state };
-  newState.series = [];
-  delete newState.spec;
+  const thresholdLines = generateThresholdLines(styles.thresholdOptions);
 
   if (!axisColumnMappings) {
     throw new Error('axisColumnMappings must be available for createStackAreaSeries');
@@ -370,10 +228,10 @@ export const createStackAreaSeries = <T extends BaseChartStyle>(
   }
 
   // Create multi-series for each category column
-  const newseries = cateColumns.map((categoryName: string) => ({
+  const newseries = cateColumns.map((categoryName: string, index: number) => ({
     name: String(categoryName),
-    type: 'line' as const,
-    stack: 'Total' as const,
+    type: 'line',
+    stack: 'Total',
     areaStyle: {
       opacity: styles.areaOpacity || 0.3,
     },
@@ -384,12 +242,13 @@ export const createStackAreaSeries = <T extends BaseChartStyle>(
       y: categoryName,
     },
     emphasis: {
-      focus: 'self' as const,
+      focus: 'self',
     },
+    ...(index === 0 && thresholdLines),
   }));
 
   // Series created successfully
-  newState.series = newseries;
+  newState.series = newseries as LineSeriesOption[];
 
   return newState;
 };
