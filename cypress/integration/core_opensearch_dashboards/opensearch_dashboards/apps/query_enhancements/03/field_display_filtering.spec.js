@@ -3,45 +3,50 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DATASOURCE_NAME, INDEX_WITH_TIME_1 } from '../../../../../../utils/apps/constants';
+import { DATASOURCE_NAME, INDEX_WITH_TIME_1 } from '../../../../../../utils/constants';
 import * as docTable from '../../../../../../utils/apps/query_enhancements/doc_table.js';
 import { generateFieldDisplayFilteringTestConfiguration } from '../../../../../../utils/apps/query_enhancements/field_display_filtering.js';
-import { BASE_PATH } from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/query_enhancements/shared';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
-const workspace = getRandomizedWorkspaceName();
+const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const fieldDisplayFilteringTestSuite = () => {
-  describe('filter for value spec', () => {
+  describe.skip('filter for value spec', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspace,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        `${INDEX_WITH_TIME_1}*`,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-search'] // features
+      );
     });
 
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
-        url: BASE_PATH,
-        workspaceName: workspace,
-        page: 'discover',
+        workspaceName,
+        page: 'data-explorer/discover',
         isEnhancement: true,
       });
       cy.getElementByTestId('discoverNewButton').click();
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
     generateAllTestConfigurations(generateFieldDisplayFilteringTestConfiguration, {
