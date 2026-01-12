@@ -29,13 +29,13 @@
  */
 
 import { getSeriesRequestParams } from './series/get_request_params';
-import { handleResponseBody } from './series/handle_response_body';
+import { handleResponseBodyRaw } from './series/handle_response_body_raw';
 import { handleErrorResponse } from './handle_error_response';
 import { getAnnotations } from './get_annotations';
 import { getOpenSearchQueryConfig } from './helpers/get_opensearch_query_uisettings';
 import { getActiveSeries } from './helpers/get_active_series';
 
-export async function getSeriesData(req, panel) {
+export async function getSeriesDataRaw(req, panel) {
   const {
     searchStrategy,
     capabilities,
@@ -59,7 +59,7 @@ export async function getSeriesData(req, panel) {
 
     const data = await searchStrategy.search(req, searches, {}, panelDataSourceId);
 
-    const handleResponseBodyFn = handleResponseBody(panel);
+    const handleResponseBodyFn = handleResponseBodyRaw(panel);
 
     const series = data.map((resp) =>
       handleResponseBodyFn(resp.rawResponse ? resp.rawResponse : resp)

@@ -95,7 +95,7 @@ export const createBarSpec = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({ title: `${yAxis?.name} by ${xAxis?.name}` }),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
@@ -240,7 +240,7 @@ export const createTimeBarChart = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({ title: `${axisColumnMappings?.y?.name} Over Time` }),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
@@ -404,7 +404,9 @@ export const createGroupedTimeBarChart = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: `${axisColumnMappings?.y?.name} Over Time by ${colorColumn.name}`,
+      }),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
@@ -584,7 +586,9 @@ export const createFacetedTimeBarChart = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: `${axisColumnMappings.y?.name} Over Time by ${axisColumnMappings.color?.name} (Faceted by ${axisColumnMappings.facet?.name})`,
+      }),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
@@ -761,7 +765,9 @@ export const createStackedBarSpec = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({
+        title: `${axisColumnMappings?.y?.name} by ${axisColumnMappings?.x?.name} and ${colorMapping.name}`,
+      }),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
@@ -904,7 +910,7 @@ export const createDoubleNumericalBarChart = (
         }),
         convertTo2DArray()
       ),
-      createBaseConfig,
+      createBaseConfig({ title: `${xAxis?.name} with ${yAxis?.name}` }),
       buildAxisConfigs,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),

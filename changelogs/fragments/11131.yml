@@ -1,0 +1,2 @@
+feat:
+- [chat] expose action register method to allow plugins to register permanent actions ([#11131](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11131))
