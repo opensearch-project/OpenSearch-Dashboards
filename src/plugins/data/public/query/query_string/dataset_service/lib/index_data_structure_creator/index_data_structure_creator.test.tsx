@@ -60,7 +60,7 @@ jest.mock('./unified_index_selector', () => ({
 
 const mockSelectDataStructure = jest.fn();
 const mockHttp = {
-  post: jest.fn().mockResolvedValue([
+  get: jest.fn().mockResolvedValue([
     {
       health: 'green',
       status: 'open',
@@ -241,45 +241,45 @@ describe('IndexDataStructureCreator', () => {
       fireEvent.click(getByTestId('add-single-index'));
 
       await waitFor(() => {
-        expect(mockHttp.post).toHaveBeenCalledWith(
-          '/api/index_patterns/_cat_indices',
+        expect(mockHttp.get).toHaveBeenCalledWith(
+          '/api/directquery/dsl/cat.indices/dataSourceMDSId=test',
           expect.objectContaining({
             query: expect.objectContaining({
-              data_source: 'test',
+              format: 'json',
+              index: 'index1',
             }),
-            body: JSON.stringify({ indices: ['index1'] }),
           })
         );
       });
     });
 
     it('handles health data fetch errors gracefully', async () => {
-      mockHttp.post.mockRejectedValueOnce(new Error('Network error'));
+      mockHttp.get.mockRejectedValueOnce(new Error('Network error'));
       const { getByTestId } = renderComponent();
 
       fireEvent.click(getByTestId('add-single-index'));
 
       await waitFor(() => {
-        expect(mockHttp.post).toHaveBeenCalled();
+        expect(mockHttp.get).toHaveBeenCalled();
       });
 
       // Component should still work after error
       expect(getByTestId('selected-count')).toHaveTextContent('1');
     });
 
-    it('includes data_source in query when present', async () => {
+    it('includes dataSourceId in URL path when present', async () => {
       const { getByTestId } = renderComponent();
 
       fireEvent.click(getByTestId('add-single-index'));
 
       await waitFor(() => {
-        expect(mockHttp.post).toHaveBeenCalledWith(
-          '/api/index_patterns/_cat_indices',
+        expect(mockHttp.get).toHaveBeenCalledWith(
+          '/api/directquery/dsl/cat.indices/dataSourceMDSId=test',
           expect.objectContaining({
             query: expect.objectContaining({
-              data_source: 'test',
+              format: 'json',
+              index: 'index1',
             }),
-            body: JSON.stringify({ indices: ['index1'] }),
           })
         );
       });

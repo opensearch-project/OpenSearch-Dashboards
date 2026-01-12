@@ -150,44 +150,4 @@ export function registerRoutes(http: HttpServiceSetup) {
       }
     }
   );
-
-  router.post(
-    {
-      path: '/api/index_patterns/_cat_indices',
-      validate: {
-        body: schema.object({
-          indices: schema.arrayOf(schema.string()),
-        }),
-        query: schema.object({
-          data_source: schema.maybe(schema.string()),
-        }),
-      },
-    },
-    async (context, request, response) => {
-      try {
-        const callAsCurrentUser = await decideLegacyClient(context, request);
-        const { indices } = request.body;
-
-        const result = await callAsCurrentUser('cat.indices', {
-          index: indices.join(','),
-          format: 'json',
-          h: 'health,status,index,docs.count,store.size',
-        });
-
-        return response.ok({
-          body: result.body || result,
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
-      } catch (error) {
-        return response.customError({
-          statusCode: error.statusCode || 500,
-          body: {
-            message: error.message || 'Error fetching index information',
-          },
-        });
-      }
-    }
-  );
 }

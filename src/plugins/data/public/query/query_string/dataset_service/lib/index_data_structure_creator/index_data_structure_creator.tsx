@@ -85,15 +85,15 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
       try {
         const dataSourceId = path?.find((item) => item.type === 'DATA_SOURCE')?.id;
 
-        const queryParams: Record<string, any> = {};
-        if (dataSourceId) {
-          queryParams.data_source = dataSourceId;
-        }
-
-        const response = await services.http.post<any>(`/api/index_patterns/_cat_indices`, {
-          query: queryParams,
-          body: JSON.stringify({ indices: indexNames }),
-        });
+        const response = await services.http.get<any>(
+          `/api/directquery/dsl/cat.indices/dataSourceMDSId=${dataSourceId || ''}`,
+          {
+            query: {
+              format: 'json',
+              index: indexNames.join(','),
+            },
+          }
+        );
 
         if (response && Array.isArray(response)) {
           // Cache all results
