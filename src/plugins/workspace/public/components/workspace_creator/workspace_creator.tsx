@@ -223,6 +223,9 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                 }
               } catch (error) {
                 // Don't block workspace creation if trace detection fails
+              } finally {
+                // Clear the workspace context to prevent subsequent operations from targeting the new workspace
+                savedObjects.client.setCurrentWorkspace(undefined as any);
               }
             }
 

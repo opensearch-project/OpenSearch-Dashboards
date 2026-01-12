@@ -206,7 +206,7 @@ export const TraceAutoDetectCallout: React.FC = () => {
                 <p>
                   <FormattedMessage
                     id="explore.traces.autoDetect.description"
-                    defaultMessage="We found trace data matching OpenTelemetry conventions in {count} data {sources}:"
+                    defaultMessage="We found OpenTelemetry trace data in {count} data {sources}. We will create trace datasets to reference the following data:"
                     values={{
                       count: detections.length,
                       sources: detections.length === 1 ? 'source' : 'sources',

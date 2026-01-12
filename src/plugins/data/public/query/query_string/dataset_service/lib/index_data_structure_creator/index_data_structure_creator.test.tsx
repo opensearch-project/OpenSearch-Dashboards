@@ -242,12 +242,12 @@ describe('IndexDataStructureCreator', () => {
 
       await waitFor(() => {
         expect(mockHttp.post).toHaveBeenCalledWith(
-          '/api/console/proxy',
+          '/api/index_patterns/_cat_indices',
           expect.objectContaining({
             query: expect.objectContaining({
-              path: expect.stringContaining('_cat/indices/index1'),
-              method: 'GET',
+              data_source: 'test',
             }),
+            body: JSON.stringify({ indices: ['index1'] }),
           })
         );
       });
@@ -267,18 +267,19 @@ describe('IndexDataStructureCreator', () => {
       expect(getByTestId('selected-count')).toHaveTextContent('1');
     });
 
-    it('includes dataSourceId in health query when present', async () => {
+    it('includes data_source in query when present', async () => {
       const { getByTestId } = renderComponent();
 
       fireEvent.click(getByTestId('add-single-index'));
 
       await waitFor(() => {
         expect(mockHttp.post).toHaveBeenCalledWith(
-          '/api/console/proxy',
+          '/api/index_patterns/_cat_indices',
           expect.objectContaining({
             query: expect.objectContaining({
-              dataSourceId: 'test',
+              data_source: 'test',
             }),
+            body: JSON.stringify({ indices: ['index1'] }),
           })
         );
       });

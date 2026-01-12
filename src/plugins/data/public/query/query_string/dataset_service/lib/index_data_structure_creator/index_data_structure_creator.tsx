@@ -85,20 +85,14 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
       try {
         const dataSourceId = path?.find((item) => item.type === 'DATA_SOURCE')?.id;
 
-        const queryParams: Record<string, any> = {
-          path: `_cat/indices/${indexNames.join(
-            ','
-          )}?format=json&h=health,status,index,docs.count,store.size`,
-          method: 'GET',
-        };
-
+        const queryParams: Record<string, any> = {};
         if (dataSourceId) {
-          queryParams.dataSourceId = dataSourceId;
+          queryParams.data_source = dataSourceId;
         }
 
-        const response = await services.http.post<any>(`/api/console/proxy`, {
+        const response = await services.http.post<any>(`/api/index_patterns/_cat_indices`, {
           query: queryParams,
-          body: '',
+          body: JSON.stringify({ indices: indexNames }),
         });
 
         if (response && Array.isArray(response)) {
@@ -626,7 +620,7 @@ export const IndexDataStructureCreator: React.FC<IndexDataStructureCreatorProps>
                                 content={i18n.translate(
                                   'data.datasetService.unifiedSelector.clickToShowMatchingIndices',
                                   {
-                                    defaultMessage: 'Click to show matching indices',
+                                    defaultMessage: 'Show matching indices',
                                   }
                                 )}
                               >
