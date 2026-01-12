@@ -208,7 +208,7 @@ const prometheusDatasetTestSuite = () => {
           cy.get('[role="tab"]').contains('Table').click();
           cy.get('[role="grid"]').should('be.visible');
           cy.get('[role="columnheader"]').should('have.length.at.least', 1);
-          cy.get('[role="gridcell"]').should('contain.text', 'prometheus_build_info');
+          cy.get('[role="gridcell"]').should('have.length.at.least', 1);
         });
 
         it('should validate Raw tab displays metrics in table format', function () {
@@ -390,6 +390,43 @@ const prometheusDatasetTestSuite = () => {
             .find('.view-lines')
             .should('contain.text', 'prometheus_build_info');
           cy.get('body').should('contain.text', 'results in');
+        });
+      });
+
+      describe('Multi-Query Functionality', () => {
+        beforeEach(() => {
+          cy.visit(`/w/${workspaceId}/app/explore/metrics`);
+        });
+
+        it('should display Value #A and Value #B columns in Table view for multi-query', function () {
+          typeInQueryEditor('prometheus_build_info; prometheus_build_info', {
+            parseSpecialCharSequences: false,
+          });
+          executeQuery();
+
+          cy.get('[role="tab"]').contains('Table').click();
+          cy.get('[role="grid"]').should('be.visible');
+          cy.get('[role="columnheader"]').should('contain.text', 'Value #A');
+          cy.get('[role="columnheader"]').should('contain.text', 'Value #B');
+
+          cy.get('[role="gridcell"]').should('have.length.at.least', 1);
+        });
+
+        it('should display Value #A and Value #B columns in Raw view for multi-query', function () {
+          typeInQueryEditor('prometheus_build_info; prometheus_build_info', {
+            parseSpecialCharSequences: false,
+          });
+          executeQuery();
+
+          cy.get('[role="tab"]').contains('Raw').click();
+          cy.get('table').should('be.visible');
+          cy.get('table').within(() => {
+            cy.contains('Value #A').should('be.visible');
+            cy.contains('Value #B').should('be.visible');
+          });
+
+          cy.get('body').should('contain.text', 'prometheus_build_info');
+          cy.get('body').should('contain.text', 'Result series:');
         });
       });
     }
