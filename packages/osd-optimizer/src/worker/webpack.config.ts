@@ -34,7 +34,7 @@ import NodePolyfillPlugin from 'node-polyfill-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import { getSwcLoaderConfig } from '@osd/utils';
 import * as UiSharedDeps from '@osd/ui-shared-deps';
-import browserlist from 'browserslist';
+import browserslist from 'browserslist';
 import * as sass from 'sass-embedded';
 
 import { Bundle, BundleRefs, WorkerConfig } from '../common';
@@ -75,7 +75,7 @@ export const sassCompiler = {
 };
 
 export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
-  const targets = browserlist.loadConfig({ path: worker.repoRoot });
+  const targets = browserslist.loadConfig({ path: worker.repoRoot });
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
   const resolveOptions = {
     extensions: ['.js', '.ts', '.tsx', '.json'],

@@ -105,18 +105,16 @@ export class BundleDepsCheckPlugin {
               }
 
               // If we found possible refs but none matched, it's a non-public export error
-              if (possibleRefs.length > 0) {
-                if (!foundMatch) {
-                  const bundleId = Array.from(new Set(possibleRefs.map((r) => r.bundleId))).join(
-                    ', '
-                  );
-                  const publicDir = possibleRefs.map((r) => r.entry).join(', ');
-                  const error = new Error(
-                    `import [${userRequest}] references a non-public export of the [${bundleId}] bundle and must point to one of the public directories: [${publicDir}]`
-                  );
-                  (error as any).file = manifestPath;
-                  compilation.errors.push(error);
-                }
+              if (!foundMatch) {
+                const bundleId = Array.from(new Set(possibleRefs.map((r) => r.bundleId))).join(
+                  ', '
+                );
+                const publicDir = possibleRefs.map((r) => r.entry).join(', ');
+                const error = new Error(
+                  `import [${userRequest}] references a non-public export of the [${bundleId}] bundle and must point to one of the public directories: [${publicDir}]`
+                );
+                (error as any).file = manifestPath;
+                compilation.errors.push(error);
               }
             }
           }
