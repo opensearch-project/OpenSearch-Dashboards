@@ -37,6 +37,7 @@ describe('PrometheusManager', () => {
     it('should fetch labels', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['__name__', 'instance', 'job'],
         },
       };
@@ -63,6 +64,7 @@ describe('PrometheusManager', () => {
     it('should fetch labels with match parameter', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['cpu', 'mode'],
         },
       };
@@ -279,6 +281,7 @@ describe('PrometheusManager', () => {
     it('should handle POST request and call getResources', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['label1', 'label2'],
         },
       };
@@ -379,7 +382,7 @@ describe('PrometheusManager', () => {
       });
     });
 
-    it('should return failed status when query executor throws error', async () => {
+    it('should throw error when query executor throws error', async () => {
       const mockExecutor: QueryExecutor<PromQLQueryParams, PromQLQueryResponse> = {
         execute: jest.fn().mockRejectedValue(new Error('Query timeout')),
       };
@@ -401,13 +404,9 @@ describe('PrometheusManager', () => {
         dataconnection: 'prom-conn',
       };
 
-      const result = await prometheusManager.query(mockContext, mockRequest, params);
-
-      expect(result).toEqual({
-        status: 'failed',
-        data: undefined,
-        error: 'Query timeout',
-      });
+      await expect(prometheusManager.query(mockContext, mockRequest, params)).rejects.toThrow(
+        'Query timeout'
+      );
     });
 
     it('should throw error when no query executor is set', async () => {
