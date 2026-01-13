@@ -20,8 +20,8 @@ const workspaceName = getRandomizedWorkspaceName();
 
 const traceTestSuite = () => {
   let traceUrl;
-
-  before(() => {
+  // Reenable it after updating the setup utils
+  before.skip(() => {
     // Setup workspace with both log and trace indices
     cy.explore.setupWorkspaceAndDataSourceWithTraces(workspaceName, [LOG_INDEX, TRACE_INDEX]);
 

@@ -21,7 +21,7 @@ const workspaceName = getRandomizedWorkspaceName();
 const datasetId = getRandomizedDatasetId();
 
 const fieldDisplayFilteringTestSuite = () => {
-  describe.skip('filter for value spec', () => {
+  describe('filter for value spec', () => {
     before(() => {
       cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
 

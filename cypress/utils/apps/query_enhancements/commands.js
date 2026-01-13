@@ -234,9 +234,10 @@ Cypress.Commands.add(
 
     cy.get(`[title="${title}"]`).should('be.visible').click();
 
-  // verify that it has been selected
-  cy.getElementByTestId('datasetSelectorButton').should('contain.text', `${title}`);
-});
+    // verify that it has been selected
+    cy.getElementByTestId('datasetSelectorButton').should('contain.text', `${title}`);
+  }
+);
 
 Cypress.Commands.add('setDataset', (dataset, dataSourceName, type) => {
   switch (type) {

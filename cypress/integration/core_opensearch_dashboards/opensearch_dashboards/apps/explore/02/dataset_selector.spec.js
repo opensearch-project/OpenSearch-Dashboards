@@ -6,8 +6,6 @@
 import {
   DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
-  INDEX_WITH_TIME_2,
   DatasetTypes,
 } from '../../../../../../utils/constants';
 
@@ -51,10 +49,7 @@ export const runDatasetSelectorTests = () => {
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
     generateAllTestConfigurations(generateDatasetSelectorTestConfiguration).forEach((config) => {

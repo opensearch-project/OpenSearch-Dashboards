@@ -28,6 +28,7 @@ const queriesTestSuite = () => {
   describe('query enhancement queries', { scrollBehavior: false }, () => {
     before(() => {
       cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
       // Create workspace and dataset using our new helper function
       createWorkspaceAndDatasetUsingEndpoint(
         DATASOURCE_NAME,
@@ -148,8 +149,7 @@ const queriesTestSuite = () => {
         cy.get('button[role="tab"]').contains('Logs').click();
         cy.get('button[role="tab"][aria-selected="true"]').contains('Logs').should('be.visible');
 
-        // Change date range to trigger query re-execution (use valid range)
-        cy.explore.setTopNavDate('Jan 1, 2020 @ 00:00:00.000', 'Jan 2, 2020 @ 00:00:00.000');
+        cy.explore.setTopNavDate(START_TIME, START_TIME);
 
         cy.getElementByTestId('exploreQueryExecutionButton').click();
         cy.osd.waitForLoader(true);
