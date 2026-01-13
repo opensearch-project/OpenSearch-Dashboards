@@ -33,7 +33,7 @@ export const createBarGaugeSpec = (
   if (getChartRender() === 'echarts') {
     const { xAxis, yAxis } = getBarOrientation(styleOptions, axisColumnMappings);
     if (!xAxis || !yAxis) {
-      throw Error('Missing axis config for Bar chart');
+      throw Error('Missing axis config for bar gauge chart');
     }
 
     let categoryField = '';
@@ -54,7 +54,7 @@ export const createBarGaugeSpec = (
           field: valueField,
           calculateType: styleOptions.valueCalculation,
         })
-      ),
+      ), // Bar gauge uses individual series with custom itemStyle per bar, can't use 2d array format
       createBaseConfig({ title: `${yAxis?.name} by ${xAxis?.name}`, addLegend: false }),
       createBarGaugeSeries({ styles: styleOptions, categoryField, valueField }),
       assembleSpec

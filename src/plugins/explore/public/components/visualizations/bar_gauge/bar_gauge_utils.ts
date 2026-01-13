@@ -246,8 +246,9 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
   );
 
   const barNumbers = values?.length;
-  const maxNumber = barNumbers > 0 ? Math.max(...values.filter((v) => v !== null)) : 0;
-  const minNumber = barNumbers > 0 ? Math.min(...values.filter((v) => v !== null)) : 0;
+  const validValues = values.filter((v) => v !== null);
+  const maxNumber = validValues.length > 0 ? Math.max(...validValues) : 0;
+  const minNumber = validValues.length > 0 ? Math.min(...validValues) : 0;
 
   let maxBase = styles?.max ?? Math.max(maxNumber, 0);
   let minBase = styles?.min ?? Math.min(minNumber, 0);
@@ -320,12 +321,12 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
     }) ?? [];
 
   const series = [
-    styles?.exclusive.showUnfilledArea && {
+    {
       type: 'bar',
       name: 'unfilledArea',
       barGap: '-100%', // make sure unfilled area is below
       itemStyle: {
-        color: getColors().backgroundShade,
+        color: styles?.exclusive.showUnfilledArea ? getColors().backgroundShade : 'transparent',
       },
       silent: true,
       emphasis: { disabled: true },
@@ -604,7 +605,7 @@ const getAxesStyleConfig = (
   const isXNumerical = xAxis?.schema === VisFieldType.Numerical;
 
   const axisStyle = { axisLine: { show: false }, axisTick: { show: false } };
-  const nullStyle = { show: true };
+  const nullStyle = { show: false };
 
   if (isHorizontal) {
     return {
