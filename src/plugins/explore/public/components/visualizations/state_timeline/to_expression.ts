@@ -511,7 +511,7 @@ export const createCategoricalStateTimeline = (
     $schema: VEGASCHEMA,
     title: styleOptions.titleOptions?.show
       ? styleOptions.titleOptions?.titleName ||
-        `${categoryName2} by ${yAxis?.name} and ${xAxis?.name} `
+        `${categoryName2} by ${yAxis?.name} and ${xAxis?.name}`
       : undefined,
     data: { values: processedData },
     transform: transformLayer,
@@ -563,7 +563,7 @@ export const createSingleCategoricalStateTimeline = (
         groupByMergedLabel(convertTo2DArray())
       ),
       createBaseConfig({
-        title: ` ${colorMapping?.name}  by ${axisConfig.xAxis?.name}`,
+        title: `${colorMapping?.name}  by ${axisConfig.xAxis?.name}`,
         addTrigger: false,
       }),
       buildAxisConfigs,
@@ -808,7 +808,7 @@ export const createSingleNumericalStateTimeline = (
         groupByMergedLabel(convertTo2DArray())
       ),
       createBaseConfig({
-        title: ` ${colorMapping?.name}  by ${axisConfig.xAxis?.name}`,
+        title: `${colorMapping?.name}  by ${axisConfig.xAxis?.name}`,
         addTrigger: false,
       }),
       buildAxisConfigs,
