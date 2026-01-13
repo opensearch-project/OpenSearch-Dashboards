@@ -43,19 +43,26 @@ import { BundleDepsCheckPlugin } from './bundle_deps_check_plugin';
 
 const compilers: sass.AsyncCompiler[] = [];
 let index = 0;
+let initPromise: Promise<void> | undefined;
+
+async function ensureSassCompilers() {
+  if (compilers.length > 0) return;
+  initPromise ??= (async () => {
+    compilers.push(
+      ...(await Promise.all([
+        sass.initAsyncCompiler(),
+        sass.initAsyncCompiler(),
+        sass.initAsyncCompiler(),
+      ]))
+    );
+  })();
+  await initPromise;
+}
 
 export const sassCompiler = {
   ...sass,
   compileStringAsync: async (data: string, options: sass.StringOptions<'async'>) => {
-    if (compilers.length === 0) {
-      compilers.push(
-        ...[
-          await sass.initAsyncCompiler(),
-          await sass.initAsyncCompiler(),
-          await sass.initAsyncCompiler(),
-        ]
-      );
-    }
+    await ensureSassCompilers();
     const compiler = compilers[index++ % compilers.length];
     return compiler.compileStringAsync(data, options);
   },
@@ -129,9 +136,10 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       new BundleDepsCheckPlugin(bundle, bundleRefs),
       new NodePolyfillPlugin({ additionalAliases: ['process'] }),
       new rspack.DefinePlugin({
-        'process.env': {
-          IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE: worker.dist ? `"true"` : `"false"`,
-        },
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'process.env.IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE': JSON.stringify(
+          worker.dist ? 'true' : 'false'
+        ),
       }),
       new rspack.experiments.VirtualModulesPlugin(virtualFiles),
       ...(bundle.banner ? [new rspack.BannerPlugin({ banner: bundle.banner, raw: true })] : []),

@@ -50,9 +50,15 @@ export class BundleDepsCheckPlugin {
         this.allowedBundleIds.add(ref.bundleId);
       }
 
-      compilation.hooks.additionalAssets.tap('BundleDepsCheckPlugin/watchManifest', () => {
-        compilation.fileDependencies.add(manifestPath);
-      });
+      compilation.hooks.processAssets.tap(
+        {
+          name: 'BundleDepsCheckPlugin/watchManifest',
+          stage: compiler.rspack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL,
+        },
+        () => {
+          compilation.fileDependencies.add(manifestPath);
+        }
+      );
 
       compilation.hooks.finishModules.tapPromise(
         'BundleDepsCheckPlugin/finishModules',
@@ -140,7 +146,11 @@ export class BundleDepsCheckPlugin {
 
   private resolve(request: string, startPath: string, compiler: Compiler) {
     const resolver = compiler.resolverFactory.get('normal', compiler.options.resolve);
-    const resolvedPath = resolver.resolveSync({}, startPath, request);
-    return resolvedPath;
+    try {
+      const resolvedPath = resolver.resolveSync({}, startPath, request);
+      return resolvedPath;
+    } catch (e) {
+      return false;
+    }
   }
 }
