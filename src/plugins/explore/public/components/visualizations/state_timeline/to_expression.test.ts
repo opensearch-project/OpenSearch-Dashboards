@@ -89,7 +89,10 @@ const mockTimeColumns: VisColumn[] = [
   },
 ];
 
-const mockStyleOptions = { ...defaultStateTimeLineChartStyles, useValueMappingColor: true };
+const mockStyleOptions = {
+  ...defaultStateTimeLineChartStyles,
+  valueMappingOptions: { valueMappings: [{ type: 'value', value: 'red' }] },
+};
 
 describe('to_expression', () => {
   describe('createNumericalStateTimeline', () => {
@@ -152,7 +155,7 @@ describe('to_expression', () => {
         mockNumericalColumns,
         mockCateColumns,
         mockTimeColumns,
-        { ...mockStyleOptions, useValueMappingColor: false },
+        { ...mockStyleOptions, valueMappingOptions: {} },
         mockAxisColumnMappings
       );
 

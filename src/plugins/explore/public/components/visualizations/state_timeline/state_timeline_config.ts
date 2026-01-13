@@ -43,11 +43,9 @@ export interface StateTimeLineChartStyleOptions {
   titleOptions?: TitleOptions;
 
   valueMappingOptions?: ValueMappingOptions;
+  // TODO add Color mode options(temporary name) to make a switch between No style, Use Value Mapping Color, Use Threshold Color
   useThresholdColor?: boolean;
   thresholdOptions?: ThresholdOptions;
-
-  // add this feature to make a switch between No style, Use Value Mapping Color, Use Threshold Color
-  useValueMappingColor?: boolean;
 }
 
 export type StateTimeLineChartStyle = Required<StateTimeLineChartStyleOptions>;
@@ -80,7 +78,6 @@ export const defaultStateTimeLineChartStyles: StateTimeLineChartStyle = {
   },
 
   useThresholdColor: false,
-  useValueMappingColor: false,
   thresholdOptions: {
     thresholds: [],
     baseColor: getColors().statusGreen,

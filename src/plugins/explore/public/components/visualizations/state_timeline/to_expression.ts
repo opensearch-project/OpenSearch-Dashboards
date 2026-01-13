@@ -94,7 +94,11 @@ export const createNumericalStateTimeline = (
           disconnectThreshold,
           connectThreshold,
           useThresholdColor: styleOptions.useThresholdColor,
-          useValueMappingColor: styleOptions.useValueMappingColor,
+          // TODO: Replace useValueMappingColor and useThresholdColor with Color mode option to make a switch between No style, Use Value Mapping Color, Use Threshold Color
+          // Current rule: If value mappings exist, use them regardless of match; unmatched values render as light_grey with label "_unmatched_"
+          useValueMappingColor:
+            !styleOptions.useThresholdColor &&
+            [...(valueMappings ?? []), ...(rangeMappings ?? [])].length > 0,
         }),
         groupByMergedLabel(convertTo2DArray())
       ),
@@ -148,6 +152,10 @@ export const createNumericalStateTimeline = (
 
   const convertedThresholds = convertThresholdsToValueMappings(completeThreshold);
 
+  const useValueMappingColor =
+    !styleOptions.useThresholdColor &&
+    [...(valueMappings ?? []), ...(rangeMappings ?? [])].length > 0;
+
   const processedData = mergeDataCore({
     timestampField: xAxis?.column,
     groupField: yAxis?.column,
@@ -157,32 +165,17 @@ export const createNumericalStateTimeline = (
     disconnectThreshold,
     connectThreshold,
     useThresholdColor: styleOptions.useThresholdColor,
-    useValueMappingColor: styleOptions.useValueMappingColor,
+    useValueMappingColor,
   })(transformedData);
 
-  const canUseValueMapping = styleOptions.useValueMappingColor || styleOptions.useThresholdColor;
+  const canUseValueMapping = useValueMappingColor || styleOptions.useThresholdColor;
 
-  const validMappings = styleOptions.useThresholdColor ? convertedThresholds : rangeMappings;
+  const validMappings = styleOptions.useThresholdColor
+    ? convertedThresholds
+    : [...(valueMappings ?? []), ...(rangeMappings ?? [])];
 
   const rowHeight = 1 - (styleOptions?.exclusive?.rowHeight ?? 0);
 
-  const transformLayer = canUseValueMapping
-    ? [
-        {
-          lookup: 'mergedLabel',
-          from: {
-            data: {
-              values: validMappings?.map((mapping) => ({
-                mappingValue: `[${mapping?.range?.min},${mapping?.range?.max ?? '∞'})`,
-                displayText: mapping?.displayText,
-              })),
-            },
-            key: 'mappingValue',
-            fields: ['displayText'],
-          },
-        },
-      ]
-    : null;
   const barLayer = {
     params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
     mark: {
@@ -220,7 +213,10 @@ export const createNumericalStateTimeline = (
           : null,
         ...(canUseValueMapping && {
           scale: {
-            domain: validMappings?.map((m) => `[${m.range?.min},${m?.range?.max ?? '∞'})`),
+            domain: validMappings?.reduce((acc, m) => {
+              acc.push(m.type === 'range' ? `[${m.range?.min},${m?.range?.max ?? '∞'})` : m.value);
+              return acc;
+            }, [] as Array<string | undefined>),
             range: validMappings?.map((m, i) => resolveColor(m.color) || getCategoryNextColor(i)),
           },
         }),
@@ -287,7 +283,6 @@ export const createNumericalStateTimeline = (
         `${rangeFieldColumn?.name} by ${yAxis?.name} and ${xAxis?.name}`
       : undefined,
     data: { values: processedData },
-    transform: transformLayer,
     layer: [barLayer, textLayer].filter(Boolean),
   };
 
@@ -331,7 +326,8 @@ export const createCategoricalStateTimeline = (
           disconnectThreshold,
           connectThreshold,
           useThresholdColor: styleOptions.useThresholdColor,
-          useValueMappingColor: styleOptions.useValueMappingColor,
+          useValueMappingColor:
+            !styleOptions.useThresholdColor && [...(valueMappings ?? [])].length > 0,
         }),
         groupByMergedLabel(convertTo2DArray())
       ),
@@ -362,6 +358,10 @@ export const createCategoricalStateTimeline = (
   const categoryName2 = colorMapping?.name;
 
   const { valueMappings, disconnectThreshold, connectThreshold } = normalizeConfig(styleOptions);
+
+  const useValueMappingColor =
+    !styleOptions.useThresholdColor && [...(valueMappings ?? [])].length > 0;
+
   const processedData = mergeDataCore({
     timestampField: xAxis?.column,
     groupField: yAxis?.column,
@@ -370,12 +370,12 @@ export const createCategoricalStateTimeline = (
     disconnectThreshold,
     connectThreshold,
     useThresholdColor: styleOptions.useThresholdColor,
-    useValueMappingColor: styleOptions.useValueMappingColor,
+    useValueMappingColor,
   })(transformedData);
 
   const rowHeight = 1 - (styleOptions?.exclusive?.rowHeight ?? 0);
 
-  const canUseValueMapping = styleOptions.useValueMappingColor;
+  const canUseValueMapping = useValueMappingColor;
 
   const transformLayer = canUseValueMapping
     ? [
@@ -557,7 +557,8 @@ export const createSingleCategoricalStateTimeline = (
           disconnectThreshold,
           connectThreshold,
           useThresholdColor: styleOptions.useThresholdColor,
-          useValueMappingColor: styleOptions.useValueMappingColor,
+          useValueMappingColor:
+            !styleOptions.useThresholdColor && [...(valueMappings ?? [])].length > 0,
         }),
         groupByMergedLabel(convertTo2DArray())
       ),
@@ -587,6 +588,9 @@ export const createSingleCategoricalStateTimeline = (
 
   const { valueMappings, disconnectThreshold, connectThreshold } = normalizeConfig(styleOptions);
 
+  const useValueMappingColor =
+    !styleOptions.useThresholdColor && [...(valueMappings ?? [])].length > 0;
+
   const processedData = mergeDataCore({
     timestampField: xAxis?.column,
     groupField: undefined,
@@ -595,9 +599,9 @@ export const createSingleCategoricalStateTimeline = (
     disconnectThreshold,
     connectThreshold,
     useThresholdColor: styleOptions.useThresholdColor,
-    useValueMappingColor: styleOptions.useValueMappingColor,
+    useValueMappingColor,
   })(transformedData);
-  const canUseValueMapping = styleOptions.useValueMappingColor;
+  const canUseValueMapping = useValueMappingColor;
 
   const rowHeight = 1 - (styleOptions?.exclusive?.rowHeight ?? 0);
 
@@ -797,7 +801,9 @@ export const createSingleNumericalStateTimeline = (
           disconnectThreshold,
           connectThreshold,
           useThresholdColor: styleOptions.useThresholdColor,
-          useValueMappingColor: styleOptions.useValueMappingColor,
+          useValueMappingColor:
+            !styleOptions.useThresholdColor &&
+            [...(valueMappings ?? []), ...(rangeMappings ?? [])].length > 0,
         }),
         groupByMergedLabel(convertTo2DArray())
       ),
@@ -838,6 +844,10 @@ export const createSingleNumericalStateTimeline = (
 
   const convertedThresholds = convertThresholdsToValueMappings(completeThreshold);
 
+  const useValueMappingColor =
+    !styleOptions.useThresholdColor &&
+    [...(valueMappings ?? []), ...(rangeMappings ?? [])].length > 0;
+
   const processedData = mergeDataCore({
     timestampField: xAxis?.column,
     groupField: undefined,
@@ -847,32 +857,16 @@ export const createSingleNumericalStateTimeline = (
     disconnectThreshold,
     connectThreshold,
     useThresholdColor: styleOptions.useThresholdColor,
-    useValueMappingColor: styleOptions.useValueMappingColor,
+    useValueMappingColor,
   })(transformedData);
 
-  const canUseValueMapping = styleOptions.useValueMappingColor || styleOptions.useThresholdColor;
+  const canUseValueMapping = useValueMappingColor || styleOptions.useThresholdColor;
 
-  const validMappings = styleOptions.useThresholdColor ? convertedThresholds : rangeMappings;
+  const validMappings = styleOptions.useThresholdColor
+    ? convertedThresholds
+    : [...(valueMappings ?? []), ...(rangeMappings ?? [])];
 
   const rowHeight = 1 - (styleOptions?.exclusive?.rowHeight ?? 0);
-
-  const transformLayer = canUseValueMapping
-    ? [
-        {
-          lookup: 'mergedLabel',
-          from: {
-            data: {
-              values: validMappings?.map((mapping) => ({
-                mappingValue: `[${mapping?.range?.min},${mapping?.range?.max ?? '∞'})`,
-                displayText: mapping?.displayText,
-              })),
-            },
-            key: 'mappingValue',
-            fields: ['displayText'],
-          },
-        },
-      ]
-    : null;
 
   const barLayer = {
     params: [{ name: 'highlight', select: { type: 'point', on: 'pointerover' } }],
@@ -921,7 +915,10 @@ export const createSingleNumericalStateTimeline = (
           : null,
         ...(canUseValueMapping && {
           scale: {
-            domain: validMappings?.map((m) => `[${m.range?.min},${m?.range?.max ?? '∞'})`),
+            domain: validMappings?.reduce((acc, m) => {
+              acc.push(m.type === 'range' ? `[${m.range?.min},${m?.range?.max ?? '∞'})` : m.value);
+              return acc;
+            }, [] as Array<string | undefined>),
             range: validMappings?.map((m, i) => resolveColor(m.color) || getCategoryNextColor(i)),
           },
         }),
@@ -994,7 +991,6 @@ export const createSingleNumericalStateTimeline = (
       ? styleOptions.titleOptions?.titleName || `${categoryName} by ${xAxis?.name}`
       : undefined,
     data: { values: processedData },
-    transform: transformLayer,
     layer: [barLayer, textLayer].filter(Boolean),
   };
 

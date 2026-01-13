@@ -16,8 +16,6 @@ interface StateTimeLineExclusiveVisOptionsProps {
   onChange: (styles: StateTimeLineChartStyle['exclusive']) => void;
   useThresholdColor?: boolean;
   onUseThresholdColorChange: (useThresholdColor: boolean) => void;
-  useValueMappingColor?: boolean;
-  onUseValueMappingColorChange: (useValueMappingColor: boolean) => void;
 }
 
 const disconnectValuesOption = [
@@ -55,8 +53,6 @@ export const StateTimeLineExclusiveVisOptions = ({
   onChange,
   useThresholdColor,
   onUseThresholdColorChange,
-  useValueMappingColor,
-  onUseValueMappingColorChange,
 }: StateTimeLineExclusiveVisOptionsProps) => {
   const updateStyle = <K extends keyof StateTimeLineChartStyle['exclusive']>(
     key: K,
@@ -84,22 +80,7 @@ export const StateTimeLineExclusiveVisOptions = ({
           })}
           data-test-subj="useThresholdColorButton"
           checked={useThresholdColor ?? false}
-          disabled={useValueMappingColor}
           onChange={(e) => onUseThresholdColorChange(e.target.checked)}
-        />
-      </EuiFormRow>
-
-      {/* add this toggle to make a switch between No style, Use Value Mapping Color, Use Threshold Color */}
-      <EuiFormRow>
-        <EuiSwitch
-          compressed
-          label={i18n.translate('explore.vis.statetimeline.useValueMappingColor', {
-            defaultMessage: 'Use valueMapping color',
-          })}
-          data-test-subj="useValueMappingColorButton"
-          checked={useValueMappingColor ?? false}
-          disabled={useThresholdColor}
-          onChange={(e) => onUseValueMappingColorChange(e.target.checked)}
         />
       </EuiFormRow>
 
