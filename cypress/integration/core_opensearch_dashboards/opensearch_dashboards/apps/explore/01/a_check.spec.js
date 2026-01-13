@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { INDEX_WITH_TIME_1 } from '../../../../../../utils/constants';
+import { DATASOURCE_NAME } from '../../../../../../utils/constants';
 import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared';
 import { prepareTestSuite } from '../../../../../../utils/helpers';
 
@@ -12,11 +12,21 @@ const workspaceName = getRandomizedWorkspaceName();
 const noIndexPatternTestSuite = () => {
   describe('No Index Pattern Check Test', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      cy.get('@DATASOURCE_ID').then((datasourceId) => {
+        cy.osd.createWorkspaceWithDataSourceId(
+          datasourceId,
+          workspaceName,
+          ['use-case-observability'],
+          `${workspaceName}:WORKSPACE_ID`
+        );
+        cy.wait(2000);
+      });
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
     describe('empty state', () => {

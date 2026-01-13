@@ -3,29 +3,36 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
-} from '../../../../../../utils/apps/constants.js';
+import { INDEX_PATTERN_WITH_TIME } from '../../../../../../utils/apps/constants.js';
 import { BASE_PATH, DATASOURCE_NAME } from '../../../../../../utils/constants.js';
 import { DatasetTypes } from '../../../../../../utils/apps/explore/constants.js';
-import { getRandomizedWorkspaceName } from '../../../../../../utils/apps/explore/shared.js';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
+} from '../../../../../../utils/apps/explore/shared.js';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const cachingTestSuite = () => {
   describe('caching spec', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        INDEX_PATTERN_WITH_TIME, // Uses 'data_logs_small_time_*'
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
     });
 
     beforeEach(() => {
@@ -38,7 +45,7 @@ const cachingTestSuite = () => {
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
     it('should validate index pattern refresh', () => {
@@ -50,14 +57,26 @@ const cachingTestSuite = () => {
         DATASOURCE_NAME,
         DatasetTypes.INDEX_PATTERN.name
       );
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspaceName,
-        indexPattern: alternativeIndexPatternName,
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
+
+      const alternativeDatasetId = getRandomizedDatasetId();
+      const workspaceId = Cypress.env(`${workspaceName}:WORKSPACE_ID`);
+
+      cy.osd.getDataSourceId(DATASOURCE_NAME);
+      cy.get('@DATASOURCE_ID').then((datasourceId) => {
+        cy.osd.createDatasetByEndpoint(
+          alternativeDatasetId,
+          workspaceId,
+          datasourceId,
+          {
+            title: alternativeIndexPattern,
+            signalType: 'logs',
+            timestamp: 'timestamp',
+          },
+          `${alternativeDatasetId}:DATASET_ID`
+        );
+        cy.wait(2000);
       });
+
       cy.osd.navigateToWorkSpaceSpecificPage({
         url: BASE_PATH,
         workspaceName: workspaceName,

@@ -4,14 +4,17 @@
  */
 
 import {
+  DATASOURCE_NAME,
   INDEX_WITH_TIME_1,
   QueryLanguages,
-  DATASOURCE_NAME,
 } from '../../../../../../utils/constants';
+
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
+  getRandomizedDatasetId,
 } from '../../../../../../utils/apps/query_enhancements/shared';
+
 import {
   generateAutocompleteTestConfiguration,
   generateAutocompleteTestConfigurations,
@@ -20,27 +23,34 @@ import {
   hideWidgets,
   createQuery,
 } from '../../../../../../utils/apps/query_enhancements/autocomplete';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 export const runAutocompleteTests = () => {
   describe('discover autocomplete tests', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        `${INDEX_WITH_TIME_1}*`,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-search'] // features
+      );
     });
 
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
-        page: 'discover',
+        page: 'data-explorer/discover',
         isEnhancement: true,
       });
     });
@@ -58,7 +68,6 @@ export const runAutocompleteTests = () => {
             cy.setQueryLanguage(config.language);
             setDatePickerDatesAndSearchIfRelevant(config.language);
             cy.clearQueryEditor();
-
             const editorType =
               config.language === QueryLanguages.DQL.name
                 ? 'osdQueryEditor__singleLine'

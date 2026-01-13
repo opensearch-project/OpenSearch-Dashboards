@@ -476,9 +476,12 @@ const getSavedObjectPostBody = (config, workspaceId, datasourceId, indexPatternI
 /**
  * send a POST request to API to create a saved search object
  * @param {SavedTestConfig} config - the relevant config for the test case
+ * @param {string} workspaceName - the name of the workspace (optional, defaults to using @WORKSPACE_ID)
  */
-export const postRequestSaveSearch = (config) => {
-  cy.get('@WORKSPACE_ID').then((workspaceId) => {
+export const postRequestSaveSearch = (config, workspaceName = null) => {
+  const workspaceAlias = workspaceName ? `@${workspaceName}:WORKSPACE_ID` : '@WORKSPACE_ID';
+
+  cy.get(workspaceAlias).then((workspaceId) => {
     cy.get('@DATASOURCE_ID').then((datasourceId) => {
       cy.get('@INDEX_PATTERN_ID').then((indexPatternId) => {
         // POST a saved search
@@ -510,6 +513,11 @@ export const updateSavedSearchAndSaveAndVerify = (
   datasourceName,
   saveAsNew
 ) => {
+  cy.osd.navigateToWorkSpaceSpecificPage({
+    workspaceName: workspaceName,
+    page: 'discover',
+    isEnhancement: true,
+  });
   cy.loadSaveSearch(config.saveName);
 
   // Change the dataset type to use
@@ -536,13 +544,17 @@ export const updateSavedSearchAndSaveAndVerify = (
   // Load updated saved search and verify
   cy.getElementByTestId('discoverNewButton').click();
   // wait for the new tab to load
-  cy.getElementByTestId('loadingSpinnerText').should('not.exist');
-
+  cy.getElementByTestId('docTableHeader').should('be.visible');
   cy.loadSaveSearch(saveNameToUse);
   setDatePickerDatesAndSearchIfRelevant(newConfig.language);
   verifyDiscoverPageState(newConfig);
 };
 
+/**
+ * Loads a saved search and updates it without saving and verify using snapshot url
+ * @param {SavedTestConfig} config - the relevant config for the test case
+ * @param {string} datasourceName - the name of the datasource
+ */
 export const updateSavedSearchAndNotSaveAndVerify = (config, datasourceName) => {
   cy.loadSaveSearch(config.saveName);
 

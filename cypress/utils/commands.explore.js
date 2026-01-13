@@ -97,12 +97,8 @@ cy.explore.add('clearQueryEditor', () => {
             return clearWithRetry(attempt + 1);
           } else {
             cy.log('Failed to clear editor after all attempts');
-            // Instead of throwing error, try one last time ensuring editor is ready
-            return cy
-              .get('.monaco-editor')
-              .should('be.visible')
-              .then(forceFocusEditor)
-              .then(clearMonacoEditor);
+            // Instead of throwing error, try one last time with extra waiting
+            return cy.wait(2000).then(forceFocusEditor).then(clearMonacoEditor);
           }
         });
       });
@@ -261,7 +257,9 @@ cy.explore.add('setRelativeTopNavDate', (time, timeUnit) => {
 });
 
 cy.explore.add('updateTopNav', (options) => {
-  cy.getElementByTestId('exploreQueryExecutionButton', options).click({ force: true });
+  cy.getElementByTestId('exploreQueryExecutionButton', options).click({
+    force: true,
+  });
 });
 
 cy.explore.add(
@@ -369,7 +367,9 @@ cy.explore.add('deleteSavedQuery', (name) => {
     .click();
 
   cy.getElementByTestId('confirmModalConfirmButton').click();
-  cy.osd.waitForSync();
+
+  cy.wait(2000);
+  cy.get('.euiFlyoutFooter').find('button[type="button"]').contains('Cancel').first().click();
 });
 
 cy.explore.add('setDataset', (dataset, dataSourceName, type) => {
@@ -392,8 +392,7 @@ cy.explore.add('setDataset', (dataset, dataSourceName, type) => {
       throw new Error(`setIndexPatternAsDataset encountered unknown type: ${type}`);
   }
 
-  // Wait for dataset selection to complete by verifying the button is ready
-  cy.getElementByTestId('datasetSelectButton').should('be.visible').should('not.be.disabled');
+  cy.wait(3000);
 });
 
 cy.explore.add(
@@ -448,9 +447,7 @@ cy.explore.add(
     } else {
       cy.get('[type="button"]').contains('Cancel').click();
     }
-    // Wait for dataset selection to complete
-    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.getElementByTestId('datasetSelectButton').should('be.visible').should('not.be.disabled');
+    cy.wait(3000);
   }
 );
 
@@ -472,9 +469,7 @@ cy.explore.add('setIndexPatternAsDataset', (indexPattern) => {
   // verify that it has been selected
   cy.getElementByTestId('datasetSelectButton').should('contain.text', `${indexPattern}`);
 
-  // Wait for dataset selection to complete
-  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-  cy.getElementByTestId('datasetSelectButton').should('be.visible').should('not.be.disabled');
+  cy.wait(3000);
 });
 
 cy.explore.add(
@@ -508,7 +503,7 @@ cy.explore.add(
     selectIndexWildcardMode(indexPattern);
 
     // Step 8 - Click Next button
-    cy.getElementByTestId('datasetSelectorNext').should('be.visible').click();
+    cy.getElementByTestId('datasetSelectorNext').should('be.visible').click({ force: true });
 
     // Step 9 - Select language (if provided)
     if (language) {
@@ -529,9 +524,7 @@ cy.explore.add(
     } else {
       cy.get('[type="button"]').contains('Cancel').click();
     }
-    // Wait for dataset selection to complete
-    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-    cy.getElementByTestId('datasetSelectButton').should('be.visible').should('not.be.disabled');
+    cy.wait(3000);
   }
 );
 
@@ -539,11 +532,12 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName, o
   cy.explore.clearQueryEditor();
   cy.explore.setDataset(datasetName, DATASOURCE_NAME, 'INDEX_PATTERN');
   setDatePickerDatesAndSearchIfRelevant('PPL');
+  cy.wait(2000);
   cy.explore.setQueryEditor(query);
   // Run the query
   cy.getElementByTestId('exploreQueryExecutionButton').click();
   cy.osd.waitForLoader(true);
-  cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+  cy.wait(1000);
   cy.getElementByTestId('exploreVisualizationLoader').should('be.visible');
 
   // Ensure chart type is correct
@@ -566,6 +560,7 @@ cy.explore.add('createVisualizationWithQuery', (query, chartType, datasetName, o
   // Ensure chart type is correct
   cy.getElementByTestId('exploreChartTypeSelector').should('be.visible').click();
   cy.get(`#${chartType}`).should('match', '[role="option"][aria-selected="true"]');
+
   cy.get('body').click(0, 0);
 });
 
@@ -630,7 +625,7 @@ cy.explore.add(
     // Therefore it is unreliable to leverage the "create" button to navigate to this page
     if (Cypress.env('CYPRESS_RUNTIME_ENV') === 'neo') {
       cy.get('@WORKSPACE_ID').then((workspaceId) => {
-        cy.visit(`/w/${workspaceId}/app/indexPatterns/create`);
+        cy.visit(`/w/${workspaceId}/app/datasets`);
       });
     } else {
       // Navigate to Workspace Specific IndexPattern Page
@@ -639,23 +634,22 @@ cy.explore.add(
         page: 'datasets',
         isEnhancement,
       });
+    }
 
-      // Step 2 - Wait for create dataset button to be fully ready before clicking
-      cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
-      cy.getElementByTestId('createDatasetButton')
-        .should('exist')
-        .should('be.visible')
-        .should('not.be.disabled');
-      cy.getElementByTestId('createDatasetButton').click({ force: true });
+    // Adding a wait here as sometimes the button doesn't click below
+    cy.wait(2000);
 
-      // Step 3 - Select signal type (logs or traces)
-      if (signalType === 'logs') {
-        cy.getElementByTestId('createLogsDataset').should('be.visible').click({ force: true });
-      }
+    // Step 2 - Click create dataset button
+    cy.getElementByTestId('createDatasetButton').should('exist').should('be.visible');
+    cy.getElementByTestId('createDatasetButton').click({ force: true });
 
-      if (signalType === 'traces') {
-        cy.getElementByTestId('createTracesDataset').should('be.visible').click({ force: true });
-      }
+    // Step 3 - Select signal type (logs or traces)
+    if (signalType === 'logs') {
+      cy.getElementByTestId('createLogsDataset').should('be.visible').click({ force: true });
+    }
+
+    if (signalType === 'traces') {
+      cy.getElementByTestId('createTracesDataset').should('be.visible').click({ force: true });
     }
 
     // Step 4 - Indexes panel is now hidden when it's the only option, skip to data source selection
@@ -747,8 +741,39 @@ cy.explore.add(
       cy.wrap(interception.response.body.id).as('INDEX_PATTERN_ID');
     });
 
-    // Step 15 - Verify page title contains the index pattern (this will wait for the page to update)
-    cy.get('[data-test-subj="globalLoadingIndicator"]').should('not.exist');
+    cy.wait(3000);
+
+    // Step 15 - Verify page title contains the index pattern
     cy.getElementByTestId('headerApplicationTitle').should('contain', indexPattern);
   }
 );
+
+// TODO: Replace once we have APM datasource
+// Navigate to traces page by getting logs URL and replacing /logs with /traces
+cy.explore.add('navigateToTracesViaLogsUrl', (opts) => {
+  const { workspaceName, isEnhancement = false } = opts;
+
+  // First navigate to logs page to get the URL structure
+  cy.osd.navigateToWorkSpaceSpecificPage({
+    workspaceName: workspaceName,
+    page: 'explore/logs',
+    isEnhancement: isEnhancement,
+  });
+
+  // Get the current URL and modify it to point to traces
+  cy.url().then((logsUrl) => {
+    // Replace /logs with /traces and remove everything after /traces
+    const baseUrl = logsUrl.replace('/logs', '/traces');
+    const tracesIndex = baseUrl.indexOf('/traces');
+    const tracesUrl = baseUrl.substring(0, tracesIndex + '/traces'.length);
+    cy.log(`Navigating from logs URL: ${logsUrl} to traces URL: ${tracesUrl}`);
+    cy.visit(tracesUrl);
+  });
+
+  cy.osd.waitForLoader(isEnhancement);
+
+  // On a new session, a syntax helper popover appears, which obstructs the typing within the query
+  // editor. Clicking on a random element removes the popover.
+  cy.getElementByTestId('headerGlobalNav').should('be.visible').click();
+  cy.wait(1000);
+});

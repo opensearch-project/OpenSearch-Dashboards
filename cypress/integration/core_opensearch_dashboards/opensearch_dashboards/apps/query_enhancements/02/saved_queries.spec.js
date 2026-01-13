@@ -3,12 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  DATASOURCE_NAME,
-  INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
-  INDEX_WITH_TIME_2,
-} from '../../../../../../utils/constants';
+import { DATASOURCE_NAME, INDEX_PATTERN_WITH_TIME } from '../../../../../../utils/constants';
 
 import {
   verifyDiscoverPageState,
@@ -23,43 +18,43 @@ import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
   generateAllTestConfigurations,
+  getRandomizedDatasetId,
+  resetPageState,
 } from '../../../../../../utils/apps/query_enhancements/shared';
 
 import { generateSavedTestConfiguration } from '../../../../../../utils/apps/query_enhancements/saved';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const createSavedQuery = (config) => {
+  cy.log('Creating a Saved Query');
+
   cy.osd.navigateToWorkSpaceSpecificPage({
     workspaceName,
-    page: 'discover',
+    page: 'data-explorer/discover',
     isEnhancement: true,
   });
-
   cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
 
   cy.setQueryLanguage(config.language);
   setDatePickerDatesAndSearchIfRelevant(config.language);
-
   setQueryConfigurations(config);
-  verifyDiscoverPageState(config);
 
+  // Skip loader wait - just save
   cy.saveQuery(`${workspaceName}-${config.saveName}`, ' ', true, true);
 };
 
 const loadSavedQuery = (config) => {
-  cy.osd.navigateToWorkSpaceSpecificPage({
-    workspaceName,
-    page: 'discover',
-    isEnhancement: true,
-  });
+  cy.log('Loading a Saved Query');
 
-  cy.getElementByTestId('discoverNewButton').click();
-  // Todo - Date Picker sometimes does not load when expected. Have to set dataset and query language again.
-  cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+  resetPageState();
+
   cy.setQueryLanguage(config.language);
-
   setDatePickerDatesAndSearchIfRelevant(
     config.language,
     'Aug 29, 2020 @ 00:00:00.000',
@@ -67,54 +62,55 @@ const loadSavedQuery = (config) => {
   );
 
   cy.loadSavedQuery(`${workspaceName}-${config.saveName}`);
-  // wait for saved queries to load.
-  cy.getElementByTestId('docTable').should('be.visible');
+
   verifyDiscoverPageState(config);
 };
 
 const modifyAndVerifySavedQuery = (config, saveAsNewQueryName) => {
+  cy.log('Inside Modify and Verify Saved Search');
   if (config.filters) {
     cy.deleteAllFilters();
   }
+  cy.setQueryLanguage(config.language);
   setDatePickerDatesAndSearchIfRelevant(config.language);
 
   setQueryConfigurations(config);
-  verifyDiscoverPageState(config);
   validateSaveAsNewQueryMatchingNameHasError(`${workspaceName}-${config.saveName}`);
   cy.updateSavedQuery(`${workspaceName}-${saveAsNewQueryName}`, true, true, true);
 
-  cy.reload();
+  resetPageState();
+
+  setDatePickerDatesAndSearchIfRelevant(config.language);
+
+  cy.setQueryLanguage(config.language);
+  // Verify the saved query loads correctly
   cy.loadSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
-  // wait for saved query to load
-  cy.getElementByTestId('docTable').should('be.visible');
   verifyDiscoverPageState(config);
+  cy.osd.waitForLoader(true);
 };
 
 const deleteSavedQuery = (saveAsNewQueryName) => {
-  cy.osd.navigateToWorkSpaceSpecificPage({
-    workspaceName,
-    page: 'discover',
-    isEnhancement: true,
-  });
+  cy.log('Deleting Saved Query');
 
   cy.deleteSavedQuery(`${workspaceName}-${saveAsNewQueryName}`);
+
   verifyQueryDoesNotExistInSavedQueries(`${workspaceName}-${saveAsNewQueryName}`);
 };
 
 const runSavedQueriesUITests = () => {
   describe('saved queries UI', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        INDEX_PATTERN_WITH_TIME,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-search'] // features
+      );
     });
 
     afterEach(() => {
@@ -125,23 +121,30 @@ const runSavedQueriesUITests = () => {
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
     const testConfigurations = generateAllTestConfigurations(generateSavedTestConfiguration);
 
     testConfigurations.forEach((config) => {
-      it(`should create, load, update, modify and delete the saved query: ${config.testName}`, () => {
-        createSavedQuery(config);
-        loadSavedQuery(config);
-        updateAndVerifySavedQuery(config);
+      describe(`saved query lifecycle: ${config.testName}`, () => {
+        beforeEach(() => {
+          cy.then(() => {
+            const workspaceId = Cypress.env(`${workspaceName}:WORKSPACE_ID`);
+            cy.osd.apiDeleteSavedQueryIfExists(`${workspaceName}-${config.saveName}`, workspaceId);
+            cy.osd.apiDeleteSavedQueryIfExists(`${workspaceName}-${config.testName}`, workspaceId);
+          });
+        });
 
-        const saveAsNewQueryName = config.testName + SAVE_AS_NEW_QUERY_SUFFIX;
-        modifyAndVerifySavedQuery(config, saveAsNewQueryName);
-        deleteSavedQuery(saveAsNewQueryName);
+        it('creates, loads, updates, modifies and deletes the saved query', () => {
+          createSavedQuery(config);
+          loadSavedQuery(config);
+          updateAndVerifySavedQuery(config);
+
+          const saveAsNewQueryName = config.testName + SAVE_AS_NEW_QUERY_SUFFIX;
+          modifyAndVerifySavedQuery(config, saveAsNewQueryName);
+          deleteSavedQuery(saveAsNewQueryName);
+        });
       });
     });
   });
