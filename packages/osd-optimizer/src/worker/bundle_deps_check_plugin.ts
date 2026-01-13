@@ -83,11 +83,13 @@ export class BundleDepsCheckPlugin {
                 continue;
               }
 
+              let foundMatch = false;
               for (const ref of possibleRefs) {
                 const resolvedEntry = this.resolve(`./${ref.entry}`, ref.contextDir, compiler);
                 if (userRequest !== resolvedEntry) {
                   continue;
                 }
+                foundMatch = true;
 
                 if (!this.allowedBundleIds.has(ref.bundleId)) {
                   const error = new Error(
@@ -104,15 +106,6 @@ export class BundleDepsCheckPlugin {
 
               // If we found possible refs but none matched, it's a non-public export error
               if (possibleRefs.length > 0) {
-                let foundMatch = false;
-                for (const ref of possibleRefs) {
-                  const resolvedEntry = this.resolve(`./${ref.entry}`, ref.contextDir, compiler);
-                  if (userRequest === resolvedEntry) {
-                    foundMatch = true;
-                    break;
-                  }
-                }
-
                 if (!foundMatch) {
                   const bundleId = Array.from(new Set(possibleRefs.map((r) => r.bundleId))).join(
                     ', '

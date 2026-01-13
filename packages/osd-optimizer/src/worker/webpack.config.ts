@@ -70,6 +70,7 @@ export const sassCompiler = {
     // Dispose of all SASS compilers to allow the process to exit cleanly
     compilers.forEach((compiler) => compiler.dispose());
     compilers.length = 0;
+    initPromise = undefined;
   },
 };
 
@@ -128,6 +129,16 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     optimization: {
       emitOnErrors: false,
       chunkIds: 'natural',
+      minimizer: [
+        new rspack.SwcJsMinimizerRspackPlugin({
+          extractComments: false,
+          minimizerOptions: {
+            compress: false,
+            mangle: false,
+          },
+        }),
+        new rspack.LightningCssMinimizerRspackPlugin(),
+      ],
     },
 
     externals: [UiSharedDeps.externals],
