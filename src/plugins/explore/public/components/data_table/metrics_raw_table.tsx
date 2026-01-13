@@ -169,25 +169,29 @@ export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label={i18n.translate('explore.metricsRawTable.expandResultsLabel', {
-              defaultMessage: 'Expand results',
-            })}
-            checked={expanded}
-            onChange={(e) => setExpanded(e.target.checked)}
-            compressed
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">
-            <FormattedMessage
-              id="explore.metricsRawTable.resultSeriesCount"
-              defaultMessage="Result series: {count}"
-              values={{ count: tableData.length }}
-            />
-          </EuiText>
+      <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="flexStart" alignItems="center" className="dscResultCount">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <FormattedMessage
+                  id="explore.metricsRawTable.resultSeriesCount"
+                  defaultMessage="Result series: {count}"
+                  values={{ count: <strong>{tableData.length.toLocaleString()}</strong> }}
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={i18n.translate('explore.metricsRawTable.expandResultsLabel', {
+                  defaultMessage: 'Expand results',
+                })}
+                checked={expanded}
+                onChange={(e) => setExpanded(e.target.checked)}
+                compressed
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
