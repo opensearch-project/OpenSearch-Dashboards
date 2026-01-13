@@ -61,8 +61,7 @@ export const callAgentActionCreator = createAsyncThunk<
     const params: QueryAssistParameters = {
       question: editorText,
       index: dataset.title,
-      // TODO: when we introduce more query languages, this should be no longer be hardcoded to PPL
-      language: 'PPL',
+      language: dataset.type === 'PROMETHEUS' ? 'PROMQL' : 'PPL',
       dataSourceId: dataset.dataSource?.id,
       currentTime: moment().format('YYYY-MM-DD HH:mm:ss'),
       timeField: dataset.timeFieldName,

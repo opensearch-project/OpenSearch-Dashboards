@@ -21,6 +21,11 @@ export const configSchema = schema.object({
             agentConfig: 'os_query_assist_ppl',
             timeRangeParserAgentConfig: 'os_query_time_range_parser',
           },
+          {
+            language: 'PROMQL',
+            agentConfig: 'os_query_assist_promql',
+            timeRangeParserAgentConfig: 'os_query_time_range_parser',
+          },
         ],
       }
     ),

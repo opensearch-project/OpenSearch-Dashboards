@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -31,6 +31,29 @@ const PatternsContainerContent = () => {
 
   const usingRegexPatterns = useSelector(selectUsingRegexPatterns);
 
+  const logsTotal = histogramResults?.hits.total || 0;
+  const hits = useMemo(() => patternResults?.hits?.hits || [], [patternResults?.hits.hits]);
+
+  const items: PatternItem[] = useMemo(
+    () =>
+      hits?.map((row: any) => ({
+        // not including null check for logs total, the table will handle errors and we want to
+        //    display the other information if it can appear fine
+        ratio: row._source[COUNT_FIELD] / logsTotal,
+        count: row._source[COUNT_FIELD],
+        // SAMPLE_FIELD needs [0] because the sample will be an array, but we're showing a 'sample' so 0th is fine
+        sample: usingRegexPatterns
+          ? row._source[SAMPLE_FIELD][0]
+          : highlightLogUsingPattern(row._source[SAMPLE_FIELD][0], row._source[PATTERNS_FIELD]),
+        flyout: {
+          pattern: row._source[PATTERNS_FIELD],
+          count: row._source[COUNT_FIELD],
+          sample: row._source[SAMPLE_FIELD],
+        },
+      })),
+    [hits, logsTotal, usingRegexPatterns]
+  );
+
   if (status?.status === QueryExecutionStatus.LOADING) {
     return (
       <EuiFlexGroup
@@ -57,54 +80,29 @@ const PatternsContainerContent = () => {
     );
   }
 
-  try {
-    const logsTotal = histogramResults?.hits.total || 0; // uses the logs total to calc the event ratio
-
-    const hits = patternResults?.hits?.hits || [];
-
-    const hit = hits?.[0];
-    if (!hit) {
-      return null;
-    }
-
-    // Check if the hit has all required fields in hit._source
-    const requiredFields = [COUNT_FIELD, SAMPLE_FIELD, PATTERNS_FIELD];
-    const hasAllRequiredFields = requiredFields.every((field) => field in hit._source);
-
-    if (!hasAllRequiredFields) {
-      // doesn't match normal fields or calcite fields
-      const title = i18n.translate('explore.patterns.schemaUnexpected', {
-        defaultMessage: 'Expected schema not found',
-      });
-      return <EuiCallOut title={title} color="danger" iconType="alert" />;
-    }
-
-    // Convert rows to pattern items or use default if rows is undefined
-    const items: PatternItem[] = hits?.map((row: any) => ({
-      // not including null check for logs total, the table will handle errors and we want to
-      //    display the other information if it can appear fine
-      ratio: row._source[COUNT_FIELD] / logsTotal,
-      count: row._source[COUNT_FIELD],
-      // SAMPLE_FIELD needs [0] because the sample will be an array, but we're showing a 'sample' so 0th is fine
-      sample: usingRegexPatterns
-        ? row._source[SAMPLE_FIELD][0]
-        : highlightLogUsingPattern(row._source[SAMPLE_FIELD][0], row._source[PATTERNS_FIELD]),
-      flyout: {
-        pattern: row._source[PATTERNS_FIELD],
-        count: row._source[COUNT_FIELD],
-        sample: row._source[SAMPLE_FIELD],
-      },
-    }));
-
-    return (
-      <>
-        {isFlyoutOpen && <PatternsTableFlyout />}
-        <PatternsTable items={items} />
-      </>
-    );
-  } catch {
-    return <></>;
+  const hit = hits?.[0];
+  if (!hit) {
+    return null;
   }
+
+  // Check if the hit has all required fields in hit._source
+  const requiredFields = [COUNT_FIELD, SAMPLE_FIELD, PATTERNS_FIELD];
+  const hasAllRequiredFields = requiredFields.every((field) => field in hit._source);
+
+  if (!hasAllRequiredFields) {
+    // doesn't match normal fields or calcite fields
+    const title = i18n.translate('explore.patterns.schemaUnexpected', {
+      defaultMessage: 'Expected schema not found',
+    });
+    return <EuiCallOut title={title} color="danger" iconType="alert" />;
+  }
+
+  return (
+    <>
+      {isFlyoutOpen && <PatternsTableFlyout />}
+      <PatternsTable items={items} />
+    </>
+  );
 };
 
 export const PatternsContainer = () => {
