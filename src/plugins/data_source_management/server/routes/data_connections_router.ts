@@ -176,9 +176,6 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
     {
       path: `${DATACONNECTIONS_BASE}`,
       validate: {
-        query: schema.object({
-          dataSourceMDSId: schema.maybe(schema.string()),
-        }),
         body: schema.object({
           name: schema.string(),
           connector: schema.string(),
@@ -192,14 +189,11 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
       request,
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
-      const dataSourceMDSId = request.query.dataSourceMDSId;
       try {
-        const client =
-          dataSourceEnabled && dataSourceMDSId
-            ? context.dataSource.opensearch.legacy.getClient(dataSourceMDSId).callAPI
-            : // @ts-expect-error TS2339 TODO(ts-error): fixme
-              context.opensearch_data_source_management.dataSourceManagementClient.asScoped(request)
-                .callAsCurrentUser;
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
+        const client = context.opensearch_data_source_management.dataSourceManagementClient.asScoped(
+          request
+        ).callAsCurrentUser;
 
         const dataConnectionsresponse = await client('ppl.createDataSource', {
           body: {
@@ -212,19 +206,11 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
 
         // Create data-connection saved object for Prometheus datasources
         if (dataSourceEnabled && request.body.connector === 'prometheus') {
-          await context.core.savedObjects.client.create(
-            'data-connection',
-            {
-              connectionId: request.body.name,
-              type: DataConnectionType.Prometheus,
-              meta: JSON.stringify({ properties: request.body.properties }),
-            },
-            {
-              references: dataSourceMDSId
-                ? [{ id: dataSourceMDSId, type: 'data-source', name: 'dataSource' }]
-                : [],
-            }
-          );
+          await context.core.savedObjects.client.create('data-connection', {
+            connectionId: request.body.name,
+            type: DataConnectionType.Prometheus,
+            meta: JSON.stringify({ properties: request.body.properties }),
+          });
         }
 
         return response.ok({ body: dataConnectionsresponse });
@@ -381,7 +367,6 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
           type: 'data-connection',
           search: request.params.name,
           searchFields: ['connectionId'],
-          ...(dataSourceMDSId && { hasReference: { id: dataSourceMDSId, type: 'data-source' } }),
         });
 
         if (savedObjects.total > 0) {
