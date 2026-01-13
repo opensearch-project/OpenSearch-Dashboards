@@ -176,7 +176,7 @@ export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }
               <EuiText size="s">
                 <FormattedMessage
                   id="explore.metricsRawTable.resultSeriesCount"
-                  defaultMessage="Result series: {count}"
+                  defaultMessage="{count} result series"
                   values={{ count: <strong>{tableData.length.toLocaleString()}</strong> }}
                 />
               </EuiText>
