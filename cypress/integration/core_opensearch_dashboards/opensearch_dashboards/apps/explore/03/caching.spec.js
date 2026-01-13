@@ -92,7 +92,7 @@ const cachingTestSuite = () => {
       cy.getElementByTestId('datasetSelectSelectable')
         .should('be.visible')
         .within(() => {
-          cy.get(`[title="${alternativeIndexPattern}Index Patterns"]`).should('exist');
+          cy.getElementByTestId(`datasetSelectOption-${alternativeIndexPattern}`).should('exist');
         });
     });
   });

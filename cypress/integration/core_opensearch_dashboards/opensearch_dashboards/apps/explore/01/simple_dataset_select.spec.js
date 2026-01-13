@@ -163,7 +163,7 @@ export const runSimpleDatasetSelectorTests = () => {
       for (let i = 1; i <= noIndexPatterns; i++) {
         validateItemsInSimpleDatasetSelectorDropDown(
           `${INDEX_PATTERN_WITH_TIME.slice(0, i)}`,
-          noIndexPatterns - i + 1
+          noIndexPatterns
         );
       }
     });
