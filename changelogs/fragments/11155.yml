@@ -1,0 +1,2 @@
+refactor:
+- Add echarts implementation of metric visualization ([#11155](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11155))

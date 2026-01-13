@@ -72,7 +72,14 @@ const queriesTestSuite = () => {
 
         // Query should persist across refresh
         cy.reload();
-        cy.getElementByTestId(`discoverQueryElapsedMs`).should('be.visible');
+        cy.osd.waitForLoader(true);
+        // Wait for dataset to be fully loaded after reload
+        cy.getElementByTestId('datasetSelectButton', { timeout: 30000 })
+          .should('be.visible')
+          .should('not.be.disabled');
+        // Wait for page to fully stabilize and query to execute
+        cy.osd.waitForLoader(true);
+        cy.getElementByTestId(`discoverQueryElapsedMs`, { timeout: 30000 }).should('be.visible');
 
         // Verify the state again after reload
         verifyDiscoverPageState({
@@ -147,7 +154,8 @@ const queriesTestSuite = () => {
         cy.get('button[role="tab"]').contains('Logs').click();
         cy.get('button[role="tab"][aria-selected="true"]').contains('Logs').should('be.visible');
 
-        cy.explore.setTopNavDate(START_TIME, START_TIME);
+        // Change date range to trigger query re-execution (use valid range)
+        cy.explore.setTopNavDate('Jan 1, 2020 @ 00:00:00.000', 'Jan 2, 2020 @ 00:00:00.000');
 
         cy.getElementByTestId('exploreQueryExecutionButton').click();
         cy.osd.waitForLoader(true);

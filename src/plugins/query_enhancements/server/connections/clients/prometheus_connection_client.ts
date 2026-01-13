@@ -19,6 +19,7 @@ export class PrometheusConnectionClient extends BaseConnectionClient<OpenSearchC
 
   constructor(context: RequestHandlerContext, _request: OpenSearchDashboardsRequest) {
     super();
+    // Prometheus connections are always created with "Local Cluster". Always use the non-MDS client.
     this.client = context.core.opensearch.client.asCurrentUser;
   }
 
