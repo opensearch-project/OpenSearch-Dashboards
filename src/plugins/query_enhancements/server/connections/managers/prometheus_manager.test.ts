@@ -88,6 +88,7 @@ describe('PrometheusManager', () => {
     it('should fetch label values', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['prometheus', 'node_exporter'],
         },
       };
@@ -111,6 +112,7 @@ describe('PrometheusManager', () => {
     it('should fetch metrics', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['up', 'node_cpu_seconds_total', 'prometheus_http_requests_total'],
         },
       };
@@ -138,6 +140,7 @@ describe('PrometheusManager', () => {
     it('should fetch metric metadata', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: {
             up: [{ type: 'gauge', help: 'Target up status', unit: '' }],
           },
@@ -164,6 +167,7 @@ describe('PrometheusManager', () => {
     it('should fetch metric metadata with specific metric', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: {
             up: [{ type: 'gauge', help: 'Target up status', unit: '' }],
           },
@@ -188,6 +192,7 @@ describe('PrometheusManager', () => {
     it('should fetch alerts', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: {
             alerts: [{ labels: { alertname: 'TestAlert' }, state: 'firing' }],
           },
@@ -212,6 +217,7 @@ describe('PrometheusManager', () => {
     it('should fetch alert manager alert groups', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: [{ labels: { alertname: 'TestAlert' }, alerts: [] }],
         },
       };
@@ -234,6 +240,7 @@ describe('PrometheusManager', () => {
     it('should fetch rules', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: {
             groups: [{ name: 'test-rules', rules: [] }],
           },
@@ -258,6 +265,7 @@ describe('PrometheusManager', () => {
     it('should include query parameters in querystring', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['label1'],
         },
       };
@@ -307,6 +315,7 @@ describe('PrometheusManager', () => {
     it('should handle POST request with resourceName', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['value1', 'value2'],
         },
       };
@@ -376,10 +385,7 @@ describe('PrometheusManager', () => {
       const result = await prometheusManager.query(mockContext, mockRequest, params);
 
       expect(mockExecutor.execute).toHaveBeenCalledWith(mockContext, mockRequest, params);
-      expect(result).toEqual({
-        status: 'success',
-        data: mockQueryResponse,
-      });
+      expect(result).toEqual(mockQueryResponse);
     });
 
     it('should throw error when query executor throws error', async () => {

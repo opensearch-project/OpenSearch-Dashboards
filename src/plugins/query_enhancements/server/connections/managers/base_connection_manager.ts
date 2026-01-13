@@ -8,7 +8,7 @@ import {
   OpenSearchDashboardsRequest,
   RequestHandlerContext,
 } from 'src/core/server';
-import { BaseConnectionClient, QueryResponse } from '../clients/base_connection_client';
+import { BaseConnectionClient } from '../clients/base_connection_client';
 
 type ClientFactory<T> = (
   context: RequestHandlerContext,
@@ -88,15 +88,11 @@ export abstract class BaseConnectionManager<
     context: RequestHandlerContext,
     request: OpenSearchDashboardsRequest,
     params: TQueryParams
-  ): Promise<QueryResponse<TQueryResponse>> {
+  ): Promise<TQueryResponse> {
     if (!this.queryExecutor) {
       throw new Error('No query executor available');
     }
-    const response = await this.queryExecutor.execute(context, request, params);
-    return {
-      status: 'success',
-      data: response,
-    };
+    return this.queryExecutor.execute(context, request, params);
   }
 
   abstract handlePostRequest(

@@ -140,19 +140,19 @@ async function executeMultipleQueries(
         dataconnection: datasetId,
       };
 
-      const queryRes = await prometheusManager.query(context, request, params);
+      try {
+        const queryRes = await prometheusManager.query(context, request, params);
 
-      if (queryRes.status === 'failed') {
         return {
           label: parsedQuery.label,
-          error: queryRes.error || `Query ${parsedQuery.label} failed`,
+          response: queryRes,
+        };
+      } catch (error) {
+        return {
+          label: parsedQuery.label,
+          error: error instanceof Error ? error.message : `Query ${parsedQuery.label} failed`,
         };
       }
-
-      return {
-        label: parsedQuery.label,
-        response: queryRes.data,
-      };
     }
   );
 

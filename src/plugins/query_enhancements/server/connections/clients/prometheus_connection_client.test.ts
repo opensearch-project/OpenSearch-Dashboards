@@ -59,10 +59,10 @@ describe('PrometheusConnectionClient', () => {
       });
     });
 
-    it('should pass through failed status from response body', async () => {
+    it('should pass through error status from response body', async () => {
       const mockResponse = {
         body: {
-          status: 'failed',
+          status: 'error',
           data: null,
         },
       };
@@ -75,7 +75,7 @@ describe('PrometheusConnectionClient', () => {
       });
 
       expect(result).toEqual({
-        status: 'failed',
+        status: 'error',
         data: null,
         type: 'prometheus',
       });
