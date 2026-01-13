@@ -47,6 +47,7 @@ import {
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
 import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
+import { DataPublicPluginStart } from '../../../plugins/data/public';
 import {
   enrichBreadcrumbsWithWorkspace,
   filterWorkspaceConfigurableApps,
@@ -92,6 +93,7 @@ interface WorkspacePluginSetupDeps {
 export interface WorkspacePluginStartDeps {
   contentManagement: ContentManagementPluginStart;
   navigation: NavigationPublicPluginStart;
+  data: DataPublicPluginStart;
 }
 
 export class WorkspacePlugin
@@ -298,7 +300,7 @@ export class WorkspacePlugin
     await this.workspaceValidationService.setup(core, workspaceId);
 
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
-      const [coreStart, { navigation }] = await core.getStartServices();
+      const [coreStart, { navigation, data }] = await core.getStartServices();
       const workspaceClient = coreStart.workspaces.client$.getValue() as WorkspaceClient;
 
       const services: Services = {
@@ -308,6 +310,7 @@ export class WorkspacePlugin
         collaboratorTypes: this.collaboratorTypes,
         navigationUI: navigation.ui,
         useCaseService: this.useCase,
+        data,
       };
 
       return renderApp(params, services, {
