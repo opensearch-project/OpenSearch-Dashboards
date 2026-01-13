@@ -854,7 +854,7 @@ cy.osd.add('apiDeleteSavedQueryIfExists', (queryName, workspaceName, endpoint) =
 
           cy.request({
             method: 'DELETE',
-            url: `${baseUrl}/api/saved_objects/search/${savedQuery.id}`,
+            url: `${baseUrl}/api/saved_objects/query/${savedQuery.id}`,
             headers: { 'osd-xsrf': true },
             failOnStatusCode: false,
           }).then((deleteResponse) => {
@@ -873,110 +873,6 @@ cy.osd.add('apiDeleteSavedQueryIfExists', (queryName, workspaceName, endpoint) =
     }
   });
 });
-
-/**
- * Creates a dataset (index pattern) by making an API request to the endpoint
- * @param {string} datasetId The unique ID for the dataset to be created
- * @param {string} workspaceId The ID of the workspace where the dataset will be created
- * @param {string} datasourceId The ID of the data source to associate with the dataset
- * @param {Object} options Configuration options for the dataset
- * @param {string} options.title The title/name of the dataset
- * @param {string} [options.displayName] Optional display name for the dataset
- * @param {string} [options.signalType] Signal type for the dataset (default: "logs")
- * @param {string} options.timestamp The name of the time field
- * @param {Array} [options.fields] Optional fields array, defaults to defaultFieldsForDatasetCreation
- * @param {string} aliasName The alias name to save the dataset ID under (e.g., 'WorkSpace:DataSetId')
- * @param {string} [endpoint] Optional endpoint URL, defaults to baseUrl from Cypress config
- */
-cy.osd.add(
-  'createDatasetByEndpoint',
-  (datasetId, workspaceId, datasourceId, options, aliasName, endpoint) => {
-    const baseUrl = endpoint || Cypress.config('baseUrl') || '';
-    const fields = options.fields || defaultFieldsForDatasetCreation;
-
-    // Build attributes object conditionally
-    const attributes = {
-      title: options.title,
-      displayName: options.displayName || '',
-      signalType: options.signalType || 'logs',
-      fields: fields,
-      schemaMappings: options.schemaMappings || '{}',
-    };
-
-    // Only include timeFieldName if timestamp is provided
-    if (options.timestamp) {
-      attributes.timeFieldName = options.timestamp;
-    }
-
-    cy.request({
-      method: 'POST',
-      url: `${baseUrl}/api/saved_objects/index-pattern/${datasourceId}::${datasetId}`,
-      headers: {
-        'osd-xsrf': true,
-      },
-      body: {
-        attributes: attributes,
-        references: [
-          {
-            id: datasourceId,
-            type: 'OpenSearch',
-            name: 'dataSource',
-          },
-        ],
-        workspaces: [workspaceId],
-      },
-    }).then((response) => {
-      // Validate successful response
-      expect(response.status).to.be.oneOf([200, 201]);
-      expect(response.body).to.have.property('id');
-
-      // Log success
-      cy.log(`Dataset created successfully: ${options.title} (ID: ${response.body.id})`);
-
-      // Save the dataset ID as an alias with WorkSpace:DataSetId format
-      cy.wrap(response.body.id).as(aliasName);
-    });
-  }
-);
-
-/**
- * Creates a workspace with a specific data source ID
- * @param {string} datasourceId The ID of the data source to associate with the workspace
- * @param {string} workspaceName The name for the workspace
- * @param {string} [endpoint] Optional endpoint URL, defaults to baseUrl from Cypress config
- * @param {string} [aliasName] Optional custom alias name, defaults to 'WORKSPACE_ID'
- */
-cy.osd.add(
-  'createWorkspaceWithDataSourceId',
-  (datasourceId, workspaceName, useCase, aliasName = 'WORKSPACE_ID', endpoint) => {
-    const baseUrl = endpoint || Cypress.config('baseUrl') || '';
-
-    cy.createWorkspaceWithEndpoint(baseUrl, {
-      name: workspaceName,
-      features: useCase || ['use-case-observability'],
-      settings: {
-        permissions: {
-          library_write: { users: ['%me%'] },
-          write: { users: ['%me%'] },
-        },
-        dataSources: [datasourceId],
-        dataConnections: [],
-      },
-    }).then((response) => {
-      // Validate successful response
-      expect(response).to.have.property('id');
-
-      // Log success
-      cy.log(`Workspace created successfully: ${workspaceName} (ID: ${response.id})`);
-
-      // Save the workspace ID as an alias (with custom name to avoid conflicts)
-      cy.wrap(response.id).as(aliasName);
-
-      // Also store in Cypress env for persistence across runs
-      Cypress.env(aliasName, response.id);
-    });
-  }
-);
 /*
   Create an No Auth Opensearch Datasource for tests
 */
@@ -1135,17 +1031,3 @@ cy.osd.add('deleteWorkSpace', (workspaceName) => {
     });
   });
 });
-
-cy.osd.add(
-  'setExplorePage',
-  (datasourceId, workspaceId, timeRange, datasetId, datasetOptions, query, endpoint) => {
-    const baseUrl = endpoint || Cypress.config('baseUrl') || '';
-
-    const dataset = `(dataSource:(id:${datasourceId},title:dataConn,type:OpenSearch),id:${datasetId},timeFieldName:'${datasetOptions.timeField}',title:'${datasetOptions.title},type:INDEX_PATTERN)`;
-    const encodedQuery = encodeURIComponent(query);
-
-    cy.visit(
-      `${baseUrl}/w/${workspaceId}/app/explore/logs/#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${timeRange.from},to:${timeRange.to}))&_q=(dataset:${dataset},language:PPL,query:'${encodedQuery}')`
-    );
-  }
-);

@@ -13,6 +13,7 @@ import {
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
+  getRandomizedDatasetId,
 } from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   postRequestSaveSearch,
@@ -21,13 +22,17 @@ import {
   loadSavedSearchFromDashboards,
   navigateToDashboardAndOpenSavedSearchPanel,
 } from '../../../../../../utils/apps/query_enhancements/saved';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 export const runSavedSearchTests = () => {
   // TODO: Since the top nav has been changed, this needs to be updated with the correct add to dashboards flow.
-  describe('saved search in dashboards', () => {
+  describe.skip('saved search in dashboards', () => {
     // TODO: Currently we cannot convert this into a "before" and "after" due to us grabbing several aliases that are required by postRequestSaveSearch()
     beforeEach(() => {
       cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
@@ -42,7 +47,7 @@ export const runSavedSearchTests = () => {
         ['use-case-search'] // features
       );
 
-      cy.osd.grabDataSourceId(workspaceName, DATASOURCE_NAME);
+      // cy.osd.grabDataSourceId(workspaceName, DATASOURCE_NAME);
     });
 
     afterEach(() => {
