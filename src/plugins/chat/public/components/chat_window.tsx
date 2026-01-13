@@ -30,7 +30,7 @@ import { ChatInput } from './chat_input';
 
 export interface ChatWindowInstance{
   startNewChat: ()=>void;
-  sendMessage: (options:{content: string})=>Promise<unknown>;
+  sendMessage: (options:{content: string; messages?: Message[]})=>Promise<unknown>;
 }
 
 interface ChatWindowProps {
@@ -115,7 +115,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     chatService.updateCurrentMessages(timeline);
   }, [timeline, chatService]);
 
-  const handleSend = async (options?: {input?: string}) => {
+  const handleSend = async (options?: {input?: string; messages?: Message[]}) => {
     const messageContent = options?.input ?? input.trim();
     if (!messageContent || isStreaming) return;
 
@@ -123,12 +123,19 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setIsStreaming(true);
 
     try {
+      // Prepare additional messages for sending (but don't add to timeline yet)
+      const additionalMessages = options?.messages ?? [];
+
+      // Merge additional messages with current timeline for sending
+      const messagesToSend = [...timeline, ...additionalMessages];
+
       const { observable, userMessage } = await chatService.sendMessage(
         messageContent,
-        timeline
+        messagesToSend
       );
 
-      // Add user message immediately to timeline
+      // Add the final merged user message to timeline
+      // (chat_service already merged any additional messages with the text)
       const timelineUserMessage: UserMessage = {
         id: userMessage.id,
         role: 'user',
@@ -249,7 +256,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   useImperativeHandle(ref, ()=>({
     startNewChat: ()=>handleNewChat(),
-    sendMessage: async ({content})=>(await handleSendRef.current?.({input:content}))
+    sendMessage: async ({content, messages})=>(await handleSendRef.current?.({input:content, messages}))
   }), [handleNewChat]);
 
   return (
