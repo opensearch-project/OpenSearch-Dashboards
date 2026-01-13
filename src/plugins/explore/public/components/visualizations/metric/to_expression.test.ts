@@ -13,6 +13,7 @@ jest.mock('../utils/utils', () => ({
   calculateValue: jest.fn().mockReturnValue(45),
   getTooltipFormat: jest.fn().mockReturnValue('%b %d, %Y %H:%M:%S'),
   getMaxAndMinBase: jest.fn(() => ({ minBase: 10, maxBase: 200 })),
+  getChartRender: jest.fn().mockReturnValue('vega'),
 }));
 
 describe('to_expression', () => {
