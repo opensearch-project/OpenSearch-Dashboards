@@ -104,7 +104,7 @@ export function pipe<T extends BaseChartStyle>(
 /**
  * Get ECharts axis type from VisColumn schema
  */
-function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time' {
+export function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time' {
   if (!axis) return 'value';
 
   switch (axis.schema) {
@@ -124,9 +124,11 @@ function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time'
 export const createBaseConfig = <T extends BaseChartStyle>({
   title,
   addTrigger = true,
+  addLegend = true,
 }: {
   title?: string;
   addTrigger?: boolean;
+  addLegend?: boolean;
 }) => (state: EChartsSpecState<T>): EChartsSpecState<T> => {
   const { styles, axisConfig } = state;
 
@@ -139,12 +141,14 @@ export const createBaseConfig = <T extends BaseChartStyle>({
       ...(axisConfig && addTrigger && { trigger: 'axis' }),
       axisPointer: { type: 'shadow' },
     },
-    legend: {
-      ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
-        ? { orient: 'vertical' }
-        : {}),
-      [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%', // distance between legend and the corresponding orientation edge side of the container
-    },
+    ...(addLegend && {
+      legend: {
+        ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
+          ? { orient: 'vertical' }
+          : {}),
+        [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%', // distance between legend and the corresponding orientation edge side of the container
+      },
+    }),
   };
 
   return { ...state, baseConfig };

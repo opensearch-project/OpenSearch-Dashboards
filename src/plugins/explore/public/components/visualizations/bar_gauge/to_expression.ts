@@ -8,7 +8,7 @@ import { BarGaugeChartStyle } from './bar_gauge_vis_config';
 import { VisColumn, AxisColumnMappings, VEGASCHEMA, Threshold, VisFieldType } from '../types';
 import { calculateValue } from '../utils/calculation';
 import { getColors } from '../theme/default_colors';
-import { getSchemaByAxis } from '../utils/utils';
+import { getSchemaByAxis, getChartRender } from '../utils/utils';
 import {
   getBarOrientation,
   thresholdsToGradient,
@@ -16,8 +16,11 @@ import {
   generateParams,
   generateThresholds,
   generateValueThresholds,
+  createBarGaugeSeries,
 } from './bar_gauge_utils';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
+import { pipe, createBaseConfig, assembleSpec } from '../utils/echarts_spec';
+import { aggregate, transform } from '../utils/data_transformation';
 
 export const createBarGaugeSpec = (
   transformedData: Array<Record<string, any>>,
@@ -27,6 +30,43 @@ export const createBarGaugeSpec = (
   styleOptions: BarGaugeChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
+  if (getChartRender() === 'echarts') {
+    const { xAxis, yAxis } = getBarOrientation(styleOptions, axisColumnMappings);
+    if (!xAxis || !yAxis) {
+      throw Error('Missing axis config for Bar chart');
+    }
+
+    let categoryField = '';
+    let valueField = '';
+
+    if (xAxis.schema === VisFieldType.Categorical) {
+      categoryField = xAxis.column;
+      valueField = yAxis.column;
+    } else if (yAxis.schema === VisFieldType.Categorical) {
+      categoryField = yAxis.column;
+      valueField = xAxis.column;
+    }
+
+    const result = pipe(
+      transform(
+        aggregate({
+          groupBy: categoryField,
+          field: valueField,
+          calculateType: styleOptions.valueCalculation,
+        })
+      ),
+      createBaseConfig({ title: `${yAxis?.name} by ${xAxis?.name}`, addLegend: false }),
+      createBarGaugeSeries({ styles: styleOptions, categoryField, valueField }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles: styleOptions,
+      axisConfig: {},
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+    return result.spec;
+  }
+
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getBarOrientation(
     styleOptions,
     axisColumnMappings
