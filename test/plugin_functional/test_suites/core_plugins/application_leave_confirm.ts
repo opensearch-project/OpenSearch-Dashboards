@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 const getOpenSearchDashboardsUrl = (pathname?: string, search?: string) => {
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
         await testSubjects.existOrFail('appLeaveConfirmModal');
         await PageObjects.common.clickCancelOnModal(false);
-        expect(await browser.getCurrentUrl()).to.eql(getOpenSearchDashboardsUrl('/app/appleave1'));
+        expect(await browser.getCurrentUrl()).toEqual(getOpenSearchDashboardsUrl('/app/appleave1'));
       });
       it('allows navigation if user click confirm on the confirmation dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
         await testSubjects.existOrFail('appLeaveConfirmModal');
         await PageObjects.common.clickConfirmOnModal();
-        expect(await browser.getCurrentUrl()).to.eql(getOpenSearchDashboardsUrl('/app/appleave2'));
+        expect(await browser.getCurrentUrl()).toEqual(getOpenSearchDashboardsUrl('/app/appleave2'));
       });
     });
   });

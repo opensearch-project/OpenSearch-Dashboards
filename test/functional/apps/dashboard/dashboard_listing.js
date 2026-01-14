@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
     describe('create prompt', () => {
       it('appears when there are no dashboards', async function () {
         const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
-        expect(promptExists).to.be(true);
+        expect(promptExists).toBe(true);
       });
 
       it('creates a new dashboard', async function () {
@@ -58,14 +58,14 @@ export default function ({ getService, getPageObjects }) {
 
       it('is not shown when there is a dashboard', async function () {
         const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
-        expect(promptExists).to.be(false);
+        expect(promptExists).toBe(false);
       });
 
       it('is not shown when there are no dashboards shown during a search', async function () {
         await listingTable.searchAndExpectItemsCount('dashboard', 'gobeldeguck', 0);
 
         const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
-        expect(promptExists).to.be(false);
+        expect(promptExists).toBe(false);
       });
     });
 
@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }) {
         await browser.get(newUrl.toString(), useTimeStamp);
 
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
-        expect(onDashboardLandingPage).to.equal(false);
+        expect(onDashboardLandingPage).toEqual(false);
       });
 
       it('title match is case insensitive', async function () {
@@ -154,7 +154,7 @@ export default function ({ getService, getPageObjects }) {
         await browser.get(newUrl.toString(), useTimeStamp);
 
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
-        expect(onDashboardLandingPage).to.equal(false);
+        expect(onDashboardLandingPage).toEqual(false);
       });
 
       it('stays on listing page if title matches no dashboards', async function () {
@@ -167,12 +167,12 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
-        expect(onDashboardLandingPage).to.equal(true);
+        expect(onDashboardLandingPage).toEqual(true);
       });
 
       it('preloads search filter bar when there is no match', async function () {
         const searchFilter = await listingTable.getSearchFilterValue();
-        expect(searchFilter).to.equal('"nodashboardsnamedme"');
+        expect(searchFilter).toEqual('"nodashboardsnamedme"');
       });
 
       it('stays on listing page if title matches two dashboards', async function () {
@@ -187,12 +187,12 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
-        expect(onDashboardLandingPage).to.equal(true);
+        expect(onDashboardLandingPage).toEqual(true);
       });
 
       it('preloads search filter bar when there is more than one match', async function () {
         const searchFilter = await listingTable.getSearchFilterValue();
-        expect(searchFilter).to.equal('"two words"');
+        expect(searchFilter).toEqual('"two words"');
       });
 
       it('matches a title with many special characters', async function () {
@@ -210,7 +210,7 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
-        expect(onDashboardLandingPage).to.equal(false);
+        expect(onDashboardLandingPage).toEqual(false);
       });
     });
   });

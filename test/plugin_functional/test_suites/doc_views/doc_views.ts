@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
@@ -50,14 +50,14 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       );
       await expandButtons[0].click();
       const reactTab = await find.byButtonText('React doc view');
-      expect(await reactTab.isDisplayed()).to.be(true);
+      expect(await reactTab.isDisplayed()).toBe(true);
     });
 
     it('should render react doc view', async () => {
       const reactTab = await find.byButtonText('React doc view');
       await reactTab.click();
       const reactContent = await testSubjects.find('react-docview');
-      expect(await reactContent.getVisibleText()).to.match(/logstash-2015\.09\.2[0-2]/);
+      expect(await reactContent.getVisibleText()).toMatch(/logstash-2015\.09\.2[0-2]/);
     });
   });
 }

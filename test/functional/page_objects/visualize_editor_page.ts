@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect/expect.js';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -488,7 +488,7 @@ export function VisualizeEditorPageProvider({ getService, getPageObjects }: FtrP
       const metrics = await find.allByCssSelector(
         '[data-test-subj="visualizationLoader"] .mtrVis .mtrVis__container'
       );
-      expect(metrics.length).greaterThan(index);
+      expect(metrics.length).toBeGreaterThan(index);
       await metrics[index].click();
     }
 

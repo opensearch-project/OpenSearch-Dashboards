@@ -30,7 +30,7 @@
 
 import { fork } from 'child_process';
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 const FTR_SCRIPT = require.resolve('../../../../../scripts/functional_test_runner');
 const CONFIG_PATH = require.resolve('./fixtures/several_nested_window_size_changes/config.js');
@@ -61,7 +61,7 @@ describe('remote default window size', function () {
       proc.once('error', reject);
     });
 
-    expect(messages).to.eql([
+    expect(messages).toEqual([
       // default width/height
       { name: 'before suite1', size: DEFAULT_SIZE },
       // suite1 uses 1000X1000

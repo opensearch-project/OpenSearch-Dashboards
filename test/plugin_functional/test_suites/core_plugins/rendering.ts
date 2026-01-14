@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 
 import '../../plugins/core_provider_plugin/types';
 import { PluginFunctionalProviderContext } from '../../services';
@@ -85,11 +85,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         getUserSettings(),
       ]);
 
-      expect(userSettings).to.not.be.empty();
+      expect(userSettings).not.toBe('');
 
       await find.waitForElementStale(loadingMessage);
 
-      expect(await exists('renderingHeader')).to.be(true);
+      expect(await exists('renderingHeader')).toBe(true);
     });
 
     it('renders "core" application without user settings', async () => {
@@ -100,11 +100,11 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         getUserSettings(),
       ]);
 
-      expect(userSettings).to.be.empty();
+      expect(userSettings).toBe('');
 
       await find.waitForElementStale(loadingMessage);
 
-      expect(await exists('renderingHeader')).to.be(true);
+      expect(await exists('renderingHeader')).toBe(true);
     });
 
     it('navigates between standard application and one with custom appRoute', async () => {
@@ -112,18 +112,18 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await find.waitForElementStale(await findLoadingMessage());
 
       await navigateToApp('App Status');
-      expect(await exists('appStatusApp')).to.be(true);
-      expect(await exists('renderingHeader')).to.be(false);
+      expect(await exists('appStatusApp')).toBe(true);
+      expect(await exists('renderingHeader')).toBe(false);
 
       await navigateToApp('Rendering');
-      expect(await exists('appStatusApp')).to.be(false);
-      expect(await exists('renderingHeader')).to.be(true);
+      expect(await exists('appStatusApp')).toBe(false);
+      expect(await exists('renderingHeader')).toBe(true);
 
       await navigateToApp('App Status');
-      expect(await exists('appStatusApp')).to.be(true);
-      expect(await exists('renderingHeader')).to.be(false);
+      expect(await exists('appStatusApp')).toBe(true);
+      expect(await exists('renderingHeader')).toBe(false);
 
-      expect(await getRenderingSession()).to.eql([
+      expect(await getRenderingSession()).toEqual([
         '/app/app_status',
         '/render/core',
         '/app/app_status',
@@ -135,18 +135,18 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await find.waitForElementStale(await findLoadingMessage());
 
       await navigateToApp('Rendering');
-      expect(await exists('renderingHeader')).to.be(true);
-      expect(await exists('customAppRouteHeader')).to.be(false);
+      expect(await exists('renderingHeader')).toBe(true);
+      expect(await exists('customAppRouteHeader')).toBe(false);
 
       await navigateToApp('Custom App Route');
-      expect(await exists('customAppRouteHeader')).to.be(true);
-      expect(await exists('renderingHeader')).to.be(false);
+      expect(await exists('customAppRouteHeader')).toBe(true);
+      expect(await exists('renderingHeader')).toBe(false);
 
       await navigateToApp('Rendering');
-      expect(await exists('renderingHeader')).to.be(true);
-      expect(await exists('customAppRouteHeader')).to.be(false);
+      expect(await exists('renderingHeader')).toBe(true);
+      expect(await exists('customAppRouteHeader')).toBe(false);
 
-      expect(await getRenderingSession()).to.eql([
+      expect(await getRenderingSession()).toEqual([
         '/render/core',
         '/custom/appRoute',
         '/render/core',

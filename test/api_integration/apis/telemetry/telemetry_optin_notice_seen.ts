@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { Client, DeleteDocumentParams, GetParams, GetResponse } from 'elasticsearch';
 import { TelemetrySavedObjectAttributes } from 'src/plugins/telemetry/server/telemetry_repository';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -61,7 +61,7 @@ export default function optInTest({ getService }: FtrProviderContext) {
         id: 'telemetry:telemetry',
       } as GetParams);
 
-      expect(telemetry.userHasSeenNotice).to.be(true);
+      expect(telemetry.userHasSeenNotice).toBe(true);
     });
   });
 }

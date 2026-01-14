@@ -4,7 +4,6 @@
  */
 
 const EventEmitter = require('events').EventEmitter;
-const expect = require('chai').expect;
 const Host = require('elasticsearch/src/lib/host');
 const sinon = require('sinon');
 const { defaultProvider } = require('@aws-sdk/credential-provider-node');
@@ -23,7 +22,7 @@ describe('constructor', function () {
     const host = new Host();
     const connector = new Connector(host, { httpOptions });
 
-    expect(connector.httpOptions).to.deep.equal(httpOptions);
+    expect(connector.httpOptions).toStrictEqual(httpOptions);
   });
 });
 
@@ -64,7 +63,7 @@ describe('request', function () {
 
     connector.request({}, function (err) {
       try {
-        expect(err).to.deep.equal(error);
+        expect(err).toStrictEqual(error);
         done();
       } catch (e) {
         done(e);
@@ -95,7 +94,7 @@ describe('createRequest', () => {
 
     const request = connector.createRequest({}, reqParams);
 
-    expect(request.path).to.equal(reqParams.path);
+    expect(request.path).toEqual(reqParams.path);
   });
 
   it('should set Content-Length as a string for a string body', () => {
@@ -124,9 +123,9 @@ describe('createRequest', () => {
 
     // Calculate the expected content length and convert it to string.
     const expectedLength = Buffer.byteLength(bodyString).toString();
-    expect(request.headers).to.have.property('Content-Length');
+    expect(request.headers).toHaveProperty('Content-Length');
     expect(request.headers['Content-Length']).to.be.a('string');
-    expect(request.headers['Content-Length']).to.equal(expectedLength);
+    expect(request.headers['Content-Length']).toEqual(expectedLength);
   });
 
   it('should set Content-Length as a string for a Buffer body', () => {
@@ -155,9 +154,9 @@ describe('createRequest', () => {
 
     // Calculate the expected content length for the Buffer and convert to string.
     const expectedLength = bodyBuffer.length.toString();
-    expect(request.headers).to.have.property('Content-Length');
+    expect(request.headers).toHaveProperty('Content-Length');
     expect(request.headers['Content-Length']).to.be.a('string');
-    expect(request.headers['Content-Length']).to.equal(expectedLength);
+    expect(request.headers['Content-Length']).toEqual(expectedLength);
   });
 
   it('should correctly separate path and query parameters', () => {
@@ -181,12 +180,12 @@ describe('createRequest', () => {
     const request = connector.createRequest(params, reqParams);
 
     // Test path separation
-    expect(request.path).to.equal('/test');
+    expect(request.path).toEqual('/test');
 
     // Test query parameters
-    expect(Object.keys(request.query).length).to.equal(2);
-    expect(request.query.dataSourceId).to.equal('sample');
-    expect(request.query.sort).to.equal('true');
+    expect(Object.keys(request.query).length).toEqual(2);
+    expect(request.query.dataSourceId).toEqual('sample');
+    expect(request.query.sort).toEqual('true');
   });
 
   it('should handle path with special characters', () => {
@@ -209,7 +208,7 @@ describe('createRequest', () => {
 
     const request = connector.createRequest(params, reqParams);
 
-    expect(request.path).to.equal('/test/%2A/%28hello%27%29/%21');
+    expect(request.path).toEqual('/test/%2A/%28hello%27%29/%21');
   });
 
   it('should handle path without query parameters', () => {
@@ -232,7 +231,7 @@ describe('createRequest', () => {
 
     const request = connector.createRequest(params, reqParams);
 
-    expect(request.path).to.equal('/test');
+    expect(request.path).toEqual('/test');
     expect(request.query).to.be.empty;
   });
 
@@ -250,8 +249,8 @@ describe('createRequest', () => {
 
     const request = connector.createRequest(params, reqParams);
 
-    expect(request.path).to.equal('/test');
-    expect(request.query).to.have.property('v', '');
+    expect(request.path).toEqual('/test');
+    expect(request.query).toHaveProperty('v', '');
   });
 
   it('should treat query parameter with explicit empty value as empty string', () => {
@@ -268,8 +267,8 @@ describe('createRequest', () => {
 
     const request = connector.createRequest(params, reqParams);
 
-    expect(request.path).to.equal('/test');
-    expect(request.query).to.have.property('v', '');
+    expect(request.path).toEqual('/test');
+    expect(request.query).toHaveProperty('v', '');
   });
 
   it('should correctly parse standard key-value query parameters', () => {
@@ -286,8 +285,8 @@ describe('createRequest', () => {
 
     const request = connector.createRequest(params, reqParams);
 
-    expect(request.path).to.equal('/test');
-    expect(request.query).to.deep.equal({ foo: 'bar', baz: 'qux' });
+    expect(request.path).toEqual('/test');
+    expect(request.query).toStrictEqual({ foo: 'bar', baz: 'qux' });
   });
 });
 

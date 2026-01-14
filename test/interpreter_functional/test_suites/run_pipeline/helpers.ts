@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { ExpressionValue } from 'src/plugins/expressions';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
@@ -100,7 +100,7 @@ export function expectExpressionProvider({
        */
       toReturn: async (expectedResult: ExpressionResult) => {
         const pipelineResponse = await handler.getResponse();
-        expect(pipelineResponse).to.eql(expectedResult);
+        expect(pipelineResponse).toEqual(expectedResult);
       },
       /**
        * returns expression response
@@ -157,7 +157,7 @@ export function expectExpressionProvider({
               toSerializable(lastResponse!),
               updateBaselines
             );
-            expect(diff).to.be.lessThan(0.05);
+            expect(diff).toBeLessThan(0.05);
           }
           if (!responsePromise) {
             responsePromise = Promise.resolve(lastResponse!);
@@ -201,7 +201,7 @@ export function expectExpressionProvider({
           updateBaselines,
           chartEl
         );
-        expect(percentDifference).to.be.lessThan(0.1);
+        expect(percentDifference).toBeLessThan(0.1);
         return handler;
       },
     };

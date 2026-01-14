@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { Response } from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(200)
           .then((resp: Response) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               page: 1,
               per_page: 20,
               total: 1,
@@ -94,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
             .get('/api/opensearch-dashboards/management/saved_objects/_find?type=wigwags')
             .expect(200)
             .then((resp: Response) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 page: 1,
                 per_page: 20,
                 total: 0,
@@ -111,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(200)
             .then((resp: Response) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 page: 100,
                 per_page: 100,
                 total: 1,
@@ -128,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(400)
             .then((resp: Response) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 statusCode: 400,
                 error: 'Bad Request',
                 message: '[request query.searchFields]: definition for this key is missing',
@@ -152,7 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
           .get('/api/opensearch-dashboards/management/saved_objects/_find?type=visualization')
           .expect(200)
           .then((resp: Response) => {
-            expect(resp.body).to.eql({
+            expect(resp.body).toEqual({
               page: 1,
               per_page: 20,
               total: 0,
@@ -166,7 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
             .get('/api/opensearch-dashboards/management/saved_objects/_find?type=wigwags')
             .expect(200)
             .then((resp: Response) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 page: 1,
                 per_page: 20,
                 total: 0,
@@ -181,7 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
             .get('/api/opensearch-dashboards/management/saved_objects/_find')
             .expect(400)
             .then((resp: Response) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 error: 'Bad Request',
                 message:
                   '[request query.type]: expected at least one defined value but got [undefined]',
@@ -198,7 +198,7 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(200)
             .then((resp: Response) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 page: 100,
                 per_page: 100,
                 total: 0,
@@ -215,7 +215,7 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(400)
             .then((resp: Response) => {
-              expect(resp.body).to.eql({
+              expect(resp.body).toEqual({
                 statusCode: 400,
                 error: 'Bad Request',
                 message: '[request query.searchFields]: definition for this key is missing',
@@ -233,8 +233,8 @@ export default function ({ getService }: FtrProviderContext) {
           .get('/api/opensearch-dashboards/management/saved_objects/_find?type=search')
           .expect(200)
           .then((resp: Response) => {
-            expect(resp.body.saved_objects).to.have.length(1);
-            expect(resp.body.saved_objects[0].meta).to.eql({
+            expect(resp.body.saved_objects).toHaveLength(1);
+            expect(resp.body.saved_objects[0].meta).toEqual({
               icon: 'discoverApp',
               title: 'OneRecord',
               editUrl:
@@ -252,8 +252,8 @@ export default function ({ getService }: FtrProviderContext) {
           .get('/api/opensearch-dashboards/management/saved_objects/_find?type=dashboard')
           .expect(200)
           .then((resp: Response) => {
-            expect(resp.body.saved_objects).to.have.length(1);
-            expect(resp.body.saved_objects[0].meta).to.eql({
+            expect(resp.body.saved_objects).toHaveLength(1);
+            expect(resp.body.saved_objects[0].meta).toEqual({
               icon: 'dashboardApp',
               title: 'Dashboard',
               editUrl:
@@ -271,8 +271,8 @@ export default function ({ getService }: FtrProviderContext) {
           .get('/api/opensearch-dashboards/management/saved_objects/_find?type=visualization')
           .expect(200)
           .then((resp: Response) => {
-            expect(resp.body.saved_objects).to.have.length(2);
-            expect(resp.body.saved_objects[0].meta).to.eql({
+            expect(resp.body.saved_objects).toHaveLength(2);
+            expect(resp.body.saved_objects[0].meta).toEqual({
               icon: 'visualizeApp',
               title: 'VisualizationFromSavedSearch',
               editUrl:
@@ -283,7 +283,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
               namespaceType: 'single',
             });
-            expect(resp.body.saved_objects[1].meta).to.eql({
+            expect(resp.body.saved_objects[1].meta).toEqual({
               icon: 'visualizeApp',
               title: 'Visualization',
               editUrl:
@@ -301,8 +301,8 @@ export default function ({ getService }: FtrProviderContext) {
           .get('/api/opensearch-dashboards/management/saved_objects/_find?type=index-pattern')
           .expect(200)
           .then((resp: Response) => {
-            expect(resp.body.saved_objects).to.have.length(1);
-            expect(resp.body.saved_objects[0].meta).to.eql({
+            expect(resp.body.saved_objects).toHaveLength(1);
+            expect(resp.body.saved_objects[0].meta).toEqual({
               icon: 'indexPatternApp',
               title: 'saved_objects*',
               editUrl:

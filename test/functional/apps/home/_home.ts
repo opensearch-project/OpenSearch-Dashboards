@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import expect from '@osd/expect';
+import { jestExpect as expect } from '@jest/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await globalNav.clickLogo();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const url = await browser.getCurrentUrl();
-      expect(url.includes('/app/home')).to.be(true);
+      expect(url.includes('/app/home')).toBe(true);
     });
 
     it('clicking on home button should take you to home page', async () => {
@@ -52,13 +52,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await globalNav.clickHomeButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const url = await browser.getCurrentUrl();
-      expect(url.includes('/app/home')).to.be(true);
+      expect(url.includes('/app/home')).toBe(true);
     });
 
     it('clicking on console on homepage should take you to console app', async () => {
       await PageObjects.home.clickSynopsis('console');
       const url = await browser.getCurrentUrl();
-      expect(url.includes('/app/dev_tools#/console')).to.be(true);
+      expect(url.includes('/app/dev_tools#/console')).toBe(true);
     });
   });
 }

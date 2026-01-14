@@ -28,9 +28,6 @@
  * under the License.
  */
 
-/* eslint-env mocha */
-
-import expect from '@osd/expect';
 import sinon from 'sinon';
 import https, { Agent as HttpsAgent } from 'https';
 
@@ -68,10 +65,10 @@ describe('ProxyConfig', function () {
       });
 
       // @ts-ignore private prop access
-      expect(config.sslAgent).to.be.a(https.Agent);
+      expect(config.sslAgent).toBeInstanceOf(https.Agent);
       sinon.assert.calledOnce(agentStub);
       const sslAgentOpts = agentStub.firstCall.args[0];
-      expect(sslAgentOpts).to.eql({
+      expect(sslAgentOpts).toEqual({
         ca: ['content-of-some-path'],
         cert: undefined,
         key: undefined,
@@ -89,10 +86,10 @@ describe('ProxyConfig', function () {
       });
 
       // @ts-ignore private prop access
-      expect(config.sslAgent).to.be.a(https.Agent);
+      expect(config.sslAgent).toBeInstanceOf(https.Agent);
       sinon.assert.calledOnce(agentStub);
       const sslAgentOpts = agentStub.firstCall.args[0];
-      expect(sslAgentOpts).to.eql({
+      expect(sslAgentOpts).toEqual({
         ca: undefined,
         cert: 'content-of-some-path',
         key: 'content-of-another-path',
@@ -111,10 +108,10 @@ describe('ProxyConfig', function () {
       });
 
       // @ts-ignore private prop access
-      expect(config.sslAgent).to.be.a(https.Agent);
+      expect(config.sslAgent).toBeInstanceOf(https.Agent);
       sinon.assert.calledOnce(agentStub);
       const sslAgentOpts = agentStub.firstCall.args[0];
-      expect(sslAgentOpts).to.eql({
+      expect(sslAgentOpts).toEqual({
         ca: ['content-of-some-path'],
         cert: 'content-of-another-path',
         key: 'content-of-yet-another-path',
@@ -131,7 +128,7 @@ describe('ProxyConfig', function () {
           timeout: 100,
         });
 
-        expect(config.getForParsedUri(parsedLocalOpenSearch)).to.eql({});
+        expect(config.getForParsedUri(parsedLocalOpenSearch)).toEqual({});
       });
     });
 
@@ -143,7 +140,7 @@ describe('ProxyConfig', function () {
           timeout: timeValue,
         });
 
-        expect(config.getForParsedUri(parsedGoogle).timeout).to.be(timeValue);
+        expect(config.getForParsedUri(parsedGoogle).timeout).toBe(timeValue);
       });
 
       it('assigns ssl.verify to rejectUnauthorized', function () {
@@ -162,8 +159,8 @@ describe('ProxyConfig', function () {
           },
         });
 
-        expect(configWithVerification.getForParsedUri(parsedGoogle).rejectUnauthorized).to.be(true);
-        expect(configWithoutVerification.getForParsedUri(parsedGoogle).rejectUnauthorized).to.be(
+        expect(configWithVerification.getForParsedUri(parsedGoogle).rejectUnauthorized).toBe(true);
+        expect(configWithoutVerification.getForParsedUri(parsedGoogle).rejectUnauthorized).toBe(
           false
         );
       });
@@ -179,8 +176,8 @@ describe('ProxyConfig', function () {
             });
 
             // @ts-ignore private prop access
-            expect(config.sslAgent).to.be.an(HttpsAgent);
-            expect(config.getForParsedUri({ ...parsedGoogle, protocol: 'http:' }).agent).to.be(
+            expect(config.sslAgent).toBeInstanceOf(HttpsAgent);
+            expect(config.getForParsedUri({ ...parsedGoogle, protocol: 'http:' }).agent).toBe(
               undefined
             );
           });
@@ -195,8 +192,8 @@ describe('ProxyConfig', function () {
             });
 
             // @ts-ignore private prop access
-            expect(config.sslAgent).to.be.an(HttpsAgent);
-            expect(config.getForParsedUri({ ...parsedGoogle, protocol: 'http:' }).agent).to.be(
+            expect(config.sslAgent).toBeInstanceOf(HttpsAgent);
+            expect(config.getForParsedUri({ ...parsedGoogle, protocol: 'http:' }).agent).toBe(
               undefined
             );
           });
@@ -211,8 +208,8 @@ describe('ProxyConfig', function () {
             });
 
             // @ts-ignore private prop access
-            expect(config.sslAgent).to.be.an(HttpsAgent);
-            expect(config.getForParsedUri({ ...parsedGoogle, protocol: 'http:' }).agent).to.be(
+            expect(config.sslAgent).toBeInstanceOf(HttpsAgent);
+            expect(config.getForParsedUri({ ...parsedGoogle, protocol: 'http:' }).agent).toBe(
               undefined
             );
           });
@@ -228,8 +225,8 @@ describe('ProxyConfig', function () {
             });
 
             // @ts-ignore private prop access
-            expect(config.sslAgent).to.be.an(HttpsAgent);
-            expect(config.getForParsedUri({ ...parsedGoogle, protocol: 'http:' }).agent).to.be(
+            expect(config.sslAgent).toBeInstanceOf(HttpsAgent);
+            expect(config.getForParsedUri({ ...parsedGoogle, protocol: 'http:' }).agent).toBe(
               undefined
             );
           });
@@ -248,8 +245,8 @@ describe('ProxyConfig', function () {
 
             // @ts-ignore private prop access
             const agent = config.sslAgent;
-            expect(agent).to.be.an(HttpsAgent);
-            expect(config.getForParsedUri({ ...parsedGoogle, protocol: 'https:' }).agent).to.be(
+            expect(agent).toBeInstanceOf(HttpsAgent);
+            expect(config.getForParsedUri({ ...parsedGoogle, protocol: 'https:' }).agent).toBe(
               agent
             );
           });
@@ -265,8 +262,8 @@ describe('ProxyConfig', function () {
 
             // @ts-ignore private prop access
             const agent = config.sslAgent;
-            expect(agent).to.be.an(HttpsAgent);
-            expect(config.getForParsedUri({ ...parsedGoogle, protocol: 'https:' }).agent).to.be(
+            expect(agent).toBeInstanceOf(HttpsAgent);
+            expect(config.getForParsedUri({ ...parsedGoogle, protocol: 'https:' }).agent).toBe(
               agent
             );
           });
@@ -282,8 +279,8 @@ describe('ProxyConfig', function () {
 
             // @ts-ignore private prop access
             const agent = config.sslAgent;
-            expect(agent).to.be.an(HttpsAgent);
-            expect(config.getForParsedUri({ ...parsedGoogle, protocol: 'https:' }).agent).to.be(
+            expect(agent).toBeInstanceOf(HttpsAgent);
+            expect(config.getForParsedUri({ ...parsedGoogle, protocol: 'https:' }).agent).toBe(
               agent
             );
           });
@@ -300,8 +297,8 @@ describe('ProxyConfig', function () {
 
             // @ts-ignore private prop access
             const agent = config.sslAgent;
-            expect(agent).to.be.an(HttpsAgent);
-            expect(config.getForParsedUri({ ...parsedGoogle, protocol: 'https:' }).agent).to.be(
+            expect(agent).toBeInstanceOf(HttpsAgent);
+            expect(config.getForParsedUri({ ...parsedGoogle, protocol: 'https:' }).agent).toBe(
               agent
             );
           });
