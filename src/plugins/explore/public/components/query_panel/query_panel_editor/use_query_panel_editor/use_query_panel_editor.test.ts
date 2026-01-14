@@ -94,7 +94,7 @@ jest.mock('@osd/monaco', () => ({
 
 // Now import after mocking
 import { act } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useSelector, useDispatch } from 'react-redux';
 import { monaco } from '@osd/monaco';
 import { useQueryPanelEditor } from './use_query_panel_editor';

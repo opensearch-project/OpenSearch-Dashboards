@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -131,7 +131,7 @@ describe('useSearch', () => {
     const services = createMockServices();
     (services.uiSettings.get as jest.Mock).mockReturnValueOnce(true);
 
-    const { result, waitForNextUpdate } = renderHook(() => useSearch(services), { wrapper });
+    const { result } = renderHook(() => useSearch(services), { wrapper });
 
     expect(result.current.data$.getValue()).toEqual(
       expect.objectContaining({ status: ResultStatus.LOADING })
@@ -139,8 +139,8 @@ describe('useSearch', () => {
 
     // useSearch updates state async in useEffect, wait for it to finish to
     // avoid warning
-    await act(async () => {
-      await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.data$.getValue()).toBeDefined();
     });
   });
 
@@ -152,13 +152,13 @@ describe('useSearch', () => {
       value: 10,
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useSearch(services), { wrapper });
+    const { result } = renderHook(() => useSearch(services), { wrapper });
     expect(result.current.data$.getValue()).toEqual(
       expect.objectContaining({ status: ResultStatus.UNINITIALIZED })
     );
 
-    await act(async () => {
-      await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.data$.getValue()).toBeDefined();
     });
   });
 
@@ -173,13 +173,13 @@ describe('useSearch', () => {
       value: 10,
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useSearch(services), { wrapper });
+    const { result } = renderHook(() => useSearch(services), { wrapper });
     expect(result.current.data$.getValue()).toEqual(
       expect.objectContaining({ status: ResultStatus.UNINITIALIZED })
     );
 
-    await act(async () => {
-      await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.data$.getValue()).toBeDefined();
     });
   });
 
@@ -194,13 +194,13 @@ describe('useSearch', () => {
       value: 10,
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useSearch(services), { wrapper });
+    const { result } = renderHook(() => useSearch(services), { wrapper });
     expect(result.current.data$.getValue()).toEqual(
       expect.objectContaining({ status: ResultStatus.UNINITIALIZED })
     );
 
-    await act(async () => {
-      await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.data$.getValue()).toBeDefined();
     });
   });
 
@@ -232,7 +232,7 @@ describe('useSearch', () => {
     const mockDatasetUpdates$ = new Subject();
     services.data.query.queryString.getUpdates$ = jest.fn().mockReturnValue(mockDatasetUpdates$);
 
-    const { result, waitForNextUpdate } = renderHook(() => useSearch(services), {
+    const { result } = renderHook(() => useSearch(services), {
       wrapper,
     });
 
@@ -262,28 +262,25 @@ describe('useSearch', () => {
       });
     });
 
-    await act(async () => {
-      await waitForNextUpdate();
+    await waitFor(() => {
+      expect(result.current.data$.getValue()).toEqual(
+        expect.objectContaining({ status: ResultStatus.LOADING, rows: [] })
+      );
     });
-
-    expect(result.current.data$.getValue()).toEqual(
-      expect.objectContaining({ status: ResultStatus.LOADING, rows: [] })
-    );
   });
 
   it('should load saved search', async () => {
     const services = createMockServices();
     services.data.query.queryString.setQuery = jest.fn();
 
-    const { waitForNextUpdate } = renderHook(() => useSearch(services), {
+    renderHook(() => useSearch(services), {
       wrapper,
     });
 
-    await act(async () => {
-      await waitForNextUpdate();
+    await waitFor(() => {
+      expect(services.data.query.queryString.setQuery).toBeCalledWith(mockQuery);
     });
 
-    expect(services.data.query.queryString.setQuery).toBeCalledWith(mockQuery);
     expect(services.filterManager.setAppFilters).toBeCalledWith(
       expect.arrayContaining([mockFilterA, mockFilterB])
     );
@@ -295,15 +292,13 @@ describe('useSearch', () => {
     services.data.query.queryString.getQuery = jest.fn().mockReturnValue(mockDefaultQuery);
     services.data.query.queryString.setQuery = jest.fn();
 
-    const { waitForNextUpdate } = renderHook(() => useSearch(services), {
+    renderHook(() => useSearch(services), {
       wrapper,
     });
 
-    await act(async () => {
-      await waitForNextUpdate();
+    await waitFor(() => {
+      expect(services.data.query.queryString.setQuery).toBeCalledWith(mockDefaultQuery);
     });
-
-    expect(services.data.query.queryString.setQuery).toBeCalledWith(mockDefaultQuery);
   });
 
   it('should call fetch without long numerals support when configured not to', async () => {
@@ -315,12 +310,12 @@ describe('useSearch', () => {
     const mockDatasetUpdates$ = new Subject();
     services.data.query.queryString.getUpdates$ = jest.fn().mockReturnValue(mockDatasetUpdates$);
 
-    const { waitForNextUpdate } = renderHook(() => useSearch(services), {
+    renderHook(() => useSearch(services), {
       wrapper,
     });
 
-    await act(async () => {
-      await waitForNextUpdate();
+    await waitFor(() => {
+      expect(mockSavedSearch.searchSource.fetch).toHaveBeenCalled();
     });
 
     act(() => {
@@ -329,19 +324,13 @@ describe('useSearch', () => {
       });
     });
 
-    await act(async () => {
-      try {
-        await waitForNextUpdate({ timeout: 1000 });
-      } catch (_) {
-        // Do nothing.
-      }
+    await waitFor(() => {
+      expect(mockSavedSearch.searchSource.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          withLongNumeralsSupport: false,
+        })
+      );
     });
-
-    expect(mockSavedSearch.searchSource.fetch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        withLongNumeralsSupport: false,
-      })
-    );
   });
 
   it('should call fetch with long numerals support when configured to', async () => {
@@ -353,12 +342,12 @@ describe('useSearch', () => {
     const mockDatasetUpdates$ = new Subject();
     services.data.query.queryString.getUpdates$ = jest.fn().mockReturnValue(mockDatasetUpdates$);
 
-    const { waitForNextUpdate } = renderHook(() => useSearch(services), {
+    renderHook(() => useSearch(services), {
       wrapper,
     });
 
-    await act(async () => {
-      await waitForNextUpdate();
+    await waitFor(() => {
+      expect(mockSavedSearch.searchSource.fetch).toHaveBeenCalled();
     });
 
     act(() => {
@@ -367,19 +356,13 @@ describe('useSearch', () => {
       });
     });
 
-    await act(async () => {
-      try {
-        await waitForNextUpdate({ timeout: 1000 });
-      } catch (_) {
-        // Do nothing.
-      }
+    await waitFor(() => {
+      expect(mockSavedSearch.searchSource.fetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          withLongNumeralsSupport: true,
+        })
+      );
     });
-
-    expect(mockSavedSearch.searchSource.fetch).toHaveBeenCalledWith(
-      expect.objectContaining({
-        withLongNumeralsSupport: true,
-      })
-    );
   });
 
   it('should call fetch when fetchForMaxCsvOption is called', async () => {
@@ -387,12 +370,12 @@ describe('useSearch', () => {
     const mockDatasetUpdates$ = new Subject();
     services.data.query.queryString.getUpdates$ = jest.fn().mockReturnValue(mockDatasetUpdates$);
 
-    const { result, waitForNextUpdate } = renderHook(() => useSearch(services), {
+    const { result } = renderHook(() => useSearch(services), {
       wrapper,
     });
 
-    await act(async () => {
-      await waitForNextUpdate();
+    await waitFor(() => {
+      expect(mockSavedSearch.searchSource.fetch).toHaveBeenCalled();
     });
 
     act(() => {
@@ -401,12 +384,8 @@ describe('useSearch', () => {
       });
     });
 
-    await act(async () => {
-      try {
-        await waitForNextUpdate({ timeout: 1000 });
-      } catch (_) {
-        // Do nothing.
-      }
+    await waitFor(() => {
+      expect(mockSavedSearch.searchSource.fetch).toHaveBeenCalledTimes(2);
     });
 
     await act(async () => {

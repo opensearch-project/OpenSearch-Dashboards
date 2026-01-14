@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useDirectQuery } from '../../../../framework/hooks/direct_query_hook';
 import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { DirectQueryLoadingStatus } from '../../../../framework/types';

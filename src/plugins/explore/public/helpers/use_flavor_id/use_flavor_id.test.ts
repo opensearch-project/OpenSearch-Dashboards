@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import { useFlavorId } from './use_flavor_id';
 import { ExploreFlavor } from '../../../common';

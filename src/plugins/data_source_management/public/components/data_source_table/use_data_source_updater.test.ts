@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useDataSourceUpdater } from './use_data_source_updater';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../constants';
 import { UiSettingScope } from '../../../../../core/public';
