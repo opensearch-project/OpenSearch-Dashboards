@@ -22,7 +22,7 @@ export function mergeThresholdsWithBase(
 ): { textColor: string; mergedThresholds: Threshold[] } {
   const defaultColor = baseColor ?? getColors().statusGreen;
 
-  let textColor = !targetValue || minBase > targetValue ? DEFAULT_GREY : defaultColor;
+  let textColor = targetValue === undefined || minBase > targetValue ? DEFAULT_GREY : defaultColor;
 
   // Handle empty thresholds
   if (!validThresholds || validThresholds.length === 0) {
@@ -71,7 +71,8 @@ export function locateThreshold(
   targetValue: number | undefined
 ): Threshold | null {
   // Return null if target value is below the minimum range
-  if (!targetValue || thresholds.length < 1 || targetValue < thresholds[0].value) return null;
+  if (targetValue === undefined || thresholds.length < 1 || targetValue < thresholds[0].value)
+    return null;
 
   // Iterate through ranges to find where target value belongs
   for (let i = 0; i < thresholds.length - 1; i++) {
