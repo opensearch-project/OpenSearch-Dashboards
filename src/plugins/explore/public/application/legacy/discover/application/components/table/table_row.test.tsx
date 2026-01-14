@@ -62,11 +62,11 @@ describe('DocViewTableRow', () => {
     expect(DOMPurify.sanitize).toHaveBeenCalledWith(maliciousValue);
   });
 
-  it('DOMPurify.sanitize removes malicious scripts', () => {
-    const maliciousInput = '<script>alert("xss")</script><p>Safe content</p>';
-    const sanitized = DOMPurify.sanitize(maliciousInput);
-
-    expect(sanitized).toBe('<p>Safe content</p>');
-    expect(sanitized).not.toContain('<script>');
+  it('renders component without dangerous script tags in HTML output', () => {
+    const maliciousValue = '<script>alert("xss")</script><p>Safe content</p>';
+    const wrapper = shallow(<DocViewTableRow {...defaultProps} value={maliciousValue} />);
+    const html = wrapper.html();
+    expect(html).not.toContain('<script>');
+    expect(html).not.toContain('alert("xss")');
   });
 });
