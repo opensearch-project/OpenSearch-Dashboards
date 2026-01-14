@@ -222,7 +222,7 @@ const prometheusDatasetTestSuite = () => {
           cy.get('body').should('contain.text', 'prometheus_build_info');
           cy.get('body').should('contain.text', 'prometheus');
 
-          cy.get('body').should('contain.text', 'Result series:');
+          cy.get('body').should('contain.text', 'result series');
         });
 
         it('should validate Visualization tab displays chart with controls', function () {
@@ -426,7 +426,7 @@ const prometheusDatasetTestSuite = () => {
           });
 
           cy.get('body').should('contain.text', 'prometheus_build_info');
-          cy.get('body').should('contain.text', 'Result series:');
+          cy.get('body').should('contain.text', 'result series');
         });
       });
     }
