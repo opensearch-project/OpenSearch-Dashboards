@@ -5,7 +5,8 @@
 /* eslint-disable max-classes-per-file */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { I18nStart } from '../../i18n';
@@ -122,6 +123,7 @@ export class SidecarService {
   private activeSidecar: SidecarRef | null = null;
   private targetDomElement: Element | null = null;
   private readonly stop$ = new ReplaySubject(1);
+  private sidecarRoot?: Root;
 
   public start({ i18n, targetDomElement }: StartDeps): OverlaySidecarStart {
     this.targetDomElement = targetDomElement;
@@ -178,15 +180,15 @@ export class SidecarService {
 
         this.activeSidecar = sidecar;
 
-        render(
+        this.sidecarRoot = createRoot(this.targetDomElement!);
+        this.sidecarRoot.render(
           <Sidecar
             sidecarConfig$={sidecarConfig$}
             setSidecarConfig={setSidecarConfig}
             options={options}
             i18n={i18n}
             mount={mount}
-          />,
-          this.targetDomElement
+          />
         );
 
         return sidecar;
@@ -207,8 +209,9 @@ export class SidecarService {
    * unmounting for cleanup behavior, this function ensures proper cleanup of the DOM.
    */
   private cleanupDom(sidecarConfig$?: BehaviorSubject<ISidecarConfig | undefined>): void {
-    if (this.targetDomElement != null) {
-      unmountComponentAtNode(this.targetDomElement);
+    if (this.sidecarRoot) {
+      this.sidecarRoot.unmount();
+      this.sidecarRoot = undefined;
     }
     this.activeSidecar = null;
     // Reset the sidecar configuration to remove any padding from the main window

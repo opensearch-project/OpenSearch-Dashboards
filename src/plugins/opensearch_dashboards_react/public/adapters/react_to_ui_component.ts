@@ -29,7 +29,7 @@
  */
 
 import { ComponentType, createElement as h } from 'react';
-import { render as renderReact, unmountComponentAtNode } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { UiComponent, UiComponentInstance } from '../../../opensearch_dashboards_utils/public';
 
 /**
@@ -40,15 +40,20 @@ import { UiComponent, UiComponentInstance } from '../../../opensearch_dashboards
 export const reactToUiComponent = <Props extends object>(
   ReactComp: ComponentType<Props>
 ): UiComponent<Props> => () => {
-  let lastEl: HTMLElement | undefined;
+  let root: Root | null = null;
 
   const render: UiComponentInstance<Props>['render'] = (el, props) => {
-    lastEl = el;
-    renderReact(h(ReactComp, props), el);
+    if (!root) {
+      root = createRoot(el);
+    }
+    root.render(h(ReactComp, props));
   };
 
   const unmount: UiComponentInstance<Props>['unmount'] = () => {
-    if (lastEl) unmountComponentAtNode(lastEl);
+    if (root) {
+      root.unmount();
+      root = null;
+    }
   };
 
   const comp: UiComponentInstance<Props> = {

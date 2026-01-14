@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { ExpressionRenderDefinition } from '../../../expressions/public';
 import { ExprVis } from './vis';
 import { Visualization } from '../components';
@@ -53,12 +53,13 @@ export const visualization = (): ExpressionRenderDefinition<VisRenderValue> => (
 
     const uiState = handlers.uiState || vis.getUiState();
 
+    const root = createRoot(domNode);
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
 
     const listenOnChange = params ? params.listenOnChange : false;
-    render(
+    root.render(
       <Visualization
         vis={vis}
         visData={visData}
@@ -66,8 +67,7 @@ export const visualization = (): ExpressionRenderDefinition<VisRenderValue> => (
         uiState={uiState}
         listenOnChange={listenOnChange}
         onInit={handlers.done}
-      />,
-      domNode
+      />
     );
   },
 });

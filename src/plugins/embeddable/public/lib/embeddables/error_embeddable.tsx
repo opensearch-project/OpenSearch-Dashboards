@@ -30,7 +30,7 @@
 
 import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { Markdown } from '../../../../opensearch_dashboards_react/public';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
@@ -48,6 +48,7 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public readonly type = ERROR_EMBEDDABLE_TYPE;
   public error: Error | string;
   private dom?: HTMLElement;
+  private root?: Root;
 
   constructor(error: Error | string, input: EmbeddableInput, parent?: IContainer) {
     super(input, {}, parent);
@@ -59,7 +60,10 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public render(dom: HTMLElement) {
     const title = typeof this.error === 'string' ? this.error : this.error.message;
     this.dom = dom;
-    ReactDOM.render(
+    if (!this.root) {
+      this.root = createRoot(dom);
+    }
+    this.root.render(
       // @ts-ignore
       <div className="embPanel__error embPanel__content" data-test-subj="embeddableStackError">
         <EuiText color="subdued" size="xs">
@@ -71,14 +75,13 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
             data-test-subj="errorMessageMarkdown"
           />
         </EuiText>
-      </div>,
-      dom
+      </div>
     );
   }
 
   public destroy() {
-    if (this.dom) {
-      ReactDOM.unmountComponentAtNode(this.dom);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 }

@@ -9,7 +9,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { WorkspaceCollaborators } from './workspace_collaborators';
 import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { of } from 'rxjs';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { fireEvent } from '@testing-library/react';
 import { WorkspaceCollaboratorPermissionType } from '../../types';
 
@@ -110,10 +110,11 @@ describe('WorkspaceCollaborators', () => {
 
   it('should call workspaceClient.update when handleSubmitPermissionSettings is called', async () => {
     const { renderResult } = setup({ permissionEnabled: true });
+    const modalRootRef = { current: undefined as Root | undefined };
     mockOverlays.openModal.mockReturnValue({
       onClose: Promise.resolve(),
       close: async () => {
-        ReactDOM.unmountComponentAtNode(renderResult.getByTestId('confirm-modal-container'));
+        modalRootRef.current?.unmount();
       },
     });
 
@@ -121,7 +122,9 @@ describe('WorkspaceCollaborators', () => {
     const deleteCollaborator = renderResult.getByText('Delete 1 collaborator');
     fireEvent.click(deleteCollaborator);
     expect(mockOverlays.openModal).toHaveBeenCalled();
-    mockOverlays.openModal.mock.calls[0][0](renderResult.getByTestId('confirm-modal-container'));
+    const modalContainer = renderResult.getByTestId('confirm-modal-container');
+    modalRootRef.current = createRoot(modalContainer);
+    mockOverlays.openModal.mock.calls[0][0](modalContainer);
     await waitFor(() => {
       expect(renderResult.getByText('Confirm')).toBeInTheDocument();
     });
@@ -138,20 +141,17 @@ describe('WorkspaceCollaborators', () => {
         },
       }
     );
-    mockOverlays.openModal.mock.calls[0][0](renderResult.getByTestId('confirm-modal-container'));
-    const modal = renderResult.queryByTestId('confirm-modal-container');
-    if (modal) {
-      ReactDOM.unmountComponentAtNode(modal);
-    }
+    modalRootRef.current?.unmount();
   });
 
   it('should call notification add danger if update is failed', async () => {
     const workspaceClientUpdate = jest.fn().mockRejectedValue('error');
     const { renderResult } = setup({ permissionEnabled: true, workspaceClientUpdate });
+    const modalRootRef = { current: undefined as Root | undefined };
     mockOverlays.openModal.mockReturnValue({
       onClose: Promise.resolve(),
       close: async () => {
-        ReactDOM.unmountComponentAtNode(renderResult.getByTestId('confirm-modal-container'));
+        modalRootRef.current?.unmount();
       },
     });
 
@@ -159,7 +159,9 @@ describe('WorkspaceCollaborators', () => {
     const deleteCollaborator = renderResult.getByText('Delete 1 collaborator');
     fireEvent.click(deleteCollaborator);
     expect(mockOverlays.openModal).toHaveBeenCalled();
-    mockOverlays.openModal.mock.calls[0][0](renderResult.getByTestId('confirm-modal-container'));
+    const modalContainer = renderResult.getByTestId('confirm-modal-container');
+    modalRootRef.current = createRoot(modalContainer);
+    mockOverlays.openModal.mock.calls[0][0](modalContainer);
     await waitFor(() => {
       expect(renderResult.getByText('Confirm')).toBeInTheDocument();
     });

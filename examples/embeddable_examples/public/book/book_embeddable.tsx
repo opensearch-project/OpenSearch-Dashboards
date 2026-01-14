@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { Subscription } from 'rxjs';
 import {
   Embeddable,
@@ -78,6 +78,7 @@ export class BookEmbeddable
   public readonly type = BOOK_EMBEDDABLE;
   private subscription: Subscription;
   private node?: HTMLElement;
+  private root: Root | null = null;
   private savedObjectId?: string;
   private attributes?: BookSavedObjectAttributes;
 
@@ -126,11 +127,13 @@ export class BookEmbeddable
   };
 
   public render(node: HTMLElement) {
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
+      this.root = null;
     }
     this.node = node;
-    ReactDOM.render(<BookEmbeddableComponent embeddable={this} />, node);
+    this.root = createRoot(node);
+    this.root.render(<BookEmbeddableComponent embeddable={this} />);
   }
 
   public async reload() {
@@ -150,8 +153,9 @@ export class BookEmbeddable
   public destroy() {
     super.destroy();
     this.subscription.unsubscribe();
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
+      this.root = null;
     }
   }
 }

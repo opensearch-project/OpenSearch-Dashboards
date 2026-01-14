@@ -29,7 +29,7 @@
  */
 
 import * as React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { CoreSetup, CoreStart, AppMountParameters } from 'opensearch-dashboards/public';
 import { OpenSearchDashboardsContextProvider } from '../../../src/plugins/opensearch_dashboards_react/public';
 import { BfetchExplorerStartPlugins, ExplorerService } from './plugin';
@@ -53,6 +53,7 @@ export const mount = (
       <App />
     </OpenSearchDashboardsContextProvider>
   );
-  render(reactElement, element);
-  return () => unmountComponentAtNode(element);
+  const root = createRoot(element);
+  root.render(reactElement);
+  return () => root.unmount();
 };

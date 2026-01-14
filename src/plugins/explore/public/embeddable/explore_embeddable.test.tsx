@@ -4,17 +4,23 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { ExploreEmbeddable } from './explore_embeddable';
 import { ExploreInput } from './types';
 import { EXPLORE_EMBEDDABLE_TYPE } from './constants';
 import { discoverPluginMock } from '../application/legacy/discover/mocks';
 import { visualizationRegistry } from '../components/visualizations/visualization_registry';
 
-// Mock ReactDOM
-jest.mock('react-dom', () => ({
-  render: jest.fn(),
-  unmountComponentAtNode: jest.fn(),
+// Mock react-dom/client
+const mockUnmount = jest.fn();
+const mockRender = jest.fn();
+const mockRoot = {
+  render: mockRender,
+  unmount: mockUnmount,
+};
+
+jest.mock('react-dom/client', () => ({
+  createRoot: jest.fn(() => mockRoot),
 }));
 
 // Mock the ExploreEmbeddableComponent
@@ -213,8 +219,8 @@ describe('ExploreEmbeddable', () => {
     // Call destroy
     embeddable.destroy();
 
-    // Check that unmountComponentAtNode was called
-    expect(ReactDOM.unmountComponentAtNode).toHaveBeenCalledWith(mockNode);
+    // Check that unmount was called
+    expect(mockUnmount).toHaveBeenCalled();
   });
 
   test('updates input correctly', () => {

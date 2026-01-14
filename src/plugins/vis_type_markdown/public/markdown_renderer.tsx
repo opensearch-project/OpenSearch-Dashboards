@@ -29,7 +29,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
 import { MarkdownVisRenderValue } from './markdown_fn';
@@ -37,20 +37,28 @@ import { MarkdownVisRenderValue } from './markdown_fn';
 // @ts-ignore
 const MarkdownVisComponent = lazy(() => import('./markdown_vis_controller'));
 
+let root: Root | null = null;
+
 export const markdownVisRenderer: ExpressionRenderDefinition<MarkdownVisRenderValue> = {
   name: 'markdown_vis',
   displayName: 'markdown visualization',
   reuseDomNode: true,
   render: async (domNode, { visParams }, handlers) => {
+    if (!root) {
+      root = createRoot(domNode);
+    }
+
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      if (root) {
+        root.unmount();
+        root = null;
+      }
     });
 
-    render(
+    root.render(
       <VisualizationContainer className="markdownVis">
         <MarkdownVisComponent {...visParams} renderComplete={handlers.done} />
-      </VisualizationContainer>,
-      domNode
+      </VisualizationContainer>
     );
   },
 };

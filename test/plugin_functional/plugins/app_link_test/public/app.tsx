@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, IBasePath, ApplicationStart } from 'opensearch-dashboards/public';
 import { RedirectAppLinks } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 
@@ -86,14 +86,14 @@ export const renderApp = (
   { appId, basePath, targetAppId, application }: AppOptions,
   { element }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <FooApp
       appId={appId}
       targetAppId={targetAppId}
       basePath={basePath}
       application={application}
-    />,
-    element
+    />
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

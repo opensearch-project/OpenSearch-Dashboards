@@ -29,7 +29,8 @@
  */
 
 import React, { Fragment } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
@@ -54,6 +55,7 @@ const ReactMarkdownLazy = React.lazy(() => import('react-markdown'));
  */
 export class UserBannerService {
   private settingsSubscription?: Subscription;
+  private bannerRoot?: Root;
 
   public start({ banners, i18n, uiSettings }: StartDeps) {
     let id: string | undefined;
@@ -76,7 +78,8 @@ export class UserBannerService {
       id = banners.replace(
         id,
         (el) => {
-          ReactDOM.render(
+          this.bannerRoot = createRoot(el);
+          this.bannerRoot.render(
             <i18n.Context>
               <EuiCallOut
                 title={
@@ -104,13 +107,17 @@ export class UserBannerService {
                   />
                 </EuiButton>
               </EuiCallOut>
-            </i18n.Context>,
-            el
+            </i18n.Context>
           );
 
           timeout = setTimeout(dismiss, lifetime);
 
-          return () => ReactDOM.unmountComponentAtNode(el);
+          return () => {
+            if (this.bannerRoot) {
+              this.bannerRoot.unmount();
+              this.bannerRoot = undefined;
+            }
+          };
         },
         100
       );
