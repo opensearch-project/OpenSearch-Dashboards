@@ -209,9 +209,10 @@ jobs:
         run: yarn osd bootstrap
 
       - name: Build plugins
-        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12
+        run: node scripts/build_opensearch_dashboards_platform_plugins --no-examples --workers 12 --dist
 
       - name: Checkout FT repo
+        if: matrix.test_location == 'ftr'
         uses: actions/checkout@v4
         with:
           path: ${{ env.FTR_PATH }}
