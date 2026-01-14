@@ -4,7 +4,7 @@
  */
 
 import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
-import { act, renderHook } from '@testing-library/react-hooks/dom';
+import { act, renderHook } from '@testing-library/react/dom';
 import { coreMock } from '../../../../../core/public/mocks';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { useGenerateQuery } from './use_generate';
