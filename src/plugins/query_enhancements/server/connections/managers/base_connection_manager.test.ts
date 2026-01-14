@@ -33,7 +33,7 @@ describe('BaseConnectionManager', () => {
   });
 
   describe('query', () => {
-    it('should return success status and data when query executor succeeds', async () => {
+    it('should return data when query executor succeeds', async () => {
       const mockExecutor: QueryExecutor<{ query: string }, string> = {
         execute: jest.fn().mockResolvedValue('query result'),
       };
@@ -44,10 +44,7 @@ describe('BaseConnectionManager', () => {
       expect(mockExecutor.execute).toHaveBeenCalledWith(mockContext, mockRequest, {
         query: 'test',
       });
-      expect(result).toEqual({
-        status: 'success',
-        data: 'query result',
-      });
+      expect(result).toEqual('query result');
     });
 
     it('should propagate errors when query executor throws', async () => {
