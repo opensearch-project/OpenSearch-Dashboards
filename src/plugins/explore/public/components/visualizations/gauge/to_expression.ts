@@ -5,7 +5,7 @@
 
 import { GaugeChartStyle } from './gauge_vis_config';
 import { VisColumn, AxisRole, AxisColumnMappings, VEGASCHEMA } from '../types';
-import { generateArcExpression } from './gauge_chart_utils';
+import { generateArcExpression, createGaugeSeries } from './gauge_chart_utils';
 import { calculateValue } from '../utils/calculation';
 import {
   locateThreshold,
@@ -15,6 +15,21 @@ import {
 } from '../style_panel/threshold/threshold_utils';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
+import { getChartRender } from '../utils/utils';
+import {
+  pipe,
+  createBaseConfig,
+  buildAxisConfigs,
+  assembleSpec,
+  buildVisMap,
+} from '../utils/echarts_spec';
+import {
+  aggregate,
+  convertTo2DArray,
+  transform,
+  pivot,
+  facetTransform,
+} from '../utils/data_transformation';
 
 export const createGauge = (
   transformedData: Array<Record<string, any>>,
@@ -24,6 +39,25 @@ export const createGauge = (
   styleOptions: GaugeChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {
+  if (getChartRender() === 'echarts') {
+    const valueColumn = axisColumnMappings?.[AxisRole.Value];
+    if (!valueColumn?.column) {
+      throw Error('Missing value for metric chart');
+    }
+
+    const result = pipe(
+      transform(convertTo2DArray()),
+      createBaseConfig({ title: '' }),
+      createGaugeSeries({ styles: styleOptions, seriesFields: [valueColumn.column] }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles: styleOptions,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
+  }
   const colors = getColors();
   // Only contains one and the only one value
   const valueColumn = axisColumnMappings?.[AxisRole.Value];
