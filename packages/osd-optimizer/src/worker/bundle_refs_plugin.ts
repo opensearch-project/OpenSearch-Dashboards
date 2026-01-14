@@ -23,52 +23,38 @@ import Path from 'path';
 
 import webpack from 'webpack';
 
-import { Bundle, BundleRefs, BundleRef } from '../common';
+import { Bundle, BundleRefs } from '../common';
 import { BundleRefModule } from './bundle_ref_module';
 
 const RESOLVE_EXTENSIONS = ['.js', '.ts', '.tsx'];
 
-interface RequestData {
-  context: string;
-  dependencies: Array<{ request: string }>;
-}
-
 type Callback<T> = (error?: any, result?: T) => void;
-type ModuleFactory = (data: RequestData, callback: Callback<BundleRefModule>) => void;
 
 export class BundleRefsPlugin {
-  private readonly resolvedRefEntryCache = new Map<BundleRef, Promise<string>>();
-  private readonly resolvedRequestCache = new Map<string, Promise<string | undefined>>();
-  private readonly ignorePrefix = Path.resolve(this.bundle.contextDir) + Path.sep;
+  private readonly ignorePrefix: string;
   private allowedBundleIds = new Set<string>();
 
-  constructor(private readonly bundle: Bundle, private readonly bundleRefs: BundleRefs) {}
+  constructor(private readonly bundle: Bundle, private readonly bundleRefs: BundleRefs) {
+    this.ignorePrefix = Path.resolve(this.bundle.contextDir) + Path.sep;
+  }
 
   /**
    * Called by webpack when the plugin is passed in the webpack config
    */
   public apply(compiler: webpack.Compiler) {
-    // called whenever the compiler starts to compile, passed the params
-    // that will be used to create the compilation
-    compiler.hooks.compile.tap('BundleRefsPlugin', (compilationParams: any) => {
-      // clear caches because a new compilation is starting, meaning that files have
-      // changed and we should re-run resolutions
-      this.resolvedRefEntryCache.clear();
-      this.resolvedRequestCache.clear();
-
-      // hook into the creation of NormalModule instances in webpack, if the import
-      // statement leading to the creation of the module is pointing to a bundleRef
-      // entry then create a BundleRefModule instead of a NormalModule.
-      compilationParams.normalModuleFactory.hooks.factory.tap(
-        'BundleRefsPlugin/normalModuleFactory/factory',
-        (wrappedFactory: ModuleFactory): ModuleFactory => (data, callback) => {
+    // Webpack 5: Use normalModuleFactory hook directly instead of compile.tap
+    compiler.hooks.normalModuleFactory.tap('BundleRefsPlugin', (normalModuleFactory: any) => {
+      // Webpack 5: Use factorize hook instead of factory hook
+      normalModuleFactory.hooks.factorize.tapAsync(
+        'BundleRefsPlugin/normalModuleFactory/factorize',
+        (data: any, callback: Callback<any>) => {
           const context = data.context;
-          const dep = data.dependencies[0];
+          const request = data.request;
 
-          this.maybeReplaceImport(context, dep.request, compiler).then(
+          this.maybeReplaceImport(context, request, compiler).then(
             (module) => {
               if (!module) {
-                wrappedFactory(data, callback);
+                callback();
               } else {
                 callback(undefined, module);
               }
@@ -79,7 +65,8 @@ export class BundleRefsPlugin {
       );
     });
 
-    compiler.hooks.compilation.tap('BundleRefsPlugin/getRequiredBundles', (compilation) => {
+    // Webpack 5: Use compilation hook to track bundle dependencies
+    compiler.hooks.compilation.tap('BundleRefsPlugin/getRequiredBundles', (compilation: any) => {
       this.allowedBundleIds.clear();
 
       const manifestPath = this.bundle.manifestPath;
@@ -92,14 +79,23 @@ export class BundleRefsPlugin {
         this.allowedBundleIds.add(ref.bundleId);
       }
 
-      compilation.hooks.additionalAssets.tap('BundleRefsPlugin/watchManifest', () => {
-        compilation.fileDependencies.add(manifestPath);
-      });
+      // Webpack 5: Use processAssets hook instead of additionalAssets
+      compilation.hooks.processAssets.tap(
+        {
+          name: 'BundleRefsPlugin/watchManifest',
+          stage: (webpack.Compilation as any).PROCESS_ASSETS_STAGE_ADDITIONAL,
+        },
+        () => {
+          compilation.fileDependencies.add(manifestPath);
+        }
+      );
 
       compilation.hooks.finishModules.tapPromise(
         'BundleRefsPlugin/finishModules',
-        async (modules) => {
-          const usedBundleIds = (modules as any[])
+        async (modules: Set<any>) => {
+          // Webpack 5: modules is a Set, not an Array
+          const modulesArray = Array.from(modules);
+          const usedBundleIds = modulesArray
             .filter((m: any): m is BundleRefModule => m instanceof BundleRefModule)
             .map((m) => m.ref.bundleId);
 
@@ -120,7 +116,7 @@ export class BundleRefsPlugin {
   }
 
   private async resolve(request: string, startPath: string, compiler: webpack.Compiler) {
-    const resolver = compiler.resolverFactory.get('normal');
+    const resolver = (compiler as any).resolverFactory.get('normal');
     return new Promise<string | undefined>((resolve, reject) => {
       resolver.resolve({}, startPath, request, {}, (err: unknown | null, resolvedPath: string) => {
         if (err) {
@@ -139,7 +135,7 @@ export class BundleRefsPlugin {
    * undefined is returned. Otherwise it returns the referenced bundleRef.
    */
   private async maybeReplaceImport(context: string, request: string, compiler: webpack.Compiler) {
-    const alias = Object.keys(compiler.options.resolve?.alias ?? {});
+    const alias = Object.keys((compiler.options.resolve as any)?.alias ?? {});
     const isAliasRequest = alias.some((a) => request.startsWith(a));
 
     // For non-alias import path, ignore imports that have loaders defined or are not relative seeming
