@@ -9,11 +9,10 @@ import { ChatLayoutMode } from './chat_header_button';
 import { MessageRow } from './message_row';
 import { ToolCallRow } from './tool_call_row';
 import { ErrorRow } from './error_row';
+import { ConfirmationMessage } from './confirmation_message';
 import type { Message, AssistantMessage, ToolMessage, ToolCall } from '../../common/types';
 import './chat_messages.scss';
 import { ChatSuggestions } from './chat_suggestions';
-
-type TimelineItem = Message;
 
 /**
  * Determine tool status based on tool call and result
@@ -32,6 +31,9 @@ interface ChatMessagesProps {
   timeline: Message[];
   isStreaming: boolean;
   onResendMessage?: (message: Message) => void;
+  pendingConfirmation?: any; // ConfirmationRequest
+  onApproveConfirmation?: () => void;
+  onRejectConfirmation?: () => void;
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
@@ -39,8 +41,23 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   timeline,
   isStreaming,
   onResendMessage,
+  pendingConfirmation,
+  onApproveConfirmation,
+  onRejectConfirmation,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Log timeline changes
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('[ChatMessages] Timeline updated:', {
+      messageCount: timeline.length,
+      messages: timeline.map((m) => ({
+        m: JSON.stringify(m),
+      })),
+    });
+  }, [timeline]);
+
   // Context is now handled by RFC hooks and context pills
   // No need for separate context display here
 
@@ -162,6 +179,15 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
           return null;
         })}
+
+        {/* Pending confirmation request - shown inline in timeline */}
+        {pendingConfirmation && onApproveConfirmation && onRejectConfirmation && (
+          <ConfirmationMessage
+            request={pendingConfirmation}
+            onApprove={onApproveConfirmation}
+            onReject={onRejectConfirmation}
+          />
+        )}
 
         {/* Loading indicator - waiting for agent response */}
         {isStreaming && timeline.length === 0 && (

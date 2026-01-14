@@ -44,15 +44,17 @@ export class ChatEventHandler {
   private lastTextMessageStartId: string | null = null;
   private lastAssistantMessageId: string | null = null;
   private toolExecutor: ToolExecutor;
+  private executedToolSignatures = new Set<string>(); // Track executed tool calls to prevent duplicates
 
   constructor(
     private assistantActionService: AssistantActionService,
     private chatService: ChatService | null,
     private onTimelineUpdate: (updater: (prev: Message[]) => Message[]) => void,
     private onStreamingStateChange: (isStreaming: boolean) => void,
-    private getTimeline: () => Message[]
+    private getTimeline: () => Message[],
+    confirmationService?: any
   ) {
-    this.toolExecutor = new ToolExecutor(assistantActionService);
+    this.toolExecutor = new ToolExecutor(assistantActionService, confirmationService);
   }
 
   /**
@@ -322,6 +324,32 @@ export class ChatEventHandler {
       const args =
         toolCall.function.arguments && !isAgentTool ? JSON.parse(toolCall.function.arguments) : {};
 
+      // Create a signature for deduplication (tool name + args hash)
+      const toolSignature = `${toolCall.function.name}:${JSON.stringify(args)}`;
+
+      // Check if we've already executed this exact tool call
+      if (this.executedToolSignatures.has(toolSignature)) {
+        // eslint-disable-next-line no-console
+        console.warn(`Duplicate tool call detected and skipped: ${toolCall.function.name}`);
+
+        // Update state to complete with a duplicate message
+        this.assistantActionService.updateToolCallState(toolCallId, {
+          status: 'complete',
+          result: {
+            success: false,
+            error: 'Duplicate tool call skipped',
+            message: 'This tool was already executed with the same parameters',
+          },
+        });
+
+        // Clean up pending tool call
+        this.pendingToolCalls.delete(toolCallId);
+        return;
+      }
+
+      // Mark this tool signature as executed
+      this.executedToolSignatures.add(toolSignature);
+
       // Update state to executing
       this.assistantActionService.updateToolCallState(toolCallId, {
         status: 'executing',
@@ -329,7 +357,29 @@ export class ChatEventHandler {
       });
 
       // Execute the tool
-      const result = await this.toolExecutor.executeTool(toolCall.function.name, args);
+      const result = await this.toolExecutor.executeTool(
+        toolCall.function.name,
+        args,
+        toolCallId,
+        this.chatService?.getCurrentDataSourceId()
+      );
+
+      if (result.userRejected) {
+        // User rejected the tool execution
+        this.assistantActionService.updateToolCallState(toolCallId, {
+          status: 'failed',
+          error: 'User rejected',
+        });
+
+        // Send rejection message back to assistant
+        if (this.chatService && (this.chatService as any).sendToolResult) {
+          await this.sendToolResultToAssistant(toolCallId, result.data);
+        }
+
+        // Clean up pending tool call
+        this.pendingToolCalls.delete(toolCallId);
+        return;
+      }
 
       if (result.waitingForAgentResponse) {
         // Agent will handle this tool and send results back via events
@@ -576,5 +626,73 @@ export class ChatEventHandler {
     this.toolExecutor.clearAllPendingTools();
     this.lastTextMessageStartId = null;
     this.lastAssistantMessageId = null;
+  }
+
+  /**
+   * Execute a tool directly (for slash commands)
+   */
+  async executeToolDirectly(toolCall: ToolCall, messages: Message[]): Promise<any> {
+    const { id: toolCallId, function: toolFunction } = toolCall;
+
+    try {
+      // Update state to executing
+      this.assistantActionService.updateToolCallState(toolCallId, {
+        id: toolCallId,
+        name: toolFunction.name,
+        status: 'executing',
+        timestamp: Date.now(),
+      });
+
+      // Parse arguments
+      const args = toolFunction.arguments ? JSON.parse(toolFunction.arguments) : {};
+
+      // Execute the tool
+      const result = await this.toolExecutor.executeTool(
+        toolFunction.name,
+        args,
+        toolCallId,
+        this.chatService?.getCurrentDataSourceId()
+      );
+
+      // Update state to complete
+      this.assistantActionService.updateToolCallState(toolCallId, {
+        status: 'complete',
+        result: result.data,
+      });
+
+      // Add tool result message to timeline
+      const toolMessage: ToolMessage = {
+        id: `tool-result-${toolCallId}`,
+        role: 'tool',
+        content: JSON.stringify(result.data),
+        toolCallId,
+      };
+
+      this.onTimelineUpdate((prev) => [...prev, toolMessage]);
+
+      return result.data;
+    } catch (error: any) {
+      // eslint-disable-next-line no-console
+      console.error(`Error executing tool ${toolFunction.name}:`, error);
+
+      // Update state to failed
+      this.assistantActionService.updateToolCallState(toolCallId, {
+        status: 'failed',
+        error: error.message,
+      });
+
+      // Add error tool result message to timeline
+      const errorToolMessage: ToolMessage = {
+        id: `tool-error-${toolCallId}`,
+        role: 'tool',
+        content: error.message,
+        toolCallId,
+        error: error.message,
+      };
+
+      this.onTimelineUpdate((prev) => [...prev, errorToolMessage]);
+
+      throw error;
+    }
   }
 }

@@ -62,7 +62,8 @@ export interface AssistantMessage extends BaseMessage {
  */
 export interface UserMessage extends BaseMessage {
   role: 'user';
-  content: string;
+  content: string; // Message sent to LLM (raw message or processed for slash commands)
+  rawMessage?: string; // Original message typed by user (always shown in UI)
 }
 
 /**

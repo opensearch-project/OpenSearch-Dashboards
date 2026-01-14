@@ -28,8 +28,11 @@ export const MessageRow: React.FC<MessageRowProps> = ({
     }
   };
 
-  // Handle optional content
-  const content = message.content || '';
+  // Always show raw message if available, otherwise show content
+  const content =
+    message.role === 'user' && 'rawMessage' in message && message.rawMessage
+      ? message.rawMessage
+      : message.content || '';
 
   return (
     <div

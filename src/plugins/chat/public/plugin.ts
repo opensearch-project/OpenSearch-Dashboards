@@ -22,6 +22,7 @@ import { ChatHeaderButton, ChatLayoutMode } from './components/chat_header_butto
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { SuggestedActionsService } from './services/suggested_action';
 import { isChatEnabled } from '../common/chat_capabilities';
+import { CommandRegistryService } from './services/command_registry_service';
 
 const isValidChatWindowState = (test: unknown): test is ChatWindowState => {
   const state = test as ChatWindowState | null;
@@ -41,6 +42,7 @@ const isValidChatWindowState = (test: unknown): test is ChatWindowState => {
 export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
   private chatService: ChatService | undefined;
   private suggestedActionsService = new SuggestedActionsService();
+  private commandRegistryService = new CommandRegistryService();
   private paddingSizeSubscription?: Subscription;
   private unsubscribeWindowStateChange?: () => void;
   private coreSetup?: CoreSetup;
@@ -85,6 +87,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     // Store core setup reference for later use
     this.coreSetup = core;
     const suggestedActionsSetup = this.suggestedActionsService.setup();
+    const commandRegistrySetup = this.commandRegistryService.setup();
 
     // Register suggested actions service with core chat service
     if (this.coreSetup?.chat?.setSuggestedActionsService) {
@@ -93,6 +96,7 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
 
     return {
       suggestedActionsService: suggestedActionsSetup,
+      commandRegistry: commandRegistrySetup,
     };
   }
 

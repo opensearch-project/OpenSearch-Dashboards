@@ -6,14 +6,10 @@
 /* eslint-disable no-console */
 
 import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, useRef } from 'react';
-import { CoreStart } from '../../../../core/public';
 import { useChatContext } from '../contexts/chat_context';
 import { ChatEventHandler } from '../services/chat_event_handler';
-import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
-import {
-  ContextProviderStart,
-  AssistantActionService,
-} from '../../../context_provider/public';
+import { AssistantActionService } from '../../../context_provider/public';
+import { ConfirmationService, ConfirmationRequest } from '../services/confirmation_service';
 import {
   // eslint-disable-next-line prettier/prettier
   type Event as ChatEvent,
@@ -27,6 +23,7 @@ import { ChatContainer } from './chat_container';
 import { ChatHeader } from './chat_header';
 import { ChatMessages } from './chat_messages';
 import { ChatInput } from './chat_input';
+import { slashCommandRegistry } from '../services/slash_commands';
 
 export interface ChatWindowInstance{
   startNewChat: ()=>void;
@@ -54,14 +51,11 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   const service = AssistantActionService.getInstance();
   const { chatService } = useChatContext();
-  const { services } = useOpenSearchDashboards<{
-    core: CoreStart;
-    contextProvider?: ContextProviderStart;
-  }>();
   const [timeline, setTimeline] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
+  const [pendingConfirmation, setPendingConfirmation] = useState<ConfirmationRequest | null>(null);
   const handleSendRef = useRef<typeof handleSend>();
   
   const timelineRef = React.useRef<Message[]>(timeline);
@@ -69,6 +63,23 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   React.useEffect(() => {
     timelineRef.current = timeline;
   }, [timeline]);
+
+  // Create confirmation service
+  const confirmationService = useMemo(() => new ConfirmationService(), []);
+
+  // Subscribe to pending confirmations
+  useEffect(() => {
+    const subscription = confirmationService.getPendingConfirmations$().subscribe((requests) => {
+      // Show the first pending confirmation in the timeline
+      if (requests.length > 0) {
+        setPendingConfirmation(requests[0]);
+      } else {
+        setPendingConfirmation(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [confirmationService]);
 
   // Create the event handler using useMemo
   const eventHandler = useMemo(
@@ -78,9 +89,10 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         chatService,
         setTimeline,
         setIsStreaming,
-        () => timelineRef.current
+        () => timelineRef.current,
+        confirmationService
       ),
-    [service, chatService]
+    [service, chatService, confirmationService]
   );
 
   // Subscribe to tool updates from the service
@@ -120,6 +132,58 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     if (!messageContent || isStreaming) return;
 
     setInput('');
+
+    // Check if this is a slash command
+    const commandResult = await slashCommandRegistry.execute(messageContent);
+    if (commandResult.handled) {
+      // If command was handled and returned a message, send it to the AI
+      if (commandResult.message) {
+        setIsStreaming(true);
+        try {
+          const { observable, userMessage } = await chatService.sendMessage(
+            commandResult.message,
+            timeline
+          );
+
+          // Add user message immediately to timeline with raw message for UI display
+          const timelineUserMessage: UserMessage = {
+            id: userMessage.id,
+            role: 'user',
+            content: userMessage.content,  // Processed message (sent to LLM)
+            rawMessage: messageContent,    // Original user input (shown in UI)
+          };
+          setTimeline((prev) => [...prev, timelineUserMessage]);
+
+          // Subscribe to streaming response
+          const subscription = observable.subscribe({
+            next: async (event: ChatEvent) => {
+              // Update runId if we get it from the event
+              if ('runId' in event && event.runId && event.runId !== currentRunId) {
+                setCurrentRunId(event.runId);
+              }
+
+              // Handle all events through the event handler service
+              await eventHandler.handleEvent(event);
+            },
+            error: (error: any) => {
+              console.error('Subscription error:', error);
+              setIsStreaming(false);
+            },
+            complete: () => {
+              setIsStreaming(false);
+            },
+          });
+
+          return () => subscription.unsubscribe();
+        } catch (error) {
+          console.error('Failed to send message:', error);
+          setIsStreaming(false);
+        }
+      }
+      return;
+    }
+
+    // Normal message flow
     setIsStreaming(true);
 
     try {
@@ -133,6 +197,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         id: userMessage.id,
         role: 'user',
         content: userMessage.content,
+        rawMessage: messageContent,  // For regular messages, raw and content are the same
       };
       
       // Add loading assistant message
@@ -281,7 +346,20 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setTimeline([]);
     setCurrentRunId(null);
     setIsStreaming(false);
+    setPendingConfirmation(null);
   }, [chatService]);
+
+  const handleApproveConfirmation = useCallback(() => {
+    if (pendingConfirmation) {
+      confirmationService.approve(pendingConfirmation.id);
+    }
+  }, [pendingConfirmation, confirmationService]);
+
+  const handleRejectConfirmation = useCallback(() => {
+    if (pendingConfirmation) {
+      confirmationService.reject(pendingConfirmation.id);
+    }
+  }, [pendingConfirmation, confirmationService]);
 
   const currentState = service.getCurrentState();
   const enhancedProps = {
@@ -309,6 +387,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         timeline={timeline}
         isStreaming={isStreaming}
         onResendMessage={handleResendMessage}
+        pendingConfirmation={pendingConfirmation}
+        onApproveConfirmation={handleApproveConfirmation}
+        onRejectConfirmation={handleRejectConfirmation}
         {...enhancedProps}
       />
 

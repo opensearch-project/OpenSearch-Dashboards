@@ -4,6 +4,7 @@
  */
 
 import { AssistantActionService } from '../../../context_provider/public';
+import { ConfirmationService } from './confirmation_service';
 
 export interface ToolResult {
   success: boolean;
@@ -11,6 +12,7 @@ export interface ToolResult {
   error?: string;
   source?: 'registered_action' | 'agent_tool';
   waitingForAgentResponse?: boolean;
+  userRejected?: boolean;
 }
 
 interface PendingToolCall {
@@ -24,23 +26,77 @@ interface PendingToolCall {
  */
 export class ToolExecutor {
   private pendingAgentTools = new Map<string, PendingToolCall>();
+  private confirmationService?: ConfirmationService;
 
-  constructor(private assistantActionService: AssistantActionService) {}
+  constructor(
+    private assistantActionService: AssistantActionService,
+    confirmationService?: ConfirmationService
+  ) {
+    this.confirmationService = confirmationService;
+  }
+
+  /**
+   * Set the confirmation service (can be set after construction)
+   */
+  setConfirmationService(service: ConfirmationService): void {
+    this.confirmationService = service;
+  }
 
   /**
    * Execute a tool by name and arguments
    * First checks registered actions, then agent-only tools
+   * Supports user confirmation for tools that require it
    */
-  async executeTool(toolName: string, toolArgs: any): Promise<ToolResult> {
+  async executeTool(
+    toolName: string,
+    toolArgs: any,
+    toolCallId?: string,
+    datasourceId?: string
+  ): Promise<ToolResult> {
     try {
+      // Check if this tool requires confirmation
+      const requiresConfirmation = this.toolRequiresConfirmation(toolName);
+
+      if (requiresConfirmation && this.confirmationService && toolCallId) {
+        // Request user confirmation
+        const description = this.getToolConfirmationDescription(toolName);
+        const response = await this.confirmationService.requestConfirmation(
+          toolName,
+          toolCallId,
+          toolArgs,
+          description
+        );
+
+        if (!response.approved) {
+          return {
+            success: false,
+            error: 'User rejected the tool execution',
+            userRejected: true,
+            data: {
+              message: 'The user chose not to proceed with this action.',
+              toolName,
+              args: toolArgs,
+            },
+          };
+        }
+
+        // Use modified args if provided
+        if (response.modifiedArgs) {
+          toolArgs = response.modifiedArgs;
+        }
+      }
+
+      // Include datasourceId in toolArgs if provided
+      const enrichedToolArgs = datasourceId ? { ...toolArgs, datasourceId } : toolArgs;
+
       // First, check if this is a registered assistant action
-      const registeredAction = await this.tryExecuteRegisteredAction(toolName, toolArgs);
-      if (registeredAction.handled) {
+      const registeredAction = await this.tryExecuteRegisteredAction(toolName, enrichedToolArgs);
+      if (registeredAction.handled && registeredAction.result) {
         return registeredAction.result;
       }
 
       // Otherwise, handle as agent-only tool
-      return await this.executeAgentTool(toolName, toolArgs);
+      return await this.executeAgentTool(toolName, enrichedToolArgs);
     } catch (error: any) {
       return {
         success: false,
@@ -48,6 +104,40 @@ export class ToolExecutor {
         data: null,
       };
     }
+  }
+
+  /**
+   * Check if a tool requires user confirmation
+   * Checks action metadata first, then falls back to default list
+   */
+  private toolRequiresConfirmation(toolName: string): boolean {
+    // Get the action from the service
+    const currentState = this.assistantActionService.getCurrentState();
+    const action = currentState.actions.get(toolName);
+
+    // Check if action has requiresConfirmation flag
+    if (action && (action as any).requiresConfirmation) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Get confirmation description for a tool
+   * Uses action metadata if available
+   */
+  private getToolConfirmationDescription(toolName: string): string {
+    // Get the action from the service
+    const currentState = this.assistantActionService.getCurrentState();
+    const action = currentState.actions.get(toolName);
+
+    // Check if action has custom confirmation description
+    if (action && (action as any).confirmationDescription) {
+      return (action as any).confirmationDescription;
+    }
+
+    return 'This action requires your confirmation to proceed.';
   }
 
   /**

@@ -28,6 +28,9 @@ export interface AssistantAction<T = any> {
   available?: 'enabled' | 'disabled'; // 'disabled' for render-only actions
   enabled?: boolean;
   deps?: any[];
+  requiresConfirmation?: boolean; // Whether this action requires user confirmation
+  confirmationDescription?: ReactNode | string; // Custom description for confirmation dialog
+  useCustomRenderer?: boolean; // Whether to use custom render method for tool results
 }
 
 export function useAssistantAction<T = any>(action: AssistantAction<T>) {

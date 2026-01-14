@@ -56,6 +56,7 @@ export const AssistantMessageSchema = BaseMessageSchema.extend({
 export const UserMessageSchema = BaseMessageSchema.extend({
   role: z.literal('user'),
   content: z.string(),
+  rawMessage: z.string().optional(),
 });
 
 export const ToolMessageSchema = z.object({
