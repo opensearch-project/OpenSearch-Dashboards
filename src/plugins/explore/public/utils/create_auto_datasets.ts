@@ -132,7 +132,7 @@ export async function createAutoDetectedDatasets(
             signalType: 'logs',
             schemaMappings: JSON.stringify({
               otelLogs: {
-                timeField: detection.logTimeField || 'time',
+                timestamp: detection.logTimeField || 'time',
                 traceId: 'traceId',
                 spanId: 'spanId',
                 serviceName: 'resource.attributes.service.name',
@@ -165,7 +165,7 @@ export async function createAutoDetectedDatasets(
             signalType: 'logs',
             schemaMappings: JSON.stringify({
               otelLogs: {
-                timeField: detection.logTimeField || 'time',
+                timestamp: detection.logTimeField || 'time',
                 traceId: 'traceId',
                 spanId: 'spanId',
                 serviceName: 'resource.attributes.service.name',
