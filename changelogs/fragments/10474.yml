@@ -1,0 +1,2 @@
+chore:
+- Migrate away from glob-all dev deps ([#10474](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/10474))
