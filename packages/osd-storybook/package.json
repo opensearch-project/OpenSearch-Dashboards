@@ -39,6 +39,7 @@
     "serve-static": "1.14.1",
     "styled-components": "^5.3.9",
     "webpack": "^5.104.1",
+    "webpack-dev-middleware": "5.3.4",
     "@babel/plugin-transform-nullish-coalescing-operator": "^7.22.9",
     "@babel/plugin-transform-optional-chaining": "^7.22.9",
     "@storybook/builder-webpack5": "~6.5.16",

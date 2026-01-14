@@ -4,13 +4,13 @@ pageLoadAssetSize:
   banner: 36204
   bfetch: 20195
   charts: 68574
-  chat: 362321
+  chat: 363035
   console: 39723
   contentManagement: 41596
-  contextProvider: 30944
-  core: 1157049
+  contextProvider: 31278
+  core: 1176853
   dashboard: 588910
-  data: 4766723
+  data: 4769791
   dataExplorer: 139538
   dataImporter: 28576
   datasetManagement: 94760
@@ -19,7 +19,7 @@ pageLoadAssetSize:
   devTools: 59629
   discover: 757129
   embeddable: 130779
-  explore: 1187010
+  explore: 1214421
   expressions: 142997
   home: 73420
   indexPatternManagement: 95159
@@ -34,7 +34,7 @@ pageLoadAssetSize:
   opensearchDashboardsReact: 125466
   opensearchDashboardsUtils: 244864
   opensearchUiShared: 288797
-  queryEnhancements: 331613
+  queryEnhancements: 332480
   regionMap: 76679
   savedObjects: 115916
   savedObjectsManagement: 252054
@@ -51,7 +51,7 @@ pageLoadAssetSize:
   visTypeTable: 123327
   visTypeTagcloud: 23900
   visTypeTimeline: 35034
-  visTypeTimeseries: 165356
+  visTypeTimeseries: 1052005
   visTypeVega: 163185
   visTypeVislib: 204812
   visTypeXy: 6079
