@@ -6,7 +6,7 @@
 import { unparse } from 'papaparse';
 import { saveAs } from 'file-saver';
 import moment from 'moment';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useDiscoverContext } from '../../view_components/context';
 import { useSelector } from '../../utils/state_management';
 import { AbortError, IndexPattern } from '../../../../../data/common';

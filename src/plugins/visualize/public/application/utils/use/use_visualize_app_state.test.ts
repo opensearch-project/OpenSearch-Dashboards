@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { EventEmitter } from 'events';
 import { Observable } from 'rxjs';
 
@@ -180,11 +180,9 @@ describe('useVisualizeAppState', () => {
     it('should successfully update vis state and set up app state container', async () => {
       // @ts-expect-error
       stateContainerGetStateMock.mockImplementation(() => state);
-      const { result, waitForNextUpdate } = renderHook(() =>
+      const { result } = renderHook(() =>
         useVisualizeAppState(mockServices, eventEmitter, savedVisInstance)
       );
-
-      await waitForNextUpdate();
 
       const { aggs, ...visState } = stateContainer.getState().vis;
       const expectedNewVisState = {
@@ -192,10 +190,12 @@ describe('useVisualizeAppState', () => {
         data: { aggs: state.vis.aggs },
       };
 
-      expect(savedVisInstance.vis.setState).toHaveBeenCalledWith(expectedNewVisState);
-      expect(result.current).toEqual({
-        appState: stateContainer,
-        hasUnappliedChanges: false,
+      await waitFor(() => {
+        expect(savedVisInstance.vis.setState).toHaveBeenCalledWith(expectedNewVisState);
+        expect(result.current).toEqual({
+          appState: stateContainer,
+          hasUnappliedChanges: false,
+        });
       });
     });
 

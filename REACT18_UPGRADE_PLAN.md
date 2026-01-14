@@ -108,7 +108,7 @@ root.unmount();
 
 ## Phase 4: Test Migration (Week 3-4)
 
-### 4.1 Hook Test Migration (73 files)
+### 4.1 Hook Test Migration (70 files)
 ```typescript
 // Before
 import { renderHook } from '@testing-library/react-hooks';
@@ -116,8 +116,9 @@ import { renderHook } from '@testing-library/react-hooks';
 // After
 import { renderHook } from '@testing-library/react';
 ```
+- [x] Migrated 70 test files from `@testing-library/react-hooks` to `@testing-library/react`
 
-### 4.2 waitFor Updates
+### 4.2 waitFor Updates (7 files)
 ```typescript
 // Before
 const { result, waitForNextUpdate } = renderHook(...);
@@ -127,9 +128,10 @@ await waitForNextUpdate();
 const { result } = renderHook(...);
 await waitFor(() => expect(result.current.data).toBeDefined());
 ```
+- [x] Migrated 7 test files using `waitForNextUpdate` to `waitFor` pattern
 
 ### 4.3 Enzyme Tests (~492 files)
-- [ ] Update adapter configuration
+- [x] Update adapter configuration (done in Phase 1)
 - [ ] Validate all enzyme tests pass with new adapter
 
 ---
@@ -205,9 +207,9 @@ await waitFor(() => expect(result.current.data).toBeDefined());
 | 2025-01-14 | Phase 1.1 | Completed | Core packages updated in package.json |
 | 2025-01-14 | Phase 1.2 | Completed | TypeScript updated to 4.6.4 |
 | 2025-01-14 | Phase 1.3 | Completed | Testing framework packages updated |
-| | Phase 2 | Not Started | |
-| | Phase 3 | Not Started | |
-| | Phase 4 | Not Started | |
+| 2025-01-14 | Phase 2 | Completed | react-redux v8, react-markdown v9, react-resize-detector v9 |
+| 2025-01-14 | Phase 3 | Completed | ~120 files migrated to createRoot/root.unmount() |
+| | Phase 4 | In Progress | |
 | | Phase 5 | Not Started | |
 | | Phase 6 | Not Started | |
 

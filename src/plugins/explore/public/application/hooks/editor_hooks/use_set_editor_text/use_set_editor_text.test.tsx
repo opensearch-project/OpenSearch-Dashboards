@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { useSetEditorText } from './use_set_editor_text';
 import { EditorContext, InternalEditorContextValue } from '../../../context';

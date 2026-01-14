@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useKeyboardShortcut } from './use_keyboard_shortcut';
 import { ShortcutDefinition } from './types';
 import { KeyboardShortcutService } from './keyboard_shortcut_service';

@@ -6,7 +6,7 @@
 import { unparse } from 'papaparse';
 import { saveAs } from 'file-saver';
 import moment from 'moment';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import {
   useSelector,
   useDispatch,
