@@ -29,7 +29,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 
 import { ExpressionRenderDefinition } from 'src/plugins/expressions';
 import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
@@ -41,36 +41,46 @@ const TimelineVisComponent = lazy(() => import('./components/timeline_vis_compon
 
 export const getTimelineVisRenderer: (
   deps: TimelineVisDependencies
-) => ExpressionRenderDefinition<TimelineRenderValue> = (deps) => ({
-  name: 'timeline_vis',
-  displayName: 'Timeline visualization',
-  reuseDomNode: true,
-  render: (domNode, { visData, visParams }, handlers) => {
-    handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
-    });
+) => ExpressionRenderDefinition<TimelineRenderValue> = (deps) => {
+  let root: Root | null = null;
 
-    const [seriesList] = visData.sheet;
-    const showNoResult = !seriesList || !seriesList.list.length;
+  return {
+    name: 'timeline_vis',
+    displayName: 'Timeline visualization',
+    reuseDomNode: true,
+    render: (domNode, { visData, visParams }, handlers) => {
+      if (!root) {
+        root = createRoot(domNode);
+      }
 
-    if (showNoResult) {
-      // send the render complete event when there is no data to show
-      // to notify that a chart is updated
-      handlers.done();
-    }
+      handlers.onDestroy(() => {
+        if (root) {
+          root.unmount();
+          root = null;
+        }
+      });
 
-    render(
-      <VisualizationContainer showNoResult={showNoResult}>
-        <OpenSearchDashboardsContextProvider services={{ ...deps }}>
-          <TimelineVisComponent
-            interval={visParams.interval}
-            seriesList={seriesList}
-            renderComplete={handlers.done}
-            fireEvent={handlers.event}
-          />
-        </OpenSearchDashboardsContextProvider>
-      </VisualizationContainer>,
-      domNode
-    );
-  },
-});
+      const [seriesList] = visData.sheet;
+      const showNoResult = !seriesList || !seriesList.list.length;
+
+      if (showNoResult) {
+        // send the render complete event when there is no data to show
+        // to notify that a chart is updated
+        handlers.done();
+      }
+
+      root.render(
+        <VisualizationContainer showNoResult={showNoResult}>
+          <OpenSearchDashboardsContextProvider services={{ ...deps }}>
+            <TimelineVisComponent
+              interval={visParams.interval}
+              seriesList={seriesList}
+              renderComplete={handlers.done}
+              fireEvent={handlers.event}
+            />
+          </OpenSearchDashboardsContextProvider>
+        </VisualizationContainer>
+      );
+    },
+  };
+};

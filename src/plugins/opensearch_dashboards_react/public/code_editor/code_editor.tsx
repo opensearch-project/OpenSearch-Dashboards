@@ -28,8 +28,8 @@
  * under the License.
  */
 
-import React from 'react';
-import ReactResizeDetector from 'react-resize-detector';
+import React, { useRef, useCallback, useEffect } from 'react';
+import { useResizeDetector } from 'react-resize-detector';
 import MonacoEditor from 'react-monaco-editor';
 
 import { monaco } from '@osd/monaco';
@@ -120,114 +120,140 @@ export interface Props {
   useLatestTheme?: boolean;
 }
 
-export class CodeEditor extends React.Component<Props, {}> {
-  _editor: monaco.editor.IStandaloneCodeEditor | null = null;
+export const CodeEditor: React.FC<Props> = ({
+  languageId,
+  value,
+  onChange,
+  width,
+  height,
+  options,
+  suggestionProvider,
+  signatureProvider,
+  hoverProvider,
+  languageConfiguration,
+  editorWillMount,
+  overrideEditorWillMount,
+  editorDidMount,
+  useDarkTheme,
+  triggerSuggestOnFocus,
+  useLatestTheme,
+}) => {
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
-  _editorWillMount = (__monaco: unknown) => {
-    if (__monaco !== monaco) {
-      throw new Error('react-monaco-editor is using a different version of monaco');
+  const handleResize = useCallback(() => {
+    if (editorRef.current) {
+      editorRef.current.layout();
     }
+  }, []);
 
-    if (this.props.overrideEditorWillMount) {
-      this.props.overrideEditorWillMount();
-      return;
-    }
+  const { ref: containerRef } = useResizeDetector({
+    handleWidth: true,
+    handleHeight: true,
+    onResize: handleResize,
+  });
 
-    if (this.props.editorWillMount) {
-      this.props.editorWillMount();
-    }
+  const handleEditorWillMount = useCallback(
+    (__monaco: unknown) => {
+      if (__monaco !== monaco) {
+        throw new Error('react-monaco-editor is using a different version of monaco');
+      }
 
-    // Register the theme
-    monaco.editor.defineTheme(
-      'euiColors',
-      this.props.useLatestTheme
-        ? this.props.useDarkTheme
-          ? DARK_THEME
-          : LIGHT_THEME
-        : this.props.useDarkTheme
-        ? DEFAULT_DARK_THEME
-        : DEAFULT_LIGHT_THEME
-    );
-  };
+      if (overrideEditorWillMount) {
+        overrideEditorWillMount();
+        return;
+      }
 
-  _editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
-    if (__monaco !== monaco) {
-      throw new Error('react-monaco-editor is using a different version of monaco');
-    }
+      if (editorWillMount) {
+        editorWillMount();
+      }
 
-    this._editor = editor;
+      // Register the theme
+      monaco.editor.defineTheme(
+        'euiColors',
+        useLatestTheme
+          ? useDarkTheme
+            ? DARK_THEME
+            : LIGHT_THEME
+          : useDarkTheme
+          ? DEFAULT_DARK_THEME
+          : DEAFULT_LIGHT_THEME
+      );
+    },
+    [overrideEditorWillMount, editorWillMount, useLatestTheme, useDarkTheme]
+  );
 
-    if (this.props.editorDidMount) {
-      this.props.editorDidMount(editor);
-    }
+  const handleEditorDidMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
+      if (__monaco !== monaco) {
+        throw new Error('react-monaco-editor is using a different version of monaco');
+      }
 
-    if (this.props.triggerSuggestOnFocus) {
-      editor.onDidFocusEditorWidget(() => {
-        editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
-      });
-    }
+      editorRef.current = editor;
 
-    editor.onMouseDown((e) => {
-      if (e.target.position) {
-        if (e.event.detail === 1) {
-          e.event.preventDefault(); // Prevent Monaco's default focus handling
-          editor.setPosition(e.target.position!);
-          editor.revealPosition(e.target.position!);
+      if (editorDidMount) {
+        editorDidMount(editor);
+      }
+
+      if (triggerSuggestOnFocus) {
+        editor.onDidFocusEditorWidget(() => {
+          editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+        });
+      }
+
+      editor.onMouseDown((e) => {
+        if (e.target.position) {
+          if (e.event.detail === 1) {
+            e.event.preventDefault(); // Prevent Monaco's default focus handling
+            editor.setPosition(e.target.position!);
+            editor.revealPosition(e.target.position!);
+          }
+          editor.focus();
         }
-        editor.focus();
-      }
-    });
+      });
 
-    // Show the documentation panel by default
-    const suggestController = editor.getContribution('editor.contrib.suggestController') as any;
-    suggestController.widget.value._setDetailsVisible(true);
-  };
+      // Show the documentation panel by default
+      const suggestController = editor.getContribution('editor.contrib.suggestController') as any;
+      suggestController.widget.value._setDetailsVisible(true);
+    },
+    [editorDidMount, triggerSuggestOnFocus]
+  );
 
-  render() {
-    const { languageId, value, onChange, width, height, options } = this.props;
-
+  useEffect(() => {
     monaco.languages.onLanguage(languageId, () => {
-      if (this.props.suggestionProvider) {
-        monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider);
+      if (suggestionProvider) {
+        monaco.languages.registerCompletionItemProvider(languageId, suggestionProvider);
       }
 
-      if (this.props.signatureProvider) {
-        monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider);
+      if (signatureProvider) {
+        monaco.languages.registerSignatureHelpProvider(languageId, signatureProvider);
       }
 
-      if (this.props.hoverProvider) {
-        monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider);
+      if (hoverProvider) {
+        monaco.languages.registerHoverProvider(languageId, hoverProvider);
       }
 
-      if (this.props.languageConfiguration) {
-        monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
+      if (languageConfiguration) {
+        monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
       }
     });
+  }, [languageId, suggestionProvider, signatureProvider, hoverProvider, languageConfiguration]);
 
-    return (
-      <React.Fragment>
-        <MonacoEditor
-          theme="euiColors"
-          language={languageId}
-          value={value}
-          onChange={onChange}
-          editorWillMount={this._editorWillMount}
-          editorDidMount={this._editorDidMount}
-          width={width}
-          height={height}
-          options={options}
-        />
-        <ReactResizeDetector handleWidth handleHeight onResize={this._updateDimensions} />
-      </React.Fragment>
-    );
-  }
-
-  _updateDimensions = () => {
-    if (this._editor) {
-      this._editor.layout();
-    }
-  };
-}
+  return (
+    <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
+      <MonacoEditor
+        theme="euiColors"
+        language={languageId}
+        value={value}
+        onChange={onChange}
+        editorWillMount={handleEditorWillMount}
+        editorDidMount={handleEditorDidMount}
+        width={width}
+        height={height}
+        options={options}
+      />
+    </div>
+  );
+};
 
 // React.lazy requires default export
 // eslint-disable-next-line import/no-default-export

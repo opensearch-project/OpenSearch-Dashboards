@@ -29,12 +29,13 @@
  */
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { act, Simulate } from 'react-dom/test-utils';
 import { createStateContainer } from './create_state_container';
 import { createStateContainerReactHelpers } from './create_state_container_react_helpers';
 
 let container: HTMLDivElement | null;
+let root: Root | null;
 
 beforeEach(() => {
   container = document.createElement('div');
@@ -42,7 +43,15 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  document.body.removeChild(container!);
+  if (root) {
+    act(() => {
+      root!.unmount();
+    });
+    root = null;
+  }
+  if (container) {
+    document.body.removeChild(container!);
+  }
   container = null;
 });
 
@@ -61,12 +70,14 @@ test('<Provider> passes state to <Consumer>', () => {
   const stateContainer = createStateContainer({ hello: 'world' });
   const { Provider, Consumer } = createStateContainerReactHelpers<typeof stateContainer>();
 
-  ReactDOM.render(
-    <Provider value={stateContainer}>
-      <Consumer>{(s: typeof stateContainer) => s.get().hello}</Consumer>
-    </Provider>,
-    container
-  );
+  act(() => {
+    root = createRoot(container!);
+    root.render(
+      <Provider value={stateContainer}>
+        <Consumer>{(s: typeof stateContainer) => s.get().hello}</Consumer>
+      </Provider>
+    );
+  });
 
   expect(container!.innerHTML).toBe('world');
 });
@@ -93,12 +104,14 @@ test('<Provider> passes state to connect()()', () => {
   const mergeProps = ({ hello }: State1) => ({ message: hello });
   const DemoConnected = connect<Props1, 'message'>(mergeProps)(Demo);
 
-  ReactDOM.render(
-    <Provider value={stateContainer}>
-      <DemoConnected stop="?" />
-    </Provider>,
-    container
-  );
+  act(() => {
+    root = createRoot(container!);
+    root.render(
+      <Provider value={stateContainer}>
+        <DemoConnected stop="?" />
+      </Provider>
+    );
+  });
 
   expect(container!.innerHTML).toBe('Bob?');
 });
@@ -107,14 +120,16 @@ test('context receives stateContainer', () => {
   const stateContainer = createStateContainer({ foo: 'bar' });
   const { Provider, context } = createStateContainerReactHelpers<typeof stateContainer>();
 
-  ReactDOM.render(
+  act(() => {
+    root = createRoot(container!);
     /* eslint-disable no-shadow */
-    <Provider value={stateContainer}>
-      <context.Consumer>{(stateContainer) => stateContainer.get().foo}</context.Consumer>
-    </Provider>,
+    root.render(
+      <Provider value={stateContainer}>
+        <context.Consumer>{(stateContainer) => stateContainer.get().foo}</context.Consumer>
+      </Provider>
+    );
     /* eslint-enable no-shadow */
-    container
-  );
+  });
 
   expect(container!.innerHTML).toBe('bar');
 });
@@ -132,12 +147,14 @@ describe('hooks', () => {
         return <>{stateContainer.get().foo}</>;
       };
 
-      ReactDOM.render(
-        <Provider value={stateContainer}>
-          <Demo />
-        </Provider>,
-        container
-      );
+      act(() => {
+        root = createRoot(container!);
+        root.render(
+          <Provider value={stateContainer}>
+            <Demo />
+          </Provider>
+        );
+      });
 
       expect(container!.innerHTML).toBe('bar');
     });
@@ -152,12 +169,14 @@ describe('hooks', () => {
         return <>{foo}</>;
       };
 
-      ReactDOM.render(
-        <Provider value={stateContainer}>
-          <Demo />
-        </Provider>,
-        container
-      );
+      act(() => {
+        root = createRoot(container!);
+        root.render(
+          <Provider value={stateContainer}>
+            <Demo />
+          </Provider>
+        );
+      });
 
       expect(container!.innerHTML).toBe('qux');
     });
@@ -175,12 +194,14 @@ describe('hooks', () => {
         return <>{foo}</>;
       };
 
-      ReactDOM.render(
-        <Provider value={stateContainer}>
-          <Demo />
-        </Provider>,
-        container
-      );
+      act(() => {
+        root = createRoot(container!);
+        root.render(
+          <Provider value={stateContainer}>
+            <Demo />
+          </Provider>
+        );
+      });
 
       expect(container!.innerHTML).toBe('bar');
       act(() => {
@@ -218,12 +239,14 @@ describe('hooks', () => {
         );
       };
 
-      ReactDOM.render(
-        <Provider value={stateContainer}>
-          <Demo />
-        </Provider>,
-        container
-      );
+      act(() => {
+        root = createRoot(container!);
+        root.render(
+          <Provider value={stateContainer}>
+            <Demo />
+          </Provider>
+        );
+      });
 
       expect(container!.querySelector('strong')!.innerHTML).toBe('0');
       act(() => {
@@ -253,12 +276,14 @@ describe('hooks', () => {
         return <>{value}</>;
       };
 
-      ReactDOM.render(
-        <Provider value={stateContainer}>
-          <Demo />
-        </Provider>,
-        container
-      );
+      act(() => {
+        root = createRoot(container!);
+        root.render(
+          <Provider value={stateContainer}>
+            <Demo />
+          </Provider>
+        );
+      });
 
       expect(container!.innerHTML).toBe('qux');
     });
@@ -278,12 +303,14 @@ describe('hooks', () => {
         return <>{value}</>;
       };
 
-      ReactDOM.render(
-        <Provider value={stateContainer}>
-          <Demo />
-        </Provider>,
-        container
-      );
+      act(() => {
+        root = createRoot(container!);
+        root.render(
+          <Provider value={stateContainer}>
+            <Demo />
+          </Provider>
+        );
+      });
 
       expect(container!.innerHTML).toBe('qux');
       act(() => {
@@ -309,12 +336,14 @@ describe('hooks', () => {
         const value = useSelector(selector);
         return <>{value}</>;
       };
-      ReactDOM.render(
-        <Provider value={stateContainer}>
-          <Demo />
-        </Provider>,
-        container
-      );
+      act(() => {
+        root = createRoot(container!);
+        root.render(
+          <Provider value={stateContainer}>
+            <Demo />
+          </Provider>
+        );
+      });
 
       await new Promise((r) => setTimeout(r, 1));
       expect(cnt).toBe(1);
@@ -345,12 +374,14 @@ describe('hooks', () => {
         const value = useSelector(selector);
         return <>{JSON.stringify(value)}</>;
       };
-      ReactDOM.render(
-        <Provider value={stateContainer}>
-          <Demo />
-        </Provider>,
-        container
-      );
+      act(() => {
+        root = createRoot(container!);
+        root.render(
+          <Provider value={stateContainer}>
+            <Demo />
+          </Provider>
+        );
+      });
 
       await new Promise((r) => setTimeout(r, 1));
       expect(cnt).toBe(1);
@@ -387,12 +418,14 @@ describe('hooks', () => {
         const value = useSelector(selector, comparator);
         return <>{JSON.stringify(value)}</>;
       };
-      ReactDOM.render(
-        <Provider value={stateContainer}>
-          <Demo />
-        </Provider>,
-        container
-      );
+      act(() => {
+        root = createRoot(container!);
+        root.render(
+          <Provider value={stateContainer}>
+            <Demo />
+          </Provider>
+        );
+      });
 
       await new Promise((r) => setTimeout(r, 1));
       expect(cnt).toBe(1);

@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
 import { AppPluginDependencies } from './types';
 import { StateDemoApp } from './components/app';
@@ -42,7 +42,8 @@ export const renderApp = (
 ) => {
   const osdUrlStateStorage = createOsdUrlStateStorage({ useHash: false, history });
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <StateDemoApp
       notifications={notifications}
       http={http}
@@ -50,9 +51,8 @@ export const renderApp = (
       data={data}
       history={history}
       osdUrlStateStorage={osdUrlStateStorage}
-    />,
-    element
+    />
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };
