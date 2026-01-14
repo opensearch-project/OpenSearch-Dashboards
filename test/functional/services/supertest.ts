@@ -30,10 +30,10 @@
 
 import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 
-import supertestAsPromised from 'supertest-as-promised';
+import supertest from 'supertest';
 
 export function OpenSearchDashboardsSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const opensearchDashboardsServerUrl = config.get('servers.opensearchDashboards.serverUrl');
-  return supertestAsPromised(opensearchDashboardsServerUrl);
+  return supertest(opensearchDashboardsServerUrl);
 }
