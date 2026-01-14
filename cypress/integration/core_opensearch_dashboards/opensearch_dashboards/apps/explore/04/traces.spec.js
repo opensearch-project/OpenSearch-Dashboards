@@ -149,7 +149,7 @@ const traceTestSuite = () => {
       cy.getElementByTestId('exploreSidebarFacetValue')
         .find('[data-test-subj="fieldToggle-2"][aria-label="Filter for 2"]')
         .click();
-      verifyMonacoEditorContent(`| WHERE \`status.code\` = '2'`);
+      verifyMonacoEditorContent(`| WHERE \`status.code\` = 2`);
       cy.getElementByTestId('exploreQueryExecutionButton').click();
       cy.osd.verifyResultsCount(2);
     });
