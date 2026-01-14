@@ -69,5 +69,6 @@ describe('DocViewTableRow', () => {
     const html = wrapper.html();
     expect(html).not.toContain('<script>');
     expect(html).not.toContain('alert("xss")');
+    expect(html).toContain('Safe content');
   });
 });
