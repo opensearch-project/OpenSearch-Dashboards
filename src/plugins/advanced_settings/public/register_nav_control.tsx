@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
 import { HeaderUserThemeMenu } from './header_user_theme_menu';
@@ -13,17 +13,17 @@ export function setupTopNavThemeButton(coreStart: CoreStart, useUpdatedAppearanc
   coreStart.chrome.navControls[useUpdatedAppearance ? 'registerLeftBottom' : 'registerRight']({
     order: 2001,
     mount: (element: HTMLElement) => {
-      ReactDOM.render(
+      const root = createRoot(element);
+      root.render(
         <OpenSearchDashboardsContextProvider
           services={{
             ...coreStart,
           }}
         >
           <HeaderUserThemeMenu />
-        </OpenSearchDashboardsContextProvider>,
-        element
+        </OpenSearchDashboardsContextProvider>
       );
-      return () => ReactDOM.unmountComponentAtNode(element);
+      return () => root.unmount();
     },
   });
 }

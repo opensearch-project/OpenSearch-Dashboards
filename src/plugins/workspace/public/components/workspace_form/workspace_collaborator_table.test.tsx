@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { fireEvent, render, waitFor, within } from '@testing-library/react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { WorkspaceCollaboratorTable, getDisplayedType } from './workspace_collaborator_table';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
@@ -167,10 +167,11 @@ describe('WorkspaceCollaboratorTable', () => {
       </Provider>
     );
 
+    const modalRootRef = { current: undefined as Root | undefined };
     mockOverlays.openModal.mockReturnValue({
       onClose: Promise.resolve(),
       close: async () => {
-        ReactDOM.unmountComponentAtNode(getByTestId('confirm-modal-container'));
+        modalRootRef.current?.unmount();
       },
     });
     const action = getByTestId('workspace-detail-collaborator-table-actions-box');
@@ -178,7 +179,9 @@ describe('WorkspaceCollaboratorTable', () => {
     const deleteCollaborator = getByText('Delete collaborator');
     fireEvent.click(deleteCollaborator);
 
-    mockOverlays.openModal.mock.calls[0][0](getByTestId('confirm-modal-container'));
+    const modalContainer = getByTestId('confirm-modal-container');
+    modalRootRef.current = createRoot(modalContainer);
+    mockOverlays.openModal.mock.calls[0][0](modalContainer);
     await waitFor(() => {
       expect(getByText('Confirm')).toBeInTheDocument();
     });
@@ -278,10 +281,11 @@ describe('WorkspaceCollaboratorTable', () => {
       </Provider>
     );
 
+    const modalRootRef = { current: undefined as Root | undefined };
     mockOverlays.openModal.mockReturnValue({
       onClose: Promise.resolve(),
       close: async () => {
-        ReactDOM.unmountComponentAtNode(getByTestId('modal-container'));
+        modalRootRef.current?.unmount();
       },
     });
 
@@ -293,7 +297,9 @@ describe('WorkspaceCollaboratorTable', () => {
     await waitFor(() => {
       fireEvent.click(within(getByRole('dialog')).getByText('Read only'));
     });
-    mockOverlays.openModal.mock.calls[0][0](getByTestId('modal-container'));
+    const modalContainer = getByTestId('modal-container');
+    modalRootRef.current = createRoot(modalContainer);
+    mockOverlays.openModal.mock.calls[0][0](modalContainer);
     await waitFor(() => {
       expect(getByText('Confirm')).toBeInTheDocument();
     });
@@ -351,10 +357,11 @@ describe('WorkspaceCollaboratorTable', () => {
         </>
       </Provider>
     );
+    const modalRootRef = { current: undefined as Root | undefined };
     mockOverlays.openModal.mockReturnValue({
       onClose: Promise.resolve(),
       close: async () => {
-        ReactDOM.unmountComponentAtNode(getByTestId('confirm-modal-container'));
+        modalRootRef.current?.unmount();
       },
     });
     const action = getByTestId('workspace-detail-collaborator-table-actions-box');
@@ -364,7 +371,9 @@ describe('WorkspaceCollaboratorTable', () => {
       fireEvent.click(within(getByRole('dialog')).getByText('Read only'));
     });
 
-    mockOverlays.openModal.mock.calls[0][0](getByTestId('confirm-modal-container'));
+    const modalContainer = getByTestId('confirm-modal-container');
+    modalRootRef.current = createRoot(modalContainer);
+    mockOverlays.openModal.mock.calls[0][0](modalContainer);
     await waitFor(() => {
       expect(getByText('Confirm')).toBeInTheDocument();
     });

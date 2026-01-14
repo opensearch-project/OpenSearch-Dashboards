@@ -4,11 +4,12 @@
  */
 
 import React, { FC } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { RenderFn } from '../../../../services/section_type/section_type';
 
 export const renderFn = (Component: FC): RenderFn => (element: HTMLElement) => {
-  ReactDOM.render(<Component />, element);
+  const root = createRoot(element);
+  root.render(<Component />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

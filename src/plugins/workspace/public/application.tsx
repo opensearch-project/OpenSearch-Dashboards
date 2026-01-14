@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { HashRouter as Router, Route, Switch } from 'react-router-dom';
 import { AppMountParameters, ScopedHistory } from '../../../core/public';
 import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
@@ -25,7 +25,8 @@ export const renderCreatorApp = (
   services: Services,
   props: WorkspaceCreatorProps
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <OpenSearchDashboardsContextProvider services={services}>
       <Router>
         <Switch>
@@ -34,27 +35,26 @@ export const renderCreatorApp = (
           </Route>
         </Switch>
       </Router>
-    </OpenSearchDashboardsContextProvider>,
-    element
+    </OpenSearchDashboardsContextProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 
 export const renderFatalErrorApp = (params: AppMountParameters, services: Services) => {
   const { element } = params;
   const history = params.history as ScopedHistory<{ error?: string }>;
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <OpenSearchDashboardsContextProvider services={services}>
       <WorkspaceFatalError error={history.location.state?.error} />
-    </OpenSearchDashboardsContextProvider>,
-    element
+    </OpenSearchDashboardsContextProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 export const renderListApp = (
@@ -62,7 +62,8 @@ export const renderListApp = (
   services: Services,
   props: WorkspaceListAppProps
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <OpenSearchDashboardsContextProvider services={services}>
       <Router>
         <Switch>
@@ -71,12 +72,11 @@ export const renderListApp = (
           </Route>
         </Switch>
       </Router>
-    </OpenSearchDashboardsContextProvider>,
-    element
+    </OpenSearchDashboardsContextProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 
@@ -85,7 +85,8 @@ export const renderDetailApp = (
   services: Services,
   props: WorkspaceDetailProps
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <OpenSearchDashboardsContextProvider services={services}>
       <Router>
         <Switch>
@@ -94,12 +95,11 @@ export const renderDetailApp = (
           </Route>
         </Switch>
       </Router>
-    </OpenSearchDashboardsContextProvider>,
-    element
+    </OpenSearchDashboardsContextProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 
@@ -108,15 +108,15 @@ export const renderInitialApp = (
   services: Services,
   props: WorkspaceInitialProps
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <OpenSearchDashboardsContextProvider services={services}>
       <WorkspaceInitialApp {...props} />
-    </OpenSearchDashboardsContextProvider>,
-    element
+    </OpenSearchDashboardsContextProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 
@@ -125,15 +125,15 @@ export const renderUseCaseOverviewApp = async (
   services: Omit<Services, 'collaboratorTypes'>,
   pageId: string
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <OpenSearchDashboardsContextProvider services={services}>
       <WorkspaceUseCaseOverviewApp pageId={pageId} />
-    </OpenSearchDashboardsContextProvider>,
-    element
+    </OpenSearchDashboardsContextProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 
@@ -142,14 +142,14 @@ export const renderCollaboratorsApp = (
   services: Services,
   props: {}
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <OpenSearchDashboardsContextProvider services={services}>
       <WorkspaceCollaboratorsApp {...props} />
-    </OpenSearchDashboardsContextProvider>,
-    element
+    </OpenSearchDashboardsContextProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
