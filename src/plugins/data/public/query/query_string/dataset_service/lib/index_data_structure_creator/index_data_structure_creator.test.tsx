@@ -16,93 +16,74 @@ jest.mock('./use_index_fetcher', () => ({
   }),
 }));
 
-// Mock the child components
-jest.mock('./mode_selection_row', () => ({
-  ModeSelectionRow: ({
-    onModeChange,
-    onWildcardPatternsChange,
-    onCurrentWildcardPatternChange,
-    onMultiIndexSelectionChange,
-    selectionMode,
-    wildcardPatterns,
-    selectedIndexIds,
-  }: any) => (
+// Mock the UnifiedIndexSelector component
+jest.mock('./unified_index_selector', () => ({
+  UnifiedIndexSelector: ({ selectedItems, onSelectionChange }: any) => (
     <div>
-      <div data-test-subj="current-mode">{selectionMode}</div>
+      <div data-test-subj="unified-selector">Unified Index Selector</div>
+      <div data-test-subj="selected-count">{selectedItems.length}</div>
       <button
-        data-test-subj="mode-change-to-prefix"
-        onClick={() => onModeChange([{ value: 'prefix' }])}
+        data-test-subj="add-single-index"
+        onClick={() =>
+          onSelectionChange([
+            ...selectedItems,
+            { id: 'test::index1', title: 'index1', isWildcard: false },
+          ])
+        }
       >
-        Switch to Prefix Mode
-      </button>
-      <button
-        data-test-subj="mode-change-to-single"
-        onClick={() => onModeChange([{ value: 'single' }])}
-      >
-        Switch to Single Mode
-      </button>
-      <button
-        data-test-subj="select-indices"
-        onClick={() => onMultiIndexSelectionChange(['index1', 'index2'])}
-      >
-        Select Indices
-      </button>
-      <button data-test-subj="clear-indices" onClick={() => onMultiIndexSelectionChange([])}>
-        Clear Indices
+        Add Single Index
       </button>
       <button
-        data-test-subj="add-pattern"
-        onClick={() => onWildcardPatternsChange([...wildcardPatterns, 'logs-*'])}
+        data-test-subj="add-wildcard"
+        onClick={() =>
+          onSelectionChange([
+            ...selectedItems,
+            { id: 'test::logs-*', title: 'logs-*', isWildcard: true },
+          ])
+        }
       >
-        Add Pattern
+        Add Wildcard
       </button>
-      <button data-test-subj="clear-patterns" onClick={() => onWildcardPatternsChange([])}>
-        Clear Patterns
+      <button data-test-subj="clear-selection" onClick={() => onSelectionChange([])}>
+        Clear Selection
       </button>
-      <button
-        data-test-subj="set-current-pattern"
-        onClick={() => onCurrentWildcardPatternChange('test-*')}
-      >
-        Set Current Pattern
-      </button>
-      <div data-test-subj="selected-ids">{selectedIndexIds.join(',')}</div>
-      <div data-test-subj="wildcard-patterns">{wildcardPatterns.join(',')}</div>
-    </div>
-  ),
-}));
-
-jest.mock('./matching_indices_list', () => ({
-  MatchingIndicesList: ({ matchingIndices, customPrefix, isLoading }: any) => (
-    <div data-test-subj="matching-list">
-      <div data-test-subj="matching-prefix">{customPrefix}</div>
-      <div data-test-subj="matching-loading">{isLoading ? 'loading' : 'not-loading'}</div>
-      {matchingIndices.map((index: string) => (
-        <div key={index} data-test-subj={`matching-index-${index}`}>
-          {index}
-        </div>
-      ))}
+      <div data-test-subj="selected-items">
+        {selectedItems.map((item: any) => (
+          <div key={item.id} data-test-subj={`selected-item-${item.title}`}>
+            {item.title} ({item.isWildcard ? 'wildcard' : 'single'})
+          </div>
+        ))}
+      </div>
     </div>
   ),
 }));
 
 const mockSelectDataStructure = jest.fn();
+const mockHttp = {
+  get: jest.fn().mockResolvedValue([
+    {
+      health: 'green',
+      status: 'open',
+      index: 'test-index',
+      'docs.count': '1000',
+      'store.size': '1mb',
+    },
+  ]),
+};
 
 const defaultProps = {
   path: [
     {
       id: 'test',
       title: 'Test',
-      type: 'INDEX' as const,
-      children: [
-        { id: 'index1', title: 'logs-2024', type: 'INDEX' as const },
-        { id: 'index2', title: 'metrics-2024', type: 'INDEX' as const },
-      ],
+      type: 'DATA_SOURCE' as const,
     },
   ],
   index: 0,
   selectDataStructure: mockSelectDataStructure,
-  setPath: jest.fn(),
-  fetchDataStructure: jest.fn(),
+  services: {
+    http: mockHttp,
+  } as any,
 };
 
 const renderComponent = (props = {}) =>
@@ -115,13 +96,7 @@ const renderComponent = (props = {}) =>
 describe('IndexDataStructureCreator', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.useFakeTimers();
-    mockFetchIndices.mockResolvedValue(['result1', 'result2']);
-  });
-
-  afterEach(() => {
-    jest.runOnlyPendingTimers();
-    jest.useRealTimers();
+    mockFetchIndices.mockResolvedValue(['index1', 'index2', 'logs-2024']);
   });
 
   describe('Basic Rendering', () => {
@@ -130,442 +105,244 @@ describe('IndexDataStructureCreator', () => {
       expect(container.querySelector('.indexDataStructureCreator')).toBeInTheDocument();
     });
 
-    it('renders mode selection row', () => {
-      const { getByText } = renderComponent();
-      expect(getByText('Switch to Prefix Mode')).toBeInTheDocument();
+    it('renders unified index selector', () => {
+      const { getByTestId } = renderComponent();
+      expect(getByTestId('unified-selector')).toBeInTheDocument();
     });
 
-    it('starts in single mode by default', () => {
+    it('starts with no selected items', () => {
       const { getByTestId } = renderComponent();
-      expect(getByTestId('current-mode')).toHaveTextContent('single');
-    });
-  });
-
-  describe('Mode Switching', () => {
-    it('switches to prefix mode and sets currentWildcardPattern to *', async () => {
-      const { getByTestId } = renderComponent();
-
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-
-      await waitFor(() => {
-        expect(getByTestId('current-mode')).toHaveTextContent('prefix');
-      });
-
-      // Should trigger debounced fetch with '*'
-      jest.advanceTimersByTime(300);
-
-      await waitFor(() => {
-        expect(mockFetchIndices).toHaveBeenCalledWith({ patterns: ['*'] });
-      });
-    });
-
-    it('switches back to single mode and clears patterns', async () => {
-      const { getByTestId } = renderComponent();
-
-      // Switch to prefix mode first
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-      await waitFor(() => {
-        expect(getByTestId('current-mode')).toHaveTextContent('prefix');
-      });
-
-      // Switch back to single mode
-      fireEvent.click(getByTestId('mode-change-to-single'));
-
-      await waitFor(() => {
-        expect(getByTestId('current-mode')).toHaveTextContent('single');
-      });
-
-      // MatchingIndicesList should not be rendered in single mode
-      expect(() => getByTestId('matching-list')).toThrow();
-    });
-
-    it('clears wildcardPatterns and matchingIndices when switching modes', async () => {
-      const { getByTestId } = renderComponent();
-
-      // Switch to prefix and add patterns
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-      fireEvent.click(getByTestId('add-pattern'));
-
-      await waitFor(() => {
-        expect(getByTestId('wildcard-patterns')).toHaveTextContent('logs-*');
-      });
-
-      // Switch back to single
-      fireEvent.click(getByTestId('mode-change-to-single'));
-
-      await waitFor(() => {
-        expect(getByTestId('wildcard-patterns')).toHaveTextContent('');
-      });
+      expect(getByTestId('selected-count')).toHaveTextContent('0');
     });
   });
 
-  describe('Multi-Index Selection (Single Mode)', () => {
-    it('creates data structure when indices are selected', async () => {
+  describe('Single Index Selection', () => {
+    it('handles single index selection', async () => {
       const { getByTestId } = renderComponent();
 
-      fireEvent.click(getByTestId('select-indices'));
+      fireEvent.click(getByTestId('add-single-index'));
 
       await waitFor(() => {
-        expect(mockSelectDataStructure).toHaveBeenCalledWith(
-          {
-            id: 'local::logs-2024,metrics-2024',
-            title: 'logs-2024,metrics-2024',
-            type: 'INDEX',
-            meta: {
-              type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-              isMultiIndex: true,
-              selectedIndices: ['index1', 'index2'],
-              selectedTitles: ['logs-2024', 'metrics-2024'],
-            },
-          },
-          [defaultProps.path[0]]
+        expect(getByTestId('selected-count')).toHaveTextContent('1');
+        expect(getByTestId('selected-item-index1')).toHaveTextContent('index1 (single)');
+      });
+
+      expect(mockSelectDataStructure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test::index1',
+          title: 'index1',
+          type: 'INDEX',
+          meta: expect.objectContaining({
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            isMultiIndex: true,
+            selectedIndices: ['test::index1'],
+            selectedTitles: ['index1'],
+          }),
+        }),
+        expect.any(Array)
+      );
+    });
+
+    it('handles multiple single index selections', async () => {
+      const { getByTestId } = renderComponent();
+
+      fireEvent.click(getByTestId('add-single-index'));
+      fireEvent.click(getByTestId('add-single-index'));
+
+      await waitFor(() => {
+        expect(getByTestId('selected-count')).toHaveTextContent('2');
+      });
+    });
+
+    it('clears selection', async () => {
+      const { getByTestId } = renderComponent();
+
+      fireEvent.click(getByTestId('add-single-index'));
+      await waitFor(() => {
+        expect(getByTestId('selected-count')).toHaveTextContent('1');
+      });
+
+      fireEvent.click(getByTestId('clear-selection'));
+
+      await waitFor(() => {
+        expect(getByTestId('selected-count')).toHaveTextContent('0');
+      });
+
+      expect(mockSelectDataStructure).toHaveBeenCalledWith(undefined, expect.any(Array));
+    });
+  });
+
+  describe('Wildcard Pattern Selection', () => {
+    it('handles wildcard pattern selection', async () => {
+      const { getByTestId } = renderComponent();
+
+      fireEvent.click(getByTestId('add-wildcard'));
+
+      await waitFor(() => {
+        expect(getByTestId('selected-count')).toHaveTextContent('1');
+        expect(getByTestId('selected-item-logs-*')).toHaveTextContent('logs-* (wildcard)');
+      });
+
+      expect(mockSelectDataStructure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'test::logs-*',
+          title: 'logs-*',
+          type: 'INDEX',
+          meta: expect.objectContaining({
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            isMultiWildcard: true,
+            wildcardPatterns: ['logs-*'],
+          }),
+        }),
+        expect.any(Array)
+      );
+    });
+  });
+
+  describe('Mixed Selection (Single + Wildcard)', () => {
+    it('handles mixed selection of single indices and wildcards', async () => {
+      const mockOnSelectionChange = jest.fn();
+      const { getByTestId } = renderComponent();
+
+      // Add single index first
+      fireEvent.click(getByTestId('add-single-index'));
+
+      await waitFor(() => {
+        expect(getByTestId('selected-count')).toHaveTextContent('1');
+      });
+
+      // Add wildcard
+      fireEvent.click(getByTestId('add-wildcard'));
+
+      await waitFor(() => {
+        expect(getByTestId('selected-count')).toHaveTextContent('2');
+      });
+
+      expect(mockSelectDataStructure).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          title: 'index1,logs-*',
+          meta: expect.objectContaining({
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            isMultiWildcard: true,
+            wildcardPatterns: ['logs-*'],
+            selectedIndices: ['test::index1'],
+            selectedTitles: ['index1'],
+          }),
+        }),
+        expect.any(Array)
+      );
+    });
+  });
+
+  describe('Health Data Fetching', () => {
+    it('fetches health data when exact index is selected', async () => {
+      const { getByTestId } = renderComponent();
+
+      fireEvent.click(getByTestId('add-single-index'));
+
+      await waitFor(() => {
+        expect(mockHttp.get).toHaveBeenCalledWith(
+          '/api/directquery/dsl/cat.indices/dataSourceMDSId=test',
+          expect.objectContaining({
+            query: expect.objectContaining({
+              format: 'json',
+              index: 'index1',
+            }),
+          })
         );
       });
     });
 
-    it('clears data structure when all indices are deselected', async () => {
+    it('handles health data fetch errors gracefully', async () => {
+      mockHttp.get.mockRejectedValueOnce(new Error('Network error'));
       const { getByTestId } = renderComponent();
 
-      // First select indices
-      fireEvent.click(getByTestId('select-indices'));
-      await waitFor(() => {
-        expect(mockSelectDataStructure).toHaveBeenCalled();
-      });
-
-      mockSelectDataStructure.mockClear();
-
-      // Then clear selection
-      fireEvent.click(getByTestId('clear-indices'));
+      fireEvent.click(getByTestId('add-single-index'));
 
       await waitFor(() => {
-        expect(mockSelectDataStructure).toHaveBeenCalledWith(undefined, [defaultProps.path[0]]);
+        expect(mockHttp.get).toHaveBeenCalled();
       });
+
+      // Component should still work after error
+      expect(getByTestId('selected-count')).toHaveTextContent('1');
     });
 
-    it('uses data source ID from path when available', async () => {
-      const propsWithDataSource = {
-        ...defaultProps,
-        path: [
-          {
-            id: 'my-datasource',
-            title: 'My DataSource',
-            type: 'DATA_SOURCE' as const,
-          },
-          ...defaultProps.path,
-        ],
-        index: 1,
-      };
+    it('includes dataSourceId in URL path when present', async () => {
+      const { getByTestId } = renderComponent();
 
-      const { getByTestId } = renderComponent(propsWithDataSource);
+      fireEvent.click(getByTestId('add-single-index'));
 
-      fireEvent.click(getByTestId('select-indices'));
+      await waitFor(() => {
+        expect(mockHttp.get).toHaveBeenCalledWith(
+          '/api/directquery/dsl/cat.indices/dataSourceMDSId=test',
+          expect.objectContaining({
+            query: expect.objectContaining({
+              format: 'json',
+              index: 'index1',
+            }),
+          })
+        );
+      });
+    });
+  });
+
+  describe('Empty State', () => {
+    it('shows empty state message when no items selected', () => {
+      const { getByText } = renderComponent();
+      expect(getByText(/No indices or patterns selected yet/i)).toBeInTheDocument();
+    });
+
+    it('hides empty state when items are selected', async () => {
+      const { getByTestId, queryByText } = renderComponent();
+
+      fireEvent.click(getByTestId('add-single-index'));
+
+      await waitFor(() => {
+        expect(queryByText(/No indices or patterns selected yet/i)).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Data Source Handling', () => {
+    it('uses local as default when no data source in path', async () => {
+      const { getByTestId } = renderComponent({
+        path: [],
+      });
+
+      fireEvent.click(getByTestId('add-single-index'));
 
       await waitFor(() => {
         expect(mockSelectDataStructure).toHaveBeenCalledWith(
           expect.objectContaining({
-            id: 'my-datasource::logs-2024,metrics-2024',
+            id: 'local::index1',
           }),
-          expect.anything()
+          expect.any(Array)
         );
       });
     });
 
-    it('displays selected index badges', async () => {
-      const { getByTestId, getByText } = renderComponent();
-
-      fireEvent.click(getByTestId('select-indices'));
-
-      await waitFor(() => {
-        expect(getByText('logs-2024')).toBeInTheDocument();
-        expect(getByText('metrics-2024')).toBeInTheDocument();
-      });
-    });
-
-    it('removes individual index when badge cross is clicked', async () => {
-      const { getByTestId, getByLabelText } = renderComponent();
-
-      fireEvent.click(getByTestId('select-indices'));
-
-      await waitFor(() => {
-        const removeButton = getByLabelText('Remove index logs-2024');
-        expect(removeButton).toBeInTheDocument();
-      });
-
-      mockSelectDataStructure.mockClear();
-
-      const removeButton = getByLabelText('Remove index logs-2024');
-      fireEvent.click(removeButton);
-
-      await waitFor(() => {
-        expect(mockSelectDataStructure).toHaveBeenCalled();
-        const callArgs = mockSelectDataStructure.mock.calls[0];
-        expect(callArgs[0].meta.selectedIndices).toEqual(['index2']);
-        expect(callArgs[0].meta.selectedTitles).toEqual(['metrics-2024']);
-      });
-    });
-  });
-
-  describe('Wildcard Pattern Selection (Prefix Mode)', () => {
-    it('creates data structure when wildcard patterns are added', async () => {
+    it('uses data source id from path when present', async () => {
       const { getByTestId } = renderComponent();
 
-      // Switch to prefix mode
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-      jest.advanceTimersByTime(300);
-      await waitFor(() => {
-        expect(mockFetchIndices).toHaveBeenCalledWith({ patterns: ['*'] });
-      });
-
-      mockSelectDataStructure.mockClear();
-
-      // Add pattern
-      fireEvent.click(getByTestId('add-pattern'));
+      fireEvent.click(getByTestId('add-single-index'));
 
       await waitFor(() => {
         expect(mockSelectDataStructure).toHaveBeenCalledWith(
-          {
-            id: 'local::logs-*',
-            title: 'logs-*',
-            type: 'INDEX',
-            meta: {
-              type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-              isMultiWildcard: true,
-              wildcardPatterns: ['logs-*'],
-              matchingIndices: ['result1', 'result2'],
-            },
-          },
-          [defaultProps.path[0]]
+          expect.objectContaining({
+            id: 'test::index1',
+          }),
+          expect.any(Array)
         );
       });
     });
-
-    it('clears data structure when all patterns are removed', async () => {
-      const { getByTestId } = renderComponent();
-
-      // Switch to prefix mode and add pattern
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-      fireEvent.click(getByTestId('add-pattern'));
-
-      await waitFor(() => {
-        expect(mockSelectDataStructure).toHaveBeenCalled();
-      });
-
-      mockSelectDataStructure.mockClear();
-
-      // Clear patterns
-      fireEvent.click(getByTestId('clear-patterns'));
-
-      await waitFor(() => {
-        expect(mockSelectDataStructure).toHaveBeenCalledWith(undefined, [defaultProps.path[0]]);
-      });
-    });
-
-    it('displays wildcard pattern badges', async () => {
-      const { getByTestId, getAllByText } = renderComponent();
-
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-      fireEvent.click(getByTestId('add-pattern'));
-
-      await waitFor(() => {
-        const badges = getAllByText('logs-*');
-        // Should have at least one badge (in the actual EuiBadge component)
-        expect(badges.length).toBeGreaterThanOrEqual(1);
-      });
-    });
-
-    it('removes individual pattern when badge cross is clicked', async () => {
-      const { getByTestId, getByLabelText } = renderComponent();
-
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-      fireEvent.click(getByTestId('add-pattern'));
-
-      await waitFor(() => {
-        const removeButton = getByLabelText('Remove pattern logs-*');
-        expect(removeButton).toBeInTheDocument();
-      });
-
-      mockSelectDataStructure.mockClear();
-
-      const removeButton = getByLabelText('Remove pattern logs-*');
-      fireEvent.click(removeButton);
-
-      await waitFor(() => {
-        expect(mockSelectDataStructure).toHaveBeenCalledWith(undefined, [defaultProps.path[0]]);
-      });
-    });
   });
 
-  describe('Debounced API Calls', () => {
-    it('debounces fetchMatchingIndices calls with 300ms delay', async () => {
-      const { getByTestId } = renderComponent();
-
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-
-      // Should not call immediately
-      expect(mockFetchIndices).not.toHaveBeenCalled();
-
-      // Advance timer by 300ms
-      jest.advanceTimersByTime(300);
-
-      await waitFor(() => {
-        expect(mockFetchIndices).toHaveBeenCalledWith({ patterns: ['*'] });
+  describe('Services Prop', () => {
+    it('renders without services prop', () => {
+      const { container } = renderComponent({
+        services: undefined,
       });
-    });
-
-    it('only triggers one API call for multiple rapid changes', async () => {
-      const { getByTestId } = renderComponent();
-
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-
-      // Make multiple rapid changes
-      fireEvent.click(getByTestId('set-current-pattern'));
-      jest.advanceTimersByTime(100);
-      fireEvent.click(getByTestId('set-current-pattern'));
-      jest.advanceTimersByTime(100);
-      fireEvent.click(getByTestId('set-current-pattern'));
-
-      // Only advance by remaining time
-      jest.advanceTimersByTime(100);
-
-      await waitFor(() => {
-        // Should only be called once (not three times)
-        expect(mockFetchIndices).toHaveBeenCalledTimes(1);
-      });
-    });
-
-    it('clears matchingIndices when switching away from prefix mode', async () => {
-      const { getByTestId, queryByTestId } = renderComponent();
-
-      // Switch to prefix mode
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-      jest.advanceTimersByTime(300);
-
-      await waitFor(() => {
-        expect(getByTestId('matching-list')).toBeInTheDocument();
-      });
-
-      // Switch back to single mode
-      fireEvent.click(getByTestId('mode-change-to-single'));
-
-      await waitFor(() => {
-        expect(queryByTestId('matching-list')).not.toBeInTheDocument();
-      });
-    });
-
-    it('shows all indices (*) when no patterns are entered', async () => {
-      const { getByTestId } = renderComponent();
-
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-      jest.advanceTimersByTime(300);
-
-      await waitFor(() => {
-        expect(mockFetchIndices).toHaveBeenCalledWith({ patterns: ['*'] });
-      });
-    });
-
-    it('combines added patterns with current pattern for fetch', async () => {
-      const { getByTestId } = renderComponent();
-
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-      fireEvent.click(getByTestId('add-pattern')); // adds 'logs-*'
-      fireEvent.click(getByTestId('set-current-pattern')); // sets 'test-*'
-
-      mockFetchIndices.mockClear();
-      jest.advanceTimersByTime(300);
-
-      await waitFor(() => {
-        expect(mockFetchIndices).toHaveBeenCalledWith({ patterns: ['logs-*', 'test-*'] });
-      });
-    });
-  });
-
-  describe('MatchingIndicesList Integration', () => {
-    it('only renders MatchingIndicesList in prefix mode', async () => {
-      const { getByTestId, queryByTestId } = renderComponent();
-
-      // Should not be visible in single mode
-      expect(queryByTestId('matching-list')).not.toBeInTheDocument();
-
-      // Switch to prefix mode
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-
-      await waitFor(() => {
-        expect(getByTestId('matching-list')).toBeInTheDocument();
-      });
-    });
-
-    it('passes matchingIndices to MatchingIndicesList', async () => {
-      const { getByTestId } = renderComponent();
-
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-      jest.advanceTimersByTime(300);
-
-      await waitFor(() => {
-        expect(getByTestId('matching-index-result1')).toBeInTheDocument();
-        expect(getByTestId('matching-index-result2')).toBeInTheDocument();
-      });
-    });
-
-    it('passes currentWildcardPattern to MatchingIndicesList', async () => {
-      const { getByTestId } = renderComponent();
-
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-
-      await waitFor(() => {
-        expect(getByTestId('matching-prefix')).toHaveTextContent('*');
-      });
-    });
-
-    it('passes loading state to MatchingIndicesList', async () => {
-      const { getByTestId } = renderComponent();
-
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-
-      // Should show loading before timer completes
-      expect(getByTestId('matching-loading')).toHaveTextContent('not-loading');
-
-      jest.advanceTimersByTime(300);
-
-      // Wait for loading state to update
-      await waitFor(() => {
-        expect(mockFetchIndices).toHaveBeenCalled();
-      });
-    });
-  });
-
-  describe('Error Handling', () => {
-    it('handles empty pattern gracefully', async () => {
-      mockFetchIndices.mockResolvedValue([]);
-
-      const { getByTestId } = renderComponent();
-
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-      jest.advanceTimersByTime(300);
-
-      await waitFor(() => {
-        expect(mockFetchIndices).toHaveBeenCalled();
-      });
-
-      // Should not crash and matchingIndices should be empty
-      const matchingList = getByTestId('matching-list');
-      expect(matchingList).toBeInTheDocument();
-    });
-
-    it('handles fetchIndices errors gracefully', async () => {
-      // When fetch fails, it returns empty array (handled in the hook)
-      // This test verifies the component handles that gracefully
-      mockFetchIndices.mockResolvedValue([]);
-
-      const { getByTestId } = renderComponent();
-
-      fireEvent.click(getByTestId('mode-change-to-prefix'));
-      jest.advanceTimersByTime(300);
-
-      // Component should still render with empty results
-      await waitFor(() => {
-        expect(getByTestId('matching-list')).toBeInTheDocument();
-        expect(mockFetchIndices).toHaveBeenCalled();
-      });
+      expect(container.querySelector('.indexDataStructureCreator')).toBeInTheDocument();
     });
   });
 });

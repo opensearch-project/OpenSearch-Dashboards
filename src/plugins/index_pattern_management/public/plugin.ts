@@ -116,45 +116,46 @@ export class IndexPatternManagementPlugin
       return pathInApp && `/patterns${pathInApp}`;
     });
 
-    // only display if datasetManagement is not enabled
-    if (!isDatasetManagementEnabled) {
-      opensearchDashboardsSection.registerApp({
-        id: IPM_APP_ID,
-        title: sectionsHeader,
-        order: 0,
-        mount: async (params) => {
-          if (core.chrome.navGroup.getNavGroupEnabled()) {
-            const [coreStart] = await core.getStartServices();
-            const urlForStandardIPMApp = new URL(
-              coreStart.application.getUrlForApp(IPM_APP_ID),
-              window.location.href
-            );
-            const targetUrl = new URL(window.location.href);
-            targetUrl.pathname = urlForStandardIPMApp.pathname;
-            coreStart.application.navigateToUrl(targetUrl.toString());
-            return () => {};
-          }
-          const { mountManagementSection } = await import('./management_app');
-
-          return mountManagementSection(
-            core.getStartServices,
-            params,
-            () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
-            dataSource
+    // Always display index patterns
+    // Dataset management will only show in observability workspace
+    opensearchDashboardsSection.registerApp({
+      id: IPM_APP_ID,
+      title: sectionsHeader,
+      order: 0,
+      mount: async (params) => {
+        if (core.chrome.navGroup.getNavGroupEnabled()) {
+          const [coreStart] = await core.getStartServices();
+          const urlForStandardIPMApp = new URL(
+            coreStart.application.getUrlForApp(IPM_APP_ID),
+            window.location.href
           );
-        },
-      });
+          const targetUrl = new URL(window.location.href);
+          targetUrl.pathname = urlForStandardIPMApp.pathname;
+          coreStart.application.navigateToUrl(targetUrl.toString());
+          return () => {};
+        }
+        const { mountManagementSection } = await import('./management_app');
 
-      core.application.register({
-        id: IPM_APP_ID,
-        title: sectionsHeader,
-        description: i18n.translate('indexPatternManagement.indexPattern.description', {
-          defaultMessage: 'Manage index patterns to retrieve data from OpenSearch.',
-        }),
-        status: core.chrome.navGroup.getNavGroupEnabled()
-          ? AppStatus.accessible
-          : AppStatus.inaccessible,
-        mount: async (params: AppMountParameters) => {
+        return mountManagementSection(
+          core.getStartServices,
+          params,
+          () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
+          dataSource
+        );
+      },
+    });
+
+    core.application.register({
+      id: IPM_APP_ID,
+      title: sectionsHeader,
+      description: i18n.translate('indexPatternManagement.indexPattern.description', {
+        defaultMessage: 'Manage index patterns to retrieve data from OpenSearch.',
+      }),
+      status: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppStatus.accessible
+        : AppStatus.inaccessible,
+      mount: async (params: AppMountParameters) => {
+        try {
           const { mountManagementSection } = await import('./management_app');
           const [coreStart] = await core.getStartServices();
 
@@ -170,27 +171,52 @@ export class IndexPatternManagementPlugin
             () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
             dataSource
           );
-        },
-      });
+        } catch (error) {
+          // Try to show error notification to user
+          try {
+            const [coreStart] = await core.getStartServices();
+            coreStart.notifications.toasts.addDanger({
+              title: i18n.translate('indexPatternManagement.mountError.title', {
+                defaultMessage: 'Failed to mount Index Pattern Management',
+              }),
+              text: error.message,
+            });
+          } catch (notificationError) {
+            // If we can't show notification, log to console as last resort
+            // eslint-disable-next-line no-console
+            console.error('Failed to mount Index Pattern Management:', error);
+            // eslint-disable-next-line no-console
+            console.error('Also failed to show error notification:', notificationError);
+          }
 
-      core.getStartServices().then(([coreStart]) => {
-        /**
-         * The `capabilities.workspaces.enabled` indicates
-         * if workspace feature flag is turned on or not and
-         * the global index pattern management page should only be registered
-         * to settings and setup when workspace is turned off,
-         */
-        if (!coreStart.application.capabilities.workspaces.enabled) {
-          core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
-            {
-              id: IPM_APP_ID,
-              title: sectionsHeader,
-              order: 400,
-            },
-          ]);
+          // Return no-op unmount function
+          return () => {};
         }
-      });
-    }
+      },
+    });
+
+    core.getStartServices().then(([coreStart]) => {
+      /**
+       * The `capabilities.workspaces.enabled` indicates
+       * if workspace feature flag is turned on or not and
+       * the global index pattern management page should only be registered
+       * to settings and setup when workspace is turned off.
+       * Additionally, only add the nav link if nav groups are enabled to match
+       * the app accessibility status.
+       */
+      if (
+        !coreStart.application.capabilities.workspaces.enabled &&
+        core.chrome.navGroup.getNavGroupEnabled()
+      ) {
+        core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+          {
+            id: IPM_APP_ID,
+            title: sectionsHeader,
+            order: 400,
+          },
+        ]);
+      }
+    });
 
     return this.indexPatternManagementService.setup({ httpClient: core.http });
   }

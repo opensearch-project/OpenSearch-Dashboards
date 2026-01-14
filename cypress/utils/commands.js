@@ -170,3 +170,26 @@ Cypress.Commands.add('login', () => {
     },
   });
 });
+
+Cypress.Commands.add('getAdvancedSetting', (settingKey) => {
+  const url = `${Cypress.config().baseUrl}/api/opensearch-dashboards/settings`;
+  return cy
+    .request({
+      method: 'GET',
+      url,
+      headers: {
+        'content-type': 'application/json;charset=UTF-8',
+        'osd-xsrf': true,
+      },
+      failOnStatusCode: false,
+    })
+    .then((response) => {
+      if (response.status !== 200) {
+        throw new Error(`Failed to get advanced settings: ${response.status}`);
+      }
+      const settings = response.body.settings || response.body;
+      const settingValue = settings[settingKey]?.userValue ?? settings[settingKey]?.value;
+      cy.log(`Advanced setting ${settingKey}: ${settingValue}`);
+      return cy.wrap(settingValue);
+    });
+});

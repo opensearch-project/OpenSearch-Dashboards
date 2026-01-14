@@ -7,41 +7,47 @@ import {
   DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME,
   INDEX_WITH_TIME_1,
-} from '../../../../../../utils/apps/constants';
+} from '../../../../../../utils/constants';
+
 import {
+  generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
-  generateAllTestConfigurations,
+  getRandomizedDatasetId,
 } from '../../../../../../utils/apps/query_enhancements/shared';
+
 import {
   generateRecentQueriesTestConfiguration,
   BaseQuery,
   TestQueries,
   //TODO: QueryRegex,
 } from '../../../../../../utils/apps/query_enhancements/recent_queries';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 const runRecentQueryTests = () => {
   // TODO: refactor these tests to not navigate away so often
   describe.skip('recent queries spec', () => {
-    const index = INDEX_PATTERN_WITH_TIME.replace('*', '');
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspace,
-        indexPattern: index,
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspace,
+        datasetId,
+        INDEX_PATTERN_WITH_TIME,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-search'] // features
+      );
     });
 
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
-        page: 'discover',
+        page: 'data-explorer/discover',
         isEnhancement: true,
       });
     });
@@ -109,20 +115,6 @@ const runRecentQueryTests = () => {
                 cy.wrap(null).then(() => {
                   // force Cypress to run this method in order
                   reverseList.unshift(config.defaultQuery);
-                });
-              },
-            },
-            {
-              // check table after visiting a different URL and coming back to the workspace
-              action: () => {
-                cy.visit('/app/workspace_initial');
-                cy.osd.navigateToWorkSpaceSpecificPage({
-                  workspaceName: workspace,
-                  page: 'discover',
-                  isEnhancement: true,
-                });
-                cy.getElementByTestId('queryEditorFooterToggleRecentQueriesButton').click({
-                  force: true,
                 });
               },
             },

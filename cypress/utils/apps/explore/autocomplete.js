@@ -70,7 +70,7 @@ export const selectSpecificSuggestion = (suggestionText) => {
           });
 
           if (exactMatch.length > 0) {
-            cy.wrap(exactMatch).first().click();
+            cy.wrap(exactMatch).first().click({ force: true });
             return;
           }
         });
@@ -233,7 +233,6 @@ export const selectSuggestion = (suggestionText, useKeyboard = false) => {
           const extractedSuggestion = highlightedRow
             .find('.monaco-icon-label-container .label-name')
             .text();
-          cy.log('Pikachu says:', extractedSuggestion);
           if (extractedSuggestion.trim().toLowerCase() === suggestionText.trim().toLowerCase()) {
             return cy.get('.inputarea').trigger('keydown', {
               key: 'Tab',

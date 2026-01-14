@@ -6,7 +6,6 @@
 import {
   DATASOURCE_NAME,
   INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
   QueryLanguages,
 } from '../../../../../../utils/apps/constants.js';
 import * as docTable from '../../../../../../utils/apps/explore/doc_table.js';
@@ -14,6 +13,7 @@ import { BASE_PATH } from '../../../../../../utils/constants.js';
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared.js';
 import {
@@ -24,26 +24,33 @@ import {
   visualizationTitlesWithNoInspectOptions,
   visualizationTitlesWithInspectOptions,
 } from '../../../../../../utils/apps/explore/inspect.js';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const NUMBER_OF_VISUALIZATIONS_IN_FLIGHTS_DASHBOARD = 17;
 
 const inspectTestSuite = () => {
   describe('inspect spec', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        INDEX_PATTERN_WITH_TIME, // Uses 'data_logs_small_time_*'
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
       cy.osd.grabDataSourceId(workspaceName, DATASOURCE_NAME);
-      cy.get('@WORKSPACE_ID').then((workspaceID) => {
+      cy.get(`@${workspaceName}:WORKSPACE_ID`).then((workspaceID) => {
         cy.get('@DATASOURCE_ID').then((dataSourceId) => {
           cy.request({
             method: 'POST',
@@ -61,7 +68,7 @@ const inspectTestSuite = () => {
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
     generateAllTestConfigurations(generateInspectTestConfiguration).forEach((config) => {

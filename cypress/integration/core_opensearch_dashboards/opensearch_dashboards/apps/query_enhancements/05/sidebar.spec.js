@@ -3,24 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DatasetTypes } from '../../../../../../utils/constants';
 import {
   DATASOURCE_NAME,
+  DatasetTypes,
   INDEX_PATTERN_WITH_TIME_1,
   INDEX_WITH_TIME_1,
   QueryLanguages,
-} from '../../../../../../utils/apps/query_enhancements/constants';
+} from '../../../../../../utils/constants';
+
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
+  getRandomizedDatasetId,
 } from '../../../../../../utils/apps/query_enhancements/shared';
+
 import { getDocTableField } from '../../../../../../utils/apps/query_enhancements/doc_table';
 import * as sideBar from '../../../../../../utils/apps/query_enhancements/sidebar';
 import { generateSideBarTestConfiguration } from '../../../../../../utils/apps/query_enhancements/sidebar';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const sidebarFields = {
   aggregatableFields: {
@@ -147,6 +154,8 @@ const addSidebarFieldsAndCheckDocTableColumns = (
 
   if (config.language === QueryLanguages.PPL.name) {
     cy.intercept('**/api/enhancements/search/ppl').as('query');
+    cy.clearQueryEditor();
+    cy.wait(200);
     cy.setQueryEditor(pplQuery);
     cy.wait('@query').then(() => {
       checkTableHeaders(testFields);
@@ -157,6 +166,8 @@ const addSidebarFieldsAndCheckDocTableColumns = (
     });
   } else if (config.language === QueryLanguages.SQL.name) {
     cy.intercept('**/api/enhancements/search/sql').as('query');
+    cy.clearQueryEditor();
+    cy.wait(200);
     cy.setQueryEditor(sqlQuery);
     cy.wait('@query').then(() => {
       checkTableHeaders(testFields);
@@ -239,14 +250,17 @@ export const runSideBarTests = () => {
     };
 
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        `${INDEX_WITH_TIME_1}*`,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-search'] // features
+      );
     });
 
     afterEach(() => {
@@ -268,13 +282,12 @@ export const runSideBarTests = () => {
         beforeEach(() => {
           cy.osd.navigateToWorkSpaceSpecificPage({
             workspaceName: workspaceName,
-            page: 'discover',
+            page: 'data-explorer/discover',
             isEnhancement: true,
           });
           cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
           cy.setQueryLanguage(config.language);
           setDatePickerDatesAndSearchIfRelevant(config.language);
-          sideBar.removeAllSelectedFields();
         });
 
         it('adds simple fields', () => {
@@ -321,7 +334,7 @@ export const runSideBarTests = () => {
 
           cy.osd.navigateToWorkSpaceSpecificPage({
             workspaceName: workspaceName,
-            page: 'discover',
+            page: 'data-explorer/discover',
             isEnhancement: true,
           });
           cy.getElementByTestId('discoverNewButton').click();
