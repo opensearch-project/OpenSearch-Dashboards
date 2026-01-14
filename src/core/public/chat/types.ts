@@ -58,11 +58,12 @@ export interface AssistantMessage extends BaseMessage {
 }
 
 /**
- * User message type
+ * User message type with optional image content
  */
 export interface UserMessage extends BaseMessage {
   role: 'user';
   content: string;
+  imageData?: string; // Base64 encoded image data
 }
 
 /**
@@ -134,13 +135,16 @@ export interface ChatServiceInterface {
   closeWindow(): Promise<void>;
   sendMessage(
     content: string,
-    messages: Message[]
+    messages: Message[],
+    imageData?: string
   ): Promise<{ observable: any; userMessage: UserMessage }>;
   sendMessageWithWindow(
     content: string,
     messages: Message[],
-    options?: { clearConversation?: boolean }
+    options?: { clearConversation?: boolean; imageData?: string }
   ): Promise<{ observable: any; userMessage: UserMessage }>;
+  setPendingImage?(imageData: string | undefined): void;
+  setCapturingImage?(isCapturing: boolean): void;
 }
 
 /**
@@ -150,18 +154,23 @@ export interface ChatImplementationFunctions {
   // Message operations
   sendMessage: (
     content: string,
-    messages: Message[]
+    messages: Message[],
+    imageData?: string
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
 
   sendMessageWithWindow: (
     content: string,
     messages: Message[],
-    options?: { clearConversation?: boolean }
+    options?: { clearConversation?: boolean; imageData?: string }
   ) => Promise<{ observable: any; userMessage: UserMessage }>;
 
   // Window operations
   openWindow: () => Promise<void>;
   closeWindow: () => Promise<void>;
+
+  // Image operations
+  setPendingImage?: (imageData: string | undefined) => void;
+  setCapturingImage?: (isCapturing: boolean) => void;
 }
 
 /**

@@ -4,6 +4,10 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
+### 📈 Features/Enhancements
+
+ - Add 'Ask AI' capability to visualizations with screenshot capture and Claude 4 integration ([#TBD](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/TBD))
+
 ## [3.2.0-2025-08-06](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/3.2.0)
 
 ### 💥 Breaking Changes

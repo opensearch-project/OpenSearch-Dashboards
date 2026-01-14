@@ -212,6 +212,18 @@ export class ChatService {
     this.chatWindowRef = null;
   }
 
+  public setPendingImage(imageData: string | undefined): void {
+    if (this.chatWindowRef?.current) {
+      this.chatWindowRef.current.setPendingImage(imageData);
+    }
+  }
+
+  public setCapturingImage(isCapturing: boolean): void {
+    if (this.chatWindowRef?.current) {
+      this.chatWindowRef.current.setCapturingImage(isCapturing);
+    }
+  }
+
   public async openWindow(): Promise<void> {
     if (!this.coreChatService) {
       throw new Error('Core chat service not available');
@@ -229,7 +241,7 @@ export class ChatService {
   public async sendMessageWithWindow(
     content: string,
     messages: Message[],
-    options?: { clearConversation?: boolean }
+    options?: { clearConversation?: boolean; imageData?: string }
   ): Promise<{
     observable: any;
     userMessage: UserMessage;
@@ -250,13 +262,14 @@ export class ChatService {
     // If ChatWindow is available, delegate to its sendMessage for proper timeline management
     if (this.chatWindowRef?.current && this.isWindowOpen()) {
       try {
-        await this.chatWindowRef.current.sendMessage({ content });
+        await this.chatWindowRef.current.sendMessage({ content, imageData: options?.imageData });
 
         // Create a user message for consistency with the return type
         const userMessage: UserMessage = {
           id: this.generateMessageId(),
           role: 'user',
           content: content.trim(),
+          imageData: options?.imageData,
         };
 
         // Return a dummy observable since ChatWindow handles everything internally
@@ -271,7 +284,7 @@ export class ChatService {
     }
 
     // Fallback to direct service call
-    const result = await this.sendMessage(content, messages);
+    const result = await this.sendMessage(content, messages, options?.imageData);
     return result;
   }
 
@@ -353,7 +366,8 @@ export class ChatService {
 
   public async sendMessage(
     content: string,
-    messages: Message[]
+    messages: Message[],
+    imageData?: string
   ): Promise<{
     observable: any;
     userMessage: UserMessage;
@@ -365,6 +379,7 @@ export class ChatService {
       id: this.generateMessageId(),
       role: 'user',
       content: content.trim(),
+      imageData, // Include image data if provided
     };
 
     // Get workspace-aware data source ID

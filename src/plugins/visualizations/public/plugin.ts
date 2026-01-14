@@ -100,6 +100,14 @@ import { DashboardStart } from '../../dashboard/public';
 import { createSavedAugmentVisLoader } from '../../vis_augmenter/public';
 import { DocLinksStart } from '../../../core/public';
 import { createNewVisActions } from './wizard/new_vis_actions';
+import { AskAIAction, ACTION_ASK_AI, AskAIActionContext } from './actions';
+import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
+
+declare module '../../ui_actions/public' {
+  export interface ActionContextMapping {
+    [ACTION_ASK_AI]: AskAIActionContext;
+  }
+}
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -204,6 +212,11 @@ export class VisualizationsPlugin
       application: core.application,
       savedObjects: core.savedObjects,
     });
+
+    // Register Ask AI action
+    const askAIAction = new AskAIAction(core);
+    uiActions.registerAction(askAIAction);
+    uiActions.attachAction(CONTEXT_MENU_TRIGGER, askAIAction.id);
 
     setDataStart(data);
     setSavedAugmentVisLoader(savedAugmentVisLoader);
