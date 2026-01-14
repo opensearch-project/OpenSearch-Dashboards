@@ -7,6 +7,7 @@ import React from 'react';
 import { DatasetSelectWidget } from './dataset_select';
 import { SaveQueryButton } from './save_query';
 import { RecentQueriesButton } from './recent_queries_button';
+import { ImportDataButton } from './import_data_button';
 import { LanguageToggle } from './language_toggle';
 import { QueryPanelActions } from './query_panel_actions';
 import { ExploreServices } from '../../../types';
@@ -28,6 +29,8 @@ export const QueryPanelWidgets = () => {
         <RecentQueriesButton />
         <div className="exploreQueryPanelWidgets__verticalSeparator" />
         <SaveQueryButton />
+        <div className="exploreQueryPanelWidgets__verticalSeparator" />
+        <ImportDataButton />
         {!queryPanelActionsRegistry.isEmpty() ? (
           <>
             <div className="exploreQueryPanelWidgets__verticalSeparator" />

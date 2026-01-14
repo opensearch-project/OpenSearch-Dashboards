@@ -88,8 +88,8 @@ export const PreviewComponent = ({
           className="customSearchBar"
         />
       </div>
-      <div style={{ height: 'calc(100% - 40px)', overflowY: 'auto' }}>
-        <EuiTable>
+      <div className="previewTableContainer">
+        <EuiTable className="previewTable">
           <EuiTableHeader>
             <EuiTableHeaderCell>#</EuiTableHeaderCell>
             {previewData?.length > 0 ? (
