@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BarSeriesOption } from 'echarts';
 import { graphic } from 'echarts';
 import { AxisColumnMappings, Threshold, VisFieldType, AxisRole, VisColumn } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
@@ -347,7 +348,7 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
     ...(!invalidCase ? bars : []),
   ];
 
-  newState.series = series as any;
+  newState.series = series as BarSeriesOption[];
   newState.xAxisConfig = xAxisConfig;
   newState.yAxisConfig = yAxisConfig;
 
