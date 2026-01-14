@@ -749,8 +749,11 @@ cy.osd.add(
       // Log success
       cy.log(`Dataset created successfully: ${options.title} (ID: ${response.body.id})`);
 
-      // Save the dataset ID as an alias with WorkSpace:DataSetId format
+      // Save the dataset ID as an alias with format
       cy.wrap(response.body.id).as(aliasName);
+
+      // Save the dataset ID to environment as well
+      Cypress.env(aliasName, response.body.id);
     });
   }
 );
