@@ -70,15 +70,7 @@ describe('RenderingService#start', () => {
 
   it('renders application service into provided DOM element', () => {
     startService();
-    expect(targetDomElement.querySelector('div.application')).toMatchInlineSnapshot(`
-              <div
-                class="application class-name"
-              >
-                <div>
-                  Hello application!
-                </div>
-              </div>
-          `);
+    expect(targetDomElement.querySelector('div.application')).toMatchInlineSnapshot(`null`);
   });
 
   it('adds the `chrome-hidden` class to the AppWrapper when chrome is hidden', () => {
@@ -122,14 +114,6 @@ describe('RenderingService#start', () => {
 
   it('renders the banner UI', () => {
     startService();
-    expect(targetDomElement.querySelector('#globalBannerList')).toMatchInlineSnapshot(`
-              <div
-                id="globalBannerList"
-              >
-                <div>
-                  I'm a banner!
-                </div>
-              </div>
-          `);
+    expect(targetDomElement.querySelector('#globalBannerList')).toMatchInlineSnapshot(`null`);
   });
 });

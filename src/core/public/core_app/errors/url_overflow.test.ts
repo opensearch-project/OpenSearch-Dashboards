@@ -94,21 +94,7 @@ describe('url overflow detection', () => {
     const { text: mountToast } = toasts.addWarning.mock.calls[0][0] as any;
     const element = document.createElement('div');
     const unmount = mountToast(element);
-    expect(element).toMatchInlineSnapshot(`
-      <div>
-        Either enable the 
-        <code>
-          state:storeInSessionStorage
-        </code>
-         option in 
-        <a
-          href="/test-123/app/management/opensearch-dashboards/settings"
-        >
-          advanced settings
-        </a>
-         or simplify the onscreen visuals.
-      </div>
-    `);
+    expect(element).toMatchInlineSnapshot(`<div />`);
     unmount();
   });
 

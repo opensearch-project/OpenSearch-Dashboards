@@ -1,7 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`is rendered 1`] = `
-<Fragment>
+<div
+  style={
+    Object {
+      "height": "100%",
+      "width": "100%",
+    }
+  }
+>
   <MonacoEditor
     editorDidMount={[Function]}
     editorWillMount={[Function]}
@@ -15,15 +22,5 @@ exports[`is rendered 1`] = `
 [Sun Mar 7 21:16:17 2004] [error] [client xx.xx.xx.xx] File does not exist: /home/httpd/twiki/view/Main/WebHome
 "
   />
-  <ResizeDetector
-    handleHeight={true}
-    handleWidth={true}
-    nodeType="div"
-    onResize={[Function]}
-    querySelector={null}
-    refreshRate={1000}
-    skipOnMount={false}
-    targetDomEl={null}
-  />
-</Fragment>
+</div>
 `;
