@@ -34,7 +34,7 @@
     "postcss-loader": "^8.1.1",
     "postcss-flexbugs-fixes": "^4.2.1",
     "react-docgen-typescript-loader": "^3.1.1",
-    "react-is": "^16.8.0",
+    "react-is": "^18.2.0",
     "rxjs": "^6.5.5",
     "serve-static": "1.14.1",
     "styled-components": "^5.3.9",

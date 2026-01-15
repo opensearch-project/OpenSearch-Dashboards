@@ -33,7 +33,7 @@ import { MemoryRouter, Route, withRouter } from 'react-router-dom';
 import * as H from 'history';
 
 export const WithMemoryRouter = (initialEntries: string[] = ['/'], initialIndex: number = 0) => (
-  WrappedComponent: ComponentType
+  WrappedComponent: ComponentType<any>
 ) => (props: any) => (
   <MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
     <WrappedComponent {...props} />
@@ -41,7 +41,7 @@ export const WithMemoryRouter = (initialEntries: string[] = ['/'], initialIndex:
 );
 
 export const WithRoute = (componentRoutePath = '/', onRouter = (router: any) => {}) => (
-  WrappedComponent: ComponentType
+  WrappedComponent: ComponentType<any>
 ) => {
   // Create a class component that will catch the router
   // and forward it to our "onRouter()" handler.

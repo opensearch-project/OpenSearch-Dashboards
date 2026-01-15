@@ -117,7 +117,7 @@ test('editor mount setup', () => {
     />
   );
 
-  const instance = wrapper.instance() as CodeEditor;
+  const instance = wrapper.instance() as any;
   instance._editorWillMount(monaco);
 
   // Verify our mount callback will be called
@@ -155,7 +155,7 @@ test('suggest controller details visibility is set on editor mount', () => {
     <CodeEditor languageId="loglang" height={250} value={logs} onChange={() => {}} />
   );
 
-  const instance = component.instance() as CodeEditor;
+  const instance = component.instance() as any;
   instance._editorDidMount(mockEditor, monaco);
 
   expect(mockEditor.getContribution).toHaveBeenCalledWith('editor.contrib.suggestController');

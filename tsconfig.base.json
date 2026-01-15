@@ -52,6 +52,8 @@
     // import tslib helpers rather than inlining helpers for iteration or spreading, for instance
     "importHelpers": true,
     "useUnknownInCatchVariables": false,
+    // Skip type checking of declaration files to avoid conflicts between different @types/react versions
+    "skipLibCheck": true,
     // adding global typings
     "types": [
       "node",
