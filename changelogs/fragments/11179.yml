@@ -1,0 +1,2 @@
+infra:
+- Allow external plugins to be a different version from OSD. ([#11179](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11179))
