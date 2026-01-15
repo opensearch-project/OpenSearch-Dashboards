@@ -11,6 +11,7 @@ export const prometheusDocumentationWebsite =
   '[Prometheus Documentation](https://prometheus.io/docs/prometheus/latest/querying/basics/)';
 
 export const enum PromQLSuggestionItemDescriptions {
+  METRIC = 'metric',
   LABEL = 'label',
   VALUE = 'value',
   DURATION = 'duration unit',

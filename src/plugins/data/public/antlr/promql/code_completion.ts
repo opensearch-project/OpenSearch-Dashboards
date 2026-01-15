@@ -45,9 +45,7 @@ export const getSuggestions = async ({
       column: column || selectionEnd,
     });
     const prometheusResourceClient = services.data.resourceClientFactory.get<{
-      getMetricMetadata: (
-        dataSourceId?: string
-      ) => Promise<Record<string, Array<{ type: string; help: string }>>>;
+      getMetrics: (dataSourceId: string) => Promise<string[]>;
       getLabels: (dataSourceId: string, metric?: string) => Promise<string[]>;
       getLabelValues: (dataSourceId: string, label: string, metric?: string) => Promise<string[]>;
     }>('prometheus');
@@ -56,13 +54,12 @@ export const getSuggestions = async ({
     const finalSuggestions: MonacoCompatibleQuerySuggestion[] = [];
 
     if (suggestions.suggestMetrics) {
-      const metrics = await prometheusResourceClient.getMetricMetadata(indexPattern.id);
+      const metrics = await prometheusResourceClient.getMetrics(indexPattern.id!);
       finalSuggestions.push(
-        ...Object.entries(metrics).map(([af, [{ type, help }]]) => ({
-          text: `${af}`,
+        ...metrics.map((metric: string) => ({
+          text: metric,
           type: monaco.languages.CompletionItemKind.Field,
-          labelDescription: `${type} (metric)`,
-          detail: help,
+          detail: PromQLSuggestionItemDescriptions.METRIC,
         }))
       );
     }

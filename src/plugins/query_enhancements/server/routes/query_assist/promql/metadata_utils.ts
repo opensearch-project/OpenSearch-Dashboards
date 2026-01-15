@@ -3,17 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  prometheusManager,
-  MetricMetadata,
-} from '../../../connections/managers/prometheus_manager';
+import { prometheusManager } from '../../../connections/managers/prometheus_manager';
 import { RESOURCE_TYPES } from '../../../../common/constants';
 import type { LanguageHandler, LanguageHandlerContext } from '../language_handlers';
 
 interface PrometheusMetadataResult {
   metrics: string[];
   labels: string[];
-  metricMetadata: MetricMetadata;
 }
 
 const getPrometheusMetadata = async (
@@ -22,43 +18,35 @@ const getPrometheusMetadata = async (
   const { context, request, index: dataSourceName, logger } = handlerContext;
 
   try {
-    const [labelsResponse, metadataResponse] = await Promise.all([
+    const [labelsResponse, metricsResponse] = await Promise.all([
       prometheusManager.getResources<string[]>(context, request, {
         dataSourceName,
         resourceType: RESOURCE_TYPES.PROMETHEUS.LABELS,
         resourceName: undefined,
         query: {},
       }),
-      prometheusManager.getResources<MetricMetadata>(context, request, {
+      prometheusManager.getResources<string[]>(context, request, {
         dataSourceName,
-        resourceType: RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA,
+        resourceType: RESOURCE_TYPES.PROMETHEUS.METRICS,
         resourceName: undefined,
         query: {},
       }),
     ]);
 
     const labels = labelsResponse.status === 'success' ? labelsResponse.data : [];
-    const metricMetadata = metadataResponse.status === 'success' ? metadataResponse.data : {};
-    const metrics = Object.keys(metricMetadata);
+    const metrics = metricsResponse.status === 'success' ? metricsResponse.data : [];
 
-    return { metrics, labels, metricMetadata };
+    return { metrics, labels };
   } catch (error) {
     logger.error(`Failed to fetch Prometheus metadata: ${error}`);
-    return { metrics: [], labels: [], metricMetadata: {} };
+    return { metrics: [], labels: [] };
   }
 };
 
 const formatPrometheusMetadataForPrompt = (metadata: PrometheusMetadataResult): string => {
-  const { metrics, labels, metricMetadata } = metadata;
+  const { metrics, labels } = metadata;
   const labelsSection = `Available labels: ${labels.join(', ')}`;
-  const metricsWithInfo = metrics.map((metric) => {
-    const info = metricMetadata[metric]?.[0];
-    if (info) {
-      return `- ${metric} (${info.type}): ${info.help}`;
-    }
-    return `- ${metric}`;
-  });
-  const metricsSection = `Available metrics:\n${metricsWithInfo.join('\n')}`;
+  const metricsSection = `Available metrics:\n${metrics.map((metric) => `- ${metric}`).join('\n')}`;
   return `${labelsSection}\n\n${metricsSection}`;
 };
 

@@ -148,7 +148,7 @@ export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }
           const displayValue =
             valueEntry?.value !== null && valueEntry?.value !== undefined ? valueEntry.value : '—';
           return (
-            <EuiText size="s">
+            <EuiText size="s" className="metricsRawTable__value">
               <code>{displayValue}</code>
             </EuiText>
           );
