@@ -175,7 +175,9 @@ const prometheusDatasetTestSuite = () => {
             .should('be.visible')
             .should('contain.text', prometheusConfig.name);
 
-          cy.get('body').should('contain.text', 'PROMQL');
+          cy.getElementByTestId('queryPanelFooterLanguageToggle')
+            .should('be.visible')
+            .should('contain.text', 'PromQL');
           cy.getElementByTestId('exploreQueryPanelEditor').should('be.visible');
         });
 
