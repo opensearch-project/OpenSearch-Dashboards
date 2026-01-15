@@ -25,7 +25,6 @@ import { extname } from 'path';
 import {
   DataSourceManagementPluginSetup,
   DataSourceOption,
-  DataSourceSelectableConfig,
 } from '../../../data_source_management/public';
 import { CoreStart } from '../../../../core/public';
 import { NavigationPublicPluginStart } from '../../../navigation/public';
