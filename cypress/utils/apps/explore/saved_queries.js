@@ -10,7 +10,7 @@ import {
   verifyDiscoverPageState as verifyDiscoverPageStateFromSaved,
 } from './saved';
 
-import { setDatePickerDatesAndSearchIfRelevant } from './shared';
+import { setDatePickerDatesAndSearchIfRelevant, resetPageState } from './shared';
 
 /**
  * Error text when there is a name conflict when saving a query.
@@ -229,7 +229,6 @@ export const setAlternateQueryConfigurations = ({ filters, queryString, histogra
  * @param {string} deletedQueryName - Name of the query that should not exist.
  */
 export const verifyQueryDoesNotExistInSavedQueries = (deletedQueryName) => {
-  cy.reload();
   cy.wait(5000);
   cy.getElementByTestId('queryPanelFooterSaveQueryButton').click();
   cy.getElementByTestId('saved-query-management-open-button').click();
@@ -260,8 +259,8 @@ export const updateAndVerifySavedQuery = (config) => {
   verifyAlternateDiscoverPageState(alternateConfig);
   cy.explore.updateSavedQuery('', false, true, true);
 
-  cy.reload();
-  cy.wait(5000);
+  resetPageState();
+
   cy.explore.loadSavedQuery(config.saveName);
   // wait for saved query to load
   cy.getElementByTestId('docTable').should('be.visible');

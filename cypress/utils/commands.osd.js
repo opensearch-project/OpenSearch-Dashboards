@@ -6,7 +6,14 @@
 import moment from 'moment';
 import { TestFixtureHandler } from '../lib/test_fixture_handler';
 import initCommandNamespace from './command_namespace';
-import { DATASOURCE_NAME, PATHS, WAIT_MS, WAIT_MS_LONG } from './constants';
+import {
+  DATASOURCE_NAME,
+  PATHS,
+  WAIT_MS,
+  WAIT_MS_LONG,
+  defaultFieldsForDatasetCreation,
+  AVAILABLE_FIXTURE_INDICES,
+} from './constants';
 
 /**
  * This file houses all the commands specific to OSD. For commands that are used across the project please move it to the general commands file
@@ -29,34 +36,37 @@ cy.osd.add('waitForSync', () => {
   cy.wait(WAIT_MS);
 });
 
-cy.osd.add('createInitialWorkspaceWithDataSource', (dataSourceTitle, workspaceName) => {
-  cy.intercept('POST', '/api/workspaces').as('createWorkspaceInterception');
-  cy.getElementByTestId('workspace-initial-card-createWorkspace-button')
-    .should('be.visible')
-    .click();
-  cy.getElementByTestId('workspace-initial-button-create-observability-workspace')
-    .should('be.visible')
-    .click();
-  cy.getElementByTestId('workspaceForm-workspaceDetails-nameInputText')
-    .should('be.visible')
-    .type(workspaceName);
-  cy.getElementByTestId('workspace-creator-dataSources-assign-button')
-    .scrollIntoView()
-    .should('be.visible')
-    .click();
-  cy.get(`.euiSelectableListItem[title="${dataSourceTitle}"]`)
-    .should('be.visible')
-    .trigger('click');
-  cy.getElementByTestId('workspace-detail-dataSources-associateModal-save-button').click();
-  cy.getElementByTestId('workspaceForm-bottomBar-createButton').should('be.visible').click();
+cy.osd.add(
+  'createInitialWorkspaceWithDataSource',
+  (dataSourceTitle, workspaceName, useCase = 'observability') => {
+    cy.intercept('POST', '/api/workspaces').as('createWorkspaceInterception');
+    cy.getElementByTestId('workspace-initial-card-createWorkspace-button')
+      .should('be.visible')
+      .click();
+    cy.getElementByTestId(`workspace-initial-button-create-${useCase}-workspace`)
+      .should('be.visible')
+      .click();
+    cy.getElementByTestId('workspaceForm-workspaceDetails-nameInputText')
+      .should('be.visible')
+      .type(workspaceName);
+    cy.getElementByTestId('workspace-creator-dataSources-assign-button')
+      .scrollIntoView()
+      .should('be.visible')
+      .click();
+    cy.get(`.euiSelectableListItem[title="${dataSourceTitle}"]`)
+      .should('be.visible')
+      .trigger('click');
+    cy.getElementByTestId('workspace-detail-dataSources-associateModal-save-button').click();
+    cy.getElementByTestId('workspaceForm-bottomBar-createButton').should('be.visible').click();
 
-  cy.wait('@createWorkspaceInterception').then((interception) => {
-    // save the created workspace ID as an alias
-    cy.wrap(interception.response.body.result.id).as('WORKSPACE_ID');
-  });
-  cy.contains(/successfully/);
-  cy.osd.waitForSync();
-});
+    cy.wait('@createWorkspaceInterception').then((interception) => {
+      // save the created workspace ID as an alias
+      cy.wrap(interception.response.body.result.id).as('WORKSPACE_ID');
+    });
+    cy.contains(/successfully/);
+    cy.osd.waitForSync();
+  }
+);
 
 cy.osd.add('deleteIndex', (indexName, options = {}) => {
   // This function should only run in OSD environment
@@ -258,37 +268,52 @@ cy.osd.add(
   'navigateToWorkSpaceSpecificPage',
   (opts) => {
     const { workspaceName, page, isEnhancement = false } = opts;
-    // Navigating to the WorkSpace Home Page
-    // TODO validate if it is safe enough to delete this line
-    cy.osd.navigateToWorkSpaceHomePage(workspaceName);
 
-    // Check for toggleNavButton and handle accordingly
-    // If collapsibleNavShrinkButton is shown which means toggleNavButton is already clicked, try clicking the app link directly
-    // Using collapsibleNavShrinkButton is more robust than using toggleNavButton due to another toggleNavButton item on discover page
-    cy.get('body').then(($body) => {
-      const shrinkButton = $body.find('[data-test-subj="collapsibleNavShrinkButton"]');
-
-      if (shrinkButton.length === 0) {
-        cy.get('[data-test-subj="toggleNavButton"]').filter(':visible').first().click();
-      }
-
-      cy.getElementByTestId(`collapsibleNavAppLink-${page}`)
-        .should('exist')
-        .scrollIntoView()
-        .click();
-    });
+    // Get workspace ID from Cypress env
+    const workspaceId = Cypress.env(`${workspaceName}:WORKSPACE_ID`);
+    cy.visit(`/w/${workspaceId}/app/${page}`);
 
     cy.osd.waitForLoader(isEnhancement);
 
     // On a new session, a syntax helper popover appears, which obstructs the typing within the query
     // editor. Clicking on a random element removes the popover.
-    cy.getElementByTestId('headerGlobalNav').should('be.visible').click();
+    cy.getElementByTestId('headerGlobalNav').should('be.visible').click({ force: true });
     cy.wait(1000);
   }
 );
 
 cy.osd.add('wait', () => {
   cy.wait(Cypress.env('WAIT_MS'));
+});
+
+cy.osd.add('deleteWorkspaceByNameUsingEndpoint', (workspaceName, endpoint) => {
+  const baseUrl = endpoint || Cypress.config('baseUrl') || '';
+
+  // Get the workspace ID from environment variable or alias using the pattern ${workspaceName}:WORKSPACE_ID
+  const workspaceId = Cypress.env(`${workspaceName}:WORKSPACE_ID`);
+
+  return cy
+    .request({
+      method: 'DELETE',
+      url: `${baseUrl}/api/workspaces/${workspaceId}`,
+      headers: {
+        'osd-xsrf': true,
+      },
+      failOnStatusCode: false, // Don't fail the test if workspace doesn't exist
+    })
+    .then((resp) => {
+      if (resp.status === 200 || resp.status === 204) {
+        cy.log(`Successfully deleted workspace: ${workspaceName} (ID: ${workspaceId})`);
+      } else if (resp.status === 404) {
+        cy.log(
+          `Workspace ${workspaceName} (ID: ${workspaceId}) not found - may already be deleted`
+        );
+      } else {
+        throw new Error(
+          `Delete workspace ${workspaceName} failed: ${resp?.body?.error || resp.statusText}`
+        );
+      }
+    });
 });
 
 cy.osd.add('waitForLoader', (isEnhancement = false) => {
@@ -301,9 +326,10 @@ cy.osd.add('waitForLoader', (isEnhancement = false) => {
   });
 
   // Use recentItemsSectionButton for query enhancement, otherwise use homeIcon
-  cy.getElementByTestId(isEnhancement ? 'recentItemsSectionButton' : 'homeIcon', opts).should(
-    'be.visible'
-  );
+  cy.getElementByTestId(isEnhancement ? 'recentItemsSectionButton' : 'homeIcon', {
+    timeout: 60000,
+    ...opts,
+  }).should('be.visible', { timeout: 60000 });
 });
 
 cy.osd.add('grabDataSourceId', (workspaceName, dataSourceName) => {
@@ -427,37 +453,38 @@ cy.osd.add('deleteAllOldWorkspaces', () => {
 });
 
 // this currently only works with data-logs-1. If we ever need data from data-logs-2, we should update this.
-cy.osd.add('setupWorkspaceAndDataSourceWithIndices', (workspaceName, indices) => {
-  // Load test data
-  cy.osd.setupTestData(
-    PATHS.SECONDARY_ENGINE,
-    indices.map((index) => `cypress/fixtures/query_enhancements/data_logs_1/${index}.mapping.json`),
-    indices.map((index) => `cypress/fixtures/query_enhancements/data_logs_1/${index}.data.ndjson`)
-  );
+cy.osd.add(
+  'setupWorkspaceAndDataSourceWithIndices',
+  (workspaceName, indices, useCase = 'observability') => {
+    // Load test data
+    cy.osd.setupTestData(
+      PATHS.SECONDARY_ENGINE,
+      indices.map(
+        (index) => `cypress/fixtures/query_enhancements/data_logs_1/${index}.mapping.json`
+      ),
+      indices.map((index) => `cypress/fixtures/query_enhancements/data_logs_1/${index}.data.ndjson`)
+    );
 
-  // Add data source
-  cy.osd.addDataSource({
-    name: DATASOURCE_NAME,
-    url: PATHS.SECONDARY_ENGINE,
-    authType: 'no_auth',
-  });
+    // Add data source
+    cy.osd.addDataSource({
+      name: DATASOURCE_NAME,
+      url: PATHS.SECONDARY_ENGINE,
+      authType: 'no_auth',
+    });
 
-  // delete any old workspaces and potentially conflicting one
-  cy.deleteWorkspaceByName(workspaceName);
-  cy.osd.deleteAllOldWorkspaces();
+    // delete any old workspaces and potentially conflicting one
+    cy.osd.deleteWorkspaceByNameUsingEndpoint(workspaceName);
+    cy.osd.deleteAllOldWorkspaces();
 
-  // create workspace
-  cy.visit('/app/home');
-  cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName);
-});
+    // create workspace
+    cy.visit('/app/home');
+    cy.osd.createInitialWorkspaceWithDataSource(DATASOURCE_NAME, workspaceName, useCase);
+  }
+);
 
 // this currently only works with data-logs-1.
-cy.osd.add('cleanupWorkspaceAndDataSourceAndIndices', (workspaceName, indices) => {
-  cy.deleteWorkspaceByName(workspaceName);
-  cy.osd.deleteDataSourceByName(DATASOURCE_NAME);
-  for (const index of indices) {
-    cy.osd.deleteIndex(index);
-  }
+cy.osd.add('cleanupWorkspaceAndDataSourceAndIndices', (workspaceName) => {
+  cy.osd.deleteWorkspaceByNameUsingEndpoint(workspaceName);
 });
 
 cy.osd.add('ensureTopNavExists', () => {
@@ -487,8 +514,13 @@ cy.osd.add('ensureTopNavExists', () => {
       ) {
         if (attempt < MAX_RETRY) {
           cy.log(`Top Nav not found, reloading and retrying... (attempt ${attempt})`);
-          cy.reload();
-          cy.wait(2000, opts);
+
+          // Page Reload
+          cy.url().then((currentUrl) => {
+            cy.visit(currentUrl);
+          });
+
+          cy.wait(10000, opts);
           return getTopNavOrRetry(attempt + 1);
         } else {
           cy.log(`Failed to find Top Nav after attempting ${MAX_RETRY} times`);
@@ -635,7 +667,6 @@ cy.osd.add('getDataSourceId', (dataSourceName, endpoint) => {
       'osd-xsrf': true,
     },
     qs: {
-      fields: 'id,attributes.title',
       per_page: 100,
       type: 'data-source',
       search: dataSourceName,
@@ -656,5 +687,350 @@ cy.osd.add('getDataSourceId', (dataSourceName, endpoint) => {
 
     // Save the data source ID as an alias for later use
     cy.wrap(dataSource.id).as('DATASOURCE_ID');
+  });
+});
+
+/**
+ * Creates a dataset (index pattern) by making an API request to the endpoint
+ * @param {string} datasetId The unique ID for the dataset to be created
+ * @param {string} workspaceId The ID of the workspace where the dataset will be created
+ * @param {string} datasourceId The ID of the data source to associate with the dataset
+ * @param {Object} options Configuration options for the dataset
+ * @param {string} options.title The title/name of the dataset
+ * @param {string} [options.displayName] Optional display name for the dataset
+ * @param {string} [options.signalType] Signal type for the dataset (default: "logs")
+ * @param {string} options.timestamp The name of the time field
+ * @param {Array} [options.fields] Optional fields array, defaults to defaultFieldsForDatasetCreation
+ * @param {string} aliasName The alias name to save the dataset ID under (e.g., 'WorkSpace:DataSetId')
+ * @param {string} [endpoint] Optional endpoint URL, defaults to baseUrl from Cypress config
+ */
+cy.osd.add(
+  'createDatasetByEndpoint',
+  (datasetId, workspaceId, datasourceId, options, aliasName, endpoint) => {
+    const baseUrl = endpoint || Cypress.config('baseUrl') || '';
+    const fields = options.fields || defaultFieldsForDatasetCreation;
+
+    // Build attributes object conditionally
+    const attributes = {
+      title: options.title,
+      displayName: options.displayName || '',
+      signalType: options.signalType || 'logs',
+      fields: fields,
+      schemaMappings: options.schemaMappings || '{}',
+    };
+
+    // Only include timeFieldName if timestamp is provided
+    if (options.timestamp) {
+      attributes.timeFieldName = options.timestamp;
+    }
+
+    cy.request({
+      method: 'POST',
+      url: `${baseUrl}/api/saved_objects/index-pattern/${datasourceId}::${datasetId}`,
+      headers: {
+        'osd-xsrf': true,
+      },
+      body: {
+        attributes: attributes,
+        references: [
+          {
+            id: datasourceId,
+            type: 'OpenSearch',
+            name: 'dataSource',
+          },
+        ],
+        workspaces: [workspaceId],
+      },
+    }).then((response) => {
+      // Validate successful response
+      expect(response.status).to.be.oneOf([200, 201]);
+      expect(response.body).to.have.property('id');
+
+      // Log success
+      cy.log(`Dataset created successfully: ${options.title} (ID: ${response.body.id})`);
+
+      // Save the dataset ID as an alias with format
+      cy.wrap(response.body.id).as(aliasName);
+
+      // Save the dataset ID to environment as well
+      Cypress.env(aliasName, response.body.id);
+    });
+  }
+);
+
+/**
+ * Creates a workspace with a specific data source ID
+ * @param {string} datasourceId The ID of the data source to associate with the workspace
+ * @param {string} workspaceName The name for the workspace
+ * @param {string} [endpoint] Optional endpoint URL, defaults to baseUrl from Cypress config
+ * @param {string} [aliasName] Optional custom alias name, defaults to 'WORKSPACE_ID'
+ */
+cy.osd.add(
+  'createWorkspaceWithDataSourceId',
+  (datasourceId, workspaceName, useCase, aliasName = 'WORKSPACE_ID', endpoint) => {
+    const baseUrl = endpoint || Cypress.config('baseUrl') || '';
+
+    cy.createWorkspaceWithEndpoint(baseUrl, {
+      name: workspaceName,
+      features: useCase || ['use-case-observability'],
+      settings: {
+        permissions: {
+          library_write: { users: ['%me%'] },
+          write: { users: ['%me%'] },
+        },
+        dataSources: [datasourceId],
+        dataConnections: [],
+      },
+    }).then((response) => {
+      // Validate successful response
+      expect(response).to.have.property('id');
+
+      // Log success
+      cy.log(`Workspace created successfully: ${workspaceName} (ID: ${response.id})`);
+
+      // Save the workspace ID as an alias (with custom name to avoid conflicts)
+      cy.wrap(response.id).as(aliasName);
+
+      // Also store in Cypress env for persistence across runs
+      Cypress.env(aliasName, response.id);
+    });
+  }
+);
+
+cy.osd.add(
+  'setExplorePage',
+  (datasourceId, workspaceId, timeRange, datasetId, datasetOptions, query, endpoint) => {
+    const baseUrl = endpoint || Cypress.config('baseUrl') || '';
+
+    const dataset = `(dataSource:(id:${datasourceId},title:dataConn,type:OpenSearch),id:${datasetId},timeFieldName:'${datasetOptions.timeField}',title:'${datasetOptions.title},type:INDEX_PATTERN)`;
+    const encodedQuery = encodeURIComponent(query);
+
+    cy.visit(
+      `${baseUrl}/w/${workspaceId}/app/explore/logs/#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:${timeRange.from},to:${timeRange.to}))&_q=(dataset:${dataset},language:PPL,query:'${encodedQuery}')`
+    );
+  }
+);
+
+/**
+ * Deletes a saved query by name if it exists using API calls
+ * @param {string} queryName - Name of the saved query to delete
+ * @param {string} workspaceName - Workspace name to get the workspace ID from Cypress env
+ * @param {string} [endpoint] - Optional endpoint URL, defaults to baseUrl from Cypress config
+ */
+cy.osd.add('apiDeleteSavedQueryIfExists', (queryName, workspaceName, endpoint) => {
+  const baseUrl = endpoint || Cypress.config('baseUrl') || '';
+  const workspaceId = Cypress.env(`${workspaceName}:WORKSPACE_ID`);
+
+  cy.log(`Checking for saved query: ${queryName} in workspace: ${workspaceName}`);
+
+  // Find saved queries matching the name using global API
+  cy.request({
+    method: 'GET',
+    url: `${baseUrl}/api/saved_objects/_find`,
+    headers: { 'osd-xsrf': true },
+    qs: {
+      type: 'query',
+      search: queryName,
+      search_fields: 'title',
+      per_page: 100,
+    },
+    failOnStatusCode: false,
+  }).then((response) => {
+    if (
+      response.status === 200 &&
+      response.body.saved_objects &&
+      response.body.saved_objects.length > 0
+    ) {
+      cy.log(`Found ${response.body.saved_objects.length} potential matches for: ${queryName}`);
+
+      // Filter and delete matching saved queries in the specific workspace
+      response.body.saved_objects.forEach((savedQuery) => {
+        if (
+          savedQuery.attributes &&
+          savedQuery.attributes.title === queryName &&
+          savedQuery.workspaces &&
+          savedQuery.workspaces.includes(workspaceId)
+        ) {
+          cy.log(
+            `Deleting saved query: ${queryName} (ID: ${savedQuery.id}) from workspace: ${workspaceName}`
+          );
+
+          cy.request({
+            method: 'DELETE',
+            url: `${baseUrl}/api/saved_objects/query/${savedQuery.id}`,
+            headers: { 'osd-xsrf': true },
+            failOnStatusCode: false,
+          }).then((deleteResponse) => {
+            if (deleteResponse.status === 200) {
+              cy.log(`Successfully deleted saved query: ${queryName}`);
+            } else {
+              cy.log(
+                `Failed to delete saved query: ${queryName}, status: ${deleteResponse.status}`
+              );
+            }
+          });
+        }
+      });
+    } else {
+      cy.log(`No saved query found with name: ${queryName}`);
+    }
+  });
+});
+/*
+  Create an No Auth Opensearch Datasource for tests
+*/
+cy.osd.add('createOpensearchDatasourceUsingEndpoint', (datasourceUrl, datasourceName, endpoint) => {
+  const baseUrl = endpoint || Cypress.config('baseUrl');
+  cy.request({
+    method: 'POST',
+    url: `${baseUrl}/internal/data-source-management/fetchDataSourceMetaData`,
+    headers: {
+      'osd-xsrf': true,
+    },
+    body: {
+      dataSourceAttr: {
+        endpoint: datasourceUrl,
+        auth: {
+          type: 'no_auth',
+        },
+      },
+    },
+  }).then((response) => {
+    // Validate successful response
+    expect(response.status).to.be.oneOf([200, 201]);
+    const datasourceMetaData = response.body;
+
+    const createRequest = {
+      method: 'POST',
+      url: `${baseUrl}/api/saved_objects/data-source`,
+      headers: {
+        'osd-xsrf': true,
+      },
+      body: {
+        attributes: {
+          title: datasourceName,
+          description: '',
+          endpoint: datasourceUrl,
+          auth: {
+            type: 'no_auth',
+          },
+          ...datasourceMetaData,
+        },
+      },
+      failOnStatusCode: false,
+    };
+
+    cy.log('Creating data source with request:', JSON.stringify(createRequest, null, 2));
+
+    cy.request(createRequest).then((response) => {
+      cy.log('Data source creation response:', JSON.stringify(response, null, 2));
+      expect(response.status).to.be.oneOf([200, 201]);
+      cy.log('Datasource created successfully.');
+    });
+  });
+});
+
+/*
+  Setup environment and get data source ID in proper sequence
+*/
+cy.osd.add('setupEnvAndGetDataSource', (dataSourceName) => {
+  cy.log(`setupEnvAndGetDataSource called with: ${dataSourceName}`);
+  cy.log(`CYPRESS_RUNTIME_ENV: ${Cypress.env('CYPRESS_RUNTIME_ENV')}`);
+
+  const datasourceUrl = PATHS.SECONDARY_ENGINE;
+  const baseUrl = Cypress.config('baseUrl') || '';
+
+  // Disabled for non osd env
+  if (Cypress.env('CYPRESS_RUNTIME_ENV') !== 'osd') {
+    cy.log('Non-OSD environment - calling getDataSourceId directly');
+    // For non-OSD env, just try to get the data source ID
+    cy.osd.getDataSourceId(dataSourceName);
+
+    // mock AI mode disablement for Non OSD Envs
+    cy.intercept('GET', '**/enhancements/assist/languages*', {
+      // mock AI mode disablement
+      statusCode: 200,
+      body: {
+        configuredLanguages: [],
+      },
+    });
+    return;
+  }
+
+  cy.log('OSD environment - checking for existing data source');
+
+  // Check if the datasource is available, if not create it
+  cy.request({
+    method: 'GET',
+    url: `${baseUrl}/api/saved_objects/_find`,
+    headers: {
+      'osd-xsrf': true,
+    },
+    qs: {
+      per_page: 100,
+      type: 'data-source',
+      search: dataSourceName,
+      search_fields: 'title',
+    },
+    failOnStatusCode: false,
+  }).then((resp) => {
+    const savedObjects = resp.body?.saved_objects || [];
+
+    // Find the data source with exact name match
+    const dataSource = savedObjects.find((obj) => obj.attributes?.title === dataSourceName);
+
+    if (dataSource) {
+      // Data source already exists
+      cy.log(`Data source "${dataSourceName}" already exists (ID: ${dataSource.id})`);
+      cy.wrap(dataSource.id).as('DATASOURCE_ID');
+    } else {
+      // Data source doesn't exist, create it
+      cy.log(`Data source "${dataSourceName}" not found, creating it...`);
+      cy.osd.createOpensearchDatasourceUsingEndpoint(datasourceUrl, dataSourceName).then(() => {
+        // Wait a moment for the data source to be indexed, then get the data source ID
+        cy.osd.getDataSourceId(dataSourceName);
+      });
+    }
+
+    // Upload all available fixture indices to the data source
+    cy.osd.uploadAllFixtureIndices(datasourceUrl);
+  });
+});
+
+/*
+  Upload all available fixture indices to the data source
+*/
+cy.osd.add('uploadAllFixtureIndices', (datasourceUrl = PATHS.SECONDARY_ENGINE) => {
+  // This function should only run in OSD environment
+  if (Cypress.env('CYPRESS_RUNTIME_ENV') !== 'osd') {
+    cy.log('Non-OSD environment - skipping index upload');
+    return;
+  }
+
+  cy.log(`Uploading ${AVAILABLE_FIXTURE_INDICES.length} test indices to data source...`);
+  cy.osd.setupTestData(
+    datasourceUrl,
+    AVAILABLE_FIXTURE_INDICES.map((index) => index.mappingPath),
+    AVAILABLE_FIXTURE_INDICES.map((index) => index.dataPath)
+  );
+});
+
+/*
+  Delete a Workspace with workspace Name
+*/
+cy.osd.add('deleteWorkSpace', (workspaceName) => {
+  const endpoint = Cypress.config('baseUrl') || '';
+  cy.get(`@${workspaceName}:WORKSPACE_ID`).then((workspaceId) => {
+    cy.request({
+      method: 'DELETE',
+      url: `${endpoint}/api/workspaces/${workspaceId}`,
+      headers: {
+        'osd-xsrf': true,
+      },
+      failOnStatusCode: false,
+    }).then((response) => {
+      expect(response.status).to.be.oneOf([200, 201]);
+      cy.log('Workspace deleted successfully.');
+    });
   });
 });

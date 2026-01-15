@@ -168,6 +168,9 @@ describe('useQueryPanelEditor', () => {
         query: {
           queryString: {
             getQuery: jest.fn(() => ({ dataset: { id: 'test-id', type: 'INDEX_PATTERN' } })),
+            getLanguageService: jest.fn(() => ({
+              getLanguage: jest.fn((languageId: string) => ({ title: languageId })),
+            })),
           },
         },
         autocomplete: {

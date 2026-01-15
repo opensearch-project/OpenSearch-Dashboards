@@ -50,7 +50,7 @@ run(
     }
 
     await procRunner.run('worker', {
-      cmd: 'webpack',
+      cmd: 'rspack',
       args: ['--config', WEBPACK_CONFIG_PATH],
       wait: true,
       env,

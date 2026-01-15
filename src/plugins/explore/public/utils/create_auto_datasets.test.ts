@@ -93,7 +93,7 @@ describe('createAutoDetectedDatasets', () => {
         signalType: 'logs',
         schemaMappings: JSON.stringify({
           otelLogs: {
-            timeField: 'time',
+            timestamp: 'time',
             traceId: 'traceId',
             spanId: 'spanId',
             serviceName: 'resource.attributes.service.name',
@@ -170,7 +170,7 @@ describe('createAutoDetectedDatasets', () => {
         signalType: 'logs',
         schemaMappings: JSON.stringify({
           otelLogs: {
-            timeField: 'time',
+            timestamp: 'time',
             traceId: 'traceId',
             spanId: 'spanId',
             serviceName: 'resource.attributes.service.name',
@@ -282,7 +282,7 @@ describe('createAutoDetectedDatasets', () => {
         signalType: 'logs',
         schemaMappings: JSON.stringify({
           otelLogs: {
-            timeField: 'time',
+            timestamp: 'time',
             traceId: 'traceId',
             spanId: 'spanId',
             serviceName: 'resource.attributes.service.name',
@@ -652,7 +652,7 @@ describe('createAutoDetectedDatasets', () => {
 
     const expectedSchemaMappings = {
       otelLogs: {
-        timeField: 'time',
+        timestamp: 'time',
         traceId: 'traceId',
         spanId: 'spanId',
         serviceName: 'resource.attributes.service.name',
@@ -689,7 +689,7 @@ describe('createAutoDetectedDatasets', () => {
 
     const expectedSchemaMappings = {
       otelLogs: {
-        timeField: 'timestamp',
+        timestamp: 'timestamp',
         traceId: 'traceId',
         spanId: 'spanId',
         serviceName: 'resource.attributes.service.name',

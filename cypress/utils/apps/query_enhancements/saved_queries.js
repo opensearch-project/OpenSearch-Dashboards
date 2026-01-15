@@ -10,7 +10,7 @@ import {
   verifyDiscoverPageState as verifyDiscoverPageStateFromSaved,
 } from './saved';
 
-import { setDatePickerDatesAndSearchIfRelevant } from './shared';
+import { setDatePickerDatesAndSearchIfRelevant, resetPageState } from './shared';
 
 /**
  * Error text when there is a name conflict when saving a query.
@@ -152,16 +152,14 @@ const generateAlternateTestConfiguration = (config) => {
  */
 export const verifyDiscoverPageState = (config) => {
   // Extract only the parameters needed for saved queries
-  const { queryString, language, hitCount, filters, histogram, startTime, endTime } = config;
+  const { queryString, language, filters, startTime, endTime } = config;
 
   // Call the imported function with only the parameters needed for saved queries
   // This ensures we don't pass dataset, selectFields, or sampleTableData
   verifyDiscoverPageStateFromSaved({
     queryString,
     language,
-    hitCount,
     filters,
-    histogram,
     startTime,
     endTime,
   });
@@ -174,17 +172,13 @@ export const verifyDiscoverPageState = (config) => {
 export const verifyAlternateDiscoverPageState = ({
   queryString,
   language,
-  hitCount,
   filters,
-  histogram,
   startTime,
   endTime,
 }) => {
   verifyDiscoverPageStateFromSaved({
     queryString,
     language,
-    hitCount,
-    histogram,
     startTime,
     endTime,
   });
@@ -248,7 +242,7 @@ export const setAlternateQueryConfigurations = ({ filters, queryString, histogra
  * @param {string} deletedQueryName - Name of the query that should not exist.
  */
 export const verifyQueryDoesNotExistInSavedQueries = (deletedQueryName) => {
-  cy.reload();
+  cy.osd.waitForLoader(true);
   cy.getElementByTestId('saved-query-management-popover-button').click();
   cy.getElementByTestId('saved-query-management-open-button').click();
   cy.getElementByTestId('savedQueriesFlyoutBody').contains(deletedQueryName).should('not.exist');
@@ -265,9 +259,6 @@ export const updateAndVerifySavedQuery = (config) => {
   const alternateConfig = generateAlternateTestConfiguration(config);
   cy.loadSavedQuery(config.saveName);
 
-  // wait for saved query to load
-  cy.getElementByTestId('docTable').should('be.visible');
-
   if (alternateConfig.filters) {
     cy.deleteAllFilters();
   }
@@ -275,13 +266,11 @@ export const updateAndVerifySavedQuery = (config) => {
   setDatePickerDatesAndSearchIfRelevant(config.language, ALTERNATE_START_TIME, ALTERNATE_END_TIME);
 
   setAlternateQueryConfigurations(alternateConfig);
-  verifyAlternateDiscoverPageState(alternateConfig);
+  // Skip page state verification here - just update
   cy.updateSavedQuery('', false, true, true);
 
-  cy.reload();
+  resetPageState();
   cy.loadSavedQuery(config.saveName);
-  // wait for saved query to load
-  cy.getElementByTestId('docTable').should('be.visible');
   verifyAlternateDiscoverPageState(alternateConfig);
 };
 

@@ -43,6 +43,7 @@ export interface StateTimeLineChartStyleOptions {
   titleOptions?: TitleOptions;
 
   valueMappingOptions?: ValueMappingOptions;
+  // TODO add Color mode options(temporary name) to make a switch between No style, Use Value Mapping Color, Use Threshold Color
   useThresholdColor?: boolean;
   thresholdOptions?: ThresholdOptions;
 }
@@ -126,6 +127,10 @@ export const createStateTimelineConfig = (): VisualizationType<'state_timeline'>
       {
         [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
         [AxisRole.COLOR]: { type: VisFieldType.Categorical, index: 0 },
+      },
+      {
+        [AxisRole.X]: { type: VisFieldType.Date, index: 0 },
+        [AxisRole.COLOR]: { type: VisFieldType.Numerical, index: 0 },
       },
     ],
   },
