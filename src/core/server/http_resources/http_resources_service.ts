@@ -32,6 +32,7 @@ import crypto from 'crypto';
 import { RequestHandlerContext } from 'src/core/server';
 
 import { CoreContext } from '../core_context';
+import { applyCspModifications } from '../csp_modifications';
 import {
   IRouter,
   RouteConfig,
@@ -122,6 +123,24 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
         }
       : {};
 
+    let modifiedCspHeader = cspHeader;
+    try {
+      const dynamicConfigClient = context.core.dynamicConfig.client;
+      const dynamicConfigStore = context.core.dynamicConfig.createStoreFromRequest(request);
+
+      const cspModificationsDynamicConfig = await dynamicConfigClient.getConfig(
+        { pluginConfigPath: 'csp-modifications' },
+        dynamicConfigStore ? { asyncLocalStorageContext: dynamicConfigStore } : undefined
+      );
+
+      const modifications = cspModificationsDynamicConfig?.modifications;
+      if (modifications && modifications.length > 0) {
+        modifiedCspHeader = applyCspModifications(deps.http.csp.rules, modifications);
+      }
+    } catch (e) {
+      // Fall back to default CSP header on error
+    }
+
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
         const body = await deps.rendering.render(request, context.core.uiSettings.client, {
@@ -134,7 +153,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           headers: {
             ...options.headers,
             ...cspReportOnlyHeaders,
-            'content-security-policy': cspHeader,
+            'content-security-policy': modifiedCspHeader,
           },
         });
       },
@@ -149,7 +168,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
           headers: {
             ...options.headers,
             ...cspReportOnlyHeaders,
-            'content-security-policy': cspHeader,
+            'content-security-policy': modifiedCspHeader,
           },
         });
       },
@@ -160,7 +179,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
             ...options.headers,
             ...cspReportOnlyHeaders,
             'content-type': 'text/html',
-            'content-security-policy': cspHeader,
+            'content-security-policy': modifiedCspHeader,
           },
         });
       },
@@ -171,7 +190,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
             ...options.headers,
             ...cspReportOnlyHeaders,
             'content-type': 'text/javascript',
-            'content-security-policy': cspHeader,
+            'content-security-policy': modifiedCspHeader,
           },
         });
       },

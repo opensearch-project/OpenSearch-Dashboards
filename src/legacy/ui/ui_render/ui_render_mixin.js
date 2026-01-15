@@ -41,6 +41,7 @@ import * as UiSharedDeps from '@osd/ui-shared-deps';
 import { OpenSearchDashboardsRequest } from '../../../core/server';
 import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
+import { applyCspModifications } from './utils';
 
 /**
  * @typedef {import('../../server/osd_server').default} OsdServer
@@ -325,10 +326,27 @@ export function uiRenderMixin(osdServer, server, config) {
       nonce,
     });
 
+    let cspHeader = http.csp.header;
+    try {
+      const dynamicConfigClient = dynamicConfig.getClient();
+      const dynamicConfigStore = dynamicConfig.createStoreFromRequest(req);
+      const cspModificationsDynamicConfig = await dynamicConfigClient.getConfig(
+        { pluginConfigPath: 'csp-modifications' },
+        dynamicConfigStore ? { asyncLocalStorageContext: dynamicConfigStore } : undefined
+      );
+
+      const modifications = cspModificationsDynamicConfig?.modifications;
+      if (modifications && modifications.length > 0) {
+        cspHeader = applyCspModifications(http.csp.rules, modifications);
+      }
+    } catch (e) {
+      // Fall back to default CSP header on error
+    }
+
     const output = h
       .response(content)
       .type('text/html')
-      .header('content-security-policy', http.csp.header);
+      .header('content-security-policy', cspHeader);
 
     let cspReportOnlyIsEmitting;
     try {
