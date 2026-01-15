@@ -15,14 +15,17 @@ interface TimelineToolCall {
   toolName: string;
   status: 'running' | 'completed' | 'error';
   result?: string;
+  arguments?: string;
   timestamp: number;
 }
 
 interface ToolCallRowProps {
   toolCall: TimelineToolCall;
+  onApprove?: () => void;
+  onReject?: () => void;
 }
 
-export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
+export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall, onApprove, onReject }) => {
   // Always call useContext at the top level - React Hook rules
   const context = useContext(AssistantActionContext);
 
@@ -52,8 +55,6 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
 
     if (context?.toolCallStates) {
       const ourToolState = context.toolCallStates.get(toolCall.id);
-      // log the toolCallStates to the console
-      console.log('toolCallStates', context.toolCallStates);
       if (ourToolState?.args) {
         args = ourToolState.args;
       }
@@ -69,6 +70,15 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
       } catch (error) {
         // Not JSON, use as is
         result = toolCall.result;
+      }
+    }
+    // Also try to parse arguments from toolCall.arguuments
+    if (!args && toolCall.arguments) {
+      try {
+        args = JSON.parse(toolCall.arguments);
+      } catch (error) {
+        // Not JSON, use as is
+        args = toolCall.arguments;
       }
     }
 
@@ -113,6 +123,8 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
               status: renderStatus,
               args,
               result,
+              onApprove,
+              onReject,
               error:
                 toolCall.status === 'error'
                   ? new Error(toolCall.result || 'Unknown error')
@@ -369,35 +381,6 @@ export const ToolCallRow: React.FC<ToolCallRowProps> = ({ toolCall }) => {
             {toolCall.status === 'running' ? 'Running' : toolCall.status}
           </EuiBadge>
         </div>
-
-        {/* Show tool arguments if available */}
-        {context?.toolCallStates &&
-          (() => {
-            const ourToolState = context.toolCallStates.get(toolCall.id);
-            if (ourToolState?.args) {
-              return (
-                <div className="toolCallRow__args" style={{ marginTop: '8px' }}>
-                  <EuiAccordion
-                    id={`tool-args-${toolCall.id}`}
-                    buttonContent="View Arguments"
-                    paddingSize="none"
-                    initialIsOpen={false}
-                  >
-                    <EuiCodeBlock
-                      paddingSize="s"
-                      fontSize="s"
-                      isCopyable
-                      className="toolCallRow__argsText"
-                      language="json"
-                    >
-                      {JSON.stringify(ourToolState.args, null, 2)}
-                    </EuiCodeBlock>
-                  </EuiAccordion>
-                </div>
-              );
-            }
-            return null;
-          })()}
 
         {toolCall.result && toolCall.status === 'completed' && (
           <div className="toolCallRow__result">

@@ -50,7 +50,7 @@ export class ToolExecutor {
   async executeTool(
     toolName: string,
     toolArgs: any,
-    toolCallId?: string,
+    toolCallId: string,
     datasourceId?: string
   ): Promise<ToolResult> {
     try {
@@ -59,12 +59,10 @@ export class ToolExecutor {
 
       if (requiresConfirmation && this.confirmationService && toolCallId) {
         // Request user confirmation
-        const description = this.getToolConfirmationDescription(toolName);
         const response = await this.confirmationService.requestConfirmation(
           toolName,
           toolCallId,
-          toolArgs,
-          description
+          toolArgs
         );
 
         if (!response.approved) {
@@ -80,10 +78,7 @@ export class ToolExecutor {
           };
         }
 
-        // Use modified args if provided
-        if (response.modifiedArgs) {
-          toolArgs = response.modifiedArgs;
-        }
+        toolArgs = { ...toolArgs, confirmed: true };
       }
 
       // Include datasourceId in toolArgs if provided
@@ -121,23 +116,6 @@ export class ToolExecutor {
     }
 
     return false;
-  }
-
-  /**
-   * Get confirmation description for a tool
-   * Uses action metadata if available
-   */
-  private getToolConfirmationDescription(toolName: string): string {
-    // Get the action from the service
-    const currentState = this.assistantActionService.getCurrentState();
-    const action = currentState.actions.get(toolName);
-
-    // Check if action has custom confirmation description
-    if (action && (action as any).confirmationDescription) {
-      return (action as any).confirmationDescription;
-    }
-
-    return 'This action requires your confirmation to proceed.';
   }
 
   /**

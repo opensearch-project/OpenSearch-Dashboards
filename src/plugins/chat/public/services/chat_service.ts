@@ -105,7 +105,7 @@ export class ChatService {
     return `run-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
-  private generateMessageId(): string {
+  public generateMessageId(): string {
     return `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 

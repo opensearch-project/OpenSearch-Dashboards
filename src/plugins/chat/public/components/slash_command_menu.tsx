@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { SlashCommand } from '../services/slash_commands';
 import './slash_command_menu.scss';
 
@@ -39,22 +39,19 @@ export const SlashCommandMenu: React.FC<SlashCommandMenuProps> = ({
           role="button"
           tabIndex={0}
         >
-          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="console" size="s" />
-            </EuiFlexItem>
+          <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false}>
             <EuiFlexItem>
-              <EuiText size="xs">
-                <strong>/{command.command}</strong>
-              </EuiText>
-            </EuiFlexItem>
-            {command.description && (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {command.description}
+              <div>
+                <EuiText size="xs">
+                  <strong>/{command.command}</strong>
                 </EuiText>
-              </EuiFlexItem>
-            )}
+                {command.description && (
+                  <EuiText size="xs" color="subdued">
+                    {command.description}
+                  </EuiText>
+                )}
+              </div>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </div>
       ))}

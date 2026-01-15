@@ -4,16 +4,14 @@
  */
 
 .confirmationMessage {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
   display: flex;
   gap: 12px;
-  padding: 12px 16px;
-  margin-bottom: 8px;
-  animation: slideIn 0.2s ease-out;
-
-  &__icon {
-    flex-shrink: 0;
-    padding-top: 2px;
-  }
+  animation: slideIn 0.3s ease-out;
+  border-radius: 6px;
+  background-color: transparent;
 
   &__content {
     flex: 1;
@@ -26,6 +24,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);

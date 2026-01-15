@@ -160,6 +160,16 @@ export class AssistantActionService {
     return action?.useCustomRenderer === true;
   };
 
+  /**
+   * Check if an action need user confirmation
+   */
+  isUserConfirmRequired = (name: string): boolean => {
+    const currentState = this.state$.getValue();
+    const action = currentState.actions.get(name);
+
+    return !!action?.requiresConfirmation;
+  };
+
   private createToolDefinitions = (actions: Map<string, AssistantAction>): ToolDefinition[] => {
     return Array.from(actions.values())
       .filter((action) => action.available !== 'disabled')

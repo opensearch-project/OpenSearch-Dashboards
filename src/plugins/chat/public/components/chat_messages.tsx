@@ -152,11 +152,14 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                     return (
                       <ToolCallRow
                         key={toolCall.id}
+                        onApprove={onApproveConfirmation}
+                        onReject={onRejectConfirmation}
                         toolCall={{
                           type: 'tool_call',
                           id: toolCall.id,
                           toolName: toolCall.function.name,
                           status: getToolStatus(toolCall, toolResult),
+                          arguments: toolCall.function.arguments,
                           result: toolResult?.content,
                           timestamp: Date.now(), // Not used in display
                         }}
