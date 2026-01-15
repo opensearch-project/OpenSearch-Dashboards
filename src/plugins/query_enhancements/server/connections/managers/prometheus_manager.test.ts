@@ -37,6 +37,7 @@ describe('PrometheusManager', () => {
     it('should fetch labels', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['__name__', 'instance', 'job'],
         },
       };
@@ -63,6 +64,7 @@ describe('PrometheusManager', () => {
     it('should fetch labels with match parameter', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['cpu', 'mode'],
         },
       };
@@ -86,6 +88,7 @@ describe('PrometheusManager', () => {
     it('should fetch label values', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['prometheus', 'node_exporter'],
         },
       };
@@ -109,6 +112,7 @@ describe('PrometheusManager', () => {
     it('should fetch metrics', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['up', 'node_cpu_seconds_total', 'prometheus_http_requests_total'],
         },
       };
@@ -136,6 +140,7 @@ describe('PrometheusManager', () => {
     it('should fetch metric metadata', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: {
             up: [{ type: 'gauge', help: 'Target up status', unit: '' }],
           },
@@ -162,6 +167,7 @@ describe('PrometheusManager', () => {
     it('should fetch metric metadata with specific metric', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: {
             up: [{ type: 'gauge', help: 'Target up status', unit: '' }],
           },
@@ -186,6 +192,7 @@ describe('PrometheusManager', () => {
     it('should fetch alerts', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: {
             alerts: [{ labels: { alertname: 'TestAlert' }, state: 'firing' }],
           },
@@ -210,6 +217,7 @@ describe('PrometheusManager', () => {
     it('should fetch alert manager alert groups', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: [{ labels: { alertname: 'TestAlert' }, alerts: [] }],
         },
       };
@@ -232,6 +240,7 @@ describe('PrometheusManager', () => {
     it('should fetch rules', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: {
             groups: [{ name: 'test-rules', rules: [] }],
           },
@@ -256,6 +265,7 @@ describe('PrometheusManager', () => {
     it('should include query parameters in querystring', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['label1'],
         },
       };
@@ -279,6 +289,7 @@ describe('PrometheusManager', () => {
     it('should handle POST request and call getResources', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['label1', 'label2'],
         },
       };
@@ -304,6 +315,7 @@ describe('PrometheusManager', () => {
     it('should handle POST request with resourceName', async () => {
       const mockResponse = {
         body: {
+          status: 'success',
           data: ['value1', 'value2'],
         },
       };
@@ -373,13 +385,10 @@ describe('PrometheusManager', () => {
       const result = await prometheusManager.query(mockContext, mockRequest, params);
 
       expect(mockExecutor.execute).toHaveBeenCalledWith(mockContext, mockRequest, params);
-      expect(result).toEqual({
-        status: 'success',
-        data: mockQueryResponse,
-      });
+      expect(result).toEqual(mockQueryResponse);
     });
 
-    it('should return failed status when query executor throws error', async () => {
+    it('should throw error when query executor throws error', async () => {
       const mockExecutor: QueryExecutor<PromQLQueryParams, PromQLQueryResponse> = {
         execute: jest.fn().mockRejectedValue(new Error('Query timeout')),
       };
@@ -401,13 +410,9 @@ describe('PrometheusManager', () => {
         dataconnection: 'prom-conn',
       };
 
-      const result = await prometheusManager.query(mockContext, mockRequest, params);
-
-      expect(result).toEqual({
-        status: 'failed',
-        data: undefined,
-        error: 'Query timeout',
-      });
+      await expect(prometheusManager.query(mockContext, mockRequest, params)).rejects.toThrow(
+        'Query timeout'
+      );
     });
 
     it('should throw error when no query executor is set', async () => {
