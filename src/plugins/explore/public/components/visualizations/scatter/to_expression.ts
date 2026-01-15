@@ -4,10 +4,23 @@
  */
 
 import { ScatterChartStyle } from './scatter_vis_config';
-import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
-import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
+import { VisColumn, VEGASCHEMA, AxisColumnMappings, AxisRole } from '../types';
+import {
+  applyAxisStyling,
+  getSwappedAxisRole,
+  getSchemaByAxis,
+  getChartRender,
+} from '../utils/utils';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
 import { buildThresholdColorEncoding } from '../bar/bar_chart_utils';
+import { pipe, createBaseConfig, buildAxisConfigs, assembleSpec } from '../utils/echarts_spec';
+import {
+  createScatterSeries,
+  createCategoryScatterSeries,
+  createSizeScatterSeries,
+  assembleSizeScatterSpec,
+} from './scatter_chart_utils';
+import { convertTo2DArray, transform } from '../utils/data_transformation';
 
 const DEFAULT_POINTER_SIZE = 80;
 const DEFAULT_STROKE_OPACITY = 0.65;
@@ -42,6 +55,36 @@ export const createTwoMetricScatter = (
   styles: ScatterChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+
+    const xField = axisConfig.xAxis?.column;
+    const yField = axisConfig.yAxis?.column;
+
+    if (!xField || !yField) throw Error('Missing axis config for scatter chart');
+
+    const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+
+    const result = pipe(
+      transform(convertTo2DArray(allColumns)),
+      createBaseConfig({ title: `${axisConfig.xAxis?.name} vs ${axisConfig.yAxis?.name}` }),
+      buildAxisConfigs,
+      createScatterSeries({
+        styles,
+        xField,
+        yField,
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
+  }
+
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const colorEncodingLayer = buildThresholdColorEncoding(yAxis, styles);
@@ -109,6 +152,43 @@ export const createTwoMetricOneCateScatter = (
   styles: ScatterChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+
+    const xField = axisConfig.xAxis?.column;
+    const yField = axisConfig.yAxis?.column;
+    const colorField = axisColumnMappings?.[AxisRole.COLOR]?.column;
+
+    if (!xField || !yField || !colorField)
+      throw Error('Missing axis config for colored scatter chart');
+
+    const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+
+    const result = pipe(
+      transform(convertTo2DArray(allColumns)),
+      createBaseConfig({
+        title: `${axisConfig.xAxis?.name} vs ${axisConfig.yAxis?.name} by ${
+          axisColumnMappings?.[AxisRole.COLOR]?.name
+        }`,
+      }),
+      buildAxisConfigs,
+      createCategoryScatterSeries({
+        styles,
+        xField,
+        yField,
+        colorField,
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
+  }
+
   const colorColumn = axisColumnMappings?.color;
   const categoryFields = axisColumnMappings?.color?.column!;
   const categoryNames = axisColumnMappings?.color?.name!;
@@ -188,6 +268,46 @@ export const createThreeMetricOneCateScatter = (
   styles: ScatterChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+
+    const xField = axisConfig.xAxis?.column;
+    const yField = axisConfig.yAxis?.column;
+    const colorField = axisColumnMappings?.[AxisRole.COLOR]?.column;
+    const sizeField = axisColumnMappings?.[AxisRole.SIZE]?.column;
+
+    if (!xField || !yField || !colorField || !sizeField) {
+      throw Error('Missing axis config for size scatter chart');
+    }
+
+    const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
+
+    const result = pipe(
+      transform(convertTo2DArray(allColumns)),
+      createBaseConfig({
+        title: `${axisConfig.xAxis?.name} vs ${axisConfig.yAxis?.name} by ${
+          axisColumnMappings?.[AxisRole.COLOR]?.name
+        } (Size: ${axisColumnMappings?.[AxisRole.SIZE]?.name})`,
+      }),
+      buildAxisConfigs,
+      createSizeScatterSeries({
+        styles,
+        xField,
+        yField,
+        colorField,
+        sizeField,
+      }),
+      assembleSizeScatterSpec()
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
+  }
+
   const colorColumn = axisColumnMappings?.color;
   const categoryFields = axisColumnMappings?.color?.column!;
   const categoryNames = axisColumnMappings?.color?.name!;
@@ -225,7 +345,7 @@ export const createThreeMetricOneCateScatter = (
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
-          : null,
+          : false,
       },
       size: {
         field: numericalSize?.column,
@@ -234,9 +354,9 @@ export const createThreeMetricOneCateScatter = (
           ? {
               title: styles?.legendTitleForSize,
               orient: styles?.legendPosition,
-              symbolLimit: 10,
+              offset: 40,
             }
-          : null,
+          : false,
       },
       ...hoverStateEncoding,
       ...(styles.tooltipOptions?.mode !== 'hidden' && {

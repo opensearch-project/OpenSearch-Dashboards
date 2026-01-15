@@ -11,6 +11,7 @@ import {
   XAXisComponentOption,
   YAXisComponentOption,
   PieSeriesOption,
+  ScatterSeriesOption,
 } from 'echarts';
 import {
   AggregationType,
@@ -79,8 +80,13 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   baseConfig?: any;
   xAxisConfig?: any;
   yAxisConfig?: any;
-  series?: Array<BarSeriesOption | LineSeriesOption | CustomSeriesOption | PieSeriesOption>;
+  series?: Array<
+    BarSeriesOption | LineSeriesOption | CustomSeriesOption | PieSeriesOption | ScatterSeriesOption
+  >;
   visualMap?: any;
+  tooltipConfig?: any;
+  useDataInsteadOfDataset?: boolean;
+  disableDefaultLegend?: boolean;
   // Final output
   spec?: EChartsOption;
 }
@@ -128,7 +134,7 @@ export const createBaseConfig = <T extends BaseChartStyle>({
   title?: string;
   addTrigger?: boolean;
 }) => (state: EChartsSpecState<T>): EChartsSpecState<T> => {
-  const { styles, axisConfig } = state;
+  const { styles, axisConfig, disableDefaultLegend } = state;
 
   const baseConfig = {
     title: {
@@ -139,12 +145,18 @@ export const createBaseConfig = <T extends BaseChartStyle>({
       ...(axisConfig && addTrigger && { trigger: 'axis' }),
       axisPointer: { type: 'shadow' },
     },
-    legend: {
-      ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
-        ? { orient: 'vertical' }
-        : {}),
-      [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%', // distance between legend and the corresponding orientation edge side of the container
-    },
+    // Only add legend config if not disabled (for category scatter we use visualMap)
+    ...(disableDefaultLegend
+      ? {}
+      : {
+          legend: {
+            ...(styles?.legendPosition === Positions.LEFT ||
+            styles?.legendPosition === Positions.RIGHT
+              ? { orient: 'vertical' }
+              : {}),
+            [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%', // distance between legend and the corresponding orientation edge side of the container
+          },
+        }),
   };
 
   return { ...state, baseConfig };
@@ -211,6 +223,8 @@ export const assembleSpec = <T extends BaseChartStyle>(
     series,
     visualMap,
     axisColumnMappings,
+    tooltipConfig,
+    useDataInsteadOfDataset,
   } = state;
 
   const hasMultiDatasets = Array.isArray(transformedData[0]?.[0]);
@@ -245,14 +259,21 @@ export const assembleSpec = <T extends BaseChartStyle>(
 
   const spec = {
     ...baseConfig,
-    dataset: data,
-
+    ...(useDataInsteadOfDataset ? {} : { dataset: data }),
     xAxis: xAxisConfig,
     yAxis: yAxisConfig,
     visualMap,
     series,
     grid,
   };
+
+  // Override tooltip config for scatter charts if provided
+  if (tooltipConfig) {
+    spec.tooltip = {
+      show: baseConfig?.tooltip?.show !== false,
+      ...tooltipConfig,
+    };
+  }
 
   return { ...state, spec };
 };
