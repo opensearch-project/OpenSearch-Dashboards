@@ -4,7 +4,11 @@
  */
 
 import { groupBy } from 'lodash';
-import { RangeValue, Threshold, ValueMapping } from '../types';
+import { Threshold, ValueMapping } from '../types';
+import { StateTimeLineChartStyle } from './state_timeline_config';
+import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
+import { resolveColor } from '../theme/color_utils';
+import { TransformFn } from '../utils/data_transformation';
 
 const addThresholdTime = (currentTime: string, threshold: string): number | undefined => {
   const date = new Date(currentTime.replace(' ', 'T'));
@@ -69,39 +73,34 @@ const formatDuration = (ms: number) => {
   return parts.join(' ') || '0s';
 };
 
-const mergeRecords = (
+const mergeRecordsWithColor = (
   records: Array<Record<string, any>>,
   timestampField: string,
-  nextData?: string
-) => {
-  const endTime = nextData ? nextData : records[records.length - 1][timestampField];
-  const startTime = records[0][timestampField];
-  const duration = new Date(endTime).getTime() - new Date(startTime).getTime();
-  return {
-    ...records[0],
-    start: startTime,
-    end: endTime,
-    mergedCount: records.length,
-    duration: formatDuration(duration),
-  };
-};
-
-const mergeNumercialRecord = (
-  records: Record<string, any>,
-  timestampField: string,
   nextData?: string,
-  range?: RangeValue
+  valueMapping?: ValueMapping | string
 ) => {
   const endTime = nextData ? nextData : records[records.length - 1][timestampField];
   const startTime = records[0][timestampField];
   const duration = new Date(endTime).getTime() - new Date(startTime).getTime();
+
+  const label =
+    typeof valueMapping !== 'object' && valueMapping !== undefined
+      ? String(valueMapping)
+      : valueMapping?.type === 'value'
+      ? valueMapping?.value
+      : valueMapping?.type === 'range'
+      ? `[${valueMapping?.range?.min},${valueMapping?.range?.max ?? '∞'})`
+      : '_unmatched_';
+
   return {
     ...records[0],
     start: startTime,
     end: endTime,
-    ...(range ? { mergedLabel: `[${range?.min},${range?.max ?? Infinity})` } : {}),
-    duration: formatDuration(duration),
     mergedCount: records.length,
+    duration: formatDuration(duration),
+    mergedColor: typeof valueMapping === 'object' ? valueMapping?.color : undefined,
+    mergedLabel: label,
+    displayText: typeof valueMapping === 'object' ? valueMapping?.displayText : undefined,
   };
 };
 
@@ -110,301 +109,138 @@ export const convertThresholdsToValueMappings = (thresholds: Threshold[]): Value
     type: 'range',
     range: {
       min: t.value,
-      max: i === thresholds.length - 1 ? Infinity : thresholds[i + 1].value,
+      max: i === thresholds.length - 1 ? undefined : thresholds[i + 1].value,
     },
     color: t.color,
   }));
 };
 
 /**
- * Merges consecutive data points with the same categorical value.
- */
-export const mergeCategoricalData = (
-  data: Array<Record<string, any>>,
-  timestampField?: string,
-  groupField1?: string,
-  groupField2?: string,
-  mappings?: ValueMapping[],
-  disconnectThreshold?: string,
-  connectThreshold?: string
-): [Array<Record<string, any>>, ValueMapping[] | undefined] => {
-  if (!timestampField || !groupField1 || !groupField2) return [data, []];
-
-  const sorted = [...data].sort(
-    (a, b) => new Date(a[timestampField]).getTime() - new Date(b[timestampField]).getTime()
-  );
-
-  // Collect all possible values from the secondary categorical field
-  const allPossibleOptions = Object.keys(groupBy(sorted, (item) => item[groupField2]));
-
-  const validValues = mappings?.filter((r) => {
-    if (!r.value) return false;
-    return allPossibleOptions.includes(r.value);
-  });
-
-  // if validValues doesn't exist, fallback to group values by groupField2 and present a stacked bar
-  if (validValues?.length === 0) {
-    return [fallbackForCategorical(sorted, timestampField, groupField1, groupField2), []];
-  }
-
-  const findValue = (value: string) => validValues?.find((v) => v.value === `${value}`)?.value;
-
-  const merged = mergeByGroup<string>({
-    sorted,
-    groupField: groupField1,
-    valueField: groupField2,
-    timestampField,
-    disconnectThreshold,
-    connectThreshold,
-    findTarget: findValue,
-    mergeFn: mergeRecords,
-  });
-
-  return [merged, validValues];
-};
-
-export const mergeSingleCategoricalData = (
-  data: Array<Record<string, any>>,
-  timestampField?: string,
-  groupField1?: string,
-  mappings?: ValueMapping[],
-  disconnectThreshold?: string,
-  connectThreshold?: string
-): [Array<Record<string, any>>, ValueMapping[] | undefined] => {
-  if (!timestampField || !groupField1) return [data, []];
-
-  const sorted = [...data].sort(
-    (a, b) => new Date(a[timestampField]).getTime() - new Date(b[timestampField]).getTime()
-  );
-
-  // Collect all possible values from the secondary field
-  const allPossibleOptions = Object.keys(groupBy(sorted, (item) => item[groupField1]));
-
-  const validValues = mappings?.filter((r) => {
-    if (!r.value) return false;
-    return allPossibleOptions.includes(r.value);
-  });
-
-  // if validValues doesn't exist, fallback to group values by groupField2 and present a stacked bar
-  if (!validValues || validValues?.length === 0) {
-    return [fallbackForSingleCategorical(sorted, timestampField, groupField1), []];
-  }
-
-  const findValue = (value: string) => validValues?.find((v) => v.value === `${value}`)?.value;
-
-  const merged: Array<Record<string, any>> = [];
-
-  const buffer: Array<Record<string, any>> = [];
-  let currentValue: string | undefined;
-
-  const storeState = { buffer, currentValue };
-
-  mergeInAGroup<string>({
-    sorted,
-    timestampField,
-    valueField: groupField1,
-    disconnectThreshold,
-    connectThreshold,
-    merged,
-    storeState,
-    findTarget: findValue,
-    mergeFn: mergeRecords,
-  });
-
-  // Merge any remaining buffered entries, no need to pass nextTime
-  if (storeState.buffer.length > 0) {
-    const rec = mergeRecords(buffer, timestampField, undefined);
-    merged.push(rec);
-  }
-
-  return [merged, validValues];
-};
-
-/**
  * Merges consecutive data points by a field that fall within the same numerical range.
  */
-export const mergeNumericalData = (
-  data: Array<Record<string, any>>,
-  timestampField?: string,
-  groupField?: string,
-  rangeField?: string,
-  mappings?: ValueMapping[],
-  disconnectThreshold?: string,
-  connectThreshold?: string
-): [Array<Record<string, any>>, ValueMapping[] | undefined] => {
-  if (!timestampField || !groupField || !rangeField) return [data, []];
 
-  const sorted = [...data].sort(
-    (a, b) => new Date(a[timestampField]).getTime() - new Date(b[timestampField]).getTime()
-  );
+export const mergeDataCore = ({
+  timestampField,
+  groupField,
+  mappingField,
+  rangeMappings = [],
+  valueMappings = [],
+  disconnectThreshold,
+  connectThreshold,
+  useThresholdColor,
+  useValueMappingColor,
+}: {
+  timestampField?: string;
+  groupField?: string;
+  mappingField?: string;
+  rangeMappings?: ValueMapping[];
+  valueMappings?: ValueMapping[];
+  disconnectThreshold?: string;
+  connectThreshold?: string;
+  useThresholdColor?: boolean;
+  useValueMappingColor?: boolean;
+}) => (data: Array<Record<string, any>>): Array<Record<string, any>> => {
+  if (!timestampField || !mappingField) return data;
 
-  // Filter ranges to only include those within data bounds
-  const validRanges = mappings?.filter((r) => {
-    if (!r.range) return false;
-    if (r?.range?.min === undefined) return false;
+  const mergedMappings = [...valueMappings, ...rangeMappings];
 
-    return sorted.some((s) => {
-      const value = Number(s[rangeField]);
-      return (
-        r.range?.min !== undefined && value >= r.range.min && value < (r.range.max ?? Infinity)
-      );
+  const findMatch = (value: string) => {
+    if (!useThresholdColor && !useValueMappingColor) return String(value);
+    return mergedMappings.find((v) => {
+      if (v.type === 'range') {
+        const numberValue = Number(value);
+        return (
+          v.range?.min !== undefined &&
+          numberValue >= v.range.min &&
+          numberValue < (v.range.max ?? Infinity)
+        );
+      } else {
+        return v.value === `${value}`;
+      }
     });
-  });
-
-  // if validRange doesn't exist, fallback to compute the entire count through the time range
-  if (validRanges?.length === 0) {
-    return [fallbackMerge(sorted, timestampField, groupField), []];
-  }
-
-  const findRange = (value: string) => {
-    if (value === null || value === undefined) return undefined;
-    const numberValue = Number(value);
-    return validRanges?.find(
-      (r) =>
-        r?.range?.min !== undefined &&
-        r.range.min <= numberValue &&
-        (r.range.max ?? Infinity) > numberValue
-    )?.range;
   };
 
-  const merged = mergeByGroup<RangeValue>({
-    sorted,
-    groupField,
-    valueField: rangeField,
-    timestampField,
-    disconnectThreshold,
-    connectThreshold,
-    findTarget: findRange,
-    mergeFn: mergeNumercialRecord,
+  if (groupField) {
+    const merged = mergeByGroup({
+      sorted: data,
+      groupField,
+      valueField: mappingField,
+      timestampField,
+      disconnectThreshold,
+      connectThreshold,
+      findTarget: findMatch,
+      mergeFn: mergeRecordsWithColor,
+    });
+
+    return merged;
+  } else {
+    const merged: Array<Record<string, any>> = [];
+
+    const buffer: Array<Record<string, any>> = [];
+    let currentValue: ValueMapping | undefined;
+
+    const storeState = { buffer, currentValue };
+
+    mergeInAGroup({
+      sorted: data,
+      timestampField,
+      valueField: mappingField,
+      disconnectThreshold,
+      connectThreshold,
+      merged,
+      storeState,
+      findTarget: findMatch,
+      mergeFn: mergeRecordsWithColor,
+    });
+
+    // Merge any remaining buffered entries, no need to pass nextTime
+    const finalData = storeState.buffer.pop();
+    if (storeState.buffer.length > 0) {
+      const rec = mergeRecordsWithColor(
+        buffer,
+        timestampField,
+        finalData?.[timestampField],
+        storeState.currentValue
+      );
+      merged.push(rec);
+    }
+
+    return merged;
+  }
+};
+
+export const groupByMergedLabel = (fn: TransformFn) => (data: Array<Record<string, any>>) => {
+  const result = new Map<string, Array<Record<string, any>>>();
+  data.forEach((row) => {
+    const label = row.mergedLabel;
+    if (!result.has(label)) result.set(label, []);
+    result.get(label)!.push(row);
   });
 
-  return [merged, validRanges];
+  const newData = Array.from(result.values()).map((group) => {
+    return fn(group);
+  });
+
+  return newData;
 };
 
-// Fallback: when no valid ranges exist, create timeline bars showing count per group
-const fallbackMerge = (
-  sorted: Array<Record<string, any>>,
-  timestampField: string,
-  groupField: string
-) => {
-  const groups = groupBy(sorted, (item) => item[groupField]);
-
-  const result: Array<Record<string, any>> = [];
-
-  for (const g1 of Object.values(groups)) {
-    const endTime = g1[g1.length - 1][timestampField];
-    const startTime = g1[0][timestampField];
-    const duration = new Date(endTime).getTime() - new Date(startTime).getTime();
-    result.push({
-      ...g1[0],
-      start: startTime,
-      end: endTime,
-      mergedCount: g1.length,
-      duration: formatDuration(duration),
-    });
-  }
-
-  return result;
-};
-
-// Fallback: when no valid values exist, group same values
-const fallbackForCategorical = (
-  sorted: Array<Record<string, any>>,
-  timestampField: string,
-  groupField1: string,
-  groupField2: string
-) => {
-  const groups = groupBy(sorted, (item) => item[groupField1]);
-
-  const merged: Array<Record<string, any>> = [];
-
-  for (const g1 of Object.values(groups)) {
-    // Buffer for consecutive same-value entries
-    let buffer: Array<Record<string, any>> = [];
-
-    for (let i = 0; i < g1.length; i++) {
-      const curr = g1[i];
-      const prev = buffer.length ? buffer[0][groupField2] : null;
-
-      if (curr[groupField2] === prev) {
-        buffer.push(curr);
-      } else {
-        // Value changed - merge buffered entries and start new buffer
-        if (buffer.length > 0) {
-          const rec = mergeRecords(buffer, timestampField, curr[timestampField]);
-          merged.push(rec);
-        }
-        if (curr[groupField2] === undefined || curr[groupField2] === null) {
-          buffer = [];
-          continue;
-        }
-        buffer = [curr];
-      }
-    }
-
-    // Merge any remaining buffered entries
-    if (buffer.length) {
-      const rec = mergeRecords(buffer, timestampField);
-      if (rec) merged.push(rec);
-    }
-  }
-
-  return merged;
-};
-
-// Fallback: when no valid values exist, group same values
-const fallbackForSingleCategorical = (
-  sorted: Array<Record<string, any>>,
-  timestampField: string,
-  groupField1: string
-) => {
-  const merged: Array<Record<string, any>> = [];
-  let buffer: Array<Record<string, any>> = [];
-  for (let i = 0; i < sorted.length; i++) {
-    const curr = sorted[i];
-    const prev = buffer.length ? buffer[0][groupField1] : null;
-
-    if (curr[groupField1] === prev) {
-      buffer.push(curr);
-    } else {
-      // Value changed - merge buffered entries and start new buffer
-      if (buffer.length > 0) {
-        const rec = mergeRecords(buffer, timestampField, curr[timestampField]);
-        merged.push(rec);
-      }
-      if (curr[groupField1] === undefined || curr[groupField1] === null) {
-        buffer = [];
-        continue;
-      }
-      buffer = [curr];
-    }
-  }
-  // Merge any remaining buffered entries
-  if (buffer.length) {
-    const rec = mergeRecords(buffer, timestampField);
-    if (rec) merged.push(rec);
-  }
-
-  return merged;
-};
-
-type MergeFn<T extends string | RangeValue> = (
+type MergeFn = (
   buffer: Array<Record<string, any>>,
   timestampField: string,
   endTime?: string,
-  vaule?: T
+  valueMapping?: ValueMapping | string
 ) => any;
-interface MergeOptions<T extends string | RangeValue> {
+interface MergeOptions {
   sorted: Array<Record<string, any>>;
   timestampField: string;
   groupField: string;
   valueField: string;
   disconnectThreshold?: string;
   connectThreshold?: string;
-  findTarget: (value: string) => T | undefined;
-  mergeFn: MergeFn<T>;
+  findTarget: (value: string) => string | ValueMapping | undefined;
+  mergeFn: MergeFn;
 }
-const mergeByGroup = <T extends string | RangeValue>({
+const mergeByGroup = ({
   sorted,
   groupField,
   valueField,
@@ -413,13 +249,13 @@ const mergeByGroup = <T extends string | RangeValue>({
   connectThreshold,
   findTarget,
   mergeFn,
-}: MergeOptions<T>) => {
+}: MergeOptions) => {
   const groups = groupBy(sorted, (item) => item[groupField]);
   const merged: Array<Record<string, any>> = [];
 
   for (const g1 of Object.values(groups)) {
     const buffer: Array<Record<string, any>> = [];
-    let currentValue: T | undefined;
+    let currentValue: ValueMapping | undefined;
 
     const storeState = { buffer, currentValue };
 
@@ -435,9 +271,16 @@ const mergeByGroup = <T extends string | RangeValue>({
       mergeFn,
     });
 
-    // Merge any remaining buffered entries, no need to pass nextTime
+    // Process any remaining buffered entries
+    // Skip single entries to avoid zero-duration records
+    const finalData = storeState.buffer.pop();
     if (storeState.buffer.length > 0) {
-      const rec = mergeFn(storeState.buffer, timestampField, undefined, storeState.currentValue);
+      const rec = mergeFn(
+        storeState.buffer,
+        timestampField,
+        finalData?.[timestampField],
+        storeState.currentValue
+      );
       merged.push(rec);
     }
   }
@@ -445,7 +288,7 @@ const mergeByGroup = <T extends string | RangeValue>({
   return merged;
 };
 
-interface MergeInAGroupOptions<T extends string | RangeValue> {
+interface MergeInAGroupOptions {
   sorted: Array<Record<string, any>>;
   timestampField: string;
   valueField: string;
@@ -454,13 +297,13 @@ interface MergeInAGroupOptions<T extends string | RangeValue> {
   merged: Array<Record<string, any>>;
   storeState: {
     buffer: Array<Record<string, any>>;
-    currentValue: T | undefined;
+    currentValue: string | ValueMapping | undefined;
   };
-  findTarget: (value: string) => T | undefined;
-  mergeFn: MergeFn<T>;
+  findTarget: (value: string) => string | ValueMapping | undefined;
+  mergeFn: MergeFn;
 }
 
-export const mergeInAGroup = <T extends string | RangeValue>({
+export const mergeInAGroup = ({
   sorted,
   valueField,
   timestampField,
@@ -470,7 +313,7 @@ export const mergeInAGroup = <T extends string | RangeValue>({
   storeState,
   findTarget,
   mergeFn,
-}: MergeInAGroupOptions<T>) => {
+}: MergeInAGroupOptions) => {
   const flushBuffer = (nextTimestamp: string) => {
     if (storeState.buffer.length === 0) return;
     const next = generatedDisconnectTimestamp(
@@ -487,21 +330,21 @@ export const mergeInAGroup = <T extends string | RangeValue>({
   for (const curr of sorted) {
     const currentMapping = findTarget(curr[valueField]);
 
-    if (
-      (curr[valueField] === undefined || curr[valueField] === null) &&
-      storeState.buffer.length > 0
-    ) {
-      firstNullValueTime ??= curr[timestampField];
+    if (curr[valueField] === undefined || curr[valueField] === null) {
+      if (storeState.buffer.length > 0) {
+        firstNullValueTime ??= curr[timestampField];
 
-      // if connect null values is on, push null data points into buffer
-      if (connectThreshold && firstNullValueTime) {
-        const thresholdTime = addThresholdTime(firstNullValueTime, connectThreshold);
-        if (thresholdTime && new Date(curr[timestampField]).getTime() >= thresholdTime) {
+        // if connect null values is on, push null data points into buffer
+        if (connectThreshold && firstNullValueTime) {
+          const thresholdTime = addThresholdTime(firstNullValueTime, connectThreshold);
+          if (thresholdTime && new Date(curr[timestampField]).getTime() >= thresholdTime) {
+            continue;
+          }
+          storeState.buffer.push(curr);
           continue;
         }
-        storeState.buffer.push(curr);
-        continue;
       }
+
       flushBuffer(curr[timestampField]);
       continue;
     }
@@ -516,6 +359,7 @@ export const mergeInAGroup = <T extends string | RangeValue>({
       // If threshold exceeded(cannot connect the last null)flush the buffer and continue processing
       if (shouldFlush) {
         const lastTime = storeState.buffer[storeState.buffer.length - 1][timestampField];
+        storeState.buffer.pop(); // last null cannot be connect, pop that to ensure correct length
         flushBuffer(lastTime);
       }
 
@@ -523,13 +367,8 @@ export const mergeInAGroup = <T extends string | RangeValue>({
       firstNullValueTime = undefined;
     }
 
-    // Handle invalid mappings
-    if (!currentMapping) {
-      flushBuffer(curr[timestampField]);
-      continue;
-    }
     // Add to buffer or flush and start new
-    if (storeState.currentValue === currentMapping || storeState.currentValue === undefined) {
+    if (storeState.currentValue === currentMapping || storeState.buffer.length === 0) {
       storeState.buffer.push(curr);
       storeState.currentValue = currentMapping;
     } else {
@@ -538,4 +377,158 @@ export const mergeInAGroup = <T extends string | RangeValue>({
       storeState.currentValue = currentMapping;
     }
   }
+};
+
+function decideSeriesStyle(mapping: { label: any; color: any; displayText: any }) {
+  return mapping.label === '_unmatched_' ? 'lightgrey' : resolveColor(mapping.color);
+}
+
+const renderSingleStateTimeLineItem = (styles: StateTimeLineChartStyle, displayText?: string) => (
+  params: any,
+  api: any
+) => {
+  const y = 5; // a fake y
+  const start = api.coord([+new Date(api.value('start')), y]);
+  const end = api.coord([+new Date(api.value('end')), y]);
+  const height = api.size([0, 1])[1] * 5 * (styles.exclusive.rowHeight ?? 0.8);
+  return {
+    type: 'group',
+    children: [
+      {
+        type: 'rect',
+        shape: {
+          x: start[0],
+          y: start[1] - height / 2,
+          width: end[0] - start[0],
+          height,
+        },
+        z2: 5,
+        style: {
+          ...api.style(),
+        },
+      },
+      ...(styles.exclusive.showValues
+        ? [
+            {
+              type: 'text',
+              z2: 10,
+              style: {
+                text: displayText,
+                font: '10px sans-serif',
+              },
+              // position text in the center of the rect
+              x: (start[0] + end[0]) / 2,
+              y: start[1],
+            },
+          ]
+        : []),
+    ],
+  };
+};
+
+const renderItem = (styles: StateTimeLineChartStyle, groupField: string, displayText?: string) => (
+  params: any,
+  api: any
+) => {
+  const y = api.value(groupField);
+  const start = api.coord([+new Date(api.value('start')), y]);
+  const end = api.coord([+new Date(api.value('end')), y]);
+  const height = api.size([0, 1])[1] * (styles.exclusive.rowHeight ?? 0.8);
+  // api.size([0, 1])[1] meaning:
+  // How many pixels tall is 1 unit on the Y axis in the current chart scale
+  return {
+    type: 'group',
+    children: [
+      {
+        type: 'rect',
+        shape: {
+          x: start[0],
+          y: start[1] - height / 2,
+          width: end[0] - start[0],
+          height,
+        },
+        z2: 5,
+        style: {
+          ...api.style(),
+        },
+      },
+
+      // TODO style display text
+      ...(styles.exclusive.showValues
+        ? [
+            {
+              type: 'text',
+              z2: 10,
+              style: {
+                text: displayText,
+                font: '10px sans-serif',
+              },
+              // position text in the center of the rect
+              x: (start[0] + end[0]) / 2,
+              y: start[1],
+            },
+          ]
+        : []),
+    ],
+  };
+};
+
+export const createStateTimeLineSpec = <T extends BaseChartStyle>({
+  styles,
+  groupField,
+}: {
+  styles: StateTimeLineChartStyle;
+  groupField?: string;
+}): PipelineFn<T> => (state) => {
+  const { transformedData, yAxisConfig } = state;
+  const newState = { ...state };
+  const mergeLabelCombo: Array<{ label: any; color: any; displayText: any }> = [];
+
+  // Transform data into serval datasets based on color mapping
+  // Structure: [{ source: [headers, ...dataRows] }, { source: [headers, ...dataRows] }, ...]
+  // Headers: [originalFields..., "start", "end", "mergedCount", "duration", "mergedColor", "mergedLabel", "displayText"]
+  // Get mergedLabel/mergedColor/displayText combination for styling
+  transformedData?.forEach((row) => {
+    const mergeLabelIndex = row[0].indexOf('mergedLabel');
+    const mergedColorIndex = row[0].indexOf('mergedColor');
+    const displayTextIndex = row[0].indexOf('displayText');
+    mergeLabelCombo.push({
+      label: row[1][mergeLabelIndex],
+      color: row[1][mergedColorIndex],
+      displayText: row[1][displayTextIndex],
+    });
+  });
+
+  if (!groupField) {
+    const newyAxisConfig = { ...yAxisConfig };
+    newyAxisConfig.min = 0;
+    newyAxisConfig.max = 10;
+    newyAxisConfig.axisTick = { show: false };
+    newyAxisConfig.axisLabel = { show: false };
+    newyAxisConfig.splitLine = { show: false };
+    newState.yAxisConfig = newyAxisConfig;
+  }
+
+  const allSeries = mergeLabelCombo.map((mapping, index: number) => {
+    return {
+      name: mapping.displayText || mapping.label,
+      type: 'custom',
+      renderItem: groupField
+        ? renderItem(styles, groupField, mapping.displayText)
+        : renderSingleStateTimeLineItem(styles, mapping.displayText),
+      datasetIndex: index,
+      itemStyle: {
+        color: decideSeriesStyle(mapping),
+      },
+      encode: {
+        x: ['start', 'end'],
+        ...(groupField && { y: groupField }),
+        tooltip: ['start', 'end', 'duration', 'mergedCount'],
+      },
+    };
+  });
+
+  newState.series = allSeries?.flat() as any;
+
+  return newState;
 };

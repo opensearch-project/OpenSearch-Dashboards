@@ -76,7 +76,7 @@ export const StateTimeLineExclusiveVisOptions = ({
         <EuiSwitch
           compressed
           label={i18n.translate('explore.vis.statetimeline.useThresholdColor', {
-            defaultMessage: 'Use threshold colors',
+            defaultMessage: 'Use threshold color',
           })}
           data-test-subj="useThresholdColorButton"
           checked={useThresholdColor ?? false}
