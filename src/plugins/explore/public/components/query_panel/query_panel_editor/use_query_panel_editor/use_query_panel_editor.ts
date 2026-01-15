@@ -93,6 +93,10 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
   // Using a ref will ensure it always uses the latest value
   const editorTextRef = useRef(editorText);
   const queryLanguage = useSelector(selectQueryLanguage);
+  const languageTitle = useMemo(() => {
+    const languageService = services.data.query.queryString.getLanguageService();
+    return languageService.getLanguage(queryLanguage)?.title ?? queryLanguage;
+  }, [queryLanguage, services.data.query.queryString]);
   const dispatch = useDispatch();
   const editorRef = useEditorRef();
   const isPromptMode = useSelector(selectIsPromptEditorMode);
@@ -368,7 +372,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       {
         defaultMessage: 'Press `space` to Ask AI with natural language, or search with {language}',
         values: {
-          language: queryLanguage,
+          language: languageTitle,
         },
       }
     );
@@ -378,7 +382,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
         defaultMessage: 'Search using {symbol} {language}',
         values: {
           symbol: '</>',
-          language: queryLanguage,
+          language: languageTitle,
         },
       }
     );
@@ -387,7 +391,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
       {
         defaultMessage: 'Ask AI with natural language. `Esc` to clear and search with {language}',
         values: {
-          language: queryLanguage,
+          language: languageTitle,
         },
       }
     );
@@ -397,7 +401,7 @@ export const useQueryPanelEditor = (): UseQueryPanelEditorReturnType => {
     }
 
     return isPromptMode ? promptModePlaceholder : enabledPromptPlaceholder;
-  }, [isPromptMode, promptModeIsAvailable, queryLanguage]);
+  }, [isPromptMode, promptModeIsAvailable, languageTitle]);
 
   const onEditorClick = useCallback(() => {
     editorRef.current?.focus();

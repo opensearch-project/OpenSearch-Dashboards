@@ -16,15 +16,9 @@ export type ClientRequest = Omit<TransportRequestParams, 'method'>;
 
 export interface GetResourcesResponse<R> {
   nextToken?: string;
-  status: 'success' | 'failed';
+  status: 'success' | 'error';
   data: R;
   type: string;
-}
-
-export interface QueryResponse<R = unknown> {
-  status: 'success' | 'failed';
-  data: R;
-  error?: string;
 }
 
 export abstract class BaseConnectionClient<C> {

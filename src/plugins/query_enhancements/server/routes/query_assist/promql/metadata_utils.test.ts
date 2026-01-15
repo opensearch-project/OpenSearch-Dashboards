@@ -40,10 +40,7 @@ describe('promqlHandler', () => {
         })
         .mockResolvedValueOnce({
           status: 'success',
-          data: {
-            http_requests_total: [{ type: 'counter', help: 'Total HTTP requests', unit: '' }],
-            process_cpu_seconds: [{ type: 'gauge', help: 'CPU seconds used', unit: '' }],
-          },
+          data: ['http_requests_total', 'process_cpu_seconds'],
         });
 
       const handlerContext = createMockHandlerContext();
@@ -51,14 +48,14 @@ describe('promqlHandler', () => {
 
       expect(result).toHaveProperty('metadata');
       expect(result.metadata).toContain('Available labels: label1, label2, __name__');
-      expect(result.metadata).toContain('- http_requests_total (counter): Total HTTP requests');
-      expect(result.metadata).toContain('- process_cpu_seconds (gauge): CPU seconds used');
+      expect(result.metadata).toContain('- http_requests_total');
+      expect(result.metadata).toContain('- process_cpu_seconds');
     });
 
     it('handles empty responses gracefully', async () => {
       mockGetResources
         .mockResolvedValueOnce({ status: 'success', data: [] })
-        .mockResolvedValueOnce({ status: 'success', data: {} });
+        .mockResolvedValueOnce({ status: 'success', data: [] });
 
       const handlerContext = createMockHandlerContext();
       const result = await promqlHandler.getAdditionalAgentParameters(handlerContext);
@@ -71,7 +68,7 @@ describe('promqlHandler', () => {
     it('handles failed API responses', async () => {
       mockGetResources
         .mockResolvedValueOnce({ status: 'error', data: [] })
-        .mockResolvedValueOnce({ status: 'error', data: {} });
+        .mockResolvedValueOnce({ status: 'error', data: [] });
 
       const handlerContext = createMockHandlerContext();
       const result = await promqlHandler.getAdditionalAgentParameters(handlerContext);
@@ -98,7 +95,7 @@ describe('promqlHandler', () => {
     it('calls getResources with correct parameters', async () => {
       mockGetResources
         .mockResolvedValueOnce({ status: 'success', data: [] })
-        .mockResolvedValueOnce({ status: 'success', data: {} });
+        .mockResolvedValueOnce({ status: 'success', data: [] });
 
       const handlerContext = createMockHandlerContext();
       await promqlHandler.getAdditionalAgentParameters(handlerContext);
@@ -119,31 +116,27 @@ describe('promqlHandler', () => {
         handlerContext.request,
         {
           dataSourceName: 'my_prometheus',
-          resourceType: RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA,
+          resourceType: RESOURCE_TYPES.PROMETHEUS.METRICS,
           resourceName: undefined,
           query: {},
         }
       );
     });
 
-    it('derives metrics list from metadata keys', async () => {
+    it('lists metrics from metrics endpoint', async () => {
       mockGetResources
         .mockResolvedValueOnce({ status: 'success', data: ['label1'] })
         .mockResolvedValueOnce({
           status: 'success',
-          data: {
-            metric_a: [{ type: 'counter', help: 'Metric A', unit: '' }],
-            metric_b: [{ type: 'gauge', help: 'Metric B', unit: '' }],
-            metric_c: [{ type: 'histogram', help: 'Metric C', unit: '' }],
-          },
+          data: ['metric_a', 'metric_b', 'metric_c'],
         });
 
       const handlerContext = createMockHandlerContext();
       const result = await promqlHandler.getAdditionalAgentParameters(handlerContext);
 
-      expect(result.metadata).toContain('- metric_a (counter): Metric A');
-      expect(result.metadata).toContain('- metric_b (gauge): Metric B');
-      expect(result.metadata).toContain('- metric_c (histogram): Metric C');
+      expect(result.metadata).toContain('- metric_a');
+      expect(result.metadata).toContain('- metric_b');
+      expect(result.metadata).toContain('- metric_c');
     });
   });
 });

@@ -23,10 +23,7 @@ describe('promqlSearchStrategy', () => {
   const emptyRequestHandlerContext = ({} as unknown) as RequestHandlerContext;
 
   const mockPrometheusManagerQuery = (mockResponse: any) => {
-    (prometheusManager.query as jest.Mock).mockResolvedValue({
-      status: 'success',
-      data: mockResponse,
-    });
+    (prometheusManager.query as jest.Mock).mockResolvedValue(mockResponse);
   };
 
   beforeEach(() => {
@@ -344,10 +341,7 @@ describe('promqlSearchStrategy', () => {
   });
 
   it('should handle errors and track usage', async () => {
-    (prometheusManager.query as jest.Mock).mockResolvedValue({
-      status: 'failed',
-      error: 'Query failed',
-    });
+    (prometheusManager.query as jest.Mock).mockRejectedValue(new Error('Query failed'));
 
     const strategy = promqlSearchStrategyProvider(config$, logger, usage);
     await expect(
@@ -404,8 +398,8 @@ describe('promqlSearchStrategy', () => {
       };
 
       (prometheusManager.query as jest.Mock)
-        .mockResolvedValueOnce({ status: 'success', data: mockResponseA })
-        .mockResolvedValueOnce({ status: 'success', data: mockResponseB });
+        .mockResolvedValueOnce(mockResponseA)
+        .mockResolvedValueOnce(mockResponseB);
 
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
@@ -454,8 +448,8 @@ describe('promqlSearchStrategy', () => {
       };
 
       (prometheusManager.query as jest.Mock)
-        .mockResolvedValueOnce({ status: 'success', data: mockResponse })
-        .mockResolvedValueOnce({ status: 'success', data: mockResponse });
+        .mockResolvedValueOnce(mockResponse)
+        .mockResolvedValueOnce(mockResponse);
 
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
@@ -516,8 +510,8 @@ describe('promqlSearchStrategy', () => {
       };
 
       (prometheusManager.query as jest.Mock)
-        .mockResolvedValueOnce({ status: 'success', data: mockResponseA })
-        .mockResolvedValueOnce({ status: 'success', data: mockResponseB });
+        .mockResolvedValueOnce(mockResponseA)
+        .mockResolvedValueOnce(mockResponseB);
 
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
@@ -568,8 +562,8 @@ describe('promqlSearchStrategy', () => {
       };
 
       (prometheusManager.query as jest.Mock)
-        .mockResolvedValueOnce({ status: 'success', data: mockResponseA })
-        .mockResolvedValueOnce({ status: 'failed', error: 'Query B failed' });
+        .mockResolvedValueOnce(mockResponseA)
+        .mockRejectedValueOnce(new Error('Query B failed'));
 
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       const result = await strategy.search(
@@ -693,10 +687,7 @@ describe('promqlSearchStrategy', () => {
     });
 
     it('should fail fast for single query with error', async () => {
-      (prometheusManager.query as jest.Mock).mockResolvedValue({
-        status: 'failed',
-        error: 'Single query failed',
-      });
+      (prometheusManager.query as jest.Mock).mockRejectedValue(new Error('Single query failed'));
 
       const strategy = promqlSearchStrategyProvider(config$, logger, usage);
       await expect(

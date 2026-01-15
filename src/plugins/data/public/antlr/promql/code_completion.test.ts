@@ -56,14 +56,7 @@ describe('promql code_completion', () => {
     } as IndexPattern;
 
     const mockPrometheusClient = {
-      getMetricMetadata: jest.fn().mockResolvedValue({
-        prometheus_http_requests_total: [
-          {
-            type: 'counter',
-            help: 'Total number of HTTP requests',
-          },
-        ],
-      }),
+      getMetrics: jest.fn().mockResolvedValue(['prometheus_http_requests_total']),
       getLabels: jest.fn().mockResolvedValue([]),
       getLabelValues: jest.fn().mockResolvedValue([]),
     };
@@ -89,14 +82,7 @@ describe('promql code_completion', () => {
       (mockServices.data.resourceClientFactory.get as jest.Mock).mockReturnValue(
         mockPrometheusClient
       );
-      mockPrometheusClient.getMetricMetadata.mockResolvedValue({
-        prometheus_http_requests_total: [
-          {
-            type: 'counter',
-            help: 'Total number of HTTP requests',
-          },
-        ],
-      });
+      mockPrometheusClient.getMetrics.mockResolvedValue(['prometheus_http_requests_total']);
       mockPrometheusClient.getLabels.mockResolvedValue([]);
       mockPrometheusClient.getLabelValues.mockResolvedValue([]);
 
@@ -201,7 +187,7 @@ describe('promql code_completion', () => {
     it('should call prometheus client with indexPattern.id', async () => {
       await getSimpleSuggestions('');
 
-      expect(mockPrometheusClient.getMetricMetadata).toHaveBeenCalledWith(mockIndexPattern.id);
+      expect(mockPrometheusClient.getMetrics).toHaveBeenCalledWith(mockIndexPattern.id);
     });
   });
 });

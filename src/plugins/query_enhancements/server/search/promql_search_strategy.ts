@@ -124,42 +124,33 @@ async function executeMultipleQueries(
 ): Promise<LabeledQueryResult[]> {
   const promises = queries.map(
     async (parsedQuery): Promise<LabeledQueryResult> => {
-      try {
-        const params: PromQLQueryParams = {
-          body: {
-            query: parsedQuery.query,
-            language: options.language,
-            maxResults: options.maxResults,
-            timeout: options.timeout,
-            options: {
-              queryType: 'range',
-              start: options.timeRange.start.toString(),
-              end: options.timeRange.end.toString(),
-              step: options.step,
-            },
+      const params: PromQLQueryParams = {
+        body: {
+          query: parsedQuery.query,
+          language: options.language,
+          maxResults: options.maxResults,
+          timeout: options.timeout,
+          options: {
+            queryType: 'range',
+            start: options.timeRange.start.toString(),
+            end: options.timeRange.end.toString(),
+            step: options.step,
           },
-          dataconnection: datasetId,
-        };
+        },
+        dataconnection: datasetId,
+      };
 
+      try {
         const queryRes = await prometheusManager.query(context, request, params);
 
-        if (queryRes.status === 'failed') {
-          return {
-            label: parsedQuery.label,
-            error: queryRes.error || `Query ${parsedQuery.label} failed`,
-          };
-        }
-
         return {
           label: parsedQuery.label,
-          response: queryRes.data,
+          response: queryRes,
         };
-      } catch (e: unknown) {
-        const error = e as Error;
-        logger.error(`Query ${parsedQuery.label} failed: ${error.message}`);
+      } catch (error) {
         return {
           label: parsedQuery.label,
-          error: error.message,
+          error: error instanceof Error ? error.message : `Query ${parsedQuery.label} failed`,
         };
       }
     }
