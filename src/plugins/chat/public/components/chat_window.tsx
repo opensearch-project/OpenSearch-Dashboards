@@ -24,6 +24,7 @@ import { ChatContainer } from './chat_container';
 import { ChatHeader } from './chat_header';
 import { ChatMessages } from './chat_messages';
 import { ChatInput } from './chat_input';
+import { ConfirmationMessage } from './confirmation_message';
 import { slashCommandRegistry } from '../services/slash_commands';
 
 export interface ChatWindowInstance{
@@ -432,12 +433,19 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         timeline={timeline}
         isStreaming={isStreaming}
         onResendMessage={handleResendMessage}
-        confirmationService={confirmationService}
-        pendingConfirmation={pendingConfirmation}
         onApproveConfirmation={handleApproveConfirmation}
         onRejectConfirmation={handleRejectConfirmation}
         {...enhancedProps}
       />
+
+      {/* Sticky confirmation message - positioned above chat input */}
+      {pendingConfirmation && (
+        <ConfirmationMessage
+          request={pendingConfirmation}
+          onApprove={handleApproveConfirmation}
+          onReject={handleRejectConfirmation}
+        />
+      )}
 
       <ChatInput
         layoutMode={layoutMode}

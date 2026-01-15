@@ -4,13 +4,12 @@
  */
 
 .confirmationMessage {
-  position: sticky;
-  bottom: 0;
+  grid-area: confirmation;
   z-index: 10;
   display: flex;
-  gap: 12px;
+  gap: 8px;
+  padding-bottom: 4px;
   animation: slideIn 0.3s ease-out;
-  border-radius: 6px;
   background-color: transparent;
 
   &__content {

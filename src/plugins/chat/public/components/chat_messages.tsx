@@ -9,7 +9,6 @@ import { ChatLayoutMode } from './chat_header_button';
 import { MessageRow } from './message_row';
 import { ToolCallRow } from './tool_call_row';
 import { ErrorRow } from './error_row';
-import { ConfirmationMessage } from './confirmation_message';
 import type { Message, AssistantMessage, ToolMessage, ToolCall } from '../../common/types';
 import './chat_messages.scss';
 import { ChatSuggestions } from './chat_suggestions';
@@ -31,7 +30,6 @@ interface ChatMessagesProps {
   timeline: Message[];
   isStreaming: boolean;
   onResendMessage?: (message: Message) => void;
-  pendingConfirmation?: any; // ConfirmationRequest
   onApproveConfirmation?: () => void;
   onRejectConfirmation?: () => void;
 }
@@ -41,7 +39,6 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   timeline,
   isStreaming,
   onResendMessage,
-  pendingConfirmation,
   onApproveConfirmation,
   onRejectConfirmation,
 }) => {
@@ -182,15 +179,6 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
           return null;
         })}
-
-        {/* Pending confirmation request - shown inline in timeline */}
-        {pendingConfirmation && onApproveConfirmation && onRejectConfirmation && (
-          <ConfirmationMessage
-            request={pendingConfirmation}
-            onApprove={onApproveConfirmation}
-            onReject={onRejectConfirmation}
-          />
-        )}
 
         {/* Loading indicator - waiting for agent response */}
         {isStreaming && timeline.length === 0 && (

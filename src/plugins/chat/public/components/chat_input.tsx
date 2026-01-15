@@ -155,7 +155,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <div className="chatInput__fieldWrapper">
           <EuiFieldText
             inputRef={inputRef}
-            placeholder="Ask a question, type / for commands"
+            placeholder="Ask anything. Type / for actions"
             value={input}
             onChange={(e) => onInputChange(e.target.value)}
             onKeyDown={handleKeyDown}

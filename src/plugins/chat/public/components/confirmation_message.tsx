@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { EuiPanel, EuiText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ConfirmationRequest } from '../services/confirmation_service';
 import './confirmation_message.scss';
@@ -23,30 +23,18 @@ export const ConfirmationMessage: React.FC<ConfirmationMessageProps> = ({
   onApprove,
   onReject,
 }) => {
-  const confirmationRef = useRef<HTMLDivElement>(null);
-
-  // Auto-scroll to confirmation when it appears
-  useEffect(() => {
-    if (confirmationRef.current) {
-      confirmationRef.current.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest',
-      });
-    }
-  }, []);
-
   return (
-    <div className="confirmationMessage" ref={confirmationRef}>
+    <div className="confirmationMessage">
       <div className="confirmationMessage__content">
         <EuiPanel paddingSize="s" color="warning" hasShadow={false} hasBorder={true}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
             <EuiFlexItem>
-              <EuiText size="s" color="default">
+              <EuiText size="xs" color="default">
                 Waiting for input...
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiButtonIcon
                     size="s"
