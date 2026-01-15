@@ -9,6 +9,7 @@ import { getSeriesDisplayName } from '../utils/series';
 import { AreaChartStyle } from './area_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { generateThresholdLines } from '../utils/utils';
+import { DEFAULT_OPACITY } from '../constants';
 
 /**
  * Helper function to convert null values to 0 for stacked area charts
@@ -78,7 +79,7 @@ export const createAreaSeries = <T extends BaseChartStyle>({
       type: 'line',
       connectNulls: true,
       areaStyle: {
-        opacity: styles.areaOpacity || 0.3,
+        opacity: styles.areaOpacity || DEFAULT_OPACITY,
       },
       smooth: true,
       encode: {
@@ -122,7 +123,7 @@ export const createFacetAreaSeries = <T extends BaseChartStyle>({
       stack: `Total_${index}`, // Use unique stack name for each facet
       connectNulls: true,
       areaStyle: {
-        opacity: styles.areaOpacity || 0.3,
+        opacity: styles.areaOpacity || DEFAULT_OPACITY3,
       },
       smooth: true,
       encode: {
@@ -171,7 +172,7 @@ export const createCategoryAreaSeries = <T extends BaseChartStyle>({
       name: getSeriesDisplayName(valueField, Object.values(axisColumnMappings)),
       connectNulls: true,
       areaStyle: {
-        opacity: styles.areaOpacity || 0.3,
+        opacity: styles.areaOpacity || DEFAULT_OPACITY,
       },
       smooth: true,
       encode: {
@@ -233,7 +234,7 @@ export const createStackAreaSeries = <T extends BaseChartStyle>(
     type: 'line',
     stack: 'Total',
     areaStyle: {
-      opacity: styles.areaOpacity || 0.3,
+      opacity: styles.areaOpacity || DEFAULT_OPACITY,
     },
     smooth: true,
     connectNulls: true,
