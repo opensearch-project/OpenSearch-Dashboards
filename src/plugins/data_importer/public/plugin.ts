@@ -63,7 +63,14 @@ export class DataImporterPlugin
       },
     ]);
 
-    return {};
+    return {
+      config: {
+        enabledFileTypes: config.enabledFileTypes,
+        maxFileSizeBytes: config.maxFileSizeBytes,
+        maxTextCount: config.maxTextCount,
+        filePreviewDocumentsCount: config.filePreviewDocumentsCount,
+      },
+    };
   }
 
   public start(_: CoreStart): DataImporterPluginStart {

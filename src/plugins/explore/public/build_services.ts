@@ -26,7 +26,8 @@ export function buildServices(
   visualizationRegistry: VisualizationRegistryService,
   queryPanelActionsRegistry: QueryPanelActionsRegistryService,
   isDatasetManagementEnabled: boolean = false,
-  slotRegistry?: SlotRegistryService
+  slotRegistry?: SlotRegistryService,
+  dataImporterConfig?: ExploreServices['dataImporterConfig']
 ): ExploreServices {
   const config = context.config.get<ConfigSchema>();
   const supportedTypes = config.supportedTypes;
@@ -102,5 +103,6 @@ export function buildServices(
     // Add supportedTypes from config
     supportedTypes,
     isDatasetManagementEnabled,
+    dataImporterConfig,
   };
 }

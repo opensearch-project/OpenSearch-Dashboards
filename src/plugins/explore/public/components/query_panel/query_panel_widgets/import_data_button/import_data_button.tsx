@@ -60,12 +60,7 @@ export const ImportDataButton = () => {
               notifications={services.notifications}
               http={services.http}
               navigation={services.navigation}
-              config={{
-                enabledFileTypes: ['csv', 'json', 'ndjson'],
-                maxFileSizeBytes: 100000000,
-                maxTextCount: 10000,
-                filePreviewDocumentsCount: 10,
-              }}
+              config={services.dataImporterConfig}
               savedObjects={services.savedObjects}
               dataSourceEnabled={false}
               hideLocalCluster={false}

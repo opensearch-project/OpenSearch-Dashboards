@@ -29,8 +29,12 @@ export const QueryPanelWidgets = () => {
         <RecentQueriesButton />
         <div className="exploreQueryPanelWidgets__verticalSeparator" />
         <SaveQueryButton />
-        <div className="exploreQueryPanelWidgets__verticalSeparator" />
-        <ImportDataButton />
+        {services.dataImporterConfig ? (
+          <>
+            <div className="exploreQueryPanelWidgets__verticalSeparator" />
+            <ImportDataButton />
+          </>
+        ) : null}
         {!queryPanelActionsRegistry.isEmpty() ? (
           <>
             <div className="exploreQueryPanelWidgets__verticalSeparator" />

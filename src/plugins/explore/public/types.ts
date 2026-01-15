@@ -39,6 +39,7 @@ import { ExpressionsPublicPlugin, ExpressionsStart } from 'src/plugins/expressio
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { ContextProviderStart } from '../../context_provider/public';
 import { DatasetManagementSetup } from '../../dataset_management/public';
+import { DataImporterPluginSetup } from '../../data_importer/public';
 import { Storage, IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
 import { ScopedHistory } from '../../../core/public';
 import { SavedExploreLoader, SavedExplore } from './saved_explore';
@@ -104,6 +105,7 @@ export interface ExploreSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   dashboard: DashboardSetup;
   datasetManagement?: DatasetManagementSetup;
+  dataImporter?: DataImporterPluginSetup;
 }
 
 /**
@@ -192,4 +194,5 @@ export interface ExploreServices {
 
   supportedTypes?: string[];
   isDatasetManagementEnabled: boolean;
+  dataImporterConfig?: DataImporterPluginSetup['config'];
 }
