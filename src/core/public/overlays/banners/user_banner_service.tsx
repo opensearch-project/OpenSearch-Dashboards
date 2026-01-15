@@ -97,7 +97,9 @@ export class UserBannerService {
                     </div>
                   }
                 >
-                  <ReactMarkdownLazy renderers={{ root: Fragment }} source={content.trim()} />
+                  <ReactMarkdownLazy components={{ p: Fragment }}>
+                    {content.trim()}
+                  </ReactMarkdownLazy>
                 </React.Suspense>
 
                 <EuiButton type="primary" size="s" onClick={() => banners.remove(id!)}>
