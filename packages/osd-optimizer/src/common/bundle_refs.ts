@@ -139,6 +139,10 @@ export class BundleRefs {
     );
   }
 
+  public getRefs() {
+    return this.refs;
+  }
+
   public toSpecJson() {
     return JSON.stringify(this.refs);
   }
