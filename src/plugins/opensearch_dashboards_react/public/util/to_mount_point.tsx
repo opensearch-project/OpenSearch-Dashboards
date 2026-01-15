@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@osd/i18n/react';
 import { MountPoint } from 'opensearch-dashboards/public';
 

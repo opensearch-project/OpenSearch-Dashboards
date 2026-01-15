@@ -1,0 +1,53 @@
+{
+  "name": "@osd/storybook",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "main": "./target/index.js",
+  "opensearchDashboards": {
+    "devOnly": true
+  },
+  "dependencies": {
+    "@osd/dev-utils": "1.0.0",
+    "@storybook/addon-actions": "~6.5.16",
+    "@storybook/addon-essentials": "~6.5.16",
+    "@storybook/addon-knobs": "~6.4.0",
+    "@storybook/addons": "~6.5.16",
+    "@storybook/api": "~6.5.16",
+    "@storybook/components": "~6.5.16",
+    "@storybook/core": "~6.5.16",
+    "@storybook/core-events": "~6.5.16",
+    "@storybook/react": "~6.5.16",
+    "@storybook/theming": "~6.5.16",
+    "@types/webpack": "^5.28.5",
+    "@types/webpack-env": "^1.16.3",
+    "webpack-merge": "^5.10.0",
+    "@osd/utils": "1.0.0",
+    "autoprefixer": "^10.4.1",
+    "babel-loader": "^10.0.0",
+    "copy-webpack-plugin": "^11.0.0",
+    "jest-styled-components": "^7.0.8",
+    "mkdirp": "0.5.1",
+    "mini-css-extract-plugin": "^2.9.2",
+    "normalize-path": "^3.0.0",
+    "postcss": "^8.4.31",
+    "postcss-loader": "^8.1.1",
+    "postcss-flexbugs-fixes": "^4.2.1",
+    "react-docgen-typescript-loader": "^3.1.1",
+    "react-is": "^18.2.0",
+    "rxjs": "^6.5.5",
+    "serve-static": "1.14.1",
+    "styled-components": "^5.3.9",
+    "webpack": "^5.104.1",
+    "webpack-dev-middleware": "5.3.4",
+    "@babel/plugin-transform-nullish-coalescing-operator": "^7.22.9",
+    "@babel/plugin-transform-optional-chaining": "^7.22.9",
+    "@storybook/builder-webpack5": "~6.5.16",
+    "@storybook/manager-webpack5": "~6.5.16"
+  },
+  "scripts": {
+    "build": "tsc",
+    "osd:bootstrap": "yarn build",
+    "watch": "yarn build --watch"
+  }
+}
