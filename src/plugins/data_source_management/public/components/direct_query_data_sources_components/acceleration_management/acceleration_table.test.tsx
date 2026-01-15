@@ -5,8 +5,7 @@
 
 import React from 'react';
 import { mount, configure, render } from 'enzyme';
-// @ts-expect-error TS7016 TODO(ts-error): fixme
-import Adapter from 'enzyme-adapter-react-16';
+import Adapter from '@cfaester/enzyme-adapter-react-18';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AccelerationTable } from './acceleration_table';
 import { act } from 'react-dom/test-utils';

@@ -8,10 +8,17 @@ import { render, screen } from '@testing-library/react';
 
 import * as VB from '../../../visualizations/visualization_builder';
 import * as ReactUse from 'react-use';
-import * as ReactRedux from 'react-redux';
 import { ResizableVisControlAndTabs } from './resizable_vis_control_and_tabs';
 import { useTabError } from '../../../../application/utils/hooks/use_tab_error';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
+
+// Mock react-redux before importing any components
+const mockUseSelector = jest.fn();
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useSelector: (selector: any) => mockUseSelector(selector),
+  useDispatch: () => jest.fn(),
+}));
 
 jest.mock('../../../tabs/tabs', () => ({
   ExploreTabs: () => <div data-test-subj="explore-tabs">Explore Tabs</div>,
@@ -37,6 +44,7 @@ const mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.MockedFuncti
 
 describe('<ResizableVisControlAndTabs />', () => {
   beforeEach(() => {
+    mockUseSelector.mockClear();
     jest.spyOn(ReactUse, 'useObservable').mockReturnValue({});
     jest.spyOn(VB, 'getVisualizationBuilder').mockReturnValue(new VB.VisualizationBuilder({}));
     mockUseTabError.mockReturnValue(null);
@@ -59,21 +67,21 @@ describe('<ResizableVisControlAndTabs />', () => {
   });
 
   test('it should NOT display StylePanel if the current active tab is not visualization', () => {
-    jest.spyOn(ReactRedux, 'useSelector').mockReturnValue('logs');
+    mockUseSelector.mockReturnValue('logs');
     render(<ResizableVisControlAndTabs />);
     expect(screen.getByTestId('explore-tabs')).toBeInTheDocument();
     expect(screen.queryByTestId('style-panel')).not.toBeInTheDocument();
   });
 
   test('it should display StylePanel if the current active tab is visualization', () => {
-    jest.spyOn(ReactRedux, 'useSelector').mockReturnValue('explore_visualization_tab');
+    mockUseSelector.mockReturnValue('explore_visualization_tab');
     render(<ResizableVisControlAndTabs />);
     expect(screen.getByTestId('explore-tabs')).toBeInTheDocument();
     expect(screen.getByTestId('style-panel')).toBeInTheDocument();
   });
 
   test('it should NOT display StylePanel if the current active tab is visualization but no data', () => {
-    jest.spyOn(ReactRedux, 'useSelector').mockReturnValue('explore_visualization_tab');
+    mockUseSelector.mockReturnValue('explore_visualization_tab');
     jest.spyOn(ReactUse, 'useObservable').mockReturnValue(undefined);
     render(<ResizableVisControlAndTabs />);
     expect(screen.getByTestId('explore-tabs')).toBeInTheDocument();
@@ -81,7 +89,7 @@ describe('<ResizableVisControlAndTabs />', () => {
   });
 
   test('it should display only ExploreTabs when visualization tab has error', () => {
-    jest.spyOn(ReactRedux, 'useSelector').mockReturnValue('explore_visualization_tab');
+    mockUseSelector.mockReturnValue('explore_visualization_tab');
     mockUseTabError.mockReturnValue({
       statusCode: 400,
       error: 'Bad Request',

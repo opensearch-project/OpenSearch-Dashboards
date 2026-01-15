@@ -215,44 +215,8 @@ exports[`DataSourceTable should get datasources successful should render normall
                 "pathname": "test1",
               },
             ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
           ],
           "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
             Object {
               "type": "return",
               "value": undefined,
@@ -2933,46 +2897,6 @@ exports[`DataSourceTable should handle datasources with empty description correc
             ],
             Array [
               Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
                 "pathname": "test1",
               },
             ],
@@ -3449,361 +3373,6 @@ exports[`DataSourceTable should handle datasources with empty description correc
             Array [
               Object {
                 "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test-no-description",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test-null",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test-undefined",
               },
             ],
             Array [
@@ -3823,322 +3392,6 @@ exports[`DataSourceTable should handle datasources with empty description correc
             ],
           ],
           "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
             Object {
               "type": "return",
               "value": undefined,
@@ -4632,6 +3885,15 @@ exports[`DataSourceTable should handle datasources with empty description correc
           Object {
             "actions": Array [
               Object {
+                "data-test-subj": "dataSourcesManagement-dataSourceTable-dissociateButton",
+                "description": "Remove association",
+                "icon": "unlink",
+                "isPrimary": true,
+                "name": "Remove association",
+                "onClick": [Function],
+                "type": "icon",
+              },
+              Object {
                 "render": [Function],
               },
             ],
@@ -5116,6 +4378,15 @@ exports[`DataSourceTable should handle datasources with empty description correc
               },
               Object {
                 "actions": Array [
+                  Object {
+                    "data-test-subj": "dataSourcesManagement-dataSourceTable-dissociateButton",
+                    "description": "Remove association",
+                    "icon": "unlink",
+                    "isPrimary": true,
+                    "name": "Remove association",
+                    "onClick": [Function],
+                    "type": "icon",
+                  },
                   Object {
                     "render": [Function],
                   },
@@ -6062,6 +5333,15 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                   actions={
                                     Array [
                                       Object {
+                                        "data-test-subj": "dataSourcesManagement-dataSourceTable-dissociateButton",
+                                        "description": "Remove association",
+                                        "icon": "unlink",
+                                        "isPrimary": true,
+                                        "name": "Remove association",
+                                        "onClick": [Function],
+                                        "type": "icon",
+                                      },
+                                      Object {
                                         "render": [Function],
                                       },
                                     ]
@@ -6080,15 +5360,20 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                   itemId="test-no-description"
                                   key=".0"
                                 >
-                                  <CustomItemAction
+                                  <DefaultItemAction
                                     action={
                                       Object {
-                                        "render": [Function],
+                                        "data-test-subj": "dataSourcesManagement-dataSourceTable-dissociateButton",
+                                        "description": "Remove association",
+                                        "icon": "unlink",
+                                        "isPrimary": true,
+                                        "name": "Remove association",
+                                        "onClick": [Function],
+                                        "type": "icon",
                                       }
                                     }
                                     className="euiTableCellContent__hoverItem"
                                     enabled={true}
-                                    index={0}
                                     item={
                                       Object {
                                         "connectionType": 0,
@@ -6100,6 +5385,83 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                       }
                                     }
                                     key="item_action_test-no-description_0"
+                                  >
+                                    <EuiToolTip
+                                      content="Remove association"
+                                      delay="long"
+                                      position="top"
+                                    >
+                                      <span
+                                        className="euiToolTipAnchor"
+                                        onKeyUp={[Function]}
+                                        onMouseOut={[Function]}
+                                        onMouseOver={[Function]}
+                                      >
+                                        <EuiButtonIcon
+                                          aria-labelledby="generated-id"
+                                          className="euiTableCellContent__hoverItem"
+                                          color="primary"
+                                          data-test-subj="dataSourcesManagement-dataSourceTable-dissociateButton"
+                                          iconType="unlink"
+                                          isDisabled={false}
+                                          onClick={[Function]}
+                                        >
+                                          <button
+                                            aria-labelledby="generated-id"
+                                            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                                            data-test-subj="dataSourcesManagement-dataSourceTable-dissociateButton"
+                                            disabled={false}
+                                            onClick={[Function]}
+                                            type="button"
+                                          >
+                                            <EuiIcon
+                                              aria-hidden="true"
+                                              className="euiButtonIcon__icon"
+                                              color="inherit"
+                                              size="m"
+                                              type="unlink"
+                                            >
+                                              <span
+                                                aria-hidden="true"
+                                                className="euiButtonIcon__icon"
+                                                color="inherit"
+                                                data-euiicon-type="unlink"
+                                                size="m"
+                                              />
+                                            </EuiIcon>
+                                          </button>
+                                        </EuiButtonIcon>
+                                        <EuiScreenReaderOnly>
+                                          <span
+                                            className="euiScreenReaderOnly"
+                                            id="generated-id"
+                                          >
+                                            Remove association
+                                          </span>
+                                        </EuiScreenReaderOnly>
+                                      </span>
+                                    </EuiToolTip>
+                                  </DefaultItemAction>
+                                  <CustomItemAction
+                                    action={
+                                      Object {
+                                        "render": [Function],
+                                      }
+                                    }
+                                    className="euiTableCellContent__hoverItem"
+                                    enabled={true}
+                                    index={1}
+                                    item={
+                                      Object {
+                                        "connectionType": 0,
+                                        "description": undefined,
+                                        "id": "test-no-description",
+                                        "relatedConnections": Array [],
+                                        "title": "test-no-description",
+                                        "type": "OpenSearch",
+                                      }
+                                    }
+                                    key="item_action_test-no-description_1"
                                   >
                                     <div
                                       className="euiTableCellContent__hoverItem"
@@ -6440,6 +5802,15 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                   actions={
                                     Array [
                                       Object {
+                                        "data-test-subj": "dataSourcesManagement-dataSourceTable-dissociateButton",
+                                        "description": "Remove association",
+                                        "icon": "unlink",
+                                        "isPrimary": true,
+                                        "name": "Remove association",
+                                        "onClick": [Function],
+                                        "type": "icon",
+                                      },
+                                      Object {
                                         "render": [Function],
                                       },
                                     ]
@@ -6458,15 +5829,20 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                   itemId="test-null"
                                   key=".0"
                                 >
-                                  <CustomItemAction
+                                  <DefaultItemAction
                                     action={
                                       Object {
-                                        "render": [Function],
+                                        "data-test-subj": "dataSourcesManagement-dataSourceTable-dissociateButton",
+                                        "description": "Remove association",
+                                        "icon": "unlink",
+                                        "isPrimary": true,
+                                        "name": "Remove association",
+                                        "onClick": [Function],
+                                        "type": "icon",
                                       }
                                     }
                                     className="euiTableCellContent__hoverItem"
                                     enabled={true}
-                                    index={0}
                                     item={
                                       Object {
                                         "connectionType": 0,
@@ -6478,6 +5854,83 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                       }
                                     }
                                     key="item_action_test-null_0"
+                                  >
+                                    <EuiToolTip
+                                      content="Remove association"
+                                      delay="long"
+                                      position="top"
+                                    >
+                                      <span
+                                        className="euiToolTipAnchor"
+                                        onKeyUp={[Function]}
+                                        onMouseOut={[Function]}
+                                        onMouseOver={[Function]}
+                                      >
+                                        <EuiButtonIcon
+                                          aria-labelledby="generated-id"
+                                          className="euiTableCellContent__hoverItem"
+                                          color="primary"
+                                          data-test-subj="dataSourcesManagement-dataSourceTable-dissociateButton"
+                                          iconType="unlink"
+                                          isDisabled={false}
+                                          onClick={[Function]}
+                                        >
+                                          <button
+                                            aria-labelledby="generated-id"
+                                            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                                            data-test-subj="dataSourcesManagement-dataSourceTable-dissociateButton"
+                                            disabled={false}
+                                            onClick={[Function]}
+                                            type="button"
+                                          >
+                                            <EuiIcon
+                                              aria-hidden="true"
+                                              className="euiButtonIcon__icon"
+                                              color="inherit"
+                                              size="m"
+                                              type="unlink"
+                                            >
+                                              <span
+                                                aria-hidden="true"
+                                                className="euiButtonIcon__icon"
+                                                color="inherit"
+                                                data-euiicon-type="unlink"
+                                                size="m"
+                                              />
+                                            </EuiIcon>
+                                          </button>
+                                        </EuiButtonIcon>
+                                        <EuiScreenReaderOnly>
+                                          <span
+                                            className="euiScreenReaderOnly"
+                                            id="generated-id"
+                                          >
+                                            Remove association
+                                          </span>
+                                        </EuiScreenReaderOnly>
+                                      </span>
+                                    </EuiToolTip>
+                                  </DefaultItemAction>
+                                  <CustomItemAction
+                                    action={
+                                      Object {
+                                        "render": [Function],
+                                      }
+                                    }
+                                    className="euiTableCellContent__hoverItem"
+                                    enabled={true}
+                                    index={1}
+                                    item={
+                                      Object {
+                                        "connectionType": 0,
+                                        "description": null,
+                                        "id": "test-null",
+                                        "relatedConnections": Array [],
+                                        "title": "test-null",
+                                        "type": "OpenSearch",
+                                      }
+                                    }
+                                    key="item_action_test-null_1"
                                   >
                                     <div
                                       className="euiTableCellContent__hoverItem"
@@ -6818,6 +6271,15 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                   actions={
                                     Array [
                                       Object {
+                                        "data-test-subj": "dataSourcesManagement-dataSourceTable-dissociateButton",
+                                        "description": "Remove association",
+                                        "icon": "unlink",
+                                        "isPrimary": true,
+                                        "name": "Remove association",
+                                        "onClick": [Function],
+                                        "type": "icon",
+                                      },
+                                      Object {
                                         "render": [Function],
                                       },
                                     ]
@@ -6836,15 +6298,20 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                   itemId="test-undefined"
                                   key=".0"
                                 >
-                                  <CustomItemAction
+                                  <DefaultItemAction
                                     action={
                                       Object {
-                                        "render": [Function],
+                                        "data-test-subj": "dataSourcesManagement-dataSourceTable-dissociateButton",
+                                        "description": "Remove association",
+                                        "icon": "unlink",
+                                        "isPrimary": true,
+                                        "name": "Remove association",
+                                        "onClick": [Function],
+                                        "type": "icon",
                                       }
                                     }
                                     className="euiTableCellContent__hoverItem"
                                     enabled={true}
-                                    index={0}
                                     item={
                                       Object {
                                         "connectionType": 0,
@@ -6856,6 +6323,83 @@ exports[`DataSourceTable should handle datasources with empty description correc
                                       }
                                     }
                                     key="item_action_test-undefined_0"
+                                  >
+                                    <EuiToolTip
+                                      content="Remove association"
+                                      delay="long"
+                                      position="top"
+                                    >
+                                      <span
+                                        className="euiToolTipAnchor"
+                                        onKeyUp={[Function]}
+                                        onMouseOut={[Function]}
+                                        onMouseOver={[Function]}
+                                      >
+                                        <EuiButtonIcon
+                                          aria-labelledby="generated-id"
+                                          className="euiTableCellContent__hoverItem"
+                                          color="primary"
+                                          data-test-subj="dataSourcesManagement-dataSourceTable-dissociateButton"
+                                          iconType="unlink"
+                                          isDisabled={false}
+                                          onClick={[Function]}
+                                        >
+                                          <button
+                                            aria-labelledby="generated-id"
+                                            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                                            data-test-subj="dataSourcesManagement-dataSourceTable-dissociateButton"
+                                            disabled={false}
+                                            onClick={[Function]}
+                                            type="button"
+                                          >
+                                            <EuiIcon
+                                              aria-hidden="true"
+                                              className="euiButtonIcon__icon"
+                                              color="inherit"
+                                              size="m"
+                                              type="unlink"
+                                            >
+                                              <span
+                                                aria-hidden="true"
+                                                className="euiButtonIcon__icon"
+                                                color="inherit"
+                                                data-euiicon-type="unlink"
+                                                size="m"
+                                              />
+                                            </EuiIcon>
+                                          </button>
+                                        </EuiButtonIcon>
+                                        <EuiScreenReaderOnly>
+                                          <span
+                                            className="euiScreenReaderOnly"
+                                            id="generated-id"
+                                          >
+                                            Remove association
+                                          </span>
+                                        </EuiScreenReaderOnly>
+                                      </span>
+                                    </EuiToolTip>
+                                  </DefaultItemAction>
+                                  <CustomItemAction
+                                    action={
+                                      Object {
+                                        "render": [Function],
+                                      }
+                                    }
+                                    className="euiTableCellContent__hoverItem"
+                                    enabled={true}
+                                    index={1}
+                                    item={
+                                      Object {
+                                        "connectionType": 0,
+                                        "description": undefined,
+                                        "id": "test-undefined",
+                                        "relatedConnections": Array [],
+                                        "title": "test-undefined",
+                                        "type": "OpenSearch",
+                                      }
+                                    }
+                                    key="item_action_test-undefined_1"
                                   >
                                     <div
                                       className="euiTableCellContent__hoverItem"
@@ -7333,46 +6877,6 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
                 "pathname": "test1",
               },
             ],
@@ -7389,226 +6893,6 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             Array [
               Object {
                 "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "alpha-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "beta-test",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test2",
-              },
-            ],
-            Array [
-              Object {
-                "pathname": "test1",
               },
             ],
             Array [
@@ -7953,214 +7237,6 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
           ],
           "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
             Object {
               "type": "return",
               "value": undefined,

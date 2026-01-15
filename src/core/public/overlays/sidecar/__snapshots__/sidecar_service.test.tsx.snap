@@ -6,9 +6,7 @@ exports[`SidecarService SidecarRef#Show() recover sidecar when calling show afte
 
 exports[`SidecarService SidecarRef#close() can be called multiple times on the same SidecarRef 1`] = `
 Array [
-  Array [
-    <div />,
-  ],
+  Array [],
 ]
 `;
 

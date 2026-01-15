@@ -36,3 +36,8 @@ bluebird.Promise.setScheduler(function (fn) {
 });
 
 require('whatwg-fetch');
+
+// TextEncoder/TextDecoder polyfill required for React 18 enzyme adapter
+const { TextEncoder, TextDecoder } = require('util');
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
