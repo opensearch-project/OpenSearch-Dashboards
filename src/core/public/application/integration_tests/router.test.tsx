@@ -29,6 +29,7 @@
  */
 
 import React from 'react';
+import { act } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { createMemoryHistory, History, createHashHistory } from 'history';
 
@@ -43,8 +44,10 @@ describe('AppRouter', () => {
   let update: ReturnType<typeof createRenderer>;
   let scopedAppHistory: History;
 
-  const navigate = (path: string) => {
-    globalHistory.push(path);
+  const navigate = async (path: string) => {
+    await act(async () => {
+      globalHistory.push(path);
+    });
     return update();
   };
   const mockMountersToMounters = () =>
@@ -124,7 +127,7 @@ describe('AppRouter', () => {
 
     expect(app1.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingSpinner euiLoadingSpinner--xLarge\\" aria-label=\\"Loading application\\"></span></div><div><div>
+      "<div><div>
       basename: /app/app1
       html: <span>App 1</span>
       </div></div>"
@@ -136,7 +139,7 @@ describe('AppRouter', () => {
     expect(app1Unmount).toHaveBeenCalled();
     expect(app2.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingSpinner euiLoadingSpinner--xLarge\\" aria-label=\\"Loading application\\"></span></div><div><div>
+      "<div><div>
       basename: /app/app2
       html: <div>App 2</div>
       </div></div>"
@@ -150,7 +153,7 @@ describe('AppRouter', () => {
 
     expect(standardApp.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingSpinner euiLoadingSpinner--xLarge\\" aria-label=\\"Loading application\\"></span></div><div><div>
+      "<div><div>
       basename: /app/app1
       html: <span>App 1</span>
       </div></div>"
@@ -162,7 +165,7 @@ describe('AppRouter', () => {
     expect(standardAppUnmount).toHaveBeenCalled();
     expect(chromelessApp.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingSpinner euiLoadingSpinner--xLarge\\" aria-label=\\"Loading application\\"></span></div><div><div>
+      "<div><div>
       basename: /chromeless-a/path
       html: <div>Chromeless A</div>
       </div></div>"
@@ -174,7 +177,7 @@ describe('AppRouter', () => {
     expect(chromelessAppUnmount).toHaveBeenCalled();
     expect(standardApp.mounter.mount).toHaveBeenCalledTimes(2);
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingSpinner euiLoadingSpinner--xLarge\\" aria-label=\\"Loading application\\"></span></div><div><div>
+      "<div><div>
       basename: /app/app1
       html: <span>App 1</span>
       </div></div>"
@@ -188,7 +191,7 @@ describe('AppRouter', () => {
 
     expect(chromelessAppA.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingSpinner euiLoadingSpinner--xLarge\\" aria-label=\\"Loading application\\"></span></div><div><div>
+      "<div><div>
       basename: /chromeless-a/path
       html: <div>Chromeless A</div>
       </div></div>"
@@ -200,7 +203,7 @@ describe('AppRouter', () => {
     expect(chromelessAppAUnmount).toHaveBeenCalled();
     expect(chromelessAppB.mounter.mount).toHaveBeenCalled();
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingSpinner euiLoadingSpinner--xLarge\\" aria-label=\\"Loading application\\"></span></div><div><div>
+      "<div><div>
       basename: /chromeless-b/path
       html: <div>Chromeless B</div>
       </div></div>"
@@ -212,7 +215,7 @@ describe('AppRouter', () => {
     expect(chromelessAppBUnmount).toHaveBeenCalled();
     expect(chromelessAppA.mounter.mount).toHaveBeenCalledTimes(2);
     expect(dom?.html()).toMatchInlineSnapshot(`
-      "<div class=\\"appContainer__loading\\"><span class=\\"euiLoadingSpinner euiLoadingSpinner--xLarge\\" aria-label=\\"Loading application\\"></span></div><div><div>
+      "<div><div>
       basename: /chromeless-a/path
       html: <div>Chromeless A</div>
       </div></div>"
@@ -332,7 +335,9 @@ describe('AppRouter', () => {
 
     // Hitting back button within app does not trigger re-render
     await navigate('/app/app1/page2');
-    globalHistory.goBack();
+    await act(async () => {
+      globalHistory.goBack();
+    });
     await update();
     expect(mounter.mount).toHaveBeenCalledTimes(1);
     expect(unmount).not.toHaveBeenCalled();
@@ -382,7 +387,10 @@ describe('AppRouter', () => {
     expect(globalHistory.location.pathname).toEqual('/app/scopedApp/subpath');
 
     // Simulate user clicking on navlink again to return to app root
-    globalHistory.push('/app/scopedApp');
+    await act(async () => {
+      globalHistory.push('/app/scopedApp');
+    });
+    await update();
     // Should not call mount again
     expect(scopedApp?.mounter.mount).toHaveBeenCalledTimes(1);
     expect(scopedApp?.unmount).not.toHaveBeenCalled();
@@ -390,7 +398,10 @@ describe('AppRouter', () => {
     expect(scopedAppHistory.location.pathname).toEqual('');
 
     // Make sure going back to subpath works
-    globalHistory.goBack();
+    await act(async () => {
+      globalHistory.goBack();
+    });
+    await update();
     expect(scopedApp?.mounter.mount).toHaveBeenCalledTimes(1);
     expect(scopedApp?.unmount).not.toHaveBeenCalled();
     expect(scopedAppHistory.location.pathname).toEqual('/subpath');
