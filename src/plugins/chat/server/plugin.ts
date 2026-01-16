@@ -39,6 +39,13 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
     const router = core.http.createRouter();
     const getCapabilitiesResolver = () => this.capabilitiesResolver;
 
+    // Register capability to indicate observability agent availability
+    core.capabilities.registerProvider(() => ({
+      chat: {
+        observabilityAgentEnabled: !!config.observabilityAgentId,
+      },
+    }));
+
     defineRoutes(
       router,
       this.logger,
