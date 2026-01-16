@@ -44,7 +44,8 @@ export class ChatPlugin implements Plugin<ChatPluginSetup, ChatPluginStart> {
       this.logger,
       config.agUiUrl,
       getCapabilitiesResolver,
-      config.mlCommonsAgentId
+      config.mlCommonsAgentId,
+      config.observabilityAgentId
     );
 
     return {};
