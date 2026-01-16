@@ -30,6 +30,10 @@ export const ImportDataButton = () => {
   const closeModal = () => setIsModalVisible(false);
   const showModal = () => setIsModalVisible(true);
 
+  if (services.dataImporterConfig === undefined) {
+    return null;
+  }
+
   return (
     <>
       <EuiButtonEmpty

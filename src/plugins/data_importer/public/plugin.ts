@@ -64,12 +64,7 @@ export class DataImporterPlugin
     ]);
 
     return {
-      config: {
-        enabledFileTypes: config.enabledFileTypes,
-        maxFileSizeBytes: config.maxFileSizeBytes,
-        maxTextCount: config.maxTextCount,
-        filePreviewDocumentsCount: config.filePreviewDocumentsCount,
-      },
+      config,
     };
   }
 
