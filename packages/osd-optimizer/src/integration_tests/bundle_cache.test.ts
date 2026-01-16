@@ -211,11 +211,11 @@ it('emits "bundle not cached" event when optimizerCacheKey is outdated, includes
     Array [
       Object {
         "bundle": <Bundle>,
-        "diff": "[32m- Expected[39m
-    [31m+ Received[39m
+        "diff": "- Expected
+    + Received
 
-    [32m- \\"old\\"[39m
-    [31m+ \\"optimizerCacheKey\\"[39m",
+    - \\"old\\"
+    + \\"optimizerCacheKey\\"",
         "reason": "optimizer cache key mismatch",
         "type": "bundle not cached",
       },
@@ -255,12 +255,12 @@ it('emits "bundle not cached" event when bundleRefExportIds is outdated, include
     Array [
       Object {
         "bundle": <Bundle>,
-        "diff": "[32m- Expected[39m
-    [31m+ Received[39m
+        "diff": "- Expected
+    + Received
 
-    [2m  [[22m
-    [31m+   \\"plugin/bar/public\\"[39m
-    [2m  ][22m",
+      [
+    +   \\"plugin/bar/public\\"
+      ]",
         "reason": "bundle references outdated",
         "type": "bundle not cached",
       },
@@ -337,11 +337,11 @@ it('emits "bundle not cached" event when cacheKey is outdated', async () => {
     Array [
       Object {
         "bundle": <Bundle>,
-        "diff": "[32m- Expected[39m
-    [31m+ Received[39m
+        "diff": "- Expected
+    + Received
 
-    [32m- \\"old\\"[39m
-    [31m+ \\"new\\"[39m",
+    - \\"old\\"
+    + \\"new\\"",
         "reason": "cache key mismatch",
         "type": "bundle not cached",
       },

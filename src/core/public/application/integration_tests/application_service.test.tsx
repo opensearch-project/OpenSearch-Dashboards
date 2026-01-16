@@ -224,6 +224,9 @@ describe('ApplicationService', () => {
 
       await act(async () => {
         await navigate('/app/app1');
+      });
+      await flushPromises(); // Ensure mount and onAppLeave registration complete
+      await act(async () => {
         await navigateToApp('app2');
       });
 
@@ -263,6 +266,9 @@ describe('ApplicationService', () => {
 
       await act(async () => {
         await navigate('/app/app1');
+      });
+      await flushPromises(); // Ensure mount and onAppLeave registration complete
+      await act(async () => {
         await navigateToApp('app2');
       });
 
