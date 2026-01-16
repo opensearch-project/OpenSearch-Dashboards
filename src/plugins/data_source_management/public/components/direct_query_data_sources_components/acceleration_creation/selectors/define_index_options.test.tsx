@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiFieldText, EuiLink, EuiMarkdownFormat, EuiModal } from '@elastic/eui';
 import { DefineIndexOptions } from './define_index_options';
 import { CreateAccelerationForm } from '../../../../../framework/types';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 const defaultAccelerationFormData: CreateAccelerationForm = {
   dataSource: 'test_source',

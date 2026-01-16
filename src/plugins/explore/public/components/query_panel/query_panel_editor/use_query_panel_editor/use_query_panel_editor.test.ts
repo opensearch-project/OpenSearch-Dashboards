@@ -517,6 +517,7 @@ describe('useQueryPanelEditor', () => {
       });
 
       mockUseSelector.mockImplementation((selector: any) => {
+        if (!selector) return '';
         const selectorString = selector.toString();
         if (selectorString.includes('selectIsPromptEditorMode')) return false;
         if (selectorString.includes('selectPromptModeIsAvailable')) return false;
@@ -548,8 +549,9 @@ describe('useQueryPanelEditor', () => {
       );
     });
 
-    it('should not trigger autosuggestion when text is empty', () => {
+    it('should trigger autosuggestion immediately when text is empty', () => {
       mockUseSelector.mockImplementation((selector: any) => {
+        if (!selector) return '';
         const selectorString = selector.toString();
         if (selectorString.includes('selectIsPromptEditorMode')) return false;
         if (selectorString.includes('selectQueryString')) return '';
@@ -559,8 +561,13 @@ describe('useQueryPanelEditor', () => {
 
       renderHook(() => useQueryPanelEditor());
 
-      // Should not set up focus event listener when text is empty
-      expect(mockEditor.onDidFocusEditorWidget).not.toHaveBeenCalled();
+      // Should set up focus event listener and trigger suggestions immediately when text is empty
+      expect(mockEditor.onDidFocusEditorWidget).toHaveBeenCalled();
+      expect(mockEditor.trigger).toHaveBeenCalledWith(
+        'keyboard',
+        'editor.action.triggerSuggest',
+        {}
+      );
     });
   });
 

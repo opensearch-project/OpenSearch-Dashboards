@@ -41,7 +41,12 @@ export function useDynamicContext(
 
     // If we had a previous context with an ID, remove it
     if (previousOptionsRef.current?.id && contextStore.removeContextById) {
-      contextStore.removeContextById(previousOptionsRef.current.id);
+      try {
+        contextStore.removeContextById(previousOptionsRef.current.id);
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.warn('Error removing context:', error);
+      }
     }
 
     // Update the reference
@@ -57,7 +62,12 @@ export function useDynamicContext(
     contextIdRef.current = options.id || null;
 
     // Register the context (store handles replacement automatically)
-    contextStore.addContext(options);
+    try {
+      contextStore.addContext(options);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Error adding context:', error);
+    }
   }, [options]);
 
   // Cleanup on unmount (only if shouldCleanupOnUnmount is true)
@@ -69,7 +79,12 @@ export function useDynamicContext(
     return () => {
       const contextStore = (window as any).assistantContextStore as AssistantContextStore;
       if (contextStore && contextIdRef.current && contextStore.removeContextById) {
-        contextStore.removeContextById(contextIdRef.current);
+        try {
+          contextStore.removeContextById(contextIdRef.current);
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.warn('Error removing context on unmount:', error);
+        }
       }
     };
   }, [shouldCleanupOnUnmount]);

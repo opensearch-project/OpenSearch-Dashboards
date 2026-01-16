@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor, act } from '@testing-library/react';
 import { GanttChart } from './gantt_chart_vega';
 import { convertToVegaGanttData } from './gantt_data_adapter';
 import { createGanttSpec } from './gantt_chart_spec';
@@ -17,6 +17,7 @@ jest.mock('vega', () => {
     run: jest.fn().mockResolvedValue({}),
     addEventListener: jest.fn(),
     finalize: jest.fn(),
+    tooltip: jest.fn().mockReturnThis(),
   };
 
   return {
@@ -207,7 +208,7 @@ describe('GanttChart', () => {
     expect(mockGetBoundingClientRect.mock.calls.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('sets up click handler when onSpanClick is provided', () => {
+  it('sets up click handler when onSpanClick is provided', async () => {
     const mockOnSpanClick = jest.fn();
 
     render(
@@ -223,12 +224,12 @@ describe('GanttChart', () => {
     const { __mockView } = vega;
 
     // Wait for the async initialization to complete
-    setTimeout(() => {
+    await waitFor(() => {
       expect(__mockView.addEventListener).toHaveBeenCalledWith('mousedown', expect.any(Function));
-    }, 0);
+    });
   });
 
-  it('cleans up Vega view on unmount', () => {
+  it('cleans up Vega view on unmount', async () => {
     // Reset the mock before this test
     const vega = jest.requireMock('vega');
     const { __mockView } = vega;
@@ -236,12 +237,17 @@ describe('GanttChart', () => {
 
     const { unmount } = render(<GanttChart data={mockData} colorMap={mockColorMap} height={400} />);
 
+    // Wait for Vega view to be initialized first
+    await waitFor(() => {
+      expect(__mockView.run).toHaveBeenCalled();
+    });
+
     unmount();
 
     // Wait for the cleanup to happen
-    setTimeout(() => {
+    await waitFor(() => {
       expect(__mockView.finalize).toHaveBeenCalled();
-    }, 0);
+    });
   });
 
   it('handles errors gracefully', () => {

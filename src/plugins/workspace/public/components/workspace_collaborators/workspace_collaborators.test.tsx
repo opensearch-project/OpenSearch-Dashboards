@@ -8,7 +8,7 @@ import { render, waitFor } from '@testing-library/react';
 import { coreMock } from '../../../../../core/public/mocks';
 import { WorkspaceCollaborators } from './workspace_collaborators';
 import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
-import { of } from 'rxjs';
+import { of, BehaviorSubject } from 'rxjs';
 import { createRoot, Root } from 'react-dom/client';
 import { fireEvent } from '@testing-library/react';
 import { WorkspaceCollaboratorPermissionType } from '../../types';
@@ -19,6 +19,29 @@ const coreStartMock = coreMock.createStart();
 
 const mockOverlays = coreStartMock.overlays;
 
+// Create workspace data outside of setup to ensure stable reference
+const workspaceData = {
+  id: 'test',
+  name: 'current-workspace-name',
+  features: ['use-case-observability'],
+  permissions: {
+    library_write: {
+      users: ['admin'],
+      groups: ['foo'],
+    },
+    write: {
+      users: ['admin'],
+    },
+    library_read: {
+      users: ['bar'],
+    },
+    read: {
+      users: ['bar'],
+      groups: ['foo'],
+    },
+  },
+};
+
 const setup = ({
   permissionEnabled = true,
   workspaceClientUpdate = workspaceClientUpdateMock,
@@ -27,6 +50,8 @@ const setup = ({
   workspaceClientUpdate?: jest.Mock;
 }) => {
   const collaboratorTypes: WorkspaceCollaboratorPermissionType[] = [];
+  // Use BehaviorSubject instead of of() to avoid infinite loops with useObservable in React 18
+  const currentWorkspace$ = new BehaviorSubject(permissionEnabled ? workspaceData : null);
   const services = {
     ...coreStartMock,
     application: {
@@ -40,27 +65,7 @@ const setup = ({
     },
     workspaces: {
       ...coreStartMock.workspaces,
-      currentWorkspace$: of({
-        id: 'test',
-        name: 'current-workspace-name',
-        features: ['use-case-observability'],
-        permissions: {
-          library_write: {
-            users: ['admin'],
-            groups: ['foo'],
-          },
-          write: {
-            users: ['admin'],
-          },
-          library_read: {
-            users: ['bar'],
-          },
-          read: {
-            users: ['bar'],
-            groups: ['foo'],
-          },
-        },
-      }),
+      currentWorkspace$,
     },
     workspaceClient: {
       update: workspaceClientUpdate,
@@ -96,6 +101,10 @@ describe('WorkspaceCollaborators', () => {
   beforeEach(() => {
     mockOverlays.openModal.mockClear();
   });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
   it('should return null if currentWorkspace is null', () => {
     const { renderResult } = setup({ permissionEnabled: false });
     expect(renderResult.queryByTestId('workspace-collaborators-panel')).not.toBeInTheDocument();
@@ -118,6 +127,10 @@ describe('WorkspaceCollaborators', () => {
       },
     });
 
+    // Wait for table to render with React 18 async updates
+    await waitFor(() => {
+      expect(renderResult.getByTestId('checkboxSelectRow-0')).toBeInTheDocument();
+    });
     fireEvent.click(renderResult.getByTestId('checkboxSelectRow-0'));
     const deleteCollaborator = renderResult.getByText('Delete 1 collaborator');
     fireEvent.click(deleteCollaborator);
@@ -155,6 +168,10 @@ describe('WorkspaceCollaborators', () => {
       },
     });
 
+    // Wait for table to render with React 18 async updates
+    await waitFor(() => {
+      expect(renderResult.getByTestId('checkboxSelectRow-0')).toBeInTheDocument();
+    });
     fireEvent.click(renderResult.getByTestId('checkboxSelectRow-0'));
     const deleteCollaborator = renderResult.getByText('Delete 1 collaborator');
     fireEvent.click(deleteCollaborator);

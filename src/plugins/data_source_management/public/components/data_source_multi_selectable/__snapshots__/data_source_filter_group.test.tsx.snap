@@ -132,6 +132,184 @@ Object {
         </div>
       </div>
     </div>
+    <div>
+      <div
+        data-eui="EuiFocusTrap"
+      >
+        <div
+          aria-describedby="generated-id"
+          aria-live="off"
+          aria-modal="true"
+          class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--bottom"
+          role="dialog"
+          style="top: 16px; left: -22px; z-index: 2000;"
+          tabindex="0"
+        >
+          <div
+            class="euiPopover__panelArrow euiPopover__panelArrow--bottom"
+            style="left: 10px; top: 0px;"
+          />
+          <p
+            class="euiScreenReaderOnly"
+            id="generated-id"
+          >
+            You are in a dialog. To close this dialog, hit escape.
+          </p>
+          <div>
+            <div
+              class="euiPopoverTitle euiPopoverTitle--paddingSmall"
+            >
+              <div
+                class="euiFormControlLayout euiFormControlLayout--compressed"
+              >
+                <div
+                  class="euiFormControlLayout__childrenWrapper"
+                >
+                  <input
+                    class="euiFieldSearch euiFieldSearch--compressed"
+                    data-test-subj="dataSourceMultiSelectFieldSearch"
+                    type="search"
+                  />
+                  <div
+                    class="euiFormControlLayoutIcons"
+                  >
+                    <span
+                      class="euiFormControlLayoutCustomIcon"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiFormControlLayoutCustomIcon__icon"
+                        data-euiicon-type="search"
+                      />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="dataSourceFilterGroupItems"
+            >
+              <button
+                class="euiFilterSelectItem"
+                role="option"
+                type="button"
+              >
+                <span
+                  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <span
+                      color="text"
+                      data-euiicon-type="check"
+                    />
+                  </div>
+                  <span
+                    class="euiFlexItem euiFilterSelectItem__content"
+                  >
+                    <div
+                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive dataSourceFilterGroupOuiFlexGroup"
+                    >
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrowZero dataSourceFilterGroupOuiFlexItem"
+                      >
+                        name1
+                      </div>
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <span
+                          class="euiBadge euiBadge--iconLeft"
+                          style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
+                          title="Default"
+                        >
+                          <span
+                            class="euiBadge__content"
+                          >
+                            <span
+                              class="euiBadge__text"
+                            >
+                              Default
+                            </span>
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </span>
+                </span>
+              </button>
+            </div>
+            <div
+              class="euiPopoverFooter"
+            >
+              <fieldset
+                class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+              >
+                <legend
+                  class="euiScreenReaderOnly"
+                >
+                  All options selection toggle group
+                </legend>
+                <div
+                  class="euiButtonGroup__buttons"
+                >
+                  <label
+                    class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+                    for="generated-id"
+                  >
+                    <span
+                      class="euiButtonContent euiButton__content"
+                    >
+                      <span
+                        class="euiButton__text euiButtonGroupButton__textShift"
+                        data-text="Select all"
+                        title="Select all"
+                      >
+                        <input
+                          checked=""
+                          class="euiScreenReaderOnly"
+                          data-test-subj="select_all"
+                          id="generated-id"
+                          name="generated-id"
+                          type="radio"
+                          value=""
+                        />
+                        Select all
+                      </span>
+                    </span>
+                  </label>
+                  <label
+                    class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                    for="generated-id"
+                  >
+                    <span
+                      class="euiButtonContent euiButton__content"
+                    >
+                      <span
+                        class="euiButton__text euiButtonGroupButton__textShift"
+                        data-text="Deselect all"
+                        title="Deselect all"
+                      >
+                        <input
+                          class="euiScreenReaderOnly"
+                          data-test-subj="deselect_all"
+                          id="generated-id"
+                          name="generated-id"
+                          type="radio"
+                          value=""
+                        />
+                        Deselect all
+                      </span>
+                    </span>
+                  </label>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>,
   "container": <div>
     <div
@@ -273,7 +451,7 @@ Object {
           aria-modal="true"
           class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--bottom"
           role="dialog"
-          style="top: 16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
+          style="top: 16px; left: -22px; z-index: 2000;"
           tabindex="0"
         >
           <div

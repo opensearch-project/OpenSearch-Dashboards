@@ -6,7 +6,7 @@
 import { ShallowWrapper, shallow } from 'enzyme';
 import React from 'react';
 import { DataSourceFilterGroup } from './data_source_filter_group';
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 
 describe('DataSourceFilterGroup', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -34,6 +34,12 @@ describe('DataSourceFilterGroup', () => {
     );
     const button = await container.findByTestId('dataSourceFilterGroupButton');
     button.click();
+
+    // Wait for the popover to open and render the option
+    await waitFor(() => {
+      expect(screen.getByText('name1')).toBeInTheDocument();
+    });
+
     expect(container).toMatchSnapshot();
     expect(mockCallBack).toBeCalledTimes(0);
 
@@ -54,6 +60,11 @@ describe('DataSourceFilterGroup', () => {
     );
     const button = await container.findByTestId('dataSourceFilterGroupButton');
     button.click();
+
+    // Wait for the popover to open and render the buttons
+    await waitFor(() => {
+      expect(screen.getByText('Deselect all')).toBeInTheDocument();
+    });
 
     fireEvent.click(screen.getByText('Deselect all'));
     expect(mockCallBack).toBeCalledWith([

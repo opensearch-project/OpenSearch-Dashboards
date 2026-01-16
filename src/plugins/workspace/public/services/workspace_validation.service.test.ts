@@ -3,28 +3,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { workspaceClientMock, WorkspaceClientMock } from '../workspace_client.mock';
 import { coreMock } from '../../../../core/public/mocks';
 import { WorkspaceValidationService } from './workspace_validation_service';
 import { waitFor } from '@testing-library/dom';
-import { WORKSPACE_FATAL_ERROR_APP_ID } from '../../common/constants';
+import { WORKSPACE_DETAIL_APP_ID, WORKSPACE_FATAL_ERROR_APP_ID } from '../../common/constants';
 import { WorkspaceError } from '../../../../core/public';
 
-const setupWorkspaceValidationStart = () => {
+const setupWorkspaceValidationStart = (initialAppId?: string) => {
   const core = coreMock.createStart();
 
-  core.application.currentAppId$.subscribe = jest.fn();
+  // Create a BehaviorSubject so we can control the currentAppId$ emissions in tests
+  const currentAppIdSubject$ = new BehaviorSubject<string | undefined>(initialAppId);
+  Object.defineProperty(core.application, 'currentAppId$', {
+    get: () => currentAppIdSubject$,
+    configurable: true,
+  });
 
   const workspaceError$ = core.workspaces.workspaceError$;
   const initialized$ = core.workspaces.initialized$;
-  const currentAppId$ = core.application.currentAppId$;
   const service = new WorkspaceValidationService();
 
   return {
     core,
     workspaceError$,
     initialized$,
-    currentAppId$,
+    currentAppIdSubject$,
     service,
   };
 };
@@ -71,13 +76,16 @@ describe('WorkspaceValidationService', () => {
     });
 
     it('should redirect from error page to workspace detail when workspace becomes valid', async () => {
-      const { core, service, initialized$ } = setupWorkspaceValidationStart();
+      // Initialize with user already on the error page
+      const { core, service, initialized$ } = setupWorkspaceValidationStart(
+        WORKSPACE_FATAL_ERROR_APP_ID
+      );
 
       service.start(core);
       initialized$.next(true);
 
       await waitFor(() => {
-        expect(core.application.currentAppId$.subscribe).toHaveBeenCalledWith(expect.any(Function));
+        expect(core.application.navigateToApp).toHaveBeenCalledWith(WORKSPACE_DETAIL_APP_ID);
       });
     });
 
