@@ -490,6 +490,7 @@ await waitFor(() => expect(result.current.data).toBeDefined());
 5. Reset persistent service state (like timefilter) at START of beforeEach, BEFORE enabling fake timers
 6. Add `wrapper.update()` after async operations in enzyme tests to reflect DOM changes
 7. Use `BehaviorSubject` instead of `of()` for mocking observables to avoid infinite loops with `useObservable`
+8. Fix `stripAnsiSnapshotSerializer.serialize()` to return `JSON.stringify(stripAnsi(value))` for proper string quoting in inline snapshots when chalk outputs ANSI codes
 
 ##### Task 11: Fix Dev/Build Tests (3 files) - Priority: Low ✅ COMPLETED
 **Scope:** `src/dev/`
@@ -592,12 +593,25 @@ jest.mock('../../lib', () => ({
 
 | Category | Files | Tests Failing | Priority |
 |----------|-------|---------------|----------|
-| Pre-existing (skip) | 5 | ~12 | N/A |
-| Regressions (Task 12) | 8 | ~20 | High |
+| Pre-existing (NOT React 18) | 4 | 14 | N/A - Out of scope |
+| ~~Regressions (Task 12)~~ | ~~8~~ | ~~0~~ | ✅ Done |
 | ~~Complex Plugin (Task 13)~~ | ~~4~~ | ~~0~~ | ✅ Done |
 | ~~Package Tests (Task 14)~~ | ~~7~~ | ~~0~~ | ✅ Done |
 | ~~Server-Side (Task 15)~~ | ~~4~~ | ~~0~~ | ✅ Done |
-| **Total** | **13** | **~32** | |
+| **Total React 18 Related** | **0** | **0** | ✅ **Complete** |
+
+#### Pre-Existing Test Failures (NOT React 18 Related)
+
+These failures existed before the React 18 upgrade and are caused by timezone/environment issues:
+
+| File | Failing Tests | Root Cause |
+|------|---------------|------------|
+| `src/core/server/metrics/collectors/cgroup.test.ts` | 1 | EACCES error message format |
+| `src/plugins/explore/.../pivot.test.ts` | 2 | Timezone-dependent date formatting |
+| `src/plugins/explore/.../aggregate.test.ts` | 2 | Timezone-dependent date formatting |
+| `src/plugins/query_enhancements/common/utils.test.ts` | 9 | Timezone-dependent formatDate |
+
+**Note:** `src/core/server/plugins/discovery/plugins_discovery.test.ts` was listed as pre-existing but now passes.
 
 ---
 
@@ -683,8 +697,8 @@ jest.mock('../../lib', () => ({
 | 2025-01-14 | Phase 1.3 | Completed | Testing framework packages updated |
 | 2025-01-14 | Phase 2 | Completed | react-redux v8, react-markdown v9, react-resize-detector v9 |
 | 2025-01-14 | Phase 3 | Completed | ~120 files migrated to createRoot/root.unmount() |
-| | Phase 4 | In Progress | |
-| 2025-01-15 | Phase 5 | In Progress | 76 failed test suites (71 new, 5 pre-existing), ~188 warnings in passing tests |
+| 2025-01-15 | Phase 4 | ✅ Completed | Hook test migration complete |
+| 2025-01-16 | Phase 5 | ✅ Completed | All React 18 test fixes complete. 4 pre-existing failures remain (timezone/env issues, NOT React 18) |
 | 2025-01-15 | Task 1 | ✅ Completed | Fixed 6 Explore plugin tests (47 tests total) |
 | 2025-01-15 | Task 2 | ✅ Completed | Fixed 7 Data Source Management tests (48 tests total) |
 | 2025-01-15 | Task 3 | ✅ Completed | Fixed 4 Workspace plugin tests (23 tests total) |
@@ -701,7 +715,9 @@ jest.mock('../../lib', () => ({
 | 2025-01-16 | Task 13 | ✅ Completed | Fixed 4 complex plugin tests (28 tests total): form.test.tsx (8), tutorial.test.js (4), step_index_pattern.test.tsx (8), step_dataset.test.tsx (8) |
 | 2025-01-16 | Task 14 | ✅ Completed | All 7 package tests passing (86 tests total) |
 | 2025-01-16 | Task 15 | ✅ Completed | Fixed 1 server-side test (search.test.ts), 3 already passing (23 tests total) |
-| | Phase 6 | Not Started | |
+| 2025-01-16 | Task 16 | ✅ Completed | Fixed `stripAnsiSnapshotSerializer` in 2 files - serialize() now returns JSON.stringify() for proper quoting |
+| 2025-01-16 | Task 17 | ✅ Completed | Disabled chalk colors in jest tests (`FORCE_COLOR=0` in polyfills.js) for consistent snapshots across environments |
+| | Phase 6 | Not Started | Cleanup and documentation |
 
 ### Phase 1 Changes Made:
 - `package.json`: react/react-dom ^16.14.0 → ^18.2.0
@@ -718,4 +734,4 @@ jest.mock('../../lib', () => ({
 
 ---
 
-*Last updated: 2025-01-16 (Tasks 1-15 completed; only pre-existing issues and regressions remain)*
+*Last updated: 2025-01-16 (Phase 5 COMPLETE - All React 18 test fixes done. 4 pre-existing test failures remain - NOT React 18 related)*
