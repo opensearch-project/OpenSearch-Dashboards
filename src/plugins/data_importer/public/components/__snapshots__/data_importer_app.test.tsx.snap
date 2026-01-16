@@ -1,5 +1,127 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`App should render in embedded mode without Router and page wrappers 1`] = `
+<I18nProvider>
+  <EuiFlexGroup
+    style={
+      Object {
+        "height": "100%",
+      }
+    }
+  >
+    <EuiFlexItem
+      grow={1}
+      style={
+        Object {
+          "maxWidth": "400px",
+          "minWidth": "300px",
+        }
+      }
+    >
+      <ImportTypeSelector
+        initialSelection="file"
+        updateSelection={[Function]}
+      />
+      <EuiSpacer
+        size="s"
+      />
+      <EuiSpacer
+        size="s"
+      />
+      <EuiTitle
+        size="xs"
+      >
+        <span>
+          Select an existing index or create new
+        </span>
+      </EuiTitle>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        labelType="label"
+      >
+        <EuiComboBox
+          async={false}
+          compressed={false}
+          fullWidth={false}
+          isClearable={true}
+          onChange={[Function]}
+          onCreateOption={[Function]}
+          options={Array []}
+          placeholder="Enter index name"
+          selectedOptions={Array []}
+          singleSelection={
+            Object {
+              "asPlainText": true,
+            }
+          }
+          sortMatchesBy="none"
+        />
+      </EuiFormRow>
+      <EuiSpacer
+        size="s"
+      />
+      <ImportFileContentBody
+        enabledFileTypes={
+          Array [
+            "csv",
+            "json",
+            "ndjson",
+          ]
+        }
+        onFileUpdate={[Function]}
+      />
+      <EuiSpacer
+        size="s"
+      />
+      <EuiButton
+        fullWidth={true}
+        onClick={[Function]}
+      >
+        Preview
+      </EuiButton>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiButton
+        fullWidth={true}
+        onClick={[Function]}
+      >
+        Import
+      </EuiButton>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={2}
+      style={
+        Object {
+          "minWidth": 0,
+        }
+      }
+    >
+      <div
+        style={
+          Object {
+            "height": "100%",
+            "minWidth": 0,
+          }
+        }
+      >
+        <PreviewComponent
+          existingMapping={Object {}}
+          loadMoreRows={[Function]}
+          predictedMapping={Object {}}
+          previewData={Array []}
+          visibleRows={10}
+        />
+      </div>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</I18nProvider>
+`;
+
 exports[`App should render with MDS 1`] = `
 <BrowserRouter
   basename="dataImporter"
