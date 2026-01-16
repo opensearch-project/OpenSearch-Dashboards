@@ -7,64 +7,28 @@ import { AgUiTool } from './agui_types';
 
 /**
  * Frontend tools for PromQL query generation
- * These tools allow the agent to search Prometheus metadata
- * before generating a PromQL query.
+ * Single consolidated tool that returns metrics with their labels and sample values
+ * in one call to reduce agent round trips and prevent infinite loops.
  */
 const PROMQL_FRONTEND_TOOLS_INTERNAL = [
   {
-    name: 'search_metrics',
+    name: 'search_prometheus_metadata',
     description:
-      'Search for available Prometheus metrics. Returns a list of metrics with their type and description. Use this to find relevant metrics for the user query.',
+      'Search Prometheus metadata. Returns matched metrics with their labels and metadata in a single call. Use this to understand available metrics and their filtering options before writing a PromQL query.',
     parameters: {
       type: 'object',
       properties: {
         query: {
           type: 'string',
           description:
-            'Optional search pattern to filter metrics. Supports substring matching. Leave empty to get all available metrics.',
+            'Search pattern to filter metrics by name. Supports regex (e.g., "cpu|memory" to match both) or substring matching.',
         },
         limit: {
           type: 'number',
-          description: 'Maximum number of metrics to return. Defaults to 100.',
+          description: 'Maximum number of metrics to return. Defaults to 20.',
         },
       },
       required: [],
-    },
-  },
-  {
-    name: 'search_labels',
-    description:
-      'Search for available Prometheus labels. Labels are used to filter and group metrics in PromQL queries. Optionally filter by a specific metric.',
-    parameters: {
-      type: 'object',
-      properties: {
-        metric: {
-          type: 'string',
-          description:
-            'Optional metric name to get labels for. If provided, returns only labels available for that metric. Leave empty to get all labels.',
-        },
-      },
-      required: [],
-    },
-  },
-  {
-    name: 'search_label_values',
-    description:
-      'Search for possible values of a specific Prometheus label. Use this to find valid filter values for label selectors in PromQL queries.',
-    parameters: {
-      type: 'object',
-      properties: {
-        label: {
-          type: 'string',
-          description: 'The label name to get values for (e.g., "instance", "job", "namespace").',
-        },
-        metric: {
-          type: 'string',
-          description:
-            'Optional metric name to filter label values by. If provided, returns only values that exist for this metric.',
-        },
-      },
-      required: ['label'],
     },
   },
 ] as const;

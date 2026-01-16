@@ -18,14 +18,12 @@ const DEFAULT_REQUEST_TIMEOUT = 2 * 60 * 1000;
  * Input for running the AG-UI agent
  */
 export interface AgUiRunInput {
-  /** The user's question */
-  question: string;
+  /** Messages to send to the agent (system prompt, user message, etc.) */
+  messages: Message[];
   /** The data source name/index */
   dataSourceName: string;
   /** The query language */
   language: string;
-  /** Previous messages in the conversation (for tool call responses) */
-  messages?: Message[];
   /** Frontend tools to provide to the agent */
   tools?: Tool[];
   /** Additional context */
@@ -57,7 +55,7 @@ export class AgUiAgent {
     return `run-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
-  private generateMessageId(): string {
+  public generateMessageId(): string {
     return `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
@@ -148,14 +146,7 @@ export class AgUiAgent {
    * Returns an Observable that emits AG-UI events as they stream from the server
    */
   public runAgent(input: AgUiRunInput): Observable<BaseEvent> {
-    const userMessage: Message = {
-      id: this.generateMessageId(),
-      role: 'user',
-      content: input.question,
-    };
-
-    const messages = input.messages ? [...input.messages, userMessage] : [userMessage];
-    const requestBody = this.buildRequestBody(messages, input);
+    const requestBody = this.buildRequestBody(input.messages, input);
     return this.executeRequest(requestBody, input);
   }
 
@@ -165,7 +156,6 @@ export class AgUiAgent {
   public sendToolResult(
     toolCallId: string,
     result: unknown,
-    messages: Message[],
     input: AgUiRunInput
   ): Observable<BaseEvent> {
     const toolMessage: Message = {
@@ -175,7 +165,7 @@ export class AgUiAgent {
       toolCallId,
     };
 
-    const requestBody = this.buildRequestBody([...messages, toolMessage], input);
+    const requestBody = this.buildRequestBody([...input.messages, toolMessage], input);
     return this.executeRequest(requestBody, input);
   }
 

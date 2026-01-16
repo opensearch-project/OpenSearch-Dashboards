@@ -12,36 +12,27 @@ import {
 
 describe('promql_tools', () => {
   describe('PROMQL_FRONTEND_TOOLS', () => {
-    it('should export an array of tools', () => {
+    it('should export an array with single consolidated tool', () => {
       expect(Array.isArray(PROMQL_FRONTEND_TOOLS)).toBe(true);
-      expect(PROMQL_FRONTEND_TOOLS.length).toBe(3);
+      expect(PROMQL_FRONTEND_TOOLS.length).toBe(1);
     });
 
-    it('should include search_metrics tool', () => {
-      const searchMetrics = PROMQL_FRONTEND_TOOLS.find((t) => t.name === 'search_metrics');
-      expect(searchMetrics).toBeDefined();
-      expect(searchMetrics?.description).toContain('Search for available Prometheus metrics');
-      expect(searchMetrics?.parameters.type).toBe('object');
-      expect(searchMetrics?.parameters.properties).toHaveProperty('query');
-      expect(searchMetrics?.parameters.properties).toHaveProperty('limit');
+    it('should include search_prometheus_metadata tool', () => {
+      const tool = PROMQL_FRONTEND_TOOLS.find((t) => t.name === 'search_prometheus_metadata');
+      expect(tool).toBeDefined();
+      expect(tool?.description).toContain('Search Prometheus metadata');
+      expect(tool?.description).toContain('metrics with their labels');
+      expect(tool?.parameters.type).toBe('object');
+      expect(tool?.parameters.properties).toHaveProperty('query');
+      expect(tool?.parameters.properties).toHaveProperty('limit');
     });
 
-    it('should include search_labels tool', () => {
-      const searchLabels = PROMQL_FRONTEND_TOOLS.find((t) => t.name === 'search_labels');
-      expect(searchLabels).toBeDefined();
-      expect(searchLabels?.description).toContain('Search for available Prometheus labels');
-      expect(searchLabels?.parameters.type).toBe('object');
-      expect(searchLabels?.parameters.properties).toHaveProperty('metric');
-    });
-
-    it('should include search_label_values tool', () => {
-      const searchLabelValues = PROMQL_FRONTEND_TOOLS.find((t) => t.name === 'search_label_values');
-      expect(searchLabelValues).toBeDefined();
-      expect(searchLabelValues?.description).toContain('Search for possible values');
-      expect(searchLabelValues?.parameters.type).toBe('object');
-      expect(searchLabelValues?.parameters.properties).toHaveProperty('label');
-      expect(searchLabelValues?.parameters.properties).toHaveProperty('metric');
-      expect(searchLabelValues?.parameters.required).toContain('label');
+    it('should have correct parameter schema for search_prometheus_metadata', () => {
+      const tool = PROMQL_FRONTEND_TOOLS[0];
+      expect(tool.name).toBe('search_prometheus_metadata');
+      expect(tool.parameters.properties.query.type).toBe('string');
+      expect(tool.parameters.properties.limit.type).toBe('number');
+      expect(tool.parameters.required).toEqual([]);
     });
 
     it('should have correct parameter schema structure for all tools', () => {
@@ -58,8 +49,8 @@ describe('promql_tools', () => {
   });
 
   describe('PROMQL_TOOL_NAMES', () => {
-    it('should contain all tool names', () => {
-      expect(PROMQL_TOOL_NAMES).toEqual(['search_metrics', 'search_labels', 'search_label_values']);
+    it('should contain only search_prometheus_metadata', () => {
+      expect(PROMQL_TOOL_NAMES).toEqual(['search_prometheus_metadata']);
     });
 
     it('should match PROMQL_FRONTEND_TOOLS names', () => {
@@ -69,16 +60,14 @@ describe('promql_tools', () => {
   });
 
   describe('isPromQLMetadataTool', () => {
-    it('should return true for search_metrics', () => {
-      expect(isPromQLMetadataTool('search_metrics')).toBe(true);
+    it('should return true for search_prometheus_metadata', () => {
+      expect(isPromQLMetadataTool('search_prometheus_metadata')).toBe(true);
     });
 
-    it('should return true for search_labels', () => {
-      expect(isPromQLMetadataTool('search_labels')).toBe(true);
-    });
-
-    it('should return true for search_label_values', () => {
-      expect(isPromQLMetadataTool('search_label_values')).toBe(true);
+    it('should return false for old tool names', () => {
+      expect(isPromQLMetadataTool('search_metrics')).toBe(false);
+      expect(isPromQLMetadataTool('search_labels')).toBe(false);
+      expect(isPromQLMetadataTool('search_label_values')).toBe(false);
     });
 
     it('should return false for unknown tool name', () => {
@@ -90,22 +79,22 @@ describe('promql_tools', () => {
     });
 
     it('should return false for similar but incorrect names', () => {
-      expect(isPromQLMetadataTool('search_metric')).toBe(false);
-      expect(isPromQLMetadataTool('search_label')).toBe(false);
-      expect(isPromQLMetadataTool('searchMetrics')).toBe(false);
+      expect(isPromQLMetadataTool('search_prometheus')).toBe(false);
+      expect(isPromQLMetadataTool('prometheus_metadata')).toBe(false);
+      expect(isPromQLMetadataTool('searchPrometheusMetadata')).toBe(false);
     });
 
     it('should be case-sensitive', () => {
-      expect(isPromQLMetadataTool('SEARCH_METRICS')).toBe(false);
-      expect(isPromQLMetadataTool('Search_Metrics')).toBe(false);
+      expect(isPromQLMetadataTool('SEARCH_PROMETHEUS_METADATA')).toBe(false);
+      expect(isPromQLMetadataTool('Search_Prometheus_Metadata')).toBe(false);
     });
 
     it('should serve as a type guard', () => {
-      const toolName: string = 'search_metrics';
+      const toolName: string = 'search_prometheus_metadata';
       if (isPromQLMetadataTool(toolName)) {
         // TypeScript should recognize toolName as PromQLToolName here
         const typed: PromQLToolName = toolName;
-        expect(typed).toBe('search_metrics');
+        expect(typed).toBe('search_prometheus_metadata');
       }
     });
   });

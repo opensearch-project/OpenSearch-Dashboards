@@ -54,6 +54,19 @@ function isRunErrorEvent(event: BaseEvent): event is RunErrorEvent {
   return event.type === EventType.RUN_ERROR;
 }
 
+const PROMQL_SYSTEM_PROMPT = `You are a PromQL expert. Your task is to convert natural language questions into valid PromQL queries.
+
+Instructions:
+1. Use the search_prometheus_metadata tool to find relevant metrics and their labels.
+2. Analyze the user's question and generate a valid PromQL query that answers it.
+3. Return a markdown code block with PromQL query inside.
+4. If it requires multiple queries, use \`;\` and a new line to separate them.
+
+Example response format:
+\`\`\`
+rate(http_requests_total[5m])
+\`\`\``;
+
 /**
  * Generate a PromQL query using AG-UI streaming with frontend tool execution.
  * This is a standalone function for use in Redux thunks or other non-hook contexts.
@@ -72,7 +85,10 @@ export async function generatePromQLWithAgUi({
   let finalQuery: string | undefined;
   let error: Error | undefined;
 
-  const messages: Message[] = [{ id: `msg-user-${Date.now()}`, role: 'user', content: question }];
+  const messages: Message[] = [
+    { id: agent.generateMessageId(), role: 'system', content: PROMQL_SYSTEM_PROMPT },
+    { id: agent.generateMessageId(), role: 'user', content: question },
+  ];
   const currentToolCalls = new Map<string, ToolCall>();
   const toolCallArgs = new Map<string, string>();
 
@@ -96,14 +112,14 @@ export async function generatePromQLWithAgUi({
       const result = await toolHandlers.executeTool(toolName, args);
 
       const assistantMessage: Message = {
-        id: `msg-assistant-${Date.now()}`,
+        id: agent.generateMessageId(),
         role: 'assistant',
         toolCalls: [toolCall],
       };
       messages.push(assistantMessage);
 
-      const observable = agent.sendToolResult(toolCallId, result, messages, {
-        question: '',
+      const observable = agent.sendToolResult(toolCallId, result, {
+        messages,
         dataSourceName,
         language: 'promql',
         tools: PROMQL_FRONTEND_TOOLS,
@@ -201,6 +217,7 @@ export async function generatePromQLWithAgUi({
             error = err as Error;
           }
 
+          console.log('❗streamingText:', streamingText);
           if (!finalQuery && streamingText) {
             finalQuery = extractQueryFromText(streamingText);
           }
@@ -214,7 +231,7 @@ export async function generatePromQLWithAgUi({
     agent.newThread();
 
     const observable = agent.runAgent({
-      question,
+      messages,
       dataSourceName,
       language: 'PROMQL',
       tools: PROMQL_FRONTEND_TOOLS,
