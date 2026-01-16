@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { MountPoint } from 'opensearch-dashboards/public';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { TopNavMenu, TopNavMenuItemRenderType } from './top_nav_menu';

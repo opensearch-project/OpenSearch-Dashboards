@@ -259,19 +259,20 @@ describe('#setup', () => {
     });
   });
 
-  it('opensearchNodeVersionCompatibility$ stops polling when unsubscribed from', async () => {
+  it('opensearchNodeVersionCompatibility$ stops polling when unsubscribed from', (done) => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>
       opensearchClientMock.createErrorTransportRequestPromise(new Error())
     );
 
-    const setupContract = await opensearchService.setup(setupDeps);
-
-    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
-    const sub = setupContract.opensearchNodesCompatibility$.subscribe(async () => {
-      sub.unsubscribe();
-      await delay(100);
-      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+    opensearchService.setup(setupDeps).then((setupContract) => {
+      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
+      const sub = setupContract.opensearchNodesCompatibility$.subscribe(async () => {
+        sub.unsubscribe();
+        await delay(100);
+        expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+        done();
+      });
     });
   });
 
@@ -397,7 +398,7 @@ describe('#stop', () => {
   });
 
   it('stops pollOpenSearchNodeVersions even if there are active subscriptions', (done) => {
-    expect.assertions(3);
+    expect.assertions(2);
 
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>

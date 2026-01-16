@@ -17,7 +17,7 @@ import { CreateDataSourceWizard } from './create_data_source_wizard';
 import { scopedHistoryMock } from '../../../../../core/public/mocks';
 import { ScopedHistory } from 'opensearch-dashboards/public';
 import { RouteComponentProps } from 'react-router-dom';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import * as utils from '../utils';
 
 const formIdentifier = 'CreateDataSourceForm';

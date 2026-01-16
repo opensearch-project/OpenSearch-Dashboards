@@ -38,7 +38,7 @@ import {
 } from './context';
 import { coreMock, overlayServiceMock } from '../../../../core/public/mocks';
 import { CoreStart } from '../../../../core/public';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 let container: HTMLDivElement | null;
 let root: Root | null;

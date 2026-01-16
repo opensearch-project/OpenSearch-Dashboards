@@ -30,7 +30,8 @@
 
 import * as React from 'react';
 import { createRoot, Root } from 'react-dom/client';
-import { act, Simulate } from 'react-dom/test-utils';
+import { act } from 'react';
+import { Simulate } from 'react-dom/test-utils';
 import { useUiSetting$ } from './use_ui_setting';
 import { createOpenSearchDashboardsReactContext } from '../context';
 import { OpenSearchDashboardsServices } from '../context/types';

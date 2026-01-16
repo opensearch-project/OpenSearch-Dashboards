@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiFieldNumber, EuiFieldText, EuiSuperSelect, EuiSelect } from '@elastic/eui';
 import { IndexSettingOptions } from './index_setting_options';
 import { CreateAccelerationForm } from '../../../../../framework/types';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import {
   ACCELERATION_REFRESH_TIME_INTERVAL,
   ACCELERATION_TIME_INTERVAL,

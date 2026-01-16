@@ -29,7 +29,7 @@
  */
 
 import { take } from 'rxjs/operators';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { createMemoryHistory, MemoryHistory } from 'history';
 
 import { createRenderer } from './utils';

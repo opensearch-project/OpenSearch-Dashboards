@@ -31,7 +31,7 @@
 import React, { ComponentType } from 'react';
 import { Store } from 'redux';
 import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 import { mountWithIntl } from '../enzyme_helpers';
 import { WithMemoryRouter, WithRoute, WithStore } from '../helpers';

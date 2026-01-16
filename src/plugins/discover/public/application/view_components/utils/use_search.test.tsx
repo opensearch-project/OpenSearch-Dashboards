@@ -101,16 +101,19 @@ const createMockServices = (): DiscoverViewServices => {
 };
 
 const history = createMemoryHistory();
+// Create a stable state object that doesn't change reference on each getState() call
+// React 18's useSyncExternalStore requires getSnapshot to return cached results
+const mockState = {
+  discover: {
+    savedSearch: 'test-saved-search',
+    sort: [],
+    interval: 'auto',
+    savedQuery: undefined,
+  },
+};
 const mockStore = {
-  getState: () => ({
-    discover: {
-      savedSearch: 'test-saved-search',
-      sort: [],
-      interval: 'auto',
-      savedQuery: undefined,
-    },
-  }),
-  subscribe: jest.fn(),
+  getState: () => mockState,
+  subscribe: jest.fn(() => () => {}), // Return unsubscribe function
   dispatch: jest.fn(),
 };
 const wrapper: React.FC = ({ children }) => {

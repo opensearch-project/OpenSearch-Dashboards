@@ -33,7 +33,7 @@ import { createRoot, Root } from 'react-dom/client';
 import { UiComponent } from '../../../opensearch_dashboards_utils/public';
 import { uiToReactComponent } from './ui_to_react_component';
 import { reactToUiComponent } from './react_to_ui_component';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 const UiComp: UiComponent<{ cnt?: number }> = () => ({
   render: (el, { cnt = 0 }) => {

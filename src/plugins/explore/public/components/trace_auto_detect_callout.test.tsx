@@ -59,9 +59,6 @@ describe('TraceAutoDetectCallout', () => {
     writable: true,
   });
 
-  // Mock setTimeout
-  jest.useFakeTimers();
-
   beforeEach(() => {
     jest.clearAllMocks();
     localStorageMock.clear();
@@ -76,14 +73,6 @@ describe('TraceAutoDetectCallout', () => {
         get: jest.fn(),
       } as any,
     };
-  });
-
-  afterEach(() => {
-    jest.clearAllTimers();
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
   });
 
   const renderWithContext = () => {
@@ -286,6 +275,7 @@ describe('TraceAutoDetectCallout', () => {
 
     renderWithContext();
 
+    // Wait for initial render and component to be ready
     await waitFor(() => {
       expect(screen.getByText('Create Trace Datasets')).toBeInTheDocument();
     });
@@ -293,6 +283,7 @@ describe('TraceAutoDetectCallout', () => {
     const createButton = screen.getByText('Create Trace Datasets');
     fireEvent.click(createButton);
 
+    // Wait for the create action to complete and verify toast is shown
     await waitFor(() => {
       expect(mockCore.notifications.toasts.addSuccess).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -301,9 +292,14 @@ describe('TraceAutoDetectCallout', () => {
       );
     });
 
-    // Fast-forward time to trigger reload
-    jest.advanceTimersByTime(2000);
-    expect(mockReload).toHaveBeenCalled();
+    // After successful creation, reload should eventually be called via setTimeout
+    // Wait for the setTimeout (1500ms in component) to complete
+    await waitFor(
+      () => {
+        expect(mockReload).toHaveBeenCalled();
+      },
+      { timeout: 3000 }
+    );
   });
 
   it('should show error toast when dataset creation fails', async () => {
@@ -399,11 +395,14 @@ describe('TraceAutoDetectCallout', () => {
       },
     ]);
 
-    // Mock a slow creation
-    mockCreateAutoDetectedDatasets.mockImplementation(
-      () =>
-        new Promise((resolve) => setTimeout(() => resolve({ traceDatasetId: 'trace-id' }), 1000))
-    );
+    // Create a deferred promise that we can control
+    let resolveCreation: (value: any) => void;
+    const creationPromise = new Promise((resolve) => {
+      resolveCreation = resolve;
+    });
+
+    // Mock a slow creation using deferred promise
+    mockCreateAutoDetectedDatasets.mockImplementation(() => creationPromise);
 
     renderWithContext();
 
@@ -414,10 +413,14 @@ describe('TraceAutoDetectCallout', () => {
     const createButton = screen.getByText('Create Trace Datasets').closest('button');
     fireEvent.click(createButton!);
 
+    // Button should be disabled while creation is in progress
     await waitFor(() => {
       expect(createButton).toBeDisabled();
       const loadingSpinner = createButton!.querySelector('.euiLoadingSpinner');
       expect(loadingSpinner).toBeInTheDocument();
     });
+
+    // Resolve the creation promise to clean up
+    resolveCreation!({ traceDatasetId: 'trace-id' });
   });
 });

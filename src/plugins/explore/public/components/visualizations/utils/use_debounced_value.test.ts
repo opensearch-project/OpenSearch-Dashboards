@@ -6,10 +6,14 @@
 import { renderHook, act } from '@testing-library/react';
 import { useDebouncedValue, useDebouncedNumber } from './use_debounced_value';
 
-// Mock timer functions
-jest.useFakeTimers();
-
 describe('useDebouncedValue', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
   it('should return the initial value immediately', () => {
     const mockOnChange = jest.fn();
     const { result } = renderHook(() => useDebouncedValue('initial', mockOnChange, 500));
@@ -67,6 +71,14 @@ describe('useDebouncedValue', () => {
 });
 
 describe('useDebouncedNumber', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('should return the initial value immediately', () => {
     const mockOnChange = jest.fn();
     const { result } = renderHook(() => useDebouncedNumber(10, mockOnChange));

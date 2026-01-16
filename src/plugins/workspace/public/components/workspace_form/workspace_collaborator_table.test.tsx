@@ -4,8 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor, within } from '@testing-library/react';
-import { createRoot, Root } from 'react-dom/client';
+import { act, fireEvent, render, waitFor, within } from '@testing-library/react';
 import { WorkspaceCollaboratorTable, getDisplayedType } from './workspace_collaborator_table';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
@@ -167,11 +166,12 @@ describe('WorkspaceCollaboratorTable', () => {
       </Provider>
     );
 
-    const modalRootRef = { current: undefined as Root | undefined };
+    // Store the unmount function returned by the mount point
+    let unmountModal: (() => void) | undefined;
     mockOverlays.openModal.mockReturnValue({
       onClose: Promise.resolve(),
       close: async () => {
-        modalRootRef.current?.unmount();
+        unmountModal?.();
       },
     });
     const action = getByTestId('workspace-detail-collaborator-table-actions-box');
@@ -180,8 +180,11 @@ describe('WorkspaceCollaboratorTable', () => {
     fireEvent.click(deleteCollaborator);
 
     const modalContainer = getByTestId('confirm-modal-container');
-    modalRootRef.current = createRoot(modalContainer);
-    mockOverlays.openModal.mock.calls[0][0](modalContainer);
+    // Call the mount function and store its returned unmount function
+    // Wrap in act() to handle React 18 state updates during modal mount
+    await act(async () => {
+      unmountModal = mockOverlays.openModal.mock.calls[0][0](modalContainer);
+    });
     await waitFor(() => {
       expect(getByText('Confirm')).toBeInTheDocument();
     });
@@ -281,11 +284,12 @@ describe('WorkspaceCollaboratorTable', () => {
       </Provider>
     );
 
-    const modalRootRef = { current: undefined as Root | undefined };
+    // Store the unmount function returned by the mount point
+    let unmountModal: (() => void) | undefined;
     mockOverlays.openModal.mockReturnValue({
       onClose: Promise.resolve(),
       close: async () => {
-        modalRootRef.current?.unmount();
+        unmountModal?.();
       },
     });
 
@@ -298,8 +302,11 @@ describe('WorkspaceCollaboratorTable', () => {
       fireEvent.click(within(getByRole('dialog')).getByText('Read only'));
     });
     const modalContainer = getByTestId('modal-container');
-    modalRootRef.current = createRoot(modalContainer);
-    mockOverlays.openModal.mock.calls[0][0](modalContainer);
+    // Call the mount function and store its returned unmount function
+    // Wrap in act() to handle React 18 state updates during modal mount
+    await act(async () => {
+      unmountModal = mockOverlays.openModal.mock.calls[0][0](modalContainer);
+    });
     await waitFor(() => {
       expect(getByText('Confirm')).toBeInTheDocument();
     });
@@ -357,11 +364,12 @@ describe('WorkspaceCollaboratorTable', () => {
         </>
       </Provider>
     );
-    const modalRootRef = { current: undefined as Root | undefined };
+    // Store the unmount function returned by the mount point
+    let unmountModal: (() => void) | undefined;
     mockOverlays.openModal.mockReturnValue({
       onClose: Promise.resolve(),
       close: async () => {
-        modalRootRef.current?.unmount();
+        unmountModal?.();
       },
     });
     const action = getByTestId('workspace-detail-collaborator-table-actions-box');
@@ -372,8 +380,11 @@ describe('WorkspaceCollaboratorTable', () => {
     });
 
     const modalContainer = getByTestId('confirm-modal-container');
-    modalRootRef.current = createRoot(modalContainer);
-    mockOverlays.openModal.mock.calls[0][0](modalContainer);
+    // Call the mount function and store its returned unmount function
+    // Wrap in act() to handle React 18 state updates during modal mount
+    await act(async () => {
+      unmountModal = mockOverlays.openModal.mock.calls[0][0](modalContainer);
+    });
     await waitFor(() => {
       expect(getByText('Confirm')).toBeInTheDocument();
     });

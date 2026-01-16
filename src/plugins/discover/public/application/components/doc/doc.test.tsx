@@ -30,7 +30,7 @@
 
 import { throwError, of } from 'rxjs';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from 'test_utils/helpers';
@@ -119,7 +119,12 @@ async function mountDoc(update = false, indexPatternGetter: any = null) {
 
 describe('Test of <Doc /> of Discover', () => {
   test('renders loading msg', async () => {
-    const comp = await mountDoc();
+    // Use a pending promise that never resolves to keep the component in loading state
+    const pendingPromise = new Promise(() => {});
+    const indexPatternGetter = jest.fn(() => pendingPromise);
+    const comp = await mountDoc(false, indexPatternGetter);
+    // Update the wrapper to ensure React 18's deferred updates are reflected
+    comp.update();
     expect(findTestSubject(comp, 'doc-msg-loading').length).toBe(1);
   });
 

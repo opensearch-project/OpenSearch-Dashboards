@@ -37,26 +37,38 @@ const DEFAULT_CATEGORIES = ['page', 'static'];
  * Capture current URL state using direct browser URL monitoring
  * Uses OpenSearch Dashboards' existing URL parsing utilities
  */
-function captureCurrentURLState(): URLState {
-  const url = new URL(window.location.href);
+function captureCurrentURLState(): URLState | null {
+  try {
+    // Handle missing window.location gracefully
+    if (typeof window === 'undefined' || typeof window.location === 'undefined') {
+      return null;
+    }
 
-  // Use OpenSearch Dashboards' built-in URL state parsing utilities
-  // These handle rison decoding automatically
-  const _g = getStateFromOsdUrl('_g', url.href);
-  const _a = getStateFromOsdUrl('_a', url.href);
-  const _q = getStateFromOsdUrl('_q', url.href);
+    const url = new URL(window.location.href);
 
-  const urlState: URLState = {
-    pathname: url.pathname,
-    search: url.search,
-    hash: url.hash,
-    searchParams: Object.fromEntries(url.searchParams.entries()),
-    _g,
-    _a,
-    _q,
-  };
+    // Use OpenSearch Dashboards' built-in URL state parsing utilities
+    // These handle rison decoding automatically
+    const _g = getStateFromOsdUrl('_g', url.href);
+    const _a = getStateFromOsdUrl('_a', url.href);
+    const _q = getStateFromOsdUrl('_q', url.href);
 
-  return urlState;
+    const urlState: URLState = {
+      pathname: url.pathname,
+      search: url.search,
+      hash: url.hash,
+      searchParams: Object.fromEntries(url.searchParams.entries()),
+      _g,
+      _a,
+      _q,
+    };
+
+    return urlState;
+  } catch (error) {
+    // Handle URL parsing errors gracefully
+    // eslint-disable-next-line no-console
+    console.warn('Error capturing URL state:', error);
+    return null;
+  }
 }
 
 /**
@@ -95,17 +107,25 @@ export function usePageContext(options?: UsePageContextOptions): string {
 
     // 3. Monitor pushState/replaceState (for programmatic navigation)
     // These are the main methods used by OpenSearch Dashboards for navigation
-    const originalPushState = history.pushState;
-    const originalReplaceState = history.replaceState;
+    // Use window.history to handle cases where history might not be available
+    if (typeof window.history === 'undefined') {
+      return () => {
+        window.removeEventListener('hashchange', hashChangeHandler);
+        window.removeEventListener('popstate', popstateHandler);
+      };
+    }
 
-    history.pushState = function (...args) {
-      originalPushState.apply(history, args);
+    const originalPushState = window.history.pushState;
+    const originalReplaceState = window.history.replaceState;
+
+    window.history.pushState = function (...args) {
+      originalPushState.apply(window.history, args);
       // Use microtask to ensure URL is updated before we check it
       queueMicrotask(() => handleUrlChange('pushState'));
     };
 
-    history.replaceState = function (...args) {
-      originalReplaceState.apply(history, args);
+    window.history.replaceState = function (...args) {
+      originalReplaceState.apply(window.history, args);
       // Use microtask to ensure URL is updated before we check it
       queueMicrotask(() => handleUrlChange('replaceState'));
     };
@@ -114,8 +134,8 @@ export function usePageContext(options?: UsePageContextOptions): string {
     return () => {
       window.removeEventListener('hashchange', hashChangeHandler);
       window.removeEventListener('popstate', popstateHandler);
-      history.pushState = originalPushState;
-      history.replaceState = originalReplaceState;
+      window.history.pushState = originalPushState;
+      window.history.replaceState = originalReplaceState;
     };
   }, [options?.enabled]);
 
@@ -135,8 +155,16 @@ export function usePageContext(options?: UsePageContextOptions): string {
       return null;
     }
 
-    // Create processed value
-    const processedValue = options?.convert ? options.convert(urlState) : urlState;
+    // Create processed value with error handling
+    let processedValue;
+    try {
+      processedValue = options?.convert ? options.convert(urlState) : urlState;
+    } catch (error) {
+      // If convert function throws, fall back to raw urlState
+      // eslint-disable-next-line no-console
+      console.warn('Error in usePageContext convert function:', error);
+      processedValue = urlState;
+    }
 
     return {
       id: contextIdRef.current,

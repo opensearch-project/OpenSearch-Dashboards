@@ -180,16 +180,19 @@ export class SidecarService {
 
         this.activeSidecar = sidecar;
 
-        this.sidecarRoot = createRoot(this.targetDomElement!);
-        this.sidecarRoot.render(
-          <Sidecar
-            sidecarConfig$={sidecarConfig$}
-            setSidecarConfig={setSidecarConfig}
-            options={options}
-            i18n={i18n}
-            mount={mount}
-          />
-        );
+        // Only create root and render if targetDomElement exists
+        if (this.targetDomElement) {
+          this.sidecarRoot = createRoot(this.targetDomElement);
+          this.sidecarRoot.render(
+            <Sidecar
+              sidecarConfig$={sidecarConfig$}
+              setSidecarConfig={setSidecarConfig}
+              options={options}
+              i18n={i18n}
+              mount={mount}
+            />
+          );
+        }
 
         return sidecar;
       },

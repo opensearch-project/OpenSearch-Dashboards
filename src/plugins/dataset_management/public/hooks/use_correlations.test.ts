@@ -4,7 +4,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { savedObjectsServiceMock } from '../../../../core/public/mocks';
 import { useCorrelations, useCorrelationCount, useSingleCorrelation } from './use_correlations';
 import { CorrelationSavedObject } from '../types/correlations';
