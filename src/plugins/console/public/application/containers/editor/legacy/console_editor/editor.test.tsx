@@ -33,7 +33,7 @@ import './editor.test.mock';
 import React from 'react';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@osd/i18n/react';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import * as sinon from 'sinon';
 
 import { serviceContextMock } from '../../../../contexts/services_context.mock';

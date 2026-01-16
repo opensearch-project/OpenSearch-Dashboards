@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import sinon from 'sinon';
 
 import {
@@ -42,6 +42,11 @@ describe('useRequest hook', () => {
 
   beforeEach(() => {
     helpers = createUseRequestHelpers();
+  });
+
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
   });
 
   describe('parameters', () => {

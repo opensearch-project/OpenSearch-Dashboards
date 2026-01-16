@@ -4,6 +4,7 @@
  */
 
 import { combineLatest, Subscription } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 
 import { recentWorkspaceManager } from '../recent_workspace_manager';
@@ -68,11 +69,12 @@ export class WorkspaceValidationService {
            * If the workspace id is valid and user is currently on workspace_fatal_error page,
            * we should redirect user to overview page of workspace.
            */
-          const currentAppIdSubscription = application.currentAppId$.subscribe((currentAppId) => {
+          // Use take(1) to auto-unsubscribe after first emission, avoiding TDZ error
+          // when BehaviorSubject emits synchronously before subscribe() returns
+          application.currentAppId$.pipe(take(1)).subscribe((currentAppId) => {
             if (currentAppId === WORKSPACE_FATAL_ERROR_APP_ID) {
               application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
             }
-            currentAppIdSubscription.unsubscribe();
           });
           // Add workspace id to recent workspaces.
           recentWorkspaceManager.addRecentWorkspace(this.workspaceId!);

@@ -32,7 +32,7 @@ import React from 'react';
 import { CodeEditor } from './code_editor';
 import { monaco } from '@osd/monaco';
 import { shallow, mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 
 // disabled because this is a test, but also it seems we shouldn't need this?
 /* eslint-disable-next-line @osd/eslint/module_migration */

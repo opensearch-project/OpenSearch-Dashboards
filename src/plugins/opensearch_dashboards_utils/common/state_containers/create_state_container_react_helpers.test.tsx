@@ -30,7 +30,8 @@
 
 import * as React from 'react';
 import { createRoot, Root } from 'react-dom/client';
-import { act, Simulate } from 'react-dom/test-utils';
+import { act } from 'react';
+import { Simulate } from 'react-dom/test-utils';
 import { createStateContainer } from './create_state_container';
 import { createStateContainerReactHelpers } from './create_state_container_react_helpers';
 

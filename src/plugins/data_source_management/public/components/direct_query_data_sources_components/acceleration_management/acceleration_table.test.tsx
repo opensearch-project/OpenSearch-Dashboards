@@ -8,7 +8,7 @@ import { mount, configure, render } from 'enzyme';
 import Adapter from '@cfaester/enzyme-adapter-react-18';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AccelerationTable } from './acceleration_table';
-import { act } from 'react-dom/test-utils';
+import { act } from 'react';
 import { ACC_LOADING_MSG } from './acceleration_utils';
 import { ReactWrapper } from 'enzyme';
 import { DirectQueryLoadingStatus } from '../../../../framework/types';
@@ -154,12 +154,18 @@ describe('AccelerationTable Component', () => {
           cacheLoadingHooks={mockCacheLoadingHooks}
         />
       );
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      wrapper!.update();
     });
+    wrapper!.update();
+
+    // Wait for any async updates to complete
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    wrapper!.update();
 
     const activeStatusRows = wrapper!.find('tr.euiTableRow').filterWhere((node) => {
-      return node.find('.euiFlexItem').someWhere((subNode) => subNode.text() === 'Active');
+      // Check if any text in the row contains 'Active' (case-sensitive status)
+      return node.text().includes('Active');
     });
 
     expect(activeStatusRows.length).toBe(

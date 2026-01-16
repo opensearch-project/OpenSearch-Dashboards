@@ -182,12 +182,12 @@ describe('useKeyboardShortcut', () => {
         throw new Error('Registration failed');
       });
 
+      // In React 18, errors from useEffect properly bubble up through renderHook
       expect(() => {
         renderHook(() => useKeyboardShortcut(mockShortcut, mockKeyboardShortcutService));
-      }).not.toThrow();
+      }).toThrow('Registration failed');
 
       expect(mockKeyboardShortcutService.register).toHaveBeenCalledWith(mockShortcut);
-      expect(mockKeyboardShortcutService.register).toThrow('Registration failed');
     });
 
     it('should handle unregistration errors gracefully', () => {

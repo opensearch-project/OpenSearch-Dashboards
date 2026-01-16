@@ -28,9 +28,10 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { act } from 'react';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { waitFor } from '@testing-library/react';
 
 import { Tutorial } from './tutorial';
 
@@ -133,19 +134,31 @@ describe('isCloudEnabled is false', () => {
   });
 
   test('should display ON_PREM_ELASTIC_CLOUD instructions when toggle is clicked', async () => {
-    const component = mountWithIntl(
-      <Tutorial.WrappedComponent
-        addBasePath={addBasePath}
-        isCloudEnabled={false}
-        getTutorial={getTutorial}
-        replaceTemplateStrings={replaceTemplateStrings}
-        tutorialId={'my_testing_tutorial'}
-        bulkCreate={() => {}}
-      />
-    );
-    await loadTutorialPromise;
+    let component;
+    await act(async () => {
+      component = mountWithIntl(
+        <Tutorial.WrappedComponent
+          addBasePath={addBasePath}
+          isCloudEnabled={false}
+          getTutorial={getTutorial}
+          replaceTemplateStrings={replaceTemplateStrings}
+          tutorialId={'my_testing_tutorial'}
+          bulkCreate={() => {}}
+        />
+      );
+      await loadTutorialPromise;
+    });
     component.update();
-    findTestSubject(component, 'onPremElasticCloud').simulate('change');
+
+    // Wait for the toggle to appear after async state update
+    await waitFor(() => {
+      component.update();
+      expect(findTestSubject(component, 'onPremElasticCloud').length).toBeGreaterThan(0);
+    });
+
+    act(() => {
+      findTestSubject(component, 'onPremElasticCloud').simulate('change');
+    });
     component.update();
     expect(component.state('visibleInstructions')).toBe('onPremElasticCloud');
   });

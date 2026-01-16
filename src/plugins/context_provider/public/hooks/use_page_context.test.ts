@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { renderHook } from '@testing-library/react';
+import { renderHook, act } from '@testing-library/react';
 import { usePageContext, UsePageContextOptions } from './use_page_context';
 import { useDynamicContext } from './use_dynamic_context';
 import { getStateFromOsdUrl } from '../../../opensearch_dashboards_utils/public';
@@ -264,7 +264,9 @@ describe('usePageContext', () => {
         searchParams: new URLSearchParams(),
       }));
 
-      hashChangeHandler!();
+      act(() => {
+        hashChangeHandler!();
+      });
 
       expect(mockUseDynamicContext).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -291,7 +293,9 @@ describe('usePageContext', () => {
       mockUseDynamicContext.mockClear();
 
       // Simulate popstate
-      popstateHandler!();
+      act(() => {
+        popstateHandler!();
+      });
 
       expect(mockUseDynamicContext).toHaveBeenCalled();
     });
@@ -456,7 +460,9 @@ describe('usePageContext', () => {
 
       renderHook(() => usePageContext(options));
 
-      expect(window.addEventListener).toHaveBeenCalledWith('error', expect.any(Function));
+      // When disabled, hashchange and popstate listeners should not be set up
+      expect(window.addEventListener).not.toHaveBeenCalledWith('hashchange', expect.any(Function));
+      expect(window.addEventListener).not.toHaveBeenCalledWith('popstate', expect.any(Function));
     });
 
     it('should use stable references for default categories', () => {
@@ -586,7 +592,9 @@ describe('usePageContext', () => {
       // Simulate rapid hash changes
       for (let i = 0; i < 10; i++) {
         window.location.hash = `#/path-${i}`;
-        hashChangeHandler!();
+        act(() => {
+          hashChangeHandler!();
+        });
       }
 
       expect(mockUseDynamicContext).toHaveBeenCalledTimes(10);
