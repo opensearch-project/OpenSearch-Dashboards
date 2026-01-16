@@ -28,6 +28,10 @@
  * under the License.
  */
 
+// Disable chalk colors in tests for consistent snapshot results across environments
+// (TTY detection varies between Docker containers, CI, and local terminals)
+process.env.FORCE_COLOR = '0';
+
 // bluebird < v3.3.5 does not work with MutationObserver polyfill
 // when MutationObserver exists, bluebird avoids using node's builtin async schedulers
 const bluebird = require('bluebird');
