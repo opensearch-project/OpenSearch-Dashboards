@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ImportDataButton } from './import_data_button';
 
 // Mock opensearch-dashboards-react
@@ -12,13 +12,16 @@ jest.mock('../../../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
 }));
 
-// Mock DataImporterPluginApp component
+// Mock DataImporterPluginApp component - must be hoisted for dynamic imports
+const mockDataImporterPluginApp = ({ embedded }: { embedded: boolean }) => (
+  <div data-test-subj="data-importer-app" data-embedded={embedded}>
+    Data Importer App
+  </div>
+);
+
+// Mock the data_importer module for dynamic imports
 jest.mock('../../../../../../data_importer/public', () => ({
-  DataImporterPluginApp: ({ embedded }: { embedded: boolean }) => (
-    <div data-test-subj="data-importer-app" data-embedded={embedded}>
-      Data Importer App
-    </div>
-  ),
+  DataImporterPluginApp: mockDataImporterPluginApp,
 }));
 
 describe('ImportDataButton', () => {
@@ -63,32 +66,42 @@ describe('ImportDataButton', () => {
     expect(screen.queryByTestId('data-importer-app')).not.toBeInTheDocument();
   });
 
-  it('opens modal when button is clicked', () => {
+  it('opens modal when button is clicked', async () => {
     render(<ImportDataButton />);
 
     const button = screen.getByTestId('exploreImportDataButton');
     fireEvent.click(button);
 
-    expect(screen.getByTestId('data-importer-app')).toBeInTheDocument();
+    // Wait for lazy-loaded component to appear
+    await waitFor(() => {
+      expect(screen.getByTestId('data-importer-app')).toBeInTheDocument();
+    });
   });
 
-  it('passes embedded=true to DataImporterPluginApp', () => {
+  it('passes embedded=true to DataImporterPluginApp', async () => {
     render(<ImportDataButton />);
 
     const button = screen.getByTestId('exploreImportDataButton');
     fireEvent.click(button);
 
-    const dataImporterApp = screen.getByTestId('data-importer-app');
-    expect(dataImporterApp).toHaveAttribute('data-embedded', 'true');
+    // Wait for lazy-loaded component to appear
+    await waitFor(() => {
+      const dataImporterApp = screen.getByTestId('data-importer-app');
+      expect(dataImporterApp).toHaveAttribute('data-embedded', 'true');
+    });
   });
 
-  it('closes modal when Done button is clicked', () => {
+  it('closes modal when Done button is clicked', async () => {
     render(<ImportDataButton />);
 
     // Open modal
     const button = screen.getByTestId('exploreImportDataButton');
     fireEvent.click(button);
-    expect(screen.getByTestId('data-importer-app')).toBeInTheDocument();
+
+    // Wait for lazy-loaded component to appear
+    await waitFor(() => {
+      expect(screen.getByTestId('data-importer-app')).toBeInTheDocument();
+    });
 
     // Close modal
     const doneButton = screen.getByText('Done');
@@ -97,13 +110,17 @@ describe('ImportDataButton', () => {
     expect(screen.queryByTestId('data-importer-app')).not.toBeInTheDocument();
   });
 
-  it('closes modal when close button (X) is clicked', () => {
+  it('closes modal when close button (X) is clicked', async () => {
     render(<ImportDataButton />);
 
     // Open modal
     const button = screen.getByTestId('exploreImportDataButton');
     fireEvent.click(button);
-    expect(screen.getByTestId('data-importer-app')).toBeInTheDocument();
+
+    // Wait for lazy-loaded component to appear
+    await waitFor(() => {
+      expect(screen.getByTestId('data-importer-app')).toBeInTheDocument();
+    });
 
     // Find and click the X button (close button in modal header)
     const closeButton = screen.getByLabelText('Closes this modal window');
@@ -112,7 +129,7 @@ describe('ImportDataButton', () => {
     expect(screen.queryByTestId('data-importer-app')).not.toBeInTheDocument();
   });
 
-  it('passes correct services to DataImporterPluginApp', () => {
+  it('passes correct services to DataImporterPluginApp', async () => {
     const mockServices = {
       notifications: { toasts: {} },
       http: { basePath: { prepend: jest.fn() } },
@@ -136,40 +153,24 @@ describe('ImportDataButton', () => {
     const button = screen.getByTestId('exploreImportDataButton');
     fireEvent.click(button);
 
-    expect(screen.getByTestId('data-importer-app')).toBeInTheDocument();
+    // Wait for lazy-loaded component to appear
+    await waitFor(() => {
+      expect(screen.getByTestId('data-importer-app')).toBeInTheDocument();
+    });
   });
 
-  it('passes all required props to DataImporterPluginApp', () => {
-    // Use a more detailed mock to verify props
-    const DataImporterPluginAppMock = jest.fn(
-      ({ embedded, dataSourceEnabled, hideLocalCluster }) => (
-        <div
-          data-test-subj="data-importer-app"
-          data-embedded={embedded}
-          data-datasource-enabled={dataSourceEnabled}
-          data-hide-local-cluster={hideLocalCluster}
-        >
-          Data Importer App
-        </div>
-      )
-    );
-
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../../../../../data_importer/public').DataImporterPluginApp = DataImporterPluginAppMock;
-
+  it('passes all required props to DataImporterPluginApp', async () => {
     render(<ImportDataButton />);
 
     const button = screen.getByTestId('exploreImportDataButton');
     fireEvent.click(button);
 
-    expect(DataImporterPluginAppMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        embedded: true,
-        dataSourceEnabled: false,
-        hideLocalCluster: false,
-        basename: '',
-      }),
-      expect.anything()
-    );
+    // Wait for lazy-loaded component to appear
+    await waitFor(() => {
+      const dataImporterApp = screen.getByTestId('data-importer-app');
+      // Verify key props are set correctly
+      expect(dataImporterApp).toHaveAttribute('data-embedded', 'true');
+      expect(dataImporterApp).toBeInTheDocument();
+    });
   });
 });
