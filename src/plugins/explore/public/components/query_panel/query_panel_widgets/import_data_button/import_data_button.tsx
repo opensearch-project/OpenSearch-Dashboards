@@ -33,11 +33,21 @@ export const ImportDataButton = () => {
   // Lazy load the data importer component when modal is opened
   React.useEffect(() => {
     if (isModalVisible && !DataImporterApp) {
-      import('../../../../../../data_importer/public').then((module) => {
-        setDataImporterApp(() => module.DataImporterPluginApp);
-      });
+      import('../../../../../../data_importer/public')
+        .then((module) => {
+          setDataImporterApp(() => module.DataImporterPluginApp);
+        })
+        .catch((error) => {
+          services.notifications.toasts.addDanger({
+            title: i18n.translate('explore.queryPanel.importDataLoadError', {
+              defaultMessage: 'Failed to load data importer',
+            }),
+            text: error.message,
+          });
+          closeModal();
+        });
     }
-  }, [isModalVisible, DataImporterApp]);
+  }, [isModalVisible, DataImporterApp, services.notifications.toasts]);
 
   if (services.dataImporterConfig === undefined) {
     return null;
