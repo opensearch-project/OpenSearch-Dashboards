@@ -29,6 +29,7 @@ export interface DiscoverResultsActionBarProps {
   dataset?: Dataset;
   inspectionHanlder?: () => void;
   extraActions?: Array<SlotItemsForType<'resultsActionBar'>>;
+  rowsCountOverride?: number;
 }
 
 export const DiscoverResultsActionBar = ({
@@ -40,6 +41,7 @@ export const DiscoverResultsActionBar = ({
   dataset,
   inspectionHanlder,
   extraActions,
+  rowsCountOverride,
 }: DiscoverResultsActionBarProps) => {
   const currentTab = useSelector(selectActiveTabId);
   const shouldShowAddToDashboardButton = currentTab !== 'explore_patterns_tab';
@@ -72,6 +74,7 @@ export const DiscoverResultsActionBar = ({
               onResetQuery={resetQuery}
               rows={rows}
               elapsedMs={elapsedMs}
+              rowsCountOverride={rowsCountOverride}
             />
           </EuiFlexItem>
           {/* TODO: Fix data consistency issue with inspection panel */}

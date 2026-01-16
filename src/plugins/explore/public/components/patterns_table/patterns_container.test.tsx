@@ -153,4 +153,64 @@ describe('PatternsContainer', () => {
     expect(screen.queryByTestId('patternsLoading')).not.toBeInTheDocument();
     expect(screen.queryByText('Searching in progress...')).not.toBeInTheDocument();
   });
+
+  it('should filter rows appropriately when given raw API response structure', () => {
+    // Simulate the raw API response data_frame structure converted to hits format
+    const rawApiHits = [
+      {
+        _source: {
+          patterns_field: '', // Empty string - should be filtered out due to null sample
+          pattern_count: 6060,
+          sample_logs: null, // Null sample - should be filtered out
+        },
+      },
+      {
+        _source: {
+          patterns_field: 'Linux', // Valid pattern
+          pattern_count: 20,
+          sample_logs: ['Linux'], // Valid sample array
+        },
+      },
+      {
+        _source: {
+          patterns_field: 'Debian GNU/Linux', // Valid pattern
+          pattern_count: 18,
+          sample_logs: ['Debian GNU/Linux'], // Valid sample array
+        },
+      },
+    ];
+
+    mockUseTabResults.mockReturnValueOnce({
+      results: {
+        hits: {
+          hits: rawApiHits,
+          total: 3,
+        },
+      },
+      status: {
+        status: QueryExecutionStatus.READY,
+      },
+    });
+
+    const { getByTestId } = render(<PatternsContainer />);
+    const patternsTable = getByTestId('mocked-patterns-table');
+
+    expect(patternsTable).toBeInTheDocument();
+
+    // Parse the items passed to the mocked table
+    const itemsAttr = patternsTable.getAttribute('data-items');
+    const items = JSON.parse(itemsAttr || '[]');
+
+    // Should have 2 items after filtering (the first row with null sample should be filtered out)
+    expect(items).toHaveLength(2);
+
+    // Verify the filtered items contain only valid data
+    expect(items[0].flyout.pattern).toBe('Linux');
+    expect(items[0].count).toBe(20);
+    expect(items[0].flyout.sample).toEqual(['Linux']);
+
+    expect(items[1].flyout.pattern).toBe('Debian GNU/Linux');
+    expect(items[1].count).toBe(18);
+    expect(items[1].flyout.sample).toEqual(['Debian GNU/Linux']);
+  });
 });
