@@ -22,6 +22,7 @@ import {
   setPromptToQueryIsLoading,
 } from '../../../../slices';
 import { runQueryActionCreator } from '../../run_query';
+import { generatePromQLWithAgUi } from '../../../../../query_assist';
 
 export const callAgentActionCreator = createAsyncThunk<
   void,
@@ -58,10 +59,32 @@ export const callAgentActionCreator = createAsyncThunk<
 
   try {
     dispatch(setPromptToQueryIsLoading(true));
+
+    if (dataset.type === 'PROMETHEUS') {
+      const result = await generatePromQLWithAgUi({
+        http: services.http,
+        data: services.data,
+        question: editorText,
+        dataSourceName: dataset.title,
+        dataSourceId: dataset.dataSource?.id,
+      });
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      if (result.query) {
+        dispatch(runQueryActionCreator(services, result.query));
+        dispatch(setLastExecutedTranslatedQuery(result.query));
+        dispatch(setLastExecutedPrompt(editorText));
+      }
+      return;
+    }
+
     const params: QueryAssistParameters = {
       question: editorText,
       index: dataset.title,
-      language: dataset.type === 'PROMETHEUS' ? 'PROMQL' : 'PPL',
+      language: 'PPL',
       dataSourceId: dataset.dataSource?.id,
       currentTime: moment().format('YYYY-MM-DD HH:mm:ss'),
       timeField: dataset.timeFieldName,

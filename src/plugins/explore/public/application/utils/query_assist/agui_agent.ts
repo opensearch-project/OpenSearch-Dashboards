@@ -1,0 +1,191 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { parseSSEStream, runHttpRequest } from '@ag-ui/client';
+import { BaseEvent, Context, EventType, Message, RunErrorEvent, Tool } from '@ag-ui/core';
+import { HttpSetup } from 'opensearch-dashboards/public';
+import { Observable } from 'rxjs';
+import { AgUiRequest } from './agui_types';
+
+/**
+ * Default timeout for agent requests (2 minutes)
+ */
+const DEFAULT_REQUEST_TIMEOUT = 2 * 60 * 1000;
+
+/**
+ * Input for running the AG-UI agent
+ */
+export interface AgUiRunInput {
+  /** The user's question */
+  question: string;
+  /** The data source name/index */
+  dataSourceName: string;
+  /** The query language */
+  language: string;
+  /** Previous messages in the conversation (for tool call responses) */
+  messages?: Message[];
+  /** Frontend tools to provide to the agent */
+  tools?: Tool[];
+  /** Additional context */
+  context?: Context[];
+  /** Data source ID for MDS */
+  dataSourceId?: string;
+  /** Request timeout in milliseconds */
+  timeout?: number;
+}
+
+/**
+ * Client for communicating with the AG-UI agent endpoint
+ */
+export class AgUiAgent {
+  private abortController?: AbortController;
+  private threadId: string;
+  private http: HttpSetup;
+
+  constructor(http: HttpSetup) {
+    this.http = http;
+    this.threadId = this.generateThreadId();
+  }
+
+  private generateThreadId(): string {
+    return `thread-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+  }
+
+  private generateRunId(): string {
+    return `run-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+  }
+
+  private generateMessageId(): string {
+    return `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+  }
+
+  public getThreadId(): string {
+    return this.threadId;
+  }
+
+  /**
+   * Start a new conversation thread
+   */
+  public newThread(): void {
+    this.threadId = this.generateThreadId();
+  }
+
+  private buildRequestBody(messages: Message[], input: AgUiRunInput): AgUiRequest {
+    return {
+      threadId: this.threadId,
+      runId: this.generateRunId(),
+      messages,
+      tools: input.tools || [],
+      context: [
+        {
+          description: 'Data source name',
+          value: input.dataSourceName,
+        },
+        ...(input.context || []),
+      ],
+      state: {},
+      forwardedProps: {
+        language: input.language,
+      },
+    };
+  }
+
+  private executeRequest(requestBody: AgUiRequest, input: AgUiRunInput): Observable<BaseEvent> {
+    this.abort();
+
+    const basePath = '/api/chat/proxy';
+    const url = input.dataSourceId
+      ? `${basePath}?dataSourceId=${encodeURIComponent(input.dataSourceId)}`
+      : basePath;
+
+    this.abortController = new AbortController();
+    const timeout = input.timeout || DEFAULT_REQUEST_TIMEOUT;
+    const timeoutId = setTimeout(() => this.abortController?.abort(), timeout);
+    this.abortController.signal.addEventListener('abort', () => clearTimeout(timeoutId));
+
+    const config: RequestInit = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'text/event-stream',
+        'osd-xsrf': 'true',
+      },
+      body: JSON.stringify(requestBody),
+      signal: this.abortController.signal,
+    };
+
+    return new Observable<BaseEvent>((observer) => {
+      const subscription = runHttpRequest(url, config)
+        .pipe(parseSSEStream)
+        .subscribe({
+          next: (event: BaseEvent) => observer.next(event),
+          error: (error: Error) => {
+            if (error.name === 'AbortError') {
+              observer.complete();
+              return;
+            }
+            const errorEvent: RunErrorEvent = {
+              type: EventType.RUN_ERROR,
+              message: error.message || 'Unknown error',
+            };
+            observer.next(errorEvent);
+            observer.error(error);
+          },
+          complete: () => observer.complete(),
+        });
+
+      return () => {
+        subscription.unsubscribe();
+        this.abort();
+      };
+    });
+  }
+
+  /**
+   * Run the AG-UI agent using the official parseSSEStream from @ag-ui/client
+   * Returns an Observable that emits AG-UI events as they stream from the server
+   */
+  public runAgent(input: AgUiRunInput): Observable<BaseEvent> {
+    const userMessage: Message = {
+      id: this.generateMessageId(),
+      role: 'user',
+      content: input.question,
+    };
+
+    const messages = input.messages ? [...input.messages, userMessage] : [userMessage];
+    const requestBody = this.buildRequestBody(messages, input);
+    return this.executeRequest(requestBody, input);
+  }
+
+  /**
+   * Send a tool result back to the agent
+   */
+  public sendToolResult(
+    toolCallId: string,
+    result: unknown,
+    messages: Message[],
+    input: AgUiRunInput
+  ): Observable<BaseEvent> {
+    const toolMessage: Message = {
+      id: this.generateMessageId(),
+      role: 'tool',
+      content: typeof result === 'string' ? result : JSON.stringify(result),
+      toolCallId,
+    };
+
+    const requestBody = this.buildRequestBody([...messages, toolMessage], input);
+    return this.executeRequest(requestBody, input);
+  }
+
+  /**
+   * Abort the current request
+   */
+  public abort(): void {
+    if (this.abortController) {
+      this.abortController.abort();
+      this.abortController = undefined;
+    }
+  }
+}
