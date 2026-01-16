@@ -48,6 +48,7 @@ export const useDashboardAppAndGlobalState = ({
   useEffect(() => {
     if (savedDashboardInstance && dashboard) {
       let unsubscribeFromDashboardContainer: () => void;
+      let containerRef: DashboardContainer | undefined;
 
       const {
         dashboardConfig,
@@ -149,6 +150,7 @@ export const useDashboardAppAndGlobalState = ({
           }
         };
 
+        containerRef = dashboardContainer;
         setCurrentContainer(dashboardContainer);
 
         const stopSyncingDashboardContainerOutputs = handleDashboardContainerOutputs(
@@ -221,6 +223,11 @@ export const useDashboardAppAndGlobalState = ({
         stopSyncingAppFilters();
         stopSyncingQueryServiceStateWithUrl();
         unsubscribeFromDashboardContainer?.();
+
+        // Fire signal for each widget when user Navigates away
+        if (containerRef) {
+          containerRef.destroy();
+        }
       };
     }
   }, [dashboard, eventEmitter, savedDashboardInstance, services]);
