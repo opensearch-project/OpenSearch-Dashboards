@@ -183,9 +183,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     );
   }, [data.query, savedSearch, uiSettings, timefilter]);
 
-  // Use useRef to store startTime so it doesn't change on every render and cause infinite loops
-  const startTimeRef = useRef(Date.now());
-  const startTime = startTimeRef.current;
+  const startTime = Date.now();
   const data$ = useMemo(
     () =>
       new BehaviorSubject<SearchData>({
