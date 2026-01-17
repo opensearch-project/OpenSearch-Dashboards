@@ -62,7 +62,6 @@ export const callAgentActionCreator = createAsyncThunk<
 
     if (dataset.type === 'PROMETHEUS') {
       const result = await generatePromQLWithAgUi({
-        http: services.http,
         data: services.data,
         question: editorText,
         dataSourceName: dataset.title,

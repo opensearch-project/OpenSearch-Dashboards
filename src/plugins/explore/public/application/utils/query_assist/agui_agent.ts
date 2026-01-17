@@ -4,10 +4,17 @@
  */
 
 import { parseSSEStream, runHttpRequest } from '@ag-ui/client';
-import { BaseEvent, Context, EventType, Message, RunErrorEvent, Tool } from '@ag-ui/core';
+import {
+  BaseEvent,
+  Context,
+  EventType,
+  Message,
+  RunAgentInput,
+  RunErrorEvent,
+  Tool,
+} from '@ag-ui/core';
 import { HttpSetup } from 'opensearch-dashboards/public';
 import { Observable } from 'rxjs';
-import { AgUiRequest } from './agui_types';
 
 /**
  * Default timeout for agent requests (2 minutes)
@@ -40,10 +47,8 @@ export interface AgUiRunInput {
 export class AgUiAgent {
   private abortController?: AbortController;
   private threadId: string;
-  private http: HttpSetup;
 
-  constructor(http: HttpSetup) {
-    this.http = http;
+  constructor() {
     this.threadId = this.generateThreadId();
   }
 
@@ -70,7 +75,7 @@ export class AgUiAgent {
     this.threadId = this.generateThreadId();
   }
 
-  private buildRequestBody(messages: Message[], input: AgUiRunInput): AgUiRequest {
+  private buildRequestBody(messages: Message[], input: AgUiRunInput): RunAgentInput {
     return {
       threadId: this.threadId,
       runId: this.generateRunId(),
@@ -90,7 +95,7 @@ export class AgUiAgent {
     };
   }
 
-  private executeRequest(requestBody: AgUiRequest, input: AgUiRunInput): Observable<BaseEvent> {
+  private executeRequest(requestBody: RunAgentInput, input: AgUiRunInput): Observable<BaseEvent> {
     this.abort();
 
     const basePath = '/api/chat/proxy';

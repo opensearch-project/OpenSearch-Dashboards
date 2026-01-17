@@ -3,25 +3,24 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AgUiTool } from './agui_types';
+import type { Tool } from '@ag-ui/core';
 
-/**
- * Frontend tools for PromQL query generation
- * Single consolidated tool that returns metrics with their labels and sample values
- * in one call to reduce agent round trips and prevent infinite loops.
- */
-const PROMQL_FRONTEND_TOOLS_INTERNAL = [
+export enum PromQLToolName {
+  SEARCH_PROMETHEUS_METADATA = 'search_prometheus_metadata',
+  SEARCH_PROMETHEUS_LABELS = 'search_prometheus_labels',
+}
+
+export const PROMQL_FRONTEND_TOOLS: Tool[] = [
   {
-    name: 'search_prometheus_metadata',
+    name: PromQLToolName.SEARCH_PROMETHEUS_METADATA,
     description:
-      'Search Prometheus metadata. Returns matched metrics with their labels and metadata in a single call. Use this to understand available metrics and their filtering options before writing a PromQL query.',
+      'Search Prometheus metadata. Returns matched metrics with up to 5 label names each. Use this to discover available metrics before writing a PromQL query.',
     parameters: {
       type: 'object',
       properties: {
         query: {
           type: 'string',
-          description:
-            'Search pattern to filter metrics by name. Supports regex (e.g., "cpu|memory" to match both) or substring matching.',
+          description: 'Regex pattern to filter metrics by name.',
         },
         limit: {
           type: 'number',
@@ -31,11 +30,23 @@ const PROMQL_FRONTEND_TOOLS_INTERNAL = [
       required: [],
     },
   },
-] as const;
-
-export const PROMQL_FRONTEND_TOOLS = (PROMQL_FRONTEND_TOOLS_INTERNAL as unknown) as AgUiTool[];
-export const PROMQL_TOOL_NAMES = PROMQL_FRONTEND_TOOLS_INTERNAL.map((tool) => tool.name);
-export type PromQLToolName = typeof PROMQL_TOOL_NAMES[number];
+  {
+    name: PromQLToolName.SEARCH_PROMETHEUS_LABELS,
+    description:
+      'Get labels with sample values for specific metrics. Use this tool only if necessary.',
+    parameters: {
+      type: 'object',
+      properties: {
+        metricNames: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'List of metric names to get labels for.',
+        },
+      },
+      required: ['metricNames'],
+    },
+  },
+];
 
 export const isPromQLMetadataTool = (toolName: string): toolName is PromQLToolName =>
-  PROMQL_TOOL_NAMES.includes(toolName as PromQLToolName);
+  Object.values(PromQLToolName).includes(toolName as PromQLToolName);

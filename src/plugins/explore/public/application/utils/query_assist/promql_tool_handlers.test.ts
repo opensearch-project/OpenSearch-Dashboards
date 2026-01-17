@@ -54,20 +54,6 @@ describe('PromQLToolHandlers', () => {
     });
   });
 
-  describe('setDataSourceName', () => {
-    it('should update the data source name', async () => {
-      mockPrometheusClient.getMetrics.mockResolvedValue(['metric1']);
-      mockPrometheusClient.getMetricMetadata.mockResolvedValue({});
-      mockPrometheusClient.getLabels.mockResolvedValue(['job']);
-      mockPrometheusClient.getLabelValues.mockResolvedValue([]);
-
-      handlers.setDataSourceName('new-datasource');
-      await handlers.searchPrometheusMetadata({});
-
-      expect(mockPrometheusClient.getMetrics).toHaveBeenCalledWith('new-datasource');
-    });
-  });
-
   describe('executeTool', () => {
     it('should execute search_prometheus_metadata tool', async () => {
       mockPrometheusClient.getMetrics.mockResolvedValue(['metric1']);

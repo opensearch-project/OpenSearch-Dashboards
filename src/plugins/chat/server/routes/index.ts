@@ -110,7 +110,7 @@ export function defineRoutes(
       },
     },
     async (context, request, response) => {
-      console.log('❗request:', request.body);
+      console.log('❗request:', JSON.stringify(request.body, null, 2));
       const dataSourceId = request.query?.dataSourceId;
 
       try {

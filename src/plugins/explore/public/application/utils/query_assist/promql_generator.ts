@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HttpSetup } from 'opensearch-dashboards/public';
 import {
   EventType,
   BaseEvent,
@@ -22,7 +21,6 @@ import { AgUiAgent } from './agui_agent';
 import { PromQLToolHandlers } from './promql_tool_handlers';
 
 interface GeneratePromQLOptions {
-  http: HttpSetup;
   data: DataPublicPluginStart;
   question: string;
   dataSourceName: string;
@@ -56,29 +54,35 @@ function isRunErrorEvent(event: BaseEvent): event is RunErrorEvent {
 
 const PROMQL_SYSTEM_PROMPT = `You are a PromQL expert. Your task is to convert natural language questions into valid PromQL queries.
 
-Instructions:
-1. Use the search_prometheus_metadata tool to find relevant metrics and their labels.
-2. Analyze the user's question and generate a valid PromQL query that answers it.
-3. Return a markdown code block with PromQL query inside.
+## Instructions
+1. First, use tools to discover available metrics matching the user's intent.
+2. Select the most appropriate metric and construct a query using proper functions.
+3. Return only one markdown code block with PromQL query inside.
 4. If it requires multiple queries, use \`;\` and a new line to separate them.
+5. Do not output explanations. Output 'OOD' if question is out of domain.
+`;
 
-Example response format:
-\`\`\`
-rate(http_requests_total[5m])
-\`\`\``;
+/** Maximum number of tool calls allowed per query generation */
+const MAX_TOOL_CALLS = 3;
+
+/**
+ * Generate a cache key for deduplicating tool calls
+ */
+function getToolCallCacheKey(toolName: string, args: Record<string, unknown>): string {
+  return `${toolName}:${JSON.stringify(args, Object.keys(args).sort())}`;
+}
 
 /**
  * Generate a PromQL query using AG-UI streaming with frontend tool execution.
  * This is a standalone function for use in Redux thunks or other non-hook contexts.
  */
 export async function generatePromQLWithAgUi({
-  http,
   data,
   question,
   dataSourceName,
   dataSourceId,
 }: GeneratePromQLOptions): Promise<GeneratePromQLResult> {
-  const agent = new AgUiAgent(http);
+  const agent = new AgUiAgent();
   const toolHandlers = new PromQLToolHandlers(data, dataSourceName);
 
   let streamingText = '';
@@ -86,11 +90,13 @@ export async function generatePromQLWithAgUi({
   let error: Error | undefined;
 
   const messages: Message[] = [
-    { id: agent.generateMessageId(), role: 'system', content: PROMQL_SYSTEM_PROMPT },
+    // 'system' role messages seem to be ignored by ag-ui agent
+    { id: agent.generateMessageId(), role: 'user', content: PROMQL_SYSTEM_PROMPT },
     { id: agent.generateMessageId(), role: 'user', content: question },
   ];
   const currentToolCalls = new Map<string, ToolCall>();
   const toolCallArgs = new Map<string, string>();
+  let toolCallCount = 0;
 
   /**
    * Execute a tool call and send the result back to the agent
@@ -109,8 +115,13 @@ export async function generatePromQLWithAgUi({
         throw new Error(`Invalid tool arguments: ${validationError}`);
       }
 
-      const result = await toolHandlers.executeTool(toolName, args);
+      if (toolCallCount++ > MAX_TOOL_CALLS) {
+        throw new Error(
+          `Exceeded maximum tool calls (${MAX_TOOL_CALLS}). Please simplify your question.`
+        );
+      }
 
+      const result = await toolHandlers.executeTool(toolName, args);
       const assistantMessage: Message = {
         id: agent.generateMessageId(),
         role: 'assistant',
@@ -121,10 +132,19 @@ export async function generatePromQLWithAgUi({
       const observable = agent.sendToolResult(toolCallId, result, {
         messages,
         dataSourceName,
-        language: 'promql',
+        language: 'PROMQL',
         tools: PROMQL_FRONTEND_TOOLS,
         dataSourceId,
       });
+
+      // Add tool result to messages for subsequent requests in the conversation
+      const toolResultMessage: Message = {
+        id: agent.generateMessageId(),
+        role: 'tool',
+        content: typeof result === 'string' ? result : JSON.stringify(result),
+        toolCallId,
+      };
+      messages.push(toolResultMessage);
 
       await processStream(observable);
     } catch (err) {
