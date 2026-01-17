@@ -31,8 +31,7 @@
 import React from 'react';
 import { CodeEditor } from './code_editor';
 import { monaco } from '@osd/monaco';
-import { shallow, mount } from 'enzyme';
-import { act } from 'react';
+import { shallow } from 'enzyme';
 
 // disabled because this is a test, but also it seems we shouldn't need this?
 /* eslint-disable-next-line @osd/eslint/module_migration */
@@ -92,9 +91,9 @@ test('editor mount setup', () => {
 
   const editorWillMount = jest.fn();
 
-  // Mock monaco APIs
   monaco.languages.onLanguage = jest.fn((languageId, func) => {
     expect(languageId).toBe('loglang');
+
     // Call the function immediately so we can see our providers
     // get setup without a monaco editor setting up completely
     func();
@@ -103,6 +102,7 @@ test('editor mount setup', () => {
   monaco.languages.registerCompletionItemProvider = jest.fn();
   monaco.languages.registerSignatureHelpProvider = jest.fn();
   monaco.languages.registerHoverProvider = jest.fn();
+
   monaco.editor.defineTheme = jest.fn();
 
   const wrapper = shallow(
@@ -117,18 +117,20 @@ test('editor mount setup', () => {
     />
   );
 
-  // Find the MonacoEditor and get its editorWillMount prop
-  const monacoEditor = wrapper.find('MonacoEditor');
-  const editorWillMountProp = monacoEditor.prop('editorWillMount') as Function;
-
-  // Call the internal handler with monaco to simulate the editor mounting
-  editorWillMountProp(monaco);
+  const instance = wrapper.instance() as CodeEditor;
+  instance._editorWillMount(monaco);
 
   // Verify our mount callback will be called
   expect(editorWillMount.mock.calls.length).toBe(1);
 
   // Verify our theme will be setup
   expect((monaco.editor.defineTheme as jest.Mock).mock.calls.length).toBe(1);
+
+  // Verify our language features have been registered
+  expect((monaco.languages.onLanguage as jest.Mock).mock.calls.length).toBe(1);
+  expect((monaco.languages.registerCompletionItemProvider as jest.Mock).mock.calls.length).toBe(1);
+  expect((monaco.languages.registerSignatureHelpProvider as jest.Mock).mock.calls.length).toBe(1);
+  expect((monaco.languages.registerHoverProvider as jest.Mock).mock.calls.length).toBe(1);
 });
 
 test('suggest controller details visibility is set on editor mount', () => {
@@ -147,39 +149,15 @@ test('suggest controller details visibility is set on editor mount', () => {
     setPosition: jest.fn(),
     revealPosition: jest.fn(),
     focus: jest.fn(),
-    trigger: jest.fn(),
   } as any;
 
-  // Track if editorDidMount was called and capture the editor
-  let capturedEditor: any = null;
-  const editorDidMount = jest.fn((editor) => {
-    capturedEditor = editor;
-  });
-
-  // The component internally calls handleEditorDidMount which sets up the suggest controller.
-  // We need to simulate what react-monaco-editor does when it mounts.
-  // Since we can't easily trigger the actual monaco editor mount, we test the callback behavior.
-
-  // Create a wrapper that will receive our mock editor through editorDidMount prop
   const component = shallow(
-    <CodeEditor
-      languageId="loglang"
-      height={250}
-      value={logs}
-      onChange={() => {}}
-      editorDidMount={editorDidMount}
-    />
+    <CodeEditor languageId="loglang" height={250} value={logs} onChange={() => {}} />
   );
 
-  // Find the MonacoEditor and simulate its editorDidMount callback
-  const monacoEditor = component.find('MonacoEditor');
-  const editorDidMountProp = monacoEditor.prop('editorDidMount') as Function;
-
-  // Call the internal handler with our mock editor
-  editorDidMountProp(mockEditor, monaco);
+  const instance = component.instance() as CodeEditor;
+  instance._editorDidMount(mockEditor, monaco);
 
   expect(mockEditor.getContribution).toHaveBeenCalledWith('editor.contrib.suggestController');
   expect(mockSuggestController.widget.value._setDetailsVisible).toHaveBeenCalledWith(true);
-  // Verify the user's editorDidMount callback was also called
-  expect(editorDidMount).toHaveBeenCalledWith(mockEditor);
 });
