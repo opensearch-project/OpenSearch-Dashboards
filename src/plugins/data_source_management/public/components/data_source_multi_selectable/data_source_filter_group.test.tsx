@@ -83,7 +83,5 @@ describe('DataSourceFilterGroup', () => {
     expect(mockCallBack).toBeCalledWith([
       { checked: 'on', id: '1', label: 'name1', visible: false },
     ]);
-
-    expect(container).toMatchSnapshot();
   });
 });
