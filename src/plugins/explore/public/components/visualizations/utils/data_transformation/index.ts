@@ -4,7 +4,7 @@
  */
 
 // Main transformation functions
-export { aggregate } from './aggregate';
+export { aggregate, aggregateByGroups } from './aggregate';
 export { pivot } from './pivot';
 export { flatten } from './flatten';
 export { convertTo2DArray } from './convert';

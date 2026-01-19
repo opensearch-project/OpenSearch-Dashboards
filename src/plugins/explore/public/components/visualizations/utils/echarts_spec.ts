@@ -12,6 +12,7 @@ import {
   XAXisComponentOption,
   YAXisComponentOption,
   PieSeriesOption,
+  HeatmapSeriesOption,
 } from 'echarts';
 import {
   AggregationType,
@@ -81,7 +82,12 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   xAxisConfig?: any;
   yAxisConfig?: any;
   series?: Array<
-    BarSeriesOption | LineSeriesOption | CustomSeriesOption | PieSeriesOption | GaugeSeriesOption
+    | BarSeriesOption
+    | LineSeriesOption
+    | CustomSeriesOption
+    | PieSeriesOption
+    | GaugeSeriesOption
+    | HeatmapSeriesOption
   >;
   visualMap?: any;
   // Final output
