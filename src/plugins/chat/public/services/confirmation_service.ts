@@ -23,7 +23,6 @@ export interface ConfirmationResponse {
 
 /**
  * Service to manage user confirmations for tool calls
- * Similar to Kiro's confirmation system
  */
 export class ConfirmationService {
   private pendingConfirmations$ = new BehaviorSubject<ConfirmationRequest[]>([]);

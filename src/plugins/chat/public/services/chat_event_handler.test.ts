@@ -18,16 +18,26 @@ import type {
 } from '../../common/events';
 import type { Message, AssistantMessage, ToolMessage } from '../../common/types';
 
+const mockGetCurrentState = jest.fn().mockReturnValue({
+  actions: new Map(), // Empty map means no actions have requiresConfirmation flag
+});
+
 // Mock dependencies
 const mockAssistantActionService = ({
   updateToolCallState: jest.fn(),
   executeAction: jest.fn(),
   hasAction: jest.fn().mockReturnValue(true),
+  getCurrentState: mockGetCurrentState,
 } as unknown) as jest.Mocked<AssistantActionService>;
 
 const mockChatService = ({
   sendToolResult: jest.fn(),
+  getCurrentDataSourceId: jest.fn().mockReturnValue(undefined),
 } as unknown) as jest.Mocked<ChatService>;
+
+const mockConfirmationService = {
+  requestConfirmation: jest.fn().mockResolvedValue({ approved: true }),
+};
 
 describe('ChatEventHandler', () => {
   let chatEventHandler: ChatEventHandler;
@@ -38,6 +48,12 @@ describe('ChatEventHandler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Reset hasAction to return true by default
+    mockAssistantActionService.hasAction = jest.fn().mockReturnValue(true);
+
+    // Reset confirmationService to approve by default
+    mockConfirmationService.requestConfirmation = jest.fn().mockResolvedValue({ approved: true });
 
     timeline = [];
     mockOnTimelineUpdate = jest.fn((updater) => {
@@ -51,7 +67,8 @@ describe('ChatEventHandler', () => {
       mockChatService,
       mockOnTimelineUpdate,
       mockOnStreamingStateChange,
-      mockGetTimeline
+      mockGetTimeline,
+      mockConfirmationService
     );
   });
 
