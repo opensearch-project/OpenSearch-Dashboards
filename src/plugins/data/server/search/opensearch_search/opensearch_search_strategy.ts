@@ -36,9 +36,14 @@ import { ApiResponse } from '@opensearch-project/opensearch';
 import { DataSourcePluginSetup } from 'src/plugins/data_source/server';
 import { SearchUsage } from '../collectors/usage';
 import { toSnakeCase } from './to_snake_case';
-import { getDefaultSearchParams, getTotalLoaded, getShardTimeout, shimAbortSignal } from '.';
+import {
+  ISearchStrategy,
+  getDefaultSearchParams,
+  getTotalLoaded,
+  getShardTimeout,
+  shimAbortSignal,
+} from '..';
 import { decideClient } from '../../../../data_source/common/util/';
-import { ISearchStrategy } from '../..';
 
 export const opensearchSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
