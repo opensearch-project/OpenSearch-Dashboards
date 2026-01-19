@@ -335,7 +335,13 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
         show: false,
       },
       data: displayValues.map((_, i) => ({
-        value: !invalidCase ? maxBase : 100,
+        value: !invalidCase
+          ? styles?.exclusive.showUnfilledArea
+            ? maxBase
+            : values[i]
+          : styles?.exclusive.showUnfilledArea
+          ? 100
+          : 0,
         label: {
           show: true,
           position: 'top',
