@@ -1,0 +1,2 @@
+fix:
+- Fix server basepath is missing for recently accessed asserts ([#11193](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11193))
