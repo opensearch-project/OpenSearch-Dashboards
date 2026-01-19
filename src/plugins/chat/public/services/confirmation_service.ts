@@ -12,7 +12,6 @@ export interface ConfirmationRequest {
   args: any;
   description?: string;
   timestamp: number;
-  displayedInTimeline?: boolean; // Track if this is shown in chat timeline
 }
 
 export interface ConfirmationResponse {
@@ -53,7 +52,6 @@ export class ConfirmationService {
       args,
       description,
       timestamp: Date.now(),
-      displayedInTimeline: true, // Will be shown in chat timeline
     };
 
     // Add to pending confirmations

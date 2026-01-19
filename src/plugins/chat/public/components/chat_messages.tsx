@@ -44,17 +44,6 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Log timeline changes
-  useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log('[ChatMessages] Timeline updated:', {
-      messageCount: timeline.length,
-      messages: timeline.map((m) => ({
-        m: JSON.stringify(m),
-      })),
-    });
-  }, [timeline]);
-
   // Context is now handled by RFC hooks and context pills
   // No need for separate context display here
 

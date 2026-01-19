@@ -173,69 +173,18 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     chatService.updateCurrentMessages(timeline);
   }, [timeline, chatService]);
 
-  const handleSend = async (options?: {input?: string}) => {
-    const messageContent = options?.input ?? input.trim();
-    if (!messageContent || isStreaming) return;
-
-    setInput('');
-
-    // Check if this is a slash command
-    const commandResult = await slashCommandRegistry.execute(messageContent);
-    if (commandResult.handled) {
-      // If command was handled and returned a message, send it to the AI
-      if (commandResult.message) {
-        setIsStreaming(true);
-        try {
-          const { observable, userMessage } = await chatService.sendMessage(
-            commandResult.message,
-            timeline
-          );
-
-          // Add user message immediately to timeline with raw message for UI display
-          const timelineUserMessage: UserMessage = {
-            id: userMessage.id,
-            role: 'user',
-            content: userMessage.content,  // Processed message (sent to LLM)
-            rawMessage: messageContent,    // Original user input (shown in UI)
-          };
-          setTimeline((prev) => [...prev, timelineUserMessage]);
-
-          // Subscribe to streaming response
-          const subscription = observable.subscribe({
-            next: async (event: ChatEvent) => {
-              // Update runId if we get it from the event
-              if ('runId' in event && event.runId && event.runId !== currentRunId) {
-                setCurrentRunId(event.runId);
-              }
-
-              // Handle all events through the event handler service
-              await eventHandler.handleEvent(event);
-            },
-            error: (error: any) => {
-              console.error('Subscription error:', error);
-              setIsStreaming(false);
-            },
-            complete: () => {
-              setIsStreaming(false);
-            },
-          });
-
-          return () => subscription.unsubscribe();
-        } catch (error) {
-          console.error('Failed to send message:', error);
-          setIsStreaming(false);
-        }
-      }
-      return;
-    }
-
-    // Normal message flow
+  // Helper function to handle message streaming with observable subscription
+  const subscribeToMessageStream = useCallback(async (
+    messageContent: string,
+    timelineContext: Message[],
+    rawMessage?: string
+  ) => {
     setIsStreaming(true);
 
     try {
       const { observable, userMessage } = await chatService.sendMessage(
         messageContent,
-        timeline
+        timelineContext
       );
 
       // Add user message immediately to timeline
@@ -243,7 +192,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         id: userMessage.id,
         role: 'user',
         content: userMessage.content,
-        rawMessage: messageContent,  // For regular messages, raw and content are the same
+        rawMessage: rawMessage || messageContent,  // For regular messages, raw and content are the same
       };
       
       // Add loading assistant message
@@ -293,6 +242,26 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
       console.error('Failed to send message:', error);
       setIsStreaming(false);
     }
+  }, [chatService, currentRunId, eventHandler]);
+
+  const handleSend = async (options?: {input?: string}) => {
+    const messageContent = options?.input ?? input.trim();
+    if (!messageContent || isStreaming) return;
+
+    setInput('');
+
+    // Check if this is a slash command
+    const commandResult = await slashCommandRegistry.execute(messageContent);
+    if (commandResult.handled) {
+      // If command was handled and returned a message, send it to the AI
+      if (commandResult.message) {
+        return subscribeToMessageStream(commandResult.message, timeline, messageContent);
+      }
+      return;
+    }
+
+    // Normal message flow
+    return subscribeToMessageStream(messageContent, timeline);
   };
 
   handleSendRef.current = handleSend;
@@ -323,68 +292,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     // Clear any streaming state and input
     setInput('');
-    setIsStreaming(true);
 
-    try {
-      const { observable, userMessage } = await chatService.sendMessage(
-        message.content,
-        truncatedTimeline
-      );
-
-      // Add user message immediately to timeline
-      const timelineUserMessage: UserMessage = {
-        id: userMessage.id,
-        role: 'user',
-        content: userMessage.content,
-      };
-      
-      // Add loading assistant message
-      const loadingMessageId = `loading-${Date.now()}`;
-      const loadingMessage: Message = {
-        id: loadingMessageId,
-        role: 'assistant',
-        content: '',
-      };
-      
-      setTimeline((prev) => [...prev, timelineUserMessage, loadingMessage]);
-
-      let firstResponseReceived = false;
-
-      // Subscribe to streaming response
-      const subscription = observable.subscribe({
-        next: async (event: ChatEvent) => {
-          // Update runId if we get it from the event
-          if ('runId' in event && event.runId && event.runId !== currentRunId) {
-            setCurrentRunId(event.runId);
-          }
-
-          // Remove loading message on first response
-          if (!firstResponseReceived) {
-            firstResponseReceived = true;
-            setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
-          }
-
-          // Handle all events through the event handler service
-          await eventHandler.handleEvent(event);
-        },
-        error: (error: any) => {
-          console.error('Subscription error:', error);
-          // Remove loading message on error
-          setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
-          setIsStreaming(false);
-        },
-        complete: () => {
-          // Remove loading message if still present
-          setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
-          setIsStreaming(false);
-        },
-      });
-
-      return () => subscription.unsubscribe();
-    } catch (error) {
-      console.error('Failed to resend message:', error);
-      setIsStreaming(false);
-    }
+    // Resend the message with truncated timeline
+    return subscribeToMessageStream(message.content, truncatedTimeline);
   };
 
   const handleNewChat = useCallback(() => {
