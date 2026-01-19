@@ -10,6 +10,137 @@ import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { generateThresholdLines } from '../utils/utils';
 
 /**
+ * Transforms data from [x, y, category] format to pivot format for multi-series scatter charts
+ */
+export const transformToPivotDataset = (
+  transformedData: any[][],
+  xField: string,
+  yField: string,
+  colorField: string
+): any[][] => {
+  if (!transformedData || transformedData.length < 2) {
+    throw new Error('transformedData must have at least header and one data row');
+  }
+
+  const headerRow = transformedData[0] as string[];
+  const dataRows = transformedData.slice(1);
+
+  const xFieldIndex = headerRow.indexOf(xField);
+  const yFieldIndex = headerRow.indexOf(yField);
+  const colorFieldIndex = headerRow.indexOf(colorField);
+
+  if (xFieldIndex === -1 || yFieldIndex === -1 || colorFieldIndex === -1) {
+    throw new Error(
+      `Cannot find field indices: x=${xFieldIndex}, y=${yFieldIndex}, color=${colorFieldIndex}`
+    );
+  }
+
+  const categories = [
+    ...new Set(dataRows.map((row) => String(row[colorFieldIndex] || 'undefined'))),
+  ];
+  const newHeader = [xField, yField, ...categories];
+  const coordinateGroups = new Map<string, { x: any; y: any; categories: Map<string, any> }>();
+
+  dataRows.forEach((row) => {
+    const x = row[xFieldIndex];
+    const y = row[yFieldIndex];
+    const category = String(row[colorFieldIndex] || 'undefined');
+    const coordKey = `${x},${y}`;
+
+    if (!coordinateGroups.has(coordKey)) {
+      coordinateGroups.set(coordKey, {
+        x,
+        y,
+        categories: new Map(),
+      });
+    }
+
+    coordinateGroups.get(coordKey)!.categories.set(category, y);
+  });
+
+  // Convert grouped data to pivot format
+  const pivotDataRows = Array.from(coordinateGroups.values()).map((group) => {
+    const row = [group.x, group.y];
+
+    // For each category, add the y value if this point belongs to that category, otherwise null
+    categories.forEach((category) => {
+      row.push(group.categories.has(category) ? group.categories.get(category) : null);
+    });
+
+    return row;
+  });
+
+  return [newHeader, ...pivotDataRows];
+};
+
+/**
+ * Transforms data for scatter charts with both color and size encoding
+ * Groups data by color category while preserving size information for each point
+ */
+export const transformToMultiSeriesWithSize = (
+  transformedData: any[][],
+  xField: string,
+  yField: string,
+  colorField: string,
+  sizeField: string
+): {
+  categories: string[];
+  seriesData: Record<string, any[][]>;
+  sizeRange: { min: number; max: number };
+} => {
+  if (!transformedData || transformedData.length < 2) {
+    throw new Error('transformedData must have at least header and one data row');
+  }
+
+  const headerRow = transformedData[0] as string[];
+  const dataRows = transformedData.slice(1);
+
+  const xFieldIndex = headerRow.indexOf(xField);
+  const yFieldIndex = headerRow.indexOf(yField);
+  const colorFieldIndex = headerRow.indexOf(colorField);
+  const sizeFieldIndex = headerRow.indexOf(sizeField);
+
+  if (xFieldIndex === -1 || yFieldIndex === -1 || colorFieldIndex === -1 || sizeFieldIndex === -1) {
+    throw new Error(
+      `Cannot find field indices: x=${xFieldIndex}, y=${yFieldIndex}, color=${colorFieldIndex}, size=${sizeFieldIndex}`
+    );
+  }
+
+  const categories = [
+    ...new Set(dataRows.map((row) => String(row[colorFieldIndex] || 'undefined'))),
+  ];
+  const seriesData: Record<string, any[][]> = {};
+  let minSize = Infinity;
+  let maxSize = -Infinity;
+
+  // Initialize arrays for each category
+  categories.forEach((category) => {
+    seriesData[String(category)] = [];
+  });
+
+  // Group data points by color category
+  dataRows.forEach((row) => {
+    const x = row[xFieldIndex];
+    const y = row[yFieldIndex];
+    const category = String(row[colorFieldIndex] || 'undefined');
+    const size = Number(row[sizeFieldIndex]) || 0;
+
+    // Track size range
+    minSize = Math.min(minSize, size);
+    maxSize = Math.max(maxSize, size);
+
+    // Add point to corresponding category
+    seriesData[category].push([x, y, size]);
+  });
+
+  return {
+    categories,
+    seriesData,
+    sizeRange: { min: minSize, max: maxSize },
+  };
+};
+
+/**
  * Create basic scatter series configuration for ECharts
  */
 export const createScatterSeries = <T extends BaseChartStyle>({
@@ -71,7 +202,8 @@ export const createScatterSeries = <T extends BaseChartStyle>({
 };
 
 /**
- * Create category scatter series with color encoding
+ * Create category scatter series with multiple series (one per category)
+ * Uses pivot data format and automatic ECharts coloring instead of visualMap
  */
 export const createCategoryScatterSeries = <T extends BaseChartStyle>({
   styles,
@@ -91,6 +223,37 @@ export const createCategoryScatterSeries = <T extends BaseChartStyle>({
     throw new Error('transformedData must be an array with data rows');
   }
 
+  // Transform data to pivot format
+  const pivotDataset = transformToPivotDataset(transformedData, xField, yField, colorField);
+  const pivotHeader = pivotDataset[0];
+
+  // Extract categories
+  const categories = pivotHeader.slice(2);
+
+  const thresholdLines = generateThresholdLines(styles.thresholdOptions);
+
+  // Create multiple scatter series
+  const series = categories.map((category) => ({
+    name: String(category),
+    type: 'scatter',
+    symbolSize: 8,
+    symbol: styles.exclusive?.pointShape || 'circle',
+    symbolRotate: styles.exclusive?.angle || 0,
+    encode: {
+      x: xField,
+      y: category,
+    },
+    itemStyle: {
+      opacity: 0.8,
+    },
+    emphasis: {
+      focus: 'series',
+      scale: 1.2,
+    },
+    ...thresholdLines,
+  })) as ScatterSeriesOption[];
+
+  // Setup tooltip configuration
   const xAxisName = axisConfig?.xAxisStyle?.title?.text || axisConfig?.xAxis?.name || xField;
   const yAxisName = axisConfig?.yAxisStyle?.title?.text || axisConfig?.yAxis?.name || yField;
   const colorAxisMapping = Object.values(axisColumnMappings).find(
@@ -98,108 +261,32 @@ export const createCategoryScatterSeries = <T extends BaseChartStyle>({
   );
   const colorAxisName = colorAxisMapping?.name || colorField;
 
-  const thresholdLines = generateThresholdLines(styles.thresholdOptions);
-
-  // Data is in 2D array format: first row is header, rest are data rows
-  const headerRow = transformedData[0] as string[];
-  const dataRows = transformedData.slice(1);
-
-  // Get field indices from header
-  const xFieldIndex = headerRow.indexOf(xField);
-  const yFieldIndex = headerRow.indexOf(yField);
-  const colorFieldIndex = headerRow.indexOf(colorField);
-
-  if (xFieldIndex === -1 || yFieldIndex === -1 || colorFieldIndex === -1) {
-    throw new Error(
-      `Cannot find field indices: x=${xFieldIndex}, y=${yFieldIndex}, color=${colorFieldIndex}`
-    );
-  }
-
-  // Get unique categories from the data
-  const categories = [
-    ...new Set(dataRows.map((row) => String(row[colorFieldIndex] || 'undefined'))),
-  ];
-
-  // Create single series using data format
-  const series = [
-    {
-      type: 'scatter',
-      symbolSize: 8,
-      symbol: styles.exclusive?.pointShape || 'circle',
-      symbolRotate: styles.exclusive?.angle || 0,
-      data: dataRows.map((row) => [row[xFieldIndex], row[yFieldIndex], row[colorFieldIndex]]),
-      itemStyle: {
-        opacity: 0.8,
-      },
-      emphasis: {
-        focus: 'self',
-        scale: 1.2,
-      },
-      ...thresholdLines,
-    },
-  ] as any[];
-
-  const legendPosition = styles.legendPosition || 'bottom';
-  newState.visualMap = {
-    show: styles.addLegend === true,
-    type: 'piecewise',
-    categories,
-    dimension: 2,
-    inRange: {
-      color:
-        categories.length <= 10
-          ? [
-              '#5470c6',
-              '#91cc75',
-              '#fac858',
-              '#ee6666',
-              '#73c0de',
-              '#3ba272',
-              '#fc8452',
-              '#9a60b4',
-              '#ea7ccc',
-              '#c2c2c2',
-            ].slice(0, categories.length)
-          : undefined,
-    },
-    textStyle: {
-      color: '#333',
-    },
-    // Position visualMap according to legendPosition
-    orient: legendPosition === 'left' || legendPosition === 'right' ? 'vertical' : 'horizontal',
-    left: legendPosition === 'left' ? 'left' : legendPosition === 'right' ? 'right' : 'center',
-    top: legendPosition === 'top' ? 'top' : legendPosition === 'bottom' ? 'bottom' : 'center',
-    bottom: legendPosition === 'bottom' ? 20 : undefined,
-    right: legendPosition === 'right' ? 20 : undefined,
-  };
-
-  // Add tooltip configuration for colored scatter charts
   newState.tooltipConfig = {
     trigger: 'item',
     formatter: (params: any) => {
-      if (params.value && Array.isArray(params.value) && params.value.length >= 3) {
+      if (params.value && Array.isArray(params.value) && params.value.length >= 2) {
         const xValue = params.value[0];
         const yValue = params.value[1];
-        const colorValue = params.value[2];
-        return `${xAxisName}: ${xValue}<br/>${yAxisName}: ${yValue}<br/>${colorAxisName}: ${colorValue}`;
+        const seriesName = params.seriesName;
+        return `${xAxisName}: ${xValue}<br/>${yAxisName}: ${yValue}<br/>${colorAxisName}: ${seriesName}`;
       }
-
       return `${xAxisName}: ${params.value || 'N/A'}<br/>${yAxisName}: ${params.name || 'N/A'}`;
     },
   };
 
-  // Set flags for category scatter
-  newState.useDataInsteadOfDataset = true;
-  newState.disableDefaultLegend = true; // Use visualMap instead of default legend
+  // Set the pivot dataset and series
+  newState.transformedData = pivotDataset;
   newState.series = series;
+  newState.disableDefaultLegend = false;
+
   return newState;
 };
 
 /**
- * Custom spec assembly for category scatter charts (no dataset)
+ * Custom spec assembly for category scatter charts with dataset support
  */
 export const assembleCategoryScatterSpec = <T extends BaseChartStyle>() => (state: any) => {
-  const { styles, axisConfig, series, tooltipConfig } = state;
+  const { styles, axisConfig, series, tooltipConfig, transformedData } = state;
 
   const spec = {
     title: {
@@ -240,6 +327,10 @@ export const assembleCategoryScatterSpec = <T extends BaseChartStyle>() => (stat
       nameLocation: 'middle',
       nameGap: 50,
     },
+    // Use dataset for pivot data format
+    dataset: {
+      source: transformedData,
+    },
     series,
     grid: { top: 60, bottom: 60, left: 60, right: 80 },
   };
@@ -248,7 +339,7 @@ export const assembleCategoryScatterSpec = <T extends BaseChartStyle>() => (stat
 };
 
 /**
- * Custom spec assembly for size scatter charts with dynamic grid for legend positioning
+ * Custom spec assembly for size scatter charts
  */
 export const assembleSizeScatterSpec = <T extends BaseChartStyle>() => (state: any) => {
   const { styles, axisConfig, series, tooltipConfig, visualMap } = state;
@@ -257,15 +348,13 @@ export const assembleSizeScatterSpec = <T extends BaseChartStyle>() => (state: a
   const getGridConfig = () => {
     switch (legendPosition) {
       case 'left':
-        return { top: 60, bottom: 60, left: 220, right: 80 };
+        return { top: 60, bottom: 60, left: 200, right: 80 };
       case 'right':
-        return { top: 60, bottom: 60, left: 60, right: 220 };
+        return { top: 60, bottom: 60, left: 60, right: 200 };
       case 'top':
         return { top: 80, bottom: 60, left: 60, right: 80 };
       case 'bottom':
-        return { top: 60, bottom: 140, left: 60, right: 80 };
-      default:
-        return { top: 60, bottom: 60, left: 60, right: 80 };
+        return { top: 60, bottom: 120, left: 60, right: 80 };
     }
   };
 
@@ -276,6 +365,25 @@ export const assembleSizeScatterSpec = <T extends BaseChartStyle>() => (state: a
     tooltip: tooltipConfig || {
       trigger: 'item',
       show: styles.tooltipOptions?.mode !== 'hidden',
+    },
+    legend: {
+      show: styles.addLegend,
+      orient:
+        styles.legendPosition === 'left' || styles.legendPosition === 'right'
+          ? 'vertical'
+          : 'horizontal',
+      left:
+        styles.legendPosition === 'left'
+          ? 'left'
+          : styles.legendPosition === 'right'
+          ? 'right'
+          : 'center',
+      top:
+        styles.legendPosition === 'top'
+          ? 'top'
+          : styles.legendPosition === 'bottom'
+          ? 'bottom'
+          : undefined,
     },
     xAxis: {
       type: 'value',
@@ -291,6 +399,7 @@ export const assembleSizeScatterSpec = <T extends BaseChartStyle>() => (state: a
     },
     visualMap,
     series,
+    // Dynamic grid based on legend positions
     grid: getGridConfig(),
   };
 
@@ -313,29 +422,23 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
   colorField: string;
   sizeField: string;
 }): PipelineFn<T> => (state) => {
-  const { transformedData = [], axisColumnMappings } = state;
+  const { transformedData = [], axisColumnMappings, axisConfig } = state;
   const newState = { ...state };
 
   if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
     throw new Error('transformedData must be an array with data rows');
   }
 
-  const headerRow = transformedData[0] as string[];
-  const dataRows = transformedData.slice(1);
-
-  // Get field indices from header
-  const xFieldIndex = headerRow.indexOf(xField);
-  const yFieldIndex = headerRow.indexOf(yField);
-  const colorFieldIndex = headerRow.indexOf(colorField);
-  const sizeFieldIndex = headerRow.indexOf(sizeField);
-  if (xFieldIndex === -1 || yFieldIndex === -1 || colorFieldIndex === -1 || sizeFieldIndex === -1) {
-    throw new Error(
-      `Cannot find field indices: x=${xFieldIndex}, y=${yFieldIndex}, color=${colorFieldIndex}, size=${sizeFieldIndex}`
-    );
-  }
+  // Transform data using multi-series approach
+  const { categories, seriesData, sizeRange } = transformToMultiSeriesWithSize(
+    transformedData,
+    xField,
+    yField,
+    colorField,
+    sizeField
+  );
 
   // Get display names for tooltip
-  const axisConfig = state.axisConfig;
   const xAxisName = axisConfig?.xAxisStyle?.title?.text || axisConfig?.xAxis?.name || xField;
   const yAxisName = axisConfig?.yAxisStyle?.title?.text || axisConfig?.yAxis?.name || yField;
   const colorAxisMapping = Object.values(axisColumnMappings).find(
@@ -347,104 +450,93 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
   const colorAxisName = colorAxisMapping?.name || colorField;
   const sizeAxisName = sizeAxisMapping?.name || sizeField;
 
-  // Get unique categories from the data
-  const categories = [
-    ...new Set(dataRows.map((row) => String(row[colorFieldIndex] || 'undefined'))),
-  ];
-
   const thresholdLines = generateThresholdLines(styles.thresholdOptions);
 
-  // Create single series with data in [x, y, colorValue, sizeValue] format
-  const series = [
-    {
-      type: 'scatter',
-      symbol: styles.exclusive?.pointShape || 'circle',
-      symbolRotate: styles.exclusive?.angle || 0,
-      data: dataRows.map((row) => [
-        row[xFieldIndex],
-        row[yFieldIndex],
-        row[colorFieldIndex],
-        row[sizeFieldIndex],
-      ]),
-      itemStyle: {
-        opacity: 0.7,
-      },
-      emphasis: {
-        focus: 'self',
-        scale: 1.2,
-      },
-      ...thresholdLines,
+  // Create multiple scatter series, one for each color category
+  // Data format: [x, y, size] where size is at dimension 2 for visualMap
+  const series = categories.map((category) => ({
+    name: String(category),
+    type: 'scatter',
+    symbol: styles.exclusive?.pointShape || 'circle',
+    symbolRotate: styles.exclusive?.angle || 0,
+    data: seriesData[category], // [x, y, size] format
+    itemStyle: {
+      opacity: 0.7,
     },
-  ] as any[];
+    emphasis: {
+      focus: 'series',
+      scale: 1.2,
+    },
+    ...thresholdLines,
+  })) as ScatterSeriesOption[];
 
-  const legendPosition = styles.legendPosition || 'bottom';
-  newState.visualMap = [
-    {
-      show: styles.addLegend === true,
-      type: 'piecewise',
-      categories,
-      dimension: 2,
-      inRange: {
-        color:
-          categories.length <= 10
-            ? [
-                '#5470c6',
-                '#91cc75',
-                '#fac858',
-                '#ee6666',
-                '#73c0de',
-                '#3ba272',
-                '#fc8452',
-                '#9a60b4',
-                '#ea7ccc',
-                '#c2c2c2',
-              ].slice(0, categories.length)
-            : undefined,
-      },
-      textStyle: { color: '#333' },
-      orient: legendPosition === 'left' || legendPosition === 'right' ? 'vertical' : 'horizontal',
-      left: legendPosition === 'left' ? 'left' : legendPosition === 'right' ? 'right' : 'center',
-      top: legendPosition === 'top' ? 'top' : legendPosition === 'bottom' ? undefined : '10%',
-      bottom: legendPosition === 'bottom' ? 60 : undefined,
-      right: legendPosition === 'right' ? 20 : undefined,
-    },
-    {
-      show: styles.addLegend === true,
-      type: 'continuous',
-      dimension: 3,
-      min: Math.min(...dataRows.map((row) => Number(row[sizeFieldIndex]) || 0)),
-      max: Math.max(...dataRows.map((row) => Number(row[sizeFieldIndex]) || 0)),
-      inRange: {
-        symbolSize: [5, 25],
-      },
-      textStyle: { color: '#333' },
-      orient: legendPosition === 'left' || legendPosition === 'right' ? 'vertical' : 'horizontal',
-      left: legendPosition === 'left' ? 'left' : legendPosition === 'right' ? 'right' : 'center',
-      top: legendPosition === 'top' ? '5%' : legendPosition === 'bottom' ? undefined : undefined,
-      bottom: legendPosition === 'bottom' ? 20 : legendPosition === 'top' ? undefined : '5%',
-      right: legendPosition === 'right' ? 20 : undefined,
-      text: [`${sizeAxisName} Max`, `${sizeAxisName} Min`],
-    },
-  ];
-
-  // Add tooltip configuration
+  // Setup tooltip configuration
   newState.tooltipConfig = {
     trigger: 'item',
     formatter: (params: any) => {
-      if (params.value && Array.isArray(params.value) && params.value.length >= 4) {
+      if (params.value && Array.isArray(params.value) && params.value.length >= 3) {
         const xValue = params.value[0];
         const yValue = params.value[1];
-        const colorValue = params.value[2];
-        const sizeValue = params.value[3];
-        return `${xAxisName}: ${xValue}<br/>${yAxisName}: ${yValue}<br/>${colorAxisName}: ${colorValue}<br/>${sizeAxisName}: ${sizeValue}`;
+        const sizeValue = params.value[2];
+        const seriesName = params.seriesName;
+        return `${xAxisName}: ${xValue}<br/>${yAxisName}: ${yValue}<br/>${colorAxisName}: ${seriesName}<br/>${sizeAxisName}: ${sizeValue}`;
       }
       return `${xAxisName}: ${params.value || 'N/A'}<br/>${yAxisName}: ${params.name || 'N/A'}`;
     },
   };
 
-  // Set flags for size scatter
-  newState.useDataInsteadOfDataset = true;
-  newState.disableDefaultLegend = true;
+  // Set series and visualMap
   newState.series = series;
+
+  // Position visualMap according to legendPosition (same as color legend)
+  const legendPosition = styles.legendPosition || 'bottom';
+
+  const getVisualMapConfig = () => {
+    switch (legendPosition) {
+      case 'left':
+        return {
+          orient: 'vertical',
+          left: 'left',
+          top: 'top',
+        };
+      case 'right':
+        return {
+          orient: 'vertical',
+          right: 'right',
+          top: 'top',
+        };
+      case 'top':
+        return {
+          orient: 'horizontal',
+          left: 'center',
+          top: '5%',
+        };
+      case 'bottom':
+        return {
+          orient: 'horizontal',
+          left: 'center',
+          bottom: '5%',
+        };
+    }
+  };
+
+  newState.visualMap = {
+    show: styles.addLegend === true,
+    type: 'continuous',
+    dimension: 2,
+    min: sizeRange.min,
+    max: sizeRange.max,
+    text: [`${sizeAxisName} Max`, `${sizeAxisName} Min`],
+    inRange: {
+      symbolSize: [5, 25],
+    },
+    outOfRange: {
+      symbolSize: [5, 25],
+      color: ['rgba(255,255,255,0.4)'],
+    },
+    ...getVisualMapConfig(),
+  };
+
+  newState.disableDefaultLegend = false;
   return newState;
 };

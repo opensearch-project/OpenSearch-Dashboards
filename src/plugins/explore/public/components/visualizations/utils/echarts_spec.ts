@@ -85,7 +85,6 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   >;
   visualMap?: any;
   tooltipConfig?: any;
-  useDataInsteadOfDataset?: boolean;
   disableDefaultLegend?: boolean;
   // Final output
   spec?: EChartsOption;
@@ -224,7 +223,6 @@ export const assembleSpec = <T extends BaseChartStyle>(
     visualMap,
     axisColumnMappings,
     tooltipConfig,
-    useDataInsteadOfDataset,
   } = state;
 
   const hasMultiDatasets = Array.isArray(transformedData[0]?.[0]);
@@ -259,7 +257,7 @@ export const assembleSpec = <T extends BaseChartStyle>(
 
   const spec = {
     ...baseConfig,
-    ...(useDataInsteadOfDataset ? {} : { dataset: data }),
+    dataset: data,
     xAxis: xAxisConfig,
     yAxis: yAxisConfig,
     visualMap,
