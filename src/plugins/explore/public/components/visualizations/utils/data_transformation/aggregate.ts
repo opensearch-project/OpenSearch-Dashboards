@@ -74,6 +74,7 @@ export const aggregate = (options: {
   field: string;
   aggregationType?: AggregationType;
   timeUnit?: TimeUnit;
+  // TODO: align AggregationType and CalculationMethod
   calculateType?: CalculationMethod;
 }) => (data: Array<Record<string, any>>) => {
   const { groupBy, field, aggregationType, timeUnit, calculateType } = options;

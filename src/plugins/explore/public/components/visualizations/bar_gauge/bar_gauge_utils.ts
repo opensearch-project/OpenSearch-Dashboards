@@ -311,7 +311,7 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
   const gradientDirection = xAxisConfig.type === 'category' ? [0, 1, 0, 0] : [0, 0, 1, 0];
 
   const bars =
-    generateBarStyle({
+    createBarSeries({
       styles,
       values: updatedValues,
       originalValues: values,
@@ -340,7 +340,7 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
           show: true,
           position: 'top',
           color: fontColors[i],
-          fontSize: Math.max(8, Math.min(30, 100 / Math.sqrt(fontFactor))), // font size between 8px (minimum) and 30px
+          fontSize: Math.max(10, Math.min(30, 100 / Math.sqrt(fontFactor))), // font size between 10px  and 30px
           formatter: displayValues[i],
         },
       })),
@@ -355,7 +355,7 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
   return newState;
 };
 
-const generateBarStyle = ({
+const createBarSeries = ({
   styles,
   thresholds,
   values, // tranformed values for drawing bars
