@@ -123,7 +123,7 @@ export const createFacetAreaSeries = <T extends BaseChartStyle>({
       stack: `Total_${index}`, // Use unique stack name for each facet
       connectNulls: true,
       areaStyle: {
-        opacity: styles.areaOpacity || DEFAULT_OPACITY3,
+        opacity: styles.areaOpacity || DEFAULT_OPACITY,
       },
       smooth: true,
       encode: {
