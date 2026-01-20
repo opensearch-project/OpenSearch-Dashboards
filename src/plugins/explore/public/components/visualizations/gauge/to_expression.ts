@@ -16,20 +16,8 @@ import {
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { getUnitById, showDisplayValue } from '../style_panel/unit/collection';
 import { getChartRender } from '../utils/utils';
-import {
-  pipe,
-  createBaseConfig,
-  buildAxisConfigs,
-  assembleSpec,
-  buildVisMap,
-} from '../utils/echarts_spec';
-import {
-  aggregate,
-  convertTo2DArray,
-  transform,
-  pivot,
-  facetTransform,
-} from '../utils/data_transformation';
+import { pipe, createBaseConfig, assembleSpec } from '../utils/echarts_spec';
+import { convertTo2DArray, transform } from '../utils/data_transformation';
 
 export const createGauge = (
   transformedData: Array<Record<string, any>>,
@@ -55,7 +43,7 @@ export const createGauge = (
       styles: styleOptions,
       axisColumnMappings: axisColumnMappings ?? {},
     });
-
+    console.log('result.spec', result.spec);
     return result.spec;
   }
   const colors = getColors();
