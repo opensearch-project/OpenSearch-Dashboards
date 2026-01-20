@@ -54,6 +54,7 @@ import {
   createNumericalStateTimeline,
   createCategoricalStateTimeline,
   createSingleCategoricalStateTimeline,
+  createSingleNumericalStateTimeline,
 } from './state_timeline/to_expression';
 import { createBarGaugeSpec } from './bar_gauge/to_expression';
 import {
@@ -151,6 +152,15 @@ const oneMetricOneDateRule: VisualizationRule = {
           categoricalColumns,
           dateColumns,
           styleOptions as MetricChartStyle,
+          axisColumnMappings
+        );
+      case 'state_timeline':
+        return createSingleNumericalStateTimeline(
+          transformedData,
+          numericalColumns,
+          categoricalColumns,
+          dateColumns,
+          styleOptions as StateTimeLineChartStyle,
           axisColumnMappings
         );
       default:
