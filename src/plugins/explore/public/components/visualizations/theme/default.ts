@@ -3,10 +3,81 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import * as echarts from 'echarts';
+
 import { getColors } from './default_colors';
 import { Config } from './config';
 
 const colorPalettes = getColors();
+
+export const DEFAULT_THEME = 'osd-default';
+echarts.registerTheme(DEFAULT_THEME, createEchartsTheme(colorPalettes));
+
+export function createEchartsTheme(colors: ReturnType<typeof getColors>) {
+  const axis = {
+    axisLine: {
+      show: true,
+      lineStyle: {
+        color: colors.grid,
+      },
+    },
+    axisTick: {
+      show: true,
+      lineStyle: {
+        color: colors.grid,
+      },
+    },
+    axisLabel: {
+      show: true,
+      color: colors.text,
+    },
+    splitLine: {
+      show: true,
+      lineStyle: {
+        color: [colors.grid],
+      },
+    },
+    splitArea: {
+      show: false,
+    },
+  };
+
+  return {
+    color: colors.categories,
+    title: {
+      textStyle: {
+        color: colors.text,
+      },
+      subtextStyle: {
+        color: colors.subText,
+      },
+    },
+    categoryAxis: axis,
+    valueAxis: axis,
+    logAxis: axis,
+    timeAxis: axis,
+    legend: {
+      textStyle: {
+        color: colors.text,
+      },
+    },
+    tooltip: {
+      axisPointer: {
+        lineStyle: {
+          color: colors.grid,
+          width: 1,
+        },
+        crossStyle: {
+          color: colors.grid,
+          width: 1,
+        },
+      },
+    },
+    visualMap: {
+      color: [colors.statusGreen, colors.statusYellow, colors.statusOrange, colors.statusRed],
+    },
+  };
+}
 
 export const defaultTheme: Config = {
   arc: { fill: colorPalettes.categories[0] },
