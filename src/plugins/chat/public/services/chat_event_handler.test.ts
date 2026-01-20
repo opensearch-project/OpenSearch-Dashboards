@@ -528,6 +528,117 @@ describe('ChatEventHandler', () => {
     });
   });
 
+  describe('user confirmation handling', () => {
+    it('should handle user rejection of tool execution', async () => {
+      const toolCallId = 'tool-123';
+      const mockRejectedResult = { userRejected: true, data: 'User rejected the action' };
+
+      // Mock tool executor to return rejection
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockRejectedResult);
+
+      // Mock sendToolResult
+      const mockToolMessage: ToolMessage = {
+        id: `tool-result-${toolCallId}`,
+        role: 'tool',
+        content: JSON.stringify(mockRejectedResult),
+        toolCallId,
+      };
+
+      const mockObservable = {
+        subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+      };
+
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: mockObservable,
+        toolMessage: mockToolMessage,
+      });
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_action',
+      } as ToolCallStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{"param": "value"}',
+      } as ToolCallArgsEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      // Should update state to failed
+      expect(mockAssistantActionService.updateToolCallState).toHaveBeenCalledWith(toolCallId, {
+        status: 'failed',
+      });
+
+      // Should send rejection back to assistant
+      expect(mockChatService.sendToolResult).toHaveBeenCalledWith(
+        toolCallId,
+        mockRejectedResult,
+        expect.any(Array)
+      );
+    });
+
+    it('should handle user approval of tool execution', async () => {
+      const toolCallId = 'tool-123';
+      const mockApprovedResult = { success: true, data: 'Action executed successfully' };
+
+      // Mock tool executor to return successful result (no userRejected flag)
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockApprovedResult);
+
+      // Mock sendToolResult
+      const mockToolMessage: ToolMessage = {
+        id: `tool-result-${toolCallId}`,
+        role: 'tool',
+        content: JSON.stringify(mockApprovedResult),
+        toolCallId,
+      };
+
+      const mockObservable = {
+        subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+      };
+
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: mockObservable,
+        toolMessage: mockToolMessage,
+      });
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_action',
+      } as ToolCallStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{"param": "value"}',
+      } as ToolCallArgsEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      // Should update state to complete
+      expect(mockAssistantActionService.updateToolCallState).toHaveBeenCalledWith(toolCallId, {
+        status: 'complete',
+        result: mockApprovedResult,
+      });
+
+      // Should send result back to assistant
+      expect(mockChatService.sendToolResult).toHaveBeenCalledWith(
+        toolCallId,
+        mockApprovedResult,
+        expect.any(Array)
+      );
+    });
+  });
+
   describe('error handling', () => {
     it('should handle malformed tool call arguments', async () => {
       const toolCallId = 'tool-123';

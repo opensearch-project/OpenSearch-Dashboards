@@ -14,10 +14,6 @@ interface ConfirmationMessageProps {
   onReject: () => void;
 }
 
-/**
- * Inline confirmation message displayed in the chat timeline
- * Shows as "Waiting for input..." with a yellow background for user confirmation
- */
 export const ConfirmationMessage: React.FC<ConfirmationMessageProps> = ({
   request,
   onApprove,

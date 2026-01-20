@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useRef, useState, useEffect, useImperativeHandle } from 'react';
+import React, {
+  useCallback,
+  useRef,
+  useState,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+} from 'react';
 import { useEffectOnce, useUnmount } from 'react-use';
 import { EuiToolTip, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -19,6 +26,7 @@ import {
 import { ContextProviderStart, TextSelectionMonitor } from '../../../context_provider/public';
 import './chat_header_button.scss';
 import { SuggestedActionsService } from '../services/suggested_action';
+import { ConfirmationService } from '../services/confirmation_service';
 import gradientGenerateIcon from '../assets/gradient_generate_icon.svg';
 
 export interface ChatHeaderButtonInstance {
@@ -46,6 +54,9 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
     const sideCarRef = useRef<{ close: () => void }>();
     const chatWindowRef = useRef<ChatWindowInstance>(null);
     const flyoutMountPoint = useRef(null);
+
+    // Instantiate confirmation service
+    const confirmationService = useMemo(() => new ConfirmationService(), []);
 
     const setMountPoint = useCallback((mountPoint) => {
       flyoutMountPoint.current = mountPoint;
@@ -236,6 +247,7 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
                   <ChatProvider
                     chatService={chatService}
                     suggestedActionsService={suggestedActionsService}
+                    confirmationService={confirmationService}
                   >
                     <ChatWindow
                       layoutMode={layoutMode}

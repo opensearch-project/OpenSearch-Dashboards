@@ -32,7 +32,6 @@ export interface AssistantAction<T = any> {
   deps?: any[];
   requiresConfirmation?: boolean; // Whether this action requires user confirmation
   useCustomRenderer?: boolean; // Whether to use custom render method for tool results
-  sendActionResultBack?: boolean; // Whether to send tool output to assistant
 }
 
 export function useAssistantAction<T = any>(action: AssistantAction<T>) {

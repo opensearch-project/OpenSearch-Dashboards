@@ -35,7 +35,6 @@ describe('ChatHeaderButton', () => {
   let mockChatService: jest.Mocked<ChatService>;
   let mockContextProvider: any;
   let mockSuggestedActionsService: any;
-  let mockConfig: any;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -76,11 +75,6 @@ describe('ChatHeaderButton', () => {
         agenticFeaturesEnabled: true,
       },
     } as any;
-
-    // Mock config with enabled = true by default
-    mockConfig = {
-      enabled: true,
-    };
   });
 
   describe('ref functionality', () => {
@@ -93,7 +87,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
           ref={ref}
         />
       );
@@ -112,7 +105,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
           ref={ref}
         />
       );
@@ -137,7 +129,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
         />
       );
 
@@ -154,7 +145,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
         />
       );
 
@@ -168,7 +158,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
         />
       );
 
@@ -182,7 +171,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
         />
       );
 
@@ -206,7 +194,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
         />
       );
 
@@ -238,7 +225,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
         />
       );
 
@@ -265,7 +251,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
         />
       );
 
@@ -289,7 +274,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
         />
       );
 
@@ -311,7 +295,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
         />
       );
 
@@ -339,7 +322,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
         />
       );
 
@@ -358,7 +340,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
         />
       );
 
@@ -379,7 +360,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
         />
       );
 
@@ -397,7 +377,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
         />
       );
 
@@ -415,7 +394,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
         />
       );
 
@@ -434,7 +412,6 @@ describe('ChatHeaderButton', () => {
           chatService={mockChatService}
           contextProvider={mockContextProvider}
           suggestedActionsService={mockSuggestedActionsService}
-          config={mockConfig}
         />
       );
 

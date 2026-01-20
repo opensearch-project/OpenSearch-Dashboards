@@ -26,20 +26,13 @@ interface PendingToolCall {
  */
 export class ToolExecutor {
   private pendingAgentTools = new Map<string, PendingToolCall>();
-  private confirmationService?: ConfirmationService;
+  private confirmationService: ConfirmationService;
 
   constructor(
     private assistantActionService: AssistantActionService,
-    confirmationService?: ConfirmationService
+    confirmationService: ConfirmationService
   ) {
     this.confirmationService = confirmationService;
-  }
-
-  /**
-   * Set the confirmation service (can be set after construction)
-   */
-  setConfirmationService(service: ConfirmationService): void {
-    this.confirmationService = service;
   }
 
   /**
@@ -55,7 +48,7 @@ export class ToolExecutor {
   ): Promise<ToolResult> {
     try {
       // Check if this tool requires confirmation
-      const requiresConfirmation = this.toolRequiresConfirmation(toolName);
+      const requiresConfirmation = this.assistantActionService.isUserConfirmRequired(toolName);
 
       if (requiresConfirmation && this.confirmationService && toolCallId) {
         // Request user confirmation
@@ -99,23 +92,6 @@ export class ToolExecutor {
         data: null,
       };
     }
-  }
-
-  /**
-   * Check if a tool requires user confirmation
-   * Checks action metadata first, then falls back to default list
-   */
-  private toolRequiresConfirmation(toolName: string): boolean {
-    // Get the action from the service
-    const currentState = this.assistantActionService.getCurrentState();
-    const action = currentState.actions.get(toolName);
-
-    // Check if action has requiresConfirmation flag
-    if (action && (action as any).requiresConfirmation) {
-      return true;
-    }
-
-    return false;
   }
 
   /**

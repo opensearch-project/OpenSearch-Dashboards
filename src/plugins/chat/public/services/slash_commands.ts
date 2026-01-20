@@ -15,6 +15,11 @@ class SlashCommandRegistry {
   private commands: Map<string, SlashCommand> = new Map();
 
   register(command: SlashCommand) {
+    if (this.commands.has(command.command)) {
+      // eslint-disable-next-line no-console
+      console.warn(`Slash command "/${command.command}" is already registered.`);
+      return;
+    }
     this.commands.set(command.command, command);
   }
 

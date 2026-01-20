@@ -9,7 +9,7 @@ import React, { useState, useEffect, useMemo, useImperativeHandle, useCallback, 
 import { useChatContext } from '../contexts/chat_context';
 import { ChatEventHandler } from '../services/chat_event_handler';
 import { AssistantActionService } from '../../../context_provider/public';
-import { ConfirmationService, ConfirmationRequest } from '../services/confirmation_service';
+import { ConfirmationRequest } from '../services/confirmation_service';
 import {
   // eslint-disable-next-line prettier/prettier
   type Event as ChatEvent,
@@ -52,7 +52,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 }, ref) => {
 
   const service = AssistantActionService.getInstance();
-  const { chatService } = useChatContext();
+  const { chatService, confirmationService } = useChatContext();
   const [timeline, setTimeline] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
@@ -65,9 +65,6 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   React.useEffect(() => {
     timelineRef.current = timeline;
   }, [timeline]);
-
-  // Create confirmation service
-  const confirmationService = useMemo(() => new ConfirmationService(), []);
 
   // Subscribe to pending confirmations
   useEffect(() => {
