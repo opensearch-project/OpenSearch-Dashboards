@@ -27,7 +27,7 @@ export const PROMQL_FRONTEND_TOOLS: Tool[] = [
         },
         labelsLimit: {
           type: 'number',
-          description: 'Maximum number of labels per metric. Defaults to 10.',
+          description: 'Maximum number of labels per metric. Defaults to 20.',
         },
         valuesLimit: {
           type: 'number',

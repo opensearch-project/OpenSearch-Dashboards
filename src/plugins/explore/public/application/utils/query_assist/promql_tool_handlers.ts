@@ -10,7 +10,7 @@ import { PromQLToolName } from './promql_tools';
 const DEFAULT_METRICS_LIMIT = 20;
 
 /** Default limit for labels per metric */
-const DEFAULT_LABELS_LIMIT = 10;
+const DEFAULT_LABELS_LIMIT = 20;
 
 /** Default limit for sample values per label */
 const DEFAULT_VALUES_LIMIT = 5;

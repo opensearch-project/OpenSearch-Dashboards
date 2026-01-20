@@ -68,10 +68,6 @@ export const callAgentActionCreator = createAsyncThunk<
         dataSourceId: dataset.dataSource?.id,
       });
 
-      if (result.error) {
-        throw result.error;
-      }
-
       if (result.query) {
         dispatch(runQueryActionCreator(services, result.query));
         dispatch(setLastExecutedTranslatedQuery(result.query));

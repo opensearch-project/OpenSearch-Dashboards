@@ -29,7 +29,6 @@ interface GeneratePromQLOptions {
 
 interface GeneratePromQLResult {
   query?: string;
-  error?: Error;
 }
 
 function isTextMessageContentEvent(event: BaseEvent): event is TextMessageContentEvent {
@@ -64,13 +63,6 @@ const PROMQL_SYSTEM_PROMPT = `You are a PromQL expert. Your task is to convert n
 
 /** Maximum number of tool calls allowed per query generation */
 const MAX_TOOL_CALLS = 3;
-
-/**
- * Generate a cache key for deduplicating tool calls
- */
-function getToolCallCacheKey(toolName: string, args: Record<string, unknown>): string {
-  return `${toolName}:${JSON.stringify(args, Object.keys(args).sort())}`;
-}
 
 /**
  * Generate a PromQL query using AG-UI streaming with frontend tool execution.
@@ -259,15 +251,17 @@ export async function generatePromQLWithAgUi({
 
     await processStream(observable);
 
-    if (!finalQuery && !error) {
-      error = new Error(
+    if (error) {
+      throw error;
+    }
+
+    if (!finalQuery) {
+      throw new Error(
         'Could not generate a PromQL query from your question. Please rephrase and try again.'
       );
     }
 
-    return { query: finalQuery, error };
-  } catch (err) {
-    return { error: err as Error };
+    return { query: finalQuery };
   } finally {
     agent.abort();
   }
