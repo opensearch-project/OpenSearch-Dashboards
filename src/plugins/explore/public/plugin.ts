@@ -75,6 +75,7 @@ import { SlotRegistryService } from './services/slot_registry';
 // Log Actions
 import { logActionRegistry } from './services/log_action_registry';
 import { createAskAiAction } from './actions/ask_ai_action';
+import { importDataActionConfig } from './actions/import_data_action';
 
 export class ExplorePlugin
   implements
@@ -129,6 +130,14 @@ export class ExplorePlugin
     setUsageCollector(setupDeps.usageCollection);
     this.registerExploreVisualization(core, setupDeps);
     const visualizationRegistryService = this.visualizationRegistryService.setup();
+
+    // Setup query panel actions registry
+    const queryPanelActionsRegistry = this.queryPanelActionsRegistryService.setup();
+
+    // Register import data action if data importer is available
+    if (this.dataImporterConfig) {
+      queryPanelActionsRegistry.register(importDataActionConfig);
+    }
 
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
@@ -472,7 +481,7 @@ export class ExplorePlugin
           this.docViewsLinksRegistry?.addDocViewLink(docViewLinkSpec as any),
       },
       visualizationRegistry: visualizationRegistryService,
-      queryPanelActionsRegistry: this.queryPanelActionsRegistryService.setup(),
+      queryPanelActionsRegistry,
       logActionRegistry: {
         registerAction: (action) => logActionRegistry.registerAction(action),
       },

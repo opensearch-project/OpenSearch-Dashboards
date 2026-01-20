@@ -56,10 +56,6 @@ jest.mock('./ask_ai_button', () => ({
   AskAIButton: () => <div data-test-subj="ask-ai-button">Ask AI Button</div>,
 }));
 
-jest.mock('./import_data_button', () => ({
-  ImportDataButton: () => <div data-test-subj="import-data-button">Import Data Button</div>,
-}));
-
 jest.mock('../../../application/context', () => ({
   useDatasetContext: jest.fn(),
 }));
@@ -95,7 +91,6 @@ describe('QueryPanelWidgets', () => {
     mockUseOpenSearchDashboards.mockReturnValue({
       services: {
         queryPanelActionsRegistry: mockQueryPanelActionsRegistry,
-        dataImporterConfig: undefined, // Default to undefined
       },
     });
 
@@ -211,79 +206,6 @@ describe('QueryPanelWidgets', () => {
 
       expect(mockUseOpenSearchDashboards).toHaveBeenCalled();
       expect(mockQueryPanelActionsRegistry.isEmpty).toHaveBeenCalled();
-    });
-  });
-
-  describe('import data button integration', () => {
-    it('does not render import data button when dataImporterConfig is undefined', () => {
-      mockQueryPanelActionsRegistry.isEmpty.mockReturnValue(true);
-      mockUseOpenSearchDashboards.mockReturnValue({
-        services: {
-          queryPanelActionsRegistry: mockQueryPanelActionsRegistry,
-          dataImporterConfig: undefined,
-        },
-      });
-
-      render(<QueryPanelWidgets />);
-
-      expect(screen.queryByTestId('import-data-button')).not.toBeInTheDocument();
-    });
-
-    it('renders import data button when dataImporterConfig is present', () => {
-      mockQueryPanelActionsRegistry.isEmpty.mockReturnValue(true);
-      mockUseOpenSearchDashboards.mockReturnValue({
-        services: {
-          queryPanelActionsRegistry: mockQueryPanelActionsRegistry,
-          dataImporterConfig: {
-            enabledFileTypes: ['csv', 'json'],
-            maxFileSizeBytes: 104857600,
-            maxTextCount: 10000,
-            filePreviewDocumentsCount: 10,
-          },
-        },
-      });
-
-      const { container } = render(<QueryPanelWidgets />);
-
-      expect(screen.getByTestId('import-data-button')).toBeInTheDocument();
-
-      // Check that separator is added before import data button
-      const separators = container.querySelectorAll('.exploreQueryPanelWidgets__verticalSeparator');
-      expect(separators).toHaveLength(3); // 2 original + 1 before import data button
-    });
-
-    it('maintains correct component order with import data button', () => {
-      mockQueryPanelActionsRegistry.isEmpty.mockReturnValue(false);
-      mockUseOpenSearchDashboards.mockReturnValue({
-        services: {
-          queryPanelActionsRegistry: mockQueryPanelActionsRegistry,
-          dataImporterConfig: {
-            enabledFileTypes: ['csv'],
-            maxFileSizeBytes: 104857600,
-            maxTextCount: 10000,
-            filePreviewDocumentsCount: 10,
-          },
-        },
-      });
-
-      const { container } = render(<QueryPanelWidgets />);
-
-      const leftSection = container.querySelector('.exploreQueryPanelWidgets__left');
-      expect(leftSection).toBeInTheDocument();
-
-      const childNodes = Array.from(leftSection!.children);
-      const testSubjects = childNodes
-        .filter((node) => node.getAttribute('data-test-subj'))
-        .map((node) => node.getAttribute('data-test-subj'));
-
-      expect(testSubjects).toEqual([
-        'language-toggle',
-        'dataset-select-widget',
-        'recent-queries-button',
-        'save-query-button',
-        'import-data-button',
-        'query-panel-actions',
-      ]);
     });
   });
 });
