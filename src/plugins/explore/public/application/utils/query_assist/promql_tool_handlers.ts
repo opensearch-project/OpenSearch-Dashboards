@@ -6,22 +6,20 @@
 import { DataPublicPluginStart } from '../../../../../data/public';
 import { PromQLToolName } from './promql_tools';
 
-/** Maximum sample values to return per label */
-const MAX_LABEL_VALUES = 5;
-
 /** Default limit for metrics */
 const DEFAULT_METRICS_LIMIT = 20;
 
-/** Labels per metric in metadata search */
-const LABELS_PER_METRIC = 5;
+/** Default limit for labels per metric */
+const DEFAULT_LABELS_LIMIT = 10;
+
+/** Default limit for sample values per label */
+const DEFAULT_VALUES_LIMIT = 5;
 
 interface SearchPrometheusMetadataArgs {
   query?: string;
-  limit?: number;
-}
-
-interface SearchPrometheusLabelsArgs {
-  metricNames: string[];
+  metricsLimit?: number;
+  labelsLimit?: number;
+  valuesLimit?: number;
 }
 
 interface MetricInfo {
@@ -32,11 +30,9 @@ interface MetricInfo {
 }
 
 interface SearchPrometheusMetadataResult {
+  sharedLabels: string[];
   metrics: MetricInfo[];
-}
-
-interface SearchPrometheusLabelsResult {
-  labelsByMetric: Record<string, Record<string, string[]>>;
+  labelValues: Record<string, string[]>;
 }
 
 interface PrometheusResourceClient {
@@ -71,13 +67,11 @@ export class PromQLToolHandlers {
 
   public async executeTool(
     toolName: PromQLToolName,
-    args: SearchPrometheusMetadataArgs | SearchPrometheusLabelsArgs
-  ): Promise<SearchPrometheusMetadataResult | SearchPrometheusLabelsResult> {
+    args: SearchPrometheusMetadataArgs
+  ): Promise<SearchPrometheusMetadataResult> {
     switch (toolName) {
       case PromQLToolName.SEARCH_PROMETHEUS_METADATA:
-        return this.searchPrometheusMetadata(args as SearchPrometheusMetadataArgs);
-      case PromQLToolName.SEARCH_PROMETHEUS_LABELS:
-        return this.searchPrometheusLabels(args as SearchPrometheusLabelsArgs);
+        return this.searchPrometheusMetadata(args);
       default:
         throw new Error(`Unknown tool: ${toolName}`);
     }
@@ -87,6 +81,10 @@ export class PromQLToolHandlers {
     args: SearchPrometheusMetadataArgs
   ): Promise<SearchPrometheusMetadataResult> {
     try {
+      const metricsLimit = args.metricsLimit ?? DEFAULT_METRICS_LIMIT;
+      const labelsLimit = args.labelsLimit ?? DEFAULT_LABELS_LIMIT;
+      const valuesLimit = args.valuesLimit ?? DEFAULT_VALUES_LIMIT;
+
       let metricNames = await this.prometheusClient.getMetrics(this.dataSourceName);
 
       if (args.query) {
@@ -101,10 +99,10 @@ export class PromQLToolHandlers {
         }
       }
 
-      metricNames = (metricNames || []).slice(0, args.limit || DEFAULT_METRICS_LIMIT);
+      metricNames = (metricNames || []).slice(0, metricsLimit);
 
       if (metricNames.length === 0) {
-        return { metrics: [] };
+        return { sharedLabels: [], metrics: [], labelValues: {} };
       }
 
       const [metadata, ...labelsResults] = await Promise.all([
@@ -114,9 +112,22 @@ export class PromQLToolHandlers {
         ),
       ]);
 
+      const allLabelSets: string[][] = metricNames.map((_, index) =>
+        (labelsResults[index] || []).slice(0, labelsLimit)
+      );
+
+      const sharedLabels =
+        allLabelSets.length > 0
+          ? allLabelSets.reduce((common, labels) =>
+              common.filter((label) => labels.includes(label))
+            )
+          : [];
+
+      const allLabelNames = new Set<string>();
       const metrics: MetricInfo[] = metricNames.map((name, index) => {
         const metaInfo = (metadata as MetricMetadata)?.[name];
-        const labels = (labelsResults[index] || []).slice(0, LABELS_PER_METRIC);
+        const labels = allLabelSets[index].filter((l) => !sharedLabels.includes(l));
+        allLabelSets[index].forEach((label) => allLabelNames.add(label));
         return {
           name,
           type: metaInfo?.[0]?.type,
@@ -125,45 +136,21 @@ export class PromQLToolHandlers {
         };
       });
 
-      return { metrics };
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to search Prometheus metadata:', error);
-      return { metrics: [] };
-    }
-  }
-
-  public async searchPrometheusLabels(
-    args: SearchPrometheusLabelsArgs
-  ): Promise<SearchPrometheusLabelsResult> {
-    try {
-      const labelsByMetric: Record<string, Record<string, string[]>> = {};
-
+      const labelValues: Record<string, string[]> = {};
       await Promise.all(
-        args.metricNames.map(async (metric) => {
-          const labels = await this.prometheusClient
-            .getLabels(this.dataSourceName, metric)
+        Array.from(allLabelNames).map(async (label) => {
+          const values = await this.prometheusClient
+            .getLabelValues(this.dataSourceName, label)
             .catch(() => []);
-
-          const labelValues: Record<string, string[]> = {};
-          await Promise.all(
-            labels.map(async (label) => {
-              const values = await this.prometheusClient
-                .getLabelValues(this.dataSourceName, label, metric)
-                .catch(() => []);
-              labelValues[label] = values.slice(0, MAX_LABEL_VALUES);
-            })
-          );
-
-          labelsByMetric[metric] = labelValues;
+          labelValues[label] = values.slice(0, valuesLimit);
         })
       );
 
-      return { labelsByMetric };
+      return { sharedLabels, metrics, labelValues };
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Failed to search Prometheus labels:', error);
-      return { labelsByMetric: {} };
+      console.error('Failed to search Prometheus metadata:', error);
+      return { sharedLabels: [], metrics: [], labelValues: {} };
     }
   }
 }

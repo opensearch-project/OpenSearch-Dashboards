@@ -3,12 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  PROMQL_FRONTEND_TOOLS,
-  PROMQL_TOOL_NAMES,
-  isPromQLMetadataTool,
-  PromQLToolName,
-} from './promql_tools';
+import { PROMQL_FRONTEND_TOOLS, isPromQLMetadataTool, PromQLToolName } from './promql_tools';
 
 describe('promql_tools', () => {
   describe('PROMQL_FRONTEND_TOOLS', () => {
@@ -24,14 +19,18 @@ describe('promql_tools', () => {
       expect(tool?.description).toContain('metrics with their labels');
       expect(tool?.parameters.type).toBe('object');
       expect(tool?.parameters.properties).toHaveProperty('query');
-      expect(tool?.parameters.properties).toHaveProperty('limit');
+      expect(tool?.parameters.properties).toHaveProperty('metricsLimit');
+      expect(tool?.parameters.properties).toHaveProperty('labelsLimit');
+      expect(tool?.parameters.properties).toHaveProperty('valuesLimit');
     });
 
     it('should have correct parameter schema for search_prometheus_metadata', () => {
       const tool = PROMQL_FRONTEND_TOOLS[0];
       expect(tool.name).toBe('search_prometheus_metadata');
       expect(tool.parameters.properties.query.type).toBe('string');
-      expect(tool.parameters.properties.limit.type).toBe('number');
+      expect(tool.parameters.properties.metricsLimit.type).toBe('number');
+      expect(tool.parameters.properties.labelsLimit.type).toBe('number');
+      expect(tool.parameters.properties.valuesLimit.type).toBe('number');
       expect(tool.parameters.required).toEqual([]);
     });
 
@@ -45,17 +44,6 @@ describe('promql_tools', () => {
         expect(tool.parameters).toHaveProperty('required');
         expect(Array.isArray(tool.parameters.required)).toBe(true);
       });
-    });
-  });
-
-  describe('PROMQL_TOOL_NAMES', () => {
-    it('should contain only search_prometheus_metadata', () => {
-      expect(PROMQL_TOOL_NAMES).toEqual(['search_prometheus_metadata']);
-    });
-
-    it('should match PROMQL_FRONTEND_TOOLS names', () => {
-      const toolNames = PROMQL_FRONTEND_TOOLS.map((t) => t.name);
-      expect(PROMQL_TOOL_NAMES).toEqual(toolNames);
     });
   });
 

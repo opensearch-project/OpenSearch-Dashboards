@@ -237,7 +237,6 @@ export async function generatePromQLWithAgUi({
             error = err as Error;
           }
 
-          console.log('❗streamingText:', streamingText);
           if (!finalQuery && streamingText) {
             finalQuery = extractQueryFromText(streamingText);
           }
