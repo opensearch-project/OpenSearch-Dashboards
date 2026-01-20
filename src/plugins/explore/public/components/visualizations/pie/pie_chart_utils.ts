@@ -16,7 +16,7 @@ export const createPieSeries = <T extends BaseChartStyle>({
   cateField: string;
   valueField: string;
 }): PipelineFn<T> => (state: EChartsSpecState<T>) => {
-  const radius = styles?.exclusive.donut ? ['40%', '70%'] : '70%';
+  const radius = styles?.exclusive.donut ? ['50%', '70%'] : '70%';
 
   // In dataset + pie mode, params.value is an array like [name, value],
   // so we use params.value[1] to extract only the numeric value for the label.
