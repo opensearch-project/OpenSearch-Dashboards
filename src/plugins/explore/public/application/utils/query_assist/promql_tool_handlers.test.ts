@@ -17,6 +17,7 @@ describe('PromQLToolHandlers', () => {
   let mockData: DataPublicPluginStart;
   let handlers: PromQLToolHandlers;
   const testDataSourceName = 'test-datasource';
+  const mockTimeRange = { from: 'now-15m', to: 'now' };
 
   beforeEach(() => {
     mockPrometheusClient = {
@@ -29,6 +30,13 @@ describe('PromQLToolHandlers', () => {
     mockData = ({
       resourceClientFactory: {
         get: jest.fn().mockReturnValue(mockPrometheusClient),
+      },
+      query: {
+        timefilter: {
+          timefilter: {
+            getTime: jest.fn().mockReturnValue(mockTimeRange),
+          },
+        },
       },
     } as unknown) as DataPublicPluginStart;
 
@@ -131,16 +139,22 @@ describe('PromQLToolHandlers', () => {
 
       const result = await handlers.searchPrometheusMetadata({});
 
-      // Should fetch values for all labels
+      // Should fetch values for all labels (with timeRange parameter)
       expect(mockPrometheusClient.getLabelValues).toHaveBeenCalledWith(
         testDataSourceName,
-        'custom_label'
+        'custom_label',
+        mockTimeRange
       );
       expect(mockPrometheusClient.getLabelValues).toHaveBeenCalledWith(
         testDataSourceName,
-        'instance'
+        'instance',
+        mockTimeRange
       );
-      expect(mockPrometheusClient.getLabelValues).toHaveBeenCalledWith(testDataSourceName, 'job');
+      expect(mockPrometheusClient.getLabelValues).toHaveBeenCalledWith(
+        testDataSourceName,
+        'job',
+        mockTimeRange
+      );
       expect(mockPrometheusClient.getLabelValues).toHaveBeenCalledTimes(3);
       expect(Object.keys(result.labelValues)).toHaveLength(3);
       expect(result.labelValues.job).toEqual(['value1', 'value2']);
@@ -314,7 +328,7 @@ describe('PromQLToolHandlers', () => {
       mockPrometheusClient.getMetricMetadata.mockResolvedValue({});
       mockPrometheusClient.getLabels.mockResolvedValue(['job', 'instance']);
       // One label value fetch succeeds, one fails
-      mockPrometheusClient.getLabelValues.mockImplementation((_, label) => {
+      mockPrometheusClient.getLabelValues.mockImplementation((_, label, _timeRange) => {
         if (label === 'instance') {
           return Promise.resolve(['localhost:9090']);
         }

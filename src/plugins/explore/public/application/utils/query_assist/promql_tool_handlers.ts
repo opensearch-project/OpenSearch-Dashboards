@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DataPublicPluginStart } from '../../../../../data/public';
+import { DataPublicPluginStart, TimeRange } from '../../../../../data/public';
 import { PromQLToolName } from './promql_tools';
 
 /** Default limit for metrics */
@@ -36,12 +36,22 @@ interface SearchPrometheusMetadataResult {
 }
 
 interface PrometheusResourceClient {
-  getMetrics: (dataConnectionId: string) => Promise<string[]>;
+  getMetrics: (dataConnectionId: string, timeRange?: TimeRange) => Promise<string[]>;
   getMetricMetadata: (
-    dataConnectionId: string
+    dataConnectionId: string,
+    metric?: string,
+    timeRange?: TimeRange
   ) => Promise<Record<string, Array<{ type: string; help: string }>>>;
-  getLabels: (dataConnectionId: string, metric?: string) => Promise<string[]>;
-  getLabelValues: (dataConnectionId: string, label: string, metric?: string) => Promise<string[]>;
+  getLabels: (
+    dataConnectionId: string,
+    metric?: string,
+    timeRange?: TimeRange
+  ) => Promise<string[]>;
+  getLabelValues: (
+    dataConnectionId: string,
+    label: string,
+    timeRange?: TimeRange
+  ) => Promise<string[]>;
 }
 
 interface MetricMetadata {
@@ -55,6 +65,7 @@ interface MetricMetadata {
 export class PromQLToolHandlers {
   private prometheusClient: PrometheusResourceClient;
   private dataSourceName: string;
+  private data: DataPublicPluginStart;
 
   constructor(data: DataPublicPluginStart, dataSourceName: string) {
     const client = data.resourceClientFactory.get<PrometheusResourceClient>('prometheus');
@@ -63,6 +74,7 @@ export class PromQLToolHandlers {
     }
     this.prometheusClient = client;
     this.dataSourceName = dataSourceName;
+    this.data = data;
   }
 
   public async executeTool(
@@ -84,8 +96,9 @@ export class PromQLToolHandlers {
       const metricsLimit = args.metricsLimit ?? DEFAULT_METRICS_LIMIT;
       const labelsLimit = args.labelsLimit ?? DEFAULT_LABELS_LIMIT;
       const valuesLimit = args.valuesLimit ?? DEFAULT_VALUES_LIMIT;
+      const timeRange = this.data.query.timefilter.timefilter.getTime();
 
-      let metricNames = await this.prometheusClient.getMetrics(this.dataSourceName);
+      let metricNames = await this.prometheusClient.getMetrics(this.dataSourceName, timeRange);
 
       if (args.query) {
         try {
@@ -106,9 +119,9 @@ export class PromQLToolHandlers {
       }
 
       const [metadata, ...labelsResults] = await Promise.all([
-        this.prometheusClient.getMetricMetadata(this.dataSourceName),
+        this.prometheusClient.getMetricMetadata(this.dataSourceName, undefined, timeRange),
         ...metricNames.map((metric) =>
-          this.prometheusClient.getLabels(this.dataSourceName, metric).catch(() => [])
+          this.prometheusClient.getLabels(this.dataSourceName, metric, timeRange).catch(() => [])
         ),
       ]);
 
@@ -140,7 +153,7 @@ export class PromQLToolHandlers {
       await Promise.all(
         Array.from(allLabelNames).map(async (label) => {
           const values = await this.prometheusClient
-            .getLabelValues(this.dataSourceName, label)
+            .getLabelValues(this.dataSourceName, label, timeRange)
             .catch(() => []);
           labelValues[label] = values.slice(0, valuesLimit);
         })
