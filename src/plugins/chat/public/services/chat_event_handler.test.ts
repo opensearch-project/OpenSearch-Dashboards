@@ -28,6 +28,7 @@ const mockAssistantActionService = ({
   executeAction: jest.fn(),
   hasAction: jest.fn().mockReturnValue(true),
   getCurrentState: mockGetCurrentState,
+  isUserConfirmRequired: jest.fn().mockReturnValue(false),
 } as unknown) as jest.Mocked<AssistantActionService>;
 
 const mockChatService = ({
@@ -529,29 +530,26 @@ describe('ChatEventHandler', () => {
   });
 
   describe('user confirmation handling', () => {
+    beforeEach(() => {
+      mockAssistantActionService.isUserConfirmRequired = jest.fn().mockReturnValue(true);
+    });
+
     it('should handle user rejection of tool execution', async () => {
       const toolCallId = 'tool-123';
-      const mockRejectedResult = { userRejected: true, data: 'User rejected the action' };
-
-      // Mock tool executor to return rejection
-      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockRejectedResult);
-
-      // Mock sendToolResult
-      const mockToolMessage: ToolMessage = {
-        id: `tool-result-${toolCallId}`,
-        role: 'tool',
-        content: JSON.stringify(mockRejectedResult),
-        toolCallId,
+      const mockRejectedResult = {
+        success: false,
+        error: 'User rejected the tool execution',
+        userRejected: true,
+        data: {
+          message: 'The user chose not to proceed with this action.',
+          toolName: 'test_action',
+          args: { param: 'value' },
+        },
       };
 
-      const mockObservable = {
-        subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
-      };
-
-      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
-        observable: mockObservable,
-        toolMessage: mockToolMessage,
-      });
+      mockConfirmationService.requestConfirmation = jest
+        .fn()
+        .mockResolvedValue({ approved: false });
 
       await chatEventHandler.handleEvent({
         type: EventType.TOOL_CALL_START,

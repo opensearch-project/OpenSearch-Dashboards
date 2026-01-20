@@ -57,6 +57,11 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
 
     // Instantiate confirmation service
     const confirmationService = useMemo(() => new ConfirmationService(), []);
+    useEffect(() => {
+      return () => {
+        confirmationService.stop();
+      };
+    }, [confirmationService]);
 
     const setMountPoint = useCallback((mountPoint) => {
       flyoutMountPoint.current = mountPoint;

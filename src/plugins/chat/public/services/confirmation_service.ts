@@ -122,4 +122,12 @@ export class ConfirmationService {
   hasPendingConfirmations(): boolean {
     return this.pendingConfirmations$.getValue().length > 0;
   }
+
+  /**
+   * stop all confirmations (e.g. on unmount)
+   */
+  stop(): void {
+    this.pendingConfirmations$.next([]);
+    this.responseCallbacks.clear();
+  }
 }

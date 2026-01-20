@@ -67,9 +67,7 @@ describe('SlashCommandRegistry', () => {
       expect(slashCommandRegistry.get('test')?.description).toBe('First version');
 
       // Should have logged a warning
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'Slash command "/test" is already registered. Ignoring duplicate registration.'
-      );
+      expect(consoleWarnSpy).toHaveBeenCalledWith('Slash command "/test" is already registered.');
 
       consoleWarnSpy.mockRestore();
     });
@@ -111,7 +109,7 @@ describe('SlashCommandRegistry', () => {
       slashCommandRegistry.register(command2);
       expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'Slash command "/duplicate" is already registered. Ignoring duplicate registration.'
+        'Slash command "/duplicate" is already registered.'
       );
 
       consoleWarnSpy.mockRestore();
@@ -555,9 +553,7 @@ describe('SlashCommandRegistry', () => {
       expect(result.message).toBe('v1');
 
       // Should have logged a warning
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        'Slash command "/test" is already registered. Ignoring duplicate registration.'
-      );
+      expect(consoleWarnSpy).toHaveBeenCalledWith('Slash command "/test" is already registered.');
 
       consoleWarnSpy.mockRestore();
     });
