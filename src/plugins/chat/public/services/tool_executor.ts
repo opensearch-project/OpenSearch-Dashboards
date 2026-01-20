@@ -7,12 +7,13 @@ import { AssistantActionService } from '../../../context_provider/public';
 import { ConfirmationService } from './confirmation_service';
 
 export interface ToolResult {
-  success: boolean;
+  success?: boolean;
   data?: any;
   error?: string;
   source?: 'registered_action' | 'agent_tool';
   waitingForAgentResponse?: boolean;
   userRejected?: boolean;
+  cancelled?: boolean;
 }
 
 interface PendingToolCall {
@@ -57,6 +58,14 @@ export class ToolExecutor {
           toolCallId,
           toolArgs
         );
+
+        // Check if confirmation was cancelled (e.g., due to cleanup)
+        if (response.cancelled) {
+          return {
+            success: false,
+            cancelled: true,
+          };
+        }
 
         if (!response.approved) {
           return {

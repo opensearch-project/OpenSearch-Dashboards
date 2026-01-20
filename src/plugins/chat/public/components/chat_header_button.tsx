@@ -59,7 +59,7 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
     const confirmationService = useMemo(() => new ConfirmationService(), []);
     useEffect(() => {
       return () => {
-        confirmationService.stop();
+        confirmationService.cleanAll();
       };
     }, [confirmationService]);
 

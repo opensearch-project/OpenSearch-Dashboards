@@ -115,54 +115,58 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   // Restore timeline from current chat state on component mount
   useEffect(() => {
-    const currentMessages = chatService.getCurrentMessages();
-    if (currentMessages.length > 0) {
-      // load message and query unfinished tool call
-      const lastMessage = currentMessages[currentMessages.length - 1];
-      if (lastMessage.role === 'assistant' && lastMessage.toolCalls) {
-        // restore unfinished tool call by triggering events
-        const unfinishedToolCalls = lastMessage.toolCalls.filter(toolCall => {
-          // Check if there's no corresponding tool result message
-          const hasToolResult = currentMessages.some(msg => 
-            msg.role === 'tool' && msg.toolCallId === toolCall.id
-          );
-          return !hasToolResult;
-        });
+    const restoreTimeline = async () => {
+      const currentMessages = chatService.getCurrentMessages();
+      if (currentMessages.length > 0) {
+        // load message and query unfinished tool call
+        const lastMessage = currentMessages[currentMessages.length - 1];
+        if (lastMessage.role === 'assistant' && lastMessage.toolCalls) {
+          // restore unfinished tool call by triggering events
+          const unfinishedToolCalls = lastMessage.toolCalls.filter(toolCall => {
+            // Check if there's no corresponding tool result message
+            const hasToolResult = currentMessages.some(msg => 
+              msg.role === 'tool' && msg.toolCallId === toolCall.id
+            );
+            return !hasToolResult;
+          });
 
-        // Trigger tool call events for unfinished tool calls
-        unfinishedToolCalls.forEach(async (toolCall) => {
-          try {
-            // Trigger TOOL_CALL_START event
-            await eventHandler.handleEvent({
-              type: EventType.TOOL_CALL_START,
-              toolCallId: toolCall.id,
-              toolCallName: toolCall.function.name,
-              parentMessageId: lastMessage.id,
-              timestamp: Date.now(),
-            });
+          // Trigger tool call events for unfinished tool calls
+          for (const toolCall of unfinishedToolCalls) {
+            try {
+              // Trigger TOOL_CALL_START event
+              await eventHandler.handleEvent({
+                type: EventType.TOOL_CALL_START,
+                toolCallId: toolCall.id,
+                toolCallName: toolCall.function.name,
+                parentMessageId: lastMessage.id,
+                timestamp: Date.now(),
+              });
 
-            // Trigger TOOL_CALL_ARGS event with full arguments
-            await eventHandler.handleEvent({
-              type: EventType.TOOL_CALL_ARGS,
-              toolCallId: toolCall.id,
-              delta: toolCall.function.arguments,
-              timestamp: Date.now(),
-            });
+              // Trigger TOOL_CALL_ARGS event with full arguments
+              await eventHandler.handleEvent({
+                type: EventType.TOOL_CALL_ARGS,
+                toolCallId: toolCall.id,
+                delta: toolCall.function.arguments,
+                timestamp: Date.now(),
+              });
 
-            // Trigger TOOL_CALL_END event to execute the tool
-            await eventHandler.handleEvent({
-              type: EventType.TOOL_CALL_END,
-              toolCallId: toolCall.id,
-              timestamp: Date.now(),
-            });
+              // Trigger TOOL_CALL_END event to execute the tool
+              await eventHandler.handleEvent({
+                type: EventType.TOOL_CALL_END,
+                toolCallId: toolCall.id,
+                timestamp: Date.now(),
+              });
 
-          } catch (error: any) {
-            console.error(`Error restoring tool call for ${toolCall.function.name}:`, error);
+            } catch (error: any) {
+              console.error(`Error restoring tool call for ${toolCall.function.name}:`, error);
+            }
           }
-        });
+        }
+        setTimeline(currentMessages);
       }
-      setTimeline(currentMessages);
-    }
+    };
+
+    restoreTimeline();
   }, [chatService, eventHandler]);
 
   // Sync timeline changes with ChatService for persistence

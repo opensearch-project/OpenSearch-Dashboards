@@ -360,8 +360,8 @@ export class ChatService {
    * Get the current cached data source ID
    * Returns the datasourceId that was last retrieved
    */
-  public getCurrentDataSourceId(): string | undefined {
-    return this.cachedDataSourceId;
+  public async getCurrentDataSourceId(): Promise<string | undefined> {
+    return this.cachedDataSourceId || (await this.getWorkspaceAwareDataSourceId());
   }
 
   public async sendMessage(

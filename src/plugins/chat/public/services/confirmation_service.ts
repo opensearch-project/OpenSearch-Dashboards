@@ -18,6 +18,7 @@ export interface ConfirmationResponse {
   id: string;
   approved: boolean;
   modifiedArgs?: any;
+  cancelled?: boolean;
 }
 
 /**
@@ -126,7 +127,19 @@ export class ConfirmationService {
   /**
    * stop all confirmations (e.g. on unmount)
    */
-  stop(): void {
+  cleanAll(): void {
+    // Resolve all pending promises with cancellation flag to prevent memory leaks
+    // This signals that the confirmation was cancelled due to cleanup, not user rejection
+    this.pendingConfirmations$.getValue().forEach((request) => {
+      const callback = this.responseCallbacks.get(request.id);
+      if (callback) {
+        callback({
+          id: request.id,
+          approved: false,
+          cancelled: true,
+        });
+      }
+    });
     this.pendingConfirmations$.next([]);
     this.responseCallbacks.clear();
   }

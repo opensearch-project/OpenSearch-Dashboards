@@ -334,8 +334,14 @@ export class ChatEventHandler {
         toolCall.function.name,
         args,
         toolCallId,
-        this.chatService?.getCurrentDataSourceId()
+        await this.chatService?.getCurrentDataSourceId()
       );
+
+      // Check if tool execution was cancelled (e.g., due to cleanup)
+      if (result.cancelled) {
+        this.pendingToolCalls.delete(toolCallId);
+        return;
+      }
 
       if (result.userRejected) {
         // User rejected the tool execution
