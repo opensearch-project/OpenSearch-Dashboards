@@ -36,12 +36,12 @@ interface SearchPrometheusMetadataResult {
 }
 
 interface PrometheusResourceClient {
-  getMetrics: (dataSourceId: string) => Promise<string[]>;
+  getMetrics: (dataConnectionId: string) => Promise<string[]>;
   getMetricMetadata: (
-    dataSourceId: string
+    dataConnectionId: string
   ) => Promise<Record<string, Array<{ type: string; help: string }>>>;
-  getLabels: (dataSourceId: string, metric?: string) => Promise<string[]>;
-  getLabelValues: (dataSourceId: string, label: string, metric?: string) => Promise<string[]>;
+  getLabels: (dataConnectionId: string, metric?: string) => Promise<string[]>;
+  getLabelValues: (dataConnectionId: string, label: string, metric?: string) => Promise<string[]>;
 }
 
 interface MetricMetadata {

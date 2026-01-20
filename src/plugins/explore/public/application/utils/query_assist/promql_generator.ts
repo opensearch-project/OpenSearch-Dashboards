@@ -28,7 +28,7 @@ interface GeneratePromQLOptions {
 }
 
 interface GeneratePromQLResult {
-  query?: string;
+  query: string;
 }
 
 function isTextMessageContentEvent(event: BaseEvent): event is TextMessageContentEvent {
@@ -78,7 +78,7 @@ export async function generatePromQLWithAgUi({
   const toolHandlers = new PromQLToolHandlers(data, dataSourceName);
 
   let streamingText = '';
-  let finalQuery: string | undefined;
+  let query: string | undefined;
   let error: Error | undefined;
 
   const messages: Message[] = [
@@ -107,7 +107,7 @@ export async function generatePromQLWithAgUi({
         throw new Error(`Invalid tool arguments: ${validationError}`);
       }
 
-      if (toolCallCount++ > MAX_TOOL_CALLS) {
+      if (++toolCallCount > MAX_TOOL_CALLS) {
         throw new Error(
           `Exceeded maximum tool calls (${MAX_TOOL_CALLS}). Please simplify your question.`
         );
@@ -155,7 +155,7 @@ export async function generatePromQLWithAgUi({
     }
 
     if (event.type === EventType.TEXT_MESSAGE_END) {
-      finalQuery = extractQueryFromText(streamingText);
+      query = extractQueryFromText(streamingText);
       return undefined;
     }
 
@@ -229,8 +229,8 @@ export async function generatePromQLWithAgUi({
             error = err as Error;
           }
 
-          if (!finalQuery && streamingText) {
-            finalQuery = extractQueryFromText(streamingText);
+          if (!query && streamingText) {
+            query = extractQueryFromText(streamingText);
           }
           resolve();
         },
@@ -255,13 +255,13 @@ export async function generatePromQLWithAgUi({
       throw error;
     }
 
-    if (!finalQuery) {
+    if (!query) {
       throw new Error(
         'Could not generate a PromQL query from your question. Please rephrase and try again.'
       );
     }
 
-    return { query: finalQuery };
+    return { query };
   } finally {
     agent.abort();
   }

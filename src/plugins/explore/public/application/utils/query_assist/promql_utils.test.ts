@@ -85,40 +85,59 @@ describe('promql_utils', () => {
     });
 
     describe('search_prometheus_metadata validation', () => {
-      it('should accept valid limit', () => {
-        expect(validateToolArgs('search_prometheus_metadata', { limit: 50 })).toBeUndefined();
+      it('should accept valid metricsLimit', () => {
+        expect(
+          validateToolArgs('search_prometheus_metadata', { metricsLimit: 50 })
+        ).toBeUndefined();
       });
 
       it('should accept limit at minimum boundary', () => {
-        expect(validateToolArgs('search_prometheus_metadata', { limit: 1 })).toBeUndefined();
+        expect(validateToolArgs('search_prometheus_metadata', { metricsLimit: 1 })).toBeUndefined();
       });
 
       it('should accept limit at maximum boundary', () => {
-        expect(validateToolArgs('search_prometheus_metadata', { limit: 1000 })).toBeUndefined();
+        expect(
+          validateToolArgs('search_prometheus_metadata', { labelsLimit: 1000 })
+        ).toBeUndefined();
       });
 
-      it('should reject limit below minimum', () => {
-        const result = validateToolArgs('search_prometheus_metadata', { limit: 0 });
-        expect(result).toContain('Limit must be a number between 1 and 1000');
+      it('should reject metricsLimit below minimum', () => {
+        const result = validateToolArgs('search_prometheus_metadata', { metricsLimit: 0 });
+        expect(result).toContain('metricsLimit must be a number between 1 and 1000');
       });
 
-      it('should reject limit above maximum', () => {
-        const result = validateToolArgs('search_prometheus_metadata', { limit: 1001 });
-        expect(result).toContain('Limit must be a number between 1 and 1000');
+      it('should reject labelsLimit above maximum', () => {
+        const result = validateToolArgs('search_prometheus_metadata', { labelsLimit: 1001 });
+        expect(result).toContain('labelsLimit must be a number between 1 and 1000');
       });
 
-      it('should reject non-numeric limit', () => {
-        const result = validateToolArgs('search_prometheus_metadata', { limit: 'invalid' });
-        expect(result).toContain('Limit must be a number between 1 and 1000');
+      it('should reject non-numeric valuesLimit', () => {
+        const result = validateToolArgs('search_prometheus_metadata', { valuesLimit: 'invalid' });
+        expect(result).toContain('valuesLimit must be a number between 1 and 1000');
       });
 
-      it('should accept missing limit (optional)', () => {
+      it('should accept missing limits (optional)', () => {
         expect(validateToolArgs('search_prometheus_metadata', {})).toBeUndefined();
       });
 
-      it('should accept query parameter', () => {
+      it('should accept query parameter with valid limits', () => {
         expect(
-          validateToolArgs('search_prometheus_metadata', { query: 'cpu', limit: 20 })
+          validateToolArgs('search_prometheus_metadata', {
+            query: 'cpu',
+            metricsLimit: 20,
+            labelsLimit: 10,
+            valuesLimit: 5,
+          })
+        ).toBeUndefined();
+      });
+
+      it('should validate all limit arguments', () => {
+        expect(
+          validateToolArgs('search_prometheus_metadata', {
+            metricsLimit: 50,
+            labelsLimit: 100,
+            valuesLimit: 10,
+          })
         ).toBeUndefined();
       });
     });

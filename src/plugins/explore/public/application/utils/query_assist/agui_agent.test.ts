@@ -74,7 +74,7 @@ describe('AgUiAgent', () => {
 
   describe('runAgent', () => {
     const mockInput: AgUiRunInput = {
-      question: 'Test question',
+      messages: [{ id: 'msg-1', role: 'user', content: 'Test question' }],
       dataSourceName: 'test-datasource',
       language: 'promql',
     };
@@ -236,18 +236,21 @@ describe('AgUiAgent', () => {
       });
     });
 
-    it('should append user message to existing messages', (done) => {
+    it('should pass through all messages in request body', (done) => {
       mockRunHttpRequest.mockReturnValue(of({ type: EventType.RUN_STARTED }));
 
-      const existingMessages = [{ id: 'msg-1', role: 'assistant', content: 'Previous response' }];
-      agent.runAgent({ ...mockInput, messages: existingMessages as any }).subscribe({
+      const messages = [
+        { id: 'msg-1', role: 'user', content: 'First question' },
+        { id: 'msg-2', role: 'assistant', content: 'Response' },
+        { id: 'msg-3', role: 'user', content: 'Follow-up question' },
+      ];
+      agent.runAgent({ ...mockInput, messages: messages as any }).subscribe({
         complete: () => {
           const callArgs = mockRunHttpRequest.mock.calls[0];
           const requestBody = JSON.parse(callArgs[1].body);
 
-          expect(requestBody.messages).toHaveLength(2);
-          expect(requestBody.messages[0]).toEqual(existingMessages[0]);
-          expect(requestBody.messages[1].role).toBe('user');
+          expect(requestBody.messages).toHaveLength(3);
+          expect(requestBody.messages).toEqual(messages);
           done();
         },
       });
@@ -283,17 +286,15 @@ describe('AgUiAgent', () => {
   });
 
   describe('sendToolResult', () => {
-    const mockInput: AgUiRunInput = {
-      question: '',
-      dataSourceName: 'test-datasource',
-      language: 'promql',
-    };
-
     it('should send tool result message', (done) => {
       mockRunHttpRequest.mockReturnValue(of({ type: EventType.RUN_STARTED }));
 
-      const messages = [{ id: 'msg-1', role: 'user', content: 'Original question' }] as any;
-      agent.sendToolResult('tool-call-123', { result: 'data' }, messages, mockInput).subscribe({
+      const inputWithMessages: AgUiRunInput = {
+        messages: [{ id: 'msg-1', role: 'user', content: 'Original question' }],
+        dataSourceName: 'test-datasource',
+        language: 'promql',
+      };
+      agent.sendToolResult('tool-call-123', { result: 'data' }, inputWithMessages).subscribe({
         complete: () => {
           const callArgs = mockRunHttpRequest.mock.calls[0];
           const requestBody = JSON.parse(callArgs[1].body);
@@ -310,31 +311,45 @@ describe('AgUiAgent', () => {
     it('should stringify non-string results', (done) => {
       mockRunHttpRequest.mockReturnValue(of({ type: EventType.RUN_STARTED }));
 
-      agent.sendToolResult('tool-call-123', { metrics: ['m1', 'm2'] }, [], mockInput).subscribe({
-        complete: () => {
-          const callArgs = mockRunHttpRequest.mock.calls[0];
-          const requestBody = JSON.parse(callArgs[1].body);
+      const inputWithEmptyMessages: AgUiRunInput = {
+        messages: [],
+        dataSourceName: 'test-datasource',
+        language: 'promql',
+      };
+      agent
+        .sendToolResult('tool-call-123', { metrics: ['m1', 'm2'] }, inputWithEmptyMessages)
+        .subscribe({
+          complete: () => {
+            const callArgs = mockRunHttpRequest.mock.calls[0];
+            const requestBody = JSON.parse(callArgs[1].body);
 
-          const toolMessage = requestBody.messages.find((m: any) => m.role === 'tool');
-          expect(toolMessage.content).toBe('{"metrics":["m1","m2"]}');
-          done();
-        },
-      });
+            const toolMessage = requestBody.messages.find((m: any) => m.role === 'tool');
+            expect(toolMessage.content).toBe('{"metrics":["m1","m2"]}');
+            done();
+          },
+        });
     });
 
     it('should pass string results as-is', (done) => {
       mockRunHttpRequest.mockReturnValue(of({ type: EventType.RUN_STARTED }));
 
-      agent.sendToolResult('tool-call-123', 'plain string result', [], mockInput).subscribe({
-        complete: () => {
-          const callArgs = mockRunHttpRequest.mock.calls[0];
-          const requestBody = JSON.parse(callArgs[1].body);
+      const inputWithEmptyMessages: AgUiRunInput = {
+        messages: [],
+        dataSourceName: 'test-datasource',
+        language: 'promql',
+      };
+      agent
+        .sendToolResult('tool-call-123', 'plain string result', inputWithEmptyMessages)
+        .subscribe({
+          complete: () => {
+            const callArgs = mockRunHttpRequest.mock.calls[0];
+            const requestBody = JSON.parse(callArgs[1].body);
 
-          const toolMessage = requestBody.messages.find((m: any) => m.role === 'tool');
-          expect(toolMessage.content).toBe('plain string result');
-          done();
-        },
-      });
+            const toolMessage = requestBody.messages.find((m: any) => m.role === 'tool');
+            expect(toolMessage.content).toBe('plain string result');
+            done();
+          },
+        });
     });
   });
 
@@ -354,7 +369,7 @@ describe('AgUiAgent', () => {
 
   describe('error handling', () => {
     const mockInput: AgUiRunInput = {
-      question: 'Test question',
+      messages: [{ id: 'msg-1', role: 'user', content: 'Test question' }],
       dataSourceName: 'test-datasource',
       language: 'promql',
     };
@@ -412,7 +427,7 @@ describe('AgUiAgent', () => {
       mockRunHttpRequest.mockReturnValue(of({ type: EventType.RUN_STARTED }));
 
       const inputData: AgUiRunInput = {
-        question: 'Test',
+        messages: [{ id: 'msg-1', role: 'user', content: 'Test' }],
         dataSourceName: 'ds',
         language: 'promql',
       };

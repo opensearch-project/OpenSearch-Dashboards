@@ -48,10 +48,12 @@ export function validateToolArgs(
 
   switch (toolName) {
     case 'search_prometheus_metadata':
-      if (args.limit !== undefined) {
-        const limit = Number(args.limit);
-        if (isNaN(limit) || limit < 1 || limit > 1000) {
-          return 'Limit must be a number between 1 and 1000';
+      for (const limitArg of ['metricsLimit', 'labelsLimit', 'valuesLimit'] as const) {
+        if (args[limitArg] !== undefined) {
+          const limit = Number(args[limitArg]);
+          if (isNaN(limit) || limit < 1 || limit > 1000) {
+            return `${limitArg} must be a number between 1 and 1000`;
+          }
         }
       }
       break;

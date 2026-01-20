@@ -167,12 +167,16 @@ export class GenericMLRouter implements MLAgentRouter {
       if (isStreamResponse(mlResponse)) {
         const contentEncoding =
           mlResponse.headers['content-encoding'] || mlResponse.headers['Content-Encoding'];
+        const encHeader = Array.isArray(contentEncoding)
+          ? contentEncoding.join(',')
+          : contentEncoding ?? '';
+        const encodings = encHeader
+          .toLowerCase()
+          .split(',')
+          .map((e) => e.trim());
         let responseBody: NodeJS.ReadableStream = mlResponse.body;
 
-        if (
-          contentEncoding === 'gzip' ||
-          (Array.isArray(contentEncoding) && contentEncoding.includes('gzip'))
-        ) {
+        if (encodings.includes('gzip')) {
           const gunzip = createGunzip();
           gunzip.on('error', (err) => {
             logger.error(`Gzip decompression error: ${err.message}`);

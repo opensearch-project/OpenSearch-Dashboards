@@ -45,9 +45,13 @@ export const getSuggestions = async ({
       column: column || selectionEnd,
     });
     const prometheusResourceClient = services.data.resourceClientFactory.get<{
-      getMetrics: (dataSourceId: string) => Promise<string[]>;
-      getLabels: (dataSourceId: string, metric?: string) => Promise<string[]>;
-      getLabelValues: (dataSourceId: string, label: string, metric?: string) => Promise<string[]>;
+      getMetrics: (dataConnectionId: string) => Promise<string[]>;
+      getLabels: (dataConnectionId: string, metric?: string) => Promise<string[]>;
+      getLabelValues: (
+        dataConnectionId: string,
+        label: string,
+        metric?: string
+      ) => Promise<string[]>;
     }>('prometheus');
     if (!prometheusResourceClient) throw new Error('Prometheus resource client not found.');
 
