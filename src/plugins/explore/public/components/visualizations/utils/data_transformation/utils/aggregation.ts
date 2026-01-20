@@ -4,6 +4,7 @@
  */
 
 import { AggregationType } from '../../../types';
+import { CalculationMethod, calculateValue } from '../../calculation';
 
 /**
  * Aggregate values based on aggregation type
@@ -11,8 +12,16 @@ import { AggregationType } from '../../../types';
  * @param values - Array of numeric values to aggregate
  * @returns Aggregated value or null if no values
  */
-export const aggregateValues = (aggregationType: AggregationType, values?: number[]) => {
+export const aggregateValues = (
+  aggregationType?: AggregationType,
+  values?: number[],
+  calculateType?: CalculationMethod
+) => {
   if (!values || values.length === 0) return null;
+
+  if (calculateType) {
+    return calculateValue(values, calculateType);
+  }
 
   switch (aggregationType) {
     case AggregationType.SUM:

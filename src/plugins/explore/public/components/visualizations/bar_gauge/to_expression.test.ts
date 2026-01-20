@@ -22,6 +22,7 @@ jest.mock('../theme/default_colors', () => ({
 
 jest.mock('../utils/utils', () => ({
   getSchemaByAxis: jest.fn((axis) => axis?.schema || 'nominal'),
+  getChartRender: jest.fn(),
 }));
 
 describe('createBarGaugeSpec', () => {
