@@ -96,13 +96,14 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
 
           if (message.role === 'assistant') {
             const assistantMsg = message as AssistantMessage;
+            const isLoadingMessage = message.id.startsWith('loading-');
             const isEmptyAndStreaming =
               !assistantMsg.content?.trim() && !assistantMsg.toolCalls?.length && isStreaming;
 
             return (
               <div key={message.id}>
-                {/* Show thinking indicator for empty streaming messages */}
-                {isEmptyAndStreaming && (
+                {/* Show loading indicator for loading messages or empty streaming messages */}
+                {(isLoadingMessage || isEmptyAndStreaming) && (
                   <div className="messageRow">
                     <div className="messageRow__icon">
                       <EuiIcon type="console" size="m" color="success" />
@@ -114,36 +115,37 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                 )}
 
                 {/* Assistant message content */}
-                {assistantMsg.content && assistantMsg.content.trim() && (
+                {!isLoadingMessage && assistantMsg.content && assistantMsg.content.trim() && (
                   <MessageRow message={assistantMsg} />
                 )}
 
-                {suggestionsEnabled && lastAssistantMessageIndex === index && (
+                {!isLoadingMessage && suggestionsEnabled && lastAssistantMessageIndex === index && (
                   <ChatSuggestions messages={timeline} currentMessage={message} />
                 )}
 
                 {/* Tool calls below the message */}
-                {assistantMsg.toolCalls?.map((toolCall) => {
-                  // Find corresponding tool result
-                  const toolResult = timeline.find(
-                    (m): m is ToolMessage =>
-                      m.role === 'tool' && (m as ToolMessage).toolCallId === toolCall.id
-                  );
+                {!isLoadingMessage &&
+                  assistantMsg.toolCalls?.map((toolCall) => {
+                    // Find corresponding tool result
+                    const toolResult = timeline.find(
+                      (m): m is ToolMessage =>
+                        m.role === 'tool' && (m as ToolMessage).toolCallId === toolCall.id
+                    );
 
-                  return (
-                    <ToolCallRow
-                      key={toolCall.id}
-                      toolCall={{
-                        type: 'tool_call',
-                        id: toolCall.id,
-                        toolName: toolCall.function.name,
-                        status: getToolStatus(toolCall, toolResult),
-                        result: toolResult?.content,
-                        timestamp: Date.now(), // Not used in display
-                      }}
-                    />
-                  );
-                })}
+                    return (
+                      <ToolCallRow
+                        key={toolCall.id}
+                        toolCall={{
+                          type: 'tool_call',
+                          id: toolCall.id,
+                          toolName: toolCall.function.name,
+                          status: getToolStatus(toolCall, toolResult),
+                          result: toolResult?.content,
+                          timestamp: Date.now(), // Not used in display
+                        }}
+                      />
+                    );
+                  })}
               </div>
             );
           }
