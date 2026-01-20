@@ -422,12 +422,15 @@ export class ExplorePlugin
       });
     }
 
-    navLinks.push({
-      id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
-      category: undefined,
-      order: 300,
-      parentNavLinkId: PLUGIN_ID,
-    });
+    // Only add Metrics nav link if the discoverMetrics feature is enabled
+    if (this.config.discoverMetrics?.enabled) {
+      navLinks.push({
+        id: `${PLUGIN_ID}/${ExploreFlavor.Metrics}`,
+        category: undefined,
+        order: 300,
+        parentNavLinkId: PLUGIN_ID,
+      });
+    }
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, navLinks);
     this.registerEmbeddable(core, setupDeps);
