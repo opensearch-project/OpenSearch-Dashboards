@@ -7,7 +7,7 @@ import { BarSeriesOption } from 'echarts';
 import { graphic } from 'echarts';
 import { AxisColumnMappings, Threshold, VisFieldType, AxisRole, VisColumn } from '../types';
 import { BarGaugeChartStyle } from './bar_gauge_vis_config';
-import { getColors } from '../theme/default_colors';
+import { DEFAULT_GREY, getColors } from '../theme/default_colors';
 import { BaseChartStyle, PipelineFn, EChartsSpecState, getAxisType } from '../utils/echarts_spec';
 import { getUnitById } from '../style_panel/unit/collection';
 
@@ -261,7 +261,7 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
   const fontColors = values.map((value) => {
     if (styles?.exclusive?.valueDisplay === 'textColor') return getColors().text;
     if (styles?.exclusive?.valueDisplay === 'hidden') return 'transparent';
-
+    if (value === null) return DEFAULT_GREY;
     const thresholds = (styles.thresholdOptions.thresholds ?? []).filter(
       (t) => t.value <= Number(value)
     );
@@ -279,27 +279,6 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
     maxBase = 100;
   }
 
-  // ECharts bars are always rendered from 0 as the baseline,
-  // not from yAxis.min.
-  // If minBase < 0, apply an offset to values and thresholds
-  // to visually simulate a negative axis baseline
-
-  const updatedThresholds = [...(styles.thresholdOptions.thresholds ?? [])];
-  const updatedValues = values.map((value) =>
-    value === null ? (minBase < 0 ? minBase : 0) : value
-  );
-  if (minBase < 0) {
-    const offset = Math.abs(minBase);
-    minBase = 0;
-    maxBase = maxBase + offset;
-    updatedValues.forEach((value, index) => {
-      updatedValues[index] = value + offset;
-    });
-    updatedThresholds.forEach((t, index) => {
-      updatedThresholds[index] = { ...t, value: t.value + offset };
-    });
-  }
-
   const { xAxisConfig, yAxisConfig } = createBarGaugeAxesConfig({
     styles,
     categories,
@@ -310,14 +289,14 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
 
   const gradientDirection = xAxisConfig.type === 'category' ? [0, 1, 0, 0] : [0, 0, 1, 0];
 
+  const updatedValues = values.map((value) => (value === null ? minBase : value));
   const bars =
     createBarSeries({
       styles,
       values: updatedValues,
-      originalValues: values,
       minBase,
       maxBase,
-      thresholds: updatedThresholds,
+      thresholds: styles.thresholdOptions.thresholds ?? [],
       gradientDirection,
     }) ?? [];
 
@@ -364,8 +343,7 @@ export const createBarGaugeSeries = <T extends BaseChartStyle>({
 const createBarSeries = ({
   styles,
   thresholds,
-  values, // tranformed values for drawing bars
-  originalValues, // original values for tooltip
+  values,
   minBase,
   maxBase,
   gradientDirection,
@@ -373,7 +351,6 @@ const createBarSeries = ({
   styles: BarGaugeChartStyle;
   thresholds: Threshold[];
   values: number[];
-  originalValues: Array<number | null>;
   maxBase: number;
   minBase: number;
   gradientDirection: number[];
@@ -385,7 +362,7 @@ const createBarSeries = ({
       tooltip: {
         trigger: 'item',
         formatter: (param: any) => {
-          const originalValue = originalValues[param.dataIndex];
+          const originalValue = values[param.dataIndex];
           return `
         <strong>${param.name}</strong>: ${originalValue}
       `;
@@ -589,14 +566,15 @@ export const createBarGaugeAxesConfig = ({
     ...xAxisStyle,
     ...(!isXNumerical && { data: categories }),
     ...(isXNumerical && { max: maxBase, min: minBase }),
+    ...(isXNumerical && { startValue: minBase }),
   };
 
   const yAxisConfig = {
     type: getAxisType(yAxis),
     ...yAxisStyle,
     ...(isXNumerical && { data: categories }),
-
     ...(!isXNumerical && { max: maxBase, min: minBase }),
+    ...(!isXNumerical && { startValue: minBase }),
   };
 
   return { xAxisConfig, yAxisConfig };
