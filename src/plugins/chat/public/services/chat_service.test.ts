@@ -1202,7 +1202,7 @@ describe('ChatService', () => {
 
       const result = await chatService.sendMessageWithWindow('test message', []);
 
-      expect(mockSendMessage).toHaveBeenCalledWith({ content: 'test message' });
+      expect(mockSendMessage).toHaveBeenCalledWith({ content: 'test message', messages: [] });
       expect(result.userMessage.content).toBe('test message');
       expect(result.observable).toBeDefined();
     });

@@ -38,7 +38,6 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { ExpressionsPublicPlugin, ExpressionsStart } from 'src/plugins/expressions/public';
 import { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import { ContextProviderStart } from '../../context_provider/public';
-import { ChatPluginStart } from '../../chat/public';
 import { DatasetManagementSetup } from '../../dataset_management/public';
 import { Storage, IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
 import { ScopedHistory } from '../../../core/public';
@@ -124,7 +123,6 @@ export interface ExploreStartDependencies {
   expressions: ExpressionsStart;
   dashboard: DashboardStart;
   contextProvider?: ContextProviderStart;
-  chat?: ChatPluginStart;
 }
 
 // ============================================================================

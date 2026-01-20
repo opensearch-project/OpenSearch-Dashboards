@@ -24,7 +24,6 @@ import { ExpressionsPublicPlugin, ExpressionsStart } from '../../expressions/pub
 import { DashboardSetup, DashboardStart } from '../../dashboard/public';
 import { ChartsPluginStart } from '../../charts/public';
 import { Start as InspectorPublicPluginStart } from '../../inspector/public';
-import { ChatPluginStart } from '../../chat/public';
 import { ContextProviderStart } from '../../context_provider/public';
 
 // Mock the action
@@ -163,13 +162,6 @@ describe('ExplorePlugin', () => {
       urlForwarding: {} as UrlForwardingStart,
       embeddable: {} as EmbeddableStart,
       opensearchDashboardsLegacy: {} as OpenSearchDashboardsLegacyStart,
-      chat: ({
-        chatService: {
-          updateCurrentMessages: jest.fn(),
-          sendMessageWithWindow: jest.fn(),
-          openWindow: jest.fn(),
-        },
-      } as unknown) as ChatPluginStart,
       contextProvider: ({
         getAssistantContextStore: jest.fn().mockReturnValue({
           addContext: jest.fn(),
@@ -251,12 +243,6 @@ describe('ExplorePlugin', () => {
       expect(coreSetup.application.register).toHaveBeenCalledTimes(4);
       expect(coreSetup.application.register).toHaveBeenCalledWith(
         expect.objectContaining({
-          id: 'explore',
-          title: 'Explore',
-        })
-      );
-      expect(coreSetup.application.register).toHaveBeenCalledWith(
-        expect.objectContaining({
           id: 'explore/logs',
           title: 'Logs',
         })
@@ -271,6 +257,12 @@ describe('ExplorePlugin', () => {
         expect.objectContaining({
           id: 'explore/metrics',
           title: 'Metrics',
+        })
+      );
+      expect(coreSetup.application.register).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'explore',
+          title: 'Discover',
         })
       );
     });
@@ -325,28 +317,9 @@ describe('ExplorePlugin', () => {
     it('should register Ask AI embeddable action when chat and contextProvider are available', () => {
       plugin.start(coreStart, startDeps);
 
-      expect(AskAIEmbeddableAction).toHaveBeenCalledWith(
-        coreStart,
-        startDeps.contextProvider,
-        startDeps.chat
-      );
+      expect(AskAIEmbeddableAction).toHaveBeenCalledWith(coreStart, startDeps.contextProvider);
       expect(startDeps.uiActions.registerAction).toHaveBeenCalled();
       expect(startDeps.uiActions.addTriggerAction).toHaveBeenCalledWith(
-        CONTEXT_MENU_TRIGGER,
-        expect.any(Object)
-      );
-    });
-
-    it('should not register Ask AI embeddable action when chat is not available', () => {
-      const startDepsWithoutChat = {
-        ...startDeps,
-        chat: undefined,
-      };
-
-      plugin.start(coreStart, startDepsWithoutChat);
-
-      expect(AskAIEmbeddableAction).not.toHaveBeenCalled();
-      expect(startDeps.uiActions.addTriggerAction).not.toHaveBeenCalledWith(
         CONTEXT_MENU_TRIGGER,
         expect.any(Object)
       );

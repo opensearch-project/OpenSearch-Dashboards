@@ -29,7 +29,6 @@ describe('AskAIEmbeddableAction', () => {
   let action: AskAIEmbeddableAction;
   let mockCore: any;
   let mockContextProvider: any;
-  let mockChat: any;
   let mockEmbeddable: any;
 
   beforeEach(() => {
@@ -44,6 +43,10 @@ describe('AskAIEmbeddableAction', () => {
           addError: jest.fn(),
         },
       },
+      chat: {
+        isAvailable: () => true,
+        sendMessageWithWindow: jest.fn().mockResolvedValue(undefined),
+      },
     };
 
     // Mock context provider
@@ -51,15 +54,6 @@ describe('AskAIEmbeddableAction', () => {
       getAssistantContextStore: jest.fn().mockReturnValue({
         addContext: jest.fn().mockResolvedValue(undefined),
       }),
-    };
-
-    // Mock chat
-    mockChat = {
-      chatService: {
-        updateCurrentMessages: jest.fn(),
-        sendMessageWithWindow: jest.fn().mockResolvedValue(undefined),
-        openWindow: jest.fn().mockResolvedValue(undefined),
-      },
     };
 
     // Mock embeddable
@@ -91,7 +85,7 @@ describe('AskAIEmbeddableAction', () => {
     } as unknown) as ExploreEmbeddable;
 
     // Create action instance
-    action = new AskAIEmbeddableAction(mockCore, mockContextProvider, mockChat);
+    action = new AskAIEmbeddableAction(mockCore, mockContextProvider);
   });
 
   afterEach(() => {
@@ -126,7 +120,21 @@ describe('AskAIEmbeddableAction', () => {
     });
 
     it('should return false when context provider is not available', async () => {
-      const actionWithoutContext = new AskAIEmbeddableAction(mockCore, undefined, mockChat);
+      const actionWithoutContext = new AskAIEmbeddableAction(mockCore, undefined);
+      const result = await actionWithoutContext.isCompatible({ embeddable: mockEmbeddable });
+      expect(result).toBe(false);
+    });
+
+    it('should return false when chat is not available', async () => {
+      const actionWithoutContext = new AskAIEmbeddableAction(
+        {
+          ...mockCore,
+          chat: {
+            isAvailable: () => false,
+          },
+        },
+        undefined
+      );
       const result = await actionWithoutContext.isCompatible({ embeddable: mockEmbeddable });
       expect(result).toBe(false);
     });
@@ -154,22 +162,6 @@ describe('AskAIEmbeddableAction', () => {
       document.body.innerHTML = '';
     });
 
-    it('should capture visualization and send to API', async () => {
-      await action.execute({ embeddable: mockEmbeddable });
-
-      await waitFor(() => {
-        expect(html2canvas).toHaveBeenCalled();
-        expect(mockCore.http.post).toHaveBeenCalledWith(
-          '/api/visualizations/summary',
-          expect.objectContaining({
-            body: JSON.stringify({
-              visualization: 'mockImageData',
-            }),
-          })
-        );
-      });
-    });
-
     it('should add context to context provider', async () => {
       await action.execute({ embeddable: mockEmbeddable });
 
@@ -185,57 +177,11 @@ describe('AskAIEmbeddableAction', () => {
       });
     });
 
-    it('should open chat window', async () => {
+    it('should call sendMessageWithWindow', async () => {
       await action.execute({ embeddable: mockEmbeddable });
 
       await waitFor(() => {
-        expect(mockChat.chatService.sendMessageWithWindow).toHaveBeenCalled();
-        expect(mockChat.chatService.openWindow).toHaveBeenCalled();
-      });
-    });
-
-    it('should handle errors gracefully', async () => {
-      mockCore.http.post.mockRejectedValue(new Error('API Error'));
-
-      await action.execute({ embeddable: mockEmbeddable });
-
-      // Should still try to add context even if API fails
-      await waitFor(() => {
-        expect(mockContextProvider.getAssistantContextStore).toHaveBeenCalled();
-      });
-    });
-
-    it('should include dataSourceId in API call when available', async () => {
-      const embeddableWithDataSource = ({
-        ...mockEmbeddable,
-        savedExplore: {
-          searchSource: {
-            getFields: jest.fn().mockReturnValue({
-              query: {
-                query: 'test query',
-                dataset: {
-                  title: 'test-index',
-                  dataSource: {
-                    id: 'ds-123',
-                  },
-                },
-              },
-            }),
-          },
-        },
-      } as unknown) as ExploreEmbeddable;
-
-      await action.execute({ embeddable: embeddableWithDataSource });
-
-      await waitFor(() => {
-        expect(mockCore.http.post).toHaveBeenCalledWith(
-          '/api/visualizations/summary',
-          expect.objectContaining({
-            query: {
-              dataSourceId: 'ds-123',
-            },
-          })
-        );
+        expect(mockCore.chat.sendMessageWithWindow).toHaveBeenCalled();
       });
     });
   });

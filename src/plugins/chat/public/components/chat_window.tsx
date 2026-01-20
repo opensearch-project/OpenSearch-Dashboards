@@ -63,9 +63,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const handleSendRef = useRef<typeof handleSend>();
-  
+
   const timelineRef = React.useRef<Message[]>(timeline);
-  
+
   React.useEffect(() => {
     timelineRef.current = timeline;
   }, [timeline]);
@@ -192,6 +192,24 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     if (messageIndex === -1) return;
 
+    let textContent = typeof message.content === "string" ? message.content : "";
+    const additionalMessages: Message[] = [];
+
+    if (Array.isArray(message.content)) {
+      const lastMessageContent =  message.content[message.content.length - 1];
+      if (lastMessageContent.type === "text") {
+        textContent = lastMessageContent.text;
+        additionalMessages.push({
+          ...message,
+          content: message.content.slice(0, message.content.length - 1),
+        });
+      }
+    }
+
+    if (textContent === "") {
+        return;
+    }
+
     // Remove this message and everything after it from the timeline
     const truncatedTimeline = timeline.slice(0, messageIndex);
     setTimeline(truncatedTimeline);
@@ -202,8 +220,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     try {
       const { observable, userMessage } = await chatService.sendMessage(
-        message.content,
-        truncatedTimeline
+        textContent,
+        [...truncatedTimeline,...additionalMessages]
       );
 
       // Add user message immediately to timeline

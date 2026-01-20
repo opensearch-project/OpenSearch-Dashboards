@@ -516,12 +516,8 @@ export class ExplorePlugin
     const askAiAction = createAskAiAction(core.chat);
     logActionRegistry.registerAction(askAiAction);
 
-    if (plugins.chat && plugins.contextProvider) {
-      const askAIEmbeddableAction = new AskAIEmbeddableAction(
-        core,
-        plugins.contextProvider,
-        plugins.chat
-      );
+    if (core.chat && plugins.contextProvider) {
+      const askAIEmbeddableAction = new AskAIEmbeddableAction(core, plugins.contextProvider);
       plugins.uiActions.registerAction(askAIEmbeddableAction);
       plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, askAIEmbeddableAction);
     }

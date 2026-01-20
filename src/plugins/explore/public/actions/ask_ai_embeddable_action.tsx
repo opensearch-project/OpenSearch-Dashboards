@@ -11,7 +11,6 @@ import { EmbeddableContext, IEmbeddable } from '../../../embeddable/public';
 import { Action, IncompatibleActionError } from '../../../ui_actions/public';
 import { CoreStart } from '../../../../core/public';
 import { ContextProviderStart } from '../../../context_provider/public';
-import { ChatPluginStart } from '../../../chat/public';
 import { SavedExplore } from '../saved_explore';
 
 interface DiscoverVisualizationEmbeddable extends IEmbeddable {
@@ -45,8 +44,7 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
 
   constructor(
     private readonly core: CoreStart,
-    private readonly contextProvider?: ContextProviderStart,
-    private readonly chat?: ChatPluginStart
+    private readonly contextProvider?: ContextProviderStart
   ) {}
 
   public getIconType(): EuiIconType {
@@ -62,7 +60,7 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
   public async isCompatible({ embeddable }: EmbeddableContext) {
     // Check if this is an explore embeddable and if context provider is available
     const hasContextProvider = this.contextProvider !== undefined;
-    return embeddable.type === 'explore' && hasContextProvider;
+    return embeddable.type === 'explore' && hasContextProvider && this.core.chat.isAvailable();
   }
 
   public async execute({ embeddable }: EmbeddableContext) {
@@ -108,7 +106,6 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
 
       // Add context to the context provider
       if (this.contextProvider) {
-        this.chat?.chatService?.updateCurrentMessages([]);
         const contextStore = this.contextProvider.getAssistantContextStore();
         await contextStore.addContext({
           id: `visualization-${savedObjectId || embeddable.id}`,
@@ -120,7 +117,7 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
       }
 
       // Send visualization screenshot to chat
-      if (this.chat?.chatService) {
+      if (this.core.chat) {
         // Create a message with the visualization image following AG-UI protocol
         const imageMessage = {
           role: 'user' as const,
@@ -135,7 +132,7 @@ export class AskAIEmbeddableAction implements Action<EmbeddableContext> {
         };
 
         // sendMessageWithWindow will open the chat window and send the message
-        await this.chat.chatService.sendMessageWithWindow(
+        await this.core.chat.sendMessageWithWindow(
           'Give me a summary for the selected visualization',
           [imageMessage]
         );
