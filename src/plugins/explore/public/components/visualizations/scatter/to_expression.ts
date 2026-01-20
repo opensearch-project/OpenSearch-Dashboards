@@ -24,6 +24,7 @@ import { convertTo2DArray, transform, pivot } from '../utils/data_transformation
 
 const DEFAULT_POINTER_SIZE = 80;
 const DEFAULT_STROKE_OPACITY = 0.65;
+const LEGEND_VERTICAL_OFFSET = 20;
 
 const hoverParams = [
   {
@@ -359,7 +360,7 @@ export const createThreeMetricOneCateScatter = (
           ? {
               title: styles?.legendTitleForSize,
               orient: styles?.legendPosition,
-              offset: 40,
+              offset: LEGEND_VERTICAL_OFFSET,
             }
           : false,
       },

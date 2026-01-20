@@ -8,6 +8,26 @@ import { getSeriesDisplayName } from '../utils/series';
 import { ScatterChartStyle } from './scatter_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { generateThresholdLines } from '../utils/utils';
+import { PointShape } from '../types';
+
+/**
+ * Maps PointShape enum values to ECharts symbol types
+ */
+const mapPointShapeToEChartsSymbol = (pointShape?: PointShape): string => {
+  switch (pointShape) {
+    case PointShape.CIRCLE:
+      return 'circle';
+    case PointShape.SQUARE:
+      return 'rect';
+    case PointShape.CROSS:
+      // use custom SVG path
+      return 'path://M12,2 L12,10 L20,10 L20,14 L12,14 L12,22 L8,22 L8,14 L0,14 L0,10 L8,10 L8,2 Z';
+    case PointShape.DIAMOND:
+      return 'diamond';
+    default:
+      return 'circle';
+  }
+};
 
 /**
  * Transforms data for scatter charts with both color and size encoding
@@ -59,8 +79,8 @@ export const transformToMultiSeriesWithSize = (
     const x = row[xFieldIndex];
     const y = row[yFieldIndex];
     const category = String(row[colorFieldIndex] || 'undefined');
-    const size = Number(row[sizeFieldIndex]) || 0;
-
+    const size = Number(row[sizeFieldIndex]);
+    if (isNaN(size) || size <= 0) return;
     // Track size range
     minSize = Math.min(minSize, size);
     maxSize = Math.max(maxSize, size);
@@ -88,15 +108,13 @@ export const createScatterSeries = <T extends BaseChartStyle>({
   xField: string;
   yField: string;
 }): PipelineFn<T> => (state) => {
-  const { transformedData = [], axisColumnMappings, axisConfig } = state;
+  const { transformedData = [], axisColumnMappings } = state;
   const newState = { ...state };
 
   if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
-    throw new Error('transformedData must be an array with data rows');
+    newState.series = [];
+    return newState;
   }
-
-  const xAxisName = axisConfig?.xAxisStyle?.title?.text || axisConfig?.xAxis?.name || xField;
-  const yAxisName = axisConfig?.yAxisStyle?.title?.text || axisConfig?.yAxis?.name || yField;
 
   const thresholdLines = generateThresholdLines(styles.thresholdOptions);
   const series = [
@@ -104,11 +122,18 @@ export const createScatterSeries = <T extends BaseChartStyle>({
       type: 'scatter',
       name: getSeriesDisplayName(yField, Object.values(axisColumnMappings)),
       symbolSize: 8,
-      symbol: styles.exclusive?.pointShape || 'circle',
+      symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
       symbolRotate: styles.exclusive?.angle || 0,
-      itemStyle: {
-        opacity: 0.8,
-      },
+      itemStyle: styles.exclusive?.filled
+        ? {
+            opacity: 0.8,
+          }
+        : {
+            opacity: 0.8,
+            color: 'transparent',
+            borderColor: 'auto',
+            borderWidth: 2,
+          },
       encode: {
         x: xField,
         y: yField,
@@ -120,18 +145,6 @@ export const createScatterSeries = <T extends BaseChartStyle>({
       ...thresholdLines,
     },
   ] as ScatterSeriesOption[];
-
-  // Add tooltip configuration for scatter charts
-  newState.tooltipConfig = {
-    trigger: 'item',
-    formatter: (params: any) => {
-      if (params.value && Array.isArray(params.value) && params.value.length >= 2) {
-        const xValue = params.value[0];
-        const yValue = params.value[1];
-        return `${xAxisName}: ${xValue}<br/>${yAxisName}: ${yValue}`;
-      }
-    },
-  };
 
   newState.series = series;
   return newState;
@@ -152,11 +165,12 @@ export const createCategoryScatterSeries = <T extends BaseChartStyle>({
   yField: string;
   colorField: string;
 }): PipelineFn<T> => (state) => {
-  const { transformedData = [], axisColumnMappings, axisConfig } = state;
+  const { transformedData = [] } = state;
   const newState = { ...state };
 
   if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
-    throw new Error('transformedData must be an array with data rows');
+    newState.series = [];
+    return newState;
   }
 
   // Data is already in pivot format from the pipe: ['x', 'A', 'B', 'C', ...]
@@ -173,15 +187,22 @@ export const createCategoryScatterSeries = <T extends BaseChartStyle>({
     name: String(category),
     type: 'scatter',
     symbolSize: 8,
-    symbol: styles.exclusive?.pointShape || 'circle',
+    symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
     symbolRotate: styles.exclusive?.angle || 0,
     encode: {
       x: xField,
       y: category,
     },
-    itemStyle: {
-      opacity: 0.8,
-    },
+    itemStyle: styles.exclusive?.filled
+      ? {
+          opacity: 0.8,
+        }
+      : {
+          opacity: 0.8,
+          color: 'transparent',
+          borderColor: 'auto',
+          borderWidth: 2,
+        },
     emphasis: {
       focus: 'series',
       scale: 1.2,
@@ -189,33 +210,9 @@ export const createCategoryScatterSeries = <T extends BaseChartStyle>({
     ...thresholdLines,
   })) as ScatterSeriesOption[];
 
-  // Setup tooltip configuration
-  const xAxisName = axisConfig?.xAxisStyle?.title?.text || axisConfig?.xAxis?.name || xField;
-  const yAxisName = axisConfig?.yAxisStyle?.title?.text || axisConfig?.yAxis?.name || yField;
-  const colorAxisMapping = Object.values(axisColumnMappings).find(
-    (mapping) => mapping.column === colorField
-  );
-  const colorAxisName = colorAxisMapping?.name || colorField;
-
-  newState.tooltipConfig = {
-    trigger: 'item',
-    formatter: (params: any) => {
-      if (params.value && Array.isArray(params.value) && params.value.length >= 2) {
-        const xValue = params.value[0];
-        const seriesName = params.seriesName;
-        const yValueIndex = pivotHeader.indexOf(String(seriesName));
-        const yValue = yValueIndex >= 0 ? params.value[yValueIndex] : null;
-
-        return `${xAxisName}: ${xValue}<br/>${yAxisName}: ${yValue}<br/>${colorAxisName}: ${seriesName}`;
-      }
-      return `${xAxisName}: ${params.value || 'N/A'}<br/>${yAxisName}: ${params.name || 'N/A'}`;
-    },
-  };
-
   // Set the pivot dataset and series
   newState.transformedData = pivotDataset;
   newState.series = series;
-  newState.disableDefaultLegend = false;
 
   return newState;
 };
@@ -224,34 +221,18 @@ export const createCategoryScatterSeries = <T extends BaseChartStyle>({
  * Custom spec assembly for category scatter charts with dataset support
  */
 export const assembleCategoryScatterSpec = <T extends BaseChartStyle>() => (state: any) => {
-  const { styles, axisConfig, series, tooltipConfig, transformedData } = state;
+  const { styles, axisConfig, series, transformedData } = state;
 
   const spec = {
     title: {
       text: styles.titleOptions?.show ? styles.titleOptions?.titleName : undefined,
     },
-    tooltip: tooltipConfig || {
+    tooltip: {
       trigger: 'item',
       show: styles.tooltipOptions?.mode !== 'hidden',
     },
     legend: {
       show: styles.addLegend,
-      orient:
-        styles.legendPosition === 'left' || styles.legendPosition === 'right'
-          ? 'vertical'
-          : 'horizontal',
-      left:
-        styles.legendPosition === 'left'
-          ? 'left'
-          : styles.legendPosition === 'right'
-          ? 'right'
-          : 'center',
-      top:
-        styles.legendPosition === 'top'
-          ? 'top'
-          : styles.legendPosition === 'bottom'
-          ? 'bottom'
-          : undefined,
     },
     xAxis: {
       type: 'value',
@@ -270,7 +251,6 @@ export const assembleCategoryScatterSpec = <T extends BaseChartStyle>() => (stat
       source: transformedData,
     },
     series,
-    grid: { top: 60, bottom: 60, left: 60, right: 80 },
   };
 
   return { ...state, spec };
@@ -280,7 +260,7 @@ export const assembleCategoryScatterSpec = <T extends BaseChartStyle>() => (stat
  * Custom spec assembly for size scatter charts
  */
 export const assembleSizeScatterSpec = <T extends BaseChartStyle>() => (state: any) => {
-  const { styles, axisConfig, series, tooltipConfig, visualMap } = state;
+  const { styles, axisConfig, series, visualMap } = state;
   const legendPosition = styles.legendPosition || 'bottom';
 
   const getGridConfig = () => {
@@ -300,7 +280,7 @@ export const assembleSizeScatterSpec = <T extends BaseChartStyle>() => (state: a
     title: {
       text: styles.titleOptions?.show ? styles.titleOptions?.titleName : undefined,
     },
-    tooltip: tooltipConfig || {
+    tooltip: {
       trigger: 'item',
       show: styles.tooltipOptions?.mode !== 'hidden',
     },
@@ -360,11 +340,24 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
   colorField: string;
   sizeField: string;
 }): PipelineFn<T> => (state) => {
-  const { transformedData = [], axisColumnMappings, axisConfig } = state;
+  const { transformedData = [], axisColumnMappings } = state;
   const newState = { ...state };
 
   if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
-    throw new Error('transformedData must be an array with data rows');
+    newState.series = [];
+    // Set default visualMap for empty data
+    newState.visualMap = {
+      show: false,
+      type: 'continuous',
+      dimension: 2,
+      min: 0,
+      max: 10,
+      text: ['Max', 'Min'],
+      inRange: {
+        symbolSize: [5, 25],
+      },
+    };
+    return newState;
   }
 
   // Transform data using multi-series approach
@@ -376,18 +369,10 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
     sizeField
   );
 
-  // Get display names for tooltip
-  const xAxisName = axisConfig?.xAxisStyle?.title?.text || axisConfig?.xAxis?.name || xField;
-  const yAxisName = axisConfig?.yAxisStyle?.title?.text || axisConfig?.yAxis?.name || yField;
-  const colorAxisMapping = Object.values(axisColumnMappings).find(
-    (mapping) => mapping.column === colorField
-  );
   const sizeAxisMapping = Object.values(axisColumnMappings).find(
     (mapping) => mapping.column === sizeField
   );
-  const colorAxisName = colorAxisMapping?.name || colorField;
   const sizeAxisName = sizeAxisMapping?.name || sizeField;
-
   const thresholdLines = generateThresholdLines(styles.thresholdOptions);
 
   // Create multiple scatter series, one for each color category
@@ -395,33 +380,25 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
   const series = categories.map((category) => ({
     name: String(category),
     type: 'scatter',
-    symbol: styles.exclusive?.pointShape || 'circle',
+    symbol: mapPointShapeToEChartsSymbol(styles.exclusive?.pointShape),
     symbolRotate: styles.exclusive?.angle || 0,
     data: seriesData[category], // [x, y, size] format
-    itemStyle: {
-      opacity: 0.7,
-    },
+    itemStyle: styles.exclusive?.filled
+      ? {
+          opacity: 0.7,
+        }
+      : {
+          opacity: 0.7,
+          color: 'transparent',
+          borderColor: 'auto',
+          borderWidth: 2,
+        },
     emphasis: {
       focus: 'series',
       scale: 1.2,
     },
     ...thresholdLines,
   })) as ScatterSeriesOption[];
-
-  // Setup tooltip configuration
-  newState.tooltipConfig = {
-    trigger: 'item',
-    formatter: (params: any) => {
-      if (params.value && Array.isArray(params.value) && params.value.length >= 3) {
-        const xValue = params.value[0];
-        const yValue = params.value[1];
-        const sizeValue = params.value[2];
-        const seriesName = params.seriesName;
-        return `${xAxisName}: ${xValue}<br/>${yAxisName}: ${yValue}<br/>${colorAxisName}: ${seriesName}<br/>${sizeAxisName}: ${sizeValue}`;
-      }
-      return `${xAxisName}: ${params.value || 'N/A'}<br/>${yAxisName}: ${params.name || 'N/A'}`;
-    },
-  };
 
   // Set series and visualMap
   newState.series = series;
@@ -475,6 +452,5 @@ export const createSizeScatterSeries = <T extends BaseChartStyle>({
     ...getVisualMapConfig(),
   };
 
-  newState.disableDefaultLegend = false;
   return newState;
 };

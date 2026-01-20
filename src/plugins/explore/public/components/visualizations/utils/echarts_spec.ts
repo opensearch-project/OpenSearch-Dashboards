@@ -84,8 +84,6 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
     BarSeriesOption | LineSeriesOption | CustomSeriesOption | PieSeriesOption | ScatterSeriesOption
   >;
   visualMap?: any;
-  tooltipConfig?: any;
-  disableDefaultLegend?: boolean;
   // Final output
   spec?: EChartsOption;
 }
@@ -133,7 +131,7 @@ export const createBaseConfig = <T extends BaseChartStyle>({
   title?: string;
   addTrigger?: boolean;
 }) => (state: EChartsSpecState<T>): EChartsSpecState<T> => {
-  const { styles, axisConfig, disableDefaultLegend } = state;
+  const { styles, axisConfig } = state;
 
   const baseConfig = {
     title: {
@@ -144,18 +142,12 @@ export const createBaseConfig = <T extends BaseChartStyle>({
       ...(axisConfig && addTrigger && { trigger: 'axis' }),
       axisPointer: { type: 'shadow' },
     },
-    // Only add legend config if not disabled (for category scatter we use visualMap)
-    ...(disableDefaultLegend
-      ? {}
-      : {
-          legend: {
-            ...(styles?.legendPosition === Positions.LEFT ||
-            styles?.legendPosition === Positions.RIGHT
-              ? { orient: 'vertical' }
-              : {}),
-            [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%', // distance between legend and the corresponding orientation edge side of the container
-          },
-        }),
+    legend: {
+      ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
+        ? { orient: 'vertical' }
+        : {}),
+      [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%', // distance between legend and the corresponding orientation edge side of the container
+    },
   };
 
   return { ...state, baseConfig };
@@ -222,7 +214,6 @@ export const assembleSpec = <T extends BaseChartStyle>(
     series,
     visualMap,
     axisColumnMappings,
-    tooltipConfig,
   } = state;
 
   const hasMultiDatasets = Array.isArray(transformedData[0]?.[0]);
@@ -264,14 +255,6 @@ export const assembleSpec = <T extends BaseChartStyle>(
     series,
     grid,
   };
-
-  // Override tooltip config for scatter charts if provided
-  if (tooltipConfig) {
-    spec.tooltip = {
-      show: baseConfig?.tooltip?.show !== false,
-      ...tooltipConfig,
-    };
-  }
 
   return { ...state, spec };
 };
