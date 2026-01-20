@@ -145,6 +145,9 @@
 # WARNING: Index patterns are user-supplied data. Disabling this will place the expectation that you are handling the data safely.
 # opensearch.disablePrototypePoisoningProtection: true
 
+# Request compressed responses from OpenSearch to reduce payload size and improve query latency.
+# opensearch.requestCompression: true
+
 # Specifies the path where OpenSearch Dashboards creates the process ID file.
 # pid.file: /var/run/opensearchDashboards.pid
 
