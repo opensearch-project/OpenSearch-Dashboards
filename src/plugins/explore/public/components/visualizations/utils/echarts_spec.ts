@@ -5,10 +5,12 @@
 
 import {
   BarSeriesOption,
+  LineSeriesOption,
   CustomSeriesOption,
   EChartsOption,
   XAXisComponentOption,
   YAXisComponentOption,
+  PieSeriesOption,
 } from 'echarts';
 import {
   AggregationType,
@@ -18,9 +20,10 @@ import {
   TimeUnit,
   VisColumn,
   VisFieldType,
+  Threshold,
+  ThresholdOptions,
 } from '../types';
-import { aggregate, aggregateByTime } from './data_transformation';
-import { getSwappedAxisRole } from './utils';
+import { convertThresholds } from './utils';
 
 /**
  * Base style interface that all chart styles should extend
@@ -39,6 +42,10 @@ export interface BaseChartStyle {
   };
   switchAxes?: boolean;
   standardAxes?: StandardAxes[];
+  thresholdOptions?: ThresholdOptions;
+  useThresholdColor?: boolean;
+  addLegend?: boolean;
+  legendPosition?: Positions;
 }
 
 /**
@@ -57,7 +64,8 @@ export interface EChartsAxisConfig {
 export interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
   data: Array<Record<string, any>>;
   styles: T;
-  axisColumnMappings?: AxisColumnMappings;
+  axisConfig?: EChartsAxisConfig;
+  axisColumnMappings: AxisColumnMappings;
 }
 
 /**
@@ -65,17 +73,14 @@ export interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
  */
 export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   extends EChartsSpecInput<T> {
-  // Derived from input
-  axisConfig?: EChartsAxisConfig;
-
   // Built incrementally
   // TODO: avoid any
-  aggregatedData?: any[];
+  transformedData?: any[];
   baseConfig?: any;
   xAxisConfig?: any;
   yAxisConfig?: any;
-  series?: Array<BarSeriesOption | CustomSeriesOption>;
-
+  series?: Array<BarSeriesOption | LineSeriesOption | CustomSeriesOption | PieSeriesOption>;
+  visualMap?: any;
   // Final output
   spec?: EChartsOption;
 }
@@ -114,92 +119,31 @@ function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time'
 }
 
 /**
- * Derive axis configuration from styles and mappings
- */
-export const deriveAxisConfig = <T extends BaseChartStyle>(
-  state: EChartsSpecState<T>
-): EChartsSpecState<T> => {
-  const { styles, axisColumnMappings } = state;
-  const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
-
-  return { ...state, axisConfig };
-};
-
-/**
- * Prepare and aggregate data
- */
-export const prepareData = <T extends BaseChartStyle>(
-  state: EChartsSpecState<T>
-): EChartsSpecState<T> => {
-  const { data, axisConfig, styles } = state;
-
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before prepareData');
-  }
-
-  // Detect column types
-  const dateColumn = [axisConfig.xAxis, axisConfig.yAxis].find(
-    (axis) => axis?.schema === VisFieldType.Date
-  );
-  const categoricalColumn = [axisConfig.xAxis, axisConfig.yAxis].find(
-    (axis) => axis?.schema === VisFieldType.Categorical
-  );
-  const numericalColumn = [axisConfig.xAxis, axisConfig.yAxis].find(
-    (axis) => axis?.schema === VisFieldType.Numerical
-  );
-
-  let aggregatedData;
-
-  // TIME + NUMERICAL: Use time-based aggregation
-  if (dateColumn && numericalColumn) {
-    const timeUnit = styles.bucket?.bucketTimeUnit ?? TimeUnit.AUTO;
-    aggregatedData = aggregateByTime(
-      data,
-      dateColumn.column,
-      numericalColumn.column,
-      timeUnit,
-      styles.bucket?.aggregationType || AggregationType.SUM
-    );
-  }
-  // CATEGORICAL + NUMERICAL: Use existing aggregation
-  else if (categoricalColumn && numericalColumn) {
-    aggregatedData = aggregate(
-      data,
-      categoricalColumn.column,
-      numericalColumn.column,
-      styles.bucket?.aggregationType || AggregationType.SUM
-    );
-  }
-  // Fallback: return data as-is
-  else {
-    aggregatedData = data;
-  }
-
-  return { ...state, aggregatedData };
-};
-
-/**
  * Create base configuration (title, tooltip)
  */
-export const createBaseConfig = <T extends BaseChartStyle>(
-  state: EChartsSpecState<T>
-): EChartsSpecState<T> => {
+export const createBaseConfig = <T extends BaseChartStyle>({
+  title,
+  addTrigger = true,
+}: {
+  title?: string;
+  addTrigger?: boolean;
+}) => (state: EChartsSpecState<T>): EChartsSpecState<T> => {
   const { styles, axisConfig } = state;
-
-  if (!axisConfig) {
-    throw new Error('axisConfig must be derived before createBaseConfig');
-  }
 
   const baseConfig = {
     title: {
-      text: styles.titleOptions?.show
-        ? styles.titleOptions?.titleName || `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name}`
-        : undefined,
+      text: styles.titleOptions?.show ? styles.titleOptions?.titleName || title : undefined,
     },
     tooltip: {
       show: styles.tooltipOptions?.mode !== 'hidden',
-      trigger: 'axis',
+      ...(axisConfig && addTrigger && { trigger: 'axis' }),
       axisPointer: { type: 'shadow' },
+    },
+    legend: {
+      ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
+        ? { orient: 'vertical' }
+        : {}),
+      [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%', // distance between legend and the corresponding orientation edge side of the container
     },
   };
 
@@ -212,21 +156,43 @@ export const createBaseConfig = <T extends BaseChartStyle>(
 export const buildAxisConfigs = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { axisConfig } = state;
+  const { axisConfig, transformedData = [], axisColumnMappings } = state;
+
+  const hasFacet = Array.isArray(transformedData[0]?.[0]) && axisColumnMappings.facet !== undefined;
+
+  const getConfig = (
+    axis: VisColumn | undefined,
+    axisStyle: StandardAxes | undefined,
+    gridNumber?: number
+  ) => {
+    return {
+      type: getAxisType(axis),
+      ...applyAxisStyling({ axisStyle }),
+      ...(hasFacet && { gridIndex: gridNumber }),
+    };
+  };
 
   if (!axisConfig) {
     throw new Error('axisConfig must be derived before buildAxisConfigs');
   }
 
-  const xAxisConfig = {
-    type: getAxisType(axisConfig.xAxis),
-    ...applyAxisStyling({ axisStyle: axisConfig.xAxisStyle }),
-  };
+  let xAxisConfig;
+  let yAxisConfig;
 
-  const yAxisConfig = {
-    type: getAxisType(axisConfig.yAxis),
-    ...applyAxisStyling({ axisStyle: axisConfig.yAxisStyle }),
-  };
+  if (hasFacet) {
+    // each grids needs an axis config
+    xAxisConfig = transformedData.map((_: any, index: number) => {
+      return getConfig(axisConfig.xAxis, axisConfig.xAxisStyle, index);
+    });
+
+    yAxisConfig = transformedData.map((_: any, index: number) => {
+      return getConfig(axisConfig.yAxis, axisConfig.yAxisStyle, index);
+    });
+  } else {
+    xAxisConfig = getConfig(axisConfig.xAxis, axisConfig.xAxisStyle);
+
+    yAxisConfig = getConfig(axisConfig.yAxis, axisConfig.yAxisStyle);
+  }
 
   return { ...state, xAxisConfig, yAxisConfig };
 };
@@ -237,14 +203,55 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
 export const assembleSpec = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { baseConfig, aggregatedData, xAxisConfig, yAxisConfig, series } = state;
+  const {
+    baseConfig,
+    transformedData = [],
+    xAxisConfig,
+    yAxisConfig,
+    series,
+    visualMap,
+    axisColumnMappings,
+  } = state;
+
+  const hasMultiDatasets = Array.isArray(transformedData[0]?.[0]);
+  const hasFacet = hasMultiDatasets && axisColumnMappings.facet !== undefined;
+
+  // Multi-datasets case (faceted or state-timeline)
+  const data = hasMultiDatasets
+    ? transformedData.map((facetData: any) => ({ source: facetData }))
+    : { source: transformedData };
+
+  const facetNumber = transformedData.length;
+
+  let grid;
+  if (!hasFacet || facetNumber <= 1) grid = { top: '5%', left: '5%', right: '5%' };
+  else {
+    const cols = Math.ceil(facetNumber / 2); // always in two rows
+    const colWidth = 90 / cols;
+    const rowHeight = 39; // slightly smaller to make legend fit
+
+    grid = Array.from({ length: facetNumber }).map((_, i) => {
+      const row = Math.floor(i / cols);
+      const col = i % cols;
+      return {
+        left: `${5 + col * colWidth}%`,
+        width: `${colWidth - 2}%`,
+        top: `${5 + row * (rowHeight + 10)}%`,
+        height: `${rowHeight}%`,
+        containLabel: true,
+      };
+    });
+  }
 
   const spec = {
     ...baseConfig,
-    dataset: { source: aggregatedData },
+    dataset: data,
+
     xAxis: xAxisConfig,
     yAxis: yAxisConfig,
+    visualMap,
     series,
+    grid,
   };
 
   return { ...state, spec };
@@ -266,6 +273,7 @@ export const applyAxisStyling = ({
     name: axisStyle?.title?.text || '',
     nameLocation: 'middle',
     nameGap: 35,
+    axisLine: { show: true },
   };
 
   // Apply axis visibility
@@ -310,4 +318,70 @@ export const applyAxisStyling = ({
   }
 
   return echartsAxisConfig;
+};
+
+export const buildVisMap = ({
+  seriesFields,
+}: {
+  seriesFields: (headers?: string[]) => string[];
+}) => (state: EChartsSpecState) => {
+  const { styles, transformedData = [] } = state;
+
+  const hasFacet = Array.isArray(transformedData[0]?.[0]);
+
+  if (!styles.useThresholdColor) return state;
+
+  const completeThreshold =
+    styles.thresholdOptions && styles?.thresholdOptions.thresholds
+      ? [
+          { value: 0, color: styles.thresholdOptions.baseColor } as Threshold,
+          ...styles.thresholdOptions.thresholds,
+        ]
+      : [];
+
+  const convertedThresholds = convertThresholds(completeThreshold);
+  const pieces = convertedThresholds.map((t) => ({
+    gte: t.min,
+    lt: t.max,
+    color: t.color,
+  }));
+
+  let visualMap;
+  if (hasFacet) {
+    let seriesIndexCounter = 0;
+    const facetVis = transformedData.map((seriesData: any[], index: number) => {
+      const header = seriesData[0];
+      const cateColumns = seriesFields(header);
+      return cateColumns.map((c: string) => {
+        const originalIndex = header?.indexOf(c);
+        return {
+          datasetIndex: index,
+          gridIndex: index,
+          type: 'piecewise',
+          show: false,
+          seriesIndex: seriesIndexCounter++,
+          dimension: originalIndex,
+          pieces,
+        };
+      });
+    });
+
+    visualMap = facetVis.flat();
+  } else {
+    visualMap = seriesFields(transformedData[0]).map((c: string, index: number) => {
+      const originalIndex = transformedData[0]?.indexOf(c);
+      return {
+        type: 'piecewise',
+        show: false,
+        seriesIndex: index,
+        dimension: originalIndex,
+        pieces,
+      };
+    });
+  }
+
+  return {
+    ...state,
+    visualMap,
+  };
 };

@@ -4,53 +4,61 @@
  */
 
 import {
+  DATASOURCE_NAME,
   INDEX_WITH_TIME_1,
   INDEX_WITHOUT_TIME_1,
-  DATASOURCE_NAME,
+  nonTimeBasedFieldsForDatasetCreation,
 } from '../../../../../../utils/constants';
+
 import {
   getRandomizedWorkspaceName,
   setDatePickerDatesAndSearchIfRelevant,
   generateBaseConfiguration,
+  getRandomizedDatasetId,
 } from '../../../../../../utils/apps/query_enhancements/shared';
+
 import { getDatasetName } from '../../../../../../utils/apps/query_enhancements/autocomplete';
 import {
   generateQueryTestConfigurations,
   LanguageConfigs,
 } from '../../../../../../utils/apps/query_enhancements/queries';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+  createDatasetWithEndpoint,
+} from '../../../../../../utils/helpers';
 import { getDocTableField } from '../../../../../../utils/apps/query_enhancements/doc_table';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId1 = getRandomizedDatasetId();
+const datasetId2 = getRandomizedDatasetId();
 
 export const runQueryTests = () => {
-  describe('discover autocomplete tests', () => {
+  describe('discover Queries tests', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITHOUT_TIME_1,
-      ]);
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
-      cy.createWorkspaceIndexPatterns({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITHOUT_TIME_1,
-        timefieldName: '',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-        indexPatternHasTimefield: false,
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId1,
+        `${INDEX_WITH_TIME_1}*`,
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-search'] // features
+      );
+
+      createDatasetWithEndpoint(DATASOURCE_NAME, workspaceName, datasetId2, {
+        title: `${INDEX_WITHOUT_TIME_1}*`,
+        signalType: 'logs',
+        fields: nonTimeBasedFieldsForDatasetCreation,
       });
     });
 
     beforeEach(() => {
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspaceName,
-        page: 'discover',
+        page: 'data-explorer/discover',
         isEnhancement: true,
       });
     });

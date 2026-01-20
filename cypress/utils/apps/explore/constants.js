@@ -11,6 +11,7 @@ export const clusterName = 'test_cluster';
 export const clusterConnection = 'http://localhost:9200';
 
 export const S3_CLUSTER = Cypress.env('S3_ENGINE') || {};
+export const PROMETHEUS_CLUSTER = Cypress.env('PROMETHEUS') || {};
 
 export const DS_API_PREFIX = '/api/saved_objects';
 export const DS_API = {

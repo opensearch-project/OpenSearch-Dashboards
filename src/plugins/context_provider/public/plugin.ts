@@ -14,6 +14,7 @@ import { ContextCaptureService } from './services/context_capture_service';
 import { usePageContext } from './hooks/use_page_context';
 import { useDynamicContext } from './hooks/use_dynamic_context';
 import { useAssistantAction } from './hooks/use_assistant_action';
+import { AssistantActionService } from './services/assistant_action_service';
 
 /**
  * @experimental
@@ -50,6 +51,10 @@ export class ContextProviderPlugin
     if (!config.enabled || !this.contextCaptureService) {
       return {
         getAssistantContextStore: () => undefined as any,
+        actions: {
+          registerAssistantAction: () => undefined,
+          unregisterAssistantAction: () => undefined,
+        },
         hooks: {
           usePageContext: () => '',
           useDynamicContext: () => '',
@@ -62,6 +67,10 @@ export class ContextProviderPlugin
 
     return {
       getAssistantContextStore: () => this.contextCaptureService!.getAssistantContextStore(),
+      actions: {
+        registerAssistantAction: AssistantActionService.getInstance().registerAction,
+        unregisterAssistantAction: AssistantActionService.getInstance().unregisterAction,
+      },
       hooks: {
         usePageContext,
         useDynamicContext,

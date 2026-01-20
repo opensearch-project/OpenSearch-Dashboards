@@ -11,38 +11,45 @@ import {
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   setDatePickerDatesAndSearchIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
 import { generateHistogramTestConfigurations } from '../../../../../../utils/apps/explore/histogram_interaction';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const workspace = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const runHistogramBreakdownTests = () => {
+  // THe tests have some issues in Neo, They are currently skipped Need to revisit them again.
   describe('histogram breakdown', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspace,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      // Create workspace and dataset using our new helper function
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspace,
+        datasetId,
+        INDEX_PATTERN_WITH_TIME, // Uses 'data_logs_small_time_*'
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
     });
 
     beforeEach(() => {
-      cy.clearLocalStorage('exploreChartState');
-
-      cy.setAdvancedSetting({
-        'explore:experimental': true,
-      });
-
       cy.osd.navigateToWorkSpaceSpecificPage({
         workspaceName: workspace,
         page: 'explore/logs',
         isEnhancement: true,
+      });
+
+      cy.setAdvancedSetting({
+        'explore:experimental': true,
       });
     });
 
@@ -59,11 +66,9 @@ const runHistogramBreakdownTests = () => {
 
         cy.getElementByTestId('discoverChart').should('be.visible');
 
-        cy.osd.waitForLoader(true);
         cy.getElementByTestId('histogramBreakdownFieldSelector').click();
         cy.get('.euiComboBoxOptionsList').contains('category').click();
 
-        cy.osd.waitForLoader(true);
         cy.getElementByTestId('histogramBreakdownFieldSelector').should('contain', 'category');
         cy.getElementByTestId('discoverChart').should('be.visible');
 
@@ -71,30 +76,24 @@ const runHistogramBreakdownTests = () => {
           .find('button.euiFormControlLayoutClearButton')
           .click();
 
-        cy.osd.waitForLoader(true);
         cy.getElementByTestId('histogramBreakdownFieldSelector').should('not.contain', 'category');
         cy.getElementByTestId('discoverChart').should('be.visible');
       });
 
+      //
       it(`check breakdown persistence with interval changes for ${config.testName}`, () => {
         if (!config.isHistogramVisible) return;
 
         cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
-        // Ensure breakdown selector is visible and ready
-        cy.getElementByTestId('histogramBreakdownFieldSelector', { timeout: 15000 })
-          .should('be.visible')
-          .and('not.be.disabled')
-          .click();
+        cy.getElementByTestId('histogramBreakdownFieldSelector').click();
         cy.get('.euiComboBoxOptionsList').contains('category').click();
 
-        cy.osd.waitForLoader(true);
         const intervals = ['auto', 'h', 'd'];
         intervals.forEach((interval) => {
           cy.getElementByTestId('discoverIntervalSelect').select(interval);
 
-          cy.osd.waitForLoader(true);
           cy.getElementByTestId('histogramBreakdownFieldSelector').should('contain', 'category');
           cy.getElementByTestId('discoverChart').should('be.visible');
         });
@@ -106,14 +105,9 @@ const runHistogramBreakdownTests = () => {
         cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
-        // Ensure breakdown selector is visible and ready
-        cy.getElementByTestId('histogramBreakdownFieldSelector', { timeout: 15000 })
-          .should('be.visible')
-          .and('not.be.disabled')
-          .click();
+        cy.getElementByTestId('histogramBreakdownFieldSelector').click();
         cy.get('.euiComboBoxOptionsList').contains('category').click();
 
-        cy.osd.waitForLoader(true);
         cy.getElementByTestId('histogramCollapseBtn').click();
         cy.getElementByTestId('discoverChart').should('not.exist');
         cy.getElementByTestId('histogramBreakdownFieldSelector').should('contain', 'category');
@@ -129,13 +123,12 @@ const runHistogramBreakdownTests = () => {
         cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
         setDatePickerDatesAndSearchIfRelevant(config.language);
 
-        // Ensure breakdown selector is visible and ready
-        cy.getElementByTestId('histogramBreakdownFieldSelector', { timeout: 15000 })
-          .should('be.visible')
-          .and('not.be.disabled')
-          .click();
+        cy.getElementByTestId('histogramBreakdownFieldSelector').click();
         cy.get('.euiComboBoxOptionsList').contains('category').click();
-        cy.osd.waitForLoader(true);
+
+        const START_DATE = 'Jan 1, 2021 @ 13:00:00.000';
+        const END_DATE = 'Oct 1, 2021 @ 13:00:00.000';
+        cy.explore.setTopNavDate(START_DATE, END_DATE);
 
         cy.getElementByTestId('histogramBreakdownFieldSelector').should('contain', 'category');
         cy.getElementByTestId('discoverChart').should('be.visible');

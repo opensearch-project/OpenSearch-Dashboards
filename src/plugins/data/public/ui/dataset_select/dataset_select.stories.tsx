@@ -1879,7 +1879,7 @@ const createMockQueryStringManager = () => {
   const languageService = createMockLanguageService();
 
   return {
-    getQuery: () => {},
+    getQuery: () => ({ dataset: undefined }),
     setQuery: () => {},
     getUpdates$: () => {},
     getDefaultQuery: () => {},

@@ -114,7 +114,7 @@ export function mathAgg(resp, panel, series, meta) {
               },
             });
             // if the result is an object (usually when the user is working with maps and functions) flatten the results and return the last value.
-            if (typeof result === 'object') {
+            if (result !== null && typeof result === 'object') {
               return [ts, last(flatten(result.valueOf()))];
             }
             return [ts, result];

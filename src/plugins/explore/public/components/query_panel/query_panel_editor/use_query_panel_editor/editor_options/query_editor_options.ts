@@ -15,6 +15,7 @@ export const queryEditorOptions: IEditorConstructionOptions = {
   renderValidationDecorations: 'on', // Explicitly enable validation decorations for markers
   formatOnType: true,
   formatOnPaste: true,
+  glyphMargin: true, // Enable glyph margin for multi-query labels
   suggest: {
     snippetsPreventQuickSuggestions: false, // Ensure all suggestions are shown
     filterGraceful: false, // Don't filter suggestions

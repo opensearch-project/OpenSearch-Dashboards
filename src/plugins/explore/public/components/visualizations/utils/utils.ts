@@ -14,6 +14,8 @@ import {
   AxisColumnMappings,
   Threshold,
   AxisConfig,
+  ThresholdOptions,
+  ThresholdMode,
 } from '../types';
 import { ChartStyles, StyleOptions } from './use_visualization_types';
 
@@ -421,6 +423,29 @@ export function applyTimeRangeToEncoding(
   }
 }
 
+/**
+ * Parses a date string as UTC time
+ * Handles date strings without timezone information by treating them as UTC
+ *
+ * @param dateString - Date string in formats like "2025-12-10 00:00:00" or "2025-12-10T00:00:00"
+ * @returns Date object representing the UTC time
+ *
+ * @example
+ * parseUTCDate("2025-12-10 00:00:00") // Treats as UTC: 2025-12-10T00:00:00Z
+ * parseUTCDate("2025-12-10T00:00:00") // Treats as UTC: 2025-12-10T00:00:00Z
+ * parseUTCDate("2025-12-10T00:00:00Z") // Already UTC, parses correctly
+ */
+export function parseUTCDate(dateString: string): Date {
+  // If already has timezone info (Z, +, or -), parse directly
+  if (dateString.includes('Z') || /[+-]\d{2}:\d{2}$/.test(dateString)) {
+    return new Date(dateString);
+  }
+
+  // Convert space to 'T' for ISO 8601 format and add 'Z' for UTC
+  const isoString = dateString.replace(' ', 'T') + 'Z';
+  return new Date(isoString);
+}
+
 export const getChartRender = () => {
   try {
     const chartRender = localStorage.getItem('__DEVELOPMENT__.discover.vis.render');
@@ -428,4 +453,91 @@ export const getChartRender = () => {
   } catch (e) {
     return 'vega';
   }
+};
+
+export const convertThresholds = (thresholds: Threshold[]) => {
+  return thresholds.map((t, i) => ({
+    min: t.value,
+    max: i === thresholds.length - 1 ? Infinity : thresholds[i + 1].value,
+
+    color: t.color,
+  }));
+};
+
+export const convertThresholdLineStyle = (style: ThresholdMode | undefined) => {
+  if (style === ThresholdMode.DotDashed) return 'dotted';
+  return style;
+};
+
+export const adjustOppositeSymbol = (switchAxes: boolean, symbol: string) => {
+  if (switchAxes) {
+    return symbol === 'x' ? 'y' : 'x';
+  }
+  return symbol;
+};
+
+export const generateThresholdSteps = (
+  thresholds: Threshold[] | undefined,
+  switchAxes?: boolean
+) => {
+  return thresholds?.map((t) => ({
+    [switchAxes ? 'xAxis' : 'yAxis']: t.value,
+    itemStyle: { color: t.color },
+  }));
+};
+
+export const generateThresholdLines = (
+  thresholdOptions: ThresholdOptions,
+  switchAxes?: boolean
+) => {
+  if (thresholdOptions.thresholdStyle === ThresholdMode.Off) return {};
+
+  const ThresholdSteps = generateThresholdSteps(thresholdOptions.thresholds, switchAxes);
+
+  return {
+    markLine: {
+      symbol: 'none',
+      animation: false,
+      lineStyle: {
+        width: 2,
+        type: convertThresholdLineStyle(thresholdOptions?.thresholdStyle),
+      },
+      data: ThresholdSteps,
+    },
+  };
+};
+
+// return a combined markline with threshold lines and time marker
+export const composeMarkLine = (thresholdOptions: ThresholdOptions, addTimeMarker: boolean) => {
+  const hasThresholds = thresholdOptions?.thresholdStyle !== ThresholdMode.Off;
+
+  if (!hasThresholds && !addTimeMarker) return {};
+
+  const data = [];
+
+  if (hasThresholds) {
+    const thresholdSteps = generateThresholdSteps(thresholdOptions?.thresholds) ?? [];
+    data.push(...thresholdSteps);
+  }
+
+  if (addTimeMarker) {
+    data.push({
+      xAxis: new Date(),
+      itemStyle: { color: 'red' },
+      lineStyle: { type: 'dashed' },
+      label: { formatter: new Date().toISOString() },
+    });
+  }
+
+  return {
+    markLine: {
+      symbol: 'none',
+      animation: false,
+      lineStyle: {
+        width: 2,
+        type: convertThresholdLineStyle(thresholdOptions?.thresholdStyle),
+      },
+      data,
+    },
+  };
 };

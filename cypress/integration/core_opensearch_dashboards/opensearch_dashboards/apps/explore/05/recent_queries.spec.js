@@ -3,13 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  DATASOURCE_NAME,
-  INDEX_PATTERN_WITH_TIME,
-  INDEX_WITH_TIME_1,
-} from '../../../../../../utils/apps/constants';
+import { DATASOURCE_NAME, INDEX_PATTERN_WITH_TIME } from '../../../../../../utils/apps/constants';
 import {
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   setDatePickerDatesAndSearchIfRelevant,
   generateAllTestConfigurations,
 } from '../../../../../../utils/apps/explore/shared';
@@ -19,27 +16,33 @@ import {
   TestQueries,
   //TODO: QueryRegex,
 } from '../../../../../../utils/apps/explore/recent_queries';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 
 const normalizeQuery = (queryString) => {
   return queryString.replace('\n', ' ').replace(/\s+/g, ' ');
 };
 
 const workspace = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 const runRecentQueryTests = () => {
   // TODO: Recent queries the way it is written is currently broken beause we are switching languages. we must refactor these test completely.
   describe('recent queries spec', () => {
-    const index = INDEX_PATTERN_WITH_TIME.replace('*', '');
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspace, [INDEX_WITH_TIME_1]);
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspace,
-        indexPattern: index,
-        timefieldName: 'timestamp',
-        indexPatternHasTimefield: true,
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspace,
+        datasetId,
+        INDEX_PATTERN_WITH_TIME, // Uses 'data_logs_small_time_*'
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
     });
 
     beforeEach(() => {
@@ -58,7 +61,7 @@ const runRecentQueryTests = () => {
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace, [INDEX_WITH_TIME_1]);
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspace);
     });
 
     generateAllTestConfigurations(generateRecentQueriesTestConfiguration)

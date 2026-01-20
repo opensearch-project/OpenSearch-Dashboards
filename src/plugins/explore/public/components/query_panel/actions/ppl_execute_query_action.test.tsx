@@ -12,7 +12,7 @@ import {
 import { QueryExecutionStatus } from '../../../application/utils/state_management/types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { loadQueryActionCreator } from '../../../application/utils/state_management/actions/query_editor/load_query';
-import { defaultPrepareQueryString } from '../../../application/utils/state_management/actions/query_actions';
+import { prepareQueryForLanguage } from '../../../application/utils/languages';
 import { useDispatch } from 'react-redux';
 
 // Mock dependencies
@@ -26,8 +26,8 @@ jest.mock('../../../application/utils/state_management/actions/query_editor/load
   loadQueryActionCreator: jest.fn(),
 }));
 
-jest.mock('../../../application/utils/state_management/actions/query_actions', () => ({
-  defaultPrepareQueryString: jest.fn(),
+jest.mock('../../../application/utils/languages', () => ({
+  prepareQueryForLanguage: jest.fn(),
 }));
 
 jest.mock('react-redux', () => ({
@@ -59,14 +59,14 @@ describe('usePPLExecuteQueryAction', () => {
   let mockUseOpenSearchDashboards: jest.Mock;
   let mockLoadQueryActionCreator: jest.Mock;
   let mockUseDispatch: jest.Mock;
-  let mockDefaultPrepareQueryString: jest.Mock;
+  let mockPrepareQueryForLanguage: jest.Mock;
   let mockDispatch: jest.Mock;
 
   beforeEach(() => {
     // Get the mocked functions
     mockUseOpenSearchDashboards = useOpenSearchDashboards as jest.Mock;
     mockLoadQueryActionCreator = loadQueryActionCreator as jest.Mock;
-    mockDefaultPrepareQueryString = defaultPrepareQueryString as jest.Mock;
+    mockPrepareQueryForLanguage = prepareQueryForLanguage as jest.Mock;
     mockUseDispatch = useDispatch as jest.Mock;
     mockDispatch = jest.fn();
 
@@ -95,7 +95,7 @@ describe('usePPLExecuteQueryAction', () => {
     // Setup mocks
     mockUseOpenSearchDashboards.mockReturnValue({ services: mockServices });
     mockLoadQueryActionCreator.mockReturnValue({ type: 'LOAD_QUERY' });
-    mockDefaultPrepareQueryString.mockReturnValue('test-cache-key');
+    mockPrepareQueryForLanguage.mockReturnValue({ query: 'test-cache-key' });
     mockSetEditorTextWithQuery = jest.fn();
     mockUseDispatch.mockReturnValue(mockDispatch);
     mockUseAssistantAction.mockClear();
@@ -448,7 +448,7 @@ describe('usePPLExecuteQueryAction', () => {
         await resultPromise;
 
         // Verify that defaultPrepareQueryString was called with the correct query object
-        expect(mockDefaultPrepareQueryString).toHaveBeenCalledWith({
+        expect(mockPrepareQueryForLanguage).toHaveBeenCalledWith({
           dataSource: 'test-source',
           timeRange: { from: 'now-1h', to: 'now' },
           query: 'source=logs | where status="error"',

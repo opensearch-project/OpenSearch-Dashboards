@@ -3,46 +3,45 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  INDEX_WITH_TIME_1,
-  INDEX_WITH_TIME_2,
-  DATASOURCE_NAME,
-  INDEX_PATTERN_WITH_TIME,
-} from '../../../../../../utils/constants';
+import { DATASOURCE_NAME, INDEX_PATTERN_WITH_TIME } from '../../../../../../utils/constants';
 import {
   generateAllTestConfigurations,
   generateBaseConfiguration,
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
   setDatePickerDatesIfRelevant,
 } from '../../../../../../utils/apps/explore/shared';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 import { DatasetTypes } from '../../../../../../utils/apps/explore/constants';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const runAiEditorTests = () => {
   const generatedQuery = 'source=data_logs_small_time_* | where bytes_transferred > 9000';
 
   describe('AI Editor', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_PATTERN_WITH_TIME.replace('*', ''),
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        INDEX_PATTERN_WITH_TIME, // Uses 'data_logs_small_time_*'
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
     });
 
     after(() => {
-      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [
-        INDEX_WITH_TIME_1,
-        INDEX_WITH_TIME_2,
-      ]);
+      // Cleanup workspace and associated resources
+      cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName);
     });
 
     beforeEach(() => {
@@ -110,6 +109,7 @@ const runAiEditorTests = () => {
           setDatePickerDatesIfRelevant(config.language.name);
           // fire query so that we have data to add filter on
           cy.explore.updateTopNav({ log: false });
+
           cy.getElementByTestId('exploreTabs').should('exist');
 
           cy.explore.setQueryEditor(' ');

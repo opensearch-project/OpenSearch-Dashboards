@@ -7,36 +7,41 @@ import { INDEX_WITH_TIME_1, DATASOURCE_NAME } from '../../../../../../utils/cons
 import {
   generateAllTestConfigurations,
   getRandomizedWorkspaceName,
+  getRandomizedDatasetId,
 } from '../../../../../../utils/apps/query_enhancements/shared';
 import {
   generateSavedTestConfiguration,
   postRequestSaveSearch,
 } from '../../../../../../utils/apps/query_enhancements/saved';
-import { prepareTestSuite } from '../../../../../../utils/helpers';
+import {
+  prepareTestSuite,
+  createWorkspaceAndDatasetUsingEndpoint,
+} from '../../../../../../utils/helpers';
 import { QueryLanguages } from '../../../../../../utils/apps/explore/constants';
 import { verifyMonacoEditorContent } from '../../../../../../utils/apps/query_enhancements/autocomplete';
 
 const workspaceName = getRandomizedWorkspaceName();
+const datasetId = getRandomizedDatasetId();
 
 const runSavedSearchTests = () => {
   describe('saved search', () => {
     before(() => {
-      cy.osd.setupWorkspaceAndDataSourceWithIndices(workspaceName, [INDEX_WITH_TIME_1]);
-      cy.explore.createWorkspaceDataSets({
-        workspaceName: workspaceName,
-        indexPattern: INDEX_WITH_TIME_1,
-        timefieldName: 'timestamp',
-        dataSource: DATASOURCE_NAME,
-        isEnhancement: true,
-      });
-      // Extarct the workspace id from URl
-      cy.url().then((url) => {
-        const workspaceId = url.match(/\/w\/([^\/]+)\//)[1];
-        cy.wrap(workspaceId).as('workspaceId');
-      });
+      cy.osd.setupEnvAndGetDataSource(DATASOURCE_NAME);
+
+      // Create workspace and dataset using our new helper function
+      createWorkspaceAndDatasetUsingEndpoint(
+        DATASOURCE_NAME,
+        workspaceName,
+        datasetId,
+        `${INDEX_WITH_TIME_1}*`, // Create index pattern from base index
+        'timestamp', // timestampField
+        'logs', // signalType
+        ['use-case-observability'] // features
+      );
     });
 
     after(() => {
+      // Cleanup workspace and associated resources
       cy.osd.cleanupWorkspaceAndDataSourceAndIndices(workspaceName, [INDEX_WITH_TIME_1]);
     });
 
@@ -51,15 +56,17 @@ const runSavedSearchTests = () => {
     }).forEach((config) => {
       it(`should redirect to older discover page when we load an older saved search ${config.testName}`, () => {
         // Use workspace id to navigate to discover page
-        cy.get('@workspaceId').then((workspaceId) => {
-          cy.visit(`/w/${workspaceId}/app/data-explorer/discover`);
+        cy.osd.navigateToWorkSpaceSpecificPage({
+          workspaceName,
+          page: 'data-explorer/discover',
+          isEnhancement: true,
         });
 
-        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
+        cy.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType, true);
         cy.osd.grabIdsFromDiscoverPageUrl();
 
         // using a POST request to create a saved search to load
-        postRequestSaveSearch(config);
+        postRequestSaveSearch(config, workspaceName);
 
         // Navigating to explore page
         cy.osd.navigateToWorkSpaceSpecificPage({

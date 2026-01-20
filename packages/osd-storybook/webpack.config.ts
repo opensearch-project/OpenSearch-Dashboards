@@ -4,25 +4,40 @@
  */
 
 import { resolve } from 'path';
-import { stringifyRequest } from 'loader-utils';
-import { Configuration, Stats } from 'webpack';
-import webpackMerge from 'webpack-merge';
+import { Configuration } from 'webpack';
+// Webpack 5: webpack-merge v5 uses named export 'merge'
+import { merge as webpackMerge } from 'webpack-merge';
 import { REPO_ROOT } from './lib/constants';
 
 const BABEL_PRESET_PATH = require.resolve('@osd/babel-preset/webpack_preset');
 
+// Webpack 5: Stats.presetToOptions removed, use preset string directly
 const stats = {
-  ...Stats.presetToOptions('minimal'),
+  preset: 'minimal',
   colors: true,
   errorDetails: true,
   errors: true,
   moduleTrace: true,
-  warningsFilter: /(export .* was not found in)|(entrypoint size limit)/,
 };
 
 // Extend the Storybook Webpack config with some customizations
 /* eslint-disable import/no-default-export */
 export default function ({ config: storybookConfig }: { config: Configuration }) {
+  // Remove Storybook's default CSS rules to avoid double processing
+  // Storybook's CSS rules conflict with PostCSS 8 configuration
+  if (storybookConfig.module?.rules) {
+    storybookConfig.module.rules = storybookConfig.module.rules.filter((rule) => {
+      if (rule && typeof rule === 'object' && 'test' in rule) {
+        const testStr = rule.test?.toString();
+        // Remove CSS rules (but keep other rules)
+        if (testStr && (testStr.includes('\\.css') || testStr.includes('.css'))) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }
+
   const config = {
     devServer: {
       stats,
@@ -61,7 +76,6 @@ export default function ({ config: storybookConfig }: { config: Configuration })
         {
           test: /\.mjs$/,
           include: /node_modules/,
-          type: 'javascript/auto',
           use: {
             loader: 'babel-loader',
             options: {
@@ -88,9 +102,31 @@ export default function ({ config: storybookConfig }: { config: Configuration })
         },
         {
           test: /\.(html|md|txt|tmpl)$/,
-          use: {
-            loader: 'raw-loader',
-          },
+          // Webpack 5: asset/source replaces raw-loader
+          type: 'asset/source',
+        },
+        {
+          test: /\.css$/,
+          use: [
+            { loader: 'style-loader' },
+            { loader: 'css-loader', options: { importLoaders: 1 } },
+            {
+              loader: 'postcss-loader',
+              options: {
+                postcssOptions: {
+                  plugins: [
+                    'postcss-flexbugs-fixes',
+                    [
+                      'autoprefixer',
+                      {
+                        flexbox: 'no-2009',
+                      },
+                    ],
+                  ],
+                },
+              },
+            },
+          ],
         },
         {
           test: /\.scss$/,
@@ -109,14 +145,27 @@ export default function ({ config: storybookConfig }: { config: Configuration })
             {
               loader: 'sass-loader',
               options: {
+                api: 'modern',
                 additionalData(content: string, loaderContext: any) {
-                  return `@import ${stringifyRequest(
-                    loaderContext,
-                    resolve(REPO_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
+                  return `@import ${JSON.stringify(
+                    loaderContext.utils.contextify(
+                      loaderContext.context || loaderContext.rootContext,
+                      resolve(REPO_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
+                    )
                   )};\n${content}`;
                 },
                 sassOptions: {
-                  includePaths: [resolve(REPO_ROOT, 'node_modules')],
+                  // Webpack 5 / sass-loader v14: includePaths renamed to loadPaths
+                  loadPaths: [resolve(REPO_ROOT, 'node_modules')],
+                  // Silence deprecation warnings from @elastic/eui (using old Sass APIs)
+                  silenceDeprecations: [
+                    'color-functions',
+                    'global-builtin',
+                    'import',
+                    'legacy-js-api',
+                  ],
+                  // Suppress Sass if() function deprecation warnings
+                  quietDeps: true,
                 },
               },
             },
@@ -145,9 +194,19 @@ export default function ({ config: storybookConfig }: { config: Configuration })
       extensions: ['.scss'],
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/core_app/images'),
+        // Legacy module aliases used by some plugins (pointing to core exports)
+        'opensearch-dashboards/public': resolve(REPO_ROOT, 'src/core/public'),
+        'opensearch-dashboards/server': resolve(REPO_ROOT, 'src/core/server'),
       },
     },
     stats,
+    // Webpack 5: Add ignoreWarnings to replace stats.warningsFilter
+    ignoreWarnings: [
+      /export .* was not found in/,
+      /entrypoint size limit/,
+      // Suppress autoprefixer warnings about flex-end (from @elastic/eui CSS)
+      /from "autoprefixer" plugin/,
+    ],
   };
 
   // @ts-ignore There's a long error here about the types of the

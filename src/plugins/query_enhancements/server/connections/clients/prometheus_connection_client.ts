@@ -19,26 +19,12 @@ export class PrometheusConnectionClient extends BaseConnectionClient<OpenSearchC
 
   constructor(context: RequestHandlerContext, _request: OpenSearchDashboardsRequest) {
     super();
+    // Prometheus connections are always created with "Local Cluster". Always use the non-MDS client.
     this.client = context.core.opensearch.client.asCurrentUser;
   }
 
   async getResources<R>(request: ClientRequest): Promise<GetResourcesResponse<R>> {
-    try {
-      const response = await this.client.transport.request({
-        ...request,
-        method: 'GET',
-      });
-      return {
-        status: 'success',
-        data: response.body.data,
-        type: 'prometheus',
-      };
-    } catch (err) {
-      return {
-        status: 'failed',
-        data: ([] as unknown) as R,
-        type: 'prometheus',
-      };
-    }
+    const response = await this.client.transport.request({ ...request, method: 'GET' });
+    return { status: response.body.status, data: response.body.data, type: 'prometheus' };
   }
 }
