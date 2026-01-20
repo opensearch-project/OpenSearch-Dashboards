@@ -5,6 +5,7 @@
 
 import * as echarts from 'echarts';
 import React, { useMemo, useRef, useEffect, useState } from 'react';
+import { DEFAULT_THEME } from './theme/default';
 
 interface Props {
   spec: echarts.EChartsOption;
@@ -53,6 +54,7 @@ export const EchartsRender = ({ spec }: Props) => {
         },
         { notMerge: true } // this is a must to update compulsorily otherwise will merge with previous option
       );
+      instance.setTheme(DEFAULT_THEME);
     }
   }, [spec, instance]);
 

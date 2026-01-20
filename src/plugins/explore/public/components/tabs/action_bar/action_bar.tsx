@@ -15,11 +15,15 @@ import { ExploreFlavor } from '../../../../common';
 import { useTabResults } from '../../../application/utils/hooks/use_tab_results';
 import { useHistogramResults } from '../../../application/utils/hooks/use_histogram_results';
 
+interface ActionBarProps {
+  filteredRowsCount?: number;
+}
+
 /**
  * Logs tab component for displaying log entries
  * Uses legacy components from discover and handles all content states
  */
-const ActionBarComponent = () => {
+const ActionBarComponent = ({ filteredRowsCount }: ActionBarProps = {}) => {
   const { services } = useOpenSearchDashboards<ExploreServices>();
   const { dataset } = useDatasetContext();
   const { results } = useTabResults();
@@ -58,8 +62,9 @@ const ActionBarComponent = () => {
       dataset={dataset}
       inspectionHanlder={openInspector}
       extraActions={slotItems}
+      rowsCountOverride={filteredRowsCount}
     />
   );
 };
 
-export const ActionBar = memo(ActionBarComponent);
+export const ActionBar = memo<ActionBarProps>(ActionBarComponent);

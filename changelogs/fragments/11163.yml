@@ -1,0 +1,2 @@
+fix:
+- Migrate bar gauge ([#11163](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11163))

@@ -104,7 +104,7 @@ export function pipe<T extends BaseChartStyle>(
 /**
  * Get ECharts axis type from VisColumn schema
  */
-function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time' {
+export function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time' {
   if (!axis) return 'value';
 
   switch (axis.schema) {
@@ -124,9 +124,11 @@ function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time'
 export const createBaseConfig = <T extends BaseChartStyle>({
   title,
   addTrigger = true,
+  addLegend = true,
 }: {
   title?: string;
   addTrigger?: boolean;
+  addLegend?: boolean;
 }) => (state: EChartsSpecState<T>): EChartsSpecState<T> => {
   const { styles, axisConfig } = state;
 
@@ -139,12 +141,14 @@ export const createBaseConfig = <T extends BaseChartStyle>({
       ...(axisConfig && addTrigger && { trigger: 'axis' }),
       axisPointer: { type: 'shadow' },
     },
-    legend: {
-      ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
-        ? { orient: 'vertical' }
-        : {}),
-      [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%', // distance between legend and the corresponding orientation edge side of the container
-    },
+    ...(addLegend && {
+      legend: {
+        ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
+          ? { orient: 'vertical' }
+          : {}),
+        [String(styles?.legendPosition ?? Positions.BOTTOM)]: 1, // distance between legend and the corresponding orientation edge side of the container
+      },
+    }),
   };
 
   return { ...state, baseConfig };
@@ -211,6 +215,7 @@ export const assembleSpec = <T extends BaseChartStyle>(
     series,
     visualMap,
     axisColumnMappings,
+    styles,
   } = state;
 
   const hasMultiDatasets = Array.isArray(transformedData[0]?.[0]);
@@ -224,8 +229,17 @@ export const assembleSpec = <T extends BaseChartStyle>(
   const facetNumber = transformedData.length;
 
   let grid;
-  if (!hasFacet || facetNumber <= 1) grid = { top: '5%', left: '5%', right: '5%' };
-  else {
+
+  // TODO long-term method to handle legend display
+  if (!hasFacet || facetNumber <= 1) {
+    const gridMap = {
+      [Positions.LEFT]: { top: '5%', right: '5%', bottom: '5%' },
+      [Positions.RIGHT]: { top: '5%', left: '5%', bottom: '5%' },
+      [Positions.TOP]: { right: '5%', left: '5%', bottom: '5%' },
+      [Positions.BOTTOM]: { right: '5%', left: '5%', top: '5%' },
+    };
+    grid = gridMap[styles.legendPosition ?? Positions.TOP];
+  } else {
     const cols = Math.ceil(facetNumber / 2); // always in two rows
     const colWidth = 90 / cols;
     const rowHeight = 39; // slightly smaller to make legend fit
