@@ -63,7 +63,6 @@ export const EchartsRender = ({ spec }: Props) => {
         overflowX: 'auto',
         ...(shouldScroll && { width: widthPercentage }),
       }}
-      id="echartContainer"
       ref={containerRef}
     />
   );

@@ -43,7 +43,6 @@ export const createGauge = (
       styles: styleOptions,
       axisColumnMappings: axisColumnMappings ?? {},
     });
-    console.log('result.spec', result.spec);
     return result.spec;
   }
   const colors = getColors();
