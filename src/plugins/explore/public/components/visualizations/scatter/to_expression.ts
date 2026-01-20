@@ -20,7 +20,7 @@ import {
   createSizeScatterSeries,
   assembleSizeScatterSpec,
 } from './scatter_chart_utils';
-import { convertTo2DArray, transform } from '../utils/data_transformation';
+import { convertTo2DArray, transform, pivot } from '../utils/data_transformation';
 
 const DEFAULT_POINTER_SIZE = 80;
 const DEFAULT_STROKE_OPACITY = 0.65;
@@ -162,10 +162,15 @@ export const createTwoMetricOneCateScatter = (
     if (!xField || !yField || !colorField)
       throw Error('Missing axis config for colored scatter chart');
 
-    const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];
-
     const result = pipe(
-      transform(convertTo2DArray(allColumns)),
+      transform(
+        pivot({
+          groupBy: xField,
+          pivot: colorField,
+          field: yField,
+        }),
+        convertTo2DArray()
+      ),
       createBaseConfig({
         title: `${axisConfig.xAxis?.name} vs ${axisConfig.yAxis?.name} by ${
           axisColumnMappings?.[AxisRole.COLOR]?.name

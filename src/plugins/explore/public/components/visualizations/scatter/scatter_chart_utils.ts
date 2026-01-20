@@ -10,70 +10,6 @@ import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { generateThresholdLines } from '../utils/utils';
 
 /**
- * Transforms data from [x, y, category] format to pivot format for multi-series scatter charts
- */
-export const transformToPivotDataset = (
-  transformedData: any[][],
-  xField: string,
-  yField: string,
-  colorField: string
-): any[][] => {
-  if (!transformedData || transformedData.length < 2) {
-    throw new Error('transformedData must have at least header and one data row');
-  }
-
-  const headerRow = transformedData[0] as string[];
-  const dataRows = transformedData.slice(1);
-
-  const xFieldIndex = headerRow.indexOf(xField);
-  const yFieldIndex = headerRow.indexOf(yField);
-  const colorFieldIndex = headerRow.indexOf(colorField);
-
-  if (xFieldIndex === -1 || yFieldIndex === -1 || colorFieldIndex === -1) {
-    throw new Error(
-      `Cannot find field indices: x=${xFieldIndex}, y=${yFieldIndex}, color=${colorFieldIndex}`
-    );
-  }
-
-  const categories = [
-    ...new Set(dataRows.map((row) => String(row[colorFieldIndex] || 'undefined'))),
-  ];
-  const newHeader = [xField, yField, ...categories];
-  const coordinateGroups = new Map<string, { x: any; y: any; categories: Map<string, any> }>();
-
-  dataRows.forEach((row) => {
-    const x = row[xFieldIndex];
-    const y = row[yFieldIndex];
-    const category = String(row[colorFieldIndex] || 'undefined');
-    const coordKey = `${x},${y}`;
-
-    if (!coordinateGroups.has(coordKey)) {
-      coordinateGroups.set(coordKey, {
-        x,
-        y,
-        categories: new Map(),
-      });
-    }
-
-    coordinateGroups.get(coordKey)!.categories.set(category, y);
-  });
-
-  // Convert grouped data to pivot format
-  const pivotDataRows = Array.from(coordinateGroups.values()).map((group) => {
-    const row = [group.x, group.y];
-
-    // For each category, add the y value if this point belongs to that category, otherwise null
-    categories.forEach((category) => {
-      row.push(group.categories.has(category) ? group.categories.get(category) : null);
-    });
-
-    return row;
-  });
-
-  return [newHeader, ...pivotDataRows];
-};
-
-/**
  * Transforms data for scatter charts with both color and size encoding
  * Groups data by color category while preserving size information for each point
  */
@@ -203,7 +139,7 @@ export const createScatterSeries = <T extends BaseChartStyle>({
 
 /**
  * Create category scatter series with multiple series (one per category)
- * Uses pivot data format and automatic ECharts coloring instead of visualMap
+ * Expects data already in pivot format: ['x', 'A', 'B', 'C', ...] from the universal pivot function
  */
 export const createCategoryScatterSeries = <T extends BaseChartStyle>({
   styles,
@@ -223,12 +159,12 @@ export const createCategoryScatterSeries = <T extends BaseChartStyle>({
     throw new Error('transformedData must be an array with data rows');
   }
 
-  // Transform data to pivot format
-  const pivotDataset = transformToPivotDataset(transformedData, xField, yField, colorField);
-  const pivotHeader = pivotDataset[0];
+  // Data is already in pivot format from the pipe: ['x', 'A', 'B', 'C', ...]
+  const pivotDataset = transformedData;
+  const pivotHeader = pivotDataset[0] as string[];
 
-  // Extract categories
-  const categories = pivotHeader.slice(2);
+  // Extract categories (skip the first column which is xField)
+  const categories = pivotHeader.slice(1);
 
   const thresholdLines = generateThresholdLines(styles.thresholdOptions);
 
@@ -266,8 +202,10 @@ export const createCategoryScatterSeries = <T extends BaseChartStyle>({
     formatter: (params: any) => {
       if (params.value && Array.isArray(params.value) && params.value.length >= 2) {
         const xValue = params.value[0];
-        const yValue = params.value[1];
         const seriesName = params.seriesName;
+        const yValueIndex = pivotHeader.indexOf(String(seriesName));
+        const yValue = yValueIndex >= 0 ? params.value[yValueIndex] : null;
+
         return `${xAxisName}: ${xValue}<br/>${yAxisName}: ${yValue}<br/>${colorAxisName}: ${seriesName}`;
       }
       return `${xAxisName}: ${params.value || 'N/A'}<br/>${yAxisName}: ${params.name || 'N/A'}`;
