@@ -5,9 +5,27 @@
 
 import { HistogramChartStyle } from './histogram_vis_config';
 import { AxisColumnMappings, VEGASCHEMA, VisColumn, VisFieldType, AggregationType } from '../types';
-import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
+import {
+  applyAxisStyling,
+  getSwappedAxisRole,
+  getSchemaByAxis,
+  getChartRender,
+} from '../utils/utils';
 import { createThresholdLayer } from '../style_panel/threshold/threshold_utils';
-import { adjustBucketBins, buildThresholdColorEncoding } from '../bar/bar_chart_utils';
+import {
+  adjustBucketBins,
+  buildThresholdColorEncoding,
+  createBarSeries,
+} from '../bar/bar_chart_utils';
+import {
+  assembleSpec,
+  buildAxisConfigs,
+  buildVisMap,
+  createBaseConfig,
+  pipe,
+} from '../utils/echarts_spec';
+import { convertTo2DArray, transform } from '../utils/data_transformation';
+import { bin } from '../utils/data_transformation/bin';
 
 // Only set size and binSpacing in manual mode
 const configureBarSizeAndSpacing = (barMark: any, styles: HistogramChartStyle) => {
@@ -23,6 +41,59 @@ export const createNumericalHistogramChart = (
   styles: HistogramChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const { xAxis, yAxis } = axisConfig;
+    if (!xAxis) {
+      throw Error('Missing axis config for Histogram chart');
+    }
+
+    const categoryField = xAxis.column;
+    const valueField = yAxis?.column;
+
+    const result = pipe(
+      transform(
+        bin({
+          bin: { size: styles.bucket.bucketSize, count: styles.bucket.bucketCount },
+          binField: categoryField,
+          valueField,
+          aggregationType: styles.bucket.aggregationType,
+        }),
+        convertTo2DArray()
+      ),
+      createBaseConfig({ legend: { show: false } }),
+      buildAxisConfigs,
+      buildVisMap({
+        seriesFields: () => ['value'],
+      }),
+      createBarSeries({
+        kind: 'histogram',
+        styles,
+        categoryField: 'bucket',
+        seriesFields: ['value'],
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig: {
+        ...axisConfig,
+        xAxis: {
+          name: 'bucket',
+          column: 'bucket',
+          schema: VisFieldType.Categorical,
+        },
+        yAxis: {
+          name: 'value',
+          column: 'value',
+          schema: VisFieldType.Numerical,
+        },
+      },
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+    return result.spec;
+  }
+
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const layers: any[] = [];
@@ -103,6 +174,56 @@ export const createSingleHistogramChart = (
   styles: HistogramChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ): any => {
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const { xAxis } = axisConfig;
+    if (!xAxis) {
+      throw Error('Missing axis config for Histogram chart');
+    }
+
+    const categoryField = xAxis.column;
+
+    const result = pipe(
+      transform(
+        bin({
+          bin: { size: styles.bucket.bucketSize, count: styles.bucket.bucketCount },
+          binField: categoryField,
+        }),
+        convertTo2DArray()
+      ),
+      createBaseConfig({ legend: { show: false } }),
+      buildAxisConfigs,
+      buildVisMap({
+        seriesFields: () => ['value'],
+      }),
+      createBarSeries({
+        kind: 'histogram',
+        styles,
+        categoryField: 'bucket',
+        seriesFields: ['value'],
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig: {
+        ...axisConfig,
+        xAxis: {
+          name: 'bucket',
+          column: 'bucket',
+          schema: VisFieldType.Categorical,
+        },
+        yAxis: {
+          name: 'value',
+          column: 'value',
+          schema: VisFieldType.Numerical,
+        },
+      },
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+    return result.spec;
+  }
+
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const layers: any[] = [];

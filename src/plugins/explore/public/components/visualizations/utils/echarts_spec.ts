@@ -19,7 +19,6 @@ import {
   Positions,
   StandardAxes,
   TimeUnit,
-  VisColumn,
   VisFieldType,
   Threshold,
   ThresholdOptions,
@@ -49,12 +48,18 @@ export interface BaseChartStyle {
   legendPosition?: Positions;
 }
 
+interface Axis {
+  name: string;
+  schema: VisFieldType;
+  column: string;
+}
+
 /**
  * Configuration for ECharts axes (after swapping)
  */
 export interface EChartsAxisConfig {
-  xAxis?: VisColumn;
-  yAxis?: VisColumn;
+  xAxis?: Axis;
+  yAxis?: Axis;
   xAxisStyle?: StandardAxes;
   yAxisStyle?: StandardAxes;
 }
@@ -107,7 +112,7 @@ export function pipe<T extends BaseChartStyle>(
 /**
  * Get ECharts axis type from VisColumn schema
  */
-export function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time' {
+export function getAxisType(axis: Axis | undefined): 'category' | 'value' | 'time' {
   if (!axis) return 'value';
 
   switch (axis.schema) {
@@ -127,11 +132,11 @@ export function getAxisType(axis: VisColumn | undefined): 'category' | 'value' |
 export const createBaseConfig = <T extends BaseChartStyle>({
   title,
   addTrigger = true,
-  addLegend = true,
+  legend,
 }: {
   title?: string;
   addTrigger?: boolean;
-  addLegend?: boolean;
+  legend?: EChartsOption['legend'];
 }) => (state: EChartsSpecState<T>): EChartsSpecState<T> => {
   const { styles, axisConfig } = state;
 
@@ -144,14 +149,13 @@ export const createBaseConfig = <T extends BaseChartStyle>({
       ...(axisConfig && addTrigger && { trigger: 'axis' }),
       axisPointer: { type: 'shadow' },
     },
-    ...(addLegend && {
-      legend: {
-        ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
-          ? { orient: 'vertical' }
-          : {}),
-        [String(styles?.legendPosition ?? Positions.BOTTOM)]: 1, // distance between legend and the corresponding orientation edge side of the container
-      },
-    }),
+    legend: {
+      ...legend,
+      ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
+        ? { orient: 'vertical' }
+        : {}),
+      [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%', // distance between legend and the corresponding orientation edge side of the container
+    },
   };
 
   return { ...state, baseConfig };
@@ -168,7 +172,7 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
   const hasFacet = Array.isArray(transformedData[0]?.[0]) && axisColumnMappings.facet !== undefined;
 
   const getConfig = (
-    axis: VisColumn | undefined,
+    axis: Axis | undefined,
     axisStyle: StandardAxes | undefined,
     gridNumber?: number
   ) => {

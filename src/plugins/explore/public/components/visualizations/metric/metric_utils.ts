@@ -49,7 +49,6 @@ export const createMetricChartSeries = ({
   const { transformedData = [], axisColumnMappings } = state;
   const newState = { ...state };
 
-  // If date field is set, it will a display sparkline
   const colorPalette = getColors();
 
   const series: Array<LineSeriesOption | CustomSeriesOption> = [];
@@ -80,9 +79,9 @@ export const createMetricChartSeries = ({
     const displayValue = showDisplayValue(isValidNumber, selectedUnit, calculatedValue);
 
     const fillColor = targetFillColor(
-      styles?.useThresholdColor ?? false,
-      styles?.thresholdOptions?.thresholds,
-      styles?.thresholdOptions?.baseColor,
+      styles.useThresholdColor ?? false,
+      styles.thresholdOptions?.thresholds,
+      styles.thresholdOptions?.baseColor,
       calculatedValue
     );
 
@@ -116,6 +115,7 @@ export const createMetricChartSeries = ({
       }
     }
 
+    // If date field is set, it will display a sparkline
     if (dateField) {
       series.push({
         name: seriesDisplayName,
