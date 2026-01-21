@@ -30,10 +30,33 @@ $hoverIconSize: $euiSizeXS * 2 + $euiSizeL;
     padding-right: 52px;
   }
 
+  // Enable text truncation for field names
+  &__name {
+    display: block;
+    max-width: 100%;
+    min-width: 0; // Required for flexbox truncation
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiFlexItem {
+    min-width: 0; // Allow flex item to shrink for truncation
+  }
+
+  // Fix EuiToolTip anchor breaking width inheritance
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiToolTipAnchor {
+    display: block;
+    max-width: 100%;
+    min-width: 0;
+  }
+
   &__actionButtons {
     background-color: $euiColorLightestShade;
     position: absolute;
-    right: $euiSizeS;
+    right: $ouiSizeXXS;
     display: flex;
     gap: $euiSizeXS;
     opacity: 0;
