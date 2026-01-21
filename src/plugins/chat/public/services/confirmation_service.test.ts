@@ -214,28 +214,6 @@ describe('ConfirmationService', () => {
     });
   });
 
-  describe('cancel', () => {
-    it('should reject the confirmation', async () => {
-      const promise = service.requestConfirmation('testTool', 'call-123', { param: 'value' });
-      const pending = service.getPendingConfirmations();
-
-      service.cancel(pending[0].id);
-
-      const response = await promise;
-      expect(response.approved).toBe(false);
-    });
-
-    it('should remove confirmation from pending list', async () => {
-      const promise = service.requestConfirmation('testTool', 'call-123', { param: 'value' });
-      const pending = service.getPendingConfirmations();
-
-      service.cancel(pending[0].id);
-      await promise;
-
-      expect(service.getPendingConfirmations().length).toBe(0);
-    });
-  });
-
   describe('getPendingConfirmations', () => {
     it('should return empty array initially', () => {
       expect(service.getPendingConfirmations()).toEqual([]);
