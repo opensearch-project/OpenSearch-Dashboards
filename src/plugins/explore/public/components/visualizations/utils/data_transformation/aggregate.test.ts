@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { aggregate } from './aggregate';
+import { aggregate, aggregateByGroups } from './aggregate';
 import { AggregationType, TimeUnit } from '../../types';
 
 describe('aggregate', () => {
@@ -195,5 +195,118 @@ describe('aggregate', () => {
       // When all values are invalid, the group is not included in the result
       expect(result).toEqual([]);
     });
+  });
+});
+describe('aggregateByGroups', () => {
+  const data = [
+    { region: 'North', product: 'A', sales: 100 },
+    { region: 'North', product: 'A', sales: 150 },
+    { region: 'North', product: 'B', sales: 200 },
+    { region: 'South', product: 'A', sales: 120 },
+    { region: 'South', product: 'B', sales: 180 },
+  ];
+
+  it('aggregates by multiple groups with SUM', () => {
+    const result = aggregateByGroups({
+      groupBy: ['region', 'product'],
+      field: 'sales',
+      aggregationType: AggregationType.SUM,
+    })(data);
+
+    expect(result).toEqual([
+      { region: 'North', product: 'A', sales: 250 },
+      { region: 'North', product: 'B', sales: 200 },
+      { region: 'South', product: 'A', sales: 120 },
+      { region: 'South', product: 'B', sales: 180 },
+    ]);
+  });
+
+  it('aggregates by multiple groups with MEAN', () => {
+    const result = aggregateByGroups({
+      groupBy: ['region', 'product'],
+      field: 'sales',
+      aggregationType: AggregationType.MEAN,
+    })(data);
+
+    expect(result).toEqual([
+      { region: 'North', product: 'A', sales: 125 },
+      { region: 'North', product: 'B', sales: 200 },
+      { region: 'South', product: 'A', sales: 120 },
+      { region: 'South', product: 'B', sales: 180 },
+    ]);
+  });
+
+  it('handles single group field', () => {
+    const result = aggregateByGroups({
+      groupBy: ['product'],
+      field: 'sales',
+      aggregationType: AggregationType.SUM,
+    })(data);
+
+    expect(result).toEqual([
+      { product: 'A', sales: 370 },
+      { product: 'B', sales: 380 },
+    ]);
+  });
+
+  it('handles empty data', () => {
+    const result = aggregateByGroups({
+      groupBy: ['region', 'product'],
+      field: 'sales',
+      aggregationType: AggregationType.SUM,
+    })([]);
+
+    expect(result).toEqual([]);
+  });
+
+  it('handles NaN values', () => {
+    const dataWithNaN = [
+      { region: 'North', product: 'A', sales: 100 },
+      { region: 'North', product: 'A', sales: 'invalid' },
+      { region: 'North', product: 'A', sales: 150 },
+    ];
+
+    const result = aggregateByGroups({
+      groupBy: ['region', 'product'],
+      field: 'sales',
+      aggregationType: AggregationType.SUM,
+    })(dataWithNaN);
+
+    expect(result).toEqual([{ region: 'North', product: 'A', sales: 250 }]);
+  });
+
+  it('aggregates with MAX', () => {
+    const result = aggregateByGroups({
+      groupBy: ['region', 'product'],
+      field: 'sales',
+      aggregationType: AggregationType.MAX,
+    })(data);
+
+    expect(result).toEqual([
+      { region: 'North', product: 'A', sales: 150 },
+      { region: 'North', product: 'B', sales: 200 },
+      { region: 'South', product: 'A', sales: 120 },
+      { region: 'South', product: 'B', sales: 180 },
+    ]);
+  });
+
+  it('handles undefined and null group values', () => {
+    const dataWithNulls = [
+      { region: null, product: 'A', sales: 100 },
+      { region: undefined, product: 'B', sales: 150 },
+      { region: 'North', product: null, sales: 200 },
+    ];
+
+    const result = aggregateByGroups({
+      groupBy: ['region', 'product'],
+      field: 'sales',
+      aggregationType: AggregationType.SUM,
+    })(dataWithNulls);
+
+    expect(result).toEqual([
+      { region: null, product: 'A', sales: 100 },
+      { region: undefined, product: 'B', sales: 150 },
+      { region: 'North', product: null, sales: 200 },
+    ]);
   });
 });

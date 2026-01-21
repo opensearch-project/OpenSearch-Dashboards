@@ -152,3 +152,44 @@ export const aggregate = (options: {
 
   return result;
 };
+
+// TODO: can be integrated with aggregate
+export const aggregateByGroups = (options: {
+  groupBy: string[];
+  field: string;
+  aggregationType: AggregationType;
+}) => (data: Array<Record<string, any>>) => {
+  const { groupBy, field, aggregationType } = options;
+
+  const grouped = data.reduce((acc, row) => {
+    const groupKey = groupBy.reduce((ac, group) => `${ac}+${row[group]}`, '');
+    const groupValue = groupBy.map((group) => ({
+      [group]: row[group],
+    }));
+
+    const value = Number(row[field]);
+    if (!isNaN(value)) {
+      if (!acc[groupKey]) {
+        acc[groupKey] = { groupValue, values: [] };
+      }
+      acc[groupKey].values.push(value);
+    }
+
+    return acc;
+  }, {} as Record<string, { groupValue: Array<Record<string, any>>; values: number[] }>);
+
+  // Apply aggregation and convert to array of objects
+  const result = Object.values(grouped).map(({ groupValue, values }) => {
+    // values is guaranteed to have at least one element since groups
+    // are only created when valid values exist
+    const aggregatedValue: number = aggregateValues(aggregationType, values) ?? 0;
+
+    const groupKey = Object.assign({}, ...groupValue);
+    return {
+      ...groupKey,
+      [field]: aggregatedValue,
+    };
+  });
+
+  return result;
+};

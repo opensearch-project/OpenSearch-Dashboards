@@ -30,7 +30,6 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
   axisColumnMappings,
   updateVisualization,
 }) => {
-  const shouldShowTypeAndGrid = numericalColumns.length === 3;
   const updateStyleOption = <K extends keyof HeatmapChartStyleOptions>(
     key: K,
     value: HeatmapChartStyleOptions[K]
@@ -81,7 +80,6 @@ export const HeatmapVisStyleControls: React.FC<HeatmapVisStyleControlsProps> = (
           <EuiFlexItem grow={false}>
             <AllAxesOptions
               axisColumnMappings={axisColumnMappings}
-              disableGrid={!shouldShowTypeAndGrid}
               standardAxes={styleOptions.standardAxes}
               onStandardAxesChange={(standardAxes) =>
                 updateStyleOption('standardAxes', standardAxes)

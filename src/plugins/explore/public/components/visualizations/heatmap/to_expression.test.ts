@@ -17,6 +17,7 @@ jest.mock('../utils/utils', () => ({
   applyAxisStyling: jest.fn(() => ({ title: 'mockAxis' })),
   getSwappedAxisRole: jest.fn((styles, mappings) => ({ xAxis: mappings.x, yAxis: mappings.y })),
   getSchemaByAxis: jest.fn((axis) => (axis?.schema === 'Numerical' ? 'quantitative' : 'nominal')),
+  getChartRender: jest.fn(),
 }));
 
 const mockNumericColumns: VisColumn[] = [

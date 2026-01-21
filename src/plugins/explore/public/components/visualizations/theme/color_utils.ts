@@ -6,7 +6,7 @@
 import { darkMode } from '@osd/ui-shared-deps/theme';
 import { getColors } from './default_colors';
 
-function hexToRgb(hex: string) {
+export function hexToRgb(hex: string) {
   hex = hex.replace(/^#/, '');
   if (hex.length === 3) {
     hex = hex
@@ -21,7 +21,7 @@ function hexToRgb(hex: string) {
   };
 }
 
-function rgbToHex(r: number, g: number, b: number) {
+export function rgbToHex(r: number, g: number, b: number) {
   return (
     '#' +
     [r, g, b]

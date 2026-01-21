@@ -4,9 +4,28 @@
  */
 
 import { HeatmapChartStyle } from './heatmap_vis_config';
-import { VisColumn, VEGASCHEMA, AxisColumnMappings } from '../types';
-import { applyAxisStyling, getSwappedAxisRole, getSchemaByAxis } from '../utils/utils';
-import { createLabelLayer, enhanceStyle, addTransform } from './heatmap_chart_utils';
+import { VisColumn, VEGASCHEMA, AxisColumnMappings, AggregationType, VisFieldType } from '../types';
+import {
+  applyAxisStyling,
+  getSwappedAxisRole,
+  getSchemaByAxis,
+  getChartRender,
+} from '../utils/utils';
+import {
+  createLabelLayer,
+  enhanceStyle,
+  addTransform,
+  createHeatmapSeries,
+} from './heatmap_chart_utils';
+
+import {
+  pipe,
+  createBaseConfig,
+  buildAxisConfigs,
+  assembleSpec,
+  buildVisMap,
+} from '../utils/echarts_spec';
+import { convertTo2DArray, aggregateByGroups, transform } from '../utils/data_transformation';
 
 export const createHeatmapWithBin = (
   transformedData: Array<Record<string, any>>,
@@ -97,6 +116,52 @@ export const createRegularHeatmap = (
   styles: HeatmapChartStyle,
   axisColumnMappings?: AxisColumnMappings
 ) => {
+  if (getChartRender() === 'echarts') {
+    const axisConfig = getSwappedAxisRole(styles, axisColumnMappings);
+    const xAxis = axisConfig.xAxis;
+    const yAxis = axisConfig.yAxis;
+
+    const valueField = axisColumnMappings?.color?.column;
+    const valueName = axisColumnMappings?.color?.name;
+
+    if (!xAxis || !yAxis || !valueField) {
+      throw Error('Missing axis config for heatmap chart');
+    }
+
+    const result = pipe(
+      transform(
+        aggregateByGroups({
+          groupBy: [xAxis.column, yAxis.column],
+          field: valueField,
+          aggregationType: AggregationType.SUM, // TODO use AggregationType.SUM temporarily and add aggregtaion choice in UI
+        }),
+        convertTo2DArray()
+      ),
+      createBaseConfig({
+        title: `${valueName} by ${xAxis?.name} and ${yAxis?.name}`,
+        addTrigger: false,
+      }),
+      buildAxisConfigs,
+      buildVisMap({
+        seriesFields: (headers) =>
+          (headers ?? []).filter((h) => h !== yAxis.column && h !== xAxis.column),
+      }),
+      createHeatmapSeries({
+        styles,
+        categoryFields: [xAxis.column, yAxis.column],
+        seriesField: valueField,
+      }),
+      assembleSpec
+    )({
+      data: transformedData,
+      styles,
+      axisConfig,
+      axisColumnMappings: axisColumnMappings ?? {},
+    });
+
+    return result.spec;
+  }
+
   const { xAxis, xAxisStyle, yAxis, yAxisStyle } = getSwappedAxisRole(styles, axisColumnMappings);
 
   const colorFieldColumn = axisColumnMappings?.color!;
