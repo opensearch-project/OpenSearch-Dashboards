@@ -27,9 +27,9 @@ import { ChatInput } from './chat_input';
 import { ConfirmationMessage } from './confirmation_message';
 import { slashCommandRegistry } from '../services/slash_commands';
 
-export interface ChatWindowInstance{
+export interface ChatWindowInstance {
   startNewChat: ()=>void;
-  sendMessage: (options:{content: string})=>Promise<unknown>;
+  sendMessage: (options:{content: string; messages?: Message[]})=>Promise<unknown>;
 }
 
 interface ChatWindowProps {
@@ -59,9 +59,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const [pendingConfirmation, setPendingConfirmation] = useState<ConfirmationRequest | null>(null);
   const handleSendRef = useRef<typeof handleSend>();
-  
+
   const timelineRef = React.useRef<Message[]>(timeline);
-  
+
   React.useEffect(() => {
     timelineRef.current = timeline;
   }, [timeline]);
@@ -124,7 +124,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
           // restore unfinished tool call by triggering events
           const unfinishedToolCalls = lastMessage.toolCalls.filter(toolCall => {
             // Check if there's no corresponding tool result message
-            const hasToolResult = currentMessages.some(msg => 
+            const hasToolResult = currentMessages.some(msg =>
               msg.role === 'tool' && msg.toolCallId === toolCall.id
             );
             return !hasToolResult;
@@ -177,7 +177,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   // Helper function to handle message streaming with observable subscription
   const subscribeToMessageStream = useCallback(async (
     messageContent: string,
-    timelineContext: Message[],
+    messages: Message[],
     rawMessage?: string
   ) => {
     setIsStreaming(true);
@@ -185,17 +185,16 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     try {
       const { observable, userMessage } = await chatService.sendMessage(
         messageContent,
-        timelineContext
+        messages
       );
 
-      // Add user message immediately to timeline
       const timelineUserMessage: UserMessage = {
         id: userMessage.id,
         role: 'user',
         content: userMessage.content,
         rawMessage: rawMessage || messageContent,  // For regular messages, raw and content are the same
       };
-      
+
       // Add loading assistant message
       const loadingMessageId = `loading-${Date.now()}`;
       const loadingMessage: Message = {
@@ -203,7 +202,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         role: 'assistant',
         content: '',
       };
-      
+
       setTimeline((prev) => [...prev, timelineUserMessage, loadingMessage]);
 
       let firstResponseReceived = false;
@@ -245,24 +244,30 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     }
   }, [chatService, currentRunId, eventHandler]);
 
-  const handleSend = async (options?: {input?: string}) => {
+  const handleSend = async (options?: {input?: string, messages?: Message[]}) => {
     const messageContent = options?.input ?? input.trim();
     if (!messageContent || isStreaming) return;
 
     setInput('');
+
+    // Prepare additional messages for sending (but don't add to timeline yet)
+    const additionalMessages = options?.messages ?? [];
+
+    // Merge additional messages with current timeline for sending
+    const messagesToSend = [...timeline, ...additionalMessages];
 
     // Check if this is a slash command
     const commandResult = await slashCommandRegistry.execute(messageContent);
     if (commandResult.handled) {
       // If command was handled and returned a message, send it to the AI
       if (commandResult.message) {
-        return subscribeToMessageStream(commandResult.message, timeline, messageContent);
+        return subscribeToMessageStream(commandResult.message, messagesToSend, messageContent);
       }
       return;
     }
 
     // Normal message flow
-    return subscribeToMessageStream(messageContent, timeline);
+    return subscribeToMessageStream(messageContent, messagesToSend);
   };
 
   handleSendRef.current = handleSend;
@@ -287,6 +292,24 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     if (messageIndex === -1) return;
 
+    let textContent = typeof message.content === "string" ? message.content : "";
+    const additionalMessages: Message[] = [];
+
+    if (Array.isArray(message.content)) {
+      const lastMessageContent =  message.content[message.content.length - 1];
+      if (lastMessageContent.type === "text") {
+        textContent = lastMessageContent.text;
+        additionalMessages.push({
+          ...message,
+          content: message.content.slice(0, message.content.length - 1),
+        });
+      }
+    }
+
+    if (textContent === "") {
+        return;
+    }
+
     // Remove this message and everything after it from the timeline
     const truncatedTimeline = timeline.slice(0, messageIndex);
     setTimeline(truncatedTimeline);
@@ -294,8 +317,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     // Clear any streaming state and input
     setInput('');
 
-    // Resend the message with truncated timeline
-    return subscribeToMessageStream(message.content, truncatedTimeline);
+    subscribeToMessageStream(textContent, [...truncatedTimeline,...additionalMessages]);
   };
 
   const handleNewChat = useCallback(() => {
@@ -326,7 +348,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   useImperativeHandle(ref, ()=>({
     startNewChat: ()=>handleNewChat(),
-    sendMessage: async ({content})=>(await handleSendRef.current?.({input:content}))
+    sendMessage: async ({content, messages})=>(await handleSendRef.current?.({input:content, messages}))
   }), [handleNewChat]);
 
   return (
