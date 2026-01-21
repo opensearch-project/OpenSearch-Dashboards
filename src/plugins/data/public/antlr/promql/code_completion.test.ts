@@ -61,11 +61,20 @@ describe('promql code_completion', () => {
       getLabelValues: jest.fn().mockResolvedValue([]),
     };
 
+    const mockTimeRange = { from: 'now-15m', to: 'now' };
+
     const mockServices = ({
       appName: 'test-app',
       data: {
         resourceClientFactory: {
           get: jest.fn().mockReturnValue(mockPrometheusClient),
+        },
+        query: {
+          timefilter: {
+            timefilter: {
+              getTime: jest.fn().mockReturnValue(mockTimeRange),
+            },
+          },
         },
       },
     } as unknown) as IDataPluginServices;
@@ -184,10 +193,13 @@ describe('promql code_completion', () => {
       );
     });
 
-    it('should call prometheus client with indexPattern.id', async () => {
+    it('should call prometheus client with indexPattern.id and timeRange', async () => {
       await getSimpleSuggestions('');
 
-      expect(mockPrometheusClient.getMetrics).toHaveBeenCalledWith(mockIndexPattern.id);
+      expect(mockPrometheusClient.getMetrics).toHaveBeenCalledWith(
+        mockIndexPattern.id,
+        mockTimeRange
+      );
     });
   });
 });

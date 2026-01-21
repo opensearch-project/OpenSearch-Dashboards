@@ -16,6 +16,7 @@ import {
   PromQLSuggestionItemDescriptions,
 } from './constants';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
+import { TimeRange } from '../../../common';
 
 export interface SuggestionParams {
   position: monaco.Position;
@@ -45,16 +46,25 @@ export const getSuggestions = async ({
       column: column || selectionEnd,
     });
     const prometheusResourceClient = services.data.resourceClientFactory.get<{
-      getMetrics: (dataSourceId: string) => Promise<string[]>;
-      getLabels: (dataSourceId: string, metric?: string) => Promise<string[]>;
-      getLabelValues: (dataSourceId: string, label: string, metric?: string) => Promise<string[]>;
+      getMetrics: (dataConnectionId: string, timeRange?: TimeRange) => Promise<string[]>;
+      getLabels: (
+        dataConnectionId: string,
+        metric?: string,
+        timeRange?: TimeRange
+      ) => Promise<string[]>;
+      getLabelValues: (
+        dataConnectionId: string,
+        label: string,
+        timeRange?: TimeRange
+      ) => Promise<string[]>;
     }>('prometheus');
     if (!prometheusResourceClient) throw new Error('Prometheus resource client not found.');
 
+    const timeRange = services.data.query.timefilter.timefilter.getTime();
     const finalSuggestions: MonacoCompatibleQuerySuggestion[] = [];
 
     if (suggestions.suggestMetrics) {
-      const metrics = await prometheusResourceClient.getMetrics(indexPattern.id!);
+      const metrics = await prometheusResourceClient.getMetrics(indexPattern.id!, timeRange);
       finalSuggestions.push(
         ...metrics.map((metric: string) => ({
           text: metric,
@@ -68,7 +78,8 @@ export const getSuggestions = async ({
       // TODO: figure out why partial label being typed will always appear regardless of metric before it
       const labels = await prometheusResourceClient.getLabels(
         indexPattern.id!,
-        suggestions.suggestLabels !== '' ? suggestions.suggestLabels : undefined
+        suggestions.suggestLabels !== '' ? suggestions.suggestLabels : undefined,
+        timeRange
       );
       finalSuggestions.push(
         ...labels.map((af: string) => ({
@@ -84,7 +95,8 @@ export const getSuggestions = async ({
       // TODO: update when we can get metric name passed in
       const labelValues = await prometheusResourceClient.getLabelValues(
         indexPattern.id!,
-        suggestions.suggestLabelValues.label
+        suggestions.suggestLabelValues.label,
+        timeRange
       );
       finalSuggestions.push(
         ...labelValues.map((af: string) => ({
