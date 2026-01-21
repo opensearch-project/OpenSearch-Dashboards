@@ -12,6 +12,7 @@ import {
   XAXisComponentOption,
   YAXisComponentOption,
   PieSeriesOption,
+  ScatterSeriesOption,
   HeatmapSeriesOption,
 } from 'echarts';
 import {
@@ -92,6 +93,7 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
     | CustomSeriesOption
     | PieSeriesOption
     | GaugeSeriesOption
+    | ScatterSeriesOption
     | HeatmapSeriesOption
   >;
   visualMap?: any;
@@ -273,7 +275,6 @@ export const assembleSpec = <T extends BaseChartStyle>(
   const spec = {
     ...baseConfig,
     dataset: data,
-
     xAxis: xAxisConfig,
     yAxis: yAxisConfig,
     visualMap,
