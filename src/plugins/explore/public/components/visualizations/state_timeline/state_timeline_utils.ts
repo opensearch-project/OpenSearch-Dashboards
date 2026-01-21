@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { CustomSeriesOption } from 'echarts';
 import { groupBy } from 'lodash';
 import { Threshold, ValueMapping } from '../types';
 import { StateTimeLineChartStyle } from './state_timeline_config';
@@ -528,7 +529,7 @@ export const createStateTimeLineSpec = <T extends BaseChartStyle>({
     };
   });
 
-  newState.series = allSeries?.flat() as any;
+  newState.series = allSeries?.flat() as CustomSeriesOption[];
 
   return newState;
 };

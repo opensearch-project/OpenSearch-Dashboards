@@ -27,13 +27,10 @@ import { DEFAULT_X_AXIS_CONFIG, DEFAULT_Y_AXIS_CONFIG } from '../constants';
 
 // Mock the line chart utils
 jest.mock('./line_chart_utils', () => ({
+  ...jest.requireActual('./line_chart_utils'),
   buildMarkConfig: jest.fn().mockReturnValue({ type: 'line', tooltip: true }),
   createTimeMarkerLayer: jest.fn().mockReturnValue(null),
   applyAxisStyling: jest.fn().mockReturnValue({ title: 'Mocked Axis' }),
-  ValueAxisPosition: {
-    Left: 'left',
-    Right: 'right',
-  },
 }));
 
 // Mock the threshold utils
@@ -47,6 +44,7 @@ jest.mock('../utils/utils', () => ({
   ...jest.requireActual('../utils/utils'),
   applyTimeRangeToEncoding: jest.fn().mockReturnValue(undefined),
   getTooltipFormat: jest.fn().mockReturnValue('%b %d, %Y %H:%M:%S'),
+  getChartRender: jest.fn().mockReturnValue('vega'),
 }));
 
 describe('to_expression', () => {
@@ -891,6 +889,215 @@ describe('to_expression', () => {
         mockAxisColumnMappings
       );
       expect(customTitleResult.title).toBe('Custom Category Multi-Line Chart');
+    });
+  });
+
+  describe('createSimpleLineChart in echarts rendering', () => {
+    it('should create a simple line chart with one metric and one date', () => {
+      (utils.getChartRender as jest.Mock).mockReturnValue('echarts');
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+      };
+      const modifiedStyles = { ...styleOptions, addTimeMarker: true };
+      const result = createSimpleLineChart(
+        transformedData,
+        [numericColumn1],
+        [dateColumn],
+        modifiedStyles,
+        mockAxisColumnMappings
+      );
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('dataset');
+      expect(result.xAxis.type).toBe('time');
+      expect(result.yAxis.type).toBe('value');
+      expect(result).toHaveProperty('tooltip');
+    });
+
+    it('should handle different title display', () => {
+      (utils.getChartRender as jest.Mock).mockReturnValue('echarts');
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+      };
+      const noTitleStyles = { ...styleOptions, titleOptions: { show: false, titleName: '' } };
+      const result = createSimpleLineChart(
+        transformedData,
+        [numericColumn1],
+        [dateColumn],
+        noTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(result.title).toMatchObject({ text: undefined });
+
+      const defultTitleStyles = { ...styleOptions, titleOptions: { show: true, titleName: '' } };
+      const result1 = createSimpleLineChart(
+        transformedData,
+        [numericColumn1],
+        [dateColumn],
+        defultTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(result1.title).toMatchObject({ text: 'value1 Over Time' });
+
+      const customTitleStyles = {
+        ...styleOptions,
+        titleOptions: { show: true, titleName: 'Custom Simple Line Chart' },
+      };
+      const result2 = createSimpleLineChart(
+        transformedData,
+        [numericColumn1],
+        [dateColumn],
+        customTitleStyles,
+        mockAxisColumnMappings
+      );
+      expect(result2.title).toMatchObject({ text: 'Custom Simple Line Chart' });
+    });
+  });
+
+  describe('createLineBarChart in echarts rendering', () => {
+    it('should create a combined line and bar chart with two metrics and one date', () => {
+      (utils.getChartRender as jest.Mock).mockReturnValue('echarts');
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+        [AxisRole.Y_SECOND]: numericColumn2,
+      };
+      const modifiedStyles = { ...styleOptions, addTimeMarker: true };
+      const result = createLineBarChart(
+        transformedData,
+        [numericColumn1, numericColumn2],
+        [dateColumn],
+        modifiedStyles,
+        mockAxisColumnMappings
+      );
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('dataset');
+      expect(result.xAxis.type).toBe('time');
+      expect(result.yAxis).toHaveLength(2);
+      expect(result.yAxis[0].type).toBe('value');
+      expect(result.yAxis[1].type).toBe('value');
+      expect(result.yAxis[1].position).toBe('right');
+      expect(result.series).toHaveLength(2);
+      expect(result.series[1].type).toBe('bar');
+      expect(result.series[0].type).toBe('line');
+      expect(result).toHaveProperty('tooltip');
+    });
+  });
+
+  describe('createMultiLineChart in echarts rendering', () => {
+    it('should create a multi-line chart with one metric, one date, and one categorical column', () => {
+      (utils.getChartRender as jest.Mock).mockReturnValue('echarts');
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+        [AxisRole.COLOR]: categoricalColumn1,
+      };
+      const modifiedStyles = { ...styleOptions, addTimeMarker: true };
+      const result = createMultiLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1],
+        [dateColumn],
+        modifiedStyles,
+        mockAxisColumnMappings
+      );
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('dataset');
+      expect(result.xAxis.type).toBe('time');
+      expect(result.yAxis.type).toBe('value');
+      expect(result.series).toHaveLength(2);
+      expect(result.series[1].type).toBe('line');
+      expect(result.series[0].type).toBe('line');
+      expect(result).toHaveProperty('tooltip');
+    });
+  });
+
+  describe('createFacetedMultiLineChart in echarts rendering', () => {
+    it('should create a faceted multi-line chart with one metric, one date, and two categorical columns', () => {
+      (utils.getChartRender as jest.Mock).mockReturnValue('echarts');
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: dateColumn,
+        [AxisRole.COLOR]: categoricalColumn1,
+        [AxisRole.FACET]: categoricalColumn2,
+      };
+      const modifiedStyles = {
+        ...styleOptions,
+        addTimeMarker: true,
+        thresholdOptions: {
+          ...styleOptions.thresholdOptions,
+          thresholdStyle: ThresholdMode.Solid,
+        },
+      };
+      const result = createFacetedMultiLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1, categoricalColumn2],
+        [dateColumn],
+        modifiedStyles,
+        mockAxisColumnMappings
+      );
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('dataset');
+      expect(result.xAxis).toHaveLength(2);
+      expect(result.yAxis).toHaveLength(2);
+      expect(result.series).toHaveLength(2);
+      expect(result.grid).toHaveLength(2);
+      expect(result.series[1].type).toBe('line');
+      expect(result.series[0].type).toBe('line');
+    });
+  });
+
+  describe('createCategoryLineChart in echarts rendering', () => {
+    it('should create a category-based line chart with one metric and one categorical column', () => {
+      (utils.getChartRender as jest.Mock).mockReturnValue('echarts');
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: categoricalColumn1,
+      };
+      const result = createCategoryLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1],
+        [],
+        styleOptions,
+        mockAxisColumnMappings
+      );
+
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('dataset');
+      expect(result.xAxis.type).toBe('category');
+      expect(result.yAxis.type).toBe('value');
+      expect(result).toHaveProperty('tooltip');
+    });
+  });
+
+  describe('createCategoryMultiLineChart in echarts rendering', () => {
+    it('should create a category-based line chart with one metric and one categorical column', () => {
+      (utils.getChartRender as jest.Mock).mockReturnValue('echarts');
+      const mockAxisColumnMappings: AxisColumnMappings = {
+        [AxisRole.Y]: numericColumn1,
+        [AxisRole.X]: categoricalColumn1,
+        [AxisRole.COLOR]: categoricalColumn2,
+      };
+      const result = createCategoryMultiLineChart(
+        transformedData,
+        [numericColumn1],
+        [categoricalColumn1, categoricalColumn2],
+        [],
+        styleOptions,
+        mockAxisColumnMappings
+      );
+      expect(result).toHaveProperty('series');
+      expect(result).toHaveProperty('dataset');
+      expect(result.xAxis.type).toBe('category');
+      expect(result.yAxis.type).toBe('value');
+      expect(result).toHaveProperty('tooltip');
+      expect(result.series).toHaveLength(2);
+      expect(result.series[1].type).toBe('line');
+      expect(result.series[0].type).toBe('line');
+      expect(result).toHaveProperty('tooltip');
     });
   });
 });
