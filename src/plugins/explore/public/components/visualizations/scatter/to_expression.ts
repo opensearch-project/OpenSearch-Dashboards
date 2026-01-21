@@ -351,7 +351,7 @@ export const createThreeMetricOneCateScatter = (
               orient: styles?.legendPosition,
               symbolLimit: 10,
             }
-          : false,
+          : null,
       },
       size: {
         field: numericalSize?.column,
@@ -362,7 +362,7 @@ export const createThreeMetricOneCateScatter = (
               orient: styles?.legendPosition,
               offset: LEGEND_VERTICAL_OFFSET,
             }
-          : false,
+          : null,
       },
       ...hoverStateEncoding,
       ...(styles.tooltipOptions?.mode !== 'hidden' && {

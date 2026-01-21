@@ -82,7 +82,12 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   xAxisConfig?: any;
   yAxisConfig?: any;
   series?: Array<
-    BarSeriesOption | LineSeriesOption | CustomSeriesOption | PieSeriesOption | GaugeSeriesOption | ScatterSeriesOption
+    | BarSeriesOption
+    | LineSeriesOption
+    | CustomSeriesOption
+    | PieSeriesOption
+    | GaugeSeriesOption
+    | ScatterSeriesOption
   >;
   visualMap?: any;
   // Final output
