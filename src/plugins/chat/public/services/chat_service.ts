@@ -250,7 +250,7 @@ export class ChatService {
     // If ChatWindow is available, delegate to its sendMessage for proper timeline management
     if (this.chatWindowRef?.current && this.isWindowOpen()) {
       try {
-        await this.chatWindowRef.current.sendMessage({ content });
+        await this.chatWindowRef.current.sendMessage({ content, messages });
 
         // Create a user message for consistency with the return type
         const userMessage: UserMessage = {
@@ -361,11 +361,31 @@ export class ChatService {
     const requestId = this.generateRequestId();
 
     this.addActiveRequest(requestId);
-    const userMessage: UserMessage = {
-      id: this.generateMessageId(),
-      role: 'user',
-      content: content.trim(),
-    };
+
+    // Check if the last message in the array is a user message with array content
+    // If so, append the text to the existing content array (for multimodal messages)
+    let userMessage: UserMessage;
+    const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+    const hasArrayContent = lastMessage?.role === 'user' && Array.isArray(lastMessage.content);
+
+    if (hasArrayContent && lastMessage) {
+      // Remove the last message from the array since we'll merge it with the new message
+      messages = messages.slice(0, -1);
+
+      // Append text to the existing content array (preserves order from caller)
+      userMessage = {
+        ...lastMessage,
+        id: this.generateMessageId(),
+        content: [...(lastMessage.content as any[]), { type: 'text', text: content.trim() }],
+      };
+    } else {
+      // No array content, create a simple text message
+      userMessage = {
+        id: this.generateMessageId(),
+        role: 'user',
+        content: content.trim(),
+      };
+    }
 
     // Get workspace-aware data source ID
     const dataSourceId = await this.getWorkspaceAwareDataSourceId();

@@ -5,6 +5,22 @@
 
 import { Observable } from 'rxjs';
 
+interface TextInputContent {
+  type: 'text';
+  text: string;
+}
+
+interface BinaryInputContent {
+  type: 'binary';
+  mimeType: string;
+  id?: string;
+  url?: string;
+  data?: string;
+  filename?: string;
+}
+
+type InputContent = TextInputContent | BinaryInputContent;
+
 /**
  * Function call interface
  */
@@ -28,7 +44,7 @@ export interface ToolCall {
 export interface BaseMessage {
   id: string;
   role: string;
-  content?: string;
+  content?: string | InputContent[];
   name?: string;
 }
 
@@ -62,7 +78,7 @@ export interface AssistantMessage extends BaseMessage {
  */
 export interface UserMessage extends BaseMessage {
   role: 'user';
-  content: string;
+  content: string | InputContent[];
 }
 
 /**
