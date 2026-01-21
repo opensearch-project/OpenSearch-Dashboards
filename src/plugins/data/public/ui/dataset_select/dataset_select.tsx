@@ -29,6 +29,8 @@ import {
   EuiBasicTable,
   EuiFieldSearch,
   EuiSpacer,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -42,6 +44,33 @@ import { DatasetDetails } from './dataset_details';
 import { AdvancedSelector } from '../dataset_selector/advanced_selector';
 import './_index.scss';
 
+interface TimeBasedDatasetDisclaimerProps {
+  onClick: () => void;
+}
+
+const TimeBasedDatasetDisclaimer: React.FC<TimeBasedDatasetDisclaimerProps> = ({ onClick }) => (
+  <EuiCallOut
+    color="primary"
+    size="s"
+    className="datasetSelect__timeBasedDisclaimer"
+    data-test-subj="TimeBasedDatasetCallout"
+  >
+    <EuiText size="xs">
+      <EuiIcon type="iInCircle" size="s" />{' '}
+      <FormattedMessage
+        id="data.datasetSelect.timeBasedDatasetDisclaimer.message"
+        defaultMessage="Only time-based Datasets are supported."
+      />{' '}
+      <EuiLink onClick={onClick} data-test-subj="TimeBasedDatasetCalloutDatasetNavigationButton">
+        <FormattedMessage
+          id="data.datasetSelect.timeBasedDatasetDisclaimer.createLink"
+          defaultMessage="Create a time-based Dataset here."
+        />
+      </EuiLink>
+    </EuiText>
+  </EuiCallOut>
+);
+
 export interface DetailedDataset extends Dataset {
   description?: string;
   displayName?: string;
@@ -52,6 +81,7 @@ export interface DatasetSelectProps {
   onSelect: (dataset: Dataset | undefined) => void;
   supportedTypes?: string[];
   signalType: string | null;
+  showNonTimeFieldDatasets?: boolean;
 }
 
 interface ViewDatasetsModalProps {
@@ -202,6 +232,12 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
+        <TimeBasedDatasetDisclaimer
+          onClick={() => {
+            onClose();
+            services.application?.navigateToApp('datasets');
+          }}
+        />
         <EuiFieldSearch
           placeholder={i18n.translate('data.datasetSelect.viewModal.searchPlaceholder', {
             defaultMessage: 'Search...',
@@ -233,7 +269,12 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
 /**
  * @experimental This component is experimental and may change in future versions
  */
-const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes, signalType }) => {
+const DatasetSelect: React.FC<DatasetSelectProps> = ({
+  onSelect,
+  supportedTypes,
+  signalType,
+  showNonTimeFieldDatasets = true,
+}) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const isMounted = useRef(true);
   const hasCompletedInitialLoad = useRef(false);
@@ -390,6 +431,11 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
           return false;
         }
 
+        // Filter by time field requirement
+        if (!showNonTimeFieldDatasets && !detailedDataset.timeFieldName) {
+          return false;
+        }
+
         // Filter by supportedAppNames
         const typeConfig = datasetService.getType(detailedDataset.type);
         const appNameMatch =
@@ -448,7 +494,16 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
         hasCompletedInitialLoad.current = true;
       }
     }
-  }, [dataViews, signalType, onSelect, queryString, datasetService, services, supportedTypes]);
+  }, [
+    dataViews,
+    signalType,
+    onSelect,
+    queryString,
+    datasetService,
+    services,
+    supportedTypes,
+    showNonTimeFieldDatasets,
+  ]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -859,7 +914,115 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
           gutterSize="s"
           className="datasetSelect__footer"
         >
-          {signalType === CORE_SIGNAL_TYPES.METRICS ? metricsFooterContent : defaultFooterContent}
+          <EuiFlexItem grow={false} className="datasetSelect__footerItem">
+            <EuiButton
+              className="datasetSelect__createButton"
+              data-test-subj="datasetSelectorAdvancedButton"
+              iconType="plus"
+              iconSide="left"
+              size="s"
+              fill
+              onClick={() => {
+                closePopover();
+                const overlay = overlays?.openModal(
+                  toMountPoint(
+                    <AdvancedSelector
+                      useConfiguratorV2
+                      alwaysShowDatasetFields
+                      signalType={signalType || undefined}
+                      services={services}
+                      showNonTimeFieldDatasets={showNonTimeFieldDatasets}
+                      onSelect={async (query: Partial<Query>, saveDataset) => {
+                        overlay?.close();
+                        if (query?.dataset) {
+                          try {
+                            if (saveDataset) {
+                              await datasetService.saveDataset(
+                                query.dataset,
+                                services,
+                                signalType || undefined
+                              );
+                            } else {
+                              await datasetService.cacheDataset(
+                                query.dataset,
+                                services,
+                                false,
+                                signalType || undefined
+                              );
+                            }
+                            const dataView = await data.dataViews.get(
+                              query.dataset.id,
+                              query.dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+                            );
+
+                            if (dataView) {
+                              // Refresh datasets list if a new dataset was saved
+                              if (saveDataset) {
+                                // Convert dataView back to dataset to get the correct type
+                                const updatedDataset = await dataViews.convertToDataset(dataView);
+                                onSelect(updatedDataset);
+                                // Clear cache to ensure getIds() returns fresh results including the newly saved dataset
+                                dataViews.clearCache();
+                                await fetchDatasets();
+                              } else {
+                                onSelect(query.dataset);
+                              }
+                            }
+                          } catch (error) {
+                            services.notifications?.toasts.addError(error, {
+                              title: i18n.translate('data.datasetSelect.errorTitle', {
+                                defaultMessage: 'Error selecting dataset',
+                              }),
+                            });
+                          }
+                        }
+                      }}
+                      onCancel={() => overlay?.close()}
+                      supportedTypes={supportedTypes}
+                    />
+                  ),
+                  {
+                    maxWidth: false,
+                    className: 'datasetSelect__advancedModal',
+                  }
+                );
+              }}
+            >
+              <FormattedMessage
+                id="data.datasetSelect.createDatasetButton"
+                defaultMessage="Create dataset"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} className="datasetSelect__footerItem">
+            <EuiButton
+              className="datasetSelect__viewDatasetsButton"
+              data-test-subj="datasetSelectViewDatasetsButton"
+              size="s"
+              onClick={() => {
+                closePopover();
+                const overlay = overlays?.openModal(
+                  toMountPoint(
+                    <ViewDatasetsModal
+                      datasets={datasets}
+                      isLoading={isLoading}
+                      onClose={() => overlay?.close()}
+                      services={services}
+                    />
+                  ),
+                  {
+                    maxWidth: '800px',
+                    className: 'datasetSelect__viewDatasetsModal',
+                  }
+                );
+              }}
+            >
+              <FormattedMessage
+                id="data.datasetSelect.viewDatasetsButton"
+                defaultMessage="View datasets"
+              />
+            </EuiButton>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverFooter>
     </EuiPopover>
