@@ -1,0 +1,2 @@
+feat:
+- Migrate gauge to ECharts ([#11170](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11170))

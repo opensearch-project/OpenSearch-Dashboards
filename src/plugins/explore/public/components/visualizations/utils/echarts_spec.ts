@@ -7,6 +7,7 @@ import {
   BarSeriesOption,
   LineSeriesOption,
   CustomSeriesOption,
+  GaugeSeriesOption,
   EChartsOption,
   XAXisComponentOption,
   YAXisComponentOption,
@@ -79,7 +80,9 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   baseConfig?: any;
   xAxisConfig?: any;
   yAxisConfig?: any;
-  series?: Array<BarSeriesOption | LineSeriesOption | CustomSeriesOption | PieSeriesOption>;
+  series?: Array<
+    BarSeriesOption | LineSeriesOption | CustomSeriesOption | PieSeriesOption | GaugeSeriesOption
+  >;
   visualMap?: any;
   // Final output
   spec?: EChartsOption;
