@@ -267,6 +267,38 @@ export const DatasetExplorer = ({
                       },
                       searchable: true,
                     })}
+                    emptyMessage={
+                      !current.children || current.children.length === 0 ? (
+                        <EuiText size="s" color="subdued">
+                          <p>
+                            <FormattedMessage
+                              id="data.explorer.datasetSelector.advancedSelector.noDataSources"
+                              defaultMessage="No data source associated. "
+                            />
+                            <FormattedMessage
+                              id="data.explorer.datasetSelector.advancedSelector.noDataSourcesAction"
+                              defaultMessage="Please associate one using the"
+                            />
+                            <br />
+                            <EuiLink
+                              href={`${services.http.basePath.get()}/app/dataSources`}
+                              target="_blank"
+                              external
+                            >
+                              <FormattedMessage
+                                id="data.explorer.datasetSelector.advancedSelector.dataSourcesPage"
+                                defaultMessage="data sources page"
+                              />
+                            </EuiLink>
+                            <br />
+                            <FormattedMessage
+                              id="data.explorer.datasetSelector.advancedSelector.noDataSourcesActionEnd"
+                              defaultMessage="Then re-open this window."
+                            />
+                          </p>
+                        </EuiText>
+                      ) : undefined
+                    }
                     height="full"
                     className="datasetExplorer__selectable"
                     data-test-subj="datasetExplorerSelectable"
