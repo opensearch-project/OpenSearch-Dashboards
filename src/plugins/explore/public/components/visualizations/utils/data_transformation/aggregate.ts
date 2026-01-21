@@ -176,7 +176,7 @@ export const aggregateByGroups = (options: {
     }
 
     return acc;
-  }, {} as Record<string, { values: number[] }>);
+  }, {} as Record<string, { groupValue: Array<Record<string, any>>; values: number[] }>);
 
   // Apply aggregation and convert to array of objects
   const result = Object.values(grouped).map(({ groupValue, values }) => {

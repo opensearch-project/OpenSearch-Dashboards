@@ -188,6 +188,11 @@ export const createHeatmapSeries = <T extends BaseChartStyle>({
   const { transformedData = [], visualMap } = state;
 
   const seriesIndex = transformedData[0].indexOf(seriesField);
+
+  if (seriesIndex < 0) {
+    throw new Error(`Series field not found in transformed data: ${seriesField}`);
+  }
+
   const newState = { ...state };
 
   const numericalValues: number[] = [];
@@ -195,16 +200,24 @@ export const createHeatmapSeries = <T extends BaseChartStyle>({
   const logSource = (rawSource: any[]) =>
     rawSource.map((row, i) => {
       if (i === 0) return row;
-      return [row[0], row[1], Math.log10(row[2] + 1)]; // avoid log(0)
+      const newRow = [...row];
+
+      const v = Number(newRow[seriesIndex] ?? 0);
+      newRow[seriesIndex] = v > 0 ? Math.log10(v) : null; // ensure mathematically correct
+
+      return newRow;
     });
 
   const sqrtSource = (rawSource: any[]) =>
     rawSource.map((row, i) => {
       if (i === 0) return row;
-      return [row[0], row[1], Math.sqrt(row[2])];
+      const newRow = [...row];
+      const v = newRow[seriesIndex];
+      newRow[seriesIndex] = v != null && v >= 0 ? Math.sqrt(Number(v)) : null; // invalid result will not be shown in charts
+      return newRow;
     });
 
-  let newTransformedData = [...transformedData];
+  let newTransformedData: Array<Array<string | number | null>> = [...transformedData];
   if (styles.exclusive.colorScaleType === ScaleType.LOG) {
     newTransformedData = logSource(transformedData);
   } else if (styles.exclusive.colorScaleType === ScaleType.SQRT) {
@@ -212,17 +225,26 @@ export const createHeatmapSeries = <T extends BaseChartStyle>({
   }
 
   if (styles.exclusive.percentageMode) {
-    const maxValue = Math.max(...newTransformedData.slice(1).map((row) => row[seriesIndex]));
-    newTransformedData = newTransformedData.map((row, i) => {
+    const maxValue = Math.max(
+      ...newTransformedData
+        .slice(1)
+        .filter((row) => row[seriesIndex] !== null)
+        .map((row) => Number(row[seriesIndex]))
+    );
+    newTransformedData = [...newTransformedData].map((row, i) => {
       if (i === 0) return row;
       const newRow = [...row];
-      newRow[seriesIndex] = maxValue === 0 ? row[seriesIndex] : row[seriesIndex] / maxValue;
+      newRow[seriesIndex] =
+        maxValue === 0 || row[seriesIndex] === null
+          ? row[seriesIndex]
+          : Number(row[seriesIndex]) / maxValue;
       return newRow;
     });
   }
 
   for (let i = 1; i < newTransformedData.length; i++) {
-    numericalValues.push(newTransformedData[i][seriesIndex]);
+    if (newTransformedData[i][seriesIndex] !== null)
+      numericalValues.push(Number(newTransformedData[i][seriesIndex])); // numericalValues is used for building visual map
   }
 
   const series: HeatmapSeriesOption[] = [
