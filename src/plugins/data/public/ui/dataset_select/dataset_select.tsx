@@ -544,6 +544,143 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
     return selectedDataset.title;
   }, [selectedDataset]);
 
+  const metricsFooterContent = (
+    <EuiFlexItem grow={false} className="datasetSelect__footerItem">
+      <EuiButton
+        className="datasetSelect__associateButton"
+        data-test-subj="datasetSelectorAssociateDataSourcesButton"
+        iconType="popout"
+        iconSide="left"
+        size="s"
+        onClick={() => {
+          closePopover();
+          window.open(
+            `${services.http.basePath.get()}/app/management/opensearch-dashboards/dataSources`,
+            '_blank'
+          );
+        }}
+      >
+        <FormattedMessage
+          id="data.datasetSelect.manageDataSourcesButton"
+          defaultMessage="Manage data sources"
+        />
+      </EuiButton>
+    </EuiFlexItem>
+  );
+
+  const defaultFooterContent = (
+    <>
+      <EuiFlexItem grow={false} className="datasetSelect__footerItem">
+        <EuiButton
+          className="datasetSelect__createButton"
+          data-test-subj="datasetSelectorAdvancedButton"
+          iconType="plus"
+          iconSide="left"
+          size="s"
+          fill
+          onClick={() => {
+            closePopover();
+            const overlay = overlays?.openModal(
+              toMountPoint(
+                <AdvancedSelector
+                  useConfiguratorV2
+                  alwaysShowDatasetFields
+                  signalType={signalType || undefined}
+                  services={services}
+                  onSelect={async (query: Partial<Query>, saveDataset) => {
+                    overlay?.close();
+                    if (query?.dataset) {
+                      try {
+                        if (saveDataset) {
+                          await datasetService.saveDataset(
+                            query.dataset,
+                            services,
+                            signalType || undefined
+                          );
+                        } else {
+                          await datasetService.cacheDataset(
+                            query.dataset,
+                            services,
+                            false,
+                            signalType || undefined
+                          );
+                        }
+                        const dataView = await data.dataViews.get(
+                          query.dataset.id,
+                          query.dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+                        );
+
+                        if (dataView) {
+                          // Refresh datasets list if a new dataset was saved
+                          if (saveDataset) {
+                            // Convert dataView back to dataset to get the correct type
+                            const updatedDataset = await dataViews.convertToDataset(dataView);
+                            onSelect(updatedDataset);
+                            // Clear cache to ensure getIds() returns fresh results including the newly saved dataset
+                            dataViews.clearCache();
+                            await fetchDatasets();
+                          } else {
+                            onSelect(query.dataset);
+                          }
+                        }
+                      } catch (error) {
+                        services.notifications?.toasts.addError(error, {
+                          title: i18n.translate('data.datasetSelect.errorTitle', {
+                            defaultMessage: 'Error selecting dataset',
+                          }),
+                        });
+                      }
+                    }
+                  }}
+                  onCancel={() => overlay?.close()}
+                  supportedTypes={supportedTypes}
+                />
+              ),
+              {
+                maxWidth: false,
+                className: 'datasetSelect__advancedModal',
+              }
+            );
+          }}
+        >
+          <FormattedMessage
+            id="data.datasetSelect.createDatasetButton"
+            defaultMessage="Create dataset"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} className="datasetSelect__footerItem">
+        <EuiButton
+          className="datasetSelect__viewDatasetsButton"
+          data-test-subj="datasetSelectViewDatasetsButton"
+          size="s"
+          onClick={() => {
+            closePopover();
+            const overlay = overlays?.openModal(
+              toMountPoint(
+                <ViewDatasetsModal
+                  datasets={datasets}
+                  isLoading={isLoading}
+                  onClose={() => overlay?.close()}
+                  services={services}
+                />
+              ),
+              {
+                maxWidth: '800px',
+                className: 'datasetSelect__viewDatasetsModal',
+              }
+            );
+          }}
+        >
+          <FormattedMessage
+            id="data.datasetSelect.viewDatasetsButton"
+            defaultMessage="View datasets"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+    </>
+  );
+
   return (
     <EuiPopover
       className="datasetSelect"
@@ -721,114 +858,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
           gutterSize="s"
           className="datasetSelect__footer"
         >
-          <EuiFlexItem grow={false} className="datasetSelect__footerItem">
-            <EuiButton
-              className="datasetSelect__createButton"
-              data-test-subj="datasetSelectorAdvancedButton"
-              iconType="plus"
-              iconSide="left"
-              size="s"
-              fill
-              onClick={() => {
-                closePopover();
-                const overlay = overlays?.openModal(
-                  toMountPoint(
-                    <AdvancedSelector
-                      useConfiguratorV2
-                      alwaysShowDatasetFields
-                      signalType={signalType || undefined}
-                      services={services}
-                      onSelect={async (query: Partial<Query>, saveDataset) => {
-                        overlay?.close();
-                        if (query?.dataset) {
-                          try {
-                            if (saveDataset) {
-                              await datasetService.saveDataset(
-                                query.dataset,
-                                services,
-                                signalType || undefined
-                              );
-                            } else {
-                              await datasetService.cacheDataset(
-                                query.dataset,
-                                services,
-                                false,
-                                signalType || undefined
-                              );
-                            }
-                            const dataView = await data.dataViews.get(
-                              query.dataset.id,
-                              query.dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-                            );
-
-                            if (dataView) {
-                              // Refresh datasets list if a new dataset was saved
-                              if (saveDataset) {
-                                // Convert dataView back to dataset to get the correct type
-                                const updatedDataset = await dataViews.convertToDataset(dataView);
-                                onSelect(updatedDataset);
-                                // Clear cache to ensure getIds() returns fresh results including the newly saved dataset
-                                dataViews.clearCache();
-                                await fetchDatasets();
-                              } else {
-                                onSelect(query.dataset);
-                              }
-                            }
-                          } catch (error) {
-                            services.notifications?.toasts.addError(error, {
-                              title: i18n.translate('data.datasetSelect.errorTitle', {
-                                defaultMessage: 'Error selecting dataset',
-                              }),
-                            });
-                          }
-                        }
-                      }}
-                      onCancel={() => overlay?.close()}
-                      supportedTypes={supportedTypes}
-                    />
-                  ),
-                  {
-                    maxWidth: false,
-                    className: 'datasetSelect__advancedModal',
-                  }
-                );
-              }}
-            >
-              <FormattedMessage
-                id="data.datasetSelect.createDatasetButton"
-                defaultMessage="Create dataset"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} className="datasetSelect__footerItem">
-            <EuiButton
-              className="datasetSelect__viewDatasetsButton"
-              data-test-subj="datasetSelectViewDatasetsButton"
-              size="s"
-              onClick={() => {
-                closePopover();
-                const overlay = overlays?.openModal(
-                  toMountPoint(
-                    <ViewDatasetsModal
-                      datasets={datasets}
-                      isLoading={isLoading}
-                      onClose={() => overlay?.close()}
-                      services={services}
-                    />
-                  ),
-                  {
-                    maxWidth: '800px',
-                    className: 'datasetSelect__viewDatasetsModal',
-                  }
-                );
-              }}
-            >
-              <FormattedMessage
-                id="data.datasetSelect.viewDatasetsButton"
-                defaultMessage="View datasets"
-              />
-            </EuiButton>
-          </EuiFlexItem>
+          {signalType === CORE_SIGNAL_TYPES.METRICS ? metricsFooterContent : defaultFooterContent}
         </EuiFlexGroup>
       </EuiPopoverFooter>
     </EuiPopover>
