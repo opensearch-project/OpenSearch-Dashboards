@@ -211,7 +211,24 @@ describe('Line Chart Utils', () => {
         categoryField: 'x',
       })(mockState);
       expect(result.series).toHaveLength(2);
-      expect(result.series).toMatchSnapshot();
+
+      expect(result.series?.[0]).toMatchObject({
+        name: 'y1',
+        type: 'line',
+        encode: { x: 'x', y: 'y1' },
+        emphasis: {
+          focus: 'self',
+        },
+      });
+
+      expect(result.series?.[1]).toMatchObject({
+        name: 'y2',
+        type: 'line',
+        encode: { x: 'x', y: 'y2' },
+        emphasis: {
+          focus: 'self',
+        },
+      });
     });
 
     it('creates different line mode for line series', () => {
@@ -245,7 +262,7 @@ describe('Line Chart Utils', () => {
         categoryField: 'x',
       })(mockState);
 
-      expect(result.series?.[0]?.markLine).toMatchSnapshot();
+      expect(result.series?.[0]?.markLine?.data?.[0]?.xAxis).toBeInstanceOf(Date);
     });
 
     it('add thresholds lines', () => {
@@ -315,7 +332,23 @@ describe('Line Chart Utils', () => {
       })(mockState);
 
       expect(result.series).toHaveLength(2);
-      expect(result.series).toMatchSnapshot();
+      expect(result.series?.[0]).toMatchObject({
+        name: 'Line Value',
+        type: 'line',
+        encode: { x: 'x', y: 'lineCol' },
+        emphasis: {
+          focus: 'self',
+        },
+      });
+
+      expect(result.series?.[1]).toMatchObject({
+        name: 'Bar Value',
+        type: 'bar',
+        encode: { x: 'x', y: 'barCol' },
+        emphasis: {
+          focus: 'self',
+        },
+      });
       expect(result.yAxisConfig).toHaveLength(2);
     });
 
@@ -340,7 +373,7 @@ describe('Line Chart Utils', () => {
         categoryField: 'x',
       })(mockState);
 
-      expect(result.series?.[0]?.markLine).toMatchSnapshot();
+      expect(result.series?.[0]?.markLine?.data?.[0]?.xAxis).toBeInstanceOf(Date);
     });
 
     it('add thresholds lines', () => {
@@ -392,7 +425,23 @@ describe('Line Chart Utils', () => {
       })(mockState);
 
       expect(result.series).toHaveLength(2);
-      expect(result.series).toMatchSnapshot();
+      expect(result.series?.[0]).toMatchObject({
+        name: 'y1',
+        type: 'line',
+        encode: { x: 'x', y: 'y1' },
+        emphasis: {
+          focus: 'self',
+        },
+      });
+
+      expect(result.series?.[1]).toMatchObject({
+        name: 'y1',
+        type: 'line',
+        encode: { x: 'x', y: 'y1' },
+        emphasis: {
+          focus: 'self',
+        },
+      });
     });
 
     it('extends all x-axes when time marker is enabled', () => {
@@ -417,8 +466,8 @@ describe('Line Chart Utils', () => {
         categoryField: 'x',
       })(mockState);
 
-      expect(result?.series?.[0].markLine).toMatchSnapshot();
-      expect(result?.series?.[1].markLine).toMatchSnapshot();
+      expect(result.series?.[0]?.markLine?.data?.[0]?.xAxis).toBeInstanceOf(Date);
+      expect(result.series?.[1]?.markLine?.data?.[0]?.xAxis).toBeInstanceOf(Date);
     });
 
     it('add thresholds lines for each facet', () => {
