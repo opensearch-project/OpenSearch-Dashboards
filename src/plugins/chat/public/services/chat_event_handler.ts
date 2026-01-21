@@ -24,6 +24,7 @@ import type {
 import { AssistantActionService } from '../../../context_provider/public';
 import { ToolExecutor } from './tool_executor';
 import { ChatService } from './chat_service';
+import { ConfirmationService } from './confirmation_service';
 
 // Timeline is now purely AG-UI Messages
 
@@ -51,7 +52,7 @@ export class ChatEventHandler {
     private onTimelineUpdate: (updater: (prev: Message[]) => Message[]) => void,
     private onStreamingStateChange: (isStreaming: boolean) => void,
     private getTimeline: () => Message[],
-    confirmationService: any
+    confirmationService: ConfirmationService
   ) {
     this.toolExecutor = new ToolExecutor(assistantActionService, confirmationService);
   }

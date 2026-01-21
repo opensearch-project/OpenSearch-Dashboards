@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, {
-  useCallback,
-  useRef,
-  useState,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-} from 'react';
+import React, { useCallback, useRef, useState, useEffect, useImperativeHandle } from 'react';
 import { useEffectOnce, useUnmount } from 'react-use';
 import { EuiToolTip, EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -44,24 +37,20 @@ interface ChatHeaderButtonProps {
   contextProvider?: ContextProviderStart;
   charts?: any;
   suggestedActionsService: SuggestedActionsService;
+  confirmationService: ConfirmationService;
 }
 
 export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatHeaderButtonProps>(
-  ({ core, chatService, contextProvider, charts, suggestedActionsService }, ref) => {
+  (
+    { core, chatService, contextProvider, charts, suggestedActionsService, confirmationService },
+    ref
+  ) => {
     // Use ChatService as source of truth for window state
     const [isOpen, setIsOpen] = useState<boolean>(chatService.isWindowOpen());
     const [layoutMode, setLayoutMode] = useState<ChatLayoutMode>(chatService.getWindowMode());
     const sideCarRef = useRef<{ close: () => void }>();
     const chatWindowRef = useRef<ChatWindowInstance>(null);
     const flyoutMountPoint = useRef(null);
-
-    // Instantiate confirmation service
-    const confirmationService = useMemo(() => new ConfirmationService(), []);
-    useEffect(() => {
-      return () => {
-        confirmationService.cleanAll();
-      };
-    }, [confirmationService]);
 
     const setMountPoint = useCallback((mountPoint) => {
       flyoutMountPoint.current = mountPoint;

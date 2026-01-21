@@ -104,13 +104,6 @@ export class ConfirmationService {
   }
 
   /**
-   * Cancel a pending confirmation
-   */
-  cancel(id: string): void {
-    this.reject(id);
-  }
-
-  /**
    * Get current pending confirmations
    */
   getPendingConfirmations(): ConfirmationRequest[] {
