@@ -3,6 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Mock @ag-ui/client before any imports that use it
+jest.mock('@ag-ui/client', () => ({
+  parseSSEStream: jest.fn(),
+  runHttpRequest: jest.fn(),
+}));
+
+jest.mock('@ag-ui/core', () => ({
+  EventType: {
+    RUN_STARTED: 'RUN_STARTED',
+    RUN_FINISHED: 'RUN_FINISHED',
+    RUN_ERROR: 'RUN_ERROR',
+    TEXT_MESSAGE_START: 'TEXT_MESSAGE_START',
+    TEXT_MESSAGE_CONTENT: 'TEXT_MESSAGE_CONTENT',
+    TEXT_MESSAGE_END: 'TEXT_MESSAGE_END',
+    TOOL_CALL_START: 'TOOL_CALL_START',
+    TOOL_CALL_ARGS: 'TOOL_CALL_ARGS',
+    TOOL_CALL_END: 'TOOL_CALL_END',
+  },
+}));
+
+// Mock the query_assist module to prevent transitive @ag-ui imports
+jest.mock('../../../../../query_assist', () => ({
+  generatePromQLWithAgUi: jest.fn(),
+}));
+
 import moment from 'moment';
 import { callAgentActionCreator } from './call_agent';
 import {
@@ -396,33 +421,6 @@ describe('callAgentActionCreator', () => {
   describe('dataset variations', () => {
     beforeEach(() => {
       (mockServices.http.post as jest.Mock).mockResolvedValue({ query: 'test query' });
-    });
-
-    it('should use PromQL language for PROMETHEUS dataset type', async () => {
-      (mockServices.data.query.queryString.getQuery as jest.Mock).mockReturnValue({
-        dataset: {
-          title: 'prometheus-metrics',
-          type: 'PROMETHEUS',
-          dataSource: { id: 'prometheus-datasource' },
-          timeFieldName: 'timestamp',
-        },
-      });
-
-      const thunk = callAgentActionCreator({
-        services: mockServices,
-        editorText: testEditorText,
-      });
-
-      await thunk(mockDispatch, jest.fn(), undefined);
-
-      const callArgs = (mockServices.http.post as jest.Mock).mock.calls[0];
-      const bodyData = JSON.parse(callArgs[1].body);
-
-      expect(callArgs[0]).toBe('/api/enhancements/assist/generate');
-      expect(bodyData.question).toBe(testEditorText);
-      expect(bodyData.index).toBe('prometheus-metrics');
-      expect(bodyData.language).toBe('PROMQL');
-      expect(bodyData.dataSourceId).toBe('prometheus-datasource');
     });
 
     it('should handle dataset without dataSource', async () => {

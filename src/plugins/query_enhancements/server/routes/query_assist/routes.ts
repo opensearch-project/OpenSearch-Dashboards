@@ -10,7 +10,6 @@ import { isResponseError } from '../../..../../../../../core/server/opensearch/c
 import { API, ERROR_DETAILS } from '../../../common';
 import { getAgentIdByConfig, requestAgentByConfig } from './agents';
 import { createResponseBody } from './createResponse';
-import { getLanguageHandler } from './language_handlers';
 import { parseTimeRangeXML, getUnselectedTimeFields } from './ppl/time_parser_utils';
 
 export function registerQueryAssistRoutes(router: IRouter) {
@@ -33,6 +32,18 @@ export function registerQueryAssistRoutes(router: IRouter) {
           : context.core.opensearch.client.asCurrentUser;
       const configuredLanguages: string[] = [];
       try {
+        // @ts-expect-error TS2339 TODO(ts-error): fixme
+        const capabilitiesResolver = context.query_assist.getCapabilitiesResolver?.();
+        if (capabilitiesResolver) {
+          const capabilities = await capabilitiesResolver(request);
+          // PromQL generation relies on the generic observability agent.
+          // Prompt and tools will come from frontend through ag-ui protocol
+          if (capabilities?.chat?.observabilityAgentEnabled) {
+            configuredLanguages.push('PROMQL');
+          }
+        }
+
+        // Check other languages via ML Commons agent config
         await Promise.allSettled(
           // @ts-expect-error TS7006 TODO(ts-error): fixme
           config.queryAssist.supportedLanguages.map((languageConfig) =>
@@ -82,15 +93,6 @@ export function registerQueryAssistRoutes(router: IRouter) {
       );
       if (!languageConfig) return response.badRequest({ body: 'Unsupported language' });
       try {
-        const additionalParameters = await getLanguageHandler(
-          request.body.language
-        ).getAdditionalAgentParameters({
-          context,
-          request,
-          index: request.body.index,
-          logger,
-        });
-
         // Execute the main query agent
         const queryPromise = requestAgentByConfig({
           context,
@@ -99,7 +101,6 @@ export function registerQueryAssistRoutes(router: IRouter) {
             parameters: {
               index: request.body.index,
               question: request.body.question,
-              ...additionalParameters,
             },
           },
           dataSourceId: request.body.dataSourceId,
@@ -121,9 +122,6 @@ export function registerQueryAssistRoutes(router: IRouter) {
               selectedTimeField: request.body.timeField,
               client,
               logger,
-              // For non-OpenSearch data sources (e.g., Prometheus), skip mapping lookup
-              getTimestampFieldClustersFn:
-                request.body.language === 'promql' ? async () => [] : undefined,
             });
 
             // Call the time range parser agent with the retrieved fields

@@ -25,6 +25,7 @@ export interface MLAgentRouter {
    * @param logger Logger instance
    * @param configuredAgentId ML Commons agent ID
    * @param dataSourceId Optional data source ID for multi-cluster setups
+   * @param observabilityAgentId Optional observability agent ID for PromQL/observability query assist
    * @returns Promise resolving to the response
    */
   forward(
@@ -33,7 +34,8 @@ export interface MLAgentRouter {
     response: OpenSearchDashboardsResponseFactory,
     logger: Logger,
     configuredAgentId?: string,
-    dataSourceId?: string
+    dataSourceId?: string,
+    observabilityAgentId?: string
   ): Promise<IOpenSearchDashboardsResponse<any>>;
 
   /**

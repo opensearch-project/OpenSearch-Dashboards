@@ -3,6 +3,31 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Mock @ag-ui/client and @ag-ui/core before any imports that use them
+jest.mock('@ag-ui/client', () => ({
+  parseSSEStream: jest.fn(),
+  runHttpRequest: jest.fn(),
+}));
+
+jest.mock('@ag-ui/core', () => ({
+  EventType: {
+    RUN_STARTED: 'RUN_STARTED',
+    RUN_FINISHED: 'RUN_FINISHED',
+    RUN_ERROR: 'RUN_ERROR',
+    TEXT_MESSAGE_START: 'TEXT_MESSAGE_START',
+    TEXT_MESSAGE_CONTENT: 'TEXT_MESSAGE_CONTENT',
+    TEXT_MESSAGE_END: 'TEXT_MESSAGE_END',
+    TOOL_CALL_START: 'TOOL_CALL_START',
+    TOOL_CALL_ARGS: 'TOOL_CALL_ARGS',
+    TOOL_CALL_END: 'TOOL_CALL_END',
+  },
+}));
+
+// Mock the query_assist module to prevent transitive @ag-ui imports
+jest.mock('../../../../application/utils/query_assist', () => ({
+  generatePromQLWithAgUi: jest.fn(),
+}));
+
 // Mock all dependencies BEFORE any imports - targeting the specific problematic chain
 jest.mock('react-redux', () => ({
   useSelector: jest.fn(),

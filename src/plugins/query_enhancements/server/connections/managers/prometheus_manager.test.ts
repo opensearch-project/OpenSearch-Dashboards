@@ -74,12 +74,12 @@ describe('PrometheusManager', () => {
         dataSourceName: 'prom-conn',
         resourceType: RESOURCE_TYPES.PROMETHEUS.LABELS,
         resourceName: 'node_cpu_seconds_total',
-        query: {},
+        query: { 'match[]': 'node_cpu_seconds_total' },
       });
 
       expect(mockClient.transport.request).toHaveBeenCalledWith({
-        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/labels?match[]=node_cpu_seconds_total`,
-        querystring: '',
+        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/labels`,
+        querystring: 'match%5B%5D=node_cpu_seconds_total',
         method: 'GET',
       });
       expect(result.status).toBe('success');
@@ -179,12 +179,12 @@ describe('PrometheusManager', () => {
         dataSourceName: 'prom-conn',
         resourceType: RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA,
         resourceName: 'up',
-        query: {},
+        query: { metric: 'up' },
       });
 
       expect(mockClient.transport.request).toHaveBeenCalledWith({
-        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/metadata?metric=up`,
-        querystring: '',
+        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/metadata`,
+        querystring: 'metric=up',
         method: 'GET',
       });
     });
@@ -328,11 +328,89 @@ describe('PrometheusManager', () => {
         },
       } as unknown) as OpenSearchDashboardsRequest;
 
-      const result = await prometheusManager.handlePostRequest(mockContext, postRequest as any);
+      await prometheusManager.handlePostRequest(mockContext, postRequest as any);
 
       expect(mockClient.transport.request).toHaveBeenCalledWith({
         path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/label/job/values`,
         querystring: '',
+        method: 'GET',
+      });
+    });
+
+    it('should handle POST request with time range content', async () => {
+      const mockResponse = {
+        body: {
+          status: 'success',
+          data: ['label1', 'label2'],
+        },
+      };
+      mockClient.transport.request.mockResolvedValue(mockResponse);
+
+      const postRequest = ({
+        body: {
+          connection: { id: 'prom-conn' },
+          resource: { type: 'labels', name: undefined },
+          content: { start: 1638316800, end: 1638320400 },
+        },
+      } as unknown) as OpenSearchDashboardsRequest;
+
+      await prometheusManager.handlePostRequest(mockContext, postRequest as any);
+
+      expect(mockClient.transport.request).toHaveBeenCalledWith({
+        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/labels`,
+        querystring: 'start=1638316800&end=1638320400',
+        method: 'GET',
+      });
+    });
+
+    it('should handle POST request for labels with metric and time range', async () => {
+      const mockResponse = {
+        body: {
+          status: 'success',
+          data: ['cpu', 'mode'],
+        },
+      };
+      mockClient.transport.request.mockResolvedValue(mockResponse);
+
+      const postRequest = ({
+        body: {
+          connection: { id: 'prom-conn' },
+          resource: { type: 'labels', name: 'node_cpu_seconds_total' },
+          content: { start: 1638316800, end: 1638320400 },
+        },
+      } as unknown) as OpenSearchDashboardsRequest;
+
+      await prometheusManager.handlePostRequest(mockContext, postRequest as any);
+
+      expect(mockClient.transport.request).toHaveBeenCalledWith({
+        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/labels`,
+        querystring: 'match%5B%5D=node_cpu_seconds_total&start=1638316800&end=1638320400',
+        method: 'GET',
+      });
+    });
+
+    it('should handle POST request for metric metadata with metric name and time range', async () => {
+      const mockResponse = {
+        body: {
+          status: 'success',
+          data: { up: [{ type: 'gauge', help: 'Target up status', unit: '' }] },
+        },
+      };
+      mockClient.transport.request.mockResolvedValue(mockResponse);
+
+      const postRequest = ({
+        body: {
+          connection: { id: 'prom-conn' },
+          resource: { type: 'metric_metadata', name: 'up' },
+          content: { start: 1638316800, end: 1638320400 },
+        },
+      } as unknown) as OpenSearchDashboardsRequest;
+
+      await prometheusManager.handlePostRequest(mockContext, postRequest as any);
+
+      expect(mockClient.transport.request).toHaveBeenCalledWith({
+        path: `${URI.DIRECT_QUERY.RESOURCES}/prom-conn/api/v1/metadata`,
+        querystring: 'metric=up&start=1638316800&end=1638320400',
         method: 'GET',
       });
     });

@@ -17,7 +17,8 @@ export class BaseResourceClient {
   protected async get<T>(
     dataConnectionId: string,
     resourceType: string,
-    resourceName?: string
+    resourceName?: string,
+    content?: Record<string, unknown>
   ): Promise<T> {
     const response = await this.http.post('/api/enhancements/resources', {
       body: JSON.stringify({
@@ -29,6 +30,7 @@ export class BaseResourceClient {
           type: resourceType,
           name: resourceName,
         },
+        ...(content && { content }),
       }),
     });
     return response.data;

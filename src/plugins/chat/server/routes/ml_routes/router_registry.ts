@@ -18,16 +18,19 @@ export class MLAgentRouterRegistry {
 
   /**
    * Initialize and register ML agent routers based on environment capabilities
-   * This should be called once during plugin setup with current capabilities
+   * or configured agent IDs. This should be called once during plugin setup.
+   * @param capabilities Core application capabilities
+   * @param observabilityAgentId Configured observability agent ID
    */
-  static initialize(capabilities?: Capabilities): void {
+  static initialize(capabilities?: Capabilities, observabilityAgentId?: string): void {
     if (this.initialized) {
       return;
     }
 
-    // Environment detection: register router based on capabilities
-    if (hasInvestigationCapabilities(capabilities)) {
-      MLAgentRouterFactory.registerRouter(new GenericMLRouter());
+    // Register router if investigation capabilities are enabled OR if any agent ID is configured
+    if (hasInvestigationCapabilities(capabilities) || observabilityAgentId) {
+      const router = new GenericMLRouter();
+      MLAgentRouterFactory.registerRouter(router);
     }
 
     this.initialized = true;

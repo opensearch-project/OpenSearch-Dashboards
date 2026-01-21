@@ -9,6 +9,7 @@ export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   agUiUrl: schema.maybe(schema.string()),
   mlCommonsAgentId: schema.maybe(schema.string()),
+  observabilityAgentId: schema.maybe(schema.string()),
 });
 
 export type ChatConfigType = TypeOf<typeof configSchema>;
