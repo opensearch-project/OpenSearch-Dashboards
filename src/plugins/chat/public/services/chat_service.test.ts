@@ -350,6 +350,126 @@ describe('ChatService', () => {
         undefined
       ); // dataSourceId is undefined when no uiSettings provided
     });
+
+    it('should merge text with multimodal content when last message has array content', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      const imageMessage: Message = {
+        id: 'image-msg-1',
+        role: 'user',
+        content: [
+          {
+            type: 'binary',
+            mimeType: 'image/jpeg',
+            data: 'base64encodeddata',
+          },
+        ],
+      };
+
+      const result = await chatService.sendMessage('Analyze this image', [imageMessage]);
+
+      // Should merge image with text into a single message
+      expect(result.userMessage.content).toEqual([
+        {
+          type: 'binary',
+          mimeType: 'image/jpeg',
+          data: 'base64encodeddata',
+        },
+        {
+          type: 'text',
+          text: 'Analyze this image',
+        },
+      ]);
+
+      // Should have a new ID
+      expect(result.userMessage.id).not.toBe('image-msg-1');
+      expect(result.userMessage.id).toMatch(/^msg-\d+-[a-z0-9]{9}$/);
+
+      // Should only send the merged message (not the original image message)
+      expect(mockAgent.runAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          messages: [result.userMessage],
+        }),
+        undefined
+      );
+    });
+
+    it('should preserve order when merging multimodal content', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      const multimodalMessage: Message = {
+        id: 'multi-msg-1',
+        role: 'user',
+        content: [
+          {
+            type: 'binary',
+            mimeType: 'image/png',
+            data: 'firstimage',
+          },
+          {
+            type: 'binary',
+            mimeType: 'image/jpeg',
+            data: 'secondimage',
+          },
+        ],
+      };
+
+      const result = await chatService.sendMessage('What are these?', [multimodalMessage]);
+
+      // Should preserve order: first image, second image, then text
+      expect(result.userMessage.content).toEqual([
+        {
+          type: 'binary',
+          mimeType: 'image/png',
+          data: 'firstimage',
+        },
+        {
+          type: 'binary',
+          mimeType: 'image/jpeg',
+          data: 'secondimage',
+        },
+        {
+          type: 'text',
+          text: 'What are these?',
+        },
+      ]);
+    });
+
+    it('should create simple text message when no array content exists', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      const textMessage: Message = {
+        id: 'text-msg-1',
+        role: 'user',
+        content: 'Previous message',
+      };
+
+      const result = await chatService.sendMessage('New message', [textMessage]);
+
+      // Should create a simple text message (not array)
+      expect(result.userMessage.content).toBe('New message');
+      expect(Array.isArray(result.userMessage.content)).toBe(false);
+    });
+
+    it('should not merge when last message is not a user message', async () => {
+      const mockObservable = new Observable<BaseEvent>();
+      mockAgent.runAgent.mockReturnValue(mockObservable);
+
+      const assistantMessage: Message = {
+        id: 'assistant-msg-1',
+        role: 'assistant',
+        content: 'I am the assistant',
+      };
+
+      const result = await chatService.sendMessage('User message', [assistantMessage]);
+
+      // Should create a simple text message
+      expect(result.userMessage.content).toBe('User message');
+      expect(Array.isArray(result.userMessage.content)).toBe(false);
+    });
   });
 
   describe('sendToolResult', () => {
@@ -1082,7 +1202,7 @@ describe('ChatService', () => {
 
       const result = await chatService.sendMessageWithWindow('test message', []);
 
-      expect(mockSendMessage).toHaveBeenCalledWith({ content: 'test message' });
+      expect(mockSendMessage).toHaveBeenCalledWith({ content: 'test message', messages: [] });
       expect(result.userMessage.content).toBe('test message');
       expect(result.observable).toBeDefined();
     });

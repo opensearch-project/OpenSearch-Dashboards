@@ -223,7 +223,7 @@ export const createLineBarChart = (
     const value2Field = axisColumnMappings?.[AxisRole.Y_SECOND];
 
     if (!timeField || !valueField || !value2Field) {
-      throw Error('Missing axis config or color field for multi lines chart');
+      throw Error('Missing axis config or color field for line-bar chart');
     }
 
     const allColumns = [...Object.values(axisColumnMappings ?? {}).map((m) => m.column)];

@@ -53,7 +53,7 @@ const Plugins = {
     'opensearch_dashboards.json': JSON.stringify({ version: '1' }),
   }),
   incompatible: () => ({
-    'opensearch_dashboards.json': JSON.stringify({ id: 'plugin', version: '1' }),
+    'opensearch_dashboards.json': JSON.stringify({ id: 'plugin', version: '1', server: true }),
   }),
   missingManifest: () => ({}),
   inaccessibleManifest: () => ({
@@ -165,7 +165,7 @@ describe('plugins discovery system', () => {
     expect(pluginNames).toEqual(expect.arrayContaining(['pluginA', 'pluginB']));
   });
 
-  it('return errors when the manifest is invalid or incompatible', async () => {
+  it('return errors when the manifest is invalid or incomplete', async () => {
     const { plugin$, error$ } = discover(
       new PluginsConfig(pluginConfig, env),
       coreContext,
@@ -176,8 +176,6 @@ describe('plugins discovery system', () => {
       {
         [`${PROCESS_WORKING_DIR}/src/plugins/plugin_a`]: Plugins.invalid(),
         [`${PROCESS_WORKING_DIR}/src/plugins/plugin_b`]: Plugins.incomplete(),
-        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_c`]: Plugins.incompatible(),
-        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_ad`]: Plugins.missingManifest(),
       },
       { createCwd: false }
     );
@@ -198,9 +196,83 @@ describe('plugins discovery system', () => {
         `Error: Plugin manifest must contain an "id" property. (invalid-manifest, ${manifestPath(
           'plugin_b'
         )})`,
-        expect.stringContaining(`incompatible-version, ${manifestPath('plugin_c')}`),
       ])
     );
+  });
+
+  it('logs warnings for incompatible plugins but allows them to be discovered', async () => {
+    const { plugin$, error$ } = discover(
+      new PluginsConfig(pluginConfig, env),
+      coreContext,
+      instanceInfo
+    );
+
+    mockFs(
+      {
+        [`${PROCESS_WORKING_DIR}/src/plugins/plugin_c`]: Plugins.incompatible(),
+        [`${PROCESS_WORKING_DIR}/plugins`]: {},
+        [`${PROCESS_WORKING_DIR}/../opensearch-dashboards-extra`]: {},
+      },
+      { createCwd: false }
+    );
+
+    const plugins = await plugin$.pipe(toArray()).toPromise();
+    expect(plugins).toHaveLength(1);
+    expect(plugins[0].name).toBe('plugin');
+
+    const errors = await error$
+      .pipe(
+        map((error) => error.toString()),
+        toArray()
+      )
+      .toPromise();
+
+    expect(errors).toHaveLength(0);
+
+    const warnings = loggingSystemMock.collect(logger).warn;
+    expect(warnings).toEqual(
+      expect.arrayContaining([
+        expect.arrayContaining([
+          expect.stringMatching(
+            /Plugin "plugin" is version "1", but used OpenSearch Dashboards version is "1\.2\.3"\./
+          ),
+        ]),
+      ])
+    );
+  });
+
+  it('does not discover plugins with missing manifests', async () => {
+    const { plugin$, error$ } = discover(
+      new PluginsConfig(pluginConfig, env),
+      coreContext,
+      instanceInfo
+    );
+
+    mockFs(
+      {
+        [`${PROCESS_WORKING_DIR}/src/plugins`]: {
+          plugin_ad: Plugins.missingManifest(),
+        },
+        [`${PROCESS_WORKING_DIR}/plugins`]: {},
+        [`${PROCESS_WORKING_DIR}/../opensearch-dashboards-extra`]: {},
+      },
+      { createCwd: false }
+    );
+
+    const plugins = await plugin$.pipe(toArray()).toPromise();
+    expect(plugins).toHaveLength(0);
+
+    const errors = await error$
+      .pipe(
+        map((error) => error.toString()),
+        toArray()
+      )
+      .toPromise();
+
+    expect(errors).toHaveLength(0);
+
+    const warnings = loggingSystemMock.collect(logger).warn;
+    expect(warnings).toHaveLength(0);
   });
 
   it('return errors when the plugin search path is not accessible', async () => {
