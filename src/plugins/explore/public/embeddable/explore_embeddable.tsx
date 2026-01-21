@@ -62,6 +62,7 @@ export interface SearchProps {
   hits?: number;
   isLoading?: boolean;
   services: ExploreServices;
+  spec?: any;
   expression?: string;
   sharedItemTitle?: string;
   searchContext?: {
@@ -418,8 +419,10 @@ export class ExploreEmbeddable
             dateColumns,
             styles || styleOptions,
             selectedChartType,
-            axesMapping
+            axesMapping,
+            searchContext.timeRange
           );
+          this.searchProps.spec = spec;
           const exp = toExpression(searchContext, spec);
           this.searchProps.expression = exp;
         }

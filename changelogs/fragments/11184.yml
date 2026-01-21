@@ -1,0 +1,5 @@
+chore:
+- Add echarts theme ([#11184](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11184))
+
+fix:
+- Explore embeddable not able to render echarts ([#11184](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11184))
