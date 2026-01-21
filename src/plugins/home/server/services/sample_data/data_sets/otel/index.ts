@@ -78,13 +78,13 @@ export const otelSpecProvider = function (): SampleDatasetSchema {
         indexName: 'opensearch_dashboards_sample_data_otel_service_map',
       },
       {
-        id: 'opensearch_dashboards_sample_data_otel_metrics',
+        id: 'ss4o_metrics-otel-opensearch_dashboards-sample',
         dataPath: path.join(__dirname, './sample_metrics.json.gz'),
         fields: metricsFieldMappings,
         timeFields: ['@timestamp', 'exemplar.time', 'startTime', 'time', 'observedTimestamp'],
         currentTimeMarker: '2024-10-16T19:00:01',
         preserveDayOfWeekTimeOfDay: false,
-        indexName: 'opensearch_dashboards_sample_data_otel_metrics',
+        indexName: 'ss4o_metrics-otel-opensearch_dashboards-sample',
       },
       {
         id: 'opensearch_dashboards_sample_data_otel_logs',
