@@ -2,7 +2,14 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { createLabelLayer, getDataBound, addTransform, enhanceStyle } from './heatmap_chart_utils';
+import {
+  createLabelLayer,
+  getDataBound,
+  addTransform,
+  enhanceStyle,
+  generateSchemeList,
+  getColorRange,
+} from './heatmap_chart_utils';
 import { AggregationType, VisFieldType, ColorSchemas, ScaleType, VisColumn } from '../types';
 import { DEFAULT_GREY } from '../theme/default_colors';
 import { defaultHeatmapChartStyles, HeatmapLabels, HeatmapChartStyle } from './heatmap_vis_config';
@@ -326,5 +333,74 @@ describe('enhanceStyle', () => {
     enhanceStyle(markLayer, ({} as unknown) as HeatmapChartStyle, transformedData, colorField);
 
     expect(markLayer).toEqual(baseMarkLayer);
+  });
+});
+
+describe('generateSchemeList', () => {
+  it('should generate default 11 colors with center color matching target', () => {
+    const result = generateSchemeList('#ff0000');
+    expect(result).toHaveLength(11);
+    expect(result[5]).toBe('#ff0000');
+  });
+
+  it('should create lighter colors on left side', () => {
+    const result = generateSchemeList('#808080');
+    expect(result[0]).toBe('#e4e4e4');
+    expect(result[1]).toBe('#d0d0d0');
+    expect(result[5]).toBe('#808080');
+  });
+
+  it('should create darker colors on right side', () => {
+    const result = generateSchemeList('#808080');
+    expect(result[5]).toBe('#808080');
+    expect(result[6]).toBe('#6c6c6c');
+    expect(result[7]).toBe('#585858');
+  });
+});
+
+describe('getColorRange', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return blues color scheme', () => {
+    const result = getColorRange(ColorSchemas.BLUES);
+    expect(result).toHaveLength(11);
+    expect(result[5]).toBe('#6092c0');
+  });
+
+  it('should return purples color scheme', () => {
+    const result = getColorRange(ColorSchemas.PURPLES);
+    expect(result).toHaveLength(11);
+    expect(result[5]).toBe('#9170b8');
+  });
+
+  it('should return oranges color scheme', () => {
+    const result = getColorRange(ColorSchemas.ORANGES);
+    expect(result).toHaveLength(11);
+    expect(result[5]).toBe('#e7664c');
+  });
+
+  it('should return yellows color scheme', () => {
+    const result = getColorRange(ColorSchemas.YELLOWS);
+    expect(result).toHaveLength(11);
+    expect(result[5]).toBe('#d6bf57');
+  });
+
+  it('should return greens color scheme', () => {
+    const result = getColorRange(ColorSchemas.GREENS);
+    expect(result).toHaveLength(11);
+    expect(result[5]).toBe('#54b399');
+  });
+
+  it('should return reds color scheme', () => {
+    const result = getColorRange(ColorSchemas.REDS);
+    expect(result).toHaveLength(11);
+    expect(result[5]).toBe('#d36086');
+  });
+
+  it('should return undefined for unknown color schema', () => {
+    const result = getColorRange('UNKNOWN' as ColorSchemas);
+    expect(result).toBeUndefined();
   });
 });
