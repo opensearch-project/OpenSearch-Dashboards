@@ -107,13 +107,13 @@ export const defaultHeatmapChartStyles: HeatmapChartStyle = {
     {
       ...DEFAULT_X_AXIS_CONFIG,
       grid: {
-        showLines: false,
+        showLines: true,
       },
     },
     {
       ...DEFAULT_Y_AXIS_CONFIG,
       grid: {
-        showLines: false,
+        showLines: true,
       },
     },
   ],
