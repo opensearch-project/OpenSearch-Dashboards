@@ -68,5 +68,6 @@ export type DataSourcePluginConfigType = ConfigSchema & {
   globalOpenSearchConfig: {
     requestTimeout: Duration;
     pingTimeout: Duration;
+    requestCompression: boolean;
   };
 };

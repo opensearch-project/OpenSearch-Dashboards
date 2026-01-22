@@ -67,6 +67,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       globalOpenSearchConfig: {
         requestTimeout: globalConfig.opensearch.requestTimeout,
         pingTimeout: globalConfig.opensearch.pingTimeout,
+        requestCompression: globalConfig.opensearch.requestCompression,
       },
     };
 
