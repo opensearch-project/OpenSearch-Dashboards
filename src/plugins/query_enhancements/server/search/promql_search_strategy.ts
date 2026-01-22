@@ -258,10 +258,14 @@ function createDataFrame(
           const seriesName = isSingleQuery
             ? formattedLabels
             : `${result.label}: ${formattedLabels}`;
+          // TODO: remove escaping if not using vega
+          // Escape brackets in series name to prevent Vega's splitAccessPath from
+          // interpreting them as array index notation when used as field names
+          const escapedSeriesName = seriesName.replace(/\[/g, '\\[').replace(/\]/g, '\\]');
 
           allVizRows.push({
             Time: timeMs,
-            Series: seriesName,
+            Series: escapedSeriesName,
             Value: Number(value),
           });
         }
