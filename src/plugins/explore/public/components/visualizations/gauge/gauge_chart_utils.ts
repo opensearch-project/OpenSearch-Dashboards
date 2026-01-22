@@ -180,7 +180,7 @@ export const createGaugeSeries = ({
       center: ['50%', '60%'],
       startAngle: 200,
       endAngle: -20,
-      radius: '102%',
+      radius: '110%',
       min: minBase,
       max: maxBase,
       itemStyle: {
