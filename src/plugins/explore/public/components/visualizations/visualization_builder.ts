@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { BehaviorSubject, Observable, Subscription, combineLatest } from 'rxjs';
-import { isEmpty } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { debounceTime, map } from 'rxjs/operators';
 
 import { ChartStyles, ChartType, StyleOptions } from './utils/use_visualization_types';
@@ -326,7 +326,7 @@ export class VisualizationBuilder {
 
   setAxesMapping(mapping: Record<string, string>) {
     const config = this.visConfig$.value;
-    if (config) {
+    if (config && !isEqual(config.axesMapping, mapping)) {
       this.visConfig$.next({ ...config, axesMapping: mapping });
     }
   }

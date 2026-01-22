@@ -14,6 +14,7 @@ import {
   PieSeriesOption,
   ScatterSeriesOption,
   HeatmapSeriesOption,
+  LegendComponentOption,
 } from 'echarts';
 import {
   AggregationType,
@@ -87,7 +88,7 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   // Built incrementally
   // TODO: avoid any
   transformedData?: any[];
-  baseConfig?: any;
+  baseConfig?: Pick<EChartsOption, 'title' | 'tooltip' | 'legend'>;
   xAxisConfig?: any;
   yAxisConfig?: any;
   series?: Array<
@@ -99,7 +100,7 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
     | ScatterSeriesOption
     | HeatmapSeriesOption
   >;
-  visualMap?: any;
+  visualMap?: EChartsOption['visualMap'];
   // Final output
   spec?: EChartsOption;
 }
@@ -157,13 +158,14 @@ export const createBaseConfig = <T extends BaseChartStyle>({
     },
     tooltip: {
       show: styles.tooltipOptions?.mode !== 'hidden',
-      ...(axisConfig && addTrigger && { trigger: 'axis' }),
-      axisPointer: { type: 'shadow' },
+      ...(axisConfig && addTrigger && { trigger: 'axis' as const }),
+      axisPointer: { type: 'shadow' as const },
     },
     legend: {
+      type: 'scroll',
       ...legend,
       ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
-        ? { orient: 'vertical' }
+        ? { orient: 'vertical' as const }
         : {}),
       [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%', // distance between legend and the corresponding orientation edge side of the container
     },
@@ -233,7 +235,6 @@ export const assembleSpec = <T extends BaseChartStyle>(
     series,
     visualMap,
     axisColumnMappings,
-    styles,
   } = state;
 
   const hasMultiDatasets = Array.isArray(transformedData[0]?.[0]);
@@ -248,15 +249,38 @@ export const assembleSpec = <T extends BaseChartStyle>(
 
   let grid;
 
-  // TODO long-term method to handle legend display
+  // TODO: grid should also consider visualMap
   if (!hasFacet || facetNumber <= 1) {
-    const gridMap = {
-      [Positions.LEFT]: { top: '5%', right: '5%', bottom: '5%' },
-      [Positions.RIGHT]: { top: '5%', left: '5%', bottom: '5%' },
-      [Positions.TOP]: { right: '5%', left: '5%', bottom: '5%' },
-      [Positions.BOTTOM]: { right: '5%', left: '5%', top: '5%' },
+    const computedGrid: Pick<LegendComponentOption, 'top' | 'right' | 'bottom' | 'left'> = {
+      top: '10%',
+      right: '10%',
+      bottom: '10%',
+      left: '10%',
     };
-    grid = gridMap[styles.legendPosition ?? Positions.TOP];
+    if (!baseConfig?.legend) {
+      grid = computedGrid;
+    } else {
+      // Infer grid configuration based on Legend
+      const legend = Array<LegendComponentOption>().concat(baseConfig.legend);
+      for (const l of legend) {
+        if (l.show === false) {
+          continue;
+        }
+        if (l.top !== undefined) {
+          delete computedGrid.top;
+        }
+        if (l.right !== undefined) {
+          delete computedGrid.right;
+        }
+        if (l.bottom !== undefined) {
+          delete computedGrid.bottom;
+        }
+        if (l.left !== undefined) {
+          delete computedGrid.left;
+        }
+      }
+      grid = computedGrid;
+    }
   } else {
     const cols = Math.ceil(facetNumber / 2); // always in two rows
     const colWidth = 90 / cols;

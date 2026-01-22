@@ -11,7 +11,7 @@ interface Props {
   spec: echarts.EChartsOption;
 }
 
-export const EchartsRender = ({ spec }: Props) => {
+export const EchartsRender = React.memo(({ spec }: Props) => {
   const [instance, setInstance] = useState<echarts.ECharts | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const instanceRef = useRef<echarts.ECharts | null>(null);
@@ -68,4 +68,4 @@ export const EchartsRender = ({ spec }: Props) => {
       ref={containerRef}
     />
   );
-};
+});

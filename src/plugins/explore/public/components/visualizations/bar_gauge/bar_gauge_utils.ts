@@ -589,7 +589,11 @@ const getAxesStyleConfig = (
   const isHorizontal = styles?.exclusive.orientation === 'horizontal';
   const isXNumerical = xAxis?.schema === VisFieldType.Numerical;
 
-  const axisStyle = { axisLine: { show: false }, axisTick: { show: false } };
+  const axisStyle = {
+    axisLine: { show: false },
+    axisTick: { show: false },
+    splitLine: { show: false },
+  };
   const nullStyle = { show: false };
 
   if (isHorizontal) {

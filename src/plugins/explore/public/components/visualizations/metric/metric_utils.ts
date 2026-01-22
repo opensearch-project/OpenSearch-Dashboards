@@ -209,10 +209,10 @@ export const assembleForMetric = <T extends BaseChartStyle>(state: EChartsSpecSt
   const spec = {
     ...state.spec,
     grid: {
-      left: 0,
-      right: 0,
+      left: '10px',
+      right: '10px',
       top: '50%',
-      bottom: 0,
+      bottom: '10px',
     },
     xAxis,
     yAxis,
