@@ -1,0 +1,2 @@
+fix:
+- Fix Traces: Auto detect bug ([#11191](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11191))

@@ -30,7 +30,7 @@ import { ChatInput } from './chat_input';
 
 export interface ChatWindowInstance{
   startNewChat: ()=>void;
-  sendMessage: (options:{content: string})=>Promise<unknown>;
+  sendMessage: (options:{content: string; messages?: Message[]})=>Promise<unknown>;
 }
 
 interface ChatWindowProps {
@@ -63,9 +63,9 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
   const [isStreaming, setIsStreaming] = useState(false);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
   const handleSendRef = useRef<typeof handleSend>();
-  
+
   const timelineRef = React.useRef<Message[]>(timeline);
-  
+
   React.useEffect(() => {
     timelineRef.current = timeline;
   }, [timeline]);
@@ -115,7 +115,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     chatService.updateCurrentMessages(timeline);
   }, [timeline, chatService]);
 
-  const handleSend = async (options?: {input?: string}) => {
+  const handleSend = async (options?: {input?: string; messages?: Message[]}) => {
     const messageContent = options?.input ?? input.trim();
     if (!messageContent || isStreaming) return;
 
@@ -123,18 +123,36 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
     setIsStreaming(true);
 
     try {
+      // Prepare additional messages for sending (but don't add to timeline yet)
+      const additionalMessages = options?.messages ?? [];
+
+      // Merge additional messages with current timeline for sending
+      const messagesToSend = [...timeline, ...additionalMessages];
+
       const { observable, userMessage } = await chatService.sendMessage(
         messageContent,
-        timeline
+        messagesToSend
       );
 
-      // Add user message immediately to timeline
+      // Add the final merged user message to timeline
+      // (chat_service already merged any additional messages with the text)
       const timelineUserMessage: UserMessage = {
         id: userMessage.id,
         role: 'user',
         content: userMessage.content,
       };
-      setTimeline((prev) => [...prev, timelineUserMessage]);
+      
+      // Add loading assistant message
+      const loadingMessageId = `loading-${Date.now()}`;
+      const loadingMessage: Message = {
+        id: loadingMessageId,
+        role: 'assistant',
+        content: '',
+      };
+      
+      setTimeline((prev) => [...prev, timelineUserMessage, loadingMessage]);
+
+      let firstResponseReceived = false;
 
       // Subscribe to streaming response
       const subscription = observable.subscribe({
@@ -144,14 +162,24 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             setCurrentRunId(event.runId);
           }
 
+          // Remove loading message on first response
+          if (!firstResponseReceived) {
+            firstResponseReceived = true;
+            setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
+          }
+
           // Handle all events through the event handler service
           await eventHandler.handleEvent(event);
         },
         error: (error: any) => {
           console.error('Subscription error:', error);
+          // Remove loading message on error
+          setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
           setIsStreaming(false);
         },
         complete: () => {
+          // Remove loading message if still present
+          setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
           setIsStreaming(false);
         },
       });
@@ -185,6 +213,24 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     if (messageIndex === -1) return;
 
+    let textContent = typeof message.content === "string" ? message.content : "";
+    const additionalMessages: Message[] = [];
+
+    if (Array.isArray(message.content)) {
+      const lastMessageContent =  message.content[message.content.length - 1];
+      if (lastMessageContent.type === "text") {
+        textContent = lastMessageContent.text;
+        additionalMessages.push({
+          ...message,
+          content: message.content.slice(0, message.content.length - 1),
+        });
+      }
+    }
+
+    if (textContent === "") {
+        return;
+    }
+
     // Remove this message and everything after it from the timeline
     const truncatedTimeline = timeline.slice(0, messageIndex);
     setTimeline(truncatedTimeline);
@@ -195,8 +241,8 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
     try {
       const { observable, userMessage } = await chatService.sendMessage(
-        message.content,
-        truncatedTimeline
+        textContent,
+        [...truncatedTimeline,...additionalMessages]
       );
 
       // Add user message immediately to timeline
@@ -205,7 +251,18 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         role: 'user',
         content: userMessage.content,
       };
-      setTimeline((prev) => [...prev, timelineUserMessage]);
+      
+      // Add loading assistant message
+      const loadingMessageId = `loading-${Date.now()}`;
+      const loadingMessage: Message = {
+        id: loadingMessageId,
+        role: 'assistant',
+        content: '',
+      };
+      
+      setTimeline((prev) => [...prev, timelineUserMessage, loadingMessage]);
+
+      let firstResponseReceived = false;
 
       // Subscribe to streaming response
       const subscription = observable.subscribe({
@@ -215,14 +272,24 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
             setCurrentRunId(event.runId);
           }
 
+          // Remove loading message on first response
+          if (!firstResponseReceived) {
+            firstResponseReceived = true;
+            setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
+          }
+
           // Handle all events through the event handler service
           await eventHandler.handleEvent(event);
         },
         error: (error: any) => {
           console.error('Subscription error:', error);
+          // Remove loading message on error
+          setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
           setIsStreaming(false);
         },
         complete: () => {
+          // Remove loading message if still present
+          setTimeline((prev) => prev.filter((msg) => msg.id !== loadingMessageId));
           setIsStreaming(false);
         },
       });
@@ -249,7 +316,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
 
   useImperativeHandle(ref, ()=>({
     startNewChat: ()=>handleNewChat(),
-    sendMessage: async ({content})=>(await handleSendRef.current?.({input:content}))
+    sendMessage: async ({content, messages})=>(await handleSendRef.current?.({input:content, messages}))
   }), [handleNewChat]);
 
   return (

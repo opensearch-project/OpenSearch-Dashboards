@@ -7,10 +7,13 @@ import {
   BarSeriesOption,
   LineSeriesOption,
   CustomSeriesOption,
+  GaugeSeriesOption,
   EChartsOption,
   XAXisComponentOption,
   YAXisComponentOption,
   PieSeriesOption,
+  ScatterSeriesOption,
+  HeatmapSeriesOption,
 } from 'echarts';
 import {
   AggregationType,
@@ -18,7 +21,6 @@ import {
   Positions,
   StandardAxes,
   TimeUnit,
-  VisColumn,
   VisFieldType,
   Threshold,
   ThresholdOptions,
@@ -48,12 +50,18 @@ export interface BaseChartStyle {
   legendPosition?: Positions;
 }
 
+interface Axis {
+  name: string;
+  schema: VisFieldType;
+  column: string;
+}
+
 /**
  * Configuration for ECharts axes (after swapping)
  */
 export interface EChartsAxisConfig {
-  xAxis?: VisColumn;
-  yAxis?: VisColumn;
+  xAxis?: Axis;
+  yAxis?: Axis;
   xAxisStyle?: StandardAxes;
   yAxisStyle?: StandardAxes;
 }
@@ -79,7 +87,15 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   baseConfig?: any;
   xAxisConfig?: any;
   yAxisConfig?: any;
-  series?: Array<BarSeriesOption | LineSeriesOption | CustomSeriesOption | PieSeriesOption>;
+  series?: Array<
+    | BarSeriesOption
+    | LineSeriesOption
+    | CustomSeriesOption
+    | PieSeriesOption
+    | GaugeSeriesOption
+    | ScatterSeriesOption
+    | HeatmapSeriesOption
+  >;
   visualMap?: any;
   // Final output
   spec?: EChartsOption;
@@ -104,7 +120,7 @@ export function pipe<T extends BaseChartStyle>(
 /**
  * Get ECharts axis type from VisColumn schema
  */
-function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time' {
+export function getAxisType(axis: Axis | undefined): 'category' | 'value' | 'time' {
   if (!axis) return 'value';
 
   switch (axis.schema) {
@@ -124,9 +140,11 @@ function getAxisType(axis: VisColumn | undefined): 'category' | 'value' | 'time'
 export const createBaseConfig = <T extends BaseChartStyle>({
   title,
   addTrigger = true,
+  legend,
 }: {
   title?: string;
   addTrigger?: boolean;
+  legend?: EChartsOption['legend'];
 }) => (state: EChartsSpecState<T>): EChartsSpecState<T> => {
   const { styles, axisConfig } = state;
 
@@ -140,6 +158,7 @@ export const createBaseConfig = <T extends BaseChartStyle>({
       axisPointer: { type: 'shadow' },
     },
     legend: {
+      ...legend,
       ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
         ? { orient: 'vertical' }
         : {}),
@@ -161,7 +180,7 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
   const hasFacet = Array.isArray(transformedData[0]?.[0]) && axisColumnMappings.facet !== undefined;
 
   const getConfig = (
-    axis: VisColumn | undefined,
+    axis: Axis | undefined,
     axisStyle: StandardAxes | undefined,
     gridNumber?: number
   ) => {
@@ -211,6 +230,7 @@ export const assembleSpec = <T extends BaseChartStyle>(
     series,
     visualMap,
     axisColumnMappings,
+    styles,
   } = state;
 
   const hasMultiDatasets = Array.isArray(transformedData[0]?.[0]);
@@ -224,8 +244,17 @@ export const assembleSpec = <T extends BaseChartStyle>(
   const facetNumber = transformedData.length;
 
   let grid;
-  if (!hasFacet || facetNumber <= 1) grid = { top: '5%', left: '5%', right: '5%' };
-  else {
+
+  // TODO long-term method to handle legend display
+  if (!hasFacet || facetNumber <= 1) {
+    const gridMap = {
+      [Positions.LEFT]: { top: '5%', right: '5%', bottom: '5%' },
+      [Positions.RIGHT]: { top: '5%', left: '5%', bottom: '5%' },
+      [Positions.TOP]: { right: '5%', left: '5%', bottom: '5%' },
+      [Positions.BOTTOM]: { right: '5%', left: '5%', top: '5%' },
+    };
+    grid = gridMap[styles.legendPosition ?? Positions.TOP];
+  } else {
     const cols = Math.ceil(facetNumber / 2); // always in two rows
     const colWidth = 90 / cols;
     const rowHeight = 39; // slightly smaller to make legend fit
@@ -246,7 +275,6 @@ export const assembleSpec = <T extends BaseChartStyle>(
   const spec = {
     ...baseConfig,
     dataset: data,
-
     xAxis: xAxisConfig,
     yAxis: yAxisConfig,
     visualMap,

@@ -9,6 +9,7 @@ import { getSeriesDisplayName } from '../utils/series';
 import { AreaChartStyle } from './area_vis_config';
 import { BaseChartStyle, PipelineFn } from '../utils/echarts_spec';
 import { generateThresholdLines } from '../utils/utils';
+import { DEFAULT_OPACITY } from '../constants';
 
 /**
  * Helper function to convert null values to 0 for stacked area charts
@@ -78,7 +79,7 @@ export const createAreaSeries = <T extends BaseChartStyle>({
       type: 'line',
       connectNulls: true,
       areaStyle: {
-        opacity: styles.areaOpacity || 0.3,
+        opacity: styles.areaOpacity || DEFAULT_OPACITY,
       },
       smooth: true,
       encode: {
@@ -122,7 +123,7 @@ export const createFacetAreaSeries = <T extends BaseChartStyle>({
       stack: `Total_${index}`, // Use unique stack name for each facet
       connectNulls: true,
       areaStyle: {
-        opacity: styles.areaOpacity || 0.3,
+        opacity: styles.areaOpacity || DEFAULT_OPACITY,
       },
       smooth: true,
       encode: {
@@ -161,7 +162,8 @@ export const createCategoryAreaSeries = <T extends BaseChartStyle>({
   const newState = { ...state };
 
   if (!transformedData || !Array.isArray(transformedData) || transformedData.length === 0) {
-    throw new Error('transformedData must be an array with data rows');
+    newState.series = [];
+    return newState;
   }
 
   const thresholdLines = generateThresholdLines(styles.thresholdOptions);
@@ -171,7 +173,7 @@ export const createCategoryAreaSeries = <T extends BaseChartStyle>({
       name: getSeriesDisplayName(valueField, Object.values(axisColumnMappings)),
       connectNulls: true,
       areaStyle: {
-        opacity: styles.areaOpacity || 0.3,
+        opacity: styles.areaOpacity || DEFAULT_OPACITY,
       },
       smooth: true,
       encode: {
@@ -203,13 +205,9 @@ export const createStackAreaSeries = <T extends BaseChartStyle>(
     throw new Error('axisColumnMappings must be available for createStackAreaSeries');
   }
 
-  if (!aggregatedData) {
-    throw new Error('aggregatedData must be available for createStackAreaSeries');
-  }
-
-  // Check if aggregatedData is in the expected 2D array format
-  if (!Array.isArray(aggregatedData) || aggregatedData.length < 2) {
-    throw new Error('aggregatedData must be a 2D array with header and data rows');
+  if (!aggregatedData || !Array.isArray(aggregatedData) || aggregatedData.length < 2) {
+    newState.series = [];
+    return newState;
   }
 
   // Find the x-axis column from axisColumnMappings
@@ -233,7 +231,7 @@ export const createStackAreaSeries = <T extends BaseChartStyle>(
     type: 'line',
     stack: 'Total',
     areaStyle: {
-      opacity: styles.areaOpacity || 0.3,
+      opacity: styles.areaOpacity || DEFAULT_OPACITY,
     },
     smooth: true,
     connectNulls: true,

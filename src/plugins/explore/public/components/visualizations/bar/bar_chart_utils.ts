@@ -22,6 +22,7 @@ import { BarChartStyle } from './bar_vis_config';
 import { getColors, DEFAULT_GREY } from '../theme/default_colors';
 import { BaseChartStyle, PipelineFn, EChartsSpecState } from '../utils/echarts_spec';
 import { getSeriesDisplayName } from '../utils/series';
+import { HistogramChartStyle } from '../histogram/histogram_vis_config';
 
 export const inferTimeIntervals = (data: Array<Record<string, any>>, field: string | undefined) => {
   if (!data || data.length === 0 || !field) {
@@ -195,18 +196,29 @@ export const buildThresholdColorEncoding = (
   return colorLayer;
 };
 
+type Options =
+  | {
+      kind: 'bar';
+      styles: BarChartStyle;
+      categoryField: string;
+      seriesFields: string[] | ((headers?: string[]) => string[]);
+    }
+  | {
+      kind: 'histogram';
+      styles: HistogramChartStyle;
+      categoryField: string;
+      seriesFields: string[] | ((headers?: string[]) => string[]);
+    };
+
 /**
  * Create bar series configuration
  */
-export const createBarSeries = <T extends BaseChartStyle>({
-  styles,
-  categoryField,
-  seriesFields,
-}: {
-  styles: BarChartStyle;
-  categoryField: string;
-  seriesFields: string[] | ((headers?: string[]) => string[]);
-}): PipelineFn<T> => (state) => {
+export const createBarSeries = <T extends BaseChartStyle>(options: Options): PipelineFn<T> => (
+  state
+) => {
+  const { styles, categoryField } = options;
+  let seriesFields = options.seriesFields;
+
   const { axisColumnMappings, transformedData = [] } = state;
   const newState = { ...state };
 
@@ -214,7 +226,24 @@ export const createBarSeries = <T extends BaseChartStyle>({
     seriesFields = seriesFields(transformedData[0]);
   }
 
-  const thresholdLines = generateThresholdLines(styles?.thresholdOptions, styles?.switchAxes);
+  const thresholdLines =
+    options.kind === 'bar'
+      ? generateThresholdLines(options.styles?.thresholdOptions, options.styles?.switchAxes)
+      : generateThresholdLines(options.styles?.thresholdOptions);
+
+  const encodeX =
+    options.kind === 'bar' ? adjustOppositeSymbol(options.styles?.switchAxes, 'x') : 'x';
+  const encodeY =
+    options.kind === 'bar' ? adjustOppositeSymbol(options.styles?.switchAxes, 'y') : 'y';
+
+  let barWidth: string | undefined;
+  if (styles.barSizeMode === 'manual') {
+    barWidth = `${(styles.barWidth || 0.7) * 100}%`;
+  } else {
+    if (options.kind === 'histogram') {
+      barWidth = '99%';
+    }
+  }
 
   const series = seriesFields.map((seriesField, index) => {
     const name = getSeriesDisplayName(seriesField, Object.values(axisColumnMappings));
@@ -226,11 +255,11 @@ export const createBarSeries = <T extends BaseChartStyle>({
       },
       name,
       encode: {
-        [adjustOppositeSymbol(styles?.switchAxes, 'x')]: categoryField,
-        [adjustOppositeSymbol(styles?.switchAxes, 'y')]: seriesField,
+        [encodeX]: categoryField,
+        [encodeY]: seriesField,
       },
       // TODO: barWidth and barCategoryGap seems are exclusive, we need to revise the current UI for this config
-      barWidth: styles.barSizeMode === 'manual' ? `${(styles.barWidth || 0.7) * 100}%` : undefined,
+      barWidth,
       barCategoryGap:
         styles.barSizeMode === 'manual' ? `${(styles.barPadding || 0.1) * 100}%` : undefined,
       ...(index === 0 && thresholdLines),
@@ -264,6 +293,7 @@ export const createFacetBarSeries = <T extends BaseChartStyle>({
   // facet into one chart
   if (!Array.isArray(transformedData?.[0]?.[0])) {
     const simpleBar = createBarSeries({
+      kind: 'bar',
       styles,
       categoryField,
       seriesFields,

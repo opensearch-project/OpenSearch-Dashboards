@@ -86,6 +86,7 @@ test('set correct defaults', () => {
       "optimizedHealthcheck": undefined,
       "password": undefined,
       "pingTimeout": "PT30S",
+      "requestCompression": false,
       "requestHeadersWhitelist": Array [
         "authorization",
       ],

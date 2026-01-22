@@ -100,7 +100,7 @@ export const createBarSpec = (
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
       }),
-      createBarSeries({ styles, categoryField, seriesFields: [valueField] }),
+      createBarSeries({ kind: 'bar', styles, categoryField, seriesFields: [valueField] }),
       assembleSpec
     )({
       data: transformedData,
@@ -246,6 +246,7 @@ export const createTimeBarChart = (
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
       }),
       createBarSeries({
+        kind: 'bar',
         styles,
         categoryField: timeField,
         seriesFields: [valueField],
@@ -412,6 +413,7 @@ export const createGroupedTimeBarChart = (
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
       }),
       createBarSeries({
+        kind: 'bar',
         styles,
         categoryField: timeField,
         seriesFields(headers) {
@@ -773,6 +775,7 @@ export const createStackedBarSpec = (
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
       }),
       createBarSeries({
+        kind: 'bar',
         styles,
         categoryField,
         seriesFields(headers) {
@@ -915,7 +918,7 @@ export const createDoubleNumericalBarChart = (
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== categoryField),
       }),
-      createBarSeries({ styles, categoryField, seriesFields: [valueField] }),
+      createBarSeries({ kind: 'bar', styles, categoryField, seriesFields: [valueField] }),
       assembleSpec
     )({
       data: transformedData,
@@ -924,6 +927,7 @@ export const createDoubleNumericalBarChart = (
       axisColumnMappings: axisColumnMappings ?? {},
     });
 
+    // TODO: check if this is needed
     if (styles.switchAxes) {
       result.yAxisConfig.type = 'category';
     } else {
