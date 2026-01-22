@@ -187,7 +187,7 @@ describe('createAutoDetectedDatasets', () => {
       3,
       'correlations',
       {
-        correlationType: 'APM-Correlation',
+        correlationType: 'trace-to-logs-otel-v1-apm-span*',
         version: '1.0.0',
         entities: [
           { tracesDataset: { id: 'references[0].id' } },

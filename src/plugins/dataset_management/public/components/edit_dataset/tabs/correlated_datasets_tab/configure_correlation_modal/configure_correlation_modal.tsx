@@ -135,6 +135,7 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
         // Create new correlation
         await createCorrelation({
           traceDatasetId: traceDataset.id,
+          traceDatasetTitle: traceDataset.title,
           logDatasetIds: selectedLogDatasetIds,
         });
       }
@@ -153,6 +154,7 @@ export const ConfigureCorrelationModal: React.FC<ConfigureCorrelationModalProps>
     }
   }, [
     traceDataset.id,
+    traceDataset.title,
     existingCorrelation,
     selectedLogDatasetIds,
     createCorrelation,

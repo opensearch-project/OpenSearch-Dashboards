@@ -4,6 +4,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/public';
+import { CORRELATION_TYPE_PREFIXES } from '../../../data/common';
 import { DetectionResult } from './auto_detect_trace_data';
 
 export interface CreateDatasetsResult {
@@ -198,7 +199,7 @@ export async function createAutoDetectedDatasets(
       const correlationResponse = await savedObjectsClient.create(
         'correlations',
         {
-          correlationType: 'APM-Correlation',
+          correlationType: `${CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS}${detection.tracePattern}`,
           version: '1.0.0',
           entities: [
             { tracesDataset: { id: 'references[0].id' } },
