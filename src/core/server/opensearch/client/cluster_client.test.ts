@@ -46,6 +46,7 @@ const createConfig = (parts: Partial<OpenSearchClientConfig> = {}): OpenSearchCl
     requestHeadersWhitelist: ['authorization'],
     customHeaders: {},
     hosts: ['http://localhost'],
+    requestCompression: false,
     ...parts,
   };
 };
