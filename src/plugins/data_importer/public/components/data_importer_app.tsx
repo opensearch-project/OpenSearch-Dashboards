@@ -302,7 +302,7 @@ export const DataImporterPluginApp = ({
     if (!hideLocalCluster || dataSourceId) {
       fetchIndices();
     }
-  }, [http, dataSourceId, notifications.toasts, filePreviewData, hideLocalCluster]);
+  }, [http, dataSourceId, notifications.toasts, hideLocalCluster]);
 
   useEffect(() => {
     setDisableImport(shouldDisableImportButton());
@@ -425,6 +425,7 @@ export const DataImporterPluginApp = ({
             <ImportFileContentBody
               enabledFileTypes={config.enabledFileTypes}
               onFileUpdate={onFileInput}
+              maxFileSizeBytes={config.maxFileSizeBytes}
             />
           </>
         )}

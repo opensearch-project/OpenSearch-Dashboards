@@ -72,6 +72,7 @@ exports[`App should render in embedded mode without Router and page wrappers 1`]
             "ndjson",
           ]
         }
+        maxFileSizeBytes={104857600}
         onFileUpdate={[Function]}
       />
       <EuiSpacer
@@ -252,6 +253,7 @@ exports[`App should render with MDS 1`] = `
                     "ndjson",
                   ]
                 }
+                maxFileSizeBytes={104857600}
                 onFileUpdate={[Function]}
               />
               <EuiSpacer
@@ -382,6 +384,7 @@ exports[`App should render without MDS 1`] = `
                     "ndjson",
                   ]
                 }
+                maxFileSizeBytes={104857600}
                 onFileUpdate={[Function]}
               />
               <EuiSpacer
