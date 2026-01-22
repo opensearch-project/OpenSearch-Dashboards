@@ -15,6 +15,22 @@ const DEFAULT_LABELS_LIMIT = 20;
 /** Default limit for sample values per label */
 const DEFAULT_VALUES_LIMIT = 5;
 
+/** Maximum concurrent requests for getLabels */
+const MAX_CONCURRENT_LABEL_REQUESTS = 5;
+
+async function executeWithConcurrencyLimit<T>(
+  tasks: Array<() => Promise<T>>,
+  limit: number
+): Promise<T[]> {
+  const results: T[] = [];
+  for (let i = 0; i < tasks.length; i += limit) {
+    const batch = tasks.slice(i, i + limit);
+    const batchResults = await Promise.all(batch.map((task) => task()));
+    results.push(...batchResults);
+  }
+  return results;
+}
+
 interface SearchPrometheusMetadataArgs {
   query?: string;
   metricsLimit?: number;
@@ -118,10 +134,13 @@ export class PromQLToolHandlers {
         return { sharedLabels: [], metrics: [], labelValues: {} };
       }
 
-      const [metadata, ...labelsResults] = await Promise.all([
+      const [metadata, labelsResults] = await Promise.all([
         this.prometheusClient.getMetricMetadata(this.dataSourceName, undefined, timeRange),
-        ...metricNames.map((metric) =>
-          this.prometheusClient.getLabels(this.dataSourceName, metric, timeRange).catch(() => [])
+        executeWithConcurrencyLimit(
+          metricNames.map((metric) => () =>
+            this.prometheusClient.getLabels(this.dataSourceName, metric, timeRange).catch(() => [])
+          ),
+          MAX_CONCURRENT_LABEL_REQUESTS
         ),
       ]);
 
@@ -149,15 +168,19 @@ export class PromQLToolHandlers {
         };
       });
 
-      const labelValues: Record<string, string[]> = {};
-      await Promise.all(
-        Array.from(allLabelNames).map(async (label) => {
-          const values = await this.prometheusClient
+      const labelNamesList = Array.from(allLabelNames);
+      const labelValuesResults = await executeWithConcurrencyLimit(
+        labelNamesList.map((label) => () =>
+          this.prometheusClient
             .getLabelValues(this.dataSourceName, label, timeRange)
-            .catch(() => []);
-          labelValues[label] = values.slice(0, valuesLimit);
-        })
+            .catch(() => [])
+        ),
+        MAX_CONCURRENT_LABEL_REQUESTS
       );
+      const labelValues: Record<string, string[]> = {};
+      labelNamesList.forEach((label, index) => {
+        labelValues[label] = labelValuesResults[index].slice(0, valuesLimit);
+      });
 
       return { sharedLabels, metrics, labelValues };
     } catch (error) {

@@ -13,7 +13,6 @@ import {
   RunErrorEvent,
   Tool,
 } from '@ag-ui/core';
-import { HttpSetup } from 'opensearch-dashboards/public';
 import { Observable } from 'rxjs';
 
 /**

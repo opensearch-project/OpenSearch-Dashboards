@@ -94,9 +94,7 @@ export async function generatePromQLWithAgUi({
       }
 
       if (++toolCallCount > MAX_TOOL_CALLS) {
-        throw new Error(
-          `Exceeded maximum tool calls (${MAX_TOOL_CALLS}). Please simplify your question.`
-        );
+        throw new Error(`Exceeded maximum tool calls.`);
       }
 
       const result = await toolHandlers.executeTool(toolName, args);
