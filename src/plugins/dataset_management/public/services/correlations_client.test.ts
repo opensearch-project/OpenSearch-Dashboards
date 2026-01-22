@@ -8,7 +8,7 @@ import { CorrelationsClient } from './correlations_client';
 import {
   CorrelationSavedObject,
   CorrelationAttributes,
-  CORRELATION_TYPES,
+  CORRELATION_TYPE_PREFIXES,
   CORRELATION_VERSION,
 } from '../types/correlations';
 
@@ -161,7 +161,7 @@ describe('CorrelationsClient', () => {
         logDatasetIds: ['logs-456', 'logs-789'],
       };
 
-      const expectedCorrelationType = `${CORRELATION_TYPES.TRACES_LOGS_PREFIX}my-trace-dataset`;
+      const expectedCorrelationType = `${CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS}my-trace-dataset`;
 
       const mockResponse: CorrelationSavedObject = {
         id: 'new-correlation',
@@ -215,7 +215,7 @@ describe('CorrelationsClient', () => {
         logDatasetIds: ['logs-456'],
       };
 
-      const expectedCorrelationType = `${CORRELATION_TYPES.TRACES_LOGS_PREFIX}my-trace-dataset`;
+      const expectedCorrelationType = `${CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS}my-trace-dataset`;
 
       const mockResponse: CorrelationSavedObject = {
         id: 'new-correlation',

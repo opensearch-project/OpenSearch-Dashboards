@@ -14,7 +14,7 @@ import {
   FindCorrelationsOptions,
   CreateCorrelationData,
   UpdateCorrelationData,
-  CORRELATION_TYPES,
+  CORRELATION_TYPE_PREFIXES,
   CORRELATION_VERSION,
 } from '../types/correlations';
 import { extractDatasetIdsFromEntities } from '../utils/correlation_display';
@@ -80,7 +80,7 @@ export class CorrelationsClient {
 
     // Use trace dataset title in correlationType for unique identification
     const finalCorrelationType =
-      correlationType || `${CORRELATION_TYPES.TRACES_LOGS_PREFIX}${traceDatasetTitle}`;
+      correlationType || `${CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS}${traceDatasetTitle}`;
 
     // Build attributes
     const attributes: CorrelationAttributes = {

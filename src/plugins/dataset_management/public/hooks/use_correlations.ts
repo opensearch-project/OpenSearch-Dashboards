@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { SavedObjectsClientContract } from '../../../../core/public';
+import { CORRELATION_TYPE_PREFIXES } from '../../../data/common';
 import { CorrelationsClient } from '../services/correlations_client';
 import { CorrelationSavedObject, FindCorrelationsOptions } from '../types/correlations';
 
@@ -36,15 +37,18 @@ export function useCorrelations(
       const results = await client.find(options);
 
       // Client-side filtering: only include correlations where datasetId appears in references
-      // AND correlationType starts with 'trace-to-logs-' (trace-to-logs)
+      // AND correlationType starts with trace-to-logs prefix
       const filtered = options.datasetId
         ? results.filter(
             (correlation) =>
-              correlation.attributes.correlationType.startsWith('trace-to-logs-') &&
-              correlation.references.some((ref) => ref.id === options.datasetId)
+              correlation.attributes.correlationType.startsWith(
+                CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS
+              ) && correlation.references.some((ref) => ref.id === options.datasetId)
           )
         : results.filter((correlation) =>
-            correlation.attributes.correlationType.startsWith('trace-to-logs-')
+            correlation.attributes.correlationType.startsWith(
+              CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS
+            )
           );
 
       setCorrelations(filtered);
@@ -102,8 +106,9 @@ export function useCorrelationCount(
       // Client-side filtering: only count trace-to-logs correlations where datasetId appears in references
       const filtered = correlations.filter(
         (correlation) =>
-          correlation.attributes.correlationType.startsWith('trace-to-logs-') &&
-          correlation.references.some((ref) => ref.id === datasetId)
+          correlation.attributes.correlationType.startsWith(
+            CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS
+          ) && correlation.references.some((ref) => ref.id === datasetId)
       );
 
       setCount(filtered.length);

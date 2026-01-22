@@ -4,6 +4,7 @@
  */
 
 import { SavedObjectsType } from '../../../../core/server';
+import { CORRELATION_TYPE_PREFIXES } from '../../common';
 
 // @experimental This schema is experimental and might change in future releases.
 export const correlationsSavedObjectType: SavedObjectsType = {
@@ -16,10 +17,10 @@ export const correlationsSavedObjectType: SavedObjectsType = {
     importableAndExportable: true,
     getTitle(obj) {
       const correlationType = obj.attributes?.correlationType || '';
-      if (correlationType.startsWith('APM-Config-')) {
+      if (correlationType.startsWith(CORRELATION_TYPE_PREFIXES.APM_CONFIG)) {
         return 'APM-config';
       }
-      if (correlationType.startsWith('trace-to-logs-')) {
+      if (correlationType.startsWith(CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS)) {
         // Show full correlationType for unique identification in Assets page
         return correlationType;
       }
@@ -27,13 +28,13 @@ export const correlationsSavedObjectType: SavedObjectsType = {
     },
     getInAppUrl(obj) {
       const correlationType = obj.attributes?.correlationType || '';
-      if (correlationType.startsWith('APM-Config-')) {
+      if (correlationType.startsWith(CORRELATION_TYPE_PREFIXES.APM_CONFIG)) {
         return {
           path: '/app/observability-apm-services#/services',
           uiCapabilitiesPath: 'observability.show',
         };
       }
-      if (correlationType.startsWith('trace-to-logs-')) {
+      if (correlationType.startsWith(CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS)) {
         const traceDatasetId = obj.references?.[0]?.id;
         if (traceDatasetId) {
           return {

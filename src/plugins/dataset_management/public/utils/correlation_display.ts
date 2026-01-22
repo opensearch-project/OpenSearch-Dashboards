@@ -4,15 +4,16 @@
  */
 
 import { SavedObjectReference } from '../../../../core/public';
+import { CORRELATION_TYPE_PREFIXES } from '../../../data/common';
 
 /**
  * Maps internal correlation type to user-friendly display name
  */
 export function getCorrelationTypeDisplay(correlationType: string): string {
-  if (correlationType.startsWith('APM-Config-')) {
+  if (correlationType.startsWith(CORRELATION_TYPE_PREFIXES.APM_CONFIG)) {
     return 'APM-config';
   }
-  if (correlationType.startsWith('trace-to-logs-')) {
+  if (correlationType.startsWith(CORRELATION_TYPE_PREFIXES.TRACE_TO_LOGS)) {
     return 'Trace-to-logs'; // Simple name for dataset tabs
   }
   return correlationType;

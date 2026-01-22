@@ -4,6 +4,8 @@
  */
 
 import { SavedObject, SavedObjectReference } from '../../../../core/public';
+// Re-export CORRELATION_TYPE_PREFIXES from data plugin for convenience
+export { CORRELATION_TYPE_PREFIXES } from '../../../data/common';
 
 /**
  * Correlation attributes matching the saved object schema
@@ -80,13 +82,6 @@ export interface UpdateCorrelationData {
   id: string;
   logDatasetIds: string[];
 }
-
-/**
- * Constants for correlation types
- */
-export const CORRELATION_TYPES = {
-  TRACES_LOGS_PREFIX: 'trace-to-logs-',
-} as const;
 
 /**
  * Constants for correlation versions
