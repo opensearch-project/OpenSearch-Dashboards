@@ -98,7 +98,7 @@ const runRecentQueryTests = () => {
                   config.alternativeDataset,
                   DATASOURCE_NAME,
                   config.language.name,
-                  'timestamp'
+                  'updated_at'
                 );
                 cy.explore.setDataset(config.dataset, DATASOURCE_NAME, config.datasetType);
                 cy.getElementByTestId('exploreRecentQueriesButton').click({
