@@ -90,7 +90,7 @@ export class AgUiAgent {
       ],
       state: {},
       forwardedProps: {
-        language: input.language,
+        queryAssistLanguage: input.language,
       },
     };
   }

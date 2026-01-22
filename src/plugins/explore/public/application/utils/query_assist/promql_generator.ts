@@ -51,16 +51,6 @@ function isRunErrorEvent(event: BaseEvent): event is RunErrorEvent {
   return event.type === EventType.RUN_ERROR;
 }
 
-const PROMQL_SYSTEM_PROMPT = `You are a PromQL expert. Your task is to convert natural language questions into valid PromQL queries.
-
-## Instructions
-1. First, use tools to discover available metrics matching the user's intent.
-2. Select the most appropriate metric and construct a query using proper functions.
-3. Return only one markdown code block with PromQL query inside.
-4. If it requires multiple queries, use \`;\` and a new line to separate them.
-5. Do not output explanations. Output 'OOD' if question is out of domain.
-`;
-
 /** Maximum number of tool calls allowed per query generation */
 const MAX_TOOL_CALLS = 3;
 
@@ -81,11 +71,7 @@ export async function generatePromQLWithAgUi({
   let query: string | undefined;
   let error: Error | undefined;
 
-  const messages: Message[] = [
-    // 'system' role messages seem to be ignored by ag-ui agent
-    { id: agent.generateMessageId(), role: 'user', content: PROMQL_SYSTEM_PROMPT },
-    { id: agent.generateMessageId(), role: 'user', content: question },
-  ];
+  const messages: Message[] = [{ id: agent.generateMessageId(), role: 'user', content: question }];
   const currentToolCalls = new Map<string, ToolCall>();
   const toolCallArgs = new Map<string, string>();
   let toolCallCount = 0;
