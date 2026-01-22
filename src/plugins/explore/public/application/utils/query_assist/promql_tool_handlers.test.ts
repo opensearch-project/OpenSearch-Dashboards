@@ -72,7 +72,7 @@ describe('PromQLToolHandlers', () => {
       const result = await handlers.executeTool('search_prometheus_metadata', { query: 'test' });
 
       expect(result).toHaveProperty('metrics');
-      expect(result).toHaveProperty('sharedLabels');
+      expect(result).toHaveProperty('labelsCommonToAllMetrics');
       expect(result).toHaveProperty('labelValues');
     });
 
@@ -114,7 +114,7 @@ describe('PromQLToolHandlers', () => {
         help: 'CPU seconds',
         labels: ['cpu'],
       });
-      expect(result.sharedLabels).toEqual(expect.arrayContaining(['job', 'instance']));
+      expect(result.labelsCommonToAllMetrics).toEqual(expect.arrayContaining(['job', 'instance']));
     });
 
     it('should compute shared labels as intersection', async () => {
@@ -127,8 +127,8 @@ describe('PromQLToolHandlers', () => {
 
       const result = await handlers.searchPrometheusMetadata({});
 
-      expect(result.sharedLabels).toEqual(expect.arrayContaining(['job', 'instance']));
-      expect(result.sharedLabels).toHaveLength(2);
+      expect(result.labelsCommonToAllMetrics).toEqual(expect.arrayContaining(['job', 'instance']));
+      expect(result.labelsCommonToAllMetrics).toHaveLength(2);
     });
 
     it('should fetch label values for all labels', async () => {
@@ -296,7 +296,7 @@ describe('PromQLToolHandlers', () => {
 
       const result = await handlers.searchPrometheusMetadata({});
 
-      expect(result).toEqual({ metrics: [], sharedLabels: [], labelValues: {} });
+      expect(result).toEqual({ metrics: [], labelsCommonToAllMetrics: [], labelValues: {} });
     });
 
     it('should handle null metrics response', async () => {
@@ -305,7 +305,7 @@ describe('PromQLToolHandlers', () => {
 
       const result = await handlers.searchPrometheusMetadata({});
 
-      expect(result).toEqual({ metrics: [], sharedLabels: [], labelValues: {} });
+      expect(result).toEqual({ metrics: [], labelsCommonToAllMetrics: [], labelValues: {} });
     });
 
     it('should handle labels fetch errors gracefully', async () => {
@@ -374,7 +374,7 @@ describe('PromQLToolHandlers', () => {
       });
     });
 
-    it('should return empty sharedLabels when metrics have no overlapping labels', async () => {
+    it('should return empty labelsCommonToAllMetrics when metrics have no overlapping labels', async () => {
       mockPrometheusClient.getMetrics.mockResolvedValue(['metric1', 'metric2']);
       mockPrometheusClient.getMetricMetadata.mockResolvedValue({});
       mockPrometheusClient.getLabels
@@ -384,7 +384,7 @@ describe('PromQLToolHandlers', () => {
 
       const result = await handlers.searchPrometheusMetadata({});
 
-      expect(result.sharedLabels).toEqual([]);
+      expect(result.labelsCommonToAllMetrics).toEqual([]);
     });
 
     it('should return all labels as shared when only one metric', async () => {
@@ -395,8 +395,10 @@ describe('PromQLToolHandlers', () => {
 
       const result = await handlers.searchPrometheusMetadata({});
 
-      expect(result.sharedLabels).toEqual(expect.arrayContaining(['job', 'instance', 'custom']));
-      expect(result.sharedLabels).toHaveLength(3);
+      expect(result.labelsCommonToAllMetrics).toEqual(
+        expect.arrayContaining(['job', 'instance', 'custom'])
+      );
+      expect(result.labelsCommonToAllMetrics).toHaveLength(3);
     });
   });
 });

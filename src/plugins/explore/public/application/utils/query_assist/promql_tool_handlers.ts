@@ -18,6 +18,10 @@ const DEFAULT_VALUES_LIMIT = 5;
 /** Maximum concurrent requests for getLabels */
 const MAX_CONCURRENT_LABEL_REQUESTS = 5;
 
+// Currently backend proxy does not support multiple `match[]` values for the
+// series API, we need to call labels API multiple times. This prevents any
+// backend side throttling.
+// TODO use one series API to get label metadata when backend is ready.
 async function executeWithConcurrencyLimit<T>(
   tasks: Array<() => Promise<T>>,
   limit: number
@@ -46,7 +50,7 @@ interface MetricInfo {
 }
 
 interface SearchPrometheusMetadataResult {
-  sharedLabels: string[];
+  labelsCommonToAllMetrics: string[];
   metrics: MetricInfo[];
   labelValues: Record<string, string[]>;
 }
@@ -131,7 +135,7 @@ export class PromQLToolHandlers {
       metricNames = (metricNames || []).slice(0, metricsLimit);
 
       if (metricNames.length === 0) {
-        return { sharedLabels: [], metrics: [], labelValues: {} };
+        return { labelsCommonToAllMetrics: [], metrics: [], labelValues: {} };
       }
 
       const [metadata, labelsResults] = await Promise.all([
@@ -148,7 +152,7 @@ export class PromQLToolHandlers {
         (labelsResults[index] || []).slice(0, labelsLimit)
       );
 
-      const sharedLabels =
+      const labelsCommonToAllMetrics =
         allLabelSets.length > 0
           ? allLabelSets.reduce((common, labels) =>
               common.filter((label) => labels.includes(label))
@@ -158,7 +162,7 @@ export class PromQLToolHandlers {
       const allLabelNames = new Set<string>();
       const metrics: MetricInfo[] = metricNames.map((name, index) => {
         const metaInfo = (metadata as MetricMetadata)?.[name];
-        const labels = allLabelSets[index].filter((l) => !sharedLabels.includes(l));
+        const labels = allLabelSets[index].filter((l) => !labelsCommonToAllMetrics.includes(l));
         allLabelSets[index].forEach((label) => allLabelNames.add(label));
         return {
           name,
@@ -182,11 +186,11 @@ export class PromQLToolHandlers {
         labelValues[label] = labelValuesResults[index].slice(0, valuesLimit);
       });
 
-      return { sharedLabels, metrics, labelValues };
+      return { labelsCommonToAllMetrics, metrics, labelValues };
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to search Prometheus metadata:', error);
-      return { sharedLabels: [], metrics: [], labelValues: {} };
+      return { labelsCommonToAllMetrics: [], metrics: [], labelValues: {} };
     }
   }
 }

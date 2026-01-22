@@ -13,13 +13,15 @@ export const PROMQL_FRONTEND_TOOLS: Tool[] = [
   {
     name: PromQLToolName.SEARCH_PROMETHEUS_METADATA,
     description:
-      'Search Prometheus metadata. Returns matched metrics with their labels and sample label values. Use this to discover available metrics before writing a PromQL query.',
+      // currently multiple tool calls is not supported. see https://github.com/opensearch-project/ml-commons/issues/4548
+      'Search Prometheus metadata. Returns matched metrics with their labels and sample label values. Use this to discover available metrics before writing a PromQL query. Only call this tool once.',
     parameters: {
       type: 'object',
       properties: {
         query: {
           type: 'string',
-          description: 'Regex pattern to filter metrics by name.',
+          description:
+            'Pattern to filter metrics by name, supports regex or substring match. Pick the most relevant pattern based on the user question.',
         },
         metricsLimit: {
           type: 'number',
