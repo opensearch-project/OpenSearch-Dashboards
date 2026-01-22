@@ -36,11 +36,16 @@ export function useCorrelations(
       const results = await client.find(options);
 
       // Client-side filtering: only include correlations where datasetId appears in references
+      // AND correlationType starts with 'trace-to-logs-' (trace-to-logs)
       const filtered = options.datasetId
-        ? results.filter((correlation) =>
-            correlation.references.some((ref) => ref.id === options.datasetId)
+        ? results.filter(
+            (correlation) =>
+              correlation.attributes.correlationType.startsWith('trace-to-logs-') &&
+              correlation.references.some((ref) => ref.id === options.datasetId)
           )
-        : results;
+        : results.filter((correlation) =>
+            correlation.attributes.correlationType.startsWith('trace-to-logs-')
+          );
 
       setCorrelations(filtered);
     } catch (err) {
@@ -94,9 +99,11 @@ export function useCorrelationCount(
       const client = new CorrelationsClient(savedObjectsClient);
       const correlations = await client.find({ datasetId, perPage: 1000 });
 
-      // Client-side filtering: only count correlations where datasetId appears in references
-      const filtered = correlations.filter((correlation) =>
-        correlation.references.some((ref) => ref.id === datasetId)
+      // Client-side filtering: only count trace-to-logs correlations where datasetId appears in references
+      const filtered = correlations.filter(
+        (correlation) =>
+          correlation.attributes.correlationType.startsWith('trace-to-logs-') &&
+          correlation.references.some((ref) => ref.id === datasetId)
       );
 
       setCount(filtered.length);

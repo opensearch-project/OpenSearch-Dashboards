@@ -15,7 +15,36 @@ export const correlationsSavedObjectType: SavedObjectsType = {
     defaultSearchField: 'correlationType',
     importableAndExportable: true,
     getTitle(obj) {
+      const correlationType = obj.attributes?.correlationType || '';
+      if (correlationType.startsWith('APM-Config-')) {
+        return 'APM-config';
+      }
+      if (correlationType.startsWith('trace-to-logs-')) {
+        // Show full correlationType for unique identification in Assets page
+        return correlationType;
+      }
       return `Correlation ${obj.id}`;
+    },
+    getInAppUrl(obj) {
+      const correlationType = obj.attributes?.correlationType || '';
+      if (correlationType.startsWith('APM-Config-')) {
+        return {
+          path: '/app/observability-apm-services#/services',
+          uiCapabilitiesPath: 'observability.show',
+        };
+      }
+      if (correlationType.startsWith('trace-to-logs-')) {
+        const traceDatasetId = obj.references?.[0]?.id;
+        if (traceDatasetId) {
+          return {
+            path: `/app/datasets/patterns/${encodeURIComponent(
+              traceDatasetId
+            )}#/?_a=(tab:correlatedDatasets)`,
+            uiCapabilitiesPath: 'indexPatterns.save',
+          };
+        }
+      }
+      return undefined;
     },
   },
   mappings: {

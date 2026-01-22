@@ -67,6 +67,7 @@ export interface FindCorrelationsOptions {
  */
 export interface CreateCorrelationData {
   traceDatasetId: string;
+  traceDatasetTitle: string;
   logDatasetIds: string[];
   correlationType?: string;
   version?: string;
@@ -84,7 +85,7 @@ export interface UpdateCorrelationData {
  * Constants for correlation types
  */
 export const CORRELATION_TYPES = {
-  TRACES_LOGS: 'APM-Correlation',
+  TRACES_LOGS_PREFIX: 'trace-to-logs-',
 } as const;
 
 /**

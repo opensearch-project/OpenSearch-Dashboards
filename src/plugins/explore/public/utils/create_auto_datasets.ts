@@ -198,7 +198,7 @@ export async function createAutoDetectedDatasets(
       const correlationResponse = await savedObjectsClient.create(
         'correlations',
         {
-          correlationType: 'APM-Correlation',
+          correlationType: `trace-to-logs-${detection.tracePattern}`,
           version: '1.0.0',
           entities: [
             { tracesDataset: { id: 'references[0].id' } },

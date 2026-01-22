@@ -152,7 +152,7 @@ Correlations are stored as saved objects with the type `correlations`. Each corr
   "migrationVersion": "1.0.0",
   "updatedAt": "2025-07-16T10:15:30.000Z",
   "attributes": {
-    "type": "APM-Correlation",
+    "type": "trace-to-logs-ss4o_traces-nginx-*",
     "entities": [
       {
         "tracesDataset": {

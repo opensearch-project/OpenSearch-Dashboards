@@ -9,11 +9,13 @@ import { SavedObjectReference } from '../../../../core/public';
  * Maps internal correlation type to user-friendly display name
  */
 export function getCorrelationTypeDisplay(correlationType: string): string {
-  const displayMapping: Record<string, string> = {
-    'APM-Correlation': 'Trace-to-logs',
-  };
-
-  return displayMapping[correlationType] || correlationType;
+  if (correlationType.startsWith('APM-Config-')) {
+    return 'APM-config';
+  }
+  if (correlationType.startsWith('trace-to-logs-')) {
+    return 'Trace-to-logs'; // Simple name for dataset tabs
+  }
+  return correlationType;
 }
 
 /**
