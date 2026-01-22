@@ -38,21 +38,25 @@ import MetricVisComponent from './components/metric_vis_component';
 // @ts-ignore
 
 export const metricVisRenderer: () => ExpressionRenderDefinition<MetricVisRenderValue> = () => {
-  let root: Root | null = null;
+  // Use WeakMap to store roots per DOM node to support multiple instances
+  const rootsMap = new WeakMap<HTMLElement, Root>();
 
   return {
     name: 'metric_vis',
     displayName: 'metric visualization',
     reuseDomNode: true,
     render: async (domNode, { visData, visConfig }, handlers) => {
+      let root = rootsMap.get(domNode);
       if (!root) {
         root = createRoot(domNode);
+        rootsMap.set(domNode, root);
       }
 
       handlers.onDestroy(() => {
-        if (root) {
-          root.unmount();
-          root = null;
+        const existingRoot = rootsMap.get(domNode);
+        if (existingRoot) {
+          existingRoot.unmount();
+          rootsMap.delete(domNode);
         }
       });
 

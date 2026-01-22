@@ -41,21 +41,25 @@ const TagCloudChart = lazy(() => import('./components/tag_cloud_chart'));
 export const getTagCloudVisRenderer: (
   deps: TagCloudVisDependencies
 ) => ExpressionRenderDefinition<TagCloudVisRenderValue> = ({ colors }) => {
-  let root: Root | null = null;
+  // Use WeakMap to store roots per DOM node to support multiple instances
+  const rootsMap = new WeakMap<HTMLElement, Root>();
 
   return {
     name: 'tagloud_vis',
     displayName: 'Tag Cloud visualization',
     reuseDomNode: true,
     render: async (domNode, config, handlers) => {
+      let root = rootsMap.get(domNode);
       if (!root) {
         root = createRoot(domNode);
+        rootsMap.set(domNode, root);
       }
 
       handlers.onDestroy(() => {
-        if (root) {
-          root.unmount();
-          root = null;
+        const existingRoot = rootsMap.get(domNode);
+        if (existingRoot) {
+          existingRoot.unmount();
+          rootsMap.delete(domNode);
         }
       });
 

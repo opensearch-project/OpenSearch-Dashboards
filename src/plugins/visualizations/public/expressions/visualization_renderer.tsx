@@ -29,11 +29,15 @@
  */
 
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, Root } from 'react-dom/client';
+import { flushSync } from 'react-dom';
 import { ExpressionRenderDefinition } from '../../../expressions/public';
 import { ExprVis } from './vis';
 import { Visualization } from '../components';
 import { VisParams, VisRenderValue } from '../types';
+
+// Use WeakMap to store roots per DOM node to support multiple instances
+const rootsMap = new WeakMap<HTMLElement, Root>();
 
 export const visualization = (): ExpressionRenderDefinition<VisRenderValue> => ({
   name: 'visualization',
@@ -53,21 +57,35 @@ export const visualization = (): ExpressionRenderDefinition<VisRenderValue> => (
 
     const uiState = handlers.uiState || vis.getUiState();
 
-    const root = createRoot(domNode);
+    let root = rootsMap.get(domNode);
+    if (!root) {
+      root = createRoot(domNode);
+      rootsMap.set(domNode, root);
+    }
+
     handlers.onDestroy(() => {
-      root.unmount();
+      const existingRoot = rootsMap.get(domNode);
+      if (existingRoot) {
+        existingRoot.unmount();
+        rootsMap.delete(domNode);
+      }
     });
 
     const listenOnChange = params ? params.listenOnChange : false;
-    root.render(
-      <Visualization
-        vis={vis}
-        visData={visData}
-        visParams={vis.params}
-        uiState={uiState}
-        listenOnChange={listenOnChange}
-        onInit={handlers.done}
-      />
-    );
+    // Use flushSync to ensure synchronous rendering like React 17's render()
+    // This is necessary because D3 charts measure DOM dimensions immediately
+    // after mount, and async rendering would cause incorrect measurements
+    flushSync(() => {
+      root.render(
+        <Visualization
+          vis={vis}
+          visData={visData}
+          visParams={vis.params}
+          uiState={uiState}
+          listenOnChange={listenOnChange}
+          onInit={handlers.done}
+        />
+      );
+    });
   },
 });
