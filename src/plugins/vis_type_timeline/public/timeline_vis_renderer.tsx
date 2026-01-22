@@ -42,21 +42,25 @@ const TimelineVisComponent = lazy(() => import('./components/timeline_vis_compon
 export const getTimelineVisRenderer: (
   deps: TimelineVisDependencies
 ) => ExpressionRenderDefinition<TimelineRenderValue> = (deps) => {
-  let root: Root | null = null;
+  // Use WeakMap to store roots per DOM node to support multiple instances
+  const rootsMap = new WeakMap<HTMLElement, Root>();
 
   return {
     name: 'timeline_vis',
     displayName: 'Timeline visualization',
     reuseDomNode: true,
     render: (domNode, { visData, visParams }, handlers) => {
+      let root = rootsMap.get(domNode);
       if (!root) {
         root = createRoot(domNode);
+        rootsMap.set(domNode, root);
       }
 
       handlers.onDestroy(() => {
-        if (root) {
-          root.unmount();
-          root = null;
+        const existingRoot = rootsMap.get(domNode);
+        if (existingRoot) {
+          existingRoot.unmount();
+          rootsMap.delete(domNode);
         }
       });
 
