@@ -169,7 +169,7 @@ function formatMetricLabels(metric: Record<string, string>): string {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, value]) => `${key}="${value}"`);
 
-  return labelParts.length > 0 ? `{${labelParts.join(', ')}}` : '';
+  return `{${labelParts.join(', ')}}`;
 }
 
 /**

@@ -66,6 +66,7 @@ const formatMetricString = (source: Record<string, unknown>, expanded: boolean):
   const match = metric.match(/^([^{]*)\{(.*)\}$/);
   if (match) {
     const [, metricName, labelsStr] = match;
+    if (!labelsStr) return metric;
     const labels = labelsStr.split(', ');
     const indent = '    ';
     return `${metricName}{\n${indent}${labels.join(',\n' + indent)}\n}`;
