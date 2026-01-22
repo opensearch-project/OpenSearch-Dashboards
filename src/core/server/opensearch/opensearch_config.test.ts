@@ -77,7 +77,7 @@ test('set correct defaults', () => {
       "hosts": Array [
         "http://localhost:9200",
       ],
-      "ignoreVersionMismatch": false,
+      "ignoreVersionMismatch": true,
       "logQueries": false,
       "memoryCircuitBreaker": Object {
         "enabled": false,

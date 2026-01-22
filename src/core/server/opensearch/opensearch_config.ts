@@ -129,7 +129,7 @@ export const configSchema = schema.object({
   ),
   apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
   healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
-  ignoreVersionMismatch: schema.boolean({ defaultValue: false }),
+  ignoreVersionMismatch: schema.boolean({ defaultValue: true }),
   disablePrototypePoisoningProtection: schema.maybe(schema.boolean({ defaultValue: false })),
 });
 
