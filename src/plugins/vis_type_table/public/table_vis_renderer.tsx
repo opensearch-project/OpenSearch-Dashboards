@@ -14,21 +14,25 @@ import { TableVisApp } from './components/table_vis_app';
 export const getTableVisRenderer: (
   core: CoreStart
 ) => ExpressionRenderDefinition<TableVisRenderValue> = (core) => {
-  let root: Root | null = null;
+  // Use WeakMap to store roots per DOM node to support multiple instances
+  const rootsMap = new WeakMap<HTMLElement, Root>();
 
   return {
     name: 'table_vis',
     displayName: 'table visualization',
     reuseDomNode: true,
     render: async (domNode, { visData, visConfig }, handlers) => {
+      let root = rootsMap.get(domNode);
       if (!root) {
         root = createRoot(domNode);
+        rootsMap.set(domNode, root);
       }
 
       handlers.onDestroy(() => {
-        if (root) {
-          root.unmount();
-          root = null;
+        const existingRoot = rootsMap.get(domNode);
+        if (existingRoot) {
+          existingRoot.unmount();
+          rootsMap.delete(domNode);
         }
       });
 
