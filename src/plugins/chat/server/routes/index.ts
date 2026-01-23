@@ -13,6 +13,7 @@ import {
 } from '../../../../core/server';
 import { MLAgentRouterFactory } from './ml_routes/ml_agent_router';
 import { MLAgentRouterRegistry } from './ml_routes/router_registry';
+import { injectSystemPrompt } from '../prompts';
 
 /**
  * Forward request to external AG-UI server
@@ -113,6 +114,9 @@ export function defineRoutes(
       const dataSourceId = request.query?.dataSourceId;
 
       try {
+        // Inject server-side system prompt if present
+        injectSystemPrompt(request.body.messages, request.body.forwardedProps?.queryAssistLanguage);
+
         // Check if ML Commons agentic features are enabled via capabilities
         const capabilitiesResolver = getCapabilitiesResolver?.();
         const capabilities = capabilitiesResolver ? await capabilitiesResolver(request) : undefined;
