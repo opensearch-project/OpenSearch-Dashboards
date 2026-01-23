@@ -9,6 +9,7 @@ const createSetupContractMock = () => {
   const setupContract: jest.Mocked<SecurityServiceSetup> = {
     readonlyService: jest.fn(),
     registerReadonlyService: jest.fn(),
+    registerIdentitySourceHandler: jest.fn(),
   };
   return setupContract;
 };
