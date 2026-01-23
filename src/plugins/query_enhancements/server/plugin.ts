@@ -6,9 +6,11 @@
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import {
+  Capabilities,
   CoreSetup,
   CoreStart,
   Logger,
+  OpenSearchDashboardsRequest,
   Plugin,
   PluginInitializerContext,
   SharedGlobalConfig,
@@ -39,6 +41,8 @@ export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
   private readonly logger: Logger;
   private readonly config$: Observable<SharedGlobalConfig>;
+  private capabilitiesResolver?: (request: OpenSearchDashboardsRequest) => Promise<Capabilities>;
+
   constructor(private initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config$ = initializerContext.config.legacy.globalConfig$;
@@ -81,6 +85,8 @@ export class QueryEnhancementsPlugin
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL_ASYNC, pplAsyncSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PROMQL, promqlSearchStrategy);
 
+    const getCapabilitiesResolver = () => this.capabilitiesResolver;
+
     // @ts-ignore https://github.com/opensearch-project/openSearch-Dashboards/issues/4274
     core.http.registerRouteHandlerContext('query_assist', () => ({
       logger: this.logger,
@@ -89,6 +95,7 @@ export class QueryEnhancementsPlugin
         .pipe(first())
         .toPromise(),
       dataSourceEnabled: !!dataSource,
+      getCapabilitiesResolver,
     }));
 
     // @ts-ignore https://github.com/opensearch-project/openSearch-Dashboards/issues/4274
@@ -124,6 +131,10 @@ export class QueryEnhancementsPlugin
 
   public start(core: CoreStart) {
     this.logger.debug('queryEnhancements: Started');
+
+    this.capabilitiesResolver = (request: OpenSearchDashboardsRequest) =>
+      core.capabilities.resolveCapabilities(request);
+
     return {};
   }
 

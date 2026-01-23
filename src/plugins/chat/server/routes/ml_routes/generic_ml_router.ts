@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { createGunzip } from 'zlib';
+import { Readable } from 'stream';
 import {
   Logger,
   RequestHandlerContext,
   OpenSearchDashboardsRequest,
   IOpenSearchDashboardsResponse,
   OpenSearchDashboardsResponseFactory,
-  Capabilities,
   OpenSearchClient,
 } from '../../../../../core/server';
 import { MLAgentRouter } from './ml_agent_router';
@@ -90,20 +91,24 @@ export class GenericMLRouter implements MLAgentRouter {
     response: OpenSearchDashboardsResponseFactory,
     logger: Logger,
     configuredAgentId?: string,
-    dataSourceId?: string
+    dataSourceId?: string,
+    observabilityAgentId?: string
   ): Promise<IOpenSearchDashboardsResponse<any>> {
-    if (!configuredAgentId) {
-      return response.customError({
-        statusCode: 503,
-        body: { message: 'ML Commons agent ID not configured' },
-      });
-    }
-
     // Validate request body
     if (!request.body || typeof request.body !== 'object') {
       return response.customError({
         statusCode: 400,
         body: { message: 'Invalid request body for ML Commons agent' },
+      });
+    }
+
+    const language = request.body.forwardedProps?.language;
+    const agentId = language ? observabilityAgentId : configuredAgentId;
+
+    if (!agentId) {
+      return response.customError({
+        statusCode: 503,
+        body: { message: 'ML Commons agent ID not configured' },
       });
     }
 
@@ -140,14 +145,15 @@ export class GenericMLRouter implements MLAgentRouter {
 
     try {
       logger.info('Forwarding request to ML Commons agent', {
-        agentId: configuredAgentId,
+        agentId,
+        language,
         dataSourceId,
       });
 
       const mlResponse: MLClientResponse = await mlClient.request(
         {
           method: 'POST',
-          path: `/_plugins/_ml/agents/${configuredAgentId}/_execute/stream`,
+          path: `/_plugins/_ml/agents/${agentId}/_execute/stream`,
           body: JSON.stringify(request.body),
           datasourceId: dataSourceId, // Use actual dataSourceId from request
           stream: true,
@@ -159,6 +165,25 @@ export class GenericMLRouter implements MLAgentRouter {
 
       // Handle streaming response properly using type guard
       if (isStreamResponse(mlResponse)) {
+        const contentEncoding =
+          mlResponse.headers['content-encoding'] || mlResponse.headers['Content-Encoding'];
+        const encHeader = Array.isArray(contentEncoding)
+          ? contentEncoding.join(',')
+          : contentEncoding ?? '';
+        const encodings = encHeader
+          .toLowerCase()
+          .split(',')
+          .map((e) => e.trim());
+        let responseBody: NodeJS.ReadableStream = mlResponse.body;
+
+        if (encodings.includes('gzip')) {
+          const gunzip = createGunzip();
+          gunzip.on('error', (err) => {
+            logger.error(`Gzip decompression error: ${err.message}`);
+          });
+          responseBody = (mlResponse.body as Readable).pipe(gunzip);
+        }
+
         return response.custom({
           statusCode: mlResponse.status,
           headers: {
@@ -166,7 +191,7 @@ export class GenericMLRouter implements MLAgentRouter {
             'Content-Encoding': 'identity',
             Connection: 'keep-alive',
           },
-          body: mlResponse.body,
+          body: responseBody,
         });
       } else {
         return response.custom({
