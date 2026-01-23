@@ -89,6 +89,9 @@ describe('ChatPlugin', () => {
           registerProvider: expect.any(Function),
           unregisterProvider: expect.any(Function),
         }),
+        commandRegistry: expect.objectContaining({
+          registerCommand: expect.any(Function),
+        }),
       });
     });
 

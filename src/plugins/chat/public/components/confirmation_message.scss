@@ -1,0 +1,31 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.confirmationMessage {
+  grid-area: confirmation;
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+  padding-bottom: 4px;
+  animation: slideIn 0.3s ease-out;
+  background-color: transparent;
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -24,6 +24,7 @@ import type {
 import { AssistantActionService } from '../../../context_provider/public';
 import { ToolExecutor } from './tool_executor';
 import { ChatService } from './chat_service';
+import { ConfirmationService } from './confirmation_service';
 
 // Timeline is now purely AG-UI Messages
 
@@ -47,12 +48,13 @@ export class ChatEventHandler {
 
   constructor(
     private assistantActionService: AssistantActionService,
-    private chatService: ChatService | null,
+    private chatService: ChatService,
     private onTimelineUpdate: (updater: (prev: Message[]) => Message[]) => void,
     private onStreamingStateChange: (isStreaming: boolean) => void,
-    private getTimeline: () => Message[]
+    private getTimeline: () => Message[],
+    confirmationService: ConfirmationService
   ) {
-    this.toolExecutor = new ToolExecutor(assistantActionService);
+    this.toolExecutor = new ToolExecutor(assistantActionService, confirmationService);
   }
 
   /**
@@ -328,8 +330,35 @@ export class ChatEventHandler {
         args,
       });
 
-      // Execute the tool
-      const result = await this.toolExecutor.executeTool(toolCall.function.name, args);
+      // Execute the tool and update tool execution status
+      const result = await this.toolExecutor.executeTool(
+        toolCall.function.name,
+        args,
+        toolCallId,
+        await this.chatService?.getCurrentDataSourceId()
+      );
+
+      // Check if tool execution was cancelled (e.g., due to cleanup)
+      if (result.cancelled) {
+        this.pendingToolCalls.delete(toolCallId);
+        return;
+      }
+
+      if (result.userRejected) {
+        // User rejected the tool execution
+        this.assistantActionService.updateToolCallState(toolCallId, {
+          status: 'failed',
+        });
+
+        // Send rejection message back to assistant
+        if (this.chatService && (this.chatService as any).sendToolResult) {
+          await this.sendToolResultToAssistant(toolCallId, result);
+        }
+
+        // Clean up pending tool call
+        this.pendingToolCalls.delete(toolCallId);
+        return;
+      }
 
       if (result.waitingForAgentResponse) {
         // Agent will handle this tool and send results back via events
@@ -533,7 +562,7 @@ export class ChatEventHandler {
     try {
       const messages = this.getTimeline();
 
-      const { observable, toolMessage } = await (this.chatService as any).sendToolResult(
+      const { observable, toolMessage } = await this.chatService.sendToolResult(
         toolCallId,
         result,
         messages

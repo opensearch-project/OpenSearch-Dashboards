@@ -3,10 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
-import { EuiFieldText, EuiButtonIcon } from '@elastic/eui';
+import React, { useRef } from 'react';
+import { EuiFieldText, EuiButtonIcon, EuiTextColor } from '@elastic/eui';
 import { ChatLayoutMode } from './chat_header_button';
 import { ContextPills } from './context_pills';
+import { SlashCommandMenu } from './slash_command_menu';
+import { useCommandMenuKeyboard } from '../hooks/use_command_menu_keyboard';
 import './chat_input.scss';
 
 interface ChatInputProps {
@@ -26,18 +28,54 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onSend,
   onKeyDown,
 }) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Use custom hook for command menu keyboard handling
+  const {
+    showCommandMenu,
+    commandSuggestions,
+    selectedCommandIndex,
+    ghostText,
+    handleKeyDown,
+    handleCommandSelect,
+  } = useCommandMenuKeyboard({
+    input,
+    onInputChange,
+    onKeyDown,
+    inputRef,
+  });
+
   return (
     <div className={`chatInput chatInput--${layoutMode}`}>
       <ContextPills category="chat" />
-      <div className="chatInput__inputRow">
-        <EuiFieldText
-          placeholder="Type your message..."
-          value={input}
-          onChange={(e) => onInputChange(e.target.value)}
-          onKeyDown={onKeyDown}
-          disabled={isStreaming}
-          fullWidth
-        />
+      <div className="chatInput__inputRow" style={{ position: 'relative' }}>
+        {showCommandMenu && (
+          <SlashCommandMenu
+            commands={commandSuggestions}
+            selectedIndex={selectedCommandIndex}
+            onSelect={handleCommandSelect}
+          />
+        )}
+        <div className="chatInput__fieldWrapper">
+          <EuiFieldText
+            inputRef={inputRef}
+            placeholder="Ask anything. Type / for actions"
+            value={input}
+            onChange={(e) => onInputChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={isStreaming}
+            autoFocus={true}
+            fullWidth
+          />
+          {ghostText && (
+            <div className="chatInput__ghostText" aria-hidden="true">
+              {input}
+              <EuiTextColor color="subdued" className="chatInput__ghostText--subdued">
+                {ghostText}
+              </EuiTextColor>
+            </div>
+          )}
+        </div>
         <EuiButtonIcon
           iconType={isStreaming ? 'generate' : 'sortUp'}
           onClick={onSend}

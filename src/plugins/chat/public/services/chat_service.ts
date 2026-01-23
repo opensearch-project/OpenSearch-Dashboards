@@ -55,6 +55,9 @@ export class ChatService {
   // Subscription to assistant action service for tool updates
   private toolSubscription?: Subscription;
 
+  // Cache for datasourceId to avoid repeated lookups
+  private cachedDataSourceId?: string;
+
   constructor(
     uiSettings: IUiSettingsClient,
     coreChatService?: ChatServiceStart,
@@ -102,7 +105,7 @@ export class ChatService {
     return `run-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
-  private generateMessageId(): string {
+  public generateMessageId(): string {
     return `msg-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 
@@ -315,6 +318,7 @@ export class ChatService {
 
       const pageDataSourceId = this.extractDataSourceIdFromPageContext(allContexts);
       if (pageDataSourceId) {
+        this.cachedDataSourceId = pageDataSourceId;
         return pageDataSourceId;
       }
 
@@ -343,12 +347,21 @@ export class ChatService {
       // Get default data source with proper scope
       const dataSourceId = await getDefaultDataSourceId(this.uiSettings, scope);
 
+      this.cachedDataSourceId = dataSourceId || undefined;
       return dataSourceId || undefined;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.warn('Failed to determine data source, proceeding without:', error);
       return undefined; // Graceful fallback - undefined means local cluster
     }
+  }
+
+  /**
+   * Get the current cached data source ID
+   * Returns the datasourceId that was last retrieved
+   */
+  public async getCurrentDataSourceId(): Promise<string | undefined> {
+    return this.cachedDataSourceId || (await this.getWorkspaceAwareDataSourceId());
   }
 
   public async sendMessage(

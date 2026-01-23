@@ -235,4 +235,143 @@ describe('MessageRow', () => {
       expect(cursor).not.toBeInTheDocument();
     });
   });
+
+  describe('resend button visibility', () => {
+    const mockOnResend = jest.fn();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should show resend button for regular user messages without rawMessage', () => {
+      const message: Message = {
+        id: 'msg-15',
+        role: 'user',
+        content: 'Hello, how are you?',
+      };
+
+      render(<MessageRow message={message} onResend={mockOnResend} />);
+
+      const resendButton = screen.getByLabelText('Resend message');
+      expect(resendButton).toBeInTheDocument();
+    });
+
+    it('should show resend button even if content starts with "/" (no rawMessage)', () => {
+      const message: Message = {
+        id: 'msg-16',
+        role: 'user',
+        content: '/help',
+      };
+
+      render(<MessageRow message={message} onResend={mockOnResend} />);
+
+      const resendButton = screen.getByLabelText('Resend message');
+      expect(resendButton).toBeInTheDocument();
+    });
+
+    it('should NOT show resend button when rawMessage is a slash command', () => {
+      const message: Message = {
+        id: 'msg-17',
+        role: 'user',
+        content: 'processed content',
+        rawMessage: '/help',
+      };
+
+      render(<MessageRow message={message} onResend={mockOnResend} />);
+
+      const resendButton = screen.queryByLabelText('Resend message');
+      expect(resendButton).not.toBeInTheDocument();
+    });
+
+    it('should NOT show resend button for slash command with arguments in rawMessage', () => {
+      const message: Message = {
+        id: 'msg-18',
+        role: 'user',
+        content: 'processed: search results',
+        rawMessage: '/search query string',
+      };
+
+      render(<MessageRow message={message} onResend={mockOnResend} />);
+
+      const resendButton = screen.queryByLabelText('Resend message');
+      expect(resendButton).not.toBeInTheDocument();
+    });
+
+    it('should NOT show resend button for slash command with leading whitespace in rawMessage', () => {
+      const message: Message = {
+        id: 'msg-19',
+        role: 'user',
+        content: 'processed content',
+        rawMessage: '  /help',
+      };
+
+      render(<MessageRow message={message} onResend={mockOnResend} />);
+
+      const resendButton = screen.queryByLabelText('Resend message');
+      expect(resendButton).not.toBeInTheDocument();
+    });
+
+    it('should show resend button when rawMessage contains "/" but not at the start', () => {
+      const message: Message = {
+        id: 'msg-20',
+        role: 'user',
+        content: 'What is the path/to/file?',
+        rawMessage: 'What is the path/to/file?',
+      };
+
+      render(<MessageRow message={message} onResend={mockOnResend} />);
+
+      const resendButton = screen.getByLabelText('Resend message');
+      expect(resendButton).toBeInTheDocument();
+    });
+
+    it('should NOT show resend button for assistant messages', () => {
+      const message: Message = {
+        id: 'msg-21',
+        role: 'assistant',
+        content: 'Here is my response',
+      };
+
+      render(<MessageRow message={message} onResend={mockOnResend} />);
+
+      const resendButton = screen.queryByLabelText('Resend message');
+      expect(resendButton).not.toBeInTheDocument();
+    });
+
+    it('should NOT show resend button when onResend is not provided', () => {
+      const message: Message = {
+        id: 'msg-22',
+        role: 'user',
+        content: 'Hello',
+      };
+
+      render(<MessageRow message={message} />);
+
+      const resendButton = screen.queryByLabelText('Resend message');
+      expect(resendButton).not.toBeInTheDocument();
+    });
+
+    it('should show resend button for multimodal content (not slash commands)', () => {
+      const message: Message = {
+        id: 'msg-23',
+        role: 'user',
+        content: [
+          {
+            type: 'text',
+            text: 'Check this image',
+          },
+          {
+            type: 'binary',
+            data: 'base64data',
+            mimeType: 'image/png',
+          },
+        ],
+      };
+
+      render(<MessageRow message={message} onResend={mockOnResend} />);
+
+      const resendButton = screen.getByLabelText('Resend message');
+      expect(resendButton).toBeInTheDocument();
+    });
+  });
 });

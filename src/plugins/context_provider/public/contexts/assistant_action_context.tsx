@@ -35,6 +35,7 @@ export interface AssistantActionContextValue {
   getToolDefinitions: () => ToolDefinition[];
   updateToolCallState: (id: string, state: Partial<ToolCallState>) => void;
   getActionRenderer: (name: string) => AssistantAction['render'] | undefined;
+  shouldUseCustomRenderer: (name: string) => boolean;
 }
 
 export const AssistantActionContext = createContext<AssistantActionContextValue | null>(null);
@@ -149,6 +150,14 @@ export function AssistantActionProvider({
     [actions]
   );
 
+  const shouldUseCustomRenderer = useCallback(
+    (name: string) => {
+      const action = actions.get(name);
+      return action?.useCustomRenderer === true;
+    },
+    [actions]
+  );
+
   const getToolDefinitions = useCallback(() => {
     return Array.from(actions.values())
       .filter((action) => action.available !== 'disabled')
@@ -170,6 +179,7 @@ export function AssistantActionProvider({
         getToolDefinitions,
         updateToolCallState,
         getActionRenderer,
+        shouldUseCustomRenderer,
       }}
     >
       {children}

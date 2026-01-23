@@ -13,8 +13,6 @@ import type { Message, AssistantMessage, ToolMessage, ToolCall } from '../../com
 import './chat_messages.scss';
 import { ChatSuggestions } from './chat_suggestions';
 
-type TimelineItem = Message;
-
 /**
  * Determine tool status based on tool call and result
  */
@@ -32,6 +30,8 @@ interface ChatMessagesProps {
   timeline: Message[];
   isStreaming: boolean;
   onResendMessage?: (message: Message) => void;
+  onApproveConfirmation?: () => void;
+  onRejectConfirmation?: () => void;
 }
 
 export const ChatMessages: React.FC<ChatMessagesProps> = ({
@@ -39,8 +39,11 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
   timeline,
   isStreaming,
   onResendMessage,
+  onApproveConfirmation,
+  onRejectConfirmation,
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
   // Context is now handled by RFC hooks and context pills
   // No need for separate context display here
 
@@ -135,11 +138,14 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
                     return (
                       <ToolCallRow
                         key={toolCall.id}
+                        onApprove={onApproveConfirmation}
+                        onReject={onRejectConfirmation}
                         toolCall={{
                           type: 'tool_call',
                           id: toolCall.id,
                           toolName: toolCall.function.name,
                           status: getToolStatus(toolCall, toolResult),
+                          arguments: toolCall.function.arguments,
                           result: toolResult?.content,
                           timestamp: Date.now(), // Not used in display
                         }}

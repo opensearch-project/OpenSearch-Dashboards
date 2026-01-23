@@ -1,0 +1,2 @@
+feat:
+- Add slash command system with autocomplete and user confirmations for chatbot ([#11194](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/11194))
