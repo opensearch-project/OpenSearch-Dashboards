@@ -123,18 +123,22 @@ export const createGaugeSeries = ({
       center: ['50%', '60%'],
       startAngle: 200,
       endAngle: -20,
-      radius: '90%',
+      z: 5,
       min: minBase,
       max: maxBase,
       progress: {
-        show: false,
+        show: true,
+        width: fontSizeFactor + 2,
+        itemStyle: {
+          color: getColors().backgroundShade,
+        },
       },
       pointer: {
         show: false,
       },
       axisLine: {
         lineStyle: {
-          width: 6,
+          width: fontSizeFactor + 4,
           ...(normalizeThresholds.length > 0 && { color: normalizeThresholds }),
         },
       },
@@ -169,7 +173,7 @@ export const createGaugeSeries = ({
       },
       data: [
         {
-          value: calculatedValue,
+          value: maxBase,
           name: styles?.title || seriesDisplayName,
         },
       ],
@@ -180,7 +184,7 @@ export const createGaugeSeries = ({
       center: ['50%', '60%'],
       startAngle: 200,
       endAngle: -20,
-      radius: '110%',
+      z: 10,
       min: minBase,
       max: maxBase,
       itemStyle: {
@@ -221,9 +225,8 @@ export const createGaugeSeries = ({
         },
       ],
     };
-
-    series.push(thresholdArc);
     series.push(valueArc);
+    series.push(thresholdArc);
   });
 
   newState.series = series;
