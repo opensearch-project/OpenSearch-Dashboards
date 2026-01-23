@@ -240,6 +240,7 @@ export const createLineBarChart = (
       transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
       createBaseConfig({
         title: `${valueField.name} (Bar) and ${value2Field.name} (Line) Over Time`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
       applyTimeRange,
@@ -462,6 +463,7 @@ export const createMultiLineChart = (
         title: `${axisConfig.yAxis?.name} Over Time by ${
           axisColumnMappings?.[AxisRole.COLOR]?.name
         }`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
       applyTimeRange,
@@ -479,6 +481,7 @@ export const createMultiLineChart = (
       timeRange,
     });
 
+    console.log(result.spec);
     return result.spec;
   }
 
@@ -651,6 +654,7 @@ export const createFacetedMultiLineChart = (
         title: `${axisConfig.yAxis?.name} Over Time by ${
           axisColumnMappings?.[AxisRole.COLOR]?.name
         } (Faceted by ${axisColumnMappings?.[AxisRole.FACET]?.name})`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
       applyTimeRange,
@@ -994,6 +998,7 @@ export const createCategoryMultiLineChart = (
         title: `${axisConfig.yAxis?.name} by ${axisConfig.xAxis?.name} and ${
           axisColumnMappings?.[AxisRole.COLOR]?.name
         }`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
       createLineSeries({

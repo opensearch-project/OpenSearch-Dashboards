@@ -115,7 +115,7 @@ export const VisualizationRender = ({
   const hasSelectionMapping = Object.keys(visConfig?.axesMapping ?? {}).length !== 0;
   if (hasSelectionMapping) {
     if (!spec.$schema) {
-      return <EchartsRender spec={spec} />;
+      return <EchartsRender spec={spec} onSelectTimeRange={onSelectTimeRange} />;
     }
     return (
       <VegaRender

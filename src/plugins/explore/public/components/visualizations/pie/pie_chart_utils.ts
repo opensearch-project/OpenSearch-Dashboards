@@ -18,14 +18,14 @@ export const createPieSeries = <T extends BaseChartStyle>({
 }): PipelineFn<T> => (state: EChartsSpecState<T>) => {
   const radius = styles?.exclusive.donut ? ['50%', '70%'] : '70%';
 
-  // In dataset + pie mode, params.value is an array like [name, value],
-  // so we use params.value[1] to extract only the numeric value for the label.
-  const formatter =
-    styles?.exclusive?.showValues && styles?.exclusive?.showLabels
-      ? (params: any) => params.value
-      : styles?.exclusive?.showValues
-      ? (params: any) => params.value[1]
-      : '{b}';
+  let formatter = '';
+  if (styles?.exclusive?.showValues && styles?.exclusive?.showLabels) {
+    formatter = `{b}: {@${valueField}}`;
+  } else if (styles?.exclusive?.showLabels) {
+    formatter = '{b}';
+  } else if (styles?.exclusive?.showValues) {
+    formatter = `{@${valueField}}`;
+  }
 
   const series: PieSeriesOption[] = [
     {

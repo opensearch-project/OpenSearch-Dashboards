@@ -458,9 +458,9 @@ export function parseUTCDate(input: string | number): Date {
 export const getChartRender = () => {
   try {
     const chartRender = localStorage.getItem('__DEVELOPMENT__.discover.vis.render');
-    return chartRender || 'echarts';
+    return chartRender || 'vega';
   } catch (e) {
-    return 'echarts';
+    return 'vega';
   }
 };
 

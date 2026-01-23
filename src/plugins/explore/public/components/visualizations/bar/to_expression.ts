@@ -413,6 +413,7 @@ export const createGroupedTimeBarChart = (
       ),
       createBaseConfig({
         title: `${axisColumnMappings?.y?.name} Over Time by ${colorColumn.name}`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
       applyTimeRange,
@@ -779,6 +780,7 @@ export const createStackedBarSpec = (
       ),
       createBaseConfig({
         title: `${axisColumnMappings?.y?.name} by ${axisColumnMappings?.x?.name} and ${colorMapping.name}`,
+        legend: { show: styles.addLegend },
       }),
       buildAxisConfigs,
       buildVisMap({

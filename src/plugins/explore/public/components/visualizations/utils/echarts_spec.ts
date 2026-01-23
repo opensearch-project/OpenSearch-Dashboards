@@ -14,7 +14,6 @@ import {
   PieSeriesOption,
   ScatterSeriesOption,
   HeatmapSeriesOption,
-  LegendComponentOption,
 } from 'echarts';
 import {
   AggregationType,
@@ -167,7 +166,7 @@ export const createBaseConfig = <T extends BaseChartStyle>({
       ...(styles?.legendPosition === Positions.LEFT || styles?.legendPosition === Positions.RIGHT
         ? { orient: 'vertical' as const }
         : {}),
-      [String(styles?.legendPosition ?? Positions.BOTTOM)]: '1%', // distance between legend and the corresponding orientation edge side of the container
+      [String(styles?.legendPosition ?? Positions.BOTTOM)]: 10, // distance between legend and the corresponding orientation edge side of the container
     },
   };
 
@@ -251,36 +250,12 @@ export const assembleSpec = <T extends BaseChartStyle>(
 
   // TODO: grid should also consider visualMap
   if (!hasFacet || facetNumber <= 1) {
-    const computedGrid: Pick<LegendComponentOption, 'top' | 'right' | 'bottom' | 'left'> = {
-      top: '10%',
-      right: '10%',
-      bottom: '10%',
-      left: '10%',
+    grid = {
+      top: baseConfig?.title?.text ? 60 : 30,
+      right: 30,
+      bottom: 30,
+      left: 30,
     };
-    if (!baseConfig?.legend) {
-      grid = computedGrid;
-    } else {
-      // Infer grid configuration based on Legend
-      const legend = Array<LegendComponentOption>().concat(baseConfig.legend);
-      for (const l of legend) {
-        if (l.show === false) {
-          continue;
-        }
-        if (l.top !== undefined) {
-          delete computedGrid.top;
-        }
-        if (l.right !== undefined) {
-          delete computedGrid.right;
-        }
-        if (l.bottom !== undefined) {
-          delete computedGrid.bottom;
-        }
-        if (l.left !== undefined) {
-          delete computedGrid.left;
-        }
-      }
-      grid = computedGrid;
-    }
   } else {
     const cols = Math.ceil(facetNumber / 2); // always in two rows
     const colWidth = 90 / cols;
