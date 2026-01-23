@@ -5,5 +5,5 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["navigation"],
-  "optionalPlugins": ["dataSource", "dataSourceManagement"]
+  "optionalPlugins": []
 }

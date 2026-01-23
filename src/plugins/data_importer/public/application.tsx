@@ -12,12 +12,15 @@ import { PublicConfigSchema } from '../config';
 import { DataImporterPluginSetupDeps } from './types';
 
 export const renderApp = (
-  { notifications, http, savedObjects }: CoreStart,
+  { notifications, http, savedObjects, application }: CoreStart,
   { navigation }: DataImporterPluginStartDependencies,
   { appBasePath, element }: AppMountParameters,
-  { dataSource, dataSourceManagement }: DataImporterPluginSetupDeps,
+  { dataSourceManagement }: DataImporterPluginSetupDeps,
   config: PublicConfigSchema
 ) => {
+  const dataSourceEnabled = application.capabilities.dataSource?.enabled ?? false;
+  const hideLocalCluster = application.capabilities.dataSource?.hideLocalCluster ?? false;
+
   ReactDOM.render(
     <DataImporterPluginApp
       basename={appBasePath}
@@ -26,8 +29,8 @@ export const renderApp = (
       navigation={navigation}
       config={config}
       savedObjects={savedObjects}
-      dataSourceEnabled={!!dataSource}
-      hideLocalCluster={dataSource?.hideLocalCluster || false}
+      dataSourceEnabled={dataSourceEnabled}
+      hideLocalCluster={hideLocalCluster}
       dataSourceManagement={dataSourceManagement}
     />,
     element

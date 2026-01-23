@@ -40,8 +40,6 @@ import { NavigationPublicPluginStart as NavigationStart } from '../../navigation
 import { ContextProviderStart } from '../../context_provider/public';
 import { DatasetManagementSetup } from '../../dataset_management/public';
 import { DataImporterPluginSetup } from '../../data_importer/public';
-import { DataSourcePluginSetup } from '../../data_source/public';
-import { DataSourceManagementPluginSetup } from '../../data_source_management/public';
 import { Storage, IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
 import { ScopedHistory } from '../../../core/public';
 import { SavedExploreLoader, SavedExplore } from './saved_explore';
@@ -108,8 +106,6 @@ export interface ExploreSetupDependencies {
   dashboard: DashboardSetup;
   datasetManagement?: DatasetManagementSetup;
   dataImporter?: DataImporterPluginSetup;
-  dataSource?: DataSourcePluginSetup;
-  dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
 /**
@@ -199,7 +195,4 @@ export interface ExploreServices {
   supportedTypes?: string[];
   isDatasetManagementEnabled: boolean;
   dataImporterConfig?: DataImporterPluginSetup['config'];
-  dataSourceEnabled: boolean;
-  hideLocalCluster: boolean;
-  dataSourceManagement?: DataSourceManagementPluginSetup;
 }

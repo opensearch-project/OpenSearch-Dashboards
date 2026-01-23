@@ -36,6 +36,10 @@ export const ImportDataModal: React.FC<ImportDataModalProps> = ({
 }) => {
   const [DataImporterApp, setDataImporterApp] = useState<React.ComponentType<any> | null>(null);
 
+  // Get capabilities for data source configuration
+  const dataSourceEnabled = services.capabilities.dataSource?.enabled ?? false;
+  const hideLocalCluster = services.capabilities.dataSource?.hideLocalCluster ?? false;
+
   // Lazy load the data importer component when modal is opened
   useEffect(() => {
     if (isVisible && !DataImporterApp) {
@@ -80,9 +84,9 @@ export const ImportDataModal: React.FC<ImportDataModalProps> = ({
             navigation={services.navigation}
             config={services.dataImporterConfig}
             savedObjects={services.savedObjects}
-            dataSourceEnabled={services.dataSourceEnabled}
-            hideLocalCluster={services.hideLocalCluster}
-            dataSourceManagement={services.dataSourceManagement}
+            dataSourceEnabled={dataSourceEnabled}
+            hideLocalCluster={hideLocalCluster}
+            dataSourceManagement={undefined}
             embedded={true}
           />
         )}

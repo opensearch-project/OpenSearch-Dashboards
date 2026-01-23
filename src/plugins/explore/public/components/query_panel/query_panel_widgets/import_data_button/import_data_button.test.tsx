@@ -49,6 +49,12 @@ describe('Import Data Action', () => {
         filePreviewDocumentsCount: 10,
       },
       savedObjects: {},
+      capabilities: {
+        dataSource: {
+          enabled: false,
+          hideLocalCluster: false,
+        },
+      },
     };
     mockDependencies = {
       query: {},
@@ -160,6 +166,12 @@ describe('Import Data Action', () => {
         filePreviewDocumentsCount: 20,
       },
       savedObjects: { client: {} },
+      capabilities: {
+        dataSource: {
+          enabled: false,
+          hideLocalCluster: false,
+        },
+      },
     };
 
     const ImportDataModal = importDataActionConfig.component;

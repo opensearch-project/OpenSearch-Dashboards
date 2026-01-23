@@ -27,10 +27,7 @@ export function buildServices(
   queryPanelActionsRegistry: QueryPanelActionsRegistryService,
   isDatasetManagementEnabled: boolean = false,
   slotRegistry?: SlotRegistryService,
-  dataImporterConfig?: ExploreServices['dataImporterConfig'],
-  dataSourceEnabled: boolean = false,
-  hideLocalCluster: boolean = false,
-  dataSourceManagement?: ExploreServices['dataSourceManagement']
+  dataImporterConfig?: ExploreServices['dataImporterConfig']
 ): ExploreServices {
   const config = context.config.get<ConfigSchema>();
   const supportedTypes = config.supportedTypes;
@@ -107,8 +104,5 @@ export function buildServices(
     supportedTypes,
     isDatasetManagementEnabled,
     dataImporterConfig,
-    dataSourceEnabled,
-    hideLocalCluster,
-    dataSourceManagement,
   };
 }

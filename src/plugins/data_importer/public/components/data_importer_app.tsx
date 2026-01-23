@@ -22,13 +22,29 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 import { extname } from 'path';
-import {
-  DataSourceManagementPluginSetup,
-  DataSourceOption,
-} from '../../../data_source_management/public';
 import { CoreStart } from '../../../../core/public';
 import { NavigationPublicPluginStart } from '../../../navigation/public';
 import { PLUGIN_ID } from '../../common';
+
+// Minimal interface for data source management to avoid importing the entire bundle
+interface DataSourceOption {
+  id?: string;
+  label?: string;
+}
+
+interface DataSourceManagement {
+  ui: {
+    DataSourceSelector: React.ComponentType<{
+      savedObjectsClient: any;
+      notifications: any;
+      onSelectedDataSource: (dataSources: DataSourceOption[]) => void;
+      disabled?: boolean;
+      fullWidth?: boolean;
+      compressed?: boolean;
+      hideLocalCluster?: boolean;
+    }>;
+  };
+}
 import {
   ImportChoices,
   ImportTypeSelector,
@@ -56,7 +72,7 @@ interface DataImporterPluginAppProps {
   config: PublicConfigSchema;
   hideLocalCluster: boolean;
   dataSourceEnabled: boolean;
-  dataSourceManagement?: DataSourceManagementPluginSetup;
+  dataSourceManagement?: DataSourceManagement;
   embedded?: boolean; // When true, skip Router, nav, and page wrappers
 }
 
@@ -332,9 +348,7 @@ export const DataImporterPluginApp = ({
   const renderDataSourceComponent = useMemo(() => {
     if (!dataSourceEnabled || !dataSourceManagement) return null;
 
-    const DataSourceSelector = dataSourceManagement!.ui.DataSourceSelector as React.ComponentType<
-      any
-    >;
+    const DataSourceSelector = dataSourceManagement.ui.DataSourceSelector;
     return (
       <DataSourceSelector
         savedObjectsClient={savedObjects.client}
