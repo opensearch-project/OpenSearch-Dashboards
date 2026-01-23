@@ -57,6 +57,10 @@ export const visualization = (): ExpressionRenderDefinition<VisRenderValue> => (
       unmountComponentAtNode(domNode);
     });
 
+    if (vis.getUiState() !== uiState) {
+      vis.setUiState(uiState);
+    }
+
     const listenOnChange = params ? params.listenOnChange : false;
     render(
       <Visualization
