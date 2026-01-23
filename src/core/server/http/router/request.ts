@@ -76,6 +76,7 @@ export interface OpenSearchDashboardsRequestRoute<Method extends RouteMethod> {
   path: string;
   method: Method;
   options: OpenSearchDashboardsRequestRouteOptions<Method>;
+  routePath: string;
 }
 
 /**
@@ -284,6 +285,7 @@ export class OpenSearchDashboardsRequest<
       path: request.path,
       method,
       options,
+      routePath: request.route.path,
     };
   }
 
