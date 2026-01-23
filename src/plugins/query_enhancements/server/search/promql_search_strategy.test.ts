@@ -248,6 +248,55 @@ describe('promqlSearchStrategy', () => {
       expect(schemaNames).toEqual(['Time', 'Metric', 'cpu', 'host', 'mode', 'Value']);
     });
 
+    it('should escape brackets in series names for Vega compatibility', async () => {
+      const mockPrometheusResponse = {
+        queryId: 'query-1',
+        sessionId: 'session-1',
+        results: {
+          'dataset-1': {
+            resultType: 'matrix',
+            result: [
+              {
+                metric: {
+                  __name__: 'jvm_cpu_count',
+                  resource_process_command_args: '[/usr/lib/jvm/java]',
+                },
+                values: [[1638316800, 42.5]],
+              },
+            ],
+          },
+        },
+      };
+
+      mockPrometheusManagerQuery(mockPrometheusResponse);
+      const strategy = promqlSearchStrategyProvider(config$, logger, usage);
+      const result = await strategy.search(
+        emptyRequestHandlerContext,
+        ({
+          body: {
+            query: {
+              query: 'jvm_cpu_count',
+              dataset: { id: 'dataset-1' },
+              language: 'PROMQL',
+            },
+            timeRange: {
+              from: '2021-12-01T00:00:00.000Z',
+              to: '2021-12-01T01:00:00.000Z',
+            },
+          },
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      );
+
+      // Brackets should be escaped in Series field values
+      const seriesField = result.body.fields.find((f) => f.name === 'Series');
+      expect(seriesField).toBeDefined();
+      expect(seriesField?.values[0]).toContain('\\[');
+      expect(seriesField?.values[0]).toContain('\\]');
+      // Should not contain unescaped brackets
+      expect(seriesField?.values[0]).not.toMatch(/[^\\]\[/);
+    });
+
     it('should handle metrics with missing labels', async () => {
       const mockPrometheusResponse = {
         queryId: 'query-1',

@@ -102,7 +102,7 @@ export class GenericMLRouter implements MLAgentRouter {
       });
     }
 
-    const language = request.body.forwardedProps?.language;
+    const language = request.body.forwardedProps?.queryAssistLanguage;
     const agentId = language ? observabilityAgentId : configuredAgentId;
 
     if (!agentId) {

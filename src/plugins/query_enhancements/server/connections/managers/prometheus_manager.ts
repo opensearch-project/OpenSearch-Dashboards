@@ -106,6 +106,10 @@ interface RulesQuery {
   resourceType: typeof RESOURCE_TYPES.PROMETHEUS.RULES;
   resourceName: undefined;
 }
+interface SeriesQuery {
+  resourceType: typeof RESOURCE_TYPES.PROMETHEUS.SERIES;
+  resourceName: string; // match[] selector, e.g. '{__name__=~"metric1|metric2"}'
+}
 type PrometheusResourceQuery = CommonQuery &
   (
     | LabelsQuery
@@ -115,6 +119,7 @@ type PrometheusResourceQuery = CommonQuery &
     | AlertsQuery
     | AlertsGroupsQuery
     | RulesQuery
+    | SeriesQuery
   );
 
 class PrometheusManager extends BaseConnectionManager<
@@ -175,6 +180,9 @@ class PrometheusManager extends BaseConnectionManager<
       case RESOURCE_TYPES.PROMETHEUS.RULES: {
         return `${BASE_RESOURCE_API}/rules`;
       }
+      case RESOURCE_TYPES.PROMETHEUS.SERIES: {
+        return `${BASE_RESOURCE_API}/series`;
+      }
       default: {
         throw Error(`unknown resource type: ${resourceType}`);
       }
@@ -205,6 +213,8 @@ class PrometheusManager extends BaseConnectionManager<
       queryParams['match[]'] = resourceName;
     } else if (resourceType === RESOURCE_TYPES.PROMETHEUS.METRIC_METADATA && resourceName) {
       queryParams.metric = resourceName;
+    } else if (resourceType === RESOURCE_TYPES.PROMETHEUS.SERIES && resourceName) {
+      queryParams['match[]'] = resourceName;
     }
 
     if (content?.start !== undefined) {

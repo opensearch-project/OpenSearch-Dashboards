@@ -227,4 +227,139 @@ describe('MetricsRawTable', () => {
     expect(screen.getByText('10.5')).toBeInTheDocument();
     expect(screen.getByText('20.3')).toBeInTheDocument();
   });
+
+  describe('sorting', () => {
+    const sortableSearchResult: IPrometheusSearchResult = {
+      ...mockSearchResult,
+      instantHits: {
+        hits: [
+          {
+            _index: 'prometheus',
+            _source: {
+              Metric: 'beta_metric{label="b"}',
+              Time: 1638316800000,
+              Value: 200,
+            },
+          },
+          {
+            _index: 'prometheus',
+            _source: {
+              Metric: 'alpha_metric{label="a"}',
+              Time: 1638316800000,
+              Value: 100,
+            },
+          },
+          {
+            _index: 'prometheus',
+            _source: {
+              Metric: 'gamma_metric{label="c"}',
+              Time: 1638316800000,
+              Value: 300,
+            },
+          },
+        ],
+        total: 3,
+      },
+    };
+
+    it('sorts by Value column when header is clicked', () => {
+      const { container } = render(<MetricsRawTable searchResult={sortableSearchResult} />);
+
+      const valueHeader = container.querySelector(
+        'th[data-test-subj="tableHeaderCell_value_0_1"] button'
+      );
+      fireEvent.click(valueHeader!);
+
+      const getValueTexts = () => {
+        const rows = container.querySelectorAll('tbody tr');
+        return Array.from(rows).map((row) => {
+          const valueCell = row.querySelector('td:nth-child(2) code');
+          return valueCell?.textContent;
+        });
+      };
+
+      const ascendingTexts = getValueTexts();
+      expect(ascendingTexts[0]).toBe('100');
+      expect(ascendingTexts[1]).toBe('200');
+      expect(ascendingTexts[2]).toBe('300');
+
+      fireEvent.click(valueHeader!);
+
+      const descendingTexts = getValueTexts();
+      expect(descendingTexts[0]).toBe('300');
+      expect(descendingTexts[1]).toBe('200');
+      expect(descendingTexts[2]).toBe('100');
+    });
+
+    it('returns to default order on third click (neutral sort)', () => {
+      const { container } = render(<MetricsRawTable searchResult={sortableSearchResult} />);
+
+      const valueHeader = container.querySelector(
+        'th[data-test-subj="tableHeaderCell_value_0_1"] button'
+      );
+
+      const getValueTexts = () => {
+        const rows = container.querySelectorAll('tbody tr');
+        return Array.from(rows).map((row) => {
+          const valueCell = row.querySelector('td:nth-child(2) code');
+          return valueCell?.textContent;
+        });
+      };
+
+      // Original order (as returned from API): 200, 100, 300
+      const originalTexts = getValueTexts();
+      expect(originalTexts[0]).toBe('200');
+      expect(originalTexts[1]).toBe('100');
+      expect(originalTexts[2]).toBe('300');
+
+      // First click: ascending
+      fireEvent.click(valueHeader!);
+      expect(getValueTexts()).toEqual(['100', '200', '300']);
+
+      // Second click: descending
+      fireEvent.click(valueHeader!);
+      expect(getValueTexts()).toEqual(['300', '200', '100']);
+
+      // Third click: back to default/original order
+      fireEvent.click(valueHeader!);
+      const resetTexts = getValueTexts();
+      expect(resetTexts[0]).toBe('200');
+      expect(resetTexts[1]).toBe('100');
+      expect(resetTexts[2]).toBe('300');
+    });
+
+    it('resets pagination to first page when sorting changes', () => {
+      const manyHits = Array.from({ length: 100 }, (_, i) => ({
+        _index: 'prometheus',
+        _source: {
+          Metric: `metric_${String(i).padStart(3, '0')}{index="${i}"}`,
+          Time: 1638316800000 + i * 1000,
+          Value: i,
+        },
+      }));
+
+      const largeResult: IPrometheusSearchResult = {
+        ...mockSearchResult,
+        instantHits: {
+          hits: manyHits,
+          total: 100,
+        },
+      };
+
+      const { container } = render(<MetricsRawTable searchResult={largeResult} />);
+
+      const nextPageButton = container.querySelector('[data-test-subj="pagination-button-1"]');
+      if (nextPageButton) {
+        fireEvent.click(nextPageButton);
+      }
+
+      const valueHeader = container.querySelector(
+        'th[data-test-subj="tableHeaderCell_value_0_1"] button'
+      );
+      fireEvent.click(valueHeader!);
+
+      const activePage = container.querySelector('[data-test-subj="pagination-button-0"]');
+      expect(activePage?.getAttribute('aria-current')).toBe('true');
+    });
+  });
 });

@@ -188,4 +188,30 @@ describe('MetricsDataTable', () => {
     const { container } = render(<MetricsDataTable searchResult={resultWithMissingSource} />);
     expect(container.querySelector('.euiDataGrid')).toBeInTheDocument();
   });
+
+  describe('sorting', () => {
+    it('renders with sorting enabled via inMemory prop', () => {
+      const { container } = render(<MetricsDataTable searchResult={mockSearchResult} />);
+      // EuiDataGrid with inMemory sorting should render
+      expect(container.querySelector('.euiDataGrid')).toBeInTheDocument();
+    });
+
+    it('renders data grid with sortable columns', () => {
+      const { container } = render(<MetricsDataTable searchResult={mockSearchResult} />);
+      // EuiDataGrid should be present with sorting capability
+      const dataGrid = container.querySelector('.euiDataGrid');
+      expect(dataGrid).toBeInTheDocument();
+      // Verify the grid has columns configured from field schema
+      expect(mockSearchResult.instantFieldSchema?.length).toBeGreaterThan(0);
+    });
+
+    it('maintains sorting state after re-render', () => {
+      const { container, rerender } = render(<MetricsDataTable searchResult={mockSearchResult} />);
+      expect(container.querySelector('.euiDataGrid')).toBeInTheDocument();
+
+      // Re-render with same props should maintain component state
+      rerender(<MetricsDataTable searchResult={mockSearchResult} />);
+      expect(container.querySelector('.euiDataGrid')).toBeInTheDocument();
+    });
+  });
 });

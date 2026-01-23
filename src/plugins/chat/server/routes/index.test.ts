@@ -429,5 +429,66 @@ describe('Chat Proxy Routes', () => {
         expect(mockFetch).toHaveBeenCalled();
       });
     });
+
+    describe('System Prompt Injection', () => {
+      const mockSuccessfulAgUiResponse = () => {
+        mockFetch.mockResolvedValue({
+          ok: true,
+          status: 200,
+          body: {
+            getReader: () => ({
+              read: jest.fn().mockResolvedValue({ done: true, value: undefined }),
+            }),
+          },
+        } as any);
+      };
+
+      it('should inject system prompt when queryAssistLanguage is PROMQL', async () => {
+        mockSuccessfulAgUiResponse();
+
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        const requestWithPromQL = {
+          ...validRequest,
+          forwardedProps: { queryAssistLanguage: 'PROMQL' },
+        };
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(requestWithPromQL)
+          .expect(200);
+
+        // Verify fetch was called with injected system prompt
+        expect(mockFetch).toHaveBeenCalledTimes(1);
+        const fetchCall = mockFetch.mock.calls[0];
+        const requestBody = JSON.parse(fetchCall[1]!.body as string);
+
+        // System prompt should be prepended
+        expect(requestBody.messages).toHaveLength(2);
+        expect(requestBody.messages[0].role).toBe('user');
+        expect(requestBody.messages[0].content).toContain('You are a PromQL expert');
+        expect(requestBody.messages[0].id).toMatch(/^system-/);
+        // Original message should follow
+        expect(requestBody.messages[1]).toEqual(validRequest.messages[0]);
+      });
+
+      it('should not inject system prompt when queryAssistLanguage is not provided', async () => {
+        mockSuccessfulAgUiResponse();
+
+        const httpSetup = await testSetup('http://test-agui:3000');
+
+        await supertest(httpSetup.server.listener)
+          .post('/api/chat/proxy')
+          .send(validRequest)
+          .expect(200);
+
+        // Verify fetch was called with original messages (no injection)
+        const fetchCall = mockFetch.mock.calls[0];
+        const requestBody = JSON.parse(fetchCall[1]!.body as string);
+
+        expect(requestBody.messages).toHaveLength(1);
+        expect(requestBody.messages[0]).toEqual(validRequest.messages[0]);
+      });
+    });
   });
 });

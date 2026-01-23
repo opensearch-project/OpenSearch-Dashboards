@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiDataGrid, EuiDataGridCellProps } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridCellProps, EuiDataGridSorting } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -24,6 +24,7 @@ export const MetricsDataTable: React.FC<MetricsDataTableProps> = ({ searchResult
 
   const [visibleColumns, setVisibleColumns] = useState<string[]>([]);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridSorting['columns']>([]);
 
   const rows = searchResult?.instantHits?.hits || emptyHits;
   const columns = useMemo(
@@ -44,6 +45,10 @@ export const MetricsDataTable: React.FC<MetricsDataTableProps> = ({ searchResult
   useEffect(() => {
     setPagination((prev) => ({ ...prev, pageIndex: 0 }));
   }, [searchResult]);
+
+  const onSort = useCallback((newSortingColumns: EuiDataGridSorting['columns']) => {
+    setSortingColumns(newSortingColumns);
+  }, []);
 
   const renderCellValue: EuiDataGridCellProps['renderCellValue'] = useCallback(
     ({ rowIndex, columnId }) => {
@@ -68,6 +73,8 @@ export const MetricsDataTable: React.FC<MetricsDataTableProps> = ({ searchResult
       columnVisibility={{ visibleColumns, setVisibleColumns }}
       rowCount={rows.length}
       renderCellValue={renderCellValue}
+      inMemory={{ level: 'sorting' }}
+      sorting={{ columns: sortingColumns, onSort }}
       pagination={{
         ...pagination,
         pageSizeOptions: [25, 50, 100],

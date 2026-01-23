@@ -754,4 +754,59 @@ describe('DatasetSelect', () => {
       expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
     });
   });
+
+  describe('footer content', () => {
+    it('shows "Manage data sources" button for METRICS signal type', async () => {
+      renderWithContext({
+        ...defaultProps,
+        signalType: CORE_SIGNAL_TYPES.METRICS,
+      });
+
+      await waitFor(() => {
+        expect(mockDataViews.getIds).toHaveBeenCalled();
+      });
+
+      const button = screen.getByTestId('datasetSelectButton');
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+      });
+
+      // Should show "Manage data sources" button for metrics
+      expect(screen.getByTestId('datasetSelectorAssociateDataSourcesButton')).toBeInTheDocument();
+      expect(screen.getByText('Manage data sources')).toBeInTheDocument();
+
+      // Should NOT show default footer buttons
+      expect(screen.queryByTestId('datasetSelectorAdvancedButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('datasetSelectViewDatasetsButton')).not.toBeInTheDocument();
+    });
+
+    it('shows default footer content for non-METRICS', async () => {
+      renderWithContext({
+        ...defaultProps,
+        signalType: null,
+      });
+
+      await waitFor(() => {
+        expect(mockDataViews.getIds).toHaveBeenCalled();
+      });
+
+      const button = screen.getByTestId('datasetSelectButton');
+      fireEvent.click(button);
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+      });
+
+      // Should show default footer buttons when signalType is null
+      expect(screen.getByTestId('datasetSelectorAdvancedButton')).toBeInTheDocument();
+      expect(screen.getByTestId('datasetSelectViewDatasetsButton')).toBeInTheDocument();
+
+      // Should NOT show metrics footer button
+      expect(
+        screen.queryByTestId('datasetSelectorAssociateDataSourcesButton')
+      ).not.toBeInTheDocument();
+    });
+  });
 });
