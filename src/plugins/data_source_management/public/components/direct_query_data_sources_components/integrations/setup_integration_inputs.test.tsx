@@ -21,6 +21,16 @@ import { TEST_INTEGRATION_CONFIG, TEST_INTEGRATION_SETUP_INPUTS } from '../../..
 describe('Integration Setup Inputs', () => {
   configure({ adapter: new Adapter() });
 
+  beforeEach(() => {
+    // Mock Date to have consistent snapshot results for date picker
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-01-22T12:00:00.000Z'));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('Renders the index form as expected', async () => {
     const wrapper = shallow(
       // @ts-expect-error TS2741 TODO(ts-error): fixme
