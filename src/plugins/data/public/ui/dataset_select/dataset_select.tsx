@@ -556,7 +556,8 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
           closePopover();
           window.open(
             `${services.http.basePath.get()}/app/management/opensearch-dashboards/dataSources`,
-            '_blank'
+            '_blank',
+            'noopener,noreferrer'
           );
         }}
       >
