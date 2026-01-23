@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import moment from 'moment';
+
 /**
  * Generates a universal WHERE clause for filtering materialized views by timestamp.
  *
@@ -32,17 +34,10 @@ export function generateTimestampFilter(refreshRangeDays: number): string {
     return '';
   }
 
-  // Calculate the start date based on refresh range
-  const now = new Date();
-  const startDate = new Date(now.getTime() - refreshRangeDays * 24 * 60 * 60 * 1000);
-
   // Format as 'YYYY-MM-DD HH:mm:ss' for SQL TIMESTAMP comparison.
   // Uses UTC which aligns with how source timestamps (Unix, ISO) are typically stored.
   // This ensures consistent filtering since both @timestamp data and this filter use UTC.
-  const isoString = startDate
-    .toISOString()
-    .replace('T', ' ')
-    .replace(/\.\d{3}Z$/, '');
+  const startDate = moment().utc().subtract(refreshRangeDays, 'days').format('YYYY-MM-DD HH:mm:ss');
 
-  return `WHERE \`@timestamp\` >= '${isoString}'`;
+  return `WHERE \`@timestamp\` >= '${startDate}'`;
 }
