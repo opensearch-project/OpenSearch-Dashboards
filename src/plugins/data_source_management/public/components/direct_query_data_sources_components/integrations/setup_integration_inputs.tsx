@@ -259,7 +259,6 @@ export function IntegrationQueryInputs({
   const [isBucketBlurred, setIsBucketBlurred] = useState(false);
   const [isCheckpointBlurred, setIsCheckpointBlurred] = useState(false);
 
-  // Calculate the start date from refreshRangeDays for the date picker
   const getStartDate = () => {
     if (config.refreshRangeDays === 0) {
       return null;
@@ -267,7 +266,6 @@ export function IntegrationQueryInputs({
     return moment().subtract(config.refreshRangeDays, 'days');
   };
 
-  // Handle date picker change - convert selected date to days from now
   const handleDateChange = (date: moment.Moment | null) => {
     if (date) {
       const now = moment();
@@ -276,7 +274,6 @@ export function IntegrationQueryInputs({
     }
   };
 
-  // Handle the "no limit" toggle
   const handleNoLimitToggle = (checked: boolean) => {
     if (checked) {
       updateConfig({ refreshRangeDays: 0 });
