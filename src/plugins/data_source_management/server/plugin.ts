@@ -102,8 +102,6 @@ export class DataSourceManagementPlugin
     core.capabilities.registerProvider(() => ({
       dataSource: {
         canManage: false,
-        enabled: dataSourceEnabled,
-        hideLocalCluster: dataSourceEnabled ? dataSource?.hideLocalCluster ?? false : false,
       },
     }));
 

@@ -3,17 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { DataSourceManagementPluginSetup } from '../../data_source_management/public';
+import { DataSourcePluginSetup } from '../../data_source/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 
-// Minimal interface for data source management to avoid importing the entire bundle
-export interface DataSourceManagement {
-  ui: {
-    DataSourceSelector: React.ComponentType<any>;
-  };
-}
-
 export interface DataImporterPluginSetupDeps {
-  dataSourceManagement?: DataSourceManagement;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
+  dataSource?: DataSourcePluginSetup;
 }
 
 import { PublicConfigSchema } from '../config';
