@@ -772,6 +772,13 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
                       searchable={true}
                       isLoading={isLoading}
                       onChange={handleOptionChange}
+                      emptyMessage={
+                        signalType === CORE_SIGNAL_TYPES.METRICS
+                          ? i18n.translate('data.datasetSelect.noPrometheusDataSources', {
+                              defaultMessage: 'There are no Prometheus data sources available.',
+                            })
+                          : undefined
+                      }
                       renderOption={(option, searchValue) => {
                         // Searchable label is prepended with the label (title/display name) for better searching, this will strip it out.
                         const description =
