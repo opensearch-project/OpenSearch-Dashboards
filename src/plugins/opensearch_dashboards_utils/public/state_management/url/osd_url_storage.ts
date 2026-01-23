@@ -213,7 +213,12 @@ export const createOsdUrlControls = (
   return {
     listen: (cb: () => void) =>
       history.listen(() => {
-        cb();
+        try {
+          cb();
+        } catch {
+          // TODO: Do something when ScopedHistory
+          // instance has fell out of navigation scope
+        }
       }),
     update: (newUrl: string, replace = false) => updateUrl(newUrl, replace),
     updateAsync: (updater: UrlUpdaterFnType, replace = false) => {
