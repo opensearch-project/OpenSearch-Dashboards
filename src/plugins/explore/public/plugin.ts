@@ -30,7 +30,6 @@ import {
   withNotifyOnErrors,
 } from '../../opensearch_dashboards_utils/public';
 import { ExploreFlavor, PLUGIN_ID, PLUGIN_NAME } from '../common';
-import { ConfigSchema } from '../common/config';
 import { generateDocViewsUrl } from './application/legacy/discover/application/components/doc_views/generate_doc_views_url';
 import { DocViewsLinksRegistry } from './application/legacy/discover/application/doc_views_links/doc_views_links_registry';
 import {
@@ -87,8 +86,6 @@ export class ExplorePlugin
       ExploreSetupDependencies,
       ExploreStartDependencies
     > {
-  // @ts-ignore
-  private config: ConfigSchema;
   private stateUpdaterByApp: Partial<
     Record<ExploreFlavor | 'explore', BehaviorSubject<AppUpdater>>
   > = {
@@ -113,9 +110,7 @@ export class ExplorePlugin
   private queryPanelActionsRegistryService = new QueryPanelActionsRegistryService();
   private slotRegistryService = new SlotRegistryService();
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<ConfigSchema>();
-  }
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup<ExploreStartDependencies, ExplorePluginStart>,
