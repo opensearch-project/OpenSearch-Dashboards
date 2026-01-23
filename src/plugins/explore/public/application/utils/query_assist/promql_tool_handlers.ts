@@ -15,13 +15,12 @@ const DEFAULT_LABELS_LIMIT = 20;
 /** Default limit for sample values per label */
 const DEFAULT_VALUES_LIMIT = 5;
 
-/** Maximum concurrent requests for getLabels */
-const MAX_CONCURRENT_LABEL_REQUESTS = 5;
+/** Maximum concurrent requests for series API batches */
+const MAX_CONCURRENT_REQUESTS = 5;
 
-// Currently backend proxy does not support multiple `match[]` values for the
-// series API, we need to call labels API multiple times. This prevents any
-// backend side throttling.
-// TODO use one series API to get label metadata when backend is ready.
+/** Maximum metrics per series API call to avoid URL length limits */
+const MAX_METRICS_PER_SERIES_BATCH = 10;
+
 async function executeWithConcurrencyLimit<T>(
   tasks: Array<() => Promise<T>>,
   limit: number
@@ -33,6 +32,16 @@ async function executeWithConcurrencyLimit<T>(
     results.push(...batchResults);
   }
   return results;
+}
+
+/**
+ * Escapes special regex characters in metric names for use in Prometheus match
+ * selector. This is needed because currently backend only supports one match[]
+ * value, and we are sending multiple names as regex.
+ * TODO use multiple match[] parameters when backend supports it.
+ */
+function escapeRegexForPrometheus(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 interface SearchPrometheusMetadataArgs {
@@ -72,6 +81,11 @@ interface PrometheusResourceClient {
     label: string,
     timeRange?: TimeRange
   ) => Promise<string[]>;
+  getSeries: (
+    dataConnectionId: string,
+    match: string,
+    timeRange?: TimeRange
+  ) => Promise<Array<Record<string, string>>>;
 }
 
 interface MetricMetadata {
@@ -138,19 +152,52 @@ export class PromQLToolHandlers {
         return { labelsCommonToAllMetrics: [], metrics: [], labelValues: {} };
       }
 
-      const [metadata, labelsResults] = await Promise.all([
+      // Batch metrics to avoid URL length limits
+      const metricBatches: string[][] = [];
+      for (let i = 0; i < metricNames.length; i += MAX_METRICS_PER_SERIES_BATCH) {
+        metricBatches.push(metricNames.slice(i, i + MAX_METRICS_PER_SERIES_BATCH));
+      }
+
+      // Build match selectors for each batch: {__name__=~"metric1|metric2|..."}
+      const seriesTasks = metricBatches.map((batch) => () => {
+        const escapedMetrics = batch.map(escapeRegexForPrometheus);
+        const matchSelector = `{__name__=~"${escapedMetrics.join('|')}"}`;
+        return this.prometheusClient
+          .getSeries(this.dataSourceName, matchSelector, timeRange)
+          .catch(() => []);
+      });
+
+      const [metadata, seriesResults] = await Promise.all([
         this.prometheusClient.getMetricMetadata(this.dataSourceName, undefined, timeRange),
-        executeWithConcurrencyLimit(
-          metricNames.map((metric) => () =>
-            this.prometheusClient.getLabels(this.dataSourceName, metric, timeRange).catch(() => [])
-          ),
-          MAX_CONCURRENT_LABEL_REQUESTS
-        ),
+        executeWithConcurrencyLimit(seriesTasks, MAX_CONCURRENT_REQUESTS),
       ]);
 
-      const allLabelSets: string[][] = metricNames.map((_, index) =>
-        (labelsResults[index] || []).slice(0, labelsLimit)
-      );
+      const seriesData = seriesResults.flat();
+
+      const labelsPerMetric: Map<string, Set<string>> = new Map();
+      const valuesPerLabel: Map<string, Set<string>> = new Map();
+      metricNames.forEach((name) => labelsPerMetric.set(name, new Set()));
+
+      for (const series of seriesData) {
+        const metricName = series.__name__;
+        if (metricName && labelsPerMetric.has(metricName)) {
+          const labelSet = labelsPerMetric.get(metricName)!;
+          for (const [labelName, labelValue] of Object.entries(series)) {
+            if (labelName !== '__name__') {
+              labelSet.add(labelName);
+              if (!valuesPerLabel.has(labelName)) {
+                valuesPerLabel.set(labelName, new Set());
+              }
+              valuesPerLabel.get(labelName)!.add(labelValue);
+            }
+          }
+        }
+      }
+
+      const allLabelSets: string[][] = metricNames.map((name) => {
+        const labelSet = labelsPerMetric.get(name) || new Set<string>();
+        return Array.from(labelSet).slice(0, labelsLimit);
+      });
 
       const labelsCommonToAllMetrics =
         allLabelSets.length > 0
@@ -172,19 +219,11 @@ export class PromQLToolHandlers {
         };
       });
 
-      const labelNamesList = Array.from(allLabelNames);
-      const labelValuesResults = await executeWithConcurrencyLimit(
-        labelNamesList.map((label) => () =>
-          this.prometheusClient
-            .getLabelValues(this.dataSourceName, label, timeRange)
-            .catch(() => [])
-        ),
-        MAX_CONCURRENT_LABEL_REQUESTS
-      );
       const labelValues: Record<string, string[]> = {};
-      labelNamesList.forEach((label, index) => {
-        labelValues[label] = labelValuesResults[index].slice(0, valuesLimit);
-      });
+      for (const labelName of allLabelNames) {
+        const values = valuesPerLabel.get(labelName) || new Set<string>();
+        labelValues[labelName] = Array.from(values).slice(0, valuesLimit);
+      }
 
       return { labelsCommonToAllMetrics, metrics, labelValues };
     } catch (error) {
