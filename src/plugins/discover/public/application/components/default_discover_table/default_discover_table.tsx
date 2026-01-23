@@ -259,7 +259,8 @@ const DefaultDiscoverTableUI = ({
               (row: OpenSearchSearchHit) => {
                 return (
                   <TableRow
-                    key={row._id}
+                    // TODO: use the id from the row._id when all languages support retreving it
+                    key={index}
                     row={row}
                     columns={displayedColumnNames}
                     indexPattern={indexPattern}
