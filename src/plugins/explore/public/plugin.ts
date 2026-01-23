@@ -526,7 +526,10 @@ export class ExplorePlugin
     }
 
     // Configure visualization visibility based on workspace
-    this.configureExploreVisualizationVisibility(core, plugins);
+    this.configureExploreVisualizationVisibility(core, plugins).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error('Failed to configure explore visualization visibility', error);
+    });
 
     this.initializeServices = () => {
       if (this.servicesInitialized) {
