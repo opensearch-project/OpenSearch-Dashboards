@@ -336,17 +336,15 @@ export const DataImporterPluginApp = ({
       any
     >;
     return (
-      <div className="devAppDataSourceSelector">
-        <DataSourceSelector
-          savedObjectsClient={savedObjects.client}
-          notifications={notifications.toasts}
-          onSelectedDataSource={onDataSourceSelect}
-          disabled={!dataSourceEnabled}
-          fullWidth={false}
-          compressed={false}
-          hideLocalCluster={hideLocalCluster}
-        />
-      </div>
+      <DataSourceSelector
+        savedObjectsClient={savedObjects.client}
+        notifications={notifications.toasts}
+        onSelectedDataSource={onDataSourceSelect}
+        disabled={!dataSourceEnabled}
+        fullWidth={true}
+        compressed={false}
+        hideLocalCluster={hideLocalCluster}
+      />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataSourceManagement, savedObjects.client, notifications]);
@@ -377,8 +375,8 @@ export const DataImporterPluginApp = ({
 
   // Core importer content
   const importerContent = (
-    <EuiFlexGroup style={embedded ? { height: '100%' } : undefined}>
-      <EuiFlexItem grow={1} style={embedded ? { minWidth: '300px', maxWidth: '400px' } : undefined}>
+    <EuiFlexGroup className={embedded ? 'dataImporterEmbedded__flexGroup' : undefined}>
+      <EuiFlexItem grow={1} className={embedded ? 'dataImporterEmbedded__leftPanel' : undefined}>
         <ImportTypeSelector updateSelection={onImportTypeChange} initialSelection={importType} />
         <EuiSpacer size="s" />
         {dataSourceEnabled && (
@@ -446,7 +444,7 @@ export const DataImporterPluginApp = ({
           })}
         </EuiButton>
       </EuiFlexItem>
-      <EuiFlexItem grow={2} style={embedded ? { minWidth: 0 } : undefined}>
+      <EuiFlexItem grow={2} className={embedded ? 'dataImporterEmbedded__rightPanel' : undefined}>
         {importType === IMPORT_CHOICE_TEXT && (
           <ImportTextContentBody
             onTextChange={onTextInput}
@@ -457,7 +455,7 @@ export const DataImporterPluginApp = ({
           />
         )}
         {importType === IMPORT_CHOICE_FILE && (
-          <div style={embedded ? { height: '100%', minWidth: 0 } : undefined}>
+          <div className={embedded ? 'dataImporterEmbedded__previewContainer' : undefined}>
             {isLoadingPreview ? (
               <EuiLoadingSpinner size="xl" />
             ) : (

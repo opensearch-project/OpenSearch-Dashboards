@@ -3,20 +3,11 @@
 exports[`App should render in embedded mode without Router and page wrappers 1`] = `
 <I18nProvider>
   <EuiFlexGroup
-    style={
-      Object {
-        "height": "100%",
-      }
-    }
+    className="dataImporterEmbedded__flexGroup"
   >
     <EuiFlexItem
+      className="dataImporterEmbedded__leftPanel"
       grow={1}
-      style={
-        Object {
-          "maxWidth": "400px",
-          "minWidth": "300px",
-        }
-      }
     >
       <ImportTypeSelector
         initialSelection="file"
@@ -95,20 +86,11 @@ exports[`App should render in embedded mode without Router and page wrappers 1`]
       </EuiButton>
     </EuiFlexItem>
     <EuiFlexItem
+      className="dataImporterEmbedded__rightPanel"
       grow={2}
-      style={
-        Object {
-          "minWidth": 0,
-        }
-      }
     >
       <div
-        style={
-          Object {
-            "height": "100%",
-            "minWidth": 0,
-          }
-        }
+        className="dataImporterEmbedded__previewContainer"
       >
         <PreviewComponent
           existingMapping={Object {}}
@@ -171,41 +153,37 @@ exports[`App should render with MDS 1`] = `
                   Select target data source
                 </span>
               </EuiTitle>
-              <div
-                className="devAppDataSourceSelector"
-              >
-                <Component
-                  compressed={false}
-                  disabled={false}
-                  fullWidth={false}
-                  notifications={
-                    Object {
-                      "add": [MockFunction],
-                      "addDanger": [MockFunction],
-                      "addError": [MockFunction],
-                      "addInfo": [MockFunction],
-                      "addSuccess": [MockFunction],
-                      "addWarning": [MockFunction],
-                      "get$": [MockFunction],
-                      "remove": [MockFunction],
-                    }
+              <Component
+                compressed={false}
+                disabled={false}
+                fullWidth={true}
+                notifications={
+                  Object {
+                    "add": [MockFunction],
+                    "addDanger": [MockFunction],
+                    "addError": [MockFunction],
+                    "addInfo": [MockFunction],
+                    "addSuccess": [MockFunction],
+                    "addWarning": [MockFunction],
+                    "get$": [MockFunction],
+                    "remove": [MockFunction],
                   }
-                  onSelectedDataSource={[Function]}
-                  savedObjectsClient={
-                    Object {
-                      "bulkCreate": [MockFunction],
-                      "bulkGet": [MockFunction],
-                      "bulkUpdate": [MockFunction],
-                      "create": [MockFunction],
-                      "delete": [MockFunction],
-                      "find": [MockFunction],
-                      "get": [MockFunction],
-                      "setCurrentWorkspace": [MockFunction],
-                      "update": [MockFunction],
-                    }
+                }
+                onSelectedDataSource={[Function]}
+                savedObjectsClient={
+                  Object {
+                    "bulkCreate": [MockFunction],
+                    "bulkGet": [MockFunction],
+                    "bulkUpdate": [MockFunction],
+                    "create": [MockFunction],
+                    "delete": [MockFunction],
+                    "find": [MockFunction],
+                    "get": [MockFunction],
+                    "setCurrentWorkspace": [MockFunction],
+                    "update": [MockFunction],
                   }
-                />
-              </div>
+                }
+              />
               <EuiSpacer
                 size="s"
               />

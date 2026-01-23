@@ -105,6 +105,9 @@ export class ExplorePlugin
   private initializeServices?: () => { core: CoreStart; plugins: ExploreStartDependencies };
   private isDatasetManagementEnabled: boolean = false;
   private dataImporterConfig?: import('./types').ExploreServices['dataImporterConfig'];
+  private dataSourceEnabled: boolean = false;
+  private hideLocalCluster: boolean = false;
+  private dataSourceManagement?: import('./types').ExploreServices['dataSourceManagement'];
 
   // Registries
   private tabRegistry: TabRegistryService = new TabRegistryService();
@@ -125,6 +128,11 @@ export class ExplorePlugin
 
     // Store data importer config if available
     this.dataImporterConfig = setupDeps.dataImporter?.config;
+
+    // Store data source configuration
+    this.dataSourceEnabled = !!setupDeps.dataSource;
+    this.hideLocalCluster = setupDeps.dataSource?.hideLocalCluster || false;
+    this.dataSourceManagement = setupDeps.dataSourceManagement;
 
     // Set usage collector
     setUsageCollector(setupDeps.usageCollection);
@@ -342,7 +350,10 @@ export class ExplorePlugin
             this.queryPanelActionsRegistryService,
             this.isDatasetManagementEnabled,
             this.slotRegistryService,
-            this.dataImporterConfig
+            this.dataImporterConfig,
+            this.dataSourceEnabled,
+            this.hideLocalCluster,
+            this.dataSourceManagement
           );
 
           // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
@@ -511,7 +522,10 @@ export class ExplorePlugin
         this.queryPanelActionsRegistryService,
         this.isDatasetManagementEnabled,
         this.slotRegistryService,
-        this.dataImporterConfig
+        this.dataImporterConfig,
+        this.dataSourceEnabled,
+        this.hideLocalCluster,
+        this.dataSourceManagement
       );
       setLegacyServices({
         ...services,
