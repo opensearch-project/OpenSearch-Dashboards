@@ -18,16 +18,27 @@ import type {
 } from '../../common/events';
 import type { Message, AssistantMessage, ToolMessage } from '../../common/types';
 
+const mockGetCurrentState = jest.fn().mockReturnValue({
+  actions: new Map(), // Empty map means no actions have requiresConfirmation flag
+});
+
 // Mock dependencies
 const mockAssistantActionService = ({
   updateToolCallState: jest.fn(),
   executeAction: jest.fn(),
   hasAction: jest.fn().mockReturnValue(true),
+  getCurrentState: mockGetCurrentState,
+  isUserConfirmRequired: jest.fn().mockReturnValue(false),
 } as unknown) as jest.Mocked<AssistantActionService>;
 
 const mockChatService = ({
   sendToolResult: jest.fn(),
+  getCurrentDataSourceId: jest.fn().mockReturnValue(undefined),
 } as unknown) as jest.Mocked<ChatService>;
+
+const mockConfirmationService = {
+  requestConfirmation: jest.fn().mockResolvedValue({ approved: true }),
+};
 
 describe('ChatEventHandler', () => {
   let chatEventHandler: ChatEventHandler;
@@ -38,6 +49,12 @@ describe('ChatEventHandler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Reset hasAction to return true by default
+    mockAssistantActionService.hasAction = jest.fn().mockReturnValue(true);
+
+    // Reset confirmationService to approve by default
+    mockConfirmationService.requestConfirmation = jest.fn().mockResolvedValue({ approved: true });
 
     timeline = [];
     mockOnTimelineUpdate = jest.fn((updater) => {
@@ -51,7 +68,8 @@ describe('ChatEventHandler', () => {
       mockChatService,
       mockOnTimelineUpdate,
       mockOnStreamingStateChange,
-      mockGetTimeline
+      mockGetTimeline,
+      mockConfirmationService
     );
   });
 
@@ -508,6 +526,114 @@ describe('ChatEventHandler', () => {
 
       // The timeline should have been updated twice: once for TEXT_MESSAGE_START and once for TOOL_CALL_START
       expect(mockOnTimelineUpdate).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('user confirmation handling', () => {
+    beforeEach(() => {
+      mockAssistantActionService.isUserConfirmRequired = jest.fn().mockReturnValue(true);
+    });
+
+    it('should handle user rejection of tool execution', async () => {
+      const toolCallId = 'tool-123';
+      const mockRejectedResult = {
+        success: false,
+        error: 'User rejected the tool execution',
+        userRejected: true,
+        data: {
+          message: 'The user chose not to proceed with this action.',
+          toolName: 'test_action',
+          args: { param: 'value' },
+        },
+      };
+
+      mockConfirmationService.requestConfirmation = jest
+        .fn()
+        .mockResolvedValue({ approved: false });
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_action',
+      } as ToolCallStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{"param": "value"}',
+      } as ToolCallArgsEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      // Should update state to failed
+      expect(mockAssistantActionService.updateToolCallState).toHaveBeenCalledWith(toolCallId, {
+        status: 'failed',
+      });
+
+      // Should send rejection back to assistant
+      expect(mockChatService.sendToolResult).toHaveBeenCalledWith(
+        toolCallId,
+        mockRejectedResult,
+        expect.any(Array)
+      );
+    });
+
+    it('should handle user approval of tool execution', async () => {
+      const toolCallId = 'tool-123';
+      const mockApprovedResult = { success: true, data: 'Action executed successfully' };
+
+      // Mock tool executor to return successful result (no userRejected flag)
+      mockAssistantActionService.executeAction = jest.fn().mockResolvedValue(mockApprovedResult);
+
+      // Mock sendToolResult
+      const mockToolMessage: ToolMessage = {
+        id: `tool-result-${toolCallId}`,
+        role: 'tool',
+        content: JSON.stringify(mockApprovedResult),
+        toolCallId,
+      };
+
+      const mockObservable = {
+        subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+      };
+
+      mockChatService.sendToolResult = jest.fn().mockResolvedValue({
+        observable: mockObservable,
+        toolMessage: mockToolMessage,
+      });
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_START,
+        toolCallId,
+        toolCallName: 'test_action',
+      } as ToolCallStartEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_ARGS,
+        toolCallId,
+        delta: '{"param": "value"}',
+      } as ToolCallArgsEvent);
+
+      await chatEventHandler.handleEvent({
+        type: EventType.TOOL_CALL_END,
+        toolCallId,
+      } as ToolCallEndEvent);
+
+      // Should update state to complete
+      expect(mockAssistantActionService.updateToolCallState).toHaveBeenCalledWith(toolCallId, {
+        status: 'complete',
+        result: mockApprovedResult,
+      });
+
+      // Should send result back to assistant
+      expect(mockChatService.sendToolResult).toHaveBeenCalledWith(
+        toolCallId,
+        mockApprovedResult,
+        expect.any(Array)
+      );
     });
   });
 

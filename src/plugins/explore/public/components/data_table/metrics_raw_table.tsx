@@ -13,7 +13,9 @@ import {
   EuiSwitch,
   EuiSpacer,
   EuiTablePagination,
+  EuiTableSortingType,
   EuiText,
+  Criteria,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -29,6 +31,8 @@ interface RawTableRow {
   id: number;
   metricString: string;
   values: Array<{ label: string; value: string | number | null }>;
+  // Flattened value fields for sorting (e.g., value_0, value_1, etc.)
+  [key: string]: string | number | null | Array<{ label: string; value: string | number | null }>;
 }
 
 const emptyHits: NonNullable<IPrometheusSearchResult['instantHits']>['hits'] = [];
@@ -62,6 +66,7 @@ const formatMetricString = (source: Record<string, unknown>, expanded: boolean):
   const match = metric.match(/^([^{]*)\{(.*)\}$/);
   if (match) {
     const [, metricName, labelsStr] = match;
+    if (!labelsStr) return metric;
     const labels = labelsStr.split(', ');
     const indent = '    ';
     return `${metricName}{\n${indent}${labels.join(',\n' + indent)}\n}`;
@@ -72,6 +77,8 @@ const formatMetricString = (source: Record<string, unknown>, expanded: boolean):
 export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }) => {
   const [expanded, setExpanded] = useState(false);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 50 });
+  const [sortField, setSortField] = useState<keyof RawTableRow | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const rows = searchResult?.instantHits?.hits || emptyHits;
 
@@ -83,15 +90,41 @@ export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }
   }, [rows]);
 
   const tableData: RawTableRow[] = useMemo(() => {
-    return rows.map((hit, index) => {
+    const data = rows.map((hit, index) => {
       const source = hit._source || {};
-      return {
+      const values = extractValueColumns(source);
+      const row: RawTableRow = {
         id: index,
         metricString: formatMetricString(source, expanded),
-        values: extractValueColumns(source),
+        values,
       };
+      // Add flattened value fields for sorting
+      values.forEach((v, i) => {
+        row[`value_${i}`] = v.value;
+      });
+      return row;
     });
-  }, [rows, expanded]);
+
+    // Only sort if a sort field is selected (null means use default/original order)
+    if (sortField !== null) {
+      const field = sortField;
+      data.sort((a, b) => {
+        const aVal = a[field];
+        const bVal = b[field];
+
+        if (aVal === null || aVal === undefined) return sortDirection === 'asc' ? 1 : -1;
+        if (bVal === null || bVal === undefined) return sortDirection === 'asc' ? -1 : 1;
+
+        if (typeof aVal === 'number' && typeof bVal === 'number') {
+          return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+        }
+        const comparison = String(aVal).localeCompare(String(bVal));
+        return sortDirection === 'asc' ? comparison : -comparison;
+      });
+    }
+
+    return data;
+  }, [rows, expanded, sortField, sortDirection]);
 
   const columns: Array<EuiBasicTableColumn<RawTableRow>> = useMemo(() => {
     const baseColumns: Array<EuiBasicTableColumn<RawTableRow>> = [
@@ -100,6 +133,7 @@ export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }
         name: i18n.translate('explore.metricsRawTable.metricColumn', {
           defaultMessage: 'Metric',
         }),
+        sortable: true,
         render: (metricString: string) => (
           <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -139,12 +173,13 @@ export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }
           });
 
       baseColumns.push({
-        field: 'values',
+        field: `value_${index}` as keyof RawTableRow,
         name: columnName,
+        sortable: true,
         align: 'right',
         style: { verticalAlign: 'top' },
-        render: (values: Array<{ label: string; value: string | number | null }>) => {
-          const valueEntry = values[index];
+        render: (_value: unknown, row: RawTableRow) => {
+          const valueEntry = row.values[index];
           const displayValue =
             valueEntry?.value !== null && valueEntry?.value !== undefined ? valueEntry.value : '—';
           return (
@@ -165,6 +200,30 @@ export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }
   }, [tableData, pagination]);
 
   const pageCount = Math.ceil(tableData.length / pagination.pageSize);
+
+  const sorting: EuiTableSortingType<RawTableRow> = {
+    sort:
+      sortField !== null
+        ? {
+            field: sortField as keyof RawTableRow,
+            direction: sortDirection,
+          }
+        : undefined,
+  };
+
+  const onTableChange = ({ sort }: Criteria<RawTableRow>) => {
+    if (sort) {
+      // Manual three-state cycling: asc -> desc -> neutral (null)
+      if (sort.field === sortField && sortDirection === 'desc') {
+        // Third click on same column: clear sort (neutral)
+        setSortField(null);
+      } else {
+        setSortField(sort.field);
+        setSortDirection(sort.direction);
+      }
+    }
+    setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+  };
 
   return (
     <>
@@ -197,7 +256,13 @@ export const MetricsRawTable: React.FC<MetricsRawTableProps> = ({ searchResult }
       <EuiSpacer size="s" />
       <div className="metricsRawTable">
         <div className="metricsRawTable__tableContainer">
-          <EuiBasicTable items={paginatedData} columns={columns} tableLayout="auto" />
+          <EuiBasicTable
+            items={paginatedData}
+            columns={columns}
+            tableLayout="auto"
+            sorting={sorting}
+            onChange={onTableChange}
+          />
         </div>
         {tableData.length > 0 && (
           <div className="metricsRawTable__pagination">

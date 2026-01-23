@@ -19,6 +19,7 @@ import {
 import { ContextProviderStart, TextSelectionMonitor } from '../../../context_provider/public';
 import './chat_header_button.scss';
 import { SuggestedActionsService } from '../services/suggested_action';
+import { ConfirmationService } from '../services/confirmation_service';
 import gradientGenerateIcon from '../assets/gradient_generate_icon.svg';
 
 export interface ChatHeaderButtonInstance {
@@ -36,10 +37,14 @@ interface ChatHeaderButtonProps {
   contextProvider?: ContextProviderStart;
   charts?: any;
   suggestedActionsService: SuggestedActionsService;
+  confirmationService: ConfirmationService;
 }
 
 export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatHeaderButtonProps>(
-  ({ core, chatService, contextProvider, charts, suggestedActionsService }, ref) => {
+  (
+    { core, chatService, contextProvider, charts, suggestedActionsService, confirmationService },
+    ref
+  ) => {
     // Use ChatService as source of truth for window state
     const [isOpen, setIsOpen] = useState<boolean>(chatService.isWindowOpen());
     const [layoutMode, setLayoutMode] = useState<ChatLayoutMode>(chatService.getWindowMode());
@@ -236,6 +241,7 @@ export const ChatHeaderButton = React.forwardRef<ChatHeaderButtonInstance, ChatH
                   <ChatProvider
                     chatService={chatService}
                     suggestedActionsService={suggestedActionsService}
+                    confirmationService={confirmationService}
                   >
                     <ChatWindow
                       layoutMode={layoutMode}
