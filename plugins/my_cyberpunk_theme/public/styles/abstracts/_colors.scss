@@ -1,0 +1,77 @@
+// NEON COLORS - Primary Palette
+
+// Cyan/Blue Neon (Primary)
+$cyberpunkNeonCyan: #00FFFF;
+$cyberpunkNeonCyanBright: #00D9FF;
+$cyberpunkNeonCyanDark: #0099CC;
+$cyberpunkNeonCyanGlow: rgba(0, 255, 255, 0.5);
+
+// Magenta/Pink Neon (Secondary)
+$cyberpunkNeonMagenta: #FF00FF;
+$cyberpunkNeonMagentaBright: #FF1493;
+$cyberpunkNeonMagentaDark: #CC00CC;
+$cyberpunkNeonMagentaGlow: rgba(255, 0, 255, 0.5);
+
+// Yellow Neon (Accent)
+$cyberpunkNeonYellow: #FFFF00;
+$cyberpunkNeonYellowBright: #FFD700;
+$cyberpunkNeonYellowDark: #CCCC00;
+$cyberpunkNeonYellowGlow: rgba(255, 255, 0, 0.4);
+
+// Green Neon (Success/Positive)
+$cyberpunkNeonGreen: #00FF00;
+$cyberpunkNeonGreenBright: #00FF88;
+$cyberpunkNeonGreenGlow: rgba(0, 255, 0, 0.4);
+
+// Red Neon (Danger/Error)
+$cyberpunkNeonRed: #FF0040;
+$cyberpunkNeonRedBright: #FF0066;
+$cyberpunkNeonRedGlow: rgba(255, 0, 64, 0.5);
+
+// Orange Neon (Warning)
+$cyberpunkNeonOrange: #FF6600;
+$cyberpunkNeonOrangeBright: #FF8800;
+$cyberpunkNeonOrangeGlow: rgba(255, 102, 0, 0.4);
+
+// BACKGROUND COLORS
+$cyberpunkBgPrimary: #0A0A0A;
+$cyberpunkBgSecondary: #1A1A1A;
+$cyberpunkBgTertiary: #2A2A2A;
+$cyberpunkBgSurface: #1F1F1F;
+$cyberpunkBgElevated: #2F2F2F;
+$cyberpunkBgOverlay: rgba(10, 10, 10, 0.95);
+
+// TEXT COLORS
+$cyberpunkTextPrimary: #FFFFFF;
+$cyberpunkTextSecondary: #E0E0E0;
+$cyberpunkTextTertiary: #B0B0B0;
+$cyberpunkTextMuted: #808080;
+$cyberpunkTextNeon: $cyberpunkNeonCyan;
+
+// BORDER COLORS
+
+$cyberpunkBorderPrimary: #3A3A3A;
+$cyberpunkBorderSecondary: #4A4A4A;
+$cyberpunkBorderNeon: $cyberpunkNeonCyan;
+$cyberpunkBorderNeonSecondary: $cyberpunkNeonMagenta;
+$cyberpunkBorderDefault: #263042;
+$cyberpunkBorderFocus: $cyberpunkNeonCyan;
+
+// shadows and glows
+$cyberpunkGlowCyan: 0 0 10px rgba(0, 255, 255, 0.5),
+                    0 0 20px rgba(0, 255, 255, 0.3),
+                    0 0 30px rgba(0, 255, 255, 0.2);
+
+$cyberpunkGlowMagenta: 0 0 10px rgba(255, 0, 255, 0.5),
+                       0 0 20px rgba(255, 0, 255, 0.3),
+                       0 0 30px rgba(255, 0, 255, 0.2);
+
+$cyberpunkGlowYellow: 0 0 10px rgba(255, 255, 0, 0.4),
+                      0 0 20px rgba(255, 255, 0, 0.3),
+                      0 0 30px rgba(255, 255, 0, 0.2);
+
+$cyberpunkShadowNeon: 0 0 5px rgba(0, 255, 255, 0.3),
+                      0 0 10px rgba(0, 255, 255, 0.2);
+
+$cyberpunkShadowDark: 0 4px 12px rgba(0, 0, 0, 0.8),
+                      0 2px 4px rgba(0, 0, 0, 0.6);

@@ -1,0 +1,7 @@
+{
+  "prefix": "myCyberpunkTheme",
+  "paths": {
+    "myCyberpunkTheme": "."
+  },
+  "translations": ["translations/ja-JP.json"]
+}

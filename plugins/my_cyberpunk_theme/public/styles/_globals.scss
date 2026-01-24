@@ -1,0 +1,12 @@
+// Cyberpunk 2077 global scope
+
+@import "./abstracts/colors";
+
+body.cyberpunk-theme {
+  background: $cyberpunkBgPrimary;
+}
+
+body.cyberpunk-theme .euiHeader {
+  background: $cyberpunkBgPrimary;
+  border: 1px solid $cyberpunkNeonRed;
+}
