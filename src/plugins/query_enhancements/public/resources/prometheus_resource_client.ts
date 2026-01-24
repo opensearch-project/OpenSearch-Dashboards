@@ -78,4 +78,24 @@ export class PrometheusResourceClient extends BaseResourceClient {
       this.toContent(timeRange)
     );
   }
+
+  /**
+   * Get series data for metrics matching a selector.
+   * Returns an array of label sets, where each item contains all labels for a series.
+   * @param dataConnectionId - The data connection identifier
+   * @param match - The match selector, e.g. '{__name__=~"metric1|metric2"}'
+   * @param timeRange - Optional time range
+   */
+  getSeries(
+    dataConnectionId: string,
+    match: string,
+    timeRange?: TimeRange
+  ): Promise<Array<Record<string, string>>> {
+    return this.get<Array<Record<string, string>>>(
+      dataConnectionId,
+      RESOURCE_TYPES.PROMETHEUS.SERIES,
+      match,
+      this.toContent(timeRange)
+    );
+  }
 }

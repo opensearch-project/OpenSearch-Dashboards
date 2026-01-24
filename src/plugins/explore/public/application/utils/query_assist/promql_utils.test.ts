@@ -4,6 +4,7 @@
  */
 
 import { extractQueryFromText, validateToolArgs } from './promql_utils';
+import { PromQLToolName } from './promql_tools';
 
 describe('promql_utils', () => {
   describe('extractQueryFromText', () => {
@@ -67,19 +68,19 @@ describe('promql_utils', () => {
     describe('string length validation', () => {
       it('should return undefined for valid string length', () => {
         const args = { query: 'short string' };
-        expect(validateToolArgs('search_prometheus_metadata', args)).toBeUndefined();
+        expect(validateToolArgs(PromQLToolName.SEARCH_PROMETHEUS_METADATA, args)).toBeUndefined();
       });
 
       it('should return error for string exceeding max length', () => {
         const args = { query: 'a'.repeat(1001) };
-        const result = validateToolArgs('search_prometheus_metadata', args);
+        const result = validateToolArgs(PromQLToolName.SEARCH_PROMETHEUS_METADATA, args);
         expect(result).toContain('exceeds maximum length');
         expect(result).toContain('query');
       });
 
       it('should validate all string arguments', () => {
         const args = { arg1: 'short', arg2: 'b'.repeat(1001) };
-        const result = validateToolArgs('search_prometheus_metadata', args);
+        const result = validateToolArgs(PromQLToolName.SEARCH_PROMETHEUS_METADATA, args);
         expect(result).toContain('arg2');
       });
     });
@@ -87,42 +88,50 @@ describe('promql_utils', () => {
     describe('search_prometheus_metadata validation', () => {
       it('should accept valid metricsLimit', () => {
         expect(
-          validateToolArgs('search_prometheus_metadata', { metricsLimit: 50 })
+          validateToolArgs(PromQLToolName.SEARCH_PROMETHEUS_METADATA, { metricsLimit: 50 })
         ).toBeUndefined();
       });
 
       it('should accept limit at minimum boundary', () => {
-        expect(validateToolArgs('search_prometheus_metadata', { metricsLimit: 1 })).toBeUndefined();
+        expect(
+          validateToolArgs(PromQLToolName.SEARCH_PROMETHEUS_METADATA, { metricsLimit: 1 })
+        ).toBeUndefined();
       });
 
       it('should accept limit at maximum boundary', () => {
         expect(
-          validateToolArgs('search_prometheus_metadata', { labelsLimit: 1000 })
+          validateToolArgs(PromQLToolName.SEARCH_PROMETHEUS_METADATA, { labelsLimit: 1000 })
         ).toBeUndefined();
       });
 
       it('should reject metricsLimit below minimum', () => {
-        const result = validateToolArgs('search_prometheus_metadata', { metricsLimit: 0 });
+        const result = validateToolArgs(PromQLToolName.SEARCH_PROMETHEUS_METADATA, {
+          metricsLimit: 0,
+        });
         expect(result).toContain('metricsLimit must be a number between 1 and 1000');
       });
 
       it('should reject labelsLimit above maximum', () => {
-        const result = validateToolArgs('search_prometheus_metadata', { labelsLimit: 1001 });
+        const result = validateToolArgs(PromQLToolName.SEARCH_PROMETHEUS_METADATA, {
+          labelsLimit: 1001,
+        });
         expect(result).toContain('labelsLimit must be a number between 1 and 1000');
       });
 
       it('should reject non-numeric valuesLimit', () => {
-        const result = validateToolArgs('search_prometheus_metadata', { valuesLimit: 'invalid' });
+        const result = validateToolArgs(PromQLToolName.SEARCH_PROMETHEUS_METADATA, {
+          valuesLimit: 'invalid',
+        });
         expect(result).toContain('valuesLimit must be a number between 1 and 1000');
       });
 
       it('should accept missing limits (optional)', () => {
-        expect(validateToolArgs('search_prometheus_metadata', {})).toBeUndefined();
+        expect(validateToolArgs(PromQLToolName.SEARCH_PROMETHEUS_METADATA, {})).toBeUndefined();
       });
 
       it('should accept query parameter with valid limits', () => {
         expect(
-          validateToolArgs('search_prometheus_metadata', {
+          validateToolArgs(PromQLToolName.SEARCH_PROMETHEUS_METADATA, {
             query: 'cpu',
             metricsLimit: 20,
             labelsLimit: 10,
@@ -133,18 +142,12 @@ describe('promql_utils', () => {
 
       it('should validate all limit arguments', () => {
         expect(
-          validateToolArgs('search_prometheus_metadata', {
+          validateToolArgs(PromQLToolName.SEARCH_PROMETHEUS_METADATA, {
             metricsLimit: 50,
             labelsLimit: 100,
             valuesLimit: 10,
           })
         ).toBeUndefined();
-      });
-    });
-
-    describe('unknown tool names', () => {
-      it('should pass validation for unknown tool names', () => {
-        expect(validateToolArgs('unknown_tool', { anyArg: 'value' })).toBeUndefined();
       });
     });
   });

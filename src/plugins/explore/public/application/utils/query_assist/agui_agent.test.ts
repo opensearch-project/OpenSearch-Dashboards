@@ -230,7 +230,7 @@ describe('AgUiAgent', () => {
           const callArgs = mockRunHttpRequest.mock.calls[0];
           const requestBody = JSON.parse(callArgs[1].body);
 
-          expect(requestBody.forwardedProps).toEqual({ language: 'promql' });
+          expect(requestBody.forwardedProps).toEqual({ queryAssistLanguage: 'promql' });
           done();
         },
       });

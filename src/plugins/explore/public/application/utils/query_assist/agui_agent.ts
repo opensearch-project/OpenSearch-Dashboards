@@ -13,7 +13,6 @@ import {
   RunErrorEvent,
   Tool,
 } from '@ag-ui/core';
-import { HttpSetup } from 'opensearch-dashboards/public';
 import { Observable } from 'rxjs';
 
 /**
@@ -90,7 +89,7 @@ export class AgUiAgent {
       ],
       state: {},
       forwardedProps: {
-        language: input.language,
+        queryAssistLanguage: input.language,
       },
     };
   }

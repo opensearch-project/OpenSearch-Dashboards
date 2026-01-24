@@ -11,6 +11,8 @@ import { of } from 'rxjs';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ChatProvider } from '../contexts/chat_context';
 import { ChatService } from '../services/chat_service';
+import { SuggestedActionsService } from '../services/suggested_action';
+import { ConfirmationService } from '../services/confirmation_service';
 
 // Create mock observable before using it in mocks
 const mockObservable = of({ toolDefinitions: [], toolCallStates: {} });
@@ -41,7 +43,8 @@ describe('ChatWindow', () => {
   let mockCore: ReturnType<typeof coreMock.createStart>;
   let mockContextProvider: any;
   let mockChatService: jest.Mocked<ChatService>;
-  let mockSuggestedActionsService: any;
+  let mockSuggestedActionsService: jest.Mocked<SuggestedActionsService>;
+  let mockConfirmationService: jest.Mocked<ConfirmationService>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -60,6 +63,14 @@ describe('ChatWindow', () => {
       updateCurrentMessages: jest.fn(),
       getThreadId: jest.fn().mockReturnValue('mock-thread-id'),
     } as any;
+    mockSuggestedActionsService = {} as any;
+    mockConfirmationService = {
+      getPendingConfirmations$: jest.fn().mockReturnValue(of([])),
+      requestConfirmation: jest.fn(),
+      approve: jest.fn(),
+      reject: jest.fn(),
+      cancel: jest.fn(),
+    } as any;
   });
 
   const renderWithContext = (component: React.ReactElement) => {
@@ -70,6 +81,7 @@ describe('ChatWindow', () => {
         <ChatProvider
           chatService={mockChatService}
           suggestedActionsService={mockSuggestedActionsService}
+          confirmationService={mockConfirmationService}
         >
           {component}
         </ChatProvider>
@@ -81,7 +93,7 @@ describe('ChatWindow', () => {
     it('should expose startNewChat method via ref', () => {
       const ref = React.createRef<ChatWindowInstance>();
 
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       expect(ref.current).toBeDefined();
       expect(ref.current?.startNewChat).toBeDefined();
@@ -91,7 +103,7 @@ describe('ChatWindow', () => {
     it('should expose sendMessage method via ref', () => {
       const ref = React.createRef<ChatWindowInstance>();
 
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       expect(ref.current).toBeDefined();
       expect(ref.current?.sendMessage).toBeDefined();
@@ -101,7 +113,7 @@ describe('ChatWindow', () => {
     it('should call chatService.newThread when startNewChat is invoked', async () => {
       const ref = React.createRef<ChatWindowInstance>();
 
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       await act(async () => {
         ref.current?.startNewChat();
@@ -113,7 +125,7 @@ describe('ChatWindow', () => {
     it('should call chatService.sendMessage when sendMessage is invoked via ref', async () => {
       const ref = React.createRef<ChatWindowInstance>();
 
-      renderWithContext(<ChatWindow ref={ref} />);
+      renderWithContext(<ChatWindow ref={ref} onClose={jest.fn()} />);
 
       await act(async () => {
         // Wait for the sendMessage to complete
@@ -254,12 +266,12 @@ describe('ChatWindow', () => {
   describe('persistence integration', () => {
     it('should restore timeline from persisted messages on mount', () => {
       const persistedMessages = [
-        { id: '1', role: 'user', content: 'Hello' },
-        { id: '2', role: 'assistant', content: 'Hi there!' },
+        { id: '1', role: 'user' as const, content: 'Hello' },
+        { id: '2', role: 'assistant' as const, content: 'Hi there!' },
       ];
       mockChatService.getCurrentMessages.mockReturnValue(persistedMessages);
 
-      renderWithContext(<ChatWindow />);
+      renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
       // Should call getCurrentMessages on mount
       expect(mockChatService.getCurrentMessages).toHaveBeenCalled();
@@ -268,14 +280,14 @@ describe('ChatWindow', () => {
     it('should not restore timeline when no persisted messages exist', () => {
       mockChatService.getCurrentMessages.mockReturnValue([]);
 
-      renderWithContext(<ChatWindow />);
+      renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
       // Should call getCurrentMessages but timeline should remain empty
       expect(mockChatService.getCurrentMessages).toHaveBeenCalled();
     });
 
     it('should sync timeline changes with ChatService for persistence', async () => {
-      const { rerender } = renderWithContext(<ChatWindow />);
+      const { rerender } = renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
       // Wait for initial render and useEffect calls
       await new Promise((resolve) => setTimeout(resolve, 0));
@@ -288,8 +300,12 @@ describe('ChatWindow', () => {
         <OpenSearchDashboardsContextProvider
           services={{ core: mockCore, contextProvider: mockContextProvider }}
         >
-          <ChatProvider chatService={mockChatService}>
-            <ChatWindow />
+          <ChatProvider
+            chatService={mockChatService}
+            suggestedActionsService={mockSuggestedActionsService}
+            confirmationService={mockConfirmationService}
+          >
+            <ChatWindow onClose={jest.fn()} />
           </ChatProvider>
         </OpenSearchDashboardsContextProvider>
       );
@@ -299,13 +315,47 @@ describe('ChatWindow', () => {
     });
 
     it('should call updateCurrentMessages on every timeline update', async () => {
-      renderWithContext(<ChatWindow />);
+      renderWithContext(<ChatWindow onClose={jest.fn()} />);
 
       // Wait for initial mount effects
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Should be called at least once during initialization
       expect(mockChatService.updateCurrentMessages).toHaveBeenCalled();
+    });
+  });
+
+  describe('confirmationService context integration', () => {
+    it('should use confirmationService from context (not creating new instance)', () => {
+      renderWithContext(<ChatWindow onClose={jest.fn()} />);
+
+      // Verify that the mock confirmationService from context is being used
+      // by checking that getPendingConfirmations$ was called (which happens in useEffect)
+      expect(mockConfirmationService.getPendingConfirmations$).toHaveBeenCalled();
+    });
+
+    it('should pass context-provided confirmationService to ChatEventHandler', () => {
+      // Import ChatEventHandler to access the mock
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { ChatEventHandler } = require('../services/chat_event_handler');
+
+      renderWithContext(<ChatWindow onClose={jest.fn()} />);
+
+      // Verify ChatEventHandler was instantiated with the mock confirmationService
+      expect(ChatEventHandler).toHaveBeenCalled();
+
+      // Get the last call to ChatEventHandler constructor
+      const lastCall = ChatEventHandler.mock.calls[ChatEventHandler.mock.calls.length - 1];
+
+      // The confirmationService should be the 6th argument (index 5)
+      expect(lastCall[5]).toBe(mockConfirmationService);
+    });
+
+    it('should subscribe to confirmationService pending confirmations on mount', () => {
+      renderWithContext(<ChatWindow onClose={jest.fn()} />);
+
+      // Verify subscription was created
+      expect(mockConfirmationService.getPendingConfirmations$).toHaveBeenCalled();
     });
   });
 
