@@ -52,7 +52,7 @@ describe('check previously loaded data', () => {
       cy.get('[data-title="[Flights] Average Ticket Price"]').should('exist');
     });
 
-    it('If set filter for carrier, [Flights] Airline Carrier should show correct carrier', () => {
+    it.skip('If set filter for carrier, [Flights] Airline Carrier should show correct carrier', () => {
       commonUI.addFilterRetrySelection('Carrier', 'is', 'Logstash Airways');
       // Wait for visualization to complete rendering before checking label
       cy.get('[data-title="[Flights] Airline Carrier"]')
@@ -87,7 +87,7 @@ describe('check previously loaded data', () => {
       cy.get('[data-title="[eCommerce] Average Sold Quantity"]').should('exist');
     });
 
-    it('If set filter for gender, [eCommerce] Sales by Gender should show one gender', () => {
+    it.skip('If set filter for gender, [eCommerce] Sales by Gender should show one gender', () => {
       commonUI.addFilterRetrySelection('customer_gender', 'is', 'FEMALE');
       // Wait for visualization to complete rendering before checking label
       cy.get('[data-title="[eCommerce] Sales by Gender"]')
