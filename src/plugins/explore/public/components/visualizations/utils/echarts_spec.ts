@@ -248,15 +248,7 @@ export const assembleSpec = <T extends BaseChartStyle>(
 
   let grid;
 
-  // TODO: grid should also consider visualMap
-  if (!hasFacet || facetNumber <= 1) {
-    grid = {
-      top: baseConfig?.title?.text ? 60 : 30,
-      right: 30,
-      bottom: 30,
-      left: 30,
-    };
-  } else {
+  if (hasFacet && facetNumber > 1) {
     const cols = Math.ceil(facetNumber / 2); // always in two rows
     const colWidth = 90 / cols;
     const rowHeight = 39; // slightly smaller to make legend fit

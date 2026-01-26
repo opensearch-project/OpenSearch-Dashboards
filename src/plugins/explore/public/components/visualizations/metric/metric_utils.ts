@@ -200,11 +200,11 @@ export const createMetricChartSeries = ({
 export const assembleForMetric = <T extends BaseChartStyle>(state: EChartsSpecState<T>) => {
   // Metric sparkline doesn't have x/y axis
   const xAxis = Array.isArray(state.spec?.xAxis)
-    ? state.spec.xAxis.map((a) => ({ ...a, show: false }))
-    : { ...state.spec?.xAxis, show: false };
+    ? state.spec.xAxis.map((a) => ({ ...a, show: false, silent: true }))
+    : { ...state.spec?.xAxis, show: false, silent: true };
   const yAxis = Array.isArray(state.spec?.yAxis)
-    ? state.spec.yAxis.map((a) => ({ ...a, show: false }))
-    : { ...state.spec?.yAxis, show: false };
+    ? state.spec.yAxis.map((a) => ({ ...a, show: false, silent: true }))
+    : { ...state.spec?.yAxis, show: false, silent: true };
 
   const spec = {
     ...state.spec,

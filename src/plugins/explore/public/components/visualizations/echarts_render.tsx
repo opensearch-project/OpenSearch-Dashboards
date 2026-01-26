@@ -17,6 +17,9 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
   const [instance, setInstance] = useState<echarts.ECharts | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const instanceRef = useRef<echarts.ECharts | null>(null);
+  // grid config computed at runtime
+  const gridConfigRef = useRef<echarts.GridComponentOption | null>(null);
+
   const containerResizeObserver = useMemo(
     () =>
       new ResizeObserver(() => {
@@ -72,29 +75,44 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
+      // if grid is not specified, use a default grid config
+      // and adjust the grid dynamically based on legend and visualMap
+      if (spec.grid) {
+        return;
+      }
       if (instance) {
         // @ts-ignore
         const legend = instance._componentsViews.find(
           (entry: any) => entry.type === 'legend.plain' || entry.type === 'legend.scroll'
         );
-        const grid: echarts.EChartsOption['grid'] = {};
-        const title: echarts.EChartsOption['title'] = {};
+        const grid = {
+          top: 50,
+          right: 30,
+          bottom: 50,
+          left: 40,
+        };
+        const legendConfig: echarts.EChartsOption['legend'] = {};
         if (legend) {
-          const legendWidth = legend._backgroundEl.shape.width;
-          const legendHeight = legend._backgroundEl.shape.height;
+          const legendWidth = legend._backgroundEl?.shape?.width ?? 0;
+          const legendHeight = legend._backgroundEl?.shape?.height ?? 0;
           if (!Array.isArray(spec.legend)) {
             if (spec.legend?.left) {
-              grid.left = legendWidth + 40;
+              grid.left = legendWidth + grid.left;
             } else if (spec.legend?.right) {
               grid.right = legendWidth + 30;
             } else if (spec.legend?.top) {
-              grid.top = legendHeight + 50;
-              title.top = legendHeight + 10;
+              grid.top = legendHeight + grid.top;
+              legendConfig.top = 18;
+              if (spec.title && !Array.isArray(spec.title) && spec.title.text) {
+                grid.top = 20 + grid.top;
+                legendConfig.top = 50;
+              }
             } else if (spec.legend?.bottom) {
-              grid.bottom = legendHeight + 50;
+              grid.bottom = legendHeight + grid.bottom;
             }
           }
         }
+
         if (spec.visualMap) {
           const visualMap = Array<echarts.VisualMapComponentOption>().concat(spec.visualMap);
           for (const v of visualMap) {
@@ -105,21 +123,23 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
             }
           }
         }
-        instance.setOption({ grid, title });
+        instance.setOption({ grid, legend: legendConfig });
+        gridConfigRef.current = grid;
       }
     }, 300);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [instance, spec.legend, spec.visualMap]);
+  }, [instance, spec.legend, spec.visualMap, spec.grid, spec.title]);
 
   useEffect(() => {
     if (instance && spec) {
       const xAxis = Array.isArray(spec.xAxis) ? spec.xAxis[0] : spec.xAxis;
       const yAxis = Array.isArray(spec.yAxis) ? spec.yAxis[0] : spec.yAxis;
       let option = { ...spec };
-      if (xAxis?.type === 'time') {
+      // time range selection brush
+      if (xAxis?.type === 'time' && !xAxis.silent) {
         option = {
           ...option,
           brush: {
@@ -130,7 +150,7 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
             show: false,
           },
         };
-      } else if (yAxis?.type === 'time') {
+      } else if (yAxis?.type === 'time' && !yAxis.silent) {
         option = {
           ...option,
           brush: {
@@ -143,13 +163,17 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
         };
       }
 
+      if (gridConfigRef.current) {
+        option.grid = { ...option.grid, ...gridConfigRef.current };
+      }
+
       instance.setOption(
         option,
         { notMerge: true } // this is a must to update compulsorily otherwise will merge with previous option
       );
       instance.setTheme(DEFAULT_THEME);
 
-      if (xAxis?.type === 'time' || yAxis?.type === 'time') {
+      if ((xAxis?.type === 'time' && !xAxis.silent) || (yAxis?.type === 'time' && !yAxis.silent)) {
         instance.dispatchAction({
           type: 'takeGlobalCursor',
           key: 'brush',
