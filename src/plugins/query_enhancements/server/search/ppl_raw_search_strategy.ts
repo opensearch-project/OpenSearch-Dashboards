@@ -23,7 +23,6 @@ export const pplRawSearchStrategyProvider = (
       try {
         const rawResponse: any = await runSearch('enhancements.pplQuery', {
           body: request.params.body,
-          headers: { 'accept-encoding': 'gzip, deflate' },
         });
         const data = shimSchemaRow(rawResponse);
         rawResponse.jsonData = data.jsonData;
