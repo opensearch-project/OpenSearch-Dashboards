@@ -26,12 +26,14 @@ export const pplAsyncSearchStrategyProvider = (
     client,
     logger,
     endpoint: 'enhancements.runDirectQuery',
+    requestCompression: true,
   });
   const pplAsyncJobsFacet = new Facet({
     client,
     logger,
     endpoint: 'enhancements.getJobStatus',
     useJobs: true,
+    requestCompression: true,
   });
 
   return {

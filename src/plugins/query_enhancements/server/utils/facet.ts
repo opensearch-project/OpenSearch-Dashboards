@@ -14,6 +14,7 @@ export interface FacetProps {
   endpoint: string;
   useJobs?: boolean;
   shimResponse?: boolean;
+  requestCompression?: boolean;
 }
 
 export class Facet {
@@ -22,13 +23,26 @@ export class Facet {
   private endpoint: string;
   private useJobs: boolean;
   private shimResponse: boolean;
+  private requestCompression: boolean;
 
-  constructor({ client, logger, endpoint, useJobs = false, shimResponse = false }: FacetProps) {
+  constructor({
+    client,
+    logger,
+    endpoint,
+    useJobs = false,
+    shimResponse = false,
+    requestCompression = false,
+  }: FacetProps) {
     this.defaultClient = client;
     this.logger = logger;
     this.endpoint = endpoint;
     this.useJobs = useJobs;
     this.shimResponse = shimResponse;
+    this.requestCompression = requestCompression;
+  }
+
+  private getCompressionHeaders(): Record<string, string> {
+    return this.requestCompression ? { 'accept-encoding': 'gzip, deflate' } : {};
   }
 
   protected fetch = async (
@@ -41,6 +55,7 @@ export class Facet {
       const dataSource = query.dataset?.dataSource;
       const meta = dataSource?.meta;
       const { format, lang } = request.body;
+      const compressionHeaders = this.getCompressionHeaders();
       const params = {
         body: {
           query: query.query,
@@ -51,6 +66,7 @@ export class Facet {
           ...(lang && { lang }),
         },
         ...(format !== 'jdbc' && { format }),
+        ...(Object.keys(compressionHeaders).length > 0 && { headers: compressionHeaders }),
       };
       const clientId = dataSource?.id;
       const client = clientId
@@ -77,7 +93,11 @@ export class Facet {
   ): Promise<FacetResponse> => {
     try {
       const query: Query = request.body.query;
-      const params = request.params;
+      const compressionHeaders = this.getCompressionHeaders();
+      const params = {
+        ...request.params,
+        ...(Object.keys(compressionHeaders).length > 0 && { headers: compressionHeaders }),
+      };
       const clientId = query.dataset?.dataSource?.id;
       const client = clientId
         ? context.dataSource.opensearch.legacy.getClient(clientId).callAPI
