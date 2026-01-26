@@ -36,7 +36,7 @@ export const NonFilterableTableCell: React.FC<NonFilterableTableCellProps> = ({
   const { dataset } = useDatasetContext();
   return (
     <td key={colName} data-test-subj="docTableField" className={className}>
-      <div className="truncate-by-height">
+      <div className="exploreDocTableCell__content">
         {/* eslint-disable-next-line react/no-danger */}
         <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
 
