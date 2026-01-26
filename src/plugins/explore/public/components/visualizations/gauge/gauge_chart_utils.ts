@@ -48,7 +48,7 @@ export const createGaugeSeries = ({
   const series: Array<GaugeSeriesOption | CustomSeriesOption> = [];
 
   // TODO use instance width and height
-  const fontSizeFactor = 20;
+  const fontSizeFactor = 12;
 
   seriesFields.forEach((item: string) => {
     if (!transformedData.length || !Array.isArray(transformedData[0])) {
@@ -233,13 +233,13 @@ export const createGaugeSeries = ({
         return {
           type: 'group',
           x: width * 0.5,
-          y: height * 0.5,
+          y: height * 0.6,
           children: [
             {
               type: 'text',
               style: {
                 x: 0,
-                y: 0,
+                y: -2 * textSizeFactor * (selectedUnit?.fontScale ?? 1),
                 text: displayValue,
                 textAlign: 'center',
                 fontSize: valueFontSize,
@@ -251,7 +251,7 @@ export const createGaugeSeries = ({
               type: 'text',
               style: {
                 x: 0,
-                y: 3 * textSizeFactor * (selectedUnit?.fontScale ?? 1),
+                y: textSizeFactor * (selectedUnit?.fontScale ?? 1),
                 text: styles?.title || seriesDisplayName,
                 textAlign: 'center',
                 fontSize: titleFontSize,
