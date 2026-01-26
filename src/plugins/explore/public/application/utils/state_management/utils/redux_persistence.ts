@@ -23,7 +23,9 @@ import {
 } from '../../../../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../../../../data/public';
 import {
+  DEFAULT_COLUMNS_SETTING,
   DEFAULT_TRACE_COLUMNS_SETTING,
+  DEFAULT_LOGS_COLUMNS_SETTING,
   ExploreFlavor,
   EXPLORE_DEFAULT_LANGUAGE,
 } from '../../../../../common';
@@ -438,7 +440,9 @@ export const getPreloadedLegacyState = async (services: ExploreServices): Promis
   const defaultColumns =
     flavorFromAppId === ExploreFlavor.Traces
       ? services.uiSettings?.get(DEFAULT_TRACE_COLUMNS_SETTING)
-      : services.uiSettings?.get('defaultColumns');
+      : flavorFromAppId === ExploreFlavor.Logs
+      ? services.uiSettings?.get(DEFAULT_LOGS_COLUMNS_SETTING)
+      : services.uiSettings?.get(DEFAULT_COLUMNS_SETTING);
 
   return {
     // Fields that exist in data_explorer + discover
@@ -481,7 +485,9 @@ const getColumnsForDataset = async (
     const tracesDefaultColumns = services.uiSettings?.get(DEFAULT_TRACE_COLUMNS_SETTING) || [
       'spanId',
     ];
-    const logsDefaultColumns = services.uiSettings?.get('defaultColumns') || ['_source'];
+    const logsDefaultColumns = services.uiSettings?.get(DEFAULT_LOGS_COLUMNS_SETTING) || [
+      '_source',
+    ];
 
     const hasTracesColumns = currentColumns.some((col) => tracesDefaultColumns.includes(col));
     const hasLogsColumns = currentColumns.some((col) => logsDefaultColumns.includes(col));

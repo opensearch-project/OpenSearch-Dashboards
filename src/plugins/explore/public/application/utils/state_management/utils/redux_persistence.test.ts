@@ -6,7 +6,12 @@
 import { getPreloadedState, loadReduxState, persistReduxState } from './redux_persistence';
 import { ExploreServices } from '../../../../types';
 import { RootState } from '../store';
-import { EXPLORE_DEFAULT_LANGUAGE, DEFAULT_TRACE_COLUMNS_SETTING } from '../../../../../common';
+import {
+  EXPLORE_DEFAULT_LANGUAGE,
+  DEFAULT_COLUMNS_SETTING,
+  DEFAULT_TRACE_COLUMNS_SETTING,
+  DEFAULT_LOGS_COLUMNS_SETTING,
+} from '../../../../../common';
 import { ColorSchemas } from '../../../../components/visualizations/types';
 import { EditorMode, QueryExecutionStatus } from '../types';
 import { CORE_SIGNAL_TYPES } from '../../../../../../data/common';
@@ -73,8 +78,10 @@ describe('redux_persistence', () => {
       },
       uiSettings: {
         get: jest.fn((key) => {
-          if (key === 'defaultColumns') return ['_source'];
+          if (key === DEFAULT_COLUMNS_SETTING) return ['_source'];
           if (key === DEFAULT_TRACE_COLUMNS_SETTING) return ['spanId'];
+          if (key === DEFAULT_LOGS_COLUMNS_SETTING)
+            return ['body', 'severityText', 'resource.attributes.service.name'];
           return undefined;
         }),
       },
@@ -286,7 +293,11 @@ describe('redux_persistence', () => {
       expect(result.query.query).toBe(''); // Should be empty string
       expect(result.results).toEqual({});
       expect(result.tab.logs).toEqual({});
-      expect(result.legacy.columns).toEqual(['_source']);
+      expect(result.legacy.columns).toEqual([
+        'body',
+        'severityText',
+        'resource.attributes.service.name',
+      ]);
       expect(result.queryEditor.promptModeIsAvailable).toBe(false);
       expect(result.queryEditor.queryStatusMap).toEqual({});
       expect(result.queryEditor.overallQueryStatus).toEqual({
@@ -341,7 +352,7 @@ describe('redux_persistence', () => {
     it('should use default columns from uiSettings', async () => {
       const customColumns = ['field1', 'field2'];
       (mockServices.uiSettings!.get as jest.Mock).mockImplementation((key) => {
-        if (key === 'defaultColumns') return customColumns;
+        if (key === DEFAULT_LOGS_COLUMNS_SETTING) return customColumns;
         return undefined;
       });
 
@@ -613,7 +624,11 @@ describe('redux_persistence', () => {
       const result = await loadReduxState(mockServices);
 
       // Should use default columns from UI settings instead of empty array
-      expect(result.legacy.columns).toEqual(['_source']);
+      expect(result.legacy.columns).toEqual([
+        'body',
+        'severityText',
+        'resource.attributes.service.name',
+      ]);
     });
 
     it('should use default columns for traces flavor when URL state has empty columns', async () => {
@@ -1043,7 +1058,11 @@ describe('redux_persistence', () => {
       const result = await loadReduxState(logsServices);
 
       // Should replace traces columns with logs defaults
-      expect(result.legacy.columns).toEqual(['_source']);
+      expect(result.legacy.columns).toEqual([
+        'body',
+        'severityText',
+        'resource.attributes.service.name',
+      ]);
       expect(result.legacy.columns).not.toContain('spanId');
     });
 
@@ -1103,7 +1122,7 @@ describe('redux_persistence', () => {
         ui: { activeTabId: 'logs', showHistogram: true },
         tab: { logs: {} },
         legacy: {
-          columns: ['_source', 'timestamp', 'message'],
+          columns: ['body', 'severityText', 'traceId'],
           sort: [],
           isDirty: false,
           interval: 'auto',
@@ -1123,7 +1142,7 @@ describe('redux_persistence', () => {
       const result = await loadReduxState(logsServices);
 
       // Should keep the valid logs columns
-      expect(result.legacy.columns).toEqual(['_source', 'timestamp', 'message']);
+      expect(result.legacy.columns).toEqual(['body', 'severityText', 'traceId']);
     });
 
     it('should replace columns when dataset type does not match flavor', async () => {
