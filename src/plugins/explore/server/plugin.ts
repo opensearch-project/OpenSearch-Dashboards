@@ -28,6 +28,43 @@ export class ExplorePlugin implements Plugin<ExplorePluginSetup, ExplorePluginSt
     this.logger.debug('explore: Setup');
 
     core.capabilities.registerProvider(capabilitiesProvider);
+
+    // Register default explore capabilities
+    core.capabilities.registerProvider(() => ({
+      explore: {
+        discoverTracesEnabled: false,
+        discoverMetricsEnabled: false,
+      },
+    }));
+
+    // Register dynamic capabilities switcher for feature flags
+    // This will override the defaults with values from DynamicConfigService
+    core.capabilities.registerSwitcher(async (request, capabilities) => {
+      try {
+        const dynamicConfigServiceStart = await core.dynamicConfigService.getStartService();
+        const client = dynamicConfigServiceStart.getClient();
+        const store = dynamicConfigServiceStart.getAsyncLocalStore();
+
+        const config = await client.getConfig(
+          { name: 'explore' },
+          { asyncLocalStorageContext: store! }
+        );
+
+        return {
+          ...capabilities,
+          explore: {
+            ...(capabilities.explore || {}),
+            discoverTracesEnabled: config.discoverTraces?.enabled ?? false,
+            discoverMetricsEnabled: config.discoverMetrics?.enabled ?? false,
+          },
+        };
+      } catch (error) {
+        this.logger.error('Failed to load explore dynamic config, using defaults', error);
+        // Keep defaults from provider (false for both flags)
+        return capabilities;
+      }
+    });
+
     core.capabilities.registerSwitcher(async (request, capabilites) => {
       return await core.security.readonlyService().hideForReadonly(request, capabilites, {
         discover: {
