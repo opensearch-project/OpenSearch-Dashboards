@@ -145,10 +145,7 @@ export const DiscoverField = ({
 
   const fieldName = (
     <EuiToolTip delay="long" content={field.name}>
-      <span
-        data-test-subj={`field-${field.name}`}
-        className="exploreSidebarField__name eui-textBreakWord"
-      >
+      <span data-test-subj={`field-${field.name}`} className="exploreSidebarField__name">
         {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
       </span>
     </EuiToolTip>

@@ -117,16 +117,12 @@ export const TableCellUI = ({
     </>
   );
 
-  return isTimeField ? (
-    <td data-test-subj="docTableField" className="exploreDocTableCell eui-textNoWrap">
-      {content}
-    </td>
-  ) : (
+  return (
     <td
       data-test-subj="docTableField"
-      className="exploreDocTableCell eui-textBreakAll eui-textBreakWord"
+      className={`exploreDocTableCell ${isTimeField ? 'eui-textNoWrap' : 'eui-textTruncate'}`}
     >
-      <div className="truncate-by-height">{content}</div>
+      <div className="exploreDocTableCell__content">{content}</div>
     </td>
   );
 };
