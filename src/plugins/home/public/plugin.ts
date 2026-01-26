@@ -340,17 +340,18 @@ export class HomePublicPlugin
       });
     }
 
-    if (core.chrome.navGroup.getNavGroupEnabled()) {
-      core.chrome.navControls.registerLeftBottom({
-        order: 0,
-        mount: toMountPoint(
-          React.createElement(HomeIcon, {
-            core,
-            appId: PLUGIN_ID,
-          })
-        ),
-      });
-    }
+    // Home icon removed from footer navigation
+    // if (core.chrome.navGroup.getNavGroupEnabled()) {
+    //   core.chrome.navControls.registerLeftBottom({
+    //     order: 0,
+    //     mount: toMountPoint(
+    //       React.createElement(HomeIcon, {
+    //         core,
+    //         appId: PLUGIN_ID,
+    //       })
+    //     ),
+    //   });
+    // }
 
     return {
       featureCatalogue: this.featuresCatalogueRegistry,
