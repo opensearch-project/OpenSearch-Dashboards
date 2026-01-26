@@ -26,7 +26,60 @@
     align-items: center;
     justify-content: center;
     height: 100%;
-    gap: 16px;
+    gap: 24px;
+    padding: 24px;
+  }
+
+  &__emptyStateHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+
+    h3 {
+      margin-bottom: 0;
+      font-weight: 600;
+    }
+
+    p {
+      margin-bottom: 0;
+    }
+  }
+
+  // AI gradient glow effect above empty state icon
+  /* stylelint-disable @osd/stylelint/no_restricted_values */
+  &__gradientGlow {
+    width: 160px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, #06c 0%, #7b68ee 50%, #a855f7 100%);
+    filter: blur(32px);
+    opacity: 0.5;
+    margin-bottom: -30px;
+  }
+  /* stylelint-enable @osd/stylelint/no_restricted_values */
+
+  &__suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    max-width: 320px;
+  }
+
+  &__suggestionCard {
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+    &:hover {
+      background-color: $euiColorLightestShade;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 10%);
+    }
+
+    &:active {
+      transform: scale(0.99);
+    }
   }
 
   &__loadingIndicator {

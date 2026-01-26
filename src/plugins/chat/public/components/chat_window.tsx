@@ -368,6 +368,7 @@ const ChatWindowContent = React.forwardRef<ChatWindowInstance, ChatWindowProps>(
         onResendMessage={handleResendMessage}
         onApproveConfirmation={handleApproveConfirmation}
         onRejectConfirmation={handleRejectConfirmation}
+        onFillInput={setInput}
         {...enhancedProps}
       />
 
