@@ -12,6 +12,17 @@ jest.mock('file-saver', () => ({
   saveAs: jest.fn(),
 }));
 
+// Mock query_actions to avoid defaultResultsProcessor requiring complex dataset structure
+jest.mock('./query_actions', () => ({
+  defaultPrepareQueryString: jest.fn((query) => query.query),
+  defaultResultsProcessor: jest.fn(() => null),
+}));
+
+// Mock the use_displayed_columns module to avoid complex dependency chain
+jest.mock('../../../../helpers/use_displayed_columns', () => ({
+  processDisplayedColumnNames: jest.fn((columns) => columns),
+}));
+
 describe('export_actions', () => {
   let mockServices: jest.Mocked<ExploreServices>;
   let mockDispatch: jest.MockedFunction<AppDispatch>;
@@ -49,12 +60,12 @@ describe('export_actions', () => {
         showHistogram: true,
       },
       query: {
-        query: 'SELECT * FROM test',
-        language: 'SQL',
+        query: 'source = test',
+        language: 'PPL',
         dataset: undefined,
       },
       results: {
-        'SELECT * FROM test': {
+        'source = test': {
           hits: {
             total: 2,
             max_score: 1.0,
@@ -162,7 +173,7 @@ describe('export_actions', () => {
       mockGetState.mockReturnValue({
         ...mockState,
         results: {
-          'SELECT * FROM test': {
+          'source = test': {
             hits: null,
           } as any,
         },
@@ -238,7 +249,7 @@ describe('export_actions', () => {
       mockGetState.mockReturnValue({
         ...mockState,
         results: {
-          'SELECT * FROM test': {
+          'source = test': {
             hits: {
               total: 1,
               max_score: 1.0,
@@ -330,7 +341,7 @@ describe('export_actions', () => {
     it('should use tab prepareQuery when available', async () => {
       const mockPrepareQuery = jest.fn().mockReturnValue({
         query: 'PREPARED QUERY',
-        language: 'SQL',
+        language: 'PPL',
         dataset: undefined,
       });
 
@@ -344,7 +355,7 @@ describe('export_actions', () => {
       expect(mockPrepareQuery).toHaveBeenCalledWith(mockState.query);
       expect(mockSearchSource.setField).toHaveBeenCalledWith('query', {
         query: 'PREPARED QUERY',
-        language: 'SQL',
+        language: 'PPL',
         dataset: undefined,
       });
     });
