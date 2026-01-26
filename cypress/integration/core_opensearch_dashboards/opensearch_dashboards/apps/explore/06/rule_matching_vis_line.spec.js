@@ -54,7 +54,7 @@ export const runCreateVisTests = () => {
       const query = `source=${datasetName} | stats count() by event_time`;
       cy.explore.createVisualizationWithQuery(query, 'line', datasetName);
       let beforeCanvasDataUrl;
-      cy.get('canvas.marks')
+      cy.get('.exploreVisContainer canvas')
         .should('be.visible')
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
@@ -64,7 +64,7 @@ export const runCreateVisTests = () => {
       // turn off show X axis
       cy.getElementByTestId('showAxisSwitch').first().click();
       // compare with new canvas
-      cy.get('canvas.marks').then((canvas) => {
+      cy.get('.exploreVisContainer canvas').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
       });
@@ -73,7 +73,7 @@ export const runCreateVisTests = () => {
       const query = `source=${datasetName} | stats count() by event_time`;
       cy.explore.createVisualizationWithQuery(query, 'line', datasetName);
       let beforeCanvasDataUrl;
-      cy.get('canvas.marks')
+      cy.get('.exploreVisContainer canvas')
         .should('be.visible')
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
@@ -81,7 +81,7 @@ export const runCreateVisTests = () => {
       // turn off show X axis
       cy.getElementByTestId('lineMode-stepped').click();
       // compare with new canvas
-      cy.get('canvas.marks').then((canvas) => {
+      cy.get('.exploreVisContainer canvas').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
       });
@@ -90,7 +90,7 @@ export const runCreateVisTests = () => {
       const query = `source=${datasetName} | stats count() by event_time`;
       cy.explore.createVisualizationWithQuery(query, 'line', datasetName);
       let beforeCanvasDataUrl;
-      cy.get('canvas.marks')
+      cy.get('.exploreVisContainer canvas')
         .should('be.visible')
         .then((canvas) => {
           beforeCanvasDataUrl = canvas[0].toDataURL(); // current representation of image
@@ -102,7 +102,7 @@ export const runCreateVisTests = () => {
       cy.getElementByTestId('thresholdModeSelect').select('Solid lines');
       cy.getElementByTestId('exploreVisAddThreshold').click();
       // compare with new canvas
-      cy.get('canvas.marks').then((canvas) => {
+      cy.get('.exploreVisContainer canvas').then((canvas) => {
         const afterCanvasDataUrl = canvas[0].toDataURL();
         expect(afterCanvasDataUrl).not.to.eq(beforeCanvasDataUrl);
       });
