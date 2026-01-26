@@ -213,12 +213,13 @@ export class VisualizationBuilder {
 
     const currentRule = visualizationRegistry.findRuleByAxesMapping(axesMapping, allColumns);
     if (!isEmpty(axesMapping) && currentRule) {
+      const columns = Object.values(axesMapping);
       const columnMapping = visualizationRegistry.getDefaultAxesMapping(
         currentRule,
         chartType,
-        data?.numericalColumns ?? [],
-        data?.categoricalColumns ?? [],
-        data?.dateColumns ?? []
+        (data?.numericalColumns ?? []).filter((c) => columns.includes(c.name)),
+        (data?.categoricalColumns ?? []).filter((c) => columns.includes(c.name)),
+        (data?.dateColumns ?? []).filter((c) => columns.includes(c.name))
       );
       const updatedAxesMapping: Record<string, string> = {};
       Object.entries(columnMapping).forEach(([role, value]) => {
