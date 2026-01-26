@@ -29,6 +29,7 @@ import {
   buildAxisConfigs,
   assembleSpec,
   buildVisMap,
+  applyTimeRange,
 } from '../utils/echarts_spec';
 import {
   createAreaSeries,
@@ -76,6 +77,7 @@ export const createSimpleAreaChart = (
       transform(sortByTime(axisColumnMappings?.x?.column), convertTo2DArray(allColumns)),
       createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time` }),
       buildAxisConfigs,
+      applyTimeRange,
       createAreaSeries({
         styles,
         categoryField: timeField,
@@ -87,6 +89,7 @@ export const createSimpleAreaChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
@@ -254,6 +257,7 @@ export const createMultiAreaChart = (
         }`,
       }),
       buildAxisConfigs,
+      applyTimeRange,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
       }),
@@ -264,6 +268,7 @@ export const createMultiAreaChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
@@ -451,6 +456,7 @@ export const createFacetedMultiAreaChart = (
         } (Faceted by ${axisColumnMappings?.[AxisRole.FACET]?.name})`,
       }),
       buildAxisConfigs,
+      applyTimeRange,
       createFacetAreaSeries({
         styles,
         categoryField: timeField,
@@ -462,6 +468,7 @@ export const createFacetedMultiAreaChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
