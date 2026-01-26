@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { Subscription } from 'rxjs';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
 import { Query } from '../../..';
 import { QueryStringContract } from '../../../query/query_string';
 
@@ -38,40 +37,61 @@ interface UseQueryStringProps {
   queryString: QueryStringContract;
 }
 
+/**
+ * Hook to subscribe to QueryStringManager state using React 18's useSyncExternalStore.
+ *
+ * This hook properly handles the synchronization between React's render cycle and
+ * external state (the QueryStringManager service). Using useSyncExternalStore ensures:
+ * 1. No missed updates between render and effect execution
+ * 2. Proper handling of concurrent React features (Suspense, transitions)
+ * 3. Consistent state during server-side rendering
+ *
+ * @param props.query - Optional initial query to use instead of service state
+ * @param props.queryString - The QueryStringManager service contract
+ * @returns Object containing the current query and an updateQuery function
+ */
 export const useQueryStringManager = (props: UseQueryStringProps) => {
-  // Filters should be either what's passed in the initial state or the current state of the filter manager
-  const [query, setQuery] = useState(() => props.query || props.queryString.getQuery());
+  // Create stable subscribe function that connects to the RxJS observable
+  const subscribe = useCallback(
+    (onStoreChange: () => void) => {
+      // Subscribe to query updates from the service
+      const subscription = props.queryString.getUpdates$().subscribe({
+        next: onStoreChange,
+      });
 
-  useEffect(() => {
-    const subscriptions = new Subscription();
-    subscriptions.add(
-      props.queryString.getUpdates$().subscribe({
-        next: () => {
-          setQuery((prevQuery) => {
-            const newQuery = props.queryString.getQuery();
-            // Only update if the query has actually changed
-            return JSON.stringify(prevQuery) !== JSON.stringify(newQuery) ? newQuery : prevQuery;
-          });
-        },
-      })
-    );
-    return () => {
-      subscriptions.unsubscribe();
-    };
-  }, [props.queryString]);
-
-  // Use callback to memoize the function
-  const updateQuery = useCallback(
-    (newQueryPartial: Partial<Query>) => {
-      const updatedQuery = { ...query, ...newQueryPartial };
-      props.queryString.setQuery(updatedQuery);
-      setQuery(updatedQuery);
+      // Return unsubscribe function
+      return () => {
+        subscription.unsubscribe();
+      };
     },
-    [query, props.queryString]
+    [props.queryString]
   );
 
-  return {
-    query,
-    updateQuery,
-  };
+  // Create stable getSnapshot function that returns current query state
+  // If props.query is provided, use it; otherwise get from service
+  const getSnapshot = useCallback(() => {
+    return props.query || props.queryString.getQuery();
+  }, [props.query, props.queryString]);
+
+  // useSyncExternalStore ensures React always has the latest state from the service
+  // It handles the timing issues that occur with useEffect + useState pattern
+  const query = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+
+  // Memoize updateQuery to prevent unnecessary re-renders in consumers
+  const updateQuery = useCallback(
+    (newQueryPartial: Partial<Query>) => {
+      const currentQuery = props.queryString.getQuery();
+      const updatedQuery = { ...currentQuery, ...newQueryPartial };
+      props.queryString.setQuery(updatedQuery);
+    },
+    [props.queryString]
+  );
+
+  return useMemo(
+    () => ({
+      query,
+      updateQuery,
+    }),
+    [query, updateQuery]
+  );
 };
