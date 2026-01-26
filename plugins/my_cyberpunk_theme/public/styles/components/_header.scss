@@ -1,0 +1,8 @@
+@import "../abstracts/colors";
+
+body.cyberpunk-theme {
+  .euiHeader {
+    background: $cyberpunkBgPrimary;
+    border: 1px solid $cyberpunkNeonRed;
+  }
+}

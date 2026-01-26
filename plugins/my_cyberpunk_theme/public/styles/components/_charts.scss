@@ -1,0 +1,181 @@
+@import "../abstracts/colors";
+
+body.cyberpunk-theme {
+    svg {
+        background-color: $cyberpunkBgPrimary;
+    }
+
+    text {
+        fill: $cyberpunkTextPrimary;
+    }
+
+    .euiChartAxis__title {
+        fill: $cyberpunkTextNeonSecondary;
+        font-weight: 600;
+    }
+
+    .euiChartAxis__tickLabel {
+        fill: $cyberpunkTextPrimary;
+    }
+
+    .euiChartAxis__axisLine {
+        stroke: $cyberpunkBorderSecondary;
+        stroke-width: 1.5;
+    }
+
+    .euiChartAxis__gridLine {
+        stroke: rgba(0, 255, 255, 0.1);
+        stroke-dasharray: 4, 2;
+    }
+
+    .euiChartLegendItem__label {
+        fill: $cyberpunkTextPrimary;
+        font-weight: 500;
+    }
+
+    .echTooltip {
+        background-color: $cyberpunkBgSecondary;
+        border: 1.5px solid $cyberpunkBorderNeon;
+        border-radius: 4px;
+        box-shadow: $cyberpunkGlowCyan;
+        padding: 8px 12px;
+
+        .echTooltip__title {
+            color: $cyberpunkTextNeonSecondary;
+            font-weight: 600;
+        }
+
+        .echTooltip__item {
+            color: $cyberpunkTextPrimary;
+        }
+    }
+
+    .echAnnotation line {
+        stroke: $cyberpunkNeonYellow;
+        stroke-dasharray: 5, 5;
+        opacity: 0.7;
+    }
+
+    .echAnnotation text {
+        fill: $cyberpunkNeonYellowBright;
+        font-weight: 500;
+    }
+
+    // Line Chart
+    .echChartStatus .echSeriesLine {
+        stroke-width: 2.5;
+        filter: drop-shadow(0 0 3px $cyberpunkNeonCyan);
+    }
+
+    .echChartStatus .echPointGroup circle {
+        filter: drop-shadow(0 0 4px $cyberpunkNeonCyan);
+        stroke-width: 1.5;
+    }
+
+    // Bar Chart
+    .echChartBar rect {
+        filter: drop-shadow(0 0 3px $cyberpunkNeonMagenta);
+        stroke: $cyberpunkNeonMagentaBright;
+    }
+
+    .echChartBar rect:hover {
+        filter: drop-shadow(0 0 8px $cyberpunkNeonMagenta);
+        stroke-width: 2;
+    }
+
+    // Area Chart
+    .echChartArea polyline {
+        stroke: $cyberpunkNeonYellowBright;
+        stroke-width: 2.5;
+        filter: drop-shadow(0 0 4px $cyberpunkNeonYellow);
+    }
+
+    // Pie Chart
+    .echChartPie path {
+        stroke: $cyberpunkBgPrimary;
+        stroke-width: 2;
+        filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.4));
+    }
+
+    .echChartPie path:hover {
+        filter: drop-shadow(0 0 10px $cyberpunkNeonCyan);
+        stroke-width: 3;
+    }
+
+    // Metric Chart
+    .echMetricText text {
+        fill: $cyberpunkNeonMagentaBright;
+        font-weight: 700;
+        filter: drop-shadow(0 0 4px $cyberpunkNeonMagenta);
+    }
+
+    // Gauge Chart 
+    .echMetricWrapper text {
+        fill: $cyberpunkTextPrimary !important;
+    }
+
+    .echGauge text {
+        fill: $cyberpunkTextPrimary !important;
+    }
+
+    // Time Series Chart 
+    .echDataSeriesGroup line {
+        stroke: $cyberpunkNeonCyan;
+        stroke-width: 2;
+    }
+
+    .echDataSeriesGroup path {
+        stroke: $cyberpunkNeonCyan;
+        fill: none;
+        stroke-width: 2;
+    }
+
+    g[data-label*="Trousers"] line,
+    g[data-label*="Trousers"] path {
+        stroke: $cyberpunkNeonGreenBright;
+    }
+
+    g[data-label*="Watches"] line,
+    g[data-label*="Watches"] path {
+        stroke: $cyberpunkNeonCyan;
+    }
+
+    g[data-label*="Bags"] line,
+    g[data-label*="Bags"] path {
+        stroke: $cyberpunkNeonMagenta;
+    }
+
+    g[data-label*="Cocktail"] line,
+    g[data-label*="Cocktail"] path {
+        stroke: $cyberpunkNeonYellow;
+    }
+
+    .embPanel {
+        background-color: $cyberpunkBgPrimary;
+        border: 1.5px solid $cyberpunkBorderSecondary;
+        box-shadow: $cyberpunkShadowNeon;
+    }
+
+    .embPanel:hover {
+        border-color: $cyberpunkBorderNeon;
+        box-shadow: 0 0 12px rgba(0, 255, 255, 0.2);
+    }
+
+    .embPanel__title {
+        color: $cyberpunkTextNeonSecondary;
+        font-weight: 600;
+    }
+
+    input,
+    select {
+        background-color: $cyberpunkBgTertiary;
+        border: 1px solid $cyberpunkBorderNeon;
+        color: $cyberpunkTextPrimary;
+    }
+
+    input:focus,
+    select:focus {
+        border-color: $cyberpunkNeonCyan;
+        box-shadow: $cyberpunkShadowNeon;
+    }
+}

@@ -1,1 +1,12 @@
+@import "./colors";
 
+@mixin hover-red-border-no-underline {
+    text-decoration: none;
+  
+    &:hover {
+      text-decoration: none;
+      border-color: $cyberpunkBorderPrimary;
+      color: $cyberpunkNeonRedButtonHover;
+    }
+  }
+  

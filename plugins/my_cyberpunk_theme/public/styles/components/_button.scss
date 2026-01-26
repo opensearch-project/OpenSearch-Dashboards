@@ -1,0 +1,7 @@
+@import "../abstracts/mixins";
+
+body.cyberpunk-theme {
+    .euiButton {
+        @include hover-red-border-no-underline;
+    }
+}

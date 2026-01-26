@@ -40,17 +40,20 @@ $cyberpunkBgTertiary: #2A2A2A;
 $cyberpunkBgSurface: #1F1F1F;
 $cyberpunkBgElevated: #2F2F2F;
 $cyberpunkBgOverlay: rgba(10, 10, 10, 0.95);
+$cyberpunkBgSimple: #c4c4c4;
 
 // TEXT COLORS
 $cyberpunkTextPrimary: #FFFFFF;
 $cyberpunkTextSecondary: #E0E0E0;
 $cyberpunkTextTertiary: #B0B0B0;
 $cyberpunkTextMuted: #808080;
-$cyberpunkTextNeon: $cyberpunkNeonCyan;
+$cyberpunkTextNeonPrimary: $cyberpunkNeonRed;
+$cyberpunkTextNeonSecondary: $cyberpunkNeonCyan;
+
 
 // BORDER COLORS
 
-$cyberpunkBorderPrimary: #3A3A3A;
+$cyberpunkBorderPrimary: $cyberpunkNeonRed;
 $cyberpunkBorderSecondary: #4A4A4A;
 $cyberpunkBorderNeon: $cyberpunkNeonCyan;
 $cyberpunkBorderNeonSecondary: $cyberpunkNeonMagenta;
@@ -75,3 +78,7 @@ $cyberpunkShadowNeon: 0 0 5px rgba(0, 255, 255, 0.3),
 
 $cyberpunkShadowDark: 0 4px 12px rgba(0, 0, 0, 0.8),
                       0 2px 4px rgba(0, 0, 0, 0.6);
+
+
+// Button hover color
+$cyberpunkNeonRedButtonHover: #FF0040;

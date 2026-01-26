@@ -1,0 +1,22 @@
+@import "../abstracts/colors";
+
+body.cyberpunk-theme {
+
+    .euiFlexItem .euiPanel {
+        border: 1.5px solid $cyberpunkBorderPrimary;
+        background-color: $cyberpunkBgPrimary;
+
+        .euiTitle {
+            color: $cyberpunkTextNeonSecondary
+        }
+
+        .euiText {
+            color: $cyberpunkTextTertiary;
+        }
+    }
+
+    .euiCard__betaBadgeWrapper .euiBetaBadge {
+        border: 1.5px solid $cyberpunkBorderPrimary;
+    }
+
+}

@@ -1,0 +1,25 @@
+@import "../abstracts/colors";
+@import "../abstracts/typography";
+
+
+body.cyberpunk-theme {
+
+    .euiCollapsibleNav,
+    .euiCollapsibleNavGroup {
+        background-color: $cyberpunkBgPrimary;
+
+        h3 {
+            color: $cyberpunkNeonCyan;
+        }
+
+        .euiListGroupItem.euiListGroupItem-isActive {
+
+            background-color: $cyberpunkNeonRedButtonHover;
+
+            a {
+                color: white;
+                font-family: $cyberpunkFontUI;
+            }
+        }
+    }
+}
