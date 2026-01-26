@@ -14,6 +14,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm 1`] = `
             "connectionType": "index",
             "displayName": "test_integration Integration",
             "enabledWorkflows": Array [],
+            "refreshRangeDays": 7,
           }
         }
         http={
@@ -53,6 +54,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm 1`] = `
           "connectionType": "index",
           "displayName": "test_integration Integration",
           "enabledWorkflows": Array [],
+          "refreshRangeDays": 7,
         }
       }
       http={
@@ -93,6 +95,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm 2`] = `
             "connectionType": "index",
             "displayName": "test_integration Integration",
             "enabledWorkflows": Array [],
+            "refreshRangeDays": 7,
           }
         }
         http={
@@ -132,6 +135,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm 2`] = `
           "connectionType": "index",
           "displayName": "test_integration Integration",
           "enabledWorkflows": Array [],
+          "refreshRangeDays": 7,
         }
       }
       http={
@@ -245,6 +249,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                   "connectionType": "index",
                   "displayName": "test_integration Integration",
                   "enabledWorkflows": Array [],
+                  "refreshRangeDays": 7,
                 }
               }
               http={
@@ -368,6 +373,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                         "connectionType": "index",
                         "displayName": "test_integration Integration",
                         "enabledWorkflows": Array [],
+                        "refreshRangeDays": 7,
                       }
                     }
                     integration={
@@ -497,6 +503,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                         "connectionType": "index",
                         "displayName": "test_integration Integration",
                         "enabledWorkflows": Array [],
+                        "refreshRangeDays": 7,
                       }
                     }
                     http={
@@ -1152,6 +1159,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                   "connectionType": "index",
                   "displayName": "test_integration Integration",
                   "enabledWorkflows": Array [],
+                  "refreshRangeDays": 7,
                 }
               }
               http={
