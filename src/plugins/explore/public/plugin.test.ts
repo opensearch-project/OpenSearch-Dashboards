@@ -5,8 +5,6 @@
 
 import { ExplorePlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
-import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
-import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
 import { CoreSetup, CoreStart } from 'opensearch-dashboards/public';
 import { ExplorePluginStart, ExploreSetupDependencies, ExploreStartDependencies } from './types';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
@@ -25,9 +23,6 @@ import { DashboardSetup, DashboardStart } from '../../dashboard/public';
 import { ChartsPluginStart } from '../../charts/public';
 import { Start as InspectorPublicPluginStart } from '../../inspector/public';
 import { ContextProviderStart } from '../../context_provider/public';
-
-// Mock the action
-jest.mock('./actions/ask_ai_embeddable_action');
 
 // Mock log action registry
 jest.mock('./services/log_action_registry', () => ({
@@ -312,32 +307,6 @@ describe('ExplorePlugin', () => {
   describe('start', () => {
     beforeEach(() => {
       plugin.setup(coreSetup, setupDeps);
-    });
-
-    it('should register Ask AI embeddable action when chat and contextProvider are available', () => {
-      plugin.start(coreStart, startDeps);
-
-      expect(AskAIEmbeddableAction).toHaveBeenCalledWith(coreStart, startDeps.contextProvider);
-      expect(startDeps.uiActions.registerAction).toHaveBeenCalled();
-      expect(startDeps.uiActions.addTriggerAction).toHaveBeenCalledWith(
-        CONTEXT_MENU_TRIGGER,
-        expect.any(Object)
-      );
-    });
-
-    it('should not register Ask AI embeddable action when contextProvider is not available', () => {
-      const startDepsWithoutContextProvider = {
-        ...startDeps,
-        contextProvider: undefined,
-      };
-
-      plugin.start(coreStart, startDepsWithoutContextProvider);
-
-      expect(AskAIEmbeddableAction).not.toHaveBeenCalled();
-      expect(startDeps.uiActions.addTriggerAction).not.toHaveBeenCalledWith(
-        CONTEXT_MENU_TRIGGER,
-        expect.any(Object)
-      );
     });
 
     it('should create saved explore loader', () => {
