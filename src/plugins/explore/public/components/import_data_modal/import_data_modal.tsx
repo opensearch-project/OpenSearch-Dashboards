@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { ExploreServices } from '../../types';
+import type { DataImporterPluginAppProps } from '../../../../data_importer/public';
 
 interface ImportDataModalProps {
   services: ExploreServices;
@@ -34,7 +35,9 @@ export const ImportDataModal: React.FC<ImportDataModalProps> = ({
   isVisible,
   onClose,
 }) => {
-  const [DataImporterApp, setDataImporterApp] = useState<React.ComponentType<any> | null>(null);
+  const [DataImporterApp, setDataImporterApp] = useState<React.ComponentType<
+    DataImporterPluginAppProps
+  > | null>(null);
 
   // Lazy load the data importer component when modal is opened
   useEffect(() => {
@@ -60,18 +63,12 @@ export const ImportDataModal: React.FC<ImportDataModalProps> = ({
   }
 
   return (
-    <EuiModal
-      onClose={onClose}
-      maxWidth="1200px"
-      style={{ width: 'min(1200px, 90vw)', maxHeight: '80vh' }}
-    >
+    <EuiModal onClose={onClose} maxWidth="1200px" className="importDataModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>{label}</EuiModalHeaderTitle>
       </EuiModalHeader>
 
-      <EuiModalBody
-        style={{ maxHeight: 'calc(80vh - 100px)', minHeight: '400px', padding: '16px' }}
-      >
+      <EuiModalBody className="importDataModal__body">
         {DataImporterApp && (
           <DataImporterApp
             basename=""

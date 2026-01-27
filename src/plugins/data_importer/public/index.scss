@@ -13,15 +13,19 @@
 .dataImporterEmbedded {
   &__flexGroup {
     height: 100%;
+    align-items: flex-start;
   }
 
   &__leftPanel {
     min-width: 300px;
     max-width: 400px;
+    flex-shrink: 0;
   }
 
   &__rightPanel {
     min-width: 0;
+    flex: 1;
+    overflow: auto;
   }
 
   &__previewContainer {

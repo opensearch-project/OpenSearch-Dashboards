@@ -47,7 +47,7 @@ import { previewFile } from '../lib/preview_file';
 import { PreviewComponent } from './preview_table';
 import { catIndices } from '../lib/cat_indices';
 
-interface DataImporterPluginAppProps {
+export interface DataImporterPluginAppProps {
   basename: string;
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];

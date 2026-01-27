@@ -14,4 +14,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export { DataImporterPluginSetup, DataImporterPluginStart } from './types';
 export { DataImporterPluginApp } from './components/data_importer_app';
+export type { DataImporterPluginAppProps } from './components/data_importer_app';
 export type { PublicConfigSchema } from '../config';
