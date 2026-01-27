@@ -29,6 +29,8 @@ import {
   EuiBasicTable,
   EuiFieldSearch,
   EuiSpacer,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -42,6 +44,33 @@ import { DatasetDetails } from './dataset_details';
 import { AdvancedSelector } from '../dataset_selector/advanced_selector';
 import './_index.scss';
 
+interface TimeBasedDatasetDisclaimerProps {
+  onClick: () => void;
+}
+
+const TimeBasedDatasetDisclaimer: React.FC<TimeBasedDatasetDisclaimerProps> = ({ onClick }) => (
+  <EuiCallOut
+    color="primary"
+    size="s"
+    className="datasetSelect__timeBasedDisclaimer"
+    data-test-subj="TimeBasedDatasetCallout"
+  >
+    <EuiText size="xs">
+      <EuiIcon type="iInCircle" size="s" />{' '}
+      <FormattedMessage
+        id="data.datasetSelect.timeBasedDatasetDisclaimer.message"
+        defaultMessage="Only time-based Datasets are supported."
+      />{' '}
+      <EuiLink onClick={onClick} data-test-subj="TimeBasedDatasetCalloutDatasetNavigationButton">
+        <FormattedMessage
+          id="data.datasetSelect.timeBasedDatasetDisclaimer.createLink"
+          defaultMessage="Create a time-based Dataset here."
+        />
+      </EuiLink>
+    </EuiText>
+  </EuiCallOut>
+);
+
 export interface DetailedDataset extends Dataset {
   description?: string;
   displayName?: string;
@@ -52,6 +81,7 @@ export interface DatasetSelectProps {
   onSelect: (dataset: Dataset | undefined) => void;
   supportedTypes?: string[];
   signalType: string | null;
+  showNonTimeFieldDatasets?: boolean;
 }
 
 interface ViewDatasetsModalProps {
@@ -202,6 +232,12 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
+        <TimeBasedDatasetDisclaimer
+          onClick={() => {
+            onClose();
+            services.application?.navigateToApp('datasets');
+          }}
+        />
         <EuiFieldSearch
           placeholder={i18n.translate('data.datasetSelect.viewModal.searchPlaceholder', {
             defaultMessage: 'Search...',
@@ -233,7 +269,12 @@ const ViewDatasetsModal: React.FC<ViewDatasetsModalProps> = ({
 /**
  * @experimental This component is experimental and may change in future versions
  */
-const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes, signalType }) => {
+const DatasetSelect: React.FC<DatasetSelectProps> = ({
+  onSelect,
+  supportedTypes,
+  signalType,
+  showNonTimeFieldDatasets = true,
+}) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const isMounted = useRef(true);
   const hasCompletedInitialLoad = useRef(false);
@@ -390,6 +431,11 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
           return false;
         }
 
+        // Filter by time field requirement
+        if (!showNonTimeFieldDatasets && !detailedDataset.timeFieldName) {
+          return false;
+        }
+
         // Filter by supportedAppNames
         const typeConfig = datasetService.getType(detailedDataset.type);
         const appNameMatch =
@@ -448,7 +494,16 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
         hasCompletedInitialLoad.current = true;
       }
     }
-  }, [dataViews, signalType, onSelect, queryString, datasetService, services, supportedTypes]);
+  }, [
+    dataViews,
+    signalType,
+    onSelect,
+    queryString,
+    datasetService,
+    services,
+    supportedTypes,
+    showNonTimeFieldDatasets,
+  ]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -588,6 +643,7 @@ const DatasetSelect: React.FC<DatasetSelectProps> = ({ onSelect, supportedTypes,
                   alwaysShowDatasetFields
                   signalType={signalType || undefined}
                   services={services}
+                  showNonTimeFieldDatasets={showNonTimeFieldDatasets}
                   onSelect={async (query: Partial<Query>, saveDataset) => {
                     overlay?.close();
                     if (query?.dataset) {

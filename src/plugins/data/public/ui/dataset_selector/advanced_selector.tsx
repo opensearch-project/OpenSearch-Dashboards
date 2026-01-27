@@ -45,6 +45,7 @@ export const AdvancedSelector = ({
   useConfiguratorV2,
   alwaysShowDatasetFields,
   signalType,
+  showNonTimeFieldDatasets,
 }: {
   services: IDataPluginServices;
   onSelect: (query: Partial<Query>, saveDataset?: boolean) => void;
@@ -53,6 +54,7 @@ export const AdvancedSelector = ({
   useConfiguratorV2?: boolean;
   alwaysShowDatasetFields?: boolean;
   signalType?: string;
+  showNonTimeFieldDatasets?: boolean;
 }) => {
   const queryString = getQueryService().queryString;
 
@@ -100,6 +102,7 @@ export const AdvancedSelector = ({
       onPrevious={() => setSelectedDataset(undefined)}
       alwaysShowDatasetFields={alwaysShowDatasetFields}
       signalType={signalType}
+      showNonTimeFieldDatasets={showNonTimeFieldDatasets}
     />
   ) : (
     <DatasetExplorer
