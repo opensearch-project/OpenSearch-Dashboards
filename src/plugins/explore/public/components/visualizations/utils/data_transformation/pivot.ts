@@ -172,7 +172,7 @@ export const pivot = (options: {
     } else {
       // Categorical grouping
       groupKey = String(row[groupBy]);
-      groupValue = groupKey;
+      groupValue = row[groupBy];
     }
 
     const pivotKey = normalizeEmptyValue(row[pivotField]);
