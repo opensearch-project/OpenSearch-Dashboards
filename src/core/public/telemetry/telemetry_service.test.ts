@@ -222,6 +222,110 @@ describe('TelemetryCoreService', () => {
           source: 'pluginB',
         });
       });
+
+      it('should return the same cached recorder for the same plugin ID', () => {
+        const startContract = service.start();
+
+        const recorder1 = startContract.getPluginRecorder('myPlugin');
+        const recorder2 = startContract.getPluginRecorder('myPlugin');
+
+        expect(recorder1).toBe(recorder2);
+      });
+
+      it('should return different cached recorders for different plugin IDs', () => {
+        const startContract = service.start();
+
+        const recorderA = startContract.getPluginRecorder('pluginA');
+        const recorderB = startContract.getPluginRecorder('pluginB');
+
+        expect(recorderA).not.toBe(recorderB);
+      });
+
+      describe('error handling', () => {
+        it('should catch and log errors from provider.recordEvent', () => {
+          const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+          const setupContract = service.setup();
+          const startContract = service.start();
+
+          const throwingProvider: TelemetryProvider = {
+            isEnabled: jest.fn().mockReturnValue(true),
+            recordEvent: jest.fn().mockImplementation(() => {
+              throw new Error('Provider error');
+            }),
+            recordMetric: jest.fn(),
+            recordError: jest.fn(),
+          };
+          setupContract.registerProvider(throwingProvider);
+
+          const recorder = startContract.getPluginRecorder('myPlugin');
+
+          expect(() => {
+            recorder.recordEvent({ name: 'test', data: {} });
+          }).not.toThrow();
+
+          expect(consoleSpy).toHaveBeenCalledWith(
+            '[Telemetry] Error recording event:',
+            expect.any(Error)
+          );
+          consoleSpy.mockRestore();
+        });
+
+        it('should catch and log errors from provider.recordMetric', () => {
+          const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+          const setupContract = service.setup();
+          const startContract = service.start();
+
+          const throwingProvider: TelemetryProvider = {
+            isEnabled: jest.fn().mockReturnValue(true),
+            recordEvent: jest.fn(),
+            recordMetric: jest.fn().mockImplementation(() => {
+              throw new Error('Provider error');
+            }),
+            recordError: jest.fn(),
+          };
+          setupContract.registerProvider(throwingProvider);
+
+          const recorder = startContract.getPluginRecorder('myPlugin');
+
+          expect(() => {
+            recorder.recordMetric({ name: 'test', value: 1 });
+          }).not.toThrow();
+
+          expect(consoleSpy).toHaveBeenCalledWith(
+            '[Telemetry] Error recording metric:',
+            expect.any(Error)
+          );
+          consoleSpy.mockRestore();
+        });
+
+        it('should catch and log errors from provider.recordError', () => {
+          const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+          const setupContract = service.setup();
+          const startContract = service.start();
+
+          const throwingProvider: TelemetryProvider = {
+            isEnabled: jest.fn().mockReturnValue(true),
+            recordEvent: jest.fn(),
+            recordMetric: jest.fn(),
+            recordError: jest.fn().mockImplementation(() => {
+              throw new Error('Provider error');
+            }),
+          };
+          setupContract.registerProvider(throwingProvider);
+
+          const recorder = startContract.getPluginRecorder('myPlugin');
+
+          expect(() => {
+            recorder.recordError({ type: 'Error', message: 'test' });
+          }).not.toThrow();
+
+          expect(consoleSpy).toHaveBeenCalledWith(
+            '[Telemetry] Error recording error:',
+            expect.any(Error)
+          );
+          consoleSpy.mockRestore();
+        });
+      });
     });
   });
 
@@ -239,6 +343,20 @@ describe('TelemetryCoreService', () => {
 
     it('should not throw if called without provider', async () => {
       await expect(service.stop()).resolves.toBeUndefined();
+    });
+
+    it('should clear the recorder cache', async () => {
+      const startContract = service.start();
+
+      const recorderBefore = startContract.getPluginRecorder('myPlugin');
+      await service.stop();
+
+      // After stop, start a new lifecycle
+      const startContract2 = service.start();
+      const recorderAfter = startContract2.getPluginRecorder('myPlugin');
+
+      // Should be different instances after cache was cleared
+      expect(recorderBefore).not.toBe(recorderAfter);
     });
   });
 });

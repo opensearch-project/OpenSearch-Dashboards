@@ -32,13 +32,28 @@ function createPluginTelemetryRecorder(
 ): PluginTelemetryRecorder {
   return {
     recordEvent: (event: Omit<TelemetryEvent, 'source'>): void => {
-      provider?.recordEvent({ ...event, source: pluginId });
+      try {
+        provider?.recordEvent({ ...event, source: pluginId });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('[Telemetry] Error recording event:', e);
+      }
     },
     recordMetric: (metric: Omit<TelemetryMetric, 'source'>): void => {
-      provider?.recordMetric({ ...metric, source: pluginId });
+      try {
+        provider?.recordMetric({ ...metric, source: pluginId });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('[Telemetry] Error recording metric:', e);
+      }
     },
     recordError: (error: Omit<TelemetryError, 'source'>): void => {
-      provider?.recordError({ ...error, source: pluginId });
+      try {
+        provider?.recordError({ ...error, source: pluginId });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn('[Telemetry] Error recording error:', e);
+      }
     },
   };
 }
@@ -54,6 +69,7 @@ function createPluginTelemetryRecorder(
 export class TelemetryCoreService
   implements CoreService<TelemetryServiceSetup, TelemetryServiceStart> {
   private provider?: TelemetryProvider;
+  private recorderCache = new Map<string, PluginTelemetryRecorder>();
 
   public setup(): TelemetryServiceSetup {
     return {
@@ -77,12 +93,18 @@ export class TelemetryCoreService
       },
 
       getPluginRecorder: (pluginId: string): PluginTelemetryRecorder => {
-        return createPluginTelemetryRecorder(pluginId, this.provider);
+        let recorder = this.recorderCache.get(pluginId);
+        if (!recorder) {
+          recorder = createPluginTelemetryRecorder(pluginId, this.provider);
+          this.recorderCache.set(pluginId, recorder);
+        }
+        return recorder;
       },
     };
   }
 
   public async stop() {
     this.provider = undefined;
+    this.recorderCache.clear();
   }
 }
