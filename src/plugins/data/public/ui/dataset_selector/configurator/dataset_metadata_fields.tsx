@@ -26,31 +26,37 @@ export const DatasetMetadataFields: React.FC<DatasetMetadataFieldsProps> = ({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate(
+        label={`${i18n.translate(
           'data.explorer.datasetSelector.advancedSelector.configurator.datasetNameLabel',
           {
             defaultMessage: 'Dataset name',
           }
-        )}
+        )} – optional`}
+        display="columnCompressed"
+        fullWidth
       >
         <EuiFieldText
           value={displayName}
           onChange={(e) => onDisplayNameChange(e.target.value)}
           data-test-subj="datasetNameInput"
+          compressed
         />
       </EuiFormRow>
       <EuiFormRow
-        label={i18n.translate(
+        label={`${i18n.translate(
           'data.explorer.datasetSelector.advancedSelector.configurator.datasetDescriptionLabel',
           {
             defaultMessage: 'Dataset description',
           }
-        )}
+        )} – optional`}
+        display="columnCompressed"
+        fullWidth
       >
         <EuiTextArea
           value={description}
           onChange={(e) => onDescriptionChange(e.target.value)}
           data-test-subj="datasetDescriptionInput"
+          compressed
         />
       </EuiFormRow>
       {showAsyncWarning && (

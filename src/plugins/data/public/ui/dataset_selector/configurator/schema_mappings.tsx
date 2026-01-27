@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiAccordion, EuiFormRow, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiFormRow, EuiSelect, EuiSpacer, EuiText, EuiPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useState } from 'react';
@@ -34,7 +34,6 @@ export const SchemaMappings: React.FC<SchemaMappingsProps> = ({
   // Auto-open accordion if there are existing schema mappings
   const hasExistingMappings = Object.keys(schemaMappings).length > 0;
   const [isOpen, setIsOpen] = useState(hasExistingMappings);
-
   const handleFieldChange = (schemaKey: string, attributeKey: string, fieldName: string) => {
     const newMappings = { ...schemaMappings };
 
@@ -67,7 +66,7 @@ export const SchemaMappings: React.FC<SchemaMappingsProps> = ({
             <strong>
               <FormattedMessage
                 id="data.explorer.datasetSelector.advancedSelector.configurator.schemaMappingsTitle"
-                defaultMessage="Schema Mappings"
+                defaultMessage="Schema Mappings – optional"
               />
             </strong>
           </EuiText>
@@ -76,73 +75,84 @@ export const SchemaMappings: React.FC<SchemaMappingsProps> = ({
         onToggle={() => setIsOpen(!isOpen)}
         data-test-subj="schemaMappingsAccordion"
       >
-        <EuiSpacer size="xs" />
-        <EuiText size="xs" color="subdued">
-          <p>
-            <FormattedMessage
-              id="data.explorer.datasetSelector.advancedSelector.configurator.schemaMappingsDescription"
-              defaultMessage="Map predefined schema attributes to actual fields in your dataset."
-            />
-          </p>
-        </EuiText>
-        <EuiSpacer size="m" />
+        <EuiPanel paddingSize="s" hasShadow={false} hasBorder={false}>
+          <EuiText size="xs" color="subdued">
+            <p>
+              <FormattedMessage
+                id="data.explorer.datasetSelector.advancedSelector.configurator.schemaMappingsDescription"
+                defaultMessage="Map predefined schema attributes to actual fields in your dataset."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="s" />
 
-        {schemas.map(([schemaKey, schemaConfig]) => {
-          return (
-            <div key={schemaKey}>
-              <EuiText size="s">
-                <strong>{schemaConfig.displayName}</strong>
-              </EuiText>
-              {schemaConfig.description && (
-                <>
-                  <EuiSpacer size="xs" />
-                  <EuiText size="xs" color="subdued">
-                    <p>{schemaConfig.description}</p>
+          {schemas.map(([schemaKey, schemaConfig], index) => {
+            return (
+              <div key={schemaKey}>
+                {index > 0 && <EuiSpacer size="s" />}
+                <EuiPanel paddingSize="s" hasShadow={false} color="subdued">
+                  <EuiText size="s">
+                    <strong>{schemaConfig.displayName}</strong>
                   </EuiText>
-                </>
-              )}
-              <EuiSpacer size="s" />
+                  {schemaConfig.description && (
+                    <>
+                      <EuiSpacer size="xs" />
+                      <EuiText size="xs" color="subdued">
+                        <p>{schemaConfig.description}</p>
+                      </EuiText>
+                    </>
+                  )}
+                  <EuiSpacer size="s" />
 
-              {Object.entries(schemaConfig.attributes).map(([attributeKey, attributeConfig]) => {
-                const currentValue = schemaMappings[schemaKey]?.[attributeKey] || '';
+                  {Object.entries(schemaConfig.attributes).map(
+                    ([attributeKey, attributeConfig]) => {
+                      const currentValue = schemaMappings[schemaKey]?.[attributeKey] || '';
 
-                // Filter available fields by attribute type if specified
-                const filteredFields = attributeConfig.type
-                  ? availableFields.filter((field) => field.type === attributeConfig.type)
-                  : availableFields;
+                      // Filter available fields by attribute type if specified
+                      const filteredFields = attributeConfig.type
+                        ? availableFields.filter((field) => field.type === attributeConfig.type)
+                        : availableFields;
 
-                return (
-                  <EuiFormRow
-                    key={`${schemaKey}.${attributeKey}`}
-                    label={attributeConfig.displayName}
-                    helpText={attributeConfig.description}
-                  >
-                    <EuiSelect
-                      options={[
-                        {
-                          text: i18n.translate(
-                            'data.explorer.datasetSelector.advancedSelector.configurator.selectFieldPlaceholder',
-                            { defaultMessage: '-- Select a field --' }
-                          ),
-                          value: '',
-                        },
-                        ...filteredFields.map((field) => ({
-                          text: field.displayName || field.name,
-                          value: field.name,
-                        })),
-                      ]}
-                      value={currentValue}
-                      onChange={(e) => handleFieldChange(schemaKey, attributeKey, e.target.value)}
-                      data-test-subj={`schemaMappingSelect-${schemaKey}-${attributeKey}`}
-                    />
-                  </EuiFormRow>
-                );
-              })}
+                      return (
+                        <EuiFormRow
+                          key={`${schemaKey}.${attributeKey}`}
+                          label={attributeConfig.displayName}
+                          helpText={attributeConfig.description}
+                          display="columnCompressed"
+                          fullWidth
+                        >
+                          <EuiSelect
+                            options={[
+                              {
+                                text: i18n.translate(
+                                  'data.explorer.datasetSelector.advancedSelector.configurator.selectFieldPlaceholder',
+                                  { defaultMessage: '-- Select a field --' }
+                                ),
+                                value: '',
+                              },
+                              ...filteredFields.map((field) => ({
+                                text: field.displayName || field.name,
+                                value: field.name,
+                              })),
+                            ]}
+                            value={currentValue}
+                            onChange={(e) =>
+                              handleFieldChange(schemaKey, attributeKey, e.target.value)
+                            }
+                            data-test-subj={`schemaMappingSelect-${schemaKey}-${attributeKey}`}
+                            compressed
+                          />
+                        </EuiFormRow>
+                      );
+                    }
+                  )}
 
-              <EuiSpacer size="m" />
-            </div>
-          );
-        })}
+                  <EuiSpacer size="s" />
+                </EuiPanel>
+              </div>
+            );
+          })}
+        </EuiPanel>
       </EuiAccordion>
     </>
   );
