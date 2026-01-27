@@ -13,7 +13,7 @@ exports[`ImportTypeSelector should render 1`] = `
       </span>
     </legend>
     <div
-      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
     >
       <div
         class="euiFlexItem"
