@@ -37,6 +37,7 @@ export const ConfiguratorV2 = ({
   onPrevious,
   alwaysShowDatasetFields,
   signalType,
+  showNonTimeFieldDatasets = true,
 }: {
   services: IDataPluginServices;
   baseDataset: BaseDataset;
@@ -45,6 +46,7 @@ export const ConfiguratorV2 = ({
   onPrevious: () => void;
   alwaysShowDatasetFields?: boolean;
   signalType?: string;
+  showNonTimeFieldDatasets?: boolean;
 }) => {
   // Services
   const queryService = getQueryService();
@@ -206,8 +208,12 @@ export const ConfiguratorV2 = ({
                       text: field.displayName || field.name,
                       value: field.name,
                     })),
-                    { text: '-----', value: '-----', disabled: true },
-                    { text: noTimeFilter, value: noTimeFilter },
+                    ...(showNonTimeFieldDatasets
+                      ? [
+                          { text: '-----', value: '-----', disabled: true },
+                          { text: noTimeFilter, value: noTimeFilter },
+                        ]
+                      : []),
                   ]}
                   value={timeFieldName}
                   onChange={(e) => {

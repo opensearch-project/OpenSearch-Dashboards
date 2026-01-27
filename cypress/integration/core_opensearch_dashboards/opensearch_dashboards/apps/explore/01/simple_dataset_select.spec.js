@@ -72,16 +72,8 @@ export const runSimpleDatasetSelectorTests = () => {
         indexPattern: INDEX_PATTERN_WITH_TIME,
         time: true,
       },
-      {
-        indexPattern: INDEX_PATTERN_WITH_NO_TIME,
-        time: false,
-      },
     ]).forEach((config) => {
-      it(`Select ${
-        config.time ? 'time-based' : 'no-time-based'
-      } Indexpattern when original language was ${
-        config.language
-      } from the simple dataset selector`, () => {
+      it(`Select time-based Indexpattern when original language was ${config.language} from the simple dataset selector`, () => {
         cy.osd.navigateToWorkSpaceSpecificPage({
           workspaceName,
           page: 'explore/logs',
@@ -109,6 +101,24 @@ export const runSimpleDatasetSelectorTests = () => {
           setDatePickerDatesAndSearchIfRelevant(config.language);
           cy.getElementByTestId('docTableHeaderField').contains('Time');
         }
+      });
+
+      it(`Validate non time-based Indexpattern are filtered when original language was ${config.language} from the simple dataset selector`, () => {
+        cy.osd.navigateToWorkSpaceSpecificPage({
+          workspaceName,
+          page: 'explore/logs',
+          isEnhancement: true,
+        });
+
+        cy.getElementByTestId('datasetSelectButton')
+          .should('not.be.disabled')
+          .click({ force: true });
+
+        cy.get('[data-test-subj*="datasetSelectOption"]').should('have.length', 1);
+        // Ensure no dataset options contain "data_logs_small_no_time_" text
+        cy.get('[data-test-subj*="datasetSelectOption"]').each(($el) => {
+          cy.wrap($el).should('not.contain.text', INDEX_PATTERN_WITH_NO_TIME);
+        });
       });
     });
   });

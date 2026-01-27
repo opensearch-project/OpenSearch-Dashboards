@@ -8,12 +8,7 @@ import {
   getRandomizedWorkspaceName,
   getRandomizedDatasetId,
 } from '../../../../../../utils/apps/explore/shared';
-import { nonTimeBasedFieldsForDatasetCreation } from '../../../../../../utils/constants';
-import {
-  DATASOURCE_NAME,
-  INDEX_WITH_TIME_1,
-  INDEX_WITHOUT_TIME_1,
-} from '../../../../../../utils/apps/explore/constants';
+import { DATASOURCE_NAME, INDEX_WITH_TIME_1 } from '../../../../../../utils/apps/explore/constants';
 import {
   downloadCsvAndVerify,
   generateDownloadCsvTestConfigurations,
@@ -28,12 +23,10 @@ import {
 import {
   prepareTestSuite,
   createWorkspaceAndDatasetUsingEndpoint,
-  createDatasetWithEndpoint,
 } from '../../../../../../utils/helpers';
 
 const workspaceName = getRandomizedWorkspaceName();
 const datasetWithTimeId = getRandomizedDatasetId();
-const datasetWithoutTimeId = getRandomizedDatasetId();
 
 const runDownloadCsvTests = () => {
   describe('Download as CSV', () => {
@@ -50,12 +43,6 @@ const runDownloadCsvTests = () => {
         'logs', // signalType
         ['use-case-observability'] // features
       );
-
-      createDatasetWithEndpoint(DATASOURCE_NAME, workspaceName, datasetWithoutTimeId, {
-        title: `${INDEX_WITHOUT_TIME_1}*`,
-        signalType: 'logs',
-        fields: nonTimeBasedFieldsForDatasetCreation,
-      });
     });
 
     afterEach(() => {
