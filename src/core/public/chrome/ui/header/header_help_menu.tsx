@@ -243,30 +243,6 @@ class HeaderHelpMenuUI extends Component<Props, State> {
           </div>
         )}
 
-        {keyboardShortcutService && (
-          <>
-            <EuiButtonEmpty
-              size="xs"
-              flush="left"
-              iconType="keyboardShortcut"
-              onClick={() => {
-                // Trigger the hidden button that KeyboardShortcutHelpModal manages
-                const hiddenButton = document.querySelector('[data-keyboard-shortcut-trigger]') as HTMLButtonElement;
-                if (hiddenButton) {
-                  hiddenButton.click();
-                  this.closeMenu(); // Close help menu when opening keyboard shortcuts
-                }
-              }}
-            >
-              <FormattedMessage
-                id="core.ui.chrome.headerGlobalNav.helpMenuKeyboardShortcutsTitle"
-                defaultMessage="Keyboard shortcuts"
-              />
-            </EuiButtonEmpty>
-            <EuiSpacer size="xs" />
-          </>
-        )}
-
         <EuiSpacer size="xs" />
 
         <EuiButtonEmpty
@@ -281,6 +257,32 @@ class HeaderHelpMenuUI extends Component<Props, State> {
             defaultMessage="Open an issue in GitHub"
           />
         </EuiButtonEmpty>
+
+        {keyboardShortcutService && (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiButtonEmpty
+              size="xs"
+              flush="left"
+              iconType="keyboardShortcut"
+              onClick={() => {
+                // Trigger the hidden button that KeyboardShortcutHelpModal manages
+                const hiddenButton = document.querySelector(
+                  '[data-keyboard-shortcut-trigger]'
+                ) as HTMLButtonElement;
+                if (hiddenButton) {
+                  hiddenButton.click();
+                  this.closeMenu(); // Close help menu when opening keyboard shortcuts
+                }
+              }}
+            >
+              <FormattedMessage
+                id="core.ui.chrome.headerGlobalNav.helpMenuKeyboardShortcutsTitle"
+                defaultMessage="Keyboard shortcuts"
+              />
+            </EuiButtonEmpty>
+          </>
+        )}
       </Fragment>
     ) : null;
 
@@ -434,7 +436,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
             {customContent}
           </div>
         </EuiPopover>
-        
+
         {/* Always render KeyboardShortcutHelpModal so keyboard shortcuts stay registered */}
         {keyboardShortcutService && (
           <KeyboardShortcutHelpModal
