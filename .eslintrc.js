@@ -749,6 +749,26 @@ module.exports = {
       },
     },
 
+    /**
+     * Disallow inline styles in JSX (must come after prettier to take precedence)
+     */
+    {
+      files: ['**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'react/forbid-dom-props': [
+          'error',
+          {
+            forbid: [
+              {
+                propName: 'style',
+                message: 'Inline styles are not allowed. Please use CSS classes instead.',
+              },
+            ],
+          },
+        ],
+      },
+    },
+
     {
       files: [
         // platform-team owned code
