@@ -60,6 +60,14 @@ jest.mock('../../services/services', () => ({
   })),
 }));
 
+jest.mock('./utils/utils', () => {
+  const actual = jest.requireActual('../utils/utils');
+  return {
+    ...actual,
+    getChartRender: jest.fn().mockReturnValue('vega'),
+  };
+});
+
 describe('VisualizationRender', () => {
   // Sample data for testing
   const mockVisData: VisData = {

@@ -17,7 +17,7 @@ import { RenderChartConfig } from './types';
 import { TimeRange } from '../../../../data/public';
 import { VegaRender } from './vega_render';
 import { EchartsRender } from './echarts_render';
-import { createVisSpec } from './utils/create_vis_spec';
+import { getChartRender } from './utils/utils';
 
 interface Props {
   data$: Observable<VisData | undefined>;
@@ -76,10 +76,6 @@ export const VisualizationRender = ({
     };
   }, [from, to]);
 
-  const spec = useMemo(() => {
-    return createVisSpec({ data: visualizationData, config: visConfig, timeRange });
-  }, [visConfig, visualizationData, timeRange]);
-
   if (!visualizationData || columns.length === 0) {
     return null;
   }
@@ -114,15 +110,24 @@ export const VisualizationRender = ({
 
   const hasSelectionMapping = Object.keys(visConfig?.axesMapping ?? {}).length !== 0;
   if (hasSelectionMapping) {
-    if (!spec.$schema) {
-      return <EchartsRender spec={spec} onSelectTimeRange={onSelectTimeRange} />;
+    if (getChartRender() === 'echarts') {
+      return (
+        <EchartsRender
+          onSelectTimeRange={onSelectTimeRange}
+          data={visualizationData}
+          timeRange={timeRange}
+          config={visConfig}
+        />
+      );
     }
     return (
       <VegaRender
         searchContext={searchContext}
         ExpressionRenderer={ExpressionRenderer}
         onSelectTimeRange={onSelectTimeRange}
-        spec={spec}
+        data={visualizationData}
+        timeRange={timeRange}
+        config={visConfig}
       />
     );
   }

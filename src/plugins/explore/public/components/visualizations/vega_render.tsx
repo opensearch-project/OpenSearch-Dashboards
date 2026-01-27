@@ -3,25 +3,32 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { toExpression } from './utils/to_expression';
 import { ExecutionContextSearch } from '../../../../expressions/common/';
 import { ExpressionRendererEvent, ExpressionsStart } from '../../../../expressions/public';
 import { opensearchFilters, TimeRange } from '../../../../data/public';
+import { VisData } from './visualization_builder.types';
+import { RenderChartConfig } from './types';
+import { createVisSpec } from './utils/create_vis_spec';
 
 interface Props {
   searchContext?: ExecutionContextSearch;
   ExpressionRenderer?: ExpressionsStart['ReactExpressionRenderer'];
   onSelectTimeRange?: (timeRange?: TimeRange) => void;
-  spec: any;
+  timeRange: TimeRange;
+  data?: VisData;
+  config?: RenderChartConfig;
 }
 
 export const VegaRender = ({
   searchContext,
   ExpressionRenderer,
   onSelectTimeRange,
-  spec,
+  data,
+  config,
+  timeRange,
 }: Props) => {
   const onExpressionEvent = useCallback(
     async (e: ExpressionRendererEvent) => {
@@ -40,6 +47,10 @@ export const VegaRender = ({
     },
     [onSelectTimeRange]
   );
+
+  const spec = useMemo(() => {
+    return createVisSpec({ data, config, timeRange });
+  }, [config, data, timeRange]);
 
   const expression = toExpression(searchContext, spec);
 
