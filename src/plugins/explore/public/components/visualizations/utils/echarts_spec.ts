@@ -102,9 +102,6 @@ export interface EChartsSpecState<T extends BaseChartStyle = BaseChartStyle>
   visualMap?: any;
   // Final output
   spec?: EChartsOption;
-
-  // byproduct
-  options?: any;
 }
 
 /**
@@ -160,7 +157,8 @@ export const createBaseConfig = <T extends BaseChartStyle>({
     },
     tooltip: {
       extraCssText: `overflow-y: auto; max-height: 50%;`,
-      enterable: true,
+      enterable: true, // for y direction overflow
+      confine: true, // for x direction
       show: styles.tooltipOptions?.mode !== 'hidden',
       ...(axisConfig && addTrigger && { trigger: 'axis' }),
       axisPointer: { type: 'shadow' },
@@ -183,24 +181,19 @@ export const createBaseConfig = <T extends BaseChartStyle>({
 export const buildAxisConfigs = <T extends BaseChartStyle>(
   state: EChartsSpecState<T>
 ): EChartsSpecState<T> => {
-  const { axisConfig, transformedData = [], axisColumnMappings, options } = state;
+  const { axisConfig, transformedData = [], axisColumnMappings } = state;
 
   const hasFacet = Array.isArray(transformedData[0]?.[0]) && axisColumnMappings.facet !== undefined;
-
-  const checkYaxisExtends = options && options.hasOwnProperty('yAxisExtend');
-  const yAxisExtend = checkYaxisExtends ? { max: options.yAxisExtend } : undefined;
 
   const getConfig = (
     axis: Axis | undefined,
     axisStyle: StandardAxes | undefined,
-    gridNumber?: number,
-    axisExtends?: { max: number }
+    gridNumber?: number
   ) => {
     return {
       type: getAxisType(axis),
       ...applyAxisStyling({ axisStyle }),
       ...(hasFacet && { gridIndex: gridNumber }),
-      ...(axisExtends ?? {}),
     };
   };
 
@@ -218,12 +211,12 @@ export const buildAxisConfigs = <T extends BaseChartStyle>(
     });
 
     yAxisConfig = transformedData.map((_: any, index: number) => {
-      return getConfig(axisConfig.yAxis, axisConfig.yAxisStyle, index, yAxisExtend);
+      return getConfig(axisConfig.yAxis, axisConfig.yAxisStyle, index);
     });
   } else {
     xAxisConfig = getConfig(axisConfig.xAxis, axisConfig.xAxisStyle);
 
-    yAxisConfig = getConfig(axisConfig.yAxis, axisConfig.yAxisStyle, undefined, yAxisExtend);
+    yAxisConfig = getConfig(axisConfig.yAxis, axisConfig.yAxisStyle);
   }
 
   return { ...state, xAxisConfig, yAxisConfig };

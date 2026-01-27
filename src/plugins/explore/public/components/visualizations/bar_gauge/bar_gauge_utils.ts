@@ -624,7 +624,7 @@ export const assembleBarGaugeSpec = <T extends BaseChartStyle>(
     xAxis: xAxisConfig,
     yAxis: yAxisConfig,
     series,
-    grid: { top: 40, right: 30, bottom: 15, left: 30 },
+    grid: { top: 50, right: 30, bottom: 40, left: 30 },
   };
 
   return { ...state, spec };

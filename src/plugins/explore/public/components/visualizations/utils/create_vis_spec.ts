@@ -14,13 +14,9 @@ interface Options {
   timeRange: TimeRange;
   data?: VisData;
   config?: RenderChartConfig;
-  containerSize?: {
-    width: number;
-    height: number;
-  };
 }
 
-export const createVisSpec = ({ timeRange, data, config, containerSize }: Options) => {
+export const createVisSpec = ({ timeRange, data, config }: Options) => {
   if (!data) {
     return;
   }
@@ -53,7 +49,6 @@ export const createVisSpec = ({ timeRange, data, config, containerSize }: Option
     styles,
     config.type,
     axisColumnMappings,
-    timeRange,
-    containerSize
+    timeRange
   );
 };
