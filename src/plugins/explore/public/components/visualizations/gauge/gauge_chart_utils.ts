@@ -236,7 +236,7 @@ export const createGaugeSeries = ({
           y: height * 0.6,
           children: [
             {
-              type: 'text',
+              type: 'text' as const,
               style: {
                 x: 0,
                 y: -2 * textSizeFactor * (selectedUnit?.fontScale ?? 1),
@@ -250,7 +250,7 @@ export const createGaugeSeries = ({
             ...(styles.showTitle
               ? [
                   {
-                    type: 'text',
+                    type: 'text' as const,
                     style: {
                       x: 0,
                       y: textSizeFactor * (selectedUnit?.fontScale ?? 1),
