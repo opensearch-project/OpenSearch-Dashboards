@@ -58,6 +58,7 @@ import { UiSettingsService } from './ui_settings';
 import { WorkspacesService } from './workspace';
 import { KeyboardShortcutService } from './keyboard_shortcut';
 import { ChatService } from './chat';
+import { TelemetryCoreService } from './telemetry';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -116,6 +117,7 @@ export class CoreSystem {
   private readonly coreContext: CoreContext;
   private readonly workspaces: WorkspacesService;
   private readonly chat: ChatService;
+  private readonly telemetry: TelemetryCoreService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
@@ -146,6 +148,7 @@ export class CoreSystem {
     this.integrations = new IntegrationsService();
     this.workspaces = new WorkspacesService();
     this.chat = new ChatService();
+    this.telemetry = new TelemetryCoreService();
 
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
 
@@ -175,6 +178,7 @@ export class CoreSystem {
       const notifications = this.notifications.setup({ uiSettings });
       const workspaces = this.workspaces.setup();
       const chat = this.chat.setup();
+      const telemetry = this.telemetry.setup();
 
       const pluginDependencies = this.plugins.getOpaqueIds();
       const context = this.context.setup({
@@ -197,6 +201,7 @@ export class CoreSystem {
         workspaces,
         keyboardShortcut,
         chat,
+        telemetry,
       };
 
       // Services that do not expose contracts at setup
@@ -245,6 +250,9 @@ export class CoreSystem {
 
       // Start chat service - enablement logic is now handled by the plugin
       const chat = this.chat.start();
+
+      // Start telemetry service
+      const telemetry = this.telemetry.start();
 
       // Only enable keyboard shortcuts when both the configuration is enabled AND workspaces are enabled
       const keyboardShortcutsConfigEnabled = injectedMetadata.getKeyboardShortcuts().enabled;
@@ -298,6 +306,7 @@ export class CoreSystem {
         workspaces,
         keyboardShortcut: keyboardShortcut || undefined,
         chat,
+        telemetry,
       };
 
       await this.plugins.start(core);
@@ -351,6 +360,7 @@ export class CoreSystem {
     this.application.stop();
     this.workspaces.stop();
     this.chat.stop();
+    this.telemetry.stop();
     this.keyboardShortcut.stop();
     this.rootDomElement.textContent = '';
   }
