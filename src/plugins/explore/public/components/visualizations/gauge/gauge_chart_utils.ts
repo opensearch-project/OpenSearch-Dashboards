@@ -247,17 +247,21 @@ export const createGaugeSeries = ({
                 fill: textColor,
               },
             },
-            {
-              type: 'text',
-              style: {
-                x: 0,
-                y: textSizeFactor * (selectedUnit?.fontScale ?? 1),
-                text: styles?.title || seriesDisplayName,
-                textAlign: 'center',
-                fontSize: titleFontSize,
-                fill: getColors().text,
-              },
-            },
+            ...(styles.showTitle
+              ? [
+                  {
+                    type: 'text',
+                    style: {
+                      x: 0,
+                      y: textSizeFactor * (selectedUnit?.fontScale ?? 1),
+                      text: styles?.title || seriesDisplayName,
+                      textAlign: 'center',
+                      fontSize: titleFontSize,
+                      fill: getColors().text,
+                    },
+                  },
+                ]
+              : []),
           ],
         };
       },
