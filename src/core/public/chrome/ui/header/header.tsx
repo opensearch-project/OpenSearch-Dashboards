@@ -128,6 +128,7 @@ export interface HeaderProps {
   currentNavGroup$: Observable<NavGroupItemInMap | undefined>;
   navGroupsMap$: Observable<Record<string, NavGroupItemInMap>>;
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
+  keyboardShortcut?: KeyboardShortcutStart;
   workspaceList$: Observable<WorkspaceObject[]>;
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
@@ -522,6 +523,7 @@ export function Header({
         opensearchDashboardsDocLink={opensearchDashboardsDocLink}
         opensearchDashboardsVersion={opensearchDashboardsVersion}
         surveyLink={survey}
+        keyboardShortcutService={keyboardShortcut}
       />
     </EuiHeaderSectionItem>
   );

@@ -341,13 +341,13 @@ export class ManagementPlugin
       });
 
       // Always register keyboard shortcut icon if service is available
-      // The icon component will handle its own visibility based on available shortcuts
-      if (core.keyboardShortcut) {
-        core.chrome.navControls.registerLeftBottom({
-          order: 5,
-          mount: toMountPoint(React.createElement(KeyboardShortcutIcon, { core })),
-        });
-      }
+      // Keyboard shortcuts moved to help menu
+      // if (core.keyboardShortcut) {
+      //   core.chrome.navControls.registerLeftBottom({
+      //     order: 5,
+      //     mount: toMountPoint(React.createElement(KeyboardShortcutIcon, { core })),
+      //   });
+      // }
     }
 
     return {};

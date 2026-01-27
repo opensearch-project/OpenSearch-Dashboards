@@ -53,6 +53,8 @@ import { combineLatest } from 'rxjs';
 import { HeaderExtension } from './header_extension';
 import { ChromeHelpExtension } from '../../chrome_service';
 import { GITHUB_CREATE_ISSUE_LINK } from '../../constants';
+import { KeyboardShortcutService } from '../../../keyboard_shortcut';
+import { KeyboardShortcutHelpModal } from '../../../keyboard_shortcut/keyboard_shortcut_help_modal';
 
 /** @public */
 export type ChromeHelpExtensionMenuGitHubLink = EuiButtonEmptyProps & {
@@ -126,6 +128,7 @@ interface Props {
   opensearchDashboardsDocLink: string;
   surveyLink?: string;
   useUpdatedAppearance?: boolean;
+  keyboardShortcutService?: KeyboardShortcutService;
 }
 
 interface State {
@@ -204,6 +207,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
       opensearchDashboardsDocLink,
       surveyLink,
       useUpdatedAppearance,
+      keyboardShortcutService,
     } = this.props;
     const { helpExtension, helpSupportUrl } = this.state;
 
@@ -237,6 +241,30 @@ class HeaderHelpMenuUI extends Component<Props, State> {
             </EuiButtonEmpty>
             <EuiSpacer size="xs" />
           </div>
+        )}
+
+        {keyboardShortcutService && (
+          <>
+            <EuiButtonEmpty
+              size="xs"
+              flush="left"
+              iconType="keyboardShortcut"
+              onClick={() => {
+                // Trigger the hidden button that KeyboardShortcutHelpModal manages
+                const hiddenButton = document.querySelector('[data-keyboard-shortcut-trigger]') as HTMLButtonElement;
+                if (hiddenButton) {
+                  hiddenButton.click();
+                  this.closeMenu(); // Close help menu when opening keyboard shortcuts
+                }
+              }}
+            >
+              <FormattedMessage
+                id="core.ui.chrome.headerGlobalNav.helpMenuKeyboardShortcutsTitle"
+                defaultMessage="Keyboard shortcuts"
+              />
+            </EuiButtonEmpty>
+            <EuiSpacer size="xs" />
+          </>
         )}
 
         <EuiSpacer size="xs" />
@@ -368,43 +396,53 @@ class HeaderHelpMenuUI extends Component<Props, State> {
     );
 
     return (
-      <EuiPopover
-        anchorPosition={useUpdatedAppearance ? 'rightDown' : 'downRight'}
-        button={button}
-        closePopover={this.closeMenu}
-        data-test-subj="helpMenuButton"
-        id="headerHelpMenu"
-        isOpen={this.state.isOpen}
-        ownFocus
-        repositionOnScroll
-        panelPaddingSize="s"
-      >
-        <EuiPopoverTitle>
-          <EuiFlexGroup responsive={false}>
-            <EuiFlexItem>
-              <h2>
+      <>
+        <EuiPopover
+          anchorPosition={useUpdatedAppearance ? 'rightDown' : 'downRight'}
+          button={button}
+          closePopover={this.closeMenu}
+          data-test-subj="helpMenuButton"
+          id="headerHelpMenu"
+          isOpen={this.state.isOpen}
+          ownFocus
+          repositionOnScroll
+          panelPaddingSize="s"
+        >
+          <EuiPopoverTitle>
+            <EuiFlexGroup responsive={false}>
+              <EuiFlexItem>
+                <h2>
+                  <FormattedMessage
+                    id="core.ui.chrome.headerGlobalNav.helpMenuTitle"
+                    defaultMessage="Help"
+                  />
+                </h2>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} className="chrHeaderHelpMenu__version">
                 <FormattedMessage
-                  id="core.ui.chrome.headerGlobalNav.helpMenuTitle"
-                  defaultMessage="Help"
+                  id="core.ui.chrome.headerGlobalNav.helpMenuVersion"
+                  defaultMessage="v {version}"
+                  values={{ version: opensearchDashboardsVersion }}
                 />
-              </h2>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} className="chrHeaderHelpMenu__version">
-              <FormattedMessage
-                id="core.ui.chrome.headerGlobalNav.helpMenuVersion"
-                defaultMessage="v {version}"
-                values={{ version: opensearchDashboardsVersion }}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverTitle>
 
-        <div style={{ maxWidth: 270 }}>
-          {defaultContent}
-          {defaultContent && customContent && <EuiHorizontalRule margin="m" />}
-          {customContent}
-        </div>
-      </EuiPopover>
+          <div style={{ maxWidth: 270 }}>
+            {defaultContent}
+            {defaultContent && customContent && <EuiHorizontalRule margin="m" />}
+            {customContent}
+          </div>
+        </EuiPopover>
+        
+        {/* Always render KeyboardShortcutHelpModal so keyboard shortcuts stay registered */}
+        {keyboardShortcutService && (
+          <KeyboardShortcutHelpModal
+            trigger={<button style={{ display: 'none' }} data-keyboard-shortcut-trigger />}
+            keyboardShortcutService={keyboardShortcutService}
+          />
+        )}
+      </>
     );
   }
 
