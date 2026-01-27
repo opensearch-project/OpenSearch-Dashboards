@@ -31,7 +31,8 @@ export const SourceFieldTableCell: React.FC<SourceFieldTableCellProps> = ({
   isShortDots,
 }) => {
   const formattedRow = dataset.formatHit(row);
-  const rawKeys = Object.keys(formattedRow);
+  const metaFields = dataset.metaFields || [];
+  const rawKeys = Object.keys(formattedRow).filter((key) => !metaFields.includes(key));
   const keys = isShortDots ? rawKeys.map((k) => shortenDottedString(k)) : rawKeys;
 
   return (

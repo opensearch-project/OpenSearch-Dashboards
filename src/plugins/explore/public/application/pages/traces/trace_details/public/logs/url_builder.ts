@@ -54,7 +54,7 @@ export function buildExploreLogsUrl(params: {
   const qParam = `(dataset:${datasetParam},language:PPL,query:'${pplQuery}')`;
 
   // Build _a parameter (app state)
-  const aParam = `(legacy:(columns:!(_source),interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(patternsField:'',usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
+  const aParam = `(legacy:(interval:auto,isDirty:!f,sort:!()),tab:(logs:(),patterns:(patternsField:'',usingRegexPatterns:!f)),ui:(activeTabId:logs,showHistogram:!t))`;
 
   // Build _g parameter (global state with time range)
   const gParam = `(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'${timeRange.from}',to:'${timeRange.to}'))`;
