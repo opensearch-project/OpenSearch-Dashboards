@@ -148,9 +148,31 @@ async function executeMultipleQueries(
           response: queryRes,
         };
       } catch (error) {
+        let errorMessage = `Query ${parsedQuery.label} failed`;
+
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        }
+
+        // Try to extract detailed error from response body from SQL plugin
+        const responseBody = (error as any)?.body ?? (error as any)?.response;
+        if (responseBody) {
+          try {
+            const parsed =
+              typeof responseBody === 'string' ? JSON.parse(responseBody) : responseBody;
+            errorMessage =
+              parsed?.error?.details ??
+              parsed?.error?.reason ??
+              parsed?.error?.message ??
+              errorMessage;
+          } catch {
+            // error might come from other places, use original message if failed
+          }
+        }
+
         return {
           label: parsedQuery.label,
-          error: error instanceof Error ? error.message : `Query ${parsedQuery.label} failed`,
+          error: errorMessage,
         };
       }
     }
