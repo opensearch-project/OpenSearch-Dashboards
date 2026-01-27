@@ -21,15 +21,14 @@ import {
   PromQLQueryParams,
   PromQLQueryResponse,
 } from '../connections/managers/prometheus_manager';
+import { calculateStep, DEFAULT_RESOLUTION } from './prom_utils';
 
-// This creates an upper bound for data points sent to the frontend (targetSamples * maxSeries)
-const AUTO_STEP_TARGET_SAMPLES = 50;
 // MAX_SERIES_TABLE: Maximum series for table display
 const MAX_SERIES_TABLE = 2000;
 // MAX_SERIES_VIZ: Maximum series for visualization. This should be lower than MAX_SERIES_TABLE
 const MAX_SERIES_VIZ = 100;
 // We'll want to re-evaluate this when we provide an affordance for step configuration
-const MAX_DATAPOINTS = AUTO_STEP_TARGET_SAMPLES * MAX_SERIES_TABLE;
+const MAX_DATAPOINTS = DEFAULT_RESOLUTION * MAX_SERIES_TABLE;
 
 /**
  * Result from executing a single query in a multi-query context
@@ -58,10 +57,8 @@ export const promqlSearchStrategyProvider = (
           start: parsedFrom.unix(),
           end: parsedTo.unix(),
         };
-        const duration = (timeRange.end - timeRange.start) * 1000;
-        const step =
-          requestBody.step ??
-          Math.max(Math.ceil(duration / AUTO_STEP_TARGET_SAMPLES) / 1000, 0.001);
+        const durationMs = (timeRange.end - timeRange.start) * 1000;
+        const step = requestBody.step ?? calculateStep(durationMs);
         const { dataset, query, language }: Query = requestBody.query;
         const datasetId = dataset?.id ?? '';
 
