@@ -115,7 +115,6 @@ export const ChatMessages: React.FC<ChatMessagesProps> = ({
         {timeline.length === 0 && !isStreaming && (
           <div className="chatMessages__emptyState">
             <div className="chatMessages__emptyStateHeader">
-              <div className="chatMessages__gradientGlow" />
               <EuiIcon type="generate" size="xxl" />
               <EuiText>
                 <h2>Hi, I&apos;m your AI Assistant</h2>

@@ -47,19 +47,6 @@
     }
   }
 
-  // AI gradient glow effect above empty state icon
-  /* stylelint-disable @osd/stylelint/no_restricted_values */
-  &__gradientGlow {
-    width: 160px;
-    height: 60px;
-    border-radius: 50%;
-    background: linear-gradient(90deg, #06c 0%, #7b68ee 50%, #a855f7 100%);
-    filter: blur(32px);
-    opacity: 0.5;
-    margin-bottom: -30px;
-  }
-  /* stylelint-enable @osd/stylelint/no_restricted_values */
-
   &__suggestions {
     display: flex;
     flex-direction: column;
@@ -74,7 +61,6 @@
 
     &:hover {
       background-color: $euiColorLightestShade;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 10%);
     }
 
     &:active {
