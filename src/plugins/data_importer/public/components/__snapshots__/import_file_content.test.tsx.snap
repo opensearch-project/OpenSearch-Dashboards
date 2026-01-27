@@ -10,14 +10,14 @@ exports[`ImportFileContent should render 1`] = `
     >
       <input
         accept=".csv, .json, .ndjson"
-        aria-describedby="mocked-id-filePicker__prompt"
+        aria-describedby="data-importer-file-picker-filePicker__prompt"
         class="euiFilePicker__input"
-        id="mocked-id"
+        id="data-importer-file-picker"
         type="file"
       />
       <div
         class="euiFilePicker__prompt"
-        id="mocked-id-filePicker__prompt"
+        id="data-importer-file-picker-filePicker__prompt"
       >
         <span
           aria-hidden="true"

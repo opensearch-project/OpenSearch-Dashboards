@@ -25,7 +25,6 @@ import { extname } from 'path';
 import {
   DataSourceManagementPluginSetup,
   DataSourceOption,
-  DataSourceSelectableConfig,
 } from '../../../data_source_management/public';
 import { CoreStart } from '../../../../core/public';
 import { NavigationPublicPluginStart } from '../../../navigation/public';
@@ -58,6 +57,7 @@ interface DataImporterPluginAppProps {
   hideLocalCluster: boolean;
   dataSourceEnabled: boolean;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  embedded?: boolean; // When true, skip Router, nav, and page wrappers
 }
 
 const ROWS_COUNT = 10;
@@ -72,6 +72,7 @@ export const DataImporterPluginApp = ({
   dataSourceEnabled,
   hideLocalCluster,
   dataSourceManagement,
+  embedded = false,
 }: DataImporterPluginAppProps) => {
   const [indexName, setIndexName] = useState<string>();
   const [importType, setImportType] = useState<ImportChoices>(IMPORT_CHOICE_FILE);
@@ -301,7 +302,7 @@ export const DataImporterPluginApp = ({
     if (!hideLocalCluster || dataSourceId) {
       fetchIndices();
     }
-  }, [http, dataSourceId, notifications.toasts, filePreviewData, hideLocalCluster]);
+  }, [http, dataSourceId, notifications.toasts, hideLocalCluster]);
 
   useEffect(() => {
     setDisableImport(shouldDisableImportButton());
@@ -335,17 +336,15 @@ export const DataImporterPluginApp = ({
       any
     >;
     return (
-      <div className="devAppDataSourceSelector">
-        <DataSourceSelector
-          savedObjectsClient={savedObjects.client}
-          notifications={notifications.toasts}
-          onSelectedDataSource={onDataSourceSelect}
-          disabled={!dataSourceEnabled}
-          fullWidth={false}
-          compressed={false}
-          hideLocalCluster={hideLocalCluster}
-        />
-      </div>
+      <DataSourceSelector
+        savedObjectsClient={savedObjects.client}
+        notifications={notifications.toasts}
+        onSelectedDataSource={onDataSourceSelect}
+        disabled={!dataSourceEnabled}
+        fullWidth={true}
+        compressed={false}
+        hideLocalCluster={hideLocalCluster}
+      />
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataSourceManagement, savedObjects.client, notifications]);
@@ -374,6 +373,111 @@ export const DataImporterPluginApp = ({
     setVisibleRows((prevVisibleRows) => prevVisibleRows + ROWS_COUNT);
   };
 
+  // Core importer content
+  const importerContent = (
+    <EuiFlexGroup className={embedded ? 'dataImporterEmbedded__flexGroup' : undefined}>
+      <EuiFlexItem grow={1} className={embedded ? 'dataImporterEmbedded__leftPanel' : undefined}>
+        <ImportTypeSelector updateSelection={onImportTypeChange} initialSelection={importType} />
+        <EuiSpacer size="s" />
+        {dataSourceEnabled && (
+          <>
+            <EuiTitle size="xs">
+              <span>
+                {i18n.translate('dataImporter.dataSource', {
+                  defaultMessage: 'Select target data source',
+                })}
+              </span>
+            </EuiTitle>
+            {renderDataSourceComponent}
+          </>
+        )}
+        <EuiSpacer size="s" />
+        <EuiTitle size="xs">
+          <span>
+            {i18n.translate('dataImporter.indexName', {
+              defaultMessage: 'Select an existing index or create new',
+            })}
+          </span>
+        </EuiTitle>
+        <EuiFormRow>
+          <EuiComboBox
+            placeholder="Enter index name"
+            singleSelection={{ asPlainText: true }}
+            options={indexOptions}
+            selectedOptions={indexName ? [{ label: indexName }] : []}
+            onChange={onIndexNameChange}
+            onCreateOption={onCreateIndexName}
+          />
+        </EuiFormRow>
+
+        {showDelimiterChoice && (
+          <>
+            <EuiSpacer size="s" />
+            <DelimiterSelect onDelimiterChange={onDelimiterChange} initialDelimiter={delimiter} />
+          </>
+        )}
+
+        {importType === IMPORT_CHOICE_FILE && (
+          <>
+            <EuiSpacer size="s" />
+            <ImportFileContentBody
+              enabledFileTypes={config.enabledFileTypes}
+              onFileUpdate={onFileInput}
+              maxFileSizeBytes={config.maxFileSizeBytes}
+            />
+          </>
+        )}
+        {importType === IMPORT_CHOICE_FILE && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiButton fullWidth={true} isDisabled={disableImport} onClick={previewData}>
+              {i18n.translate('dataImporter.previewButton', {
+                defaultMessage: 'Preview',
+              })}
+            </EuiButton>
+          </>
+        )}
+        <EuiSpacer size="s" />
+        <EuiButton fullWidth={true} isDisabled={disableImport} onClick={importData}>
+          {i18n.translate('dataImporter.importButton', {
+            defaultMessage: 'Import',
+          })}
+        </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem grow={2} className={embedded ? 'dataImporterEmbedded__rightPanel' : undefined}>
+        {importType === IMPORT_CHOICE_TEXT && (
+          <ImportTextContentBody
+            onTextChange={onTextInput}
+            enabledFileTypes={config.enabledFileTypes}
+            initialFileType={dataType!}
+            characterLimit={config.maxTextCount}
+            onFileTypeChange={onDataTypeChange}
+          />
+        )}
+        {importType === IMPORT_CHOICE_FILE && (
+          <div className={embedded ? 'dataImporterEmbedded__previewContainer' : undefined}>
+            {isLoadingPreview ? (
+              <EuiLoadingSpinner size="xl" />
+            ) : (
+              <PreviewComponent
+                previewData={filePreviewData.documents || []}
+                visibleRows={visibleRows}
+                loadMoreRows={loadMoreRows}
+                predictedMapping={filePreviewData.predictedMapping || {}}
+                existingMapping={filePreviewData.existingMapping || {}}
+              />
+            )}
+          </div>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  // Return embedded or full app version
+  if (embedded) {
+    return <I18nProvider>{importerContent}</I18nProvider>;
+  }
+
   return (
     <Router basename={basename}>
       <I18nProvider>
@@ -389,111 +493,7 @@ export const DataImporterPluginApp = ({
                 </EuiTitle>
               </EuiPageHeader>
               <EuiPageContent className="data_importer_content" paddingSize="s">
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={1}>
-                    <ImportTypeSelector
-                      updateSelection={onImportTypeChange}
-                      initialSelection={importType}
-                    />
-                    <EuiSpacer size="s" />
-                    {dataSourceEnabled && (
-                      <>
-                        <EuiTitle size="xs">
-                          <span>
-                            {i18n.translate('dataImporter.dataSource', {
-                              defaultMessage: 'Select target data source',
-                            })}
-                          </span>
-                        </EuiTitle>
-                        {renderDataSourceComponent}
-                      </>
-                    )}
-                    <EuiSpacer size="s" />
-                    <EuiTitle size="xs">
-                      <span>
-                        {i18n.translate('dataImporter.indexName', {
-                          defaultMessage: 'Select an existing index or create new',
-                        })}
-                      </span>
-                    </EuiTitle>
-                    <EuiFormRow>
-                      <EuiComboBox
-                        placeholder="Enter index name"
-                        singleSelection={{ asPlainText: true }}
-                        options={indexOptions}
-                        selectedOptions={indexName ? [{ label: indexName }] : []}
-                        onChange={onIndexNameChange}
-                        onCreateOption={onCreateIndexName}
-                      />
-                    </EuiFormRow>
-
-                    {showDelimiterChoice && (
-                      <>
-                        <EuiSpacer size="s" />
-                        <DelimiterSelect
-                          onDelimiterChange={onDelimiterChange}
-                          initialDelimiter={delimiter}
-                        />
-                      </>
-                    )}
-
-                    {importType === IMPORT_CHOICE_FILE && (
-                      <>
-                        <EuiSpacer size="s" />
-                        <ImportFileContentBody
-                          enabledFileTypes={config.enabledFileTypes}
-                          onFileUpdate={onFileInput}
-                        />
-                      </>
-                    )}
-                    {importType === IMPORT_CHOICE_FILE && (
-                      <>
-                        <EuiSpacer size="s" />
-                        <EuiButton
-                          fullWidth={true}
-                          isDisabled={disableImport}
-                          onClick={previewData}
-                        >
-                          {i18n.translate('dataImporter.previewButton', {
-                            defaultMessage: 'Preview',
-                          })}
-                        </EuiButton>
-                      </>
-                    )}
-                    <EuiSpacer size="s" />
-                    <EuiButton fullWidth={true} isDisabled={disableImport} onClick={importData}>
-                      {i18n.translate('dataImporter.importButton', {
-                        defaultMessage: 'Import',
-                      })}
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={2}>
-                    {importType === IMPORT_CHOICE_TEXT && (
-                      <ImportTextContentBody
-                        onTextChange={onTextInput}
-                        enabledFileTypes={config.enabledFileTypes}
-                        initialFileType={dataType!}
-                        characterLimit={config.maxTextCount}
-                        onFileTypeChange={onDataTypeChange}
-                      />
-                    )}
-                    {importType === IMPORT_CHOICE_FILE && (
-                      <div>
-                        {isLoadingPreview ? (
-                          <EuiLoadingSpinner size="xl" />
-                        ) : (
-                          <PreviewComponent
-                            previewData={filePreviewData.documents || []}
-                            visibleRows={visibleRows}
-                            loadMoreRows={loadMoreRows}
-                            predictedMapping={filePreviewData.predictedMapping || {}}
-                            existingMapping={filePreviewData.existingMapping || {}}
-                          />
-                        )}
-                      </div>
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                {importerContent}
               </EuiPageContent>
             </EuiPageBody>
           </EuiPage>

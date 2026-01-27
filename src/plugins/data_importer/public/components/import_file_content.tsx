@@ -5,30 +5,43 @@
 
 import { EuiFilePicker } from '@elastic/eui';
 import React from 'react';
-import uuid from 'uuid';
 
 export interface ImportFileContentBodyProps {
   enabledFileTypes: string[];
   onFileUpdate: (file?: File) => void;
+  maxFileSizeBytes?: number;
 }
 
 export const ImportFileContentBody = ({
   enabledFileTypes,
   onFileUpdate,
+  maxFileSizeBytes,
 }: ImportFileContentBodyProps) => {
   const acceptedFileExtensions = enabledFileTypes.map((fileType) => `.${fileType}`).join(', ');
 
-  const onFileChange = (files: FileList | null) => {
+  const onFileChange = async (files: FileList | null) => {
     if (files && files.length > 0) {
-      onFileUpdate(files[0]);
-    } else {
-      onFileUpdate(undefined);
+      const selectedFile = files[0];
+
+      // Read file immediately to detach it from the input element
+      // This prevents ERR_UPLOAD_FILE_CHANGED errors if re-renders happen during the upload
+      try {
+        const arrayBuffer = await selectedFile.arrayBuffer();
+        const detachedFile = new File([arrayBuffer], selectedFile.name, {
+          type: selectedFile.type,
+          lastModified: selectedFile.lastModified,
+        });
+        onFileUpdate(detachedFile);
+      } catch (error) {
+        // fallback to empty handle
+        onFileUpdate(selectedFile);
+      }
     }
   };
 
   return (
     <EuiFilePicker
-      id={uuid.v4()}
+      id="data-importer-file-picker"
       fullWidth={true}
       display={'large'}
       accept={acceptedFileExtensions}
