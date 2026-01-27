@@ -532,32 +532,29 @@ describe('useQueryPanelEditor', () => {
       };
     });
 
-    it('should trigger autosuggestion on focus when in query mode with text', () => {
-      // Set up hook with text in local state
-      const { result } = renderHook(() => useQueryPanelEditor());
-
-      // Add text to local state
-      act(() => {
-        result.current.onChange('SELECT *');
-      });
-
+    it('should trigger autosuggestion on focus when in query mode', () => {
       mockUseSelector.mockImplementation((selector: any) => {
+        if (!selector) return '';
         const selectorString = selector.toString();
         if (selectorString.includes('selectIsPromptEditorMode')) return false;
         if (selectorString.includes('selectPromptModeIsAvailable')) return false;
         if (selectorString.includes('selectQueryLanguage')) return 'PPL';
         if (selectorString.includes('selectQueryString')) return '';
+        if (selectorString.includes('selectIsQueryEditorDirty')) return false;
         return '';
       });
 
       const mockOnDidFocusDisposable = { dispose: jest.fn() };
       mockEditor.onDidFocusEditorWidget.mockReturnValue(mockOnDidFocusDisposable);
-      mockEditorRef.current = mockEditor;
 
-      // Re-render hook to apply new selector values and trigger useEffect
-      renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor());
 
-      // Check that focus event was set up
+      // Call editorDidMount to register focus handler
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+
+      // Check that focus event was set up in editorDidMount
       expect(mockEditor.onDidFocusEditorWidget).toHaveBeenCalled();
 
       // Simulate focus event
@@ -573,19 +570,74 @@ describe('useQueryPanelEditor', () => {
       );
     });
 
-    it('should not trigger autosuggestion when text is empty', () => {
+    it('should trigger autosuggestion on initial mount in query mode', () => {
       mockUseSelector.mockImplementation((selector: any) => {
+        if (!selector) return '';
         const selectorString = selector.toString();
         if (selectorString.includes('selectIsPromptEditorMode')) return false;
+        if (selectorString.includes('selectPromptModeIsAvailable')) return false;
+        if (selectorString.includes('selectQueryLanguage')) return 'PPL';
         if (selectorString.includes('selectQueryString')) return '';
-        return false;
+        if (selectorString.includes('selectIsQueryEditorDirty')) return false;
+        return '';
       });
-      mockEditorRef.current = mockEditor;
 
-      renderHook(() => useQueryPanelEditor());
+      const { result } = renderHook(() => useQueryPanelEditor());
 
-      // Should not set up focus event listener when text is empty
-      expect(mockEditor.onDidFocusEditorWidget).not.toHaveBeenCalled();
+      // Call editorDidMount
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+
+      // Should trigger suggestions immediately on mount
+      expect(mockEditor.trigger).toHaveBeenCalledWith(
+        'keyboard',
+        'editor.action.triggerSuggest',
+        {}
+      );
+    });
+
+    it('should not trigger autosuggestion on mount in prompt mode', () => {
+      mockUseSelector.mockImplementation((selector: any) => {
+        if (selector === selectIsPromptEditorMode) return true;
+        if (selector === selectPromptModeIsAvailable) return true;
+        if (selector === selectQueryLanguage) return 'PPL';
+        if (selector === selectQueryString) return '';
+        if (selector === selectIsQueryEditorDirty) return false;
+        return '';
+      });
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      // Call editorDidMount
+      act(() => {
+        result.current.editorDidMount(mockEditor);
+      });
+
+      // Should NOT trigger suggestions in prompt mode
+      expect(mockEditor.trigger).not.toHaveBeenCalledWith(
+        'keyboard',
+        'editor.action.triggerSuggest',
+        {}
+      );
+    });
+
+    it('should dispose focus suggest handler on cleanup', () => {
+      const mockFocusSuggestDisposable = { dispose: jest.fn() };
+      mockEditor.onDidFocusEditorWidget.mockReturnValue(mockFocusSuggestDisposable);
+
+      const { result } = renderHook(() => useQueryPanelEditor());
+
+      let cleanup: any;
+      act(() => {
+        cleanup = result.current.editorDidMount(mockEditor);
+      });
+
+      act(() => {
+        cleanup();
+      });
+
+      expect(mockFocusSuggestDisposable.dispose).toHaveBeenCalled();
     });
   });
 
