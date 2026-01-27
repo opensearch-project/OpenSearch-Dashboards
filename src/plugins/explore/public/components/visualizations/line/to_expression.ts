@@ -31,7 +31,13 @@ import {
 } from '../utils/utils';
 import { createCrosshairLayers, createHighlightBarLayers } from '../utils/create_hover_state';
 import { createTimeRangeBrush, createTimeRangeUpdater } from '../utils/time_range_brush';
-import { pipe, createBaseConfig, buildAxisConfigs, assembleSpec } from '../utils/echarts_spec';
+import {
+  pipe,
+  createBaseConfig,
+  buildAxisConfigs,
+  assembleSpec,
+  applyTimeRange,
+} from '../utils/echarts_spec';
 import {
   convertTo2DArray,
   transform,
@@ -84,6 +90,7 @@ export const createSimpleLineChart = (
       ),
       createBaseConfig({ title: `${axisConfig.yAxis?.name} Over Time` }),
       buildAxisConfigs,
+      applyTimeRange,
       createLineSeries({
         styles,
         categoryField: timeField,
@@ -95,6 +102,7 @@ export const createSimpleLineChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
@@ -268,6 +276,7 @@ export const createLineBarChart = (
         title: `${valueField.name} (Bar) and ${value2Field.name} (Line) Over Time`,
       }),
       buildAxisConfigs,
+      applyTimeRange,
       createLineBarSeries({ styles, categoryField: timeField, value2Field, valueField }),
       assembleSpec
     )({
@@ -275,6 +284,7 @@ export const createLineBarChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
@@ -500,6 +510,7 @@ export const createMultiLineChart = (
         }`,
       }),
       buildAxisConfigs,
+      applyTimeRange,
       createLineSeries({
         styles,
         categoryField: timeField,
@@ -511,6 +522,7 @@ export const createMultiLineChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
@@ -697,6 +709,7 @@ export const createFacetedMultiLineChart = (
         } (Faceted by ${axisColumnMappings?.[AxisRole.FACET]?.name})`,
       }),
       buildAxisConfigs,
+      applyTimeRange,
       createFacetLineSeries({
         styles,
         categoryField: timeField,
@@ -708,6 +721,7 @@ export const createFacetedMultiLineChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;

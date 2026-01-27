@@ -49,6 +49,7 @@ test('parses minimally specified config', () => {
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/opensearch'],
         requestHeadersWhitelist: [],
+        requestCompression: false,
       },
 
       logger.get()
@@ -59,7 +60,6 @@ test('parses minimally specified config', () => {
       "hosts": Array [
         Object {
           "headers": Object {
-            "accept-encoding": "gzip, deflate",
             "x-opensearch-product-origin": "opensearch-dashboards",
             "xsrf": "something",
           },
@@ -104,6 +104,7 @@ test('parses fully specified config', () => {
       keyPassphrase: 'key-pass',
       alwaysPresentCertificate: true,
     },
+    requestCompression: false,
   };
 
   const opensearchClientConfig = parseOpenSearchClientConfig(opensearchConfig, logger.get());
@@ -122,7 +123,6 @@ test('parses fully specified config', () => {
         Object {
           "auth": "opensearch:changeme",
           "headers": Object {
-            "accept-encoding": "gzip, deflate",
             "x-opensearch-product-origin": "opensearch-dashboards",
             "xsrf": "something",
           },
@@ -135,7 +135,6 @@ test('parses fully specified config', () => {
         Object {
           "auth": "opensearch:changeme",
           "headers": Object {
-            "accept-encoding": "gzip, deflate",
             "x-opensearch-product-origin": "opensearch-dashboards",
             "xsrf": "something",
           },
@@ -148,7 +147,6 @@ test('parses fully specified config', () => {
         Object {
           "auth": "opensearch:changeme",
           "headers": Object {
-            "accept-encoding": "gzip, deflate",
             "x-opensearch-product-origin": "opensearch-dashboards",
             "xsrf": "something",
           },
@@ -195,6 +193,7 @@ test('parses config timeouts of moment.Duration type', () => {
         sniffInterval: duration(1, 'minute'),
         hosts: ['http://localhost:9200/opensearch'],
         requestHeadersWhitelist: [],
+        requestCompression: false,
       },
 
       logger.get()
@@ -205,7 +204,6 @@ test('parses config timeouts of moment.Duration type', () => {
       "hosts": Array [
         Object {
           "headers": Object {
-            "accept-encoding": "gzip, deflate",
             "x-opensearch-product-origin": "opensearch-dashboards",
             "xsrf": "something",
           },
@@ -241,6 +239,7 @@ describe('#auth', () => {
           username: 'opensearch',
           password: 'changeme',
           requestHeadersWhitelist: [],
+          requestCompression: false,
         },
         logger.get(),
         { auth: false }
@@ -251,7 +250,6 @@ describe('#auth', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "accept-encoding": "gzip, deflate",
               "x-opensearch-product-origin": "opensearch-dashboards",
               "xsrf": "something",
             },
@@ -263,7 +261,6 @@ describe('#auth', () => {
           },
           Object {
             "headers": Object {
-              "accept-encoding": "gzip, deflate",
               "x-opensearch-product-origin": "opensearch-dashboards",
               "xsrf": "something",
             },
@@ -294,6 +291,7 @@ describe('#auth', () => {
           hosts: ['https://opensearch.local'],
           requestHeadersWhitelist: [],
           password: 'changeme',
+          requestCompression: false,
         },
         logger.get(),
         { auth: true }
@@ -304,7 +302,6 @@ describe('#auth', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "accept-encoding": "gzip, deflate",
               "x-opensearch-product-origin": "opensearch-dashboards",
               "xsrf": "something",
             },
@@ -335,6 +332,7 @@ describe('#auth', () => {
           hosts: ['https://opensearch.local'],
           requestHeadersWhitelist: [],
           username: 'opensearch',
+          requestCompression: false,
         },
         logger.get(),
         { auth: true }
@@ -345,7 +343,6 @@ describe('#auth', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "accept-encoding": "gzip, deflate",
               "x-opensearch-product-origin": "opensearch-dashboards",
               "xsrf": "something",
             },
@@ -379,6 +376,7 @@ describe('#customHeaders', () => {
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/opensearch'],
         requestHeadersWhitelist: [],
+        requestCompression: false,
       },
       logger.get()
     );
@@ -399,6 +397,7 @@ describe('#log', () => {
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/opensearch'],
         requestHeadersWhitelist: [],
+        requestCompression: false,
       },
       logger.get()
     );
@@ -443,6 +442,7 @@ describe('#log', () => {
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/opensearch'],
         requestHeadersWhitelist: [],
+        requestCompression: false,
       },
       logger.get()
     );
@@ -502,6 +502,7 @@ describe('#log', () => {
         sniffOnConnectionFault: false,
         hosts: ['http://localhost/opensearch'],
         requestHeadersWhitelist: [],
+        requestCompression: false,
         log: customLogger,
       },
       logger.get()
@@ -523,6 +524,7 @@ describe('#ssl', () => {
           sniffOnConnectionFault: true,
           hosts: ['https://opensearch.local'],
           requestHeadersWhitelist: [],
+          requestCompression: false,
           ssl: { verificationMode: 'none' },
         },
         logger.get()
@@ -533,7 +535,6 @@ describe('#ssl', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "accept-encoding": "gzip, deflate",
               "x-opensearch-product-origin": "opensearch-dashboards",
             },
             "host": "opensearch.local",
@@ -565,6 +566,7 @@ describe('#ssl', () => {
         sniffOnConnectionFault: true,
         hosts: ['https://opensearch.local'],
         requestHeadersWhitelist: [],
+        requestCompression: false,
         ssl: { verificationMode: 'certificate' },
       },
       logger.get()
@@ -581,7 +583,6 @@ describe('#ssl', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "accept-encoding": "gzip, deflate",
               "x-opensearch-product-origin": "opensearch-dashboards",
             },
             "host": "opensearch.local",
@@ -615,6 +616,7 @@ describe('#ssl', () => {
           sniffOnConnectionFault: true,
           hosts: ['https://opensearch.local'],
           requestHeadersWhitelist: [],
+          requestCompression: false,
           ssl: { verificationMode: 'full' },
         },
         logger.get()
@@ -625,7 +627,6 @@ describe('#ssl', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "accept-encoding": "gzip, deflate",
               "x-opensearch-product-origin": "opensearch-dashboards",
             },
             "host": "opensearch.local",
@@ -658,6 +659,7 @@ describe('#ssl', () => {
           sniffOnConnectionFault: true,
           hosts: ['https://opensearch.local'],
           requestHeadersWhitelist: [],
+          requestCompression: false,
           ssl: { verificationMode: 'misspelled' as any },
         },
         logger.get()
@@ -676,6 +678,7 @@ describe('#ssl', () => {
           sniffOnConnectionFault: true,
           hosts: ['https://opensearch.local'],
           requestHeadersWhitelist: [],
+          requestCompression: false,
           ssl: {
             verificationMode: 'certificate',
             certificateAuthorities: ['content-of-ca-path'],
@@ -694,7 +697,6 @@ describe('#ssl', () => {
         "hosts": Array [
           Object {
             "headers": Object {
-              "accept-encoding": "gzip, deflate",
               "x-opensearch-product-origin": "opensearch-dashboards",
             },
             "host": "opensearch.local",

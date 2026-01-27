@@ -24,6 +24,7 @@ import {
   VisFieldType,
   Threshold,
   ThresholdOptions,
+  AxisRole,
 } from '../types';
 import { convertThresholds } from './utils';
 
@@ -48,6 +49,7 @@ export interface BaseChartStyle {
   useThresholdColor?: boolean;
   addLegend?: boolean;
   legendPosition?: Positions;
+  showFullTimeRange?: boolean;
 }
 
 interface Axis {
@@ -74,6 +76,7 @@ export interface EChartsSpecInput<T extends BaseChartStyle = BaseChartStyle> {
   styles: T;
   axisConfig?: EChartsAxisConfig;
   axisColumnMappings: AxisColumnMappings;
+  timeRange?: { from: string; to: string };
 }
 
 /**
@@ -421,5 +424,76 @@ export const buildVisMap = ({
   return {
     ...state,
     visualMap,
+  };
+};
+
+/**
+ * Apply time range to axis if showFullTimeRange is enabled
+ */
+export const applyTimeRange = <T extends BaseChartStyle>(
+  state: EChartsSpecState<T>
+): EChartsSpecState<T> => {
+  const { styles, axisColumnMappings, timeRange, xAxisConfig, yAxisConfig } = state;
+
+  if (!styles.showFullTimeRange || !timeRange?.from || !timeRange?.to) {
+    return state;
+  }
+
+  const timeAxisEntry = Object.entries(axisColumnMappings).find(
+    ([, col]) => col?.schema === VisFieldType.Date
+  );
+
+  if (!timeAxisEntry) {
+    return state;
+  }
+
+  const [axisRole] = timeAxisEntry as [AxisRole, any];
+
+  // Process time values
+  const processTimeValue = (iso: string) => {
+    const date = new Date(iso);
+    return isNaN(date.getTime()) ? iso : date;
+  };
+
+  const minTime = processTimeValue(timeRange.from);
+  const maxTime = processTimeValue(timeRange.to);
+
+  let updatedXAxisConfig = xAxisConfig;
+  let updatedYAxisConfig = yAxisConfig;
+
+  if (axisRole === AxisRole.X) {
+    if (Array.isArray(xAxisConfig)) {
+      updatedXAxisConfig = xAxisConfig.map((config) => ({
+        ...config,
+        min: minTime,
+        max: maxTime,
+      }));
+    } else if (xAxisConfig) {
+      updatedXAxisConfig = {
+        ...xAxisConfig,
+        min: minTime,
+        max: maxTime,
+      };
+    }
+  } else if (axisRole === AxisRole.Y) {
+    if (Array.isArray(yAxisConfig)) {
+      updatedYAxisConfig = yAxisConfig.map((config) => ({
+        ...config,
+        min: minTime,
+        max: maxTime,
+      }));
+    } else if (yAxisConfig) {
+      updatedYAxisConfig = {
+        ...yAxisConfig,
+        min: minTime,
+        max: maxTime,
+      };
+    }
+  }
+
+  return {
+    ...state,
+    xAxisConfig: updatedXAxisConfig,
+    yAxisConfig: updatedYAxisConfig,
   };
 };

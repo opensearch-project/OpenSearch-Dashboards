@@ -9,4 +9,34 @@
     gap: 8px;
     align-items: center;
   }
+
+  &__fieldWrapper {
+    position: relative;
+    width: 100%;
+
+    input {
+      position: relative;
+      z-index: 1;
+      background: transparent !important;
+    }
+  }
+
+  &__ghostText {
+    position: absolute;
+    top: 2px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0 14px;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+    color: transparent;
+    white-space: nowrap;
+    overflow: hidden;
+
+    &--subdued {
+      opacity: 0.6;
+    }
+  }
 }

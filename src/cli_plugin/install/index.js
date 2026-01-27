@@ -71,7 +71,7 @@ export function installCommand(program) {
         }
         return value;
       },
-      'strict'
+      'ignore'
     )
     .description(
       'install a plugin',

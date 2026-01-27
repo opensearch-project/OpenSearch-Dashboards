@@ -51,7 +51,7 @@ describe('useCorrelations', () => {
         id: 'correlation-1',
         type: 'correlations',
         attributes: {
-          correlationType: 'Trace-to-logs',
+          correlationType: 'trace-to-logs-test-dataset',
           version: '1.0.0',
           entities: [],
         },
@@ -81,7 +81,7 @@ describe('useCorrelations', () => {
         id: 'correlation-1',
         type: 'correlations',
         attributes: {
-          correlationType: 'Trace-to-logs',
+          correlationType: 'trace-to-logs-test-dataset',
           version: '1.0.0',
           entities: [],
         },
@@ -134,7 +134,7 @@ describe('useCorrelations', () => {
         id: 'correlation-1',
         type: 'correlations',
         attributes: {
-          correlationType: 'Trace-to-logs',
+          correlationType: 'trace-to-logs-test-dataset',
           version: '1.0.0',
           entities: [],
         },
@@ -202,14 +202,29 @@ describe('useCorrelationCount', () => {
     const mockCorrelations = [
       {
         id: 'correlation-1',
+        attributes: {
+          correlationType: 'trace-to-logs-test-dataset',
+          version: '1.0.0',
+          entities: [],
+        },
         references: [{ type: 'index-pattern', id: 'dataset-123', name: 'entities[0].index' }],
       },
       {
         id: 'correlation-2',
+        attributes: {
+          correlationType: 'trace-to-logs-test-dataset',
+          version: '1.0.0',
+          entities: [],
+        },
         references: [{ type: 'index-pattern', id: 'dataset-123', name: 'entities[0].index' }],
       },
       {
         id: 'correlation-3',
+        attributes: {
+          correlationType: 'trace-to-logs-test-dataset',
+          version: '1.0.0',
+          entities: [],
+        },
         references: [{ type: 'index-pattern', id: 'dataset-123', name: 'entities[0].index' }],
       },
     ] as any;
@@ -264,7 +279,17 @@ describe('useCorrelationCount', () => {
   });
 
   it('should support refetch functionality', async () => {
-    mockFind.mockResolvedValue([{ id: '1' }] as any);
+    mockFind.mockResolvedValue([
+      {
+        id: '1',
+        attributes: {
+          correlationType: 'trace-to-logs-test-dataset',
+          version: '1.0.0',
+          entities: [],
+        },
+        references: [{ type: 'index-pattern', id: 'dataset-123', name: 'entities[0].index' }],
+      },
+    ] as any);
 
     const { result, waitForNextUpdate } = renderHook(() =>
       useCorrelationCount(mockSavedObjectsClient, 'dataset-123')
@@ -334,7 +359,7 @@ describe('useSingleCorrelation', () => {
       id: 'correlation-1',
       type: 'correlations',
       attributes: {
-        correlationType: 'Trace-to-logs',
+        correlationType: 'trace-to-logs-test-dataset',
         version: '1.0.0',
         entities: [],
       },
@@ -397,7 +422,7 @@ describe('useSingleCorrelation', () => {
       id: 'correlation-1',
       type: 'correlations',
       attributes: {
-        correlationType: 'Trace-to-logs',
+        correlationType: 'trace-to-logs-test-dataset',
         version: '1.0.0',
         entities: [],
       },
@@ -431,7 +456,7 @@ describe('useSingleCorrelation', () => {
       id: 'correlation-1',
       type: 'correlations',
       attributes: {
-        correlationType: 'Trace-to-logs',
+        correlationType: 'trace-to-logs-test-dataset',
         version: '1.0.0',
         entities: [],
       },

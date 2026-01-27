@@ -77,7 +77,7 @@ test('set correct defaults', () => {
       "hosts": Array [
         "http://localhost:9200",
       ],
-      "ignoreVersionMismatch": false,
+      "ignoreVersionMismatch": true,
       "logQueries": false,
       "memoryCircuitBreaker": Object {
         "enabled": false,
@@ -86,6 +86,7 @@ test('set correct defaults', () => {
       "optimizedHealthcheck": undefined,
       "password": undefined,
       "pingTimeout": "PT30S",
+      "requestCompression": false,
       "requestHeadersWhitelist": Array [
         "authorization",
       ],

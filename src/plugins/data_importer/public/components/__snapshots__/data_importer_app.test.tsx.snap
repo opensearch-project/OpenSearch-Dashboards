@@ -1,5 +1,110 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`App should render in embedded mode without Router and page wrappers 1`] = `
+<I18nProvider>
+  <EuiFlexGroup
+    className="dataImporterEmbedded__flexGroup"
+  >
+    <EuiFlexItem
+      className="dataImporterEmbedded__leftPanel"
+      grow={1}
+    >
+      <ImportTypeSelector
+        initialSelection="file"
+        updateSelection={[Function]}
+      />
+      <EuiSpacer
+        size="s"
+      />
+      <EuiSpacer
+        size="s"
+      />
+      <EuiTitle
+        size="xs"
+      >
+        <span>
+          Select an existing index or create new
+        </span>
+      </EuiTitle>
+      <EuiFormRow
+        describedByIds={Array []}
+        display="row"
+        fullWidth={false}
+        hasChildLabel={true}
+        hasEmptyLabelSpace={false}
+        labelType="label"
+      >
+        <EuiComboBox
+          async={false}
+          compressed={false}
+          fullWidth={false}
+          isClearable={true}
+          onChange={[Function]}
+          onCreateOption={[Function]}
+          options={Array []}
+          placeholder="Enter index name"
+          selectedOptions={Array []}
+          singleSelection={
+            Object {
+              "asPlainText": true,
+            }
+          }
+          sortMatchesBy="none"
+        />
+      </EuiFormRow>
+      <EuiSpacer
+        size="s"
+      />
+      <ImportFileContentBody
+        enabledFileTypes={
+          Array [
+            "csv",
+            "json",
+            "ndjson",
+          ]
+        }
+        maxFileSizeBytes={104857600}
+        onFileUpdate={[Function]}
+      />
+      <EuiSpacer
+        size="s"
+      />
+      <EuiButton
+        fullWidth={true}
+        onClick={[Function]}
+      >
+        Preview
+      </EuiButton>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiButton
+        fullWidth={true}
+        onClick={[Function]}
+      >
+        Import
+      </EuiButton>
+    </EuiFlexItem>
+    <EuiFlexItem
+      className="dataImporterEmbedded__rightPanel"
+      grow={2}
+    >
+      <div
+        className="dataImporterEmbedded__previewContainer"
+      >
+        <PreviewComponent
+          existingMapping={Object {}}
+          loadMoreRows={[Function]}
+          predictedMapping={Object {}}
+          previewData={Array []}
+          visibleRows={10}
+        />
+      </div>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</I18nProvider>
+`;
+
 exports[`App should render with MDS 1`] = `
 <BrowserRouter
   basename="dataImporter"
@@ -48,41 +153,37 @@ exports[`App should render with MDS 1`] = `
                   Select target data source
                 </span>
               </EuiTitle>
-              <div
-                className="devAppDataSourceSelector"
-              >
-                <Component
-                  compressed={false}
-                  disabled={false}
-                  fullWidth={false}
-                  notifications={
-                    Object {
-                      "add": [MockFunction],
-                      "addDanger": [MockFunction],
-                      "addError": [MockFunction],
-                      "addInfo": [MockFunction],
-                      "addSuccess": [MockFunction],
-                      "addWarning": [MockFunction],
-                      "get$": [MockFunction],
-                      "remove": [MockFunction],
-                    }
+              <Component
+                compressed={false}
+                disabled={false}
+                fullWidth={true}
+                notifications={
+                  Object {
+                    "add": [MockFunction],
+                    "addDanger": [MockFunction],
+                    "addError": [MockFunction],
+                    "addInfo": [MockFunction],
+                    "addSuccess": [MockFunction],
+                    "addWarning": [MockFunction],
+                    "get$": [MockFunction],
+                    "remove": [MockFunction],
                   }
-                  onSelectedDataSource={[Function]}
-                  savedObjectsClient={
-                    Object {
-                      "bulkCreate": [MockFunction],
-                      "bulkGet": [MockFunction],
-                      "bulkUpdate": [MockFunction],
-                      "create": [MockFunction],
-                      "delete": [MockFunction],
-                      "find": [MockFunction],
-                      "get": [MockFunction],
-                      "setCurrentWorkspace": [MockFunction],
-                      "update": [MockFunction],
-                    }
+                }
+                onSelectedDataSource={[Function]}
+                savedObjectsClient={
+                  Object {
+                    "bulkCreate": [MockFunction],
+                    "bulkGet": [MockFunction],
+                    "bulkUpdate": [MockFunction],
+                    "create": [MockFunction],
+                    "delete": [MockFunction],
+                    "find": [MockFunction],
+                    "get": [MockFunction],
+                    "setCurrentWorkspace": [MockFunction],
+                    "update": [MockFunction],
                   }
-                />
-              </div>
+                }
+              />
               <EuiSpacer
                 size="s"
               />
@@ -130,6 +231,7 @@ exports[`App should render with MDS 1`] = `
                     "ndjson",
                   ]
                 }
+                maxFileSizeBytes={104857600}
                 onFileUpdate={[Function]}
               />
               <EuiSpacer
@@ -260,6 +362,7 @@ exports[`App should render without MDS 1`] = `
                     "ndjson",
                   ]
                 }
+                maxFileSizeBytes={104857600}
                 onFileUpdate={[Function]}
               />
               <EuiSpacer

@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { PromQLToolName } from './promql_tools';
+
 /**
  * Shared utilities for PromQL query assist
  */
@@ -36,7 +38,7 @@ export function extractQueryFromText(text: string): string | undefined {
  * Returns an error message if invalid, undefined if valid
  */
 export function validateToolArgs(
-  toolName: string,
+  toolName: PromQLToolName,
   args: Record<string, unknown>
 ): string | undefined {
   const MAX_STRING_LENGTH = 1000;
@@ -47,7 +49,7 @@ export function validateToolArgs(
   }
 
   switch (toolName) {
-    case 'search_prometheus_metadata':
+    case PromQLToolName.SEARCH_PROMETHEUS_METADATA:
       for (const limitArg of ['metricsLimit', 'labelsLimit', 'valuesLimit'] as const) {
         if (args[limitArg] !== undefined) {
           const limit = Number(args[limitArg]);

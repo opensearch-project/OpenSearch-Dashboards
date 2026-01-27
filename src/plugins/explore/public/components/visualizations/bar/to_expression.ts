@@ -39,6 +39,7 @@ import {
   buildAxisConfigs,
   assembleSpec,
   buildVisMap,
+  applyTimeRange,
 } from '../utils/echarts_spec';
 import {
   aggregate,
@@ -269,6 +270,7 @@ export const createTimeBarChart = (
         legend: { show: false },
       }),
       buildAxisConfigs,
+      applyTimeRange,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
       }),
@@ -284,6 +286,7 @@ export const createTimeBarChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
@@ -449,6 +452,7 @@ export const createGroupedTimeBarChart = (
         title: `${axisColumnMappings?.y?.name} Over Time by ${colorColumn.name}`,
       }),
       buildAxisConfigs,
+      applyTimeRange,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
       }),
@@ -466,6 +470,7 @@ export const createGroupedTimeBarChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
 
     return result.spec;
@@ -632,6 +637,7 @@ export const createFacetedTimeBarChart = (
         title: `${axisColumnMappings.y?.name} Over Time by ${axisColumnMappings.color?.name} (Faceted by ${axisColumnMappings.facet?.name})`,
       }),
       buildAxisConfigs,
+      applyTimeRange,
       buildVisMap({
         seriesFields: (headers) => (headers ?? []).filter((h) => h !== timeField),
       }),
@@ -646,6 +652,7 @@ export const createFacetedTimeBarChart = (
       styles,
       axisConfig,
       axisColumnMappings: axisColumnMappings ?? {},
+      timeRange,
     });
     return result.spec;
   }
