@@ -481,7 +481,6 @@ export const createMultiLineChart = (
       timeRange,
     });
 
-    console.log(result.spec);
     return result.spec;
   }
 

@@ -67,7 +67,7 @@ export const EchartsRender = React.memo(({ spec, onSelectTimeRange }: Props) => 
     }
 
     return () => {
-      if (instance && onSelectTimeRange) {
+      if (instance && onSelectTimeRange && !instance.isDisposed()) {
         instance.off('brushEnd', onBrushEnd);
       }
     };
