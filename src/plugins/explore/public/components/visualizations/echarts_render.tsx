@@ -18,6 +18,13 @@ interface Props {
   config?: RenderChartConfig;
 }
 
+const DEFAULT_GRID = {
+  top: 50,
+  right: 30,
+  bottom: 50,
+  left: 40,
+};
+
 export const EchartsRender = React.memo(({ onSelectTimeRange, data, config, timeRange }: Props) => {
   const [instance, setInstance] = useState<echarts.ECharts | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -94,12 +101,7 @@ export const EchartsRender = React.memo(({ onSelectTimeRange, data, config, time
         const legend = instance._componentsViews.find(
           (entry: any) => entry.type === 'legend.plain' || entry.type === 'legend.scroll'
         );
-        const grid = {
-          top: 50,
-          right: 30,
-          bottom: 50,
-          left: 40,
-        };
+        const grid = { ...DEFAULT_GRID };
         const legendConfig: echarts.EChartsOption['legend'] = {};
         if (legend) {
           const legendWidth = legend._backgroundEl?.shape?.width ?? 0;
@@ -172,6 +174,9 @@ export const EchartsRender = React.memo(({ onSelectTimeRange, data, config, time
         };
       }
 
+      if (!option.grid) {
+        option.grid = { ...DEFAULT_GRID };
+      }
       if (gridConfigRef.current) {
         option.grid = { ...option.grid, ...gridConfigRef.current };
       }
