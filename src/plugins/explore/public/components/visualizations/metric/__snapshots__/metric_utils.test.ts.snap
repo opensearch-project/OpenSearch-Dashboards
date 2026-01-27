@@ -16,9 +16,11 @@ Object {
   },
   "xAxis": Object {
     "show": false,
+    "silent": true,
   },
   "yAxis": Object {
     "show": false,
+    "silent": true,
   },
 }
 `;
@@ -44,12 +46,14 @@ Object {
       "C",
     ],
     "show": false,
+    "silent": true,
     "type": "category",
   },
   "yAxis": Object {
     "max": 100,
     "min": 0,
     "show": false,
+    "silent": true,
     "type": "value",
   },
 }
