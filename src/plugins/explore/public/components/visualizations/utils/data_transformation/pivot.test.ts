@@ -230,6 +230,66 @@ describe('pivot', () => {
       expect(result).toHaveLength(1);
       expect(result[0].A).toBe(150);
     });
+
+    it('preserves timestamp as Date object when input is Unix timestamp number', () => {
+      // This test ensures that Unix timestamps (numbers) are preserved as Date objects
+      // not converted to strings during the grouping process
+      const timestampData = [
+        { timestamp: 1704110400000, product: 'A', sales: 100 }, // 2024-01-01 12:00:00 UTC
+        { timestamp: 1704110400000, product: 'B', sales: 200 },
+        { timestamp: 1704196800000, product: 'A', sales: 150 }, // 2024-01-02 12:00:00 UTC
+      ];
+
+      const result = pivot({
+        groupBy: 'timestamp',
+        pivot: 'product',
+        field: 'sales',
+        timeUnit: TimeUnit.DATE,
+        aggregationType: AggregationType.SUM,
+      })(timestampData);
+
+      // Verify that timestamp values are Date objects, not strings or numbers
+      expect(result[0].timestamp).toBeInstanceOf(Date);
+      expect(result[1].timestamp).toBeInstanceOf(Date);
+      expect(typeof result[0].timestamp).not.toBe('string');
+      expect(typeof result[0].timestamp).not.toBe('number');
+
+      // Verify the aggregated data is correct
+      expect(result).toEqual([
+        { timestamp: new Date('2024-01-01T00:00:00.000Z'), A: 100, B: 200 },
+        { timestamp: new Date('2024-01-02T00:00:00.000Z'), A: 150, B: null },
+      ]);
+    });
+
+    it('preserves timestamp values in categorical grouping without timeUnit', () => {
+      // This test ensures timestamps are preserved correctly even in categorical
+      // grouping (without timeUnit), verifying the fix works for both code paths
+      const timestampData = [
+        { timestamp: 1704110400000, product: 'A', sales: 100 },
+        { timestamp: 1704110400000, product: 'B', sales: 200 },
+        { timestamp: 1704196800000, product: 'A', sales: 150 },
+      ];
+
+      const result = pivot({
+        groupBy: 'timestamp',
+        pivot: 'product',
+        field: 'sales',
+        // No timeUnit - categorical grouping
+        aggregationType: AggregationType.SUM,
+      })(timestampData);
+
+      // Verify that the original timestamp values are preserved (not converted to strings)
+      expect(result[0].timestamp).toBe(1704110400000);
+      expect(result[1].timestamp).toBe(1704196800000);
+      expect(typeof result[0].timestamp).toBe('number');
+      expect(typeof result[1].timestamp).toBe('number');
+
+      // Verify the aggregated data is correct
+      expect(result).toEqual([
+        { timestamp: 1704110400000, A: 100, B: 200 },
+        { timestamp: 1704196800000, A: 150, B: null },
+      ]);
+    });
   });
 
   describe('edge cases', () => {
