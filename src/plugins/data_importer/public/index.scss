@@ -9,3 +9,23 @@
     }
   }
 }
+
+.dataImporterEmbedded {
+  &__flexGroup {
+    height: 100%;
+  }
+
+  &__leftPanel {
+    min-width: 300px;
+    max-width: 400px;
+  }
+
+  &__rightPanel {
+    min-width: 0;
+  }
+
+  &__previewContainer {
+    height: 100%;
+    min-width: 0;
+  }
+}

@@ -60,7 +60,7 @@ export const ImportTypeSelector = ({
         ),
       }}
     >
-      <EuiFlexGroup>
+      <EuiFlexGroup wrap={true}>
         <EuiFlexItem>
           <EuiCheckableCard
             id={'file-selection'}

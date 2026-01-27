@@ -75,6 +75,9 @@ import { SlotRegistryService } from './services/slot_registry';
 // Log Actions
 import { logActionRegistry } from './services/log_action_registry';
 import { createAskAiAction } from './actions/ask_ai_action';
+import { importDataActionConfig } from './actions/import_data_action';
+import { AskAIEmbeddableAction } from './actions/ask_ai_embeddable_action';
+import { CONTEXT_MENU_TRIGGER } from '../../embeddable/public';
 
 export class ExplorePlugin
   implements
@@ -101,6 +104,10 @@ export class ExplorePlugin
   private urlGenerator?: import('./types').ExplorePluginStart['urlGenerator'];
   private initializeServices?: () => { core: CoreStart; plugins: ExploreStartDependencies };
   private isDatasetManagementEnabled: boolean = false;
+  private dataImporterConfig?: import('./types').ExploreServices['dataImporterConfig'];
+  private dataSourceEnabled: boolean = false;
+  private hideLocalCluster: boolean = false;
+  private dataSourceManagement?: import('./types').ExploreServices['dataSourceManagement'];
 
   // Registries
   private tabRegistry: TabRegistryService = new TabRegistryService();
@@ -117,10 +124,26 @@ export class ExplorePlugin
     // Check if dataset management plugin is enabled
     this.isDatasetManagementEnabled = !!setupDeps.datasetManagement;
 
+    // Store data importer config if available
+    this.dataImporterConfig = setupDeps.dataImporter?.config;
+
+    // Store data source configuration
+    this.dataSourceEnabled = !!setupDeps.dataSource;
+    this.hideLocalCluster = setupDeps.dataSource?.hideLocalCluster || false;
+    this.dataSourceManagement = setupDeps.dataSourceManagement;
+
     // Set usage collector
     setUsageCollector(setupDeps.usageCollection);
     this.registerExploreVisualizationAlias(setupDeps);
     const visualizationRegistryService = this.visualizationRegistryService.setup();
+
+    // Setup query panel actions registry
+    const queryPanelActionsRegistry = this.queryPanelActionsRegistryService.setup();
+
+    // Register import data action if data importer is available
+    if (this.dataImporterConfig) {
+      queryPanelActionsRegistry.register(importDataActionConfig);
+    }
 
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
@@ -324,7 +347,11 @@ export class ExplorePlugin
             this.visualizationRegistryService,
             this.queryPanelActionsRegistryService,
             this.isDatasetManagementEnabled,
-            this.slotRegistryService
+            this.slotRegistryService,
+            this.dataImporterConfig,
+            this.dataSourceEnabled,
+            this.hideLocalCluster,
+            this.dataSourceManagement
           );
 
           // Add osdUrlStateStorage to services (like VisBuilder and DataExplorer)
@@ -470,7 +497,7 @@ export class ExplorePlugin
           this.docViewsLinksRegistry?.addDocViewLink(docViewLinkSpec as any),
       },
       visualizationRegistry: visualizationRegistryService,
-      queryPanelActionsRegistry: this.queryPanelActionsRegistryService.setup(),
+      queryPanelActionsRegistry,
       logActionRegistry: {
         registerAction: (action) => logActionRegistry.registerAction(action),
       },
@@ -536,7 +563,11 @@ export class ExplorePlugin
         this.visualizationRegistryService,
         this.queryPanelActionsRegistryService,
         this.isDatasetManagementEnabled,
-        this.slotRegistryService
+        this.slotRegistryService,
+        this.dataImporterConfig,
+        this.dataSourceEnabled,
+        this.hideLocalCluster,
+        this.dataSourceManagement
       );
       setLegacyServices({
         ...services,
